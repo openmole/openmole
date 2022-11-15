@@ -38,7 +38,7 @@ object FileManager {
     destinationPath:   SafePath,
     fileTransferState: ProcessState ⇒ Unit,
     uploadType:        UploadType,
-    onloaded:          () ⇒ Unit           = () ⇒ {}
+    onLoadEnd:         Seq[String] ⇒ Unit           = _ ⇒ {}
   ) = {
     val fileList = inputElement.ref.files
     val formData = new FormData
@@ -57,17 +57,17 @@ object FileManager {
 
     val xhr = new XMLHttpRequest
 
-    xhr.upload.onprogress = (e: ProgressEvent) ⇒ {
+    xhr.upload.onprogress = e ⇒ {
       fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
     }
 
-    xhr.upload.onloadend = (e: ProgressEvent) ⇒ {
+    xhr.upload.onloadend = e ⇒ {
       fileTransferState(Finalizing())
     }
 
-    xhr.onloadend = (e: ProgressEvent) ⇒ {
+    xhr.onloadend = e ⇒ {
       fileTransferState(Processed())
-      onloaded()
+      onLoadEnd(fileList.map(_.name).toSeq)
       inputElement.ref.value = ""
     }
 

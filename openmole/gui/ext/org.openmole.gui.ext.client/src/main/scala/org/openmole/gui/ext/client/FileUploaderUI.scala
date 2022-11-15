@@ -44,7 +44,7 @@ case class FileUploaderUI(
         (p: ProcessState) ⇒ {
         },
         UploadAuthentication(),
-        () ⇒ {
+        uploaded ⇒ {
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name
             pathSet.set(false)

@@ -118,17 +118,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   // FILES
-  def createDirectory(safePath: SafePath, directoryName: String): Boolean = {
+  def createFile(safePath: SafePath, name: String, directory: Boolean): Boolean =
     import services._
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    new File(safePath.toFile, directoryName).mkdirs
-  }
+    if directory
+    then new File(safePath.toFile, name).createNewFile
+    else new File(safePath.toFile, name).mkdirs
 
-  def createFile(safePath: SafePath, fileName: String): Boolean = {
-    import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    new File(safePath.toFile, fileName).createNewFile
-  }
 
 //  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
 //    unplug(safePath)
@@ -188,23 +184,22 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   def extractTGZ(safePath: SafePath) = {
-    import services._
+    import services.*
     FileExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
-        val archiveFile = safePathToFile(safePath)(ServerFileSystemContext.project, workspace)
-        val toFile: File = safePathToFile(safePath.parent)(ServerFileSystemContext.project, workspace)
+        val archiveFile = safePathToFile(safePath)
+        val toFile: File = safePathToFile(safePath.parent)
         extractArchiveFromFiles(archiveFile, toFile)(ServerFileSystemContext.project)
       case _ ⇒ unknownFormat(safePath.name)
     }
   }
 
-  def temporaryDirectory(): SafePath = {
-    import services._
+  def temporaryDirectory(): SafePath =
+    import services.*
     import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
     val dir = services.tmpDirectory.newDir("openmoleGUI")
     dir.mkdirs()
     dir.toSafePath
-  }
 
   def exists(safePath: SafePath): Boolean = {
     import services._
@@ -221,10 +216,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     // utils.existsExcept(exception, exceptItSelf)
   }
 
-  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
-    import services._
-    utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
-  }
+//  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
+//    import services._
+//    utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
+//  }
 
   def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
     import services._
@@ -249,13 +244,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     def test(sps: Seq[SafePath], inDir: SafePath = in) = {
       import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
 
-      val toTest: Seq[SafePath] = if (sps.size == 1) sps.flatMap { f ⇒
-        if (f.toFile.isDirectory) f.toFile.listFilesSafe.map {
-          _.toSafePath
-        }
-        else Seq(f)
-      }
-      else sps
+      val toTest: Seq[SafePath] =
+        if (sps.size == 1) sps.flatMap { f ⇒
+          if (f.toFile.isDirectory) f.toFile.listFilesSafe.map { _.toSafePath }
+          else Seq(f)
+        } else sps
 
       toTest.filter { sp ⇒ exists(inDir ++ sp.name) }.map { sp ⇒ inDir ++ sp.name }
     }
@@ -265,31 +258,29 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Archive ⇒
         // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
         // val emptyFile = new File("")
-        val from: File = safePathToFile(safePathToTest)(ServerFileSystemContext.absolute, workspace)
-        val to: File = safePathToFile(safePathToTest.parent)(ServerFileSystemContext.absolute, workspace)
+        val from: File = safePathToFile(safePathToTest)
+        val to: File = safePathToFile(safePathToTest.parent)
         val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
           _ == safePathToTest
         }
         val toTest = in ++ safePathToTest.nameWithNoExtension
-        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)(ServerFileSystemContext.project, workspace)
+        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)
         new File(to, from.getName).recursiveDelete
 
-        if (toTestFile.exists) {
-          test(extracted, toTest)
-        }
+        if (toTestFile.exists) test(extracted, toTest)
         else Seq()
       case _ ⇒ test(Seq(safePathToTest))
     }
   }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter()): ListFilesData = {
-    import services._
-    utils.listFiles(sp, fileFilter, listPlugins())(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    import services.*
+    utils.listFiles(sp, fileFilter, listPlugins())
   }
 
    def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] = {
     import services._
-    utils.recursiveListFiles(sp, findString)(org.openmole.gui.ext.data.ServerFileSystemContext.project, workspace)
+    utils.recursiveListFiles(sp, findString)
   }
 
   def isEmpty(sp: SafePath): Boolean = {
@@ -641,8 +632,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   // Analysis plugins
   def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] =
-    import services._
-    val omrFile = safePathToFile(result)(ServerFileSystemContext.project, workspace)
+    import services.*
+    val omrFile = safePathToFile(result)
     val methodName = OMROutputFormat.methodName(omrFile)
     GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
 
@@ -679,8 +670,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   // FIXME use network service provider
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] =
-    import services._
-    import org.openmole.tool.stream._
+    import services.*
+    import org.openmole.tool.stream.*
 
     val result =
       Try {
@@ -708,13 +699,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             val is = response.inputStream
 
             if (extract) {
-              val dest = safePathToFile(path)(ServerFileSystemContext.project, workspace)
+              val dest = safePathToFile(path)
               val tis = new TarInputStream(new GZIPInputStream(is))
               try tis.extract(dest)
               finally tis.close
             }
             else {
-              val dest = safePathToFile(path / name)(ServerFileSystemContext.project, workspace)
+              val dest = safePathToFile(path / name)
               dest.withOutputStream(os ⇒ copy(is, os))
             }
         }

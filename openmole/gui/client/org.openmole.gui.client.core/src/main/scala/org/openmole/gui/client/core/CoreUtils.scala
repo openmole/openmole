@@ -49,15 +49,10 @@ object CoreUtils {
     }
   }
 
-  def createDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Fetch.future(_.createDirectory(in, dirName).future).foreach { b ⇒
-      if (b) onadded()
-      else panels.alertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
-    }
-
-  def createFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Fetch.future(_.createFile(safePath, fileName).future).foreach { b ⇒
-      if (b) onadded()
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {}) =
+    Fetch.future(_.createFile(safePath, fileName, directory).future).foreach { b ⇒
+      if b
+      then onCreated()
       else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 

@@ -35,9 +35,6 @@ trait CoreAPI extends RESTAPI {
 
   // ------ Files ------------
 
-  val listFiles: Endpoint[(SafePath, FileFilter), ListFilesData] =
-    endpoint(post(path / "file" / "list", jsonRequest[(SafePath,FileFilter)]), ok(jsonResponse[ListFilesData]))
-
   val size: Endpoint[SafePath, Long] =
     endpoint(post(path / "file" / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
 
@@ -51,32 +48,33 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "file" / "copy", jsonRequest[(Seq[SafePath], SafePath, Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   //def addDirectory(safePath: SafePath, directoryName: String): Boolean
-  val createDirectory: Endpoint[(SafePath, String), Boolean] =
-    endpoint(post(path / "create-directory", jsonRequest[(SafePath, String)]), ok(jsonResponse[Boolean]))
+//  val createDirectory: Endpoint[(SafePath, String), Boolean] =
+//    endpoint(post(path / "file"  / "make-directory", jsonRequest[(SafePath, String)]), ok(jsonResponse[Boolean]))
 
   //def addFile(safePath: SafePath, fileName: String): Boolean
-  val createFile: Endpoint[(SafePath, String), Boolean] =
-    endpoint(post(path / "create-file", jsonRequest[(SafePath, String)]), ok(jsonResponse[Boolean]))
+  val createFile: Endpoint[(SafePath, String, Boolean), Boolean] =
+    endpoint(post(path / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
 
   //def extractTGZ(safePath: SafePath): ExtractResult
   val extract: Endpoint[SafePath, Option[ErrorData]] =
-    endpoint(post(path / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
+    endpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
 
-//  implicit lazy val listRecursiveRequestSchema: JsonSchema[(SafePath, Option[String])] = genericJsonSchema
-//  implicit lazy val listRecursiveResponseSchema: JsonSchema[(SafePath, Boolean)] = genericJsonSchema
+  val listFiles: Endpoint[(SafePath, FileFilter), ListFilesData] =
+    endpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileFilter)]), ok(jsonResponse[ListFilesData]))
+
   val listRecursive: Endpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
-    endpoint(post(path / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
+    endpoint(post(path / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
   //  def move(from: SafePath, to: SafePath): Unit
   val move: Endpoint[(SafePath, SafePath), Unit] =
-    endpoint(post(path / "move", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "file" / "move", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
   //  def duplicate(safePath: SafePath, newName: String): SafePath
   val duplicate: Endpoint[(SafePath, String), SafePath] =
-   endpoint(post(path / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
+   endpoint(post(path / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
 
   //  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
   val copyAllFromTmp: Endpoint[(SafePath, SafePath), Unit] =

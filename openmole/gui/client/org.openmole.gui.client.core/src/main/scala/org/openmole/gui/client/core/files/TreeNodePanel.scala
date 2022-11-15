@@ -71,8 +71,8 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
-      case true ⇒ CoreUtils.createDirectory(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, () ⇒ treeNodeManager.invalidCurrentCache)
+      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
     }
   }
 

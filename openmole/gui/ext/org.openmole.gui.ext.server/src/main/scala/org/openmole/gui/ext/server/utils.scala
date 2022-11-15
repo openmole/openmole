@@ -81,14 +81,14 @@ object utils {
     }
   }
 
-  def safePathToFile(s: SafePath)(implicit context: ServerFileSystemContext, workspace: Workspace): File = {
-    context match {
+  def safePathToFile(s: SafePath)(implicit workspace: Workspace): File = {
+    s.context match {
       case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
       case _ ⇒ getFile(new File(""), s.path)
     }
   }
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], findPath: Boolean = false)(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
 
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
@@ -140,7 +140,8 @@ object utils {
     getFile0(paths, root)
   }
 
-  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): ListFilesData = {
+  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData = {
+    given ServerFileSystemContext = path.context
     val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
     val sorted = treeNodesData.sorted(fileFilter.fileSorting)
@@ -152,7 +153,8 @@ object utils {
     }
   }
 
-  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[(SafePath, Boolean)] = {
+  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] = {
+    given ServerFileSystemContext = path.context
     val fPath = safePathToFile(path).getAbsolutePath
     val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
     allFiles.filter { case f ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
@@ -214,21 +216,20 @@ object utils {
     }.filter(exists)
   }
 
-  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath])(implicit workspace: Workspace): Unit = {
-    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
-
-    filesToBeMovedTo.foreach { f ⇒
-      val from = getFile(tmp, Seq(f.name))
-      val toFile: File = safePathToFile(f.parent)(ServerFileSystemContext.project, workspace)
-      copyFile(from, toFile)
-    }
-
-  }
+//  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath])(implicit workspace: Workspace): Unit = {
+//    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
+//
+//    filesToBeMovedTo.foreach { f ⇒
+//      val from = getFile(tmp, Seq(f.name))
+//      val toFile: File = safePathToFile(f.parent)(ServerFileSystemContext.project, workspace)
+//      copyFile(from, toFile)
+//    }
+//
+//  }
 
   def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
-
-    val f: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
-    val toFile: File = safePathToFile(to)(ServerFileSystemContext.project, workspace)
+    val f: File = safePathToFile(tmpSafePath)
+    val toFile: File = safePathToFile(to)
 
     val dirToCopy = {
       val level1 = f.listFiles.toSeq

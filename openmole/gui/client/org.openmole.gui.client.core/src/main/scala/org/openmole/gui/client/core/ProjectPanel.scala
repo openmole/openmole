@@ -30,7 +30,7 @@ object ProjectPanel {
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, () ⇒ {
+      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
         val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
         FileManager.download(
           toDisplay,

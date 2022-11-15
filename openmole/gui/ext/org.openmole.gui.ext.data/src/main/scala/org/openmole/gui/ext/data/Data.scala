@@ -223,14 +223,14 @@ package object data {
 
     def naming = (sp: SafePath) ⇒ sp.name
 
-    def allSafePaths(path: Seq[String]): Seq[SafePath] = {
-      def all(todo: Seq[String], done: Seq[SafePath]): Seq[SafePath] = {
-        if (todo.isEmpty) done
-        else all(todo.dropRight(1), done :+ SafePath.sp(todo))
-      }
-
-      all(path, Seq())
-    }
+//    def allSafePaths(path: Seq[String]): Seq[SafePath] = {
+//      def all(todo: Seq[String], done: Seq[SafePath]): Seq[SafePath] = {
+//        if (todo.isEmpty) done
+//        else all(todo.dropRight(1), done :+ SafePath.sp(todo))
+//      }
+//
+//      all(path, Seq())
+//    }
   }
 
   import org.openmole.gui.ext.data.SafePath._
@@ -249,11 +249,11 @@ package object data {
   //The path it relative to the project root directory
   case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
 
-    def ++(s: String) = sp(this.path :+ s)
+    def ++(s: String) = copy(path = this.path :+ s)
 
     def /(child: String) = copy(path = path :+ child)
 
-    def parent: SafePath = SafePath.sp(path.dropRight(1))
+    def parent: SafePath = copy(path = path.dropRight(1))
 
     def name = path.lastOption.getOrElse("")
 

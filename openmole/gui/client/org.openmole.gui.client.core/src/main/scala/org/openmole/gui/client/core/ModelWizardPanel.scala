@@ -171,11 +171,9 @@ object ModelWizardPanel {
           FileManager.upload(
             fInput,
             tempFile,
-            (p: ProcessState) ⇒ {
-              transferring.set(p)
-            },
+            (p: ProcessState) ⇒ transferring.set(p),
             UploadAbsolute(),
-            () ⇒ {
+            uploaded ⇒ {
               Fetch.future(_.extractTestExist(tempFile ++ fileName, uploadPath.parent).future).foreach {
                 existing ⇒
                   val fileType: FileType = uploadPath
@@ -186,6 +184,7 @@ object ModelWizardPanel {
 
                   // Move files from tmp to target path
                   //if (existing.isEmpty) {
+                  
                   Fetch.future(_.copyAllFromTmp(tempFile, targetPath).future).foreach {
                     b ⇒
                       fileToUploadPath.set(Some(uploadPath))

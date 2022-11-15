@@ -65,11 +65,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val renameKeyRoute =
     renameKey.implementedBy { case(name, newName) => apiImpl.renameKey(name, newName) }
 
-  val createDirectoryRoute =
-    createDirectory.implementedBy { case(path, name) => apiImpl.createDirectory(path, name) }
-
   val createFileRoute =
-    createFile.implementedBy { case(path, name) => apiImpl.createFile(path, name) }
+    createFile.implementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
   val extractRoute =
     extract.implementedBy { sp => apiImpl.extractTGZ(sp) }
@@ -181,7 +178,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
       sizeRoute,
       saveFileRoute,
       renameKeyRoute,
-      createDirectoryRoute,
       createFileRoute,
       extractRoute,
       deleteFilesRoute,
