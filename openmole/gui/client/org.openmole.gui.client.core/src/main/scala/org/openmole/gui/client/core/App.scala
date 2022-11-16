@@ -76,7 +76,7 @@ object App {
       timer.set(Some(setInterval(5000) {
         Fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
           if (x) {
-            CoreUtils.setRoute(routes.slashConnectionRoute)
+            CoreUtils.setRoute(s"/${routes.connectionRoute}")
             timer.now().foreach {
               clearInterval
             }

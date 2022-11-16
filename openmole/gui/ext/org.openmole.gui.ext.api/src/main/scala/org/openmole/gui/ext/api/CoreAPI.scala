@@ -68,36 +68,39 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
-  //  def move(from: SafePath, to: SafePath): Unit
   val move: Endpoint[(SafePath, SafePath), Unit] =
     endpoint(post(path / "file" / "move", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
-  //  def duplicate(safePath: SafePath, newName: String): SafePath
   val duplicate: Endpoint[(SafePath, String), SafePath] =
    endpoint(post(path / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
 
+  val deleteFiles: Endpoint[Seq[SafePath], Unit] =
+    endpoint(post(path / "file" / "delete", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
+  val exists: Endpoint[SafePath, Boolean] =
+    endpoint(post(path / "file" / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
+
+
+  //  val rename: Endpoint[(SafePath, String), SafePath] =
+  //    endpoint(post(path / "rename", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
+
+
   //  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
-  val copyAllFromTmp: Endpoint[(SafePath, SafePath), Unit] =
-    endpoint(post(path / "copy-from-tmp", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
+//  val copyAllFromTmp: Endpoint[(SafePath, SafePath), Unit] =
+//    endpoint(post(path / "copy-from-tmp", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
   //  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-  val extractTestExist: Endpoint[(SafePath, SafePath), Seq[SafePath]] =
-    endpoint(post(path / "extract-test-exist", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Seq[SafePath]]))
+//  val extractTestExist: Endpoint[(SafePath, SafePath), Seq[SafePath]] =
+//    endpoint(post(path / "extract-test-exist", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Seq[SafePath]]))
 
 
   //  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
   //  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
   //implicit lazy val deleteFileRequestSchema: JsonSchema[(Seq[SafePath], ServerFileSystemContext)] = genericJsonSchema
-  val deleteFiles: Endpoint[Seq[SafePath], Unit] =
-    endpoint(post(path / "delete-files", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
-
-  //def exists(safePath: SafePath): Boolean
-  val exists: Endpoint[SafePath, Boolean] =
-    endpoint(post(path / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
 
   //def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
-  val existsExcept: Endpoint[(SafePath, Boolean), Boolean] =
-    endpoint(post(path / "exists-except", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Boolean]))
+//  val existsExcept: Endpoint[(SafePath, Boolean), Boolean] =
+//    endpoint(post(path / "exists-except", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Boolean]))
 
 
   //def mdToHtml(safePath: SafePath): String
@@ -107,8 +110,6 @@ trait CoreAPI extends RESTAPI {
   //def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
 
   //def renameFile(safePath: SafePath, name: String): SafePath
-  val rename: Endpoint[(SafePath, String), SafePath] =
-    endpoint(post(path / "rename", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
 
   //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
   val sequence: Endpoint[SafePath, SequenceData] =

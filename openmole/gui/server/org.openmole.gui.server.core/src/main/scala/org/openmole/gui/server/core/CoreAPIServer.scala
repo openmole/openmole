@@ -69,19 +69,16 @@ class CoreAPIServer(apiImpl: ApiImpl)
     createFile.implementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
   val extractRoute =
-    extract.implementedBy { sp => apiImpl.extractTGZ(sp) }
+    extract.implementedBy { sp => apiImpl.extract(sp) }
 
-  val extractTestExistRoute =
-    extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
+//  val extractTestExistRoute =
+//    extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
 
   val deleteFilesRoute =
     deleteFiles.implementedBy { sp => apiImpl.deleteFiles(sp) }
 
   val existsRoute=
     exists.implementedBy { sp => apiImpl.exists(sp) }
-
-  val existsExceptRoute =
-    existsExcept.implementedBy { case(sp, i) => apiImpl.existsExcept(sp, i) }
 
   val listRecursiveRoute =
     listRecursive.implementedBy { case(path, f) => apiImpl.recursiveListFiles(path, f) }
@@ -94,9 +91,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val mdToHtmlRoute =
     mdToHtml.implementedBy { p => apiImpl.mdToHtml(p) }
-
-  val renameRoute =
-    rename.implementedBy { case(p, n) => apiImpl.renameFile(p, n) }
 
   val sequenceRoute =
     sequence.implementedBy { p => apiImpl.sequence(p) }
@@ -136,9 +130,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val temporaryDirectoryRoute =
     temporaryDirectory.implementedBy { _ => apiImpl.temporaryDirectory() }
-
-  val copyAllFromTmpRoute =
-    copyAllFromTmp.implementedBy { case(f, t) => apiImpl.copyAllTmpTo(f, t) }
 
   val shutdownRoute =
     shutdown.implementedBy { _ => apiImpl.shutdown() }
@@ -182,12 +173,10 @@ class CoreAPIServer(apiImpl: ApiImpl)
       extractRoute,
       deleteFilesRoute,
       existsRoute,
-      existsExceptRoute,
       listRecursiveRoute,
       duplicateRoute,
       moveRoute,
       mdToHtmlRoute,
-      renameRoute,
       sequenceRoute,
       allStatesRoute,
       staticInfosRoute,
@@ -201,8 +190,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
       expandResourcesRoute,
       downloadHTTPRoute,
       temporaryDirectoryRoute,
-      extractTestExistRoute,
-      copyAllFromTmpRoute,
       marketIndexRoute,
       getMarketEntryRoute,
       findAnalysisPluginRoute,

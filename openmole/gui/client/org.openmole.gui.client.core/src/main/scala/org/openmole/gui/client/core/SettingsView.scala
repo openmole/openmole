@@ -143,21 +143,21 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       "reset password",
       glyph_lock,
       "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-      routes.slashResetPasswordRoute
+      s"/${routes.resetPasswordRoute}"
     )
 
   val shutdownButton = serverActions(
     "shutdown",
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
-    routes.shutdownRoute
+    s"/${routes.shutdownRoute}"
   )
 
   val restartButton = serverActions(
     "restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",
-    routes.restartRoute
+    s"/${routes.restartRoute}"
   )
 
   // val renderApp = dropdownApp

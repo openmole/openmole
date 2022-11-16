@@ -18,19 +18,15 @@ package org.openmole.gui.ext.data
  */
 package object routes {
   val connectionRoute = "connection"
-  val slashConnectionRoute = s"/$connectionRoute"
-
-  val shutdownRoute = "/shutdown"
-  val restartRoute = "/restart"
+  val shutdownRoute = "application/shutdown"
+  val restartRoute = "application/restart"
 
   val appRoute = "app"
 
   val downloadFileRoute = "downloadFile"
-  val slashDownloadFileRoute = s"/$downloadFileRoute"
   val uploadFilesRoute = "uploadFiles"
   val resetPasswordRoute = "resetPassword"
-  val slashResetPasswordRoute = s"/$resetPasswordRoute"
 
-  def downloadFile(uri: String, hash: Boolean = false) = s"${slashDownloadFileRoute.drop(1)}?path=$uri&hash=$hash"
+  def downloadFile(uri: String, hash: Boolean = false) = s"/${downloadFileRoute.drop(1)}?path=$uri&hash=$hash"
   def hashHeader = "Content-Hash"
 }

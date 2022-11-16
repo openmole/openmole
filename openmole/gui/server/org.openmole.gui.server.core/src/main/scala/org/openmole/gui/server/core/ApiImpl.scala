@@ -183,7 +183,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     }
   }
 
-  def extractTGZ(safePath: SafePath) = {
+  def extract(safePath: SafePath) = {
     import services.*
     FileExtension(safePath.name) match {
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
@@ -206,25 +206,25 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.exists(safePath)
   }
 
-  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean = {
-    import services._
-    val li = listFiles(exception.parent, data.FileFilter.defaultFilter)
-    val count = li.list.count(l ⇒ treeNodeToSafePath(l, exception.parent).path == exception.path)
-
-    val bound = if (exceptItSelf) 1 else 0
-    if (count > bound) true else false
-    // utils.existsExcept(exception, exceptItSelf)
-  }
+//  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean = {
+//    import services._
+//    val li = listFiles(exception.parent)
+//    val count = li.list.count(l ⇒ treeNodeToSafePath(l, exception.parent).path == exception.path)
+//
+//    val bound = if (exceptItSelf) 1 else 0
+//    if (count > bound) true else false
+//    // utils.existsExcept(exception, exceptItSelf)
+//  }
 
 //  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
 //    import services._
 //    utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
 //  }
 
-  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
-    import services._
-    utils.copyAllFromTmp(tmpSafePath, to)
-  }
+//  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
+//    import services._
+//    utils.copyAllFromTmp(tmpSafePath, to)
+//  }
 
   def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
     import services._
@@ -237,43 +237,42 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 //  }
 
   // Test whether safePathToTest exists in "in"
-  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
-    import services._
-    // import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
+//  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
+//    import services.*
+//    // import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
+//
+//    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
+//      import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
+//
+//      val toTest: Seq[SafePath] =
+//        if (sps.size == 1) sps.flatMap { f ⇒
+//          if (f.toFile.isDirectory) f.toFile.listFilesSafe.map { _.toSafePath }
+//          else Seq(f)
+//        } else sps
+//
+//      toTest.filter { sp ⇒ exists(inDir ++ sp.name) }.map { sp ⇒ inDir ++ sp.name }
+//    }
+//
+//    FileType(safePathToTest) match {
+//      case Archive ⇒
+//        // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
+//        // val emptyFile = new File("")
+//        val from: File = safePathToFile(safePathToTest)
+//        val to: File = safePathToFile(safePathToTest.parent)
+//        val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
+//          _ == safePathToTest
+//        }
+//        val toTest = in ++ safePathToTest.nameWithNoExtension
+//        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)
+//        new File(to, from.getName).recursiveDelete
+//
+//        if (toTestFile.exists) test(extracted, toTest)
+//        else Seq()
+//      case _ ⇒ test(Seq(safePathToTest))
+//    }
+//  }
 
-    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
-      import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
-
-      val toTest: Seq[SafePath] =
-        if (sps.size == 1) sps.flatMap { f ⇒
-          if (f.toFile.isDirectory) f.toFile.listFilesSafe.map { _.toSafePath }
-          else Seq(f)
-        } else sps
-
-      toTest.filter { sp ⇒ exists(inDir ++ sp.name) }.map { sp ⇒ inDir ++ sp.name }
-    }
-
-    val fileType: FileType = safePathToTest
-    fileType match {
-      case Archive ⇒
-        // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
-        // val emptyFile = new File("")
-        val from: File = safePathToFile(safePathToTest)
-        val to: File = safePathToFile(safePathToTest.parent)
-        val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
-          _ == safePathToTest
-        }
-        val toTest = in ++ safePathToTest.nameWithNoExtension
-        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)
-        new File(to, from.getName).recursiveDelete
-
-        if (toTestFile.exists) test(extracted, toTest)
-        else Seq()
-      case _ ⇒ test(Seq(safePathToTest))
-    }
-  }
-
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter()): ListFilesData = {
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter.defaultFilter): ListFilesData = {
     import services.*
     utils.listFiles(sp, fileFilter, listPlugins())
   }
@@ -295,8 +294,20 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
-    utils.move(fromFile, toFile)
+
+    fromFile.move(to.toFile)
+    //utils.move(fromFile, toFile)
   }
+
+//  def renameFile(safePath: SafePath, name: String): SafePath = {
+//    import services._
+//    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+//
+//    val targetFile = new File(safePath.parent.toFile, name)
+//
+//    Files.move(safePath.toFile, targetFile, StandardCopyOption.REPLACE_EXISTING)
+//    targetFile.toSafePath
+//  }
 
   def duplicate(safePath: SafePath, newName: String): SafePath = {
     import services._
@@ -309,15 +320,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     MarkDownProcessor(safePathToFile(safePath).content)
   }
 
-  def renameFile(safePath: SafePath, name: String): SafePath = {
-    import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
-    val targetFile = new File(safePath.parent.toFile, name)
-
-    Files.move(safePath.toFile, targetFile, StandardCopyOption.REPLACE_EXISTING)
-    targetFile.toSafePath
-  }
 
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import services._

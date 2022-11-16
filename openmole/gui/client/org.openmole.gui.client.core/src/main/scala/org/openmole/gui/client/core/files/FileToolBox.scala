@@ -78,30 +78,29 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       }
     }
 
-  def testRename(safePath: SafePath, to: String) = {
+  def testRename(safePath: SafePath, to: String) =
     val newSafePath = safePath.parent ++ to
-    Fetch.future(_.existsExcept(newSafePath, false).future).foreach {
-      b ⇒
-        if (b) {
+
+    Fetch.future(_.exists(newSafePath).future).foreach {
+      exists ⇒
+        if exists
+        then
           actionEdit.set(None)
           actionConfirmation.set(Some(confirmation(s"Overwrite ${safePath.name} ?", () ⇒ rename(safePath, to, () ⇒ closeToolBox))))
-        }
-        else {
+        else
           rename(safePath, to, () ⇒ closeToolBox)
           actionEdit.set(None)
           actionConfirmation.set(None)
-        }
     }
-  }
 
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit) = {
-    Fetch.future(_.rename(safePath, to).future).foreach {
-      newNode ⇒
-        TabContent.rename(safePath, newNode)
-        treeNodeManager.invalidCurrentCache
-        TabContent.checkTabs
-        treeNodePanel.currentSafePath.set(Some(safePath.parent ++ to))
-        replacing()
+    val newNode = safePath.parent ++ to
+    Fetch.future(_.move(safePath, safePath.parent ++ to).future).foreach { _ ⇒
+      TabContent.rename(safePath, newNode)
+      treeNodeManager.invalidCurrentCache
+      TabContent.checkTabs
+      treeNodePanel.currentSafePath.set(Some(newNode))
+      replacing()
     }
   }
 

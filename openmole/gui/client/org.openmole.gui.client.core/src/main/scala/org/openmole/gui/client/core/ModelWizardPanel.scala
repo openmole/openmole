@@ -158,11 +158,9 @@ object ModelWizardPanel {
   def render(wizards: Seq[WizardPluginFactory]) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] = {
-      val fileType: FileType = safePath.name
+      val fileType: FileType = FileType(safePath.name)
 
-      wizards.filter {
-        _.fileType == fileType
-      }.headOption
+      wizards.filter { _.fileType == fileType }.headOption
     }
 
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
@@ -174,27 +172,47 @@ object ModelWizardPanel {
             (p: ProcessState) ⇒ transferring.set(p),
             UploadAbsolute(),
             uploaded ⇒ {
-              Fetch.future(_.extractTestExist(tempFile ++ fileName, uploadPath.parent).future).foreach {
-                existing ⇒
-                  val fileType: FileType = uploadPath
-                  val targetPath = fileType match {
-                    case Archive ⇒ uploadPath.parent ++ uploadPath.nameWithNoExtension
-                    case _ ⇒ uploadPath
+              def copyTo(targetPath: SafePath) =
+                // Not sure why...
+                val from =
+                  CoreUtils.listFiles(tempFile).map { files =>
+                    if files.list.size == 1
+                    then tempFile ++ files.list.head.name
+                    else tempFile
                   }
+
+                // TODO may be overwrite should be better handled
+                for
+                  f <- from
+                  _ <- CoreUtils.copyFiles(Seq(f), targetPath, overwrite = true)
+                do
+                  fileToUploadPath.set(Some(uploadPath))
+                  //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                  factory(uploadPath).foreach { f =>
+                    f.parse(uploadPath).foreach { mmd =>
+                      modelMetadata.set(mmd)
+                    }
+                  }
+
+
+              val fileType: FileType = FileType(uploadPath)
+
+              fileType match
+                case Archive ⇒
+                  Fetch.future(_.extract(tempFile ++ fileName).future).foreach {
+                    _ match {
+                      case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+                        panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
+                      case _ ⇒
+                        copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
+                    }
+                case _ ⇒ copyTo(uploadPath)
+
 
                   // Move files from tmp to target path
                   //if (existing.isEmpty) {
                   
-                  Fetch.future(_.copyAllFromTmp(tempFile, targetPath).future).foreach {
-                    b ⇒
-                      fileToUploadPath.set(Some(uploadPath))
-                      //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                      factory(uploadPath).foreach { f =>
-                        f.parse(uploadPath).foreach { mmd =>
-                          modelMetadata.set(mmd)
-                        }
-                      }
-                  }
+
 
 
                 //  }
@@ -206,7 +224,6 @@ object ModelWizardPanel {
                 //                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                 //                  }
                 //                }
-              }
             }
           )
       }
@@ -224,10 +241,7 @@ object ModelWizardPanel {
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
                   filePath.set(Some(treeNodeManager.dirNodeLine.now() ++ fileName))
-                  filePath.now().map {
-                    fp ⇒
-                      moveFilesAndBuildForm(fInput, fileName, fp)
-                  }
+                  filePath.now().map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
               child <-- labelName.signal.map {

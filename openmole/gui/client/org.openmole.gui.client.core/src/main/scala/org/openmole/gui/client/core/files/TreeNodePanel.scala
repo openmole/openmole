@@ -469,7 +469,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            Fetch.future(_.move(dragged, to).future).foreach {
+            Fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)

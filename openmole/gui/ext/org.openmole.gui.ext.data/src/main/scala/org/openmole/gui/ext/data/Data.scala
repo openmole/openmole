@@ -520,10 +520,6 @@ package object data {
   object UndefinedFileType extends FileType
 
   object FileType {
-    implicit def safePathToFileType(sp: SafePath): FileType = apply(sp)
-
-    implicit def filNameToFileType(f: String): FileType = apply(f)
-
     private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
 
     def apply(safePath: SafePath): FileType = apply(safePath.name)
@@ -796,7 +792,7 @@ package object data {
   case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
   object FileFilter {
-    def defaultFilter = FileFilter(First(), AlphaSorting())
+    def defaultFilter = FileFilter()
   }
 
   case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)

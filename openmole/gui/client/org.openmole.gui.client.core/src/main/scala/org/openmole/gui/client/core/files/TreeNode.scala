@@ -85,6 +85,11 @@ object TreeNode {
 
   case class ListFiles(list: Seq[TreeNode], nbFilesOnServer: Int)
 
+
+  def isDir(node: TreeNode) =
+    node match
+      case _: DirNode => true
+      case _ => false
 }
 
 case class DirNode(

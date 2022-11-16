@@ -79,9 +79,8 @@ object CoreUtils {
   def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
     Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
-  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] = {
+  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] =
     Fetch.future(_.listFiles(safePath, fileFilter).future)
-  }
   
  def findFilesContaining(safePath: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = {
     Fetch.future(_.listRecursive(safePath, findString).future)

@@ -199,11 +199,8 @@ object utils {
 
     build(classes, Seq())
   }
+  
 
-  def move(from: File, to: File): Unit =
-    if (from.exists && to.exists) {
-      from.move(new File(to, from.getName))
-    }
 
   def exists(safePath: SafePath)(implicit workspace: Workspace) = {
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -227,20 +224,20 @@ object utils {
 //
 //  }
 
-  def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
-    val f: File = safePathToFile(tmpSafePath)
-    val toFile: File = safePathToFile(to)
-
-    val dirToCopy = {
-      val level1 = f.listFiles.toSeq
-      if (level1.size == 1) level1.head
-      else f
-    }
-
-    toFile.mkdir
-    dirToCopy.copy(toFile)
-
-  }
+//  def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
+//    val f: File = safePathToFile(tmpSafePath)
+//    val toFile: File = safePathToFile(to)
+//
+//    val dirToCopy = {
+//      val level1 = f.listFiles.toSeq
+//      if (level1.size == 1) level1.head
+//      else f
+//    }
+//
+//    toFile.mkdir
+//    dirToCopy.copy(toFile)
+//
+//  }
 
 //  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
 //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
