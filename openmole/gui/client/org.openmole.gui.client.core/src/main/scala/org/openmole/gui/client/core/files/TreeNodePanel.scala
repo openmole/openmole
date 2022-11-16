@@ -419,10 +419,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           onDrop --> { e ⇒
             e.dataTransfer
             e.preventDefault()
-            dropAction(treeNodeManager.dirNodeLine.now() ++ tn.name, tn match {
-              case _: DirNode ⇒ true
-              case _ ⇒ false
-            })
+            dropAction(treeNodeManager.dirNodeLine.now() ++ tn.name, TreeNode.isDir(tn))
           },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,
