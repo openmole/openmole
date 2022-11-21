@@ -42,7 +42,7 @@ case class FileUploaderUI(
         fInput,
         SafePath.empty,
         (p: ProcessState) ⇒ {},
-        UploadAuthentication(),
+        UploadType.Authentication,
         uploaded ⇒ {
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name

@@ -99,7 +99,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   private val upButton = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.dirNodeLine.now()
-    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadProject())
+    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), UploadType.Project)
 //    , () ⇒ {
 //      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
 //      CoreUtils.appendToPluggedIfPlugin(sp)

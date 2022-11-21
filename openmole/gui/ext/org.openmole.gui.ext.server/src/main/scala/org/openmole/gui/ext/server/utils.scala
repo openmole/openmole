@@ -76,8 +76,8 @@ object utils {
 
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
-      case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
-      case _ ⇒ SafePath(getPathArray(f, None))
+      case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
+      case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None))
     }
   }
 
@@ -94,11 +94,11 @@ object utils {
       getFile0(paths, root)
 
     s.context match
-      case _: ProjectFileSystem ⇒ getFile(Some(projectsDirectory), s.path)
-      case _ ⇒ getFile(None, s.path)
+      case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path)
+      case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path)
 
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] = {
 
     val time = if (f.exists) Some(
       java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis

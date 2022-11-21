@@ -208,32 +208,26 @@ package object data {
   }
 
   sealed trait FileContent
-
   case class AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
-
   case class ReadOnlyFileContent() extends FileContent
-
 
 
   import org.openmole.gui.ext.data.SafePath._
 
-  sealed trait ServerFileSystemContext
+  object ServerFileSystemContext:
+    implicit val absolute: ServerFileSystemContext = ServerFileSystemContext.Absolute
+    implicit val project: ServerFileSystemContext = ServerFileSystemContext.Project
 
-  case class AbsoluteFileSystem() extends ServerFileSystemContext
+  enum ServerFileSystemContext:
+    case Absolute, Project
 
-  case class ProjectFileSystem() extends ServerFileSystemContext
-
-  object ServerFileSystemContext {
-    implicit val absolute: ServerFileSystemContext = AbsoluteFileSystem()
-    implicit val project: ServerFileSystemContext = ProjectFileSystem()
-  }
 
   object SafePath:
     def leaf(name: String) = SafePath(Seq(name))
     def empty = leaf("")
     def naming = (sp: SafePath) ⇒ sp.name
 
-  case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()):
+  case class SafePath(path: Seq[String], context: ServerFileSystemContext = ServerFileSystemContext.Project):
     def ++(s: String) = copy(path = this.path :+ s)
     def /(child: String) = copy(path = path :+ child)
     def parent: SafePath = copy(path = path.dropRight(1))
@@ -244,25 +238,13 @@ package object data {
     def normalizedPathString = path.tail.mkString("/")
     def extension = FileExtension(name)
 
-  sealed trait UploadType {
-    def typeName: String
-  }
+  object UploadType:
+    extension (t: UploadType)
+      def typeName = t.productPrefix.toLowerCase
 
-  case class UploadProject() extends UploadType {
-    def typeName = "project"
-  }
-
-  case class UploadAuthentication() extends UploadType {
-    def typeName = "authentication"
-  }
-
-  case class UploadPlugin(tmpDirectoryName: String) extends UploadType {
-    def typeName = "plugin"
-  }
-
-  case class UploadAbsolute() extends UploadType {
-    def typeName = "absolute"
-  }
+  enum UploadType:
+    case Project, Authentication, Absolute
+    case Plugin(tmpDirectoryName: String) extends UploadType
 
   case class DirData(isEmpty: Boolean)
 

@@ -44,7 +44,7 @@ object FileManager {
     val formData = new FormData
 
     uploadType match {
-      case UploadPlugin(tmpDirectoryName) ⇒
+      case UploadType.Plugin(tmpDirectoryName) ⇒
         formData.append("fileType", uploadType.typeName)
         formData.append("directoryName", tmpDirectoryName)
       case _ ⇒ formData.append("fileType", uploadType.typeName)
