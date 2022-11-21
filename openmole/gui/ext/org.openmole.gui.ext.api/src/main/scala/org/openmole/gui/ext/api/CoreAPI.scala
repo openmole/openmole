@@ -22,13 +22,11 @@ import org.openmole.gui.ext.data.*
 
 trait CoreAPI extends RESTAPI {
 
-  val omSettings: Endpoint[Unit, OMSettings] =
-    endpoint(get(path / "settings"), ok(jsonResponse[OMSettings]))
 
   // ----- Workspace -------
 
-  val isPasswordCorrect: Endpoint[String, Boolean] =
-    endpoint(post(path / "is-password-correct", jsonRequest[String]), ok(jsonResponse[Boolean]))
+//  val isPasswordCorrect: Endpoint[String, Boolean] =
+//    endpoint(post(path / "is-password-correct", jsonRequest[String]), ok(jsonResponse[Boolean]))
 
 //  val resetPassword: Endpoint[Unit, Unit] =
 //    endpoint(get(path / "reset-password"), ok(jsonResponse[Unit]))
@@ -80,6 +78,9 @@ trait CoreAPI extends RESTAPI {
   val exists: Endpoint[SafePath, Boolean] =
     endpoint(post(path / "file" / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
 
+  val temporaryDirectory: Endpoint[Unit, SafePath] =
+    endpoint(get(path / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
+
 
   //  val rename: Endpoint[(SafePath, String), SafePath] =
   //    endpoint(post(path / "rename", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
@@ -103,61 +104,47 @@ trait CoreAPI extends RESTAPI {
 //    endpoint(post(path / "exists-except", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Boolean]))
 
 
-  //def mdToHtml(safePath: SafePath): String
-  val mdToHtml: Endpoint[SafePath, String] =
-    endpoint(post(path / "md-to-html", jsonRequest[SafePath]), ok(jsonResponse[String]))
 
-  //def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
-
-  //def renameFile(safePath: SafePath, name: String): SafePath
-
-  //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
-  val sequence: Endpoint[SafePath, SequenceData] =
-    endpoint(post(path / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
-
-  val temporaryDirectory: Endpoint[Unit, SafePath] =
-    endpoint(get(path / "temporary-directory"), ok(jsonResponse[SafePath]))
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
   val allStates: Endpoint[Int, (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] =
-    endpoint(post(path / "all-states", jsonRequest[Int]), ok(jsonResponse[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])]))
+    endpoint(post(path / "execution" / "state", jsonRequest[Int]), ok(jsonResponse[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])]))
 
 //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
   val staticInfos: Endpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
-    endpoint(get(path / "static-execution-info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
+    endpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
 
 //  def cancelExecution(id: ExecutionId): Unit
   val cancelExecution: Endpoint[ExecutionId, Unit] =
-    endpoint(post(path / "cancel-execution", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "execution" / "cancel", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def removeExecution(id: ExecutionId): Unit
   val removeExecution: Endpoint[ExecutionId, Unit] =
-    endpoint(post(path / "remove-execution", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def compileScript(scriptData: ScriptData): Option[ErrorData]
   val compileScript: Endpoint[ScriptData, Option[ErrorData]] =
-    endpoint(post(path / "compile-script", jsonRequest[ScriptData]), ok(jsonResponse[Option[ErrorData]]))
+    endpoint(post(path / "execution" / "compile", jsonRequest[ScriptData]), ok(jsonResponse[Option[ErrorData]]))
 
 //  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
   val runScript: Endpoint[(ScriptData, Boolean), Unit] =
-    endpoint(post(path / "run-script", jsonRequest[(ScriptData, Boolean)]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "execution" / "run", jsonRequest[(ScriptData, Boolean)]), ok(jsonResponse[Unit]))
 
 //  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   val clearEnvironmentErrors: Endpoint[EnvironmentId, Unit] =
-    endpoint(post(path / "clear-environment-errors", jsonRequest[EnvironmentId]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "execution" / "clear-environment-error", jsonRequest[EnvironmentId]), ok(jsonResponse[Unit]))
 
 //  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
   val runningErrorEnvironmentData: Endpoint[(EnvironmentId, Int), EnvironmentErrorData] =
-    endpoint(post(path / "running-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[EnvironmentErrorData]))
-
+    endpoint(post(path / "execution" / "get-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[EnvironmentErrorData]))
 
   // ---- Authentication ---------
 
   //def renameKey(keyName: String, newName: String): Unit
   val renameKey =
-    endpoint(post(path / "rename-key", jsonRequest[(String, String)]), ok(jsonResponse[Unit]))
+    endpoint(post(path / "authentication" / "rename-key", jsonRequest[(String, String)]), ok(jsonResponse[Unit]))
 
   // ---- Plugins -----
   val listPlugins: Endpoint[Unit, Seq[Plugin]] =
@@ -209,6 +196,9 @@ trait CoreAPI extends RESTAPI {
 
   // ---------- Application ------------
 
+  val omSettings: Endpoint[Unit, OMSettings] =
+    endpoint(get(path / "application" / "settings"), ok(jsonResponse[OMSettings]))
+
   // def shutdown(): Unit
   val shutdown: Endpoint[Unit, Unit] =
     endpoint(get(path / "application" / "shutdown"), ok(jsonResponse[Unit]))
@@ -224,6 +214,20 @@ trait CoreAPI extends RESTAPI {
   //  def jvmInfos(): JVMInfos
   val jvmInfos: Endpoint[Unit, JVMInfos] =
     endpoint(get(path / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
+
+
+  //def mdToHtml(safePath: SafePath): String
+  val mdToHtml: Endpoint[SafePath, String] =
+    endpoint(post(path / "tool" / "md-to-html", jsonRequest[SafePath]), ok(jsonResponse[String]))
+
+  //def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
+
+  //def renameFile(safePath: SafePath, name: String): SafePath
+
+  //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
+  val sequence: Endpoint[SafePath, SequenceData] =
+    endpoint(post(path / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
+
 
   //TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =

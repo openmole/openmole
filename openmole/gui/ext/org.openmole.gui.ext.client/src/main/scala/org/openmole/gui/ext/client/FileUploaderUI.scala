@@ -41,8 +41,7 @@ case class FileUploaderUI(
       FileManager.upload(
         fInput,
         SafePath.empty,
-        (p: ProcessState) ⇒ {
-        },
+        (p: ProcessState) ⇒ {},
         UploadAuthentication(),
         uploaded ⇒ {
           if (fInput.ref.files.length > 0) {

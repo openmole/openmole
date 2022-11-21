@@ -38,8 +38,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val settingsRoute =
     omSettings.implementedBy(_ => apiImpl.settings)
 
-  val isPasswordCorrectRoute =
-    isPasswordCorrect.implementedBy(apiImpl.isPasswordCorrect _)
+//  val isPasswordCorrectRoute =
+//    isPasswordCorrect.implementedBy(apiImpl.isPasswordCorrect _)
 
 //  val resetPasswordRoute =
 //    resetPassword.implementedBy(_ => apiImpl.resetPassword())
@@ -161,7 +161,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
-      isPasswordCorrectRoute,
+//      isPasswordCorrectRoute,
 //      resetPasswordRoute,
       listPluginsRoute,
       guiPluginsRoute,
