@@ -214,23 +214,9 @@ package object data {
   case class ReadOnlyFileContent() extends FileContent
 
   object SafePath {
-    def sp(path: Seq[String]): SafePath =
-      SafePath(path)
-
-    def leaf(name: String) = sp(Seq(name))
-
+    def leaf(name: String) = SafePath(Seq(name))
     def empty = leaf("")
-
     def naming = (sp: SafePath) ⇒ sp.name
-
-//    def allSafePaths(path: Seq[String]): Seq[SafePath] = {
-//      def all(todo: Seq[String], done: Seq[SafePath]): Seq[SafePath] = {
-//        if (todo.isEmpty) done
-//        else all(todo.dropRight(1), done :+ SafePath.sp(todo))
-//      }
-//
-//      all(path, Seq())
-//    }
   }
 
   import org.openmole.gui.ext.data.SafePath._
