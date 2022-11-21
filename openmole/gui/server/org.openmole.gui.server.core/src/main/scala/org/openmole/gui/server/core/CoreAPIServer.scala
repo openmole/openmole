@@ -226,7 +226,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
             }
 
           fileType match {
-            case "project"        ⇒ copyTo(utils.webUIDirectory)
+            case "project"        ⇒ copyTo(utils.projectsDirectory)
             case "authentication" ⇒ copyTo(utils.authenticationKeysFile)
             case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(directoryName.get))
             case "absolute"       ⇒ copyTo(new java.io.File(""))
@@ -252,7 +252,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
         import org.typelevel.ci.*
 
-        val f = new java.io.File(org.openmole.gui.ext.server.utils.webUIDirectory, path)
+        val f = new java.io.File(org.openmole.gui.ext.server.utils.projectsDirectory, path)
 
         if (!f.exists()) Status.NotFound.apply(s"The file $path does not exist.")
         else {

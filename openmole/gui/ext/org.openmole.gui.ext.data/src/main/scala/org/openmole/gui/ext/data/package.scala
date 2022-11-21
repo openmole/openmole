@@ -27,6 +27,6 @@ package object routes {
   val uploadFilesRoute = "uploadFiles"
   val resetPasswordRoute = "resetPassword"
 
-  def downloadFile(uri: String, hash: Boolean = false) = s"/${downloadFileRoute.drop(1)}?path=$uri&hash=$hash"
+  def downloadFile(uri: String, hash: Boolean = false) = s"/${downloadFileRoute}?path=$uri&hash=$hash"
   def hashHeader = "Content-Hash"
 }

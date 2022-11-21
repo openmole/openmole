@@ -29,9 +29,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TreeNodeManager {
 
-  val ROOTDIR = "projects"
-  val root = SafePath(Seq(ROOTDIR))
-
+  val root = SafePath.empty
+  
   val dirNodeLine: Var[SafePath] = Var(root)
 
   val sons: Var[Map[SafePath, ListFiles]] = Var(Map())

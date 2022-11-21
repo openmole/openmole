@@ -76,17 +76,27 @@ object utils {
 
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
     context match {
-      case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, projectsDirectory))
-      case _ ⇒ SafePath(getPathArray(f, new File("")))
+      case _: ProjectFileSystem ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
+      case _ ⇒ SafePath(getPathArray(f, None))
     }
   }
 
-  def safePathToFile(s: SafePath)(implicit workspace: Workspace): File = {
-    s.context match {
-      case _: ProjectFileSystem ⇒ getFile(webUIDirectory, s.path)
-      case _ ⇒ getFile(new File(""), s.path)
-    }
-  }
+  def safePathToFile(s: SafePath)(implicit workspace: Workspace): File =
+    def getFile(root: Option[File], paths: Seq[String]): File =
+      @tailrec
+      def getFile0(paths: Seq[String], accFile: Option[File]): File =
+        if (paths.isEmpty) accFile.getOrElse(new File(""))
+        else
+          accFile match
+            case None => new File(paths.head)
+            case Some(f) => getFile0(paths.tail, Some(new File(f, paths.head)))
+
+      getFile0(paths, root)
+
+    s.context match
+      case _: ProjectFileSystem ⇒ getFile(Some(projectsDirectory), s.path)
+      case _ ⇒ getFile(None, s.path)
+
 
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ProjectFileSystem(), workspace: Workspace): Option[TreeNodeData] = {
 
@@ -111,36 +121,28 @@ object utils {
     else DebugLevel()
   }
 
-  def getPathArray(f: File, until: File): Seq[String] = {
+  def getPathArray(f: File, until: Option[File]): Seq[String] =
+    val canonicalUntil = until.map(_.getCanonicalFile)
+
     @tailrec
-    def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] = {
-      val parent = f.getParentFile
-      if (parent != null) {
-        val parentName = parent.getName
-        if (parentName != "") {
-          val computed = parentName +: computedParents
-          if (parent == until) computed
-          else getParentsArray0(parent, computed)
-        }
-        else computedParents
-      }
-      else computedParents
-    }
+    def getParentsArray0(f: File, computedParents: Seq[String]): Seq[String] =
+      f.getParentFile match
+        case null => computedParents
+        case parent =>
+          parent.getName match
+            case "" => computedParents
+            case parentName =>
+              val computed = parentName +: computedParents
+              if canonicalUntil.map(f == _).getOrElse(false)
+              then computed
+              else getParentsArray0(parent, computed)
 
-    getParentsArray0(f, Seq()) :+ f.getName
-  }
+    getParentsArray0(f.getCanonicalFile, Seq()) :+ f.getName
 
-  def getFile(root: File, paths: Seq[String]): File = {
-    @tailrec
-    def getFile0(paths: Seq[String], accFile: File): File = {
-      if (paths.isEmpty) accFile
-      else getFile0(paths.tail, new File(accFile, paths.head))
-    }
 
-    getFile0(paths, root)
-  }
 
-  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData = {
+
+  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
     given ServerFileSystemContext = path.context
     val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
@@ -151,7 +153,6 @@ object utils {
       case First() ⇒ ListFilesData(sorted, nbFiles)
       case Last() ⇒ ListFilesData(sorted.reverse, nbFiles)
     }
-  }
 
   def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] = {
     given ServerFileSystemContext = path.context

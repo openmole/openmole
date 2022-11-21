@@ -71,7 +71,7 @@ object FileManager {
       inputElement.ref.value = ""
     }
 
-    xhr.open("POST", "uploadFiles", true)
+    xhr.open("POST", org.openmole.gui.ext.data.routes.uploadFilesRoute, true)
     xhr.send(formData)
   }
 

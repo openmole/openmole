@@ -213,11 +213,7 @@ package object data {
 
   case class ReadOnlyFileContent() extends FileContent
 
-  object SafePath {
-    def leaf(name: String) = SafePath(Seq(name))
-    def empty = leaf("")
-    def naming = (sp: SafePath) ⇒ sp.name
-  }
+
 
   import org.openmole.gui.ext.data.SafePath._
 
@@ -232,27 +228,21 @@ package object data {
     implicit val project: ServerFileSystemContext = ProjectFileSystem()
   }
 
-  //The path it relative to the project root directory
-  case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()) {
+  object SafePath:
+    def leaf(name: String) = SafePath(Seq(name))
+    def empty = leaf("")
+    def naming = (sp: SafePath) ⇒ sp.name
 
+  case class SafePath(path: Seq[String], context: ServerFileSystemContext = ProjectFileSystem()):
     def ++(s: String) = copy(path = this.path :+ s)
-
     def /(child: String) = copy(path = path :+ child)
-
     def parent: SafePath = copy(path = path.dropRight(1))
-
     def name = path.lastOption.getOrElse("")
-
     def isEmpty = path.isEmpty
-
     def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
-
     def nameWithNoExtension = name.split('.').head
-
     def normalizedPathString = path.tail.mkString("/")
-
     def extension = FileExtension(name)
-  }
 
   sealed trait UploadType {
     def typeName: String
