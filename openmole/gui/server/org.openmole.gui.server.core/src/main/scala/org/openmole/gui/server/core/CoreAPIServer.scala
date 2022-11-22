@@ -218,11 +218,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
               //finally stream.close
             }
 
-          import org.openmole.gui.ext.data.UploadType
+          import org.openmole.gui.ext.data.ServerFileSystemContext
           fileType match
-            case UploadType.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
-            case UploadType.Authentication.typeName ⇒ copyTo(utils.authenticationKeysDirectory)
-            case UploadType.Absolute.typeName       ⇒ copyTo(new java.io.File(""))
+            case ServerFileSystemContext.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
+            case ServerFileSystemContext.Authentication.typeName ⇒ copyTo(utils.authenticationKeysDirectory)
+            case ServerFileSystemContext.Absolute.typeName       ⇒ copyTo(new java.io.File(""))
 
         req.decode[Multipart[IO]] { parts =>
           def partContent(name: String) =

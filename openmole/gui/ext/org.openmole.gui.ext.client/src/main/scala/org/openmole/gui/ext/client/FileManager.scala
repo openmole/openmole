@@ -39,7 +39,7 @@ object FileManager {
     inputElement:      Input,
     destinationPath:   SafePath,
     fileTransferState: ProcessState ⇒ Unit,
-    uploadType:        UploadType,
+    uploadType:        ServerFileSystemContext,
     onLoadEnd:         Seq[String] ⇒ Unit           = _ ⇒ {}
   ) = {
     val fileList = inputElement.ref.files

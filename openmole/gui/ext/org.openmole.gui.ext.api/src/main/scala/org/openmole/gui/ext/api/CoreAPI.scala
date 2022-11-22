@@ -58,7 +58,6 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
-
   val listFiles: Endpoint[(SafePath, FileFilter), ListFilesData] =
     endpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileFilter)]), ok(jsonResponse[ListFilesData]))
 
@@ -140,12 +139,6 @@ trait CoreAPI extends RESTAPI {
   val runningErrorEnvironmentData: Endpoint[(EnvironmentId, Int), EnvironmentErrorData] =
     endpoint(post(path / "execution" / "get-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[EnvironmentErrorData]))
 
-  // ---- Authentication ---------
-
-  //def renameKey(keyName: String, newName: String): Unit
-  val renameKey =
-    endpoint(post(path / "authentication" / "rename-key", jsonRequest[(String, String)]), ok(jsonResponse[Unit]))
-
   // ---- Plugins -----
   val listPlugins: Endpoint[Unit, Seq[Plugin]] =
     endpoint(get(path / "plugin" / "list"), ok(jsonResponse[Seq[Plugin]]))
@@ -161,13 +154,6 @@ trait CoreAPI extends RESTAPI {
 
   val findVisualisationPlugin: Endpoint[SafePath, Option[GUIPluginAsJS]] =
     endpoint(post(path / "plugin" / "visualisation", jsonRequest[SafePath]), ok(jsonResponse[Option[GUIPluginAsJS]]))
-
-  // To port
-  //def appendToPluggedIfPlugin(safePath: SafePath): Unit
-  //def unplug(safePath: SafePath): Unit
-  //def isOSGI(safePath: SafePath): Boolean
-
-  //def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS]
 
 
   // ---- Model Wizards --------------

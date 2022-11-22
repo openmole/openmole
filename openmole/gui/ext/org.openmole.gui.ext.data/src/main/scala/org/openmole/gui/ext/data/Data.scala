@@ -219,6 +219,7 @@ package object data {
     implicit val authentication: ServerFileSystemContext = ServerFileSystemContext.Authentication
 
   enum ServerFileSystemContext:
+    val typeName = this.productPrefix.toLowerCase
     case Absolute, Project, Authentication
 
   object SafePath:
@@ -236,10 +237,6 @@ package object data {
     def nameWithNoExtension = name.split('.').head
     def normalizedPathString = path.tail.mkString("/")
     def extension = FileExtension(name)
-
-  enum UploadType:
-    val typeName = this.productPrefix.toLowerCase
-    case Project, Authentication, Absolute
 
   case class DirData(isEmpty: Boolean)
 

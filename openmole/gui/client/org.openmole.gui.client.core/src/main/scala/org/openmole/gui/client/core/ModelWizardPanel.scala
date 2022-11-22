@@ -170,7 +170,7 @@ object ModelWizardPanel {
             fInput,
             tempFile,
             (p: ProcessState) ⇒ transferring.set(p),
-            UploadType.Absolute,
+            ServerFileSystemContext.Absolute,
             uploaded ⇒ {
               def copyTo(targetPath: SafePath) =
                 // Not sure why...
