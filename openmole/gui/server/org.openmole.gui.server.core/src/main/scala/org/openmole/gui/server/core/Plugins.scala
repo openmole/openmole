@@ -92,11 +92,11 @@ object Plugins extends JavaLogger {
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
-    if (!jsFile.exists)
+    if !jsFile.exists
     then
       update
-      utils.updateIfChanged(jsPluginDirectory, _ => jsPluginHash) { identity } // Make sure hash file is created
-    else utils.updateIfChanged(jsPluginDirectory, _ => jsPluginHash) { _ ⇒ update }
+      utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { identity } // Make sure hash file is created
+    else utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { _ ⇒ update }
 
     webui / utils.webpakedOpenmoleFileName
   }

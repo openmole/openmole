@@ -281,9 +281,10 @@ object utils {
   val webpackConfigTemplateName = "template.webpack.config.js"
   val webpackJsonPackage = "package.json"
 
-  def updateIfChanged(file: File, hash: File => File = f => new File(f.toString + "-hash"))(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
+  def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._
 
+    def hash(f: File) = hashFile.getOrElse(new File(f.toString + "-hash"))
     lockFile(file).withLock { _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
