@@ -26,9 +26,14 @@ class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "sizes of computed values" should "be correct" in {
-    RangeDomain[Double](0.0, 10.0, 0.1).iterator(Context()).size shouldBe 101
-    RangeDomain[Int](0, 10, 1).iterator(Context()).size shouldBe 11
-    LogRangeDomain[Double](0.0, 10.0, 10).iterator(Context()).size shouldBe 10
+    RangeDomain(0.0, 10.0, 0.1).iterator(Context()).size shouldBe 101
+    RangeDomain(0, 10, 1).iterator(Context()).size shouldBe 11
+    LogRangeDomain(0.0, 10.0, 10).iterator(Context()).size shouldBe 10
+  }
+
+  "ranges using val" should "compile" in {
+    val i = Val[Int]
+    RangeDomain(0, i, 1)
   }
 
   "ranges using to in scala" should "be range domains" in {

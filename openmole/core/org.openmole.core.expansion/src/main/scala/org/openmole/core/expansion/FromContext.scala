@@ -31,10 +31,7 @@ import scala.annotation.tailrec
 import cats.*
 import cats.implicits.*
 
-trait LowPriorityToFromContext:
-  given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
-
-object ToFromContext extends LowPriorityToFromContext {
+trait ToFromContextLowPriorityGiven:
   given ToFromContext[String, Float] = FromContext.codeToFromContext[Float]
   given ToFromContext[String, Double] = FromContext.codeToFromContext[Double]
   given ToFromContext[String, Long] = FromContext.codeToFromContext[Long]
@@ -43,31 +40,32 @@ object ToFromContext extends LowPriorityToFromContext {
   given ToFromContext[String, BigInt] = FromContext.codeToFromContext[BigInt]
   given ToFromContext[String, Boolean] = FromContext.codeToFromContext[Boolean]
 
-  given ToFromContext[File, String] = f ⇒ ExpandedString(f.getPath) copy(stringValue = Some(s"file:${f.getPath}"))
-  given ToFromContext[String, String] = s ⇒ ExpandedString(s) copy(stringValue = Some(s))
-  given ToFromContext[String, File] = s ⇒ ExpandedString(s).map(s ⇒ File(s)) copy(stringValue = Some(s"file:$s"))
-  given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)) copy(stringValue = Some(s"file:${f.getPath}"))
-  given ToFromContext[Int, Long] = i ⇒ FromContext.value(i.toLong) copy(stringValue = Some(i.toString))
-  given ToFromContext[Int, Int] = i ⇒ FromContext.value(i) copy(stringValue = Some(i.toString))
+  given ToFromContext[File, String] = f ⇒ ExpandedString(f.getPath) copy (stringValue = Some(s"file:${f.getPath}"))
+  //given ToFromContext[String, String] = s ⇒ ExpandedString(s) copy(stringValue = Some(s))
+  given ToFromContext[String, File] = s ⇒ ExpandedString(s).map(s ⇒ File(s)) copy (stringValue = Some(s"file:$s"))
+  //given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)) copy(stringValue = Some(s"file:${f.getPath}"))
+  given ToFromContext[Int, Long] = i ⇒ FromContext.value(i.toLong) copy (stringValue = Some(i.toString))
+  //given ToFromContext[Int, Int] = i ⇒ FromContext.value(i) copy(stringValue = Some(i.toString))
 
   given ToFromContext[Int, Double] = i ⇒
     val v = i.toDouble
-    FromContext.value(v) copy(stringValue = Some(v.toString))
+    FromContext.value(v) copy (stringValue = Some(v.toString))
 
   given ToFromContext[Long, Double] = i ⇒
     val v = i.toDouble
-    FromContext.value(v) copy(stringValue = Some(v.toString))
+    FromContext.value(v) copy (stringValue = Some(v.toString))
 
-  given [T]: ToFromContext[FromContext[T], T] = identity
+  given[T]: ToFromContext[FromContext[T], T] = identity
 
-  given ToFromContext[Boolean, Boolean] = b ⇒ FromContext.value(b).copy(stringValue = Some(b.toString))
-  given [T]: ToFromContext[Val[T], T] = p ⇒ FromContext.prototype(p)
+  //given ToFromContext[Boolean, Boolean] = b ⇒ FromContext.value(b).copy(stringValue = Some(b.toString))
+  given[T]: ToFromContext[Val[T], T] = p ⇒ FromContext.prototype(p)
 
-  given [T]: ToFromContext[Val[T], String] = p => FromContext { c =>
+  given[T]: ToFromContext[Val[T], String] = p => FromContext { c =>
     import c.*
     context(p).toString
   }
-}
+object ToFromContext extends ToFromContextLowPriorityGiven:
+  given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
 
 @FunctionalInterface trait ToFromContext[F, T]: 
   def convert(f: F): FromContext[T]
@@ -180,7 +178,13 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def value[T](t: T): FromContext[T] = FromContext[T] { _ ⇒ t } copy(stringValue = Some(t.toString))
+  def value[T](t: T): FromContext[T] =
+    val stringValue =
+      t match
+        case t: File => s"file:${t.getPath}"
+        case t => t.toString
+    FromContext[T] { _ ⇒ t } copy(stringValue = Some(stringValue))
+
   def fromString(s: String): FromContext[String] = s
 
   /**
