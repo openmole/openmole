@@ -74,12 +74,11 @@ object utils {
     def toSafePath(implicit context: ServerFileSystemContext, workspace: Workspace) = fileToSafePath(f)
   }
 
-  def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath = {
-    context match {
+  def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath =
+    context match
       case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
       case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None))
-    }
-  }
+      case ServerFileSystemContext.Authentication => SafePath(getPathArray(f, Some(authenticationKeysDirectory)))
 
   def safePathToFile(s: SafePath)(implicit workspace: Workspace): File =
     def getFile(root: Option[File], paths: Seq[String]): File =
@@ -96,7 +95,7 @@ object utils {
     s.context match
       case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path)
       case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path)
-
+      case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path)
 
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] = {
 
@@ -200,7 +199,7 @@ object utils {
 
     build(classes, Seq())
   }
-  
+
 
 
   def exists(safePath: SafePath)(implicit workspace: Workspace) = {
@@ -355,7 +354,7 @@ object utils {
     res
   }
 
-  def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
+  def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.persistentDir / "keys"
 
 //  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
 //    import org.openmole.gui.ext.data.ServerFileSystemContext.project

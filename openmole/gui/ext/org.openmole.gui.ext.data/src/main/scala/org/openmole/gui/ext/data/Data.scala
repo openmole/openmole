@@ -211,16 +211,15 @@ package object data {
   case class AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
   case class ReadOnlyFileContent() extends FileContent
 
-
   import org.openmole.gui.ext.data.SafePath._
 
   object ServerFileSystemContext:
     implicit val absolute: ServerFileSystemContext = ServerFileSystemContext.Absolute
     implicit val project: ServerFileSystemContext = ServerFileSystemContext.Project
+    implicit val authentication: ServerFileSystemContext = ServerFileSystemContext.Authentication
 
   enum ServerFileSystemContext:
-    case Absolute, Project
-
+    case Absolute, Project, Authentication
 
   object SafePath:
     def leaf(name: String) = SafePath(Seq(name))

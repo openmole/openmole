@@ -46,8 +46,12 @@ case class FileUploaderUI(
         uploaded ⇒ {
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name
+            import org.openmole.gui.ext.data.ServerFileSystemContext.Authentication
+            val from = SafePath(Seq(leaf), Authentication)
+            val to = SafePath(Seq(fileName), Authentication)
+
             pathSet.set(false)
-            OMFetch(coreAPIClient).future(_.renameKey(leaf, fileName).future).foreach { b ⇒
+            OMFetch(coreAPIClient).future(_.move(from, to).future).foreach { b ⇒
               pathSet.set(true)
             }
           }

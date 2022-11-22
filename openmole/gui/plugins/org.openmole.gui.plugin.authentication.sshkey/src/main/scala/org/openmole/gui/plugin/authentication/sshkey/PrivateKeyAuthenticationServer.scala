@@ -50,7 +50,7 @@ class PrivateKeyAuthenticationServer(s: Services)
   object impl {
     import s._
 
-    private def authenticationFile(key: String) = new java.io.File(utils.authenticationKeysFile, key)
+    private def authenticationFile(key: String) = new java.io.File(utils.authenticationKeysDirectory, key)
 
     private def coreObject(data: PrivateKeyAuthenticationData) =
       data.privateKey match {

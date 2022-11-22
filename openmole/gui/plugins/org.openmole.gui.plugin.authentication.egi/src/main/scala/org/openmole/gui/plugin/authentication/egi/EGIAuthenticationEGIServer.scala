@@ -63,7 +63,7 @@ class EGIAuthenticationEGIServer(s: Services)
 
   object impl {
     private def authenticationFile(p: String) = {
-      def path = p.replace(EGIAuthenticationData.authenticationDirectory, utils.authenticationKeysFile.getAbsolutePath)
+      def path = p.replace(EGIAuthenticationData.authenticationDirectory, utils.authenticationKeysDirectory.getAbsolutePath)
 
       new java.io.File(path)
     }

@@ -62,17 +62,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val copyFilesRoute =
     copyFiles.implementedBy { case(sp, to, overwrite) => apiImpl.copyFiles(sp, to, overwrite) }
 
-  val renameKeyRoute =
-    renameKey.implementedBy { case(name, newName) => apiImpl.renameKey(name, newName) }
-
   val createFileRoute =
     createFile.implementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
   val extractRoute =
     extract.implementedBy { sp => apiImpl.extract(sp) }
-
-//  val extractTestExistRoute =
-//    extractTestExist.implementedBy { case(a, b) => apiImpl.extractAndTestExistence(a, b) }
 
   val deleteFilesRoute =
     deleteFiles.implementedBy { sp => apiImpl.deleteFiles(sp) }
@@ -168,7 +162,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
       listFilesRoute,
       sizeRoute,
       saveFileRoute,
-      renameKeyRoute,
       createFileRoute,
       extractRoute,
       deleteFilesRoute,
@@ -207,7 +200,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
         import org.openmole.gui.ext.server.utils
         import org.openmole.tool.stream.*
 
-        def move(fileParts: Vector[Part[IO]], fileType: String) = {
+        def move(fileParts: Vector[Part[IO]], fileType: String) =
 
           def copyTo(rootFile: java.io.File) =
             for (file ← fileParts) {
@@ -226,12 +219,10 @@ class CoreAPIServer(apiImpl: ApiImpl)
             }
 
           import org.openmole.gui.ext.data.UploadType
-          fileType match {
+          fileType match
             case UploadType.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
-            case UploadType.Authentication.typeName ⇒ copyTo(utils.authenticationKeysFile)
+            case UploadType.Authentication.typeName ⇒ copyTo(utils.authenticationKeysDirectory)
             case UploadType.Absolute.typeName       ⇒ copyTo(new java.io.File(""))
-          }
-        }
 
         req.decode[Multipart[IO]] { parts =>
           def partContent(name: String) =

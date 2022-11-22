@@ -101,11 +101,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     )
   }
 
-  //AUTHENTICATIONS
-  def renameKey(keyName: String, newName: String): Unit = {
-    import services._
-    Files.move(new File(authenticationKeysFile, keyName).toPath, new File(authenticationKeysFile, newName).toPath, StandardCopyOption.REPLACE_EXISTING)
-  }
 
   //WORKSPACE
   def isPasswordCorrect(pass: String): Boolean = Preference.passwordIsCorrect(Cypher(pass), services.preference)
@@ -124,13 +119,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     if directory
     then new File(safePath.toFile, name).createNewFile
     else new File(safePath.toFile, name).mkdirs
-
-
-//  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit = {
-//    unplug(safePath)
-//    import services._
-//    utils.deleteFile(safePath, context)
-//  }
 
   def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services.*
@@ -206,71 +194,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.exists(safePath)
   }
 
-//  def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean = {
-//    import services._
-//    val li = listFiles(exception.parent)
-//    val count = li.list.count(l ⇒ treeNodeToSafePath(l, exception.parent).path == exception.path)
-//
-//    val bound = if (exceptItSelf) 1 else 0
-//    if (count > bound) true else false
-//    // utils.existsExcept(exception, exceptItSelf)
-//  }
-
-//  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath]): Unit = {
-//    import services._
-//    utils.copyFromTmp(tmpSafePath, filesToBeMovedTo)
-//  }
-
-//  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit = {
-//    import services._
-//    utils.copyAllFromTmp(tmpSafePath, to)
-//  }
-
   def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
     import services._
     utils.copyFilesTo(safePaths, to, overwrite)
   }
-
-//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Seq[SafePath] = {
-//    import services._
-//    utils.testExistenceAndCopyProjectFilesTo(safePaths, to)
-//  }
-
-  // Test whether safePathToTest exists in "in"
-//  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath] = {
-//    import services.*
-//    // import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
-//
-//    def test(sps: Seq[SafePath], inDir: SafePath = in) = {
-//      import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
-//
-//      val toTest: Seq[SafePath] =
-//        if (sps.size == 1) sps.flatMap { f ⇒
-//          if (f.toFile.isDirectory) f.toFile.listFilesSafe.map { _.toSafePath }
-//          else Seq(f)
-//        } else sps
-//
-//      toTest.filter { sp ⇒ exists(inDir ++ sp.name) }.map { sp ⇒ inDir ++ sp.name }
-//    }
-//
-//    FileType(safePathToTest) match {
-//      case Archive ⇒
-//        // case j: JavaLikeLanguage ⇒ test(Seq(safePathToTest))
-//        // val emptyFile = new File("")
-//        val from: File = safePathToFile(safePathToTest)
-//        val to: File = safePathToFile(safePathToTest.parent)
-//        val extracted = getExtractedArchiveTo(from, to)(ServerFileSystemContext.absolute).filterNot {
-//          _ == safePathToTest
-//        }
-//        val toTest = in ++ safePathToTest.nameWithNoExtension
-//        val toTestFile: File = safePathToFile(in ++ safePathToTest.nameWithNoExtension)
-//        new File(to, from.getName).recursiveDelete
-//
-//        if (toTestFile.exists) test(extracted, toTest)
-//        else Seq()
-//      case _ ⇒ test(Seq(safePathToTest))
-//    }
-//  }
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter.defaultFilter): ListFilesData = {
     import services.*
@@ -290,24 +217,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   def move(from: SafePath, to: SafePath): Unit = {
-    import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import services.*
     val fromFile = safePathToFile(from)
     val toFile = safePathToFile(to)
 
     fromFile.move(to.toFile)
     //utils.move(fromFile, toFile)
   }
-
-//  def renameFile(safePath: SafePath, name: String): SafePath = {
-//    import services._
-//    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-//
-//    val targetFile = new File(safePath.parent.toFile, name)
-//
-//    Files.move(safePath.toFile, targetFile, StandardCopyOption.REPLACE_EXISTING)
-//    targetFile.toSafePath
-//  }
 
   def duplicate(safePath: SafePath, newName: String): SafePath = {
     import services._
@@ -319,8 +235,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
     MarkDownProcessor(safePathToFile(safePath).content)
   }
-
-
 
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import services._
@@ -346,10 +260,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       }
     }
   }
-
-  //  def saveFiles(fileContents: Seq[AlterableFileContent]): Seq[(SafePath, Boolean)] = fileContents.map { fc ⇒
-  //    fc.path -> saveFile(fc.path, fc.content, Some(fc.hash), false)
-  //  }
 
   def size(safePath: SafePath): Long = {
     import services._
@@ -561,21 +471,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     //autoAddPlugins(path)
   }
 
-  //PLUGINS
-//  private def autoAddPlugins(path: SafePath) = {
-//    import services._
-//    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-//
-//    val file = safePathToFile(path)
-//
-//    def recurse(f: File): List[File] = {
-//      val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
-//      PluginManager.listBundles(f).toList ::: subPlugins
-//    }
-//
-//    module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
-//  }
-
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
@@ -714,10 +609,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         }
       }
 
-    result match {
+    result match
       case Success(value) ⇒ None
       case Failure(e)     ⇒ Some(ErrorData(e))
-    }
 
 
 }
