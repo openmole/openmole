@@ -238,13 +238,9 @@ package object data {
     def normalizedPathString = path.tail.mkString("/")
     def extension = FileExtension(name)
 
-  object UploadType:
-    extension (t: UploadType)
-      def typeName = t.productPrefix.toLowerCase
-
   enum UploadType:
+    val typeName = this.productPrefix.toLowerCase
     case Project, Authentication, Absolute
-    case Plugin(tmpDirectoryName: String) extends UploadType
 
   case class DirData(isEmpty: Boolean)
 

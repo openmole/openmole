@@ -357,18 +357,18 @@ object utils {
 
   def authenticationKeysFile(implicit workspace: Workspace) = workspace.persistentDir / "keys"
 
-  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-    val files: Seq[File] = safePaths.map {
-      safePathToFile
-    }
-    addFilePlugins(files)
-  }
-
-  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
-    val errors = org.openmole.core.module.addPluginsFiles(files, false, org.openmole.core.module.pluginDirectory)
-    errors.map(e ⇒ ErrorData(e._2))
-  }
+//  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
+//    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+//    val files: Seq[File] = safePaths.map {
+//      safePathToFile
+//    }
+//    addFilePlugins(files)
+//  }
+//
+//  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
+//    val errors = org.openmole.core.module.addPluginsFiles(files, false, org.openmole.core.module.pluginDirectory)
+//    errors.map(e ⇒ ErrorData(e._2))
+//  }
 
   def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
 

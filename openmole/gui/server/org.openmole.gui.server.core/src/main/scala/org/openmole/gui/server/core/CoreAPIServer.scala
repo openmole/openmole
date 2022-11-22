@@ -207,7 +207,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
         import org.openmole.gui.ext.server.utils
         import org.openmole.tool.stream.*
 
-        def move(fileParts: Vector[Part[IO]], fileType: String, directoryName: Option[String]) = {
+        def move(fileParts: Vector[Part[IO]], fileType: String) = {
 
           def copyTo(rootFile: java.io.File) =
             for (file ← fileParts) {
@@ -225,11 +225,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
               //finally stream.close
             }
 
+          import org.openmole.gui.ext.data.UploadType
           fileType match {
-            case "project"        ⇒ copyTo(utils.projectsDirectory)
-            case "authentication" ⇒ copyTo(utils.authenticationKeysFile)
-            case "plugin"         ⇒ copyTo(utils.pluginUpdoadDirectory(directoryName.get))
-            case "absolute"       ⇒ copyTo(new java.io.File(""))
+            case UploadType.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
+            case UploadType.Authentication.typeName ⇒ copyTo(utils.authenticationKeysFile)
+            case UploadType.Absolute.typeName       ⇒ copyTo(new java.io.File(""))
           }
         }
 
@@ -239,7 +239,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
           def getFileParts = parts.parts.filter(_.filename.isDefined)
 
-          move(getFileParts, partContent("fileType").get, partContent("directoryName"))
+          move(getFileParts, partContent("fileType").get)
           Ok()
         }
 

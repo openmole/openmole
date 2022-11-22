@@ -558,23 +558,23 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.gui.ext.data.ServerFileSystemContext.project
 
     market.downloadEntry(entry, safePathToFile(path))
-    autoAddPlugins(path)
+    //autoAddPlugins(path)
   }
 
   //PLUGINS
-  private def autoAddPlugins(path: SafePath) = {
-    import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
-
-    val file = safePathToFile(path)
-
-    def recurse(f: File): List[File] = {
-      val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
-      PluginManager.listBundles(f).toList ::: subPlugins
-    }
-
-    module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
-  }
+//  private def autoAddPlugins(path: SafePath) = {
+//    import services._
+//    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+//
+//    val file = safePathToFile(path)
+//
+//    def recurse(f: File): List[File] = {
+//      val subPlugins: List[File] = if (f.isDirectory) f.listFilesSafe.toList.flatMap(recurse) else Nil
+//      PluginManager.listBundles(f).toList ::: subPlugins
+//    }
+//
+//    module.addPluginsFiles(recurse(file), false, module.moduleDirectory)
+//  }
 
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
