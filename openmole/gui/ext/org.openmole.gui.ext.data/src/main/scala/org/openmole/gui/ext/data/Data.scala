@@ -36,59 +36,16 @@ package object data {
   import java.io.{PrintWriter, StringWriter}
   import scala.scalajs.js.annotation.JSExport
 
-  sealed trait FileExtension {
-    def displayable: Boolean
-  }
+  enum FileExtension:
+    def displayable =
+      this match
+        case OpenMOLEScript | OpenMOLEResult | MDScript | SVGExtension  => true
+        case _: EditableFile => true
+        case _ => false
+    case OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, BinaryFile, TarGz, TarXz, Tar, Zip, Jar
+    case EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension
 
-  object OpenMOLEScript extends FileExtension {
-    val displayable = true
-  }
-
-  object OpenMOLEResult extends FileExtension {
-    val displayable = true
-  }
-
-  object MDScript extends FileExtension {
-    val displayable = true
-  }
-
-  object SVGExtension extends FileExtension {
-    val displayable = true
-  }
-
-  case class EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension {
-    val displayable = true
-  }
-
-  object BinaryFile extends FileExtension {
-    val displayable = false
-  }
-
-  object TarGz extends FileExtension {
-    def displayable = false
-  }
-
-  object TarXz extends FileExtension {
-    def displayable = false
-  }
-
-  object Tar extends FileExtension {
-    def displayable = false
-  }
-
-  object Zip extends FileExtension {
-    def displayable = false
-  }
-
-  object TgzBin extends FileExtension {
-    def displayable = false
-  }
-
-  object Jar extends FileExtension {
-    def displayable = false
-  }
-
-  object FileExtension {
+  object FileExtension:
     val OMS = OpenMOLEScript
     val OMR = OpenMOLEResult
     val SCALA = EditableFile("scala")
@@ -133,11 +90,10 @@ package object data {
 
     def isOMS(fileName: String) = apply(fileName) == OMS
 
-  }
 
-  sealed trait FileContent
-  case class AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
-  case class ReadOnlyFileContent() extends FileContent
+  enum FileContent:
+    case AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
+    case ReadOnlyFileContent extends FileContent
 
   import org.openmole.gui.ext.data.SafePath._
 
@@ -240,12 +196,12 @@ package object data {
   }
 
   case class NetworkActivity(
-                              downloadingFiles: Int = 0,
-                              downloadedSize: Long = 0L,
-                              readableDownloadedSize: String = "",
-                              uploadingFiles: Int = 0,
-                              uploadedSize: Long = 0L,
-                              readableUploadedSize: String = "")
+    downloadingFiles: Int = 0,
+    downloadedSize: Long = 0L,
+    readableDownloadedSize: String = "",
+    uploadingFiles: Int = 0,
+    uploadedSize: Long = 0L,
+    readableUploadedSize: String = "")
 
   case class ExecutionActivity(executionTime: Long = 0)
 
@@ -463,15 +419,15 @@ package object data {
 
   case class StaticElement(index: Int, expand: String) extends CommandElement
 
-  case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement {
+  case class VariableElement(index: Int, prototype: PrototypePair, taskType: TaskType) extends CommandElement {
     def expand =
       if (prototype.`type` == PrototypeData.File) prototype.mapping.getOrElse("")
       else taskType.preVariable + prototype.name + taskType.postVariable
-    def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
+    def clone(newPrototypePair: PrototypePair): VariableElement = copy(prototype = newPrototypePair)
     def clone(newName: String, newType: PrototypeData, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
   }
 
-  case class ModelMetadata(language: Option[Language], inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], command: Option[String], executableName: Option[String], sourcesDirectory: SafePath)
+  case class ModelMetadata(language: Option[Language], inputs: Seq[PrototypePair], outputs: Seq[PrototypePair], command: Option[String], executableName: Option[String], sourcesDirectory: SafePath)
 
   //  sealed trait LaunchingCommand {
   //    def language: Option[Language]
@@ -521,13 +477,11 @@ package object data {
   //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
   //  }
 
-  case class ProtoTypePair(name: String, `type`: org.openmole.gui.ext.data.PrototypeData, default: String = "", mapping: Option[String] = None)
+  case class PrototypePair(name: String, `type`: org.openmole.gui.ext.data.PrototypeData, default: String = "", mapping: Option[String] = None)
 
   sealed trait ClassTree {
     def name: String
-
     def flatten(prefix: Seq[String]): Seq[FullClass]
-
     def flatten: Seq[FullClass]
   }
 
@@ -567,7 +521,7 @@ package object data {
     val expand = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
   }
 
-  //case class JarMethod(methodName: String, arguments: Seq[ProtoTypePair], returnType: String, isStatic: Boolean, clazz: String) {
+  //case class JarMethod(methodName: String, arguments: Seq[PrototypePair], returnType: String, isStatic: Boolean, clazz: String) {
   //  val expand = methodName + "(" + arguments.map {
   //    _.`type`.scalaString
   //  }.mkString(",") + "): " + returnType

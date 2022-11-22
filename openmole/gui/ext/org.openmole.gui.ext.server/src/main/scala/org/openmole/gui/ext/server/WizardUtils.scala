@@ -21,23 +21,23 @@ import org.openmole.gui.ext.data._
 
 object WizardUtils {
 
-  def wizardModelData(inputs: Seq[ProtoTypePair],
-                      outputs: Seq[ProtoTypePair],
+  def wizardModelData(inputs: Seq[PrototypePair],
+                      outputs: Seq[PrototypePair],
                      // resources: Seq[String],
                       specificInputPattern: Option[String] = None,
                       specificOutputPattern: Option[String] = None,
                      ) = {
 
-    def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
+    def testBoolean(protoType: PrototypePair) = protoType.`type` match {
       case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
       case _ ⇒ protoType.default
     }
 
-    def ioString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
+    def ioString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
 
-    def imapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += ${i.name} mapped "${i.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
+    def imapString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""  $keyString += ${i.name} mapped "${i.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
 
-    def omapString(protos: Seq[ProtoTypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ${o.name} mapped "${o.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
+    def omapString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""  $keyString += ${o.name} mapped "${o.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
 
     def default(key: String, value: String) = s"  $key := $value"
 
