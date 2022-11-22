@@ -34,19 +34,20 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
       case Some(tabID: bsn.TabID) ⇒ TabContent.tabsUI.setActive(tabID)
       case _ ⇒
         fileExtension match {
-          case OpenMOLEScript ⇒
+          case FileExtension.OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
-          case FileExtension.CSV => ResultContent.addTab(safePath, content, hash)
           case OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
           case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
           case _: EditableFile => AnyTextContent.addTab(safePath, content, hash)
-          case MDScript ⇒
+        //  case MDScript ⇒
+          case _: FileExtension.EditableFile => AnyTextContent.addTab(safePath, content, hash)
+          case FileExtension.MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
             }
-          case OpenMOLEResult ⇒
+          case FileExtension.OpenMOLEResult ⇒
             Fetch.future(_.findVisualisationPlugin(safePath).future).foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
@@ -55,6 +56,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
               case None ⇒
             }
           case SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
+
 //          case editableFile: EditableFile ⇒
 //            if (DataUtils.isCSV(safePath))
 //              Post()[Api].sequence(safePath).call().foreach { seq ⇒

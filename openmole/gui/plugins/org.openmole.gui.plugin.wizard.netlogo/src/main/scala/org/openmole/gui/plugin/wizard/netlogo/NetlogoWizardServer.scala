@@ -86,8 +86,8 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
 
       val lines = safePath.toFile.lines
 
-      def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-        if (lines.isEmpty) (ProtoTypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
+      def parse0(lines: Seq[(String, Int)], args: Seq[PrototypePair], outputs: Seq[PrototypePair]): (Seq[PrototypePair], Seq[PrototypePair]) = {
+        if (lines.isEmpty) (PrototypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
         else {
           val (line, index) = lines.head
           val tail = lines.tail
@@ -101,30 +101,30 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
         }
       }
 
-      def parseSlider(start: Int): ProtoTypePair = {
+      def parseSlider(start: Int): PrototypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, PrototypeData.Double, lines(start + 9), Some(name))
+        PrototypePair(name.clean, PrototypeData.Double, lines(start + 9), Some(name))
       }
 
-      def parseSwitch(start: Int): ProtoTypePair = {
+      def parseSwitch(start: Int): PrototypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, PrototypeData.Boolean, lines(start + 7), Some(name))
+        PrototypePair(name.clean, PrototypeData.Boolean, lines(start + 7), Some(name))
       }
 
-      def parseInputBox(start: Int): ProtoTypePair = {
+      def parseInputBox(start: Int): PrototypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, PrototypeData.Double, lines(start + 6), Some(name))
+        PrototypePair(name.clean, PrototypeData.Double, lines(start + 6), Some(name))
       }
 
-      def parseMonitor(start: Int): Seq[ProtoTypePair] = {
+      def parseMonitor(start: Int): Seq[PrototypePair] = {
         val name = lines(start + 6).split(' ')
-        if (name.size == 1) Seq(ProtoTypePair(name.head.clean, PrototypeData.Double, mapping = Some(name.head)))
+        if (name.size == 1) Seq(PrototypePair(name.head.clean, PrototypeData.Double, mapping = Some(name.head)))
         else Seq()
       }
 
-      def parseChooser(start: Int): ProtoTypePair = {
+      def parseChooser(start: Int): PrototypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
+        PrototypePair(name.clean, PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
       }
 
       val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())

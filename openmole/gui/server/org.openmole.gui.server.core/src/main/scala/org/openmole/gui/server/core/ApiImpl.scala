@@ -149,27 +149,26 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def unknownFormat(name: String) = Some(ErrorData("Unknown compression format for " + name))
 
-  private def extractArchiveFromFiles(from: File, to: File)(implicit context: ServerFileSystemContext) = {
+  private def extractArchiveFromFiles(from: File, to: File) =
     Try {
       val ext = FileExtension(from.getName)
-      ext match {
-        case org.openmole.gui.ext.data.Tar ⇒
+      ext match
+        case FileExtension.Tar ⇒
           from.extract(to)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case TarGz ⇒
+        case FileExtension.TarGz ⇒
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case Zip ⇒ utils.unzip(from, to)
-        case TarXz ⇒
+        case FileExtension.Zip ⇒ utils.unzip(from, to)
+        case FileExtension.TarXz ⇒
           from.extractUncompressXZ(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
-      }
-    } match {
+    } match
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
-    }
-  }
+
+
 
   def extract(safePath: SafePath) = {
     import services.*
@@ -177,7 +176,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
         val archiveFile = safePathToFile(safePath)
         val toFile: File = safePathToFile(safePath.parent)
-        extractArchiveFromFiles(archiveFile, toFile)(ServerFileSystemContext.project)
+        extractArchiveFromFiles(archiveFile, toFile)
       case _ ⇒ unknownFormat(safePath.name)
     }
   }

@@ -40,8 +40,8 @@
 //    target:         SafePath,
 //    executableName: String,
 //    command:        String,
-//    inputs:         Seq[ProtoTypePair],
-//    outputs:        Seq[ProtoTypePair],
+//    inputs:         Seq[PrototypePair],
+//    outputs:        Seq[PrototypePair],
 //    libraries:      Option[String],
 //    resources:      Resources,
 //    data:           NativeWizardData): WizardToTask = {
@@ -125,7 +125,7 @@
 //        values.zipWithIndex.map {
 //          case (value, valIndex) ⇒
 //            val isFile = isFileString(value)
-//            VariableElement(index, ProtoTypePair(
+//            VariableElement(index, PrototypePair(
 //              key.replaceAll("-", "") + {
 //                if (values.length > 1) valIndex + 1 else ""
 //              },

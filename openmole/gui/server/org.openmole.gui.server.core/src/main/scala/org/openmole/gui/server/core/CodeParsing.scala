@@ -115,7 +115,7 @@ object CodeParsing {
   //      values.zipWithIndex.map {
   //        case (value, valIndex) ⇒
   //          val isFile = isFileString(value)
-  //          VariableElement(index, ProtoTypePair(
+  //          VariableElement(index, PrototypePair(
   //            key.replaceAll("-", "") + { if (values.length > 1) valIndex + 1 else "" },
   //            if (isFile) ProtoTYPE.FILE else ProtoTYPE.DOUBLE,
   //            if (isFile) "" else value,
@@ -147,8 +147,8 @@ object CodeParsing {
   //
   //    val lines = Source.fromFile(safePath).getLines.toArray
   //
-  //    def parse(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-  //      if (lines.isEmpty) (ProtoTypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)
+  //    def parse(lines: Seq[(String, Int)], args: Seq[PrototypePair], outputs: Seq[PrototypePair]): (Seq[PrototypePair], Seq[PrototypePair]) = {
+  //      if (lines.isEmpty) (PrototypePair("seed", ProtoTYPE.INT, "0", None) +: args, outputs)
   //      else {
   //        val (line, index) = lines.head
   //        val tail = lines.tail
@@ -162,30 +162,30 @@ object CodeParsing {
   //      }
   //    }
   //
-  //    def parseSlider(start: Int): ProtoTypePair = {
+  //    def parseSlider(start: Int): PrototypePair = {
   //      val name = lines(start + 5)
-  //      ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 9), Some(name))
+  //      PrototypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 9), Some(name))
   //    }
   //
-  //    def parseSwitch(start: Int): ProtoTypePair = {
+  //    def parseSwitch(start: Int): PrototypePair = {
   //      val name = lines(start + 5)
-  //      ProtoTypePair(name.clean, ProtoTYPE.BOOLEAN, lines(start + 7), Some(name))
+  //      PrototypePair(name.clean, ProtoTYPE.BOOLEAN, lines(start + 7), Some(name))
   //    }
   //
-  //    def parseInputBox(start: Int): ProtoTypePair = {
+  //    def parseInputBox(start: Int): PrototypePair = {
   //      val name = lines(start + 5)
-  //      ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 6), Some(name))
+  //      PrototypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 6), Some(name))
   //    }
   //
-  //    def parseMonitor(start: Int): Seq[ProtoTypePair] = {
+  //    def parseMonitor(start: Int): Seq[PrototypePair] = {
   //      val name = lines(start + 6).split(' ')
-  //      if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
+  //      if (name.size == 1) Seq(PrototypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
   //      else Seq()
   //    }
   //
-  //    def parseChooser(start: Int): ProtoTypePair = {
+  //    def parseChooser(start: Int): PrototypePair = {
   //      val name = lines(start + 5)
-  //      ProtoTypePair(name.clean, ProtoTYPE.STRING, lines(start + 7).split(' ').head, Some(name))
+  //      PrototypePair(name.clean, ProtoTYPE.STRING, lines(start + 7).split(' ').head, Some(name))
   //    }
   //
   //    val (args, outputs) = parse(lines.toSeq.zipWithIndex, Seq(), Seq())

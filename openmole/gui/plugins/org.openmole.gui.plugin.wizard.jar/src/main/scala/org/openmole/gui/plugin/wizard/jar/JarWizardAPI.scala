@@ -25,8 +25,8 @@
 //    target:         SafePath,
 //    executableName: String,
 //    command:        String,
-//    inputs:         Seq[ProtoTypePair],
-//    outputs:        Seq[ProtoTypePair],
+//    inputs:         Seq[PrototypePair],
+//    outputs:        Seq[PrototypePair],
 //    libraries:      Option[String],
 //    resources:      Resources,
 //    data:           JarWizardData): WizardToTask

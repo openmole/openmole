@@ -25,7 +25,7 @@ object DataUtils {
 
   private def typeStringToVariableElement(tString: String, index: Int): Option[VariableElement] =
     if (tString == "void") None
-    else Some(VariableElement(index, ProtoTypePair(
+    else Some(VariableElement(index, PrototypePair(
       s"var$index",
       tString.toLowerCase match {
         case "double"           ⇒ PrototypeData.Double
