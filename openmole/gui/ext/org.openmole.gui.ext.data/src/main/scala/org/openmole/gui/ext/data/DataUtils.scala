@@ -27,18 +27,18 @@ object DataUtils {
     if (tString == "void") None
     else Some(VariableElement(index, ProtoTypePair(
       s"var$index",
-      tString match {
-        case "double"           ⇒ ProtoTYPE.DOUBLE
-        case "int"              ⇒ ProtoTYPE.INT
-        case "java.io.File"     ⇒ ProtoTYPE.FILE
-        case "boolean"          ⇒ ProtoTYPE.BOOLEAN
-        case "long"             ⇒ ProtoTYPE.LONG
-        case "float"            ⇒ ProtoTYPE.DOUBLE
-        case "java.lang.String" ⇒ ProtoTYPE.STRING
-        case "char"             ⇒ ProtoTYPE.CHAR
-        case "short"            ⇒ ProtoTYPE.SHORT
-        case "byte"             ⇒ ProtoTYPE.BYTE
-        case x: String          ⇒ ProtoTYPE.ProtoTYPE(x, x, x)
+      tString.toLowerCase match {
+        case "double"           ⇒ PrototypeData.Double
+        case "int"              ⇒ PrototypeData.Int
+        case "java.io.File"     ⇒ PrototypeData.File
+        case "boolean"          ⇒ PrototypeData.Boolean
+        case "long"             ⇒ PrototypeData.Long
+        case "float"            ⇒ PrototypeData.Double
+        case "string" | "java.lang.String" ⇒ PrototypeData.String
+        case "char"             ⇒ PrototypeData.Char
+        case "short"            ⇒ PrototypeData.Short
+        case "byte"             ⇒ PrototypeData.Byte
+        case x: String          ⇒ PrototypeData.Any(x, x)
       }
     ), ScalaTaskType()))
 

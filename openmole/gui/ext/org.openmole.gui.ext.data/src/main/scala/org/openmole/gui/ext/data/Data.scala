@@ -21,92 +21,20 @@ import endpoints4s.algebra
 
 package object data {
 
-  trait Data
-
-  object ProtoTYPE {
-
-    case class ProtoTYPE(uuid: String, name: String, scalaString: String)
-
-    val INT = new ProtoTYPE("Integer", "Integer", "Int")
-    val DOUBLE = new ProtoTYPE("Double", "Double", "Double")
-    val LONG = new ProtoTYPE("Long", "Long", "Long")
-    val BOOLEAN = new ProtoTYPE("Boolean", "Boolean", "Boolean")
-    val STRING = new ProtoTYPE("String", "String", "String")
-    val FILE = new ProtoTYPE("File", "File", "File")
-    val CHAR = new ProtoTYPE("Char", "Char", "Char")
-    val SHORT = new ProtoTYPE("Short", "Short", "Short")
-    val BYTE = new ProtoTYPE("Byte", "Byte", "Byte")
-    val ALL = Seq(INT, DOUBLE, LONG, BOOLEAN, STRING, FILE, CHAR, SHORT, BYTE)
-
-    //  implicit def scalaTypeStringToPrototype(s: String): ProtoTYPE =
-    //    if (s.contains("Double")) DOUBLE
-    //    else if (s.contains("Int")) INT
-    //    else if (s.contains("Long")) LONG
-    //    else if (s.contains("File")) FILE
-    //    else STRING
-  }
+  enum PrototypeData(val name: String, val scalaString: String):
+    case Int extends PrototypeData("Integer", "Int")
+    case Double extends PrototypeData("Double", "Double")
+    case Long extends PrototypeData("Long", "Long")
+    case Boolean extends PrototypeData("Boolean", "Boolean")
+    case String extends PrototypeData("String", "String")
+    case File extends PrototypeData("File", "File")
+    case Char extends PrototypeData("Char", "Char")
+    case Short extends PrototypeData("Short", "Short")
+    case Byte extends PrototypeData("Byte", "Byte")
+    case Any(override val name: String, override val scalaString: String) extends PrototypeData(name, scalaString)
 
   import java.io.{PrintWriter, StringWriter}
-
-  import org.openmole.gui.ext.data.ProtoTYPE._
-
   import scala.scalajs.js.annotation.JSExport
-
-  class PrototypeData(val `type`: ProtoTYPE, val dimension: Int) extends Data
-
-  class IntPrototypeData(dimension: Int) extends PrototypeData(INT, dimension)
-
-  class DoublePrototypeData(dimension: Int) extends PrototypeData(DOUBLE, dimension)
-
-  class StringPrototypeData(dimension: Int) extends PrototypeData(STRING, dimension)
-
-  class LongPrototypeData(dimension: Int) extends PrototypeData(LONG, dimension)
-
-  class BooleanPrototypeData(dimension: Int) extends PrototypeData(BOOLEAN, dimension)
-
-  class FilePrototypeData(dimension: Int) extends PrototypeData(FILE, dimension)
-
-  object PrototypeData {
-
-    def apply(`type`: ProtoTYPE, dimension: Int) = new PrototypeData(`type`, dimension)
-
-    def integer(dimension: Int) = new IntPrototypeData(dimension)
-
-    def double(dimension: Int) = new DoublePrototypeData(dimension)
-
-    def long(dimension: Int) = new LongPrototypeData(dimension)
-
-    def boolean(dimension: Int) = new BooleanPrototypeData(dimension)
-
-    def string(dimension: Int) = new StringPrototypeData(dimension)
-
-    def file(dimension: Int) = new FilePrototypeData(dimension)
-
-  }
-
-  trait InputData extends Data {
-    def inputs: Seq[InOutput]
-  }
-
-  trait OutputData extends Data {
-    def outputs: Seq[InOutput]
-  }
-
-  trait InAndOutputData extends Data {
-    def inAndOutputs: Seq[InAndOutput]
-  }
-
-  trait TaskData extends Data with InputData with OutputData
-
-  trait EnvironmentData extends Data
-
-  trait HookData extends Data with InputData with OutputData
-
-  case class IOMappingData[T](key: String, value: T)
-
-  case class InOutput(prototype: PrototypeData, mappings: Seq[IOMappingData[_]])
-
-  case class InAndOutput(inputPrototype: PrototypeData, outputPrototype: PrototypeData, mapping: IOMappingData[_])
 
   sealed trait FileExtension {
     def displayable: Boolean
@@ -537,12 +465,10 @@ package object data {
 
   case class VariableElement(index: Int, prototype: ProtoTypePair, taskType: TaskType) extends CommandElement {
     def expand =
-      if (prototype.`type` == FILE) prototype.mapping.getOrElse("")
+      if (prototype.`type` == PrototypeData.File) prototype.mapping.getOrElse("")
       else taskType.preVariable + prototype.name + taskType.postVariable
-
     def clone(newPrototypePair: ProtoTypePair): VariableElement = copy(prototype = newPrototypePair)
-
-    def clone(newName: String, newType: ProtoTYPE, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
+    def clone(newName: String, newType: PrototypeData, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
   }
 
   case class ModelMetadata(language: Option[Language], inputs: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair], command: Option[String], executableName: Option[String], sourcesDirectory: SafePath)
@@ -594,8 +520,8 @@ package object data {
   //
   //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
   //  }
-  
-  case class ProtoTypePair(name: String, `type`: org.openmole.gui.ext.data.ProtoTYPE.ProtoTYPE, default: String = "", mapping: Option[String] = None)
+
+  case class ProtoTypePair(name: String, `type`: org.openmole.gui.ext.data.PrototypeData, default: String = "", mapping: Option[String] = None)
 
   sealed trait ClassTree {
     def name: String

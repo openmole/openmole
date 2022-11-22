@@ -87,7 +87,7 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
       val lines = safePath.toFile.lines
 
       def parse0(lines: Seq[(String, Int)], args: Seq[ProtoTypePair], outputs: Seq[ProtoTypePair]): (Seq[ProtoTypePair], Seq[ProtoTypePair]) = {
-        if (lines.isEmpty) (ProtoTypePair("mySeed", ProtoTYPE.LONG, "0", None) +: args, outputs)
+        if (lines.isEmpty) (ProtoTypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
         else {
           val (line, index) = lines.head
           val tail = lines.tail
@@ -103,28 +103,28 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
 
       def parseSlider(start: Int): ProtoTypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 9), Some(name))
+        ProtoTypePair(name.clean, PrototypeData.Double, lines(start + 9), Some(name))
       }
 
       def parseSwitch(start: Int): ProtoTypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, ProtoTYPE.BOOLEAN, lines(start + 7), Some(name))
+        ProtoTypePair(name.clean, PrototypeData.Boolean, lines(start + 7), Some(name))
       }
 
       def parseInputBox(start: Int): ProtoTypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, ProtoTYPE.DOUBLE, lines(start + 6), Some(name))
+        ProtoTypePair(name.clean, PrototypeData.Double, lines(start + 6), Some(name))
       }
 
       def parseMonitor(start: Int): Seq[ProtoTypePair] = {
         val name = lines(start + 6).split(' ')
-        if (name.size == 1) Seq(ProtoTypePair(name.head.clean, ProtoTYPE.DOUBLE, mapping = Some(name.head)))
+        if (name.size == 1) Seq(ProtoTypePair(name.head.clean, PrototypeData.Double, mapping = Some(name.head)))
         else Seq()
       }
 
       def parseChooser(start: Int): ProtoTypePair = {
         val name = lines(start + 5)
-        ProtoTypePair(name.clean, ProtoTYPE.STRING, lines(start + 7).split(' ').head, Some(name))
+        ProtoTypePair(name.clean, PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
       }
 
       val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())

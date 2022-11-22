@@ -341,7 +341,7 @@ object ModelWizardPanel {
     )
 
     def inferProtoTyePair(param: String) = {
-      val defaultPrototype = ProtoTypePair(param.clean, ProtoTYPE.DOUBLE, "0.0", Some(param))
+      val defaultPrototype = ProtoTypePair(param.clean, PrototypeData.Double, "0.0", Some(param))
 
       modelMetadata.now() match {
         case Some(mmd: ModelMetadata) => (mmd.inputs ++ mmd.outputs).find(p => p.name == param).getOrElse(defaultPrototype)

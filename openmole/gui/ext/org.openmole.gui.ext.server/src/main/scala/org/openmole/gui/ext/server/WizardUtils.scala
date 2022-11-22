@@ -29,7 +29,7 @@ object WizardUtils {
                      ) = {
 
     def testBoolean(protoType: ProtoTypePair) = protoType.`type` match {
-      case ProtoTYPE.BOOLEAN ⇒ if (protoType.default == "1") "true" else "false"
+      case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
       case _ ⇒ protoType.default
     }
 
@@ -43,8 +43,8 @@ object WizardUtils {
 
     val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
     val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
-    val (ifilemappings, imappings) = rawimappings.partition(_.`type` == ProtoTYPE.FILE)
-    val (ofilemappings, omappings) = rawomappings.partition(_.`type` == ProtoTYPE.FILE)
+    val (ifilemappings, imappings) = rawimappings.partition(_.`type` == PrototypeData.File)
+    val (ofilemappings, omappings) = rawomappings.partition(_.`type` == PrototypeData.File)
 
     //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
