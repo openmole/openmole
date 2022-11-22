@@ -34,12 +34,8 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
       case Some(tabID: bsn.TabID) ⇒ TabContent.tabsUI.setActive(tabID)
       case _ ⇒
         fileExtension match {
-          case FileExtension.OpenMOLEScript ⇒
-            OMSContent.addTab(safePath, content, hash)
-          case OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
+          case FileExtension.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
           case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
-          case _: EditableFile => AnyTextContent.addTab(safePath, content, hash)
-        //  case MDScript ⇒
           case _: FileExtension.EditableFile => AnyTextContent.addTab(safePath, content, hash)
           case FileExtension.MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
@@ -55,7 +51,7 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
                // treeNodeTabs add tab
               case None ⇒
             }
-          case SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
+          case FileExtension.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
 
 //          case editableFile: EditableFile ⇒
 //            if (DataUtils.isCSV(safePath))
