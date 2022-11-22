@@ -18,7 +18,7 @@ object ResultContent {
 
   def addTab(safePath: SafePath, initialContent: String, initialHash: String) = {
 
-    val resultData: ResultData = safePath.extension match {
+    val rowData: RowData = safePath.extension match {
       case FileExtension.CSV => ResultData.fromCSV(initialContent)
     }
 
@@ -33,8 +33,8 @@ object ResultContent {
     )
 
     val table = div(idAttr := "editor",
-      dataTable(resultData.content)
-        .addHeaders(resultData.header: _*)
+      dataTable(rowData.content)
+        .addHeaders(rowData.headers: _*)
         .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
         .sortable
         .render.render.amend(borderCollapse.collapse)
@@ -47,16 +47,32 @@ object ResultContent {
       resultView match {
         case Raw => view.set(editor.view)
         case Table => view.set(table)
-        case _ => view.set(div("plot"))
+        case _ => safePath.extension match {
+          case FileExtension.CSV =>
+            val columns = rowData.content.transpose
+            //We only keep data of dimension 0 or 1
+            val plotData = ColumnData(rowData.headers.zip(columns).zip(rowData.dimensions).flatMap { case ((h, c), d) =>
+              d match {
+                case 0 => Some(Column(h, ScalarColumn(c)))
+                case 1 => Some(Column(h, ArrayColumn(c.map {
+                  ResultData.fromStringToArray(_)
+                })))
+                case _ => None
+              }
+            })
+            view.set(ResultPlot.fromCSV(plotData))
+          case _ => div("plot OMR")
+        }
       }
     }
 
-    val rawState = ToggleState("Raw", btn_primary_string, () ⇒ switchView(Raw))
-    val tableState = ToggleState("Table", btn_primary_string, () ⇒ switchView(Table))
-    val plotState = ToggleState("Plot", btn_primary_string, () ⇒ switchView(Plot))
+    object DataDisplay
+    val rawState = ToggleState(DataDisplay, "Raw", btn_primary_string, _ ⇒ switchView(Raw))
+    val tableState = ToggleState(DataDisplay, "Table", btn_primary_string, _ ⇒ switchView(Table))
+    val plotState = ToggleState(DataDisplay, "Plot", btn_primary_string, _ ⇒ switchView(Plot))
 
 
-    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, tableState)
+    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, 1).element
     val controlElement = div(switchButton)
 
     val content = div(display.flex, flexDirection.column, controlElement, child <-- view)

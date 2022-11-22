@@ -19,7 +19,11 @@ object Tools {
   }
 
   def dataArrayIndexes(row: Array[String]) =
-    row.zipWithIndex.filter { case (r, i) ⇒ isDataArray(r) }.map { _._2 }
+    row.zipWithIndex.filter { case (r, i) ⇒ isDataArray(r) }.map {
+      _._2
+    }
+
+  def dataArrayFrom(row: Array[String]) = row.filter(isDataArray)
 
   def arrayDataRegEx(s: String) = arrayRegEx.exec(s).map {
     _.get

@@ -134,7 +134,7 @@ class GUIServerServices(
                          val outputRedirection:   OutputRedirection,
                          val networkService:      NetworkService,
                          val loggerService:       LoggerService,
-                         val timeService:         TimeService
+                        val timeService:         TimeService
 )
 
 object GUIServlet {
@@ -150,6 +150,7 @@ object GUIServlet {
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
       tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/plotly.min.js"),
       //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
       //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.openmoleGrammarMode),
       tags.link(tags.rel := "stylesheet", href := "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"),

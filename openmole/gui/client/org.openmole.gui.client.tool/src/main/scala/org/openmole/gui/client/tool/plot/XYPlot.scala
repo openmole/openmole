@@ -1,44 +1,48 @@
 package org.openmole.gui.client.tool.plot
 
-import org.openmole.plotlyjs._
-import scala.scalajs.js.JSConverters._
+import org.openmole.plotlyjs.*
+import org.openmole.plotlyjs.PlotlyImplicits.*
 
-import com.raquo.laminar.api.L._
+import scala.scalajs.js.JSConverters.*
+import org.openmole.plotlyjs.all.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.tool.plot.Plot.LayoutedPlot
 
 object XYPlot {
 
   def apply(
-    title:   String        = "",
-    serie:   Serie,
-    legend:  Boolean       = false,
-    plotter: Plotter,
-    error:   Option[Serie]
-  ) = {
+             xContent: Seq[String],
+             yContents: Seq[Seq[String]],
+             axisTitles: (String, String),
+             plotSettings: PlotSettings,
+             legend: Boolean = false
+           ) = {
+
 
     lazy val plotDiv = Plot.baseDiv
 
-    // val nbDims = serie.yValues.length
-    val nbDims = plotter.toBePlotted.indexes.length
-
-    nbDims match {
-      case _ if nbDims < 1 ⇒ div()
-      case _ ⇒
-
-        val data = serie.yValues.map { y ⇒
-          serie.plotDataBuilder
-            .x(serie.xValues.values.toJSArray)
-            .y(y.values.toJSArray)._result
-        }.toJSArray
-
-        Plotly.newPlot(
-          plotDiv.ref,
-          data,
-          Plot.baseLayout(title).width(800),
-          Plot.baseConfig
+    val data = yContents.map { y ⇒
+      plotSettings.plotDataBuilder
+        .x(xContent.toJSArray)
+        .y(y.toJSArray)
+        .marker(marker
+          .size(12)
+          .color(all.color.rgba(60, 90, 140, 0.5))
+          .symbol(circle)
+          .line(line.color(all.color.rgb(60, 90, 140)).width(2))
         )
+        .line(line.width(5))
+        ._result
+    }.toJSArray
 
-        plotDiv
-    }
+    val layout = Plot.baseLayout(axisTitles._1, axisTitles._2)
+    Plotly.newPlot(
+      plotDiv.ref,
+      data,
+      layout,
+      Plot.baseConfig
+    )
+    plotDiv
 
   }
 

@@ -193,22 +193,22 @@ object TreeNodeTab {
 //    lazy val block = omsEditor.view
 //  }
 
-  case class HTML(safePath: SafePath, content: HtmlElement) extends TreeNodeTab {
-
-    def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
-
-    def editableContent = None
-
-    def editor = None
-
-    def saveContent(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
-
-    def resizeEditor = {}
-
-    lazy val controlElement: HtmlElement = div()
-
-    lazy val block: HtmlElement = content
-  }
+//  case class HTML(safePath: SafePath, content: HtmlElement) extends TreeNodeTab {
+//
+//    def clone(newSafePath: SafePath) = copy(safePath = newSafePath)
+//
+//    def editableContent = None
+//
+//    def editor = None
+//
+//    def saveContent(afterRefresh: () ⇒ Unit): Unit = () ⇒ {}
+//
+//    def resizeEditor = {}
+//
+//    lazy val controlElement: HtmlElement = div()
+//
+//    lazy val block: HtmlElement = content
+//  }
 
   case class Editable(
                        safePath: SafePath,
@@ -371,24 +371,24 @@ object TreeNodeTab {
       // treeNodeTabs.switchEditableTo(this, dataTab, plotter.copy(closureFilter = newPlotClosure))
     }
 
-    def plotterAndSeqencedata(dataTab: DataTab, plotter: Plotter) = {
-      plotter.plotMode match {
-        case ScatterMode ⇒ Plotter.toBePlotted(plotter.copy(plotDimension = plotter.plotDimension, plotMode = plotter.plotMode), SequenceData(dataTab.sequence.header, filteredSequence))
-        case _ ⇒ (plotter, dataTab.sequence)
-      }
-    }
+//    def plotterAndSeqencedata(dataTab: DataTab, plotter: Plotter) = {
+//      plotter.plotMode match {
+//        case ScatterMode ⇒ Plotter.toBePlotted(plotter.copy(plotDimension = plotter.plotDimension, plotMode = plotter.plotMode), SequenceData(dataTab.sequence.header, filteredSequence))
+//        case _ ⇒ (plotter, dataTab.sequence)
+//      }
+//    }
 
-    val raw = ToggleState("Raw", btn_primary_string, () ⇒ switchView(Raw))
-    val table = ToggleState("Table", btn_primary_string, () ⇒ {}) //switchView(Table))
-    val plot = ToggleState("Plot", btn_primary_string, () ⇒ {}) //switchView(Plot))
+//    val raw = ToggleState("Raw", btn_primary_string, () ⇒ switchView(Raw))
+//    val table = ToggleState("Table", btn_primary_string, () ⇒ {}) //switchView(Table))
+//    val plot = ToggleState("Plot", btn_primary_string, () ⇒ {}) //switchView(Plot))
+//
+//    lazy val switchButton = exclusiveRadio(Seq(raw, table, plot), btn_secondary_string, raw)
 
-    lazy val switchButton = exclusiveRadio(Seq(raw, table, plot), btn_secondary_string, raw)
+//    val first100 = ToggleState("First 100", btn_primary_string, () ⇒ {}) //toView(First100))
+//    val last100 = ToggleState("Last 100", btn_primary_string, () ⇒ {}) //toView(Last100))
+//    val all = ToggleState("All", btn_danger_string, () ⇒ {}) //toView(All))
 
-    val first100 = ToggleState("First 100", btn_primary_string, () ⇒ {}) //toView(First100))
-    val last100 = ToggleState("Last 100", btn_primary_string, () ⇒ {}) //toView(Last100))
-    val all = ToggleState("All", btn_danger_string, () ⇒ {}) //toView(All))
-
-    lazy val filterRadios = exclusiveRadio(Seq(first100, last100, all), btn_secondary_string, first100)
+    //lazy val filterRadios = exclusiveRadio(Seq(first100, last100, all), btn_secondary_string, first100)
 
     val rowStyle = Seq(
       display.table,
@@ -397,40 +397,40 @@ object TreeNodeTab {
 
     lazy val colStyle = display.tableCell
 
-    lazy val axisCheckBoxes = {
-      val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
-
-      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray).toSeq }.getOrElse(Seq())
-
-      val ind = plotter.plotMode match {
-        case XYMode ⇒ arrayColIndexes
-        case _ ⇒ (0 to dataNbColumns - 1).filterNot(arrayColIndexes.contains)
-      }
-
-      val axisToggleStates = {
-        newSequenceData.header.zipWithIndex.filter {
-          case (_, i) ⇒
-            ind.contains(i)
-        }.map { a ⇒
-          val todo = () ⇒ {
-            val newAxis = newPlotter.plotMode match {
-              case SplomMode ⇒
-                if (newPlotter.toBePlotted.indexes.contains(a._2)) newPlotter.toBePlotted.indexes.filterNot(_ == a._2)
-                else newPlotter.toBePlotted.indexes :+ a._2
-              case HeatMapMode ⇒ Seq()
-              case XYMode ⇒ Seq(a._2, a._2)
-              case _ ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
-            }
-            //     toView(newAxis)
-          }
-          a._2 -> ToggleState(a._1, btn_primary_string, todo)
-        }.toMap
-      }
-
-      radio(axisToggleStates.values.toSeq, newPlotter.toBePlotted.indexes.map {
-        axisToggleStates
-      }, btn_primary_string)
-    }
+//    lazy val axisCheckBoxes = {
+//      val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
+//
+//      val arrayColIndexes = newSequenceData.content.headOption.map { s => Tools.dataArrayIndexes(s.toArray).toSeq }.getOrElse(Seq())
+//
+//      val ind = plotter.plotMode match {
+//        case XYMode ⇒ arrayColIndexes
+//        case _ ⇒ (0 to dataNbColumns - 1).filterNot(arrayColIndexes.contains)
+//      }
+//
+//      val axisToggleStates = {
+//        newSequenceData.header.zipWithIndex.filter {
+//          case (_, i) ⇒
+//            ind.contains(i)
+//        }.map { a ⇒
+//          val todo = () ⇒ {
+//            val newAxis = newPlotter.plotMode match {
+//              case SplomMode ⇒
+//                if (newPlotter.toBePlotted.indexes.contains(a._2)) newPlotter.toBePlotted.indexes.filterNot(_ == a._2)
+//                else newPlotter.toBePlotted.indexes :+ a._2
+//              case HeatMapMode ⇒ Seq()
+//              case XYMode ⇒ Seq(a._2, a._2)
+//              case _ ⇒ Seq(newPlotter.toBePlotted.indexes.last, a._2)
+//            }
+//            //     toView(newAxis)
+//          }
+//          a._2 -> ToggleState(a._1, btn_primary_string, todo)
+//        }.toMap
+//      }
+//
+//      radio(axisToggleStates.values.toSeq, newPlotter.toBePlotted.indexes.map {
+//        axisToggleStates
+//      }, btn_primary_string)
+//    }
 
     lazy val errorOptions: Options[IndexedAxis] = {
       val forErrors = IndexedAxis.noErrorBar +: Plotter.availableForError(dataTab.sequence.header, plotter)
@@ -512,33 +512,33 @@ object TreeNodeTab {
 
     lazy val columnsOrLines = Var(ColumnPlot)
 
-    def plotModeRadios = {
-
-      val plotModeStates = plotModes.map {
-        case (pm, pd) ⇒
-          pm -> ToggleState(pm.name, btn_secondary_string, () ⇒ ???) //toView(pd, pm))
-      }.toMap
-
-      exclusiveRadio(plotModeStates.values.toSeq, btn_secondary_string, plotModeStates(plotter.plotMode))
-    }
-
-    val infoStyle = Seq(
-      fontWeight.bold,
-      minWidth := "100",
-      textAlign.right,
-      marginRight := "20"
-    )
-
-    val plotModeInfo =
-      div(glyph_info, cursor.pointer, marginLeft := "20").popover(
-        div(display.flex, flexDirection.column, minWidth := "250",
-          div(display.flex, flexDirection.row, span(infoStyle, "Scatter"), span("Plot a column dimension against an other one as points")),
-          div(display.flex, flexDirection.row, span(infoStyle, "SPLOM"), span("Scatter plots matrix on all selected columns")),
-          div(display.flex, flexDirection.row, span(infoStyle, "Series"), span("Plot a column of arrays.")),
-          div(display.flex, flexDirection.row, span(infoStyle, "Heat map"), span("Plot the table as a matrix, colored by values."))
-        ),
-        Right
-      ).render
+//    def plotModeRadios = {
+//
+//      val plotModeStates = plotModes.map {
+//        case (pm, pd) ⇒
+//          pm -> ToggleState(pm.name, btn_secondary_string, () ⇒ ???) //toView(pd, pm))
+//      }.toMap
+//
+//      exclusiveRadio(plotModeStates.values.toSeq, btn_secondary_string, plotModeStates(plotter.plotMode))
+//    }
+//
+//    val infoStyle = Seq(
+//      fontWeight.bold,
+//      minWidth := "100",
+//      textAlign.right,
+//      marginRight := "20"
+//    )
+//
+//    val plotModeInfo =
+//      div(glyph_info, cursor.pointer, marginLeft := "20").popover(
+//        div(display.flex, flexDirection.column, minWidth := "250",
+//          div(display.flex, flexDirection.row, span(infoStyle, "Scatter"), span("Plot a column dimension against an other one as points")),
+//          div(display.flex, flexDirection.row, span(infoStyle, "SPLOM"), span("Scatter plots matrix on all selected columns")),
+//          div(display.flex, flexDirection.row, span(infoStyle, "Series"), span("Plot a column of arrays.")),
+//          div(display.flex, flexDirection.row, span(infoStyle, "Heat map"), span("Plot the table as a matrix, colored by values."))
+//        ),
+//        Right
+//      ).render
 
     def jsClosure(value: String, col: Int) = {
       val closure = closureInput.ref.value
@@ -554,60 +554,61 @@ object TreeNodeTab {
       }
     }
 
-    lazy val block: HtmlElement = {
-      div(
-        div(
-          if (isCSV) {
-            dataTab.view match {
-              case Table ⇒ div(switchButton, filterRadios)
-              case Plot ⇒
-                div(
-                  vForm(
-                    Seq[FormTag](
-                      div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
-                      plotter.plotDimension match {
-                        case LinePlot ⇒ div()
-                        case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
-                      },
-                      options
-                    )*
-                  )
-                )
-              case _ ⇒ div(switchButton)
-            }
-          }
-          else div()
-        ),
-        div(
-          dataTab.view match {
-            case Table ⇒
-              div(overflow := "auto", height := "90%",
-                {
-                  if (!dataTab.sequence.header.isEmpty && !filteredSequence.isEmpty) {
-
-                    dataTable(filteredSequence.map {
-                      _.toSeq
-                    })
-                      .addHeaders(dataTab.sequence.header: _*)
-                      .style(tableStyle = Seq(bordered_table))
-                      .render.render
-                    //  table(width := dataTab.sequence.header.length * 90)
-                  }
-                  else div()
-                }
-              )
-            case Raw ⇒ editorView
-            case _ ⇒
-              val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
-              div()
-            //              Plotter.plot(
-            //                SequenceData(newSequenceData.header, newSequenceData.content),
-            //                newPlotter
-            //              )
-          }
-        )
-      )
-    }
+    lazy val block:HtmlElement = div()
+//    lazy val block: HtmlElement = {
+//      div(
+//        div(
+//          if (isCSV) {
+//            dataTab.view match {
+//              case Table ⇒ div(switchButton, filterRadios)
+//              case Plot ⇒
+//                div(
+//                  vForm(
+//                    Seq[FormTag](
+//                      div(switchButton, filterRadios, plotModeRadios, plotModeInfo),
+//                      plotter.plotDimension match {
+//                        case LinePlot ⇒ div()
+//                        case _ ⇒ span(axisCheckBoxes).withLabel("x|y axis")
+//                      },
+//                      options
+//                    )*
+//                  )
+//                )
+//              case _ ⇒ div(switchButton)
+//            }
+//          }
+//          else div()
+//        ),
+//        div(
+//          dataTab.view match {
+//            case Table ⇒
+//              div(overflow := "auto", height := "90%",
+//                {
+//                  if (!dataTab.sequence.header.isEmpty && !filteredSequence.isEmpty) {
+//
+//                    dataTable(filteredSequence.map {
+//                      _.toSeq
+//                    })
+//                      .addHeaders(dataTab.sequence.header: _*)
+//                      .style(tableStyle = Seq(bordered_table))
+//                      .render.render
+//                    //  table(width := dataTab.sequence.header.length * 90)
+//                  }
+//                  else div()
+//                }
+//              )
+//            case Raw ⇒ editorView
+//            case _ ⇒
+//              val (newPlotter, newSequenceData) = plotterAndSeqencedata(dataTab, plotter)
+//              div()
+//            //              Plotter.plot(
+//            //                SequenceData(newSequenceData.header, newSequenceData.content),
+//            //                newPlotter
+//            //              )
+//          }
+//        )
+//      )
+//    }
   }
 
   //FIXME: to be removed

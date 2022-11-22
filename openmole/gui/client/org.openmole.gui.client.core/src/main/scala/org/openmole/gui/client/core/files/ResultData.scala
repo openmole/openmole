@@ -1,11 +1,28 @@
 package org.openmole.gui.client.core.files
 
+import org.openmole.gui.client.tool.plot.Tools
+
 import scala.annotation.tailrec
 
-case class ResultData(header: Seq[String] = Seq(), content: Seq[Seq[String]] = Seq())
+case class RowData(headers: Seq[String] = Seq(), content: Seq[Seq[String]] = Seq(), dimensions: Seq[Int])
+
+case class ScalarColumn(column: Seq[String])
+case class ArrayColumn(column: Seq[Seq[String]])
+
+case class Column(header: String, content: ScalarColumn | ArrayColumn)
+
+object Column {
+  def contentToSeqOfSeq(content: ScalarColumn | ArrayColumn): Seq[Seq[String]] = {
+    content match {
+      case ScalarColumn(s)=> Seq(s)
+      case ArrayColumn(a)=> a 
+    }
+  }
+}
+
+case class ColumnData(columns: Seq[Column])
 
 object ResultData {
-
 
   def fromCSV(content: String) = {
 
@@ -61,9 +78,44 @@ object ResultData {
     val lines: Seq[String] = content.split("\n")
     val header: Seq[String] = lines.head.split(",").toSeq
     val body = lines.tail.map(line => parse0(line, None, List()))
+    val dims = body.headOption.map{_.map{s=> dimension(s)}}.toSeq.flatten
 
-    ResultData(header, body)
+    RowData(header, body, dims)
   }
+
+  def dimension(s: String): Int = {
+
+    @tailrec
+    def dimension0(toBeParsed: String, dim: Int): Int = {
+      if (toBeParsed.isEmpty) dim
+      else {
+        val cur = toBeParsed.head
+        cur match {
+          case ']' => dim
+          case '[' => dimension0(toBeParsed.tail, dim + 1)
+          case _ => dimension0(toBeParsed.tail, dim)
+        }
+      }
+    }
+
+    dimension0(s, 0)
+  }
+
+  // Convert a string to an array, considering it is of dimension 1
+  def fromStringToArray(s: String): Seq[String] = {
+    s.drop(1).dropRight(1).split(",")
+  }
+
+//  def getColumnsFrom(resultData: RowData, headersQuery: Seq[String]) = {
+//
+//    val headersQuery
+//    .flatMap { h =>
+//      resultData.headers.indexOf(h) match {
+//        case -1 => Seq()
+//        case i: Int =>
+//      }
+//    }
+//  }
 
 
 }

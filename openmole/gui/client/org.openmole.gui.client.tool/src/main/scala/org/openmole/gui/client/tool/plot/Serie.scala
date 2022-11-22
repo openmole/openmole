@@ -7,15 +7,21 @@ import org.openmole.plotlyjs.plotlyConts._
 
 import scala.scalajs.js.JSConverters._
 
+case class PlotSettings(
+                         plotDataBuilder: PlotDataBuilder = linechart.lines,
+                         markerBuilder: PlotMarkerBuilder = marker.symbol(cross),
+                         colorScale: ColorScale = colorscale.blues
+                       )
+
 case class Dim(values: Seq[String], label: String = "") {
   def toDimension = Dimension.values(values.toJSArray).label(label)
 }
 
 case class Serie(
-  // dimensionSize:   Int               = 0,
-  xValues:         Dim               = Dim(Seq()),
-  yValues:         Array[Dim]        = Array(),
-  plotDataBuilder: PlotDataBuilder   = linechart.lines,
-  markerBuilder:   PlotMarkerBuilder = marker.symbol(cross),
-  colorScale:      ColorScale        = colorscale.blues
-)
+                  // dimensionSize:   Int               = 0,
+                  xValues: Dim = Dim(Seq()),
+                  yValues: Array[Dim] = Array(),
+                  plotDataBuilder: PlotDataBuilder = linechart.lines,
+                  markerBuilder: PlotMarkerBuilder = marker.symbol(cross),
+                  colorScale: ColorScale = colorscale.blues
+                )

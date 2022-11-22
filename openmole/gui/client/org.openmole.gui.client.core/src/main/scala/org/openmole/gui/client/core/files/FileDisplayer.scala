@@ -37,6 +37,8 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
           case OpenMOLEScript ⇒
             OMSContent.addTab(safePath, content, hash)
           case FileExtension.CSV => ResultContent.addTab(safePath, content, hash)
+          case OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
+          case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
           case _: EditableFile => AnyTextContent.addTab(safePath, content, hash)
           case MDScript ⇒
             Fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
@@ -48,11 +50,11 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
             Fetch.future(_.findVisualisationPlugin(safePath).future).foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-                treeNodeTabs add tab
+              //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
+               // treeNodeTabs add tab
               case None ⇒
             }
-          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
+          case SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
 //          case editableFile: EditableFile ⇒
 //            if (DataUtils.isCSV(safePath))
 //              Post()[Api].sequence(safePath).call().foreach { seq ⇒

@@ -3,22 +3,23 @@ package org.openmole.gui.client.tool.plot
 import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.PlotlyImplicits._
 import com.raquo.laminar.api.L._
+import org.openmole.plotlyjs.Margin._
 
-case class BasePlot(
-  title:   String        = "",
-  serie:   Serie,
-  legend:  Boolean       = false,
-  plotter: Plotter,
-  error:   Option[Serie]) {
-
-  def scatter = ScatterPlot(title, serie, legend, plotter, error)
-
-  def line = XYPlot(title, serie, legend, plotter, error)
-
-  def splom = SplomPlot(title, serie, legend, plotter)
-
-  def heatmap = HeatMapPlot(title, serie, legend)
-}
+//case class BasePlot(
+//  title:   String        = "",
+//  serie:   Serie,
+//  legend:  Boolean       = false,
+//  plotter: Plotter,
+//  error:   Option[Serie]) {
+//
+//  def scatter = ScatterPlot(title, serie, legend, plotter, error)
+//
+//  def line = XYPlot(title, serie, legend, plotter, error)
+//
+//  def splom = SplomPlot(title, serie, legend, plotter)
+//
+//  def heatmap = HeatMapPlot(title, serie, legend)
+//}
 
 object Plot {
 
@@ -58,7 +59,12 @@ object Plot {
     def name = "Heat map"
   }
 
-  def baseDiv = div()
+  sealed trait NumberOfColumToBePlotted
+  object OneColumn extends NumberOfColumToBePlotted
+  object TwoColumn extends NumberOfColumToBePlotted
+  object NColumn extends NumberOfColumToBePlotted
+  
+  def baseDiv:Div = div()
 
   val baseConfig = Config
     .displayModeBar(false)
@@ -66,26 +72,28 @@ object Plot {
 
   val axis = Axis.zeroline(false).showline(false)
 
-  def baseLayout(title: String) = Layout
-    .title(title)
+  def baseLayout(xTitle: String, yTitle: String) = Layout
     .showlegend(false)
     .autosize(true)
-    .xaxis(axis)
-    .yaxis(axis)
-    .margin(org.openmole.plotlyjs.Margin.t(0)._result)
+    .xaxis(axis.title(xTitle))
+    .yaxis(axis.title(yTitle))
+    .font(Font.family("gi").size(14))
 
-  def apply(
-    title:   String        = "",
-    serie:   Serie         = Serie(),
-    legend:  Boolean       = false,
-    plotter: Plotter,
-    error:   Option[Serie] = None) = {
-    val bpl = BasePlot(title, serie, legend, plotter, error)
-    plotter.plotMode match {
-      case XYMode      ⇒ bpl.line
-      case ScatterMode ⇒ bpl.scatter
-      case SplomMode   ⇒ bpl.splom
-      case HeatMapMode ⇒ bpl.heatmap
-    }
-  }
+
+  case class LayoutedPlot(element: HtmlElement, layout: Layout)
+
+//  def apply(
+//    title:   String        = "",
+//    serie:   Serie         = Serie(),
+//    legend:  Boolean       = false,
+//    plotter: Plotter,
+//    error:   Option[Serie] = None) = {
+//    val bpl = BasePlot(title, serie, legend, plotter, error)
+//    plotter.plotMode match {
+//      case XYMode      ⇒ bpl.line
+//      case ScatterMode ⇒ bpl.scatter
+//      case SplomMode   ⇒ bpl.splom
+//      case HeatMapMode ⇒ bpl.heatmap
+//    }
+//  }
 }

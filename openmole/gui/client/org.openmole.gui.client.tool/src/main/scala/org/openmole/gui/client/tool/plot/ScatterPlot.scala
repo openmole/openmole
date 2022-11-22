@@ -1,51 +1,37 @@
 package org.openmole.gui.client.tool.plot
 
-import org.openmole.plotlyjs._
-import org.openmole.plotlyjs.all._
-import org.openmole.plotlyjs.PlotlyImplicits._
-import scala.scalajs.js.JSConverters._
+import org.openmole.plotlyjs.*
+import org.openmole.plotlyjs.all.*
+import org.openmole.plotlyjs.PlotlyImplicits.*
+
+import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.tool.plot.Plot.LayoutedPlot
 
 object ScatterPlot {
 
-  def apply(
-    title:   String        = "",
-    serie:   Serie,
-    legend:  Boolean       = false,
-    plotter: Plotter,
-    error:   Option[Serie]) = {
+  def apply(xContent: Seq[String],
+            yContents: Seq[String],
+            axisTitles: (String, String),
+            plotSettings: PlotSettings,
+            legend: Boolean = false
+           ) = {
     lazy val plotDiv = Plot.baseDiv
 
-    val nbDims = plotter.toBePlotted.indexes.length
+    lazy val baseLayout = Plot.baseLayout(axisTitles._1, axisTitles._2)
 
-    //    lazy val baseLayout = Plot.baseLayout(title)
-    //      .width(800)
-    //      .xaxis(axis.title(serie.xValues.label))
-    //
-    //    val layout = {
-    //      if (nbDims == 2)
-    //        baseLayout
-    //          .xaxis(axis.title(serie.xValues.label))
-    //          .yaxis(axis.title(serie.yValues.head.label))
-    //      else baseLayout
-    //    }
-    //
-    //    val data = serie.yValues.map { y ⇒
-    //      serie.plotDataBuilder
-    //        .set(plottype.scatter).set(plotmode.markers)
-    //        .x(serie.xValues.values.toJSArray)
-    //        .y(y.values.toJSArray)
-    //    }.toJSArray
-    //
-    //    val plotDataArray = {
-    //      if (nbDims == 2) js.Array(ToolPlot.error(data.head, error)._result)
-    //      else js.Array[PlotData]()
-    //    }
+    val data = scatter
+      .x(xContent.toJSArray)
+      .y(yContents.toJSArray)
+      .marker(marker
+        .size(12)
+        .color(all.color.rgba(60, 90, 140, 0.5))
+        .symbol(circle)
+        .line(line.color(all.color.rgb(60, 90, 140)).width(2))
+      )
 
-    //  Plotly.newPlot(plotDiv.ref, plotDataArray, layout, Plot.baseConfig)
-
+    Plotly.newPlot(plotDiv.ref, js.Array(data), baseLayout, Plot.baseConfig)
     plotDiv
-
   }
 }

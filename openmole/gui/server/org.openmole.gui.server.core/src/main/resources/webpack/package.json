@@ -4,7 +4,8 @@
   "dependencies": {
     "ace-builds": "1.4.3",
     "bootstrap.native": "3.0.14-f",
-    "highlight.js": "10.4.1"
+    "highlight.js": "10.4.1",
+    "plotly.js": "2.13.3"
   },
   "devDependencies": {
     "concat-with-sourcemaps": "1.0.7",

@@ -61,8 +61,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   lazy val addRootDirButton = {
 
-    val folder = ToggleState("Folder", "btn blue-button", () ⇒ {})
-    val file = ToggleState("File", "btn blue-button", () ⇒ {})
+    object FileType
+    val folder = ToggleState(FileType, "Folder", "btn blue-button", _ ⇒ {})
+    val file = ToggleState(FileType, "File", "btn blue-button", _ ⇒ {})
 
     toggle(folder, true, file, () ⇒ {})
   }

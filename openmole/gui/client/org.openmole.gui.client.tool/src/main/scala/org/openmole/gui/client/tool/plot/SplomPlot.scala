@@ -3,15 +3,16 @@ package org.openmole.gui.client.tool.plot
 import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.all._
 import scala.scalajs.js.JSConverters._
+import org.openmole.plotlyjs.PlotlyImplicits._
 import com.raquo.laminar.api.L._
 
 object SplomPlot {
 
   def apply(
-    title:   String  = "",
-    serie:   Serie,
-    legend:  Boolean = false,
-    plotter: Plotter) = {
+             title: String = "",
+             serie: Serie,
+             legend: Boolean = false,
+             plotter: Plotter) = {
 
     lazy val plotDiv = Plot.baseDiv
 
@@ -20,9 +21,7 @@ object SplomPlot {
 
     if (nbDims > 1) {
       val size = nbDims * (if (nbDims < 3) 200 else 150)
-      lazy val layout = Plot.baseLayout(title)
-        .width(size)
-        .height(size)
+      lazy val layout = Plot.baseLayout("","")
         .dragmode("select")
         .xaxis2(Plot.axis)
         .yaxis2(Plot.axis)
@@ -43,7 +42,9 @@ object SplomPlot {
         _.toDimension._result
       }.toJSArray
 
-      val arraySize = dims.headOption.map { _.values.length }.getOrElse(0)
+      val arraySize = dims.headOption.map {
+        _.values.length
+      }.getOrElse(0)
       val colors = (0 to arraySize).toJSArray map { x ⇒ x.toDouble / arraySize }
 
       Plotly.newPlot(
@@ -60,6 +61,6 @@ object SplomPlot {
         Plot.baseConfig)
     }
 
-    plotDiv
+    (plotDiv, Plot.baseLayout("",""))
   }
 }

@@ -97,16 +97,16 @@ object Plotter {
       }
 
       if (xValues.values.isEmpty || yValues.isEmpty) nothingToplot
-      else
-        org.openmole.gui.client.tool.plot.Plot(
-          "",
-          Serie(xValues, yValues),
-          false,
-          plotter,
-          plotter.error.map { e ⇒
-            Serie(yValues = Array(Dim(Table.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
-          }
-        )
+      else div()
+//        org.openmole.gui.client.tool.plot.Plot(
+//          "",
+//          Serie(xValues, yValues),
+//          false,
+//          plotter,
+//          plotter.error.map { e ⇒
+//            Serie(yValues = Array(Dim(Table.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
+//          }
+//        )
     }
     else nothingToplot
   }
