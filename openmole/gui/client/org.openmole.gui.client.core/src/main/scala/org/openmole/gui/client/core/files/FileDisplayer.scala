@@ -48,32 +48,32 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
               //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-               // treeNodeTabs add tab
+              // treeNodeTabs add tab
               case None ⇒
             }
           case FileExtension.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
 
-//          case editableFile: EditableFile ⇒
-//            if (DataUtils.isCSV(safePath))
-//              Post()[Api].sequence(safePath).call().foreach { seq ⇒
-//                val tab = TreeNodeTab.Editable(
-//                  safePath,
-//                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
-//                  content,
-//                  hash,
-//                  Plotter.default)
-//                treeNodeTabs add tab
-//              }
-//            else {
-//              val tab = TreeNodeTab.Editable(
-//                safePath,
-//                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
-//                content,
-//                hash,
-//                Plotter.default)
-//
-//              treeNodeTabs add tab
-//            }
+          //          case editableFile: EditableFile ⇒
+          //            if (DataUtils.isCSV(safePath))
+          //              Post()[Api].sequence(safePath).call().foreach { seq ⇒
+          //                val tab = TreeNodeTab.Editable(
+          //                  safePath,
+          //                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
+          //                  content,
+          //                  hash,
+          //                  Plotter.default)
+          //                treeNodeTabs add tab
+          //              }
+          //            else {
+          //              val tab = TreeNodeTab.Editable(
+          //                safePath,
+          //                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
+          //                content,
+          //                hash,
+          //                Plotter.default)
+          //
+          //              treeNodeTabs add tab
+          //            }
 
           case _ ⇒ //FIXME for GUI workflows
         }
