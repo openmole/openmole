@@ -18,8 +18,7 @@ import scala.jdk.CollectionConverters._
 
 object Plugins extends JavaLogger {
 
-  def updateJsPluginDirectory(jsPluginDirectory: File) = {
-    jsPluginDirectory.recursiveDelete
+  def createJsPluginDirectory(jsPluginDirectory: File) = {
     jsPluginDirectory.mkdirs
     Plugins.gatherJSIRFiles(jsPluginDirectory)
     jsPluginDirectory
@@ -33,12 +32,12 @@ object Plugins extends JavaLogger {
         !b.openMOLEScope.exists(_.toLowerCase == "gui-provided")
       }
 
-    for 
+    for
       b ← bundles
-    do 
+    do
       val jar = new java.util.jar.JarFile(b.file)
-      try 
-        for 
+      try
+        for
           entry <- jar.entries().asScala
           if entry.getName().endsWith(".sjsir")
         do
@@ -60,25 +59,24 @@ object Plugins extends JavaLogger {
       println(b.file)
 
       b.classLoader.getResourceAsStream(jsir.getPath) match {
-        case null => 
+        case null =>
         case s => s copy destFile
       }
     }*/
   }
 
-  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = {
-    val jsPluginDirectory = utils.webUIDirectory / "jsplugin"
-    updateJsPluginDirectory(jsPluginDirectory)
+  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = newFile.withTmpDir { jsPluginDirectory =>
+    createJsPluginDirectory(jsPluginDirectory)
 
     val webui = workspace.persistentDir /> "webui"
+    val jsPluginHash = workspace.persistentDir / "js-plugin-hash"
     val jsFile = webui / utils.openmoleFileName
 
     def update = {
       Log.logger.info("Building GUI plugins ...")
 
-      val jsDir = jsFile.getParentFile
-      DirUtils.deleteIfExists(jsDir)
-      jsDir.mkdir
+      DirUtils.deleteIfExists(webui)
+      webui.mkdir
 
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
 
@@ -94,8 +92,11 @@ object Plugins extends JavaLogger {
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
-    if (!jsFile.exists) update
-    else utils.updateIfChanged(jsPluginDirectory) { _ ⇒ update }
+    if (!jsFile.exists)
+    then
+      update
+      utils.updateIfChanged(jsPluginDirectory, _ => jsPluginHash) { identity } // Make sure hash file is created
+    else utils.updateIfChanged(jsPluginDirectory, _ => jsPluginHash) { _ ⇒ update }
 
     webui / utils.webpakedOpenmoleFileName
   }
