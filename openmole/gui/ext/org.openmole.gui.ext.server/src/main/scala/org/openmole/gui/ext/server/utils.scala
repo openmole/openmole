@@ -148,10 +148,10 @@ object utils {
     val sorted = treeNodesData.sorted(fileFilter.fileSorting)
     val nbFiles = treeNodesData.size
 
-    fileFilter.firstLast match {
-      case First() ⇒ ListFilesData(sorted, nbFiles)
-      case Last() ⇒ ListFilesData(sorted.reverse, nbFiles)
-    }
+    fileFilter.firstLast match
+      case FirstLast.First ⇒ ListFilesData(sorted, nbFiles)
+      case FirstLast.Last ⇒ ListFilesData(sorted.reverse, nbFiles)
+
 
   def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] = {
     given ServerFileSystemContext = path.context

@@ -487,13 +487,11 @@ package object data {
 
   case class ClassNode(name: String, childs: Seq[ClassTree]) extends ClassTree {
     def flatten(prefix: Seq[String]) = childs.flatMap { c ⇒ c.flatten(prefix :+ name) }
-
     def flatten = flatten(Seq())
   }
 
   case class ClassLeaf(name: String) extends ClassTree {
     def flatten = Seq(FullClass(name))
-
     def flatten(prefix: Seq[String]) = Seq(FullClass((prefix :+ name).mkString(".")))
   }
 
@@ -502,7 +500,6 @@ package object data {
   //Processes
   sealed trait ProcessState {
     def ratio: Int = 0
-
     def display: String = ""
   }
 
@@ -511,9 +508,8 @@ package object data {
   }
 
   case class Finalizing(
-                         override val ratio: Int = 100,
-                         override val display: String = "Finalizing..."
-                       ) extends ProcessState
+    override val ratio: Int = 100,
+    override val display: String = "Finalizing...") extends ProcessState
 
   case class Processed(override val ratio: Int = 100) extends ProcessState
 
@@ -540,84 +536,62 @@ package object data {
     def size = all.size + implicits.size
   }
 
-  sealed trait FirstLast
+  enum FirstLast:
+    case First, Last
 
-  case class First() extends FirstLast
+  enum ListOrdering:
+    case Ascending, Descending
 
-  case class Last() extends FirstLast
-
-  sealed trait ListOrdering
-
-  case class Ascending() extends ListOrdering
-
-  case class Descending() extends ListOrdering
-
-  sealed trait ListSorting
-
-  case class AlphaSorting() extends ListSorting
-
-  case class SizeSorting() extends ListSorting
-
-  case class TimeSorting() extends ListSorting
-
-  case class LevelSorting() extends ListSorting
-
-  case class ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting(), fileOrdering: ListOrdering = Ascending())
-
-  object ListSortingAndOrdering {
-    def defaultSorting = ListSortingAndOrdering(AlphaSorting(), Ascending())
-  }
-
-  object FileSizeOrdering extends Ordering[TreeNodeData] {
-    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.size compare tnd2.size
-  }
-
-  object AlphaOrdering extends Ordering[TreeNodeData] {
-    def isDirectory(tnd: TreeNodeData) = tnd.dirData match {
-      case None ⇒ false
-      case _ ⇒ true
-    }
-
-    def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
-      if (isDirectory(tn1)) {
-        if (isDirectory(tn2)) tn1.name compare tn2.name
-        else -1
-      }
-      else {
-        if (isDirectory(tn2)) 1
-        else tn1.name compare tn2.name
-      }
-  }
-
-  object TimeOrdering extends Ordering[TreeNodeData] {
-    def compare(tnd1: TreeNodeData, tnd2: TreeNodeData) = tnd1.time compare tnd2.time
-  }
-
-  object ListSorting {
-
+  object ListSorting:
     implicit def sortingToOrdering(fs: ListSorting): Ordering[TreeNodeData] =
       fs match {
-        case AlphaSorting() ⇒ AlphaOrdering
-        case SizeSorting() ⇒ FileSizeOrdering
-        case _ ⇒ TimeOrdering
+        case AlphaSorting ⇒ alphaOrdering
+        case SizeSorting ⇒ fileSizeOrdering
+        case TimeSorting ⇒ timeOrdering
       }
-  }
 
-  case class FileFilter(firstLast: FirstLast = First(), fileSorting: ListSorting = AlphaSorting()) {
+    def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
+    def alphaOrdering = new Ordering[TreeNodeData]:
+      def isDirectory(tnd: TreeNodeData) = tnd.dirData match {
+        case None ⇒ false
+        case _ ⇒ true
+      }
 
-    def switchTo(newFileSorting: ListSorting) = {
-      val fl = {
-        if (fileSorting == newFileSorting) {
-          firstLast match {
-            case First() ⇒ Last()
-            case _ ⇒ First()
-          }
+      def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
+        if (isDirectory(tn1)) {
+          if (isDirectory(tn2)) tn1.name compare tn2.name
+          else -1
         }
-        else First()
-      }
+        else {
+          if (isDirectory(tn2)) 1
+          else tn1.name compare tn2.name
+        }
+
+    def timeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.time compare tnd2.time
+
+
+
+  enum ListSorting:
+    case AlphaSorting, SizeSorting, TimeSorting //, LevelSorting
+    //case ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting, fileOrdering: ListOrdering = ListOrdering.Ascending)
+
+//  object ListSortingAndOrdering {
+//    def defaultSorting = ListSorting.ListSortingAndOrdering(AlphaSorting(), Ascending())
+//  }
+
+
+  case class FileFilter(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting):
+
+    def switchTo(newFileSorting: ListSorting) =
+      val fl =
+        if (fileSorting == newFileSorting)
+        then
+          firstLast match
+            case FirstLast.First ⇒ FirstLast.Last
+            case _ ⇒ FirstLast.First
+        else FirstLast.First
       copy(fileSorting = newFileSorting, firstLast = fl)
-    }
-  }
+
 
   case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 

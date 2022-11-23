@@ -18,8 +18,8 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.{CoreUtils, panels}
-import org.openmole.gui.ext.data.{AlphaSorting, FileFilter, ListFilesData, SafePath, SizeSorting, TimeSorting}
-import com.raquo.laminar.api.L._
+import org.openmole.gui.ext.data.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
 import org.openmole.gui.client.core.panels
 import scalaz.Success
@@ -97,24 +97,19 @@ class TreeNodeManager {
 
   def switch(sp: SafePath): Unit = dirNodeLine.set(sp)
 
-  def updateFilter(newFilter: FileFilter) = {
-    fileFilter.set(newFilter)
-  }
+  def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
 
-  def switchAlphaSorting = {
-    updateFilter(fileFilter.now().switchTo(AlphaSorting()))
+  def switchAlphaSorting =
+    updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
     invalidCurrentCache
-  }
 
-  def switchTimeSorting = {
-    updateFilter(fileFilter.now().switchTo(TimeSorting()))
+  def switchTimeSorting =
+    updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
     invalidCurrentCache
-  }
 
-  def switchSizeSorting = {
-    updateFilter(fileFilter.now().switchTo(SizeSorting()))
+  def switchSizeSorting =
+    updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
     invalidCurrentCache
-  }
 
   def invalidCurrentCache = invalidCache(dirNodeLine.now())
 
