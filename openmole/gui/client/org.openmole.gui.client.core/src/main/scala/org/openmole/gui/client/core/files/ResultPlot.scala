@@ -26,11 +26,6 @@ object ResultPlot {
     val selectedHeaders: Var[Seq[String]] = Var(Seq())
     val plot: Var[HtmlElement] = Var(div())
 
-    // Remove plot mode ==> change to 'Columns to be plotted':
-    //    - 1 column
-    //    - 2 columns
-    //    - N columns
-
     // Axis selection
     // 1- only one selection ( 1 column button is set)
     //    - case array: plot n times indexes x selection values in XY mode
@@ -42,7 +37,7 @@ object ResultPlot {
     //    - arrays are not proposed -> Splom for all selection values
 
     def axisCheckBoxes(numberOfColumToBePlotted: NumberOfColumToBePlotted) = {
-      
+
       val allHeaders = plotData.columns.map {
         _.header
       }
@@ -65,12 +60,10 @@ object ResultPlot {
           case OneColumn =>
             selectedHeaders.set(Seq(h))
             val header = headers.indexOf(h)
-            val columnContent = Column.contentToSeqOfSeq(plotData.columns(header).content).head
-            val rawContents = columnContent.zipWithIndex.map(c => (c._1, c._2.toString))
-            val contents = Seq(rawContents.map(_._2), rawContents.map(_._1))
+            val columnContents = Column.contentToSeqOfSeq(plotData.columns(header).content)
 
             plot.set(
-              XYPlot(contents.head, Seq(contents.last), ("Records", h), PlotSettings()) // case Array
+              XYPlot(columnContents, ("Records", h), PlotSettings()) // case Array
             )
           case TwoColumn =>
             selectedHeaders.update(sh => (sh.length match {

@@ -11,7 +11,6 @@ import org.openmole.gui.client.tool.plot.Plot.LayoutedPlot
 object XYPlot {
 
   def apply(
-             xContent: Seq[String],
              yContents: Seq[Seq[String]],
              axisTitles: (String, String),
              plotSettings: PlotSettings,
@@ -22,8 +21,9 @@ object XYPlot {
     lazy val plotDiv = Plot.baseDiv
 
     val data = yContents.map { y ⇒
+      val xContent = y.zipWithIndex.map{_._2}.toJSArray
       plotSettings.plotDataBuilder
-        .x(xContent.toJSArray)
+        .x(xContent)
         .y(y.toJSArray)
         .marker(marker
           .size(12)
