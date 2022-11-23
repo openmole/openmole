@@ -361,7 +361,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   val currentLine = Var(-1)
 
   def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now().fileSorting match {
-    case TimeSorting() ⇒ CoreUtils.longTimeToString(tn.time)
+    case ListSorting.TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
 
