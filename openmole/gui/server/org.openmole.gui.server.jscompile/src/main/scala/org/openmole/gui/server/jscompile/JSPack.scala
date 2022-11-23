@@ -42,21 +42,20 @@ object JSPack {
       // Obtain VirtualScalaJSIRFile's from the input classpath
       val irCache = StandardImpl.irFileCache().newCache
 
-      val result = (for {
-        (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
-        sjsirFiles ← irCache.cached(containers)
-        config = StandardConfig()
-          .withSourceMap(true)
-          .withOptimizer(optimizedJS)
-          .withClosureCompiler(optimizedJS)
-          .withModuleKind(ModuleKind.CommonJSModule)
+      val result =
+        for
+          (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
+          sjsirFiles ← irCache.cached(containers)
+          config = StandardConfig()
+            .withSourceMap(true)
+            .withOptimizer(optimizedJS)
+            .withClosureCompiler(optimizedJS)
+            .withModuleKind(ModuleKind.CommonJSModule)
+            .withParallel(true)
 
-        linker = StandardImpl.linker(config)
-        _ ← {
-          linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
-        }
-
-      } yield ())
+          linker = StandardImpl.linker(config)
+          _ ← linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
+        yield ()
 
       Await.result(result, Duration.Inf)
     }

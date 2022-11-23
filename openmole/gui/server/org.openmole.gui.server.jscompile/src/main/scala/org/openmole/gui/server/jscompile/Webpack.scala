@@ -1,6 +1,7 @@
 package org.openmole.gui.server.jscompile
 
-import org.openmole.tool.file._
+import org.openmole.core.exception.InternalProcessingError
+import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
 
 object Webpack extends JavaLogger {
@@ -31,7 +32,18 @@ object Webpack extends JavaLogger {
       extraModules.foreach { em ⇒ em.jsFile copy nodeModulesDirectory / em.nodeModuleSubdirectory / em.jsFile.getName }
     }
 
-    External.run("node", cmd, workingDirectory, env = Seq("NODE_OPTIONS" -> "--openssl-legacy-provider"))
+    import scala.sys.process.{BasicIO, Process, ProcessLogger}
+    val nodeMajorVersion =
+      Process("node --version").lazyLines.headOption match
+        case Some(v) => v.dropWhile(_ == 'v').takeWhile(_.isDigit).toInt
+        case None => throw new InternalProcessingError("""Error running "node --version" returned nothing""")
+
+    val nodeEnv =
+      if nodeMajorVersion >= 17
+      then Seq("NODE_OPTIONS" -> "--openssl-legacy-provider")
+      else Seq()
+
+    External.run("node", cmd, workingDirectory, env = nodeEnv)
   }
 
   def setConfigFile(entry: java.io.File, depsOutput: java.io.File, template: java.io.File, to: java.io.File) = {

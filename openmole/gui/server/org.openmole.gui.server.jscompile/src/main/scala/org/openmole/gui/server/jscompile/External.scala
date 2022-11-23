@@ -1,5 +1,7 @@
 package org.openmole.gui.server.jscompile
 
+import org.openmole.core.exception.InternalProcessingError
+
 import java.io.{File, InputStream}
 import scala.sys.process.{BasicIO, Process, ProcessLogger}
 import org.openmole.tool.file.*
@@ -16,10 +18,6 @@ object External {
   }
 
   private def runProcess[A](cmd: Seq[String], cwd: File, env: Seq[(String, String)] = Seq()): Unit = {
-    val toErrorLog = (is: InputStream) ⇒ {
-      is.close()
-    }
-
     //Unfortunately a var is the only way to capture the result
     //    var result: Option[A] = None
     //    def outputCapture(o: InputStream): Unit = {
@@ -28,16 +26,22 @@ object External {
     //      ()
     //    }
 
+    val outputBuffer = new StringBuffer()
+
     val log = new ProcessLogger {
-      override def out(s: => String): Unit = {}
-      override def err(s: => String): Unit = {
-        println(s)
-      }
+      override def out(s: => String): Unit = outputBuffer.append(s + "\n")
+      override def err(s: => String): Unit = outputBuffer.append(s + "\n")
       override def buffer[T](f: => T): T = f
     }
 
+    Process(command = cmd, cwd = Some(cwd), extraEnv = env: _*).!(log) match
+      case 0 =>
+      case x =>
+        throw new InternalProcessingError(
+          s"""Return code of command ${cmd.mkString(" ")} as returned a non zero value: $x
+             |Output was:
+             |${outputBuffer.toString}""".stripMargin)
 
-    val process = Process(command = cmd, cwd = Some(cwd), extraEnv = env: _*).!(log)
 //    val processIO = BasicIO.standard(_ => ()).withError(_=> ())
 //    val code: Int = process.run(processIO).exitValue()
 
