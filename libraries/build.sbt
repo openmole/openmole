@@ -539,17 +539,17 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), export
 //) settings(settings: _*) settings(scala3Settings: _*) dependsOn(circe)
 
 lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*")) settings (
-  libraryDependencies += "org.openmole.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
+  libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
-  libraryDependencies += "org.openmole.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
+  libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
 
-  libraryDependencies += "org.openmole.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
-  libraryDependencies += "org.openmole.endpoints4s" %% "algebra" % endpoints4SVersion,
+  libraryDependencies += "org.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
+  libraryDependencies += "org.endpoints4s" %% "algebra" % endpoints4SVersion,
 
-  libraryDependencies += "org.openmole.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
-  libraryDependencies += "org.openmole.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
+  libraryDependencies += "org.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
+  libraryDependencies += "org.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
   
-  libraryDependencies += "org.openmole.endpoints4s" %% sjs("xhr-client") % "5.1.0+n",
+  libraryDependencies += "org.endpoints4s" %% sjs("xhr-client") % endpoint4SXHRClientVersion,
 
   version := endpoints4SVersion
 ) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats, circe, http4s)
