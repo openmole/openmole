@@ -72,10 +72,11 @@ object ResultContent {
     val plotState = ToggleState(DataDisplay, "Plot", btn_primary_string, _ ⇒ switchView(Plot))
 
 
-    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, 1).element
-    val controlElement = div(switchButton)
+    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, 1)
+      .element
+      .amend(margin := "10", width := "150px")
 
-    val content = div(display.flex, flexDirection.column, controlElement, child <-- view)
+    val content = div(display.flex, flexDirection.column, switchButton, child <-- view)
 
     TabContent.addTab(tabData, content)
 

@@ -4,27 +4,42 @@ import org.openmole.gui.client.tool.plot.Plot.*
 import org.openmole.plotlyjs.PlotlyImplicits.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.tool.plot.{PlotSettings, Plotter, ScatterPlot, Tools, XYPlot}
+import org.openmole.gui.client.tool.plot.{PlotSettings, Plotter, ScatterPlot, SplomPlot, Tools, XYPlot}
 import org.openmole.gui.ext.data.SequenceData
 import org.openmole.plotlyjs.*
 
 object ResultPlot {
 
-  def fromCSV(plotData: ColumnData) = {
-
-
-    val oneTwoNRadio = {
-      val plotModeStates = Seq(OneColumn, TwoColumn, NColumn).zip(Seq("1", "2", "N")).map { case (pm, name) =>
-        ToggleState(pm, name, "btn " + btn_danger_string) //toView(pd, pm))
-      }
-      exclusiveRadio[NumberOfColumToBePlotted](plotModeStates, btn_secondary_string, 0)
-    }
+  def
+  fromCSV(plotData: ColumnData) = {
 
     val headers = plotData.columns.map {
       _.header
     }
-    val selectedHeaders: Var[Seq[String]] = Var(Seq())
+    val axisRadios: Var[ExclusiveRadioButtons[String]] = Var(exclusiveRadios[String](Seq(), "", Seq()))
     val plot: Var[HtmlElement] = Var(div())
+
+    def doPlot(numberOfColumToBePlotted: NumberOfColumToBePlotted) = {
+      val axisSelected = axisRadios.now().selected.now().map(_.t)
+      numberOfColumToBePlotted match {
+        case OneColumn =>
+          val hIndex = headers.indexOf(axisSelected.head)
+          val header = plotData.columns(hIndex).header
+          val columnContents = Column.contentToSeqOfSeq(plotData.columns(hIndex).content)
+          plot.set(XYPlot(columnContents, ("Records", header), PlotSettings())) // case Array)
+        case TwoColumn =>
+          val contents = axisSelected.map { sh =>
+            Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
+          }
+          plot.set(ScatterPlot(contents.head, contents.last, (axisSelected.head, axisSelected.last), PlotSettings()))
+        case NColumn =>
+          val contents = axisSelected.map { sh =>
+            Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
+          }
+          plot.set(SplomPlot(contents, axisSelected, PlotSettings()))
+      }
+    }
+
 
     // Axis selection
     // 1- only one selection ( 1 column button is set)
@@ -35,7 +50,6 @@ object ResultPlot {
     //    - scalars: selection value 1 x selection value 2 in Scatter mode
     // 3- 'N column' selection
     //    - arrays are not proposed -> Splom for all selection values
-
     def axisCheckBoxes(numberOfColumToBePlotted: NumberOfColumToBePlotted) = {
 
       val allHeaders = plotData.columns.map {
@@ -55,49 +69,47 @@ object ResultPlot {
         }, Seq(0, 1))
       }
 
-      val todo: String => Unit = (h: String) => {
-        numberOfColumToBePlotted match {
-          case OneColumn =>
-            selectedHeaders.set(Seq(h))
-            val header = headers.indexOf(h)
-            val columnContents = Column.contentToSeqOfSeq(plotData.columns(header).content)
-
-            plot.set(
-              XYPlot(columnContents, ("Records", h), PlotSettings()) // case Array
-            )
-          case TwoColumn =>
-            selectedHeaders.update(sh => (sh.length match {
-              case 1 => sh
-              case 0 => headers.take(2)
-              case _ => sh.tail
-            }) :+ h)
-            val selected = selectedHeaders.now()
-            val contents = selected.map { sh =>
-              Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
-            }
-            plot.set(
-              ScatterPlot(contents.head, contents.last, (selected.head, selected.last), PlotSettings())
-            )
-          case _ => Seq()
-        }
+      lazy val todo: String => Unit = (h: String) => {
+        doPlot(numberOfColumToBePlotted)
       }
-      val axisToggleStates = availableHeaders.map { ah => ToggleState[String](ah, ah, s"btn ${btn_danger_string}", todo) }
 
-      exclusiveRadios(axisToggleStates, btn_secondary_string, initialIndexes)
+      lazy val axisToggleStates = availableHeaders.map { ah => ToggleState[String](ah, ah, s"btn ${btn_danger_string}", todo) }
+
+      val selectionMode = numberOfColumToBePlotted match {
+        case NColumn => SelectionSize.Infinite
+        case _ => SelectionSize.DefaultLength
+      }
+
+      axisRadios.set(exclusiveRadios(axisToggleStates, btn_secondary_string, initialIndexes, selectionMode))
+    }
+
+    val oneTwoNRadio = {
+      val plotModeStates = Seq(OneColumn, TwoColumn, NColumn).zip(Seq("1", "2", "N")).map { case (pm, name) =>
+        ToggleState(pm, name, "btn " + btn_danger_string, pm => {
+          axisCheckBoxes(pm)
+          doPlot(pm)
+        })
+      }
+      exclusiveRadio[NumberOfColumToBePlotted](plotModeStates, btn_secondary_string, 0)
     }
 
     val plotObserver = Observer[(HtmlElement, Seq[String])] { case (p, hs) =>
-      Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("Records")))
+      oneTwoNRadio.selected.now().map(_.t).head match {
+        case NColumn => Plotly.relayout(p.ref, splomLayout)
+        case _ => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("Records")))
+      }
     }
 
     div(
-      oneTwoNRadio.element,
-      child <-- oneTwoNRadio.selected.signal.map { as =>
-        val activePlotMode = as.head
-        div(
-          axisCheckBoxes(activePlotMode.t).element.amend(display.block),
+      child <-- oneTwoNRadio.selected.signal.combineWith(axisRadios.signal).map { (oneTwoNSelected, aRadio) =>
+
+        div(display.flex, flexDirection.column,
+          div(display.flex, flexDirection.row,
+            oneTwoNRadio.element.amend(margin := "10", height := "38"),
+            aRadio.element.amend(display.block, margin := "10")
+          ),
           child <-- plot.signal,
-          plot.signal.combineWith(selectedHeaders) --> plotObserver
+          plot.signal.combineWith(aRadio.selected.signal.map(_.map(_.t))) --> plotObserver
         )
       }
     )

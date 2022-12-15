@@ -553,7 +553,7 @@ padding-bottom: 90px;
 
 .tab-section {
   flex-grow: 1;
-  background-color: #f4f4f4;
+  background-color: white;
   display: flex;
   flex-direction: column;
   min-height: 0;

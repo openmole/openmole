@@ -7,7 +7,6 @@ import org.openmole.plotlyjs.PlotlyImplicits.*
 import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.tool.plot.Plot.LayoutedPlot
 
 object ScatterPlot {
 

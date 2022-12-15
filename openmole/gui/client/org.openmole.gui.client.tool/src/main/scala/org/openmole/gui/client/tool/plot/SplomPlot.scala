@@ -2,26 +2,30 @@ package org.openmole.gui.client.tool.plot
 
 import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.all._
-import scala.scalajs.js.JSConverters._
+import org.openmole.plotlyjs.SplomDataBuilder._
 import org.openmole.plotlyjs.PlotlyImplicits._
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js
 import com.raquo.laminar.api.L._
+
 
 object SplomPlot {
 
-  def apply(
-             title: String = "",
-             serie: Serie,
-             legend: Boolean = false,
-             plotter: Plotter) = {
+  def apply(contents: Seq[Seq[String]],
+            labels: Seq[String],
+            plotSettings: PlotSettings,
+            legend: Boolean = false
+           ) =
 
     lazy val plotDiv = Plot.baseDiv
 
-    val dims = serie.yValues
-    val nbDims = plotter.toBePlotted.indexes.length
-
+    val nbDims = contents.size
     if (nbDims > 1) {
       val size = nbDims * (if (nbDims < 3) 200 else 150)
-      lazy val layout = Plot.baseLayout("","")
+      lazy val layout = Layout
+        .showlegend(false)
+        .autosize(true)
+        .font(Font.family("gi").size(14))
         .dragmode("select")
         .xaxis2(Plot.axis)
         .yaxis2(Plot.axis)
@@ -38,29 +42,30 @@ object SplomPlot {
         .xaxis8(Plot.axis)
         .yaxis8(Plot.axis)
 
-      val dimensions = dims.map {
-        _.toDimension._result
+      val dimensions = contents.zip(labels).map { case (d, label) =>
+        Dimension.values(d.toJSArray).label(label)._result
       }.toJSArray
 
-      val arraySize = dims.headOption.map {
-        _.values.length
+      val arraySize = contents.headOption.map {
+        _.length
       }.getOrElse(0)
       val colors = (0 to arraySize).toJSArray map { x ⇒ x.toDouble / arraySize }
 
+      val data = splom
+        .set(dimensions)
+        .showupperhalf(false)
+        .set(marker
+          .color(Color.array(colors))
+          .showscale(true)
+        )
+
       Plotly.newPlot(
         plotDiv.ref,
-        scalajs.js.Array(serie.plotDataBuilder
-          .set(dimensions)
-          .set(plottype.splom)
-          .set(marker
-            .color(Color.array(colors))
-            .colorScale(ColorScale.viridis)
-          )._result
-        ),
+        scalajs.js.Array(data),
         layout,
-        Plot.baseConfig)
+        Plot.baseConfig
+      )
     }
 
-    (plotDiv, Plot.baseLayout("",""))
-  }
+    plotDiv
 }

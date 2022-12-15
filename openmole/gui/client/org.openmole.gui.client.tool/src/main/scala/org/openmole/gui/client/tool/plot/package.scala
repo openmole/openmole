@@ -78,22 +78,15 @@ object Plot {
     .xaxis(axis.title(xTitle))
     .yaxis(axis.title(yTitle))
     .font(Font.family("gi").size(14))
+    .margin(Margin.t(0))
+    .plotBgColor(Color.rgb(125,0,0))
+
+  val splomLayout = Layout
+    .showlegend(false)
+    .height(800)
+    .width(800)
+    .font(Font.family("gi").size(14))
 
 
   case class LayoutedPlot(element: HtmlElement, layout: Layout)
-
-//  def apply(
-//    title:   String        = "",
-//    serie:   Serie         = Serie(),
-//    legend:  Boolean       = false,
-//    plotter: Plotter,
-//    error:   Option[Serie] = None) = {
-//    val bpl = BasePlot(title, serie, legend, plotter, error)
-//    plotter.plotMode match {
-//      case XYMode      ⇒ bpl.line
-//      case ScatterMode ⇒ bpl.scatter
-//      case SplomMode   ⇒ bpl.splom
-//      case HeatMapMode ⇒ bpl.heatmap
-//    }
-//  }
 }
