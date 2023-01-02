@@ -29,9 +29,9 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
 
 
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-    TabContent.alreadyDisplayed(safePath) match {
-      case Some(tabID: bsn.TabID) ⇒ TabContent.tabsUI.setActive(tabID)
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices)(using panels: Panels) = {
+    panels.tabContent.alreadyDisplayed(safePath) match {
+      case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
         fileExtension match {
           case FileExtension.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)

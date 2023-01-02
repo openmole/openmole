@@ -1,22 +1,23 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Waiter, panels}
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.client.core.{Panels, Waiter, staticPanels}
+import org.openmole.gui.ext.data.*
+import org.openmole.gui.ext.data.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
-import org.openmole.gui.ext.client._
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.ext.client.*
+import scaladget.bootstrapnative.bsn.*
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AnyTextContent {
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
-    val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, TabContent.fontSizeControl, marginLeft.auto)
+    val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, panels.tabContent.fontSizeControl, marginLeft.auto)
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
 
-    TabContent.addTab(tabData, content)
+    panels.tabContent.addTab(tabData, content)
   }
 }

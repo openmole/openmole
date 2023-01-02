@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFactory}
 import com.raquo.laminar.api.L._
-import org.openmole.gui.client.core.panels.{fileDisplayer, treeNodeManager}
+import org.openmole.gui.client.core.staticPanels.{fileDisplayer, treeNodeManager}
 import org.openmole.gui.client.tool.TagBadge
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,19 +25,19 @@ object ProjectPanel {
     )
   }
 
-  def render(wizards: Seq[WizardPluginFactory]) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels) = {
 
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
-        val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
+      CoreUtils.createFile(staticPanels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
+        val toDisplay = staticPanels.treeNodeManager.dirNodeLine.now() ++ fileName
         FileManager.download(
           toDisplay,
           hash = true,
           onLoaded = (content, hash) ⇒ {
             treeNodeManager.invalidCurrentCache
-            fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
+            fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, staticPanels.pluginServices)
           }
         )
       })
@@ -52,14 +52,14 @@ object ProjectPanel {
         div("Start from", padding := "10px"),
         button("Empty project", cls := "btn newButton", onClick --> { _ =>
           emptyProject
-          panels.closeExpandable
+          staticPanels.closeExpandable
         }),
         div(display.flex, justifyContent.spaceAround, width := "600px",
           buttonStyle("Your model", 1),
           buttonStyle("The market Place", 2),
           buttonStyle("A url project", 3)
         ),
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ staticPanels.closeExpandable })
       ),
       div(
         child <-- currentOption.signal.map {

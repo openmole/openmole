@@ -1,19 +1,20 @@
 package org.openmole.gui.client.core.files
 
 
-import org.openmole.gui.client.core.{Waiter, panels}
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.client.core.{Panels, Waiter, staticPanels}
+import org.openmole.gui.ext.data.*
+import org.openmole.gui.ext.data.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
-import org.openmole.gui.ext.client._
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.ext.client.*
+import scaladget.bootstrapnative.bsn.*
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object HTMLContent {
   
-  def addTab(safePath: SafePath, content: HtmlElement) = {
+  def addTab(safePath: SafePath, content: HtmlElement)(using panels: Panels) = {
     val tabData = TabData(safePath, None)
-    TabContent.addTab(tabData, content.amend(cls := "fullOverflow"))
+    panels.tabContent.addTab(tabData, content.amend(cls := "fullOverflow"))
   }
 }

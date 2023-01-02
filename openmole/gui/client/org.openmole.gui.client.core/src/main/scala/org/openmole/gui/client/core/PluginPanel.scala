@@ -34,7 +34,7 @@ class PluginPanel {
 
   val pluginTable =
     div(
-      children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
+      children <-- plugins.signal.combineWith(staticPanels.expandablePanel.signal).map {
         case (ps, _) ⇒
           ps.zipWithIndex.map { case (p, i) ⇒
             div(
@@ -47,8 +47,8 @@ class PluginPanel {
                 cls := "badgeOM",
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
-                panels.treeNodeManager.switch(p.projectSafePath.parent)
-                panels.treeNodeManager.computeCurrentSons()
+                staticPanels.treeNodeManager.switch(p.projectSafePath.parent)
+                staticPanels.treeNodeManager.computeCurrentSons()
               }
             )
           }
@@ -60,7 +60,7 @@ class PluginPanel {
       div(
         cls := "expandable-title",
         div("Plugins", padding := "10px"),
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ staticPanels.closeExpandable })
       ),
       pluginTable
     )

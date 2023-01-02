@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Fetch, panels}
+import org.openmole.gui.client.core.{Fetch, Panels, staticPanels}
 import org.openmole.gui.ext.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
@@ -11,9 +11,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 
-object TabContent {
-
+object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
+
+class TabContent {
+
+  import TabContent.TabData
+
 
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
@@ -28,25 +32,23 @@ object TabContent {
     }
   }
 
-  val timerObserver = Observer[Option[SetIntervalHandle]] { handle =>
+  def timerObserver(using panels: Panels) = Observer[Option[SetIntervalHandle]] { handle =>
     handle match {
       case None => timer.set(Some(setInterval(15000) {
-        TabContent.tabsUI.tabs.now().foreach { t =>
-          save(t.t)
-        }
+        tabsUI.tabs.now().foreach { t => save(t.t) }
       }))
       case _ =>
     }
   }
 
-  val render =
+  def render(using panels: Panels) =
     tabsUI.render.amend(
       margin := "10px",
       tabsUI.tabs --> tabsObserver,
       timer --> timerObserver
     )
 
-  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit) = {
+  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
@@ -64,7 +66,7 @@ object TabContent {
              onClicked: SafePath => Unit = _ => {},
              onAdded: SafePath => Unit = _ => {},
              onRemoved: SafePath => Unit = _ => {}
-            ) = {
+            )(using panels: Panels) = {
     tabsUI.add(
       Tab(
         tabData,
@@ -92,7 +94,7 @@ object TabContent {
       t.t.safePath.path == safePath.path
     }.map{_.tabID}
 
-  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false): Unit = {
+  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels): Unit = {
     tabData.editorPanelUI.foreach { editorPanelUI =>
       editorPanelUI.synchronized {
         val (content, hash) = editorPanelUI.code

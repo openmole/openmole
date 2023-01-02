@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
-import org.openmole.gui.client.core.files.{FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
+import org.openmole.gui.client.core.files.{FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs, TabContent}
 import org.openmole.gui.ext.data.{ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory}
 import com.raquo.laminar.api.L._
 
@@ -22,12 +22,14 @@ import com.raquo.laminar.api.L._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object panels {
+case class Panels(treeNodePanel: TreeNodePanel, tabContent: TabContent)
+
+object staticPanels {
 
   val pluginServices =
     PluginServices(
       errorManager = new ErrorManager {
-        override def signal(message: String, stack: Option[String]): Unit = panels.bannerAlert.registerWithStack(message, stack)
+        override def signal(message: String, stack: Option[String]): Unit = staticPanels.bannerAlert.registerWithStack(message, stack)
       }
     )
 
@@ -49,14 +51,7 @@ object panels {
     new FileDisplayer(
       treeNodeTabs = treeNodeTabs
     )
-
-  lazy val treeNodePanel =
-    new TreeNodePanel(
-      treeNodeManager = treeNodeManager,
-      fileDisplayer = fileDisplayer,
-      showExecution = () ⇒ openExecutionPanel,
-      treeNodeTabs = treeNodeTabs,
-      services = pluginServices)
+  
 
   def urlImportPanel =
     new URLImportPanel(

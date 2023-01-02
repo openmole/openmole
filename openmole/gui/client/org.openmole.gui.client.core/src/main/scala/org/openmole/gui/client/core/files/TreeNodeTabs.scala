@@ -67,7 +67,7 @@ sealed trait TreeNodeTab {
 
   def editor: Option[EditorPanelUI]
 
-  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {}): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels): Unit
 
   def resizeEditor: Unit
 
@@ -273,7 +273,7 @@ object TreeNodeTab {
       )
     }
 
-    def saveContent(afterRefresh: () ⇒ Unit): Unit = {
+    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels): Unit = {
       def saveTab = {
         def saved(hash: String) = {
           editorValue.initialContentHash = hash
@@ -612,7 +612,7 @@ object TreeNodeTab {
   }
 
   //FIXME: to be removed
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false): Unit =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
       Fetch.future(_.saveFile(safePath, content, Some(hash), overwrite).future).foreach {
@@ -622,9 +622,9 @@ object TreeNodeTab {
       }
     }
 
-  def serverConflictAlert(tabData: TabData) = panels.alertPanel.string(
+  def serverConflictAlert(tabData: TabData)(using panels: Panels) = staticPanels.alertPanel.string(
     s"The file ${tabData.safePath.name} has been modified on the sever. Which version do you want to keep?",
-    okaction = { () ⇒ TabContent.save(tabData, overwrite = true) },
+    okaction = { () ⇒ panels.tabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒
       panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ {
         tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
@@ -705,13 +705,13 @@ class TreeNodeTabs {
     }
   }
 
-  val timerObserver = Observer[Option[SetIntervalHandle]] { handle =>
+  def timerObserver(using panels: Panels) = Observer[Option[SetIntervalHandle]] { handle =>
     handle match {
       case None => timer.set(Some(setInterval(15000) {
         //        tabsElement.tabs.now.foreach {
         //          _.t.saveContent()
         //        }
-        TabContent.tabsUI.tabs.now().foreach { t =>
+        panels.tabContent.tabsUI.tabs.now().foreach { t =>
           t.t.editorPanelUI.foreach(epUI=> save(t.t.safePath, epUI))
         }
       }))

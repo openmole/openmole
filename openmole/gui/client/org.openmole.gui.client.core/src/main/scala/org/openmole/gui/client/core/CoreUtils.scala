@@ -53,7 +53,7 @@ object CoreUtils {
     Fetch.future(_.createFile(safePath, fileName, directory).future).foreach { b ⇒
       if b
       then onCreated()
-      else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+      else staticPanels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
 //  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
@@ -62,22 +62,22 @@ object CoreUtils {
 //    }
 //  }
 
-  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
+  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
     Fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
-      panels.treeNodePanel.invalidCacheAnd(ontrashed)
+      treeNodePanel.invalidCacheAnd(ontrashed)
     }
   }
 
   def duplicate(safePath: SafePath, newName: String): Unit =
     Fetch.future(_.duplicate(safePath, newName).future).foreach { y ⇒
-      panels.treeNodeManager.invalidCurrentCache
+      staticPanels.treeNodeManager.invalidCurrentCache
     }
 
 //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
 //    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
-  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
-    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
+//  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
+//    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
   def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] =
     Fetch.future(_.listFiles(safePath, fileFilter).future)

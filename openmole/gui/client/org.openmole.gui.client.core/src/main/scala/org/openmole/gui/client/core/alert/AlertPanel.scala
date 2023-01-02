@@ -19,7 +19,7 @@ package org.openmole.gui.client.core.alert
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning._
 import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
-import org.openmole.gui.client.core.panels._
+import org.openmole.gui.client.core.staticPanels._
 import org.openmole.gui.client.tool.OMTags._
 import org.openmole.gui.ext.data.SafePath
 import org.openmole.gui.client.tool._

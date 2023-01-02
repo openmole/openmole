@@ -16,7 +16,7 @@ import org.scalajs.dom.raw.{HTMLButtonElement, HTMLElement, HTMLInputElement, HT
 import org.openmole.gui.client.core.Waiter._
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.panels._
+import org.openmole.gui.client.core.staticPanels._
 import org.openmole.gui.client.tool._
 import org.openmole.gui.client.core._
 import org.openmole.gui.ext.client.FileManager

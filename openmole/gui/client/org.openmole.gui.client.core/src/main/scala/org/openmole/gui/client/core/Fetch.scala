@@ -35,7 +35,7 @@ object Fetch {
                  f: CoreAPIClientImpl => Future[O],
                  timeout: FiniteDuration = 60 seconds,
                  warningTimeout: FiniteDuration = 10 seconds,
-                 alert: (String, BannerLevel) ⇒ Unit = panels.bannerAlert.register) = {
+                 alert: (String, BannerLevel) ⇒ Unit = staticPanels.bannerAlert.register) = {
 
     OMFetch(coreAPIClient).future(
       f,
@@ -51,7 +51,7 @@ object Fetch {
                    r: CoreAPIClientImpl => Future[O],
                    timeout:        FiniteDuration                     = 60 seconds,
                    warningTimeout: FiniteDuration                     = 10 seconds,
-                   alert:          (String, BannerLevel) ⇒ Unit = panels.bannerAlert.register)(action: O => R) = {
+                   alert:          (String, BannerLevel) ⇒ Unit = staticPanels.bannerAlert.register)(action: O => R) = {
     //import scala.concurrent.ExecutionContext.Implicits.global
 //    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
     val f = future(r, timeout, warningTimeout, alert)

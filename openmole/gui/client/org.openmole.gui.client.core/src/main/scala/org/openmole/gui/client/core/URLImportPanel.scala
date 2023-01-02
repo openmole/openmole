@@ -40,7 +40,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
       downloading.set(Processed())
       urlDialog.hide
       d match {
-        case None   ⇒ panels.treeNodeManager.invalidCurrentCache
+        case None   ⇒ staticPanels.treeNodeManager.invalidCurrentCache
         case Some(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
@@ -67,7 +67,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
   val alertObserver = Observer[Option[SafePath]] { osp ⇒
     osp match {
       case Some(sp: SafePath) ⇒
-        panels.alertPanel.string(
+        staticPanels.alertPanel.string(
           sp.name + " already exists. Overwrite ? ",
           () ⇒ {
             overwriteAlert.set(None)

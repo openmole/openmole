@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.panels.stackPanel
+import org.openmole.gui.client.core.staticPanels.stackPanel
 import com.raquo.laminar.api.L._
 import org.openmole.gui.ext.client._
 import org.openmole.gui.ext.client.Utils._

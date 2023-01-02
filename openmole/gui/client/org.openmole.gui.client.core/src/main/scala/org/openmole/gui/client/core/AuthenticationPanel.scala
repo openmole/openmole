@@ -105,7 +105,7 @@ object AuthenticationPanel {
         authSetting.update {
           as ⇒
             as match {
-              case None ⇒ panels.closeExpandable
+              case None ⇒ staticPanels.closeExpandable
               case _ ⇒
             }
             None
@@ -215,7 +215,7 @@ object AuthenticationPanel {
         cls := "expandable-title",
         div("Authentications", padding := "10px"),
         newButton,
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ staticPanels.closeExpandable })
       ),
       authPanel
     )

@@ -49,7 +49,7 @@ class MarketPanel(manager: TreeNodeManager) {
     case (oAlert, current) ⇒
       oAlert match {
         case Some(e: MarketIndexEntry) ⇒
-          panels.alertPanel.string(
+          staticPanels.alertPanel.string(
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert.set(None)
@@ -118,7 +118,7 @@ class MarketPanel(manager: TreeNodeManager) {
     Fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
       downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
       downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
-      panels.treeNodeManager.invalidCurrentCache
+      staticPanels.treeNodeManager.invalidCurrentCache
     }
   }
 

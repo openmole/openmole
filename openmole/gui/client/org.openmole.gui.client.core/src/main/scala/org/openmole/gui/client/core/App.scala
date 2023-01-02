@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.panels._
+import org.openmole.gui.client.core.staticPanels._
 
 import scala.scalajs.js.annotation._
 import org.scalajs.dom
@@ -47,8 +47,8 @@ object App {
     render(
       dom.document.body,
       div(
-        panels.connection.render,
-        panels.alertPanel.alertDiv
+        staticPanels.connection.render,
+        staticPanels.alertPanel.alertDiv
       )
     )
   }
@@ -105,13 +105,29 @@ object App {
       dom.document.body,
       div(
         resetPassword.resetPassDiv,
-        panels.alertPanel.alertDiv
+        staticPanels.alertPanel.alertDiv
       )
     )
   }
 
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
+    given ServerAPI = OpenMOLERESTServerAPI()
+
+    val tabContent = new TabContent
+
+    lazy val treeNodePanel =
+      new TreeNodePanel(
+        treeNodeManager = treeNodeManager,
+        fileDisplayer = fileDisplayer,
+        showExecution = () ⇒ openExecutionPanel,
+        treeNodeTabs = treeNodeTabs,
+        tabContent = tabContent,
+        services = pluginServices,
+        api = summon[ServerAPI])
+
+
+    given Panels = Panels(treeNodePanel, tabContent)
 
     //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
@@ -169,12 +185,12 @@ object App {
         },
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
-          button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
+          button(btn_danger, "New project", onClick --> { _ => staticPanels.expandTo(newProjectPanel, 3) }),
           div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
-          div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
+          div(glyph_lock, navBarItem, onClick --> { _ ⇒ staticPanels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
-            panels.pluginPanel.getPlugins
-            panels.expandTo(panels.pluginPanel.render, 1)
+            staticPanels.pluginPanel.getPlugins
+            staticPanels.expandTo(staticPanels.pluginPanel.render, 1)
           }).tooltip("Plugins")
         )
         //            settingsItem
@@ -229,7 +245,7 @@ object App {
               theNavBar,
               //openAuthentication.signal.expand(authenticationPanel),
               // treeNodeTabs.render.amend(cls := "tab-section")
-              TabContent.render //.amend(cls := "tab-section")
+              tabContent.render //.amend(cls := "tab-section")
             )
             //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
             //                  case (oft, io) ⇒
@@ -267,7 +283,7 @@ object App {
                 }
               },
                 div(cls := "splitter"),
-                child <-- panels.expandablePanel.signal.map { p ⇒
+                child <-- staticPanels.expandablePanel.signal.map { p ⇒
                   p.map {
                     _.element
                   }.getOrElse(div(top := "1000px", color.white))
@@ -275,11 +291,11 @@ object App {
               )
             ),
 
-          panels.alertPanel.alertDiv
+          staticPanels.alertPanel.alertDiv
         )
       )
     }
-    panels.treeNodeManager.invalidCurrentCache
+    staticPanels.treeNodeManager.invalidCurrentCache
     //}
   }
 
