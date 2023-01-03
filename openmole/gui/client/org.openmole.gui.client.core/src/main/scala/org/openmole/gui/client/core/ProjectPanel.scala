@@ -2,7 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFactory}
 import com.raquo.laminar.api.L._
-import org.openmole.gui.client.core.staticPanels.{fileDisplayer}
 import org.openmole.gui.client.tool.TagBadge
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +36,7 @@ object ProjectPanel {
           hash = true,
           onLoaded = (content, hash) ⇒ {
             panels.treeNodeManager.invalidCurrentCache
-            fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, staticPanels.pluginServices)
+            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
           }
         )
       })

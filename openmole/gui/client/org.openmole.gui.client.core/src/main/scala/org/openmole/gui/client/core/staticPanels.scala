@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
-import org.openmole.gui.client.core.files.{FileDisplayer, TreeNodeManager, TreeNodePanel, TreeNodeTabs, TabContent}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.ext.data.{ErrorManager, GUIPluginAsJS, PluginServices, WizardPluginFactory}
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -26,33 +26,15 @@ case class Panels(
   treeNodePanel: TreeNodePanel,
   tabContent: TabContent,
   treeNodeManager: TreeNodeManager,
-  pluginPanel: PluginPanel)
+  pluginPanel: PluginPanel,
+  fileDisplayer: FileDisplayer,
+  settingsView: SettingsView,
+  pluginServices: PluginServices,
+  executionPanel: ExecutionPanel)
 
 object staticPanels {
-
-  val pluginServices =
-    PluginServices(
-      errorManager = new ErrorManager {
-        override def signal(message: String, stack: Option[String]): Unit = staticPanels.bannerAlert.registerWithStack(message, stack)
-      }
-    )
-
-  lazy val executionPanel =
-    new ExecutionPanel(
-      // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
-      bannerAlert = bannerAlert)
-
-  def openExecutionPanel = {
-    bannerAlert.clear
-    executionPanel.dialog.show
-  }
-
+  
   lazy val treeNodeTabs = new TreeNodeTabs()
-
-  lazy val fileDisplayer =
-    new FileDisplayer(
-      treeNodeTabs = treeNodeTabs
-    )
   
 
   def urlImportPanel(treeNodeManager: TreeNodeManager) =
@@ -79,7 +61,6 @@ object staticPanels {
   //lazy val marketPanel = new MarketPanel(treeNodeManager)
 
   lazy val stackPanel = new TextPanel("Error stack")
-  lazy val settingsView = new SettingsView(fileDisplayer)
   lazy val connection = new Connection
 
   lazy val bannerAlert =

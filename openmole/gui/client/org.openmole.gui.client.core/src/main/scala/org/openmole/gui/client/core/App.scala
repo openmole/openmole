@@ -10,7 +10,7 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.{TabContent, TreeNodeManager, TreeNodePanel}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.client.FileManager
@@ -118,18 +118,35 @@ object App {
     
     val treeNodeManager = new TreeNodeManager
     val pluginPanel = new PluginPanel(treeNodeManager)
+    val fileDisplayer = new FileDisplayer(treeNodeTabs)
 
-    lazy val treeNodePanel =
+    val pluginServices =
+      PluginServices(
+        errorManager = new ErrorManager {
+          override def signal(message: String, stack: Option[String]): Unit = staticPanels.bannerAlert.registerWithStack(message, stack)
+        }
+      )
+
+    lazy val executionPanel =
+      new ExecutionPanel(
+        // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
+        bannerAlert = staticPanels.bannerAlert)
+
+    val treeNodePanel =
       new TreeNodePanel(
         treeNodeManager = treeNodeManager,
         fileDisplayer = fileDisplayer,
-        showExecution = () ⇒ openExecutionPanel,
+        showExecution = () ⇒ ExecutionPanel.open(executionPanel, staticPanels.bannerAlert),
         treeNodeTabs = treeNodeTabs,
         tabContent = tabContent,
         services = pluginServices,
         api = summon[ServerAPI])
 
-    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel)
+
+    val settingsView = new SettingsView(fileDisplayer)
+
+    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel)
+
 
     //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
@@ -188,7 +205,7 @@ object App {
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project", onClick --> { _ => staticPanels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(executionPanel, staticPanels.bannerAlert) }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ staticPanels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
             pluginPanel.getPlugins

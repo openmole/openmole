@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Fetch, Panels, Waiter, staticPanels}
+import org.openmole.gui.client.core.{ExecutionPanel, Fetch, Panels, Waiter, staticPanels}
 import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.data.*
 import com.raquo.laminar.api.L.*
@@ -67,7 +67,7 @@ object OMSContent {
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
               Fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
-                staticPanels.openExecutionPanel
+                ExecutionPanel.open(panels.executionPanel, staticPanels.bannerAlert)
               }
             )
           })

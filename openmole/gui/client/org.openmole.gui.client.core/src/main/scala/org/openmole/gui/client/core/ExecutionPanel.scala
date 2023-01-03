@@ -58,6 +58,11 @@ object ExecutionPanel {
 
   implicit def idToExecutionID(id: scaladget.tools.Utils.ID): ExecutionId = ExecutionId(id)
 
+
+  def open(executionPanel: ExecutionPanel, bannerAlert: BannerAlert) = {
+    bannerAlert.clear
+    executionPanel.dialog.show
+  }
 }
 
 import ExecutionPanel._
