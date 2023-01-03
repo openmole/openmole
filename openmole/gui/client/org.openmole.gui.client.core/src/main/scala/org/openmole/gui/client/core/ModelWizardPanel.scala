@@ -155,7 +155,7 @@ object ModelWizardPanel {
   //
 
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] = {
       val fileType: FileType = FileType(safePath.name)
@@ -240,7 +240,7 @@ object ModelWizardPanel {
                   fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
-                  filePath.set(Some(treeNodeManager.dirNodeLine.now() ++ fileName))
+                  filePath.set(Some(panels.treeNodeManager.dirNodeLine.now() ++ fileName))
                   filePath.now().map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
@@ -349,9 +349,9 @@ object ModelWizardPanel {
       }
     }
 
-    def browseToPath(safePath: SafePath) = {
+    def browseToPath(safePath: SafePath)(using panels: Panels) = {
       a(safePath.path.mkString("/"), onClick --> { _ ⇒
-        staticPanels.treeNodeManager.switch(safePath.parent)
+        panels.treeNodeManager.switch(safePath.parent)
       })
     }
 
@@ -366,7 +366,7 @@ object ModelWizardPanel {
     //          treeNodeManager.invalidCurrentCache
     //      }
 
-    def buildTask(safePath: SafePath) = {
+    def buildTask(safePath: SafePath)(using panels: Panels) = {
       factory(safePath).foreach { f =>
         modelMetadata.now().foreach { mmd =>
           println("in build " + mmd.sourcesDirectory)
@@ -410,7 +410,7 @@ object ModelWizardPanel {
           }
         },
         span(display.flex, alignItems.center,color.black, marginLeft := "10px",
-          child <-- treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
+          child <-- panels.treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
             uploadedPath match {
               case Some(p: SafePath) => span("Uploaded in ", browseToPath(p))
               case _ => span( "Your model will be uploaded in ", browseToPath(sp))

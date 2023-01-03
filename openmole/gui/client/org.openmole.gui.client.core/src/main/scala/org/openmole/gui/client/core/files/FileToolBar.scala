@@ -38,7 +38,7 @@ import org.openmole.gui.ext.client.FileManager
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileToolBar(treeNodePanel: TreeNodePanel) {
+class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager) {
   def manager = treeNodePanel.treeNodeManager
 
   val message = Var[Div](div())

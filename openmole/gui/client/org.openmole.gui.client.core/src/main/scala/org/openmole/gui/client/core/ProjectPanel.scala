@@ -2,7 +2,7 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFactory}
 import com.raquo.laminar.api.L._
-import org.openmole.gui.client.core.staticPanels.{fileDisplayer, treeNodeManager}
+import org.openmole.gui.client.core.staticPanels.{fileDisplayer}
 import org.openmole.gui.client.tool.TagBadge
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,13 +30,13 @@ object ProjectPanel {
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.createFile(staticPanels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
-        val toDisplay = staticPanels.treeNodeManager.dirNodeLine.now() ++ fileName
+      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
+        val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
         FileManager.download(
           toDisplay,
           hash = true,
           onLoaded = (content, hash) ⇒ {
-            treeNodeManager.invalidCurrentCache
+            panels.treeNodeManager.invalidCurrentCache
             fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, staticPanels.pluginServices)
           }
         )

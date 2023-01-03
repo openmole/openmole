@@ -40,7 +40,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
       downloading.set(Processed())
       urlDialog.hide
       d match {
-        case None   ⇒ staticPanels.treeNodeManager.invalidCurrentCache
+        case None   ⇒ manager.invalidCurrentCache
         case Some(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }

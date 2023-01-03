@@ -41,7 +41,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     if (!b) treeNodeManager.clearSelection
   }
 
-  val fileToolBar = new FileToolBar(this)
+  val fileToolBar = new FileToolBar(this, treeNodeManager)
   val tree: Var[HtmlElement] = Var(div())
 
   val editNodeInput = inputTag("").amend(
@@ -406,7 +406,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs, tn match {
       case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
       case _ ⇒ PluginState(false, false)
-    }, panel)
+    })
 
     def render(using panels: Panels): HtmlElement = {
       div(display.flex, flexDirection.column,

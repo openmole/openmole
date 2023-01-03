@@ -53,7 +53,7 @@ class MarketPanel(manager: TreeNodeManager) {
             e.name + " already exists. Overwrite ? ",
             () ⇒ {
               overwriteAlert.set(None)
-              deleteFile(current ++ e.name, e)
+              overwrite(current ++ e.name, e)
             }, () ⇒ {
               overwriteAlert.set(None)
             }, CenterPagePosition
@@ -118,7 +118,7 @@ class MarketPanel(manager: TreeNodeManager) {
     Fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
       downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
       downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
-      staticPanels.treeNodeManager.invalidCurrentCache
+      manager.invalidCurrentCache
     }
   }
 
@@ -136,7 +136,7 @@ class MarketPanel(manager: TreeNodeManager) {
   //    }.getOrElse(div())
   //}
 
-  def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
+  def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
     Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(marketIndexEntry)
     }

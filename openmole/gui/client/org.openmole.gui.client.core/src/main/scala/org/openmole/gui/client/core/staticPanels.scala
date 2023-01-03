@@ -22,7 +22,11 @@ import com.raquo.laminar.api.L._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-case class Panels(treeNodePanel: TreeNodePanel, tabContent: TabContent)
+case class Panels(
+  treeNodePanel: TreeNodePanel,
+  tabContent: TabContent,
+  treeNodeManager: TreeNodeManager,
+  pluginPanel: PluginPanel)
 
 object staticPanels {
 
@@ -32,8 +36,6 @@ object staticPanels {
         override def signal(message: String, stack: Option[String]): Unit = staticPanels.bannerAlert.registerWithStack(message, stack)
       }
     )
-
-  lazy val treeNodeManager = new TreeNodeManager()
 
   lazy val executionPanel =
     new ExecutionPanel(
@@ -53,7 +55,7 @@ object staticPanels {
     )
   
 
-  def urlImportPanel =
+  def urlImportPanel(treeNodeManager: TreeNodeManager) =
     new URLImportPanel(
       treeNodeManager,
       bannerAlert = bannerAlert)
@@ -72,9 +74,9 @@ object staticPanels {
     }
   }
 
-  val pluginPanel = new PluginPanel
+  //val pluginPanel = new PluginPanel
 
-  lazy val marketPanel = new MarketPanel(treeNodeManager)
+  //lazy val marketPanel = new MarketPanel(treeNodeManager)
 
   lazy val stackPanel = new TextPanel("Error stack")
   lazy val settingsView = new SettingsView(fileDisplayer)

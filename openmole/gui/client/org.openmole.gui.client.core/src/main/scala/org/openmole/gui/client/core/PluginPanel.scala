@@ -1,11 +1,12 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.*
 import org.scalajs.dom.raw.MouseEvent
-import scaladget.bootstrapnative.bsn._
+import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.files.TreeNodeManager
 import scaladget.bootstrapnative.bsn
 
 //
@@ -26,7 +27,7 @@ import scaladget.bootstrapnative.bsn
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-class PluginPanel {
+class PluginPanel(manager: TreeNodeManager) {
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
@@ -47,8 +48,8 @@ class PluginPanel {
                 cls := "badgeOM",
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
-                staticPanels.treeNodeManager.switch(p.projectSafePath.parent)
-                staticPanels.treeNodeManager.computeCurrentSons()
+                manager.switch(p.projectSafePath.parent)
+                manager.computeCurrentSons()
               }
             )
           }

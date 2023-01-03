@@ -1,26 +1,26 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.staticPanels._
+import org.openmole.gui.client.core.staticPanels.*
 
-import scala.scalajs.js.annotation._
+import scala.scalajs.js.annotation.*
 import org.scalajs.dom
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.{TabContent, TreeNodePanel}
+import org.openmole.gui.client.core.files.{TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.data._
+import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.client.FileManager
-import org.openmole.gui.ext.client._
-import com.raquo.laminar.api.L._
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.ext.client.*
+import com.raquo.laminar.api.L.*
+import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.scalajs.js.timers._
+import scala.concurrent.duration.*
+import scala.scalajs.js.timers.*
 
 /*
  * Copyright (C) 15/04/15 // mathieu.leclaire@openmole.org
@@ -115,6 +115,9 @@ object App {
     given ServerAPI = OpenMOLERESTServerAPI()
 
     val tabContent = new TabContent
+    
+    val treeNodeManager = new TreeNodeManager
+    val pluginPanel = new PluginPanel(treeNodeManager)
 
     lazy val treeNodePanel =
       new TreeNodePanel(
@@ -126,8 +129,7 @@ object App {
         services = pluginServices,
         api = summon[ServerAPI])
 
-
-    given Panels = Panels(treeNodePanel, tabContent)
+    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel)
 
     //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
@@ -189,8 +191,8 @@ object App {
           div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ staticPanels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
-            staticPanels.pluginPanel.getPlugins
-            staticPanels.expandTo(staticPanels.pluginPanel.render, 1)
+            pluginPanel.getPlugins
+            staticPanels.expandTo(pluginPanel.render, 1)
           }).tooltip("Plugins")
         )
         //            settingsItem
@@ -295,7 +297,7 @@ object App {
         )
       )
     }
-    staticPanels.treeNodeManager.invalidCurrentCache
+    treeNodeManager.invalidCurrentCache
     //}
   }
 

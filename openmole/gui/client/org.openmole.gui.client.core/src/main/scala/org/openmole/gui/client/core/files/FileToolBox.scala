@@ -12,30 +12,30 @@ import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.client._
 import com.raquo.laminar.api.L._
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState, treeNodePanel: TreeNodePanel) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState) {
 
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
 
-  def closeToolBox = treeNodePanel.currentLine.set(-1)
+  def closeToolBox(using panels: Panels) = panels.treeNodePanel.currentLine.set(-1)
 
-  def download = withSafePath { sp ⇒
+  def download(using panels: Panels) = withSafePath { sp ⇒
     closeToolBox
     org.scalajs.dom.document.location.href = routes.downloadFile(client.Utils.toURI(sp.path))
   }
 
   def trash(using panels: Panels) = withSafePath { safePath ⇒
     closeToolBox
-    CoreUtils.trashNodes(treeNodePanel, Seq(safePath)) {
+    CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)) {
       () ⇒
         panels.tabContent.removeTab(safePath)
         panels.tabContent.checkTabs
-        staticPanels.pluginPanel.getPlugins
-        treeNodeManager.invalidCurrentCache
+        panels.pluginPanel.getPlugins
+        panels.treeNodeManager.invalidCurrentCache
     }
   }
 
-  def duplicate = withSafePath { sp ⇒
+  def duplicate(using panels: Panels) = withSafePath { sp ⇒
     val newName = {
       val prefix = sp.path.last
       if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
@@ -45,19 +45,19 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     CoreUtils.duplicate(sp, newName)
   }
 
-  def extract = withSafePath { sp ⇒
+  def extract(using panels: Panels) = withSafePath { sp ⇒
     Fetch.future(_.extract(sp).future).foreach {
       error ⇒
         error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
             staticPanels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒treeNodeManager.invalidCurrentCache
+          case _ ⇒ panels.treeNodeManager.invalidCurrentCache
         }
     }
     closeToolBox
   }
 
-  def execute = {
+  def execute(using panels: Panels) = {
     import scala.concurrent.duration._
     withSafePath { sp ⇒
       Fetch.future(_.runScript(ScriptData(sp), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
@@ -67,7 +67,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def toScript =
+  def toScript(using panels: Panels) =
     withSafePath { sp ⇒
       closeToolBox
       Plugins.fetch { p ⇒
@@ -97,9 +97,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     val newNode = safePath.parent ++ to
     Fetch.future(_.move(safePath, safePath.parent ++ to).future).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
-      treeNodeManager.invalidCurrentCache
+      panels.treeNodeManager.invalidCurrentCache
       panels.tabContent.checkTabs
-      treeNodePanel.currentSafePath.set(Some(newNode))
+      panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
     }
   }
@@ -108,8 +108,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     pluginState.isPlugged match {
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
-          staticPanels.pluginPanel.getPlugins
-          treeNodeManager.invalidCurrentCache
+          panels.pluginPanel.getPlugins
+          panels.treeNodeManager.invalidCurrentCache
         }
           //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
 //          panels.pluginPanel.getPlugins
@@ -119,8 +119,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         CoreUtils.addPlugin(safePath).foreach { errors ⇒
           for e <- errors
           do staticPanels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          staticPanels.pluginPanel.getPlugins
-          treeNodeManager.invalidCurrentCache
+          panels.pluginPanel.getPlugins
+          panels.treeNodeManager.invalidCurrentCache
         }
 //        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
 //          _ ⇒
@@ -130,8 +130,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def withSafePath(action: SafePath ⇒ Unit) = {
-    treeNodePanel.currentSafePath.now().foreach { sp ⇒
+  def withSafePath(action: SafePath ⇒ Unit)(using panels: Panels) = {
+    panels.treeNodePanel.currentSafePath.now().foreach { sp ⇒
       action(sp)
     }
   }
