@@ -22,6 +22,19 @@ import com.raquo.laminar.api.L.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object Panels:
+  case class ExpandablePanel(id: Int, element: HtmlElement)
+
+  def closeExpandable(using panels: Panels) = panels.expandablePanel.set(None)
+
+  def expandTo(el: HtmlElement, id: Int)(using panels: Panels) = panels.expandablePanel.update {
+    _ match {
+      case Some(ep: ExpandablePanel) ⇒ if (ep.id == id) None else Some(ExpandablePanel(id, el))
+      case None ⇒ Some(ExpandablePanel(id, el))
+    }
+  }
+
+
 case class Panels(
   treeNodePanel: TreeNodePanel,
   tabContent: TabContent,
@@ -31,7 +44,8 @@ case class Panels(
   settingsView: SettingsView,
   pluginServices: PluginServices,
   executionPanel: ExecutionPanel,
-  bannerAlert: BannerAlert)
+  bannerAlert: BannerAlert,
+  expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None))
 
 object staticPanels {
 
@@ -42,19 +56,9 @@ object staticPanels {
       treeNodeManager,
       bannerAlert = bannerAlert)
 
-  case class ExpandablePanel(id: Int, element: HtmlElement)
-
-  val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
   //val openExpandablePanel = Var(false)
 
-  def closeExpandable = expandablePanel.set(None)
 
-  def expandTo(el: HtmlElement, id: Int) = expandablePanel.update {
-    _ match {
-      case Some(ep: ExpandablePanel) ⇒ if(ep.id == id) None else Some(ExpandablePanel(id, el))
-      case None ⇒ Some(ExpandablePanel(id,el))
-    }
-  }
 
   //val pluginPanel = new PluginPanel
 

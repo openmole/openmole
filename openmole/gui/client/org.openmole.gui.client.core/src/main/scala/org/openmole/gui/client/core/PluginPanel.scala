@@ -33,9 +33,9 @@ class PluginPanel(manager: TreeNodeManager) {
 
   def getPlugins(using fetch: Fetch) = fetch(_.listPlugins(()).future) { p ⇒ plugins.set(p.toSeq) }
 
-  def pluginTable(using fetch: Fetch) =
+  def pluginTable(using fetch: Fetch, panels: Panels) =
     div(
-      children <-- plugins.signal.combineWith(staticPanels.expandablePanel.signal).map {
+      children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
         case (ps, _) ⇒
           ps.zipWithIndex.map { case (p, i) ⇒
             div(
@@ -56,12 +56,12 @@ class PluginPanel(manager: TreeNodeManager) {
       }
     )
 
-  def render(using fetch: Fetch): HtmlElement =
+  def render(using fetch: Fetch, panels: Panels): HtmlElement =
     div(
       div(
         cls := "expandable-title",
         div("Plugins", padding := "10px"),
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ staticPanels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       pluginTable
     )

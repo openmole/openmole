@@ -153,7 +153,7 @@ object App {
 
     val settingsView = new SettingsView(fileDisplayer)
 
-    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert)
+    given panels: Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert)
 
 
     //import scala.concurrent.ExecutionContext.Implicits.global
@@ -212,12 +212,12 @@ object App {
         },
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
-          button(btn_danger, "New project", onClick --> { _ => staticPanels.expandTo(newProjectPanel, 3) }),
+          button(btn_danger, "New project", onClick --> { _ => Panels.expandTo(newProjectPanel, 3) }),
           div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(executionPanel, bannerAlert) }).tooltip("Executions"),
-          div(glyph_lock, navBarItem, onClick --> { _ ⇒ staticPanels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
+          div(glyph_lock, navBarItem, onClick --> { _ ⇒ Panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
             pluginPanel.getPlugins
-            staticPanels.expandTo(pluginPanel.render, 1)
+            Panels.expandTo(pluginPanel.render, 1)
           }).tooltip("Plugins")
         )
         //            settingsItem
@@ -301,16 +301,16 @@ object App {
           //            ),
 
             div(
-              div(cls <-- expandablePanel.signal.map { x =>
+              div(cls <-- panels.expandablePanel.signal.map { x =>
                 "collapse-bottom " + {
                   x match {
-                    case Some(ep: ExpandablePanel) => ""
+                    case Some(ep: Panels.ExpandablePanel) => ""
                     case _ => "close"
                   }
                 }
               },
                 div(cls := "splitter"),
-                child <-- staticPanels.expandablePanel.signal.map { p ⇒
+                child <-- panels.expandablePanel.signal.map { p ⇒
                   p.map {
                     _.element
                   }.getOrElse(div(top := "1000px", color.white))

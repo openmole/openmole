@@ -386,7 +386,7 @@ object ModelWizardPanel {
           println("On click")
           filePath.now().foreach { fp =>
             buildTask(fp)
-            staticPanels.closeExpandable
+            Panels.closeExpandable
           }
           println("clicked")
 

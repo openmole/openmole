@@ -51,14 +51,14 @@ object ProjectPanel {
         div("Start from", padding := "10px"),
         button("Empty project", cls := "btn newButton", onClick --> { _ =>
           emptyProject
-          staticPanels.closeExpandable
+          Panels.closeExpandable
         }),
         div(display.flex, justifyContent.spaceAround, width := "600px",
           buttonStyle("Your model", 1),
           buttonStyle("The market Place", 2),
           buttonStyle("A url project", 3)
         ),
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ staticPanels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       div(
         child <-- currentOption.signal.map {
