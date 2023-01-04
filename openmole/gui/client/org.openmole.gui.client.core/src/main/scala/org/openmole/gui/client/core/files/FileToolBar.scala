@@ -59,7 +59,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
 
   val filterToolOpen = Var(false)
 
-  val filterTool = div(
+  def filterTool(using fetch: Fetch) = div(
     cls := "file-filter",
     //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
     // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
@@ -94,7 +94,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
 
-  val sortingGroup = {
+  def sortingGroup(using fetch: Fetch) = {
     trait Sorting
     object Name extends Sorting
     object Size extends Sorting

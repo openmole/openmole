@@ -53,7 +53,7 @@ object App {
     )
   }
 
-  def stopped(): Unit = {
+  def stopped()(using fetch: Fetch): Unit = {
 
     val stoppedDiv = div(
       omsheet.connectionTabOverlay,
@@ -65,16 +65,16 @@ object App {
       )
     )
 
-    Fetch.future(_.shutdown(()).future)
+    fetch.future(_.shutdown(()).future)
     render(dom.document.body, stoppedDiv)
   }
 
-  def restarted(): Unit = {
+  def restarted()(using fetch: Fetch): Unit = {
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
     def setTimer = {
       timer.set(Some(setInterval(5000) {
-        Fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
+        fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
           if (x) {
             CoreUtils.setRoute(s"/${routes.connectionRoute}")
             timer.now().foreach {
@@ -95,7 +95,7 @@ object App {
       )
     )
 
-    Fetch.future(_.restart(()).future)
+    fetch.future(_.restart(()).future)
     render(dom.document.body, restartedDiv)
   }
 
@@ -112,7 +112,9 @@ object App {
 
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
-    given ServerAPI = OpenMOLERESTServerAPI()
+
+    given fetch: Fetch = Fetch(staticPanels.bannerAlert)
+    given ServerAPI = OpenMOLERESTServerAPI(fetch)
 
     val tabContent = new TabContent
     
@@ -144,6 +146,8 @@ object App {
 
 
     val settingsView = new SettingsView(fileDisplayer)
+
+
 
     given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel)
 

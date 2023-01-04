@@ -33,9 +33,8 @@ case class Panels(
   executionPanel: ExecutionPanel)
 
 object staticPanels {
-  
+
   lazy val treeNodeTabs = new TreeNodeTabs()
-  
 
   def urlImportPanel(treeNodeManager: TreeNodeManager) =
     new URLImportPanel(

@@ -155,7 +155,7 @@ object ModelWizardPanel {
   //
 
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] = {
       val fileType: FileType = FileType(safePath.name)
@@ -199,7 +199,7 @@ object ModelWizardPanel {
 
               fileType match
                 case Archive ⇒
-                  Fetch.future(_.extract(tempFile ++ fileName).future).foreach {
+                  fetch.future(_.extract(tempFile ++ fileName).future).foreach {
                     _ match {
                       case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
                         staticPanels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))

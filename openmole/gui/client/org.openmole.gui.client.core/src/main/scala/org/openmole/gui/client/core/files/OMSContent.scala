@@ -11,7 +11,7 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object OMSContent {
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
@@ -55,7 +55,7 @@ object OMSContent {
               editor.editor.getSession().clearBreakpoints()
               compileDisabled.set(true)
               panels.tabContent.save(tabData, _ ⇒
-              Fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
+              fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
                 setError(errorDataOption)
                 editor.editor.focus()
               }
@@ -66,7 +66,7 @@ object OMSContent {
           button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
-              Fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
+              fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
                 ExecutionPanel.open(panels.executionPanel, staticPanels.bannerAlert)
               }
             )

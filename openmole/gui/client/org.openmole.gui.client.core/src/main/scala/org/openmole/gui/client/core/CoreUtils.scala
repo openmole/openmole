@@ -42,15 +42,15 @@ object CoreUtils {
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
   }
 
-  def withTmpDirectory(todo: SafePath ⇒ Unit): Unit = {
-    Fetch.future(_.temporaryDirectory(()).future).foreach { tempFile ⇒
+  def withTmpDirectory(todo: SafePath ⇒ Unit)(using fetch: Fetch): Unit = {
+    fetch.future(_.temporaryDirectory(()).future).foreach { tempFile ⇒
       try todo(tempFile)
-      finally Fetch.future(_.deleteFiles(Seq(tempFile)).future)
+      finally fetch.future(_.deleteFiles(Seq(tempFile)).future)
     }
   }
 
-  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {}) =
-    Fetch.future(_.createFile(safePath, fileName, directory).future).foreach { b ⇒
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using fetch: Fetch) =
+    fetch.future(_.createFile(safePath, fileName, directory).future).foreach { b ⇒
       if b
       then onCreated()
       else staticPanels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
@@ -62,14 +62,13 @@ object CoreUtils {
 //    }
 //  }
 
-  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    Fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
+  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(ontrashed: () ⇒ Unit)(using fetch: Fetch): Unit =
+    fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
       treeNodePanel.invalidCacheAnd(ontrashed)
     }
-  }
 
-  def duplicate(safePath: SafePath, newName: String)(using panels: Panels): Unit =
-    Fetch.future(_.duplicate(safePath, newName).future).foreach { y ⇒
+  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, fetch: Fetch): Unit =
+    fetch.future(_.duplicate(safePath, newName).future).foreach { y ⇒
       panels.treeNodeManager.invalidCurrentCache
     }
 
@@ -79,12 +78,11 @@ object CoreUtils {
 //  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
 //    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
-  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter()): Future[ListFilesData] =
-    Fetch.future(_.listFiles(safePath, fileFilter).future)
+  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using fetch: Fetch): Future[ListFilesData] =
+    fetch.future(_.listFiles(safePath, fileFilter).future)
   
- def findFilesContaining(safePath: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = {
-    Fetch.future(_.listRecursive(safePath, findString).future)
-  }
+ def findFilesContaining(safePath: SafePath, findString: Option[String])(using fetch: Fetch): Future[Seq[(SafePath, Boolean)]] =
+    fetch.future(_.listRecursive(safePath, findString).future)
  
 //  def appendToPluggedIfPlugin(safePath: SafePath) = {
 ////    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
@@ -93,16 +91,14 @@ object CoreUtils {
 ////    }
 //  }
 
-  def addPlugin(safePath: SafePath) =
-    Fetch.future(_.addPlugin(safePath).future)
+  def addPlugin(safePath: SafePath)(using fetch: Fetch) =
+    fetch.future(_.addPlugin(safePath).future)
 
-  def removePlugin(safePath: SafePath) =
-    Fetch.future(_.removePlugin(safePath).future)
+  def removePlugin(safePath: SafePath)(using fetch: Fetch) =
+    fetch.future(_.removePlugin(safePath).future)
 
-
-  def addJSScript(relativeJSPath: String) = {
+  def addJSScript(relativeJSPath: String) = 
     org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).ref)
-  }
 
   def approximatedYearMonthDay(duration: Long): String = {
     val MINUTE = 60000L

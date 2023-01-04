@@ -23,6 +23,6 @@ import scala.concurrent.Future
 trait ServerAPI:
   def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]]
 
-class OpenMOLERESTServerAPI extends ServerAPI:
+class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
-    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
+    fetch.future(_.copyFiles(safePaths, to, overwrite).future)

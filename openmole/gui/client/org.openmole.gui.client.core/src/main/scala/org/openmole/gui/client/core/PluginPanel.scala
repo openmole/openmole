@@ -31,9 +31,9 @@ class PluginPanel(manager: TreeNodeManager) {
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
-  def getPlugins = Fetch(_.listPlugins(()).future) { p ⇒ plugins.set(p.toSeq) }
+  def getPlugins(using fetch: Fetch) = fetch(_.listPlugins(()).future) { p ⇒ plugins.set(p.toSeq) }
 
-  val pluginTable =
+  def pluginTable(using fetch: Fetch) =
     div(
       children <-- plugins.signal.combineWith(staticPanels.expandablePanel.signal).map {
         case (ps, _) ⇒
@@ -49,14 +49,14 @@ class PluginPanel(manager: TreeNodeManager) {
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
                 manager.switch(p.projectSafePath.parent)
-                manager.computeCurrentSons()
+                manager.computeCurrentSons
               }
             )
           }
       }
     )
 
-  def render: HtmlElement =
+  def render(using fetch: Fetch): HtmlElement =
     div(
       div(
         cls := "expandable-title",

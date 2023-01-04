@@ -70,26 +70,26 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       }
     )
 
-  val docButton = a(href := "#", onClick --> { _ ⇒
-    Fetch(_.omSettings(()).future) { sets ⇒
+  def docButton(using fetch: Fetch) = a(href := "#", onClick --> { _ ⇒
+    fetch(_.omSettings(()).future) { sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))
 
-  val jvmInfoButton = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
+  def jvmInfoButton(using fetch: Fetch) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
     timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }
   })
 
-  def updateJVMInfos = {
-    Fetch.future(_.jvmInfos(()).future).foreach { j ⇒
+  def updateJVMInfos(using fetch: Fetch) =
+    fetch.future(_.jvmInfos(()).future).foreach { j ⇒
       jvmInfos.set(Some(j))
     }
-  }
 
-  def setJVMTimer = {
+
+  def setJVMTimer(using fetch: Fetch) = {
     timer.set(Some(timers.setInterval(3000) {
       updateJVMInfos
     }))

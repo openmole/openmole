@@ -32,7 +32,7 @@ class TabContent {
     }
   }
 
-  def timerObserver(using panels: Panels) = Observer[Option[SetIntervalHandle]] { handle =>
+  def timerObserver(using panels: Panels, fetch: Fetch) = Observer[Option[SetIntervalHandle]] { handle =>
     handle match {
       case None => timer.set(Some(setInterval(15000) {
         tabsUI.tabs.now().foreach { t => save(t.t) }
@@ -41,14 +41,14 @@ class TabContent {
     }
   }
 
-  def render(using panels: Panels) =
+  def render(using panels: Panels, fetch: Fetch) =
     tabsUI.render.amend(
       margin := "10px",
       tabsUI.tabs --> tabsObserver,
       timer --> timerObserver
     )
 
-  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels) = {
+  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, fetch: Fetch) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
@@ -61,12 +61,12 @@ class TabContent {
     )
   }
 
-  def addTab(tabData: TabData,
-             content: HtmlElement,
-             onClicked: SafePath => Unit = _ => {},
-             onAdded: SafePath => Unit = _ => {},
-             onRemoved: SafePath => Unit = _ => {}
-            )(using panels: Panels) = {
+  def addTab(
+    tabData: TabData,
+    content: HtmlElement,
+    onClicked: SafePath => Unit = _ => {},
+    onAdded: SafePath => Unit = _ => {},
+    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, fetch: Fetch) = {
     tabsUI.add(
       Tab(
         tabData,
@@ -94,11 +94,11 @@ class TabContent {
       t.t.safePath.path == safePath.path
     }.map{_.tabID}
 
-  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels): Unit = {
+  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch): Unit = {
     tabData.editorPanelUI.foreach { editorPanelUI =>
       editorPanelUI.synchronized {
         val (content, hash) = editorPanelUI.code
-        Fetch.future(_.saveFile(tabData.safePath, content, Some(hash), overwrite).future).foreach {
+        fetch.future(_.saveFile(tabData.safePath, content, Some(hash), overwrite).future).foreach {
           case (saved, savedHash) ⇒
             if (saved) {
               editorPanelUI.onSaved(savedHash)
@@ -110,8 +110,8 @@ class TabContent {
     }
   }
 
-  def checkTabs = tabsUI.tabs.now().foreach { tab =>
-    Fetch.future(_.exists(tab.t.safePath).future).foreach {
+  def checkTabs(using fetch: Fetch) = tabsUI.tabs.now().foreach { tab =>
+    fetch.future(_.exists(tab.t.safePath).future).foreach {
       e ⇒
         if (!e) removeTab(tab.t.safePath)
     }
