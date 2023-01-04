@@ -16,6 +16,7 @@ import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.client.FileManager
 import org.openmole.gui.ext.client.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.alert.BannerAlert
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
@@ -113,7 +114,12 @@ object App {
   def run() = {
     val containerNode = dom.document.querySelector("#openmole-content")
 
-    given fetch: Fetch = Fetch(staticPanels.bannerAlert)
+    lazy val bannerAlert =
+      new BannerAlert(
+        resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
+      )
+
+    given fetch: Fetch = Fetch(bannerAlert)
     given ServerAPI = OpenMOLERESTServerAPI(fetch)
 
     val tabContent = new TabContent
@@ -125,20 +131,20 @@ object App {
     val pluginServices =
       PluginServices(
         errorManager = new ErrorManager {
-          override def signal(message: String, stack: Option[String]): Unit = staticPanels.bannerAlert.registerWithStack(message, stack)
+          override def signal(message: String, stack: Option[String]): Unit = bannerAlert.registerWithStack(message, stack)
         }
       )
 
     lazy val executionPanel =
       new ExecutionPanel(
         // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
-        bannerAlert = staticPanels.bannerAlert)
+        bannerAlert = bannerAlert)
 
     val treeNodePanel =
       new TreeNodePanel(
         treeNodeManager = treeNodeManager,
         fileDisplayer = fileDisplayer,
-        showExecution = () ⇒ ExecutionPanel.open(executionPanel, staticPanels.bannerAlert),
+        showExecution = () ⇒ ExecutionPanel.open(executionPanel, bannerAlert),
         treeNodeTabs = treeNodeTabs,
         tabContent = tabContent,
         services = pluginServices,
@@ -147,9 +153,7 @@ object App {
 
     val settingsView = new SettingsView(fileDisplayer)
 
-
-
-    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel)
+    given Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert)
 
 
     //import scala.concurrent.ExecutionContext.Implicits.global
@@ -209,7 +213,7 @@ object App {
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project", onClick --> { _ => staticPanels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(executionPanel, staticPanels.bannerAlert) }).tooltip("Executions"),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(executionPanel, bannerAlert) }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ staticPanels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
             pluginPanel.getPlugins

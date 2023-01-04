@@ -30,13 +30,14 @@ case class Panels(
   fileDisplayer: FileDisplayer,
   settingsView: SettingsView,
   pluginServices: PluginServices,
-  executionPanel: ExecutionPanel)
+  executionPanel: ExecutionPanel,
+  bannerAlert: BannerAlert)
 
 object staticPanels {
 
   lazy val treeNodeTabs = new TreeNodeTabs()
 
-  def urlImportPanel(treeNodeManager: TreeNodeManager) =
+  def urlImportPanel(treeNodeManager: TreeNodeManager, bannerAlert: BannerAlert) =
     new URLImportPanel(
       treeNodeManager,
       bannerAlert = bannerAlert)
@@ -62,10 +63,6 @@ object staticPanels {
   lazy val stackPanel = new TextPanel("Error stack")
   lazy val connection = new Connection
 
-  lazy val bannerAlert =
-    new BannerAlert(
-      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
-    )
 
   lazy val alertPanel = new AlertPanel
 

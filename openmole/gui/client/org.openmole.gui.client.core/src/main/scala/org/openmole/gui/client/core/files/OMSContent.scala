@@ -67,7 +67,7 @@ object OMSContent {
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
               fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
-                ExecutionPanel.open(panels.executionPanel, staticPanels.bannerAlert)
+                ExecutionPanel.open(panels.executionPanel, panels.bannerAlert)
               }
             )
           })
