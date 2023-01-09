@@ -79,7 +79,6 @@ object Plot {
     .yaxis(axis.title(yTitle))
     .font(Font.family("gi").size(14))
     .margin(Margin.t(0))
-    .plotBgColor(Color.rgb(125,0,0))
 
   val splomLayout = Layout
     .showlegend(false)
