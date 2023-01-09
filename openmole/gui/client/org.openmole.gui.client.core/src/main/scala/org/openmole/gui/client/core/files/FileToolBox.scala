@@ -5,7 +5,6 @@ import org.openmole.gui.client.core.alert.AbsolutePositioning._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn._
-import org.openmole.gui.client.core.staticPanels._
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.client
 import org.openmole.gui.ext.data._
@@ -50,7 +49,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       error ⇒
         error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
-            staticPanels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ panels.treeNodeManager.invalidCurrentCache
         }
     }
@@ -118,7 +117,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       case false ⇒
         CoreUtils.addPlugin(safePath).foreach { errors ⇒
           for e <- errors
-          do staticPanels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+          do panels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           panels.pluginPanel.getPlugins
           panels.treeNodeManager.invalidCurrentCache
         }

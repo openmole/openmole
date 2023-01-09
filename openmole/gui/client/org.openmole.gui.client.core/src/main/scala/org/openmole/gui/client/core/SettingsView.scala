@@ -38,7 +38,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  private def alertPanel(warnMessage: String, route: String) = staticPanels.alertPanel.string(
+  private def alertPanel(warnMessage: String, route: String)(using panels: Panels) = panels.alertPanel.string(
     warnMessage,
     () ⇒ {
       /*fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {*/ CoreUtils.setRoute(route) /*})*/
@@ -59,7 +59,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   //    resetPasswordButton
   //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, right := "20", left := "initial", right := 0)
   //
-  private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String) =
+  private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
     div(rowLayout, lineHeight := "7px",
       glyphSpan(messageGlyph ++ omsheet.shutdownButton ++ columnLayout),
       span(message, paddingTop := "3", paddingLeft := "5", settingsItemStyle, columnLayout),
@@ -138,7 +138,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   )
   )
 
-  val resetPasswordButton =
+  def resetPasswordButton(using panels: Panels) =
     serverActions(
       "reset password",
       glyph_lock,
@@ -146,14 +146,14 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       s"/${routes.resetPasswordRoute}"
     )
 
-  val shutdownButton = serverActions(
+  def shutdownButton(using panels: Panels) = serverActions(
     "shutdown",
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
     s"/${routes.shutdownRoute}"
   )
 
-  val restartButton = serverActions(
+  def restartButton(using panels: Panels) = serverActions(
     "restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",

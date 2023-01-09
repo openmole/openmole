@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 
-import org.openmole.gui.client.core.{Fetch, Panels, Waiter, staticPanels}
+import org.openmole.gui.client.core.{Fetch, Panels, Waiter}
 import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.data.*
 import com.raquo.laminar.api.L.*

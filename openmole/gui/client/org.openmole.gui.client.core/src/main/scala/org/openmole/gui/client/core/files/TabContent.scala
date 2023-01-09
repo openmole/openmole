@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Fetch, Panels, staticPanels}
+import org.openmole.gui.client.core.{Fetch, Panels}
 import org.openmole.gui.ext.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*

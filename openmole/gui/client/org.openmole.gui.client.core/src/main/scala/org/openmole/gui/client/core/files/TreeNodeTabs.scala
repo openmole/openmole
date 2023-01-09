@@ -622,7 +622,7 @@ object TreeNodeTab {
       }
     }
 
-  def serverConflictAlert(tabData: TabData)(using panels: Panels, fetch: Fetch) = staticPanels.alertPanel.string(
+  def serverConflictAlert(tabData: TabData)(using panels: Panels, fetch: Fetch) = panels.alertPanel.string(
     s"The file ${tabData.safePath.name} has been modified on the sever. Which version do you want to keep?",
     okaction = { () ⇒ panels.tabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒

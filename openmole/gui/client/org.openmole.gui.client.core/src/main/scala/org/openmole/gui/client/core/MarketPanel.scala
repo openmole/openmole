@@ -35,14 +35,14 @@ import org.openmole.gui.ext.client.InputFilter
 
 
 object MarketPanel:
-  def apply(manager: TreeNodeManager)(using fetch: Fetch) =
+  def apply(manager: TreeNodeManager)(using fetch: Fetch, panels: Panels) =
     val marketPanel = new MarketPanel(manager)
 
     marketPanel.overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
       case (oAlert, current) ⇒
         oAlert match {
           case Some(e: MarketIndexEntry) ⇒
-            staticPanels.alertPanel.string(
+            panels.alertPanel.string(
               e.name + " already exists. Overwrite ? ",
               () ⇒ {
                 marketPanel.overwriteAlert.set(None)

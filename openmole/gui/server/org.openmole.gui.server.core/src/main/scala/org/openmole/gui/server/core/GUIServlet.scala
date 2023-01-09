@@ -117,24 +117,23 @@ object GUIServerServices {
 
 }
 
-class GUIServerServices(
-                         implicit
-                         val workspace:           Workspace,
-                         val preference:          Preference,
-                         val threadProvider:      ThreadProvider,
-                         val seeder:              Seeder,
-                         val replicaCatalog:      ReplicaCatalog,
-                         val tmpDirectory:             TmpDirectory,
-                         val authenticationStore: AuthenticationStore,
-                         val serializerService:   SerializerService,
-                         val fileService:         FileService,
-                         val fileServiceCache:    FileServiceCache,
-                         val randomProvider:      RandomProvider,
-                         val eventDispatcher:     EventDispatcher,
-                         val outputRedirection:   OutputRedirection,
-                         val networkService:      NetworkService,
-                         val loggerService:       LoggerService,
-                        val timeService:         TimeService
+class GUIServerServices(implicit
+  val workspace:           Workspace,
+  val preference:          Preference,
+  val threadProvider:      ThreadProvider,
+  val seeder:              Seeder,
+  val replicaCatalog:      ReplicaCatalog,
+  val tmpDirectory:             TmpDirectory,
+  val authenticationStore: AuthenticationStore,
+  val serializerService:   SerializerService,
+  val fileService:         FileService,
+  val fileServiceCache:    FileServiceCache,
+  val randomProvider:      RandomProvider,
+  val eventDispatcher:     EventDispatcher,
+  val outputRedirection:   OutputRedirection,
+  val networkService:      NetworkService,
+  val loggerService:       LoggerService,
+  val timeService:         TimeService
 )
 
 object GUIServlet {

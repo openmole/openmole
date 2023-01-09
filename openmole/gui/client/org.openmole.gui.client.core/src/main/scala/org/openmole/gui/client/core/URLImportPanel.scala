@@ -34,7 +34,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
       else ifNotExists()
     }
 
-  def download(url: String)(using fetch: Fetch) = {
+  def download(url: String)(using fetch: Fetch, panels: Panels) = {
     downloading.set(Processing())
     fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).future).foreach { d ⇒
       downloading.set(Processed())
@@ -46,7 +46,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     }
   }
 
-  def deleteFileAndDownloadURL(sp: SafePath, url: String)(using fetch: Fetch) =
+  def deleteFileAndDownloadURL(sp: SafePath, url: String)(using fetch: Fetch, panels: Panels) =
     fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(url)
     }
@@ -55,7 +55,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   lazy val extractCheckBox = checkbox(false)
 
-  def downloadButton(using fetch: Fetch) = button(
+  def downloadButton(using fetch: Fetch, panels: Panels) = button(
     btn_primary,
     downloading.withTransferWaiter { _ ⇒
       span("Download")
@@ -64,10 +64,10 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     onClick --> { _ ⇒ download(urlInput.ref.value) }
   )
 
-  def alertObserver(using fetch: Fetch) = Observer[Option[SafePath]] { osp ⇒
+  def alertObserver(using fetch: Fetch, panels: Panels) = Observer[Option[SafePath]] { osp ⇒
     osp match {
       case Some(sp: SafePath) ⇒
-        staticPanels.alertPanel.string(
+        panels.alertPanel.string(
           sp.name + " already exists. Overwrite ? ",
           () ⇒ {
             overwriteAlert.set(None)
@@ -81,7 +81,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     }
   }
 
-  def dialogBody(using fetch: Fetch) = div(
+  def dialogBody(using fetch: Fetch, panels: Panels) = div(
     urlInput,
     span(display.flex, flexDirection.row, alignItems.flexEnd, paddingTop := "20",
       extractCheckBox,
@@ -90,7 +90,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     overwriteAlert --> alertObserver
   )
 
-  def urlDialog(using fetch: Fetch): ModalDialog = ModalDialog(
+  def urlDialog(using fetch: Fetch, panels: Panels): ModalDialog = ModalDialog(
     span(b("Import project from URL")),
     dialogBody,
     buttonGroup.amend(downloadButton, closeButton("Close")),

@@ -17,17 +17,17 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning._
-import org.openmole.gui.client.core.files.{ TreeNodeComment, TreeNodeError }
-import org.openmole.gui.client.core.staticPanels._
-import org.openmole.gui.client.tool.OMTags._
+import org.openmole.gui.client.core.alert.AbsolutePositioning.*
+import org.openmole.gui.client.core.files.{TreeNodeComment, TreeNodeError}
+import org.openmole.gui.client.tool.OMTags.*
 import org.openmole.gui.ext.data.SafePath
-import org.openmole.gui.client.tool._
-import org.openmole.gui.ext.client._
-import com.raquo.laminar.api.L._
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.client.tool.*
+import org.openmole.gui.ext.client.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.TextPanel
+import scaladget.bootstrapnative.bsn.*
 
-class AlertPanel {
+class AlertPanel(stackPanel: TextPanel) {
 
   val visible: Var[Boolean] = Var(false)
   val zoneModifier: Var[HESetters] = Var(FullPage.modifierClass)

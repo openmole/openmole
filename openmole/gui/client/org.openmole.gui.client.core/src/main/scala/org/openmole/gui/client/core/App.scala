@@ -1,7 +1,5 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.staticPanels.*
-
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import scaladget.bootstrapnative.bsn.*
@@ -10,13 +8,13 @@ import org.scalajs.dom.KeyboardEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.client.FileManager
 import org.openmole.gui.ext.client.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.alert.BannerAlert
+import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
@@ -40,22 +38,18 @@ import scala.scalajs.js.timers.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel(name = "openmole_library")
-@JSExportAll
-object App {
+class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
 
-  def connection() = {
+  def connection() =
     render(
       dom.document.body,
       div(
-        staticPanels.connection.render,
-        staticPanels.alertPanel.alertDiv
+        panels.connection.render,
+        panels.alertPanel.alertDiv
       )
     )
-  }
 
-  def stopped()(using fetch: Fetch): Unit = {
-
+  def stopped(): Unit =
     val stoppedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -68,9 +62,9 @@ object App {
 
     fetch.future(_.shutdown(()).future)
     render(dom.document.body, stoppedDiv)
-  }
 
-  def restarted()(using fetch: Fetch): Unit = {
+
+  def restarted(): Unit =
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
     def setTimer = {
@@ -98,64 +92,20 @@ object App {
 
     fetch.future(_.restart(()).future)
     render(dom.document.body, restartedDiv)
-  }
 
-  def resetPassword(): Unit = {
+
+  def resetPassword(): Unit =
     val resetPassword = new ResetPassword
     render(
       dom.document.body,
       div(
         resetPassword.resetPassDiv,
-        staticPanels.alertPanel.alertDiv
+        panels.alertPanel.alertDiv
       )
     )
-  }
 
-  def run() = {
+  def run() =
     val containerNode = dom.document.querySelector("#openmole-content")
-
-    lazy val bannerAlert =
-      new BannerAlert(
-        resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
-      )
-
-    given fetch: Fetch = Fetch(bannerAlert)
-    given ServerAPI = OpenMOLERESTServerAPI(fetch)
-
-    val tabContent = new TabContent
-    
-    val treeNodeManager = new TreeNodeManager
-    val pluginPanel = new PluginPanel(treeNodeManager)
-    val fileDisplayer = new FileDisplayer(treeNodeTabs)
-
-    val pluginServices =
-      PluginServices(
-        errorManager = new ErrorManager {
-          override def signal(message: String, stack: Option[String]): Unit = bannerAlert.registerWithStack(message, stack)
-        }
-      )
-
-    lazy val executionPanel =
-      new ExecutionPanel(
-        // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
-        bannerAlert = bannerAlert)
-
-    val treeNodePanel =
-      new TreeNodePanel(
-        treeNodeManager = treeNodeManager,
-        fileDisplayer = fileDisplayer,
-        showExecution = () ⇒ ExecutionPanel.open(executionPanel, bannerAlert),
-        treeNodeTabs = treeNodeTabs,
-        tabContent = tabContent,
-        services = pluginServices,
-        api = summon[ServerAPI])
-
-
-    val settingsView = new SettingsView(fileDisplayer)
-
-    given panels: Panels = Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert)
-
-
     //import scala.concurrent.ExecutionContext.Implicits.global
     Plugins.fetch { plugins ⇒
       val maindiv = div()
@@ -213,11 +163,11 @@ object App {
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project", onClick --> { _ => Panels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(executionPanel, bannerAlert) }).tooltip("Executions"),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(panels.executionPanel, panels.bannerAlert) }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ Panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
-            pluginPanel.getPlugins
-            Panels.expandTo(pluginPanel.render, 1)
+            panels.pluginPanel.getPlugins
+            Panels.expandTo(panels.pluginPanel.render, 1)
           }).tooltip("Plugins")
         )
         //            settingsItem
@@ -263,16 +213,16 @@ object App {
                 }
               },
               div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
-              treeNodePanel.fileControler,
-              treeNodePanel.fileToolBar.sortingGroup,
-              treeNodePanel.treeView
+              panels.treeNodePanel.fileControler,
+              panels.treeNodePanel.fileToolBar.sortingGroup,
+              panels.treeNodePanel.treeView
             ),
             div(
               cls := "tab-section",
               theNavBar,
               //openAuthentication.signal.expand(authenticationPanel),
               // treeNodeTabs.render.amend(cls := "tab-section")
-              tabContent.render //.amend(cls := "tab-section")
+              panels.tabContent.render //.amend(cls := "tab-section")
             )
             //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
             //                  case (oft, io) ⇒
@@ -300,30 +250,90 @@ object App {
           //              )
           //            ),
 
-            div(
-              div(cls <-- panels.expandablePanel.signal.map { x =>
-                "collapse-bottom " + {
-                  x match {
-                    case Some(ep: Panels.ExpandablePanel) => ""
-                    case _ => "close"
-                  }
+          div(
+            div(cls <-- panels.expandablePanel.signal.map { x =>
+              "collapse-bottom " + {
+                x match {
+                  case Some(ep: Panels.ExpandablePanel) => ""
+                  case _ => "close"
                 }
-              },
-                div(cls := "splitter"),
-                child <-- panels.expandablePanel.signal.map { p ⇒
-                  p.map {
-                    _.element
-                  }.getOrElse(div(top := "1000px", color.white))
-                }
-              )
-            ),
+              }
+            },
+              div(cls := "splitter"),
+              child <-- panels.expandablePanel.signal.map { p ⇒
+                p.map {
+                  _.element
+                }.getOrElse(div(top := "1000px", color.white))
+              }
+            )
+          ),
 
-          staticPanels.alertPanel.alertDiv
+          panels.alertPanel.alertDiv
         )
       )
     }
-    treeNodeManager.invalidCurrentCache
+    panels.treeNodeManager.invalidCurrentCache
     //}
-  }
+
+
+@JSExportTopLevel(name = "openmole_library")
+@JSExportAll
+object App {
+
+  lazy val (panels, fetch, api) =
+
+    val treeNodeTabs = new TreeNodeTabs()
+    val stackPanel = new TextPanel("Error stack")
+    val alertPanel = new AlertPanel(stackPanel)
+
+    lazy val bannerAlert =
+      new BannerAlert(
+        resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor },
+        stackPanel = stackPanel
+      )
+
+    val fetch = Fetch(bannerAlert)
+
+    val api = OpenMOLERESTServerAPI(fetch)
+
+    val tabContent = new TabContent
+    val treeNodeManager = new TreeNodeManager
+    val pluginPanel = new PluginPanel(treeNodeManager)
+    val fileDisplayer = new FileDisplayer(treeNodeTabs)
+
+    val pluginServices =
+      PluginServices(
+        errorManager = new ErrorManager {
+          override def signal(message: String, stack: Option[String]): Unit = bannerAlert.registerWithStack(message, stack)
+        }
+      )
+
+    lazy val executionPanel =
+      new ExecutionPanel(
+        // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
+        bannerAlert = bannerAlert)
+
+    val treeNodePanel =
+      new TreeNodePanel(
+        treeNodeManager = treeNodeManager,
+        fileDisplayer = fileDisplayer,
+        showExecution = () ⇒ ExecutionPanel.open(executionPanel, bannerAlert),
+        treeNodeTabs = treeNodeTabs,
+        tabContent = tabContent,
+        services = pluginServices,
+        api = api)
+
+    val settingsView = new SettingsView(fileDisplayer)
+    val connection = new Connection
+
+    (
+      Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, stackPanel),
+      fetch,
+      api
+    )
+
+  val gui = OpenMOLEGUI(using panels, fetch, api)
+
+  export gui.*
 
 }

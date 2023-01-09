@@ -34,6 +34,11 @@ object Panels:
     }
   }
 
+  def urlImportPanel(treeNodeManager: TreeNodeManager, bannerAlert: BannerAlert) =
+    new URLImportPanel(
+      treeNodeManager,
+      bannerAlert = bannerAlert)
+
 
 case class Panels(
   treeNodePanel: TreeNodePanel,
@@ -45,29 +50,10 @@ case class Panels(
   pluginServices: PluginServices,
   executionPanel: ExecutionPanel,
   bannerAlert: BannerAlert,
+  treeNodeTabs: TreeNodeTabs,
+  alertPanel: AlertPanel,
+  connection: Connection,
+  stackPanel: TextPanel,
   expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None))
 
-object staticPanels {
 
-  lazy val treeNodeTabs = new TreeNodeTabs()
-
-  def urlImportPanel(treeNodeManager: TreeNodeManager, bannerAlert: BannerAlert) =
-    new URLImportPanel(
-      treeNodeManager,
-      bannerAlert = bannerAlert)
-
-  //val openExpandablePanel = Var(false)
-
-
-
-  //val pluginPanel = new PluginPanel
-
-  //lazy val marketPanel = new MarketPanel(treeNodeManager)
-
-  lazy val stackPanel = new TextPanel("Error stack")
-  lazy val connection = new Connection
-
-
-  lazy val alertPanel = new AlertPanel
-
-}

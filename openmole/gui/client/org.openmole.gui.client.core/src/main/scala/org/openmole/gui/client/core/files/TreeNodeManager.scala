@@ -17,7 +17,7 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.{CoreUtils, Fetch, staticPanels}
+import org.openmole.gui.client.core.{CoreUtils, Fetch, Panels}
 import org.openmole.gui.ext.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
@@ -48,12 +48,12 @@ class TreeNodeManager {
 
   val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
 
-  val errorObserver = Observer[Option[TreeNodeError]] { err ⇒
-    err.foreach(staticPanels.alertPanel.treeNodeErrorDiv)
+  def errorObserver(using panels: Panels) = Observer[Option[TreeNodeError]] { err ⇒
+    err.foreach(panels.alertPanel.treeNodeErrorDiv)
   }
 
-  val commentObserver = Observer[Option[TreeNodeComment]] { tnc ⇒
-    tnc.foreach(staticPanels.alertPanel.treeNodeCommentDiv)
+  def commentObserver(using panels: Panels) = Observer[Option[TreeNodeComment]] { tnc ⇒
+    tnc.foreach(panels.alertPanel.treeNodeCommentDiv)
   }
 
   def isSelected(tn: TreeNode) = selected.now().contains(tn)

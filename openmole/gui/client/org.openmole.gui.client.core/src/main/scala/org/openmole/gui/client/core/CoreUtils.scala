@@ -49,11 +49,11 @@ object CoreUtils {
     }
   }
 
-  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using fetch: Fetch) =
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using fetch: Fetch, panels: Panels) =
     fetch.future(_.createFile(safePath, fileName, directory).future).foreach { b ⇒
       if b
       then onCreated()
-      else staticPanels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+      else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
 //  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {

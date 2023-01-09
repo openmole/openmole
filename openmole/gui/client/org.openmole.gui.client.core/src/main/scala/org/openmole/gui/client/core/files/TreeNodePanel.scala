@@ -68,7 +68,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     toggle(folder, true, file, () ⇒ {})
   }
 
-  def createNewNode(using fetch: Fetch) = {
+  def createNewNode(using fetch: Fetch, panels: Panels) = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
@@ -107,7 +107,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 //    })
   })
 
-  def createFileTool(using fetch: Fetch) =
+  def createFileTool(using fetch: Fetch, panels: Panels) =
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
       addRootDirButton.element,
       newNodeInput.amend(marginLeft := "10px"),
@@ -198,7 +198,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   val multiTool: Var[MultiTool] = Var(Off)
 
-  def fileControler(using fetch: Fetch) =
+  def fileControler(using fetch: Fetch, panels: Panels) =
     div(
       cls := "file-content",
       child <-- treeNodeManager.dirNodeLine.signal.map { curr ⇒
@@ -351,11 +351,11 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     case _ ⇒
   }
 
-  def stringAlert(message: String, okaction: () ⇒ Unit) =
-    staticPanels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
+  def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
+    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
-  def stringAlertWithDetails(message: String, detail: String) =
-    staticPanels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
+  def stringAlertWithDetails(message: String, detail: String)(using panels: Panels) =
+    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)

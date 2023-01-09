@@ -21,7 +21,6 @@ import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileType._
-import org.openmole.gui.client.core.staticPanels._
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -202,7 +201,7 @@ object ModelWizardPanel {
                   fetch.future(_.extract(tempFile ++ fileName).future).foreach {
                     _ match {
                       case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
-                        staticPanels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
+                        panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
                       case _ ⇒
                         copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
                     }
