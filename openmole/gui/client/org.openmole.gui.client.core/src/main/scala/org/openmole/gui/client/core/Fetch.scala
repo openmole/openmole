@@ -19,7 +19,7 @@ package org.openmole.gui.client.core
 
 
 
-import org.openmole.gui.client.core.alert.BannerLevel
+import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 
 import scala.concurrent.duration.*
 import org.openmole.gui.ext.client.OMFetch
@@ -27,15 +27,17 @@ import org.openmole.gui.ext.client.OMFetch
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
-import org.openmole.gui.ext.client.{coreAPIClient, CoreAPIClientImpl}
+import org.openmole.gui.ext.client.{CoreAPIClientImpl, coreAPIClient}
 
-object Fetch {
+object Fetch:
+  def apply(bannerAlert: BannerAlert) = new Fetch(bannerAlert.register)
+
+class Fetch(alert: (String, BannerLevel) => Unit):
 
   def future[O](
-                 f: CoreAPIClientImpl => Future[O],
-                 timeout: FiniteDuration = 60 seconds,
-                 warningTimeout: FiniteDuration = 10 seconds,
-                 alert: (String, BannerLevel) ⇒ Unit = panels.bannerAlert.register) = {
+    f: CoreAPIClientImpl => Future[O],
+    timeout: FiniteDuration = 60 seconds,
+    warningTimeout: FiniteDuration = 10 seconds) =
 
     OMFetch(coreAPIClient).future(
       f,
@@ -45,22 +47,17 @@ object Fetch {
       onWarningTimeout = () => alert("The request is very long. Please check your connection.", BannerLevel.Regular),
       onFailed = t => alert(s"The request ${f} failed with error $t", BannerLevel.Critical)
     )
-  }
 
   def apply[O, R](
-                   r: CoreAPIClientImpl => Future[O],
-                   timeout:        FiniteDuration                     = 60 seconds,
-                   warningTimeout: FiniteDuration                     = 10 seconds,
-                   alert:          (String, BannerLevel) ⇒ Unit = panels.bannerAlert.register)(action: O => R) = {
+    r: CoreAPIClientImpl => Future[O],
+    timeout:        FiniteDuration                     = 60 seconds,
+    warningTimeout: FiniteDuration                     = 10 seconds)(action: O => R) =
     //import scala.concurrent.ExecutionContext.Implicits.global
 //    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
-    val f = future(r, timeout, warningTimeout, alert)
+    val f = future(r, timeout, warningTimeout)
 
     f.onComplete {
       case Success(r) ⇒ action(r)
       case _ =>
     }
-  }
 
-
-}

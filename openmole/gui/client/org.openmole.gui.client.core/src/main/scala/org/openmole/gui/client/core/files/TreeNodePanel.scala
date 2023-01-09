@@ -32,7 +32,7 @@ import org.openmole.gui.client.tool.OMTags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, services: PluginServices) {
+class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, tabContent: TabContent, services: PluginServices, api: ServerAPI) { panel =>
 
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
@@ -41,7 +41,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     if (!b) treeNodeManager.clearSelection
   }
 
-  val fileToolBar = new FileToolBar(this)
+  val fileToolBar = new FileToolBar(this, treeNodeManager)
   val tree: Var[HtmlElement] = Var(div())
 
   val editNodeInput = inputTag("").amend(
@@ -68,7 +68,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     toggle(folder, true, file, () ⇒ {})
   }
 
-  def createNewNode = {
+  def createNewNode(using fetch: Fetch, panels: Panels) = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
@@ -107,7 +107,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 //    })
   })
 
-  lazy val createFileTool =
+  def createFileTool(using fetch: Fetch, panels: Panels) =
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
       addRootDirButton.element,
       newNodeInput.amend(marginLeft := "10px"),
@@ -138,7 +138,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       })
     )
 
-  lazy val copyOrTrashTool = div(
+  def copyOrTrashTool(using fetch: Fetch) = div(
     height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
     children <-- confirmationDiv.signal.map { ac ⇒
       val selected = treeNodeManager.selected
@@ -151,14 +151,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           button(cls := "btn blue-button", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              CoreUtils.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = false).foreach { existing ⇒
+              api.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
                   treeNodeManager.invalidCurrentCache
                   closeMultiTool
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    CoreUtils.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = true).foreach { b ⇒
+                    api.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
                     })))
@@ -169,7 +169,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
           ),
           button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
             confirmationDiv.set(Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-              CoreUtils.trashNodes(treeNodeManager.selected.now()) { () ⇒
+              CoreUtils.trashNodes(this, treeNodeManager.selected.now()) { () ⇒
                 treeNodeManager.invalidCurrentCache
                 closeMultiTool
               })))
@@ -198,7 +198,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   val multiTool: Var[MultiTool] = Var(Off)
 
-  lazy val fileControler =
+  def fileControler(using fetch: Fetch, panels: Panels) =
     div(
       cls := "file-content",
       child <-- treeNodeManager.dirNodeLine.signal.map { curr ⇒
@@ -269,7 +269,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
   }
 
-  def goToDirButton(safePath: SafePath, name: String = ""): HtmlElement =
+  def goToDirButton(safePath: SafePath, name: String = "")(using fetch: Fetch): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
         treeNodeManager.switch(safePath)
@@ -282,7 +282,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       }
     )
 
-  def invalidCacheAnd(todo: () ⇒ Unit) = {
+  def invalidCacheAnd(todo: () ⇒ Unit)(using fetch: Fetch) = {
     treeNodeManager.invalidCurrentCache
     todo()
   }
@@ -292,7 +292,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
   //    case _                ⇒
   //  }
 
-  val treeView: Div = {
+  def treeView(using panels: Panels)(using fetch: Fetch): Div = {
     div(cls := "file-scrollable-content",
       children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
@@ -303,7 +303,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
               fileToolBar.findInput.ref.value = ""
               val switchTarget = if (isDir) sp else sp.parent
               treeNodeManager.switch(switchTarget)
-              treeNodeManager.computeCurrentSons()
+              treeNodeManager.computeCurrentSons
               displayNode(sp)
             })
             }
@@ -330,7 +330,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
   }
 
-  def displayNode(safePath: SafePath): Unit = {
+  def displayNode(safePath: SafePath)(using panels: Panels, fetch: Fetch): Unit = {
     if (safePath.extension.displayable) {
       downloadFile(
         safePath,
@@ -344,17 +344,17 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     }
   }
 
-  def displayNode(tn: TreeNode): Unit = tn match {
+  def displayNode(tn: TreeNode)(using panels: Panels, fetch: Fetch): Unit = tn match {
     case fn: FileNode ⇒
       val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
     case _ ⇒
   }
 
-  def stringAlert(message: String, okaction: () ⇒ Unit) =
+  def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
     panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
 
-  def stringAlertWithDetails(message: String, detail: String) =
+  def stringAlertWithDetails(message: String, detail: String)(using panels: Panels) =
     panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
   val currentSafePath: Var[Option[SafePath]] = Var(None)
@@ -365,13 +365,13 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
 
-  def fileClick(todo: () ⇒ Unit) =
+  def fileClick(todo: () ⇒ Unit)(using fetch: Fetch) =
     onClick --> { _ ⇒
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
       if (currentMultiTool == Off || currentMultiTool == Paste) todo()
       fileToolBar.filterToolOpen.set(false)
-      treeNodeManager.computeCurrentSons()
+      treeNodeManager.computeCurrentSons
     }
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
@@ -408,7 +408,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       case _ ⇒ PluginState(false, false)
     })
 
-    val render: HtmlElement = {
+    def render(using panels: Panels)(using fetch: Fetch): HtmlElement = {
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s ⇒ if (isSelected(s)) toolBoxColor else "" },
@@ -461,18 +461,18 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     }
   )
 
-  def dropAction(to: SafePath, isDir: Boolean) = {
+  def dropAction(to: SafePath, isDir: Boolean)(using fetch: Fetch) = {
     draggedNode.now().map {
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            Fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
+            fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)
                 treeNodeManager.invalidCurrentCache
-                TabContent.checkTabs
+                tabContent.checkTabs
             }
             //})
           }
@@ -481,7 +481,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     draggedNode.set(None)
   }
 
-  def drawNode(node: TreeNode, i: Int) = {
+  def drawNode(node: TreeNode, i: Int)(using panels: Panels, fetch: Fetch) = {
     node match {
       case fn: FileNode ⇒
         ReactiveLine(i, fn, TreeNodeType.file, () ⇒ {

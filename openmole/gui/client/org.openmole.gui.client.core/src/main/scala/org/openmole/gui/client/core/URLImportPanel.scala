@@ -28,26 +28,26 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   val overwriteAlert: Var[Option[SafePath]] = Var(None)
 
-  def exists(sp: SafePath, ifNotExists: () ⇒ {}) =
-    Fetch.future(_.exists(sp).future).foreach { b ⇒
+  def exists(sp: SafePath, ifNotExists: () ⇒ {})(using fetch: Fetch) =
+    fetch.future(_.exists(sp).future).foreach { b ⇒
       if (b) overwriteAlert.set(Some(sp))
       else ifNotExists()
     }
 
-  def download(url: String) = {
+  def download(url: String)(using fetch: Fetch, panels: Panels) = {
     downloading.set(Processing())
-    Fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).future).foreach { d ⇒
+    fetch.future(_.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).future).foreach { d ⇒
       downloading.set(Processed())
       urlDialog.hide
       d match {
-        case None   ⇒ panels.treeNodeManager.invalidCurrentCache
+        case None   ⇒ manager.invalidCurrentCache
         case Some(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
       }
     }
   }
 
-  def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
+  def deleteFileAndDownloadURL(sp: SafePath, url: String)(using fetch: Fetch, panels: Panels) =
+    fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
       download(url)
     }
 
@@ -55,7 +55,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 
   lazy val extractCheckBox = checkbox(false)
 
-  lazy val downloadButton = button(
+  def downloadButton(using fetch: Fetch, panels: Panels) = button(
     btn_primary,
     downloading.withTransferWaiter { _ ⇒
       span("Download")
@@ -64,7 +64,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     onClick --> { _ ⇒ download(urlInput.ref.value) }
   )
 
-  val alertObserver = Observer[Option[SafePath]] { osp ⇒
+  def alertObserver(using fetch: Fetch, panels: Panels) = Observer[Option[SafePath]] { osp ⇒
     osp match {
       case Some(sp: SafePath) ⇒
         panels.alertPanel.string(
@@ -81,7 +81,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     }
   }
 
-  val dialogBody = div(
+  def dialogBody(using fetch: Fetch, panels: Panels) = div(
     urlInput,
     span(display.flex, flexDirection.row, alignItems.flexEnd, paddingTop := "20",
       extractCheckBox,
@@ -90,7 +90,7 @@ class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
     overwriteAlert --> alertObserver
   )
 
-  val urlDialog: ModalDialog = ModalDialog(
+  def urlDialog(using fetch: Fetch, panels: Panels): ModalDialog = ModalDialog(
     span(b("Import project from URL")),
     dialogBody,
     buttonGroup.amend(downloadButton, closeButton("Close")),

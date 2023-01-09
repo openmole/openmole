@@ -21,7 +21,6 @@ import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files._
 import org.openmole.gui.ext.data._
 import org.openmole.gui.ext.data.FileType._
-import org.openmole.gui.client.core.panels._
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -155,7 +154,7 @@ object ModelWizardPanel {
   //
 
 
-  def render(wizards: Seq[WizardPluginFactory]) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] = {
       val fileType: FileType = FileType(safePath.name)
@@ -184,7 +183,7 @@ object ModelWizardPanel {
                 // TODO may be overwrite should be better handled
                 for
                   f <- from
-                  _ <- CoreUtils.copyFiles(Seq(f), targetPath, overwrite = true)
+                  _ <- api.copyFiles(Seq(f), targetPath, overwrite = true)
                 do
                   fileToUploadPath.set(Some(uploadPath))
                   //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
@@ -199,7 +198,7 @@ object ModelWizardPanel {
 
               fileType match
                 case Archive ⇒
-                  Fetch.future(_.extract(tempFile ++ fileName).future).foreach {
+                  fetch.future(_.extract(tempFile ++ fileName).future).foreach {
                     _ match {
                       case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
                         panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
@@ -240,7 +239,7 @@ object ModelWizardPanel {
                   fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
-                  filePath.set(Some(treeNodeManager.dirNodeLine.now() ++ fileName))
+                  filePath.set(Some(panels.treeNodeManager.dirNodeLine.now() ++ fileName))
                   filePath.now().map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
@@ -349,7 +348,7 @@ object ModelWizardPanel {
       }
     }
 
-    def browseToPath(safePath: SafePath) = {
+    def browseToPath(safePath: SafePath)(using panels: Panels) = {
       a(safePath.path.mkString("/"), onClick --> { _ ⇒
         panels.treeNodeManager.switch(safePath.parent)
       })
@@ -366,7 +365,7 @@ object ModelWizardPanel {
     //          treeNodeManager.invalidCurrentCache
     //      }
 
-    def buildTask(safePath: SafePath) = {
+    def buildTask(safePath: SafePath)(using panels: Panels) = {
       factory(safePath).foreach { f =>
         modelMetadata.now().foreach { mmd =>
           println("in build " + mmd.sourcesDirectory)
@@ -386,7 +385,7 @@ object ModelWizardPanel {
           println("On click")
           filePath.now().foreach { fp =>
             buildTask(fp)
-            panels.closeExpandable
+            Panels.closeExpandable
           }
           println("clicked")
 
@@ -410,7 +409,7 @@ object ModelWizardPanel {
           }
         },
         span(display.flex, alignItems.center,color.black, marginLeft := "10px",
-          child <-- treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
+          child <-- panels.treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
             uploadedPath match {
               case Some(p: SafePath) => span("Uploaded in ", browseToPath(p))
               case _ => span( "Your model will be uploaded in ", browseToPath(sp))

@@ -38,7 +38,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  private def alertPanel(warnMessage: String, route: String) = panels.alertPanel.string(
+  private def alertPanel(warnMessage: String, route: String)(using panels: Panels) = panels.alertPanel.string(
     warnMessage,
     () ⇒ {
       /*fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {*/ CoreUtils.setRoute(route) /*})*/
@@ -59,7 +59,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   //    resetPasswordButton
   //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, right := "20", left := "initial", right := 0)
   //
-  private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String) =
+  private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
     div(rowLayout, lineHeight := "7px",
       glyphSpan(messageGlyph ++ omsheet.shutdownButton ++ columnLayout),
       span(message, paddingTop := "3", paddingLeft := "5", settingsItemStyle, columnLayout),
@@ -70,26 +70,26 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       }
     )
 
-  val docButton = a(href := "#", onClick --> { _ ⇒
-    Fetch(_.omSettings(()).future) { sets ⇒
+  def docButton(using fetch: Fetch) = a(href := "#", onClick --> { _ ⇒
+    fetch(_.omSettings(()).future) { sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))
 
-  val jvmInfoButton = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
+  def jvmInfoButton(using fetch: Fetch) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
     timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }
   })
 
-  def updateJVMInfos = {
-    Fetch.future(_.jvmInfos(()).future).foreach { j ⇒
+  def updateJVMInfos(using fetch: Fetch) =
+    fetch.future(_.jvmInfos(()).future).foreach { j ⇒
       jvmInfos.set(Some(j))
     }
-  }
 
-  def setJVMTimer = {
+
+  def setJVMTimer(using fetch: Fetch) = {
     timer.set(Some(timers.setInterval(3000) {
       updateJVMInfos
     }))
@@ -138,7 +138,7 @@ class SettingsView(fileDisplayer: FileDisplayer) {
   )
   )
 
-  val resetPasswordButton =
+  def resetPasswordButton(using panels: Panels) =
     serverActions(
       "reset password",
       glyph_lock,
@@ -146,14 +146,14 @@ class SettingsView(fileDisplayer: FileDisplayer) {
       s"/${routes.resetPasswordRoute}"
     )
 
-  val shutdownButton = serverActions(
+  def shutdownButton(using panels: Panels) = serverActions(
     "shutdown",
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
     s"/${routes.shutdownRoute}"
   )
 
-  val restartButton = serverActions(
+  def restartButton(using panels: Panels) = serverActions(
     "restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",

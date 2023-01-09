@@ -2,7 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFactory}
 import com.raquo.laminar.api.L._
-import org.openmole.gui.client.core.panels.{fileDisplayer, treeNodeManager}
 import org.openmole.gui.client.tool.TagBadge
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,7 +24,7 @@ object ProjectPanel {
     )
   }
 
-  def render(wizards: Seq[WizardPluginFactory]) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch) = {
 
     // 1- Empty project
     def emptyProject = {
@@ -36,8 +35,8 @@ object ProjectPanel {
           toDisplay,
           hash = true,
           onLoaded = (content, hash) ⇒ {
-            treeNodeManager.invalidCurrentCache
-            fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
+            panels.treeNodeManager.invalidCurrentCache
+            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
           }
         )
       })
@@ -52,14 +51,14 @@ object ProjectPanel {
         div("Start from", padding := "10px"),
         button("Empty project", cls := "btn newButton", onClick --> { _ =>
           emptyProject
-          panels.closeExpandable
+          Panels.closeExpandable
         }),
         div(display.flex, justifyContent.spaceAround, width := "600px",
           buttonStyle("Your model", 1),
           buttonStyle("The market Place", 2),
           buttonStyle("A url project", 3)
         ),
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       div(
         child <-- currentOption.signal.map {
