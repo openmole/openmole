@@ -17,10 +17,10 @@ package org.openmole.gui.client.core.alert
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.panels.stackPanel
-import com.raquo.laminar.api.L._
-import org.openmole.gui.ext.client._
-import org.openmole.gui.ext.client.Utils._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.TextPanel
+import org.openmole.gui.ext.client.*
+import org.openmole.gui.ext.client.Utils.*
 import scaladget.bootstrapnative.bsn
 
 object BannerLevel {
@@ -32,7 +32,7 @@ sealed trait BannerLevel
 
 case class BannerMessage(messageDiv: HtmlElement, bannerLevel: BannerLevel)
 
-class BannerAlert(resizeTabs: () ⇒ Unit) {
+class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel = new TextPanel("")) {
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
   val isOpen = bannerMessages.signal.map { bm ⇒ !bm.isEmpty }

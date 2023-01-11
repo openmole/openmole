@@ -27,6 +27,7 @@ object OMROutputFormat {
   case class Index(
     `format-version`: String,
     `openmole-version`: String,
+    `execution-id`: String,
     `data-file`: Seq[String],
     script: Option[Index.Script],
     `content-data`: ContentData,
@@ -75,7 +76,8 @@ object OMROutputFormat {
               Index(
                 `format-version` = omrVersion,
                 `openmole-version` = org.openmole.core.buildinfo.version.value,
-                `data-file` = (existingData ++ Seq(fileName)).distinct,
+                `execution-id` = executionContext.moleExecutionId,
+                 `data-file` = (existingData ++ Seq(fileName)).distinct,
                 script = script,
                 `content-data` = contentDataValue,
                 time = Index.Time(
@@ -89,17 +91,31 @@ object OMROutputFormat {
               asJson.
               deepDropNullValues
 
-          def parseExistingData(file: File): Seq[String] =
+          def parseExistingData(file: File): Option[(String, Seq[String])] =
             try 
               if file.exists 
-              then indexData(file).`data-file`
-              else Seq()
+              then
+                val data = indexData(file)
+                Some((data.`execution-id`, data.`data-file`))
+              else None
             catch 
              case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
-            
+
+          def clean(methodFile: File, data: Seq[String]) =
+            methodFile.delete()
+            for d <- data do (directory / d).delete()
+
           directory.withLockInDirectory {
             val methodFile = directory / methodFileName
-            val existingData = if methodFile.exists then parseExistingData(methodFile) else Seq()
+
+            val existingData =
+              parseExistingData(methodFile) match
+                case Some((id, data)) if format.overwrite && id != executionContext.moleExecutionId =>
+                  clean(methodFile, data)
+                  Seq()
+                case Some((_, data)) => data
+                case None => Seq()
+
             val fileName = s"$dataDirectory/${executionContext.jobId}.json.gz"
 
             val dataFile = directory / fileName
@@ -134,4 +150,4 @@ object OMROutputFormat {
 
 }
 
-case class OMROutputFormat(script: Boolean = true)
+case class OMROutputFormat(script: Boolean = true, overwrite: Boolean = true)

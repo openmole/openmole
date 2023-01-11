@@ -74,7 +74,7 @@ object panels {
     }
   }
 
-  val pluginPanel = new PluginPanel
+  val pluginPanel = new PluginPanel(treeNodeManager)
 
   lazy val marketPanel = new MarketPanel(treeNodeManager)
 
@@ -87,6 +87,6 @@ object panels {
       resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
     )
 
-  lazy val alertPanel = new AlertPanel
+  lazy val alertPanel = new AlertPanel()
 
 }

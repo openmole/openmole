@@ -38,7 +38,7 @@ object AuthenticationPanel {
   lazy val initialCheck = Var(false)
 
 
-  def render(authenticationFactories: Seq[AuthenticationPluginFactory]) = {
+  def render(authenticationFactories: Seq[AuthenticationPluginFactory])(using panels: Panels) = {
 
     def getAuthentications =
       authenticationFactories.map { factory ⇒
@@ -105,7 +105,7 @@ object AuthenticationPanel {
         authSetting.update {
           as ⇒
             as match {
-              case None ⇒ panels.closeExpandable
+              case None ⇒ Panels.closeExpandable
               case _ ⇒
             }
             None
@@ -215,7 +215,7 @@ object AuthenticationPanel {
         cls := "expandable-title",
         div("Authentications", padding := "10px"),
         newButton,
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ panels.closeExpandable })
+        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       authPanel
     )

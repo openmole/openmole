@@ -1,8 +1,9 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
-import scaladget.bootstrapnative.bsn._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.ext.data.*
+import scaladget.bootstrapnative.bsn.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.{Fetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.core.files.TreeNodeTab.Raw
 
@@ -16,7 +17,7 @@ object ResultContent {
 
   object Plot extends ResultView
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
 
     val rowData: RowData = safePath.extension match {
       case FileExtension.CSV => ResultData.fromCSV(initialContent)
@@ -78,7 +79,7 @@ object ResultContent {
 
     val content = div(display.flex, flexDirection.column, switchButton, child <-- view)
 
-    TabContent.addTab(tabData, content)
+    panels.tabContent.addTab(tabData, content)
 
   }
 }

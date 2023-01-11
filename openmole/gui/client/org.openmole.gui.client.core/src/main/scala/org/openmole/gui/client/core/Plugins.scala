@@ -26,8 +26,8 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 object Plugins {
 
-  def fetch(f: Parameters ⇒ Unit) = {
-    Fetch(_.guiPlugins(()).future) { p ⇒
+  def fetch(f: Parameters ⇒ Unit)(using fetch: Fetch) = {
+    fetch(_.guiPlugins(()).future) { p ⇒
       val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
       val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
       f(Parameters(authFact, wizardFactories))

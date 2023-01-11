@@ -33,37 +33,45 @@ import org.openmole.gui.client.core.files.TreeNodeManager
 import com.raquo.laminar.api.L._
 import org.openmole.gui.ext.client.InputFilter
 
-class MarketPanel(manager: TreeNodeManager) {
+
+object MarketPanel:
+  def apply(manager: TreeNodeManager)(using fetch: Fetch, panels: Panels) =
+    val marketPanel = new MarketPanel(manager)
+
+    marketPanel.overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
+      case (oAlert, current) ⇒
+        oAlert match {
+          case Some(e: MarketIndexEntry) ⇒
+            panels.alertPanel.string(
+              e.name + " already exists. Overwrite ? ",
+              () ⇒ {
+                marketPanel.overwriteAlert.set(None)
+                marketPanel.overwrite(current ++ e.name, e)
+              }, () ⇒ {
+                marketPanel.overwriteAlert.set(None)
+              }, CenterPagePosition
+            )
+            div
+          case _ ⇒
+        }
+    }
+    marketPanel
+
+class MarketPanel (manager: TreeNodeManager) {
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
   val selectedEntry: Var[Option[MarketIndexEntry]] = Var(None)
+
   lazy val downloading: Var[Seq[(MarketIndexEntry, Var[_ <: ProcessState])]] = Var(marketIndex.now().map {
     _.entries.map {
       (_, Var(Processed()))
     }
   }.getOrElse(Seq()))
+
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
-  overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
-    case (oAlert, current) ⇒
-      oAlert match {
-        case Some(e: MarketIndexEntry) ⇒
-          panels.alertPanel.string(
-            e.name + " already exists. Overwrite ? ",
-            () ⇒ {
-              overwriteAlert.set(None)
-              deleteFile(current ++ e.name, e)
-            }, () ⇒ {
-              overwriteAlert.set(None)
-            }, CenterPagePosition
-          )
-          div
-        case _ ⇒
-      }
-  }
-
-  lazy val marketTable = div(
+  def marketTable(using fetch: Fetch) = div(
     paddingTop := "20",
     children <-- tagFilter.nameFilter.signal.combineWith(marketIndex.signal).combineWith(selectedEntry.signal).map {
       case (_, marketIndex, sEntry) ⇒
@@ -105,22 +113,7 @@ class MarketPanel(manager: TreeNodeManager) {
     }
   )
 
-  def exists(sp: SafePath, entry: MarketIndexEntry) =
-    Fetch.future(_.exists(sp).future).foreach { b ⇒
-      if (b) overwriteAlert.set(Some(entry))
-      else download(entry)
-    }
 
-  def download(entry: MarketIndexEntry) = {
-    val path = manager.dirNodeLine.now() ++ entry.name
-    downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
-
-    Fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
-      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
-      downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
-      panels.treeNodeManager.invalidCurrentCache
-    }
-  }
 
   def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()
 
@@ -136,21 +129,17 @@ class MarketPanel(manager: TreeNodeManager) {
   //    }.getOrElse(div())
   //}
 
-  def deleteFile(sp: SafePath, marketIndexEntry: MarketIndexEntry) =
-    Fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
-      download(marketIndexEntry)
-    }
 
   val marketHeader = span(b("Market place"))
 
-  val marketBody = div(
+  def marketBody(using fetch: Fetch) = div(
     tagFilter.tag,
     marketTable
   )
 
-  val marketFooter = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
+  def marketFooter(using fetch: Fetch) = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
 
-  lazy val modalDialog: ModalDialog = ModalDialog(
+  def modalDialog(using fetch: Fetch): ModalDialog = ModalDialog(
     marketHeader,
     marketBody,
     marketFooter,
@@ -158,7 +147,7 @@ class MarketPanel(manager: TreeNodeManager) {
     onopen = () ⇒ {
       marketIndex.now() match {
         case None ⇒
-          Fetch.future(_.marketIndex(()).future).foreach { m ⇒
+          fetch.future(_.marketIndex(()).future).foreach { m ⇒
             marketIndex.set(Some(m))
           }
         case _ ⇒
@@ -166,5 +155,28 @@ class MarketPanel(manager: TreeNodeManager) {
     },
     onclose = () ⇒ {}
   )
+
+
+  def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using fetch: Fetch) =
+    fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
+      download(marketIndexEntry)
+    }
+
+  def exists(sp: SafePath, entry: MarketIndexEntry)(using fetch: Fetch) =
+    fetch.future(_.exists(sp).future).foreach { b ⇒
+      if (b) overwriteAlert.set(Some(entry))
+      else download(entry)
+    }
+
+  def download(entry: MarketIndexEntry)(using fetch: Fetch) =
+    val path = manager.dirNodeLine.now() ++ entry.name
+    downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
+
+    fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
+      downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+      downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
+      manager.invalidCurrentCache
+    }
+
 
 }

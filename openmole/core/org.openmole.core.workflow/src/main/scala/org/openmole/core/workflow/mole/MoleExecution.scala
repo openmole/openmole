@@ -54,6 +54,8 @@ object MoleExecution {
   case class JobFinished(moleJob: JobId, context: Context, capsule: MoleCapsule) extends Event[MoleExecution]
   case class Cleaned() extends Event[MoleExecution]
 
+  type Id = String
+
   object MoleExecutionFailed {
     def exception(moleExecutionError: MoleExecutionFailed) = moleExecutionError.exception
     def capsule(moleExecutionError: MoleExecutionFailed) = moleExecutionError match {
@@ -261,7 +263,8 @@ object MoleExecution {
             cache = cache,
             ticket = ticket,
             moleLaunchTime = executionContext.moleLaunchTime,
-            jobId = job)(
+            jobId = job,
+            moleExecutionId = subMoleExecutionState.moleExecution.id)(
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -657,7 +660,7 @@ class MoleExecution(
   val implicits:                   Context,
   val executionContext:            MoleExecutionContext,
   val startStopDefaultEnvironment: Boolean,
-  val id:                          String,
+  val id:                          MoleExecution.Id,
   val keyValueCache:               KeyValueCache,
   val lockRepository:              LockRepository[LockKey]
 ) { moleExecution ⇒
