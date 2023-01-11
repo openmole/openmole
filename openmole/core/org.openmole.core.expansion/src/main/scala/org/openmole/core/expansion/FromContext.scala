@@ -65,6 +65,7 @@ trait ToFromContextLowPriorityGiven:
     context(p).toString
   }
 object ToFromContext extends ToFromContextLowPriorityGiven:
+  given ToFromContext[String, String] = s => ExpandedString(s)
   given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
 
 @FunctionalInterface trait ToFromContext[F, T]: 
