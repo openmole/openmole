@@ -81,6 +81,10 @@ object TabContent {
     }.headOption
   }
 
+  def tabData(safePath: SafePath) = tab(safePath).map(_.t)
+
+  def editorPanelUI(safePath: SafePath) = tabData(safePath).flatMap(_.editorPanelUI)
+
   def removeTab(safePath: SafePath) = {
     tab(safePath).foreach { t =>
       tabsUI.remove(t.tabID)
@@ -90,7 +94,9 @@ object TabContent {
   def alreadyDisplayed(safePath: SafePath) =
     tabsUI.tabs.now().find { t ⇒
       t.t.safePath.path == safePath.path
-    }.map{_.tabID}
+    }.map {
+      _.tabID
+    }
 
   def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false): Unit = {
     tabData.editorPanelUI.foreach { editorPanelUI =>

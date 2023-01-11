@@ -588,18 +588,6 @@ padding-bottom: 90px;
     background: #c8c8fa none repeat scroll 0 0;
 }
 
-.editor-content {
-     flex: 1;
-     overflow: hidden;
-     min-height: 0;
-     padding-top: 10px;
-     background: white;
-     border-left: 1px solid #dee2e6;
-     border-right: 1px solid #dee2e6;
-     margin-bottom: 15px;
-     margin-right:15px;
-}
-
 #editor {
   top: 0;
   right: 0;
@@ -607,7 +595,7 @@ padding-bottom: 90px;
   left: 0;
   height: 80vh;
   overflow: auto;
-  border: 3px solid #3f3d5677;
+  border: 3px solid #b6b6bb66;
   border-radius: 3px;
 }
 
@@ -1009,11 +997,144 @@ padding-bottom: 90px;
 }
 
 .collapse-bottom.close {
-    top: 1000px;
+    top: 100%;
     background: white;
 }
 
 .fullOverflow {
     height: 100vh;
     overflow: auto;
+}
+
+.simulationInfo {
+    min-width: 120px;
+    min-height: 60px;
+    font-size: 16px;
+    padding: 10px;
+    font-family: gi;
+    margin-bottom: 50px;
+    background-color: #373f46;
+    color: white;
+    transition: padding 0.5s;
+    display: flex;
+    justify-content: center;
+}
+
+.simulationID {
+     justify-content: center;
+     display: flex;
+     border-radius: 20px;
+     width: 20px;
+     height: 20px;
+     align-items: center;
+     color: white;
+     margin: 7px;
+}
+
+.infoContent {
+      font-size: 18px;
+      font-family: gi;
+      padding: 10px;
+      font-weight: bold;
+}
+
+.infoContentLink {
+      font-size: 18px;
+      font-family: gi;
+      font-weight: bold;
+      padding: 10px;
+      text-decoration: underline;
+}
+
+.info {
+     font-size: 14px;
+     font-family: gi;
+     justify-content: center;
+     display: flex;
+}
+
+.contextBlock {
+  background-color: #0b5495;
+  color: white;
+  padding: 10px;
+  margin-right:1px;
+  margin-top:1px;
+  min-height: 77px;
+}
+
+.statusBlockNoColor,
+.statusBlock{
+  color: white;
+  padding: 10px;
+  margin-right:1px;
+  margin-top:1px;
+  min-height: 77px;
+}
+
+.statusBlock {
+  background-color: #373f46;
+}
+
+.statusOpen {
+    opacity: 85%;
+    transition: opacity 0.5s;
+}
+
+.statusOpenSim {
+    padding: 20px;
+    opacity: 85%;
+    transition: padding 0.5s;
+}
+
+
+.console {
+    height: 150px;
+    background-color: #3f3d56;
+    color: white;
+    font-family: Sans Serif;
+    padding: 10px;
+    font-size: 10px;
+    margin-top: 10px;
+    width: 80%;
+}
+
+.script {
+    background-color:#e2e7ec;
+    height: 150px;
+    margin-top: 10px;
+    width: 80%;
+}
+
+.controlButton {
+    width: 77px;
+    height: 77px;
+    margin-left: 10px;
+    font-family: gi;
+    font-size: 18px;
+    color: white;
+    cursor:pointer;
+}
+
+.table#exec.table-bordered.table tr td{
+  border:0px;
+  padding:0px;
+}
+
+.table#exec.table-bordered.table {
+  border:0px;
+}
+
+.execControls {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+textarea#execTextArea {
+  padding: 20px;
+  border: 3px solid #6b6b6b66;
+  border-radius: 3px;
+  margin:50px;
+  height : 500px;
+  width : 100%;
+  color : "#222";
 }

@@ -118,6 +118,7 @@ object App {
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
+      val executionPanel = ExecutionPanel.render
       val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
 
       val openFileTree = Var(true)
@@ -134,7 +135,6 @@ object App {
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
           k.preventDefault()
-          false
         }
       }
 
@@ -170,7 +170,7 @@ object App {
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project", onClick --> { _ => panels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ openExecutionPanel }).tooltip("Executions"),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ panels.expandTo(executionPanel,4) }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
             panels.pluginPanel.getPlugins

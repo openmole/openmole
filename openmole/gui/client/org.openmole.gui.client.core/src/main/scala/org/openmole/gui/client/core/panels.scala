@@ -33,16 +33,6 @@ object panels {
 
   lazy val treeNodeManager = new TreeNodeManager()
 
-  lazy val executionPanel =
-    new ExecutionPanel(
-      // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
-      bannerAlert = bannerAlert)
-
-  def openExecutionPanel = {
-    bannerAlert.clear
-    executionPanel.dialog.show
-  }
-
   lazy val treeNodeTabs = new TreeNodeTabs()
 
   lazy val fileDisplayer =
@@ -50,6 +40,13 @@ object panels {
       treeNodeTabs = treeNodeTabs
     )
 
+  def openExecutionPanel = {
+    ExecutionPanel.setTimerOn
+    ExecutionPanel.updateStaticInfos
+    ExecutionPanel.updateExecutionInfo
+    panels.expandTo(ExecutionPanel.render,4)
+  }
+  
   lazy val treeNodePanel =
     new TreeNodePanel(
       treeNodeManager = treeNodeManager,
