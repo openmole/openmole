@@ -17,10 +17,10 @@
 
 package org.openmole.core.workflow.tools
 
-import org.openmole.core.context._
-import org.openmole.core.expansion.ExpandedString
-import org.scalatest._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.context.*
+import org.openmole.core.expansion.{ExpandedString, FromContext}
+import org.scalatest.*
+import org.openmole.core.workflow.dsl.*
 import org.openmole.tool.cache.Lazy
 
 import scala.util.Random
@@ -58,6 +58,9 @@ I am 30 years old"""
     val e = ExpandedString("${x} times 2 equals ${x * 2}")
     val x = Val[Int]
     e(Context(x -> 2)) should equal("2 times 2 equals 4")
+
+    val e2: FromContext[String] = "${x} times 2 equals ${x * 2}"
+    e2(Context(x -> 2)) should equal("2 times 2 equals 4")
   }
 
 }
