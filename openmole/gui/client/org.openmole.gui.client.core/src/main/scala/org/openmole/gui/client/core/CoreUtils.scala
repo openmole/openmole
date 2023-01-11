@@ -1,15 +1,15 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ FileNode, TreeNodePanel }
+import org.openmole.gui.client.core.files.{FileNode, TreeNodePanel}
 import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
+import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalajs.dom
 
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import com.raquo.laminar.api.L._
 
 /*
@@ -56,11 +56,11 @@ object CoreUtils {
       else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
     }
 
-//  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-//    Post()[Api].deleteFiles(Seq(path), ServerFileSystemContext.project).call().foreach { d ⇒
-//      panels.treeNodePanel.invalidCacheAnd(ontrashed)
-//    }
-//  }
+  //  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
+  //    Post()[Api].deleteFiles(Seq(path), ServerFileSystemContext.project).call().foreach { d ⇒
+  //      panels.treeNodePanel.invalidCacheAnd(ontrashed)
+  //    }
+  //  }
 
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(ontrashed: () ⇒ Unit)(using fetch: Fetch): Unit =
     fetch.future(_.deleteFiles(paths).future).foreach { d ⇒
@@ -72,8 +72,8 @@ object CoreUtils {
       panels.treeNodeManager.invalidCurrentCache
     }
 
-//  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-//    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
+  //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
+  //    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
 
 //  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
 //    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
@@ -156,7 +156,6 @@ object CoreUtils {
   def ifOrNothing(condition: Boolean, classString: String) = if (condition) classString else ""
 
   def setRoute(route: String) = dom.window.location.href = route.split("/").last
-
 
 
 }

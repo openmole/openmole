@@ -111,6 +111,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
+      val executionPanel = ExecutionPanel.render
       val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
 
       val openFileTree = Var(true)
@@ -127,7 +128,6 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if (k.keyCode == 83 && k.ctrlKey) {
           k.preventDefault()
-          false
         }
       }
 
@@ -273,7 +273,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
       )
     }
     panels.treeNodeManager.invalidCurrentCache
-    //}
+//}
 
 
 @JSExportTopLevel(name = "openmole_library")

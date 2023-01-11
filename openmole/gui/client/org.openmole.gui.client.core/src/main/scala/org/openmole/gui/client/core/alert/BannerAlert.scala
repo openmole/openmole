@@ -32,7 +32,7 @@ sealed trait BannerLevel
 
 case class BannerMessage(messageDiv: HtmlElement, bannerLevel: BannerLevel)
 
-class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel) {
+class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel = new TextPanel("")) {
 
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
   val isOpen = bannerMessages.signal.map { bm ⇒ !bm.isEmpty }

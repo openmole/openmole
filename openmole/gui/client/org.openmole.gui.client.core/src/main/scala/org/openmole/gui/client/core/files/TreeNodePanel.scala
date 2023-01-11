@@ -239,14 +239,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             case _ ⇒
           }
         })
-      )
-      ,
-      plusFile.signal.expand(createFileTool)
-      ,
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
-      ,
-      treeNodeManager.error --> treeNodeManager.errorObserver
-      ,
+      ),
+      plusFile.signal.expand(createFileTool),
+      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
+      treeNodeManager.error --> treeNodeManager.errorObserver,
       treeNodeManager.comment --> treeNodeManager.commentObserver
     )
 

@@ -27,7 +27,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.TextPanel
 import scaladget.bootstrapnative.bsn.*
 
-class AlertPanel(stackPanel: TextPanel) {
+class AlertPanel() {
 
   val visible: Var[Boolean] = Var(false)
   val zoneModifier: Var[HESetters] = Var(FullPage.modifierClass)
@@ -135,8 +135,8 @@ class AlertPanel(stackPanel: TextPanel) {
     alertDiv(
       div(message),
       () ⇒ {
-        stackPanel.content.set(detail)
-        stackPanel.dialog.show
+        //stackPanel.content.set(detail)
+        //stackPanel.dialog.show
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )
 }

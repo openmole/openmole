@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core.files
 
+
 import org.openmole.gui.client.core.{ExecutionPanel, Fetch, Panels, Waiter}
 import org.openmole.gui.ext.data.*
 import org.openmole.gui.ext.data.*
@@ -9,8 +10,35 @@ import org.openmole.gui.ext.client.*
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scaladget.ace.Editor
 
 object OMSContent {
+
+  def setError(safePath: SafePath, errorDataOption: Option[ErrorData]) = {
+
+    val editorPanelUI = TabContent.editorPanelUI(safePath)
+
+    errorDataOption match {
+      case Some(ce: CompilationErrorData) ⇒
+        editorPanelUI match {
+          case Some(ed: EditorPanelUI) =>
+            ed.errors.set(EditorErrors(
+              errorsFromCompiler = ce.errors.map { ewl ⇒
+                ErrorFromCompiler(ewl, ewl.line.map { l ⇒
+                  ed.editor.getSession().doc.getLine(l)
+                }.getOrElse(""))
+              },
+              errorsInEditor = ce.errors.flatMap {
+                _.line
+              }
+            )
+            )
+          case _ =>
+        }
+      case _ ⇒
+    }
+  }
+
   def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
@@ -24,26 +52,6 @@ object OMSContent {
         editor.errorMessageOpen.set(false)
       }
 
-      def setError(errorDataOption: Option[ErrorData]) = {
-        compileDisabled.set(false)
-        errorDataOption match {
-          case Some(ce: CompilationErrorData) ⇒
-            editor.errors.set(EditorErrors(
-              errorsFromCompiler = ce.errors.map { ewl ⇒
-                ErrorFromCompiler(ewl, ewl.line.map { l ⇒
-                  editor.editor.getSession().doc.getLine(l)
-                }.getOrElse(""))
-              },
-              errorsInEditor = ce.errors.flatMap {
-                _.line
-              }
-            )
-            )
-          case _ ⇒
-        }
-      }
-
-
       import scala.concurrent.duration._
 
       div(display.flex, flexDirection.row, height := "5vh", alignItems.center,
@@ -54,11 +62,13 @@ object OMSContent {
               unsetErrors
               editor.editor.getSession().clearBreakpoints()
               compileDisabled.set(true)
+
               panels.tabContent.save(tabData, _ ⇒
-              fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
-                setError(errorDataOption)
-                editor.editor.focus()
-              }
+                fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
+                  compileDisabled.set(false)
+                  setError(errorDataOption)
+                  editor.editor.focus()
+                }
               )
             })
         },

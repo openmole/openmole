@@ -57,7 +57,7 @@ object MarketPanel:
     }
     marketPanel
 
-class MarketPanel private (manager: TreeNodeManager) {
+class MarketPanel (manager: TreeNodeManager) {
 
   private val marketIndex: Var[Option[MarketIndex]] = Var(None)
   val tagFilter = InputFilter(pHolder = "Filter")
