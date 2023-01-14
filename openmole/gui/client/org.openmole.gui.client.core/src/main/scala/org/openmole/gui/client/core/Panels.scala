@@ -40,6 +40,7 @@ object Panels:
       bannerAlert = bannerAlert)
 
 
+
 case class Panels(
   treeNodePanel: TreeNodePanel,
   tabContent: TabContent,
@@ -54,6 +55,6 @@ case class Panels(
   alertPanel: AlertPanel,
   connection: Connection,
   stackPanel: TextPanel,
-  expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None))
+  expandablePanel: Var[Option[Panels.ExpandablePanel]])
 
 

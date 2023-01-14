@@ -14,9 +14,9 @@ import scaladget.ace.Editor
 
 object OMSContent {
 
-  def setError(safePath: SafePath, errorDataOption: Option[ErrorData]) = {
+  def setError(safePath: SafePath, errorDataOption: Option[ErrorData])(using panels: Panels) = {
 
-    val editorPanelUI = TabContent.editorPanelUI(safePath)
+    val editorPanelUI = panels.tabContent.editorPanelUI(safePath)
 
     errorDataOption match {
       case Some(ce: CompilationErrorData) ⇒
@@ -66,7 +66,7 @@ object OMSContent {
               panels.tabContent.save(tabData, _ ⇒
                 fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
                   compileDisabled.set(false)
-                  setError(errorDataOption)
+                  setError(safePath, errorDataOption)
                   editor.editor.focus()
                 }
               )
@@ -77,7 +77,7 @@ object OMSContent {
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
               fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
-                ExecutionPanel.open(panels.executionPanel, panels.bannerAlert)
+                ExecutionPanel.open
               }
             )
           })

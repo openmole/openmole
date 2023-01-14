@@ -111,7 +111,6 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
-      val executionPanel = ExecutionPanel.render
       val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
 
       val openFileTree = Var(true)
@@ -163,7 +162,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project", onClick --> { _ => Panels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open(panels.executionPanel, panels.bannerAlert) }).tooltip("Executions"),
+          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open }).tooltip("Executions"),
           div(glyph_lock, navBarItem, onClick --> { _ ⇒ Panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
             panels.pluginPanel.getPlugins
@@ -282,6 +281,8 @@ object App {
 
   lazy val (panels, fetch, api) =
 
+    val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
+
     val treeNodeTabs = new TreeNodeTabs()
     val stackPanel = new TextPanel("Error stack")
     val alertPanel = new AlertPanel(stackPanel)
@@ -308,16 +309,13 @@ object App {
         }
       )
 
-    lazy val executionPanel =
-      new ExecutionPanel(
-        // setEditorErrors = TreeNodeTabs.setErrors(treeNodeTabs, _, _),
-        bannerAlert = bannerAlert)
+    lazy val executionPanel = new ExecutionPanel
 
     val treeNodePanel =
       new TreeNodePanel(
         treeNodeManager = treeNodeManager,
         fileDisplayer = fileDisplayer,
-        showExecution = () ⇒ ExecutionPanel.open(executionPanel, bannerAlert),
+//        showExecution = () ⇒ ExecutionPanel.open(expandablePanel, executionPanel, bannerAlert),
         treeNodeTabs = treeNodeTabs,
         tabContent = tabContent,
         services = pluginServices,
@@ -327,7 +325,7 @@ object App {
     val connection = new Connection
 
     (
-      Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, stackPanel),
+      Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, stackPanel, expandablePanel),
       fetch,
       api
     )

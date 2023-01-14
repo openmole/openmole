@@ -32,7 +32,7 @@ import org.openmole.gui.client.tool.OMTags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, tabContent: TabContent, services: PluginServices, api: ServerAPI) { panel =>
+class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, /*executionPanel: ExecutionPanel,  showExecution: () ⇒ Unit,*/ treeNodeTabs: TreeNodeTabs, tabContent: TabContent, services: PluginServices, api: ServerAPI) { panel =>
 
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
@@ -399,10 +399,14 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         }
       )
 
-    val toolBox = new FileToolBox(tnSafePath, showExecution, treeNodeTabs, tn match {
-      case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
-      case _ ⇒ PluginState(false, false)
-    })
+
+    def toolBox(using fetch: Fetch, panels: Panels) = {
+      val showExecution = () ⇒ ExecutionPanel.open
+      new FileToolBox(tnSafePath, showExecution, treeNodeTabs, tn match {
+        case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
+        case _ ⇒ PluginState(false, false)
+      })
+    }
 
     def render(using panels: Panels)(using fetch: Fetch): HtmlElement = {
       div(display.flex, flexDirection.column,

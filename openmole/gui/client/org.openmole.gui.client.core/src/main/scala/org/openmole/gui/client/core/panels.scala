@@ -24,69 +24,64 @@ import com.raquo.laminar.api.L._
 
 object panels {
 
-  val pluginServices =
-    PluginServices(
-      errorManager = new ErrorManager {
-        override def signal(message: String, stack: Option[String]): Unit = panels.bannerAlert.registerWithStack(message, stack)
-      }
-    )
+//  val pluginServices =
+//    PluginServices(
+//      errorManager = new ErrorManager {
+//        override def signal(message: String, stack: Option[String]): Unit = panels.bannerAlert.registerWithStack(message, stack)
+//      }
+//    )
 
-  lazy val treeNodeManager = new TreeNodeManager()
+//  lazy val treeNodeManager = new TreeNodeManager()
+//
+//  lazy val treeNodeTabs = new TreeNodeTabs()
+//
+//  lazy val fileDisplayer =
+//    new FileDisplayer(
+//      treeNodeTabs = treeNodeTabs
+//    )
 
-  lazy val treeNodeTabs = new TreeNodeTabs()
 
-  lazy val fileDisplayer =
-    new FileDisplayer(
-      treeNodeTabs = treeNodeTabs
-    )
+//
+//  lazy val treeNodePanel =
+//    new TreeNodePanel(
+//      treeNodeManager = treeNodeManager,
+//      fileDisplayer = fileDisplayer,
+//      showExecution = () ⇒ openExecutionPanel,
+//      treeNodeTabs = treeNodeTabs,
+//      services = pluginServices)
 
-  def openExecutionPanel = {
-    ExecutionPanel.setTimerOn
-    ExecutionPanel.updateStaticInfos
-    ExecutionPanel.updateExecutionInfo
-    panels.expandTo(ExecutionPanel.render,4)
-  }
-  
-  lazy val treeNodePanel =
-    new TreeNodePanel(
-      treeNodeManager = treeNodeManager,
-      fileDisplayer = fileDisplayer,
-      showExecution = () ⇒ openExecutionPanel,
-      treeNodeTabs = treeNodeTabs,
-      services = pluginServices)
+//  def urlImportPanel =
+//    new URLImportPanel(
+//      treeNodeManager,
+//      bannerAlert = bannerAlert)
+//
+//  case class ExpandablePanel(id: Int, element: HtmlElement)
 
-  def urlImportPanel =
-    new URLImportPanel(
-      treeNodeManager,
-      bannerAlert = bannerAlert)
+//  val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
+//  //val openExpandablePanel = Var(false)
 
-  case class ExpandablePanel(id: Int, element: HtmlElement)
+//  def closeExpandable = expandablePanel.set(None)
+//
+//  def expandTo(el: HtmlElement, id: Int) = expandablePanel.update {
+//    _ match {
+//      case Some(ep: ExpandablePanel) ⇒ if(ep.id == id) None else Some(ExpandablePanel(id, el))
+//      case None ⇒ Some(ExpandablePanel(id,el))
+//    }
+//  }
 
-  val expandablePanel: Var[Option[ExpandablePanel]] = Var(None)
-  //val openExpandablePanel = Var(false)
-
-  def closeExpandable = expandablePanel.set(None)
-
-  def expandTo(el: HtmlElement, id: Int) = expandablePanel.update {
-    _ match {
-      case Some(ep: ExpandablePanel) ⇒ if(ep.id == id) None else Some(ExpandablePanel(id, el))
-      case None ⇒ Some(ExpandablePanel(id,el))
-    }
-  }
-
-  val pluginPanel = new PluginPanel(treeNodeManager)
-
-  lazy val marketPanel = new MarketPanel(treeNodeManager)
-
-  lazy val stackPanel = new TextPanel("Error stack")
-  lazy val settingsView = new SettingsView(fileDisplayer)
-  lazy val connection = new Connection
-
-  lazy val bannerAlert =
-    new BannerAlert(
-      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
-    )
-
-  lazy val alertPanel = new AlertPanel()
+//  val pluginPanel = new PluginPanel(treeNodeManager)
+//
+//  lazy val marketPanel = new MarketPanel(treeNodeManager)
+//
+//  lazy val stackPanel = new TextPanel("Error stack")
+//  lazy val settingsView = new SettingsView(fileDisplayer)
+//  lazy val connection = new Connection
+//
+//  lazy val bannerAlert =
+//    new BannerAlert(
+//      resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
+//    )
+//
+//  lazy val alertPanel = new AlertPanel()
 
 }

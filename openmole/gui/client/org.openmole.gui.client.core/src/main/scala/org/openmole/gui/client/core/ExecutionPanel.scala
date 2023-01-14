@@ -14,14 +14,13 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.ext.client.Utils
 import org.openmole.gui.ext.data.ExecutionInfo.Failed
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.Panels.ExpandablePanel
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 
-object ExecutionPanel {
-
-
+object ExecutionPanel:
   case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
 
   case class ExecutionDetails(status: String,
@@ -35,8 +34,18 @@ object ExecutionPanel {
   type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
 
-  val staticInfos: Var[Statics] = Var(Map())
-  val executionDetails: Var[Execs] = Var(Map())
+  def open(using fetch: Fetch, panels: Panels) =
+    panels.executionPanel.setTimerOn
+    panels.executionPanel.updateStaticInfos
+    panels.executionPanel.updateExecutionInfo
+    Panels.expandTo(panels.executionPanel.render, 4)
+
+
+class ExecutionPanel:
+  import ExecutionPanel.*
+
+  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
+  val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
   val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
   val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
@@ -60,39 +69,36 @@ object ExecutionPanel {
     }
   }
 
-  def updateScriptError(path: SafePath, details: ExecutionDetails) = OMSContent.setError(path, details.error)
+  def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
-  def updateExecutionInfo: Unit = {
+  def updateExecutionInfo(using fetch: Fetch): Unit = {
 
-    def delay = {
+    def delay =
       updating.set(false)
       setTimeout(5000) {
-        println("UPDATE")
+        //println("UPDATE")
         updateExecutionInfo
         if (staticInfos.now().size != executionDetails.now().size) updateStaticInfos
       }
-    }
 
     if (updating.compareAndSet(false, true)) {
-      Fetch.future(_.allStates(200).future).andThen {
+      fetch.future(_.allStates(200).future).andThen {
         case Success((execInfos, runningOutputData)) ⇒
           executionDetails.set(execInfos.map { case (k, v) =>
             k -> toExecDetails(v)
           }.toMap)
           outputInfos.set(runningOutputData)
-          println("output infos now " + outputInfos.now().head)
+          //println("output infos now " + outputInfos.now().head)
           if (timerOn.now()) delay
         case Failure(_) ⇒ delay
       }
     }
   }
 
-  def updateStaticInfos = Fetch.future(_.staticInfos(()).future).foreach { s ⇒
+  def updateStaticInfos(using fetch: Fetch) = fetch.future(_.staticInfos(()).future).foreach { s ⇒
     staticInfos.set(s.toMap)
-    println("Statis infos now " + staticInfos.now().head._1)
-    setTimeout(0) {
-      updateExecutionInfo
-    }
+    //println("Statis infos now " + staticInfos.now().head._1)
+    setTimeout(0) { updateExecutionInfo }
   }
 
 
@@ -268,7 +274,7 @@ object ExecutionPanel {
     }
   )
 
-  def buildExecution(static: StaticExecutionInfo, executionDetails: ExecutionDetails) = {
+  def buildExecution(static: StaticExecutionInfo, executionDetails: ExecutionDetails)(using panels: Panels) = {
     OMSContent.setError(static.path, executionDetails.error)
     elementTable()
       .addRow(executionRow(static, executionDetails)).expandTo(expander, showExpander.signal.map(_.isDefined))
@@ -302,7 +308,7 @@ object ExecutionPanel {
       }
     )
 
-  val render = div(columnFlex, width := "100%", marginTop := "20",
+  def render(using panels: Panels) = div(columnFlex, width := "100%", marginTop := "20",
     children <-- staticInfos.signal.combineWith(executionDetails.signal).combineWith(currentOpenSimulation.signal).map { case (statics, execs, id) =>
       println("00 " + statics.keys + " // " + execs.keys + " // " + id)
       Seq(
@@ -351,4 +357,4 @@ object ExecutionPanel {
   //  //            }"""
 
 
-}
+
