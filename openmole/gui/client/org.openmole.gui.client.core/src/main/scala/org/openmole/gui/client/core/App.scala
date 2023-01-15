@@ -293,8 +293,6 @@ object App {
         stackPanel = stackPanel
       )
 
-    val fetch = Fetch(bannerAlert.register)
-    val api = OpenMOLERESTServerAPI(fetch)
 
     val tabContent = new TabContent
     val pluginPanel = new PluginPanel
@@ -312,6 +310,9 @@ object App {
     val treeNodePanel = TreeNodePanel(treeNodeManager)
     val settingsView = new SettingsView
     val connection = new Connection
+    
+    val fetch = Fetch(bannerAlert.register)
+    val api = OpenMOLERESTServerAPI(fetch)
 
     (
       Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, stackPanel, expandablePanel),
