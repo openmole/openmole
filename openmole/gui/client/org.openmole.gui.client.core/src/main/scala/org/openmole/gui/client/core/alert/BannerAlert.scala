@@ -23,12 +23,8 @@ import org.openmole.gui.ext.client.*
 import org.openmole.gui.ext.client.Utils.*
 import scaladget.bootstrapnative.bsn
 
-object BannerLevel {
-  object Regular extends BannerLevel
-  object Critical extends BannerLevel
-}
-
-sealed trait BannerLevel
+enum BannerLevel:
+  case Regular, Critical
 
 case class BannerMessage(messageDiv: HtmlElement, bannerLevel: BannerLevel)
 

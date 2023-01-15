@@ -293,7 +293,7 @@ object App {
         stackPanel = stackPanel
       )
 
-    val fetch = Fetch(bannerAlert)
+    val fetch = Fetch(bannerAlert.register)
 
     val api = OpenMOLERESTServerAPI(fetch)
 

@@ -29,9 +29,6 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 import org.openmole.gui.ext.client.{CoreAPIClientImpl, coreAPIClient}
 
-object Fetch:
-  def apply(bannerAlert: BannerAlert) = new Fetch(bannerAlert.register)
-
 class Fetch(alert: (String, BannerLevel) => Unit):
 
   def future[O](
