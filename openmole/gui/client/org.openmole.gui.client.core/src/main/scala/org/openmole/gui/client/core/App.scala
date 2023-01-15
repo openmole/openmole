@@ -287,7 +287,7 @@ object App {
     val stackPanel = new TextPanel("Error stack")
     val alertPanel = new AlertPanel
 
-    lazy val bannerAlert =
+    val bannerAlert =
       new BannerAlert(
         resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor },
         stackPanel = stackPanel
@@ -297,7 +297,6 @@ object App {
     val api = OpenMOLERESTServerAPI(fetch)
 
     val tabContent = new TabContent
-    val treeNodeManager = new TreeNodeManager
     val pluginPanel = new PluginPanel
     val fileDisplayer = new FileDisplayer
 
@@ -308,8 +307,9 @@ object App {
         }
       )
 
-    lazy val executionPanel = new ExecutionPanel
-    val treeNodePanel = TreeNodePanel(treeNodeManager = treeNodeManager, api = api)
+    val executionPanel = new ExecutionPanel
+    val treeNodeManager = new TreeNodeManager
+    val treeNodePanel = TreeNodePanel(treeNodeManager)
     val settingsView = new SettingsView
     val connection = new Connection
 

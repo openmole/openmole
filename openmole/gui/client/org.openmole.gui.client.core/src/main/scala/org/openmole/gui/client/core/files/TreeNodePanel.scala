@@ -32,7 +32,7 @@ import org.openmole.gui.client.tool.OMTags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager, api: ServerAPI) { panel =>
+class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
 
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
@@ -138,7 +138,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, api: ServerAPI) { pane
       })
     )
 
-  def copyOrTrashTool(using fetch: Fetch) = div(
+  def copyOrTrashTool(using fetch: Fetch, api: ServerAPI) = div(
     height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
     children <-- confirmationDiv.signal.map { ac ⇒
       val selected = treeNodeManager.selected
@@ -198,7 +198,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, api: ServerAPI) { pane
 
   val multiTool: Var[MultiTool] = Var(Off)
 
-  def fileControler(using fetch: Fetch, panels: Panels) =
+  def fileControler(using fetch: Fetch, panels: Panels, api: ServerAPI) =
     div(
       cls := "file-content",
       child <-- treeNodeManager.dirNodeLine.signal.map { curr ⇒
