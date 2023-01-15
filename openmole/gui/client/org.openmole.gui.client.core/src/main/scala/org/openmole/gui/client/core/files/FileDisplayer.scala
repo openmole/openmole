@@ -25,7 +25,7 @@ import scaladget.bootstrapnative.bsn
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
+class FileDisplayer:
 
   def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices)(using panels: Panels, fetch: Fetch) = {
     panels.tabContent.alreadyDisplayed(safePath) match {
@@ -78,4 +78,3 @@ class FileDisplayer(treeNodeTabs: TreeNodeTabs) {
     }
   }
 
-}

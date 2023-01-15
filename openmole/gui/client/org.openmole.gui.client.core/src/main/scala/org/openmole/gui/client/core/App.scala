@@ -283,9 +283,9 @@ object App {
 
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
 
-    val treeNodeTabs = new TreeNodeTabs()
+    val treeNodeTabs = new TreeNodeTabs
     val stackPanel = new TextPanel("Error stack")
-    val alertPanel = new AlertPanel(stackPanel)
+    val alertPanel = new AlertPanel
 
     lazy val bannerAlert =
       new BannerAlert(
@@ -294,13 +294,12 @@ object App {
       )
 
     val fetch = Fetch(bannerAlert.register)
-
     val api = OpenMOLERESTServerAPI(fetch)
 
     val tabContent = new TabContent
     val treeNodeManager = new TreeNodeManager
-    val pluginPanel = new PluginPanel(treeNodeManager)
-    val fileDisplayer = new FileDisplayer(treeNodeTabs)
+    val pluginPanel = new PluginPanel
+    val fileDisplayer = new FileDisplayer
 
     val pluginServices =
       PluginServices(
@@ -310,18 +309,8 @@ object App {
       )
 
     lazy val executionPanel = new ExecutionPanel
-
-    val treeNodePanel =
-      new TreeNodePanel(
-        treeNodeManager = treeNodeManager,
-        fileDisplayer = fileDisplayer,
-//        showExecution = () ⇒ ExecutionPanel.open(expandablePanel, executionPanel, bannerAlert),
-        treeNodeTabs = treeNodeTabs,
-        tabContent = tabContent,
-        services = pluginServices,
-        api = api)
-
-    val settingsView = new SettingsView(fileDisplayer)
+    val treeNodePanel = TreeNodePanel(treeNodeManager = treeNodeManager, api = api)
+    val settingsView = new SettingsView
     val connection = new Connection
 
     (

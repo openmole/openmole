@@ -27,7 +27,7 @@ import scaladget.bootstrapnative.bsn
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-class PluginPanel(manager: TreeNodeManager) {
+class PluginPanel:
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
@@ -48,8 +48,8 @@ class PluginPanel(manager: TreeNodeManager) {
                 cls := "badgeOM",
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
-                manager.switch(p.projectSafePath.parent)
-                manager.computeCurrentSons
+                panels.treeNodeManager.switch(p.projectSafePath.parent)
+                panels.treeNodeManager.computeCurrentSons
               }
             )
           }
@@ -65,4 +65,3 @@ class PluginPanel(manager: TreeNodeManager) {
       ),
       pluginTable
     )
-}

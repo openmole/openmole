@@ -32,7 +32,7 @@ import org.openmole.gui.client.tool.OMTags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDisplayer, /*executionPanel: ExecutionPanel,  showExecution: () ⇒ Unit,*/ treeNodeTabs: TreeNodeTabs, tabContent: TabContent, services: PluginServices, api: ServerAPI) { panel =>
+class TreeNodePanel(val treeNodeManager: TreeNodeManager, api: ServerAPI) { panel =>
 
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
@@ -70,10 +70,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
 
   def createNewNode(using fetch: Fetch, panels: Panels) = {
     val newFile = newNodeInput.ref.value
-    val currentDirNode = treeNodeManager.dirNodeLine
+    val currentDirNode = panels.treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
-      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
+      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ panels.treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ panels.treeNodeManager.invalidCurrentCache)
     }
   }
 
@@ -265,7 +265,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     )
   }
 
-  def goToDirButton(safePath: SafePath, name: String = "")(using fetch: Fetch): HtmlElement =
+  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, fetch: Fetch): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
         treeNodeManager.switch(safePath)
@@ -333,7 +333,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
         saveFile = false,
         hash = true,
         onLoaded = (content: String, hash: Option[String]) ⇒ {
-          fileDisplayer.display(safePath, content, hash.get, safePath.extension, services)
+          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension, panels.pluginServices)
           treeNodeManager.invalidCurrentCache
         }
       )
@@ -400,13 +400,12 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
       )
 
 
-    def toolBox(using fetch: Fetch, panels: Panels) = {
+    def toolBox(using fetch: Fetch, panels: Panels) =
       val showExecution = () ⇒ ExecutionPanel.open
-      new FileToolBox(tnSafePath, showExecution, treeNodeTabs, tn match {
+      new FileToolBox(tnSafePath, showExecution, panels.treeNodeTabs, tn match {
         case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
         case _ ⇒ PluginState(false, false)
       })
-    }
 
     def render(using panels: Panels)(using fetch: Fetch): HtmlElement = {
       div(display.flex, flexDirection.column,
@@ -461,7 +460,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
     }
   )
 
-  def dropAction(to: SafePath, isDir: Boolean)(using fetch: Fetch) = {
+  def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, fetch: Fetch) = {
     draggedNode.now().map {
       dragged ⇒
         if (isDir) {
@@ -469,10 +468,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager, fileDisplayer: FileDis
             //treeNodeTabs.saveAllTabs(() ⇒ {
             fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
               b ⇒
-                treeNodeManager.invalidCache(to)
-                treeNodeManager.invalidCache(dragged)
-                treeNodeManager.invalidCurrentCache
-                tabContent.checkTabs
+                panels.treeNodeManager.invalidCache(to)
+                panels.treeNodeManager.invalidCache(dragged)
+                panels.treeNodeManager.invalidCurrentCache
+                panels.tabContent.checkTabs
             }
             //})
           }

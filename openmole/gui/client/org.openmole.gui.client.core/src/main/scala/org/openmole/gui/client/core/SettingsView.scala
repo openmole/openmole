@@ -33,7 +33,7 @@ import scala.scalajs.js.timers.SetIntervalHandle
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsView(fileDisplayer: FileDisplayer) {
+class SettingsView:
 
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
@@ -164,4 +164,3 @@ class SettingsView(fileDisplayer: FileDisplayer) {
 
   //val renderConnection = dropdownConnection
 
-}
