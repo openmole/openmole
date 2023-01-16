@@ -18,7 +18,7 @@ package org.openmole.gui.client.core.alert
  */
 
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.TextPanel
+import org.openmole.gui.client.core.{Panels, TextPanel}
 import org.openmole.gui.ext.client.*
 import org.openmole.gui.ext.client.Utils.*
 import scaladget.bootstrapnative.bsn
@@ -28,8 +28,9 @@ enum BannerLevel:
 
 case class BannerMessage(messageDiv: HtmlElement, bannerLevel: BannerLevel)
 
-class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel = new TextPanel("")) {
+class BannerAlert:
 
+  val stackPanel: TextPanel = new TextPanel("Error stack")
   private val bannerMessages: Var[Seq[BannerMessage]] = Var(Seq())
   val isOpen = bannerMessages.signal.map { bm ⇒ !bm.isEmpty }
 
@@ -49,8 +50,8 @@ class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel = new TextPanel
     ),
     height := "70")
 
-  lazy val banner = isOpen.expandDiv(bannerDiv, () ⇒ {
-    resizeTabs()
+  def banner(using panels: Panels) = isOpen.expandDiv(bannerDiv, () ⇒ {
+    panels.treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor }
   })
 
   def clear = bannerMessages.set(Seq())
@@ -87,4 +88,3 @@ class BannerAlert(resizeTabs: () ⇒ Unit, stackPanel: TextPanel = new TextPanel
     else omsheet.BLUE
   }
 
-}

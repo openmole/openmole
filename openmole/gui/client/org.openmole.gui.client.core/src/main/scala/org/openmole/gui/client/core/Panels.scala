@@ -48,13 +48,11 @@ case class Panels(
   pluginPanel: PluginPanel,
   fileDisplayer: FileDisplayer,
   settingsView: SettingsView,
-  pluginServices: PluginServices,
   executionPanel: ExecutionPanel,
   bannerAlert: BannerAlert,
   treeNodeTabs: TreeNodeTabs,
   alertPanel: AlertPanel,
   connection: Connection,
-  stackPanel: TextPanel,
   expandablePanel: Var[Option[Panels.ExpandablePanel]])
 
 

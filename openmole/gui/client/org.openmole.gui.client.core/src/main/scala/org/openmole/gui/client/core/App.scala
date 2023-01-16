@@ -38,7 +38,7 @@ import scala.scalajs.js.timers.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
+class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServices, api: ServerAPI):
 
   def connection() =
     render(
@@ -279,48 +279,32 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, api: ServerAPI):
 @JSExportAll
 object App {
 
-  lazy val (panels, fetch, api) =
-
+  lazy val panels =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
-
     val treeNodeTabs = new TreeNodeTabs
-    val stackPanel = new TextPanel("Error stack")
     val alertPanel = new AlertPanel
-
-    val bannerAlert =
-      new BannerAlert(
-        resizeTabs = () ⇒ treeNodeTabs.tabsElement.tabs.now().foreach { t ⇒ t.t.resizeEditor },
-        stackPanel = stackPanel
-      )
-
-
+    val bannerAlert = new BannerAlert
     val tabContent = new TabContent
     val pluginPanel = new PluginPanel
     val fileDisplayer = new FileDisplayer
-
-    val pluginServices =
-      PluginServices(
-        errorManager = new ErrorManager {
-          override def signal(message: String, stack: Option[String]): Unit = bannerAlert.registerWithStack(message, stack)
-        }
-      )
-
     val executionPanel = new ExecutionPanel
     val treeNodeManager = new TreeNodeManager
     val treeNodePanel = TreeNodePanel(treeNodeManager)
     val settingsView = new SettingsView
     val connection = new Connection
-    
-    val fetch = Fetch(bannerAlert.register)
-    val api = OpenMOLERESTServerAPI(fetch)
 
-    (
-      Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, pluginServices, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, stackPanel, expandablePanel),
-      fetch,
-      api
+    Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
+
+
+  lazy val fetch = Fetch(panels.bannerAlert.register)
+  lazy val api = OpenMOLERESTServerAPI(fetch)
+
+  lazy val pluginServices =
+    PluginServices(
+      errorManager = (message, stack) => panels.bannerAlert.registerWithStack(message, stack)
     )
 
-  val gui = OpenMOLEGUI(using panels, fetch, api)
+  val gui = OpenMOLEGUI(using panels, fetch, pluginServices, api)
 
   export gui.*
 

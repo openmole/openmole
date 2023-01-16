@@ -288,7 +288,7 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
   //    case _                ⇒
   //  }
 
-  def treeView(using panels: Panels)(using fetch: Fetch): Div = {
+  def treeView(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Div = {
     div(cls := "file-scrollable-content",
       children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
@@ -326,21 +326,21 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
     )
   }
 
-  def displayNode(safePath: SafePath)(using panels: Panels, fetch: Fetch): Unit = {
+  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Unit = {
     if (safePath.extension.displayable) {
       downloadFile(
         safePath,
         saveFile = false,
         hash = true,
         onLoaded = (content: String, hash: Option[String]) ⇒ {
-          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension, panels.pluginServices)
+          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension, pluginServices)
           treeNodeManager.invalidCurrentCache
         }
       )
     }
   }
 
-  def displayNode(tn: TreeNode)(using panels: Panels, fetch: Fetch): Unit = tn match {
+  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Unit = tn match {
     case fn: FileNode ⇒
       val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
@@ -480,17 +480,15 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
     draggedNode.set(None)
   }
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, fetch: Fetch) = {
-    node match {
+  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch) =
+    node match
       case fn: FileNode ⇒
-        ReactiveLine(i, fn, TreeNodeType.file, () ⇒ {
-          displayNode(fn)
-        })
+        ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))
       case dn: DirNode ⇒ ReactiveLine(i, dn, TreeNodeType.folder, () ⇒ {
         treeNodeManager switch (dn.name)
         treeWarning.set(true)
       })
-    }
-  }
+
+
 
 }

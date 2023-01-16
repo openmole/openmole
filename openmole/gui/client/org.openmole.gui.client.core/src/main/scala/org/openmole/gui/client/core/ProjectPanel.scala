@@ -24,7 +24,7 @@ object ProjectPanel {
     )
   }
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch, pluginServices: PluginServices) = {
 
     // 1- Empty project
     def emptyProject = {
@@ -36,7 +36,7 @@ object ProjectPanel {
           hash = true,
           onLoaded = (content, hash) ⇒ {
             panels.treeNodeManager.invalidCurrentCache
-            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
+            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, pluginServices)
           }
         )
       })

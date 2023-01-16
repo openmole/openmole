@@ -135,8 +135,8 @@ class AlertPanel:
     alertDiv(
       div(message),
       () ⇒ {
-        panels.stackPanel.content.set(detail)
-        panels.stackPanel.dialog.show
+        panels.bannerAlert.stackPanel.content.set(detail)
+        panels.bannerAlert.stackPanel.dialog.show
       }, cancelaction, transform, zone, alertType, buttonGroupClass, "Details"
     )
 
