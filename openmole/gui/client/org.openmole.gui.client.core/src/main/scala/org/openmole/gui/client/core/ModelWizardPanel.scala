@@ -239,7 +239,7 @@ object ModelWizardPanel {
                   fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
-                  filePath.set(Some(panels.treeNodeManager.dirNodeLine.now() ++ fileName))
+                  filePath.set(Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName))
                   filePath.now().map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
@@ -350,7 +350,7 @@ object ModelWizardPanel {
 
     def browseToPath(safePath: SafePath)(using panels: Panels) = {
       a(safePath.path.mkString("/"), onClick --> { _ ⇒
-        panels.treeNodeManager.switch(safePath.parent)
+        panels.treeNodePanel.treeNodeManager.switch(safePath.parent)
       })
     }
 
@@ -409,7 +409,7 @@ object ModelWizardPanel {
           }
         },
         span(display.flex, alignItems.center,color.black, marginLeft := "10px",
-          child <-- panels.treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
+          child <-- panels.treeNodePanel.treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
             uploadedPath match {
               case Some(p: SafePath) => span("Uploaded in ", browseToPath(p))
               case _ => span( "Your model will be uploaded in ", browseToPath(sp))

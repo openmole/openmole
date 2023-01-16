@@ -30,7 +30,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         panels.tabContent.removeTab(safePath)
         panels.tabContent.checkTabs
         panels.pluginPanel.getPlugins
-        panels.treeNodeManager.invalidCurrentCache
+        panels.treeNodePanel.treeNodeManager.invalidCurrentCache
     }
   }
 
@@ -50,7 +50,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         error match {
           case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
             panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒ panels.treeNodeManager.invalidCurrentCache
+          case _ ⇒ panels.treeNodePanel.treeNodeManager.invalidCurrentCache
         }
     }
     closeToolBox
@@ -96,7 +96,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     val newNode = safePath.parent ++ to
     fetch.future(_.move(safePath, safePath.parent ++ to).future).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
-      panels.treeNodeManager.invalidCurrentCache
+      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
       panels.tabContent.checkTabs
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
@@ -108,7 +108,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
           panels.pluginPanel.getPlugins
-          panels.treeNodeManager.invalidCurrentCache
+          panels.treeNodePanel.treeNodeManager.invalidCurrentCache
         }
           //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
 //          panels.pluginPanel.getPlugins
@@ -119,7 +119,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
           for e <- errors
           do panels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           panels.pluginPanel.getPlugins
-          panels.treeNodeManager.invalidCurrentCache
+          panels.treeNodePanel.treeNodeManager.invalidCurrentCache
         }
 //        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
 //          _ ⇒

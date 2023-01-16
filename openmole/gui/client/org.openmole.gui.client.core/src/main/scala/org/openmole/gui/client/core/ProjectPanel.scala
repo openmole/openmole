@@ -29,13 +29,13 @@ object ProjectPanel {
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
-        val toDisplay = panels.treeNodeManager.dirNodeLine.now() ++ fileName
+      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
+        val toDisplay = panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName
         FileManager.download(
           toDisplay,
           hash = true,
           onLoaded = (content, hash) ⇒ {
-            panels.treeNodeManager.invalidCurrentCache
+            panels.treeNodePanel.treeNodeManager.invalidCurrentCache
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, pluginServices)
           }
         )

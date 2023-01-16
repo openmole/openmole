@@ -271,7 +271,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
         )
       )
     }
-    panels.treeNodeManager.invalidCurrentCache
+    panels.treeNodePanel.treeNodeManager.invalidCurrentCache
 //}
 
 
@@ -288,12 +288,11 @@ object App {
     val pluginPanel = new PluginPanel
     val fileDisplayer = new FileDisplayer
     val executionPanel = new ExecutionPanel
-    val treeNodeManager = new TreeNodeManager
-    val treeNodePanel = TreeNodePanel(treeNodeManager)
+    val treeNodePanel = new TreeNodePanel
     val settingsView = new SettingsView
     val connection = new Connection
 
-    Panels(treeNodePanel, tabContent, treeNodeManager, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
+    Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
 
 
   lazy val fetch = Fetch(panels.bannerAlert.register)

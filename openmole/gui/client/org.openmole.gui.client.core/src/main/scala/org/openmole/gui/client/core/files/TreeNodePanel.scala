@@ -32,8 +32,9 @@ import org.openmole.gui.client.tool.OMTags
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
+class TreeNodePanel { panel =>
 
+  val treeNodeManager: TreeNodeManager = new TreeNodeManager
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
 
@@ -70,10 +71,10 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
 
   def createNewNode(using fetch: Fetch, panels: Panels) = {
     val newFile = newNodeInput.ref.value
-    val currentDirNode = panels.treeNodeManager.dirNodeLine
+    val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
-      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ panels.treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ panels.treeNodeManager.invalidCurrentCache)
+      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
     }
   }
 
@@ -468,9 +469,9 @@ class TreeNodePanel(val treeNodeManager: TreeNodeManager) { panel =>
             //treeNodeTabs.saveAllTabs(() ⇒ {
             fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
               b ⇒
-                panels.treeNodeManager.invalidCache(to)
-                panels.treeNodeManager.invalidCache(dragged)
-                panels.treeNodeManager.invalidCurrentCache
+                treeNodeManager.invalidCache(to)
+                treeNodeManager.invalidCache(dragged)
+                treeNodeManager.invalidCurrentCache
                 panels.tabContent.checkTabs
             }
             //})

@@ -69,7 +69,7 @@ object CoreUtils {
 
   def duplicate(safePath: SafePath, newName: String)(using panels: Panels, fetch: Fetch): Unit =
     fetch.future(_.duplicate(safePath, newName).future).foreach { y ⇒
-      panels.treeNodeManager.invalidCurrentCache
+      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
     }
 
   //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =

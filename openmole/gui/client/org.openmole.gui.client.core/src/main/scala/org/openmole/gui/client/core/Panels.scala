@@ -44,7 +44,6 @@ object Panels:
 case class Panels(
   treeNodePanel: TreeNodePanel,
   tabContent: TabContent,
-  treeNodeManager: TreeNodeManager,
   pluginPanel: PluginPanel,
   fileDisplayer: FileDisplayer,
   settingsView: SettingsView,

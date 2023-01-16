@@ -48,8 +48,8 @@ class PluginPanel:
                 cls := "badgeOM",
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
-                panels.treeNodeManager.switch(p.projectSafePath.parent)
-                panels.treeNodeManager.computeCurrentSons
+                panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
+                panels.treeNodePanel.treeNodeManager.computeCurrentSons
               }
             )
           }
