@@ -19,7 +19,7 @@ package org.openmole.gui.client.tool
 
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import org.openmole.gui.ext.client.omsheet
+import org.openmole.gui.client.ext.omsheet
 import com.raquo.laminar.api.L._
 
 object OptionsDiv {

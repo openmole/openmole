@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.gui.ext.data.{ErrorData, Test}
+import org.openmole.gui.shared.data.{ErrorData, Test}
 import org.openmole.gui.ext.api.*
 
 trait EGIAuthenticationAPI extends RESTAPI {

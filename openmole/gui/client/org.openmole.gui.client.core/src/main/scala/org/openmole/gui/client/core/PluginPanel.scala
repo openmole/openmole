@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import org.scalajs.dom.raw.MouseEvent
 import scaladget.bootstrapnative.bsn.*
 

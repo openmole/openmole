@@ -1,6 +1,6 @@
 package org.openmole.gui.client
 
-import org.openmole.gui.ext.api
+import org.openmole.gui.shared.api
 
 package object core {
 //  def post(implicit context: PostContext) =

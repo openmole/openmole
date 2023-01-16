@@ -2,14 +2,14 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import org.openmole.gui.client.core.CoreUtils._
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import Waiter._
 import org.openmole.core.market.MarketIndexEntry
 import com.raquo.laminar.api.L._

@@ -3,43 +3,44 @@ package org.openmole.gui.server.core
 import java.io.File
 import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
-import org.openmole.core.event._
-import org.openmole.core.pluginmanager._
-import org.openmole.gui.ext.data
-import org.openmole.gui.ext.data._
+import org.openmole.core.event.*
+import org.openmole.core.pluginmanager.*
+import org.openmole.gui.shared.data.*
 
-import java.io._
+import java.io.*
 import java.net.URL
-import java.nio.file._
+import java.nio.file.*
 import java.util.zip.GZIPInputStream
-import org.openmole.core.compiler._
+import org.openmole.core.compiler.*
 import org.openmole.core.expansion.ScalaCompilation
-import org.openmole.core.market.{ MarketIndex, MarketIndexEntry }
+import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
-import scala.util.{ Failure, Success, Try }
-import org.openmole.core.workflow.mole.{ MoleExecution, MoleExecutionContext, MoleServices }
+import scala.util.{Failure, Success, Try}
+import org.openmole.core.workflow.mole.{MoleExecution, MoleExecutionContext, MoleServices}
 import org.openmole.tool.stream.StringPrintStream
 
-import scala.concurrent.stm._
-import org.openmole.tool.tar._
+import scala.concurrent.stm.*
+import org.openmole.tool.tar.*
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
-import org.openmole.core.preference.{ ConfigurationString, Preference, PreferenceLocation }
-import org.openmole.core.project._
+import org.openmole.core.preference.{ConfigurationString, Preference, PreferenceLocation}
+import org.openmole.core.project.*
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.dsl._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.dsl.*
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
-import org.openmole.gui.ext.server.{ GUIPluginRegistry, utils }
-import org.openmole.gui.ext.server.utils._
-import org.openmole.gui.server.core.GUIServer.{ ApplicationControl, lockFile }
+import org.openmole.gui.server.ext
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
+import org.openmole.gui.server.core.GUIServer.{ApplicationControl, lockFile}
+import org.openmole.gui.shared.data
 import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConverters.*
 
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
@@ -69,13 +70,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   //GENERAL
   def settings: OMSettings = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     OMSettings(
       utils.projectsDirectory.toSafePath,
       buildinfo.version.value,
       buildinfo.name,
-      org.openmole.gui.ext.server.utils.formatDate(buildinfo.BuildInfo.buildTime),
+      utils.formatDate(buildinfo.BuildInfo.buildTime),
       buildinfo.development
     )
   }
@@ -115,7 +116,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   // FILES
   def createFile(safePath: SafePath, name: String, directory: Boolean): Boolean =
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     if directory
     then new File(safePath.toFile, name).createNewFile
     else new File(safePath.toFile, name).mkdirs
@@ -125,7 +126,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.tool.file.*
     
     val allPlugins = listPlugins()
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def unplug(f: File) =
       if utils.isPlugged(f, allPlugins.toSeq)(workspace) then removePlugin(utils.fileToSafePath(f))
@@ -183,7 +184,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def temporaryDirectory(): SafePath =
     import services.*
-    import org.openmole.gui.ext.data.ServerFileSystemContext.absolute
+    import org.openmole.gui.shared.data.ServerFileSystemContext.absolute
     val dir = services.tmpDirectory.newDir("openmoleGUI")
     dir.mkdirs()
     dir.toSafePath
@@ -210,7 +211,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def isEmpty(sp: SafePath): Boolean = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
   }
@@ -231,13 +232,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def mdToHtml(safePath: SafePath): String = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     MarkDownProcessor(safePathToFile(safePath).content)
   }
 
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     val file = safePathToFile(path)
 
@@ -262,13 +263,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def size(safePath: SafePath): Long = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     safePathToFile(safePath).length
   }
 
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val content = safePath.toFile.content.split("\n")
     val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?|true|false""".r
 
@@ -310,7 +311,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
     onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
 
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def error(t: Throwable): ErrorData = {
       t match {
@@ -389,7 +390,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     val (execId, outputStream) = compilationData(scriptData)
 
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     val content = safePathToFile(scriptData.scriptPath).content
 
@@ -464,7 +465,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     market.downloadEntry(entry, safePathToFile(path))
     //autoAddPlugins(path)
@@ -472,24 +473,24 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
     currentPluginsSafePath.map { csp ⇒
       val file = safePathToFile(csp)
-      val date = org.openmole.gui.ext.server.utils.formatDate(file.lastModified)
+      val date = ext.utils.formatDate(file.lastModified)
       Plugin(csp, date, file.exists && PluginManager.bundle(file).isDefined)
     }
 
   def activatePlugins =
     import services.*
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/")))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
   private def isPlugged(safePath: SafePath) =
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
   private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
@@ -498,7 +499,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def addPlugin(safePath: SafePath): Seq[ErrorData] = 
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val errors = utils.addPlugin(safePath)
     if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.mkString("/")).distinct } }
     errors
@@ -522,7 +523,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def isOSGI(safePath: SafePath): Boolean = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     PluginManager.isOSGI(safePathToFile(safePath))
   }
@@ -549,7 +550,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def expandResources(resources: Resources): Resources = {
     import services._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     val paths = resources.all.map(_.safePath).distinct.map {
       sp ⇒ Resource(sp, sp.toFile.length)

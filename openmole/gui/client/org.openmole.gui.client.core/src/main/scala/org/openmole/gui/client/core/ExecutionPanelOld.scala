@@ -20,17 +20,17 @@
 //import java.util.concurrent.atomic.AtomicBoolean
 //
 //import scala.util.{ Failure, Success }
-//import org.openmole.gui.ext.client._
+//import org.openmole.gui.client.ext._
 //
 //import scala.scalajs.js.timers._
 //import scala.concurrent.ExecutionContext.Implicits.global
-//import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
-//import org.openmole.gui.ext.data._
+//import org.openmole.gui.shared.data.{ ErrorData ⇒ ExecError }
+//import org.openmole.gui.shared.data.*
 //import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }
 //import org.openmole.gui.client.core.files.TreeNodeTabs
 //import org.openmole.gui.client.tool.OMTags
-//import org.openmole.gui.ext.client.Utils
-//import org.openmole.gui.ext.data.ExecutionInfo.Failed
+//import org.openmole.gui.client.ext.Utils
+//import org.openmole.gui.shared.data.ExecutionInfo.Failed
 //import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLSpanElement }
 //import com.raquo.laminar.api.L._
 //

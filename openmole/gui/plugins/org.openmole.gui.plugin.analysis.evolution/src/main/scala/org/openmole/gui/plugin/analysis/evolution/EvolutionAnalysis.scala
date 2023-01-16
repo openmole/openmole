@@ -1,33 +1,31 @@
 package org.openmole.gui.plugin.analysis.evolution
 
-import org.openmole.plugin.method.evolution._
-import org.openmole.gui.ext.data.MethodAnalysisPlugin
+import org.openmole.plugin.method.evolution.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.client.{ InputFilter }
-import scaladget.bootstrapnative.bsn._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.InputFilter
+import scaladget.bootstrapnative.bsn.*
+import com.raquo.laminar.api.L.*
 import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation._
-import org.openmole.gui.ext.data.DataUtils._
-import org.openmole.gui.ext.client
+import scala.scalajs.js.annotation.*
+import org.openmole.gui.shared.data.DataUtils.*
+import org.openmole.gui.client.ext
 import org.openmole.plugin.method.evolution.data.AnalysisData.Convergence
-import org.openmole.plugin.method.evolution.data.{ AnalysisData, EvolutionMetadata }
+import org.openmole.plugin.method.evolution.data.{AnalysisData, EvolutionMetadata}
 
 import scala.scalajs.js
+import org.openmole.plotlyjs.PlotlyImplicits.*
+import org.openmole.plotlyjs.*
+import org.openmole.plotlyjs.all.*
+import org.openmole.plotlyjs.plotlyConts.*
 
-import org.openmole.plotlyjs.PlotlyImplicits._
-import org.openmole.plotlyjs._
-import org.openmole.plotlyjs.all._
-import org.openmole.plotlyjs.plotlyConts._
-import scala.scalajs.js.JSConverters._
-
-
-import org.openmole.gui.ext.data.*
+import scala.scalajs.js.JSConverters.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.{MethodAnalysisPlugin, PluginServices}
 
 object TopLevelExports {
   @JSExportTopLevel("evolution")

@@ -19,8 +19,8 @@
 //
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import boopickle.Default._
-//import org.openmole.gui.ext.data._
-//import org.openmole.gui.ext.client.{InputFilter, OMPost}
+//import org.openmole.gui.shared.data.*
+//import org.openmole.gui.client.ext.{InputFilter, OMPost}
 //import scaladget.bootstrapnative.bsn._
 //import scaladget.tools._
 //import autowire._
@@ -30,8 +30,8 @@
 //import scala.scalajs.js.annotation._
 //import com.raquo.laminar.api.L._
 //import org.openmole.gui.ext.api.Api
-//import org.openmole.gui.ext.data.DataUtils._
-//import org.openmole.gui.ext.client
+//import org.openmole.gui.shared.data.DataUtils._
+//import org.openmole.gui.client.ext
 //import scalajs.js
 //
 //object TopLevelExports {

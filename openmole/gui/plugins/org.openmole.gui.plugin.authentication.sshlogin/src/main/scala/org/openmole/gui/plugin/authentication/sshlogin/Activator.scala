@@ -18,8 +18,8 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.server._
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.openmole.gui.server.ext.*
+import org.osgi.framework.{BundleActivator, BundleContext}
 
 class Activator extends BundleActivator {
 

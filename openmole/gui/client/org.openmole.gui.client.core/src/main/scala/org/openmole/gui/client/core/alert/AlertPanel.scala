@@ -20,9 +20,9 @@ package org.openmole.gui.client.core.alert
 import org.openmole.gui.client.core.alert.AbsolutePositioning.*
 import org.openmole.gui.client.core.files.{TreeNodeComment, TreeNodeError}
 import org.openmole.gui.client.tool.OMTags.*
-import org.openmole.gui.ext.data.SafePath
+import org.openmole.gui.shared.data.SafePath
 import org.openmole.gui.client.tool.*
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{Panels, TextPanel}
 import scaladget.bootstrapnative.bsn.*

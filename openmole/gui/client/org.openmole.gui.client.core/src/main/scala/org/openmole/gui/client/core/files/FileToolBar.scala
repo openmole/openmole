@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 
 import scala.util._
 import com.raquo.laminar.api.L._
@@ -8,7 +8,7 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.nodes.ReactiveHtmlElement
@@ -18,7 +18,7 @@ import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, Relativ
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool._
 import org.openmole.gui.client.core._
-import org.openmole.gui.ext.client.FileManager
+import org.openmole.gui.client.ext.FileManager
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

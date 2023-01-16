@@ -20,14 +20,14 @@ package org.openmole.gui.client.core
 
 
 import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
+import org.openmole.gui.client.ext.OMFetch
 
 import scala.concurrent.duration.*
-import org.openmole.gui.ext.client.OMFetch
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
-import org.openmole.gui.ext.client.{CoreAPIClientImpl, coreAPIClient}
+import org.openmole.gui.client.ext.{CoreAPIClientImpl, coreAPIClient}
 
 class Fetch(alert: (String, BannerLevel) => Unit):
 

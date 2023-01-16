@@ -19,12 +19,14 @@ package org.openmole.gui.plugin.authentication.sshlogin
 
 
 import org.openmole.core.services.Services
-import org.openmole.gui.ext.server.APIServer
 import cats.effect.IO
 import org.http4s.HttpRoutes
-import org.openmole.gui.ext.data.*
 import org.openmole.plugin.environment.ssh.*
 import util.{Success, Failure, Try}
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.ext.api.*
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
 
 class LoginAuthenticationServer(s: Services)
   extends APIServer with LoginAuthenticationAPI {

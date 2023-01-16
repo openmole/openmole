@@ -18,7 +18,7 @@ package org.openmole.gui.client.core.files
  */
 
 import org.openmole.gui.client.core.{CoreUtils, Fetch, Panels}
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
 import scalaz.Success

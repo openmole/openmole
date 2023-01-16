@@ -2,19 +2,19 @@ package org.openmole.gui.client.core
 
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.{Failure, Success}
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.client.ext.*
 
 import scala.scalajs.js.timers.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data.ErrorData as ExecError
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.ErrorData as ExecError
+import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.client.Utils
-import org.openmole.gui.ext.data.ExecutionInfo.Failed
+import org.openmole.gui.shared.data.ExecutionInfo.Failed
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.Panels.ExpandablePanel
+import org.openmole.gui.client.ext.Utils
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*

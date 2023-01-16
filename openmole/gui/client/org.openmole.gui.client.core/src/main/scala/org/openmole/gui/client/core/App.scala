@@ -10,11 +10,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.data.*
-import org.openmole.gui.ext.client.FileManager
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
+import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.shared.data.PluginServices
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
@@ -71,7 +72,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
       timer.set(Some(setInterval(5000) {
         fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
           if (x) {
-            CoreUtils.setRoute(s"/${routes.connectionRoute}")
+            CoreUtils.setRoute(s"/${connectionRoute}")
             timer.now().foreach {
               clearInterval
             }
@@ -277,7 +278,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
 
 @JSExportTopLevel(name = "openmole_library")
 @JSExportAll
-object App {
+object App:
   lazy val panels = Panels()
   lazy val fetch = Fetch(panels.bannerAlert.register)
   lazy val api = OpenMOLERESTServerAPI(fetch)
@@ -291,4 +292,3 @@ object App {
 
   export gui.*
 
-}

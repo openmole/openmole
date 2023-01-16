@@ -17,7 +17,7 @@
 // */
 //package org.openmole.gui.plugin.wizard.native
 //
-//import org.openmole.gui.ext.data._
+//import org.openmole.gui.shared.data.*
 //
 //trait NativeWizardAPI {
 //  def toTask(

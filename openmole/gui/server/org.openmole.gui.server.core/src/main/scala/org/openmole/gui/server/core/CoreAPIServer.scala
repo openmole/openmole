@@ -23,10 +23,11 @@ import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.gui.ext
-import org.openmole.gui.ext.server.*
-import org.openmole.gui.ext.{api, data}
+import org.openmole.gui.server.ext
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
+import org.openmole.gui.shared.api
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -193,11 +194,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val routes: HttpRoutes[IO]  =
     HttpRoutes.of {
-      case req @ POST -> Root / org.openmole.gui.ext.data.routes.`uploadFilesRoute` =>
+      case req @ POST -> Root / org.openmole.gui.shared.data.`uploadFilesRoute` =>
         import apiImpl.services.*
         import cats.effect.unsafe.implicits.global
         import org.http4s.multipart.*
-        import org.openmole.gui.ext.server.utils
+        import org.openmole.gui.server.ext.utils
         import org.openmole.tool.stream.*
 
         def move(fileParts: Vector[Part[IO]], fileType: String) =
@@ -218,7 +219,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
               //finally stream.close
             }
 
-          import org.openmole.gui.ext.data.ServerFileSystemContext
+          import org.openmole.gui.shared.data.ServerFileSystemContext
           fileType match
             case ServerFileSystemContext.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
             case ServerFileSystemContext.Authentication.typeName ⇒ copyTo(utils.authenticationKeysDirectory)
@@ -234,7 +235,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
           Ok()
         }
 
-      case req @ GET -> Root / org.openmole.gui.ext.data.routes.`downloadFileRoute` =>
+      case req @ GET -> Root / org.openmole.gui.shared.data.`downloadFileRoute` =>
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
@@ -243,7 +244,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
         import org.typelevel.ci.*
 
-        val f = new java.io.File(org.openmole.gui.ext.server.utils.projectsDirectory, path)
+        val f = new java.io.File(utils.projectsDirectory, path)
 
         if (!f.exists()) Status.NotFound.apply(s"The file $path does not exist.")
         else {
@@ -267,7 +268,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
                   org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
                 )
 
-              if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.ext.data.routes.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+              if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.data.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
               else r2
             }
           }
@@ -280,7 +281,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
                     org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}"))
                   )
 
-                if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.ext.data.routes.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+                if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.data.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
                 else r2
               }
             }

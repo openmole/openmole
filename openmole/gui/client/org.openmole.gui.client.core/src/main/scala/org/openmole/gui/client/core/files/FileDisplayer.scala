@@ -1,11 +1,12 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.core._
+import org.openmole.gui.client.core.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.tool.plot.Plotter
+import org.openmole.gui.shared.data.{MethodAnalysisPlugin, PluginServices}
 import scaladget.bootstrapnative.bsn
 
 /*

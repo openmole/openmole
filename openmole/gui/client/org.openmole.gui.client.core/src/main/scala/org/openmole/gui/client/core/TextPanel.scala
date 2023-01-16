@@ -3,7 +3,7 @@ package org.openmole.gui.client.core
 import scaladget.bootstrapnative.bsn._
 
 import com.raquo.laminar.api.L._
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 
 /*
  * Copyright (C) 03/08/15 // mathieu.leclaire@openmole.org

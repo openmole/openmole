@@ -1,14 +1,15 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.ext.data.{FileType, Resources, SafePath, WizardPluginFactory}
-import com.raquo.laminar.api.L._
+import org.openmole.gui.shared.data.{FileType, Resources, SafePath}
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.tool.TagBadge
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn._
-import org.openmole.gui.ext.data._
-import Waiter._
-import org.openmole.gui.ext.client.FileManager
+import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.shared.data.*
+import Waiter.*
+import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.shared.data.{PluginServices, WizardPluginFactory}
 
 object ProjectPanel {
 

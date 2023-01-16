@@ -1,10 +1,10 @@
 package org.openmole.gui.client.core
 
 import scaladget.tools._
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import org.scalajs.dom.raw.HTMLElement
 import com.raquo.laminar.api.L._
-import org.openmole.gui.ext.client
+import org.openmole.gui.client.ext
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
@@ -46,7 +46,7 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
       child <-- processingState.signal.map { pState ⇒
         val ratio = pState.ratio
         val waiterSpan = div(
-          client.flexColumn, alignItems.center,
+          ext.flexColumn, alignItems.center,
           waiter,
           if (ratio == 0 || ratio == 100) span()
           else span(cls := "spinner-wave-ratio", ratio + " %")

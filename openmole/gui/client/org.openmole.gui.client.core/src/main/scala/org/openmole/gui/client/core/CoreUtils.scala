@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.{FileNode, TreeNodePanel}
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
 

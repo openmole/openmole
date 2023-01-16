@@ -18,13 +18,13 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.client.ext.*
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
 
 import scala.scalajs.js
 

@@ -19,8 +19,8 @@ package org.openmole.gui.client.core.alert
 
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{Panels, TextPanel}
-import org.openmole.gui.ext.client.*
-import org.openmole.gui.ext.client.Utils.*
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.Utils.*
 import scaladget.bootstrapnative.bsn
 
 enum BannerLevel:

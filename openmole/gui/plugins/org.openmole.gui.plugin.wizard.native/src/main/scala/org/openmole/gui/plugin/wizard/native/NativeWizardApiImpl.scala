@@ -27,14 +27,14 @@
 //import org.openmole.tool.tar.TarInputStream
 //import org.openmole.tool.stream._
 //import resource.{ managed, _ }
-//import org.openmole.gui.ext.data._
+//import org.openmole.gui.shared.data.*
 //import org.openmole.gui.ext.server._
 //import org.openmole.gui.ext.server.utils._
 //
 //class NativeWizardApiImpl(s: Services) extends NativeWizardAPI {
 //
 //  import s._
-//  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+//  import org.openmole.gui.shared.data.ServerFileSystemContext.project
 //
 //  def toTask(
 //    target:         SafePath,

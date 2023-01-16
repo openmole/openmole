@@ -1,15 +1,16 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core._
-import org.openmole.gui.client.core.alert.AbsolutePositioning._
+import org.openmole.gui.client.core.*
+import org.openmole.gui.client.core.alert.AbsolutePositioning.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn._
+import scaladget.bootstrapnative.bsn.*
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.client
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.client._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext
+import org.openmole.gui.client.ext.Utils
 
 class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState) {
 
@@ -20,7 +21,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def download(using panels: Panels) = withSafePath { sp ⇒
     closeToolBox
-    org.scalajs.dom.document.location.href = routes.downloadFile(client.Utils.toURI(sp.path))
+    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path))
   }
 
   def trash(using panels: Panels, fetch: Fetch) = withSafePath { safePath ⇒
@@ -48,7 +49,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     fetch.future(_.extract(sp).future).foreach {
       error ⇒
         error match {
-          case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+          case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
             panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           case _ ⇒ panels.treeNodePanel.treeNodeManager.invalidCurrentCache
         }

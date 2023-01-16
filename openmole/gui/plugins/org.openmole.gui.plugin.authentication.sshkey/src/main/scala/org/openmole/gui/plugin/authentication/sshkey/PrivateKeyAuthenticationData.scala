@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.gui.ext.data.AuthenticationData
+import org.openmole.gui.shared.data.AuthenticationData
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org

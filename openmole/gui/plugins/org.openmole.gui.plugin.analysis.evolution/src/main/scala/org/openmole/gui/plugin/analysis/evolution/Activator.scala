@@ -17,8 +17,8 @@
  */
 package org.openmole.gui.plugin.analysis.evolution
 
-import org.openmole.gui.ext.server._
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.openmole.gui.server.ext.*
+import org.osgi.framework.{BundleActivator, BundleContext}
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 
 import scala.concurrent.ExecutionContext.Implicits.global

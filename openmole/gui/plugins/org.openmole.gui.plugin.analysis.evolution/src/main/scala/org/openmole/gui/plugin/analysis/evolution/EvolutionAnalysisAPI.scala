@@ -1,9 +1,9 @@
 package org.openmole.gui.plugin.analysis.evolution
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import org.openmole.plugin.method.evolution.data._
 
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import org.openmole.gui.ext.api.*
 
 trait EvolutionAnalysisAPI extends RESTAPI {

@@ -18,15 +18,14 @@ package org.openmole.gui.plugin.wizard.netlogo
  */
 
 import org.openmole.core.services.Services
-import org.openmole.gui.ext.server.{APIServer, WizardUtils, utils}
 import cats.effect.IO
 import org.http4s.HttpRoutes
-import org.openmole.gui.ext.data.*
-import org.openmole.gui.ext.data.DataUtils.*
+import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.tool.file.*
-import org.openmole.gui.ext.server.*
-import org.openmole.gui.ext.server.utils.*
-
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
 import util.{Failure, Success, Try}
 
 class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
@@ -44,12 +43,12 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
   object impl {
 
     import s._
-    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def toTask(target: SafePath, mmd: ModelMetadata): Unit = {
 
       //  val modelMetadata = parse(target)
-      import org.openmole.gui.ext.data.ServerFileSystemContext.project
+      import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
       val modelData = WizardUtils.wizardModelData(mmd.inputs, mmd.outputs, Some("inputs"), Some("outputs"))
       val task = s"${

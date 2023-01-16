@@ -2,10 +2,10 @@ package org.openmole.gui.client.core
 
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L._
 import org.scalajs.dom.raw.{ HTMLElement, HTMLLabelElement }
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 
 /*
  * Copyright (C) 27/07/15 // mathieu.leclaire@openmole.org
@@ -65,7 +65,7 @@ import org.openmole.gui.ext.client._
 //            Seq(
 //              FixedCell(span(wordWrap := "break-word")(a(error.errorMessage, pointer, fontSize := 13, scalaJsDom.all.color := "#222", textDecoration.underline, onclick := { () ⇒ toggleDetail(id) })), 0),
 //              FixedCell(levelLabel(error.level)(badge(nb.toString, environmentErrorBadge)), 1),
-//              FixedCell(span(fontSize := 13, textCenter)(org.openmole.gui.ext.client.Utils.longToDate(date)), 2)
+//              FixedCell(span(fontSize := 13, textCenter)(org.openmole.gui.client.ext.Utils.longToDate(date)), 2)
 //            ), Seq(borderTop := "2px solid white" /*, backgroundColor := "#ff000033"*/ )
 //          )
 //        }),

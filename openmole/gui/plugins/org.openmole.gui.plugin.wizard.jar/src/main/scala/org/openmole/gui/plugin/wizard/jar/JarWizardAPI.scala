@@ -18,7 +18,7 @@
 //package org.openmole.gui.plugin.wizard.jar
 //
 //import org.openmole.core.workspace.Workspace
-//import org.openmole.gui.ext.data._
+//import org.openmole.gui.shared.data.*
 //
 //trait JarWizardAPI {
 //  def toTask(

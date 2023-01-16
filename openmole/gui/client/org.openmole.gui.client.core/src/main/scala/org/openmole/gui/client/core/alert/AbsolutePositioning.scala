@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core.alert
 
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 
 import com.raquo.laminar.api.L._
 import scaladget.bootstrapnative.bsn._

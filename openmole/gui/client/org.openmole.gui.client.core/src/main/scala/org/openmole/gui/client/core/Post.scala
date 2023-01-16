@@ -1,7 +1,7 @@
 //package org.openmole.gui.client.core
 //
 //import org.openmole.gui.client.core.alert.{ BannerLevel }
-//import org.openmole.gui.ext.client.OMPost
+//import org.openmole.gui.client.ext.OMPost
 //
 //import scala.concurrent.duration.Duration
 //import scala.concurrent.duration._

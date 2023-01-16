@@ -17,7 +17,7 @@ package org.openmole.gui.plugin.analysis
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.client.ext.*
 
 package object evolution {
  class APIClientImpl(val settings: ClientSettings) extends EvolutionAnalysisAPI with APIClient

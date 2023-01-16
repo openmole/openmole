@@ -21,7 +21,7 @@ import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import org.scalajs.dom.raw.HTMLFormElement
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 import com.raquo.laminar.api.L._
 
 class ResetPassword {

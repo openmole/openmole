@@ -26,7 +26,6 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.location.*
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.gui.ext.server.utils
 import org.openmole.gui.server.jscompile.{JSPack, Webpack}
 import org.openmole.tool.crypto.{Cypher, KeyStore}
 import org.openmole.tool.file.*
@@ -37,8 +36,8 @@ import org.http4s.blaze.server.*
 import org.http4s.dsl.io.*
 import org.http4s.implicits.*
 import org.http4s.server.Router
-import org.openmole.gui.ext.server.GUIPluginRegistry
 import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
+import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
 import org.openmole.tool.crypto.Cypher
 
 import java.io.File

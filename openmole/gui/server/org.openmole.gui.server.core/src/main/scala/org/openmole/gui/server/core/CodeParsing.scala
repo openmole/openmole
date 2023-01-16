@@ -1,8 +1,8 @@
 package org.openmole.gui.server.core
 
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.DataUtils._
 
 import scala.io.Source
 
@@ -143,7 +143,7 @@ object CodeParsing {
 
   //  def netlogoParsing(safePath: SafePath)(implicit workspace: Workspace): LaunchingCommand = {
   //
-  //    import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  //    import org.openmole.gui.shared.data.ServerFileSystemContext.project
   //
   //    val lines = Source.fromFile(safePath).getLines.toArray
   //

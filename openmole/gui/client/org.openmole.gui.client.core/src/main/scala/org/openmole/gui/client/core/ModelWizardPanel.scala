@@ -18,21 +18,22 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
-import org.openmole.gui.client.core.files._
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileType._
+import org.openmole.gui.client.core.files.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.FileType.*
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalajs.dom.raw.{HTMLDivElement, HTMLElement, HTMLInputElement}
-import org.openmole.gui.ext.client._
-import com.raquo.laminar.api.L._
-import Waiter._
-import org.openmole.gui.ext.data.DataUtils._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import org.openmole.gui.client.ext.*
+import com.raquo.laminar.api.L.*
+import Waiter.*
+import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.shared.data.DataUtils.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 import org.openmole.gui.client.tool.{OMTags, OptionsDiv, TagBadge}
-import org.openmole.gui.ext.client.FileManager
+import org.openmole.gui.shared.data.{WizardGUIPlugin, WizardPluginFactory}
 import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
@@ -200,7 +201,7 @@ object ModelWizardPanel {
                 case Archive ⇒
                   fetch.future(_.extract(tempFile ++ fileName).future).foreach {
                     _ match {
-                      case Some(e: org.openmole.gui.ext.data.ErrorData) ⇒
+                      case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
                         panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
                       case _ ⇒
                         copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }

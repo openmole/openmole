@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.{Fetch, Panels}
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}

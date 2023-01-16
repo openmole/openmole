@@ -37,8 +37,8 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.gui.ext.data.routes._
-import org.openmole.gui.ext.server.{ OMRouter, utils }
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.server.ext.{OMRouter, utils}
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.file.*
 import org.openmole.tool.lock.LockRepository

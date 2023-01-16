@@ -20,18 +20,18 @@ package org.openmole.gui.client.core
 import org.openmole.core.market._
 import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.ext.data.{ ProcessState, Processing }
-import org.openmole.gui.ext.client._
+import org.openmole.gui.shared.data.{ ProcessState, Processing }
+import org.openmole.gui.client.ext._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn._
 import org.openmole.gui.client.core.CoreUtils._
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import Waiter._
 import org.openmole.gui.client.core.files.TreeNodeManager
 
 import com.raquo.laminar.api.L._
-import org.openmole.gui.ext.client.InputFilter
+import org.openmole.gui.client.ext.InputFilter
 
 
 object MarketPanel:

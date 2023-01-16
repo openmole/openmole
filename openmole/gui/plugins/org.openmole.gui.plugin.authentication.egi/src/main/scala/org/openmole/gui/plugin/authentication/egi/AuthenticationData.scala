@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.gui.ext.data
-import org.openmole.gui.ext.data.{ AuthenticationData, ErrorData, MessageErrorData, Test }
+import org.openmole.gui.shared.data.{ AuthenticationData, ErrorData, MessageErrorData, Test }
+import org.openmole.gui.shared.data
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org

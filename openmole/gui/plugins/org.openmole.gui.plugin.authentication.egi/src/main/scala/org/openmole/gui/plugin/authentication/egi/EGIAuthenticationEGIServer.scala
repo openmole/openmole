@@ -22,11 +22,14 @@ import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.services.Services
-import org.openmole.gui.ext.server.utils
 import org.openmole.plugin.environment.egi._
 import scala.util.{Try, Success, Failure}
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.server.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.server.ext.utils
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.ext.api.*
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
 
 object EGIAuthenticationAPIServer {
   val voTest = PreferenceLocation[Seq[String]]("AuthenticationPanel", "voTest", Some(Seq[String]()))

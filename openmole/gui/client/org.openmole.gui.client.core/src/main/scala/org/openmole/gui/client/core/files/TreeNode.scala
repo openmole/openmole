@@ -17,9 +17,11 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.client.Utils._
+import org.openmole.gui.client.ext.Utils.*
+import org.openmole.gui.shared.data.DataUtils
 
 import scala.concurrent.Future
 

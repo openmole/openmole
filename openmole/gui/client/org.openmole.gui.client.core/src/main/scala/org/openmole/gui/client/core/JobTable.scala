@@ -1,8 +1,8 @@
 //package org.openmole.gui.client.core
 //
 //import org.openmole.gui.client.core.ExecutionPanel.{ CapsuleView, EnvironmentView, JobView, SubScript }
-//import org.openmole.gui.ext.data._
-//import org.openmole.gui.ext.client.omsheet
+//import org.openmole.gui.shared.data.*
+//import org.openmole.gui.client.ext.omsheet
 //import scaladget.bootstrapnative.bsn
 //import bsn._
 //import org.openmole.gui.ext.api.Api
@@ -15,7 +15,7 @@
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import boopickle.Default._
 //import autowire._
-//import org.openmole.gui.ext.data.ExecutionInfo.CapsuleExecution
+//import org.openmole.gui.shared.data.ExecutionInfo.CapsuleExecution
 //
 //import scala.scalajs.js.timers
 //import scala.scalajs.js.timers.SetTimeoutHandle

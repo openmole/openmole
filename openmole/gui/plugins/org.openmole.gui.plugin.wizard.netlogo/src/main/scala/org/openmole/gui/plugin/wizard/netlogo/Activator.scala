@@ -17,10 +17,10 @@
  */
 package org.openmole.gui.plugin.wizard.netlogo
 
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.osgi.framework.{BundleActivator, BundleContext}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.server.*
+import org.openmole.gui.server.ext.{GUIPluginInfo, GUIPluginRegistry, OMRouter}
 
 class Activator extends BundleActivator {
 

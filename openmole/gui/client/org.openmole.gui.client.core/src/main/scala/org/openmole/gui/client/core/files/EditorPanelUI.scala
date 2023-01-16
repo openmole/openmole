@@ -1,23 +1,23 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileExtension._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.FileExtension._
 
 import scala.scalajs.js
 import scaladget.ace._
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-import org.openmole.gui.ext.data.DataUtils._
+import org.openmole.gui.shared.data.DataUtils._
 
 import scala.scalajs.js.JSConverters._
-import org.openmole.gui.ext.client._
+import org.openmole.gui.client.ext._
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
 import com.raquo.laminar.api.L._
 import com.raquo.laminar.builders.DomEventStreamPropBuilder
 import com.raquo.laminar.nodes.ReactiveElement
-import org.openmole.gui.ext.data
+import org.openmole.gui.shared.data
 import org.scalajs.dom.MouseEvent
 import scaladget.bootstrapnative.Tools.MyPopoverBuilder
 import scala.scalajs.js.timers._

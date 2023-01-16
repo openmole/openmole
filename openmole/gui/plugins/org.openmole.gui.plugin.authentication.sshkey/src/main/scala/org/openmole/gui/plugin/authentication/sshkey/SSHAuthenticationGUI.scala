@@ -18,14 +18,14 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data.{AuthenticationPlugin, AuthenticationPluginFactory}
-import org.openmole.gui.ext.client.{FileUploaderUI, flexColumn, flexRow}
+import org.openmole.gui.client.ext.{FileUploaderUI, flexColumn, flexRow}
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation._
 import com.raquo.laminar.api.L._
+import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
 
 import scala.scalajs.js
 

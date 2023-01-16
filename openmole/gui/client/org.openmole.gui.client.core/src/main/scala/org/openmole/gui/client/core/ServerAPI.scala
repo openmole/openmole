@@ -17,7 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import scala.concurrent.Future
 
 trait ServerAPI:

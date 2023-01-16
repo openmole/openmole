@@ -26,11 +26,11 @@ import boopickle.Default._
 import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import org.openmole.gui.ext.server
 import org.openmole.gui.ext.server._
 import org.openmole.tool.file._
-import org.openmole.gui.ext.client.OMPost
+import org.openmole.gui.client.ext.OMPost
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -40,7 +40,7 @@ import org.openmole.gui.ext.server.utils._
 class JarWizardApiImpl(s: Services) extends JarWizardAPI {
 
   import s._
-  import org.openmole.gui.ext.data.ServerFileSystemContext.project
+  import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
   def toTask(
     target:         SafePath,
@@ -56,7 +56,7 @@ class JarWizardApiImpl(s: Services) extends JarWizardAPI {
       _.safePath.name
     })
     val task = s"${executableName.split('.').head.toLowerCase.filterNot(_.isDigit).replace("-", "")}Task"
-    val jarResourceLine: (String, Seq[org.openmole.gui.ext.data.ErrorData]) = {
+    val jarResourceLine: (String, Seq[org.openmole.gui.shared.data.ErrorData]) = {
       if (data.embedAsPlugin) {
         data.plugin.map { p ⇒
           val errors = utils.addPlugins(Seq(data.jarPath))

@@ -2,18 +2,19 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.client.core.Waiter._
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.client._
-import scaladget.bootstrapnative.bsn._
-import org.scalajs.dom.raw._
-import org.openmole.gui.client.core._
+import org.openmole.gui.client.core.Waiter.*
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.*
+import scaladget.bootstrapnative.bsn.*
+import org.scalajs.dom.raw.*
+import org.openmole.gui.client.core.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import TreeNode._
-import org.openmole.gui.ext.client.FileManager
-import com.raquo.laminar.api.L._
+import TreeNode.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
+import org.openmole.gui.shared.data.PluginServices
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org

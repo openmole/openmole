@@ -17,15 +17,15 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.ext.client._
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.ext.*
 
 import scala.concurrent.Future
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data._
-import com.raquo.laminar.api.L._
+import org.openmole.gui.shared.data.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 

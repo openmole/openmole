@@ -1,20 +1,21 @@
 package org.openmole.gui.server.core
 
-import org.openmole.core.fileservice._
+import org.openmole.core.fileservice.*
 import org.openmole.core.highlight.HighLight
-import org.openmole.core.pluginmanager._
-import org.openmole.tool.file._
-import org.openmole.tool.stream._
-import org.openmole.core.pluginmanager._
-import org.openmole.core.pluginregistry._
-import org.openmole.core.workspace._
+import org.openmole.core.pluginmanager.*
+import org.openmole.tool.file.*
+import org.openmole.tool.stream.*
+import org.openmole.core.pluginmanager.*
+import org.openmole.core.pluginregistry.*
+import org.openmole.core.workspace.*
 import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.Services
-import org.openmole.gui.ext.server._
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils
 import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object Plugins extends JavaLogger {
 

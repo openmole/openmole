@@ -1,23 +1,24 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.client.Utils._
-import scaladget.bootstrapnative.bsn._
-import org.openmole.gui.ext.client._
-import org.openmole.gui.client.core._
+import org.openmole.gui.client.ext.Utils.*
+import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.core.*
 import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.client.tool.plot.Plot._
-import org.openmole.gui.client.tool.plot._
-import org.openmole.gui.ext.client.FileManager
-import scaladget.bootstrapnative.Popup._
+import org.openmole.gui.client.tool.plot.Plot.*
+import org.openmole.gui.client.tool.plot.*
+import scaladget.bootstrapnative.Popup.*
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.Table.{BSTableStyle, DataRow}
 
-import scala.scalajs.js.timers._
-import com.raquo.laminar.api.L._
+import scala.scalajs.js.timers.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
+import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.shared.data.DataUtils
 
 object TreeNodeTabs {
 

@@ -1,6 +1,6 @@
 package org.openmole.gui.client.tool.plot
 
-import org.openmole.gui.ext.data.{ SequenceData, SequenceHeader }
+import org.openmole.gui.shared.data.{ SequenceData, SequenceHeader }
 import Plot._
 import org.openmole.gui.client.tool.plot
 import scaladget.bootstrapnative.bsn._

@@ -17,7 +17,7 @@
  */
 package org.openmole.gui.plugin.wizard.r
 
-import org.openmole.gui.ext.data.*
+import org.openmole.gui.shared.data.*
 import org.openmole.gui.ext.api.*
 
 trait RWizardAPI extends RESTAPI {

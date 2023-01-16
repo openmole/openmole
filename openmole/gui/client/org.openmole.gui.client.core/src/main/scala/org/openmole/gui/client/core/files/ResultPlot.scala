@@ -5,7 +5,7 @@ import org.openmole.plotlyjs.PlotlyImplicits.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.tool.plot.{PlotSettings, Plotter, ScatterPlot, SplomPlot, Tools, XYPlot}
-import org.openmole.gui.ext.data.SequenceData
+import org.openmole.gui.shared.data.SequenceData
 import org.openmole.plotlyjs.*
 
 object ResultPlot {

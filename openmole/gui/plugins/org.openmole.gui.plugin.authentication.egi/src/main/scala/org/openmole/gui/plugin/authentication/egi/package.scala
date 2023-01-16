@@ -18,7 +18,7 @@ package org.openmole.gui.plugin.authentication
  */
 
 
-import org.openmole.gui.ext.client.*
+import org.openmole.gui.client.ext.*
 
 package object egi {
 
