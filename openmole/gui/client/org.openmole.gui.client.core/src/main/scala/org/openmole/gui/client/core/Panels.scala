@@ -39,7 +39,20 @@ object Panels:
       treeNodeManager,
       bannerAlert = bannerAlert)
 
+  def apply() =
+    val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
+    val treeNodeTabs = new TreeNodeTabs
+    val alertPanel = new AlertPanel
+    val bannerAlert = new BannerAlert
+    val tabContent = new TabContent
+    val pluginPanel = new PluginPanel
+    val fileDisplayer = new FileDisplayer
+    val executionPanel = new ExecutionPanel
+    val treeNodePanel = new TreeNodePanel
+    val settingsView = new SettingsView
+    val connection = new Connection
 
+    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
 
 case class Panels(
   treeNodePanel: TreeNodePanel,

@@ -278,23 +278,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
 @JSExportTopLevel(name = "openmole_library")
 @JSExportAll
 object App {
-
-  lazy val panels =
-    val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
-    val treeNodeTabs = new TreeNodeTabs
-    val alertPanel = new AlertPanel
-    val bannerAlert = new BannerAlert
-    val tabContent = new TabContent
-    val pluginPanel = new PluginPanel
-    val fileDisplayer = new FileDisplayer
-    val executionPanel = new ExecutionPanel
-    val treeNodePanel = new TreeNodePanel
-    val settingsView = new SettingsView
-    val connection = new Connection
-
-    Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
-
-
+  lazy val panels = Panels()
   lazy val fetch = Fetch(panels.bannerAlert.register)
   lazy val api = OpenMOLERESTServerAPI(fetch)
 
