@@ -8,6 +8,7 @@ import org.openmole.gui.client.ext.*
 import scaladget.bootstrapnative.bsn.*
 import org.scalajs.dom.raw.*
 import org.openmole.gui.client.core.*
+import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import TreeNode.*
@@ -250,7 +251,7 @@ class TreeNodePanel { panel =>
 
   //def filter: FileFilter = treeNodeManager.fileFilter.now
 
-  def downloadFile(safePath: SafePath, onLoaded: (String, Option[String]) ⇒ Unit, saveFile: Boolean, hash: Boolean) = {
+  def downloadFile(safePath: SafePath, onLoaded: (String, Option[String]) ⇒ Unit, saveFile: Boolean, hash: Boolean)(using api: ServerAPI) = {
 
     //    if (FileExtension.isOMS(safePath.name))
     //      OMPost()[Api].hash(safePath).call().foreach { h ⇒
@@ -267,7 +268,7 @@ class TreeNodePanel { panel =>
     )
   }
 
-  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, fetch: Fetch): HtmlElement =
+  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, fetch: Fetch, api: ServerAPI): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
         treeNodeManager.switch(safePath)
@@ -290,7 +291,7 @@ class TreeNodePanel { panel =>
   //    case _                ⇒
   //  }
 
-  def treeView(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Div = {
+  def treeView(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Div =
     div(cls := "file-scrollable-content",
       children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
@@ -326,9 +327,8 @@ class TreeNodePanel { panel =>
           }
       }
     )
-  }
 
-  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Unit = {
+  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Unit =
     if (safePath.extension.displayable) {
       downloadFile(
         safePath,
@@ -340,9 +340,8 @@ class TreeNodePanel { panel =>
         }
       )
     }
-  }
 
-  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch): Unit = tn match {
+  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Unit = tn match {
     case fn: FileNode ⇒
       val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
@@ -409,7 +408,7 @@ class TreeNodePanel { panel =>
         case _ ⇒ PluginState(false, false)
       })
 
-    def render(using panels: Panels)(using fetch: Fetch): HtmlElement = {
+    def render(using panels: Panels)(using fetch: Fetch, api: ServerAPI): HtmlElement = {
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s ⇒ if (isSelected(s)) toolBoxColor else "" },
@@ -462,7 +461,7 @@ class TreeNodePanel { panel =>
     }
   )
 
-  def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, fetch: Fetch) = {
+  def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, fetch: Fetch, api: ServerAPI) =
     draggedNode.now().map {
       dragged ⇒
         if (isDir) {
@@ -480,9 +479,8 @@ class TreeNodePanel { panel =>
         }
     }
     draggedNode.set(None)
-  }
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch) =
+  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI) =
     node match
       case fn: FileNode ⇒
         ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))

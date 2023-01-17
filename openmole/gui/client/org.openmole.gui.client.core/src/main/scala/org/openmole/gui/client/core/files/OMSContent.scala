@@ -39,7 +39,7 @@ object OMSContent {
     }
   }
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))

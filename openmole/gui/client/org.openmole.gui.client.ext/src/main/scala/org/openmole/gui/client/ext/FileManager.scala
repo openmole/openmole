@@ -77,9 +77,9 @@ object FileManager {
     fileTransferState: ProcessState ⇒ Unit             = (p: ProcessState) ⇒ {},
     onLoaded:       (String, Option[String]) ⇒ Unit = (s: String, hash: Option[String]) ⇒ {},
     hash:              Boolean                         = false,
-  ) = {
+  )(using api: ServerAPI) = {
 
-    OMFetch(coreAPIClient).future(_.size(safePath).future).foreach { size ⇒
+    api.size(safePath).foreach { size ⇒
       val xhr = new XMLHttpRequest
 
       xhr.onprogress = (e: ProgressEvent) ⇒ {

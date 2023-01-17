@@ -5,6 +5,7 @@ import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}
+import org.openmole.gui.client.ext.ServerAPI
 import scaladget.tools.Utils.uuID
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,41 +15,36 @@ import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
 
-class TabContent {
+class TabContent:
 
   import TabContent.TabData
-
-
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
-  val timer: Var[Option[SetIntervalHandle]] = Var(None)
+  def render(using panels: Panels, fetch: Fetch, api: ServerAPI) =
+    val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  val tabsObserver = Observer[Seq[Tab[TabData]]] { tabs =>
-    if (tabs.isEmpty) {
-      timer.now().foreach { handle =>
-        clearInterval(handle)
+    def tabsObserver =
+      Observer[Seq[Tab[TabData]]] { tabs =>
+        if (tabs.isEmpty) {
+          timer.now().foreach { handle => clearInterval(handle) }
+          timer.set(None)
+        }
       }
-      timer.set(None)
-    }
-  }
 
-  def timerObserver(using panels: Panels, fetch: Fetch) = Observer[Option[SetIntervalHandle]] { handle =>
-    handle match {
-      case None => timer.set(Some(setInterval(15000) {
-        tabsUI.tabs.now().foreach { t => save(t.t) }
-      }))
-      case _ =>
-    }
-  }
+    def timerObserver =
+      Observer[Option[SetIntervalHandle]] {
+        case None =>
+          timer.set(Some(setInterval(15000) {tabsUI.tabs.now().foreach { t => save(t.t) } }))
+        case _ =>
+      }
 
-  def render(using panels: Panels, fetch: Fetch) =
     tabsUI.render.amend(
       margin := "10px",
       tabsUI.tabs --> tabsObserver,
       timer --> timerObserver
     )
 
-  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, fetch: Fetch) = {
+  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
@@ -66,7 +62,7 @@ class TabContent {
     content: HtmlElement,
     onClicked: SafePath => Unit = _ => {},
     onAdded: SafePath => Unit = _ => {},
-    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, fetch: Fetch) = {
+    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
     tabsUI.add(
       Tab(
         tabData,
@@ -100,7 +96,7 @@ class TabContent {
       _.tabID
     }
 
-  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch): Unit = {
+  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit = {
     tabData.editorPanelUI.foreach { editorPanelUI =>
       editorPanelUI.synchronized {
         val (content, hash) = editorPanelUI.code
@@ -153,4 +149,5 @@ class TabContent {
     fontSizeLink(25),
     fontSizeLink(35)
   )
-}
+
+

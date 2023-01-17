@@ -18,11 +18,13 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.*
 import scala.concurrent.Future
 
-trait ServerAPI:
-  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]]
-
 class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
-  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
-    fetch.future(_.copyFiles(safePaths, to, overwrite).future)
+  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = fetch.future(_.copyFiles(safePaths, to, overwrite).future)
+  def size(safePath: SafePath) = fetch.future(_.size(safePath).future)
+
+class StubRestServerAPI extends ServerAPI:
+  override def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] = Future.successful(Seq())
+  override def size(safePath: SafePath): Future[Long] = Future.successful(0L)

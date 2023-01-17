@@ -20,14 +20,7 @@ import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.data.DataUtils
 
-object TreeNodeTabs {
 
-  sealed trait Activity
-
-  object Active extends Activity
-
-  object UnActive extends Activity
-}
 
 import TreeNodeTabs._
 
@@ -68,7 +61,7 @@ sealed trait TreeNodeTab {
 
   def editor: Option[EditorPanelUI]
 
-  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, fetch: Fetch): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit
 
   def resizeEditor: Unit
 
@@ -212,11 +205,11 @@ object TreeNodeTab {
 //  }
 
   case class Editable(
-                       safePath: SafePath,
-                       dataTab: DataTab,
-                       initialContent: String,
-                       initialHash: String,
-                       plotter: Plotter) extends TreeNodeTab {
+    safePath: SafePath,
+    dataTab: DataTab,
+    initialContent: String,
+    initialHash: String,
+    plotter: Plotter) extends TreeNodeTab {
 
     def clone(newSafePath: SafePath): TreeNodeTab = copy(safePath = newSafePath)
 
@@ -255,7 +248,7 @@ object TreeNodeTab {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
     }*/
 
-    def download(afterRefresh: () ⇒ Unit)(using fetch: Fetch): Unit = editor.synchronized {
+    def download(afterRefresh: () ⇒ Unit)(using fetch: Fetch, panels: Panels, api: ServerAPI): Unit = editor.synchronized {
       // val safePath = safePath
 
       FileManager.download(
@@ -274,7 +267,7 @@ object TreeNodeTab {
       )
     }
 
-    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, fetch: Fetch): Unit = {
+    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit = {
       def saveTab = {
         def saved(hash: String) = {
           editorValue.initialContentHash = hash
@@ -613,7 +606,7 @@ object TreeNodeTab {
   }
 
   //FIXME: to be removed
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch): Unit =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
       fetch.future(_.saveFile(safePath, content, Some(hash), overwrite).future).foreach {
@@ -623,7 +616,7 @@ object TreeNodeTab {
       }
     }
 
-  def serverConflictAlert(tabData: TabData)(using panels: Panels, fetch: Fetch) = panels.alertPanel.string(
+  def serverConflictAlert(tabData: TabData)(using panels: Panels, fetch: Fetch, api: ServerAPI) = panels.alertPanel.string(
     s"The file ${tabData.safePath.name} has been modified on the sever. Which version do you want to keep?",
     okaction = { () ⇒ panels.tabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒
@@ -671,6 +664,7 @@ object TreeNodeTab {
 
   object All extends RowFilter
 
+
 }
 
 import TreeNodeTab._
@@ -690,35 +684,64 @@ object DataTab {
              editing: Boolean = false) = DataTab(sequence, view, filter, editing)
 }
 
-class TreeNodeTabs {
 
+object TreeNodeTabs:
+
+  enum Activity:
+    case Active, UnActive
+
+//  def setObservers(using panels: Panels, fetch: Fetch, api: ServerAPI) =
+//    Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
+//      if (tNodeTabs.isEmpty) {
+//        panels.treeNodeTabs.timer.now().foreach { handle =>
+//          clearInterval(handle)
+//        }
+//        panels.treeNodeTabs.timer.set(None)
+//      }
+//    }
+//
+//    Observer[Option[SetIntervalHandle]] { handle =>
+//      handle match {
+//        case None => panels.treeNodeTabs.timer.set(Some(setInterval(15000) {
+//          //        tabsElement.tabs.now.foreach {
+//          //          _.t.saveContent()
+//          //        }
+//          panels.tabContent.tabsUI.tabs.now().foreach { t =>
+//            t.t.editorPanelUI.foreach(epUI => save(t.t.safePath, epUI))
+//          }
+//        }))
+//        case _ =>
+//      }
+//    }
+
+class TreeNodeTabs {
 
   val tabsElement = Tabs.tabs[TreeNodeTab](Seq()).build
 
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
-    if (tNodeTabs.isEmpty) {
-      timer.now().foreach { handle =>
-        clearInterval(handle)
-      }
-      timer.set(None)
-    }
-  }
+//  val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
+//    if (tNodeTabs.isEmpty) {
+//      timer.now().foreach { handle =>
+//        clearInterval(handle)
+//      }
+//      timer.set(None)
+//    }
+//  }
 
-  def timerObserver(using panels: Panels, fetch: Fetch) = Observer[Option[SetIntervalHandle]] { handle =>
-    handle match {
-      case None => timer.set(Some(setInterval(15000) {
-        //        tabsElement.tabs.now.foreach {
-        //          _.t.saveContent()
-        //        }
-        panels.tabContent.tabsUI.tabs.now().foreach { t =>
-          t.t.editorPanelUI.foreach(epUI=> save(t.t.safePath, epUI))
-        }
-      }))
-      case _ =>
-    }
-  }
+//  def timerObserver(using panels: Panels, fetch: Fetch, api: ServerAPI) = Observer[Option[SetIntervalHandle]] { handle =>
+//    handle match {
+//      case None => timer.set(Some(setInterval(15000) {
+//        //        tabsElement.tabs.now.foreach {
+//        //          _.t.saveContent()
+//        //        }
+//        panels.tabContent.tabsUI.tabs.now().foreach { t =>
+//          t.t.editorPanelUI.foreach(epUI=> save(t.t.safePath, epUI))
+//        }
+//      }))
+//      case _ =>
+//    }
+//  }
 
 //  def tab(safePath: SafePath) = {
 //    tabsElement.tabs.now.filter { tab =>

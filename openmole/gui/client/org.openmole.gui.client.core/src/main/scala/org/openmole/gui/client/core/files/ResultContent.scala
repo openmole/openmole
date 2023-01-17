@@ -6,6 +6,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{Fetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.core.files.TreeNodeTab.Raw
+import org.openmole.gui.client.ext.ServerAPI
 
 object ResultContent {
 
@@ -17,7 +18,7 @@ object ResultContent {
 
   object Plot extends ResultView
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
 
     val rowData: RowData = safePath.extension match {
       case FileExtension.CSV => ResultData.fromCSV(initialContent)

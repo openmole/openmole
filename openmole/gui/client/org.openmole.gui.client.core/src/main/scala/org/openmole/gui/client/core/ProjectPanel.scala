@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import Waiter.*
-import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.data.{PluginServices, WizardPluginFactory}
 
 object ProjectPanel {

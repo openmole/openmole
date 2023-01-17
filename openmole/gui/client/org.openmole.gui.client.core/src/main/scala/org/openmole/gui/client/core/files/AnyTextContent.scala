@@ -11,7 +11,7 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AnyTextContent {
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))

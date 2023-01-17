@@ -2,8 +2,9 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
-import org.openmole.gui.shared.data.{GUIPluginAsJS}
+import org.openmole.gui.shared.data.GUIPluginAsJS
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext.ServerAPI
 import org.openmole.gui.shared.data.{ErrorManager, PluginServices, WizardPluginFactory}
 
 /*
@@ -54,6 +55,11 @@ object Panels:
     val connection = new Connection
 
     new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
+
+
+//  def initialize(using fetch: Fetch, api: ServerAPI, panels: Panels) =
+//    TreeNodeTabs.setObservers
+
 
 case class Panels(
   treeNodePanel: TreeNodePanel,

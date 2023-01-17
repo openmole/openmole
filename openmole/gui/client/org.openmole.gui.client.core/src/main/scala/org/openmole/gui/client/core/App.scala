@@ -279,7 +279,6 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
 @JSExportTopLevel(name = "openmole_library")
 @JSExportAll
 object App:
-  lazy val panels = Panels()
   lazy val fetch = Fetch(panels.bannerAlert.register)
   lazy val api = OpenMOLERESTServerAPI(fetch)
 
@@ -288,6 +287,8 @@ object App:
       errorManager = (message, stack) => panels.bannerAlert.registerWithStack(message, stack)
     )
 
+  lazy val panels = Panels()
+  
   val gui = OpenMOLEGUI(using panels, fetch, pluginServices, api)
 
   export gui.*
