@@ -24,7 +24,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path))
   }
 
-  def trash(using panels: Panels, fetch: Fetch) = withSafePath { safePath ⇒
+  def trash(using panels: Panels, api: ServerAPI) = withSafePath { safePath ⇒
     closeToolBox
     CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)) {
       () ⇒
@@ -35,7 +35,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def duplicate(using panels: Panels, fetch: Fetch) = withSafePath { sp ⇒
+  def duplicate(using panels: Panels, api: ServerAPI) = withSafePath { sp ⇒
     val newName = {
       val prefix = sp.path.last
       if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
@@ -45,8 +45,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     CoreUtils.duplicate(sp, newName)
   }
 
-  def extract(using panels: Panels, fetch: Fetch) = withSafePath { sp ⇒
-    fetch.future(_.extract(sp).future).foreach {
+  def extract(using panels: Panels, api: ServerAPI) = withSafePath { sp ⇒
+    api.extract(sp).foreach {
       error ⇒
         error match {
           case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
@@ -57,17 +57,17 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     closeToolBox
   }
 
-  def execute(using panels: Panels, fetch: Fetch) = {
+  def execute(using panels: Panels, api: ServerAPI) = {
     import scala.concurrent.duration._
     withSafePath { sp ⇒
-      fetch.future(_.runScript(ScriptData(sp), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
+      api.runScript(ScriptData(sp), true).foreach { execInfo ⇒
         showExecution()
       }
       closeToolBox
     }
   }
 
-  def toScript(using panels: Panels, fetch: Fetch) =
+  def toScript(using panels: Panels, api: ServerAPI) =
     withSafePath { sp ⇒
       closeToolBox
       Plugins.fetch { p ⇒
@@ -78,10 +78,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       }
     }
 
-  def testRename(safePath: SafePath, to: String)(using panels: Panels, fetch: Fetch) =
+  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI) =
     val newSafePath = safePath.parent ++ to
 
-    fetch.future(_.exists(newSafePath).future).foreach {
+    api.exists(newSafePath).foreach {
       exists ⇒
         if exists
         then
@@ -93,9 +93,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
           actionConfirmation.set(None)
     }
 
-  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, fetch: Fetch) = {
+  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI) = {
     val newNode = safePath.parent ++ to
-    fetch.future(_.move(safePath, safePath.parent ++ to).future).foreach { _ ⇒
+    api.move(safePath, safePath.parent ++ to).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
       panels.treeNodePanel.treeNodeManager.invalidCurrentCache
       panels.tabContent.checkTabs
@@ -104,7 +104,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, fetch: Fetch) = {
+  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI) = {
     pluginState.isPlugged match {
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
@@ -141,7 +141,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)
 
-  def editForm(sp: SafePath)(using panels: Panels, fetch: Fetch): Div = {
+  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI): Div = {
     val renameInput = inputTag(sp.name).amend(
       placeholder := "File name",
       onMountFocus
@@ -179,7 +179,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       })
     )
 
-  def contentRoot(using panels: Panels, fetch: Fetch) = {
+  def contentRoot(using panels: Panels, api: ServerAPI) = {
     div(
       height := "80px",
       child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map {

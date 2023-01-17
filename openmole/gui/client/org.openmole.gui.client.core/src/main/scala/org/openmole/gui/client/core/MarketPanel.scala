@@ -35,7 +35,7 @@ import org.openmole.gui.client.ext.InputFilter
 
 
 object MarketPanel:
-  def apply(manager: TreeNodeManager)(using fetch: Fetch, panels: Panels) =
+  def apply(manager: TreeNodeManager)(using api: ServerAPI, panels: Panels) =
     val marketPanel = new MarketPanel(manager)
 
     marketPanel.overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
@@ -71,7 +71,7 @@ class MarketPanel (manager: TreeNodeManager) {
 
   val overwriteAlert: Var[Option[MarketIndexEntry]] = Var(None)
 
-  def marketTable(using fetch: Fetch) = div(
+  def marketTable(using api: ServerAPI) = div(
     paddingTop := "20",
     children <-- tagFilter.nameFilter.signal.combineWith(marketIndex.signal).combineWith(selectedEntry.signal).map {
       case (_, marketIndex, sEntry) ⇒
@@ -132,14 +132,14 @@ class MarketPanel (manager: TreeNodeManager) {
 
   val marketHeader = span(b("Market place"))
 
-  def marketBody(using fetch: Fetch) = div(
+  def marketBody(using api: ServerAPI) = div(
     tagFilter.tag,
     marketTable
   )
 
-  def marketFooter(using fetch: Fetch) = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
+  def marketFooter(using api: ServerAPI) = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
 
-  def modalDialog(using fetch: Fetch): ModalDialog = ModalDialog(
+  def modalDialog(using api: ServerAPI): ModalDialog = ModalDialog(
     marketHeader,
     marketBody,
     marketFooter,
@@ -147,7 +147,7 @@ class MarketPanel (manager: TreeNodeManager) {
     onopen = () ⇒ {
       marketIndex.now() match {
         case None ⇒
-          fetch.future(_.marketIndex(()).future).foreach { m ⇒
+          api.marketIndex().foreach { m ⇒
             marketIndex.set(Some(m))
           }
         case _ ⇒
@@ -157,22 +157,22 @@ class MarketPanel (manager: TreeNodeManager) {
   )
 
 
-  def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using fetch: Fetch) =
-    fetch.future(_.deleteFiles(Seq(sp)).future).foreach { d ⇒
+  def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using api: ServerAPI) =
+    api.deleteFiles(Seq(sp)).foreach { d ⇒
       download(marketIndexEntry)
     }
 
-  def exists(sp: SafePath, entry: MarketIndexEntry)(using fetch: Fetch) =
-    fetch.future(_.exists(sp).future).foreach { b ⇒
+  def exists(sp: SafePath, entry: MarketIndexEntry)(using api: ServerAPI) =
+    api.exists(sp).foreach { b ⇒
       if (b) overwriteAlert.set(Some(entry))
       else download(entry)
     }
 
-  def download(entry: MarketIndexEntry)(using fetch: Fetch) =
+  def download(entry: MarketIndexEntry)(using api: ServerAPI) =
     val path = manager.dirNodeLine.now() ++ entry.name
     downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
 
-    fetch.future(_.getMarketEntry(entry, path).future).foreach { d ⇒
+    api.getMarketEntry(entry, path).foreach { d ⇒
       downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
       downloading.now().headOption.foreach(_ ⇒ modalDialog.hide)
       manager.invalidCurrentCache

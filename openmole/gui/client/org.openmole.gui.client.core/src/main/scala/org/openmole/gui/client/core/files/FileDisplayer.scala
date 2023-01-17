@@ -29,7 +29,7 @@ import scaladget.bootstrapnative.bsn
 
 class FileDisplayer:
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices)(using panels: Panels, api: ServerAPI) = {
     panels.tabContent.alreadyDisplayed(safePath) match {
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
@@ -38,13 +38,13 @@ class FileDisplayer:
           case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
           case _: FileExtension.EditableFile => AnyTextContent.addTab(safePath, content, hash)
           case FileExtension.MDScript ⇒
-            fetch.future(_.mdToHtml(safePath).future).foreach { htmlString ⇒
+            api.mdToHtml(safePath).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
             }
           case FileExtension.OpenMOLEResult ⇒
-            fetch.future(_.findVisualisationPlugin(safePath).future).foreach {
+            api.findVisualisationPlugin(safePath).foreach {
               case Some(plugin) ⇒
                 val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
               //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))

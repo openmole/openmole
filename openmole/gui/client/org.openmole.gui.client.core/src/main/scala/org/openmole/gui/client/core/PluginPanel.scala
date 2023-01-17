@@ -7,6 +7,7 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeManager
+import org.openmole.gui.client.ext.ServerAPI
 import scaladget.bootstrapnative.bsn
 
 //
@@ -31,9 +32,9 @@ class PluginPanel:
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
-  def getPlugins(using fetch: Fetch) = fetch(_.listPlugins(()).future) { p ⇒ plugins.set(p.toSeq) }
+  def getPlugins(using api: ServerAPI) = api.listPlugins().map { p ⇒ plugins.set(p.toSeq) }
 
-  def pluginTable(using fetch: Fetch, panels: Panels) =
+  def pluginTable(using api: ServerAPI, panels: Panels) =
     div(
       children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
         case (ps, _) ⇒
@@ -56,7 +57,7 @@ class PluginPanel:
       }
     )
 
-  def render(using fetch: Fetch, panels: Panels): HtmlElement =
+  def render(using api: ServerAPI, panels: Panels): HtmlElement =
     div(
       div(
         cls := "expandable-title",

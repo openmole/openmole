@@ -39,7 +39,7 @@ object OMSContent {
     }
   }
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
@@ -64,7 +64,7 @@ object OMSContent {
               compileDisabled.set(true)
 
               panels.tabContent.save(tabData, _ ⇒
-                fetch.future(_.compileScript(ScriptData(safePath)).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { errorDataOption ⇒
+                api.compileScript(ScriptData(safePath)).foreach { errorDataOption ⇒
                   compileDisabled.set(false)
                   setError(safePath, errorDataOption)
                   editor.editor.focus()
@@ -76,7 +76,7 @@ object OMSContent {
           button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
-              fetch.future(_.runScript(ScriptData(safePath), true).future, timeout = 120 seconds, warningTimeout = 60 seconds).foreach { execInfo ⇒
+              api.runScript(ScriptData(safePath), true).foreach { execInfo ⇒
                 ExecutionPanel.open
               }
             )

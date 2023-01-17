@@ -39,7 +39,7 @@ import scala.scalajs.js.timers.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServices, api: ServerAPI):
+class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: ServerAPI):
 
   def connection() =
     render(
@@ -61,7 +61,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
       )
     )
 
-    fetch.future(_.shutdown(()).future)
+    api.shutdown()
     render(dom.document.body, stoppedDiv)
 
 
@@ -70,7 +70,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
 
     def setTimer = {
       timer.set(Some(setInterval(5000) {
-        fetch.future(_.isAlive(()).future, 3 seconds, 5 minutes).foreach { x ⇒
+        api.isAlive().foreach { x ⇒
           if (x) {
             CoreUtils.setRoute(s"/${connectionRoute}")
             timer.now().foreach {
@@ -91,7 +91,7 @@ class OpenMOLEGUI(using panels: Panels, fetch: Fetch, pluginServices: PluginServ
       )
     )
 
-    fetch.future(_.restart(()).future)
+    api.restart()
     render(dom.document.body, restartedDiv)
 
 
@@ -288,8 +288,8 @@ object App:
     )
 
   lazy val panels = Panels()
-  
-  val gui = OpenMOLEGUI(using panels, fetch, pluginServices, api)
+
+  val gui = OpenMOLEGUI(using panels, pluginServices, api)
 
   export gui.*
 

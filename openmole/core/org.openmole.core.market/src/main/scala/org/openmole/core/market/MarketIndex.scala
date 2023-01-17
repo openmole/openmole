@@ -21,7 +21,10 @@ import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.workspace.Workspace
 
 
-case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]) {
+case class MarketIndexEntry(name: String, archive: String, readme: Option[String], tags: Seq[String]):
   def url: String = org.openmole.core.buildinfo.marketURL(archive)
-}
+
+object MarketIndex:
+  def empty = MarketIndex(Seq.empty)
+
 case class MarketIndex(entries: Seq[MarketIndexEntry])

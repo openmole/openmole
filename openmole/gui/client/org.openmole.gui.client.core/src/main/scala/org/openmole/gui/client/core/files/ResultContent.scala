@@ -18,7 +18,7 @@ object ResultContent {
 
   object Plot extends ResultView
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, fetch: Fetch, api: ServerAPI) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI) = {
 
     val rowData: RowData = safePath.extension match {
       case FileExtension.CSV => ResultData.fromCSV(initialContent)

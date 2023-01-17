@@ -676,8 +676,6 @@ lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data") ena
   guiSettings,
   scalaJSSettings)
 
-
-
 lazy val sharedGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = Seq("*") /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
   //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
   libraryDependencies += Libraries.endpoints4s,

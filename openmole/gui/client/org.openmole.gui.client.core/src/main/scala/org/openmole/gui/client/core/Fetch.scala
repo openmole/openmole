@@ -29,6 +29,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 import org.openmole.gui.client.ext.{CoreAPIClientImpl, coreAPIClient}
 
+
 class Fetch(alert: (String, BannerLevel) => Unit):
 
   def future[O](
@@ -45,16 +46,16 @@ class Fetch(alert: (String, BannerLevel) => Unit):
       onFailed = t => alert(s"The request ${f} failed with error $t", BannerLevel.Critical)
     )
 
-  def apply[O, R](
-    r: CoreAPIClientImpl => Future[O],
-    timeout:        FiniteDuration                     = 60 seconds,
-    warningTimeout: FiniteDuration                     = 10 seconds)(action: O => R) =
-    //import scala.concurrent.ExecutionContext.Implicits.global
-//    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
-    val f = future(r, timeout, warningTimeout)
-
-    f.onComplete {
-      case Success(r) ⇒ action(r)
-      case _ =>
-    }
-
+//  def apply[O, R](
+//    r: CoreAPIClientImpl => Future[O],
+//    timeout:        FiniteDuration                     = 60 seconds,
+//    warningTimeout: FiniteDuration                     = 10 seconds)(action: O => R) =
+//    //import scala.concurrent.ExecutionContext.Implicits.global
+////    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
+//    val f = future(r, timeout, warningTimeout)
+//
+//    f.onComplete {
+//      case Success(r) ⇒ action(r)
+//      case _ =>
+//    }
+//

@@ -21,6 +21,7 @@ import org.openmole.gui.client.core.{CoreUtils, Fetch, Panels}
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
+import org.openmole.gui.client.ext.ServerAPI
 import scalaz.Success
 
 import scala.concurrent.Future
@@ -98,26 +99,26 @@ class TreeNodeManager {
 
   def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
 
-  def switchAlphaSorting(using fetch: Fetch) =
+  def switchAlphaSorting(using api: ServerAPI) =
     updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
     invalidCurrentCache
 
-  def switchTimeSorting(using fetch: Fetch) =
+  def switchTimeSorting(using api: ServerAPI) =
     updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
     invalidCurrentCache
 
-  def switchSizeSorting(using fetch: Fetch) =
+  def switchSizeSorting(using api: ServerAPI) =
     updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
     invalidCurrentCache
 
-  def invalidCurrentCache(using fetch: Fetch) = invalidCache(dirNodeLine.now())
+  def invalidCurrentCache(using api: ServerAPI) = invalidCache(dirNodeLine.now())
 
-  def invalidCache(sp: SafePath)(using fetch: Fetch) = {
+  def invalidCache(sp: SafePath)(using api: ServerAPI) = {
     sons.update(_.filterNot(_._1.path == sp.path))
     computeCurrentSons
   }
 
-  def computeCurrentSons(using fetch: Fetch) = {
+  def computeCurrentSons(using api: ServerAPI) = {
     val cur = dirNodeLine.now()
 
     def updateSons(safePath: SafePath) = {
@@ -138,7 +139,7 @@ class TreeNodeManager {
 
   def resetFileFinder = findFilesContaining.set((None, Seq()))
 
-  def find(findString: String)(using fetch: Fetch) = {
+  def find(findString: String)(using api: ServerAPI) = {
     def updateSearch = {
       val safePath: SafePath = dirNodeLine.now()
       CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>

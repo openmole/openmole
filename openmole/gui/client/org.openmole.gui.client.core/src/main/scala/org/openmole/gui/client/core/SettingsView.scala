@@ -70,26 +70,26 @@ class SettingsView:
       }
     )
 
-  def docButton(using fetch: Fetch) = a(href := "#", onClick --> { _ ⇒
-    fetch(_.omSettings(()).future) { sets ⇒
+  def docButton(using api: ServerAPI) = a(href := "#", onClick --> { _ ⇒
+    api.omSettings().map{ sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))
 
-  def jvmInfoButton(using fetch: Fetch) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
+  def jvmInfoButton(using api: ServerAPI) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
     timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }
   })
 
-  def updateJVMInfos(using fetch: Fetch) =
-    fetch.future(_.jvmInfos(()).future).foreach { j ⇒
+  def updateJVMInfos(using api: ServerAPI) =
+    api.jvmInfos().foreach { j ⇒
       jvmInfos.set(Some(j))
     }
 
 
-  def setJVMTimer(using fetch: Fetch) = {
+  def setJVMTimer(using api: ServerAPI) = {
     timer.set(Some(timers.setInterval(3000) {
       updateJVMInfos
     }))

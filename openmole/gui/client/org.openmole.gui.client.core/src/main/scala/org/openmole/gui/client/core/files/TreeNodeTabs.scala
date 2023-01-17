@@ -61,7 +61,7 @@ sealed trait TreeNodeTab {
 
   def editor: Option[EditorPanelUI]
 
-  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI): Unit
 
   def resizeEditor: Unit
 
@@ -248,7 +248,7 @@ object TreeNodeTab {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
     }*/
 
-    def download(afterRefresh: () ⇒ Unit)(using fetch: Fetch, panels: Panels, api: ServerAPI): Unit = editor.synchronized {
+    def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = editor.synchronized {
       // val safePath = safePath
 
       FileManager.download(
@@ -257,7 +257,7 @@ object TreeNodeTab {
         (cont: String, hash) ⇒ {
           editorValue.setCode(cont, hash.get)
           if (isCSV) {
-            fetch.future(_.sequence(safePath).future).foreach {
+            api.sequence(safePath).foreach {
               seq ⇒ //switchView(seq)
             }
           }
@@ -267,7 +267,7 @@ object TreeNodeTab {
       )
     }
 
-    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit = {
+    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = {
       def saveTab = {
         def saved(hash: String) = {
           editorValue.initialContentHash = hash
@@ -606,17 +606,17 @@ object TreeNodeTab {
   }
 
   //FIXME: to be removed
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, fetch: Fetch, api: ServerAPI): Unit =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
-      fetch.future(_.saveFile(safePath, content, Some(hash), overwrite).future).foreach {
+      api.saveFile(safePath, content, Some(hash), overwrite).foreach {
         case (saved, savedHash) ⇒
           if (saved) editorPanelUI.onSaved(savedHash)
           else serverConflictAlert(TabData(safePath, Some(editorPanelUI)))
       }
     }
 
-  def serverConflictAlert(tabData: TabData)(using panels: Panels, fetch: Fetch, api: ServerAPI) = panels.alertPanel.string(
+  def serverConflictAlert(tabData: TabData)(using panels: Panels, api: ServerAPI) = panels.alertPanel.string(
     s"The file ${tabData.safePath.name} has been modified on the sever. Which version do you want to keep?",
     okaction = { () ⇒ panels.tabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒

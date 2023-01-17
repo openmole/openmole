@@ -25,7 +25,7 @@ object ProjectPanel {
     )
   }
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch, pluginServices: PluginServices) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, pluginServices: PluginServices) = {
 
     // 1- Empty project
     def emptyProject = {

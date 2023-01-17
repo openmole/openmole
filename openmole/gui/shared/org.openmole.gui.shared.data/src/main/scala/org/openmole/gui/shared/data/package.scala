@@ -211,11 +211,11 @@ package data {
   }
 
   case class EnvironmentError(
-                               environmentId: EnvironmentId,
-                               errorMessage: String,
-                               stack: ErrorData,
-                               date: Long,
-                               level: ErrorStateLevel) extends Ordered[EnvironmentError] {
+    environmentId: EnvironmentId,
+    errorMessage: String,
+    stack: ErrorData,
+    date: Long,
+    level: ErrorStateLevel) extends Ordered[EnvironmentError] {
     def compare(that: EnvironmentError) = date compare that.date
   }
 
@@ -229,9 +229,9 @@ package data {
 
   case class ExecutionActivity(executionTime: Long = 0)
 
-  object EnvironmentErrorData {
+  object EnvironmentErrorData:
     def empty = EnvironmentErrorData(Seq())
-  }
+
 
   // datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
   case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
@@ -624,6 +624,9 @@ package data {
       copy(fileSorting = newFileSorting, firstLast = fl)
 
 
+  object ListFilesData:
+    def empty = ListFilesData(Seq(), 0)
+
   case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
 
   object FileFilter {
@@ -636,66 +639,62 @@ package data {
 
   object AuthenticationExtension extends PluginExtensionType
 
+
+  object PluginExtensionData:
+    def empty = PluginExtensionData(Seq.empty, Seq.empty)
+
   //TODO: add other extension points
   case class PluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
 
   type GUIPluginAsJS = String
 
-  trait AuthenticationData {
+  trait AuthenticationData:
     def name: String
-  }
+
 
   trait WizardData
 
-  sealed trait Test {
+  sealed trait Test:
     def passed: Boolean
-
     def message: String
-
     def error: Option[ErrorData]
-  }
 
-  case class PendingTest() extends Test {
+
+  case class PendingTest() extends Test:
     def passed = false
-
     def message = "pending"
-
     def error = None
-  }
 
-  case class FailedTest(message: String, errorValue: ErrorData) extends Test {
+
+  case class FailedTest(message: String, errorValue: ErrorData) extends Test:
     def error = Some(errorValue)
-
     def passed = false
-  }
 
-  case class PassedTest(message: String) extends Test {
+  case class PassedTest(message: String) extends Test:
     def passed = true
-
     def error = None
-  }
 
-  object Test {
+
+  object Test:
     def passed(message: String = "OK") = PassedTest(message)
-
     def pending = PendingTest()
-
     def error(msg: String, err: ErrorData) = FailedTest(msg, err)
-  }
+
 
   case class JVMInfos(javaVersion: String, jvmImplementation: String, processorAvailable: Int, allocatedMemory: Long, totalMemory: Long)
 
   type SequenceHeader = Seq[String]
 
-  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Seq[String]] = Seq()) {
+  object SequenceData:
+    def empty = SequenceData()
 
-    def withRowIndexes = {
+  case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Seq[String]] = Seq()):
+    def withRowIndexes =
       val lineIndexes = (1 to content.length).map {
         _.toString
       }
       copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
-    }
-  }
+
 
   case class WizardModelData(
                               vals: String,

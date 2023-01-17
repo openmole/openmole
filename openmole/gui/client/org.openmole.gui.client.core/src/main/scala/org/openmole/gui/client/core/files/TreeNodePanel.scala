@@ -71,7 +71,7 @@ class TreeNodePanel { panel =>
     toggle(folder, true, file, () ⇒ {})
   }
 
-  def createNewNode(using fetch: Fetch, panels: Panels) = {
+  def createNewNode(using api: ServerAPI, panels: Panels) = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
     addRootDirButton.toggled.now() match {
@@ -110,7 +110,7 @@ class TreeNodePanel { panel =>
 //    })
   })
 
-  def createFileTool(using fetch: Fetch, panels: Panels) =
+  def createFileTool(using api: ServerAPI, panels: Panels) =
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
       addRootDirButton.element,
       newNodeInput.amend(marginLeft := "10px"),
@@ -141,7 +141,7 @@ class TreeNodePanel { panel =>
       })
     )
 
-  def copyOrTrashTool(using fetch: Fetch, api: ServerAPI) = div(
+  def copyOrTrashTool(using api: ServerAPI) = div(
     height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
     children <-- confirmationDiv.signal.map { ac ⇒
       val selected = treeNodeManager.selected
@@ -201,7 +201,7 @@ class TreeNodePanel { panel =>
 
   val multiTool: Var[MultiTool] = Var(Off)
 
-  def fileControler(using fetch: Fetch, panels: Panels, api: ServerAPI) =
+  def fileControler(using panels: Panels, api: ServerAPI) =
     div(
       cls := "file-content",
       child <-- treeNodeManager.dirNodeLine.signal.map { curr ⇒
@@ -268,7 +268,7 @@ class TreeNodePanel { panel =>
     )
   }
 
-  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, fetch: Fetch, api: ServerAPI): HtmlElement =
+  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI): HtmlElement =
     span(cls := "treePathItems", name,
       onClick --> { _ ⇒
         treeNodeManager.switch(safePath)
@@ -281,7 +281,7 @@ class TreeNodePanel { panel =>
       }
     )
 
-  def invalidCacheAnd(todo: () ⇒ Unit)(using fetch: Fetch) = {
+  def invalidCacheAnd(todo: () ⇒ Unit)(using api: ServerAPI) = {
     treeNodeManager.invalidCurrentCache
     todo()
   }
@@ -291,7 +291,7 @@ class TreeNodePanel { panel =>
   //    case _                ⇒
   //  }
 
-  def treeView(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Div =
+  def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Div =
     div(cls := "file-scrollable-content",
       children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
@@ -328,7 +328,7 @@ class TreeNodePanel { panel =>
       }
     )
 
-  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Unit =
+  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit =
     if (safePath.extension.displayable) {
       downloadFile(
         safePath,
@@ -341,7 +341,7 @@ class TreeNodePanel { panel =>
       )
     }
 
-  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI): Unit = tn match {
+  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit = tn match {
     case fn: FileNode ⇒
       val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
       displayNode(tnSafePath)
@@ -362,7 +362,7 @@ class TreeNodePanel { panel =>
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
 
-  def fileClick(todo: () ⇒ Unit)(using fetch: Fetch) =
+  def fileClick(todo: () ⇒ Unit)(using api: ServerAPI) =
     onClick --> { _ ⇒
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
@@ -401,14 +401,14 @@ class TreeNodePanel { panel =>
       )
 
 
-    def toolBox(using fetch: Fetch, panels: Panels) =
+    def toolBox(using api: ServerAPI, panels: Panels) =
       val showExecution = () ⇒ ExecutionPanel.open
       new FileToolBox(tnSafePath, showExecution, panels.treeNodeTabs, tn match {
         case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
         case _ ⇒ PluginState(false, false)
       })
 
-    def render(using panels: Panels)(using fetch: Fetch, api: ServerAPI): HtmlElement = {
+    def render(using panels: Panels, api: ServerAPI): HtmlElement = {
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s ⇒ if (isSelected(s)) toolBoxColor else "" },
@@ -461,13 +461,13 @@ class TreeNodePanel { panel =>
     }
   )
 
-  def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, fetch: Fetch, api: ServerAPI) =
+  def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, api: ServerAPI) =
     draggedNode.now().map {
       dragged ⇒
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            fetch.future(_.move(dragged, to ++ dragged.name).future).foreach {
+            api.move(dragged, to ++ dragged.name).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)
@@ -480,7 +480,7 @@ class TreeNodePanel { panel =>
     }
     draggedNode.set(None)
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, fetch: Fetch, api: ServerAPI) =
+  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI) =
     node match
       case fn: FileNode ⇒
         ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))

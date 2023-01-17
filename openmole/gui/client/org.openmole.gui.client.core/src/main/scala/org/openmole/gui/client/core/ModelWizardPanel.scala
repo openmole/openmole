@@ -155,13 +155,11 @@ object ModelWizardPanel {
   //
 
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, fetch: Fetch) = {
+  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels) = {
 
-    def factory(safePath: SafePath): Option[WizardPluginFactory] = {
+    def factory(safePath: SafePath): Option[WizardPluginFactory] =
       val fileType: FileType = FileType(safePath.name)
-
       wizards.filter { _.fileType == fileType }.headOption
-    }
 
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
       CoreUtils.withTmpDirectory {
@@ -199,7 +197,7 @@ object ModelWizardPanel {
 
               fileType match
                 case Archive ⇒
-                  fetch.future(_.extract(tempFile ++ fileName).future).foreach {
+                  api.extract(tempFile ++ fileName).foreach {
                     _ match {
                       case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
                         panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))

@@ -1,11 +1,11 @@
 package org.openmole.gui.client.core
 
+import org.openmole.gui.client.ext.ServerAPI
 import org.openmole.gui.shared.data.GUIPluginAsJS
-import org.openmole.gui.shared.data.{ PluginExtensionData }
+import org.openmole.gui.shared.data.PluginExtensionData
 import org.openmole.gui.shared.data.{AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel
 /*
@@ -27,13 +27,12 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 object Plugins {
 
-  def fetch(f: Parameters ⇒ Unit)(using fetch: Fetch) = {
-    fetch(_.guiPlugins(()).future) { p ⇒
+  def fetch(f: Parameters ⇒ Unit)(using api: ServerAPI) =
+    api.guiPlugins().map { p ⇒
       val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
       val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
       f(Parameters(authFact, wizardFactories))
     }
-  }
 
   def buildJSObject[T](obj: GUIPluginAsJS) = {
     val toBeEval = s"openmole_library.${obj.split('.').takeRight(2).head}"

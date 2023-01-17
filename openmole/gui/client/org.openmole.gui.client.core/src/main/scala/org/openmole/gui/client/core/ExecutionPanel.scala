@@ -34,7 +34,7 @@ object ExecutionPanel:
   type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
 
-  def open(using fetch: Fetch, panels: Panels) =
+  def open(using api: ServerAPI, panels: Panels) =
     panels.executionPanel.setTimerOn
     panels.executionPanel.updateStaticInfos
     panels.executionPanel.updateExecutionInfo
@@ -71,7 +71,7 @@ class ExecutionPanel:
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
-  def updateExecutionInfo(using fetch: Fetch): Unit = {
+  def updateExecutionInfo(using api: ServerAPI): Unit = {
 
     def delay =
       updating.set(false)
@@ -82,7 +82,7 @@ class ExecutionPanel:
       }
 
     if (updating.compareAndSet(false, true)) {
-      fetch.future(_.allStates(200).future).andThen {
+      api.allStates(200).andThen {
         case Success((execInfos, runningOutputData)) ⇒
           executionDetails.set(execInfos.map { case (k, v) =>
             k -> toExecDetails(v)
@@ -95,7 +95,7 @@ class ExecutionPanel:
     }
   }
 
-  def updateStaticInfos(using fetch: Fetch) = fetch.future(_.staticInfos(()).future).foreach { s ⇒
+  def updateStaticInfos(using api: ServerAPI) = api.staticInfos().foreach { s ⇒
     staticInfos.set(s.toMap)
     //println("Statis infos now " + staticInfos.now().head._1)
     setTimeout(0) { updateExecutionInfo }
