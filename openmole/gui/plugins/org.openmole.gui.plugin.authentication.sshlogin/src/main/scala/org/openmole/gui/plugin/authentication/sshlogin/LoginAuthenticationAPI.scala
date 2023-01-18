@@ -1,7 +1,7 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.api.*
 
 trait LoginAuthenticationAPI extends RESTAPI {
 

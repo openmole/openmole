@@ -20,7 +20,7 @@ package org.openmole.gui.plugin.wizard.netlogo
 import org.openmole.core.services.Services
 import cats.effect.IO
 import org.http4s.HttpRoutes
-import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.tool.file.*

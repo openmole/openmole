@@ -29,7 +29,7 @@
 //import scala.concurrent.Future
 //import scala.scalajs.js.annotation._
 //import com.raquo.laminar.api.L._
-//import org.openmole.gui.ext.api.Api
+//import org.openmole.gui.shared.api.Api
 //import org.openmole.gui.shared.data.DataUtils._
 //import org.openmole.gui.client.ext
 //import scalajs.js

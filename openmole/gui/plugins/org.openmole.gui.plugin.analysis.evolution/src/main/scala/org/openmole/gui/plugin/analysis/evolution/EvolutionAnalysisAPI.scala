@@ -4,7 +4,7 @@ import org.openmole.gui.shared.data.*
 import org.openmole.plugin.method.evolution.data._
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.api.*
 
 trait EvolutionAnalysisAPI extends RESTAPI {
   //def analyse(path: SafePath): Either[ErrorData, AnalysisData.Convergence]

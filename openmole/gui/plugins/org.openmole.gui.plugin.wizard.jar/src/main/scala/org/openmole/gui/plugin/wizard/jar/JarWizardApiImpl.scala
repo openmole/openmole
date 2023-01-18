@@ -25,7 +25,7 @@ import autowire._
 import boopickle.Default._
 import org.openmole.core.services._
 import org.openmole.core.workspace.Workspace
-import org.openmole.gui.ext.api.Api
+import org.openmole.gui.shared.api.Api
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.ext.server
 import org.openmole.gui.ext.server._

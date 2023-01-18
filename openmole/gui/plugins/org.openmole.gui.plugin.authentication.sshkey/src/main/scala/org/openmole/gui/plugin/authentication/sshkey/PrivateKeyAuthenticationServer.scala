@@ -26,7 +26,7 @@ import org.openmole.gui.server.ext.utils
 import org.openmole.plugin.environment.ssh.*
 import util.{Success, Failure, Try}
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 

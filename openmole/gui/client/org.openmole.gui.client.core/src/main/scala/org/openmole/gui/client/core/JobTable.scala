@@ -5,7 +5,7 @@
 //import org.openmole.gui.client.ext.omsheet
 //import scaladget.bootstrapnative.bsn
 //import bsn._
-//import org.openmole.gui.ext.api.Api
+//import org.openmole.gui.shared.api.Api
 //import scaladget.tools
 //import scaladget.tools._
 //import scalatags.JsDom.all._

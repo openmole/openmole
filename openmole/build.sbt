@@ -745,6 +745,9 @@ lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") en
   scalaJSSettings)
 
 
+val build = taskKey[Unit]("build")
+
+
 lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "org.openmole.gui.client.stub") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
   //version := ope,
   //scalaVersion := ScalaVersion,
@@ -763,7 +766,17 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
     "org.openmole.endpoints4s" %%% "xhr-client" % "5.1.0+n"
   )*/
   guiSettings,
-  scalaJSSettings
+  scalaJSSettings,
+
+  build := {
+    val jsBuild = (Compile / fastOptJS / webpack).value.head.data
+    val demoTarget = target.value
+    val demoResource = (Compile / resourceDirectory).value
+
+    IO.copyDirectory(demoResource, demoTarget)
+    IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole.js")
+    (Compile / compile).value
+  }
 ) dependsOn (clientGUI)
 
 

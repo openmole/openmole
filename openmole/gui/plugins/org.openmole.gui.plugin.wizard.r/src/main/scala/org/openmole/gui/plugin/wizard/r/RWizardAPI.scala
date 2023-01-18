@@ -18,7 +18,7 @@
 package org.openmole.gui.plugin.wizard.r
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.ext.api.*
+import org.openmole.gui.shared.api.*
 
 trait RWizardAPI extends RESTAPI {
   val toTask: Endpoint[(SafePath, ModelMetadata), Unit] =
