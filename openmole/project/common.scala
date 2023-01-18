@@ -7,7 +7,7 @@ object common {
 
   def scalaVersionValue = "2.13.9"
   def scala3VersionValue = "3.2.2"
-  def scalajsVersion = "1.11.0"
+  def scalajsVersion = "1.12.0"
 
   def scalaXMLVersion = "2.1.0"
   def gridscaleVersion = "2.43"

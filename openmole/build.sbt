@@ -192,7 +192,7 @@ def allCore = Seq(
   logconfig,
   outputManager,
   openmoleCompiler,
-  project,
+  openmoleProject,
   openmoleBuildInfo,
   module,
   market,
@@ -338,9 +338,8 @@ lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", g
   defaultActivator,
 ) dependsOn(openmoleOSGi, workspace, fileService, openmoleTypes) settings (coreSettings: _*)
 
-lazy val project = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(namespace, openmoleCompiler, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*) settings (
-  Libraries.addScalaLang
-  )
+lazy val openmoleProject = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(namespace, openmoleCompiler, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings: _*) settings (
+  Libraries.addScalaLang)
 
 lazy val openmoleBuildInfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (BuildInfoPlugin) settings(
   //sourceGenerators in Compile += buildInfo.taskValue,
@@ -521,7 +520,7 @@ lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", impo
 lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = Seq("*")) dependsOn (openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
-lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, json, openmoleBuildInfo, project, methodData, replication % "test") settings(
+lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, json, openmoleBuildInfo, openmoleProject, methodData, replication % "test") settings(
   libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
 
 
@@ -653,7 +652,7 @@ lazy val server = OsgiProject(
   "org.openmole.rest.server",
   imports = Seq("org.h2", "!com.sun.*", "*"),
   dynamicImports = Seq("org.eclipse.jetty.*")
-) dependsOn(workflow, openmoleTar, openmoleCollection, project, message, openmoleCrypto, services, module) settings(
+) dependsOn(workflow, openmoleTar, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module) settings(
   libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.codec, Libraries.json4s), Libraries.addScalaLang) settings (scala3Settings: _*)
 
 
@@ -745,6 +744,29 @@ lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") en
   guiSettings,
   scalaJSSettings)
 
+
+lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "org.openmole.gui.client.stub") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
+  //version := ope,
+  //scalaVersion := ScalaVersion,
+  //crossScalaVersions := supportedVersion,
+  name := "org-openmole-gui-client-stub",
+  scalaJSUseMainModuleInitializer := false,
+  webpackBundlingMode := BundlingMode.LibraryAndApplication(),
+  webpackNodeArgs := Seq("--openssl-legacy-provider"),
+  webpackEmitSourceMaps := false,
+  /*libraryDependencies ++= Seq(
+    "com.raquo" %%% "laminar" % laminarVersion,
+    "org.openmole.scaladget" %%% "tools" % scaladgetVersion,
+    "org.openmole.scaladget" %%% "svg" % scaladgetVersion,
+    "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion,
+    "org.scala-js" %%% "scalajs-dom" % scalajsDomVersion,
+    "org.openmole.endpoints4s" %%% "xhr-client" % "5.1.0+n"
+  )*/
+  guiSettings,
+  scalaJSSettings
+) dependsOn (clientGUI)
+
+
 /* -------------------------- Server ----------------------- */
 
 def guiServerDir = guiDir / "server"
@@ -792,7 +814,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   openmoleTar,
   openmoleHash,
   openmoleCollection,
-  project,
+  openmoleProject,
   openmoleDSL,
   batch,
   omrHook,
@@ -805,6 +827,9 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   jsCompile,
   services,
   location)
+
+
+
 
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(dataGUI, workspace, module, services) settings(
   //  libraryDependencies += Libraries.autowire,
@@ -1061,7 +1086,7 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
   libraryDependencies += Libraries.scalaTags,
 )
 
-lazy val siteJVM = site.jvm dependsOn(tools, project, serializer, openmoleBuildInfo, marketIndex) settings(
+lazy val siteJVM = site.jvm dependsOn(tools, openmoleProject, serializer, openmoleBuildInfo, marketIndex) settings(
   scalatex.SbtPlugin.projectSettings,
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
   libraryDependencies += Libraries.scalatexSite,
@@ -1227,7 +1252,7 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq(
 ) dependsOn(
   workflow,
   openmoleCompiler,
-  project,
+  openmoleProject,
   openmoleDSL,
   openmoleBuildInfo,
   module

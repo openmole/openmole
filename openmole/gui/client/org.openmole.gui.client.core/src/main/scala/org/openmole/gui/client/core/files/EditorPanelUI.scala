@@ -70,9 +70,11 @@ object EditorPanelUI {
 
   case class HighlightedFile(highlighter: String)
 
-  @js.native
-  @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
-  object openmolemode extends js.Object
+
+  // FIXME doesn't work with Stub
+  //@js.native
+  //@JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
+  //object openmolemode extends js.Object
 }
 
 class EditorPanelUI(fileType: FileExtension) {
@@ -87,7 +89,9 @@ class EditorPanelUI(fileType: FileExtension) {
     js.Dynamic.global.ace.config.set("themePath", "js")
 
     scalamode
-    EditorPanelUI.openmolemode
+
+    //EditorPanelUI.openmolemode
+
     githubtheme
     extLanguageTools
 
