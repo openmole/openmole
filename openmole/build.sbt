@@ -756,6 +756,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   scalaJSUseMainModuleInitializer := false,
   webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   webpackNodeArgs := Seq("--openssl-legacy-provider"),
+  //webpackExtraArgs := Seq("--profile", "--progress", "true"),
   webpackEmitSourceMaps := false,
   /*libraryDependencies ++= Seq(
     "com.raquo" %%% "laminar" % laminarVersion,
@@ -769,12 +770,20 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   scalaJSSettings,
 
   build := {
-    val jsBuild = (Compile / fastOptJS / webpack).value.head.data
-    val demoTarget = target.value
     val demoResource = (Compile / resourceDirectory).value
+    val demoTarget = target.value
+    val bundlerTarget = demoTarget / ("scala-" + scalaVersion.value) / "scalajs-bundler"
+
+    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-noconflict" / "mode-openmole.js")
+
+    val jsBuild = (Compile / fastOptJS / webpack).value.head.data
 
     IO.copyDirectory(demoResource, demoTarget)
-    IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole.js")
+    IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole-webpacked.js")
+
+    IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", demoTarget / "webapp" / "js" / "ace.js")
+    IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", demoTarget / "webapp" / "js" / "plotly.min.js")
+
     (Compile / compile).value
   }
 ) dependsOn (clientGUI)

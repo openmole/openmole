@@ -2,7 +2,7 @@ package org.openmole.gui.client.stub
 
 import org.openmole.gui.shared.data.PluginServices
 import org.openmole.gui.client.core.*
-import scala.scalajs.js.annotation.{JSExportAll, JSExportTopLevel}
+import scala.scalajs.js.annotation.*
 
 /*
  * Copyright (C) 2023 Romain Reuillon
@@ -21,8 +21,7 @@ import scala.scalajs.js.annotation.{JSExportAll, JSExportTopLevel}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel(name = "openmole_stub")
-@JSExportAll
+@JSExportTopLevel(name = "openmole_stub") @JSExportAll
 object Stub:
   lazy val api = StubRESTServerAPI()
 
@@ -36,3 +35,7 @@ object Stub:
   val gui = OpenMOLEGUI(using panels, pluginServices, api)
 
   export gui.*
+
+  def hello() = println("hello")
+
+

@@ -70,11 +70,9 @@ object EditorPanelUI {
 
   case class HighlightedFile(highlighter: String)
 
-
-  // FIXME doesn't work with Stub
-  //@js.native
-  //@JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
-  //object openmolemode extends js.Object
+  @js.native
+  @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
+  object openmolemode extends js.Object
 }
 
 class EditorPanelUI(fileType: FileExtension) {
