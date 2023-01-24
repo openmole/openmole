@@ -123,9 +123,7 @@ class TreeNodeManager {
 
     def updateSons(safePath: SafePath) = {
       CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
-        sons.update { s =>
-          s.updated(cur, lf)
-        }
+        sons.update { s => s.updated(cur, ListFiles(lf)) }
       }
     }
 
@@ -133,7 +131,7 @@ class TreeNodeManager {
       case safePath: SafePath ⇒
         if (!sons.now().contains(safePath))
           updateSons(safePath)
-      case _ ⇒ Future(ListFilesData(Seq(), 0))
+      case _ ⇒ Future(ListFilesData.empty)
     }
   }
 

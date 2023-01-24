@@ -47,6 +47,7 @@ package data {
     case Any(override val name: String, override val scalaString: String) extends PrototypeData(name, scalaString)
 
   import java.io.{PrintWriter, StringWriter}
+  import scala.collection.immutable.ArraySeq
   import scala.scalajs.js.annotation.JSExport
 
   enum FileExtension:
@@ -111,43 +112,39 @@ package data {
 
   import org.openmole.gui.shared.data.SafePath._
 
-  object ServerFileSystemContext:
-    implicit val absolute: ServerFileSystemContext = ServerFileSystemContext.Absolute
-    implicit val project: ServerFileSystemContext = ServerFileSystemContext.Project
-    implicit val authentication: ServerFileSystemContext = ServerFileSystemContext.Authentication
-
   enum ServerFileSystemContext:
     val typeName = this.productPrefix.toLowerCase
     case Absolute, Project, Authentication
 
   object SafePath:
-    def leaf(name: String) = SafePath(Seq(name))
-
+    def leaf(name: String) = SafePath(name)
     def empty = leaf("")
-
     def naming = (sp: SafePath) ⇒ sp.name
 
-  case class SafePath(path: Seq[String], context: ServerFileSystemContext = ServerFileSystemContext.Project):
+    def apply(value: String*): SafePath = SafePath(ArraySeq.from(value))
+    def apply(path: Iterable[String], context: ServerFileSystemContext = ServerFileSystemContext.Project): SafePath =
+      new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
+
+  case class SafePath(path: Seq[String], context: ServerFileSystemContext):
     def ++(s: String) = copy(path = this.path :+ s)
-
     def /(child: String) = copy(path = path :+ child)
-
     def parent: SafePath = copy(path = path.dropRight(1))
 
     def name = path.lastOption.getOrElse("")
-
     def isEmpty = path.isEmpty
-
     def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
-
     def nameWithNoExtension = name.split('.').head
-
     def normalizedPathString = path.tail.mkString("/")
-
     def extension = FileExtension(name)
 
-  case class DirData(isEmpty: Boolean)
+    def startsWith(safePath: SafePath) =
+      safePath.context == context &&
+        path.take(safePath.path.size) == safePath.path
 
+
+
+
+  case class DirData(isEmpty: Boolean)
 
   object PluginState:
     def empty = PluginState(false, false)
@@ -156,10 +153,10 @@ package data {
 
   case class TreeNodeData(
     name: String,
-    directory: Option[DirData],
     size: Long,
     time: Long,
-    pluginState: PluginState)
+    directory: Option[DirData] = None,
+    pluginState: PluginState = PluginState.empty)
 
   case class ScriptData(scriptPath: SafePath)
 
@@ -629,9 +626,9 @@ package data {
 
 
   object ListFilesData:
-    def empty = ListFilesData(Seq(), 0)
+    def empty = Seq()
 
-  case class ListFilesData(list: Seq[TreeNodeData], nbFilesOnServer: Int)
+  type ListFilesData = Seq[TreeNodeData]
 
   object FileFilter {
     def defaultFilter = FileFilter()

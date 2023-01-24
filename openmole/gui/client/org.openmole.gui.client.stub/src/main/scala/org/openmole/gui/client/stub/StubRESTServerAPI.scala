@@ -26,27 +26,50 @@ import org.scalajs.dom.*
 import scala.concurrent.duration.*
 import scala.concurrent.Future
 
+object AnimatedStubRESTServerAPI:
+  case class MemoryFile(path: SafePath, content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false)
+
 class AnimatedStubRESTServerAPI extends ServerAPI:
+  import AnimatedStubRESTServerAPI.*
+
   lazy val files =
-    ListFilesData(
-      Seq(
-        TreeNodeData(
-          name = "test.oms",
-          directory = None,
-          size = 0L,
-          time = System.currentTimeMillis(),
-          pluginState = PluginState.empty
-        )
-      ),
-      1
+    scala.collection.mutable.Seq(
+      MemoryFile(SafePath("test.oms"), "val i = Val[Int]")
     )
+
 
   override def size(safePath: SafePath): Future[Long] = Future.successful(0L)
   override def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] = Future.successful(Seq())
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] = Future.successful((true, ""))
   override def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean] = Future.successful(true)
   override def extract(path: SafePath): Future[Option[ErrorData]] = Future.successful(None)
-  override def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData] = Future.successful(files)
+  override def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData] =
+    val simpleFiles = files.filter(!_.directory)
+
+    val fileData =
+      simpleFiles.filter(_.path.parent == path).map { f =>
+        TreeNodeData(
+          name = f.path.name,
+          size = f.content.size,
+          time = f.time
+        )
+      }
+
+    val directoryData =
+      files.filter(_.directory).filter(_.path.startsWith(path)).map { d =>
+        val isEmpty: Boolean = simpleFiles.forall(!_.path.startsWith(d.path))
+
+        TreeNodeData(
+          name = d.path.name,
+          size = 0,
+          time = d.time,
+          directory = Some(DirData(isEmpty))
+        )
+      }
+
+    Future.successful(directoryData.toSeq ++ fileData)
+
+
   override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = Future.successful(Seq.empty)
   override def move(from: SafePath, to: SafePath): Future[Unit] = Future.successful(())
   override def duplicate(path: SafePath, name: String): Future[SafePath] = Future.successful(SafePath.empty)
@@ -78,8 +101,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def jvmInfos(): Future[JVMInfos] = Future.successful(JVMInfos("stub", "stub", 0, 0, 0))
   override def mdToHtml(safePath: SafePath): Future[String] = Future.successful("")
   override def sequence(safePath: SafePath): Future[SequenceData] = Future.successful(SequenceData.empty)
+
   override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit = {}
-  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit = {}
+
+  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit =
+    val content = files.find(_.path == safePath).get.content
+    val h = if hash then Some(content.hashCode.toString) else None
+    onLoadEnd(content, h)
 
 
 class StubRESTServerAPI extends ServerAPI:

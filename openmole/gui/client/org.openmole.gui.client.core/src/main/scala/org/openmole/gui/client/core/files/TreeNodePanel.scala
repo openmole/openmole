@@ -318,11 +318,11 @@ class TreeNodePanel { panel =>
               if (sons.contains(currentDir)) {
                 (if (multiTool == CopyOrTrash) {
                   lazy val allCheck: Input = checkbox(false).amend(cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
-                    treeNodeManager.switchAllSelection(sons(currentDir).list.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+                    treeNodeManager.switchAllSelection(sons(currentDir).map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
                   })
                   allCheck
                 } else emptyNode) +:
-                  sons(currentDir).list.zipWithIndex.flatMap { case (tn, id) =>
+                  sons(currentDir).zipWithIndex.flatMap { case (tn, id) =>
                     Seq(drawNode(tn, id).render)
                   }
               }

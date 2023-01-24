@@ -173,8 +173,8 @@ object ModelWizardPanel {
                 // Not sure why...
                 val from =
                   CoreUtils.listFiles(tempFile).map { files =>
-                    if files.list.size == 1
-                    then tempFile ++ files.list.head.name
+                    if files.size == 1
+                    then tempFile ++ files.head.name
                     else tempFile
                   }
 

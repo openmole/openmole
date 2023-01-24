@@ -784,6 +784,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 
     IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", demoTarget / "webapp" / "js" / "ace.js")
     IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", demoTarget / "webapp" / "js" / "plotly.min.js")
+    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", demoTarget / "webapp" / "js" / "mode-openmole.js")
 
     (Compile / compile).value
   }

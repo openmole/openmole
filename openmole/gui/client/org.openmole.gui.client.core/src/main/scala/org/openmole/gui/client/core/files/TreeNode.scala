@@ -59,6 +59,8 @@ sealed trait TreeNode {
 
 }
 
+def ListFiles(lfd: ListFilesData): TreeNode.ListFiles = lfd.map(TreeNode.treeNodeDataToTreeNode)
+
 object TreeNode {
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
@@ -66,26 +68,21 @@ object TreeNode {
     case _ ⇒ FileNode(tnd.name, tnd.size, tnd.time, tnd.pluginState)
   }
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = {
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
     val (dOf, pluginState) = tn match {
       case DirNode(_, _, _, isEmpty) ⇒ (Some(DirData(isEmpty)), PluginState(false, false))
       case f: FileNode ⇒ (None, f.pluginState)
     }
 
-    TreeNodeData(tn.name, dOf, tn.size, tn.time, pluginState)
-  }
+    TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf)
 
-  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
-    treeNodeToTreeNodeData
-  }
 
+  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map { treeNodeToTreeNodeData }
   implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
-
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
+  //implicit def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = lfd.map(treeNodeDataToTreeNode)
 
-  implicit def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = ListFiles(lfd.list, lfd.nbFilesOnServer)
-
-  case class ListFiles(list: Seq[TreeNode], nbFilesOnServer: Int)
+  type ListFiles = Seq[TreeNode]
 
 
   def isDir(node: TreeNode) =
@@ -95,15 +92,13 @@ object TreeNode {
 }
 
 case class DirNode(
-                    name: String,
-                    size: Long,
-                    time: Long,
-                    isEmpty: Boolean
-                  ) extends TreeNode
+  name: String,
+  size: Long,
+  time: Long,
+  isEmpty: Boolean) extends TreeNode
 
 case class FileNode(
-                     name: String,
-                     size: Long,
-                     time: Long,
-                     pluginState: PluginState
-                   ) extends TreeNode
+  name: String,
+  size: Long,
+  time: Long,
+  pluginState: PluginState) extends TreeNode
