@@ -66,10 +66,13 @@ object Plugins extends JavaLogger {
     }*/
   }
 
+
+  def persistentWebUI(using workspace: Workspace) = workspace.persistentDir /> "webui"
+
   def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = newFile.withTmpDir { jsPluginDirectory =>
     createJsPluginDirectory(jsPluginDirectory)
 
-    val webui = workspace.persistentDir /> "webui"
+    val webui = persistentWebUI
     val jsPluginHash = workspace.persistentDir / "js-plugin-hash"
     val jsFile = webui / utils.openmoleFileName
 
@@ -88,7 +91,15 @@ object Plugins extends JavaLogger {
 
       val modeOpenMOLE = Plugins.expandDepsFile(GUIServer.fromWebAppLocation /> "js" / utils.openmoleGrammarName, webui / utils.openmoleGrammarMode)
 
-      JSPack.webpack(jsFile, webpackJsonPackage, webpackConfigTemplateLocation, webpackOutput, Seq(ExtraModule(modeOpenMOLE, utils.aceModuleSource)))
+      JSPack.webpack(
+        jsFile,
+        webpackJsonPackage,
+        webpackConfigTemplateLocation,
+        webpackOutput,
+        Seq(
+          ExtraModule(modeOpenMOLE, utils.aceModuleSource)
+        )
+      )
     }
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString

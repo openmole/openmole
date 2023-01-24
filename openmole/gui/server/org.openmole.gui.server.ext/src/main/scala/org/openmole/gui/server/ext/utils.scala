@@ -33,24 +33,19 @@ object utils {
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
-  def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean = {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-    // !PluginManager.listBundles(safePathToFile(path)).isEmpty
+  def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean =
     PluginManager.isBundle(safePathToFile(path))
-  }
 
-  def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean = {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
+
+  def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
     val safePath = fileToSafePath(file)
     pluggedList.map {
       _.projectSafePath
     }.contains(safePath)
-  }
 
-  def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
+  def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
     path.toFile.listFilesSafe.filter { f ⇒ PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
-  }
+
 
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
 
@@ -59,22 +54,19 @@ object utils {
       given ServerFileSystemContext = s.context
       safePathToFile(s)
 
-    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) = {
-      import org.openmole.gui.shared.data.ServerFileSystemContext.project
-
+    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) =
       val from: File = s.toFile
       val to: File = toPath.toFile
       if (from.exists && to.exists) {
         FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
       }
     }
-  }
 
   implicit class SafePathFileDecorator(f: File) {
-    def toSafePath(implicit context: ServerFileSystemContext, workspace: Workspace) = fileToSafePath(f)
+    def toSafePath(using context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace) = fileToSafePath(f)
   }
 
-  def fileToSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): SafePath =
+  def fileToSafePath(f: File)(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): SafePath =
     context match
       case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
       case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None))
@@ -106,7 +98,7 @@ object utils {
 
     val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
 
-    time.map(t ⇒ TreeNodeData(f.getName, dirData, f.length, t, PluginState(isPlugin(fileToSafePath(f)), isPlugged(f, pluggedList))))
+    time.map(t ⇒ TreeNodeData(f.getName, f.length, t, directory = dirData, pluginState = PluginState(isPlugin(fileToSafePath(f)), isPlugged(f, pluggedList))))
   }
 
   def seqfileToSeqTreeNodeData(fs: Seq[File], pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[TreeNodeData] = fs.flatMap { f ⇒
@@ -149,8 +141,8 @@ object utils {
     val nbFiles = treeNodesData.size
 
     fileFilter.firstLast match
-      case FirstLast.First ⇒ ListFilesData(sorted, nbFiles)
-      case FirstLast.Last ⇒ ListFilesData(sorted.reverse, nbFiles)
+      case FirstLast.First ⇒ sorted
+      case FirstLast.Last ⇒ sorted.reverse
 
 
   def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] = {
@@ -162,8 +154,6 @@ object utils {
 
 
   def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.toFile.isDirectory()) toPath.toFile.mkdir
 
@@ -202,10 +192,8 @@ object utils {
 
 
 
-  def exists(safePath: SafePath)(implicit workspace: Workspace) = {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
+  def exists(safePath: SafePath)(implicit workspace: Workspace) =
     safePathToFile(safePath).exists
-  }
 
   def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
     safePaths.map { sp ⇒
@@ -368,17 +356,12 @@ object utils {
 //    errors.map(e ⇒ ErrorData(e._2))
 //  }
 
-  def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
-
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-
+  def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] =
     val file = safePathToFile(safePath)
     val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
     errors.map(e ⇒ ErrorData(e._2)).toSeq
-  }
 
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     import org.openmole.core.module
     val file: File = safePathToFile(safePath)
     val bundle = PluginManager.bundle(file)

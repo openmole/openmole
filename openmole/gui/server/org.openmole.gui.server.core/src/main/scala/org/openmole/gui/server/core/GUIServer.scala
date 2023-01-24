@@ -66,9 +66,12 @@ object GUIServer {
 
     val jsTarget = to /> "js"
     webpacked copy (jsTarget / utils.webpakedOpenmoleFileName)
-
     new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
 
+    Plugins.persistentWebUI / utils.openmoleGrammarMode copy jsTarget / utils.openmoleGrammarMode
+    Plugins.persistentWebUI / "node_modules/plotly.js/dist/plotly.min.js" copy jsTarget / "plotly.min.js"
+    Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
+    
     to
   }
 

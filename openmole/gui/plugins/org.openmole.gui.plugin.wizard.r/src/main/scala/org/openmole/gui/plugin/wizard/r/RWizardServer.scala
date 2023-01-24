@@ -44,7 +44,6 @@ class RWizardServer(s: Services) extends APIServer with RWizardAPI {
 
   object impl {
     import s._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def toTask(target: SafePath, modelMetadata: ModelMetadata): Unit = {
 

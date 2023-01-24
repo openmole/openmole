@@ -43,12 +43,10 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
   object impl {
 
     import s._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def toTask(target: SafePath, mmd: ModelMetadata): Unit = {
 
       //  val modelMetadata = parse(target)
-      import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
       val modelData = WizardUtils.wizardModelData(mmd.inputs, mmd.outputs, Some("inputs"), Some("outputs"))
       val task = s"${

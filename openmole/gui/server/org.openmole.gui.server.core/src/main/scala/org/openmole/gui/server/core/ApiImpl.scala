@@ -70,7 +70,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   //GENERAL
   def settings: OMSettings = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     OMSettings(
       utils.projectsDirectory.toSafePath,
@@ -116,7 +115,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   // FILES
   def createFile(safePath: SafePath, name: String, directory: Boolean): Boolean =
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     if directory
     then new File(safePath.toFile, name).createNewFile
     else new File(safePath.toFile, name).mkdirs
@@ -126,7 +124,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.tool.file.*
     
     val allPlugins = listPlugins()
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def unplug(f: File) =
       if utils.isPlugged(f, allPlugins.toSeq)(workspace) then removePlugin(utils.fileToSafePath(f))
@@ -184,10 +181,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def temporaryDirectory(): SafePath =
     import services.*
-    import org.openmole.gui.shared.data.ServerFileSystemContext.absolute
     val dir = services.tmpDirectory.newDir("openmoleGUI")
     dir.mkdirs()
-    dir.toSafePath
+    dir.toSafePath(using org.openmole.gui.shared.data.ServerFileSystemContext.Absolute)
 
   def exists(safePath: SafePath): Boolean = {
     import services._
@@ -211,7 +207,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def isEmpty(sp: SafePath): Boolean = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
   }
@@ -232,13 +227,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def mdToHtml(safePath: SafePath): String = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     MarkDownProcessor(safePathToFile(safePath).content)
   }
 
   def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     val file = safePathToFile(path)
 
@@ -263,13 +256,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def size(safePath: SafePath): Long = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     safePathToFile(safePath).length
   }
 
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val content = safePath.toFile.content.split("\n")
     val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?|true|false""".r
 
@@ -310,8 +301,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     outputStream: StringPrintStream,
     onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
     onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
-
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     def error(t: Throwable): ErrorData = {
       t match {
@@ -390,8 +379,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     val (execId, outputStream) = compilationData(scriptData)
 
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-
     val content = safePathToFile(scriptData.scriptPath).content
 
     execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
@@ -465,15 +452,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-
     market.downloadEntry(entry, safePathToFile(path))
     //autoAddPlugins(path)
   }
 
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
     currentPluginsSafePath.map { csp ⇒
@@ -484,13 +468,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def activatePlugins =
     import services.*
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/")))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
   private def isPlugged(safePath: SafePath) =
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
   private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
@@ -499,7 +481,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def addPlugin(safePath: SafePath): Seq[ErrorData] = 
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
     val errors = utils.addPlugin(safePath)
     if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.mkString("/")).distinct } }
     errors
@@ -523,7 +504,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def isOSGI(safePath: SafePath): Boolean = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     PluginManager.isOSGI(safePathToFile(safePath))
   }
@@ -542,7 +522,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val toDir = archivePath.toNoExtention
     // extractTGZToAndDeleteArchive(archivePath, toDir)
     (for {
-      tnd ← listFiles(toDir).list if FileType.isSupportedLanguage(tnd.name)
+      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.name)
     } yield tnd).map {
       nd ⇒ toDir ++ nd.name
     }
@@ -550,7 +530,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def expandResources(resources: Resources): Resources = {
     import services._
-    import org.openmole.gui.shared.data.ServerFileSystemContext.project
 
     val paths = resources.all.map(_.safePath).distinct.map {
       sp ⇒ Resource(sp, sp.toFile.length)
