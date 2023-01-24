@@ -29,22 +29,51 @@ import scala.concurrent.Future
 object AnimatedStubRESTServerAPI:
   case class MemoryFile(path: SafePath, content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false)
 
-class AnimatedStubRESTServerAPI extends ServerAPI:
-  import AnimatedStubRESTServerAPI.*
+  def apply() =
+    val api = new AnimatedStubRESTServerAPI()
 
-  lazy val files =
-    scala.collection.mutable.Seq(
+    val files = Seq(
       MemoryFile(SafePath("test.oms"), "val i = Val[Int]")
     )
 
+    files.foreach(api.add)
+    api
+
+class AnimatedStubRESTServerAPI extends ServerAPI:
+  import AnimatedStubRESTServerAPI.*
+
+  val files = scala.collection.mutable.HashMap[SafePath, MemoryFile]()
+
+  def add(file: MemoryFile) = files += file.path -> file
 
   override def size(safePath: SafePath): Future[Long] = Future.successful(0L)
   override def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] = Future.successful(Seq())
-  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] = Future.successful((true, ""))
-  override def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean] = Future.successful(true)
+
+  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] =
+    val file = files(safePath)
+
+    val res =
+      hash match
+        case None =>
+          add(file.copy(content = content))
+          (true, content)
+        case Some(h) if overwrite == true || file.content.hashCode.toString == h =>
+          add(file.copy(content = content))
+          (true, content)
+        case _ =>
+          (false, file.content)
+
+    Future.successful(res)
+
+  override def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean] =
+    val file = MemoryFile(path ++ name, "", directory = directory)
+    add(file)
+    Future.successful(true)
+
   override def extract(path: SafePath): Future[Option[ErrorData]] = Future.successful(None)
+
   override def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData] =
-    val simpleFiles = files.filter(!_.directory)
+    val simpleFiles = files.values.filter(!_.directory)
 
     val fileData =
       simpleFiles.filter(_.path.parent == path).map { f =>
@@ -56,7 +85,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       }
 
     val directoryData =
-      files.filter(_.directory).filter(_.path.startsWith(path)).map { d =>
+      files.values.filter(_.directory).filter(_.path.startsWith(path)).map { d =>
         val isEmpty: Boolean = simpleFiles.forall(!_.path.startsWith(d.path))
 
         TreeNodeData(
@@ -73,7 +102,11 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = Future.successful(Seq.empty)
   override def move(from: SafePath, to: SafePath): Future[Unit] = Future.successful(())
   override def duplicate(path: SafePath, name: String): Future[SafePath] = Future.successful(SafePath.empty)
-  override def deleteFiles(path: Seq[SafePath]): Future[Unit] = Future.successful(())
+
+  override def deleteFiles(path: Seq[SafePath]): Future[Unit] =
+    path.foreach(files.remove)
+    Future.successful(())
+
   override def exists(path: SafePath): Future[Boolean] = Future.successful(false)
   override def temporaryDirectory(): Future[SafePath] = Future.successful(SafePath.empty)
   override def allStates(line: Int): Future[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = Future.successful((Seq.empty, Seq.empty))
@@ -105,7 +138,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit = {}
 
   override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit =
-    val content = files.find(_.path == safePath).get.content
+    val content = files(safePath).content
     val h = if hash then Some(content.hashCode.toString) else None
     onLoadEnd(content, h)
 
