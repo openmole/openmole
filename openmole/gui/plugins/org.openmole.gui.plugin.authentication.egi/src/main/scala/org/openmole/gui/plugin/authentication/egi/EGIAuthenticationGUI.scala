@@ -24,7 +24,7 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, ServerAPI}
 
 import scala.scalajs.js
 
@@ -69,7 +69,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       onremove()
     }
 
-  lazy val panel = {
+  def panel(using api: ServerAPI) = {
     import scaladget.tools._
     div(
       flexColumn, width := "400px", height := "220",

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.stub
 
-import org.openmole.gui.shared.data.PluginServices
 import org.openmole.gui.client.core.*
+import org.openmole.gui.shared.api.PluginServices
 import scala.scalajs.js.annotation.*
 
 /*
@@ -23,7 +23,7 @@ import scala.scalajs.js.annotation.*
 
 @JSExportTopLevel(name = "openmole_stub") @JSExportAll
 object Stub:
-  lazy val api = StubRESTServerAPI()
+  lazy val api = AnimatedStubRESTServerAPI()
 
   lazy val pluginServices =
     PluginServices(
@@ -35,7 +35,5 @@ object Stub:
   val gui = OpenMOLEGUI(using panels, pluginServices, api)
 
   export gui.*
-
-  def hello() = println("hello")
 
 

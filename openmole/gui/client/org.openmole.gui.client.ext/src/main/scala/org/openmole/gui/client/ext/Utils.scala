@@ -17,9 +17,9 @@ package org.openmole.gui.client.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.raw.{ Event }
-import com.raquo.laminar.api.L._
-import org.openmole.gui.shared.data.GUIPluginFactory
+import org.scalajs.dom.raw.Event
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.GUIPluginFactory
 
 import scala.scalajs.js
 import scala.scalajs.js.Date

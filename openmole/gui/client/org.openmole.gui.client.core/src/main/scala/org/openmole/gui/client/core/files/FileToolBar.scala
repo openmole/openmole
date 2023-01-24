@@ -2,23 +2,24 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
 
-import scala.util._
-import com.raquo.laminar.api.L._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import scala.util.*
+import com.raquo.laminar.api.L.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
-import org.openmole.gui.client.ext._
+import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import org.scalajs.dom.raw.{HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement}
-import org.openmole.gui.client.core.Waiter._
+import org.openmole.gui.client.core.Waiter.*
 import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.tool._
-import org.openmole.gui.client.core._
+import org.openmole.gui.client.tool.*
+import org.openmole.gui.client.core.*
 import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.shared.api.ServerAPI
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org

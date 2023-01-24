@@ -15,26 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.shared.data
+package org.openmole.gui.shared.api
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
+
 import scala.concurrent.Future
 
 sealed trait GUIPlugin
 
 trait AuthenticationPlugin extends GUIPlugin {
   type AuthType <: AuthenticationData
-
   def data: AuthType
-
   def factory: AuthenticationPluginFactory
-
-  def panel: HtmlElement
-
+  def panel(using api: ServerAPI): HtmlElement
   def save(onsave: () ⇒ Unit): Unit
-
   def remove(onremoved: () ⇒ Unit): Unit
-
   def test: Future[Seq[Test]]
 }
 
@@ -42,31 +39,22 @@ sealed trait GUIPluginFactory
 
 trait AuthenticationPluginFactory extends GUIPluginFactory {
   type AuthType <: AuthenticationData
-
   def name: String
-
   def build(data: AuthType): AuthenticationPlugin
-
   def buildEmpty: AuthenticationPlugin
-
   def getData: Future[Seq[AuthType]]
 }
 
 trait WizardGUIPlugin extends GUIPlugin {
   def factory: WizardPluginFactory
-
   val panel: HtmlElement
-
   def save(): Unit
 }
 
 trait WizardPluginFactory extends GUIPluginFactory {
   def name: String
-
   def fileType: FileType
-
   def parse(safePath: SafePath): Future[Option[ModelMetadata]]
-  
   def toTask(safePath: SafePath, modelMetadata: ModelMetadata): Future[Unit]
 }
 

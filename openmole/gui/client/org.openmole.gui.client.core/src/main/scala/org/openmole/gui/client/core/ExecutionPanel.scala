@@ -15,6 +15,7 @@ import org.openmole.gui.shared.data.ExecutionInfo.Failed
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.Utils
+import org.openmole.gui.shared.api.ServerAPI
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*

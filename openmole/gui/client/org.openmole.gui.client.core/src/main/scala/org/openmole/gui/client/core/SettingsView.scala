@@ -5,12 +5,13 @@ import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.alert.AlertPanel
 import org.scalajs.dom
-import org.openmole.gui.client.ext.Utils._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.client.ext._
+import org.openmole.gui.client.ext.Utils.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.files.FileDisplayer
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.ServerAPI
 import org.openmole.gui.shared.data.*
 
 import scala.scalajs.js.timers

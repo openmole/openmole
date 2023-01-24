@@ -17,12 +17,13 @@
  */
 package org.openmole.gui.server.ext
 
-import org.openmole.gui.shared.data.{ AuthenticationPluginFactory, GUIPluginAsJS, MethodAnalysisPlugin, WizardPluginFactory }
-import org.openmole.core.services._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.api.*
+import org.openmole.core.services.*
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConverters.*
 
-object GUIPluginRegistry {
+object GUIPluginRegistry:
   private lazy val plugins = new java.util.concurrent.ConcurrentHashMap[AnyRef, GUIPluginInfo]().asScala
 
   def toGUIPlugins(c: Class[_]): GUIPluginAsJS = c.getName
@@ -38,11 +39,9 @@ object GUIPluginRegistry {
 
   def unregister(key: AnyRef) = GUIPluginRegistry.plugins -= key
   def register(key: AnyRef, info: GUIPluginInfo) = GUIPluginRegistry.plugins += key → info
-}
 
 case class GUIPluginInfo(
   router:         Option[Services ⇒ OMRouter]                        = None,
   authentication: Option[Class[_ <: AuthenticationPluginFactory]]    = None,
   wizard:         Option[Class[_ <: WizardPluginFactory]]            = None,
-  analysis:       Option[(String, Class[_ <: MethodAnalysisPlugin])] = None
-)
+  analysis:       Option[(String, Class[_ <: MethodAnalysisPlugin])] = None)

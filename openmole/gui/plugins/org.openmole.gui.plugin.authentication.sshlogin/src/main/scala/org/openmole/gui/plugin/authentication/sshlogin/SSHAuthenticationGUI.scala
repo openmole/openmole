@@ -19,15 +19,15 @@ package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.{flexColumn, flexRow}
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
 import org.openmole.gui.shared.data.*
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation._
-import com.raquo.laminar.api.L._
-import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import scala.scalajs.js.annotation.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.*
 
 import scalajs.js
 
@@ -67,7 +67,7 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  def panel: HtmlElement = div(
+  def panel(using api: ServerAPI): HtmlElement = div(
     flexColumn, width := "400px", height := "220",
     div(cls := "verticalFormItem", div("Login", width:="150px"), loginInput),
     div(cls := "verticalFormItem", div("Password", width:="150px"), passwordInput),

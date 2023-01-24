@@ -20,9 +20,12 @@ package org.openmole.gui.client.core
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.ServerAPI
+import org.scalajs.dom.*
 
 import scala.concurrent.duration.*
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def size(safePath: SafePath) = fetch.future(_.size(safePath).future)
@@ -62,3 +65,60 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def jvmInfos(): Future[JVMInfos] = fetch.future(_.jvmInfos(()).future)
   override def mdToHtml(safePath: SafePath): Future[String] = fetch.future(_.mdToHtml(safePath).future)
   override def sequence(safePath: SafePath): Future[SequenceData] = fetch.future(_.sequence(safePath).future)
+
+  override def upload(
+    fileList: FileList,
+    destinationPath: SafePath,
+    fileTransferState: ProcessState ⇒ Unit,
+    onLoadEnd: Seq[String] ⇒ Unit): Unit =
+    val formData = new FormData
+
+    formData.append("fileType", destinationPath.context.typeName)
+
+    for (i ← 0 to fileList.length - 1) {
+      val file = fileList(i)
+      formData.append(Utils.toURI(destinationPath.path ++ Seq(file.name)), file)
+    }
+
+    val xhr = new XMLHttpRequest
+
+    xhr.upload.onprogress = e ⇒ {
+      fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
+    }
+
+    xhr.upload.onloadend = e ⇒ {
+      fileTransferState(Finalizing())
+    }
+
+    xhr.onloadend = e ⇒ {
+      fileTransferState(Processed())
+      onLoadEnd(fileList.map(_.name).toSeq)
+    }
+
+    xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)
+    xhr.send(formData)
+
+
+  override def download(
+    safePath: SafePath,
+    fileTransferState: ProcessState ⇒ Unit = _ ⇒ (),
+    onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (),
+    hash: Boolean = false): Unit =
+    size(safePath).foreach { size ⇒
+      val xhr = new XMLHttpRequest
+
+      xhr.onprogress = (e: ProgressEvent) ⇒ {
+        fileTransferState(Processing((e.loaded.toDouble * 100 / size).toInt))
+      }
+
+      xhr.onloadend = (e: ProgressEvent) ⇒ {
+        fileTransferState(Processed())
+        val h = Option(xhr.getResponseHeader(hashHeader))
+        onLoadEnd(xhr.responseText, h)
+      }
+
+      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.map {
+        Encoding.encode
+      }), hash = hash), true)
+      xhr.send()
+    }

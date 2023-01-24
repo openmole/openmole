@@ -14,6 +14,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.gui.client.ext
+import org.openmole.gui.shared.api.{MethodAnalysisPlugin, PluginServices}
 import org.openmole.plugin.method.evolution.data.AnalysisData.Convergence
 import org.openmole.plugin.method.evolution.data.{AnalysisData, EvolutionMetadata}
 
@@ -25,7 +26,6 @@ import org.openmole.plotlyjs.plotlyConts.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.{MethodAnalysisPlugin, PluginServices}
 
 object TopLevelExports {
   @JSExportTopLevel("evolution")

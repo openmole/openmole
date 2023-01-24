@@ -17,21 +17,21 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.market._
-import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel }
+import org.openmole.core.market.*
+import org.openmole.gui.client.core.alert.{AbsolutePositioning, AlertPanel}
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.shared.data.{ ProcessState, Processing }
-import org.openmole.gui.client.ext._
+import org.openmole.gui.shared.data.{ProcessState, Processing}
+import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn._
-import org.openmole.gui.client.core.CoreUtils._
+import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.core.CoreUtils.*
 import org.openmole.gui.shared.data.*
-import Waiter._
+import Waiter.*
 import org.openmole.gui.client.core.files.TreeNodeManager
-
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.InputFilter
+import org.openmole.gui.shared.api.ServerAPI
 
 
 object MarketPanel:

@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.data.{AuthenticationPlugin, AuthenticationPluginFactory}
+import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, ServerAPI}
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
@@ -38,7 +38,7 @@ object AuthenticationPanel {
   lazy val initialCheck = Var(false)
 
 
-  def render(authenticationFactories: Seq[AuthenticationPluginFactory])(using panels: Panels) = {
+  def render(authenticationFactories: Seq[AuthenticationPluginFactory])(using panels: Panels, api: ServerAPI) = {
 
     def getAuthentications =
       authenticationFactories.map { factory ⇒

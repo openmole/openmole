@@ -15,7 +15,7 @@ import TreeNode.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.shared.data.PluginServices
+import org.openmole.gui.shared.api.{PluginServices, ServerAPI}
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -101,9 +101,13 @@ class TreeNodePanel { panel =>
       fInputMultiple(todo)
     )
 
-  private val upButton = upbtn((fileInput: Input) ⇒ {
+  private def upButton(using api: ServerAPI) = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.dirNodeLine.now()
-    FileManager.upload(fileInput, current, (p: ProcessState) ⇒ transferring.set(p), ServerFileSystemContext.Project)
+    api.upload(
+      fileInput.ref.files,
+      current,
+      (p: ProcessState) ⇒ transferring.set(p),
+      _ => fileInput.ref.value = "")
 //    , () ⇒ {
 //      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
 //      CoreUtils.appendToPluggedIfPlugin(sp)
@@ -258,13 +262,13 @@ class TreeNodePanel { panel =>
     //        HashService.set(safePath, h)
     //      }
 
-    FileManager.download(
+    api.download(
       safePath,
       (p: ProcessState) ⇒ {
         transferring.set(p)
       },
       hash = hash,
-      onLoaded = onLoaded
+      onLoadEnd = onLoaded
     )
   }
 

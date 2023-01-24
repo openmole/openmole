@@ -1,7 +1,8 @@
-package org.openmole.gui.client.ext
+package org.openmole.gui.shared.api
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
+import org.scalajs.dom.FileList
 
 import scala.concurrent.Future
 
@@ -67,3 +68,5 @@ trait ServerAPI:
   def mdToHtml(safePath: SafePath): Future[String]
   def sequence(safePath: SafePath): Future[SequenceData]
 
+  def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit
+  def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit

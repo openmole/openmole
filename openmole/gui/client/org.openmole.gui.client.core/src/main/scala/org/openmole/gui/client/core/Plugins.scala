@@ -1,9 +1,8 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.ext.ServerAPI
+import org.openmole.gui.shared.api.{AuthenticationPluginFactory, GUIPluginFactory, ServerAPI, WizardPluginFactory}
 import org.openmole.gui.shared.data.GUIPluginAsJS
 import org.openmole.gui.shared.data.PluginExtensionData
-import org.openmole.gui.shared.data.{AuthenticationPluginFactory, GUIPluginFactory, WizardPluginFactory}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js

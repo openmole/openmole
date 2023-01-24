@@ -6,6 +6,7 @@ import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.ServerAPI
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global

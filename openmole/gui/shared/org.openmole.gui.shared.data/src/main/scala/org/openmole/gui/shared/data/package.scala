@@ -148,14 +148,18 @@ package data {
 
   case class DirData(isEmpty: Boolean)
 
+
+  object PluginState:
+    def empty = PluginState(false, false)
+
   case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
 
   case class TreeNodeData(
-                           name: String,
-                           dirData: Option[DirData],
-                           size: Long,
-                           time: Long,
-                           pluginState: PluginState)
+    name: String,
+    directory: Option[DirData],
+    size: Long,
+    time: Long,
+    pluginState: PluginState)
 
   case class ScriptData(scriptPath: SafePath)
 
@@ -584,7 +588,7 @@ package data {
     def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
 
     def alphaOrdering = new Ordering[TreeNodeData]:
-      def isDirectory(tnd: TreeNodeData) = tnd.dirData match {
+      def isDirectory(tnd: TreeNodeData) = tnd.directory match {
         case None ⇒ false
         case _ ⇒ true
       }

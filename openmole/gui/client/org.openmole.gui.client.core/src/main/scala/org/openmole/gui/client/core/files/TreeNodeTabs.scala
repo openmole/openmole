@@ -19,10 +19,8 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.data.DataUtils
-
-
-
-import TreeNodeTabs._
+import TreeNodeTabs.*
+import org.openmole.gui.shared.api.ServerAPI
 
 sealed trait TreeNodeTab {
 
@@ -251,7 +249,7 @@ object TreeNodeTab {
     def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = editor.synchronized {
       // val safePath = safePath
 
-      FileManager.download(
+      api.download(
         safePath,
         (p: ProcessState) ⇒ {},
         (cont: String, hash) ⇒ {

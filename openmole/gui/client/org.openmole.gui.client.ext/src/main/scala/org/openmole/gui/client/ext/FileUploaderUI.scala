@@ -24,6 +24,7 @@ import org.scalajs.dom.raw.HTMLInputElement
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.ServerAPI
 import org.openmole.gui.shared.data.DataUtils
 
 object FileUploaderUI {
@@ -31,21 +32,20 @@ object FileUploaderUI {
 }
 
 case class FileUploaderUI(
-                           keyName: String,
-                           keySet: Boolean,
-                           renaming: Option[String] = None) {
+  keyName: String,
+  keySet: Boolean,
+  renaming: Option[String] = None) {
 
   val fileName = if (keyName == "") renaming.getOrElse(DataUtils.uuID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
-  val view = label(
+  def view(using api: ServerAPI) = label(
     fileInput((fInput: Input) ⇒ {
-      FileManager.upload(
-        fInput,
-        SafePath.empty,
+      api.upload(
+        fInput.ref.files,
+        SafePath.empty.copy(context = ServerFileSystemContext.Authentication),
         (p: ProcessState) ⇒ {},
-        ServerFileSystemContext.Authentication,
-        uploaded ⇒ {
+        uploaded ⇒
           if (fInput.ref.files.length > 0) {
             val leaf = fInput.ref.files.item(0).name
             import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
@@ -57,7 +57,7 @@ case class FileUploaderUI(
               pathSet.set(true)
             }
           }
-        }
+          fInput.ref.value = ""
       )
     }),
     child <-- pathSet.signal.map { ps ⇒

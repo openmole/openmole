@@ -11,7 +11,7 @@ import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.ext.ServerAPI
+import org.openmole.gui.shared.api.ServerAPI
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org

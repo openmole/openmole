@@ -33,7 +33,7 @@ import org.openmole.gui.shared.data.DataUtils.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.tool.{OMTags, OptionsDiv, TagBadge}
-import org.openmole.gui.shared.data.{WizardGUIPlugin, WizardPluginFactory}
+import org.openmole.gui.shared.api.{ServerAPI, WizardGUIPlugin, WizardPluginFactory}
 import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
@@ -164,11 +164,10 @@ object ModelWizardPanel {
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
       CoreUtils.withTmpDirectory {
         tempFile ⇒
-          FileManager.upload(
-            fInput,
+          api.upload(
+            fInput.ref.files,
             tempFile,
             (p: ProcessState) ⇒ transferring.set(p),
-            ServerFileSystemContext.Absolute,
             uploaded ⇒ {
               def copyTo(targetPath: SafePath) =
                 // Not sure why...
@@ -222,6 +221,8 @@ object ModelWizardPanel {
                 //                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                 //                  }
                 //                }
+
+              fInput.ref.value = ""
             }
           )
       }

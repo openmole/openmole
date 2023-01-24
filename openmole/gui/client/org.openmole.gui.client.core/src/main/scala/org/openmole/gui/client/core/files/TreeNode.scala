@@ -61,7 +61,7 @@ sealed trait TreeNode {
 
 object TreeNode {
 
-  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
+  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
     case Some(dd: DirData) ⇒ DirNode(tnd.name, tnd.size, tnd.time, dd.isEmpty)
     case _ ⇒ FileNode(tnd.name, tnd.size, tnd.time, tnd.pluginState)
   }

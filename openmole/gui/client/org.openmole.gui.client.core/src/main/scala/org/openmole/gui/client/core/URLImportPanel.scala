@@ -1,20 +1,21 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
+import org.openmole.gui.client.core.alert.{AbsolutePositioning, AlertPanel, BannerAlert}
 import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.client.ext._
+import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.client.core.CoreUtils._
+import org.openmole.gui.client.core.files.{TreeNodeManager, TreeNodePanel}
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.core.CoreUtils.*
 import org.openmole.gui.shared.data.*
-import Waiter._
+import Waiter.*
 import org.openmole.core.market.MarketIndexEntry
-import com.raquo.laminar.api.L._
-import Waiter._
+import com.raquo.laminar.api.L.*
+import Waiter.*
 import com.raquo.laminar.nodes.ReactiveElement.isActive
+import org.openmole.gui.shared.api.ServerAPI
 
 class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
 

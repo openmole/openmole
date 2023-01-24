@@ -9,7 +9,7 @@ import scaladget.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import Waiter.*
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.shared.data.{PluginServices, WizardPluginFactory}
+import org.openmole.gui.shared.api.{PluginServices, ServerAPI, WizardPluginFactory}
 
 object ProjectPanel {
 
@@ -32,10 +32,10 @@ object ProjectPanel {
       val fileName = "newProject.oms"
       CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
         val toDisplay = panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName
-        FileManager.download(
+        api.download(
           toDisplay,
           hash = true,
-          onLoaded = (content, hash) ⇒ {
+          onLoadEnd = (content, hash) ⇒ {
             panels.treeNodePanel.treeNodeManager.invalidCurrentCache
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, pluginServices)
           }
