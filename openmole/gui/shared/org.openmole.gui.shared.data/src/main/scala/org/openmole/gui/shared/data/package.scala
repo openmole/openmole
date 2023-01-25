@@ -587,10 +587,13 @@ package data {
 
 
   object PluginExtensionData:
-    def empty = PluginExtensionData(Seq.empty, Seq.empty)
+    def empty = PluginExtensionData(Seq.empty, Seq.empty, Seq.empty)
 
   //TODO: add other extension points
-  case class PluginExtensionData(authentications: Seq[GUIPluginAsJS], wizards: Seq[GUIPluginAsJS])
+  case class PluginExtensionData(
+    authentications: Seq[GUIPluginAsJS],
+    wizards: Seq[GUIPluginAsJS],
+    analysis: Seq[(String, GUIPluginAsJS)])
 
   type GUIPluginAsJS = String
 

@@ -15,7 +15,7 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.api.{PluginServices, ServerAPI}
+import org.openmole.gui.shared.api.{GUIPlugins, PluginServices, ServerAPI}
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
@@ -109,10 +109,11 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global
     api.fetchGUIPlugins { plugins ⇒
+      given GUIPlugins = plugins
       val maindiv = div()
 
-      val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)
-      val newProjectPanel = ProjectPanel.render(plugins.wizardFactories)
+      val authenticationPanel = AuthenticationPanel.render
+      val newProjectPanel = ProjectPanel.render
 
       val openFileTree = Var(true)
       //   val openAuthentication = Var(false)

@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.tool.plot.Plotter
-import org.openmole.gui.shared.api.{MethodAnalysisPlugin, PluginServices, ServerAPI}
+import org.openmole.gui.shared.api.{GUIPlugins, MethodAnalysisPlugin, PluginServices, ServerAPI}
 import scaladget.bootstrapnative.bsn
 
 /*
@@ -28,7 +28,7 @@ import scaladget.bootstrapnative.bsn
 
 class FileDisplayer:
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices)(using panels: Panels, api: ServerAPI) = {
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, plugins: GUIPlugins) = {
     panels.tabContent.alreadyDisplayed(safePath) match {
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
@@ -43,12 +43,12 @@ class FileDisplayer:
               HTMLContent.addTab(safePath, htmlDiv)
             }
           case FileExtension.OpenMOLEResult ⇒
-            api.findVisualisationPlugin(safePath).foreach {
-              case Some(plugin) ⇒
-                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-              //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-              // treeNodeTabs add tab
-              case None ⇒
+            api.omrMethod(safePath).foreach { method =>
+              plugins.analysisPlugins.get(method) match
+                case Some(analysis) ⇒
+                //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
+                // treeNodeTabs add tab
+                case None ⇒
             }
           case FileExtension.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
 

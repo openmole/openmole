@@ -49,10 +49,9 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = fetch.future(_.clearEnvironmentErrors(environment).future)
   override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = fetch.future(_.runningErrorEnvironmentData(environment, lines).future)
   override def listPlugins(): Future[Seq[Plugin]] = fetch.future(_.listPlugins(()).future)
-  override def guiPlugins(): Future[PluginExtensionData] = fetch.future(_.guiPlugins(()).future)
   override def addPlugin(path: SafePath): Future[Seq[ErrorData]] = fetch.future(_.addPlugin(path).future)
   override def removePlugin(path: SafePath): Future[Unit] = fetch.future(_.removePlugin(path).future)
-  override def findVisualisationPlugin(path: SafePath): Future[Option[GUIPluginAsJS]] = fetch.future(_.findVisualisationPlugin(path).future)
+  override def omrMethod(path: SafePath): Future[String] = fetch.future(_.omrMethod(path).future)
   override def models(path: SafePath): Future[Seq[SafePath]] = fetch.future(_.models(path).future)
   override def expandResources(resources: Resources): Future[Resources] = fetch.future(_.expandResources(resources).future)
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]] = fetch.future(_.downloadHTTP(url, path, extract).future)
@@ -123,9 +122,10 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
       xhr.send()
     }
 
-  override def fetchGUIPlugins(f: PluginParameters ⇒ Unit) =
-    guiPlugins().map { p ⇒
+  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit) =
+    fetch.future(_.guiPlugins(()).future).map { p ⇒
       val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
       val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
-      f(PluginParameters(authFact, wizardFactories))
+      val analysisFactories = p.analysis.map { (method, gp) ⇒ (method, Plugins.buildJSObject[MethodAnalysisPlugin](gp)) }.toMap
+      f(GUIPlugins(authFact, wizardFactories, analysisFactories))
     }

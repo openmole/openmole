@@ -152,9 +152,8 @@ trait CoreAPI extends RESTAPI {
   val removePlugin: Endpoint[SafePath, Unit] =
     endpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
-  val findVisualisationPlugin: Endpoint[SafePath, Option[GUIPluginAsJS]] =
-    endpoint(post(path / "plugin" / "visualisation", jsonRequest[SafePath]), ok(jsonResponse[Option[GUIPluginAsJS]]))
-
+  val omrMethod: Endpoint[SafePath, String] =
+    endpoint(post(path / "plugin" / "omr-method", jsonRequest[SafePath]), ok(jsonResponse[String]))
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]

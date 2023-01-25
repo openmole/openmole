@@ -9,7 +9,7 @@ import scaladget.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import Waiter.*
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.shared.api.{PluginServices, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.shared.api.{GUIPlugins, MethodAnalysisPlugin, PluginServices, ServerAPI, WizardPluginFactory}
 
 object ProjectPanel {
 
@@ -25,7 +25,7 @@ object ProjectPanel {
     )
   }
 
-  def render(wizards: Seq[WizardPluginFactory])(using api: ServerAPI, panels: Panels, pluginServices: PluginServices) = {
+  def render(using api: ServerAPI, panels: Panels, plugins: GUIPlugins) = {
 
     // 1- Empty project
     def emptyProject = {
@@ -37,14 +37,14 @@ object ProjectPanel {
           hash = true,
           onLoadEnd = (content, hash) ⇒ {
             panels.treeNodePanel.treeNodeManager.invalidCurrentCache
-            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, pluginServices)
+            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS)
           }
         )
       })
     }
 
     // 2- Model wizard
-    val wizardPanel = ModelWizardPanel.render(wizards)
+    val wizardPanel = ModelWizardPanel.render
 
     div(
       div(

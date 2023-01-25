@@ -15,7 +15,7 @@ import TreeNode.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.shared.api.{PluginServices, ServerAPI}
+import org.openmole.gui.shared.api.{GUIPlugins, PluginServices, ServerAPI}
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -295,7 +295,7 @@ class TreeNodePanel { panel =>
   //    case _                ⇒
   //  }
 
-  def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Div =
+  def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, plugins: GUIPlugins): Div =
     div(cls := "file-scrollable-content",
       children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
@@ -332,20 +332,20 @@ class TreeNodePanel { panel =>
       }
     )
 
-  def displayNode(safePath: SafePath)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit =
+  def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, plugins: GUIPlugins): Unit =
     if (safePath.extension.displayable) {
       downloadFile(
         safePath,
         saveFile = false,
         hash = true,
         onLoaded = (content: String, hash: Option[String]) ⇒ {
-          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension, pluginServices)
+          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)
           treeNodeManager.invalidCurrentCache
         }
       )
     }
 
-  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit =
+  def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, plugins: GUIPlugins): Unit =
     tn match
       case tn: TreeNode.File ⇒
         val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
@@ -484,7 +484,7 @@ class TreeNodePanel { panel =>
     }
     draggedNode.set(None)
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI) =
+  def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI) =
     node match
       case fn: TreeNode.File ⇒
         ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))

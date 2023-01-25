@@ -47,12 +47,11 @@ trait ServerAPI:
   def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData]
 
   def listPlugins(): Future[Seq[Plugin]]
-  def guiPlugins(): Future[PluginExtensionData]
   def addPlugin(path: SafePath): Future[Seq[ErrorData]]
   def removePlugin(path: SafePath): Future[Unit]
-  def findVisualisationPlugin(path: SafePath): Future[Option[GUIPluginAsJS]]
 
-  def fetchGUIPlugins(f: PluginParameters ⇒ Unit): Future[Unit]
+  def omrMethod(path: SafePath): Future[String]
+  def fetchGUIPlugins(f: GUIPlugins ⇒ Unit): Future[Unit]
 
   def models(path: SafePath): Future[Seq[SafePath]]
   def expandResources(resources: Resources): Future[Resources]

@@ -144,8 +144,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val getMarketEntryRoute =
     getMarketEntry.implementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
 
-  val findAnalysisPluginRoute =
-    findVisualisationPlugin.implementedBy { p => apiImpl.findAnalysisPlugin(p) }
+  val omrMethodRoute =
+    omrMethod.implementedBy { p => apiImpl.omrMethodName(p) }
 
   val addPluginRoute =
     addPlugin.implementedBy { p => apiImpl.addPlugin(p) }
@@ -186,7 +186,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
       temporaryDirectoryRoute,
       marketIndexRoute,
       getMarketEntryRoute,
-      findAnalysisPluginRoute,
+      omrMethodRoute,
       addPluginRoute,
       removePluginRoute
     )

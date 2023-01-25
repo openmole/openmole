@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, ServerAPI}
+import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, GUIPlugins, ServerAPI}
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
@@ -38,10 +38,10 @@ object AuthenticationPanel {
   lazy val initialCheck = Var(false)
 
 
-  def render(authenticationFactories: Seq[AuthenticationPluginFactory])(using panels: Panels, api: ServerAPI) = {
+  def render(using panels: Panels, api: ServerAPI, plugins: GUIPlugins) = {
 
     def getAuthentications =
-      authenticationFactories.map { factory ⇒
+      plugins.authenticationFactories.map { factory ⇒
         val data = factory.getData
         auths.set(Seq())
         data.foreach {
@@ -59,13 +59,13 @@ object AuthenticationPanel {
       lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
 
         val currentInd = {
-          val ind = authenticationFactories.map {
+          val ind = plugins.authenticationFactories.map {
             _.name
           }.indexOf(currentFactory.name)
           if (ind == -1) 0 else ind
         }
 
-        authenticationFactories.options(currentInd, bsn.btn_warning, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
+        plugins.authenticationFactories.options(currentInd, bsn.btn_warning, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
           authSetting.set(authenticationSelector.content.now().map {
             _.buildEmpty
           }))
@@ -91,7 +91,7 @@ object AuthenticationPanel {
       cls := "btn newButton",
       onClick --> {
         _ ⇒
-          authSetting.set(authenticationFactories.headOption.map {
+          authSetting.set(plugins.authenticationFactories.headOption.map {
             _.buildEmpty
           })
       })

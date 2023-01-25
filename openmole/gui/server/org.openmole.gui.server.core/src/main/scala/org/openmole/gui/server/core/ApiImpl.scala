@@ -498,9 +498,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
 
   //GUI OM PLUGINS
-  def getGUIPlugins(): PluginExtensionData = {
-    PluginExtensionData(GUIPluginRegistry.authentications, GUIPluginRegistry.wizards)
-  }
+  def getGUIPlugins(): PluginExtensionData =
+    PluginExtensionData(
+      GUIPluginRegistry.authentications,
+      GUIPluginRegistry.wizards,
+      GUIPluginRegistry.analysis)
 
   def isOSGI(safePath: SafePath): Boolean = {
     import services._
@@ -509,11 +511,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   // Analysis plugins
-  def findAnalysisPlugin(result: SafePath): Option[GUIPluginAsJS] =
+  def omrMethodName(result: SafePath): String =
     import services.*
     val omrFile = safePathToFile(result)
-    val methodName = OMROutputFormat.methodName(omrFile)
-    GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
+    OMROutputFormat.methodName(omrFile)
+
+    //GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
 
   //MODEL WIZARDS
 

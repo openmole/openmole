@@ -119,10 +119,9 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
   override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = Future.successful(EnvironmentErrorData.empty)
   override def listPlugins(): Future[Seq[Plugin]] = Future.successful(Seq.empty)
-  override def guiPlugins(): Future[PluginExtensionData] = Future.successful(PluginExtensionData.empty)
   override def addPlugin(path: SafePath): Future[Seq[ErrorData]] = Future.successful(Seq.empty)
   override def removePlugin(path: SafePath): Future[Unit] = Future.successful(())
-  override def findVisualisationPlugin(path: SafePath): Future[Option[GUIPluginAsJS]] = Future.successful(None)
+  override def omrMethod(path: SafePath): Future[String] = Future.successful("stub")
   override def models(path: SafePath): Future[Seq[SafePath]] = Future.successful(Seq.empty)
   override def expandResources(resources: Resources): Future[Resources] = Future.successful(Resources.empty)
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]] = Future.successful(None)
@@ -143,13 +142,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     val h = if hash then Some(content.hashCode.toString) else None
     onLoadEnd(content, h)
 
-  override def fetchGUIPlugins(f: PluginParameters ⇒ Unit) =
-    guiPlugins().map { p ⇒
-      import org.openmole.gui.plugin.authentication.sshlogin.*
-      val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
-      val wizardFactories = Seq()
-      f(PluginParameters(authFact, wizardFactories))
-    }
+  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit) =
+    import org.openmole.gui.plugin.authentication.sshlogin.*
+    val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
+    val wizardFactories = Seq()
+    val analysisPlugin = Map[String, MethodAnalysisPlugin]()
+    Future.successful(f(GUIPlugins(authFact, wizardFactories, analysisPlugin)))
+
 
 
 //class StubRESTServerAPI extends ServerAPI:

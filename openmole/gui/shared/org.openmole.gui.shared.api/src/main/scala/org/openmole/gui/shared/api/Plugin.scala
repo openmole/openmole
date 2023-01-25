@@ -55,7 +55,6 @@ trait WizardPluginFactory extends GUIPluginFactory:
   def parse(safePath: SafePath): Future[Option[ModelMetadata]]
   def toTask(safePath: SafePath, modelMetadata: ModelMetadata): Future[Unit]
 
-
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices): HtmlElement
 
@@ -65,4 +64,7 @@ case class PluginServices(errorManager: ErrorManager)
 trait ErrorManager:
   def signal(message: String, stack: Option[String] = None): Unit
 
-case class PluginParameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])
+case class GUIPlugins(
+                             authenticationFactories: Seq[AuthenticationPluginFactory],
+                             wizardFactories: Seq[WizardPluginFactory],
+                             analysisPlugins: Map[String, MethodAnalysisPlugin])
