@@ -61,7 +61,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def execute(using panels: Panels, api: ServerAPI) = {
     import scala.concurrent.duration._
     withSafePath { sp ⇒
-      api.runScript(ScriptData(sp), true).foreach { execInfo ⇒
+      api.runScript(sp, true).foreach { execInfo ⇒
         showExecution()
       }
       closeToolBox

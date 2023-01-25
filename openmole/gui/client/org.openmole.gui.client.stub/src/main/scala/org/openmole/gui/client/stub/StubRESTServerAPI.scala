@@ -44,6 +44,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   import AnimatedStubRESTServerAPI.*
 
   val files = scala.collection.mutable.HashMap[SafePath, MemoryFile]()
+  val executions = scala.collection.mutable.HashMap[ExecutionId, (StaticExecutionInfo, ExecutionInfo)]()
 
   def add(file: MemoryFile) = files += file.path -> file
 
@@ -110,12 +111,33 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def exists(path: SafePath): Future[Boolean] = Future.successful(false)
   override def temporaryDirectory(): Future[SafePath] = Future.successful(SafePath.empty)
-  override def allStates(line: Int): Future[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = Future.successful((Seq.empty, Seq.empty))
-  override def staticInfos(): Future[Seq[(ExecutionId, StaticExecutionInfo)]] = Future.successful(Seq.empty)
-  override def cancelExecution(id: ExecutionId): Future[Unit] = Future.successful(())
-  override def removeExecution(id: ExecutionId): Future[Unit] = Future.successful(())
-  override def compileScript(script: ScriptData): Future[Option[ErrorData]] = Future.successful(None)
-  override def runScript(script: ScriptData, validate: Boolean): Future[Unit] = Future.successful(())
+
+  override def allStates(line: Int): Future[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] =
+    Future.successful((executions.toSeq.map { (k, v) => k -> v._2 }, Seq.empty))
+
+  override def staticInfos(): Future[Seq[(ExecutionId, StaticExecutionInfo)]] =
+    Future.successful(executions.toSeq.map{(k, v) => k -> v._1})
+
+  override def cancelExecution(id: ExecutionId): Future[Unit] =
+    val execution = executions(id)
+    executions += id -> (execution._1, ExecutionInfo.Canceled(Seq(), Seq(), 1000L, true))
+    Future.successful(())
+
+  override def removeExecution(id: ExecutionId): Future[Unit] =
+    executions -= id
+    Future.successful(())
+
+  override def compileScript(script: SafePath): Future[Option[ErrorData]] = Future.successful(None)
+
+  override def runScript(script: SafePath, validate: Boolean): Future[Unit] =
+    executions +=
+      ExecutionId() -> (
+        StaticExecutionInfo(script, files(script).content, System.currentTimeMillis()),
+        ExecutionInfo.Running(Seq(), 1000L, Seq())
+      )
+    Future.successful(())
+
+
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
   override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = Future.successful(EnvironmentErrorData.empty)
   override def listPlugins(): Future[Seq[Plugin]] = Future.successful(Seq.empty)

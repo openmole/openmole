@@ -41,8 +41,8 @@ trait ServerAPI:
   def staticInfos(): Future[Seq[(ExecutionId, StaticExecutionInfo)]]
   def cancelExecution(id: ExecutionId): Future[Unit]
   def removeExecution(id: ExecutionId): Future[Unit]
-  def compileScript(script: ScriptData): Future[Option[ErrorData]]
-  def runScript(script: ScriptData, validate: Boolean): Future[Unit]
+  def compileScript(script: SafePath): Future[Option[ErrorData]]
+  def runScript(script: SafePath, validate: Boolean): Future[Unit]
   def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit]
   def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData]
 

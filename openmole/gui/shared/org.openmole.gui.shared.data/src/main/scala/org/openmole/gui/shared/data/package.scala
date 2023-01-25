@@ -157,8 +157,6 @@ package data {
     directory: Option[TreeNodeData.Directory] = None,
     pluginState: PluginState = PluginState.empty)
 
-  case class ScriptData(scriptPath: SafePath)
-
   object ErrorData:
     def empty = MessageErrorData("", None)
 
@@ -249,18 +247,18 @@ package data {
      clean: Boolean = true) extends ExecutionInfo("failed")
 
     case class Running(
-      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      capsules: Seq[ExecutionInfo.CapsuleExecution],
       duration: Long,
       environmentStates: Seq[EnvironmentState]) extends ExecutionInfo("running")
 
     case class Finished(
-      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      capsules: Seq[ExecutionInfo.CapsuleExecution],
       duration: Long = 0L,
       environmentStates: Seq[EnvironmentState],
       clean: Boolean) extends ExecutionInfo("finished")
 
     case class Canceled(
-      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      capsules: Seq[ExecutionInfo.CapsuleExecution],
       environmentStates: Seq[EnvironmentState],
       duration: Long = 0L,
       clean: Boolean) extends ExecutionInfo("canceled")

@@ -124,12 +124,12 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def compileScript(scriptData: ScriptData): Option[ErrorData]
-  val compileScript: Endpoint[ScriptData, Option[ErrorData]] =
-    endpoint(post(path / "execution" / "compile", jsonRequest[ScriptData]), ok(jsonResponse[Option[ErrorData]]))
+  val compileScript: Endpoint[SafePath, Option[ErrorData]] =
+    endpoint(post(path / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
 //  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
-  val runScript: Endpoint[(ScriptData, Boolean), Unit] =
-    endpoint(post(path / "execution" / "run", jsonRequest[(ScriptData, Boolean)]), ok(jsonResponse[Unit]))
+  val runScript: Endpoint[(SafePath, Boolean), Unit] =
+    endpoint(post(path / "execution" / "run", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Unit]))
 
 //  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   val clearEnvironmentErrors: Endpoint[EnvironmentId, Unit] =

@@ -277,27 +277,27 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
-  def compileScript(scriptData: ScriptData) = {
-    val (execId, outputStream) = compilationData(scriptData)
-    synchronousCompilation(execId, scriptData, outputStream)
+  def compileScript(script: SafePath) = {
+    val (execId, outputStream) = compilationData(script)
+    synchronousCompilation(execId, script, outputStream)
   }
 
-  def runScript(scriptData: ScriptData, validateScript: Boolean) = {
+  def runScript(script: SafePath, validateScript: Boolean) = {
     asynchronousCompilation(
-      scriptData,
+      script,
       Some(execId ⇒ execution.compiled(execId)),
       Some(processRun(_, _, validateScript))
     )
   }
 
-  private def compilationData(scriptData: ScriptData) = {
+  private def compilationData(script: SafePath) = {
     import services._
     (ExecutionId(DataUtils.uuID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
   }
 
   def synchronousCompilation(
     execId:       ExecutionId,
-    scriptData:   ScriptData,
+    scriptPath:   SafePath,
     outputStream: StringPrintStream,
     onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
     onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
@@ -323,7 +323,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val script: File = {
       import services._
-      safePathToFile(scriptData.scriptPath)
+      safePathToFile(scriptPath)
     }
 
     val executionOutputRedirection = OutputRedirection(outputStream)
@@ -375,17 +375,17 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   }
 
-  def asynchronousCompilation(scriptData: ScriptData, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
+  def asynchronousCompilation(script: SafePath, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
     import services._
-    val (execId, outputStream) = compilationData(scriptData)
+    val (execId, outputStream) = compilationData(script)
 
-    val content = safePathToFile(scriptData.scriptPath).content
+    val content = safePathToFile(script).content
 
-    execution.addStaticInfo(execId, StaticExecutionInfo(scriptData.scriptPath, content, System.currentTimeMillis()))
+    execution.addStaticInfo(execId, StaticExecutionInfo(script, content, System.currentTimeMillis()))
     execution.addOutputStreams(execId, outputStream)
 
     val compilationFuture: java.util.concurrent.Future[_] = threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
-      val errorData = synchronousCompilation(execId, scriptData, outputStream, onEvaluated, onCompiled)
+      val errorData = synchronousCompilation(execId, script, outputStream, onEvaluated, onCompiled)
       errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
     }
 

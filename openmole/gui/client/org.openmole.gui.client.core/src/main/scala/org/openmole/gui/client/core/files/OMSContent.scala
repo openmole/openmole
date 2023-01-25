@@ -65,7 +65,7 @@ object OMSContent {
               compileDisabled.set(true)
 
               panels.tabContent.save(tabData, _ ⇒
-                api.compileScript(ScriptData(safePath)).foreach { errorDataOption ⇒
+                api.compileScript(safePath).foreach { errorDataOption ⇒
                   compileDisabled.set(false)
                   setError(safePath, errorDataOption)
                   editor.editor.focus()
@@ -77,7 +77,7 @@ object OMSContent {
           button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
-              api.runScript(ScriptData(safePath), true).foreach { execInfo ⇒
+              api.runScript(safePath, true).foreach { execInfo ⇒
                 ExecutionPanel.open
               }
             )
