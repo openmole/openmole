@@ -605,7 +605,6 @@ package data {
     def message: String
     def error: Option[ErrorData]
 
-
   case class PendingTest() extends Test:
     def passed = false
     def message = "pending"

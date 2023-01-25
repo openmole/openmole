@@ -26,18 +26,12 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 object Plugins {
 
-  def fetch(f: Parameters ⇒ Unit)(using api: ServerAPI) =
-    api.guiPlugins().map { p ⇒
-      val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
-      val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
-      f(Parameters(authFact, wizardFactories))
-    }
+
 
   def buildJSObject[T](obj: GUIPluginAsJS) = {
     val toBeEval = s"openmole_library.${obj.split('.').takeRight(2).head}"
     scalajs.js.eval(toBeEval).asInstanceOf[T]
   }
 
-  case class Parameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])
 
 }

@@ -71,7 +71,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   def toScript(using panels: Panels, api: ServerAPI) =
     withSafePath { sp ⇒
       closeToolBox
-      Plugins.fetch { p ⇒
+      api.fetchGUIPlugins { p ⇒
 //FIXME
         //        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
 //        wizardPanel.dialog.show

@@ -52,6 +52,8 @@ trait ServerAPI:
   def removePlugin(path: SafePath): Future[Unit]
   def findVisualisationPlugin(path: SafePath): Future[Option[GUIPluginAsJS]]
 
+  def fetchGUIPlugins(f: PluginParameters ⇒ Unit): Future[Unit]
+
   def models(path: SafePath): Future[Seq[SafePath]]
   def expandResources(resources: Resources): Future[Resources]
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]]

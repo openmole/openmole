@@ -788,7 +788,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 
     (Compile / compile).value
   }
-) dependsOn (clientGUI)
+) dependsOn (clientGUI, guiEnvironmentSSHLoginPlugin)
 
 
 /* -------------------------- Server ----------------------- */

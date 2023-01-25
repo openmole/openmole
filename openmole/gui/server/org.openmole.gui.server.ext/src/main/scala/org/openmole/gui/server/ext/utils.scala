@@ -110,7 +110,7 @@ object utils {
   implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel =
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorStateLevel.Error
     else ErrorStateLevel.Debug
-  
+
   def getPathArray(f: File, until: Option[File]): Seq[String] =
     val canonicalUntil = until.map(_.getCanonicalFile)
 

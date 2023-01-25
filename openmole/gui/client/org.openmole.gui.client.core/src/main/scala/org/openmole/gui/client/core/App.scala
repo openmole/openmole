@@ -108,7 +108,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
   def run() =
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global
-    Plugins.fetch { plugins ⇒
+    api.fetchGUIPlugins { plugins ⇒
       val maindiv = div()
 
       val authenticationPanel = AuthenticationPanel.render(plugins.authenticationFactories)

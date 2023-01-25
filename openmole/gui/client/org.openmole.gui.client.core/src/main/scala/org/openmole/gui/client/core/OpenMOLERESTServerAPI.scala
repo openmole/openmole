@@ -20,7 +20,7 @@ package org.openmole.gui.client.core
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import org.scalajs.dom.*
 
 import scala.concurrent.duration.*
@@ -121,4 +121,11 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
         Encoding.encode
       }), hash = hash), true)
       xhr.send()
+    }
+
+  override def fetchGUIPlugins(f: PluginParameters ⇒ Unit) =
+    guiPlugins().map { p ⇒
+      val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
+      val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
+      f(PluginParameters(authFact, wizardFactories))
     }

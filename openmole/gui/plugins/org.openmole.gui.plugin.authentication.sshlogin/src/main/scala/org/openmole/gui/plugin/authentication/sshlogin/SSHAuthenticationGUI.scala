@@ -34,37 +34,26 @@ import scalajs.js
 object TopLevelExports {
   @JSExportTopLevel("sshlogin")
   val sshlogin = js.Object {
+    given LoginAuthenticationServerAPI()
     new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory
   }
 }
 
-class LoginAuthenticationFactory extends AuthenticationPluginFactory {
+class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends AuthenticationPluginFactory:
   type AuthType = LoginAuthenticationData
-
   def buildEmpty: AuthenticationPlugin = new LoginAuthenticationGUI
-
   def build(data: AuthType): AuthenticationPlugin = new LoginAuthenticationGUI(data)
-
   def name = "SSH Login/Password"
+  def getData: Future[Seq[AuthType]] = api.loginAuthentications()
 
-  def getData: Future[Seq[AuthType]] = PluginFetch.future(_.loginAuthentications(()).future)
-}
-
-class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData()) extends AuthenticationPlugin {
+class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin:
   type AuthType = LoginAuthenticationData
-
   def factory = new LoginAuthenticationFactory
-
-  def remove(onremove: () ⇒ Unit) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
-    onremove()
-  }
+  def remove(onremove: () ⇒ Unit) = api.removeAuthentication(data).foreach { _ ⇒ onremove() }
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
-
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
-
   val targetInput = inputTag(data.target).amend(placeholder := "Host")
-
   val portInput = inputTag(data.port).amend(placeholder := "Port")
 
   def panel(using api: ServerAPI): HtmlElement = div(
@@ -75,13 +64,9 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
   )
 
-  def save(onsave: () ⇒ Unit): Unit = {
-    PluginFetch.future(_.removeAuthentication(data).future).foreach { d ⇒
-      PluginFetch.future(_.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).future).foreach { b ⇒
-        onsave()
-      }
+  def save(onsave: () ⇒ Unit): Unit =
+    api.removeAuthentication(data).foreach { d ⇒
+      api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).foreach { b ⇒ onsave() }
     }
-  }
 
-  def test: Future[Seq[Test]] = PluginFetch.future(_.testAuthentication(data).future)
-}
+  def test: Future[Seq[Test]] = api.testAuthentication(data)

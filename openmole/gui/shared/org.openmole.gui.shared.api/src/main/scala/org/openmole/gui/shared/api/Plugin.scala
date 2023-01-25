@@ -25,7 +25,7 @@ import scala.concurrent.Future
 
 sealed trait GUIPlugin
 
-trait AuthenticationPlugin extends GUIPlugin {
+trait AuthenticationPlugin extends GUIPlugin:
   type AuthType <: AuthenticationData
   def data: AuthType
   def factory: AuthenticationPluginFactory
@@ -33,37 +33,36 @@ trait AuthenticationPlugin extends GUIPlugin {
   def save(onsave: () ⇒ Unit): Unit
   def remove(onremoved: () ⇒ Unit): Unit
   def test: Future[Seq[Test]]
-}
 
 sealed trait GUIPluginFactory
 
-trait AuthenticationPluginFactory extends GUIPluginFactory {
+trait AuthenticationPluginFactory extends GUIPluginFactory:
   type AuthType <: AuthenticationData
   def name: String
   def build(data: AuthType): AuthenticationPlugin
   def buildEmpty: AuthenticationPlugin
   def getData: Future[Seq[AuthType]]
-}
 
-trait WizardGUIPlugin extends GUIPlugin {
+
+trait WizardGUIPlugin extends GUIPlugin:
   def factory: WizardPluginFactory
   val panel: HtmlElement
   def save(): Unit
-}
 
-trait WizardPluginFactory extends GUIPluginFactory {
+trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
   def fileType: FileType
   def parse(safePath: SafePath): Future[Option[ModelMetadata]]
   def toTask(safePath: SafePath, modelMetadata: ModelMetadata): Future[Unit]
-}
 
-trait MethodAnalysisPlugin extends GUIPlugin {
+
+trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices): HtmlElement
-}
+
 
 case class PluginServices(errorManager: ErrorManager)
 
-trait ErrorManager {
+trait ErrorManager:
   def signal(message: String, stack: Option[String] = None): Unit
-}
+
+case class PluginParameters(authenticationFactories: Seq[AuthenticationPluginFactory], wizardFactories: Seq[WizardPluginFactory])
