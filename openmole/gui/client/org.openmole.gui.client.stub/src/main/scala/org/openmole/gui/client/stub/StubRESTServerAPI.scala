@@ -18,7 +18,7 @@ package org.openmole.gui.client.stub
  */
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
-import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.{TreeNodeData, *}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.ServerAPI
 import org.scalajs.dom.*
@@ -92,7 +92,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
           name = d.path.name,
           size = 0,
           time = d.time,
-          directory = Some(DirData(isEmpty))
+          directory = Some(TreeNodeData.Directory(isEmpty))
         )
       }
 

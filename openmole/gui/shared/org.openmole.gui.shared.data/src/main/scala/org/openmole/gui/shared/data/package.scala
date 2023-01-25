@@ -142,32 +142,30 @@ package data {
         path.take(safePath.path.size) == safePath.path
 
 
-
-
-  case class DirData(isEmpty: Boolean)
-
   object PluginState:
     def empty = PluginState(false, false)
 
   case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
 
+  object TreeNodeData:
+    case class Directory(isEmpty: Boolean)
+
   case class TreeNodeData(
     name: String,
     size: Long,
     time: Long,
-    directory: Option[DirData] = None,
+    directory: Option[TreeNodeData.Directory] = None,
     pluginState: PluginState = PluginState.empty)
 
   case class ScriptData(scriptPath: SafePath)
 
-  object ErrorData {
+  object ErrorData:
     def empty = MessageErrorData("", None)
 
-    def toStackTrace(t: Throwable) = {
+    def toStackTrace(t: Throwable) =
       val sw = new StringWriter()
       t.printStackTrace(new PrintWriter(sw))
       sw.toString
-    }
 
     def apply(errors: Seq[ErrorWithLocation], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
 
@@ -176,158 +174,107 @@ package data {
     def apply(message: String) = MessageErrorData(message, None)
 
     def stackTrace(e: ErrorData) =
-      e match {
+      e match
         case MessageErrorData(msg, stackTrace) => msg + stackTrace.map("\n" + _).getOrElse("")
         case CompilationErrorData(_, stackTrace) => stackTrace
-      }
-  }
+
 
   sealed trait ErrorData
-
   case class MessageErrorData(message: String, stackTrace: Option[String]) extends ErrorData
-
   case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
 
-
   case class Token(token: String, duration: Long)
+  case class ExecutionId(id: String = DataUtils.uuID)
+  case class EnvironmentId(id: String = DataUtils.uuID)
 
-  sealed trait ID {
-    def id: String
-  }
-
-  case class ExecutionId(id: String = DataUtils.uuID) extends ID
-
-  case class EnvironmentId(id: String = DataUtils.uuID) extends ID
-
-  sealed trait ErrorStateLevel {
-    def name: String
-  }
-
-  case class DebugLevel() extends ErrorStateLevel {
-    val name = "DEBUG"
-  }
-
-  case class ErrorLevel() extends ErrorStateLevel {
-    val name = "ERROR"
-  }
+  enum ErrorStateLevel(val name: String):
+    case Debug extends ErrorStateLevel("Debug")
+    case Error extends ErrorStateLevel("Error")
 
   case class EnvironmentError(
     environmentId: EnvironmentId,
     errorMessage: String,
     stack: ErrorData,
     date: Long,
-    level: ErrorStateLevel) extends Ordered[EnvironmentError] {
+    level: ErrorStateLevel) extends Ordered[EnvironmentError]:
     def compare(that: EnvironmentError) = date compare that.date
-  }
 
   case class NetworkActivity(
-                              downloadingFiles: Int = 0,
-                              downloadedSize: Long = 0L,
-                              readableDownloadedSize: String = "",
-                              uploadingFiles: Int = 0,
-                              uploadedSize: Long = 0L,
-                              readableUploadedSize: String = "")
+    downloadingFiles: Int = 0,
+    downloadedSize: Long = 0L,
+    readableDownloadedSize: String = "",
+    uploadingFiles: Int = 0,
+    uploadedSize: Long = 0L,
+    readableUploadedSize: String = "")
 
   case class ExecutionActivity(executionTime: Long = 0)
 
   object EnvironmentErrorData:
     def empty = EnvironmentErrorData(Seq())
 
-
   // datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
   case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
-
   case class OutputStreamData(id: ExecutionId, output: String)
-
   case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long)
 
   case class EnvironmentState(
-                               envId: EnvironmentId,
-                               taskName: String,
-                               running: Long,
-                               done: Long,
-                               submitted: Long,
-                               failed: Long,
-                               networkActivity: NetworkActivity,
-                               executionActivity: ExecutionActivity,
-                               numberOfErrors: Int)
+    envId: EnvironmentId,
+    taskName: String,
+    running: Long,
+    done: Long,
+    submitted: Long,
+    failed: Long,
+    networkActivity: NetworkActivity,
+    executionActivity: ExecutionActivity,
+    numberOfErrors: Int)
 
-  sealed trait ExecutionInfo {
-    def state: String
-
+  sealed trait ExecutionInfo(val state: String):
     def duration: Long
-
     def capsules: Seq[ExecutionInfo.CapsuleExecution]
-
     def ready: Long = capsules.map(_.statuses.ready).sum
-
     def running: Long = capsules.map(_.statuses.running).sum
-
     def completed: Long = capsules.map(_.statuses.completed).sum
-
     def environmentStates: Seq[EnvironmentState]
-  }
 
-  object ExecutionInfo {
 
+  object ExecutionInfo:
     case class CapsuleExecution(name: String, scope: String, statuses: ExecutionInfo.JobStatuses)
-
     case class JobStatuses(ready: Long, running: Long, completed: Long)
 
     case class Failed(
-                       capsules: Seq[ExecutionInfo.CapsuleExecution],
-                       error: ErrorData,
-                       environmentStates: Seq[EnvironmentState],
-                       duration: Long = 0L,
-                       clean: Boolean = true) extends ExecutionInfo {
-      def state: String = "failed"
-    }
+     capsules: Seq[ExecutionInfo.CapsuleExecution],
+     error: ErrorData,
+     environmentStates: Seq[EnvironmentState],
+     duration: Long = 0L,
+     clean: Boolean = true) extends ExecutionInfo("failed")
 
     case class Running(
-                        capsules: Vector[ExecutionInfo.CapsuleExecution],
-                        duration: Long,
-                        environmentStates: Seq[EnvironmentState]) extends ExecutionInfo {
-      def state: String = "running"
-    }
+      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      duration: Long,
+      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo("running")
 
     case class Finished(
-                         capsules: Vector[ExecutionInfo.CapsuleExecution],
-                         duration: Long = 0L,
-                         environmentStates: Seq[EnvironmentState],
-                         clean: Boolean) extends ExecutionInfo {
-      def state: String = "finished"
-    }
-
+      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      duration: Long = 0L,
+      environmentStates: Seq[EnvironmentState],
+      clean: Boolean) extends ExecutionInfo("finished")
 
     case class Canceled(
-                         capsules: Vector[ExecutionInfo.CapsuleExecution],
-                         environmentStates: Seq[EnvironmentState],
-                         duration: Long = 0L,
-                         clean: Boolean) extends ExecutionInfo {
-      def state: String = "canceled"
-    }
+      capsules: Vector[ExecutionInfo.CapsuleExecution],
+      environmentStates: Seq[EnvironmentState],
+      duration: Long = 0L,
+      clean: Boolean) extends ExecutionInfo("canceled")
 
-    case class Compiling() extends ExecutionInfo {
-      def state: String = "compiling"
-
+    case class Compiling() extends ExecutionInfo("compiling"):
       def duration: Long = 0L
-
       def capsules = Vector.empty
-
       def environmentStates: Seq[EnvironmentState] = Seq()
-    }
 
-    case class Preparing() extends ExecutionInfo {
-      def state: String = "preparing"
-
+    case class Preparing() extends ExecutionInfo("preparing"):
       def duration: Long = 0L
-
       def capsules = Vector.empty
-
       def environmentStates: Seq[EnvironmentState] = Seq()
-    }
 
-  }
 
   case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
@@ -337,9 +284,7 @@ package data {
 
   sealed trait Language {
     def name: String
-
     def extension: String
-
     def taskType: TaskType
   }
 

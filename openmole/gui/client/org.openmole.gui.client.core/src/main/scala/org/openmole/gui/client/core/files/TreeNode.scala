@@ -17,11 +17,10 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.{DataUtils, TreeNodeData, *}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.Utils.*
-import org.openmole.gui.shared.data.DataUtils
 
 import scala.concurrent.Future
 
@@ -61,21 +60,20 @@ sealed trait TreeNode {
 
 def ListFiles(lfd: ListFilesData): TreeNode.ListFiles = lfd.map(TreeNode.treeNodeDataToTreeNode)
 
-object TreeNode {
+object TreeNode:
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
-    case Some(dd: DirData) ⇒ DirNode(tnd.name, tnd.size, tnd.time, dd.isEmpty)
-    case _ ⇒ FileNode(tnd.name, tnd.size, tnd.time, tnd.pluginState)
+    case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty)
+    case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState)
   }
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
     val (dOf, pluginState) = tn match {
-      case DirNode(_, _, _, isEmpty) ⇒ (Some(DirData(isEmpty)), PluginState(false, false))
-      case f: FileNode ⇒ (None, f.pluginState)
+      case TreeNode.Directory(_, _, _, isEmpty) ⇒ (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
+      case f: TreeNode.File ⇒ (None, f.pluginState)
     }
 
     TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf)
-
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map { treeNodeToTreeNodeData }
   implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
@@ -87,18 +85,20 @@ object TreeNode {
 
   def isDir(node: TreeNode) =
     node match
-      case _: DirNode => true
+      case _: Directory => true
       case _ => false
-}
 
-case class DirNode(
-  name: String,
-  size: Long,
-  time: Long,
-  isEmpty: Boolean) extends TreeNode
+  case class Directory(
+    name: String,
+    size: Long,
+    time: Long,
+    isEmpty: Boolean) extends TreeNode
 
-case class FileNode(
-  name: String,
-  size: Long,
-  time: Long,
-  pluginState: PluginState) extends TreeNode
+  case class File(
+    name: String,
+    size: Long,
+    time: Long,
+    pluginState: PluginState) extends TreeNode
+
+
+

@@ -96,7 +96,7 @@ object utils {
     )
     else None
 
-    val dirData = if (f.isDirectory) Some(DirData(f.isDirectoryEmpty)) else None
+    val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
 
     time.map(t ⇒ TreeNodeData(f.getName, f.length, t, directory = dirData, pluginState = PluginState(isPlugin(fileToSafePath(f)), isPlugged(f, pluggedList))))
   }
@@ -107,11 +107,10 @@ object utils {
 
   implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
 
-  implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel = {
-    if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorLevel()
-    else DebugLevel()
-  }
-
+  implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel =
+    if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorStateLevel.Error
+    else ErrorStateLevel.Debug
+  
   def getPathArray(f: File, until: Option[File]): Seq[String] =
     val canonicalUntil = until.map(_.getCanonicalFile)
 

@@ -345,12 +345,13 @@ class TreeNodePanel { panel =>
       )
     }
 
-  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit = tn match {
-    case fn: FileNode ⇒
-      val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
-      displayNode(tnSafePath)
-    case _ ⇒
-  }
+  def displayNode(tn: TreeNode)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI): Unit =
+    tn match
+      case tn: TreeNode.File ⇒
+        val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
+        displayNode(tnSafePath)
+      case _ ⇒
+
 
   def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
     panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
@@ -389,9 +390,9 @@ class TreeNodePanel { panel =>
               treeNodeManager.switchSelection(tnSafePath)
           })
           else {
-            tn match {
-              case _: DirNode ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
-              case f: FileNode ⇒
+            tn match
+              case _: TreeNode.Directory ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
+              case f: TreeNode.File ⇒
                 if (f.pluginState.isPlugin) {
                   div("P", cls := "plugin-file" + {
                     if (f.pluginState.isPlugged) " plugged"
@@ -399,7 +400,6 @@ class TreeNodePanel { panel =>
                   })
                 }
                 else emptyNode
-            }
           }
         }
       )
@@ -408,7 +408,7 @@ class TreeNodePanel { panel =>
     def toolBox(using api: ServerAPI, panels: Panels) =
       val showExecution = () ⇒ ExecutionPanel.open
       new FileToolBox(tnSafePath, showExecution, panels.treeNodeTabs, tn match {
-        case f: FileNode ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
+        case f: TreeNode.File ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
         case _ ⇒ PluginState(false, false)
       })
 
@@ -486,12 +486,17 @@ class TreeNodePanel { panel =>
 
   def drawNode(node: TreeNode, i: Int)(using panels: Panels, pluginServices: PluginServices, api: ServerAPI) =
     node match
-      case fn: FileNode ⇒
+      case fn: TreeNode.File ⇒
         ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))
-      case dn: DirNode ⇒ ReactiveLine(i, dn, TreeNodeType.folder, () ⇒ {
-        treeNodeManager switch (dn.name)
-        treeWarning.set(true)
-      })
+      case dn: TreeNode.Directory ⇒
+        ReactiveLine(
+          i,
+          dn,
+          TreeNodeType.folder,
+          () ⇒
+            treeNodeManager switch (dn.name)
+            treeWarning.set(true)
+        )
 
 
 
