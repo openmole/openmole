@@ -181,7 +181,7 @@ object ModelWizardPanel {
                 // TODO may be overwrite should be better handled
                 for
                   f <- from
-                  _ <- api.copyFiles(Seq(f), targetPath, overwrite = true)
+                  _ <- api.copyFiles(Seq(f -> (targetPath ++ f.name)), overwrite = true)
                 do
                   fileToUploadPath.set(Some(uploadPath))
                   //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()

@@ -32,7 +32,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         panels.tabContent.removeTab(safePath)
         panels.tabContent.checkTabs
         panels.pluginPanel.getPlugins
-        panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+        panels.treeNodePanel.invalidCurrentCache
     }
   }
 
@@ -43,7 +43,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       else prefix + "_1"
     }
     closeToolBox
-    CoreUtils.duplicate(sp, newName)
+    api.copyFiles(Seq(sp -> (sp.parent ++ newName)), false) andThen { _ =>
+      panels.treeNodePanel.invalidCurrentCache
+    }
   }
 
   def extract(using panels: Panels, api: ServerAPI) = withSafePath { sp ⇒
@@ -52,7 +54,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
         error match {
           case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
             panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒ panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+          case _ ⇒ panels.treeNodePanel.invalidCurrentCache
         }
     }
     closeToolBox
@@ -98,7 +100,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     val newNode = safePath.parent ++ to
     api.move(safePath, safePath.parent ++ to).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
-      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+      panels.treeNodePanel.invalidCurrentCache
       panels.tabContent.checkTabs
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
@@ -110,7 +112,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
           panels.pluginPanel.getPlugins
-          panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+          panels.treeNodePanel.invalidCurrentCache
         }
           //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
 //          panels.pluginPanel.getPlugins
@@ -121,7 +123,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
           for e <- errors
           do panels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
           panels.pluginPanel.getPlugins
-          panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+          panels.treeNodePanel.invalidCurrentCache
         }
 //        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
 //          _ ⇒

@@ -34,6 +34,10 @@ import org.openmole.gui.shared.api.{GUIPlugins, PluginServices, ServerAPI}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object TreeNodePanel:
+  extension(p: TreeNodePanel)(using api: ServerAPI)
+    def invalidCurrentCache = p.treeNodeManager.invalidCurrentCache
+
 class TreeNodePanel { panel =>
 
   val treeNodeManager: TreeNodeManager = new TreeNodeManager
@@ -158,14 +162,16 @@ class TreeNodePanel { panel =>
           button(cls := "btn blue-button", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              api.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = false).foreach { existing ⇒
+              val target = treeNodeManager.dirNodeLine.now()
+              api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
                   treeNodeManager.invalidCurrentCache
                   closeMultiTool
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    api.copyFiles(selected.now(), treeNodeManager.dirNodeLine.now(), overwrite = true).foreach { b ⇒
+                    val target = treeNodeManager.dirNodeLine.now()
+                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)) , overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
                     })))

@@ -232,20 +232,33 @@ object utils {
 //  }
 
   //copy safePaths files to 'to' folder in overwriting in they exist
-  def copyFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
-    if(overwrite) {
-      val existing = ListBuffer[SafePath]()
-      safePaths.foreach { sp ⇒
-        val destination = new File(to.toFile, sp.name)
-        if(destination.exists()) existing.append(sp)
-        sp.toFile.copy(destination)
-      }
-      existing.toSeq
-    } else {
-      val existing = existsIn(safePaths, to)
-      if (existing.isEmpty) safePaths.foreach { sp ⇒ SafePathDecorator(sp).copy(to) }
-      existing
+//  def copyFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+//    if (overwrite)
+//    then
+//      val existing = ListBuffer[SafePath]()
+//      safePaths.foreach { sp ⇒
+//        val destination = new File(to.toFile, sp.name)
+//        if(destination.exists()) existing.append(sp)
+//        sp.toFile.copy(destination)
+//      }
+//      existing.toSeq
+//    else
+//      val existing = existsIn(safePaths, to)
+//      if (existing.isEmpty) safePaths.foreach { sp ⇒ SafePathDecorator(sp).copy(to) }
+//      existing
+
+  def copyFiles(safePaths: Seq[(SafePath, SafePath)], overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+    val existing = ListBuffer[SafePath]()
+    safePaths.foreach { (p, d) ⇒
+      val destination = d.toFile
+      if (destination.exists())
+      then
+        existing.append(d)
+        if overwrite then p.toFile.copy(destination) else ()
+      else p.toFile.copy(destination)
     }
+    existing.toSeq
+
 
   def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit = {
     implicit val ctx = safePath.context

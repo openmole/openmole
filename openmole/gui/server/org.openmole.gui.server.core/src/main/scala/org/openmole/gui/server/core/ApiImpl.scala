@@ -190,10 +190,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.exists(safePath)
   }
 
-  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
+  def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean) =
     import services._
-    utils.copyFilesTo(safePaths, to, overwrite)
-  }
+    utils.copyFiles(paths, overwrite)
 
   def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter.defaultFilter): ListFilesData = {
     import services.*

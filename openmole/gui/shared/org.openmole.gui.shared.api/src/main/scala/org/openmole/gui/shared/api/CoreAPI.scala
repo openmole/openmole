@@ -42,8 +42,8 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "file"/ "save", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
 
   //def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
-  val copyFiles: Endpoint[(Seq[SafePath], SafePath, Boolean), Seq[SafePath]] =
-    endpoint(post(path / "file" / "copy", jsonRequest[(Seq[SafePath], SafePath, Boolean)]), ok(jsonResponse[Seq[SafePath]]))
+  val copyFiles: Endpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    endpoint(post(path / "file" / "copy", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   //def addDirectory(safePath: SafePath, directoryName: String): Boolean
 //  val createDirectory: Endpoint[(SafePath, String), Boolean] =

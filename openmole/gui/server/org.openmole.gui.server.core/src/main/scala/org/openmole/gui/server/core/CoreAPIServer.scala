@@ -61,7 +61,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
     saveFile.implementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
 
   val copyFilesRoute =
-    copyFiles.implementedBy { case(sp, to, overwrite) => apiImpl.copyFiles(sp, to, overwrite) }
+    copyFiles.implementedBy { case(sp, overwrite) => apiImpl.copyFiles(sp, overwrite) }
 
   val createFileRoute =
     createFile.implementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
@@ -77,9 +77,6 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val listRecursiveRoute =
     listRecursive.implementedBy { case(path, f) => apiImpl.recursiveListFiles(path, f) }
-
-  val duplicateRoute =
-    duplicate.implementedBy { case(p, n) => apiImpl.duplicate(p, n) }
 
   val moveRoute =
     move.implementedBy { case(f, t) => apiImpl.move(f, t) }
@@ -168,7 +165,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
       deleteFilesRoute,
       existsRoute,
       listRecursiveRoute,
-      duplicateRoute,
+      copyFilesRoute,
       moveRoute,
       mdToHtmlRoute,
       sequenceRoute,

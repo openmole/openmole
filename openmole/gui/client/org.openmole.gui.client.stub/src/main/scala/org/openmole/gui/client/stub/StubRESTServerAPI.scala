@@ -48,8 +48,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   def add(file: MemoryFile) = files += file.path -> file
 
-  override def size(safePath: SafePath): Future[Long] = Future.successful(0L)
-  override def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] = Future.successful(Seq())
+  override def size(safePath: SafePath): Future[Long] =
+    Future.successful(files(safePath).content.size)
+
+  override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean): Future[Seq[SafePath]] =
+    val copies = paths.map((p, d) => d -> files(p))
+    files ++= copies
+    Future.successful(copies.map(_._1))
 
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] =
     val file = files(safePath)
@@ -100,10 +105,12 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     Future.successful(directoryData.toSeq ++ fileData)
 
-
   override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = Future.successful(Seq.empty)
-  override def move(from: SafePath, to: SafePath): Future[Unit] = Future.successful(())
-  override def duplicate(path: SafePath, name: String): Future[SafePath] = Future.successful(SafePath.empty)
+
+  override def move(from: SafePath, to: SafePath): Future[Unit] =
+    val f = files.remove(from).get
+    files += to -> f
+    Future.successful(())
 
   override def deleteFiles(path: Seq[SafePath]): Future[Unit] =
     path.foreach(files.remove)

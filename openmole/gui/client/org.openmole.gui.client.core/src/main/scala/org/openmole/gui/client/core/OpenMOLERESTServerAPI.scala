@@ -29,14 +29,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def size(safePath: SafePath) = fetch.future(_.size(safePath).future)
-  override def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = fetch.future(_.copyFiles(safePaths, to, overwrite).future)
+  override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean) = fetch.future(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] = fetch.future(_.saveFile(safePath, content, hash, overwrite).future)
   override def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean] = fetch.future(_.createFile(path, name, directory).future)
   override def extract(path: SafePath): Future[Option[ErrorData]] = fetch.future(_.extract(path).future)
   override def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData] = fetch.future(_.listFiles(path, filter).future)
   override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] = fetch.future(_.listRecursive(path, findString).future)
   override def move(from: SafePath, to: SafePath): Future[Unit] = fetch.future(_.move(from, to).future)
-  override def duplicate(path: SafePath, name: String): Future[SafePath] = fetch.future(_.duplicate(path, name).future)
   override def deleteFiles(path: Seq[SafePath]): Future[Unit] = fetch.future(_.deleteFiles(path).future)
   override def exists(path: SafePath): Future[Boolean] = fetch.future(_.exists(path).future)
   override def temporaryDirectory(): Future[SafePath] = fetch.future(_.temporaryDirectory(()).future)

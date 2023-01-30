@@ -67,10 +67,10 @@ object CoreUtils {
       treeNodePanel.invalidCacheAnd(ontrashed)
     }
 
-  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, api: ServerAPI): Unit =
-    api.duplicate(safePath, newName).foreach { y ⇒
-      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
-    }
+//  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, api: ServerAPI): Unit =
+//    api.duplicate(safePath, newName).foreach { y ⇒
+//      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+//    }
 
   //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
   //    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()

@@ -24,7 +24,7 @@ import scala.concurrent.Future
  */
 
 trait ServerAPI:
-  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]]
+  def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean): Future[Seq[SafePath]]
   def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)]
   def size(safePath: SafePath): Future[Long]
   def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean]
@@ -32,7 +32,6 @@ trait ServerAPI:
   def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData]
   def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]]
   def move(from: SafePath, to: SafePath): Future[Unit]
-  def duplicate(path: SafePath, name: String): Future[SafePath]
   def deleteFiles(path: Seq[SafePath]): Future[Unit]
   def exists(path: SafePath): Future[Boolean]
   def temporaryDirectory(): Future[SafePath]
@@ -58,7 +57,7 @@ trait ServerAPI:
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]]
 
   def marketIndex(): Future[MarketIndex]
-  def  getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit]
+  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit]
 
   def omSettings(): Future[OMSettings]
   def shutdown(): Future[Unit]
