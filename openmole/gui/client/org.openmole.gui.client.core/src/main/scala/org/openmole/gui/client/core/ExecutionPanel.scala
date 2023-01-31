@@ -174,12 +174,12 @@ class ExecutionPanel:
     )
 
 
-  val controls = div(cls := "execButtons",
+  def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map { c =>
       if (c)
         div(
-          button("Stop", onClick --> { _ => println("Delete") }, btn_danger, cls := "controlButton", marginLeft := "20"),
-          button("Clean", onClick --> { _ => println("Clean") }, btn_secondary, cls := "controlButton"),
+          button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton", marginLeft := "20"),
+          button("Clean", onClick --> { _ => remove(id) }, btn_secondary, cls := "controlButton"),
         )
       else div()
     }
@@ -191,7 +191,7 @@ class ExecutionPanel:
     completed + running + ready
   }"
 
-  def executionRow(staticInfo: StaticExecutionInfo, details: ExecutionDetails) = {
+  def executionRow(id: ExecutionId, staticInfo: StaticExecutionInfo, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
       scriptBlock(staticInfo.path.name),
       contextBlock("Start time", Utils.longToDate(staticInfo.startDate)),
@@ -202,9 +202,9 @@ class ExecutionPanel:
       simulationStatusBlock(details.status).amend(backgroundColor := statusColor(details.status)),
       consoleBlock,
       div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
-      controls
+      controls(id, cancel, remove)
     )
-  }
+
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
@@ -241,21 +241,21 @@ class ExecutionPanel:
     }
   )
 
-  def buildExecution(static: StaticExecutionInfo, executionDetails: ExecutionDetails)(using panels: Panels) = {
+  def buildExecution(id: ExecutionId, static: StaticExecutionInfo, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
     OMSContent.setError(static.path, executionDetails.error)
     elementTable()
-      .addRow(executionRow(static, executionDetails)).expandTo(expander, showExpander.signal.map(_.isDefined))
+      .addRow(executionRow(id, static, executionDetails, cancel, remove)).expandTo(expander, showExpander.signal.map(_.isDefined))
       .unshowSelection
       .render.render.amend(idAttr := "exec")
-  }
 
-  def statusColor(status: String) = status match {
-    case "completed" => "#00810a"
-    case "failed" => "#c8102e"
-    case "canceled" => "#d14905"
-    case "preparing" | "compiling" => "#f1c306"
-    case "running" => "#a5be21"
-  }
+  def statusColor(status: String) =
+    status match
+      case "completed" => "#00810a"
+      case "failed" => "#c8102e"
+      case "canceled" => "#d14905"
+      case "preparing" | "compiling" => "#f1c306"
+      case "running" => "#a5be21"
+
 
   def simulationBlock(executionId: ExecutionId, staticExecutionInfo: StaticExecutionInfo, executionInfo: ExecutionDetails) =
     div(rowFlex, justifyContent.center, alignItems.center,
@@ -293,7 +293,6 @@ class ExecutionPanel:
             outputInfos.set(runningOutputData)
           finally updating.set(false)
 
-
     def timerObserver =
       Observer[Option[SetIntervalHandle]] {
         case None => timer.set(Some(setInterval(15000) { updateExecutionInfo }))
@@ -313,15 +312,14 @@ class ExecutionPanel:
             }
           ),
           div(
-            id.map { i =>
-              val static = statics.get(i)
+            id.map { idValue =>
+              val static = statics.get(idValue)
               static match {
                 case Some(st) =>
-                  println("003 " + i + " / " + statics(i))
-                  div(buildExecution(st, execs(i)))
-                case None =>
-                  println("NONE")
-                  div()
+                  def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => updateExecutionInfo }
+                  def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
+                  div(buildExecution(idValue, st, execs(idValue), cancel, remove))
+                case None => div()
               }
             }
           )
