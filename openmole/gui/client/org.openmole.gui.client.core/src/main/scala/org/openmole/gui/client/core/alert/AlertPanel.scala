@@ -61,10 +61,11 @@ class AlertPanel:
     okString:         String           = "OK",
     cancelString:     String           = "Cancel"
   ) = {
-    alertElement.set(OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString, cancelString))
-    zoneModifier.set(zone.modifierClass)
-    positionModifier.set(position.modifierClass)
-    visible.set(true)
+    // FIXME disable popup until refactoring
+//    alertElement.set(OMTags.alert(alertType, messageDiv, actions.map { a ⇒ a.copy(action = actionWrapper(a.action)) }, buttonGroupClass, okString, cancelString))
+//    zoneModifier.set(zone.modifierClass)
+//    positionModifier.set(position.modifierClass)
+//    visible.set(true)
   }
 
   def actionWrapper(action: () ⇒ Unit): () ⇒ Unit = () ⇒ {
