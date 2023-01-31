@@ -36,11 +36,7 @@ object ExecutionPanel:
   type Execs = Map[ExecutionId, ExecutionDetails]
 
   def open(using api: ServerAPI, panels: Panels) =
-    panels.executionPanel.setTimerOn
-    panels.executionPanel.updateStaticInfos
-    panels.executionPanel.updateExecutionInfo
     Panels.expandTo(panels.executionPanel.render, 4)
-
 
 class ExecutionPanel:
   import ExecutionPanel.*
@@ -48,17 +44,16 @@ class ExecutionPanel:
   val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
   val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
   val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
-  val timerOn = Var(false)
+  //val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
 
-  val updating = new AtomicBoolean(false)
 
-  def setTimerOn = {
-    updating.set(false)
-    timerOn.set(true)
-  }
+//  def setTimerOn = {
+//    updating.set(false)
+//    timerOn.set(true)
+//  }
 
-  def setTimerOff = timerOn.set(false)
+  //def setTimerOff = timerOn.set(false)
 
   def toExecDetails(exec: ExecutionInfo): ExecutionDetails = {
     exec match {
@@ -72,35 +67,6 @@ class ExecutionPanel:
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
-  def updateExecutionInfo(using api: ServerAPI): Unit = {
-
-    def delay =
-      updating.set(false)
-      setTimeout(5000) {
-        //println("UPDATE")
-        updateExecutionInfo
-        if (staticInfos.now().size != executionDetails.now().size) updateStaticInfos
-      }
-
-    if (updating.compareAndSet(false, true)) {
-      api.allStates(200).andThen {
-        case Success((execInfos, runningOutputData)) ⇒
-          executionDetails.set(execInfos.map { case (k, v) =>
-            k -> toExecDetails(v)
-          }.toMap)
-          outputInfos.set(runningOutputData)
-          //println("output infos now " + outputInfos.now().head)
-          if (timerOn.now()) delay
-        case Failure(_) ⇒ delay
-      }
-    }
-  }
-
-  def updateStaticInfos(using api: ServerAPI) = api.staticInfos().foreach { s ⇒
-    staticInfos.set(s.toMap)
-    //println("Statis infos now " + staticInfos.now().head._1)
-    setTimeout(0) { updateExecutionInfo }
-  }
 
 
   val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
@@ -309,32 +275,59 @@ class ExecutionPanel:
       }
     )
 
-  def render(using panels: Panels) = div(columnFlex, width := "100%", marginTop := "20",
-    children <-- staticInfos.signal.combineWith(executionDetails.signal).combineWith(currentOpenSimulation.signal).map { case (statics, execs, id) =>
-      println("00 " + statics.keys + " // " + execs.keys + " // " + id)
-      Seq(
-        div(rowFlex, justifyContent.center,
-          statics.toSeq.map { case (id, st) =>
-            println("001 " + id)
-            simulationBlock(id, st, execs(id))
-          }
-        ),
-        div(
-          id.map { i =>
-            val static = statics.get(i)
-            static match {
-              case Some(st) =>
-                println("003 " + i + " / " + statics(i))
-                div(buildExecution(st, execs(i)))
-              case None =>
-                println("NONE")
-                div()
+  def render(using panels: Panels, api: ServerAPI) =
+    val updating = new AtomicBoolean(false)
+    val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
+    def updateExecutionInfo: Unit =
+      if updating.compareAndSet(false, true)
+      then
+        println("refresh execution")
+        for
+          s <- api.staticInfos()
+          (execInfos, runningOutputData) <- api.allStates(200)
+        do
+          try
+            staticInfos.set(s.toMap)
+            executionDetails.set(execInfos.map { case (k, v) => k -> toExecDetails(v) }.toMap)
+            outputInfos.set(runningOutputData)
+          finally updating.set(false)
+
+
+    def timerObserver =
+      Observer[Option[SetIntervalHandle]] {
+        case None => timer.set(Some(setInterval(15000) { updateExecutionInfo }))
+        case _ =>
+      }
+
+    updateExecutionInfo
+    
+    div(
+      columnFlex, width := "100%", marginTop := "20",
+      children <-- staticInfos.signal.combineWith(executionDetails.signal).combineWith(currentOpenSimulation.signal).map { case (statics, execs, id) =>
+        println("00 " + statics.keys + " // " + execs.keys + " // " + id)
+        Seq(
+          div(rowFlex, justifyContent.center,
+            statics.toSeq.flatMap { case (id, st) =>
+              execs.get(id).map { e => simulationBlock(id, st, e) }
             }
-          }
+          ),
+          div(
+            id.map { i =>
+              val static = statics.get(i)
+              static match {
+                case Some(st) =>
+                  println("003 " + i + " / " + statics(i))
+                  div(buildExecution(st, execs(i)))
+                case None =>
+                  println("NONE")
+                  div()
+              }
+            }
+          )
         )
-      )
-    }
-  )
+      }
+   ).amend(timer --> timerObserver)
 
   //lazy val executionTable = scaladget.bootstrapnative.Table(
   //  //    for {

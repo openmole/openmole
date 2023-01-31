@@ -147,6 +147,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
         StaticExecutionInfo(script, files(script).content, System.currentTimeMillis()),
         ExecutionInfo.Running(capsules, 1000L, environments)
       )
+
     Future.successful(())
 
 

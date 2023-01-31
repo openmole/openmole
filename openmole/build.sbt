@@ -777,10 +777,16 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 
     IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-noconflict" / "mode-openmole.js")
 
-    val jsBuild = (Compile / fastOptJS / webpack).value.head.data
+    val jsBuilt = (Compile / fastOptJS / webpack).value
+    val jsBuild = jsBuilt.head.data
+
+    //jsBuilt.last.data.name
+
+    //val sourceMap = scalaJSSourceMap.value
 
     IO.copyDirectory(demoResource, demoTarget)
     IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole-webpacked.js")
+    //IO.copyFile(scalaJSSourceMap., demoTarget / "webapp/js/openmole-webpacked.js.map")
 
     IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", demoTarget / "webapp" / "js" / "ace.js")
     IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", demoTarget / "webapp" / "js" / "plotly.min.js")

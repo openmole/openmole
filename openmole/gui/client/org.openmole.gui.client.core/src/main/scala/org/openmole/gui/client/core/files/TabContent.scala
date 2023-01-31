@@ -34,7 +34,7 @@ class TabContent:
     def timerObserver =
       Observer[Option[SetIntervalHandle]] {
         case None =>
-          timer.set(Some(setInterval(15000) {tabsUI.tabs.now().foreach { t => save(t.t) } }))
+          timer.set(Some(setInterval(15000) { tabsUI.tabs.now().foreach { t => save(t.t) } }))
         case _ =>
       }
 
