@@ -27,12 +27,11 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 
   def trash(using panels: Panels, api: ServerAPI) = withSafePath { safePath ⇒
     closeToolBox
-    CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)) {
-      () ⇒
-        panels.tabContent.removeTab(safePath)
-        panels.tabContent.checkTabs
-        panels.pluginPanel.getPlugins
-        panels.treeNodePanel.invalidCurrentCache
+    CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)).andThen { _ ⇒
+      panels.tabContent.removeTab(safePath)
+      panels.tabContent.checkTabs
+      panels.pluginPanel.getPlugins
+      panels.treeNodePanel.invalidCurrentCache
     }
   }
 

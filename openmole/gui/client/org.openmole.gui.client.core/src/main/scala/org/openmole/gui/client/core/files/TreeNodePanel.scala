@@ -143,10 +143,7 @@ class TreeNodePanel { panel =>
         _ ⇒
           closeMultiTool
       }),
-      div(fileItemWarning, okText, onClick --> {
-        _ ⇒
-          todo()
-      })
+      div(fileItemWarning, okText, onClick --> { _ ⇒ todo() })
     )
 
   def copyOrTrashTool(using api: ServerAPI) = div(
@@ -181,11 +178,12 @@ class TreeNodePanel { panel =>
             disabled <-- isSelectionEmpty
           ),
           button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
-            confirmationDiv.set(Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-              CoreUtils.trashNodes(this, treeNodeManager.selected.now()) { () ⇒
-                treeNodeManager.invalidCurrentCache
-                closeMultiTool
-              })))
+            confirmationDiv.set(
+              Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+              )
+            )
+            )
           },
             disabled <-- isSelectionEmpty)
         )
@@ -290,11 +288,6 @@ class TreeNodePanel { panel =>
         dropAction(safePath, true)
       }
     )
-
-  def invalidCacheAnd(todo: () ⇒ Unit)(using api: ServerAPI) = {
-    treeNodeManager.invalidCurrentCache
-    todo()
-  }
 
   //  def computePluggables = fileToolBar.selectedTool.now match {
   //    case Some(PluginTool) ⇒ treeNodeManager.computePluggables(() ⇒ if (!treeNodeManager.pluggables.now.isEmpty) turnSelectionTo(true))

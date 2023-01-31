@@ -32,7 +32,7 @@ import org.openmole.gui.shared.api.ServerAPI
 
 object CoreUtils {
 
-  implicit class SeqUpdater[T](sequence: Seq[T]) {
+  implicit class SeqUpdater[T](sequence: Seq[T]):
     def updatedFirst(t: T, s: T): Seq[T] = {
       val index = sequence.indexOf(t)
       if (index != -1) sequence.updated(index, s)
@@ -41,7 +41,7 @@ object CoreUtils {
 
     def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
-  }
+
 
   def withTmpDirectory(todo: SafePath ⇒ Unit)(using api: ServerAPI): Unit =
     api.temporaryDirectory().foreach { tempFile ⇒
@@ -62,10 +62,8 @@ object CoreUtils {
   //    }
   //  }
 
-  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(ontrashed: () ⇒ Unit)(using api: ServerAPI): Unit =
-    api.deleteFiles(paths).foreach { d ⇒
-      treeNodePanel.invalidCacheAnd(ontrashed)
-    }
+  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI): Future[Unit] =
+    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.invalidCurrentCache }
 
 //  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, api: ServerAPI): Unit =
 //    api.duplicate(safePath, newName).foreach { y ⇒
@@ -116,22 +114,20 @@ object CoreUtils {
     s"$y y $m m $d d $h h"
   }
 
-  def longTimeToString(lg: Long): String = {
+  def longTimeToString(lg: Long): String =
     val date = new scalajs.js.Date(lg)
     s"${date.toLocaleDateString} ${date.toLocaleTimeString.dropRight(3)}"
-  }
 
-  case class ReadableByteCount(bytes: String, units: String) {
+  case class ReadableByteCount(bytes: String, units: String):
     def render = s"$bytes$units"
-  }
 
-  def dropDecimalIfNull(string: String) = {
+
+  def dropDecimalIfNull(string: String) =
     val cut = string.split('.')
     val avoid = Seq("0", "00", "000")
     if (avoid.contains(cut.last)) cut.head
     else string
-  }
-
+  
   //Duplicated from server to optimize data transfer
   def readableByteCount(bytes: Long): ReadableByteCount = {
     val kb = 1024L
