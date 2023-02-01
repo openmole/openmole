@@ -22,8 +22,6 @@ import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 
 object ExecutionPanel:
-  case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
-
   case class ExecutionDetails(status: String,
                               duration: Long,
                               ratio: String,
