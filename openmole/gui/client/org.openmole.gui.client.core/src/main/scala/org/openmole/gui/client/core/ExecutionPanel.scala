@@ -10,7 +10,7 @@ import org.openmole.gui.shared.data.ErrorData as ExecError
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
-import org.openmole.gui.client.tool.OMTags
+import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.data.ExecutionInfo.Failed
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.Panels.ExpandablePanel
@@ -39,6 +39,7 @@ object ExecutionPanel:
     Panels.expandTo(panels.executionPanel.render, 4)
 
 class ExecutionPanel:
+
   import ExecutionPanel.*
 
   val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
@@ -48,10 +49,10 @@ class ExecutionPanel:
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
 
 
-//  def setTimerOn = {
-//    updating.set(false)
-//    timerOn.set(true)
-//  }
+  //  def setTimerOn = {
+  //    updating.set(false)
+  //    timerOn.set(true)
+  //  }
 
   //def setTimerOff = timerOn.set(false)
 
@@ -66,7 +67,6 @@ class ExecutionPanel:
   }
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
-
 
 
   val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
@@ -275,9 +275,31 @@ class ExecutionPanel:
       }
     )
 
-  def render(using panels: Panels, api: ServerAPI) =
+  lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
+
+  def render(using panels: Panels, api: ServerAPI) = {
     val updating = new AtomicBoolean(false)
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
+    def execFilter(execs: Execs, statics: Statics): (Execs, Statics) = {
+      val ids = {
+        if (autoRemoveFailed.isChecked) {
+          val idsForPath = statics.map { s =>
+            (s._1, s._2.path)
+          }.toSeq.groupBy(_._2).toSeq.map { case (k, v) =>
+            k -> v.map(_._1)
+          }
+
+          idsForPath.flatMap { case (_, execIds) =>
+            if (execIds.size > 1) execIds.filterNot { id =>
+              val status = execs(id).status
+              status == "failed" || status == "canceled"
+            } else execIds
+          }
+        } else execs.map(_._1).toSeq
+      }
+      (execs.filter(i=> ids.contains(i._1)),statics.filter(i=> ids.contains(i._1)))
+    }
 
     def updateExecutionInfo: Unit =
       if updating.compareAndSet(false, true)
@@ -288,19 +310,22 @@ class ExecutionPanel:
           (execInfos, runningOutputData) <- api.allStates(200)
         do
           try
-            staticInfos.set(s.toMap)
-            executionDetails.set(execInfos.map { case (k, v) => k -> toExecDetails(v) }.toMap)
+            val (execsToKeep, staticsToKeep) = execFilter(execInfos.map { case (k, v) => k -> toExecDetails(v) }.toMap, s.toMap)
+            staticInfos.set(staticsToKeep)
+            executionDetails.set(execsToKeep.toMap)
             outputInfos.set(runningOutputData)
           finally updating.set(false)
 
     def timerObserver =
       Observer[Option[SetIntervalHandle]] {
-        case None => timer.set(Some(setInterval(15000) { updateExecutionInfo }))
+        case None => timer.set(Some(setInterval(15000) {
+          updateExecutionInfo
+        }))
         case _ =>
       }
 
     updateExecutionInfo
-    
+
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <-- staticInfos.signal.combineWith(executionDetails.signal).combineWith(currentOpenSimulation.signal).map { case (statics, execs, id) =>
@@ -311,13 +336,16 @@ class ExecutionPanel:
               execs.get(id).map { e => simulationBlock(id, st, e) }
             }
           ),
+          autoRemoveFailed.element,
           div(
             id.map { idValue =>
               val static = statics.get(idValue)
               static match {
                 case Some(st) =>
                   def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => updateExecutionInfo }
+
                   def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
+
                   div(buildExecution(idValue, st, execs(idValue), cancel, remove))
                 case None => div()
               }
@@ -325,28 +353,30 @@ class ExecutionPanel:
           )
         )
       }
-   ).amend(timer --> timerObserver)
+    ).amend(timer --> timerObserver)
+  }
 
-  //lazy val executionTable = scaladget.bootstrapnative.Table(
-  //  //    for {
-  //  //      execMap ← executionInfo
-  //  //      staticInf ← staticInfo
-  //  //    } yield {
-  //  //      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
-  //  //        case (execID, info) ⇒
-  //  //          val duration: Duration = (info.duration milliseconds)
-  //  //          val h = (duration).toHours
-  //  //          val m = ((duration) - (h hours)).toMinutes
-  //  //          val s = (duration - (h hours) - (m minutes)).toSeconds
-  //  //
-  //  //          val durationString =
-  //  //            s"""${
-  //  //              h.formatted("%d")
-  //  //            }:${
-  //  //              m.formatted("%02d")
-  //  //            }:${
-  //  //              s.formatted("%02d")
-  //  //            }"""
+
+//lazy val executionTable = scaladget.bootstrapnative.Table(
+//  //    for {
+//  //      execMap ← executionInfo
+//  //      staticInf ← staticInfo
+//  //    } yield {
+//  //      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
+//  //        case (execID, info) ⇒
+//  //          val duration: Duration = (info.duration milliseconds)
+//  //          val h = (duration).toHours
+//  //          val m = ((duration) - (h hours)).toMinutes
+//  //          val s = (duration - (h hours) - (m minutes)).toSeconds
+//  //
+//  //          val durationString =
+//  //            s"""${
+//  //              h.formatted("%d")
+//  //            }:${
+//  //              m.formatted("%02d")
+//  //            }:${
+//  //              s.formatted("%02d")
+//  //            }"""
 
 
 
