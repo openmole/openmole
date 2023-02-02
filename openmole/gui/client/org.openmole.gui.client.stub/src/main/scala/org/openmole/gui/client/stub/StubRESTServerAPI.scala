@@ -35,7 +35,8 @@ object AnimatedStubRESTServerAPI:
     val api = new AnimatedStubRESTServerAPI()
 
     api.files ++= Seq(
-      SafePath("test.oms") -> MemoryFile("val i = Val[Int]")
+      SafePath("test.oms") -> MemoryFile("val i = Val[Int]"),
+      SafePath("test2.oms") -> MemoryFile("val j = Val[Double]")
     )
 
     api

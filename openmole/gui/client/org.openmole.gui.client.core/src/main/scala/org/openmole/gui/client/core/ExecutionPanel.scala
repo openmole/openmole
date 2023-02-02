@@ -209,7 +209,7 @@ class ExecutionPanel:
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
 
-  val expander = div(height := "500",
+  val expander = div(height := "500", rowFlex, justifyContent.center,
     child <-- showExpander.signal.map {
       _ match {
         case Some(Script) => div(
