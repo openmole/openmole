@@ -328,11 +328,9 @@ class ExecutionPanel:
           try executionDetails.set(execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap))
           finally updating.set(false)
 
-    def timerObserver =
+    def timerObserver(delay: Long) =
       Observer[Option[SetIntervalHandle]] {
-        case None => timer.set(Some(setInterval(15000) {
-          updateExecutionInfo
-        }))
+        case None => timer.set(Some(setInterval(delay) { updateExecutionInfo }))
         case _ =>
       }
 
@@ -358,7 +356,7 @@ class ExecutionPanel:
           )
         )
       }
-    ).amend(timer --> timerObserver)
+    ).amend(timer --> timerObserver(10000))
   }
 
 

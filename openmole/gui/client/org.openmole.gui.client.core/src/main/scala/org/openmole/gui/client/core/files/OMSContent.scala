@@ -77,7 +77,8 @@ object OMSContent {
           button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
             unsetErrors
             panels.tabContent.save(tabData, _ ⇒
-              api.launchScript(safePath, true) andThen { _ ⇒ ExecutionPanel.open }
+              api.launchScript(safePath, true)
+              ExecutionPanel.open
             )
           })
         ),
