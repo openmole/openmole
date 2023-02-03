@@ -45,7 +45,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   import AnimatedStubRESTServerAPI.*
 
   val files = scala.collection.mutable.HashMap[SafePath, MemoryFile]()
-  val executions = scala.collection.mutable.HashMap[ExecutionId, (StaticExecutionInfo, ExecutionInfo)]()
+  val executions = scala.collection.mutable.HashMap[ExecutionId, ExecutionData]()
   val plugins = scala.collection.mutable.HashMap[SafePath, Plugin]()
 
   override def size(safePath: SafePath): Future[Long] =
@@ -123,15 +123,17 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def temporaryDirectory(): Future[SafePath] =
     Future.successful(SafePath("_tmp_"))
 
-  override def allStates(line: Int): Future[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] =
-    Future.successful((executions.toSeq.map { (k, v) => k -> v._2 }, Seq.empty))
+  override def executionState(line: Int, ids: Seq[ExecutionId]): Future[Seq[ExecutionData]] =
+    val ex =
+      ids match
+        case Seq() => executions.values.toSeq
+        case _ => ids.flatMap(executions.get)
+    Future.successful(ex)
 
-  override def staticInfos(): Future[Seq[(ExecutionId, StaticExecutionInfo)]] =
-    Future.successful(executions.toSeq.map{(k, v) => k -> v._1})
 
   override def cancelExecution(id: ExecutionId): Future[Unit] =
     val execution = executions(id)
-    executions += id -> (execution._1, ExecutionInfo.Canceled(Seq(), Seq(), 1000L, true))
+    executions += id -> execution.copy(state = ExecutionInfo.Canceled(Seq(), Seq(), 1000L, true))
     Future.successful(())
 
   override def removeExecution(id: ExecutionId): Future[Unit] =
@@ -140,16 +142,16 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def compileScript(script: SafePath): Future[Option[ErrorData]] = Future.successful(None)
 
-  override def runScript(script: SafePath, validate: Boolean): Future[Unit] =
+  override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
     def capsules = Seq(ExecutionInfo.CapsuleExecution("stub", "stub", ExecutionInfo.JobStatuses(10, 10, 10), true))
     def environments = Seq(EnvironmentState(EnvironmentId(), "stub", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0))
-    executions +=
-      ExecutionId() -> (
-        StaticExecutionInfo(script, files(script).content, System.currentTimeMillis()),
-        ExecutionInfo.Running(capsules, 1000L, environments)
-      )
 
-    Future.successful(())
+    val id = ExecutionId()
+   // executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Running(capsules, 1000L, environments), "stub output")
+    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Finished(capsules, 1000L, environments, true), "stub output")
+
+
+    Future.successful(id)
 
 
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())

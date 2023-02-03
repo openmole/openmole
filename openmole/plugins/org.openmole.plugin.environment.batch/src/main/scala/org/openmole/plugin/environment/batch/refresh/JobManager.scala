@@ -59,7 +59,7 @@ object JobManager { self ⇒
     }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.enqueue(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = {
     import services._

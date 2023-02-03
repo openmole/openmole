@@ -22,15 +22,46 @@ import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 
 object ExecutionPanel:
-  case class ExecutionDetails(status: String,
-                              duration: Long,
-                              ratio: String,
-                              running: Long,
-                              error: Option[ExecError] = None,
-                              envStates: Seq[EnvironmentState] = Seq(),
-                              outputs: String = "")
+  object ExecutionDetails:
+    object State:
+      def apply(info: ExecutionInfo) =
+        info match
+          case f: ExecutionInfo.Failed => State.failed(!f.clean)
+          case _: ExecutionInfo.Running => State.running
+          case f: ExecutionInfo.Canceled => State.canceled(!f.clean)
+          case f: ExecutionInfo.Finished => State.completed(!f.clean)
+          case _: ExecutionInfo.Preparing => State.preparing
 
-  type Statics = Map[ExecutionId, StaticExecutionInfo]
+      def toString(s: State) =
+        s match
+          case State.preparing => "preparing"
+          case State.running => "running"
+          case State.completed(true) => "cleaning"
+          case State.completed(false) => "completed"
+          case State.failed(true) => "cleaning"
+          case State.failed(false) => "failed"
+          case State.canceled(true) => "cleaning"
+          case State.canceled(false) => "canceled"
+
+    enum State:
+      case preparing, running
+      case completed(cleaning: Boolean) extends State
+      case failed(cleaning: Boolean) extends State
+      case canceled(cleaning: Boolean) extends State
+
+  case class ExecutionDetails(
+    path: SafePath,
+    script: String,
+    state: ExecutionDetails.State,
+    startDate: Long,
+    duration: Long,
+    ratio: String,
+    running: Long,
+    error: Option[ExecError] = None,
+    envStates: Seq[EnvironmentState] = Seq(),
+    output: String = "")
+
+//  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
 
   def open(using api: ServerAPI, panels: Panels) =
@@ -40,9 +71,9 @@ class ExecutionPanel:
 
   import ExecutionPanel.*
 
-  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
+//  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
   val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
-  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
+//  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
   //val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
 
@@ -54,15 +85,15 @@ class ExecutionPanel:
 
   //def setTimerOff = timerOn.set(false)
 
-  def toExecDetails(exec: ExecutionInfo): ExecutionDetails = {
-    exec match {
-      case f: ExecutionInfo.Failed ⇒ ExecutionDetails(if (!f.clean) "cleaning" else exec.state, exec.duration, "0", 0, Some(f.error), f.environmentStates)
-      case f: ExecutionInfo.Finished ⇒ ExecutionDetails(if (!f.clean) "cleaning" else exec.state, exec.duration, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates)
-      case r: ExecutionInfo.Running ⇒ ExecutionDetails(exec.state, exec.duration, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates)
-      case c: ExecutionInfo.Canceled ⇒ ExecutionDetails(if (!c.clean) "cleaning" else exec.state, exec.duration, "0", 0, envStates = c.environmentStates)
-      case r: (ExecutionInfo.Compiling | ExecutionInfo.Preparing) ⇒ ExecutionDetails(exec.state, exec.duration, "0", 0, envStates = r.environmentStates)
-    }
-  }
+  def toExecDetails(exec: ExecutionData): ExecutionDetails =
+    import ExecutionPanel.ExecutionDetails.State
+    exec.state match
+      case f: ExecutionInfo.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionInfo.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case r: ExecutionInfo.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
+      case c: ExecutionInfo.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = c.environmentStates, exec.output)
+      case r: ExecutionInfo.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = r.environmentStates, exec.output)
+
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
@@ -70,45 +101,33 @@ class ExecutionPanel:
   val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
   val columnFlex = Seq(display.flex, flexDirection.column, justifyContent.flexStart)
 
-  sealed trait Expand
-
-  object Console extends Expand
-
-  object Script extends Expand
-
-  object ErrorLog extends Expand
+  enum Expand:
+    case Console, Script, ErrorLog
 
 
   val showDurationOnCores = Var(false)
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
 
-  def contextBlock(info: String, content: String) = {
+  def contextBlock(info: String, content: String) =
     div(columnFlex, div(cls := "contextBlock", div(info, cls := "info"), div(content, cls := "infoContent")))
-  }
 
-  def statusBlock(info: String, content: String) = {
+  def statusBlock(info: String, content: String) =
     statusBlockFromDiv(info, div(content, cls := "infoContent"), "statusBlock")
-  }
 
-  def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) = {
+
+  def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
     div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv))
-  }
 
   def scriptBlock(scriptName: String) =
     div(columnFlex, div(cls := "contextBlock",
       cls <-- showExpander.signal.map { exp =>
-        if (exp == Some(Script)) "statusOpen"
+        if (exp == Some(Expand.Script)) "statusOpen"
         else ""
       },
       div("Script", cls := "info"),
       div(scriptName, cls := "infoContentLink")),
-      onClick --> { _ =>
-        showExpander.update(exp =>
-          if (exp == Some(Script)) None
-          else Some(Script)
-        )
-      },
+      onClick --> { _ => showExpander.update(exp => if exp == Some(Expand.Script) then None else Some(Expand.Script)) },
       cursor.pointer
     )
 
@@ -144,27 +163,27 @@ class ExecutionPanel:
       div(child <-- showExpander.signal.map { c => if (c == Some(Console)) "Hide" else "Show" }, cls := "infoContentLink")),
       onClick --> { _ =>
         showExpander.update(exp =>
-          if (exp == Some(Console)) None
-          else Some(Console)
+          if (exp == Some(Expand.Console)) None
+          else Some(Expand.Console)
         )
       },
       cursor.pointer
     )
 
-  def simulationStatusBlock(status: String) =
+  def simulationStatusBlock(state: ExecutionDetails.State) =
     div(columnFlex, div(cls := "statusBlockNoColor",
       cls.toggle("", "statusOpen") <-- showExpander.signal.map {
-        _ == Some(ErrorLog)
+        _ == Some(Expand.ErrorLog)
       },
       div("Status", cls := "info"),
-      div(status.capitalize, cls := {
-        if (status == "failed") "infoContentLink"
+      div(ExecutionDetails.State.toString(state).capitalize, cls := {
+        if (state == ExecutionDetails.State.failed) "infoContentLink"
         else "infoContent"
       }),
       onClick --> { _ =>
         showExpander.update(exp =>
-          if (exp == Some(ErrorLog)) None
-          else Some(ErrorLog)
+          if (exp == Some(Expand.ErrorLog)) None
+          else Some(Expand.ErrorLog)
         )
       },
       cursor.pointer
@@ -189,15 +208,15 @@ class ExecutionPanel:
     completed + running + ready
   }"
 
-  def executionRow(id: ExecutionId, staticInfo: StaticExecutionInfo, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
+  def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
-      scriptBlock(staticInfo.path.name),
-      contextBlock("Start time", Utils.longToDate(staticInfo.startDate)),
+      scriptBlock(details.path.name),
+      contextBlock("Start time", Utils.longToDate(details.startDate)),
       contextBlock("Method", "???"),
       durationBlock(details.duration, 0L),
       statusBlock("Running", details.running.toString),
       statusBlock("Completed", details.ratio),
-      simulationStatusBlock(details.status).amend(backgroundColor := statusColor(details.status)),
+      simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state)),
       consoleBlock,
       div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
       controls(id, cancel, remove)
@@ -210,22 +229,22 @@ class ExecutionPanel:
   val expander = div(height := "500", rowFlex, justifyContent.center,
     child <-- showExpander.signal.map {
       _ match {
-        case Some(Script) => div(
-          child <-- staticInfos.signal.combineWith(currentOpenSimulation.signal).map { case (statics, id) =>
+        case Some(Expand.Script) => div(
+          child <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (details, id) =>
             execTextArea(id.flatMap { i =>
-              statics.get(i).map(_.script)
+              details.get(i).map(_.script)
             }.getOrElse("")
             )
           }
         )
-        case Some(Console) =>
-          div(child <-- outputInfos.signal.combineWith(currentOpenSimulation).map { case (oi, execID) ⇒
-            val cont = oi.find(o => Some(o.id) == execID).map(_.output).getOrElse("")
+        case Some(Expand.Console) =>
+          div(child <-- executionDetails.signal.combineWith(currentOpenSimulation).map { case (details, id) ⇒
+            val cont = id.flatMap(id => details.get(id).map(_.output)).getOrElse("")
             println("Cont: " + cont)
             execTextArea(cont).amend(cls := "console")
           }
           )
-        case Some(ErrorLog) =>
+        case Some(Expand.ErrorLog) =>
           div(child <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (execD, id) =>
             execTextArea(
               id.flatMap { i =>
@@ -239,28 +258,29 @@ class ExecutionPanel:
     }
   )
 
-  def buildExecution(id: ExecutionId, static: StaticExecutionInfo, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
-    OMSContent.setError(static.path, executionDetails.error)
+  def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
+    OMSContent.setError(executionDetails.path, executionDetails.error)
     elementTable()
-      .addRow(executionRow(id, static, executionDetails, cancel, remove)).expandTo(expander, showExpander.signal.map(_.isDefined))
+      .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander, showExpander.signal.map(_.isDefined))
       .unshowSelection
       .render.render.amend(idAttr := "exec")
 
-  def statusColor(status: String) =
+  def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
+    import ExecutionPanel.ExecutionDetails.State
     status match
-      case "completed" => "#00810a"
-      case "failed" => "#c8102e"
-      case "canceled" => "#d14905"
-      case "preparing" | "compiling" => "#f1c306"
-      case "running" => "#a5be21"
+      case State.completed(_) => "#00810a"
+      case State.failed(_) => "#c8102e"
+      case State.canceled(_) => "#d14905"
+      case State.preparing => "#f1c306"
+      case State.running => "#a5be21"
 
 
-  def simulationBlock(executionId: ExecutionId, staticExecutionInfo: StaticExecutionInfo, executionInfo: ExecutionDetails) =
+  def simulationBlock(executionId: ExecutionId, executionInfo: ExecutionDetails) =
     div(rowFlex, justifyContent.center, alignItems.center,
       cls := "simulationInfo",
       cls.toggle("statusOpenSim") <-- currentOpenSimulation.signal.map { os => os == Some(executionId) },
-      div("", cls := "simulationID", backgroundColor := statusColor(executionInfo.status)),
-      div(staticExecutionInfo.path.nameWithNoExtension),
+      div("", cls := "simulationID", backgroundColor := statusColor(executionInfo.state)),
+      div(executionInfo.path.nameWithNoExtension),
       cursor.pointer,
       onClick --> { _ =>
         currentOpenSimulation.update {
@@ -279,39 +299,33 @@ class ExecutionPanel:
     val updating = new AtomicBoolean(false)
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-    def execFilter(execs: Execs, statics: Statics): (Execs, Statics) = {
-      val ids = {
-        if (autoRemoveFailed.isChecked) {
-          val idsForPath = statics.map { s =>
-            (s._1, s._2.path)
-          }.toSeq.groupBy(_._2).toSeq.map { case (k, v) =>
-            k -> v.map(_._1)
-          }
+    def execFilter(execs: Execs): Execs =
+      import ExecutionPanel.ExecutionDetails.State
+      val ids =
+        if (autoRemoveFailed.isChecked)
+        then
+          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.map(_._1) }
 
           idsForPath.flatMap { case (_, execIds) =>
-            if (execIds.size > 1) execIds.filterNot { id =>
-              val status = execs(id).status
-              status == "failed" || status == "canceled"
-            } else execIds
+            if execIds.size > 1
+            then
+              execIds.filterNot { id =>
+                val state = execs(id).state
+                state == State.failed || state == State.canceled
+              }
+            else execIds
           }
-        } else execs.map(_._1).toSeq
-      }
-      (execs.filter(i=> ids.contains(i._1)),statics.filter(i=> ids.contains(i._1)))
-    }
+        else execs.map(_._1).toSeq
+
+      ids.map(id => id -> execs(id)).toMap
 
     def updateExecutionInfo: Unit =
       if updating.compareAndSet(false, true)
       then
-        println("refresh execution")
         for
-          s <- api.staticInfos()
-          (execInfos, runningOutputData) <- api.allStates(200)
+          executionData <- api.executionState(200)
         do
-          try
-            val (execsToKeep, staticsToKeep) = execFilter(execInfos.map { case (k, v) => k -> toExecDetails(v) }.toMap, s.toMap)
-            staticInfos.set(staticsToKeep)
-            executionDetails.set(execsToKeep.toMap)
-            outputInfos.set(runningOutputData)
+          try executionDetails.set(execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap))
           finally updating.set(false)
 
     def timerObserver =
@@ -326,27 +340,20 @@ class ExecutionPanel:
 
     div(
       columnFlex, width := "100%", marginTop := "20",
-      children <-- staticInfos.signal.combineWith(executionDetails.signal).combineWith(currentOpenSimulation.signal).map { case (statics, execs, id) =>
-        println("00 " + statics.keys + " // " + execs.keys + " // " + id)
+      children <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (details, id) =>
         Seq(
           div(rowFlex, justifyContent.center,
-            statics.toSeq.flatMap { case (id, st) =>
-              execs.get(id).map { e => simulationBlock(id, st, e) }
-            }
+            details.toSeq.map { (id, detailValue) => simulationBlock(id, detailValue) }
           ),
           autoRemoveFailed.element,
           div(
             id.map { idValue =>
-              val static = statics.get(idValue)
-              static match {
+              details.get(idValue) match
                 case Some(st) =>
                   def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => updateExecutionInfo }
-
                   def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
-
-                  div(buildExecution(idValue, st, execs(idValue), cancel, remove))
+                  div(buildExecution(idValue, st, cancel, remove))
                 case None => div()
-              }
             }
           )
         )

@@ -36,12 +36,11 @@ trait ServerAPI:
   def exists(path: SafePath): Future[Boolean]
   def temporaryDirectory(): Future[SafePath]
 
-  def allStates(line: Int): Future[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])]
-  def staticInfos(): Future[Seq[(ExecutionId, StaticExecutionInfo)]]
+  def executionState(line: Int, id: Seq[ExecutionId] = Seq()): Future[Seq[ExecutionData]]
   def cancelExecution(id: ExecutionId): Future[Unit]
   def removeExecution(id: ExecutionId): Future[Unit]
   def compileScript(script: SafePath): Future[Option[ErrorData]]
-  def runScript(script: SafePath, validate: Boolean): Future[Unit]
+  def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId]
   def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit]
   def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData]
 

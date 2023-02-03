@@ -212,8 +212,17 @@ package data {
 
   // datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
   case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
-  case class OutputStreamData(id: ExecutionId, output: String)
-  case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long)
+//  case class OutputStreamData(id: ExecutionId, output: String)
+//
+  case class ExecutionData(
+    id: ExecutionId,
+    path: SafePath,
+    script: String,
+    startDate: Long,
+    duration: Long,
+    state: ExecutionInfo,
+    output: String)
+
 
   case class EnvironmentState(
     envId: EnvironmentId,
@@ -263,10 +272,10 @@ package data {
       duration: Long = 0L,
       clean: Boolean) extends ExecutionInfo("canceled")
 
-    case class Compiling() extends ExecutionInfo("compiling"):
-      def duration: Long = 0L
-      def capsules = Vector.empty
-      def environmentStates: Seq[EnvironmentState] = Seq()
+//    case class Compiling() extends ExecutionInfo("compiling"):
+//      def duration: Long = 0L
+//      def capsules = Vector.empty
+//      def environmentStates: Seq[EnvironmentState] = Seq()
 
     case class Preparing() extends ExecutionInfo("preparing"):
       def duration: Long = 0L

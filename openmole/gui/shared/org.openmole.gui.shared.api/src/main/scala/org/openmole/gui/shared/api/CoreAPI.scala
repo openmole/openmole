@@ -108,12 +108,12 @@ trait CoreAPI extends RESTAPI {
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
-  val allStates: Endpoint[Int, (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] =
-    endpoint(post(path / "execution" / "state", jsonRequest[Int]), ok(jsonResponse[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])]))
+  val executionState: Endpoint[(Int, Seq[ExecutionId]), Seq[ExecutionData]] =
+    endpoint(post(path / "execution" / "state", jsonRequest[(Int, Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
 
 //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
-  val staticInfos: Endpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
-    endpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
+//  val staticInfos: Endpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
+//    endpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
 
 //  def cancelExecution(id: ExecutionId): Unit
   val cancelExecution: Endpoint[ExecutionId, Unit] =
@@ -128,8 +128,8 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
 //  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
-  val runScript: Endpoint[(SafePath, Boolean), Unit] =
-    endpoint(post(path / "execution" / "run", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Unit]))
+  val launchScript: Endpoint[(SafePath, Boolean), ExecutionId] =
+    endpoint(post(path / "execution" / "launch", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[ExecutionId]))
 
 //  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
   val clearEnvironmentErrors: Endpoint[EnvironmentId, Unit] =

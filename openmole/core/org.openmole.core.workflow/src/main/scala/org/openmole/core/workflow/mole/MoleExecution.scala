@@ -372,7 +372,7 @@ object MoleExecution {
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
       moleExecution.finishedSemaphore.release()
 
-      moleExecution.executionContext.services.threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
+      moleExecution.executionContext.services.threadProvider.enqueue(ThreadProvider.maxPriority) { () ⇒
         def stopEnvironments() = {
           if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
           moleExecution.environments.values.foreach(_.stop())

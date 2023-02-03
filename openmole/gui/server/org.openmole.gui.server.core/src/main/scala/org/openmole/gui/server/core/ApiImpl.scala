@@ -40,8 +40,7 @@ import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
 
-import scala.collection.JavaConverters.*
-
+import scala.jdk.FutureConverters.*
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
  *
@@ -276,18 +275,24 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
-  def compileScript(script: SafePath) = {
+  def compileScript(script: SafePath) =
     val (execId, outputStream) = compilationData(script)
-    synchronousCompilation(execId, script, outputStream)
-  }
+    synchronousCompilation(script, outputStream) match
+      case e: ErrorData => Some(e)
+      case _ => None
 
-  def runScript(script: SafePath, validateScript: Boolean) = {
-    asynchronousCompilation(
-      script,
-      Some(execId ⇒ execution.compiled(execId)),
-      Some(processRun(_, _, validateScript))
-    )
-  }
+
+//  def runScript(script: SafePath, validateScript: Boolean) =
+//    val (execId, outputStream) = compilationData(script)
+//    val content = safePathToFile(script).content
+//
+//    execution.addStaticInfo(execId, StaticExecutionInfo(script, content, System.currentTimeMillis()))
+//    execution.addOutputStreams(execId, outputStream)
+//
+//    val errorData = synchronousCompilation(execId, script, outputStream, onEvaluated, onCompiled)
+//    errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
+//
+//    execution.addCompilation(execId, compilationFuture)
 
   private def compilationData(script: SafePath) = {
     import services._
@@ -295,11 +300,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   def synchronousCompilation(
-    execId:       ExecutionId,
     scriptPath:   SafePath,
-    outputStream: StringPrintStream,
-    onCompiled:   Option[ExecutionId ⇒ Unit]                  = None,
-    onEvaluated:  Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Option[ErrorData] = {
+    outputStream: StringPrintStream): ErrorData | MoleExecution = {
 
     def error(t: Throwable): ErrorData = {
       t match {
@@ -333,11 +335,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory), fileServiceCache = FileServiceCache())
     }
 
-    try {
+    try
       Project.compile(script.getParentFileSafe, script)(runServices) match {
-        case ScriptFileDoesNotExists() ⇒ Some(message("Script file does not exist"))
-        case ErrorInCode(e)            ⇒ Some(error(e))
-        case ErrorInCompiler(e)        ⇒ Some(error(e))
+        case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
+        case ErrorInCode(e)            ⇒ error(e)
+        case ErrorInCompiler(e)        ⇒ error(e)
         case compiled: Compiled ⇒
           import runServices._
 
@@ -348,70 +350,64 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               outputRedirection = Some(executionOutputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          onCompiled.foreach {
-            _(execId)
-          }
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match {
-            case Failure(e) ⇒ Some(error(e))
+            case Failure(e) ⇒ error(e)
             case Success(dsl) ⇒
               Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match {
-                case Success(ex) ⇒
-                  onEvaluated.foreach {
-                    _(ex, execId)
-                  }
-                  None
+                case Success(ex) ⇒ ex
                 case Failure(e) ⇒
                   MoleServices.clean(executionServices)
-                  Some(error(e))
+                  error(e)
               }
           }
       }
-
-    }
     catch {
-      case t: Throwable ⇒ Some(error(t))
+      case t: Throwable ⇒ error(t)
     }
 
   }
 
-  def asynchronousCompilation(script: SafePath, onEvaluated: Option[ExecutionId ⇒ Unit] = None, onCompiled: Option[(MoleExecution, ExecutionId) ⇒ Unit] = None): Unit = {
-    import services._
+  def launchScript(script: SafePath, validateScript: Boolean) =
+    import services.*
+
     val (execId, outputStream) = compilationData(script)
 
     val content = safePathToFile(script).content
 
-    execution.addStaticInfo(execId, StaticExecutionInfo(script, content, System.currentTimeMillis()))
-    execution.addOutputStreams(execId, outputStream)
+    execution.addStaticInfo(execId, Execution.StaticExecutionInfo(script, content, System.currentTimeMillis(), outputStream))
 
-    val compilationFuture: java.util.concurrent.Future[_] = threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
-      val errorData = synchronousCompilation(execId, script, outputStream, onEvaluated, onCompiled)
-      errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
-    }
+    def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
+      import services._
 
-    execution.addCompilation(execId, compilationFuture)
-  }
+      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(DataUtils.uuID) → env }
+      execution.addRunningEnvironment(execId, envIds)
 
-  def processRun(ex: MoleExecution, execId: ExecutionId, validateScript: Boolean) = {
-    import services._
-    val envIds = (ex.allEnvironments).map {
-      env ⇒ EnvironmentId(DataUtils.uuID) → env
-    }
-    execution.addRunning(execId, envIds)
-    envIds.foreach {
-      case (envId, env) ⇒ env.listen(execution.environmentListener(envId))
-    }
+      envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
 
-    catchAll(ex.start(validateScript)) match {
-      case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
-      case Success(_) ⇒
-        val inserted = execution.addMoleExecution(execId, ex)
-        if (!inserted) ex.cancel
-    }
-  }
+      catchAll(ex.start(validateScript)) match
+        case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+        case Success(_) ⇒
+          val inserted = execution.addMoleExecution(execId, ex)
+          if (!inserted) ex.cancel
+    end processRun
 
-  def allStates(lines: Int) = execution.allStates(lines)
+    synchronousCompilation(script, outputStream) match
+      case e: MoleExecution => processRun(execId, e, validateScript)
+      case ed: ErrorData => execution.addError(execId, Failed(Vector.empty, ed, Seq.empty))
 
-  def staticInfos() = execution.staticInfos()
+    execId
+
+
+//  def asynchronousCompilation(script: SafePath, outputStream: StringPrintStream): java.util.concurrent.Future[MoleExecution | ErrorData] = {
+//    import services._
+//    threadProvider.javaSubmit { () ⇒ id -> synchronousCompilation(script, outputStream) }
+//  }
+
+
+
+  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = execution.executionData(outputLines, ids)
+
+  //def staticInfos() = execution.staticInfos()
 
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 

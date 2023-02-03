@@ -36,17 +36,19 @@ case class RunningEnvironment(
   networkActivity:   NetworkActivity   = NetworkActivity(),
   executionActivity: ExecutionActivity = ExecutionActivity())
 
+
+object Execution:
+  case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long, output: StringPrintStream)
+
 class Execution {
 
   import ExecutionInfo._
 
-  case class Instantiation(future: Future[_], compiled: Boolean)
+  case class Compilation(future: Future[_])
 
-  private lazy val staticExecutionInfo = TMap[ExecutionId, StaticExecutionInfo]()
-  private lazy val moleExecutions = TMap[ExecutionId, MoleExecution]()
-  private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
-  private lazy val errors = TMap[ExecutionId, Failed]()
-  private lazy val instantiation = TMap[ExecutionId, Instantiation]()
+  private lazy val staticExecutionInfo = TMap[ExecutionId, Execution.StaticExecutionInfo]()
+  private lazy val moleExecutions = TMap[ExecutionId, Failed | MoleExecution]()
+  //private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
 
   private lazy val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
   private lazy val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
@@ -55,13 +57,13 @@ class Execution {
     runningEnvironments.get(envId).foreach { env ⇒ runningEnvironments(envId) = update(env) }
   }
 
-  def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
-    instantiation.put(ex, Instantiation(future, false))
-  }
+//  def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
+//    moleExecutions.put(ex, Compilation(future))
+//  }
 
-  def compiled(ex: ExecutionId) = atomic { implicit ctx ⇒
-    instantiation.put(ex, instantiation.get(ex).get.copy(compiled = true))
-  }
+//  def compiled(ex: ExecutionId) = atomic { implicit ctx ⇒
+//    instantiation.put(ex, instantiation.get(ex).get.copy(compiled = true))
+//  }
 
   def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] = {
     case (env: Environment, bdl: BeginDownload) ⇒
@@ -115,7 +117,7 @@ class Execution {
       }
   }
 
-  def addRunning(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
+  def addRunningEnvironment(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
     environmentIds(id) = Seq()
     envIds.foreach {
       case (envId, env) ⇒
@@ -142,7 +144,7 @@ class Execution {
     }
   }
 
-  def addStaticInfo(key: ExecutionId, staticInfo: StaticExecutionInfo) = atomic { implicit ctx ⇒
+  def addStaticInfo(key: ExecutionId, staticInfo: Execution.StaticExecutionInfo) = atomic { implicit ctx ⇒
     staticExecutionInfo(key) = staticInfo
   }
 
@@ -154,33 +156,33 @@ class Execution {
     else false
   }
 
-  def addOutputStreams(key: ExecutionId, out: StringPrintStream) = atomic { implicit ctx ⇒
-    outputStreams(key) = out
-  }
+//  def addOutputStreams(key: ExecutionId, out: StringPrintStream) = atomic { implicit ctx ⇒
+//    outputStreams(key) = out
+//  }
 
   def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
-    errors(key) = error
+    moleExecutions(key) = error
   }
 
-  def cancel(key: ExecutionId) = {
-    moleExecutions.single.get(key).foreach(_.cancel)
-    instantiation.single.get(key).foreach(_.future.cancel(true))
-  }
+  def cancel(key: ExecutionId) =
+    moleExecutions.single.get(key) match
+      case Some(e: MoleExecution) => e.cancel
+      case _ =>
 
-  def remove(key: ExecutionId) = {
-    val (compil, exec) =
+  def remove(key: ExecutionId) =
+    val exec =
       atomic { implicit ctx ⇒
         removeRunningEnvironments(key)
         staticExecutionInfo.remove(key)
+//        outputStreams.remove(key)
         val exec = moleExecutions.remove(key)
-        outputStreams.remove(key)
-        errors.remove(key)
-        val compil = instantiation.remove(key)
-        (compil, exec)
+        exec
       }
-    compil.foreach(_.future.cancel(true))
-    exec.foreach(_.cancel)
-  }
+
+    exec match
+      case Some(e: MoleExecution) => e.cancel
+      case _ =>
+
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
     getRunningEnvironments(id).map {
@@ -223,12 +225,12 @@ class Execution {
 
     implicit def moleExecutionAccess: MoleExecution.SynchronisationContext = MoleExecution.UnsafeAccess
 
-    def launchStatus =
-      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
+//    def launchStatus =
+//      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
-    (errors.get(key), moleExecutions.get(key)) match {
-      case (Some(error), _) ⇒ error
-      case (_, Some(moleExecution)) ⇒
+    moleExecutions(key) match {
+      case error: Failed ⇒ error
+      case moleExecution: MoleExecution ⇒
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
 
         def scopeToString(scope: DefinitionScope) =
@@ -277,34 +279,29 @@ class Execution {
                 duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key)
               )
-            else launchStatus
+            else Preparing()
         }
-      case _ ⇒ launchStatus
     }
   }
 
-  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
-    for {
-      (k, s) ← staticExecutionInfo.toSeq
-    } yield (k, s)
-  }
+//  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
+//    for {
+//      (k, s) ← staticExecutionInfo.toSeq
+//    } yield (k, s)
+//  }
 
-  def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData]) = atomic { implicit ctx ⇒
-    val executionIds = staticExecutionInfo.map(_._1)
+  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
+    val executions =
+      for
+        id <- if ids.isEmpty then staticExecutionInfo.keys else ids
+        static ← staticExecutionInfo.get(id)
+      yield
+        val state = executionInfo(id)
+        val output  = static.output.toString.lines.toArray.takeRight(outputLines).mkString("\n")
 
-    def outputStreamData(id: ExecutionId, lines: Int) = atomic { implicit ctx ⇒
-      OutputStreamData(id, outputStreams(id).toString.lines.toArray.takeRight(lines).mkString("\n"))
-    }
+        ExecutionData(id, static.path, static.script, static.startDate, System.currentTimeMillis() - static.startDate, state, output)
 
-    val outputs = executionIds.toSeq.map {
-      outputStreamData(_, lines)
-    }
-
-    val executions = for {
-      (k, s) ← staticExecutionInfo.toSeq
-    } yield (k, executionInfo(k))
-
-    (executions, outputs)
+    executions.toSeq.sortBy(_.startDate)
   }
 
 }

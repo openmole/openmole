@@ -87,11 +87,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val sequenceRoute =
     sequence.implementedBy { p => apiImpl.sequence(p) }
 
-  val allStatesRoute =
-    allStates.implementedBy { i => apiImpl.allStates(i) }
+  val executionStateRoute =
+    executionState.implementedBy { (l, i) => apiImpl.executionData(l, i) }
 
-  val staticInfosRoute =
-    staticInfos.implementedBy { _ => apiImpl.staticInfos() }
+//  val staticInfosRoute =
+//    staticInfos.implementedBy { _ => apiImpl.staticInfos() }
 
   val cancelExecutionRoute =
     cancelExecution.implementedBy { i => apiImpl.cancelExecution(i) }
@@ -102,8 +102,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val compileScriptRoute =
     compileScript.implementedBy { s => apiImpl.compileScript(s) }
 
-  val runScriptRoute =
-    runScript.implementedBy { case(s, b) => apiImpl.runScript(s, b) }
+  val launchScriptRoute =
+    launchScript.implementedBy { case(s, b) => apiImpl.launchScript(s, b) }
 
   val clearEnvironmentErrorsRoute =
     clearEnvironmentErrors.implementedBy { i => apiImpl.clearEnvironmentErrors(i) }
@@ -149,7 +149,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
 
   val removePluginRoute =
     removePlugin.implementedBy { p => apiImpl.removePlugin(p) }
-  
+
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
@@ -169,12 +169,11 @@ class CoreAPIServer(apiImpl: ApiImpl)
       moveRoute,
       mdToHtmlRoute,
       sequenceRoute,
-      allStatesRoute,
-      staticInfosRoute,
+      executionStateRoute,
       cancelExecutionRoute,
       removeExecutionRoute,
       compileScriptRoute,
-      runScriptRoute,
+      launchScriptRoute,
       clearEnvironmentErrorsRoute,
       runningErrorEnvironmentDataRoute,
       modelsRoute,

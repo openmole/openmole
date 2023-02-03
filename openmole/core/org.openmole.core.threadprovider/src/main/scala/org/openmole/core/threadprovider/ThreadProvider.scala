@@ -25,6 +25,7 @@ object ThreadProvider {
     }
   }
 
+
   def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = new ThreadFactory {
     override def newThread(r: Runnable): Thread = {
       val t = parentGroup match {
@@ -61,12 +62,16 @@ class ThreadProvider(poolSize: Int) {
     parentGroup.interrupt()
   }
 
-  def submit(priority: Int)(task: ThreadProvider.Closure): java.util.concurrent.Future[_] = {
+  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit = {
     taskQueue.enqueue(task, priority)
     pool.submit(new ThreadProvider.RunClosure(taskQueue))
   }
 
   def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
+
+//  def javaSubmit[T](t: => T): java.util.Future[T] =
+//    val callable: Callable[T] = t
+//    pool.submit(callable)
 
   def newThread(runnable: Runnable, groupName: Option[String] = None) = synchronized {
     if (stopped) throw new RuntimeException("Thread provider has been stopped")
