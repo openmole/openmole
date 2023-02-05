@@ -19,7 +19,7 @@ package org.openmole.gui.client
 
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.openmole.gui.shared.data.ExecutionInfo
+import org.openmole.gui.shared.data.ExecutionState
 import org.scalajs.dom
 import com.raquo.laminar.api.L.*
 import endpoints4s.xhr
@@ -466,12 +466,12 @@ package object ext {
     color := BLUE
   )
 
-  def executionState(state: ExecutionInfo) = Seq(
+  def executionState(state: ExecutionState) = Seq(
     state match {
-      case _: ExecutionInfo.Failed   ⇒ color := "#CC3A36"
-      case _: ExecutionInfo.Running  ⇒ color := "yellow"
-      case _: ExecutionInfo.Finished ⇒ color := "#a6bf26"
-      case _: ExecutionInfo.Canceled ⇒ color := "orange"
+      case _: ExecutionState.Failed   ⇒ color := "#CC3A36"
+      case _: ExecutionState.Running  ⇒ color := "yellow"
+      case _: ExecutionState.Finished ⇒ color := "#a6bf26"
+      case _: ExecutionState.Canceled ⇒ color := "orange"
       case _                         ⇒ color := "#fff"
     },
     fontWeight := "bold"

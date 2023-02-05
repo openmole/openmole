@@ -60,11 +60,11 @@ import scala.jdk.FutureConverters.*
 
 class ApiImpl(val services: Services, applicationControl: Option[ApplicationControl]) {
 
-  import ExecutionInfo._
+  import ExecutionState._
 
   val outputSize = PreferenceLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
-  val execution = new Execution
+  val execution = new ExecutionRegistry
 
   //GENERAL
   def settings: OMSettings = {
@@ -374,7 +374,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val content = safePathToFile(script).content
 
-    execution.addStaticInfo(execId, Execution.StaticExecutionInfo(script, content, System.currentTimeMillis(), outputStream))
+    execution.addExecutionInfo(execId, ExecutionRegistry.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None))
 
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
       import services._

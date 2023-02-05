@@ -133,7 +133,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def cancelExecution(id: ExecutionId): Future[Unit] =
     val execution = executions(id)
-    executions += id -> execution.copy(state = ExecutionInfo.Canceled(Seq(), Seq(), 1000L, true))
+    executions += id -> execution.copy(state = ExecutionState.Canceled(Seq(), Seq(), 1000L, true))
     Future.successful(())
 
   override def removeExecution(id: ExecutionId): Future[Unit] =
@@ -143,12 +143,12 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def compileScript(script: SafePath): Future[Option[ErrorData]] = Future.successful(None)
 
   override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
-    def capsules = Seq(ExecutionInfo.CapsuleExecution("stub", "stub", ExecutionInfo.JobStatuses(10, 10, 10), true))
+    def capsules = Seq(ExecutionState.CapsuleExecution("stub", "stub", ExecutionState.JobStatuses(10, 10, 10), true))
     def environments = Seq(EnvironmentState(EnvironmentId(), "stub", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0))
 
     val id = ExecutionId()
    // executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Running(capsules, 1000L, environments), "stub output")
-    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Finished(capsules, 1000L, environments, true), "stub output")
+    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
 
 
     Future.successful(id)

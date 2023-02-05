@@ -220,9 +220,8 @@ package data {
     script: String,
     startDate: Long,
     duration: Long,
-    state: ExecutionInfo,
+    state: ExecutionState,
     output: String)
-
 
   case class EnvironmentState(
     envId: EnvironmentId,
@@ -235,49 +234,49 @@ package data {
     executionActivity: ExecutionActivity,
     numberOfErrors: Int)
 
-  sealed trait ExecutionInfo(val state: String):
+  sealed trait ExecutionState(val state: String):
     def duration: Long
-    def capsules: Seq[ExecutionInfo.CapsuleExecution]
+    def capsules: Seq[ExecutionState.CapsuleExecution]
     def ready: Long = capsules.map(_.statuses.ready).sum
     def running: Long = capsules.map(_.statuses.running).sum
     def completed: Long = capsules.map(_.statuses.completed).sum
     def environmentStates: Seq[EnvironmentState]
 
 
-  object ExecutionInfo:
-    case class CapsuleExecution(name: String, scope: String, statuses: ExecutionInfo.JobStatuses, user: Boolean)
+  object ExecutionState:
+    case class CapsuleExecution(name: String, scope: String, statuses: ExecutionState.JobStatuses, user: Boolean)
     case class JobStatuses(ready: Long, running: Long, completed: Long)
 
     case class Failed(
-     capsules: Seq[ExecutionInfo.CapsuleExecution],
-     error: ErrorData,
-     environmentStates: Seq[EnvironmentState],
-     duration: Long = 0L,
-     clean: Boolean = true) extends ExecutionInfo("failed")
+                       capsules: Seq[ExecutionState.CapsuleExecution],
+                       error: ErrorData,
+                       environmentStates: Seq[EnvironmentState],
+                       duration: Long = 0L,
+                       clean: Boolean = true) extends ExecutionState("failed")
 
     case class Running(
-      capsules: Seq[ExecutionInfo.CapsuleExecution],
-      duration: Long,
-      environmentStates: Seq[EnvironmentState]) extends ExecutionInfo("running")
+                        capsules: Seq[ExecutionState.CapsuleExecution],
+                        duration: Long,
+                        environmentStates: Seq[EnvironmentState]) extends ExecutionState("running")
 
     case class Finished(
-      capsules: Seq[ExecutionInfo.CapsuleExecution],
-      duration: Long = 0L,
-      environmentStates: Seq[EnvironmentState],
-      clean: Boolean) extends ExecutionInfo("finished")
+                         capsules: Seq[ExecutionState.CapsuleExecution],
+                         duration: Long = 0L,
+                         environmentStates: Seq[EnvironmentState],
+                         clean: Boolean) extends ExecutionState("finished")
 
     case class Canceled(
-      capsules: Seq[ExecutionInfo.CapsuleExecution],
-      environmentStates: Seq[EnvironmentState],
-      duration: Long = 0L,
-      clean: Boolean) extends ExecutionInfo("canceled")
+                         capsules: Seq[ExecutionState.CapsuleExecution],
+                         environmentStates: Seq[EnvironmentState],
+                         duration: Long = 0L,
+                         clean: Boolean) extends ExecutionState("canceled")
 
 //    case class Compiling() extends ExecutionInfo("compiling"):
 //      def duration: Long = 0L
 //      def capsules = Vector.empty
 //      def environmentStates: Seq[EnvironmentState] = Seq()
 
-    case class Preparing() extends ExecutionInfo("preparing"):
+    case class Preparing() extends ExecutionState("preparing"):
       def duration: Long = 0L
       def capsules = Vector.empty
       def environmentStates: Seq[EnvironmentState] = Seq()

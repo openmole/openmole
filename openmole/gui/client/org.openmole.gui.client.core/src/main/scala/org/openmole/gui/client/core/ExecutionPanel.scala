@@ -11,7 +11,7 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
 import org.openmole.gui.client.tool.{Component, OMTags}
-import org.openmole.gui.shared.data.ExecutionInfo.Failed
+import org.openmole.gui.shared.data.ExecutionState.Failed
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.Utils
@@ -24,13 +24,13 @@ import scaladget.tools.*
 object ExecutionPanel:
   object ExecutionDetails:
     object State:
-      def apply(info: ExecutionInfo) =
+      def apply(info: ExecutionState) =
         info match
-          case f: ExecutionInfo.Failed => State.failed(!f.clean)
-          case _: ExecutionInfo.Running => State.running
-          case f: ExecutionInfo.Canceled => State.canceled(!f.clean)
-          case f: ExecutionInfo.Finished => State.completed(!f.clean)
-          case _: ExecutionInfo.Preparing => State.preparing
+          case f: ExecutionState.Failed => State.failed(!f.clean)
+          case _: ExecutionState.Running => State.running
+          case f: ExecutionState.Canceled => State.canceled(!f.clean)
+          case f: ExecutionState.Finished => State.completed(!f.clean)
+          case _: ExecutionState.Preparing => State.preparing
 
       def toString(s: State) =
         s match
@@ -88,11 +88,11 @@ class ExecutionPanel:
   def toExecDetails(exec: ExecutionData): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionInfo.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionInfo.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
-      case r: ExecutionInfo.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
-      case c: ExecutionInfo.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = c.environmentStates, exec.output)
-      case r: ExecutionInfo.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = r.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
+      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = c.environmentStates, exec.output)
+      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = r.environmentStates, exec.output)
 
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)

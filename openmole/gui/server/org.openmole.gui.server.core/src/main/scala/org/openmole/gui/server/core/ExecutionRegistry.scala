@@ -37,19 +37,14 @@ case class RunningEnvironment(
   executionActivity: ExecutionActivity = ExecutionActivity())
 
 
-object Execution:
-  case class StaticExecutionInfo(path: SafePath, script: String, startDate: Long, output: StringPrintStream)
+object ExecutionRegistry:
+  case class ExecutionInfo(path: SafePath, script: String, startDate: Long, output: StringPrintStream, moleExecution: Option[ExecutionState.Failed | MoleExecution])
 
-class Execution {
+class ExecutionRegistry {
 
-  import ExecutionInfo._
+  import ExecutionState._
 
-  case class Compilation(future: Future[_])
-
-  private lazy val staticExecutionInfo = TMap[ExecutionId, Execution.StaticExecutionInfo]()
-  private lazy val moleExecutions = TMap[ExecutionId, Failed | MoleExecution]()
-  //private lazy val outputStreams = TMap[ExecutionId, StringPrintStream]()
-
+  private lazy val executionInfo = TMap[ExecutionId, ExecutionRegistry.ExecutionInfo]()
   private lazy val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
   private lazy val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
 
@@ -144,28 +139,21 @@ class Execution {
     }
   }
 
-  def addStaticInfo(key: ExecutionId, staticInfo: Execution.StaticExecutionInfo) = atomic { implicit ctx ⇒
-    staticExecutionInfo(key) = staticInfo
+  def addExecutionInfo(key: ExecutionId, info: ExecutionRegistry.ExecutionInfo) = atomic { implicit ctx ⇒
+    executionInfo(key) = info
   }
 
   def addMoleExecution(key: ExecutionId, moleExecution: MoleExecution) = atomic { implicit ctx ⇒
-    if (staticExecutionInfo.contains(key)) {
-      moleExecutions(key) = moleExecution
-      true
-    }
-    else false
+    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(moleExecution))) }.isDefined
   }
 
-//  def addOutputStreams(key: ExecutionId, out: StringPrintStream) = atomic { implicit ctx ⇒
-//    outputStreams(key) = out
-//  }
 
   def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
-    moleExecutions(key) = error
+    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(error))) }.isDefined
   }
 
   def cancel(key: ExecutionId) =
-    moleExecutions.single.get(key) match
+    executionInfo.single.get(key).flatMap(_.moleExecution) match
       case Some(e: MoleExecution) => e.cancel
       case _ =>
 
@@ -173,13 +161,10 @@ class Execution {
     val exec =
       atomic { implicit ctx ⇒
         removeRunningEnvironments(key)
-        staticExecutionInfo.remove(key)
-//        outputStreams.remove(key)
-        val exec = moleExecutions.remove(key)
-        exec
+        executionInfo.remove(key)
       }
 
-    exec match
+    exec.flatMap(_.moleExecution) match
       case Some(e: MoleExecution) => e.cancel
       case _ =>
 
@@ -221,17 +206,18 @@ class Execution {
     }
   }
 
-  def executionInfo(key: ExecutionId): ExecutionInfo = atomic { implicit ctx ⇒
+  def state(key: ExecutionId): ExecutionState = atomic { implicit ctx ⇒
 
     implicit def moleExecutionAccess: MoleExecution.SynchronisationContext = MoleExecution.UnsafeAccess
 
 //    def launchStatus =
 //      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
-    moleExecutions(key) match {
-      case error: Failed ⇒ error
-      case moleExecution: MoleExecution ⇒
-        def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionInfo.JobStatuses(s.ready, s.running, s.completed)
+    executionInfo(key).moleExecution match
+      case None => Preparing()
+      case Some(error: Failed) ⇒ error
+      case Some(moleExecution: MoleExecution) ⇒
+        def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
 
         def scopeToString(scope: DefinitionScope) =
           scope match {
@@ -281,25 +267,18 @@ class Execution {
               )
             else Preparing()
         }
-    }
+
   }
 
-//  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)] = atomic { implicit ctx ⇒
-//    for {
-//      (k, s) ← staticExecutionInfo.toSeq
-//    } yield (k, s)
-//  }
 
   def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
     val executions =
       for
-        id <- if ids.isEmpty then staticExecutionInfo.keys else ids
-        static ← staticExecutionInfo.get(id)
+        id <- if ids.isEmpty then executionInfo.keys else ids
+        static ← executionInfo.get(id)
       yield
-        val state = executionInfo(id)
         val output  = static.output.toString.lines.toArray.takeRight(outputLines).mkString("\n")
-
-        ExecutionData(id, static.path, static.script, static.startDate, System.currentTimeMillis() - static.startDate, state, output)
+        ExecutionData(id, static.path, static.script, static.startDate, System.currentTimeMillis() - static.startDate, state(id), output)
 
     executions.toSeq.sortBy(_.startDate)
   }
