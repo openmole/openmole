@@ -1306,7 +1306,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """cp /etc/apt/sources.list /etc/apt/sources.list.d/unsable.list && sed -i "s/testing/unstable/g" /etc/apt/sources.list.d/unsable.list && sed -i "/unstable-security/d" /etc/apt/sources.list.d/unsable.list && sed -i "/unstable-updates/d" /etc/apt/sources.list.d/unsable.list && \
        apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales singularity-container && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales singularity-container npm && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
     runRaw(
