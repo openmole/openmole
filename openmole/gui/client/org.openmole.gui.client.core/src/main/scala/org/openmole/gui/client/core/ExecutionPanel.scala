@@ -273,15 +273,12 @@ class ExecutionPanel:
 
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
-  def render(using panels: Panels, api: ServerAPI) = {
-    val updating = new AtomicBoolean(false)
-    val timer: Var[Option[SetIntervalHandle]] = Var(None)
-    val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
+  def render(using panels: Panels, api: ServerAPI) =
 
     def execFilter(execs: Execs): Execs =
       import ExecutionPanel.ExecutionDetails.State
       val ids =
-        if (autoRemoveFailed.isChecked)
+        if autoRemoveFailed.isChecked
         then
           val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.map(_._1) }
 
@@ -298,45 +295,34 @@ class ExecutionPanel:
 
       ids.map(id => id -> execs(id)).toMap
 
-    def updateExecutionInfo: Unit =
-      if updating.compareAndSet(false, true)
-      then
-        for
-          executionData <- api.executionState(200)
-        do
-          try executionDetails.set(execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap))
-          finally updating.set(false)
+    def queryState = for executionData <- api.executionState(200) yield execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap)
 
-    def timerObserver(delay: Long) =
-      Observer[Option[SetIntervalHandle]] {
-        case None => timer.set(Some(setInterval(delay) { updateExecutionInfo }))
-        case _ =>
-      }
-
-    setTimeout(1000) { updateExecutionInfo }
+    val forceUpdate = Var(0)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
-      children <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (details, id) =>
-        Seq(
-          div(rowFlex, justifyContent.center,
-            details.toSeq.map { (id, detailValue) => simulationBlock(id, detailValue) }
-          ),
-          autoRemoveFailed.element,
-          div(
-            id.map { idValue =>
-              details.get(idValue) match
-                case Some(st) =>
-                  def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => updateExecutionInfo }
-                  def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
-                  div(buildExecution(idValue, st, cancel, remove))
-                case None => div()
-            }
-          )
-        )
-      }
-    ).amend(timer --> timerObserver(10000))
-  }
+      children <--
+        EventStream.periodic(10000).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
+          EventStream.fromFuture(queryState).toSignal(Map()).map { details =>
+            Seq(
+              div(rowFlex, justifyContent.center,
+                details.toSeq.map { (id, detailValue) => simulationBlock(id, detailValue) }
+              ),
+              autoRemoveFailed.element,
+              div(
+                id.map { idValue =>
+                  details.get(idValue) match
+                    case Some(st) =>
+                      def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
+                      def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
+                      div(buildExecution(idValue, st, cancel, remove))
+                    case None => div()
+                }
+              )
+            )
+          }
+        }
+    )
 
 
 //lazy val executionTable = scaladget.bootstrapnative.Table(
