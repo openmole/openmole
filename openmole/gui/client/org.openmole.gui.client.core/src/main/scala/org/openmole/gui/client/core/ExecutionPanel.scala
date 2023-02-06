@@ -43,6 +43,11 @@ object ExecutionPanel:
           case State.canceled(true) => "cleaning"
           case State.canceled(false) => "canceled"
 
+      def isFailedOrCanceled(state: State) =
+        state match
+          case (_: State.canceled) | (_: State.failed) => true
+          case _=> false
+
     enum State:
       case preparing, running
       case completed(cleaning: Boolean) extends State
@@ -224,7 +229,6 @@ class ExecutionPanel:
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
-
   def expander(details: ExecutionDetails) =
     div(height := "500", rowFlex, justifyContent.center,
       child <-- showExpander.signal.map {
@@ -274,24 +278,20 @@ class ExecutionPanel:
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
   def render(using panels: Panels, api: ServerAPI) =
-
     def execFilter(execs: Execs): Execs =
       import ExecutionPanel.ExecutionDetails.State
       val ids =
         if autoRemoveFailed.isChecked
         then
-          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.map(_._1) }
-
+          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.map{case (sp, t)=> sp-> t.map(_._1)}
           idsForPath.flatMap { case (_, execIds) =>
-            if execIds.size > 1
-            then
-              execIds.filterNot { id =>
-                val state = execs(id).state
-                state == State.failed || state == State.canceled
-              }
-            else execIds
+            val (failedOrCanceled, otherStates) = execIds.partition(i=> State.isFailedOrCanceled(execs(i).state))
+            val (toBeCleaned, toBeKeeped) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
+            toBeCleaned.foreach(api.removeExecution)
+            otherStates ++ toBeKeeped
           }
-        else execs.map(_._1).toSeq
+        else
+          execs.map(_._1).toSeq
 
       ids.map(id => id -> execs(id)).toMap
 
@@ -306,7 +306,7 @@ class ExecutionPanel:
           EventStream.fromFuture(queryState).toSignal(Map()).map { details =>
             Seq(
               div(rowFlex, justifyContent.center,
-                details.toSeq.map { (id, detailValue) => simulationBlock(id, detailValue) }
+                details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
               ),
               autoRemoveFailed.element,
               div(

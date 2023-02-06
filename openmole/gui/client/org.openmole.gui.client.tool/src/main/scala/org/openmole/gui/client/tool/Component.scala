@@ -17,6 +17,6 @@ object Component {
         )
       )
 
-      def isChecked = isActive(in)
+      def isChecked = in.ref.checked
   }
 }
