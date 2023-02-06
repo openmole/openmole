@@ -41,7 +41,7 @@ The following properties must be defined using @code{set}:
 The following arguments are optional arguments for an advanced usage
 
 @ul
-   @li{@code{autoInstallSystemDeps} Boolean, @b{optional}} (default = @code{true}). Should system dependencies for required packages be automatically installed (these are resolved using the RSTudio packagemanager API).
+   @li{@code{installSystemDependencies} Boolean, @b{optional}} (default = @code{true}). Should system dependencies for required packages be automatically installed (these are resolved using the RSTudio packagemanager API).
    @li{@code{install} Sequence of strings, @b{optional} (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used for example if automatic system dependencies installation fails, after deactivating the option.}
    @li{@code{image} String, @b{optional} (default = "openmole/r-base"). Changes the docker image used by the RTask.}
    @li{@code{version} String, @b{optional} (default = "4.1.2"). Version of the docker image. openmole/r-base images are tagged corresponding to some R versions, check the docker hub to see which are available. If you use your own image, you will need to provide the corresponding tag.}
@@ -338,7 +338,7 @@ We need to write the names of the libraries we need in the field @code{libraries
 
 @br
 
-System libraries required by the R library are automatically installed by the RTask. You can deactivate this behavior by setting the option @code{autoInstallSystemDeps} to false, and provide yourself the installation commands.
+System libraries required by the R library are automatically installed by the RTask. You can deactivate this behavior by setting the option @code{installSystemDependencies} to false, and provide yourself the installation commands.
 The @code{RTask} is based on a Debian container, therefore you can use any Debian command here including @code{apt} installation tool.
 See advanced usage below for examples of custom commands in specific use cases.
 
@@ -406,7 +406,7 @@ The @code{install} field must be used with particular commands: we prefix instal
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        autoInstallSystemDeps = false,
+        installSystemDependencies = false,
         install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
@@ -456,7 +456,7 @@ You can do so by making a smart use of the @code{install} parameter to define yo
         # your R script here
         # [...]
         $tq,
-        autoInstallSystemDeps = false,
+        installSystemDependencies = false,
         install = Seq(
            // replace the initial Debian repositories by my repository
            "fakeroot sed -i 's/deb.debian.org/linux.myinstitute.org/g' /etc/apt/sources.list",
