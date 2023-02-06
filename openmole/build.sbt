@@ -1104,6 +1104,7 @@ lazy val site = crossProject(JSPlatform, JVMPlatform).in(binDir / "org.openmole.
 lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
   webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   scalaJSLinkerConfig := scalaJSLinkerConfig.value.withSourceMap(true),
+  webpackNodeArgs := Seq("--openssl-legacy-provider"),
   scala3Settings,
   test := {},
   Libraries.laminarJS,
