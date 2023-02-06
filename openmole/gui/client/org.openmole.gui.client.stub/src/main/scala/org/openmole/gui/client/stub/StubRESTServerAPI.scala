@@ -147,12 +147,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     def environments = Seq(EnvironmentState(EnvironmentId(), "stub", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0))
 
     val id = ExecutionId()
-    println("ID " + id)
    // executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Running(capsules, 1000L, environments), "stub output")
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
-
-    println("Exec size " + executions.size)
-
     Future.successful(id)
 
 
