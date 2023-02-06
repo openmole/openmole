@@ -759,6 +759,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   webpackNodeArgs := Seq("--openssl-legacy-provider"),
   //webpackExtraArgs := Seq("--profile", "--progress", "true"),
   webpackEmitSourceMaps := false,
+  test := false,
   /*libraryDependencies ++= Seq(
     "com.raquo" %%% "laminar" % laminarVersion,
     "org.openmole.scaladget" %%% "tools" % scaladgetVersion,
