@@ -98,7 +98,7 @@ val j = Val[Int]
 val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
   inputs += i,
   outputs += (i, j),
-  plugins += pluginsOf[myopenmoleplugin.Hello]
+  plugins += pluginsOf(myopenmoleplugin.Hello)
 )
 
 DirectSampling(
