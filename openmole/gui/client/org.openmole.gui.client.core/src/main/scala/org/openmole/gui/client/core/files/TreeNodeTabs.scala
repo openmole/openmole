@@ -268,7 +268,7 @@ object TreeNodeTab {
     def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = {
       def saveTab = {
         def saved(hash: String) = {
-          editorValue.initialContentHash = hash
+          editorValue.contentHash = hash
           afterRefresh()
         }
 

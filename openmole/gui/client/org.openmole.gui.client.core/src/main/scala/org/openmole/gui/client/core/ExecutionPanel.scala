@@ -43,6 +43,11 @@ object ExecutionPanel:
           case State.canceled(true) => "cleaning"
           case State.canceled(false) => "canceled"
 
+      def isFailedOrCanceled(state: State) =
+        state match
+          case (_: State.canceled) | (_: State.failed) => true
+          case _=> false
+
     enum State:
       case preparing, running
       case completed(cleaning: Boolean) extends State
@@ -240,7 +245,6 @@ class ExecutionPanel:
         case Some(Expand.Console) =>
           div(child <-- executionDetails.signal.combineWith(currentOpenSimulation).map { case (details, id) ⇒
             val cont = id.flatMap(id => details.get(id).map(_.output)).getOrElse("")
-            println("Cont: " + cont)
             execTextArea(cont).amend(cls := "console")
           }
           )
@@ -296,26 +300,26 @@ class ExecutionPanel:
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
   def render(using panels: Panels, api: ServerAPI) = {
+
     val updating = new AtomicBoolean(false)
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
+
+    def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
 
     def execFilter(execs: Execs): Execs =
       import ExecutionPanel.ExecutionDetails.State
       val ids =
         if (autoRemoveFailed.isChecked)
         then
-          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.map(_._1) }
-
+          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.map{case (sp, t)=> sp-> t.map(_._1)}
           idsForPath.flatMap { case (_, execIds) =>
-            if execIds.size > 1
-            then
-              execIds.filterNot { id =>
-                val state = execs(id).state
-                state == State.failed || state == State.canceled
-              }
-            else execIds
+            val (failedOrCanceled, otherStates) = execIds.partition(i=> State.isFailedOrCanceled(execs(i).state))
+            val (toBeCleaned, toBeKeeped) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
+            toBeCleaned.foreach(remove(_))
+            otherStates ++ toBeKeeped
           }
-        else execs.map(_._1).toSeq
+        else
+          execs.map(_._1).toSeq
 
       ids.map(id => id -> execs(id)).toMap
 
@@ -325,7 +329,9 @@ class ExecutionPanel:
         for
           executionData <- api.executionState(200)
         do
-          try executionDetails.set(execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap))
+          try {
+            executionDetails.set(execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap))
+          }
           finally updating.set(false)
 
     def timerObserver(delay: Long) =
@@ -341,7 +347,7 @@ class ExecutionPanel:
       children <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (details, id) =>
         Seq(
           div(rowFlex, justifyContent.center,
-            details.toSeq.map { (id, detailValue) => simulationBlock(id, detailValue) }
+            details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
           ),
           autoRemoveFailed.element,
           div(
@@ -349,7 +355,6 @@ class ExecutionPanel:
               details.get(idValue) match
                 case Some(st) =>
                   def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => updateExecutionInfo }
-                  def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => updateExecutionInfo }
                   div(buildExecution(idValue, st, cancel, remove))
                 case None => div()
             }

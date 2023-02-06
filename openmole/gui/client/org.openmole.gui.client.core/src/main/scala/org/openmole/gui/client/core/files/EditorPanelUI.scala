@@ -113,9 +113,9 @@ class EditorPanelUI(fileType: FileExtension) {
     ed
   }
 
-  var initialContentHash = ""
+  var contentHash = ""
 
-  def onSaved(hash: String) = initialContentHash = hash
+  def onSaved(hash: String) = contentHash = hash
 
   lazy val lineHeight = Var(15)
 
@@ -194,11 +194,11 @@ class EditorPanelUI(fileType: FileExtension) {
   def aceDoc = editor.getSession().getDocument()
 
   def code = editor.synchronized {
-    (editor.getSession().getValue(), initialContentHash)
+    (editor.getSession().getValue(), contentHash)
   }
 
   def setCode(content: String, hash: String) = editor.synchronized {
-    initialContentHash = hash
+    contentHash = hash
     editor.getSession().setValue(content)
   }
 
