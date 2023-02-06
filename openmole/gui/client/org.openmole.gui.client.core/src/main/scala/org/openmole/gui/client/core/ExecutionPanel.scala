@@ -334,7 +334,7 @@ class ExecutionPanel:
         case _ =>
       }
 
-    updateExecutionInfo
+    setTimeout(1000) { updateExecutionInfo }
 
     div(
       columnFlex, width := "100%", marginTop := "20",
