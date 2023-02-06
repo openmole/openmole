@@ -147,15 +147,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     def environments = Seq(EnvironmentState(EnvironmentId(), "stub", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0))
 
     val id = ExecutionId()
-<<<<<<< Updated upstream
-   // executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionInfo.Running(capsules, 1000L, environments), "stub output")
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
-=======
-    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
-    
->>>>>>> Stashed changes
     Future.successful(id)
-
 
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
   override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = Future.successful(EnvironmentErrorData.empty)
