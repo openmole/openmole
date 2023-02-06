@@ -72,7 +72,6 @@ class ExecutionPanel:
   import ExecutionPanel.*
 
 //  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
-  val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
 //  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
   //val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
@@ -226,42 +225,21 @@ class ExecutionPanel:
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
 
-  val expander = div(height := "500", rowFlex, justifyContent.center,
-    child <-- showExpander.signal.map {
-      _ match {
-        case Some(Expand.Script) => div(
-          child <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (details, id) =>
-            execTextArea(id.flatMap { i =>
-              details.get(i).map(_.script)
-            }.getOrElse("")
-            )
-          }
-        )
-        case Some(Expand.Console) =>
-          div(child <-- executionDetails.signal.combineWith(currentOpenSimulation).map { case (details, id) ⇒
-            val cont = id.flatMap(id => details.get(id).map(_.output)).getOrElse("")
-            println("Cont: " + cont)
-            execTextArea(cont).amend(cls := "console")
-          }
-          )
-        case Some(Expand.ErrorLog) =>
-          div(child <-- executionDetails.signal.combineWith(currentOpenSimulation.signal).map { case (execD, id) =>
-            execTextArea(
-              id.flatMap { i =>
-                execD.get(i).flatMap(_.error.map(ExecError.stackTrace))
-              }.getOrElse("")
-            )
-          }
-          )
-        case None => div()
+  def expander(details: ExecutionDetails) =
+    div(height := "500", rowFlex, justifyContent.center,
+      child <-- showExpander.signal.map {
+        _ match
+          case Some(Expand.Script) => div(execTextArea(details.script))
+          case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
+          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ExecError.stackTrace).getOrElse("")))
+          case None => div()
       }
-    }
-  )
+    )
 
   def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
     OMSContent.setError(executionDetails.path, executionDetails.error)
     elementTable()
-      .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander, showExpander.signal.map(_.isDefined))
+      .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(executionDetails), showExpander.signal.map(_.isDefined))
       .unshowSelection
       .render.render.amend(idAttr := "exec")
 
@@ -298,6 +276,7 @@ class ExecutionPanel:
   def render(using panels: Panels, api: ServerAPI) = {
     val updating = new AtomicBoolean(false)
     val timer: Var[Option[SetIntervalHandle]] = Var(None)
+    val executionDetails: Var[ExecutionPanel.Execs] = Var(Map())
 
     def execFilter(execs: Execs): Execs =
       import ExecutionPanel.ExecutionDetails.State
