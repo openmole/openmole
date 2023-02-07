@@ -1144,6 +1144,7 @@ textarea#execTextArea {
   height : 450px;
   width : 800px;
   color : "#222";
+  font-size:14px;
 }
 
 /*Switchs*/
