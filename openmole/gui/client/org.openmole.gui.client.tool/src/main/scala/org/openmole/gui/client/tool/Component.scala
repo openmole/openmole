@@ -5,7 +5,7 @@ import com.raquo.laminar.nodes.ReactiveElement.isActive
 
 object Component {
 
-  class Switch(name: String, activated: Boolean, cl: String) {
+  class Switch(name: String, activated: Boolean, cl: String = "") {
 
     private val in = input(`type` := "checkbox", checked := activated)
     val element = div(display.flex, flexDirection.row, cls := cl,

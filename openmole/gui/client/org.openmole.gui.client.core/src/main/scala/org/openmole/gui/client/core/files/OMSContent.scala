@@ -7,6 +7,7 @@ import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.api.ServerAPI
 import scaladget.bootstrapnative.bsn.*
 
@@ -55,33 +56,37 @@ object OMSContent {
 
       import scala.concurrent.duration._
 
-      div(display.flex, flexDirection.row, height := "5vh", alignItems.center,
+      val checkSwitch = Component.Switch("Compile only", false, "checkSwitch")
+
+      div(display.flex, flexDirection.row, height := "6vh", alignItems.center,
         child <-- compileDisabled.signal.map { compDisabled ⇒
           if (compDisabled) Waiter.waiter
-          else
-            button("CHECK", btn_secondary_outline, cls := "omsControlButton", onClick --> { _ ⇒
-              unsetErrors
-              editor.editor.getSession().clearBreakpoints()
-              compileDisabled.set(true)
+          else {
+            div(display.flex, flexDirection.row,
+              button("RUN", btn_primary, marginLeft := "10", onClick --> { _ ⇒
+                unsetErrors
+                if (checkSwitch.isChecked)
+                then
+                  editor.editor.getSession().clearBreakpoints()
+                  compileDisabled.set(true)
 
-              panels.tabContent.save(tabData, _ ⇒
-                api.compileScript(safePath).foreach { errorDataOption ⇒
-                  compileDisabled.set(false)
-                  setError(safePath, errorDataOption)
-                  editor.editor.focus()
-                }
-              )
-            })
-        },
-        div(display.flex, flexDirection.row,
-          button("RUN", btn_primary_outline, cls := "omsControlButton", marginLeft := "10", onClick --> { _ ⇒
-            unsetErrors
-            panels.tabContent.save(tabData, _ ⇒
-              api.launchScript(safePath, true)
-              ExecutionPanel.open
+                  panels.tabContent.save(tabData, _ ⇒
+                    api.compileScript(safePath).foreach { errorDataOption ⇒
+                      compileDisabled.set(false)
+                      setError(safePath, errorDataOption)
+                      editor.editor.focus()
+                    }
+                  )
+                else
+                  panels.tabContent.save(tabData, _ ⇒
+                    api.launchScript(safePath, true)
+                    ExecutionPanel.open
+                  )
+              })
             )
-          })
-        ),
+          }
+        },
+        checkSwitch.element,
         div(row, panels.tabContent.fontSizeControl, marginLeft.auto)
       )
     }

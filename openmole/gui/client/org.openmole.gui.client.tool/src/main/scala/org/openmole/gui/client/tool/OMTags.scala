@@ -57,6 +57,8 @@ object OMTags {
   lazy val glyph_search = cls("bi-search")
   val glyph_puzzle = cls("bi-puzzle-fill")
   val glyph_unpuzzle = cls("bi-clock")
+  val glyph_play = cls("bi-file-play")
+  val buttonOM = cls("btn btnOm")
 
   case class AlertAction(action: () ⇒ Unit)
 

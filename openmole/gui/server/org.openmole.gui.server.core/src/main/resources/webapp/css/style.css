@@ -593,7 +593,7 @@ padding-bottom: 90px;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 80vh;
+  height: 79vh;
   overflow: auto;
   border: 3px solid #b6b6bb66;
   border-radius: 3px;
@@ -1205,4 +1205,20 @@ input:checked + .slider:before {
     top: 20;
     right: 20;
     color: #222;
+}
+
+.btnOm {
+    color: #fff;
+    background-color: #a3bc26;
+    border-color: #a3bc26;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #3086b5;
+    border-color: #3086b5;
+}
+
+.checkSwitch {
+    margin-left: 30px;
 }
