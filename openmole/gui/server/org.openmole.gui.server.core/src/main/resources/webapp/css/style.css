@@ -24,6 +24,11 @@ body{
     overflow: hidden;
 }
 
+a {
+    color:#3f3d56;
+    font-weight: bold;
+}
+
 .table.envError>tbody>tr>td{
     border-top:none;
     vertical-align: middle;
@@ -515,6 +520,7 @@ padding-bottom: 90px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    padding: 15px;
 }
 
 .main-container {
@@ -560,7 +566,6 @@ padding-bottom: 90px;
   width: 100%;
   margin-left: 10px;
   overflow: hidden;
-  margin-bottom: 10px;
  }
 
 .file-content {
@@ -593,7 +598,7 @@ padding-bottom: 90px;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 79vh;
+  height: 77vh;
   overflow: auto;
   border: 3px solid #b6b6bb66;
   border-radius: 3px;
@@ -853,7 +858,6 @@ padding-bottom: 90px;
    color: white;
    padding: 10px;
    background: #3f3d56;
-   font-family:agane;
 }
 
 .docEntry {
@@ -969,7 +973,7 @@ padding-bottom: 90px;
     padding: 5px;
     color: #3f3d56;
     background-color: white;
-    margin: 0 10 0 50;
+    margin: 0 10 0 10;
 }
 
 .verticalFormItem {
@@ -987,7 +991,7 @@ padding-bottom: 90px;
    width: 100%;
    height : 100%;
    transition: top 1s ease 0s;
-   top: 58px;
+   top: 64px;
    overflow: hidden;
    background-color: rgb(236,236,236);
    color: #FFF;
@@ -1221,4 +1225,21 @@ input:checked + .slider:before {
 
 .checkSwitch {
     margin-left: 30px;
+}
+
+.mainMenuCurrentName {
+    display: flex;
+    color: white;
+    align-items: center;
+    margin-left: 10px;
+    font-weight: bolder;
+}
+
+.mainMenuCurrentGlyph {
+    background: #795c85;
+    border-radius: 100px;
+}
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+    background: #eee7e7;
 }

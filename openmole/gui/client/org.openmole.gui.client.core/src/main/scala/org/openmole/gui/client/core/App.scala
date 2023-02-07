@@ -145,6 +145,15 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //        })
       //      })
 
+
+
+//      def toggleMenu(m: MainMenu) =
+//        currentSelectedMenu.update(cmm=>
+//          if cmm == Some(m)
+//          then None
+//          else Some(m)
+//        )
+
       //START BUTTON
       lazy val theNavBar = div(
         cls := "nav-container",
@@ -159,13 +168,26 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         },
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
-          button(btn_danger, "New project", onClick --> { _ => Panels.expandTo(newProjectPanel, 3) }),
-          div(OMTags.glyph_flash, navBarItem, onClick --> { _ ⇒ ExecutionPanel.open }).tooltip("Executions"),
-          div(glyph_lock, navBarItem, onClick --> { _ ⇒ Panels.expandTo(authenticationPanel, 2) }).tooltip("Authentications"),
-          div(OMTags.glyph_plug, navBarItem, onClick --> { _ ⇒
+          button(btn_danger, "New project", onClick --> { _ =>
+            Panels.expandTo(newProjectPanel, 3)
+          }),
+          div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(4)},
+            onClick --> { _ ⇒
+            ExecutionPanel.open
+          }).tooltip("Executions"),
+          div(glyph_lock, navBarItem,
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(2)},
+            onClick --> { _ ⇒
+            Panels.expandTo(authenticationPanel, 2)
+          }).tooltip("Authentications"),
+          div(OMTags.glyph_plug, navBarItem,
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(1)},
+            onClick --> { _ ⇒
             panels.pluginPanel.getPlugins
             Panels.expandTo(panels.pluginPanel.render, 1)
-          }).tooltip("Plugins")
+          }).tooltip("Plugins"),
+          div(child <-- panels.expandablePanel.signal.map (_.map(ep=> Panels.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         )
         //            settingsItem
       )

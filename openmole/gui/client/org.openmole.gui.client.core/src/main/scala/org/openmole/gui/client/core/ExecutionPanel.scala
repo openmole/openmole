@@ -286,9 +286,9 @@ class ExecutionPanel:
           val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.map{case (sp, t)=> sp-> t.map(_._1)}
           idsForPath.flatMap { case (_, execIds) =>
             val (failedOrCanceled, otherStates) = execIds.partition(i=> State.isFailedOrCanceled(execs(i).state))
-            val (toBeCleaned, toBeKeeped) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
+            val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
             toBeCleaned.foreach(api.removeExecution)
-            otherStates ++ toBeKeeped
+            otherStates ++ toBeKept
           }
         else
           execs.map(_._1).toSeq
