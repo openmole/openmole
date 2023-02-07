@@ -122,7 +122,7 @@ class TreeNodePanel { panel =>
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
       addRootDirButton.element,
       newNodeInput.amend(marginLeft := "10px"),
-      upButton.amend(justifyContent.flexEnd).tooltip("Upload a file"),
+      upButton.amend(justifyContent.flexEnd),
       transferring.withTransferWaiter {
         _ ⇒
           div()
