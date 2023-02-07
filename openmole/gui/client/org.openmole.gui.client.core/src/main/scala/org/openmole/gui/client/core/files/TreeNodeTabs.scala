@@ -716,8 +716,6 @@ class TreeNodeTabs {
 
   val tabsElement = Tabs.tabs[TreeNodeTab](Seq()).build
 
-  val timer: Var[Option[SetIntervalHandle]] = Var(None)
-
 //  val tabsObserver = Observer[Seq[Tab[TreeNodeTab]]] { tNodeTabs =>
 //    if (tNodeTabs.isEmpty) {
 //      timer.now().foreach { handle =>
