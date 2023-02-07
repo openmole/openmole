@@ -1040,6 +1040,8 @@ padding-bottom: 90px;
       font-family: gi;
       padding: 10px;
       font-weight: bold;
+      justify-content: center;
+      display: flex;
 }
 
 .infoContentLink {
@@ -1110,13 +1112,14 @@ padding-bottom: 90px;
 }
 
 .controlButton {
-    width: 77px;
-    height: 77px;
-    margin-left: 10px;
-    font-family: gi;
-    font-size: 18px;
-    color: white;
-    cursor:pointer;
+   width: 57px;
+   margin-left: 10px;
+   font-family: gi;
+   font-size: 18px;
+   color: white;
+   cursor:pointer;
+   padding:4px;
+   margin: 2px;
 }
 
 .table#exec.table-bordered.table tr td{
@@ -1141,6 +1144,7 @@ textarea#execTextArea {
   height : 450px;
   width : 800px;
   color : "#222";
+  font-size:14px;
 }
 
 /*Switchs*/
