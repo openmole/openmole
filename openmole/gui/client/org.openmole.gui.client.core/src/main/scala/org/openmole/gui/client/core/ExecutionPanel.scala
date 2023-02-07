@@ -295,14 +295,21 @@ class ExecutionPanel:
 
       ids.map(id => id -> execs(id)).toMap
 
-    def queryState = for executionData <- api.executionState(200) yield execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap)
 
     val forceUpdate = Var(0)
+    @volatile var queryingState = false
+
+    def queryState =
+      queryingState = true
+      try
+        for executionData <- api.executionState(200)
+        yield execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap)
+      finally queryingState = false
 
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <--
-        EventStream.periodic(10000).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
+        EventStream.periodic(10000).filter(_ => !queryingState).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
           EventStream.fromFuture(queryState).toSignal(Map()).map { details =>
             Seq(
               div(rowFlex, justifyContent.center,
