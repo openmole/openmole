@@ -311,8 +311,8 @@ class ExecutionPanel:
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <--
-        EventStream.periodic(10000).filter(_ => !queryingState).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
-          EventStream.fromFuture(queryState).toSignal(Map()).map { allDetails =>
+        EventStream.periodic(10000).delay(1000).filter(_ => !queryingState).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
+          EventStream.fromFuture(queryState).map { allDetails =>
             val (details, toClean) = filterExecutions(allDetails)
             toClean.foreach(api.removeExecution)
             Seq(
