@@ -52,7 +52,7 @@ object Panels:
     val treeNodePanel = new TreeNodePanel
     val settingsView = new SettingsView
     val connection = new Connection
-
+    
     new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
 
 

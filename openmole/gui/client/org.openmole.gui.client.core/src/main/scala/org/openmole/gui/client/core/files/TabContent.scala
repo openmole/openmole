@@ -16,33 +16,11 @@ object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
 
 class TabContent:
-
   import TabContent.TabData
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
   def render(using panels: Panels, api: ServerAPI) =
-    val timer: Var[Option[SetIntervalHandle]] = Var(None)
-
-    def tabsObserver =
-      Observer[Seq[Tab[TabData]]] { tabs =>
-        if (tabs.isEmpty) {
-          timer.now().foreach { handle => clearInterval(handle) }
-          timer.set(None)
-        }
-      }
-
-    def timerObserver =
-      Observer[Option[SetIntervalHandle]] {
-        case None =>
-          timer.set(Some(setInterval(15000) { tabsUI.tabs.now().foreach { t => save(t.t) } }))
-        case _ =>
-      }
-
-    tabsUI.render.amend(
-      margin := "10px",
-      tabsUI.tabs --> tabsObserver,
-      timer --> timerObserver
-    )
+    tabsUI.render.amend(margin := "10px")
 
   private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, api: ServerAPI) = {
     span(display.flex, flexDirection.row, alignItems.center,

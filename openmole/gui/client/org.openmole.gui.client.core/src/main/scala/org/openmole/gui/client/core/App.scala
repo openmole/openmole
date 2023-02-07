@@ -66,23 +66,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
 
   def restarted(): Unit =
-    val timer: Var[Option[SetIntervalHandle]] = Var(None)
-
-    def setTimer = {
-      timer.set(Some(setInterval(5000) {
-        api.isAlive().foreach { x ⇒
-          if (x) {
-            CoreUtils.setRoute(s"/${connectionRoute}")
-            timer.now().foreach {
-              clearInterval
-            }
-          }
-        }
-      })
-      )
-    }
-
-    setTimer
     val restartedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -92,6 +75,16 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
     api.restart()
+
+    def checkAlive(): Unit =
+      api.isAlive().foreach { x ⇒
+        if x
+        then CoreUtils.setRoute(s"/${connectionRoute}")
+        else setTimeout(5000) { checkAlive() }
+      }
+
+    setTimeout(5000) { checkAlive() }
+
     render(dom.document.body, restartedDiv)
 
 
@@ -106,6 +99,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
   def run() =
+    // launch tab saving thread
+    setInterval(10000) { panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) } }
+
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global
     api.fetchGUIPlugins { plugins ⇒
