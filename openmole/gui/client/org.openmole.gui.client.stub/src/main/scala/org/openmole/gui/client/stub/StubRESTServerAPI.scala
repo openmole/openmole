@@ -42,6 +42,7 @@ object AnimatedStubRESTServerAPI:
     api
 
 class AnimatedStubRESTServerAPI extends ServerAPI:
+
   import AnimatedStubRESTServerAPI.*
 
   val files = scala.collection.mutable.HashMap[SafePath, MemoryFile]()
@@ -106,6 +107,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] =
     def found = files.toSeq.filter { (f, _) => f.startsWith(path) && findString.map(s => f.name.contains(s)).getOrElse(true) }.map { (f, m) => f -> m.directory }
+
     Future.successful(found)
 
   override def move(from: SafePath, to: SafePath): Future[Unit] =
@@ -144,13 +146,17 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
     def capsules = Seq(ExecutionState.CapsuleExecution("stub", "stub", ExecutionState.JobStatuses(10, 10, 10), true))
-    def environments = Seq(EnvironmentState(EnvironmentId(), "stub", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0))
+    def environments = Seq(
+      EnvironmentState(EnvironmentId(), "zebulon@iscpif.fr", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0),
+      EnvironmentState(EnvironmentId(), "egi", 5, 17, 10, 10, NetworkActivity(), ExecutionActivity(700), 20)
+    )
 
     val id = ExecutionId()
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), 1000, ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
     Future.successful(id)
 
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
+
   override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = Future.successful(EnvironmentErrorData.empty)
 
   override def listPlugins(): Future[Seq[Plugin]] =
@@ -165,17 +171,29 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     Future.successful(())
 
   override def omrMethod(path: SafePath): Future[String] = Future.successful("stub")
+
   override def models(path: SafePath): Future[Seq[SafePath]] = Future.successful(Seq.empty)
+
   override def expandResources(resources: Resources): Future[Resources] = Future.successful(Resources.empty)
+
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]] = Future.successful(None)
+
   override def marketIndex(): Future[MarketIndex] = Future.successful(MarketIndex.empty)
+
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit] = Future.successful(())
+
   override def omSettings(): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", "0", true))
+
   override def shutdown(): Future[Unit] = Future.successful(())
+
   override def restart(): Future[Unit] = Future.successful(())
+
   override def isAlive(): Future[Boolean] = Future.successful(true)
+
   override def jvmInfos(): Future[JVMInfos] = Future.successful(JVMInfos("stub", "stub", 0, 0, 0))
+
   override def mdToHtml(safePath: SafePath): Future[String] = Future.successful("")
+
   override def sequence(safePath: SafePath): Future[SequenceData] = Future.successful(SequenceData.empty)
 
   override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit = {}

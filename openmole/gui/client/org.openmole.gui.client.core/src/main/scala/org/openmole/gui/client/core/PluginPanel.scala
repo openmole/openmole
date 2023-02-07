@@ -61,7 +61,6 @@ class PluginPanel:
     div(
       div(
         cls := "expandable-title",
-        div("Plugins", padding := "10px"),
         div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       pluginTable

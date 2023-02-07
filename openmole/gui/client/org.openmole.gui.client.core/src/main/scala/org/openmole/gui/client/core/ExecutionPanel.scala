@@ -46,7 +46,7 @@ object ExecutionPanel:
       def isFailedOrCanceled(state: State) =
         state match
           case (_: State.canceled) | (_: State.failed) => true
-          case _=> false
+          case _ => false
 
     enum State:
       case preparing, running
@@ -55,18 +55,18 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-    path: SafePath,
-    script: String,
-    state: ExecutionDetails.State,
-    startDate: Long,
-    duration: Long,
-    ratio: String,
-    running: Long,
-    error: Option[ExecError] = None,
-    envStates: Seq[EnvironmentState] = Seq(),
-    output: String = "")
+                               path: SafePath,
+                               script: String,
+                               state: ExecutionDetails.State,
+                               startDate: Long,
+                               duration: Long,
+                               ratio: String,
+                               running: Long,
+                               error: Option[ExecError] = None,
+                               envStates: Seq[EnvironmentState] = Seq(),
+                               output: String = "")
 
-//  type Statics = Map[ExecutionId, StaticExecutionInfo]
+  //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
 
   def open(using api: ServerAPI, panels: Panels) =
@@ -76,8 +76,8 @@ class ExecutionPanel:
 
   import ExecutionPanel.*
 
-//  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
-//  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
+  //  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
+  //  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
   //val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
 
@@ -106,7 +106,7 @@ class ExecutionPanel:
   val columnFlex = Seq(display.flex, flexDirection.column, justifyContent.flexStart)
 
   enum Expand:
-    case Console, Script, ErrorLog
+    case Console, Script, ErrorLog, Computing
 
 
   val showDurationOnCores = Var(false)
@@ -122,18 +122,6 @@ class ExecutionPanel:
 
   def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
     div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv))
-
-  def scriptBlock(scriptName: String) =
-    div(columnFlex, div(cls := "contextBlock",
-      cls <-- showExpander.signal.map { exp =>
-        if (exp == Some(Expand.Script)) "statusOpen"
-        else ""
-      },
-      div("Script", cls := "info"),
-      div(scriptName, cls := "infoContentLink")),
-      onClick --> { _ => showExpander.update(exp => if exp == Some(Expand.Script) then None else Some(Expand.Script)) },
-      cursor.pointer
-    )
 
   def durationBlock(simpleTime: Long, timeOnCores: Long) =
 
@@ -158,17 +146,19 @@ class ExecutionPanel:
       cursor.pointer
     )
 
-  def consoleBlock =
+  def showHideBlock(expand: Expand, title: String, messageWhenClosed: String, messageWhenOpen: String) =
     div(columnFlex, div(cls := "statusBlock",
       cls.toggle("", "statusOpen") <-- showExpander.signal.map {
-        _ == Some(Console)
+        _ == Some(expand)
       },
-      div("Standard output", cls := "info"),
-      div(child <-- showExpander.signal.map { c => if (c == Some(Console)) "Hide" else "Show" }, cls := "infoContentLink")),
+      div(title, cls := "info"),
+      div(child <-- showExpander.signal.map { c =>
+        if (c == Some(expand)) messageWhenOpen else messageWhenClosed
+      }, cls := "infoContentLink")),
       onClick --> { _ =>
         showExpander.update(exp =>
-          if (exp == Some(Expand.Console)) None
-          else Some(Expand.Console)
+          if (exp == Some(expand)) None
+          else Some(expand)
         )
       },
       cursor.pointer
@@ -198,8 +188,8 @@ class ExecutionPanel:
   def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map { c =>
       if (c)
-        div(
-          button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton", marginLeft := "20"),
+        div(display.flex, flexDirection.column, alignItems.center,
+          button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton"),
           button("Clean", onClick --> { _ => remove(id) }, btn_secondary, cls := "controlButton"),
         )
       else div()
@@ -214,28 +204,54 @@ class ExecutionPanel:
 
   def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
-      scriptBlock(details.path.name),
+      showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
       contextBlock("Start time", Utils.longToDate(details.startDate)),
       contextBlock("Method", "???"),
       durationBlock(details.duration, 0L),
       statusBlock("Running", details.running.toString),
       statusBlock("Completed", details.ratio),
       simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state)),
-      consoleBlock,
+      showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
+      showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
       div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
       controls(id, cancel, remove)
     )
 
+  //("Name", "Execution time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors")
+
+  def jobs(envStates: Seq[EnvironmentState]) =
+    div(columnFlex, marginTop := "20px",
+      for
+        e <- envStates
+      yield jobRow(e)
+    )
+
+  private def displaySize(size: Long, readable: String, operations: Int) =
+    if (size > 0) s"$operations ($readable)" else s"$operations"
+
+  def jobRow(e: EnvironmentState) =
+    div(rowFlex, justifyContent.center,
+      contextBlock("Resource", e.taskName).amend(width := "180"),
+      contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime)),
+      contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
+      contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
+      contextBlock("Submitted", e.submitted.toString),
+      contextBlock("Running", e.running.toString),
+      contextBlock("Finished", e.done.toString),
+      contextBlock("Failed", e.failed.toString),
+      contextBlock("Errors", "999")
+    )
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
   def expander(details: ExecutionDetails) =
-    div(height := "500", rowFlex, justifyContent.center,
+    div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
       child <-- showExpander.signal.map {
         _ match
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ExecError.stackTrace).getOrElse("")))
+          case Some(Expand.Computing) => jobs(details.envStates)
           case None => div()
       }
     )
@@ -284,13 +300,13 @@ class ExecutionPanel:
         if autoRemoveFailed.isChecked
         then
           val idsForPath =
-            execs.groupBy(_._2.path).toSeq.
-              map { (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.
-              map{(_, t)=> t.map(_._1) }
+            execs.groupBy(_._2.path).toSeq
+              .map { (k, v) => k -> v.toSeq.sortBy(x => x._2.startDate) }
+              .map { (_, t) => t.map(_._1) }
 
           idsForPath.foldLeft((Seq[ExecutionId](), Seq[ExecutionId]())) { (s, execIds) =>
-            val (failedOrCanceled, otherStates) = execIds.partition(i=> State.isFailedOrCanceled(execs(i).state))
-            val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
+            val (failedOrCanceled, otherStates) = execIds.partition(i => State.isFailedOrCanceled(execs(i).state))
+            val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1), failedOrCanceled.takeRight(1))
             (s._1 ++ otherStates ++ toBeKept, s._2 ++ toBeCleaned)
           }
         else (execs.map(_._1).toSeq, Seq())
@@ -305,22 +321,24 @@ class ExecutionPanel:
       queryingState = true
       try
         for executionData <- api.executionState(200)
-        yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
+          yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
       val p = scala.concurrent.Promise[Unit]()
-      setTimeout(milliseconds) { p.success(()) }
+      setTimeout(milliseconds) {
+        p.success(())
+      }
       p.future
 
 
     val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
+    val periodicUpdate = EventStream.periodic(10000000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <--
-        (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal combineWith currentOpenSimulation.signal ).flatMap { (_, _, _, id) =>
+        (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal combineWith currentOpenSimulation.signal).flatMap { (_, _, _, id) =>
           EventStream.fromFuture(queryState).map { allDetails =>
             val (details, toClean) = filterExecutions(allDetails)
             toClean.foreach(api.removeExecution)
@@ -334,7 +352,9 @@ class ExecutionPanel:
                   details.get(idValue) match
                     case Some(st) =>
                       def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
+
                       def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
+
                       div(buildExecution(idValue, st, cancel, remove))
                     case None => div()
                 }
