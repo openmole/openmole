@@ -278,22 +278,24 @@ class ExecutionPanel:
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
   def render(using panels: Panels, api: ServerAPI) =
-    def execFilter(execs: Execs): Execs =
+    def filterExecutions(execs: Execs): (Execs, Seq[ExecutionId]) =
       import ExecutionPanel.ExecutionDetails.State
-      val ids =
+      val (ids, cleanIds) =
         if autoRemoveFailed.isChecked
         then
-          val idsForPath = execs.groupBy(_._2.path).toSeq.map { case (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.map{case (sp, t)=> sp-> t.map(_._1)}
-          idsForPath.flatMap { case (_, execIds) =>
+          val idsForPath =
+            execs.groupBy(_._2.path).toSeq.
+              map { (k, v) => k -> v.toSeq.sortBy(x=> x._2.startDate) }.
+              map{(_, t)=> t.map(_._1) }
+
+          idsForPath.foldLeft((Seq[ExecutionId](), Seq[ExecutionId]())) { (s, execIds) =>
             val (failedOrCanceled, otherStates) = execIds.partition(i=> State.isFailedOrCanceled(execs(i).state))
             val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1),failedOrCanceled.takeRight(1))
-            toBeCleaned.foreach(api.removeExecution)
-            otherStates ++ toBeKept
+            (s._1 ++ otherStates ++ toBeKept, s._2 ++ toBeCleaned)
           }
-        else
-          execs.map(_._1).toSeq
+        else (execs.map(_._1).toSeq, Seq())
 
-      ids.map(id => id -> execs(id)).toMap
+      (ids.map(id => id -> execs(id)).toMap, cleanIds)
 
 
     val forceUpdate = Var(0)
@@ -303,14 +305,16 @@ class ExecutionPanel:
       queryingState = true
       try
         for executionData <- api.executionState(200)
-        yield execFilter(executionData.map { e => e.id -> toExecDetails(e) }.toMap)
+        yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
       finally queryingState = false
 
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <--
         EventStream.periodic(10000).filter(_ => !queryingState).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
-          EventStream.fromFuture(queryState).toSignal(Map()).map { details =>
+          EventStream.fromFuture(queryState).toSignal(Map()).map { allDetails =>
+            val (details, toClean) = filterExecutions(allDetails)
+            toClean.foreach(api.removeExecution)
             Seq(
               div(rowFlex, justifyContent.center,
                 details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
