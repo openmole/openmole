@@ -91,5 +91,5 @@ compile
 """, "plain")
 
 You can now find the compiled OpenMOLE app in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}.
-
+@br
 Alternatively you can run the script @i{dev.sh}. It launches a docker environment, you can then run @i{build.sh} within this environment.
