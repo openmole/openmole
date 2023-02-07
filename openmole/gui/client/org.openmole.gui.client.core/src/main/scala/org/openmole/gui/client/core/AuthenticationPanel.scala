@@ -213,13 +213,11 @@ object AuthenticationPanel {
     div(
       div(
         cls := "expandable-title",
-        div("Authentications", padding := "10px"),
         newButton,
         div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
       ),
       authPanel
     )
-
   }
 
 

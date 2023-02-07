@@ -26,6 +26,14 @@ import org.openmole.gui.shared.api.{ErrorManager, PluginServices, ServerAPI, Wiz
 object Panels:
   case class ExpandablePanel(id: Int, element: HtmlElement)
 
+  object ExpandablePanel
+    def toString(id: Int) =
+      id match
+        case 4 => "EXECUTIONS"
+        case 2 => "AUTHENTICATIONS"
+        case 1 => "PLUGINS"
+        case _ => ""
+
   def closeExpandable(using panels: Panels) = panels.expandablePanel.set(None)
 
   def expandTo(el: HtmlElement, id: Int)(using panels: Panels) = panels.expandablePanel.update {
