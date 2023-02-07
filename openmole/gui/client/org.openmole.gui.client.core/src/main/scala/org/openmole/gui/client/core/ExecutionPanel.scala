@@ -308,10 +308,19 @@ class ExecutionPanel:
         yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
       finally queryingState = false
 
+    def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
+      val p = scala.concurrent.Promise[Unit]()
+      setTimeout(milliseconds) { p.success(()) }
+      p.future
+
+
+    val initialDelay = Signal.fromFuture(delay(1000))
+    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
+
     div(
       columnFlex, width := "100%", marginTop := "20",
       children <--
-        EventStream.periodic(10000).delay(1000).filter(_ => !queryingState).toSignal(0).combineWith(currentOpenSimulation.signal).combineWith(forceUpdate.signal).flatMap { (_, id, _) =>
+        (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal combineWith currentOpenSimulation.signal ).flatMap { (_, _, _, id) =>
           EventStream.fromFuture(queryState).map { allDetails =>
             val (details, toClean) = filterExecutions(allDetails)
             toClean.foreach(api.removeExecution)
