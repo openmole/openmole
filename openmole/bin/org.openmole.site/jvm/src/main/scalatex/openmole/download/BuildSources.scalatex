@@ -17,7 +17,7 @@ You will need the following tools to get a local copy of OpenMOLE running:
     @li
         @aa("SBT", href := shared.link.sbt), the Scala Building Tool.
     @li
-        @aa("npm", href := shared.link.npm), library required to build the website.
+        @aa("npm", href := shared.link.npm), the Node Package Manager.
 
 As a suggestion, we recommend the @aa("IntelliJ IDE", href := shared.link.intelliJ) to edit the Scala source code of the project.
 
@@ -91,3 +91,5 @@ compile
 """, "plain")
 
 You can now find the compiled OpenMOLE app in @i{/a/local/path/on/your/system/openmole/openmole/bin/openmole/target/assemble/}.
+
+Alternatively you can run the script @i{dev.sh}. It launches a docker environment, you can then run @{build.sh} within this environment.
