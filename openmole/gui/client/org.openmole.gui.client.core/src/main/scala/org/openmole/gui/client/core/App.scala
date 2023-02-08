@@ -187,7 +187,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             panels.pluginPanel.getPlugins
             Panels.expandTo(panels.pluginPanel.render, 1)
           }).tooltip("Plugins"),
-          div(child <-- panels.expandablePanel.signal.map (_.map(ep=> Panels.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
+          div(child <-- panels.expandablePanel.signal.map (_.map(ep=> Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         )
         //            settingsItem
       )

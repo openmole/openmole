@@ -26,7 +26,7 @@ import org.openmole.gui.shared.api.{ErrorManager, PluginServices, ServerAPI, Wiz
 object Panels:
   case class ExpandablePanel(id: Int, element: HtmlElement)
 
-  object ExpandablePanel
+  object ExpandablePanel:
     def toString(id: Int) =
       id match
         case 4 => "EXECUTIONS"
