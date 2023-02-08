@@ -333,7 +333,7 @@ class ExecutionPanel:
 
 
     val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
+    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
