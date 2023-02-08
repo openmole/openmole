@@ -185,13 +185,13 @@ object NichedNSGA2 {
   object NichedElement {
     implicit def fromValInt(v: Val[Int]): Discrete = Discrete(v)
 
-    implicit def fromAggregateString[A](a: Aggregate[Val[A], String]): Aggregated = Aggregated(a.value, a.aggregate)
+    implicit def fromAggregateString[A](a: Evaluate[Val[A], String]): Aggregated = Aggregated(a.value, a.evaluate)
 
-    implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]): Aggregated = {
+    implicit def fromAggregate[A, V[_]: FromArray](a: Evaluate[Val[A], V[A] ⇒ Int]): Aggregated = {
       val f =
         FromContext { p ⇒
           import p._
-          a.aggregate(implicitly[FromArray[V]].apply(context(a.value.array)))
+          a.evaluate(implicitly[FromArray[V]].apply(context(a.value.array)))
         }
 
       Aggregated(a.value, f)

@@ -149,7 +149,7 @@ Replication(
   evaluation = myModel,
   seed = mySeed,
   sample = 100,
-  aggregation = Seq(o aggregate median)
+  aggregation = Seq(o evaluate median)
 ) hook display
 """, name="example of replication")
 

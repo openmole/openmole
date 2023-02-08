@@ -47,19 +47,19 @@ object Objective {
         validate = fromContext.validate
       )
 
-    implicit def aggregateScalaCodeIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], ScalaCode | String]] = t ⇒
-      val fromContext: FromContext[Double] = ScalaCode.fromContext(t.aggregate)
+    implicit def evaluateScalaCodeIsObjective[T: ClassTag]: ToObjective[Evaluate[Val[T], ScalaCode | String]] = t ⇒
+      val fromContext: FromContext[Double] = ScalaCode.fromContext(t.evaluate)
       buildAggregateCodeObjective(t.value, fromContext)
 
-    implicit def aggregateIsToObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], T ⇒ Double]] = a ⇒ {
-      Objective(_ ⇒ ComputeValue(a.value, a.aggregate), negative = false, delta = None, as = None)
+    implicit def evaluateIsToObjective[T: ClassTag]: ToObjective[Evaluate[Val[T], T ⇒ Double]] = a ⇒ {
+      Objective(_ ⇒ ComputeValue(a.value, a.evaluate), negative = false, delta = None, as = None)
     }
 
-    implicit def aggregateArrayIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Array[T] ⇒ Double]] = a ⇒ {
-      Objective(_ ⇒ ComputeValue(a.value.array, a.aggregate), negative = false, delta = None, as = None, noisy = true)
+    implicit def evaluateArrayIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Array[T] ⇒ Double]] = a ⇒ {
+      Objective(_ ⇒ ComputeValue(a.value.array, a.evaluate), negative = false, delta = None, as = None, noisy = true)
     }
-    implicit def aggregateSeqIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.aggregate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
-    implicit def aggregateVectorIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.aggregate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+    implicit def evaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Seq[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+    implicit def evaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Vector[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
   }
 
   trait ToObjective[T] {

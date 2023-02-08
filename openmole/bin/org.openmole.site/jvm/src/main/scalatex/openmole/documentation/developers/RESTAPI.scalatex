@@ -155,7 +155,7 @@ Replication(
   evaluation = model,
   seed = mySeed,
   sample = 100,
-  aggregation = Seq(pi aggregate average as piAvg, pi aggregate median as piMed)
+  aggregation = Seq(pi evaluate average as piAvg, pi evaluate median as piMed)
 ) hook display hook (workDirectory / "result.json", format = JSONOutputFormat())
 
 [reuillon:/tmp/pi] $$ tar -cvzf pi.tgz *

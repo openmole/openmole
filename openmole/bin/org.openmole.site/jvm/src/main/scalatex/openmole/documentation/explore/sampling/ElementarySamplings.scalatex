@@ -39,7 +39,7 @@ A grid sampling is declared via the @code{DirectSampling} constructor, in which 
      sampling =
        (input_i in (0 to 10 by 2)) x
        (input_j in (0.0 to 5.0 by 0.5)),
-     aggregation = Seq(output1 aggregate median, output2)
+     aggregation = Seq(output1 evaluate median, output2)
    ) hook display
 """, header = "val my_own_model = EmptyTask()", name = "syntax of DirectSampling Task")
 
@@ -49,7 +49,7 @@ with
 @ul
   @li{@code{evaluation} is the task (or composition of tasks) that uses your inputs, typically your model task and a hook,}
   @li{@code{sampling} is the sampling task,}
-  @li{@code{aggregation} (@i{optional}) @a(href := aggregationSampling.file, "is some aggregation functions") to be called on the outputs of your evaluation task. The format is @code{variable aggregate function}. OpenMOLE provides some aggregation functions to such as: @code{median, medianAbsoluteDeviation, average, meanSquaredError, rootMeanSquaredError}. If no a variable is listed and no aggregate function is provided, the values are aggregated in a array.}
+  @li{@code{aggregation} (@i{optional}) @a(href := aggregationSampling.file, "is some aggregation functions") to be called on the outputs of your evaluation task. The format is @code{variable evaluate function}. OpenMOLE provides some aggregation functions to such as: @code{median, medianAbsoluteDeviation, average, meanSquaredError, rootMeanSquaredError}. If no a variable is listed and no aggregate function is provided, the values are aggregated in a array.}
 
 For Double sequence samplings, a convenient primitive provides logarithmic ranges the following way: @code{input_j in LogRangeDomain(min,max,number_of_steps)} where the third argument is the number of steps in the range. The syntax can be simplified with the @code{logSteps} keyword like this:  @code{input_j in (Range(1e-2,0.1) logSteps 4)}.
 
@@ -79,7 +79,7 @@ val myModel =
 DirectSampling(
   evaluation = myModel hook display,
   sampling = i in (0 to 10 by 1),
-  aggregation = Seq(o aggregate average)
+  aggregation = Seq(o evaluate average)
 ) hook display
 """, name="concrete example of direct sampling")
 

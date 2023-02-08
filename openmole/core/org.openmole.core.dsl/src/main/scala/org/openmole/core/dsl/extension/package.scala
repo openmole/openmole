@@ -79,7 +79,7 @@ package object extension {
   type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
   type In[+A, +B] = org.openmole.core.keyword.In[A, B]
   type :=[+A, +B] = org.openmole.core.keyword.:=[A, B]
-  type Aggregate[+A, B] = org.openmole.core.keyword.Aggregate[A, B]
+  type Evaluate[+A, B] = org.openmole.core.keyword.Evaluate[A, B]
   type Delta[+A, +B] = org.openmole.core.keyword.Delta[A, B]
   type As[+A, +B] = org.openmole.core.keyword.As[A, B]
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
@@ -89,7 +89,7 @@ package object extension {
 
   def On = org.openmole.core.keyword.On
   def By = org.openmole.core.keyword.By
-  def Aggregate = org.openmole.core.keyword.Aggregate
+  def Aggregate = org.openmole.core.keyword.Evaluate
 
   type TmpDirectory = org.openmole.core.workspace.TmpDirectory
   def TmpDirectory = org.openmole.core.workspace.TmpDirectory

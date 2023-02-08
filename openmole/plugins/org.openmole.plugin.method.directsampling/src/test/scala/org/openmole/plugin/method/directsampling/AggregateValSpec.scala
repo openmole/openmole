@@ -17,7 +17,7 @@ class AggregateValSpec extends flatspec.AnyFlatSpec with matchers.should.Matcher
   "Aggregate Val" should "be converted from Aggregate" in {
 
     val d = Val[Double]
-    val a: AggregateVal[_, _] = AggregateVal.fromAggregate[Double, Double, Seq](d aggregate median)
+    val a: AggregateVal[_, _] = AggregateVal.fromEvaluate[Double, Double, Seq](d aggregate median)
     val b: AggregateVal[_, _] = d aggregate median
 
   }
