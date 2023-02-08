@@ -113,15 +113,19 @@ class ExecutionPanel:
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
 
-  def contextBlock(info: String, content: String) =
-    div(columnFlex, div(cls := "contextBlock", div(info, cls := "info"), div(content, cls := "infoContent")))
+  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false) =
+    div(columnFlex,
+      div(cls := "contextBlock",
+        if (!alwaysOpaque) backgroundOpacityCls else emptyMod,
+        div(info, cls := "info"), div(content, cls := "infoContent"))
+    )
 
   def statusBlock(info: String, content: String) =
     statusBlockFromDiv(info, div(content, cls := "infoContent"), "statusBlock")
 
 
   def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
-    div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv))
+    div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv,backgroundOpacityCls))
 
   def durationBlock(simpleTime: Long, timeOnCores: Long) =
 
@@ -142,15 +146,19 @@ class ExecutionPanel:
     div(columnFlex, div(cls := "statusBlock",
       div(child <-- showDurationOnCores.signal.map { d => if (d) "Duration on cores" else "Duration" }, cls := "info"),
       div(child <-- showDurationOnCores.signal.map { d => if (d) "??" else durationString }, cls := "infoContentLink")),
+      backgroundOpacityCls,
       onClick --> { _ => showDurationOnCores.update(!_) },
       cursor.pointer
     )
 
+  def backgroundOpacityCls = cls.toggle("silentBlock") <-- showExpander.signal.map {_ != None}
+
+  def backgroundOpacityCls(expand: Expand) =
+    cls.toggle("silentBlock") <-- showExpander.signal.map {se=> se != Some(expand) && se != None}
+
   def showHideBlock(expand: Expand, title: String, messageWhenClosed: String, messageWhenOpen: String) =
     div(columnFlex, div(cls := "statusBlock",
-      cls.toggle("", "statusOpen") <-- showExpander.signal.map {
-        _ == Some(expand)
-      },
+      backgroundOpacityCls(expand),
       div(title, cls := "info"),
       div(child <-- showExpander.signal.map { c =>
         if (c == Some(expand)) messageWhenOpen else messageWhenClosed
@@ -166,9 +174,6 @@ class ExecutionPanel:
 
   def simulationStatusBlock(state: ExecutionDetails.State) =
     div(columnFlex, div(cls := "statusBlockNoColor",
-      cls.toggle("", "statusOpen") <-- showExpander.signal.map {
-        _ == Some(Expand.ErrorLog)
-      },
       div("Status", cls := "info"),
       div(ExecutionDetails.State.toString(state).capitalize, cls := {
         if (state == ExecutionDetails.State.failed) "infoContentLink"
@@ -210,14 +215,12 @@ class ExecutionPanel:
       durationBlock(details.duration, 0L),
       statusBlock("Running", details.running.toString),
       statusBlock("Completed", details.ratio),
-      simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state)),
+      simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),
       showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
       showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
       div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
       controls(id, cancel, remove)
     )
-
-  //("Name", "Execution time", "Uploads", "Downloads", "Submitted", "Running", "Finished", "Failed", "Errors")
 
   def jobs(envStates: Seq[EnvironmentState]) =
     div(columnFlex, marginTop := "20px",
@@ -234,23 +237,23 @@ class ExecutionPanel:
   def jobRow(e: EnvironmentState) =
     div(columnFlex,
       div(rowFlex, justifyContent.center,
-        contextBlock("Resource", e.taskName).amend(width := "180"),
-        contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime)),
-        contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
-        contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
-        contextBlock("Submitted", e.submitted.toString),
-        contextBlock("Running", e.running.toString),
-        contextBlock("Finished", e.done.toString),
-        contextBlock("Failed", e.failed.toString),
-        contextBlock("Errors", e.numberOfErrors.toString).amend(onClick --> { _ =>
+        contextBlock("Resource", e.taskName, true).amend(width := "180"),
+        contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
+        contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+        contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+        contextBlock("Submitted", e.submitted.toString, true),
+        contextBlock("Running", e.running.toString, true),
+        contextBlock("Finished", e.done.toString, true),
+        contextBlock("Failed", e.failed.toString, true),
+        contextBlock("Errors", e.numberOfErrors.toString, true).amend(onClick --> { _ =>
           openEnvironmentErrors.update(id =>
             if id == Some(e.envId)
             then None
             else Some(e.envId)
           )
-        }, cursor.pointer)
+        }, cursor.pointer),
       ),
-      openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(div("Erros", width := "100%", height := "200px", backgroundColor := "pink"))
+      openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(div("Errors", width := "100%", height := "200px", backgroundColor := "pink"))
     )
 
   //def evironmentErrors(environmentError: EnvironmentError)
