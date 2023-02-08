@@ -147,7 +147,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
     def capsules = Seq(ExecutionState.CapsuleExecution("stub", "stub", ExecutionState.JobStatuses(10, 10, 10), true))
     def environments = Seq(
-      EnvironmentState(EnvironmentId(), "zebulon@iscpif.fr", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 0),
+      EnvironmentState(EnvironmentId(), "zebulon@iscpif.fr", 10, 10, 10, 10, NetworkActivity(), ExecutionActivity(1000), 10),
       EnvironmentState(EnvironmentId(), "egi", 5, 17, 10, 10, NetworkActivity(), ExecutionActivity(700), 20)
     )
 

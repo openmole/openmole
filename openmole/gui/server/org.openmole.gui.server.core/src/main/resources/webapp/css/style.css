@@ -1082,14 +1082,18 @@ padding-bottom: 90px;
 }
 
 .statusOpen {
-    opacity: 85%;
+    opacity: 100%;
     transition: opacity 0.5s;
 }
 
 .statusOpenSim {
     padding: 20px;
-    opacity: 85%;
+    opacity: 100%;
     transition: padding 0.5s;
+}
+
+.silentBlock {
+    opacity: 10%;
 }
 
 
