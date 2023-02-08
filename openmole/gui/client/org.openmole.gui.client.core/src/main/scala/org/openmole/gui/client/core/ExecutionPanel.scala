@@ -229,18 +229,31 @@ class ExecutionPanel:
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 
+  val openEnvironmentErrors: Var[Option[EnvironmentId]] = Var(None)
+
   def jobRow(e: EnvironmentState) =
-    div(rowFlex, justifyContent.center,
-      contextBlock("Resource", e.taskName).amend(width := "180"),
-      contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime)),
-      contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
-      contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
-      contextBlock("Submitted", e.submitted.toString),
-      contextBlock("Running", e.running.toString),
-      contextBlock("Finished", e.done.toString),
-      contextBlock("Failed", e.failed.toString),
-      contextBlock("Errors", "999")
+    div(columnFlex,
+      div(rowFlex, justifyContent.center,
+        contextBlock("Resource", e.taskName).amend(width := "180"),
+        contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime)),
+        contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
+        contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles)),
+        contextBlock("Submitted", e.submitted.toString),
+        contextBlock("Running", e.running.toString),
+        contextBlock("Finished", e.done.toString),
+        contextBlock("Failed", e.failed.toString),
+        contextBlock("Errors", e.numberOfErrors.toString).amend(onClick --> { _ =>
+          openEnvironmentErrors.update(id =>
+            if id == Some(e.envId)
+            then None
+            else Some(e.envId)
+          )
+        }, cursor.pointer)
+      ),
+      openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(div("Erros", width := "100%", height := "200px", backgroundColor := "pink"))
     )
+
+  //def evironmentErrors(environmentError: EnvironmentError)
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
