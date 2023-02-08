@@ -49,7 +49,7 @@ package keyword {
 
     implicit class EvaluateDecorator[A](a: A) {
       @deprecated("15", "use evaluate")
-      def aggregate[B](b: B) = evaluate(a, b)
+      def aggregate[B](b: B): Evaluate[A, B] = evaluate(b)
       def evaluate[B](b: B) = Evaluate(a, b)
       //def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
     }

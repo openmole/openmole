@@ -356,7 +356,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objective = Seq(b aggregate median delta 100),
+      objective = Seq(b evaluate median delta 100),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -402,7 +402,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += (a, b)),
-      objective = Seq(b aggregate f _ as "aggF", a aggregate "a / 2"),
+      objective = Seq(b evaluate f as "aggF", a evaluate "a / 2"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     )
@@ -435,7 +435,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     PSEEvolution(
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f _ in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      objective = Seq(a evaluate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -451,7 +451,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     OSEEvolution(
       origin = Seq(o in (0.0 to 1.0 by 0.1)),
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f _ under 9, b under 3.0),
+      objective = Seq(a evaluate f under 9, b under 3.0),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
