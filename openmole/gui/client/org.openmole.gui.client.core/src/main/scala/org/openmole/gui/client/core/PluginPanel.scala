@@ -7,6 +7,7 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeManager
+import org.openmole.gui.client.ext.flexRow
 import org.openmole.gui.shared.api.ServerAPI
 import scaladget.bootstrapnative.bsn
 
@@ -59,9 +60,8 @@ class PluginPanel:
 
   def render(using api: ServerAPI, panels: Panels): HtmlElement =
     div(
-      div(
-        cls := "expandable-title",
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
+      div(margin := "20px", flexRow, alignItems.center,
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
       ),
       pluginTable
     )

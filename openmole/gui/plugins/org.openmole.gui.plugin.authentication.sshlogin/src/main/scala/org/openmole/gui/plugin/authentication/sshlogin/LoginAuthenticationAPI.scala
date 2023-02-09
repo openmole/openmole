@@ -31,6 +31,11 @@ class LoginAuthenticationStubAPI extends LoginAuthenticationAPI:
         "stub",
         "stub",
         "stub.stub.stub"
+      ),
+      LoginAuthenticationData(
+        "stub2",
+        "stub2",
+        "stub2.stub.stub"
       )
     )
   }

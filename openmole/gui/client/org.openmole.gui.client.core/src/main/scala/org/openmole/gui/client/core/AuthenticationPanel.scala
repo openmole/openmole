@@ -87,8 +87,9 @@ object AuthenticationPanel {
     }
 
     val newButton = button(
-      "New",
-      cls := "btn newButton",
+      "New authentication",
+      btn_primary,
+      marginLeft := "40",
       onClick --> {
         _ ⇒
           authSetting.set(plugins.authenticationFactories.headOption.map {
@@ -175,7 +176,7 @@ object AuthenticationPanel {
       }
     }
 
-    val authPanel = div(
+    val authPanel = div( marginTop := "50",
       child <-- authSetting.signal.map {
         _ match {
           case Some(p: AuthenticationPlugin) ⇒ div(padding := "20",
@@ -211,10 +212,9 @@ object AuthenticationPanel {
     )
 
     div(
-      div(
-        cls := "expandable-title",
-        newButton,
-        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
+      div(margin := "20px", flexRow, alignItems.center,
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
+        newButton
       ),
       authPanel
     )

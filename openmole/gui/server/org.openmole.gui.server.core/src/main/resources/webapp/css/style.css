@@ -853,20 +853,13 @@ padding-bottom: 90px;
     height: 7px;
 }
 
-.expandable-title {
-   font-size: 20px;
-   color: white;
-   padding: 10px;
-   background: #3f3d56;
-}
-
 .docEntry {
     cursor: pointer;
     color: #222;
     padding-left : 15;
     min-height : 46;
     align-items: center;
-    padding: 10px;
+    padding: 10 10 10 20;
   }
 
 .plugin-file {
@@ -969,13 +962,14 @@ padding-bottom: 90px;
   height: 38px;
 }
 
+/*
 .newButton {
     padding: 5px;
     color: #3f3d56;
     background-color: white;
     margin: 0 10 0 10;
 }
-
+*/
 .verticalFormItem {
     align-items: center;
     padding-top: 15px;
@@ -1229,6 +1223,18 @@ input:checked + .slider:before {
     color: #fff;
     background-color: #3086b5;
     border-color: #3086b5;
+}
+
+.btn-primary:hover {
+    background-color: #3090b5;
+    border-color: #3090b5;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  color: #fff;
+  background-color: #3090b5;
+  border-color: #3090b5;
+  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
 }
 
 .checkSwitch {

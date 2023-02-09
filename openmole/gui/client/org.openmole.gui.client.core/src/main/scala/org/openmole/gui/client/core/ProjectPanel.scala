@@ -46,11 +46,11 @@ object ProjectPanel {
     // 2- Model wizard
     val wizardPanel = ModelWizardPanel.render
 
-    div(
+    div(margin := "20px", flexRow, alignItems.center,
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
       div(
-        cls := "expandable-title",
         div("Start from", padding := "10px"),
-        button("Empty project", cls := "btn newButton", onClick --> { _ =>
+        button("Empty project", btn_primary, onClick --> { _ =>
           emptyProject
           Panels.closeExpandable
         }),

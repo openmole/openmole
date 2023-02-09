@@ -353,6 +353,7 @@ class ExecutionPanel:
 
     div(
       columnFlex, width := "100%", marginTop := "20",
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
       children <--
         (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal combineWith currentOpenSimulation.signal).flatMap { (_, _, _, id) =>
           EventStream.fromFuture(queryState).map { allDetails =>
