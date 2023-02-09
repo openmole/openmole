@@ -59,6 +59,7 @@ object OMTags {
   val glyph_unpuzzle = cls("bi-clock")
   val glyph_play = cls("bi-file-play")
   val buttonOM = cls("btn btnOm")
+  val btn_purple = cls("btn btn-purple")
 
   case class AlertAction(action: () ⇒ Unit)
 
