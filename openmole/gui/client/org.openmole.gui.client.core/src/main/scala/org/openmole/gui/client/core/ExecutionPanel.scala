@@ -55,16 +55,16 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-                               path: SafePath,
-                               script: String,
-                               state: ExecutionDetails.State,
-                               startDate: Long,
-                               duration: Long,
-                               ratio: String,
-                               running: Long,
-                               error: Option[ExecError] = None,
-                               envStates: Seq[EnvironmentState] = Seq(),
-                               output: String = "")
+    path: SafePath,
+    script: String,
+    state: ExecutionDetails.State,
+    startDate: Long,
+    duration: Long,
+    ratio: String,
+    running: Long,
+    error: Option[ExecError] = None,
+    envStates: Seq[EnvironmentState] = Seq(),
+    output: String = "")
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]

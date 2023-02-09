@@ -115,8 +115,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def createFile(safePath: SafePath, name: String, directory: Boolean): Boolean =
     import services._
     if directory
-    then new File(safePath.toFile, name).createNewFile
-    else new File(safePath.toFile, name).mkdirs
+    then new File(safePath.toFile, name).mkdirs
+    else new File(safePath.toFile, name).createNewFile
 
   def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services.*

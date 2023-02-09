@@ -219,9 +219,9 @@ package data {
     path: SafePath,
     script: String,
     startDate: Long,
-    duration: Long,
     state: ExecutionState,
-    output: String)
+    output: String):
+    def duration = state.duration
 
   case class EnvironmentState(
     envId: EnvironmentId,

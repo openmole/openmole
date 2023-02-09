@@ -278,7 +278,8 @@ class ExecutionRegistry {
         static ← executionInfo.get(id)
       yield
         val output  = static.output.toString.lines.toArray.takeRight(outputLines).mkString("\n")
-        ExecutionData(id, static.path, static.script, static.startDate, System.currentTimeMillis() - static.startDate, state(id), output)
+        val stateValue = state(id)
+        ExecutionData(id, static.path, static.script, static.startDate, stateValue, output)
 
     executions.toSeq.sortBy(_.startDate)
   }
