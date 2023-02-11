@@ -366,7 +366,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def launchScript(script: SafePath, validateScript: Boolean) =
     import services.*
-    
+
     val execId = ExecutionId()
     val outputStream = StringPrintStream(Some(preference(outputSize)))
 
