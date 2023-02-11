@@ -72,22 +72,22 @@ object ExecutionPanel:
   def open(using api: ServerAPI, panels: Panels) =
     Panels.expandTo(panels.executionPanel.render, 4)
 
+  enum Expand:
+    case Console, Script, ErrorLog, Computing
+
+
 class ExecutionPanel:
 
   import ExecutionPanel.*
 
-  //  val staticInfos: Var[ExecutionPanel.Statics] = Var(Map())
-  //  val outputInfos: Var[Seq[OutputStreamData]] = Var(Seq())
-  //val timerOn = Var(false)
   val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
 
+  val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
+  val columnFlex = Seq(display.flex, flexDirection.column, justifyContent.flexStart)
 
-  //  def setTimerOn = {
-  //    updating.set(false)
-  //    timerOn.set(true)
-  //  }
-
-  //def setTimerOff = timerOn.set(false)
+  val showDurationOnCores = Var(false)
+  val showExpander: Var[Option[Expand]] = Var(None)
+  val showControls = Var(false)
 
   def toExecDetails(exec: ExecutionData): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
@@ -102,16 +102,7 @@ class ExecutionPanel:
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
 
-  val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
-  val columnFlex = Seq(display.flex, flexDirection.column, justifyContent.flexStart)
 
-  enum Expand:
-    case Console, Script, ErrorLog, Computing
-
-
-  val showDurationOnCores = Var(false)
-  val showExpander: Var[Option[Expand]] = Var(None)
-  val showControls = Var(false)
 
   def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false) =
     div(columnFlex,
@@ -349,7 +340,7 @@ class ExecutionPanel:
 
 
     val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState).toSignal(0)
+    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
