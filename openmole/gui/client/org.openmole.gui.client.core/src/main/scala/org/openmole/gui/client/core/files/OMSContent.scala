@@ -65,23 +65,27 @@ object OMSContent {
             div(display.flex, flexDirection.row,
               button("RUN", btn_primary, marginLeft := "10", onClick --> { _ ⇒
                 unsetErrors
-                if (checkSwitch.isChecked)
+                if checkSwitch.isChecked
                 then
                   editor.editor.getSession().clearBreakpoints()
                   compileDisabled.set(true)
 
-                  panels.tabContent.save(tabData, _ ⇒
-                    api.compileScript(safePath).foreach { errorDataOption ⇒
-                      compileDisabled.set(false)
-                      setError(safePath, errorDataOption)
-                      editor.editor.focus()
-                    }
-                  )
+                  panels.tabContent.save(tabData).map { saved ⇒
+                    if saved
+                    then
+                      api.compileScript(safePath).foreach { errorDataOption ⇒
+                        compileDisabled.set(false)
+                        setError(safePath, errorDataOption)
+                        editor.editor.focus()
+                      }
+                  }
                 else
-                  panels.tabContent.save(tabData, _ ⇒
-                    api.launchScript(safePath, true)
-                    ExecutionPanel.open
-                  )
+                  panels.tabContent.save(tabData).map { saved ⇒
+                    if saved
+                    then
+                      api.launchScript(safePath, true)
+                      ExecutionPanel.open
+                  }
               })
             )
           }

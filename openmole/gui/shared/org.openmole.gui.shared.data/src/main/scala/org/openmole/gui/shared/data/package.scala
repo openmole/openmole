@@ -182,7 +182,14 @@ package data {
   case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
 
   case class Token(token: String, duration: Long)
-  case class ExecutionId(id: String = DataUtils.uuID)
+
+  object ExecutionId:
+    def apply() =
+      val id = DataUtils.uuID
+      new ExecutionId(id)
+
+  case class ExecutionId(id: String)
+
   case class EnvironmentId(id: String = DataUtils.uuID)
 
   enum ErrorStateLevel(val name: String):

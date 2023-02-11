@@ -221,7 +221,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-    val shutdown = GUIServer.server(port, localhost).withHttpApp(httpApp).allocated.unsafeRunSync()._2 // feRunSync()._2
+    val shutdown = GUIServer.server(port, localhost).withHttpApp(httpApp).withIdleTimeout(Duration.Inf).allocated.unsafeRunSync()._2 // feRunSync()._2
 
     control.cancel = shutdown.unsafeRunSync
     control

@@ -276,7 +276,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def removeExecution(id: ExecutionId): Unit = execution.remove(id)
 
   def compileScript(script: SafePath) =
-    val (execId, outputStream) = compilationData(script)
+    import services.*
+    val outputStream = StringPrintStream(Some(preference(outputSize)))
     synchronousCompilation(script, outputStream) match
       case e: ErrorData => Some(e)
       case _ => None
@@ -294,10 +295,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 //
 //    execution.addCompilation(execId, compilationFuture)
 
-  private def compilationData(script: SafePath) = {
-    import services._
-    (ExecutionId(DataUtils.uuID) /*, safePathToFile(scriptData.scriptPath)*/ , StringPrintStream(Some(preference(outputSize))))
-  }
 
   def synchronousCompilation(
     scriptPath:   SafePath,
@@ -369,8 +366,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def launchScript(script: SafePath, validateScript: Boolean) =
     import services.*
-
-    val (execId, outputStream) = compilationData(script)
+    
+    val execId = ExecutionId()
+    val outputStream = StringPrintStream(Some(preference(outputSize)))
 
     val content = safePathToFile(script).content
 

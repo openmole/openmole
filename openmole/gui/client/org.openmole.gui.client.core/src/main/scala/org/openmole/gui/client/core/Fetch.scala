@@ -43,7 +43,7 @@ class Fetch(alert: (String, BannerLevel) => Unit):
       warningTimeout = warningTimeout,
       onTimeout = () => alert("The request timed out. Please check your connection.", BannerLevel.Critical),
       onWarningTimeout = () => alert("The request is very long. Please check your connection.", BannerLevel.Regular),
-      onFailed = t => alert(s"The request ${f} failed with error $t", BannerLevel.Critical)
+      onFailed = t => alert(s"The request failed with error $t", BannerLevel.Critical)
     )
 
 //  def apply[O, R](

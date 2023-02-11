@@ -75,21 +75,23 @@ class TabContent:
       _.tabID
     }
 
-  def save(tabData: TabData, afterRefresh: TabData => Unit = _ => {}, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI): Unit = {
-    tabData.editorPanelUI.foreach { editorPanelUI =>
-      editorPanelUI.synchronized {
+  def save(tabData: TabData, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI): concurrent.Future[Boolean] = editorPanelUI.synchronized {
+    tabData.editorPanelUI match
+      case None => concurrent.Future.successful(false)
+      case Some(editorPanelUI) =>
         val (content, hash) = editorPanelUI.code
-        api.saveFile(tabData.safePath, content, Some(hash), overwrite).foreach {
+        api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
           case (saved, savedHash) ⇒
-            if (saved) {
+            if (saved)
+            then
               editorPanelUI.onSaved(savedHash)
-              afterRefresh(tabData)
-            }
-            else serverConflictAlert(tabData)
+              true
+            else
+              serverConflictAlert(tabData)
+              false
         }
-      }
-    }
   }
+
 
   def checkTabs(using api: ServerAPI) = tabsUI.tabs.now().foreach { tab =>
     api.exists(tab.t.safePath).foreach {

@@ -35,27 +35,27 @@ class OMFetch[API](api: EndpointsSettings => API) {
     warningTimeout: FiniteDuration = 10 seconds,
     onTimeout: () ⇒ Unit = () ⇒ {},
     onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {}) = {
-    val timeoutSet = timers.setTimeout(warningTimeout.toMillis) {
-      onWarningTimeout()
-    }
+    onFailed: Throwable => Unit = _ => {}) =
+    val timeoutSet = timers.setTimeout(warningTimeout.toMillis) { onWarningTimeout() }
 
     def stopTimeout = timers.clearTimeout(timeoutSet)
 
     val future = f(api(EndpointsSettings().withTimeout(Some(timeout))))
-    future.onComplete {
-      case Failure(_: scala.concurrent.TimeoutException) ⇒
+    future.andThen {
+      case f@Failure(_: scala.concurrent.TimeoutException) ⇒
         stopTimeout
         onTimeout()
-      case Failure(t) =>
+        f
+      case f@Failure(t) =>
         stopTimeout
         onFailed(t)
-      case _ =>
+        f
+      case f =>
         stopTimeout
+        f
     }
 
-    future
-  }
+
 
   def apply[O, R](
     r: API => scala.concurrent.Future[O],

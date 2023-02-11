@@ -6,7 +6,7 @@ import org.openmole.gui.client.ext.*
 
 import scala.scalajs.js.timers.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.shared.data.ErrorData as ExecError
+import org.openmole.gui.shared.data.ErrorData
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
@@ -62,7 +62,7 @@ object ExecutionPanel:
     duration: Long,
     ratio: String,
     running: Long,
-    error: Option[ExecError] = None,
+    error: Option[ErrorData] = None,
     envStates: Seq[EnvironmentState] = Seq(),
     output: String = "")
 
@@ -266,7 +266,7 @@ class ExecutionPanel:
         _ match
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
-          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ExecError.stackTrace).getOrElse("")))
+          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(details.envStates)
           case None => div()
       }
