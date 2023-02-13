@@ -136,8 +136,8 @@ trait CoreAPI extends RESTAPI {
     endpoint(post(path / "execution" / "clear-environment-error", jsonRequest[EnvironmentId]), ok(jsonResponse[Unit]))
 
 //  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
-  val runningErrorEnvironmentData: Endpoint[(EnvironmentId, Int), EnvironmentErrorData] =
-    endpoint(post(path / "execution" / "get-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[EnvironmentErrorData]))
+  val listEnvironmentErrors: Endpoint[(EnvironmentId, Int), Seq[EnvironmentErrorGroup]] =
+    endpoint(post(path / "execution" / "list-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[Seq[EnvironmentErrorGroup]]))
 
   // ---- Plugins -----
   val listPlugins: Endpoint[Unit, Seq[Plugin]] =

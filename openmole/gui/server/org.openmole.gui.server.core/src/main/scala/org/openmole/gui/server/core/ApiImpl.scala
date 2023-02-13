@@ -409,21 +409,18 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
 
-  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData = atomic {
+  def listEnvironmentErrors(environmentId: EnvironmentId, lines: Int): Seq[EnvironmentErrorGroup] = atomic {
     implicit ctx ⇒
       val environmentErrors = execution.environmentErrors(environmentId)
 
-      def groupedErrors = environmentErrors.groupBy {
-        _.errorMessage
-      }.toSeq.map {
-        case (_, err) ⇒
-          val dates = err.map {
-            _.date
-          }.sorted
-          (err.head, dates.max, dates.size)
-      }.takeRight(lines)
+      def groupedErrors =
+          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
+            case (_, err) ⇒
+              val dates = err.map { _.date }.sorted
+              EnvironmentErrorGroup(err.head, dates.max, dates.size)
+          }.takeRight(lines)
 
-      EnvironmentErrorData(groupedErrors)
+      groupedErrors
     //    EnvironmentErrorData(Seq(
     //      (EnvironmentError(environmentId, "YOur error man", Error("stansatienasitenasiruet a anuisetnasirte "), 2334454L, ErrorLevel()), 33345L, 2),
     //      (EnvironmentError(environmentId, "YOur error man 4", Error("stansatienasitenasiruet a anuaeiaiueaiueaieisetnasirte "), 2334454L, ErrorLevel()), 31345L, 1)

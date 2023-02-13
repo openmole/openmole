@@ -214,13 +214,8 @@ package data {
 
   case class ExecutionActivity(executionTime: Long = 0)
 
-  object EnvironmentErrorData:
-    def empty = EnvironmentErrorData(Seq())
+  case class EnvironmentErrorGroup(error: EnvironmentError, oldestDate: Long, number: Int)
 
-  // datedError is a triplet of (EnvironmentError, most recent occurrence, number of occurrences)
-  case class EnvironmentErrorData(datedErrors: Seq[(EnvironmentError, Long, Int)])
-//  case class OutputStreamData(id: ExecutionId, output: String)
-//
   case class ExecutionData(
     id: ExecutionId,
     path: SafePath,

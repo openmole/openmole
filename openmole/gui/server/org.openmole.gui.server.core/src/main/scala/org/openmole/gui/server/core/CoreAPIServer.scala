@@ -108,8 +108,8 @@ class CoreAPIServer(apiImpl: ApiImpl)
   val clearEnvironmentErrorsRoute =
     clearEnvironmentErrors.implementedBy { i => apiImpl.clearEnvironmentErrors(i) }
 
-  val runningErrorEnvironmentDataRoute =
-    runningErrorEnvironmentData.implementedBy { case(e, i) => apiImpl.runningErrorEnvironmentData(e, i) }
+  val listEnvironmentErrorsRoute =
+    listEnvironmentErrors.implementedBy { case(e, i) => apiImpl.listEnvironmentErrors(e, i) }
 
   val modelsRoute =
     models.implementedBy { p => apiImpl.models(p) }
@@ -175,7 +175,7 @@ class CoreAPIServer(apiImpl: ApiImpl)
       compileScriptRoute,
       launchScriptRoute,
       clearEnvironmentErrorsRoute,
-      runningErrorEnvironmentDataRoute,
+      listEnvironmentErrorsRoute,
       modelsRoute,
       expandResourcesRoute,
       downloadHTTPRoute,

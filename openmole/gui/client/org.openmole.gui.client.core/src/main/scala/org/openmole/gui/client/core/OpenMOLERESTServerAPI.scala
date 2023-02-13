@@ -45,7 +45,7 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def compileScript(script: SafePath): Future[Option[ErrorData]] = fetch.future(_.compileScript(script).future, timeout = 120 seconds, warningTimeout = 60 seconds)
   override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] = fetch.future(_.launchScript(script, validate).future, timeout = 120 seconds, warningTimeout = 60 seconds)
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = fetch.future(_.clearEnvironmentErrors(environment).future)
-  override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = fetch.future(_.runningErrorEnvironmentData(environment, lines).future)
+  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int): Future[Seq[EnvironmentErrorGroup]] = fetch.future(_.listEnvironmentErrors(environment, lines).future)
   override def listPlugins(): Future[Seq[Plugin]] = fetch.future(_.listPlugins(()).future)
   override def addPlugin(path: SafePath): Future[Seq[ErrorData]] = fetch.future(_.addPlugin(path).future)
   override def removePlugin(path: SafePath): Future[Unit] = fetch.future(_.removePlugin(path).future)

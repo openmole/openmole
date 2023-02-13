@@ -157,7 +157,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
 
-  override def runningErrorEnvironmentData(environment: EnvironmentId, lines: Int): Future[EnvironmentErrorData] = Future.successful(EnvironmentErrorData.empty)
+  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int): Future[Seq[EnvironmentErrorGroup]] = Future.successful(Seq.empty)
 
   override def listPlugins(): Future[Seq[Plugin]] =
     Future.successful(plugins.values.toSeq)
