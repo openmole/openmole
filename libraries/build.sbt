@@ -555,7 +555,7 @@ lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.se
 ) settings(settings: _*) settings(scala3Settings: _*) dependsOn(cats, circe, http4s)
 
 
-lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*",  "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*")) settings (
+lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*",  "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*", "org.typelevel.log4cats.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*")) settings (
   libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
