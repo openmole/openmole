@@ -24,6 +24,8 @@ import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption
 
 object SavePopulationHook {
 
+  def defaultFormat = CSVOutputFormat(unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
+
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
     val state = context(t.stateVal)
@@ -52,7 +54,7 @@ object SavePopulationHook {
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat(unrollArray = true, postfix = GAIntegration.generationVal, directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    format:         F                      = defaultFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
     val state = context(evolution.stateVal)

@@ -49,7 +49,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] = {
+    format:         F                      = SavePopulationHook.defaultFormat)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] = {
     val m = method(t)
     implicit def scope: DefinitionScope = m.scope
 

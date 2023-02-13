@@ -35,7 +35,7 @@ object CSVOutputFormat {
             val postfix = format.postfix.map(_.from(context)).getOrElse("") 
             if directoryMode
             then file.from(context) / (sectionName + postfix + ".csv")
-            else file.from(context) 
+            else file.from(context)
             
           for { (section, i) ← s.section.zipWithIndex } writeFile(f(section.name.getOrElse(s"$i")), section.variables)
         case (Display(ps), s) ⇒
