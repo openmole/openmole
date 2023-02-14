@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.builder.*
 import monocle.macros.*
-import org.openmole.core.workflow.format.WritableOutput
+import org.openmole.core.workflow.format.{CSVOutputFormat, WritableOutput}
 import org.openmole.plugin.hook.omr.*
 import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools.*
@@ -35,10 +35,11 @@ type GenomeDouble = Seq[Genome.GenomeBound.ScalarDouble]
 
 implicit def intToCounterTerminationConverter(n: Long): EvolutionWorkflow.AfterEvaluated = EvolutionWorkflow.AfterEvaluated(n)
 implicit def durationToDurationTerminationConverter(d: Time): EvolutionWorkflow.AfterDuration = EvolutionWorkflow.AfterDuration(d)
-
 implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v ⇒ method(patternContainer(v.value, v.by))
 
-implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]) {
+given CSVOutputFormat.Default[EvolutionMetadata] = SavePopulationHook.defaultFormat
+
+implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]):
   val decorator = new MethodHookDecorator(t)(using method)
   export decorator.*
 
@@ -49,7 +50,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = SavePopulationHook.defaultFormat)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] = {
+    format:         F                      = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] =
     val m = method(t)
     implicit def scope: DefinitionScope = m.scope
 
@@ -65,8 +66,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
         filter = filter,
         format = format)
     )
-  }
-}
+
 
 def Island = EvolutionWorkflow.Island
 

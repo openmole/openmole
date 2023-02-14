@@ -22,9 +22,9 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.format.WritableOutput
 import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
-object SavePopulationHook {
+object SavePopulationHook:
 
-  def defaultFormat = CSVOutputFormat(unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
+  def defaultFormat = CSVOutputFormat.Default[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
@@ -46,7 +46,7 @@ object SavePopulationHook {
   }
 
 
-  def apply[T, F](
+  def apply[F](
     evolution:      EvolutionWorkflow,
     output:         WritableOutput,
     frequency:      OptionalArgument[Long] = None,
@@ -79,5 +79,5 @@ object SavePopulationHook {
     context
   } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationVal, evolution.stateVal))
 
-}
+
 
