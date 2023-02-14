@@ -13,8 +13,7 @@ import org.openmole.core.workflow.format.CSVOutputFormat.Default
 object CSVOutputFormat:
 
   object Default:
-    given Default[Any] = Default()
-
+    given default[T]: Default[T] = Default[T]()
     def value[T](format: CSVOutputFormat, default: Default[T]) =
       Default[T](
         header = OptionalArgument(format.header.option.orElse(default.header)),
