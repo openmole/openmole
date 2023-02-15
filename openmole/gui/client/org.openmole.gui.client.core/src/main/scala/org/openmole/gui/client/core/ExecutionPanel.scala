@@ -172,10 +172,12 @@ class ExecutionPanel:
         div("Status", cls := "info"),
         div(ExecutionDetails.State.toString(state).capitalize, cls := (if state == ExecutionDetails.State.failed then "infoContentLink" else "infoContent")),
         onClick --> { _ =>
-          showExpander.update {
-            case Some(Expand.ErrorLog) => None
-            case _ => Some(Expand.ErrorLog)
-          }
+          if state == ExecutionDetails.State.failed
+          then
+            showExpander.update {
+              case Some(Expand.ErrorLog) => None
+              case _ => Some(Expand.ErrorLog)
+            }
         },
         cursor.pointer
      )
