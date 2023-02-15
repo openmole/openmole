@@ -171,15 +171,16 @@ class ExecutionPanel:
       div(cls := "statusBlockNoColor",
         div("Status", cls := "info"),
         div(ExecutionDetails.State.toString(state).capitalize, cls := (if state == ExecutionDetails.State.failed then "infoContentLink" else "infoContent")),
-        onClick --> { _ =>
-          if state == ExecutionDetails.State.failed
-          then
+        if state == ExecutionDetails.State.failed
+        then
+          onClick --> { _ =>
             showExpander.update {
               case Some(Expand.ErrorLog) => None
               case _ => Some(Expand.ErrorLog)
             }
-        },
-        cursor.pointer
+          }
+        else emptyMod,
+        if state == ExecutionDetails.State.failed then cursor.pointer else emptyMod
      )
     )
 
