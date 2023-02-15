@@ -152,7 +152,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     )
 
     val id = ExecutionId()
-    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output")
+    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output", 10000L)
     Future.successful(id)
 
   override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())

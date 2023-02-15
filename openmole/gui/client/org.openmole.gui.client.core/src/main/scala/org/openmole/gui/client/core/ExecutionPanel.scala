@@ -60,6 +60,7 @@ object ExecutionPanel:
     state: ExecutionDetails.State,
     startDate: Long,
     duration: Long,
+    executionTime: Long,
     ratio: String,
     running: Long,
     error: Option[ErrorData] = None,
@@ -92,16 +93,16 @@ class ExecutionPanel:
   def toExecDetails(exec: ExecutionData): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
-      case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
-      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = c.environmentStates, exec.output)
-      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, "0", 0, envStates = r.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
+      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
+      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
 
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
-  
+
   def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false) =
     div(columnFlex,
       div(cls := "contextBlock",
@@ -116,14 +117,14 @@ class ExecutionPanel:
   def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
     div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv,backgroundOpacityCls))
 
-  def durationBlock(simpleTime: Long, timeOnCores: Long) =
+  def durationBlock(simpleTime: Long, executionTime: Long) =
 
-    val duration: Duration = (simpleTime milliseconds)
-    val h = (duration).toHours
-    val m = ((duration) - (h hours)).toMinutes
-    val s = (duration - (h hours) - (m minutes)).toSeconds
+    def timeToString(simpleTime: Long) =
+      val duration: Duration = (simpleTime milliseconds)
+      val h = (duration).toHours
+      val m = ((duration) - (h hours)).toMinutes
+      val s = (duration - (h hours) - (m minutes)).toSeconds
 
-    val durationString =
       s"""${
         "%d".format(h)
       }:${
@@ -133,8 +134,8 @@ class ExecutionPanel:
       }"""
 
     div(columnFlex, div(cls := "statusBlock",
-      div(child <-- showDurationOnCores.signal.map { d => if (d) "Duration on cores" else "Duration" }, cls := "info"),
-      div(child <-- showDurationOnCores.signal.map { d => if (d) "??" else durationString }, cls := "infoContentLink")),
+      div(child <-- showDurationOnCores.signal.map { d => if d then "Execution Time" else "Duration" }, cls := "info"),
+      div(child <-- showDurationOnCores.signal.map { d => if d then timeToString(executionTime) else timeToString(simpleTime) }, cls := "infoContentLink")),
       backgroundOpacityCls,
       onClick --> { _ => showDurationOnCores.update(!_) },
       cursor.pointer
@@ -202,7 +203,7 @@ class ExecutionPanel:
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
       contextBlock("Start time", Utils.longToDate(details.startDate)),
       //contextBlock("Method", "???"),
-      durationBlock(details.duration, 0L),
+      durationBlock(details.duration, details.executionTime),
       statusBlock("Running", details.running.toString),
       statusBlock("Completed", details.ratio),
       simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),

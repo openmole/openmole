@@ -222,7 +222,8 @@ package data {
     script: String,
     startDate: Long,
     state: ExecutionState,
-    output: String):
+    output: String,
+    executionTime: Long):
     def duration = state.duration
 
   case class EnvironmentState(

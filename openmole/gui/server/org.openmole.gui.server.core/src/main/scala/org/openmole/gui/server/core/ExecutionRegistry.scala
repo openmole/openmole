@@ -279,7 +279,9 @@ class ExecutionRegistry {
       yield
         val output  = static.output.toString.lines.toArray.takeRight(outputLines).mkString("\n")
         val stateValue = state(id)
-        ExecutionData(id, static.path, static.script, static.startDate, stateValue, output)
+        def environments: Seq[RunningEnvironment] = environmentIds.get(id).flatMap(runningEnvironments.get).toSeq
+        val executionTime = environments.map(_.executionActivity.executionTime).sum
+        ExecutionData(id, static.path, static.script, static.startDate, stateValue, output, executionTime)
 
     executions.toSeq.sortBy(_.startDate)
   }
