@@ -47,7 +47,7 @@ object common {
   def guavaVersion = "31.1-jre"
   def scalaMetaVersion = "4.7.4"
   def scalaSTMVersion = "0.11.1"
-  def jlineVersion = "3.22.0"
+  def jlineVersion = "3.21.0"
 
   def http4sVersion = "0.23.12"
 

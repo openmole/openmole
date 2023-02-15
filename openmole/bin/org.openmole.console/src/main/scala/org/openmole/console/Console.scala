@@ -20,20 +20,20 @@ package org.openmole.console
 import org.jline.reader.*
 import org.jline.terminal.*
 import org.jline.keymap.*
-import org.openmole.core.compiler._
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.compiler.*
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.preference.Preference
-import org.openmole.core.project._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.project.*
+import org.openmole.core.tools.io.Prettifier.*
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.core.services._
-import org.openmole.core.workflow.mole._
+import org.openmole.core.services.*
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
 
 import scala.annotation.tailrec
-import scala.util._
+import scala.util.*
 
 object Console extends JavaLogger {
 
@@ -41,12 +41,11 @@ object Console extends JavaLogger {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  private def withReader[T](f: LineReader => T) = {
+  private def withReader[T](f: LineReader => T) =
     val terminal = TerminalBuilder.builder.build()
     val reader = LineReaderBuilder.builder().terminal(terminal).build()
     try f(reader)
     finally terminal.close()
-  }
 
   @tailrec def askPassword(msg: String = "password"): String = 
     val (password, confirmation) = 
