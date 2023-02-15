@@ -323,6 +323,7 @@ class ExecutionPanel:
 
     val forceUpdate = Var(0)
     @volatile var queryingState = false
+    def triggerStateUpdate = forceUpdate.update(_ + 1)
 
     def queryState =
       queryingState = true
@@ -342,6 +343,7 @@ class ExecutionPanel:
     val initialDelay = Signal.fromFuture(delay(1000))
     val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
+
     div(
       columnFlex, width := "100%", marginTop := "20",
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
@@ -359,9 +361,8 @@ class ExecutionPanel:
                 id.map { idValue =>
                   details.get(idValue) match
                     case Some(st) =>
-                      def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
-
-                      def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => forceUpdate.update(_ + 1) }
+                      def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+                      def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
 
                       div(buildExecution(idValue, st, cancel, remove))
                     case None => div()
@@ -369,7 +370,8 @@ class ExecutionPanel:
               )
             )
           }
-        }
+        },
+      showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate }
     )
 
 
