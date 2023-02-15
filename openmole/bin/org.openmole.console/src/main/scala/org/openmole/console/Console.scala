@@ -118,7 +118,7 @@ object Console extends JavaLogger {
     res
   }
 
-  case class CompiledDSL(dsl: DSL, compilationContext: CompilationContext, raw: Interpreter.RawCompiled)
+  class CompiledDSL(val dsl: DSL, val compilationContext: CompilationContext, val raw: Interpreter.RawCompiled)
 
 }
 
