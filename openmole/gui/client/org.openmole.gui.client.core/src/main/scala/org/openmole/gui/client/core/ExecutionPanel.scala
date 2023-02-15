@@ -101,9 +101,7 @@ class ExecutionPanel:
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
-
-
-
+  
   def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false) =
     div(columnFlex,
       div(cls := "contextBlock",
@@ -145,41 +143,42 @@ class ExecutionPanel:
   def backgroundOpacityCls = cls.toggle("silentBlock") <-- showExpander.signal.map {_ != None}
 
   def backgroundOpacityCls(expand: Expand) =
-    cls.toggle("silentBlock") <-- showExpander.signal.map {se=> se != Some(expand) && se != None}
+    cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
 
   def showHideBlock(expand: Expand, title: String, messageWhenClosed: String, messageWhenOpen: String) =
-    div(columnFlex, div(cls := "statusBlock",
-      backgroundOpacityCls(expand),
-      div(title, cls := "info"),
-      div(child <-- showExpander.signal.map { c =>
-        if (c == Some(expand)) messageWhenOpen else messageWhenClosed
-      }, cls := "infoContentLink")),
-      onClick --> { _ =>
-        showExpander.update(exp =>
-          if (exp == Some(expand)) None
-          else Some(expand)
+    div(columnFlex,
+      div(cls := "statusBlock", backgroundOpacityCls(expand),
+        div(title, cls := "info"),
+        div(child <--
+          showExpander.signal.map {
+            case Some(_) => messageWhenOpen
+            case None => messageWhenClosed
+          }, cls := "infoContentLink"
         )
+      ),
+      onClick --> { _ =>
+        showExpander.update {
+          case Some(e) if e == expand => None
+          case _ => Some(expand)
+        }
       },
       cursor.pointer
     )
 
   def simulationStatusBlock(state: ExecutionDetails.State) =
-    div(columnFlex, div(cls := "statusBlockNoColor",
-      div("Status", cls := "info"),
-      div(ExecutionDetails.State.toString(state).capitalize, cls := {
-        if (state == ExecutionDetails.State.failed) "infoContentLink"
-        else "infoContent"
-      }),
-      onClick --> { _ =>
-        showExpander.update(exp =>
-          if (exp == Some(Expand.ErrorLog)) None
-          else Some(Expand.ErrorLog)
-        )
-      },
-      cursor.pointer
+    div(columnFlex,
+      div(cls := "statusBlockNoColor",
+        div("Status", cls := "info"),
+        div(ExecutionDetails.State.toString(state).capitalize, cls := (if state == ExecutionDetails.State.failed then "infoContentLink" else "infoContent")),
+        onClick --> { _ =>
+          showExpander.update {
+            case Some(Expand.ErrorLog) => None
+            case _ => Some(Expand.ErrorLog)
+          }
+        },
+        cursor.pointer
+     )
     )
-    )
-
 
   def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map { c =>
@@ -202,7 +201,7 @@ class ExecutionPanel:
     div(rowFlex, justifyContent.center,
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
       contextBlock("Start time", Utils.longToDate(details.startDate)),
-      contextBlock("Method", "???"),
+      //contextBlock("Method", "???"),
       durationBlock(details.duration, 0L),
       statusBlock("Running", details.running.toString),
       statusBlock("Completed", details.ratio),
@@ -289,11 +288,9 @@ class ExecutionPanel:
       cursor.pointer,
       onClick --> { _ =>
         currentOpenSimulation.update {
-          _ match {
-            case None => Some(executionId)
-            case Some(x: ExecutionId) if (x != executionId) => Some(executionId)
-            case _ => None
-          }
+          case None => Some(executionId)
+          case Some(x: ExecutionId) if (x != executionId) => Some(executionId)
+          case _ => None
         }
       }
     )
