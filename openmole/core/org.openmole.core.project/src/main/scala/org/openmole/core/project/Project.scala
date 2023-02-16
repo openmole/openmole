@@ -192,7 +192,7 @@ object Project {
             import Interpreter.ErrorPosition
 
             def adjusted =
-              (positionLens composeLens Focus[ErrorPosition](_.line) modify { _ - scriptHeader.split("\n").size }) andThen
+              (positionLens composeLens Focus[ErrorPosition](_.line) modify { _ - scriptHeader.split("\n").size + 1 }) andThen
                 (positionLens composeLens Focus[ErrorPosition](_ .start) modify { _ - headerOffset }) andThen
                 (positionLens composeLens Focus[ErrorPosition](_.end) modify { _ - headerOffset }) andThen
                 (positionLens composeLens Focus[ErrorPosition](_.point) modify { _ - headerOffset })
