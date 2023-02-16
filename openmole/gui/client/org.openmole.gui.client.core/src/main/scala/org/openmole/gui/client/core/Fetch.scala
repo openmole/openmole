@@ -34,8 +34,8 @@ class Fetch(alert: (String, BannerLevel) => Unit):
 
   def future[O](
     f: CoreAPIClientImpl => Future[O],
-    timeout: FiniteDuration = 60 seconds,
-    warningTimeout: FiniteDuration = 10 seconds) =
+    timeout: Option[FiniteDuration] = Some(60 seconds),
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds)) =
 
     OMFetch(coreAPIClient).future(
       f,

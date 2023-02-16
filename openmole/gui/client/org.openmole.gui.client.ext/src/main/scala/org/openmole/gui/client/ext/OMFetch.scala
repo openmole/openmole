@@ -31,16 +31,16 @@ class OMFetch[API](api: EndpointsSettings => API) {
 
   def future[O](
     f: API => scala.concurrent.Future[O],
-    timeout: FiniteDuration = 60 seconds,
-    warningTimeout: FiniteDuration = 10 seconds,
+    timeout: Option[FiniteDuration] = Some(60 seconds),
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds),
     onTimeout: () ⇒ Unit = () ⇒ {},
     onWarningTimeout: () ⇒ Unit = () ⇒ {},
     onFailed: Throwable => Unit = _ => {}) =
-    val timeoutSet = timers.setTimeout(warningTimeout.toMillis) { onWarningTimeout() }
+    val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { onWarningTimeout() })
 
-    def stopTimeout = timers.clearTimeout(timeoutSet)
+    def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
 
-    val future = f(api(EndpointsSettings().withTimeout(Some(timeout))))
+    val future = f(api(EndpointsSettings().withTimeout(timeout)))
     future.andThen {
       case f@Failure(_: scala.concurrent.TimeoutException) ⇒
         stopTimeout
@@ -57,28 +57,28 @@ class OMFetch[API](api: EndpointsSettings => API) {
 
 
 
-  def apply[O, R](
-    r: API => scala.concurrent.Future[O],
-    timeout: FiniteDuration = 60 seconds,
-    warningTimeout: FiniteDuration = 10 seconds,
-    onTimeout: () ⇒ Unit = () ⇒ {},
-    onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {})(action: O => R) = {
-    //import scala.concurrent.ExecutionContext.Implicits.global
-    //    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
-    val f = future(
-      f = r,
-      timeout = timeout,
-      warningTimeout = warningTimeout,
-      onTimeout = onTimeout,
-      onWarningTimeout = onWarningTimeout,
-      onFailed = onFailed)
-
-    f.onComplete {
-      case Success(r) ⇒ action(r)
-      case _ =>
-    }
-  }
+//  def apply[O, R](
+//    r: API => scala.concurrent.Future[O],
+//    timeout: FiniteDuration = 60 seconds,
+//    warningTimeout: FiniteDuration = 10 seconds,
+//    onTimeout: () ⇒ Unit = () ⇒ {},
+//    onWarningTimeout: () ⇒ Unit = () ⇒ {},
+//    onFailed: Throwable => Unit = _ => {})(action: O => R) = {
+//    //import scala.concurrent.ExecutionContext.Implicits.global
+//    //    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
+//    val f = future(
+//      f = r,
+//      timeout = timeout,
+//      warningTimeout = warningTimeout,
+//      onTimeout = onTimeout,
+//      onWarningTimeout = onWarningTimeout,
+//      onFailed = onFailed)
+//
+//    f.onComplete {
+//      case Success(r) ⇒ action(r)
+//      case _ =>
+//    }
+//  }
 
 
 }
