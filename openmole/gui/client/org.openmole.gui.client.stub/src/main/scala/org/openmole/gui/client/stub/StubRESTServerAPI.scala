@@ -29,14 +29,20 @@ import scala.concurrent.Future
 import concurrent.ExecutionContext.Implicits.global
 
 object AnimatedStubRESTServerAPI:
-  case class MemoryFile(content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false)
+  case class MemoryFile(content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false, compilation: Option[CompilationErrorData] = None)
 
   def apply() =
     val api = new AnimatedStubRESTServerAPI()
 
     api.files ++= Seq(
       SafePath("testLongLongLongLongLongLongLongLongLongLongLongLongLongLong.oms") -> MemoryFile("val i = Val[Int]"),
-      SafePath("test2.oms") -> MemoryFile("val j = Val[Double]")
+      SafePath("test2.oms") -> MemoryFile(
+        """val j = Val[Double]
+          |val i = Val[error]
+          |""".stripMargin,
+        compilation = Some(CompilationErrorData(Seq(ErrorWithLocation("stub", Some(2), None, None)), "stub"))
+      )
+
     )
 
     api
@@ -142,7 +148,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     executions -= id
     Future.successful(())
 
-  override def compileScript(script: SafePath): Future[Option[ErrorData]] = Future.successful(None)
+  override def compileScript(script: SafePath): Future[Option[ErrorData]] =
+    Future.successful(files.get(script).flatMap(_.compilation))
 
   override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
     def capsules = Seq(ExecutionState.CapsuleExecution("stub", "stub", ExecutionState.JobStatuses(10, 10, 10), true))

@@ -132,15 +132,11 @@ class EditorPanelUI(fileType: FileExtension) {
   val errorsWithLocation: Var[Seq[ErrorWithLocation]] = Var(Seq())
 
   def setErrorMessage = {
-    errorsWithLocation.now().find {
-      _.line == Some(editor.selection.getCursor().row.toInt)
+    errorsWithLocation.now().find { e =>
+      e.line.map(_ - 1) == Some(editor.selection.getCursor().row.toInt)
     } match {
       case Some(e) =>
-        val message = s"${
-          e.line.map {
-            _ + 1
-          }.getOrElse("")
-        }: ${e.stackTrace}"
+        val message = s"${e.line.getOrElse("")}: ${e.stackTrace}"
         if (errorMessage.now() == message) {
           errorMessageOpen.update(!_)
         }
@@ -155,9 +151,7 @@ class EditorPanelUI(fileType: FileExtension) {
   val omsErrorObserver = Observer[EditorErrors] { (ee: EditorErrors) =>
     val ewls = ee.errorsInEditor.flatMap { i ⇒
       ee.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
-        e.errorWithLocation.line.map { l ⇒
-          editor.getSession().setBreakpoint(l)
-        }
+        e.errorWithLocation.line.map { l ⇒ editor.getSession().setBreakpoint(l - 1) }
         e.errorWithLocation
       }
     }

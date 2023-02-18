@@ -26,13 +26,9 @@ object OMSContent {
           case Some(ed: EditorPanelUI) =>
             ed.errors.set(EditorErrors(
               errorsFromCompiler = ce.errors.map { ewl ⇒
-                ErrorFromCompiler(ewl, ewl.line.map { l ⇒
-                  ed.editor.getSession().doc.getLine(l)
-                }.getOrElse(""))
+                ErrorFromCompiler(ewl, ewl.line.map { l ⇒ ed.editor.getSession().doc.getLine(l) }.getOrElse(""))
               },
-              errorsInEditor = ce.errors.flatMap {
-                _.line
-              }
+              errorsInEditor = ce.errors.flatMap { _.line }
             )
             )
           case _ =>
