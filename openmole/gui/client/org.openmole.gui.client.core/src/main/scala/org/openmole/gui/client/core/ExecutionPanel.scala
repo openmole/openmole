@@ -170,17 +170,24 @@ class ExecutionPanel:
     div(columnFlex,
       div(cls := "statusBlockNoColor",
         div("Status", cls := "info"),
-        div(ExecutionDetails.State.toString(state).capitalize, cls := (if state == ExecutionDetails.State.failed then "infoContentLink" else "infoContent")),
-        if state == ExecutionDetails.State.failed
-        then
-          onClick --> { _ =>
-            showExpander.update {
-              case Some(Expand.ErrorLog) => None
-              case _ => Some(Expand.ErrorLog)
+        div(
+          ExecutionDetails.State.toString(state).capitalize,
+          cls := (state match
+            case ExecutionDetails.State.failed(_) => "infoContentLink"
+            case _ => "infoContent")
+        ),
+        state match
+          case ExecutionDetails.State.failed(_) =>
+            onClick --> { _ =>
+              showExpander.update {
+                case Some(Expand.ErrorLog) => None
+                case _ => Some(Expand.ErrorLog)
+              }
             }
-          }
-        else emptyMod,
-        if state == ExecutionDetails.State.failed then cursor.pointer else emptyMod
+          case _ => emptyMod,
+        state match
+          case ExecutionDetails.State.failed(_) => cursor.pointer
+          case _ => emptyMod
      )
     )
 
