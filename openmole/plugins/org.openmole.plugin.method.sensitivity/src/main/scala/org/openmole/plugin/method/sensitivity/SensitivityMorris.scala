@@ -162,14 +162,18 @@ object SensitivityMorris {
 
         // for each part of the space we were asked to explore, compute the elementary effects and returns them
         // into the variables passed by the user
-        val List(mu, muStar, sigma) =
+        val effects: Seq[Seq[Double]] =
           morrisOutputs(modelInputs, modelOutputs).map {
             case (input, output) ⇒
               val outputValues: Array[Double] = context(output.toArray)
               MorrisSampling.Log.logger.fine("Processing the elementary change for input " + input + " on " + output)
               val (mu, muStar, sigma) = elementaryEffect(input, output, outputValues, factorChanged, deltas)
-              List(mu, muStar, sigma)
-          }.transpose.toList
+              Seq[Double](mu, muStar, sigma)
+          }.transpose
+
+        def mu = effects(0)
+        def muStar = effects(1)
+        def sigma = effects(2)
 
         context ++
           (muOutputs zip mu).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
