@@ -51,17 +51,17 @@ object ProjectPanel {
     val wizardPanel = ModelWizardPanel.render
     
     // 3- Market place
-    
+    val marketPanel = MarketPanel.render
 
     lazy val theTabs = Tabs.tabs(tabStyle = navbar_pills, isClosable = false)
       .add(Tab("empty", span("Empty project"), emptyProjectButton))
       .add(Tab("wizard", span("From your sources"), wizardPanel))
-      .add(Tab("market", span("From the market place"), wizardPanel))
+      .add(Tab("market", span("From the market place"), marketPanel))
 
     
     div(margin := "20px", flexRow, alignItems.flexStart,
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
-      theTabs.build.render.amend(marginLeft := "40")
+      theTabs.build.render.amend(marginLeft := "40", width := "100%")
 //      div(
 //        div("Start from", padding := "10px"),
 //        button("Empty project", btn_primary, onClick --> { _ =>
