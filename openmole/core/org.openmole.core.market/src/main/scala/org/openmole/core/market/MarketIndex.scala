@@ -25,6 +25,11 @@ case class MarketIndexEntry(name: String, archive: String, readme: Option[String
   def url: String = org.openmole.core.buildinfo.marketURL(archive)
 
 object MarketIndex:
-  def empty = MarketIndex(Seq.empty)
+  def all = MarketIndex(entries = Seq(
+    MarketIndexEntry("Beautiful R", "archive", Some("\n#R\n\nThis workflow execute 100 times a R program with differents inputs. The R task computes a matrix multiplication.\n"), Seq("R", "Stats")),
+    MarketIndexEntry("Python in action", "archive", Some("# Python"), Seq("Python", "simulation")),
+    MarketIndexEntry("Scala for newbies", "archive", Some("# Scala\n## Introduction"), Seq("Scala", "simulation")),
+    MarketIndexEntry("Calibrate your Netlogo", "archive", Some("# Netlogo"), Seq("Python", "simulation"))
+  ))
 
 case class MarketIndex(entries: Seq[MarketIndexEntry])

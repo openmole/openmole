@@ -185,7 +185,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]] = Future.successful(None)
 
-  override def marketIndex(): Future[MarketIndex] = Future.successful(MarketIndex.empty)
+  override def marketIndex(): Future[MarketIndex] = Future.successful(MarketIndex.all)
 
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit] = Future.successful(())
 
@@ -207,6 +207,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit =
     val content = files(safePath).content
+    println("COntent " + content)
     val h = if hash then Some(content.hashCode.toString) else None
     onLoadEnd(content, h)
 

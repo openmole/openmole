@@ -952,6 +952,9 @@ padding-bottom: 90px;
     padding: 10px;
     cursor: pointer;
     height: 34px;
+    background-color: rgba(220,53,69,0.8);
+    color: white;
+    border-radius:2px;
 }
 
 .badgeUploadModel {
@@ -1280,4 +1283,16 @@ input:checked + .slider:before {
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
   color: #fff;
   background-color: #3086b5;
+  height: 40px;
+  padding: 10px;
+}
+
+.marketList {
+  margin-top:20px;
+  max-height: 85%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  position: absolute;
+  width. 100%;
 }

@@ -154,14 +154,13 @@ object AuthenticationPanel {
         form(flexRow,
           cls := "docEntry",
           backgroundColor := {
-            if (i % 2 == 0) "white" else "#ececec"
+            if (i % 2 == 0) "#bdadc4" else "white"
           },
           a(testedAuth.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒
             authSetting.set(Some(testedAuth.auth))
           }),
           columnizer(span(
             cls := "badgeOM",
-            badge_warning,
             testedAuth.auth.factory.name)),
           div(
             children <-- tests.signal.map { ts ⇒
