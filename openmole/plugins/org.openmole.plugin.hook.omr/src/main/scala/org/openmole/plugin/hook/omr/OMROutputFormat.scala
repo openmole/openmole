@@ -1,19 +1,18 @@
 package org.openmole.plugin.hook.omr
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.format.CSVOutputFormat
-import org.openmole.core.project._
-import org.openmole.plugin.tool.json._
+import org.openmole.core.project.*
+import org.openmole.plugin.tool.json.*
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.*
 import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.syntax.*
-
 import org.openmole.core.project.Imports.ImportedFile
-import org.openmole.plugin.tool.methoddata.*
+import org.openmole.plugin.hook.omrdata.*
 
 object OMROutputFormat {
 
@@ -37,7 +36,7 @@ object OMROutputFormat {
   def methodNameField = "name"
   def omrVersion = "0.2"
 
-  implicit def outputFormat[MD](implicit methodData: MethodData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+  implicit def outputFormat[MD](using methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
     override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p.*
       import org.json4s.*

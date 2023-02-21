@@ -26,13 +26,13 @@ import org.openmole.plugin.domain.modifier.*
 import org.openmole.plugin.tool.pattern.*
 import org.openmole.plugin.hook.file.*
 import org.openmole.plugin.hook.omr.*
-import org.openmole.plugin.tool.methoddata.*
-
+import org.openmole.plugin.hook.omrdata.*
+import io.circe.generic.auto.*
 
 object DirectSamplingMetadata:
   def method = "direct sampling"
 
-  given MethodData[DirectSamplingMetadata] = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
+  given MethodMetaData[DirectSamplingMetadata] = MethodMetaData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
 
   case class DirectSampling(sampled: Seq[ValData], aggregation: Option[Seq[Aggregation]], output: Seq[ValData]) extends DirectSamplingMetadata
   case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata

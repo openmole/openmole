@@ -1,5 +1,7 @@
 package org.openmole.plugin.method.evolution.data
 
+import org.openmole.plugin.hook.omrdata.{MethodMetaData, ValData}
+
 case class SaveOption(
   frequency: Option[Long],
   last:      Boolean)
@@ -11,9 +13,8 @@ object EvolutionMetadata {
   import io.circe.generic.auto._
   import io.circe.`export`.Exported
   import org.openmole.plugin.hook.omr.*
-  import org.openmole.plugin.tool.methoddata.*
 
-  given MethodData[EvolutionMetadata] = MethodData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  given MethodMetaData[EvolutionMetadata] = MethodMetaData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
   given Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
 
   enum GenomeBoundData:

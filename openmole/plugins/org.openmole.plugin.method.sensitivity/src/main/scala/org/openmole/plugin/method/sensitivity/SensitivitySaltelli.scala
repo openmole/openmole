@@ -20,10 +20,10 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.dsl
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.hook.omrdata.*
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.tool.pattern.MapReduce
-import org.openmole.plugin.tool.methoddata.*
 
 object SensitivitySaltelli {
 
@@ -33,7 +33,7 @@ object SensitivitySaltelli {
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
   object MetaData:
-    given MethodData[MetaData] = MethodData(_ => SensitivitySaltelli.methodName)
+    given MethodMetaData[MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName)
     def apply(method: Method) =
       new MetaData(
         inputs = method.inputs.map(_.prototype).map(ValData.apply),

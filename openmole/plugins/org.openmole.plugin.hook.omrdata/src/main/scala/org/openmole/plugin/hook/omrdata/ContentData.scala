@@ -1,4 +1,4 @@
-package org.openmole.plugin.tool.methoddata
+package org.openmole.plugin.hook.omrdata
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,20 +17,9 @@ package org.openmole.plugin.tool.methoddata
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.dsl.*
-import org.openmole.core.dsl.extension.*
-import org.openmole.tool.types.TypeTool
+import io.circe.*
 
-export io.circe.generic.auto.*
+object ContentData:
+  case class SectionData(name: Option[String], variables: Seq[ValData])
 
-object ValData {
-  def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
-
-  def toVal(data: ValData) =
-    val (ns, n) = Val.parseName(data.name)
-    new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
-}
-
-case class ValData(name: String, `type`: String)
-
-
+case class ContentData(section: Seq[ContentData.SectionData]) 

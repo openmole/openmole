@@ -1,11 +1,12 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.plugin.method.evolution.data._
+import org.openmole.plugin.method.evolution.data.*
 import org.openmole.core.expansion.FromContext
-import io.circe._
-import io.circe.generic.auto._
-import io.circe.parser._
-import io.circe.generic.semiauto._
+import io.circe.*
+import io.circe.generic.auto.*
+import io.circe.parser.*
+import io.circe.generic.semiauto.*
+import org.openmole.plugin.hook.omrdata.ValData
 //import io.circe.generic.extras.Configuration
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
@@ -19,7 +20,6 @@ object MetadataGeneration {
 
   def boundData(b: GenomeBound) = {
     import EvolutionMetadata._
-    import org.openmole.plugin.tool.methoddata._
 
     b match {
       case b: GenomeBound.ScalarDouble             ⇒ GenomeBoundData.DoubleBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
