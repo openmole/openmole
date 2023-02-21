@@ -30,10 +30,10 @@ import monocle.syntax.all._
 
 object NSGA2 {
 
-  object DeterministicParams {
+  object DeterministicNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
 
-    given MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -42,7 +42,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicNSGA2) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -115,7 +115,7 @@ object NSGA2 {
 
   }
 
-  case class DeterministicParams(
+  case class DeterministicNSGA2(
     mu:                  Int,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
@@ -123,10 +123,10 @@ object NSGA2 {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
 
-    given MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -135,7 +135,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticNSGA2) = new Ops {
 
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
@@ -212,7 +212,7 @@ object NSGA2 {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticNSGA2(
     mu:                  Int,
     operatorExploration: Double,
     genome:              Genome,
@@ -223,7 +223,7 @@ object NSGA2 {
     reject:              Option[Condition]
   )
 
-  def apply[P](
+  def apply(
     genome:         Genome,
     objective:      Objectives,
     outputs:        Seq[Val[_]]                  = Seq(),
@@ -237,7 +237,7 @@ object NSGA2 {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicNSGA2(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -252,7 +252,7 @@ object NSGA2 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticNSGA2(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -261,24 +261,28 @@ object NSGA2 {
     }
 
 }
-import EvolutionWorkflow._
+
+import EvolutionWorkflow.*
 
 object NSGA2Evolution {
 
   import org.openmole.core.dsl.DSL
 
+  given EvolutionMethod[NSGA2Evolution] =
+    p =>
+      NSGA2(
+        populationSize = p.populationSize,
+        genome = p.genome,
+        objective = p.objective,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        reject = p.reject
+      )
+
   given ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          NSGA2(
-            populationSize = p.populationSize,
-            genome = p.genome,
-            objective = p.objective,
-            outputs = p.evaluation.outputs,
-            stochastic = p.stochastic,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,

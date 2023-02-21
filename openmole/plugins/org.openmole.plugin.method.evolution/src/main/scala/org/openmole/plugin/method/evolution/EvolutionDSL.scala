@@ -29,18 +29,59 @@ import org.openmole.plugin.task.tools.AssignTask
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern._
 
-object EvolutionWorkflow {
+trait EvolutionMethod[M]:
+  def apply(m: M): EvolutionWorkflow
 
+object EvolutionWorkflow:
   val operatorExploration = 0.1
   val parallelism = 100
 
+  def apply[M](
+    method: M,
+    evaluation: DSL,
+    termination: OMTermination,
+    parallelism: Int = 1,
+    distribution: EvolutionPattern = SteadyState(),
+    suggestion: Seq[Seq[ValueAssignment.Untyped]],
+    scope: DefinitionScope)(using evolutionMethod: EvolutionMethod[M]): DSLContainer[EvolutionWorkflow] =
+    distribution match
+      case s: SteadyState ⇒
+        SteadyStateEvolution(
+          method = method,
+          evaluation = evaluation,
+          parallelism = parallelism,
+          termination = termination,
+          wrap = s.wrap,
+          suggestion = suggestion,
+          scope = scope
+        )
+      case i: Island ⇒
+        val steadyState =
+          SteadyStateEvolution(
+            method = method,
+            evaluation = evaluation,
+            termination = i.termination,
+            parallelism = i.parallelism,
+            wrap = false,
+            suggestion = suggestion,
+            scope = scope
+          )
+
+        IslandEvolution(
+          island = steadyState,
+          parallelism = parallelism,
+          termination = termination,
+          sample = i.sample,
+          scope = scope
+        )
+
+
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
-    (Objectives.onlyExact(objectives), stochastic) match {
+    (Objectives.onlyExact(objectives), stochastic) match
       case (true, None)     ⇒ None
       case (true, Some(s))  ⇒ Some(s)
       case (false, Some(s)) ⇒ Some(s)
       case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
-    }
 
   def deterministicGAIntegration[AG, VA](
     ag:               AG,
@@ -122,48 +163,6 @@ object EvolutionWorkflow {
   case class AfterGeneration(steps: Long) extends OMTermination
   case class AfterDuration(duration: Time) extends OMTermination
 
-  object EvolutionPattern {
-    def build(
-      algorithm:    EvolutionWorkflow,
-      evaluation:   DSL,
-      termination:  OMTermination,
-      parallelism:  Int                          = 1,
-      distribution: EvolutionPattern             = SteadyState(),
-      suggestion:   Seq[Seq[ValueAssignment.Untyped]],
-      scope:        DefinitionScope): DSLContainer[EvolutionWorkflow] =
-      distribution match {
-        case s: SteadyState ⇒
-          SteadyStateEvolution(
-            algorithm = algorithm,
-            evaluation = evaluation,
-            parallelism = parallelism,
-            termination = termination,
-            wrap = s.wrap,
-            suggestion = suggestion,
-            scope = scope
-          )
-        case i: Island ⇒
-          val steadyState =
-            SteadyStateEvolution(
-              algorithm = algorithm,
-              evaluation = evaluation,
-              termination = i.termination,
-              parallelism = i.parallelism,
-              wrap = false,
-              suggestion = suggestion,
-              scope = scope
-            )
-
-          IslandEvolution(
-            island = steadyState,
-            parallelism = parallelism,
-            termination = termination,
-            sample = i.sample,
-            scope = scope
-          )
-      }
-  }
-
   sealed trait EvolutionPattern
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
@@ -182,16 +181,16 @@ object EvolutionWorkflow {
     }
   }
 
-  def SteadyStateEvolution(
-    algorithm:   EvolutionWorkflow,
+  def SteadyStateEvolution[M](
+    method:      M,
     evaluation:  DSL,
     termination: OMTermination,
     parallelism: Int                          = 1,
     suggestion:  Seq[Seq[ValueAssignment.Untyped]] = Seq.empty,
     wrap:        Boolean                      = false,
-    scope:       DefinitionScope              = "steady state evolution") = {
+    scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) = {
     implicit def defScope: DefinitionScope = scope
-    val evolution = algorithm
+    val evolution = evolutionMethod(method)
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
     val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationVal)
@@ -327,9 +326,9 @@ object EvolutionWorkflow {
       method = t)
   }
 
-}
+end EvolutionWorkflow
 
-trait EvolutionWorkflow {
+trait EvolutionWorkflow:
 
   type MGOAG
   def mgoAG: MGOAG
@@ -375,7 +374,7 @@ trait EvolutionWorkflow {
   def generationVal = GAIntegration.generationVal
   def evaluatedVal = GAIntegration.evaluatedVal
   def terminatedVal = Val[Boolean]("terminated", namespace)
-}
+
 
 case class Stochastic(
   seed:       SeedVariable = SeedVariable.empty,
