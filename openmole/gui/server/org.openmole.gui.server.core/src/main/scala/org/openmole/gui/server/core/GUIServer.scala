@@ -19,9 +19,7 @@ package org.openmole.gui.server.core
 
 import cats.effect.IO
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.server.Router
-
-import java.util.concurrent.Semaphore
+import org.http4s.server.{Router}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location.*
 import org.openmole.core.preference.{Preference, PreferenceLocation}
@@ -203,7 +201,14 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     apiImpl.activatePlugins
 
-    val apiServer = new CoreAPIServer(apiImpl)
+    def stackError(t: Throwable) =
+      import org.openmole.core.tools.io.Prettifier.*
+      import org.http4s.dsl.io.*
+      InternalServerError(
+        s"""{"message": "${t.getMessage}", "stack": "${t.stackString}"}"""
+      )
+
+    val apiServer = new CoreAPIServer(apiImpl, stackError)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -221,7 +226,13 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-    val shutdown = GUIServer.server(port, localhost).withHttpApp(httpApp).withIdleTimeout(Duration.Inf).allocated.unsafeRunSync()._2 // feRunSync()._2
+    val shutdown =
+      GUIServer.
+        server(port, localhost).
+        withHttpApp(httpApp).
+        withIdleTimeout(Duration.Inf).
+        withServiceErrorHandler(r => t => stackError(t)).
+        allocated.unsafeRunSync()._2 // feRunSync()._2
 
     control.cancel = shutdown.unsafeRunSync
     control
