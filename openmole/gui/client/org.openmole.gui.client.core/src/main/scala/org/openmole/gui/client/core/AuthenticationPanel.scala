@@ -131,10 +131,10 @@ object AuthenticationPanel {
         )
 
         test match {
-          case PassedTest(_) ⇒ lab.amend(badge_success)
-          case PendingTest() ⇒ lab.amend(badge_secondary)
+          case PassedTest(_) ⇒ lab.amend(background :="#a5be21")
+          case PendingTest() ⇒ lab.amend(background := "#f1c345")
           case _ ⇒ lab.amend(
-            badge_danger, cursor.pointer,
+            background := "#c8102e", cursor.pointer,
             onClick --> { _ ⇒
               currentStack.set(test.error.map(ErrorData.stackTrace).getOrElse(""))
               errorOn.update(!_)
@@ -151,10 +151,10 @@ object AuthenticationPanel {
       def columnizer(el: HtmlElement) = div(el, width := "150px")
 
       lazy val render = {
-        form(flexRow,
+        div(flexRow,
           cls := "docEntry",
           backgroundColor := {
-            if (i % 2 == 0) "#bdadc4" else "white"
+            if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
           },
           a(testedAuth.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒
             authSetting.set(Some(testedAuth.auth))

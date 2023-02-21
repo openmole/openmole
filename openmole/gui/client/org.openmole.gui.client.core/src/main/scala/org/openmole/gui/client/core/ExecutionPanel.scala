@@ -13,9 +13,11 @@ import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
 import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.data.ExecutionState.Failed
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.Laminar
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.Utils
 import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.data.ErrorData.stackTrace
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*
@@ -55,17 +57,17 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-    path: SafePath,
-    script: String,
-    state: ExecutionDetails.State,
-    startDate: Long,
-    duration: Long,
-    executionTime: Long,
-    ratio: String,
-    running: Long,
-    error: Option[ErrorData] = None,
-    envStates: Seq[EnvironmentState] = Seq(),
-    output: String = "")
+                               path: SafePath,
+                               script: String,
+                               state: ExecutionDetails.State,
+                               startDate: Long,
+                               duration: Long,
+                               executionTime: Long,
+                               ratio: String,
+                               running: Long,
+                               error: Option[ErrorData] = None,
+                               envStates: Seq[EnvironmentState] = Seq(),
+                               output: String = "")
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
@@ -115,24 +117,23 @@ class ExecutionPanel:
 
 
   def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
-    div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv,backgroundOpacityCls))
+    div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv, backgroundOpacityCls))
+
+  def timeToString(simpleTime: Long) =
+    val duration: Duration = (simpleTime milliseconds)
+    val h = (duration).toHours
+    val m = ((duration) - (h hours)).toMinutes
+    val s = (duration - (h hours) - (m minutes)).toSeconds
+
+    s"""${
+      "%d".format(h)
+    }:${
+      "%02d".format(m)
+    }:${
+      "%02d".format(s)
+    }"""
 
   def durationBlock(simpleTime: Long, executionTime: Long) =
-
-    def timeToString(simpleTime: Long) =
-      val duration: Duration = (simpleTime milliseconds)
-      val h = (duration).toHours
-      val m = ((duration) - (h hours)).toMinutes
-      val s = (duration - (h hours) - (m minutes)).toSeconds
-
-      s"""${
-        "%d".format(h)
-      }:${
-        "%02d".format(m)
-      }:${
-        "%02d".format(s)
-      }"""
-
     div(columnFlex, div(cls := "statusBlock",
       div(child <-- showDurationOnCores.signal.map { d => if d then "Execution Time" else "Duration" }, cls := "info"),
       div(child <-- showDurationOnCores.signal.map { d => if d then timeToString(executionTime) else timeToString(simpleTime) }, cls := "infoContentLink")),
@@ -141,7 +142,9 @@ class ExecutionPanel:
       cursor.pointer
     )
 
-  def backgroundOpacityCls = cls.toggle("silentBlock") <-- showExpander.signal.map {_ != None}
+  def backgroundOpacityCls = cls.toggle("silentBlock") <-- showExpander.signal.map {
+    _ != None
+  }
 
   def backgroundOpacityCls(expand: Expand) =
     cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
@@ -184,11 +187,12 @@ class ExecutionPanel:
                 case _ => Some(Expand.ErrorLog)
               }
             }
-          case _ => emptyMod,
-        state match
+          case _ => emptyMod
+            ,
+          state match
           case ExecutionDetails.State.failed(_) => cursor.pointer
           case _ => emptyMod
-     )
+      )
     )
 
   def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
@@ -223,62 +227,13 @@ class ExecutionPanel:
       controls(id, cancel, remove)
     )
 
-  def jobs(envStates: Seq[EnvironmentState]) =
-    div(columnFlex, marginTop := "20px",
-      for
-        e <- envStates
-      yield jobRow(e)
-    )
 
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 
-  val openEnvironmentErrors: Var[Option[EnvironmentId]] = Var(None)
-
-  def jobRow(e: EnvironmentState) =
-    div(columnFlex,
-      div(rowFlex, justifyContent.center,
-        contextBlock("Resource", e.taskName, true).amend(width := "180"),
-        contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
-        contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
-        contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
-        contextBlock("Submitted", e.submitted.toString, true),
-        contextBlock("Running", e.running.toString, true),
-        contextBlock("Finished", e.done.toString, true),
-        contextBlock("Failed", e.failed.toString, true),
-        contextBlock("Errors", e.numberOfErrors.toString, true).amend(onClick --> { _ =>
-          openEnvironmentErrors.update(id =>
-            if id == Some(e.envId)
-            then None
-            else Some(e.envId)
-          )
-        }, cursor.pointer),
-      ),
-      openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(div("Errors", width := "100%", height := "200px", backgroundColor := "pink"))
-    )
-
   //def evironmentErrors(environmentError: EnvironmentError)
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
-
-  def expander(details: ExecutionDetails) =
-    div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
-      child <-- showExpander.signal.map {
-        _ match
-          case Some(Expand.Script) => div(execTextArea(details.script))
-          case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
-          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
-          case Some(Expand.Computing) => jobs(details.envStates)
-          case None => div()
-      }
-    )
-
-  def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
-    OMSContent.setError(executionDetails.path, executionDetails.error)
-    elementTable()
-      .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(executionDetails), showExpander.signal.map(_.isDefined))
-      .unshowSelection
-      .render.render.amend(idAttr := "exec")
 
   def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
     import ExecutionPanel.ExecutionDetails.State
@@ -286,7 +241,7 @@ class ExecutionPanel:
       case State.completed(_) => "#00810a"
       case State.failed(_) => "#c8102e"
       case State.canceled(_) => "#d14905"
-      case State.preparing => "#f1c306"
+      case State.preparing => "#f1c345"
       case State.running => "#a5be21"
 
 
@@ -331,6 +286,7 @@ class ExecutionPanel:
 
     val forceUpdate = Var(0)
     @volatile var queryingState = false
+
     def triggerStateUpdate = forceUpdate.update(_ + 1)
 
     def queryState =
@@ -351,6 +307,87 @@ class ExecutionPanel:
     val initialDelay = Signal.fromFuture(delay(1000))
     val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
+    val openEnvironmentErrors: Var[Option[EnvironmentId]] = Var(None)
+
+    def jobs(envStates: Seq[EnvironmentState]) =
+      div(columnFlex, marginTop := "20px",
+        for
+          e <- envStates
+        yield jobRow(e)
+      )
+
+    def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
+      OMSContent.setError(executionDetails.path, executionDetails.error)
+      elementTable()
+        .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(executionDetails), showExpander.signal.map(_.isDefined))
+        .unshowSelection
+        .render.render.amend(idAttr := "exec")
+
+    def envErrorLevelToColor(level: ErrorStateLevel) =
+      level match {
+        case ErrorStateLevel.Error=> "#c8102e"
+        case _=> "#555"
+      }
+
+    def jobRow(e: EnvironmentState) =
+      div(columnFlex,
+        div(rowFlex, justifyContent.center,
+          contextBlock("Resource", e.taskName, true).amend(width := "180"),
+          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
+          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Submitted", e.submitted.toString, true),
+          contextBlock("Running", e.running.toString, true),
+          contextBlock("Finished", e.done.toString, true),
+          contextBlock("Failed", e.failed.toString, true),
+          contextBlock("Errors", e.numberOfErrors.toString, true).amend(
+            onClick --> { _ =>
+              openEnvironmentErrors.update(id =>
+                if id == Some(e.envId)
+                then None
+                else Some(e.envId)
+              )
+            }, cursor.pointer),
+        ),
+        openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(
+          div(width := "100%",
+            children <-- Signal.fromFuture(api.listEnvironmentErrors(e.envId, 100)).map { ee =>
+              println("EE " + ee)
+              ee.map {
+                _.zipWithIndex.map { case (e, i) =>
+                  println("E " + e)
+                  div(flexRow,
+                    cls := "docEntry",
+                    margin := "0 4 0 3",
+                    backgroundColor := {
+                      if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
+                    },
+                    div(timeToString(e.error.date), minWidth := "100"),
+                    a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
+                    div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
+                  ).expandOnclick(
+                    div(height := "200", overflow.scroll,
+                      stackTrace(e.error.stack)
+                    )
+                  )
+                }
+              }.getOrElse(Seq())
+            }
+          )
+        )
+      )
+
+    def expander(details: ExecutionDetails) =
+      div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
+        child <-- showExpander.signal.map {
+          _ match
+            case Some(Expand.Script) => div(execTextArea(details.script))
+            case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
+            case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
+            case Some(Expand.Computing) => jobs(details.envStates)
+            case None => div()
+        }
+      )
 
     div(
       columnFlex, width := "100%", marginTop := "20",
@@ -370,6 +407,7 @@ class ExecutionPanel:
                   details.get(idValue) match
                     case Some(st) =>
                       def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+
                       def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
 
                       div(buildExecution(idValue, st, cancel, remove))

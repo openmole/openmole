@@ -97,11 +97,11 @@ object MarketPanel:
       div(flexRow,
         cls := "docEntry",
         backgroundColor := {
-          if (i % 2 == 0) "#bdadc4" else "white"
+          if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
         },
         a(entry.name, float.left, color := "#222", width := "350px", cursor.pointer),
         entry.tags.map{e=> span(cls := "badgeOM", e)}      ).expandOnclick(
-        div(height := "200", backgroundColor := "#333", padding := "20",
+        div(height := "200", backgroundColor := "#333", padding := "20", overflow.scroll,
           child <-- downloadButton(entry, () ⇒ {
             exists(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ entry.name, entry)
             Panels.closeExpandable
