@@ -91,6 +91,9 @@ object MarketPanel:
 
 
     def row(entry: MarketIndexEntry, i: Int, selected: Boolean) =
+      val htmlDiv = div()
+      entry.readme.foreach(htmlDiv.ref.innerHTML = _)
+
       div(flexRow,
         cls := "docEntry",
         backgroundColor := {
@@ -103,7 +106,7 @@ object MarketPanel:
             exists(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ entry.name, entry)
             Panels.closeExpandable
           }),
-          div(cls := "mdRendering", paddingTop := "40", entry.readme, colSpan := 12)
+          div(cls := "mdRendering", paddingTop := "40", htmlDiv, colSpan := 12)
         )
       )
 
