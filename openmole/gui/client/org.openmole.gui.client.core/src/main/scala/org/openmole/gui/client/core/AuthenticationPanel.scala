@@ -151,10 +151,10 @@ object AuthenticationPanel {
       def columnizer(el: HtmlElement) = div(el, width := "150px")
 
       lazy val render = {
-        form(flexRow,
+        div(flexRow,
           cls := "docEntry",
           backgroundColor := {
-            if (i % 2 == 0) "#bdadc4" else "white"
+            if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
           },
           a(testedAuth.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒
             authSetting.set(Some(testedAuth.auth))
