@@ -19,6 +19,7 @@ package org.openmole.gui.server.core
 
 import cats.effect.*
 import endpoints4s.http4s.server
+import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
@@ -32,9 +33,11 @@ import org.openmole.gui.shared.api
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
  */
-class CoreAPIServer(apiImpl: ApiImpl)
+class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Response[IO]])
   extends APIServer
     with api.CoreAPI {
+
+  override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
   val settingsRoute =
     omSettings.implementedBy(_ => apiImpl.settings)
