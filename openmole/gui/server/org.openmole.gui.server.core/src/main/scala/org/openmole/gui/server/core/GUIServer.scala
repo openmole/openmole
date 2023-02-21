@@ -206,6 +206,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
       import org.http4s.dsl.io.*
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
+      import org.http4s.headers.`Content-Type`
       InternalServerError {
         def data =
           JObject(
@@ -214,7 +215,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
           )
 
         compact(render(data))
-      }
+      }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
     val apiServer = new CoreAPIServer(apiImpl, stackError)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
