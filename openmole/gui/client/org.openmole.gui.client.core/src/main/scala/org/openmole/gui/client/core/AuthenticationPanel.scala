@@ -131,10 +131,10 @@ object AuthenticationPanel {
         )
 
         test match {
-          case PassedTest(_) ⇒ lab.amend(badge_success)
-          case PendingTest() ⇒ lab.amend(badge_secondary)
+          case PassedTest(_) ⇒ lab.amend(background :="#a5be21")
+          case PendingTest() ⇒ lab.amend(background := "#f1c345")
           case _ ⇒ lab.amend(
-            badge_danger, cursor.pointer,
+            background := "#c8102e", cursor.pointer,
             onClick --> { _ ⇒
               currentStack.set(test.error.map(ErrorData.stackTrace).getOrElse(""))
               errorOn.update(!_)
