@@ -204,9 +204,17 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     def stackError(t: Throwable) =
       import org.openmole.core.tools.io.Prettifier.*
       import org.http4s.dsl.io.*
-      InternalServerError(
-        s"""{"message": "${t.getMessage}", "stack": "${t.stackString}"}"""
-      )
+      import org.json4s.*
+      import org.json4s.jackson.JsonMethods.*
+      InternalServerError {
+        def data =
+          JObject(
+            "message" -> JString(t.getMessage),
+            "stack" -> JString(t.stackString)
+          )
+
+        compact(render(data))
+      }
 
     val apiServer = new CoreAPIServer(apiImpl, stackError)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
