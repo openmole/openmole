@@ -1272,8 +1272,13 @@ input:checked + .slider:before {
 }
 
 .mainMenuCurrentGlyph {
-    background: #795c85;
+    background: #795c85 !important;
     border-radius: 100px;
+    border: #795c85;
+}
+
+.mainMenuCurrentGlyph:focus{
+    box-shadow: 0 0 0 0.2rem #795c85;
 }
 
 .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
@@ -1294,5 +1299,5 @@ input:checked + .slider:before {
   flex-direction: column;
   overflow: auto;
   position: absolute;
-  width. 100%;
+  width: 100%;
 }

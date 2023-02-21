@@ -168,9 +168,11 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         },
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
-          button(btn_danger, "New project", onClick --> { _ =>
-            Panels.expandTo(newProjectPanel, 3)
-          }),
+          button(btn_danger, "New project",
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(3)},
+            onClick --> { _ =>
+              Panels.expandTo(newProjectPanel, 3)
+            }),
           div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(4)},
             onClick --> { _ ⇒
