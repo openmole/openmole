@@ -105,11 +105,11 @@ class ExecutionPanel:
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
 
-  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false) =
+  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false) =
     div(columnFlex,
       div(cls := "contextBlock",
         if (!alwaysOpaque) backgroundOpacityCls else emptyMod,
-        div(info, cls := "info"), div(content, cls := "infoContent"))
+        div(info, cls := "info"), div(content, cls := (if !link then "infoContent" else "infoContentLink")))
     )
 
   def statusBlock(info: String, content: String) =
@@ -340,7 +340,7 @@ class ExecutionPanel:
           contextBlock("Running", e.running.toString, true),
           contextBlock("Finished", e.done.toString, true),
           contextBlock("Failed", e.failed.toString, true),
-          contextBlock("Errors", e.numberOfErrors.toString, true).amend(
+          contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
             onClick --> { _ =>
               openEnvironmentErrors.update(id =>
                 if id == Some(e.envId)
@@ -352,23 +352,17 @@ class ExecutionPanel:
         openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(
           div(width := "100%",
             children <-- Signal.fromFuture(api.listEnvironmentErrors(e.envId, 100)).map { ee =>
-              println("EE " + ee)
               ee.map {
                 _.zipWithIndex.map { case (e, i) =>
-                  println("E " + e)
                   div(flexRow,
                     cls := "docEntry",
                     margin := "0 4 0 3",
-                    backgroundColor := {
-                      if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
-                    },
+                    backgroundColor := { if (i % 2 == 0) "#bdadc4" else "#f4f4f4" },
                     div(timeToString(e.error.date), minWidth := "100"),
                     a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                     div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
                   ).expandOnclick(
-                    div(height := "200", overflow.scroll,
-                      stackTrace(e.error.stack)
-                    )
+                    div(height := "200", overflow.scroll, stackTrace(e.error.stack))
                   )
                 }
               }.getOrElse(Seq())
