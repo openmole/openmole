@@ -41,8 +41,8 @@ object AnimatedStubRESTServerAPI:
           |val i = Val[error]
           |""".stripMargin,
         compilation = Some(CompilationErrorData(Seq(ErrorWithLocation("stub", Some(2), None, None)), "stub"))
-      )
-
+      ),
+      SafePath("file.txt") -> MemoryFile("""modify me if you can!""")
     )
 
     api
