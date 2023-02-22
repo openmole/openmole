@@ -111,7 +111,10 @@ class TreeNodePanel { panel =>
       fileInput.ref.files,
       current,
       (p: ProcessState) ⇒ transferring.set(p),
-      _ => fileInput.ref.value = "")
+      _ =>
+        fileInput.ref.value = ""
+        treeNodeManager.invalidCurrentCache
+    )
 //    , () ⇒ {
 //      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
 //      CoreUtils.appendToPluggedIfPlugin(sp)
