@@ -11,7 +11,7 @@ import org.openmole.gui.shared.data.*
 import Waiter.*
 import org.openmole.gui.client.core.Panels.closeExpandable
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.shared.api.{GUIPlugins, MethodAnalysisPlugin, PluginServices, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.shared.api.*
 
 object ProjectPanel {
 
@@ -27,7 +27,7 @@ object ProjectPanel {
     )
   }
 
-  def render(using api: ServerAPI, panels: Panels, plugins: GUIPlugins) = {
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
 
     // 1- Empty project
     def emptyProject = {

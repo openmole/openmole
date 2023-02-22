@@ -8,34 +8,34 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeManager
 import org.openmole.gui.client.ext.flexRow
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn
 
-//
-///*
-// * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
-// *
-// * This program is free software: you can redistribute it and/or modify
-// * it under the terms of the GNU Affero General Public License as published by
-// * the Free Software Foundation, either version 3 of the License, or
-// * (at your option) any later version.
-// *
-// * This program is distributed in the hope that it will be useful,
-// * but WITHOUT ANY WARRANTY; without even the implied warranty of
-// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// * GNU Affero General Public License for more details.
-// *
-// * You should have received a copy of the GNU General Public License
-// * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// */
-//
+
+/*
+ * Copyright (C) 10/08/15 // mathieu.leclaire@openmole.org
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 class PluginPanel:
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
-  def getPlugins(using api: ServerAPI) = api.listPlugins().map { p ⇒ plugins.set(p.toSeq) }
+  def getPlugins(using api: ServerAPI, basePath: BasePath) = api.listPlugins().map { p ⇒ plugins.set(p.toSeq) }
 
-  def pluginTable(using api: ServerAPI, panels: Panels) =
+  def pluginTable(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(
       children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
         case (ps, _) ⇒
@@ -58,7 +58,7 @@ class PluginPanel:
       }
     )
 
-  def render(using api: ServerAPI, panels: Panels): HtmlElement =
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels): HtmlElement =
     div(
       div(margin := "20px", flexRow, alignItems.center,
         div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),

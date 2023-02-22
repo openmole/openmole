@@ -11,7 +11,7 @@ import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -43,13 +43,13 @@ object CoreUtils {
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
 
 
-  def withTmpDirectory(todo: SafePath ⇒ Unit)(using api: ServerAPI): Unit =
+  def withTmpDirectory(todo: SafePath ⇒ Unit)(using api: ServerAPI, path: BasePath): Unit =
     api.temporaryDirectory().foreach { tempFile ⇒
       try todo(tempFile)
       finally api.deleteFiles(Seq(tempFile))
     }
 
-  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI) =
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI, path: BasePath) =
     api.createFile(safePath, fileName, directory).foreach { b ⇒
       if b
       then onCreated()
@@ -62,7 +62,7 @@ object CoreUtils {
   //    }
   //  }
 
-  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI): Future[Unit] =
+  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
     api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.invalidCurrentCache }
 
 //  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, api: ServerAPI): Unit =
@@ -76,9 +76,9 @@ object CoreUtils {
 //  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
 //    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
-  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using api: ServerAPI): Future[ListFilesData] = api.listFiles(safePath, fileFilter)
+  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using api: ServerAPI, path: BasePath): Future[ListFilesData] = api.listFiles(safePath, fileFilter)
   
-  def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
+  def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI, path: BasePath): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
  
 //  def appendToPluggedIfPlugin(safePath: SafePath) = {
 ////    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
@@ -87,8 +87,8 @@ object CoreUtils {
 ////    }
 //  }
 
-  def addPlugin(safePath: SafePath)(using api: ServerAPI) = api.addPlugin(safePath)
-  def removePlugin(safePath: SafePath)(using api: ServerAPI) = api.removePlugin(safePath)
+  def addPlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.addPlugin(safePath)
+  def removePlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.removePlugin(safePath)
 
   def addJSScript(relativeJSPath: String) = 
     org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).ref)

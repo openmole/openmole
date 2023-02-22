@@ -8,7 +8,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.{Component, OMTags}
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +37,7 @@ object OMSContent {
     }
   }
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath) = {
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))

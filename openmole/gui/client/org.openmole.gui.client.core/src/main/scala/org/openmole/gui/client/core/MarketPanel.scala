@@ -32,13 +32,13 @@ import org.openmole.gui.client.core.files.TreeNodeManager
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.Panels.closeExpandable
 import org.openmole.gui.client.ext.InputFilter
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 
 
 object MarketPanel:
 
 
-  def render(using api: ServerAPI, panels: Panels): Div =
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels): Div =
 
     val marketIndex: Var[Option[MarketIndex]] = Var(None)
     api.marketIndex().foreach { m ⇒
@@ -68,18 +68,18 @@ object MarketPanel:
         }.getOrElse(div())
       }
 
-    def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using api: ServerAPI) =
+    def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
       api.deleteFiles(Seq(sp)).foreach { d ⇒
         download(marketIndexEntry)
       }
 
-    def exists(sp: SafePath, entry: MarketIndexEntry)(using api: ServerAPI) =
+    def exists(sp: SafePath, entry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
       api.exists(sp).foreach { b ⇒
         if (b) overwriteAlert.set(Some(entry))
         else download(entry)
       }
 
-    def download(entry: MarketIndexEntry)(using api: ServerAPI) =
+    def download(entry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
       val manager = panels.treeNodePanel.treeNodeManager
       val path = manager.dirNodeLine.now() ++ entry.name
       downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))

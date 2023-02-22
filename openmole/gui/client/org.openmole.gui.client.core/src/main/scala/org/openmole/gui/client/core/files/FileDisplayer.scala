@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.tool.plot.Plotter
-import org.openmole.gui.shared.api.{GUIPlugins, MethodAnalysisPlugin, PluginServices, ServerAPI}
+import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn
 
 /*
@@ -28,7 +28,7 @@ import scaladget.bootstrapnative.bsn
 
 class FileDisplayer:
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, plugins: GUIPlugins) = {
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) = {
     panels.tabContent.alreadyDisplayed(safePath) match {
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒

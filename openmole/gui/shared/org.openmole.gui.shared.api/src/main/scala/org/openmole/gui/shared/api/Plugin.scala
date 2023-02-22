@@ -29,10 +29,10 @@ trait AuthenticationPlugin extends GUIPlugin:
   type AuthType <: AuthenticationData
   def data: AuthType
   def factory: AuthenticationPluginFactory
-  def panel(using api: ServerAPI): HtmlElement
-  def save(onsave: () ⇒ Unit): Unit
-  def remove(onremoved: () ⇒ Unit): Unit
-  def test: Future[Seq[Test]]
+  def panel(using api: ServerAPI, basePath: BasePath): HtmlElement
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath): Unit
+  def remove(onremoved: () ⇒ Unit)(using basePath: BasePath): Unit
+  def test(using basePath: BasePath): Future[Seq[Test]]
 
 sealed trait GUIPluginFactory
 
@@ -41,22 +41,21 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def name: String
   def build(data: AuthType): AuthenticationPlugin
   def buildEmpty: AuthenticationPlugin
-  def getData: Future[Seq[AuthType]]
+  def getData(using basePath: BasePath): Future[Seq[AuthType]]
 
 
 trait WizardGUIPlugin extends GUIPlugin:
   def factory: WizardPluginFactory
-  val panel: HtmlElement
   def save(): Unit
 
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
   def fileType: FileType
-  def parse(safePath: SafePath): Future[Option[ModelMetadata]]
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata): Future[Unit]
+  def parse(safePath: SafePath)(using basePath: BasePath): Future[Option[ModelMetadata]]
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath): Future[Unit]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
-  def panel(safePath: SafePath, services: PluginServices): HtmlElement
+  def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath): HtmlElement
 
 
 case class PluginServices(errorManager: ErrorManager)

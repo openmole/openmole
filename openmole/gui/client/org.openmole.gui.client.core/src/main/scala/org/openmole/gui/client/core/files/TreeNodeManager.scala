@@ -21,7 +21,7 @@ import org.openmole.gui.client.core.{CoreUtils, Fetch, Panels}
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import scalaz.Success
 
 import scala.concurrent.Future
@@ -99,26 +99,26 @@ class TreeNodeManager {
 
   def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
 
-  def switchAlphaSorting(using api: ServerAPI) =
+  def switchAlphaSorting(using api: ServerAPI, path: BasePath) =
     updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
     invalidCurrentCache
 
-  def switchTimeSorting(using api: ServerAPI) =
+  def switchTimeSorting(using api: ServerAPI, path: BasePath) =
     updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
     invalidCurrentCache
 
-  def switchSizeSorting(using api: ServerAPI) =
+  def switchSizeSorting(using api: ServerAPI, path: BasePath) =
     updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
     invalidCurrentCache
 
-  def invalidCurrentCache(using api: ServerAPI) = invalidCache(dirNodeLine.now())
+  def invalidCurrentCache(using api: ServerAPI, path: BasePath) = invalidCache(dirNodeLine.now())
 
-  def invalidCache(sp: SafePath)(using api: ServerAPI) = {
+  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
     sons.update(_.filterNot(_._1.path == sp.path))
     computeCurrentSons
   }
 
-  def computeCurrentSons(using api: ServerAPI) = {
+  def computeCurrentSons(using api: ServerAPI, path: BasePath) = {
     val cur = dirNodeLine.now()
 
     def updateSons(safePath: SafePath) = {
@@ -137,7 +137,7 @@ class TreeNodeManager {
 
   def resetFileFinder = findFilesContaining.set((None, Seq()))
 
-  def find(findString: String)(using api: ServerAPI) = {
+  def find(findString: String)(using api: ServerAPI, path: BasePath) = {
     def updateSearch = {
       val safePath: SafePath = dirNodeLine.now()
       CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>

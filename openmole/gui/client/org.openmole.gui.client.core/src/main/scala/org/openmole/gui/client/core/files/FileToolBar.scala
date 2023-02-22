@@ -19,7 +19,7 @@ import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool.*
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 
 /*
  * Copyright (C) 20/01/16 // mathieu.leclaire@openmole.org
@@ -59,7 +59,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
 
   val filterToolOpen = Var(false)
 
-  def filterTool(using api: ServerAPI) = div(
+  def filterTool(using api: ServerAPI, basePath: BasePath) = div(
     cls := "file-filter",
     //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
     // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
@@ -94,7 +94,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
   //Filter
   implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
 
-  def sortingGroup(using api: ServerAPI) = {
+  def sortingGroup(using api: ServerAPI, basePath: BasePath) = {
     trait Sorting
     object Name extends Sorting
     object Size extends Sorting

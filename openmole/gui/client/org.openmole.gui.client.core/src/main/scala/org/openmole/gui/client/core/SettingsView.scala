@@ -11,7 +11,7 @@ import scaladget.tools.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.files.FileDisplayer
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
 import scala.scalajs.js.timers
@@ -71,26 +71,26 @@ class SettingsView:
       }
     )
 
-  def docButton(using api: ServerAPI) = a(href := "#", onClick --> { _ ⇒
+  def docButton(using api: ServerAPI, basePath: BasePath) = a(href := "#", onClick --> { _ ⇒
     api.omSettings().map{ sets ⇒
       org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
     }
   }, span("Documentation"))
 
-  def jvmInfoButton(using api: ServerAPI) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
+  def jvmInfoButton(using api: ServerAPI, basePath: BasePath) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
     timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
       case _       ⇒ setJVMTimer
     }
   })
 
-  def updateJVMInfos(using api: ServerAPI) =
+  def updateJVMInfos(using api: ServerAPI, basePath: BasePath) =
     api.jvmInfos().foreach { j ⇒
       jvmInfos.set(Some(j))
     }
 
 
-  def setJVMTimer(using api: ServerAPI) = {
+  def setJVMTimer(using api: ServerAPI, basePath: BasePath) = {
     timer.set(Some(timers.setInterval(3000) {
       updateJVMInfos
     }))

@@ -26,6 +26,7 @@ import org.openmole.plotlyjs.plotlyConts.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.api.*
 
 object TopLevelExports {
   @JSExportTopLevel("evolution")
@@ -36,7 +37,7 @@ object TopLevelExports {
 
 class EvolutionAnalysis extends MethodAnalysisPlugin {
 
-  override def panel(safePath: SafePath, services: PluginServices): HtmlElement = {
+  override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath): HtmlElement = {
     val metadata: Var[Option[Convergence]] = Var(None)
 
     PluginFetch.future(_.analyse(safePath).future).foreach {

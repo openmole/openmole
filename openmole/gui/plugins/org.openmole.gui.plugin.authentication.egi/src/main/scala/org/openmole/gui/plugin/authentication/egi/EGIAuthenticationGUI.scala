@@ -24,7 +24,8 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, ServerAPI}
+import org.openmole.gui.shared.api.*
+import scaladget.bootstrapnative.bsn
 
 import scala.scalajs.js
 
@@ -40,9 +41,10 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
   def name = "EGI"
-  def getData: Future[Seq[AuthType]] =
+  def getData(using basePath: BasePath): Future[Seq[AuthType]] =
     PluginFetch.future(_.egiAuthentications(()).future)
 }
+
 
 class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
   type AuthType = EGIAuthenticationData
@@ -54,32 +56,33 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   val privateKey =
     FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
 
-  val voInput = inputTag("").amend(placeholder := "vo1,vo2")
+  val voInputContent = Var[String]("")
+  val voInput = inputTag("").amend(placeholder := "vo1,vo2", onInput.mapToValue --> voInputContent)
+  //val voInput = input(bsn.formControl, value := voInputContent).amend(placeholder := "vo1,vo2")
 
-  PluginFetch.future(_.getVOTests(()).future).foreach {
-    _.foreach { c ⇒
-      voInput.ref.value = c
-    }
-  }
 
   def factory = new EGIAuthenticationGUIFactory
 
-  def remove(onremove: () ⇒ Unit) =
+  def remove(onremove: () ⇒ Unit)(using basePath: BasePath) =
     PluginFetch.future(_.removeAuthentications(()).future).foreach { _ ⇒
       onremove()
     }
 
-  def panel(using api: ServerAPI) = {
+  def panel(using api: ServerAPI, basePath: BasePath) = {
     import scaladget.tools._
+      //      _.foreach { c ⇒ a.voInput.ref.value = c }
+      //    }
     div(
       flexColumn, width := "400px", height := "220",
       div(cls := "verticalFormItem", div("Password", width := "150px"), password),
       div(cls := "verticalFormItem", div("Certificate", width := "150px"), display.flex, div(privateKey.view.amend(flexRow, justifyContent.flexEnd), width := "100%")),
-      div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput)
+      div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput),
+      EventStream.fromFuture(PluginFetch.future(_.getVOTests(()).future)) --> Observer[Seq[String]] { v => voInputContent.set(v.mkString(",")) }
     )
+
   }
 
-  def save(onsave: () ⇒ Unit) = {
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath) = {
     PluginFetch.future(_.removeAuthentications(()).future).foreach {
       d ⇒
         PluginFetch.future {
@@ -92,9 +95,9 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         }.foreach { b ⇒ onsave() }
     }
 
-    PluginFetch.future(_.setVOTests(voInput.ref.value.split(",").map(_.trim).toSeq).future)
+    PluginFetch.future(_.setVOTests(voInputContent.now().split(",").map(_.trim).toSeq).future)
   }
 
-  def test = PluginFetch.future(_.testAuthentication(data).future)
+  def test(using basePath: BasePath) = PluginFetch.future(_.testAuthentication(data).future)
 
 }

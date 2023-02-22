@@ -27,7 +27,9 @@ import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
-import org.openmole.gui.client.ext.{CoreAPIClientImpl, coreAPIClient}
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.*
+
 
 
 class Fetch(alert: (String, BannerLevel) => Unit):
@@ -35,7 +37,7 @@ class Fetch(alert: (String, BannerLevel) => Unit):
   def future[O](
     f: CoreAPIClientImpl => Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
-    warningTimeout: Option[FiniteDuration] = Some(10 seconds)) =
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
 
     OMFetch(coreAPIClient).future(
       f,

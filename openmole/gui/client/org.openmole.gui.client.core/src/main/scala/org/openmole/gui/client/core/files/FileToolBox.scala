@@ -11,7 +11,7 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.Utils
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 
 class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState) {
 
@@ -25,7 +25,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path))
   }
 
-  def trash(using panels: Panels, api: ServerAPI) = withSafePath { safePath ⇒
+  def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒
     closeToolBox
     CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)).andThen { _ ⇒
       panels.tabContent.removeTab(safePath)
@@ -35,7 +35,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def duplicate(using panels: Panels, api: ServerAPI) = withSafePath { sp ⇒
+  def duplicate(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
     val newName = {
       val prefix = sp.path.last
       if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
@@ -47,7 +47,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def extract(using panels: Panels, api: ServerAPI) = withSafePath { sp ⇒
+  def extract(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
     api.extract(sp).foreach {
       error ⇒
         error match {
@@ -59,7 +59,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     closeToolBox
   }
 
-  def execute(using panels: Panels, api: ServerAPI) = {
+  def execute(using panels: Panels, api: ServerAPI, path: BasePath) = {
     import scala.concurrent.duration._
     withSafePath { sp ⇒
       api.launchScript(sp, true).foreach { _ ⇒ showExecution() }
@@ -67,7 +67,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def toScript(using panels: Panels, api: ServerAPI) =
+  def toScript(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     withSafePath { sp ⇒
       closeToolBox
       api.fetchGUIPlugins { p ⇒
@@ -78,7 +78,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       }
     }
 
-  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI) =
+  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     val newSafePath = safePath.parent ++ to
 
     api.exists(newSafePath).foreach {
@@ -93,7 +93,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
           actionConfirmation.set(None)
     }
 
-  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI) = {
+  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     val newNode = safePath.parent ++ to
     api.move(safePath, safePath.parent ++ to).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
@@ -104,7 +104,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI) = {
+  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     pluginState.isPlugged match {
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
@@ -141,7 +141,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)
 
-  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI): Div = {
+  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath): Div = {
     val renameInput = inputTag(sp.name).amend(
       placeholder := "File name",
       onMountFocus
@@ -179,7 +179,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       })
     )
 
-  def contentRoot(using panels: Panels, api: ServerAPI) = {
+  def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     div(
       height := "80px",
       child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map {

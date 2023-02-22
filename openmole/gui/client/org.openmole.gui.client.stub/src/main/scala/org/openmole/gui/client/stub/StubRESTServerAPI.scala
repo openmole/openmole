@@ -55,15 +55,15 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   val executions = scala.collection.mutable.HashMap[ExecutionId, ExecutionData]()
   val plugins = scala.collection.mutable.HashMap[SafePath, Plugin]()
 
-  override def size(safePath: SafePath): Future[Long] =
+  override def size(safePath: SafePath)(using BasePath): Future[Long] =
     Future.successful(files(safePath).content.size)
 
-  override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean): Future[Seq[SafePath]] =
+  override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]] =
     val copies = paths.map((p, d) => d -> files(p))
     files ++= copies
     Future.successful(copies.map(_._1))
 
-  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)] =
+  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] =
     val file = files(safePath)
 
     val res =
@@ -79,13 +79,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     Future.successful(res)
 
-  override def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean] =
+  override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] =
     files += (path ++ name) -> MemoryFile("", directory = directory)
     Future.successful(true)
 
-  override def extract(path: SafePath): Future[Option[ErrorData]] = Future.successful(None)
+  override def extract(path: SafePath)(using BasePath): Future[Option[ErrorData]] = Future.successful(None)
 
-  override def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData] =
+  override def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData] =
     val simpleFiles = files.toSeq.filter(!_._2.directory)
 
     val fileData =
@@ -111,27 +111,27 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     Future.successful(directoryData.toSeq ++ fileData)
 
-  override def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]] =
+  override def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]] =
     def found = files.toSeq.filter { (f, _) => f.startsWith(path) && findString.map(s => f.name.contains(s)).getOrElse(true) }.map { (f, m) => f -> m.directory }
 
     Future.successful(found)
 
-  override def move(from: SafePath, to: SafePath): Future[Unit] =
+  override def move(from: SafePath, to: SafePath)(using BasePath): Future[Unit] =
     val f = files.remove(from).get
     files += to -> f
     Future.successful(())
 
-  override def deleteFiles(path: Seq[SafePath]): Future[Unit] =
+  override def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit] =
     path.foreach(files.remove)
     Future.successful(())
 
-  override def exists(path: SafePath): Future[Boolean] =
+  override def exists(path: SafePath)(using BasePath): Future[Boolean] =
     Future.successful(files.contains(path))
 
-  override def temporaryDirectory(): Future[SafePath] =
+  override def temporaryDirectory()(using BasePath): Future[SafePath] =
     Future.successful(SafePath("_tmp_"))
 
-  override def executionState(line: Int, ids: Seq[ExecutionId]): Future[Seq[ExecutionData]] =
+  override def executionState(line: Int, ids: Seq[ExecutionId])(using BasePath): Future[Seq[ExecutionData]] =
     val ex =
       ids match
         case Seq() => executions.values.toSeq
@@ -139,19 +139,19 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     Future.successful(ex)
 
 
-  override def cancelExecution(id: ExecutionId): Future[Unit] =
+  override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] =
     val execution = executions(id)
     executions += id -> execution.copy(state = ExecutionState.Canceled(Seq(), Seq(), 1000L, true))
     Future.successful(())
 
-  override def removeExecution(id: ExecutionId): Future[Unit] =
+  override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] =
     executions -= id
     Future.successful(())
 
-  override def compileScript(script: SafePath): Future[Option[ErrorData]] =
+  override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] =
     Future.successful(files.get(script).flatMap(_.compilation))
 
-  override def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId] =
+  override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] =
     def capsules = Seq(ExecutionState.CapsuleExecution("stub", "stub", ExecutionState.JobStatuses(10, 10, 10), true))
 
     def environments = Seq(
@@ -163,9 +163,9 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output", 10000L)
     Future.successful(id)
 
-  override def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit] = Future.successful(())
+  override def clearEnvironmentErrors(environment: EnvironmentId)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int): Future[Seq[EnvironmentErrorGroup]] =
+  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] =
     Future.successful(
       Seq(
         EnvironmentErrorGroup(EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, ErrorStateLevel.Error), 1L, 3),
@@ -175,52 +175,52 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       )
     )
 
-  override def listPlugins(): Future[Seq[Plugin]] =
+  override def listPlugins()(using BasePath): Future[Seq[Plugin]] =
     Future.successful(plugins.values.toSeq)
 
-  override def addPlugin(path: SafePath): Future[Seq[ErrorData]] =
+  override def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]] =
     plugins += (path -> Plugin(path, System.currentTimeMillis().toString, true))
     Future.successful(Seq.empty)
 
-  override def removePlugin(path: SafePath): Future[Unit] =
+  override def removePlugin(path: SafePath)(using BasePath): Future[Unit] =
     plugins.remove(path)
     Future.successful(())
 
-  override def omrMethod(path: SafePath): Future[String] = Future.successful("stub")
+  override def omrMethod(path: SafePath)(using BasePath): Future[String] = Future.successful("stub")
 
-  override def models(path: SafePath): Future[Seq[SafePath]] = Future.successful(Seq.empty)
+  override def models(path: SafePath)(using BasePath): Future[Seq[SafePath]] = Future.successful(Seq.empty)
 
-  override def expandResources(resources: Resources): Future[Resources] = Future.successful(Resources.empty)
+  override def expandResources(resources: Resources)(using BasePath): Future[Resources] = Future.successful(Resources.empty)
 
-  override def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]] = Future.successful(None)
+  override def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]] = Future.successful(None)
 
-  override def marketIndex(): Future[MarketIndex] = Future.successful(MarketIndex.all)
+  override def marketIndex()(using BasePath): Future[MarketIndex] = Future.successful(MarketIndex.all)
 
-  override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit] = Future.successful(())
+  override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def omSettings(): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", "0", true))
+  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", "0", true))
 
-  override def shutdown(): Future[Unit] = Future.successful(())
+  override def shutdown()(using BasePath): Future[Unit] = Future.successful(())
 
-  override def restart(): Future[Unit] = Future.successful(())
+  override def restart()(using BasePath): Future[Unit] = Future.successful(())
 
-  override def isAlive(): Future[Boolean] = Future.successful(true)
+  override def isAlive()(using BasePath): Future[Boolean] = Future.successful(true)
 
-  override def jvmInfos(): Future[JVMInfos] = Future.successful(JVMInfos("stub", "stub", 0, 0, 0))
+  override def jvmInfos()(using BasePath): Future[JVMInfos] = Future.successful(JVMInfos("stub", "stub", 0, 0, 0))
 
-  override def mdToHtml(safePath: SafePath): Future[String] = Future.successful("")
+  override def mdToHtml(safePath: SafePath)(using BasePath): Future[String] = Future.successful("")
 
-  override def sequence(safePath: SafePath): Future[SequenceData] = Future.successful(SequenceData.empty)
+  override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = Future.successful(SequenceData.empty)
 
-  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit = {}
+  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit)(using BasePath): Unit = {}
 
-  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit =
+  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false)(using BasePath): Unit =
     val content = files(safePath).content
     println("COntent " + content)
     val h = if hash then Some(content.hashCode.toString) else None
     onLoadEnd(content, h)
 
-  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit) =
+  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
     import org.openmole.gui.plugin.authentication.sshlogin.*
     val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
     val wizardFactories = Seq()

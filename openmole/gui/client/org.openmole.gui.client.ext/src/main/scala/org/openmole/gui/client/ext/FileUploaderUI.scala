@@ -24,7 +24,7 @@ import org.scalajs.dom.raw.HTMLInputElement
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.DataUtils
 
 object FileUploaderUI {
@@ -39,7 +39,7 @@ case class FileUploaderUI(
   val fileName = if (keyName == "") renaming.getOrElse(DataUtils.uuID) else keyName
   val pathSet: Var[Boolean] = Var(keySet)
 
-  def view(using api: ServerAPI) = label(
+  def view(using api: ServerAPI, path: BasePath) = label(
     fileInput((fInput: Input) ⇒ {
       api.upload(
         fInput.ref.files,
@@ -53,7 +53,7 @@ case class FileUploaderUI(
             val to = SafePath(Seq(fileName), Authentication)
 
             pathSet.set(false)
-            OMFetch(coreAPIClient).future(_.move(from, to).future).foreach { b ⇒
+            api.move(from, to).foreach { b ⇒
               pathSet.set(true)
             }
           }

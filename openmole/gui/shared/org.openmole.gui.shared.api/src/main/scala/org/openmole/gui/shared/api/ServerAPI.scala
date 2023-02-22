@@ -3,7 +3,7 @@ package org.openmole.gui.shared.api
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
 import org.scalajs.dom.FileList
-
+import org.scalajs.dom
 import scala.concurrent.Future
 
 /*
@@ -23,49 +23,58 @@ import scala.concurrent.Future
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+object BasePath:
+  def apply(location: dom.Location): BasePath =
+    val basePath = location.pathname.split("/").dropRight(1).mkString("/")
+    if basePath.isEmpty then None else Some(basePath)
+  implicit def value(p: BasePath): Option[String] = p
+
+opaque type BasePath = Option[String]
+
 trait ServerAPI:
-  def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean): Future[Seq[SafePath]]
-  def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean): Future[(Boolean, String)]
-  def size(safePath: SafePath): Future[Long]
-  def createFile(path: SafePath, name: String, directory: Boolean): Future[Boolean]
-  def extract(path: SafePath): Future[Option[ErrorData]]
-  def listFiles(path: SafePath, filter: FileFilter): Future[ListFilesData]
-  def listRecursive(path: SafePath, findString: Option[String]): Future[Seq[(SafePath, Boolean)]]
-  def move(from: SafePath, to: SafePath): Future[Unit]
-  def deleteFiles(path: Seq[SafePath]): Future[Unit]
-  def exists(path: SafePath): Future[Boolean]
-  def temporaryDirectory(): Future[SafePath]
+  def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]]
+  def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)]
+  def size(safePath: SafePath)(using BasePath): Future[Long]
+  def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean]
+  def extract(path: SafePath)(using BasePath): Future[Option[ErrorData]]
+  def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData]
+  def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]]
+  def move(from: SafePath, to: SafePath)(using BasePath): Future[Unit]
+  def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit]
+  def exists(path: SafePath)(using BasePath): Future[Boolean]
+  def temporaryDirectory()(using BasePath): Future[SafePath]
 
-  def executionState(line: Int, id: Seq[ExecutionId] = Seq()): Future[Seq[ExecutionData]]
-  def cancelExecution(id: ExecutionId): Future[Unit]
-  def removeExecution(id: ExecutionId): Future[Unit]
-  def compileScript(script: SafePath): Future[Option[ErrorData]]
-  def launchScript(script: SafePath, validate: Boolean): Future[ExecutionId]
-  def clearEnvironmentErrors(environment: EnvironmentId): Future[Unit]
-  def listEnvironmentErrors(environment: EnvironmentId, lines: Int): Future[Seq[EnvironmentErrorGroup]]
+  def executionState(line: Int, id: Seq[ExecutionId] = Seq())(using BasePath): Future[Seq[ExecutionData]]
+  def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit]
+  def removeExecution(id: ExecutionId)(using BasePath): Future[Unit]
+  def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]]
+  def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId]
+  def clearEnvironmentErrors(environment: EnvironmentId)(using BasePath): Future[Unit]
+  def listEnvironmentErrors(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]]
 
-  def listPlugins(): Future[Seq[Plugin]]
-  def addPlugin(path: SafePath): Future[Seq[ErrorData]]
-  def removePlugin(path: SafePath): Future[Unit]
+  def listPlugins()(using BasePath): Future[Seq[Plugin]]
+  def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]]
+  def removePlugin(path: SafePath)(using BasePath): Future[Unit]
 
-  def omrMethod(path: SafePath): Future[String]
-  def fetchGUIPlugins(f: GUIPlugins ⇒ Unit): Future[Unit]
+  def omrMethod(path: SafePath)(using BasePath): Future[String]
+  def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath): Future[Unit]
 
-  def models(path: SafePath): Future[Seq[SafePath]]
-  def expandResources(resources: Resources): Future[Resources]
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Future[Option[ErrorData]]
+  def models(path: SafePath)(using BasePath): Future[Seq[SafePath]]
+  def expandResources(resources: Resources)(using BasePath): Future[Resources]
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]]
 
-  def marketIndex(): Future[MarketIndex]
-  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Future[Unit]
+  def marketIndex()(using BasePath): Future[MarketIndex]
+  def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit]
 
-  def omSettings(): Future[OMSettings]
-  def shutdown(): Future[Unit]
-  def restart(): Future[Unit]
-  def isAlive(): Future[Boolean]
-  def jvmInfos(): Future[JVMInfos]
+  def omSettings()(using BasePath): Future[OMSettings]
+  def shutdown()(using BasePath): Future[Unit]
+  def restart()(using BasePath): Future[Unit]
+  def isAlive()(using BasePath): Future[Boolean]
+  def jvmInfos()(using BasePath): Future[JVMInfos]
 
-  def mdToHtml(safePath: SafePath): Future[String]
-  def sequence(safePath: SafePath): Future[SequenceData]
+  def mdToHtml(safePath: SafePath)(using BasePath): Future[String]
+  def sequence(safePath: SafePath)(using BasePath): Future[SequenceData]
 
-  def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit): Unit
-  def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false): Unit
+  def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit)(using BasePath): Unit
+  def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false)(using BasePath): Unit

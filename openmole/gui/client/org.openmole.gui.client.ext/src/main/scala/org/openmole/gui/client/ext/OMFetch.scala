@@ -23,9 +23,10 @@ import scala.concurrent.duration.*
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers
-object OMFetch {
+import org.openmole.gui.shared.api.*
+
+object OMFetch:
   def apply[API](api: EndpointsSettings => API) = new OMFetch(api)
-}
 
 class OMFetch[API](api: EndpointsSettings => API) {
 
@@ -35,12 +36,12 @@ class OMFetch[API](api: EndpointsSettings => API) {
     warningTimeout: Option[FiniteDuration] = Some(10 seconds),
     onTimeout: () ⇒ Unit = () ⇒ {},
     onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {}) =
+    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath) =
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { onWarningTimeout() })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
 
-    val future = f(api(EndpointsSettings().withTimeout(timeout)))
+    val future = f(api(EndpointsSettings().withTimeout(timeout).withBaseUri(BasePath.value(baseURI))))
     future.andThen {
       case f@Failure(_: scala.concurrent.TimeoutException) ⇒
         stopTimeout

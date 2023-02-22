@@ -5,7 +5,7 @@ import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import scaladget.tools.Utils.uuID
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,11 +19,11 @@ class TabContent:
   import TabContent.TabData
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
-  def render(using panels: Panels, api: ServerAPI) =
+  def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.render.amend(margin := "10px")
 
 
-  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, api: ServerAPI) = {
+  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
@@ -41,7 +41,7 @@ class TabContent:
     content: HtmlElement,
     onClicked: SafePath => Unit = _ => {},
     onAdded: SafePath => Unit = _ => {},
-    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, api: ServerAPI) = {
+    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     tabsUI.add(
       Tab(
         tabData,
@@ -75,7 +75,7 @@ class TabContent:
       _.tabID
     }
 
-  def save(tabData: TabData, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI): concurrent.Future[Boolean] = editorPanelUI.synchronized {
+  def save(tabData: TabData, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
     tabData.editorPanelUI match
       case None => concurrent.Future.successful(false)
       case Some(editorPanelUI) =>
@@ -93,7 +93,7 @@ class TabContent:
   }
 
 
-  def checkTabs(using api: ServerAPI) = tabsUI.tabs.now().foreach { tab =>
+  def checkTabs(using api: ServerAPI, basePath: BasePath) = tabsUI.tabs.now().foreach { tab =>
     api.exists(tab.t.safePath).foreach {
       e ⇒
         if (!e) removeTab(tab.t.safePath)

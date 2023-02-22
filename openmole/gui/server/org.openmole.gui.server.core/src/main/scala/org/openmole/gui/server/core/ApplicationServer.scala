@@ -34,10 +34,9 @@ import scalatags.Text.all.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
-object ApplicationServer {
-  def redirect(s: String) = SeeOther.apply(Location.parse(s"/$s").right.get)
-
-}
+object ApplicationServer:
+  def redirect(s: String) =
+    SeeOther.apply(Location.apply(Uri.fromString(s"$s").right.get))
 
 class ApplicationServer(webapp: File, extraHeader: String, password: Option[String], services: GUIServerServices.ServicesProvider) {
   
@@ -53,7 +52,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
   }
 
   val routes: HttpRoutes[IO] = HttpRoutes.of{
-    case GET -> Root / shared.data.appRoute =>
+    case  GET -> Root / shared.data.appRoute =>
       def application = GUIServlet.html(s"${GUIServlet.webpackLibrary}.run();", GUIServlet.cssFiles(webapp), extraHeader)
 
       if(!passwordIsChosen && passwordProvided) Preference.setPasswordTest(services.preference, services.cypher)

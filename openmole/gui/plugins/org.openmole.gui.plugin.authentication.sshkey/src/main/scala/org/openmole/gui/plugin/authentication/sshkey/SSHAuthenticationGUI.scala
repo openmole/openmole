@@ -25,7 +25,7 @@ import scaladget.tools.*
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, ServerAPI}
+import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
 
@@ -45,7 +45,7 @@ class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
 
   def name = "SSH Private key"
 
-  def getData: Future[Seq[AuthType]] = PluginFetch.future(_.privateKeyAuthentications(()).future)
+  def getData(using basePath: BasePath): Future[Seq[AuthType]] = PluginFetch.future(_.privateKeyAuthentications(()).future)
 }
 
 class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
@@ -67,11 +67,11 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   def factory = new PrivateKeyAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
+  def remove(onremove: () ⇒ Unit)(using basePath: BasePath) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
     onremove()
   }
 
-  def panel(using api: ServerAPI) = div(
+  def panel(using api: ServerAPI, basePath: BasePath) = div(
     flexColumn, width := "400px", height := "220",
     div(cls := "verticalFormItem", div("Login", width := "150px"), loginInput),
     div(cls := "verticalFormItem", div("Password", width := "150px"), passwordInput),
@@ -81,7 +81,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
   )
 
 
-  def save(onsave: () ⇒ Unit) = {
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath) = {
     PluginFetch.future(_.removeAuthentication(data).future).foreach {
       d ⇒
         PluginFetch.future(_.addAuthentication(PrivateKeyAuthenticationData(
@@ -94,6 +94,6 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     }
   }
 
-  def test = PluginFetch.future(_.testAuthentication(data).future)
+  def test(using basePath: BasePath) = PluginFetch.future(_.testAuthentication(data).future)
 
 }

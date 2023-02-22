@@ -16,7 +16,7 @@ import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.Laminar
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.Utils
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
 
 import concurrent.duration.*
@@ -72,7 +72,7 @@ object ExecutionPanel:
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Execs = Map[ExecutionId, ExecutionDetails]
 
-  def open(using api: ServerAPI, panels: Panels) =
+  def open(using api: ServerAPI, path: BasePath, panels: Panels) =
     Panels.expandTo(panels.executionPanel.render, 4)
 
   enum Expand:
@@ -263,7 +263,7 @@ class ExecutionPanel:
 
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
-  def render(using panels: Panels, api: ServerAPI) =
+  def render(using panels: Panels, api: ServerAPI, path: BasePath) =
     def filterExecutions(execs: Execs): (Execs, Seq[ExecutionId]) =
       import ExecutionPanel.ExecutionDetails.State
       val (ids, cleanIds) =

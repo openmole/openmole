@@ -4,7 +4,7 @@ import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.{KeyboardEvent, document}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
@@ -15,7 +15,7 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.api.{GUIPlugins, PluginServices, ServerAPI}
+import org.openmole.gui.shared.api.{BasePath, GUIPlugins, PluginServices, ServerAPI}
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await
@@ -51,6 +51,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
   def stopped(): Unit =
+    given BasePath = BasePath(dom.document.location)
     val stoppedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -66,6 +67,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
 
   def restarted(): Unit =
+    given BasePath = BasePath(dom.document.location)
     val restartedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -99,6 +101,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
   def run() =
+    given BasePath = BasePath(dom.document.location)
     // launch tab saving thread
     setInterval(10000) { panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) } }
 

@@ -7,10 +7,10 @@ import org.openmole.core.services.Services
 import scala.concurrent.Future
 
 trait LoginAuthenticationAPI:
-  def loginAuthentications(): Future[Seq[LoginAuthenticationData]]
-  def addAuthentication(data: LoginAuthenticationData): Future[Unit]
-  def removeAuthentication(data: LoginAuthenticationData): Future[Unit]
-  def testAuthentication(data: LoginAuthenticationData): Future[Seq[Test]]
+  def loginAuthentications()(using basePath: BasePath): Future[Seq[LoginAuthenticationData]]
+  def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit]
+  def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit]
+  def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Seq[Test]]
 
 object LoginAuthenticationServerAPI:
   class APIClientImpl(val settings: ClientSettings) extends LoginAuthenticationRESTAPI with APIClient
@@ -18,14 +18,14 @@ object LoginAuthenticationServerAPI:
 
 class LoginAuthenticationServerAPI extends LoginAuthenticationAPI:
   import LoginAuthenticationServerAPI.PluginFetch
-  override def loginAuthentications(): Future[Seq[LoginAuthenticationData]] = PluginFetch.future(_.loginAuthentications(()).future)
-  override def addAuthentication(data: LoginAuthenticationData): Future[Unit] = PluginFetch.future(_.addAuthentication(data).future)
-  override def removeAuthentication(data: LoginAuthenticationData): Future[Unit] = PluginFetch.future(_.removeAuthentication(data).future)
-  override def testAuthentication(data: LoginAuthenticationData): Future[Seq[Test]] = PluginFetch.future(_.testAuthentication(data).future)
+  override def loginAuthentications()(using basePath: BasePath): Future[Seq[LoginAuthenticationData]] = PluginFetch.future(_.loginAuthentications(()).future)
+  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit] = PluginFetch.future(_.addAuthentication(data).future)
+  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit] = PluginFetch.future(_.removeAuthentication(data).future)
+  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Seq[Test]] = PluginFetch.future(_.testAuthentication(data).future)
 
 class LoginAuthenticationStubAPI extends LoginAuthenticationAPI:
   import LoginAuthenticationServerAPI.PluginFetch
-  override def loginAuthentications(): Future[Seq[LoginAuthenticationData]] = Future.successful {
+  override def loginAuthentications()(using basePath: BasePath): Future[Seq[LoginAuthenticationData]] = Future.successful {
     Seq(
       LoginAuthenticationData(
         "stub",
@@ -40,8 +40,8 @@ class LoginAuthenticationStubAPI extends LoginAuthenticationAPI:
     )
   }
 
-  override def addAuthentication(data: LoginAuthenticationData): Future[Unit] = Future.successful(())
-  override def removeAuthentication(data: LoginAuthenticationData): Future[Unit] = Future.successful(())
-  override def testAuthentication(data: LoginAuthenticationData): Future[Seq[Test]] = Future.successful(Seq())
+  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit] = Future.successful(())
+  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Unit] = Future.successful(())
+  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath): Future[Seq[Test]] = Future.successful(Seq())
 
 

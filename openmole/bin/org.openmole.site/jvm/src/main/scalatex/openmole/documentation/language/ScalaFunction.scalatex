@@ -91,6 +91,53 @@ The seed is optional.
 If it is not provided OpenMOLE will take care of the generator initialisation in a sound manner.
 It would generally be called @code{newRNG()}.
 
+@h2{Scala Code}
+
+OpenMOLE at some places in the DSL OpenMOLE make it possible to use the @i{evaluate} keyword. You can generally provide a snippet of scala code to make some computation on the fly.
+
+@hl.openmole("""
+val param1 = Val[Double]
+val param2 = Val[Double]
+
+val distance = Val[Double]
+
+NSGA2Evolution(
+  evaluation = modelTask,
+  objective = distance evaluate "distance / 10.0",
+  genome = Seq(
+    param1 in (0.0, 99.0),
+    param2 in (0.0, 99.0)),
+  termination = 100
+) hook (workDirectory / "path/to/a/directory")
+""", header = "val modelTask = EmptyTask()", name = "Scala Code")
+
+While this is useful in many cases, it is too limiting in case where your function requiers to read data from external files for instance. In theses cases you need to use the @i{ScalaCode} keyword.
+
+@hl.openmole("""
+val myFile = Val[File]
+
+val param1 = Val[Double]
+val param2 = Val[Double]
+
+val distance = Val[Double]
+
+val myCode =
+  ScalaCode("distance / myFile.content.toDouble") set (
+    myFile := workDirectory / "file.txt"
+  )
+
+NSGA2Evolution(
+  evaluation = modelTask,
+  objective = distance evaluate myCode,
+  genome = Seq(
+    param1 in (0.0, 99.0),
+    param2 in (0.0, 99.0)),
+  termination = 100
+) hook (workDirectory / "path/to/a/directory")
+""", header = "val modelTask = EmptyTask()", name = "Scala Code With File")
+
+
+
 
 
 /* TODO: Document this part

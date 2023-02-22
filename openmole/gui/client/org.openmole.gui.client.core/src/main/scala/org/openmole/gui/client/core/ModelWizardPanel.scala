@@ -33,7 +33,7 @@ import org.openmole.gui.shared.data.DataUtils.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.tool.{OMTags, OptionsDiv, TagBadge}
-import org.openmole.gui.shared.api.{GUIPlugins, ServerAPI, WizardGUIPlugin, WizardPluginFactory}
+import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
@@ -155,7 +155,7 @@ object ModelWizardPanel {
   //
 
 
-  def render(using api: ServerAPI, panels: Panels, plugins: GUIPlugins) = {
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] =
       val fileType: FileType = FileType(safePath.name)

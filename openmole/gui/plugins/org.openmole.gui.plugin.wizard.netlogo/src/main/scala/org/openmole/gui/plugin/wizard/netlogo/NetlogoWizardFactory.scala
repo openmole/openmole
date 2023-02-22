@@ -27,7 +27,7 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.WizardPluginFactory
+import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
 
@@ -42,9 +42,9 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   val fileType = CodeFile(NetLogoLanguage())
 
-  def parse(safePath: SafePath): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
+  def parse(safePath: SafePath)(using basePath: BasePath): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
   
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "NetLogo"
 }

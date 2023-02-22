@@ -20,7 +20,7 @@ import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.data.DataUtils
 import TreeNodeTabs.*
-import org.openmole.gui.shared.api.ServerAPI
+import org.openmole.gui.shared.api.*
 
 sealed trait TreeNodeTab {
 
@@ -59,7 +59,7 @@ sealed trait TreeNodeTab {
 
   def editor: Option[EditorPanelUI]
 
-  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI): Unit
+  def saveContent(afterRefresh: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit
 
   def resizeEditor: Unit
 
@@ -246,7 +246,7 @@ object TreeNodeTab {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
     }*/
 
-    def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = editor.synchronized {
+    def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit = editor.synchronized {
       // val safePath = safePath
 
       api.download(
@@ -265,7 +265,7 @@ object TreeNodeTab {
       )
     }
 
-    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI): Unit = {
+    def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit = {
       def saveTab = {
         def saved(hash: String) = {
           editorValue.contentHash = hash
@@ -604,7 +604,7 @@ object TreeNodeTab {
   }
 
   //FIXME: to be removed
-  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI): Unit =
+  def save(safePath: SafePath, editorPanelUI: EditorPanelUI, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit =
     editorPanelUI.synchronized {
       val (content, hash) = editorPanelUI.code
       api.saveFile(safePath, content, Some(hash), overwrite).foreach {
@@ -614,7 +614,7 @@ object TreeNodeTab {
       }
     }
 
-  def serverConflictAlert(tabData: TabData)(using panels: Panels, api: ServerAPI) = panels.alertPanel.string(
+  def serverConflictAlert(tabData: TabData)(using panels: Panels, api: ServerAPI, basePath: BasePath) = panels.alertPanel.string(
     s"The file ${tabData.safePath.name} has been modified on the sever. Which version do you want to keep?",
     okaction = { () ⇒ panels.tabContent.save(tabData, overwrite = true) },
     cancelaction = { () ⇒
