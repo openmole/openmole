@@ -255,7 +255,7 @@ class ExecutionPanel:
       onClick --> { _ =>
         currentOpenSimulation.update {
           case None => Some(executionId)
-          case Some(x: ExecutionId) if (x != executionId) => Some(executionId)
+          case Some(x: ExecutionId) if x != executionId => Some(executionId)
           case _ => None
         }
       }
@@ -411,7 +411,8 @@ class ExecutionPanel:
             )
           }
         },
-      showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate }
+      showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
+      currentOpenSimulation.toObservable --> Observer { _ => showExpander.set(None) }
     )
 
 
