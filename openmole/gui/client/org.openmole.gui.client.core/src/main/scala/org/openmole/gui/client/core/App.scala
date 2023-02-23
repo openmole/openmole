@@ -102,8 +102,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
   def run() =
     given BasePath = BasePath(dom.document.location)
-    // launch tab saving thread
-    setInterval(10000) { panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) } }
 
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global
@@ -126,10 +124,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //      ))
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
-        if (k.keyCode == 83 && k.ctrlKey) {
+        if k.keyCode == 83 && k.ctrlKey
+        then
           k.preventDefault()
-        }
+          panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
       }
+
 
       //      case class MenuAction(name: String, action: () ⇒ Unit)
       //
@@ -225,6 +225,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       render(
         containerNode,
         div(
+          EventStream.periodic(10000).toObservable --> Observer { _ => panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) } },
           cls := "app-container",
           // panels.bannerAlert.banner,
           //theNavBar,
