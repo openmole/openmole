@@ -19,7 +19,7 @@ package org.openmole.gui.server.core
 
 import cats.effect.IO
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.server.{Router}
+import org.http4s.server.Router
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.location.*
 import org.openmole.core.preference.{Preference, PreferenceLocation}
@@ -34,6 +34,7 @@ import org.http4s.blaze.server.*
 import org.http4s.dsl.io.*
 import org.http4s.implicits.*
 import org.http4s.server.Router
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
 import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
 import org.openmole.tool.crypto.Cypher
@@ -46,13 +47,13 @@ import scala.concurrent.duration.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
-object GUIServer {
+object GUIServer:
 
   def fromWebAppLocation = openMOLELocation / "webapp"
 
   def webpackLocation = openMOLELocation / "webpack"
 
-  def webapp(optimizedJS: Boolean)(implicit newFile: TmpDirectory, workspace: Workspace, fileService: FileService) = {
+  def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
 
@@ -71,7 +72,7 @@ object GUIServer {
     Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
     
     to
-  }
+
 
   lazy val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
 
@@ -175,13 +176,12 @@ object GUIServer {
     s.enableHttp2(true)
   end server
 
-}
 
 
-class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], webappCache: File, extraHeaders: String) {
 
+class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], webappCache: File, extraHeaders: String):
 
-  def start() = {
+  def start() =
     import cats.effect.unsafe.IORuntime
     import cats.effect.unsafe.IORuntimeConfig
     import cats.effect.unsafe.Scheduler
@@ -245,9 +245,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
 
     control.cancel = shutdown.unsafeRunSync
     control
-  }
+  end start
 
 
-
-}
 

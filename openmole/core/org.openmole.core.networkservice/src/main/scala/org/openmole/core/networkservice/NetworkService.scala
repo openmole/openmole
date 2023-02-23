@@ -32,7 +32,7 @@ import org.bouncycastle.mime.Headers
 import java.io.InputStream
 import java.net.URI
 
-object NetworkService {
+object NetworkService:
 
   val httpProxyEnabled = PreferenceLocation("NetworkService", "HttpProxyEnabled", Some(false))
   val httpProxyURI = PreferenceLocation("NetworkService", "httpProxyURI", Option.empty[String])
@@ -97,9 +97,17 @@ object NetworkService {
 
   def urlProtocol(url: String): String = new URI(url).getScheme
 
+  def proxyVariables(using networkService: NetworkService) =
+    networkService.httpProxy match
+      case Some(proxy) ⇒
+        Seq(
+          "http_proxy" -> proxy.hostURI,
+          "HTTP_PROXY" -> proxy.hostURI,
+          "https_proxy" -> proxy.hostURI,
+          "HTTPS_PROXY" -> proxy.hostURI
+        )
+      case None ⇒ Seq()
 
-
-}
 
 class NetworkService(val httpProxy: Option[NetworkService.HttpHost])
 

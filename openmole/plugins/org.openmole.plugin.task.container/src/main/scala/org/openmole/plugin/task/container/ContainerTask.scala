@@ -90,18 +90,6 @@ object ContainerTask {
     output:               PrintStream,
     error:                PrintStream)(implicit tmpDirectory: TmpDirectory, networkService: NetworkService) = {
 
-    def proxyVariables =
-      networkService.httpProxy match {
-        case Some(proxy) ⇒
-          Seq(
-            "http_proxy" -> proxy.hostURI,
-            "HTTP_PROXY" -> proxy.hostURI,
-            "https_proxy" -> proxy.hostURI,
-            "HTTPS_PROXY" -> proxy.hostURI
-          )
-        case None ⇒ Seq()
-      }
-
     val retCode =
       containerSystem match {
         case Proot(proot, noSeccomp, kernel) ⇒
@@ -116,7 +104,7 @@ object ContainerTask {
               kernel = Some(kernel),
               noSeccomp = noSeccomp,
               bind = volumes,
-              environmentVariables = proxyVariables ++ environmentVariables,
+              environmentVariables = NetworkService.proxyVariables ++ environmentVariables,
               workDirectory = workDirectory
             )
           }
@@ -129,7 +117,7 @@ object ContainerTask {
               output = output,
               error = error,
               bind = volumes,
-              environmentVariables = proxyVariables ++ environmentVariables,
+              environmentVariables = NetworkService.proxyVariables ++ environmentVariables,
               workDirectory = workDirectory,
               singularityCommand = command,
               singularityWorkdir = Some(directory /> "singularitytmp")

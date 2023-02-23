@@ -29,12 +29,13 @@ import org.openmole.tool.file._
 import org.openmole.core.workspace._
 import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 import org.scalajs.logging.{NullLogger, ScalaConsoleLogger}
+import org.openmole.core.networkservice.*
 
-object JSPack {
+object JSPack:
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: TmpDirectory): Unit =
+  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(using newFile: TmpDirectory): Unit =
     newFile.withTmpFile("lib", ".jar") { jar ⇒
 
       JSPack.getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
@@ -60,7 +61,7 @@ object JSPack {
       Await.result(result, Duration.Inf)
     }
 
-  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(implicit newFile: TmpDirectory) = {
+  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
     newFile.withTmpDir { targetDir ⇒
 
       webpackJsonPackage copy targetDir / webpackJsonPackage.getName
@@ -77,4 +78,3 @@ object JSPack {
       )
     }
   }
-}

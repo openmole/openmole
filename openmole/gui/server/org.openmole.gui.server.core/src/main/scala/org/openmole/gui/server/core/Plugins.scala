@@ -2,6 +2,7 @@ package org.openmole.gui.server.core
 
 import org.openmole.core.fileservice.*
 import org.openmole.core.highlight.HighLight
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.pluginmanager.*
 import org.openmole.tool.file.*
 import org.openmole.tool.stream.*
@@ -69,14 +70,14 @@ object Plugins extends JavaLogger {
 
   def persistentWebUI(using workspace: Workspace) = workspace.persistentDir /> "webui"
 
-  def openmoleFile(optimizedJS: Boolean)(implicit workspace: Workspace, newFile: TmpDirectory, fileService: FileService) = newFile.withTmpDir { jsPluginDirectory =>
+  def openmoleFile(optimizedJS: Boolean)(using workspace: Workspace, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService) = newFile.withTmpDir { jsPluginDirectory =>
     createJsPluginDirectory(jsPluginDirectory)
 
     val webui = persistentWebUI
     val jsPluginHash = workspace.persistentDir / "js-plugin-hash"
     val jsFile = webui / utils.openmoleFileName
 
-    def update = {
+    def update =
       Log.logger.info("Building GUI plugins ...")
 
       DirUtils.deleteIfExists(webui)
@@ -100,7 +101,7 @@ object Plugins extends JavaLogger {
           ExtraModule(modeOpenMOLE, utils.aceModuleSource)
         )
       )
-    }
+
 
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 

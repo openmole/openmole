@@ -3,12 +3,13 @@ package org.openmole.gui.server.jscompile
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.networkservice.*
 
 object Webpack extends JavaLogger {
 
   case class ExtraModule(jsFile: java.io.File, nodeModuleSubdirectory: String)
 
-  def run(entry: java.io.File, webpackConfigTemplate: java.io.File, workingDirectory: java.io.File, depsOutput: java.io.File, extraModules: Seq[ExtraModule]) = {
+  def run(entry: java.io.File, webpackConfigTemplate: java.io.File, workingDirectory: java.io.File, depsOutput: java.io.File, extraModules: Seq[ExtraModule])(using networkService: NetworkService) = {
 
     val to = workingDirectory / "webpack.config.js"
 
@@ -43,7 +44,7 @@ object Webpack extends JavaLogger {
       then Seq("NODE_OPTIONS" -> "--openssl-legacy-provider")
       else Seq()
 
-    External.run("node", cmd, workingDirectory, env = nodeEnv)
+    External.run("node", cmd, workingDirectory, env = nodeEnv ++ NetworkService.proxyVariables)
   }
 
   def setConfigFile(entry: java.io.File, depsOutput: java.io.File, template: java.io.File, to: java.io.File) = {
