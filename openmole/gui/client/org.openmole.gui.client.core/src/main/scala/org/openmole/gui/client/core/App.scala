@@ -107,8 +107,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     //import scala.concurrent.ExecutionContext.Implicits.global
     api.fetchGUIPlugins { plugins ⇒
       given GUIPlugins = plugins
-      val maindiv = div()
-
+      
       val authenticationPanel = AuthenticationPanel.render
       val newProjectPanel = ProjectPanel.render
 
@@ -124,10 +123,8 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //      ))
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
-        if k.keyCode == 83 && k.ctrlKey
-        then
-          k.preventDefault()
-          panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
+        if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
+          //panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
       }
 
 
@@ -222,10 +219,16 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       // Define the option sequence
       //Fetch(_.omSettings(())) { sets ⇒
+      def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
+
       render(
         containerNode,
         div(
-          EventStream.periodic(10000).toObservable --> Observer { _ => panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) } },
+          onKeyDown --> { k =>
+            if k.keyCode == 83 && k.ctrlKey
+            then saveAllTabs
+          },
+          EventStream.periodic(10000).toObservable --> Observer { _ => saveAllTabs },
           cls := "app-container",
           // panels.bannerAlert.banner,
           //theNavBar,
