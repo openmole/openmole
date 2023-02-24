@@ -21,35 +21,29 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.tools.OptionalArgument
 
-object UniformDistribution {
-
-  implicit def isDiscrete[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒
+object UniformDistribution:
+  given[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒
     Domain(
       FromContext { p ⇒
         import p._
         import domain._
 
-        val distRandom: scala.util.Random = seed match {
+        val distRandom: scala.util.Random = seed.option match {
           case Some(s) ⇒ Random(s.from(context))
           case None    ⇒ p.random()
         }
 
         Iterator.continually {
-          max match {
-            case Some(i) ⇒ distribution.next(distRandom, i)
-            case None    ⇒ distribution.next(distRandom)
+          max.option match {
+            case Some(i) ⇒ domain.distribution.next(distRandom, i)
+            case None    ⇒ domain.distribution.next(distRandom)
           }
         }
       },
-      domain.seed.toSeq.flatMap(_.inputs),
-      domain.seed.map(_.validate).toSeq
+      domain.seed.option.toSeq.flatMap(_.inputs),
+      domain.seed.option.map(_.validate).toSeq
     )
 
-  def apply[T](
-    seed: OptionalArgument[FromContext[Long]] = None,
-    max:  OptionalArgument[T]                 = OptionalArgument.empty[T]
-  )(implicit distribution: Distribution[T]) = new UniformDistribution(seed, max, distribution)
-
-}
-
-case class UniformDistribution[T](seed: Option[FromContext[Long]], max: Option[T], distribution: Distribution[T])
+case class UniformDistribution[T](
+  seed: OptionalArgument[FromContext[Long]] = None,
+  max: OptionalArgument[T] = None)(using val distribution: Distribution[T])
