@@ -60,8 +60,9 @@ object Panels:
     val treeNodePanel = new TreeNodePanel
     val settingsView = new SettingsView
     val connection = new Connection
+    val notification = new NotificationManager
     
-    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, connection, expandablePanel)
+    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, bannerAlert, treeNodeTabs, alertPanel, notification, connection, expandablePanel)
 
 
 //  def initialize(using fetch: Fetch, api: ServerAPI, panels: Panels) =
@@ -78,6 +79,7 @@ case class Panels(
   bannerAlert: BannerAlert,
   treeNodeTabs: TreeNodeTabs,
   alertPanel: AlertPanel,
+  notifications: NotificationManager,
   connection: Connection,
   expandablePanel: Var[Option[Panels.ExpandablePanel]])
 

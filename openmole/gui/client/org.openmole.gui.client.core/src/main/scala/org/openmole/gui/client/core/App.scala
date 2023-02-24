@@ -193,7 +193,8 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             Panels.expandTo(panels.pluginPanel.render, 1)
           }).tooltip("Plugins"),
           div(child <-- panels.expandablePanel.signal.map (_.map(ep=> Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
-        )
+        ),
+          panels.notifications.render,
         //            settingsItem
       )
 
@@ -263,6 +264,17 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
             //                  )
           ),
+          div(display.flex, flexDirection.row,
+            div(button(btn_primary, "Show !", onClick --> {
+              _ => panels.notifications.showNotfications.update(!_)
+            })),
+            div(button(btn_danger, "Stack regular !", onClick --> {
+              _ => panels.notifications.addNotification(Notification.NotificationLevel.Info)
+            })),
+            div(button(btn_danger, "Stack error!", onClick --> {
+              _ => panels.notifications.addNotification(Notification.NotificationLevel.Error)
+            }))
+          ),
           //            openExpandablePanel.signal.expand(
           //              div(
           //                cls := "collapse-bottom",
@@ -274,7 +286,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           //                }
           //              )
           //            ),
-
+          panels.notifications.notificationList,
           div(
             div(cls <-- panels.expandablePanel.signal.map { x =>
               "collapse-bottom " + {
