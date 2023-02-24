@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
+package org.openmole.core.workflow.mole
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.mole.*
 
 import scala.collection.mutable
-import org.openmole.core.workflow.dsl._
 
 /**
  *

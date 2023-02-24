@@ -4,7 +4,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.tools.ContextAggregator
+import org.openmole.core.workflow.mole.ContextAggregator
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 

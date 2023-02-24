@@ -28,7 +28,7 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.{ JobGroup, Job, JobId }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
+import org.openmole.core.workflow.tools.Name
 import org.openmole.tool.cache._
 
 import scala.ref.WeakReference

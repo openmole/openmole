@@ -18,14 +18,13 @@
 package org.openmole.core.workflow.transition
 
 import cats.implicits._
-import org.openmole.core.context.{ Context, Val, Variable, _ }
+import org.openmole.core.context.*
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.core.workflow.validation.TypeUtil._
 import org.openmole.core.workflow.validation._
 

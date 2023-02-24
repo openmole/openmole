@@ -50,7 +50,7 @@ object CSVSampling {
     )
 
   def apply(file: File): CSVSampling = apply(file: FromContext[File])
-  def apply(directory: File, name: FromContext[String]): CSVSampling = apply(FileList(directory, name))
+  def apply(directory: File, name: FromContext[String]): CSVSampling = apply(FileFromContext(directory, name))
 
 }
 

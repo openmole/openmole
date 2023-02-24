@@ -32,10 +32,9 @@ import org.openmole.core.preference.{PreferenceLocation, Preference}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole.MoleServices
-import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.core.workspace._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
 import org.openmole.plugin.environment.batch.refresh._

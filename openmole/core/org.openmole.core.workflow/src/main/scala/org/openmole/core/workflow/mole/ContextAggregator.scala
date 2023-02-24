@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.tools
+package org.openmole.core.workflow.mole
 
-import org.openmole.core.context._
-import org.openmole.core.exception._
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
 
 object ContextAggregator {
 
