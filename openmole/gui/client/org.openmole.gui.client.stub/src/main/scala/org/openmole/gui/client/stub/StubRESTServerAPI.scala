@@ -194,7 +194,18 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]] = Future.successful(None)
 
-  override def marketIndex()(using BasePath): Future[MarketIndex] = Future.successful(MarketIndex.all)
+  override def marketIndex()(using BasePath): Future[MarketIndex] =
+    def marketIndex =
+      MarketIndex(
+        entries = Seq(
+          MarketIndexEntry("Beautiful R", "archive", Some("\n#R\n\nThis workflow execute 100 times a R program with differents inputs. The R task computes a matrix multiplication.\n"), Seq("R", "Stats")),
+          MarketIndexEntry("Python in action", "archive", Some("# Python"), Seq("Python", "simulation")),
+          MarketIndexEntry("Scala for newbies", "archive", Some("# Scala\n## Introduction"), Seq("Scala", "simulation")),
+          MarketIndexEntry("Calibrate your Netlogo", "archive", Some("# Netlogo"), Seq("Python", "simulation"))
+        )
+      )
+
+    Future.successful(marketIndex)
 
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
