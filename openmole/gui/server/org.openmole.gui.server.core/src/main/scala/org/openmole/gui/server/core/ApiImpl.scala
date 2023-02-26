@@ -165,19 +165,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
 
-
-
-  def extract(safePath: SafePath) = {
+  def extract(safePath: SafePath) =
     import services.*
-    FileExtension(safePath.name) match {
-      case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
+    FileExtension(safePath.name) match
+      case FileExtension.TarGz | FileExtension.Tar | FileExtension.Zip | FileExtension.TarXz ⇒
         val archiveFile = safePathToFile(safePath)
         val toFile: File = safePathToFile(safePath.parent)
         extractArchiveFromFiles(archiveFile, toFile)
       case _ ⇒ unknownFormat(safePath.name)
-    }
-  }
-
+  
   def temporaryDirectory(): SafePath =
     import services.*
     val dir = services.tmpDirectory.newDir("openmoleGUI")

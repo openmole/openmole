@@ -61,7 +61,7 @@ package data {
   object FileExtension:
     def isDisplayable(e: FileExtension) =
       e match
-        case BinaryFile | Jar | Tar | TarGz | Zip | TarXz=> false
+        case BinaryFile | Jar | Tar | TarGz | Zip | TarXz => false
         case _ => true
 
     def isText(e: FileExtension) =
