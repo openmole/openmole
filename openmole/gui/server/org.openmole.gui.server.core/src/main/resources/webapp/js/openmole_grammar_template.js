@@ -49,7 +49,7 @@ var OpenMOLEHighlightRules = function() {
         "Function|IndexedSeq|Iterator|" +
         "Map|" +
         "Range|Seq|Set|Stream|" +
-        "Vector|File" +
+        "Vector|File|" +
 
         ##OMClasses##
     );
