@@ -368,7 +368,6 @@ object ModelWizardPanel {
     def buildTask(safePath: SafePath)(using panels: Panels) = {
       factory(safePath).foreach { f =>
         modelMetadata.now().foreach { mmd =>
-          println("in build " + mmd.sourcesDirectory)
           val modifiedMMD = mmd.copy(
             inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
             outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
@@ -382,13 +381,10 @@ object ModelWizardPanel {
     val buildButton = button("Build", width := "150px", margin := "0 25 10 25", btn_primary_outline,
       onClick --> {
         _ ⇒
-          println("On click")
           filePath.now().foreach { fp =>
             buildTask(fp)
             Panels.closeExpandable
           }
-          println("clicked")
-
       })
 
     val IOObserver = Observer[Seq[Span]](tb =>

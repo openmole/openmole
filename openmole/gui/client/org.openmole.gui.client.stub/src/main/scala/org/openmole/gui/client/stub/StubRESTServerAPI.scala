@@ -227,7 +227,6 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false)(using BasePath): Unit =
     val content = files(safePath).content
-    println("COntent " + content)
     val h = if hash then Some(content.hashCode.toString) else None
     onLoadEnd(content, h)
 

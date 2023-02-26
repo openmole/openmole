@@ -34,14 +34,14 @@ class FileDisplayer:
       case _ ⇒
         fileExtension match {
           case FileExtension.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
-          case FileExtension.CSV | FileExtension.OMR=> ResultContent.addTab(safePath, content, hash)
-          case _: FileExtension.EditableFile => AnyTextContent.addTab(safePath, content, hash)
+          case FileExtension.CSV | FileExtension.OpenMOLEResult => ResultContent.addTab(safePath, content, hash)
           case FileExtension.MDScript ⇒
             api.mdToHtml(safePath).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
             }
+          case e if FileExtension.isText(e) => AnyTextContent.addTab(safePath, content, hash)
           case FileExtension.OpenMOLEResult ⇒
             api.omrMethod(safePath).foreach { method =>
               plugins.analysisPlugins.get(method) match

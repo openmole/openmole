@@ -48,64 +48,69 @@ package data {
     case Byte extends PrototypeData("Byte", "Byte")
     case Any(override val name: String, override val scalaString: String) extends PrototypeData(name, scalaString)
 
+  import org.openmole.gui.shared.data.FileExtension.Tar
+
   import java.io.{PrintWriter, StringWriter}
   import scala.collection.immutable.ArraySeq
   import scala.scalajs.js.annotation.JSExport
 
   enum FileExtension:
-    def displayable =
-      this match
-        case OpenMOLEScript | OpenMOLEResult | MDScript | SVGExtension => true
-        case _: EditableFile => true
-        case _ => false
-
-    case OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, BinaryFile, TarGz, TarXz, Tar, Zip, Jar
-    case EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension
+    case OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, BinaryFile, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, R, Text, Scala, Shell, Python
+    //case EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension
 
   object FileExtension:
-    val OMS = OpenMOLEScript
-    val OMR = OpenMOLEResult
-    val SCALA = EditableFile("scala")
-    val NETLOGO = EditableFile("text")
-    val R = EditableFile("R")
-    val NLS = EditableFile("text")
-    val MD = MDScript
-    val SH = EditableFile("sh")
-    val TEXT = EditableFile("text", true)
-    val CSV = EditableFile("text", true)
-    val NO_EXTENSION = EditableFile("text")
-    val SVG = SVGExtension
-    val TGZ = TarGz
-    val TXZ = TarXz
-    val TAR = Tar
-    val ZIP = Zip
-    val JAR = Jar
-    val BINARY = BinaryFile
+    def isDisplayable(e: FileExtension) =
+      e match
+        case BinaryFile | Jar | Tar | TarGz | Zip | TarXz=> false
+        case _ => true
 
-    def apply(fileName: String): FileExtension = {
-      fileName match {
-        case x if x.endsWith(".oms") ⇒ OMS
-        case x if x.endsWith(".omr") ⇒ OMR
+    def isText(e: FileExtension) =
+      e match
+        case R | Text | CSV | Scala | Shell | Python => true
+        case _ => false
+
+
+    //    val OMS = OpenMOLEScript
+//    val OMR = OpenMOLEResult
+//    val SCALA = EditableFile("scala")
+//    val NETLOGO = EditableFile("text")
+//    val R = EditableFile("R")
+//    val NLS = EditableFile("text")
+//    val MD = MDScript
+//    val SH = EditableFile("sh")
+//    val TEXT = EditableFile("text", true)
+//    val CSV = EditableFile("text", true)
+//    val NO_EXTENSION = EditableFile("text")
+//    val SVG = SVGExtension
+//    val TGZ = TarGz
+//    val TXZ = TarXz
+//    val TAR = Tar
+//    val ZIP = Zip
+//    val JAR = Jar
+//    val BINARY = BinaryFile
+
+    def apply(fileName: String): FileExtension =
+      fileName match
+        case x if x.endsWith(".oms") ⇒ OpenMOLEScript
+        case x if x.endsWith(".omr") ⇒ OpenMOLEResult
         case x if x.endsWith(".csv") ⇒ CSV
-        case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NETLOGO
+        case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NetLogo
         case x if x.endsWith(".R") ⇒ R
-        case x if x.endsWith(".gaml") |
-          x.endsWith(".py") |
-          x.endsWith(".txt") | x.endsWith(".nls") ⇒ TEXT
-        case x if x.endsWith(".md") ⇒ MD
-        case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TGZ
-        case x if x.endsWith(".tar.xz") ⇒ TXZ
-        case x if x.endsWith(".tar") ⇒ TAR
-        case x if x.endsWith(".zip") ⇒ ZIP
-        case x if x.endsWith(".jar") ⇒ JAR
-        case x if x.endsWith(".scala") ⇒ SCALA
-        case x if x.endsWith(".sh") ⇒ SH
-        case x if x.endsWith(".svg") ⇒ SVG
-        case _ ⇒ BINARY
-      }
-    }
+        case x if x.endsWith(".py") => Python
+        case x if x.endsWith(".gaml") | x.endsWith(".txt") | x.endsWith(".nls") ⇒ Text
+        case x if x.endsWith(".md") ⇒ MDScript
+        case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TarGz
+        case x if x.endsWith(".tar.xz") ⇒ TarXz
+        case x if x.endsWith(".tar") ⇒ Tar
+        case x if x.endsWith(".zip") ⇒ Zip
+        case x if x.endsWith(".jar") ⇒ Jar
+        case x if x.endsWith(".scala") ⇒ Scala
+        case x if x.endsWith(".sh") ⇒ Shell
+        case x if x.endsWith(".svg") ⇒ SVGExtension
+        case _ ⇒ BinaryFile
 
-    def isOMS(fileName: String) = apply(fileName) == OMS
+
+    def isOMS(fileName: String) = apply(fileName) == OpenMOLEScript
 
 
   enum FileContent:

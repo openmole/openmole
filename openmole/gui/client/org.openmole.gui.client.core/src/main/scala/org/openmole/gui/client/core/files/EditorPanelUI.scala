@@ -43,30 +43,24 @@ import scala.scalajs.js.annotation.JSImport
 
 object EditorPanelUI {
 
-  def apply(fileType: FileExtension,
-            initCode: String,
-            initHash: String
-            //containerHESetters: HESetters     = emptySetters
-           ) = {
-
-    val editor = {
-      fileType match {
-        case OMS ⇒ new EditorPanelUI(OMS)
-        case SCALA ⇒ new EditorPanelUI(SCALA)
-        case _ ⇒ new EditorPanelUI(NO_EXTENSION)
-      }
-    }
-    
+  def apply(
+    fileType: FileExtension,
+    initCode: String,
+    initHash: String) =
+    val editor = new EditorPanelUI(fileType)
     editor.setCode(initCode, initHash)
     editor
-  }
+
 
   def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
-    ext match {
+    ext match
       case OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
-      case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
+      case Scala ⇒ Some(HighlightedFile("scala"))
+      case NetLogo ⇒ Some(HighlightedFile("netlogo"))
+      case Shell ⇒ Some(HighlightedFile("sh"))
+      case CSV ⇒ Some(HighlightedFile("csv"))
+      case Python => Some(HighlightedFile("python"))
       case _ ⇒ None
-    }
 
   case class HighlightedFile(highlighter: String)
 
@@ -175,7 +169,7 @@ class EditorPanelUI(fileType: FileExtension) {
       edDiv.amend(
         lineHeight --> lineHeightObserver,
         fileType match {
-          case FileExtension.OMS ⇒ errors --> omsErrorObserver
+          case FileExtension.OpenMOLEScript ⇒ errors --> omsErrorObserver
           case _ => emptyMod
         },
         onClick --> { _ =>

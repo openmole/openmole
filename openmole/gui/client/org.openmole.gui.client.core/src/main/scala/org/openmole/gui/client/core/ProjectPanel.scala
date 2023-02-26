@@ -39,7 +39,7 @@ object ProjectPanel {
           hash = true,
           onLoadEnd = (content, hash) ⇒ {
             panels.treeNodePanel.treeNodeManager.invalidCurrentCache
-            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS)
+            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OpenMOLEScript)
           }
         )
         Panels.closeExpandable

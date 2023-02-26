@@ -197,17 +197,18 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
                   initSafePath.name
                 } ?", () ⇒ trash)))),
                 FileExtension(initSafePath.name) match {
-                  case FileExtension.TGZ | FileExtension.TAR | FileExtension.ZIP | FileExtension.TXZ ⇒
+                  case FileExtension.TarGz | FileExtension.Tar | FileExtension.Zip | FileExtension.TarXz ⇒
                     iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
                   case _ ⇒ emptyMod
                 },
                 FileExtension(initSafePath.name) match {
-                  case FileExtension.OMS ⇒
+                  case FileExtension.OpenMOLEScript ⇒
                     iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
                   case _ ⇒ emptyMod
                 },
                 FileExtension(initSafePath.name) match {
-                  case FileExtension.JAR | FileExtension.NETLOGO | FileExtension.R | FileExtension.TGZ ⇒
+                  //FIXME discover extensions from wizard plugins
+                  case FileExtension.Jar | FileExtension.NetLogo | FileExtension.R | FileExtension.TarGz ⇒
                     iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
                   case _ ⇒ emptyMod
                 },

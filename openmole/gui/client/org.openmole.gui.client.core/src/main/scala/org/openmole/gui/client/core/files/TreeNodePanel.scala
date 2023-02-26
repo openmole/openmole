@@ -335,7 +335,8 @@ class TreeNodePanel { panel =>
     )
 
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
-    if (safePath.extension.displayable) {
+    if FileExtension.isDisplayable(safePath.extension)
+    then
       downloadFile(
         safePath,
         saveFile = false,
@@ -345,7 +346,6 @@ class TreeNodePanel { panel =>
           treeNodeManager.invalidCurrentCache
         }
       )
-    }
 
   def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     tn match
