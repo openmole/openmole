@@ -173,7 +173,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         val toFile: File = safePathToFile(safePath.parent)
         extractArchiveFromFiles(archiveFile, toFile)
       case _ ⇒ unknownFormat(safePath.name)
-  
+
   def temporaryDirectory(): SafePath =
     import services.*
     val dir = services.tmpDirectory.newDir("openmoleGUI")

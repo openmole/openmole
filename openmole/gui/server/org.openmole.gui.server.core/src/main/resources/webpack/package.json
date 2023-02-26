@@ -2,16 +2,15 @@
   "private": true,
   "license": "UNLICENSED",
   "dependencies": {
-    "ace-builds": "1.4.3",
+    "ace-builds": "1.15.2",
     "bootstrap.native": "3.0.14-f",
     "highlight.js": "10.4.1",
     "plotly.js": "2.13.3"
   },
   "devDependencies": {
-    "concat-with-sourcemaps": "1.0.7",
-    "source-map-loader": "0.2.3",
-    "webpack": "4.32.2",
-    "webpack-cli": "3.3.2",
-    "webpack-dev-server": "3.4.1"
+    "concat-with-sourcemaps": "1.1.0",
+    "source-map-loader": "4.0.1",
+    "webpack": "5.75.0",
+    "webpack-cli": "5.0.1"
   }
 }
