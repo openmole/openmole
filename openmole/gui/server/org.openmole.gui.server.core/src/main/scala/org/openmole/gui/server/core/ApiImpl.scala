@@ -446,10 +446,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
 
-    currentPluginsSafePath.map { csp ⇒
+    currentPluginsSafePath.flatMap { csp ⇒
       val file = safePathToFile(csp)
       val date = ext.utils.formatDate(file.lastModified)
-      Plugin(csp, date, file.exists && PluginManager.bundle(file).isDefined)
+      if file.exists
+      then Some(Plugin(csp, date, PluginManager.bundle(file).isDefined))
+      else None
     }
 
   def activatePlugins =
