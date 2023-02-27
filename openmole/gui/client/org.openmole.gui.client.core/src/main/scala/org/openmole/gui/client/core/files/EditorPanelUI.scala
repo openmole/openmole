@@ -53,13 +53,13 @@ object EditorPanelUI {
 
 
   def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
-    ext match
-      case OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
-      case Scala ⇒ Some(HighlightedFile("scala"))
-      case NetLogo ⇒ Some(HighlightedFile("netlogo"))
-      case Shell ⇒ Some(HighlightedFile("sh"))
-      case CSV ⇒ Some(HighlightedFile("csv"))
-      case Python => Some(HighlightedFile("python"))
+    FileContentType(ext) match
+      case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
+      case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
+      case FileContentType.NetLogo ⇒ Some(HighlightedFile("netlogo"))
+      case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
+      case FileContentType.CSV ⇒ Some(HighlightedFile("csv"))
+      case FileContentType.Python => Some(HighlightedFile("python"))
       case _ ⇒ None
 
   case class HighlightedFile(highlighter: String)
@@ -69,7 +69,7 @@ object EditorPanelUI {
   object openmolemode extends js.Object
 }
 
-class EditorPanelUI(fileType: FileExtension) {
+class EditorPanelUI(fileExtension: FileExtension) {
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
@@ -89,7 +89,7 @@ class EditorPanelUI(fileType: FileExtension) {
 
     ed.setTheme("ace/theme/github")
 
-    EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
+    EditorPanelUI.highlightedFile(fileExtension).foreach { h ⇒
       session.setMode("ace/mode/" + h.highlighter)
     }
 
@@ -168,8 +168,8 @@ class EditorPanelUI(fileType: FileExtension) {
         backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "gi")),
       edDiv.amend(
         lineHeight --> lineHeightObserver,
-        fileType match {
-          case FileExtension.OpenMOLEScript ⇒ errors --> omsErrorObserver
+        FileContentType(fileExtension) match {
+          case FileContentType.OpenMOLEScript ⇒ errors --> omsErrorObserver
           case _ => emptyMod
         },
         onClick --> { _ =>

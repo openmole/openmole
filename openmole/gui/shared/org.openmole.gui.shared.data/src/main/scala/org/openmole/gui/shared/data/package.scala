@@ -48,74 +48,57 @@ package data {
     case Byte extends PrototypeData("Byte", "Byte")
     case Any(override val name: String, override val scalaString: String) extends PrototypeData(name, scalaString)
 
-  import org.openmole.gui.shared.data.FileExtension.Tar
-
   import java.io.{PrintWriter, StringWriter}
   import scala.collection.immutable.ArraySeq
   import scala.scalajs.js.annotation.JSExport
 
-  enum FileExtension:
-    case OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, BinaryFile, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, R, Text, Scala, Shell, Python
-    //case EditableFile(highlighter: String, onDemand: Boolean = false) extends FileExtension
-
   object FileExtension:
-    def isDisplayable(e: FileExtension) =
+    def apply(fileName: String): FileExtension = fileName.dropWhile(_ != '.').drop(1)
+
+    extension (e: FileExtension)
+      def value: String = e
+
+  opaque type FileExtension = String
+
+  object FileContentType:
+    val OpenMOLEScript = ReadableFileType("oms")
+    val OpenMOLEResult = ReadableFileType("omr")
+    val MDScript = ReadableFileType("md")
+    val SVGExtension = ReadableFileType("svg")
+    val OpaqueFileType = org.openmole.gui.shared.data.OpaqueFileType
+    val TarGz = ReadableFileType("tgz", "tar.gz")
+    val TarXz = ReadableFileType("txz", "tar.xz")
+    val Tar = ReadableFileType("tar")
+    val Zip = ReadableFileType("zip")
+    val Jar = ReadableFileType("jar")
+    val CSV = ReadableFileType("csv")
+    val NetLogo = ReadableFileType("nlogo", "nlogo3d", "nls")
+    val Gaml = ReadableFileType("gaml")
+    val R = ReadableFileType("r")
+    val Text = ReadableFileType("txt")
+    val Scala = ReadableFileType("scala")
+    val Shell = ReadableFileType("sh")
+    val Python = ReadableFileType("py")
+
+    def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python)
+
+    def apply(e: FileExtension) =
+      all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
+
+    def isDisplayable(e: FileContentType) =
       e match
-        case BinaryFile | Jar | Tar | TarGz | Zip | TarXz => false
+        case OpaqueFileType | Jar | Tar | TarGz | Zip | TarXz => false
         case _ => true
 
-    def isText(e: FileExtension) =
+    def isText(e: FileContentType) =
       e match
-        case R | Text | CSV | Scala | Shell | Python => true
+        case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript => true
         case _ => false
 
 
-    //    val OMS = OpenMOLEScript
-//    val OMR = OpenMOLEResult
-//    val SCALA = EditableFile("scala")
-//    val NETLOGO = EditableFile("text")
-//    val R = EditableFile("R")
-//    val NLS = EditableFile("text")
-//    val MD = MDScript
-//    val SH = EditableFile("sh")
-//    val TEXT = EditableFile("text", true)
-//    val CSV = EditableFile("text", true)
-//    val NO_EXTENSION = EditableFile("text")
-//    val SVG = SVGExtension
-//    val TGZ = TarGz
-//    val TXZ = TarXz
-//    val TAR = Tar
-//    val ZIP = Zip
-//    val JAR = Jar
-//    val BINARY = BinaryFile
-
-    def apply(fileName: String): FileExtension =
-      fileName match
-        case x if x.endsWith(".oms") ⇒ OpenMOLEScript
-        case x if x.endsWith(".omr") ⇒ OpenMOLEResult
-        case x if x.endsWith(".csv") ⇒ CSV
-        case x if x.endsWith(".nlogo") | x.endsWith(".nlogo3d") ⇒ NetLogo
-        case x if x.endsWith(".R") ⇒ R
-        case x if x.endsWith(".py") => Python
-        case x if x.endsWith(".gaml") | x.endsWith(".txt") | x.endsWith(".nls") ⇒ Text
-        case x if x.endsWith(".md") ⇒ MDScript
-        case x if x.endsWith(".tgz") | x.endsWith(".tar.gz") ⇒ TarGz
-        case x if x.endsWith(".tar.xz") ⇒ TarXz
-        case x if x.endsWith(".tar") ⇒ Tar
-        case x if x.endsWith(".zip") ⇒ Zip
-        case x if x.endsWith(".jar") ⇒ Jar
-        case x if x.endsWith(".scala") ⇒ Scala
-        case x if x.endsWith(".sh") ⇒ Shell
-        case x if x.endsWith(".svg") ⇒ SVGExtension
-        case _ ⇒ BinaryFile
-
-
-    def isOMS(fileName: String) = apply(fileName) == OpenMOLEScript
-
-
-  enum FileContent:
-    case AlterableFileContent(path: SafePath, content: String, hash: String) extends FileContent
-    case ReadOnlyFileContent extends FileContent
+  sealed trait FileContentType
+  object OpaqueFileType extends FileContentType
+  case class ReadableFileType(extension: String*) extends FileContentType
 
   import org.openmole.gui.shared.data.SafePath._
 

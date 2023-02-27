@@ -335,7 +335,7 @@ class TreeNodePanel { panel =>
     )
 
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
-    if FileExtension.isDisplayable(safePath.extension)
+    if FileContentType.isDisplayable(FileContentType(safePath.extension))
     then
       downloadFile(
         safePath,

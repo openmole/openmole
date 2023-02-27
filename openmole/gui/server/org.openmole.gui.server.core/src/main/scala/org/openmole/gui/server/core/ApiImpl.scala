@@ -149,15 +149,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   private def extractArchiveFromFiles(from: File, to: File) =
     Try {
       val ext = FileExtension(from.getName)
-      ext match
-        case FileExtension.Tar ⇒
+      FileContentType(ext) match
+        case FileContentType.Tar ⇒
           from.extract(to)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case FileExtension.TarGz ⇒
+        case FileContentType.TarGz ⇒
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case FileExtension.Zip ⇒ utils.unzip(from, to)
-        case FileExtension.TarXz ⇒
+        case FileContentType.Zip ⇒ utils.unzip(from, to)
+        case FileContentType.TarXz ⇒
           from.extractUncompressXZ(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
@@ -167,8 +167,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def extract(safePath: SafePath) =
     import services.*
-    FileExtension(safePath.name) match
-      case FileExtension.TarGz | FileExtension.Tar | FileExtension.Zip | FileExtension.TarXz ⇒
+    FileContentType(FileExtension(safePath.name)) match
+      case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
         val archiveFile = safePathToFile(safePath)
         val toFile: File = safePathToFile(safePath.parent)
         extractArchiveFromFiles(archiveFile, toFile)

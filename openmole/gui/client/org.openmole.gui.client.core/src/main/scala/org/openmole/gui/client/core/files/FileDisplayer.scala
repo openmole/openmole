@@ -32,17 +32,17 @@ class FileDisplayer:
     panels.tabContent.alreadyDisplayed(safePath) match {
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
-        fileExtension match {
-          case FileExtension.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
-          case FileExtension.CSV | FileExtension.OpenMOLEResult => ResultContent.addTab(safePath, content, hash)
-          case FileExtension.MDScript ⇒
+        FileContentType(fileExtension) match {
+          case FileContentType.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
+          case FileContentType.CSV => CSVContent.addTab(safePath, content, hash)
+          case FileContentType.MDScript ⇒
             api.mdToHtml(safePath).foreach { htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
             }
-          case e if FileExtension.isText(e) => AnyTextContent.addTab(safePath, content, hash)
-          case FileExtension.OpenMOLEResult ⇒
+          case e if FileContentType.isText(e) => AnyTextContent.addTab(safePath, content, hash)
+          case FileContentType.OpenMOLEResult ⇒
             api.omrMethod(safePath).foreach { method =>
               plugins.analysisPlugins.get(method) match
                 case Some(analysis) ⇒
@@ -50,7 +50,7 @@ class FileDisplayer:
                 // treeNodeTabs add tab
                 case None ⇒
             }
-          case FileExtension.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
+          case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
 
           //          case editableFile: EditableFile ⇒
           //            if (DataUtils.isCSV(safePath))

@@ -8,7 +8,7 @@ import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.core.files.TreeNodeTab.Raw
 import org.openmole.gui.shared.api.*
 
-object ResultContent {
+object CSVContent {
 
   sealed trait ResultView
 
@@ -20,9 +20,7 @@ object ResultContent {
 
   def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
 
-    val rowData: RowData = safePath.extension match {
-      case FileExtension.CSV => ResultData.fromCSV(initialContent)
-    }
+    val rowData: RowData = ResultData.fromCSV(initialContent)
 
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     editor.setReadOnly(true)
@@ -45,28 +43,24 @@ object ResultContent {
     val tabData = TabData(safePath, Some(editor))
     val view: Var[HtmlElement] = Var(table)
 
-    def switchView(resultView: ResultView) = {
-      resultView match {
+    def switchView(resultView: ResultView) =
+      resultView match
         case Raw => view.set(editor.view)
         case Table => view.set(table)
-        case _ => safePath.extension match {
-          case FileExtension.CSV =>
-            val columns = rowData.content.transpose
-            //We only keep data of dimension 0 or 1
-            val plotData = ColumnData(rowData.headers.zip(columns).zip(rowData.dimensions).flatMap { case ((h, c), d) =>
-              d match {
-                case 0 => Some(Column(h, ScalarColumn(c)))
-                case 1 => Some(Column(h, ArrayColumn(c.map {
-                  ResultData.fromStringToArray(_)
-                })))
-                case _ => None
-              }
-            })
-            view.set(ResultPlot.fromCSV(plotData))
-          case _ => div("plot OMR")
-        }
-      }
-    }
+        case _ =>
+          val columns = rowData.content.transpose
+          //We only keep data of dimension 0 or 1
+          val plotData = ColumnData(rowData.headers.zip(columns).zip(rowData.dimensions).flatMap { case ((h, c), d) =>
+            d match {
+              case 0 => Some(Column(h, ScalarColumn(c)))
+              case 1 => Some(Column(h, ArrayColumn(c.map {
+                ResultData.fromStringToArray(_)
+              })))
+              case _ => None
+            }
+          })
+          view.set(ResultPlot.fromCSV(plotData))
+
 
     object DataDisplay
     val rawState = ToggleState(DataDisplay, "Raw", btn_primary_string, _ ⇒ switchView(Raw))
