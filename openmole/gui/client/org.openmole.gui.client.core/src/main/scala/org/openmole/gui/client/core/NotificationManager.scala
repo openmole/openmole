@@ -30,9 +30,13 @@ class NotificationManager:
   def filteredStack(stack: Seq[Notification], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
 
-  def addNotification(level: NotificationLevel) = stack.update { s =>
-    (s :+ Notification(level, "An error", div("bla bla bla", cls := "notification")))
+  def addNotification(level: NotificationLevel, title: String, body: Div) = stack.update { s =>
+    (s :+ Notification(level, title, div(body, cls := "notification")))
   }
+  
+  def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div) =
+    addNotification(level, title, body)
+    showNotfications.set(true)
 
   def clearNotifications(level: NotificationLevel) = {
     stack.update(s => s.filterNot(_.level == level))
