@@ -162,6 +162,8 @@ object Resource {
       val paris = partnerResource("mairieParis.svg")
 
       val ign = partnerResource("ign.png")
+
+      val trempoline = partnerResource("trempoline.png")
     }
 
     object menu {

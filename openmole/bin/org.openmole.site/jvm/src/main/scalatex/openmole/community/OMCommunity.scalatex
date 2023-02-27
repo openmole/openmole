@@ -3,18 +3,24 @@
 @import org.openmole.site._
 @import DocumentationPages._
 
+@br
+
 The OpenMOLE community has been steadily growing these past years, and we are always happy to welcome new users!
 
 @br@br
 
-Several tools are available to keep the community alive:
+Several tools are available to interact with the OpenMOLE community:
 @ul
   @li
-    Ask questions and get help on the @aa("forum", href := shared.link.forum)
+    Get help on the @aa("chat", href := shared.link.chat)
   @li
-    Get more help on the @aa("chat", href := shared.link.chat)
+    Ask more structured questions and get help on the @aa("forum", href := shared.link.forum) (it is quite empty yet, but do be afraid of the void)
   @li
-    Stay informed about the latest OpenMOLE news on the @aa("blog", href := shared.link.blog) or via @aa("Twitter", href := shared.link.twitter)
+    Stay informed about the latest OpenMOLE news via @aa("Twitter", href := shared.link.twitter)
+  @li
+    Get commercial support for OpenMOLE and model exploration by the @aa("Trempoline", href := shared.link.partner.trempoline) company
+
+@br
 
 It is also possible to @aa("report a bug", href := shared.link.issue) and @a("help make OpenMOLE better", href := howToContribute.file).
 So many possibilities!

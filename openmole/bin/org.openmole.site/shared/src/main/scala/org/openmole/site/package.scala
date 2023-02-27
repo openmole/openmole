@@ -146,6 +146,7 @@ package object shared {
       lazy val paris = "https://www.paris.fr/"
       lazy val ign = "http://www.ign.fr/"
       lazy val ideesrouen = "http://umr-idees.fr/"
+      lazy val trempoline = "https://trempoline.io"
     }
 
     object repo {
