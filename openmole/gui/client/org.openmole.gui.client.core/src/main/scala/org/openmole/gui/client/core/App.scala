@@ -52,6 +52,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
   def stopped(): Unit =
     given BasePath = BasePath(dom.document.location)
+
     val stoppedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -68,6 +69,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
   def restarted(): Unit =
     given BasePath = BasePath(dom.document.location)
+
     val restartedDiv = div(
       omsheet.connectionTabOverlay,
       div(
@@ -82,10 +84,14 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       api.isAlive().foreach { x ⇒
         if x
         then CoreUtils.setRoute(s"/${connectionRoute}")
-        else setTimeout(5000) { checkAlive() }
+        else setTimeout(5000) {
+          checkAlive()
+        }
       }
 
-    setTimeout(5000) { checkAlive() }
+    setTimeout(5000) {
+      checkAlive()
+    }
 
     render(dom.document.body, restartedDiv)
 
@@ -107,7 +113,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     //import scala.concurrent.ExecutionContext.Implicits.global
     api.fetchGUIPlugins { plugins ⇒
       given GUIPlugins = plugins
-      
       val authenticationPanel = AuthenticationPanel.render
       val newProjectPanel = ProjectPanel.render
 
@@ -146,13 +151,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //      })
 
 
-
-//      def toggleMenu(m: MainMenu) =
-//        currentSelectedMenu.update(cmm=>
-//          if cmm == Some(m)
-//          then None
-//          else Some(m)
-//        )
+      //      def toggleMenu(m: MainMenu) =
+      //        currentSelectedMenu.update(cmm=>
+      //          if cmm == Some(m)
+      //          then None
+      //          else Some(m)
+      //        )
 
       //START BUTTON
       lazy val theNavBar = div(
@@ -169,28 +173,45 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(3)},
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
+              _.map {
+                _.id
+              } == Some(3)
+            },
             onClick --> { _ =>
               Panels.expandTo(newProjectPanel, 3)
             }),
           div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(4)},
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
+              _.map {
+                _.id
+              } == Some(4)
+            },
             onClick --> { _ ⇒
-            ExecutionPanel.open
-          }).tooltip("Executions"),
+              ExecutionPanel.open
+            }).tooltip("Executions"),
           div(glyph_lock, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(2)},
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
+              _.map {
+                _.id
+              } == Some(2)
+            },
             onClick --> { _ ⇒
-            Panels.expandTo(authenticationPanel, 2)
-          }).tooltip("Authentications"),
+              Panels.expandTo(authenticationPanel, 2)
+            }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map{_.map{_.id} == Some(1)},
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
+              _.map {
+                _.id
+              } == Some(1)
+            },
             onClick --> { _ ⇒
-            panels.pluginPanel.getPlugins
-            Panels.expandTo(panels.pluginPanel.render, 1)
-          }).tooltip("Plugins"),
-          div(child <-- panels.expandablePanel.signal.map (_.map(ep=> Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
-        )
+              panels.pluginPanel.getPlugins
+              Panels.expandTo(panels.pluginPanel.render, 1)
+            }).tooltip("Plugins"),
+          div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
+        ),
+        panels.notifications.render,
         //            settingsItem
       )
 
@@ -277,7 +298,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           //                }
           //              )
           //            ),
-
+          panels.notifications.notificationList,
           div(
             div(cls <-- panels.expandablePanel.signal.map { x =>
               "collapse-bottom " + {

@@ -90,6 +90,29 @@ object MarketPanel:
       }
 
 
+    val overwriteObserver = Observer[Option[MarketIndexEntry]](mIO =>
+      mIO match
+        case Some(mI: MarketIndexEntry) =>
+          panels.notifications.addNotification(
+            Notification.NotificationLevel.Error,
+            s"${mI.name}  already exists",
+            div(btnGroup,
+              button(btn_danger, "Overwrite"), onClick --> { _ =>
+                overwriteAlert.set(None)
+                overwrite(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ mI.name, mI)
+              },
+              button(btn_secondary, "Abort"), onClick --> { _ => overwriteAlert.set(None) }
+            )
+            //              () ⇒ {
+            //                marketPanel.overwriteAlert.set(None)
+            //                marketPanel.overwrite(current ++ e.name, e)
+            //              }, () ⇒ {
+            //                marketPanel.overwriteAlert.set(None)
+            //              }
+          )
+        case None =>
+    )
+
     def row(entry: MarketIndexEntry, i: Int, selected: Boolean) =
       val htmlDiv = div()
       entry.readme.foreach(htmlDiv.ref.innerHTML = _)
@@ -100,7 +123,7 @@ object MarketPanel:
           if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
         },
         a(entry.name, float.left, color := "#222", width := "350px", cursor.pointer),
-        entry.tags.map{e=> span(cls := "badgeOM", e)}      ).expandOnclick(
+        entry.tags.map { e => span(cls := "badgeOM", e) }).expandOnclick(
         div(height := "200", backgroundColor := "#333", padding := "20", overflow.scroll,
           child <-- downloadButton(entry, () ⇒ {
             exists(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ entry.name, entry)
@@ -118,7 +141,8 @@ object MarketPanel:
             row(entry, id, isSelected)
           }
         }.getOrElse(Seq(div()))
-      }
+      },
+      overwriteAlert --> overwriteObserver
     )
 
 
