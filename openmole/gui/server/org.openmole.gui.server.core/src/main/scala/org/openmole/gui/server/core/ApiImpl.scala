@@ -457,9 +457,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/")))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
-  private def isPlugged(safePath: SafePath) =
-    import services._
-    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
+//  private def isPlugged(safePath: SafePath) =
+//    import services._
+//    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
   private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
     import services._

@@ -33,21 +33,13 @@ object utils {
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
-  def isPlugin(path: SafePath)(implicit workspace: Workspace): Boolean =
-    PluginManager.isBundle(safePathToFile(path))
 
-
-  def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
-    val safePath = fileToSafePath(file)
-    pluggedList.map {
-      _.projectSafePath
-    }.contains(safePath)
 
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
     path.toFile.listFilesSafe.filter { f ⇒ PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
 
-
-  def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath = parent ++ tnd.name
+  def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath =
+    parent ++ tnd.name
 
   implicit class SafePathDecorator(s: SafePath) {
     def toFile(implicit workspace: Workspace) =
@@ -89,21 +81,31 @@ object utils {
       case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path)
       case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path)
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] = {
+  def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
+    val safePath = fileToSafePath(file)
+    println("sp " + safePath)
+    println("list " + pluggedList.map {
+      _.projectSafePath
+    })
+    pluggedList.map { _.projectSafePath }.contains(safePath)
 
-    val time = if (f.exists) Some(
-      java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
-    )
+
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] =
+    def isPlugin(file: File): Boolean = PluginManager.isBundle(file)
+
+
+    if f.exists()
+    then
+      val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
+      val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+      Some(TreeNodeData(f.getName, f.length, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
     else None
 
-    val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
 
-    time.map(t ⇒ TreeNodeData(f.getName, f.length, t, directory = dirData, pluginState = PluginState(isPlugin(fileToSafePath(f)), isPlugged(f, pluggedList))))
-  }
-
-  def seqfileToSeqTreeNodeData(fs: Seq[File], pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[TreeNodeData] = fs.flatMap { f ⇒
-    fileToTreeNodeData(f, pluggedList)
-  }
+  def seqfileToSeqTreeNodeData(fs: Seq[File], pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[TreeNodeData] =
+    fs.flatMap { f ⇒
+      fileToTreeNodeData(f, pluggedList)
+    }
 
   implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
 
@@ -119,17 +121,16 @@ object utils {
       f.getParentFile match
         case null => computedParents
         case parent =>
-          parent.getName match
+          if canonicalUntil.map(c => java.nio.file.Files.isSameFile(parent.toPath, c.toPath)).getOrElse(false)
+          then computedParents
+          else
+            parent.getName match
             case "" => computedParents
             case parentName =>
               val computed = parentName +: computedParents
-              if canonicalUntil.map(f == _).getOrElse(false)
-              then computed
-              else getParentsArray0(parent, computed)
+              getParentsArray0(parent, computed)
 
-    getParentsArray0(f.getCanonicalFile, Seq()) :+ f.getName
-
-
+    getParentsArray0(f, Seq()) :+ f.getName
 
 
   def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
@@ -137,22 +138,19 @@ object utils {
     val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
     val sorted = treeNodesData.sorted(fileFilter.fileSorting)
-    val nbFiles = treeNodesData.size
+    //val nbFiles = treeNodesData.size
 
     fileFilter.firstLast match
       case FirstLast.First ⇒ sorted
       case FirstLast.Last ⇒ sorted.reverse
 
-
-  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] = {
+  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context
     val fPath = safePathToFile(path).getAbsolutePath
     val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
     allFiles.filter { case f ⇒ f.getName.contains(findString) }.map{f=> (fileToSafePath(f), f.isDirectory)}
-  }
 
-
-  def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath = {
+  def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath =
     val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
     if (toPath.toFile.isDirectory()) toPath.toFile.mkdir
 
@@ -161,7 +159,6 @@ object utils {
     from.copy(replica, followSymlinks = followSymlinks)
 
     replica.toSafePath
-  }
 
   def copyFile(from: File, to: File, create: Boolean = false): Unit = {
     if (create) to.mkdirs()

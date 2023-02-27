@@ -144,10 +144,9 @@ object PluginManager extends JavaLogger {
       case None    ⇒ Iterable.empty
     }
 
-  def isBundle(file: File) = {
+  def isBundle(file: File) =
     def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
     isDirectoryPlugin(file) || (!file.isDirectory && file.isJar)
-  }
 
   def listBundles(path: File): Iterable[File] =
     if (isBundle(path)) List(path)

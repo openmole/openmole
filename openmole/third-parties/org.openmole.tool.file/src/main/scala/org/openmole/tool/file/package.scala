@@ -176,7 +176,8 @@ package file {
         val hasManifestEntry =
           try zip.getEntry("META-INF/MANIFEST.MF") != null
           finally zip.close
-        hasManifestEntry
+
+       hasManifestEntry
       }.getOrElse(false)
 
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
