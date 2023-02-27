@@ -92,11 +92,15 @@ class ExecutionPanel:
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
 
-  def toExecDetails(exec: ExecutionData): ExecutionDetails =
+  def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒
+        panels.notifications.addAndShowNotificaton(Notification.NotificationLevel.Error, f.error.toString, div(stackTrace(f.error)))
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒
+        panels.notifications.addAndShowNotificaton(Notification.NotificationLevel.Info, s"${exec.path.name} was  successfuly completed", div())
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
       case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
@@ -223,7 +227,7 @@ class ExecutionPanel:
       simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),
       showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
       showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
-      div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
+      div(cls := "bi-three-dots-vvainertical execControls", onClick --> { _ => showControls.update(!_) }),
       controls(id, cancel, remove)
     )
 
@@ -292,8 +296,9 @@ class ExecutionPanel:
     def queryState =
       queryingState = true
       try
-        for executionData <- api.executionState(200)
-          yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
+        val execs = (for executionData <- api.executionState(200)
+          yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap)
+        execs
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
@@ -325,8 +330,8 @@ class ExecutionPanel:
 
     def envErrorLevelToColor(level: ErrorStateLevel) =
       level match {
-        case ErrorStateLevel.Error=> "#c8102e"
-        case _=> "#555"
+        case ErrorStateLevel.Error => "#c8102e"
+        case _ => "#555"
       }
 
     def jobRow(e: EnvironmentState) =
@@ -357,7 +362,9 @@ class ExecutionPanel:
                   div(flexRow,
                     cls := "docEntry",
                     margin := "0 4 0 3",
-                    backgroundColor := { if (i % 2 == 0) "#bdadc4" else "#f4f4f4" },
+                    backgroundColor := {
+                      if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
+                    },
                     div(timeToString(e.error.date), minWidth := "100"),
                     a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                     div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))

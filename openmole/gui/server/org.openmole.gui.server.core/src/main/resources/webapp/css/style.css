@@ -524,15 +524,8 @@ padding-bottom: 90px;
 }
 
 .main-container {
-
-  /* give the outermost container a predefined size */
-  top: 0;
-  bottom: 0;
-  left: 0;
   display: flex;
   flex-direction: row;
-
-
   width: 100%;
   height: 100%;
 }
@@ -1068,9 +1061,8 @@ padding-bottom: 90px;
   background-color: #373f46;
   color: white;
   padding: 10px;
-  margin-right:1px;
-  margin-top:1px;
   min-height: 77px;
+  min-width: 80px;
 }
 
 .statusBlockNoColor,
@@ -1276,6 +1268,7 @@ input:checked + .slider:before {
     align-items: center;
     margin-left: 10px;
     font-weight: bolder;
+    min-width:150px;
 }
 
 .mainMenuCurrentGlyph {
@@ -1307,4 +1300,105 @@ input:checked + .slider:before {
   overflow: auto;
   position: absolute;
   width: 100%;
+}
+
+/*Notifications */
+
+
+ /*Notifications*/
+ .notificationCount {
+    position: fixed;
+    top: 0px;
+    right: 550px;
+ }
+
+  .alert {
+    background: #3f3d56;
+    width: 550px;
+    height: 70px;
+  }
+
+#container .alert {
+  transform: translateX(130%);
+  transition: 0.2s;
+  align-items: flex-end;
+}
+
+#container.alert-is-shown .alert {
+  transition: 0.25s;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification {
+    height: 100%;
+    padding: 5px;
+}
+
+.errorNotification {
+    width: 25px;
+    color: #dc3545;
+    font-size: 25;
+    height: 25px;
+    cursor:pointer;
+}
+
+.notificationBackground {
+    background: white;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items:center;
+    justify-content: center;
+}
+
+.notificationSelected {
+    transform: scale(1.6);
+}
+
+.infoNotification {
+    width: 25px;
+    color: #3086b5;
+    font-size: 25;
+    height: 25px;
+    cursor: pointer;
+}
+
+.badgeNotification {
+    width: 18px;
+    height: 18px;
+    border-radius: 10px;
+    background: white;
+    position: relative;
+    left: -6px;
+    bottom: -15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.notificationCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14;
+    font-weight: bold;
+    color: #222;
+    position: initial;
+}
+
+.notifList {
+     margin-top: 30;
+     background: #333;
+     position: absolute;
+     z-index: 500;
+     right: 10px;
+     top: 50px;
+     width: 500px;
+}
+
+.btn-purple {
+  color: #fff;
+  background-color: #795c85;
+  border-color: #795c85;
 }
