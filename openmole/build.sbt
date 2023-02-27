@@ -1308,7 +1308,10 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     copy((openmole / assemble).value, s"/openmole")
     runRaw(
       """apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales singularity-container npm && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
+       echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
+       apt-get update && \
+       apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
     runRaw(
