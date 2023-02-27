@@ -118,6 +118,12 @@ package object stylesheet {
     textAlign := "center"
   ) ++ center(100)
 
+  lazy val flexRow = Seq(
+    display.flex,
+    flexDirection.row,
+    alignItems.center
+  )
+
   lazy val footer = Seq(
     position := "relative",
     clear := "both",
@@ -140,7 +146,7 @@ package object stylesheet {
 
   val partners = Seq(
     width := 270,
-    padding := 50
+    padding := 20
   )
 
   val smallPartners = Seq(

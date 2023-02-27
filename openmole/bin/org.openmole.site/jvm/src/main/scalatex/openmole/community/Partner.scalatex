@@ -2,7 +2,7 @@
 @import org.openmole.site._
 @import org.openmole.site.stylesheet._
 
-@div(stylesheet.centerBox100){
+@div(stylesheet.flexRow){
   @a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank")
   @a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
   @a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")
