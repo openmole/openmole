@@ -45,13 +45,14 @@ class PluginPanel:
               backgroundColor := {
                 if (i % 2 == 0) "white" else "#ececec"
               },
-              div(p.projectSafePath.name, width := "350px"),
+              div(p.projectSafePath.path.mkString("/"), width := "550px"),
               div(
                 cls := "badgeOM",
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
                 panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
                 panels.treeNodePanel.treeNodeManager.computeCurrentSons
+                Panels.closeExpandable
               }
             )
           }

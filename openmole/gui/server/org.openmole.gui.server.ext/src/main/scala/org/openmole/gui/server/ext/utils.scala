@@ -83,10 +83,6 @@ object utils {
 
   def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
     val safePath = fileToSafePath(file)
-    println("sp " + safePath)
-    println("list " + pluggedList.map {
-      _.projectSafePath
-    })
     pluggedList.map { _.projectSafePath }.contains(safePath)
 
 
