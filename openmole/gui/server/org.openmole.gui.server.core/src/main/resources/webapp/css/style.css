@@ -22,6 +22,7 @@ body{
     font-family:gi;
     line-height:1;
     overflow: hidden;
+    font-size:18px;
 }
 
 a {
@@ -945,8 +946,8 @@ padding-bottom: 90px;
     padding: 10px;
     cursor: pointer;
     height: 45px;
-    background-color: #555;
-    color: white;
+    background-color: #dfd7d7;
+    color: #222;
     display: flex;
     min-width: 120px;
     align-items: center;
@@ -955,6 +956,19 @@ padding-bottom: 90px;
     font-weight: bold;
     word-wrap: break-word;
     text-align: center;
+}
+
+.badgeStatus {
+     cursor: pointer;
+     color: white;
+     border: none;
+     border-radius: 30px;
+     margin-left: 100px;
+     width: 70px;
+     display: flex;
+     padding: 10px;
+     align-items: center;
+     justify-content: center;
 }
 
 .badgeUploadModel {
@@ -977,6 +991,7 @@ padding-bottom: 90px;
 .verticalFormItem {
     align-items: center;
     padding-top: 15px;
+    color: #222;
 }
 
 .btn.btn-success {
@@ -1269,6 +1284,7 @@ input:checked + .slider:before {
     margin-left: 10px;
     font-weight: bolder;
     min-width:150px;
+    font-size: 16px;
 }
 
 .mainMenuCurrentGlyph {

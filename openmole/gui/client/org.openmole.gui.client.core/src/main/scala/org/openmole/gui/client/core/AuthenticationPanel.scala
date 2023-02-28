@@ -127,14 +127,14 @@ object AuthenticationPanel {
       def toLabel(test: Test) = {
         val lab = span(
           test.message,
-          cls := "badgeOM"
+          cls := "badgeStatus"
         )
 
         test match {
           case PassedTest(_) ⇒ lab.amend(background :="#a5be21")
           case PendingTest() ⇒ lab.amend(background := "#f1c345")
           case _ ⇒ lab.amend(
-            background := "#c8102e", cursor.pointer,
+            background := "#c8102e", color := "white", cursor.pointer,
             onClick --> { _ ⇒
               currentStack.set(test.error.map(ErrorData.stackTrace).getOrElse(""))
               errorOn.update(!_)
@@ -170,7 +170,7 @@ object AuthenticationPanel {
             }
           ),
           div(
-            glyphSpan(glyph_trash).amend(omsheet.grey, cls := "glyphitem", marginLeft := "25px", onClick --> { _ ⇒ removeAuthentication(testedAuth.auth) }))
+            glyphSpan(glyph_trash).amend(cls := "glyphitem", marginLeft := "50px", color := "#222", fontSize := "18", onClick --> { _ ⇒ removeAuthentication(testedAuth.auth) }))
         )
       }
     }

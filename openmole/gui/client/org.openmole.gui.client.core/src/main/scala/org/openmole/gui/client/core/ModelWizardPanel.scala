@@ -335,8 +335,8 @@ object ModelWizardPanel {
 
 
     def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
-      div(cls := "verticalFormItem", div("Inputs", width := "150px", margin := "15px"), inputTags.render(initialI)),
-      div(cls := "verticalFormItem", div("Outputs", width := "150px", margin := "15px"), outputTags.render(initialO))
+      div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
+      div(cls := "verticalFormItem", div("Outputs", width := "100px", margin := "15px"), outputTags.render(initialO))
     )
 
     def inferProtoTyePair(param: String) = {
