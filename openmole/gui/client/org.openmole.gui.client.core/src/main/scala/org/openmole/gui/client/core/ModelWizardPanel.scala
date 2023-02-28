@@ -177,11 +177,10 @@ object ModelWizardPanel {
                     then tempFile ++ files.head.name
                     else tempFile
                   }
-
                 // TODO may be overwrite should be better handled
                 for
                   f <- from
-                  _ <- api.copyFiles(Seq(f -> (targetPath ++ f.name)), overwrite = true)
+                  _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
                 do
                   fileToUploadPath.set(Some(uploadPath))
                   //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
@@ -239,8 +238,9 @@ object ModelWizardPanel {
                   fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
-                  filePath.set(Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName))
-                  filePath.now().map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
+                  val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)
+                  filePath.set(targetPath)
+                  targetPath.map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
               child <-- labelName.signal.map {
