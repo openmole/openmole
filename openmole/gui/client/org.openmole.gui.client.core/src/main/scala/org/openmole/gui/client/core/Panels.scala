@@ -42,11 +42,7 @@ object Panels:
       case None ⇒ Some(ExpandablePanel(id, el))
     }
   }
-
-  def urlImportPanel(treeNodeManager: TreeNodeManager, bannerAlert: BannerAlert) =
-    new URLImportPanel(
-      treeNodeManager,
-      bannerAlert = bannerAlert)
+  
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)

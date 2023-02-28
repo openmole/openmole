@@ -392,7 +392,7 @@ object ModelWizardPanel {
       else exclusiveMenu.entrySet.update(es => (es :+ 1).distinct)
     )
 
-    div(flexColumn,
+    div(flexColumn, marginTop := "20",
       div(flexRow, width := "100%",
         upButton,
         child <-- modelMetadata.signal.map {
