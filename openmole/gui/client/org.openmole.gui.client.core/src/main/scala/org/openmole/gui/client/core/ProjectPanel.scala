@@ -45,7 +45,7 @@ object ProjectPanel {
         Panels.closeExpandable
       })
     }
-    val emptyProjectButton = button(btn_purple, "Build", onClick --> {_=> emptyProject})
+    val emptyProjectButton = button(btn_purple, marginTop:= "40", "Build", onClick --> {_=> emptyProject})
 
     // 2- Model wizard
     val wizardPanel = ModelWizardPanel.render
@@ -53,10 +53,14 @@ object ProjectPanel {
     // 3- Market place
     val marketPanel = MarketPanel.render
 
+    // 4- From URL
+    val urlPanel = URLImportPanel.render
+
     lazy val theTabs = Tabs.tabs(tabStyle = navbar_pills, isClosable = false)
       .add(Tab("empty", span("Empty project"), emptyProjectButton))
       .add(Tab("wizard", span("From your sources"), wizardPanel))
       .add(Tab("market", span("From examples"), marketPanel))
+      .add(Tab("url", span("From URL"), urlPanel ))
 
     
     div(margin := "20px", flexRow, alignItems.flexStart,
