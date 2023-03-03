@@ -227,7 +227,7 @@ class ExecutionPanel:
       simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),
       showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
       showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
-      div(cls := "bi-three-dots-vvainertical execControls", onClick --> { _ => showControls.update(!_) }),
+      div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
       controls(id, cancel, remove)
     )
 
