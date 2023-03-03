@@ -159,7 +159,7 @@ class TreeNodePanel { panel =>
       ac match {
         case Some(c) ⇒ Seq(c)
         case None ⇒ Seq(
-          button(cls := "btn blue-button", marginLeft := "80px", "Copy", onClick --> { _ ⇒
+          button(cls := "btn btn-primary", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
               val target = treeNodeManager.dirNodeLine.now()

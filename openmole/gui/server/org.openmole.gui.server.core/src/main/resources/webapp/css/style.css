@@ -946,38 +946,49 @@ padding-bottom: 90px;
     padding: 10px;
     cursor: pointer;
     height: 45px;
-    background-color: #dfd7d7;
+    border: 3px solid #3f3d56;
     color: #222;
     display: flex;
     min-width: 120px;
     align-items: center;
     justify-content: center;
-    border-radius: 5px;
+    border-radius: 2px;
     font-weight: bold;
     word-wrap: break-word;
     text-align: center;
+    background-color: #dee1e3;
 }
 
 .badgeStatus {
-     cursor: pointer;
-     color: white;
      border: none;
      border-radius: 30px;
      margin-left: 100px;
-     width: 70px;
+     width: 80px;
      display: flex;
-     padding: 10px;
+     padding: 15px;
      align-items: center;
      justify-content: center;
 }
 
 .badgeUploadModel {
   display: flex;
+  display-direction: row;
   justify-content: center;
   width: 150px;
   padding: 5px;
   margin-left: 10px;
   height: 38px;
+}
+
+.successBadge {
+     color: rgb(166, 191, 38);
+     font-size: 30px;
+     position: relative;
+     display: flex;
+     justify-content: flex-end;
+     align-items: flex-end;
+     margin-left: -10px;
+     margin-bottom: -10px;
 }
 
 /*
@@ -1160,7 +1171,7 @@ textarea#execTextArea {
   height : 450px;
   width : 800px;
   color : "#222";
-  font-size:14px;
+  font-size:16px;
 }
 
 /*Switchs*/
