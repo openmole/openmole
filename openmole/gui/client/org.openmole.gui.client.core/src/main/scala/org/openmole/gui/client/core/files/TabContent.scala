@@ -126,7 +126,7 @@ class TabContent:
   //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
 
   val fontSizeControl = div(cls := "file-content", display.flex, flexDirection.row, alignItems.baseline,
-    fontSizeLink(15),
+    fontSizeLink(17),
     fontSizeLink(25),
     fontSizeLink(35)
   )

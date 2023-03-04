@@ -155,11 +155,52 @@ object ModelWizardPanel {
   //
 
 
+  def successDiv = div(cls := "bi bi-patch-check-fill successBadge")
+
+  object exclusiveMenu {
+
+    val entrySet: Var[Seq[Int]] = Var(Seq())
+    val onoff: Var[Option[Int]] = Var(None)
+
+    def onoffUpdate(currentId: Option[Int], id: Int) = {
+      if (Some(id) == currentId) None
+      else Some(id)
+    }
+
+    def expandAction(i: Option[Int], butId: Int) = {
+      i match {
+        case Some(ii: Int) =>
+          if (ii == butId) true
+          else false
+        case None => false
+      }
+    }
+
+    def entry(name: String, id: Int, panel: HtmlElement) = {
+      div(flexRow,
+        button(
+          name,
+          width := "150px", margin := "10 -5 10 25",
+          btn_primary,
+          onClick --> { _ => onoff.update(i => onoffUpdate(i, id)) }
+        ),
+        child <-- entrySet.signal.map { es =>
+          if es.contains(id)
+          then successDiv
+          else emptyNode
+        },
+        onoff.signal.map(oo => expandAction(oo, id)).expand(panel)
+      )
+    }
+  }
+
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] =
       val fileType: FileType = FileType(safePath.name)
-      plugins.wizardFactories.filter { _.fileType == fileType }.headOption
+      plugins.wizardFactories.filter {
+        _.fileType == fileType
+      }.headOption
 
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
       CoreUtils.withTmpDirectory {
@@ -180,16 +221,18 @@ object ModelWizardPanel {
                 // TODO may be overwrite should be better handled
                 for
                   f <- from
-                  _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
+                  _ <- {
+                    api.copyFiles(Seq(f -> targetPath), overwrite = true)
+                  }
                 do
                   fileToUploadPath.set(Some(uploadPath))
                   //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
                   factory(uploadPath).foreach { f =>
                     f.parse(uploadPath).foreach { mmd =>
                       modelMetadata.set(mmd)
+                      exclusiveMenu.onoff.set(Some(1))
                     }
                   }
-
 
               val fileType: FileType = FileType(uploadPath)
 
@@ -200,26 +243,25 @@ object ModelWizardPanel {
                       case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
                         panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
                       case _ ⇒
-                        copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
+                        copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension)
                     }
+                  }
                 case _ ⇒ copyTo(uploadPath)
 
 
-                  // Move files from tmp to target path
-                  //if (existing.isEmpty) {
-                  
+              // Move files from tmp to target path
+              //if (existing.isEmpty) {
 
 
-
-                //  }
-                //                else {
-                //                  Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/).call().foreach {
-                //                    b ⇒
-                //                      //buildForm(uploadPath)
-                //                      fileToUploadPath() = Some(uploadPath)
-                //                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                //                  }
-                //                }
+              //  }
+              //                else {
+              //                  Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/).call().foreach {
+              //                    b ⇒
+              //                      //buildForm(uploadPath)
+              //                      fileToUploadPath() = Some(uploadPath)
+              //                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+              //                  }
+              //                }
 
               fInput.ref.value = ""
             }
@@ -240,15 +282,23 @@ object ModelWizardPanel {
                   labelName.set(Some(fileName))
                   val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)
                   filePath.set(targetPath)
-                  targetPath.map {  fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
+                  targetPath.map { fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
                 }
               }),
-              child <-- labelName.signal.map {
-                _ match {
-                  case Some(s: String) ⇒ span(s, btn_success, cls := "badgeUploadModel")
-                  case _ => span("Upload", btn_secondary, cls := "badgeUploadModel")
+              div(
+                child <-- labelName.signal.map {
+                  _ match {
+                    case Some(s: String) ⇒
+                      div(
+                        flexRow,
+                        div(s, btn_primary, cls := " badgeUploadModel"),
+                        successDiv
+                      )
+                    case x: Any =>
+                      div("Upload", btn_primary, cls := "badgeUploadModel")
+                  }
                 }
-              }
+              )
             )
         }
       )
@@ -297,46 +347,10 @@ object ModelWizardPanel {
 
     //   def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
 
-    object exclusiveMenu {
-
-      val entrySet: Var[Seq[Int]] = Var(Seq())
-      val onoff: Var[Option[Int]] = Var(None)
-
-      def onoffUpdate(currentId: Option[Int], id: Int) = {
-        if (Some(id) == currentId) None
-        else Some(id)
-      }
-
-      def expandAction(i: Option[Int], butId: Int) = {
-        i match {
-          case Some(ii: Int) =>
-            if (ii == butId) true
-            else false
-          case None => false
-        }
-      }
-
-      def entry(name: String, id: Int, panel: HtmlElement) = {
-        div(flexRow,
-          button(
-            name,
-            width := "150px", margin := "0 25 10 25",
-            cls <-- entrySet.signal.map { es =>
-              "btn " + {
-                if (es.contains(id)) btn_success_string else btn_secondary_string
-              }
-            },
-            onClick --> { _ => onoff.update(i => onoffUpdate(i, id)) }
-          ),
-          onoff.signal.map(oo => expandAction(oo, id)).expand(panel)
-        )
-      }
-    }
-
 
     def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
-      div(cls := "verticalFormItem", div("Inputs", width := "150px", margin := "15px"), inputTags.render(initialI)),
-      div(cls := "verticalFormItem", div("Outputs", width := "150px", margin := "15px"), outputTags.render(initialO))
+      div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
+      div(cls := "verticalFormItem", div("Outputs", width := "100px", margin := "15px"), outputTags.render(initialO))
     )
 
     def inferProtoTyePair(param: String) = {
@@ -373,12 +387,14 @@ object ModelWizardPanel {
             outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
             command = commandeInput.ref.value
           )
-          f.toTask(safePath.parent, modifiedMMD)
+          f.toTask(safePath.parent, modifiedMMD).foreach {_ =>
+            panels.treeNodePanel.treeNodeManager.invalidCache(safePath.parent)
+          }
         }
       }
     }
 
-    val buildButton = button("Build", width := "150px", margin := "0 25 10 25", btn_primary_outline,
+    val buildButton = button("Build", width := "150px", margin := "40 25 10 25", OMTags.btn_purple,
       onClick --> {
         _ ⇒
           filePath.now().foreach { fp =>
@@ -395,20 +411,20 @@ object ModelWizardPanel {
     div(flexColumn, marginTop := "20",
       div(flexRow, width := "100%",
         upButton,
-        child <-- modelMetadata.signal.map {
-          _ match {
-            case Some(mmd: ModelMetadata) =>
-              val text = mmd.language.map {
-                _.name
-              }.getOrElse("Unknown language")
-              div(text, badge_warning, cls := "badgeOM", marginTop := "15px")
-          }
-        },
-        span(display.flex, alignItems.center,color.black, marginLeft := "10px",
+        //        child <-- modelMetadata.signal.map {
+        //          _ match {
+        //            case Some(mmd: ModelMetadata) =>
+        //              val text = mmd.language.map {
+        //                _.name
+        //              }.getOrElse("Unknown language")
+        //              div(text, badge_warning, cls := "badgeOM", marginTop := "15px")
+        //          }
+        //        },
+        span(display.flex, alignItems.center, color.black, marginLeft := "10px",
           child <-- panels.treeNodePanel.treeNodeManager.dirNodeLine.signal.combineWith(filePath.signal).map { case (sp, uploadedPath) =>
             uploadedPath match {
               case Some(p: SafePath) => span("Uploaded in ", browseToPath(p))
-              case _ => span( "Your model will be uploaded in ", browseToPath(sp))
+              case _ => span("Your model will be uploaded in ", browseToPath(sp))
             }
           })),
       exclusiveMenu.entry("Inputs / Ouputs", 1,
@@ -423,7 +439,8 @@ object ModelWizardPanel {
               case _ => emptyNode
             }
           })),
-      exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px")),
+      exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40" +
+        "")),
       buildButton,
       inputTags.tags --> IOObserver
     )

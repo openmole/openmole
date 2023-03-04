@@ -57,7 +57,7 @@ object URLImportPanel:
         download(url)
       }
 
-    lazy val urlInput = input(placeholder := "Project URL (.oms / .tar.gz)", width := "400px", marginTop := "20")
+    lazy val urlInput = inputTag().amend(placeholder := "Project URL (.oms / .tar.gz)", width := "400px", marginTop := "20")
 
     lazy val extractCheckBox = checkbox(false)
 

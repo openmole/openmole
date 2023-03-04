@@ -111,7 +111,7 @@ class EditorPanelUI(fileExtension: FileExtension) {
 
   def onSaved(hash: String) = contentHash = hash
 
-  lazy val lineHeight = Var(15)
+  lazy val lineHeight = Var(17)
 
   val lineHeightObserver = Observer[Int] { (i: Int) ⇒
     editor.container.style.lineHeight = s"${i}px"
