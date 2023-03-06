@@ -20,14 +20,17 @@ package org.openmole.plugin.hook.omrdata
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.tool.types.TypeTool
+import io.circe.*
 
-object ValData {
+object ValData:
+  given Codec[ValData] = Codec.AsObject.derivedConfigured
+
   def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
 
   def toVal(data: ValData) =
     val (ns, n) = Val.parseName(data.name)
     new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
-}
+
 
 case class ValData(name: String, `type`: String)
 

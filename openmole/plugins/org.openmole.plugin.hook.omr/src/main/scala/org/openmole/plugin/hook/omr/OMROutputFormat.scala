@@ -8,7 +8,6 @@ import org.openmole.plugin.tool.json.*
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.*
 import io.circe.*
-import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.syntax.*
 import org.openmole.core.project.Imports.ImportedFile
@@ -19,6 +18,11 @@ object OMROutputFormat {
   def methodFileName = "index.omr"
 
   object Index:
+    given Codec[Import] = Codec.AsObject.derivedConfigured
+    given Codec[Script] = Codec.AsObject.derivedConfigured
+    given Codec[Time] = Codec.AsObject.derivedConfigured
+    given Codec[Index] = Codec.AsObject.derivedConfigured
+
     case class Import(`import`: String, content: String)
     case class Script(content: String, `import`: Option[Seq[Import]])
     case class Time(start: Long, save: Long)
@@ -33,7 +37,7 @@ object OMROutputFormat {
     time: Index.Time)
 
   def methodField = "method"
-  def methodNameField = "name"
+  def methodPluginField = "plugin"
   def omrVersion = "0.2"
 
   implicit def outputFormat[MD](using methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
@@ -57,8 +61,8 @@ object OMROutputFormat {
             import executionContext.timeService
 
             def methodJson =
-              method.asJson.asObject.get.toList.head._2.
-              mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+              method.asJson.mapObject(_.add(methodPluginField, Json.fromString(methodData.plugin(method))))
+                //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
             val script =
               scriptData match
@@ -91,13 +95,13 @@ object OMROutputFormat {
               deepDropNullValues
 
           def parseExistingData(file: File): Option[(String, Seq[String])] =
-            try 
-              if file.exists 
+            try
+              if file.exists
               then
                 val data = indexData(file)
                 Some((data.`execution-id`, data.`data-file`))
               else None
-            catch 
+            catch
              case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
 
           def clean(methodFile: File, data: Seq[String]) =
@@ -144,7 +148,7 @@ object OMROutputFormat {
     val j = parse(file.content(gz = true)).toTry.get
     j.hcursor.
       downField(methodField).
-      downField( methodNameField).as[String].
+      downField( methodPluginField).as[String].
       toTry.get
 
 }
