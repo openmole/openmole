@@ -96,11 +96,8 @@ class ExecutionPanel:
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionState.Failed ⇒ panels.notifications.addAndShowNotificaton(NotificationLevel.Error, f.error.toString, div(stackTrace(f.error)))
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒
-        panels.notifications.addAndShowNotificaton(NotificationLevel.Info, s"${exec.path.name} was  successfuly completed", div())
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
       case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)

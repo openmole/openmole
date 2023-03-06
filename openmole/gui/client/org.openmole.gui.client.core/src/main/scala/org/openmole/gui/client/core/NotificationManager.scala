@@ -46,14 +46,12 @@ class NotificationManager:
     showNotification(last)
 
   def showNotification(notification: Notification) =
-    showNotfications.set(true)
     currentListType.set(Some(notification.level))
     currentID.set(notification.id)
 
   def hideNotificationManager =
     currentID.set(None)
     currentListType.set(None)
-    showNotfications.set(false)
 
   def showGetItNotification(level: NotificationLevel, title: String, body: Div = div()) =
     lazy val notif: Notification =
