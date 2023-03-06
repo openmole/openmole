@@ -94,7 +94,7 @@ object MarketPanel:
       mIO match
         case Some(mI: MarketIndexEntry) =>
           panels.notifications.addNotification(
-            Notification.NotificationLevel.Error,
+            NotificationLevel.Error,
             s"${mI.name}  already exists",
             div(btnGroup,
               button(btn_danger, "Overwrite"), onClick --> { _ =>

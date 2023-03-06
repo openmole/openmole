@@ -32,7 +32,7 @@ import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.data.DataUtils.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.openmole.gui.client.tool.{OMTags, OptionsDiv, TagBadge}
+import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
 
@@ -241,7 +241,7 @@ object ModelWizardPanel {
                   api.extract(tempFile ++ fileName).foreach {
                     _ match {
                       case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
-                        panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e))
+                        panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "An error occurred during extraction", div(ErrorData.stackTrace(e)))
                       case _ ⇒
                         copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension)
                     }
@@ -394,6 +394,8 @@ object ModelWizardPanel {
       }
     }
 
+    val overwriteSwitch = Component.Switch("Overwrite exitsting files", true, "autoCleanExecSwitch")
+
     val buildButton = button("Build", width := "150px", margin := "40 25 10 25", OMTags.btn_purple,
       onClick --> {
         _ ⇒
@@ -441,7 +443,10 @@ object ModelWizardPanel {
           })),
       exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40" +
         "")),
-      buildButton,
+      div(
+        buildButton,
+        overwriteSwitch.element
+      ),
       inputTags.tags --> IOObserver
     )
   }

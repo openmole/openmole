@@ -18,8 +18,6 @@ package org.openmole.gui.client.core
  */
 
 
-
-import org.openmole.gui.client.core.alert.{BannerAlert, BannerLevel}
 import org.openmole.gui.client.ext.OMFetch
 
 import scala.concurrent.duration.*
@@ -32,7 +30,7 @@ import org.openmole.gui.shared.api.*
 
 
 
-class Fetch(alert: (String, BannerLevel) => Unit):
+class Fetch(panels: Panels):
 
   def future[O](
     f: CoreAPIClientImpl => Future[O],
@@ -43,9 +41,9 @@ class Fetch(alert: (String, BannerLevel) => Unit):
       f,
       timeout = timeout,
       warningTimeout = warningTimeout,
-      onTimeout = () => alert("The request timed out. Please check your connection.", BannerLevel.Critical),
-      onWarningTimeout = () => alert("The request is very long. Please check your connection.", BannerLevel.Regular),
-      onFailed = t => alert(s"The request failed with error $t", BannerLevel.Critical)
+      onTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "The request timed out. Please check your connection."),
+      onWarningTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "The request is very long. Please check your connection."),
+      onFailed = t => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, s"The request failed with error $t")
     )
 
 //  def apply[O, R](

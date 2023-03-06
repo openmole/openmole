@@ -1341,7 +1341,7 @@ input:checked + .slider:before {
 
   .alert {
     background: #3f3d56;
-    width: 550px;
+    width: 600px;
     height: 70px;
   }
 
@@ -1360,6 +1360,8 @@ input:checked + .slider:before {
 .notification {
     height: 100%;
     padding: 5px;
+    background: white;
+    color: #222;
 }
 
 .errorNotification {
@@ -1428,4 +1430,14 @@ input:checked + .slider:before {
   color: #fff;
   background-color: #795c85;
   border-color: #795c85;
+}
+
+.importURL {
+    color: #222;
+}
+
+.getItNotification {
+    background: white;
+    color: #222;
+    margin: 20px;
 }

@@ -16,6 +16,7 @@ import com.raquo.laminar.api.L.*
 import Waiter.*
 import com.raquo.laminar.nodes.ReactiveElement.isActive
 import org.openmole.gui.client.core.Panels.closeExpandable
+import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.api.*
 
 object URLImportPanel:
@@ -33,24 +34,33 @@ object URLImportPanel:
 
     val overwriteAlert: Var[Option[SafePath]] = Var(None)
 
-    def exists(sp: SafePath, ifNotExists: () ⇒ {})(using api: ServerAPI, basePath: BasePath) =
-      api.exists(sp).foreach { b ⇒
-        if (b) overwriteAlert.set(Some(sp))
-        else ifNotExists()
+    def download(url: String) =
+      val sp = manager.dirNodeLine.now()
+
+      def doDownload(url: String) =
+        downloading.set(Processing())
+        api.downloadHTTP(url, sp, extractCheckBox.isChecked).foreach { d ⇒
+          downloading.set(Processed())
+          d match {
+            case None ⇒
+              manager.invalidCurrentCache
+              Panels.closeExpandable
+            case Some(ex) ⇒
+              panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "Download failed", div(ErrorData.stackTrace(ex)))
+          }
+        }
+
+      overwriteSwitch.isChecked match {
+        case true => doDownload(url)
+        case false =>
+          api.exists(sp).foreach {
+            _ match
+              case true =>
+                panels.notifications.showGetItNotification(NotificationLevel.Error, s"${sp.name}/${url.split("/").last} already exists", div("Turn overwrite to true to fix this problem"))
+              case false => doDownload(url)
+          }
       }
 
-    def download(url: String) = {
-      downloading.set(Processing())
-      api.downloadHTTP(url, manager.dirNodeLine.now(), extractCheckBox.ref.checked).foreach { d ⇒
-        downloading.set(Processed())
-        d match {
-          case None ⇒
-            manager.invalidCurrentCache
-            Panels.closeExpandable
-          case Some(ex) ⇒ //FIXME: bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
-        }
-      }
-    }
 
     def deleteFileAndDownloadURL(sp: SafePath, url: String) =
       api.deleteFiles(Seq(sp)).foreach { d ⇒
@@ -59,36 +69,19 @@ object URLImportPanel:
 
     lazy val urlInput = inputTag().amend(placeholder := "Project URL (.oms / .tar.gz)", width := "400px", marginTop := "20")
 
-    lazy val extractCheckBox = checkbox(false)
+    lazy val extractCheckBox = Component.Switch("Extract archive (where applicable)", true, "importURL")
+    lazy val overwriteSwitch = Component.Switch("Overwrite exitsting files", true, "importURL")
 
     val downloadButton = button(
       cls := "btn btn-purple",
       downloading.withTransferWaiter { _ ⇒ span("Download") },
-      height := "38", width := "150", marginTop:= "20",
+      height := "38", width := "150", marginTop := "20",
       onClick --> { _ ⇒ download(urlInput.ref.value) }
     )
 
-    def alertObserver = Observer[Option[SafePath]] { osp ⇒
-      osp match {
-        case Some(sp: SafePath) ⇒
-          panels.alertPanel.string(
-            sp.name + " already exists. Overwrite ? ",
-            () ⇒ {
-              overwriteAlert.set(None)
-              deleteFileAndDownloadURL(manager.dirNodeLine.now(), urlInput.ref.value)
-            }, () ⇒ {
-              overwriteAlert.set(None)
-            }, CenterPagePosition
-          )
-          div
-        case _ ⇒
-      }
-    }
-
     div(flexColumn,
       urlInput,
-      div(flexRow, marginTop:= "20", extractCheckBox, div("Extract archive (where applicable)", paddingLeft := "10", color := "#222")),
-      downloadButton,
-      //FIXME
-      // overwriteAlert --> alertObserver
+      extractCheckBox.element.amend(marginTop := "50"),
+      overwriteSwitch.element,
+      downloadButton
     )
