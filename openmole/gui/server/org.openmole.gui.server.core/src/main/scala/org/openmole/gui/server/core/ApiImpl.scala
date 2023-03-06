@@ -570,7 +570,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             if (extract) {
               val dest = safePathToFile(path)
               val tis = new TarInputStream(new GZIPInputStream(is))
-              try tis.extract(dest)
+              try tis.extract(dest, overwrite = true)
               finally tis.close
             }
             else {
