@@ -15,27 +15,63 @@ import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
 
+enum NotificationLevel:
+  case Info, Error
 
-object NotificationContent:
-  enum NotificationLevel:
-    case Info, Error
+//case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
+//import NotificationContent._
 
-
-import NotificationContent._
-
-case class NotificationContent(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None)
+case class Notification(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
 class NotificationManager:
 
   val showNotfications = Var(false)
-  val notifications: Var[Seq[NotificationContent]] = Var(Seq())
+  val notifications: Var[Seq[Notification]] = Var(Seq())
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
+  val currentID: Var[Option[Long]] = Var(None)
 
-  def filteredStack(stack: Seq[NotificationContent], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
+  def filteredStack(stack: Seq[Notification], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
+  def remove(notification: Notification) = notifications.update(s => s.filterNot(_.id == notification.id))
+
+  def addNotification(level: NotificationLevel, title: String, body: Div) =
+    val notif = Notification(level, title, div(body, cls := "notification"))
+    notifications.update { s =>
+      (s :+ notif)
+    }
+    notif
+
+  def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div = div()) =
+    val last = addNotification(level, title, body)
+    showNotification(last)
+
+  def showNotification(notification: Notification) =
+    showNotfications.set(true)
+    currentListType.set(Some(notification.level))
+    currentID.set(notification.id)
+
+  def hideNotificationManager =
+    currentID.set(None)
+    currentListType.set(None)
+    showNotfications.set(false)
+
+  def showGetItNotification(level: NotificationLevel, title: String, body: Div = div()) =
+    lazy val notif: Notification =
+      addNotification(level, title,
+        div(
+          body.amend(cls := "getItNotification"),
+          button(btn_primary, "Get it",
+            margin := "15", float.right,
+            onClick --> { _ =>
+              remove(notif)
+              hideNotificationManager
+            })
+        )
+      )
+    showNotification(notif)
 
   def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
-    val currentIds = s.flatMap(_.serverId).toSet
+    val currentIds = s.flatMap(_.id).toSet
 
     val newEvents =
       for
@@ -49,20 +85,20 @@ class NotificationManager:
                 case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString("/")} was completed at ${e.date}""")
                 case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString("/")} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
 
-            NotificationContent(NotificationLevel.Info, title, div(body, cls := "notification"), serverId = Some(NotificationEvent.id(event)))
+            Notification(NotificationLevel.Info, title, div(body, cls := "notification"), id = Some(NotificationEvent.id(event)))
 
     newEvents ++ s
   }
 
   def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-    s :+ NotificationContent(level, title, div(body, cls := "notification"))
+    s :+ Notification(level, title, div(body, cls := "notification"))
   }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
     notifications.update {
       s =>
         val (cleared, kept) = s.partition(_.level == level)
-        val serverClear = cleared.flatMap(_.serverId)
+        val serverClear = cleared.flatMap(_.id)
         if !serverClear.isEmpty then api.clearNotification(serverClear)
         kept
     }
@@ -84,11 +120,23 @@ class NotificationManager:
                 ),
                 fStack.zipWithIndex.map { case (s, i) =>
                   div(
-                    backgroundColor := {
-                      if (i % 2 == 0) "#ccc" else "#f4f4f4"
-                    },
-                    div(s.title, fontWeight.bold, padding := "10", cursor.pointer)
-                  ).expandOnclick(s.body.amend(color := "white"))
+                    div(backgroundColor := "white",
+                      div(s.title,
+                        fontWeight.bold, padding := "10", cursor.pointer, fontWeight.bold, borderLeft := "15px solid #dc3545",
+                        backgroundColor := {
+                          if (i % 2 == 0) "#ccc" else "#f4f4f4"
+                        }
+                      ),
+                      onClick --> { _ =>
+                        currentID.update(_ match {
+                          case Some(i) if Some(i) == s.id => None
+                          case None => s.id
+                        }
+                        )
+                      },
+                      currentID.signal.map { i => i == s.id }.expand(s.body.amend(color := "white"))
+                    )
+                  )
                 }
               )
           case _ => emptyNode
@@ -97,7 +145,7 @@ class NotificationManager:
     )
 
 
-  def notifTopIcon(notifCls: String, st: Seq[NotificationContent], notificationLevel: NotificationLevel) =
+  def notifTopIcon(notifCls: String, st: Seq[Notification], notificationLevel: NotificationLevel) =
     val nList = filteredStack(st, notificationLevel)
 
     def trigger = onClick --> { _ =>
@@ -122,7 +170,7 @@ class NotificationManager:
 
   def render =
     div(flexRow, alignItems.flexEnd,
-      notifications.toObservable --> Observer[Seq[NotificationContent]] { n => showNotfications.set(!n.isEmpty) },
+      notifications.toObservable --> Observer[Seq[Notification]] { n => showNotfications.set(!n.isEmpty) },
       idAttr := "container",
       cls.toggle("alert-is-shown") <-- showNotfications.signal,
       div(display.flex, flexDirection.column,

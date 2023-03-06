@@ -93,11 +93,14 @@ class ExecutionPanel:
   val showControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
-  def toExecDetails(exec: ExecutionData): ExecutionDetails =
+  def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ panels.notifications.addAndShowNotificaton(NotificationLevel.Error, f.error.toString, div(stackTrace(f.error)))
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒
+        panels.notifications.addAndShowNotificaton(NotificationLevel.Info, s"${exec.path.name} was  successfuly completed", div())
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
       case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
@@ -292,7 +295,7 @@ class ExecutionPanel:
 
     def queryState =
       queryingState = true
-      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
+      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
@@ -408,7 +411,9 @@ class ExecutionPanel:
                 details.get(idValue) match
                   case Some(st) =>
                     def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+
                     def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
+
                     div(buildExecution(idValue, st, cancel, remove))
                   case None => div()
               }
@@ -420,26 +425,26 @@ class ExecutionPanel:
     )
 
 
-//lazy val executionTable = scaladget.bootstrapnative.Table(
-//  //    for {
-//  //      execMap ← executionInfo
-//  //      staticInf ← staticInfo
-//  //    } yield {
-//  //      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
-//  //        case (execID, info) ⇒
-//  //          val duration: Duration = (info.duration milliseconds)
-//  //          val h = (duration).toHours
-//  //          val m = ((duration) - (h hours)).toMinutes
-//  //          val s = (duration - (h hours) - (m minutes)).toSeconds
-//  //
-//  //          val durationString =
-//  //            s"""${
-//  //              h.formatted("%d")
-//  //            }:${
-//  //              m.formatted("%02d")
-//  //            }:${
-//  //              s.formatted("%02d")
-//  //            }"""
+  //lazy val executionTable = scaladget.bootstrapnative.Table(
+  //  //    for {
+  //  //      execMap ← executionInfo
+  //  //      staticInf ← staticInfo
+  //  //    } yield {
+  //  //      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
+  //  //        case (execID, info) ⇒
+  //  //          val duration: Duration = (info.duration milliseconds)
+  //  //          val h = (duration).toHours
+  //  //          val m = ((duration) - (h hours)).toMinutes
+  //  //          val s = (duration - (h hours) - (m minutes)).toSeconds
+  //  //
+  //  //          val durationString =
+  //  //            s"""${
+  //  //              h.formatted("%d")
+  //  //            }:${
+  //  //              m.formatted("%02d")
+  //  //            }:${
+  //  //              s.formatted("%02d")
+  //  //            }"""
 
 
 
