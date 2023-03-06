@@ -70,7 +70,7 @@ object ExecutionPanel:
                                output: String = "")
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
-  type Execs = Map[ExecutionId, ExecutionDetails]
+  type Executions = Map[ExecutionId, ExecutionDetails]
 
   def open(using api: ServerAPI, path: BasePath, panels: Panels) =
     Panels.expandTo(panels.executionPanel.render, 4)
@@ -91,6 +91,7 @@ class ExecutionPanel:
   val showDurationOnCores = Var(false)
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
+  val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
@@ -268,7 +269,7 @@ class ExecutionPanel:
   lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
 
   def render(using panels: Panels, api: ServerAPI, path: BasePath) =
-    def filterExecutions(execs: Execs): (Execs, Seq[ExecutionId]) =
+    def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
       import ExecutionPanel.ExecutionDetails.State
       val (ids, cleanIds) =
         if autoRemoveFailed.isChecked
@@ -295,10 +296,7 @@ class ExecutionPanel:
 
     def queryState =
       queryingState = true
-      try
-        val execs = (for executionData <- api.executionState(200)
-          yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap)
-        execs
+      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
@@ -393,30 +391,33 @@ class ExecutionPanel:
     div(
       columnFlex, width := "100%", marginTop := "20",
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
-      children <--
-        (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal combineWith currentOpenSimulation.signal).flatMap { (_, _, _, id) =>
-          EventStream.fromFuture(queryState).map { allDetails =>
-            val (details, toClean) = filterExecutions(allDetails)
+      (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable --> Observer { _ =>
+        if !queryingState
+        then
+          queryState.foreach { allDetails =>
+            val (d, toClean) = filterExecutions(allDetails)
             toClean.foreach(api.removeExecution)
-            Seq(
-              div(rowFlex, justifyContent.center,
-                details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
-              ),
-              autoRemoveFailed.element,
-              div(
-                id.map { idValue =>
-                  details.get(idValue) match
-                    case Some(st) =>
-                      def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
-
-                      def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
-
-                      div(buildExecution(idValue, st, cancel, remove))
-                    case None => div()
-                }
-              )
-            )
+            details.set(d)
           }
+      },
+      children <--
+        (details.signal combineWith currentOpenSimulation.signal).map { (details, id) =>
+          Seq(
+            div(rowFlex, justifyContent.center,
+              details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
+            ),
+            autoRemoveFailed.element,
+            div(
+              id.map { idValue =>
+                details.get(idValue) match
+                  case Some(st) =>
+                    def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+                    def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
+                    div(buildExecution(idValue, st, cancel, remove))
+                  case None => div()
+              }
+            )
+          )
         },
       showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable --> Observer { _ => showExpander.set(None) }
