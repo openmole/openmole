@@ -8,31 +8,35 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, GUIPlugins, ServerAPI}
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
+import java.text.SimpleDateFormat
 
 enum NotificationLevel:
   case Info, Error
 
-import Notification._
+//case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
+//import NotificationContent._
 
-case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
+case class Notification(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
 class NotificationManager:
+
   val showNotfications = Var(false)
-  val stack: Var[Seq[Notification]] = Var(Seq())
+  val notifications: Var[Seq[Notification]] = Var(Seq())
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
-  val currentID: Var[Option[String]] = Var(None)
+  val currentID: Var[Option[Long]] = Var(None)
 
   def filteredStack(stack: Seq[Notification], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
-  def remove(notification: Notification) = stack.update(s => s.filterNot(_.id == notification.id))
+  def remove(notification: Notification) = notifications.update(s => s.filterNot(_.id == notification.id))
 
   def addNotification(level: NotificationLevel, title: String, body: Div) =
     val notif = Notification(level, title, div(body, cls := "notification"))
-    stack.update { s =>
+    notifications.update { s =>
       (s :+ notif)
     }
     notif
@@ -44,7 +48,7 @@ class NotificationManager:
   def showNotification(notification: Notification) =
     showNotfications.set(true)
     currentListType.set(Some(notification.level))
-    currentID.set(Some(notification.id))
+    currentID.set(notification.id)
 
   def hideNotificationManager =
     currentID.set(None)
@@ -66,14 +70,43 @@ class NotificationManager:
       )
     showNotification(notif)
 
-  def clearNotifications(level: NotificationLevel) = {
-    stack.update(s => s.filterNot(_.level == level))
+  def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
+    val currentIds = s.flatMap(_.id).toSet
+
+    val newEvents =
+      for
+        event <- events
+        if !currentIds.contains(NotificationEvent.id(event))
+      yield
+        event match
+          case e: NotificationEvent.MoleExecutionFinished =>
+            val (title, body) =
+              e.error match
+                case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString("/")} was completed at ${e.date}""")
+                case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString("/")} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
+
+            Notification(NotificationLevel.Info, title, div(body, cls := "notification"), id = Some(NotificationEvent.id(event)))
+
+    newEvents ++ s
   }
 
-  val notificationList =
+  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
+    s :+ Notification(level, title, div(body, cls := "notification"))
+  }
+
+  def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
+    notifications.update {
+      s =>
+        val (cleared, kept) = s.partition(_.level == level)
+        val serverClear = cleared.flatMap(_.id)
+        if !serverClear.isEmpty then api.clearNotification(serverClear)
+        kept
+    }
+
+  def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
       cls := "notifList",
-      child <-- currentListType.signal.combineWith(stack.signal).map { case (level, stack) =>
+      child <-- (currentListType.signal combineWith notifications.signal).map { case (level, stack) =>
         level match {
           case Some(n: NotificationLevel) =>
             val fStack = filteredStack(stack, n)
@@ -96,12 +129,12 @@ class NotificationManager:
                       ),
                       onClick --> { _ =>
                         currentID.update(_ match {
-                          case Some(i) if i == s.id => None
-                          case None => Some(s.id)
+                          case Some(i) if Some(i) == s.id => None
+                          case None => s.id
                         }
                         )
                       },
-                      currentID.signal.map { i => i == Some(s.id) }.expand(s.body.amend(color := "white"))
+                      currentID.signal.map { i => i == s.id }.expand(s.body.amend(color := "white"))
                     )
                   )
                 }
@@ -137,12 +170,13 @@ class NotificationManager:
 
   def render =
     div(flexRow, alignItems.flexEnd,
+      notifications.toObservable --> Observer[Seq[Notification]] { n => showNotfications.set(!n.isEmpty) },
       idAttr := "container",
       cls.toggle("alert-is-shown") <-- showNotfications.signal,
       div(display.flex, flexDirection.column,
         cls := "alert",
         div(display.flex, flexDirection.column,
-          child <-- stack.signal.map { s =>
+          child <-- notifications.signal.map { s =>
             div(display.flex, flexDirection.row,
               notifTopIcon("bi-x-square-fill errorNotification", s, NotificationLevel.Error),
               notifTopIcon("bi-info-square-fill infoNotification", s, NotificationLevel.Info).amend(marginLeft := "30")

@@ -21,9 +21,11 @@ import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.{TreeNodeData, *}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.NotificationEvent.id
 import org.scalajs.dom.*
 
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 import scala.concurrent.duration.*
 import scala.concurrent.Future
 import concurrent.ExecutionContext.Implicits.global
@@ -54,6 +56,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   val files = scala.collection.mutable.HashMap[SafePath, MemoryFile]()
   val executions = scala.collection.mutable.HashMap[ExecutionId, ExecutionData]()
   val plugins = scala.collection.mutable.HashMap[SafePath, Plugin]()
+  val notification = scala.collection.mutable.ListBuffer[NotificationEvent]()
+  val notificationId = new AtomicLong()
 
   override def size(safePath: SafePath)(using BasePath): Future[Long] =
     Future.successful(files(safePath).content.size)
@@ -161,11 +165,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     val id = ExecutionId()
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output", 10000L)
+    notification += NotificationEvent.MoleExecutionFinished(id, script, None, "Friday 42, 2222", System.currentTimeMillis(),  notificationId.getAndIncrement())
+
     Future.successful(id)
 
-  override def clearEnvironmentErrors(environment: EnvironmentId)(using BasePath): Future[Unit] = Future.successful(())
+  override def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] =
+  override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] =
     Future.successful(
       Seq(
         EnvironmentErrorGroup(EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, ErrorStateLevel.Error), 1L, 3),
@@ -237,4 +243,10 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     val analysisPlugin = Map[String, MethodAnalysisPlugin]()
     Future.successful(f(GUIPlugins(authFact, wizardFactories, analysisPlugin)))
 
+  override def listNotification()(using BasePath): Future[Seq[NotificationEvent]] = Future.successful(notification.toSeq)
 
+  override def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit] =
+    val kept = notification.filterNot(n => ids.contains(NotificationEvent.id(n)))
+    notification.clear()
+    notification.addAll(kept)
+    Future.successful(())

@@ -1,6 +1,7 @@
 package org.openmole.plugin.method.evolution.data
 
-import org.openmole.plugin.hook.omrdata.{MethodMetaData, ValData}
+import io.circe.derivation
+import org.openmole.plugin.hook.omrdata.*
 
 case class SaveOption(
   frequency: Option[Long],
@@ -8,14 +9,11 @@ case class SaveOption(
 
 object EvolutionMetadata {
 
-  import io.circe._
-  import io.circe.parser._
-  import io.circe.generic.auto._
-  import io.circe.`export`.Exported
+  import io.circe.*
   import org.openmole.plugin.hook.omr.*
 
+  given Codec[EvolutionMetadata] = Codec.AsObject.derivedConfigured
   given MethodMetaData[EvolutionMetadata] = MethodMetaData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
-  given Exported[Decoder[EvolutionMetadata]] = io.circe.generic.auto.deriveDecoder[EvolutionMetadata]
 
   enum GenomeBoundData:
     case IntBound(value: ValData, low: Int, high: Int, intervalType: GenomeBoundData.IntervalType)
@@ -24,7 +22,8 @@ object EvolutionMetadata {
     case DoubleSequenceBound(value: ValData, low: Seq[Double], high: Seq[Double], intervalType: GenomeBoundData.IntervalType)
     case Enumeration(value: ValData, values: Seq[String])
 
-  object GenomeBoundData {
+  object GenomeBoundData:
+    given Codec[GenomeBoundData] = Codec.AsObject.derivedConfigured
 
     enum IntervalType:
       case Continuous, Discrete
@@ -32,14 +31,15 @@ object EvolutionMetadata {
     export IntervalType.{Continuous, Discrete}
 
     def name(data: GenomeBoundData) =
-      data match {
+      data match
         case d: DoubleBound         ⇒ d.value.name
         case d: IntBound            ⇒ d.value.name
         case d: DoubleSequenceBound ⇒ d.value.name
         case d: IntSequenceBound    ⇒ d.value.name
         case d: Enumeration         ⇒ d.value.name
-      }
-  }
+
+  object Objective:
+    given Codec[Objective] = Codec.AsObject.derivedConfigured
 
   case class Objective(
     name:     String,
@@ -52,6 +52,10 @@ object EvolutionMetadata {
 
   object PSE:
     type Grid = Seq[PSE.GridAxe]
+
+    object GridAxe:
+      given Codec[GridAxe] = Codec.AsObject.derivedConfigured
+
     case class GridAxe(objective: String, grid: Seq[Double])
 
   case class PSE(

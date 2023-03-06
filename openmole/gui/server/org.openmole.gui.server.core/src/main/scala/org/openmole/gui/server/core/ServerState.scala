@@ -37,28 +37,35 @@ case class RunningEnvironment(
   executionActivity: ExecutionActivity = ExecutionActivity())
 
 
-object ExecutionRegistry:
+object ServerState:
   case class ExecutionInfo(path: SafePath, script: String, startDate: Long, output: StringPrintStream, moleExecution: Option[ExecutionState.Failed | MoleExecution])
 
-class ExecutionRegistry {
+class ServerState:
 
   import ExecutionState._
 
-  private lazy val executionInfo = TMap[ExecutionId, ExecutionRegistry.ExecutionInfo]()
-  private lazy val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
-  private lazy val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
+  private val executionInfo = TMap[ExecutionId, ServerState.ExecutionInfo]()
+  private val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
+  private val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
+  private val notificationEvents = TSet[NotificationEvent]()
+  private val notificationEventId = Ref[Long](0)
 
   private def updateRunningEnvironment(envId: EnvironmentId)(update: RunningEnvironment ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
     runningEnvironments.get(envId).foreach { env ⇒ runningEnvironments(envId) = update(env) }
   }
 
-//  def addCompilation(ex: ExecutionId, future: Future[_]) = atomic { implicit ctx ⇒
-//    moleExecutions.put(ex, Compilation(future))
-//  }
-
-//  def compiled(ex: ExecutionId) = atomic { implicit ctx ⇒
-//    instantiation.put(ex, instantiation.get(ex).get.copy(compiled = true))
-//  }
+  def moleExecutionListener(execId: ExecutionId, script: SafePath): EventDispatcher.Listner[MoleExecution] =
+    case (ex: MoleExecution, MoleExecution.Finished(_)) =>
+      val time = System.currentTimeMillis()
+      addNotification(id =>
+        NotificationEvent.MoleExecutionFinished(
+          execId,
+          script,
+          ex.exception.map(t => ErrorData(MoleExecution.MoleExecutionFailed.exception(t))),
+          utils.formatDate(time),
+          time,
+          id)
+      )
 
   def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] = {
     case (env: Environment, bdl: BeginDownload) ⇒
@@ -139,7 +146,7 @@ class ExecutionRegistry {
     }
   }
 
-  def addExecutionInfo(key: ExecutionId, info: ExecutionRegistry.ExecutionInfo) = atomic { implicit ctx ⇒
+  def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) = atomic { implicit ctx ⇒
     executionInfo(key) = info
   }
 
@@ -286,4 +293,18 @@ class ExecutionRegistry {
     executions.toSeq.sortBy(_.startDate)
   }
 
-}
+  def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx ⇒
+    val id = notificationEventId()
+    notificationEventId.update(id + 1)
+    notificationEvents.add(notificationEvent(id))
+  }
+
+  def clearNotification(ids: Seq[Long]) = atomic { implicit ctx ⇒
+    if ids.isEmpty
+    then notificationEvents.clear()
+    else
+      val idSet = ids.toSet
+      notificationEvents.filterInPlace(e => !idSet.contains(NotificationEvent.id(e)))
+  }
+
+  def listNotification() = notificationEvents.single.toSeq

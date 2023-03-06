@@ -33,7 +33,11 @@ object SensitivitySaltelli {
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
   object MetaData:
+    import io.circe.*
+
+    given Codec[MetaData] = Codec.AsObject.derivedConfigured
     given MethodMetaData[MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName)
+    
     def apply(method: Method) =
       new MetaData(
         inputs = method.inputs.map(_.prototype).map(ValData.apply),

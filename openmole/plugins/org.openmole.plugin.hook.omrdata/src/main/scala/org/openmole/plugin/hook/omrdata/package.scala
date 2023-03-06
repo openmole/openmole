@@ -17,4 +17,6 @@ package org.openmole.plugin.hook.omrdata
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export io.circe.generic.auto.*
+implicit def omrCirceConfiguration: io.circe.derivation.Configuration =
+  io.circe.derivation.Configuration.default.withDiscriminator("type").withKebabCaseMemberNames
+

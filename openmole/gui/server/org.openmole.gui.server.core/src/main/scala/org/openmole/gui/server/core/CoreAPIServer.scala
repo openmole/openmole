@@ -153,6 +153,12 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val removePluginRoute =
     removePlugin.implementedBy { p => apiImpl.removePlugin(p) }
 
+  val listNotificationRoute =
+    listNotification.implementedBy { p => apiImpl.listNotification }
+
+  val clearNotificationRoute =
+    clearNotification.implementedBy { s => apiImpl.clearNotification(s) }
+
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
@@ -187,7 +193,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       getMarketEntryRoute,
       omrMethodRoute,
       addPluginRoute,
-      removePluginRoute
+      removePluginRoute,
+      listNotificationRoute,
+      clearNotificationRoute
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

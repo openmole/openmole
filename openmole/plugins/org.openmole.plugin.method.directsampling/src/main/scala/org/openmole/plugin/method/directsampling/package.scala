@@ -27,10 +27,14 @@ import org.openmole.plugin.tool.pattern.*
 import org.openmole.plugin.hook.file.*
 import org.openmole.plugin.hook.omr.*
 import org.openmole.plugin.hook.omrdata.*
-import io.circe.generic.auto.*
 
 object DirectSamplingMetadata:
   def method = "direct sampling"
+
+  import io.circe.*
+
+  given Codec[Aggregation] = Codec.AsObject.derivedConfigured
+  given Codec[DirectSamplingMetadata] = Codec.AsObject.derivedConfigured
 
   given MethodMetaData[DirectSamplingMetadata] = MethodMetaData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
 
@@ -38,6 +42,7 @@ object DirectSamplingMetadata:
   case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata
 
   def aggregation(ag: org.openmole.plugin.method.directsampling.Aggregation) = Aggregation(ValData(ag.value), ValData(ag.outputVal))
+
 
   case class Aggregation(output: ValData, aggregated: ValData)
 
