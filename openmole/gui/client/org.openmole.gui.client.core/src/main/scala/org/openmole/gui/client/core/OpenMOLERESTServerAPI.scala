@@ -44,8 +44,8 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.future(_.removeExecution(id).future)
   override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = fetch.future(_.compileScript(script).future, timeout = Some(600 seconds), warningTimeout = None)
   override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] = fetch.future(_.launchScript(script, validate).future, timeout = Some(120 seconds), warningTimeout = Some(30 seconds))
-  override def clearEnvironmentErrors(environment: EnvironmentId)(using BasePath): Future[Unit] = fetch.future(_.clearEnvironmentErrors(environment).future)
-  override def listEnvironmentErrors(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] = fetch.future(_.listEnvironmentErrors(environment, lines).future)
+  override def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit] = fetch.future(_.clearEnvironmentErrors(environment).future)
+  override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] = fetch.future(_.listEnvironmentErrors(environment, lines).future)
   override def listPlugins()(using BasePath): Future[Seq[Plugin]] = fetch.future(_.listPlugins(()).future)
   override def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]] = fetch.future(_.addPlugin(path).future)
   override def removePlugin(path: SafePath)(using BasePath): Future[Unit] = fetch.future(_.removePlugin(path).future)
@@ -62,6 +62,8 @@ class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
   override def jvmInfos()(using BasePath): Future[JVMInfos] = fetch.future(_.jvmInfos(()).future)
   override def mdToHtml(safePath: SafePath)(using BasePath): Future[String] = fetch.future(_.mdToHtml(safePath).future)
   override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = fetch.future(_.sequence(safePath).future)
+  override def listNotification()(using BasePath): Future[Seq[NotificationEvent]] = fetch.future(_.listNotification(()).future)
+  override def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit] = fetch.future(_.clearNotification(ids).future)
 
   override def upload(
     fileList: FileList,

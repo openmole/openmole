@@ -663,4 +663,20 @@ package data {
 
   case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())
 
+
+  object NotificationEvent:
+    def time(event: NotificationEvent) =
+      event match
+        case e: MoleExecutionFinished => e.time
+
+    def id(event: NotificationEvent) =
+      event match
+        case e: MoleExecutionFinished => e.id
+
+    case class MoleExecutionFinished(executionId: ExecutionId, script: SafePath, error: Option[ErrorData], date: String, time: Long, id: Long) extends NotificationEvent
+
+
+  sealed trait NotificationEvent
+
+
 }

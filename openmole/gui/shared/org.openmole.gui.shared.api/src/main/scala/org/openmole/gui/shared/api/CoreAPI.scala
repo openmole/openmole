@@ -45,10 +45,6 @@ trait CoreAPI extends RESTAPI {
   val copyFiles: Endpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
     endpoint(post(path / "file" / "copy", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
-  //def addDirectory(safePath: SafePath, directoryName: String): Boolean
-//  val createDirectory: Endpoint[(SafePath, String), Boolean] =
-//    endpoint(post(path / "file"  / "make-directory", jsonRequest[(SafePath, String)]), ok(jsonResponse[Boolean]))
-
   //def addFile(safePath: SafePath, fileName: String): Boolean
   val createFile: Endpoint[(SafePath, String, Boolean), Boolean] =
     endpoint(post(path / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
@@ -79,30 +75,6 @@ trait CoreAPI extends RESTAPI {
 
   val temporaryDirectory: Endpoint[Unit, SafePath] =
     endpoint(get(path / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
-
-
-  //  val rename: Endpoint[(SafePath, String), SafePath] =
-  //    endpoint(post(path / "rename", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
-
-
-  //  def copyAllTmpTo(tmpSafePath: SafePath, to: SafePath): Unit
-//  val copyAllFromTmp: Endpoint[(SafePath, SafePath), Unit] =
-//    endpoint(post(path / "copy-from-tmp", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
-
-  //  def extractAndTestExistence(safePathToTest: SafePath, in: SafePath): Seq[SafePath]
-//  val extractTestExist: Endpoint[(SafePath, SafePath), Seq[SafePath]] =
-//    endpoint(post(path / "extract-test-exist", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Seq[SafePath]]))
-
-
-  //  def deleteFile(safePath: SafePath, context: ServerFileSystemContext): Unit
-  //  def deleteFiles(safePath: Seq[SafePath], context: ServerFileSystemContext): Unit
-  //implicit lazy val deleteFileRequestSchema: JsonSchema[(Seq[SafePath], ServerFileSystemContext)] = genericJsonSchema
-
-  //def existsExcept(exception: SafePath, exceptItSelf: Boolean): Boolean
-//  val existsExcept: Endpoint[(SafePath, Boolean), Boolean] =
-//    endpoint(post(path / "exists-except", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[Boolean]))
-
-
 
 
   // ---------- Executions --------------------
@@ -200,6 +172,11 @@ trait CoreAPI extends RESTAPI {
   val jvmInfos: Endpoint[Unit, JVMInfos] =
     endpoint(get(path / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
 
+  val listNotification: Endpoint[Unit, Seq[NotificationEvent]] =
+    endpoint(post(path / "application" / "list-notification", jsonRequest[Unit]), ok(jsonResponse[Seq[NotificationEvent]]))
+
+  val clearNotification: Endpoint[Seq[Long], Unit] =
+    endpoint(post(path / "application" / "clear-notification", jsonRequest[Seq[Long]]), ok(jsonResponse[Unit]))
 
   //def mdToHtml(safePath: SafePath): String
   val mdToHtml: Endpoint[SafePath, String] =

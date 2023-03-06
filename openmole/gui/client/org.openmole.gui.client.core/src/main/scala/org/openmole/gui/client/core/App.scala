@@ -241,6 +241,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       // Define the option sequence
       //Fetch(_.omSettings(())) { sets ⇒
       def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
+      def getServerNotifications = api.listNotification().foreach { n =>panels.notifications.addServerNotifications(n) }
 
       render(
         containerNode,
@@ -250,6 +251,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             then saveAllTabs
           },
           EventStream.periodic(10000).toObservable --> Observer { _ => saveAllTabs },
+          EventStream.periodic(10000).toObservable --> Observer { _ => getServerNotifications },
           cls := "app-container",
           // panels.bannerAlert.banner,
           //theNavBar,

@@ -8,44 +8,69 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{AuthenticationPlugin, AuthenticationPluginFactory, GUIPlugins, ServerAPI}
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
+import java.text.SimpleDateFormat
 
-object Notification {
+
+object NotificationContent:
   enum NotificationLevel:
     case Info, Error
-}
 
-import Notification._
 
-case class Notification(level: NotificationLevel, title: String, body: Div)
+import NotificationContent._
+
+case class NotificationContent(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None)
 
 class NotificationManager:
+
   val showNotfications = Var(false)
-  val stack: Var[Seq[Notification]] = Var(Seq())
+  val notifications: Var[Seq[NotificationContent]] = Var(Seq())
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
 
-  def filteredStack(stack: Seq[Notification], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
+  def filteredStack(stack: Seq[NotificationContent], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
 
-  def addNotification(level: NotificationLevel, title: String, body: Div) = stack.update { s =>
-    (s :+ Notification(level, title, div(body, cls := "notification")))
+  def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
+    val currentIds = s.flatMap(_.serverId).toSet
+
+    val newEvents =
+      for
+        event <- events
+        if !currentIds.contains(NotificationEvent.id(event))
+      yield
+        event match
+          case e: NotificationEvent.MoleExecutionFinished =>
+            val (title, body) =
+              e.error match
+                case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString("/")} was completed at ${e.date}""")
+                case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString("/")} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
+
+            NotificationContent(NotificationLevel.Info, title, div(body, cls := "notification"), serverId = Some(NotificationEvent.id(event)))
+
+    newEvents ++ s
   }
-  
-  def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div) =
-    addNotification(level, title, body)
-    showNotfications.set(true)
 
-  def clearNotifications(level: NotificationLevel) = {
-    stack.update(s => s.filterNot(_.level == level))
+  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
+    s :+ NotificationContent(level, title, div(body, cls := "notification"))
   }
 
-  val notificationList =
+  def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
+    notifications.update {
+      s =>
+        val (cleared, kept) = s.partition(_.level == level)
+        val serverClear = cleared.flatMap(_.serverId)
+        if !serverClear.isEmpty then api.clearNotification(serverClear)
+        kept
+    }
+
+  def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
       cls := "notifList",
-      child <-- currentListType.signal.combineWith(stack.signal).map { case (level, stack) =>
+      child <-- (currentListType.signal combineWith notifications.signal).map { case (level, stack) =>
         level match {
           case Some(n: NotificationLevel) =>
             val fStack = filteredStack(stack, n)
@@ -72,7 +97,7 @@ class NotificationManager:
     )
 
 
-  def notifTopIcon(notifCls: String, st: Seq[Notification], notificationLevel: NotificationLevel) =
+  def notifTopIcon(notifCls: String, st: Seq[NotificationContent], notificationLevel: NotificationLevel) =
     val nList = filteredStack(st, notificationLevel)
 
     def trigger = onClick --> { _ =>
@@ -97,12 +122,13 @@ class NotificationManager:
 
   def render =
     div(flexRow, alignItems.flexEnd,
+      notifications.toObservable --> Observer[Seq[NotificationContent]] { n => showNotfications.set(!n.isEmpty) },
       idAttr := "container",
       cls.toggle("alert-is-shown") <-- showNotfications.signal,
       div(display.flex, flexDirection.column,
         cls := "alert",
         div(display.flex, flexDirection.column,
-          child <-- stack.signal.map { s =>
+          child <-- notifications.signal.map { s =>
             div(display.flex, flexDirection.row,
               notifTopIcon("bi-x-square-fill errorNotification", s, NotificationLevel.Error),
               notifTopIcon("bi-info-square-fill infoNotification", s, NotificationLevel.Info).amend(marginLeft := "30")

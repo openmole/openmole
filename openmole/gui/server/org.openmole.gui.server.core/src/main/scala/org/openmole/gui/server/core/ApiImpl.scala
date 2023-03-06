@@ -31,6 +31,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl.*
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
+import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
@@ -64,7 +65,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   val outputSize = PreferenceLocation[Int]("gui", "outputsize", Some(10 * 1024 * 1024))
 
-  val execution = new ExecutionRegistry
+  val serverState = new ServerState
 
   //GENERAL
   def settings: OMSettings = {
@@ -121,7 +122,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services.*
     import org.openmole.tool.file.*
-    
+
     val allPlugins = listPlugins()
 
     def unplug(f: File) =
@@ -214,17 +215,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     //utils.move(fromFile, toFile)
   }
 
-  def duplicate(safePath: SafePath, newName: String): SafePath = {
+  def duplicate(safePath: SafePath, newName: String): SafePath =
     import services._
     utils.copyProjectFile(safePath, newName, followSymlinks = true)
-  }
 
-  def mdToHtml(safePath: SafePath): String = {
+  def mdToHtml(safePath: SafePath): String =
     import services._
     MarkDownProcessor(safePathToFile(safePath).content)
-  }
 
-  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) = {
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) =
     import services._
 
     val file = safePathToFile(path)
@@ -246,12 +245,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case _ ⇒ save()
       }
     }
-  }
 
-  def size(safePath: SafePath): Long = {
+  def size(safePath: SafePath): Long =
     import services._
     safePathToFile(safePath).length
-  }
 
   def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
     import services._
@@ -267,9 +264,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   // EXECUTIONS
-  def cancelExecution(id: ExecutionId): Unit = execution.cancel(id)
+  def cancelExecution(id: ExecutionId): Unit = serverState.cancel(id)
 
-  def removeExecution(id: ExecutionId): Unit = execution.remove(id)
+  def removeExecution(id: ExecutionId): Unit = serverState.remove(id)
 
   def compileScript(script: SafePath) =
     import services.*
@@ -368,26 +365,27 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val content = safePathToFile(script).content
 
-    execution.addExecutionInfo(execId, ExecutionRegistry.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None))
+    serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None))
 
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
       import services._
 
       val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(DataUtils.uuID) → env }
-      execution.addRunningEnvironment(execId, envIds)
+      serverState.addRunningEnvironment(execId, envIds)
 
-      envIds.foreach { case (envId, env) ⇒ env.listen(execution.environmentListener(envId)) }
+      ex.listen(serverState.moleExecutionListener(execId, script))
+      envIds.foreach { case (envId, env) ⇒ env.listen(serverState.environmentListener(envId)) }
 
       catchAll(ex.start(validateScript)) match
-        case Failure(e) ⇒ execution.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+        case Failure(e) ⇒ serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) ⇒
-          val inserted = execution.addMoleExecution(execId, ex)
+          val inserted = serverState.addMoleExecution(execId, ex)
           if (!inserted) ex.cancel
     end processRun
 
     synchronousCompilation(script, outputStream) match
       case e: MoleExecution => processRun(execId, e, validateScript)
-      case ed: ErrorData => execution.addError(execId, Failed(Vector.empty, ed, Seq.empty))
+      case ed: ErrorData => serverState.addError(execId, Failed(Vector.empty, ed, Seq.empty))
 
     execId
 
@@ -399,15 +397,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
 
 
-  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = execution.executionData(outputLines, ids)
+  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(outputLines, ids)
 
   //def staticInfos() = execution.staticInfos()
 
-  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = execution.deleteEnvironmentErrors(environmentId)
+  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = serverState.deleteEnvironmentErrors(environmentId)
 
   def listEnvironmentErrors(environmentId: EnvironmentId, lines: Int): Seq[EnvironmentErrorGroup] = atomic {
     implicit ctx ⇒
-      val environmentErrors = execution.environmentErrors(environmentId)
+      val environmentErrors = serverState.environmentErrors(environmentId)
 
       def groupedErrors =
           environmentErrors.groupBy { _.errorMessage }.toSeq.map {
@@ -467,7 +465,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     preference.updatePreference(GUIServer.plugins)(p => Some(set(p.getOrElse(Seq()))))
 
-  def addPlugin(safePath: SafePath): Seq[ErrorData] = 
+  def addPlugin(safePath: SafePath): Seq[ErrorData] =
     import services._
     val errors = utils.addPlugin(safePath)
     if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.mkString("/")).distinct } }
@@ -535,6 +533,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       paths.size + implicitResource.size
     )
   }
+
+  def listNotification = serverState.listNotification()
+  def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)
 
   // FIXME use network service provider
   def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] =

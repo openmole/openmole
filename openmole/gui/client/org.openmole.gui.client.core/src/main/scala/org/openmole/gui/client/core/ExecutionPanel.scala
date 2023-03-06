@@ -93,15 +93,11 @@ class ExecutionPanel:
   val showControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
-  def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
+  def toExecDetails(exec: ExecutionData): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     exec.state match
-      case f: ExecutionState.Failed ⇒
-        panels.notifications.addAndShowNotificaton(Notification.NotificationLevel.Error, f.error.toString, div(stackTrace(f.error)))
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒
-        panels.notifications.addAndShowNotificaton(Notification.NotificationLevel.Info, s"${exec.path.name} was  successfuly completed", div())
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
       case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
@@ -296,7 +292,7 @@ class ExecutionPanel:
 
     def queryState =
       queryingState = true
-      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
+      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
@@ -354,7 +350,7 @@ class ExecutionPanel:
         ),
         openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(
           div(width := "100%",
-            children <-- Signal.fromFuture(api.listEnvironmentErrors(e.envId, 100)).map { ee =>
+            children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map { ee =>
               ee.map {
                 _.zipWithIndex.map { case (e, i) =>
                   div(flexRow,
