@@ -39,7 +39,7 @@ object AuthenticationPanel {
 
 
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) = {
-    given NotificationAPI = panels.notifications
+    given NotificationService = NotificationManager.toService(panels.notifications)
 
     def getAuthentications =
       plugins.authenticationFactories.map { factory ⇒

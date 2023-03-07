@@ -37,7 +37,7 @@ class CoreFetch(panels: Panels):
     timeout: Option[FiniteDuration] = Some(60 seconds),
     warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
 
-    given NotificationAPI = panels.notifications
+    given NotificationService = NotificationManager.toService(panels.notifications)
 
     Fetch(coreAPIClient).future(
       f,
@@ -49,7 +49,7 @@ class CoreFetch(panels: Panels):
      timeout: Option[FiniteDuration] = Some(60 seconds),
      warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
 
-    given NotificationAPI = panels.notifications
+    given NotificationService = NotificationManager.toService(panels.notifications)
 
     Fetch(coreAPIClient).futureError(
       f,

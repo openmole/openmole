@@ -17,11 +17,15 @@ import java.text.SimpleDateFormat
 
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
 //import NotificationContent._
+object NotificationManager:
+  case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
-case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
+  def toService(manager: NotificationManager) =
+    new NotificationService:
+      override def notify(level: NotificationLevel, title: String, body: Div): Unit = manager.addAndShowNotificaton(level, title, body)
 
-class NotificationManager extends NotificationAPI:
-  override def notify(level: NotificationLevel, title: String, body: Div): Unit = addAndShowNotificaton(level, title, body)
+class NotificationManager:
+  import NotificationManager.NotificationLine
 
   val showNotfications = Var(false)
   val notifications: Var[Seq[NotificationLine]] = Var(Seq())

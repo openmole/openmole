@@ -22,5 +22,5 @@ import com.raquo.laminar.api.L.*
 enum NotificationLevel:
   case Info, Error
 
-trait NotificationAPI:
+trait NotificationService:
   def notify(level: NotificationLevel, title: String, body: Div = div()): Unit

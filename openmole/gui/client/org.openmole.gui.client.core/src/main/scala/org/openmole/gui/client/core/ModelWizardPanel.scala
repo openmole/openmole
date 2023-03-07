@@ -195,7 +195,7 @@ object ModelWizardPanel {
   }
 
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
-    given NotificationAPI = panels.notifications
+    given NotificationService = NotificationManager.toService(panels.notifications)
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] =
       val fileType: FileType = FileType(safePath.name)

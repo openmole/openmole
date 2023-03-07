@@ -29,10 +29,10 @@ trait AuthenticationPlugin extends GUIPlugin:
   type AuthType <: AuthenticationData
   def data: AuthType
   def factory: AuthenticationPluginFactory
-  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationAPI): HtmlElement
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI): Unit
-  def remove(onremoved: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI): Unit
-  def test(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Seq[Test]]
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
+  def remove(onremoved: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
+  def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
 sealed trait GUIPluginFactory
 
@@ -41,7 +41,7 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def name: String
   def build(data: AuthType): AuthenticationPlugin
   def buildEmpty: AuthenticationPlugin
-  def getData(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Seq[AuthType]]
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]]
 
 
 trait WizardGUIPlugin extends GUIPlugin:
@@ -51,11 +51,11 @@ trait WizardGUIPlugin extends GUIPlugin:
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
   def fileType: FileType
-  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Option[ModelMetadata]]
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Unit]
+  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]]
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
-  def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationAPI): HtmlElement
+  def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
 
 
 case class PluginServices(errorManager: ErrorManager)
