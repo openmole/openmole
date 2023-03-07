@@ -22,10 +22,10 @@ import org.openmole.gui.shared.api.*
 
 trait NetlogoWizardAPI extends RESTAPI {
   //def toTask(target:         SafePath, modelMetadata: ModelMetadata)
-  val toTask: Endpoint[(SafePath, ModelMetadata), Unit] =
-    endpoint(post(path / "wizard" / "netlogo" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
+  val toTask: ErrorEndpoint[(SafePath, ModelMetadata), Unit] =
+    errorEndpoint(post(path / "wizard" / "netlogo" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
 
   //def parse(safePath: SafePath): Option[ModelMetadata]
-  val parse: Endpoint[SafePath, Option[ModelMetadata]] =
-    endpoint(post(path / "wizard" / "netlogo" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
+  val parse: ErrorEndpoint[SafePath, Option[ModelMetadata]] =
+    errorEndpoint(post(path / "wizard" / "netlogo" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
 }

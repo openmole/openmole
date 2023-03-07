@@ -29,32 +29,32 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
 trait LoginAuthenticationRESTAPI extends RESTAPI:
-  val loginAuthentications: Endpoint[Unit, Seq[LoginAuthenticationData]] =
-    endpoint(get(path / "ssh" / "login-authentications"), ok(jsonResponse[Seq[LoginAuthenticationData]]))
+  val loginAuthentications: ErrorEndpoint[Unit, Seq[LoginAuthenticationData]] =
+    errorEndpoint(get(path / "ssh" / "login-authentications"), ok(jsonResponse[Seq[LoginAuthenticationData]]))
 
-  val addAuthentication: Endpoint[LoginAuthenticationData, Unit] =
-    endpoint(post(path / "ssh" / "add-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
+  val addAuthentication: ErrorEndpoint[LoginAuthenticationData, Unit] =
+    errorEndpoint(post(path / "ssh" / "add-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
 
-  val removeAuthentication: Endpoint[LoginAuthenticationData, Unit] =
-    endpoint(post(path / "ssh" / "remove-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
+  val removeAuthentication: ErrorEndpoint[LoginAuthenticationData, Unit] =
+    errorEndpoint(post(path / "ssh" / "remove-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
 
-  val testAuthentication: Endpoint[LoginAuthenticationData, Seq[Test]] =
-    endpoint(post(path / "ssh" / "test-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+  val testAuthentication: ErrorEndpoint[LoginAuthenticationData, Seq[Test]] =
+    errorEndpoint(post(path / "ssh" / "test-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Seq[Test]]))
 
 
 class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthenticationRESTAPI:
 
   val loginAuthenticationsRoute =
-    loginAuthentications.implementedBy { _ => impl.loginAuthentications() }
+    loginAuthentications.errorImplementedBy { _ => impl.loginAuthentications() }
 
   val addAuthenticationRoute =
-    addAuthentication.implementedBy { a => impl.addAuthentication(a) }
+    addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
 
   val removeAuthenticationRoute =
-    removeAuthentication.implementedBy { a => impl.removeAuthentication(a) }
+    removeAuthentication.errorImplementedBy { a => impl.removeAuthentication(a) }
 
   val testAuthenticationRoute =
-    testAuthentication.implementedBy { a => impl.testAuthentication(a) }
+    testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(loginAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationRoute, testAuthenticationRoute)

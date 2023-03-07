@@ -18,10 +18,10 @@ object LoginAuthenticationServerAPI:
 
 class LoginAuthenticationServerAPI extends LoginAuthenticationAPI:
   import LoginAuthenticationServerAPI.PluginFetch
-  override def loginAuthentications()(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[LoginAuthenticationData]] = PluginFetch.future(_.loginAuthentications(()).future)
-  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.future(_.addAuthentication(data).future)
-  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.future(_.removeAuthentication(data).future)
-  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = PluginFetch.future(_.testAuthentication(data).future)
+  override def loginAuthentications()(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[LoginAuthenticationData]] = PluginFetch.futureError(_.loginAuthentications(()).future)
+  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.futureError(_.addAuthentication(data).future)
+  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.futureError(_.removeAuthentication(data).future)
+  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = PluginFetch.futureError(_.testAuthentication(data).future)
 
 class LoginAuthenticationStubAPI extends LoginAuthenticationAPI:
   import LoginAuthenticationServerAPI.PluginFetch

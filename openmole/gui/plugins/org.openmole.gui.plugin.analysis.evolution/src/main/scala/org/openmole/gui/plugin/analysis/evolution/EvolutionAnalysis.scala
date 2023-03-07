@@ -39,9 +39,8 @@ class EvolutionAnalysis extends MethodAnalysisPlugin {
   override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement = {
     val metadata: Var[Option[Convergence]] = Var(None)
 
-    PluginFetch.future(_.analyse(safePath).future).foreach {
-      case Right(m) ⇒ metadata.set(Some(m))
-      case Left(e)  ⇒ services.errorManager.signal("Error in evolution analysis", Some(ErrorData.stackTrace(e)))
+    PluginFetch.futureError(_.analyse(safePath).future).foreach { m =>
+      metadata.set(Some(m))
     }
 
     div(

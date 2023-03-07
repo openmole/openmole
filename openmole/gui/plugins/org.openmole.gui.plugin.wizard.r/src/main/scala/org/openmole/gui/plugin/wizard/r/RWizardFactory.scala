@@ -42,9 +42,9 @@ object TopLevelExports {
 class RWizardFactory extends WizardPluginFactory {
   val fileType = CodeFile(RLanguage())
 
-  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
+  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]] = PluginFetch.futureError(_.parse(safePath).future)
 
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "R"
 }

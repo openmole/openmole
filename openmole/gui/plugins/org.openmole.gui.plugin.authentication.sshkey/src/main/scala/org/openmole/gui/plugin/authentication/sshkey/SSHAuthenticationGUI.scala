@@ -45,7 +45,7 @@ class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
 
   def name = "SSH Private key"
 
-  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.future(_.privateKeyAuthentications(()).future)
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.privateKeyAuthentications(()).future)
 }
 
 class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
@@ -67,7 +67,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   def factory = new PrivateKeyAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.future(_.removeAuthentication(data).future).foreach { _ ⇒
+  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future).foreach { _ ⇒
     onremove()
   }
 
@@ -82,9 +82,9 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
 
   def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = {
-    PluginFetch.future(_.removeAuthentication(data).future).foreach {
+    PluginFetch.futureError(_.removeAuthentication(data).future).foreach {
       d ⇒
-        PluginFetch.future(_.addAuthentication(PrivateKeyAuthenticationData(
+        PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
           privateKey = Some(privateKey.fileName),
           loginInput.ref.value,
           passwordInput.ref.value,
@@ -94,6 +94,6 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     }
   }
 
-  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.future(_.testAuthentication(data).future)
+  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
 }

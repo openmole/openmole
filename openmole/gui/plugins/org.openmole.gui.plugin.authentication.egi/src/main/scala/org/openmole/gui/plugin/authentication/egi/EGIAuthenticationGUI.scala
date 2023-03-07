@@ -42,7 +42,7 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
   def name = "EGI"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] =
-    PluginFetch.future(_.egiAuthentications(()).future)
+    PluginFetch.futureError(_.egiAuthentications(()).future)
 }
 
 
@@ -64,7 +64,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   def factory = new EGIAuthenticationGUIFactory
 
   def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) =
-    PluginFetch.future(_.removeAuthentications(()).future).foreach { _ ⇒
+    PluginFetch.futureError(_.removeAuthentications(()).future).foreach { _ ⇒
       onremove()
     }
 
@@ -77,15 +77,15 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       div(cls := "verticalFormItem", div("Password", width := "150px"), password),
       div(cls := "verticalFormItem", div("Certificate", width := "150px"), display.flex, div(privateKey.view.amend(flexRow, justifyContent.flexEnd), width := "100%")),
       div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput),
-      EventStream.fromFuture(PluginFetch.future(_.getVOTests(()).future)) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
+      EventStream.fromFuture(PluginFetch.futureError(_.getVOTests(()).future)) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
     )
 
   }
 
   def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = {
-    PluginFetch.future(_.removeAuthentications(()).future).foreach {
+    PluginFetch.futureError(_.removeAuthentications(()).future).foreach {
       d ⇒
-        PluginFetch.future {
+        PluginFetch.futureError {
           _.addAuthentication(
             EGIAuthenticationData(
               cypheredPassword = password.ref.value,
@@ -95,9 +95,9 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         }.foreach { b ⇒ onsave() }
     }
 
-    PluginFetch.future(_.setVOTests(voInputContent.now().split(",").map(_.trim).toSeq).future)
+    PluginFetch.futureError(_.setVOTests(voInputContent.now().split(",").map(_.trim).toSeq).future)
   }
 
-  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.future(_.testAuthentication(data).future)
+  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
 }

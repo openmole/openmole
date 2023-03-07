@@ -43,22 +43,22 @@ class EGIAuthenticationEGIServer(s: Services)
   import services._
 
   val egiAuthenticationsRoute =
-    egiAuthentications.implementedBy(_ => impl.egiAuthentications())
+    egiAuthentications.errorImplementedBy(_ => impl.egiAuthentications())
 
   val addAuthenticationRoute =
-    addAuthentication.implementedBy(a => impl.addAuthentication(a))
+    addAuthentication.errorImplementedBy(a => impl.addAuthentication(a))
 
   val removeAuthenticationsRoute =
-    removeAuthentications.implementedBy(_ => impl.removeAuthentications())
+    removeAuthentications.errorImplementedBy(_ => impl.removeAuthentications())
 
   val setVOTestsRoute =
-    setVOTests.implementedBy(vo => impl.setVOTest(vo))
+    setVOTests.errorImplementedBy(vo => impl.setVOTest(vo))
 
   val getVOTestsRoute =
-    getVOTests.implementedBy(_ => impl.geVOTests())
+    getVOTests.errorImplementedBy(_ => impl.geVOTests())
 
   val testAuthenticationRoute =
-    testAuthentication.implementedBy(d => impl.testAuthentication(d))
+    testAuthentication.errorImplementedBy(d => impl.testAuthentication(d))
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(egiAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationsRoute, setVOTestsRoute, getVOTestsRoute, testAuthenticationRoute)

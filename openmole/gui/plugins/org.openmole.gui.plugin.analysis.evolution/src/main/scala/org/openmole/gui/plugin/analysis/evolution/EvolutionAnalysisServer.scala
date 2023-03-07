@@ -33,7 +33,7 @@ import org.openmole.gui.server.ext.utils.*
 
 class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI {
 
-  val analyseRoute = analyse.implementedBy { p => ??? /*impl.analyse(p)*/ }
+  val analyseRoute = analyse.errorImplementedBy { p => ??? /*impl.analyse(p)*/ }
   //val generationRoute = generation.implementedBy { case(p, g, a) => impl.generation(p, g, a)}
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(

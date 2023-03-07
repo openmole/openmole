@@ -6,22 +6,22 @@ import org.openmole.gui.shared.api.*
 trait EGIAuthenticationAPI extends RESTAPI {
 
   val egiAuthentications =
-    endpoint(get(path / "egi" / "authentications"), ok(jsonResponse[Seq[EGIAuthenticationData]]))
+    errorEndpoint(get(path / "egi" / "authentications"), ok(jsonResponse[Seq[EGIAuthenticationData]]))
 
   val addAuthentication =
-    endpoint(post(path / "egi" / "add-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Unit]))
+    errorEndpoint(post(path / "egi" / "add-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Unit]))
 
   val removeAuthentications =
-    endpoint(get(path / "egi" / "remove-authentications"), ok(jsonResponse[Unit]))
+    errorEndpoint(get(path / "egi" / "remove-authentications"), ok(jsonResponse[Unit]))
 
   val setVOTests =
-    endpoint(post(path / "egi" / "set-vo-tests", jsonRequest[Seq[String]]), ok(jsonResponse[Unit]))
+    errorEndpoint(post(path / "egi" / "set-vo-tests", jsonRequest[Seq[String]]), ok(jsonResponse[Unit]))
 
   val getVOTests =
-    endpoint(get(path / "egi" / "get-vo-tests"), ok(jsonResponse[Seq[String]]))
+    errorEndpoint(get(path / "egi" / "get-vo-tests"), ok(jsonResponse[Seq[String]]))
 
   val testAuthentication =
-    endpoint(post(path / "egi" / "test-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+    errorEndpoint(post(path / "egi" / "test-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Seq[Test]]))
 
   //  def authentications(): Seq[AuthenticationData]
   //def egiAuthentications(): Seq[EGIAuthenticationData]

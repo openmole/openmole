@@ -21,9 +21,9 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
 
 trait RWizardAPI extends RESTAPI {
-  val toTask: Endpoint[(SafePath, ModelMetadata), Unit] =
-    endpoint(post(path / "wizard" / "r" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
+  val toTask: ErrorEndpoint[(SafePath, ModelMetadata), Unit] =
+    errorEndpoint(post(path / "wizard" / "r" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
 
-  val parse: Endpoint[SafePath, Option[ModelMetadata]] =
-    endpoint(post(path / "wizard" / "r" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
+  val parse: ErrorEndpoint[SafePath, Option[ModelMetadata]] =
+    errorEndpoint(post(path / "wizard" / "r" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
 }

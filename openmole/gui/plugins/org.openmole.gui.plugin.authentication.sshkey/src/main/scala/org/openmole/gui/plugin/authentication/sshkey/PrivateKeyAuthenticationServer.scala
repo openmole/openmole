@@ -34,16 +34,16 @@ class PrivateKeyAuthenticationServer(s: Services)
   extends APIServer with PrivateKeyAuthenticationAPI {
 
   val privateKeyAuthenticationsRoute =
-    privateKeyAuthentications.implementedBy { _ => impl.privateKeyAuthentications() }
+    privateKeyAuthentications.errorImplementedBy { _ => impl.privateKeyAuthentications() }
 
   val addAuthenticationRoute =
-    addAuthentication.implementedBy { a => impl.addAuthentication(a) }
+    addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
 
   val removeAuthenticationRoute =
-    removeAuthentication.implementedBy { a => impl.removeAuthentication(a) }
+    removeAuthentication.errorImplementedBy { a => impl.removeAuthentication(a) }
 
   val testAuthenticationRoute =
-    testAuthentication.implementedBy { a => impl.testAuthentication(a) }
+    testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(privateKeyAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationRoute, testAuthenticationRoute)

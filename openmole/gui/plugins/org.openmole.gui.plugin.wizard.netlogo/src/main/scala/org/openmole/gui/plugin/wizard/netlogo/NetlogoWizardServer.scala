@@ -31,10 +31,10 @@ import util.{Failure, Success, Try}
 class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
 
   val toTaskRoute =
-    toTask.implementedBy { case(p, m) => impl.toTask(p, m) }
+    toTask.errorImplementedBy { case(p, m) => impl.toTask(p, m) }
 
   val parseRoute =
-    parse.implementedBy { p => impl.parse(p) }
+    parse.errorImplementedBy { p => impl.parse(p) }
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(toTaskRoute, parseRoute )
