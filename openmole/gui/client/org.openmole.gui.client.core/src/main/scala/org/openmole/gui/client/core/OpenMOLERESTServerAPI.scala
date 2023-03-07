@@ -52,7 +52,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def omrMethod(path: SafePath)(using BasePath): Future[String] = fetch.futureError(_.omrMethod(path).future)
   override def models(path: SafePath)(using BasePath): Future[Seq[SafePath]] = fetch.futureError(_.models(path).future)
   override def expandResources(resources: Resources)(using BasePath): Future[Resources] = fetch.futureError(_.expandResources(resources).future)
-  override def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]] = fetch.futureError(_.downloadHTTP(url, path, extract).future)
+  override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = fetch.futureError(_.downloadHTTP(url, path, extract, overwrite).future)
   override def marketIndex()(using BasePath): Future[MarketIndex] = fetch.futureError(_.marketIndex(()).future)
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.getMarketEntry(entry, safePath).future)
   override def omSettings()(using BasePath): Future[OMSettings] = fetch.futureError(_.omSettings(()).future)

@@ -80,7 +80,9 @@ object NetworkService:
     res
   }
 
-  def getInputStream(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): InputStream = {
+
+
+  def getInputStream(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): InputStream =
     val client = networkService.httpProxy match {
       case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
       case _ ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
@@ -93,7 +95,7 @@ object NetworkService:
       httpResponse.getEntity.getContent
     } catch case t: Throwable => throw new InternalProcessingError(s"HTTP GET for $url failed", t)
     //finally client.close()
-  }
+
 
   def urlProtocol(url: String): String = new URI(url).getScheme
 

@@ -199,7 +199,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def expandResources(resources: Resources)(using BasePath): Future[Resources] = Future.successful(Resources.empty)
 
-  override def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]] = Future.successful(None)
+  override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
 
   override def marketIndex()(using BasePath): Future[MarketIndex] =
     def marketIndex =

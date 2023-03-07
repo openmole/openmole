@@ -32,6 +32,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
+import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
@@ -539,51 +540,46 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)
 
   // FIXME use network service provider
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean): Option[ErrorData] =
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean): Unit =
     import services.*
     import org.openmole.tool.stream.*
 
-    val result =
-      Try {
-        val checkedURL =
-          java.net.URI.create(url).getScheme match {
-            case null ⇒ "http://" + url
-            case _    ⇒ url
-          }
-
-        gridscale.http.getResponse(checkedURL) {
-          response ⇒
-            def extractName = checkedURL.split("/").last
-
-            val name =
-              response.headers.flatMap {
-                case ("Content-Disposition", value) ⇒
-                  value.split(";").map(_.split("=")).find(_.head.trim == "filename").map {
-                    filename ⇒
-                      val name = filename.last.trim
-                      if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
-                  }
-                case _ ⇒ None
-              }.headOption.getOrElse(extractName)
-
-            val is = response.inputStream
-
-            if (extract) {
-              val dest = safePathToFile(path)
-              val tis = new TarInputStream(new GZIPInputStream(is))
-              try tis.extract(dest, overwrite = true)
-              finally tis.close
-            }
-            else {
-              val dest = safePathToFile(path / name)
-              dest.withOutputStream(os ⇒ copy(is, os))
-            }
-        }
+    val checkedURL =
+      java.net.URI.create(url).getScheme match {
+        case null ⇒ "http://" + url
+        case _    ⇒ url
       }
 
-    result match
-      case Success(value) ⇒ None
-      case Failure(e)     ⇒ Some(ErrorData(e))
+    gridscale.http.getResponse(checkedURL) {
+      response ⇒
+        def extractName = checkedURL.split("/").last
+
+        val name =
+          response.headers.flatMap {
+            case ("Content-Disposition", value) ⇒
+              value.split(";").map(_.split("=")).find(_.head.trim == "filename").map {
+                filename ⇒
+                  val name = filename.last.trim
+                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
+              }
+            case _ ⇒ None
+          }.headOption.getOrElse(extractName)
+
+        val is = response.inputStream
+
+        if extract
+        then
+          val dest = safePathToFile(path)
+          val tis = new TarInputStream(new GZIPInputStream(is))
+          try tis.extract(dest, overwrite = overwrite)
+          finally tis.close
+        else
+          val dest = safePathToFile(path / name)
+          if !dest.exists() || overwrite
+          then dest.withOutputStream(os ⇒ copy(is, os))
+          else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
+    }
+      
 
 
 }

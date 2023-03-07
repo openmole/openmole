@@ -63,7 +63,7 @@ trait ServerAPI:
 
   def models(path: SafePath)(using BasePath): Future[Seq[SafePath]]
   def expandResources(resources: Resources)(using BasePath): Future[Resources]
-  def downloadHTTP(url: String, path: SafePath, extract: Boolean)(using BasePath): Future[Option[ErrorData]]
+  def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit]
 
   def marketIndex()(using BasePath): Future[MarketIndex]
   def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit]

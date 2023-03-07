@@ -119,7 +119,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
 
   val downloadHTTPRoute =
-    downloadHTTP.errorImplementedBy { case(s, p, b) => apiImpl.downloadHTTP(s, p, b) }
+    downloadHTTP.errorImplementedBy { case(s, p, b, o) => apiImpl.downloadHTTP(s, p, b, o) }
 
   val temporaryDirectoryRoute =
     temporaryDirectory.errorImplementedBy { _ => apiImpl.temporaryDirectory() }

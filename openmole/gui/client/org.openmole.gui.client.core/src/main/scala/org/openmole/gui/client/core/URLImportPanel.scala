@@ -32,22 +32,15 @@ object URLImportPanel:
 
     lazy val downloading: Var[ProcessState] = Var(Processed())
 
-    val overwriteAlert: Var[Option[SafePath]] = Var(None)
-
     def download(url: String) =
       val sp = manager.dirNodeLine.now()
 
       def doDownload(url: String) =
         downloading.set(Processing())
-        api.downloadHTTP(url, sp, extractCheckBox.isChecked).foreach { d ⇒
+        api.downloadHTTP(url, sp, extractCheckBox.isChecked, overwriteSwitch.isChecked).foreach { d ⇒
           downloading.set(Processed())
-          d match {
-            case None ⇒
-              manager.invalidCurrentCache
-              Panels.closeExpandable
-            case Some(ex) ⇒
-              panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "Download failed", div(ErrorData.stackTrace(ex)))
-          }
+          manager.invalidCurrentCache
+          Panels.closeExpandable
         }
 
       overwriteSwitch.isChecked match {

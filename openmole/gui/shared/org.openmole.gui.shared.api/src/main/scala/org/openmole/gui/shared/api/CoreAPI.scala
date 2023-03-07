@@ -137,8 +137,8 @@ trait CoreAPI extends RESTAPI {
     errorEndpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
 
   //def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
-  val downloadHTTP: ErrorEndpoint[(String, SafePath, Boolean), Option[ErrorData]] =
-    errorEndpoint(post(path / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean)]), ok(jsonResponse[Option[ErrorData]]))
+  val downloadHTTP: ErrorEndpoint[(String, SafePath, Boolean, Boolean), Unit] =
+    errorEndpoint(post(path / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean, Boolean)]), ok(jsonResponse[Unit]))
 
   // ---------- Market ----------
 
