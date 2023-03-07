@@ -18,6 +18,7 @@ package org.openmole.gui.client.stub
  */
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
+import org.openmole.gui.client
 import org.openmole.gui.shared.data.{TreeNodeData, *}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
@@ -241,7 +242,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
     val wizardFactories = Seq()
     val analysisPlugin = Map[String, MethodAnalysisPlugin]()
-    Future.successful(f(GUIPlugins(authFact, wizardFactories, analysisPlugin)))
+    Future.successful(f(client.ext.GUIPlugins(authFact, wizardFactories, analysisPlugin)))
 
   override def listNotification()(using BasePath): Future[Seq[NotificationEvent]] = Future.successful(notification.toSeq)
 

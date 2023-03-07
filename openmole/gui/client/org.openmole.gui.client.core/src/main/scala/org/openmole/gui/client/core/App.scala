@@ -15,7 +15,6 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.api.{BasePath, GUIPlugins, PluginServices, ServerAPI}
 import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Await

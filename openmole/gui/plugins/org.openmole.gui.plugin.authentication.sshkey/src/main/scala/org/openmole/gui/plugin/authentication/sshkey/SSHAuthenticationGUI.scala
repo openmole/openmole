@@ -18,7 +18,7 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.ext.{FileUploaderUI, flexColumn, flexRow}
+import org.openmole.gui.client.ext.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 

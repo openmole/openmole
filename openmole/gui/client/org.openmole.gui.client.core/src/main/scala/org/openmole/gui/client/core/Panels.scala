@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.shared.data.GUIPluginAsJS
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.{ErrorManager, PluginServices, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.client.ext.{ErrorManager, PluginServices, ServerAPI, WizardPluginFactory}
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org

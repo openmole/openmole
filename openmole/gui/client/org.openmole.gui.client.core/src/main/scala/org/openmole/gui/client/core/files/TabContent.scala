@@ -5,6 +5,7 @@ import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 import scaladget.tools.Utils.uuID
 

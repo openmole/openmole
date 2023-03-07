@@ -1,9 +1,10 @@
-package org.openmole.gui.shared.api
+package org.openmole.gui.client.ext
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
-import org.scalajs.dom.FileList
 import org.scalajs.dom
+import org.scalajs.dom.FileList
+
 import scala.concurrent.Future
 
 /*

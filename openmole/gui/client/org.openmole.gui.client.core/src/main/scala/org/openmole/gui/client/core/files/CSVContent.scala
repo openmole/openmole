@@ -6,6 +6,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{Fetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.core.files.TreeNodeTab.Raw
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 
 object CSVContent {

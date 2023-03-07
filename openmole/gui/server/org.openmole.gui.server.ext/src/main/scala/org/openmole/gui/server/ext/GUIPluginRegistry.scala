@@ -42,6 +42,6 @@ object GUIPluginRegistry:
 
 case class GUIPluginInfo(
   router:         Option[Services ⇒ OMRouter]                        = None,
-  authentication: Option[Class[_ <: AuthenticationPluginFactory]]    = None,
-  wizard:         Option[Class[_ <: WizardPluginFactory]]            = None,
-  analysis:       Option[(String, Class[_ <: MethodAnalysisPlugin])] = None)
+  authentication: Option[Class[_]]    = None,
+  wizard:         Option[Class[_]]            = None,
+  analysis:       Option[(String, Class[_])] = None)

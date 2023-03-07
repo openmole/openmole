@@ -19,7 +19,6 @@ package org.openmole.gui.client.ext
 
 import org.scalajs.dom.raw.Event
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.GUIPluginFactory
 
 import scala.scalajs.js
 import scala.scalajs.js.Date

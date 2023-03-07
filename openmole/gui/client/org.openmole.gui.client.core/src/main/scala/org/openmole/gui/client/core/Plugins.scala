@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.shared.api.{AuthenticationPluginFactory, GUIPluginFactory, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.client.ext.{AuthenticationPluginFactory, GUIPluginFactory, ServerAPI, WizardPluginFactory}
 import org.openmole.gui.shared.data.GUIPluginAsJS
 import org.openmole.gui.shared.data.PluginExtensionData
 

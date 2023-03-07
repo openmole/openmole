@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.shared.api
+package org.openmole.gui.client.ext
 
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
@@ -64,6 +64,6 @@ trait ErrorManager:
   def signal(message: String, stack: Option[String] = None): Unit
 
 case class GUIPlugins(
-                             authenticationFactories: Seq[AuthenticationPluginFactory],
-                             wizardFactories: Seq[WizardPluginFactory],
-                             analysisPlugins: Map[String, MethodAnalysisPlugin])
+  authenticationFactories: Seq[AuthenticationPluginFactory],
+  wizardFactories: Seq[WizardPluginFactory],
+  analysisPlugins: Map[String, MethodAnalysisPlugin])

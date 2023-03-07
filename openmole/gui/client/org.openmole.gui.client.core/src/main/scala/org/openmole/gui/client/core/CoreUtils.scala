@@ -11,6 +11,7 @@ import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 
 /*

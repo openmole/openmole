@@ -18,7 +18,7 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.ext.{flexColumn, flexRow}
+import org.openmole.gui.client.ext.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
+
 import scalajs.js
 
 object TopLevelExports {

@@ -1,7 +1,7 @@
 package org.openmole.gui.client.stub
 
 import org.openmole.gui.client.core.*
-import org.openmole.gui.shared.api.PluginServices
+import org.openmole.gui.client.ext.PluginServices
 import scala.scalajs.js.annotation.*
 
 /*

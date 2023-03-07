@@ -27,6 +27,7 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js

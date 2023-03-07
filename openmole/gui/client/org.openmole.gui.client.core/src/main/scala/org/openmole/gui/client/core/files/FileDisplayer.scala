@@ -5,6 +5,7 @@ import org.openmole.gui.shared.data.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.core.files.TabContent.TabData
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.plot.Plotter
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn

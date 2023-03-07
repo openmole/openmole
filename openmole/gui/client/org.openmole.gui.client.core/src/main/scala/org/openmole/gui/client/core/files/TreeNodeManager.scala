@@ -21,6 +21,7 @@ import org.openmole.gui.client.core.{CoreUtils, Fetch, Panels}
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 import scalaz.Success
 
