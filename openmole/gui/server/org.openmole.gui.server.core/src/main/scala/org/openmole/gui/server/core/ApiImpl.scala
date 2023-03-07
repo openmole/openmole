@@ -539,7 +539,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def listNotification = serverState.listNotification()
   def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)
 
-  // FIXME use network service provider
   def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean): Unit =
     import services.*
     import org.openmole.tool.stream.*
@@ -550,12 +549,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case _    ⇒ url
       }
 
-    gridscale.http.getResponse(checkedURL) {
+    NetworkService.withResponse(checkedURL) {
       response ⇒
         def extractName = checkedURL.split("/").last
 
         val name =
-          response.headers.flatMap {
+          response.getAllHeaders.map(h => h.getName -> h.getValue).flatMap {
             case ("Content-Disposition", value) ⇒
               value.split(";").map(_.split("=")).find(_.head.trim == "filename").map {
                 filename ⇒
@@ -565,7 +564,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             case _ ⇒ None
           }.headOption.getOrElse(extractName)
 
-        val is = response.inputStream
+        val is = response.getEntity.getContent
 
         if extract
         then
@@ -579,7 +578,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           then dest.withOutputStream(os ⇒ copy(is, os))
           else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
     }
-      
+
 
 
 }

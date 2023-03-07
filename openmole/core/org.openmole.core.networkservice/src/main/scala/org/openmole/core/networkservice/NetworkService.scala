@@ -25,7 +25,7 @@ import scala.io.Source
 import org.apache.http
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
 import org.apache.http.message.BasicHeader
 import org.bouncycastle.mime.Headers
 
@@ -80,15 +80,28 @@ object NetworkService:
     res
   }
 
-
-
-  def getInputStream(url: String, headers: Seq[(String, String)] = Seq.empty)(implicit networkService: NetworkService): InputStream =
-    val client = networkService.httpProxy match {
+  private def newClient(using networkService: NetworkService) =
+    networkService.httpProxy match {
       case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
       case _ ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
     }
+
+  def withResponse[T](url: String, headers: Seq[(String, String)] = Seq.empty)(f: CloseableHttpResponse => T)(using NetworkService): T =
+    val client = newClient
     val getReq = new HttpGet(url)
-    headers.foreach{case (k,v) => getReq.setHeader(new BasicHeader(k, v))}
+    headers.foreach { (k, v) => getReq.setHeader(new BasicHeader(k, v)) }
+    try
+      val httpResponse = client.execute(getReq)
+      try f(httpResponse)
+      finally httpResponse.close()
+    catch
+      case t: Throwable => throw new InternalProcessingError(s"HTTP GET for $url failed", t)
+    finally client.close()
+
+  def getInputStream(url: String, headers: Seq[(String, String)] = Seq.empty)(using NetworkService): InputStream =
+    val client = newClient
+    val getReq = new HttpGet(url)
+    headers.foreach{ (k,v) => getReq.setHeader(new BasicHeader(k, v)) }
     try {
       val httpResponse = client.execute(getReq)
       if (httpResponse.getStatusLine.getStatusCode >= 300) throw new InternalProcessingError(s"HTTP GET for $url responded with $httpResponse")
