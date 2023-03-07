@@ -55,17 +55,20 @@ class ServerState:
   }
 
   def moleExecutionListener(execId: ExecutionId, script: SafePath): EventDispatcher.Listner[MoleExecution] =
-    case (ex: MoleExecution, MoleExecution.Finished(_)) =>
-      val time = System.currentTimeMillis()
-      addNotification(id =>
-        NotificationEvent.MoleExecutionFinished(
-          execId,
-          script,
-          ex.exception.map(t => ErrorData(MoleExecution.MoleExecutionFailed.exception(t))),
-          utils.formatDate(time),
-          time,
-          id)
-      )
+    case (ex: MoleExecution, f: MoleExecution.Finished) =>
+      def canceled = f.canceled && !ex.exception.isDefined
+      if !canceled
+      then
+        val time = System.currentTimeMillis()
+        addNotification(
+          NotificationEvent.MoleExecutionFinished(
+            execId,
+            script,
+            ex.exception.map(t => ErrorData(MoleExecution.MoleExecutionFailed.exception(t))),
+            utils.formatDate(time),
+            time,
+            _)
+        )
 
   def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] = {
     case (env: Environment, bdl: BeginDownload) ⇒

@@ -83,7 +83,7 @@ class TabContent:
         val (content, hash) = editorPanelUI.code
         api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
           case (saved, savedHash) ⇒
-            if (saved)
+            if saved
             then
               editorPanelUI.onSaved(savedHash)
               true
