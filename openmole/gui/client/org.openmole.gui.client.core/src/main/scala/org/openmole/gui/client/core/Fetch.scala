@@ -27,7 +27,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
-
+import org.openmole.gui.shared.data.*
 
 
 class Fetch(panels: Panels):
@@ -46,16 +46,24 @@ class Fetch(panels: Panels):
       onFailed = t => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, s"The request failed with error $t")
     )
 
-//  def apply[O, R](
-//    r: CoreAPIClientImpl => Future[O],
-//    timeout:        FiniteDuration                     = 60 seconds,
-//    warningTimeout: FiniteDuration                     = 10 seconds)(action: O => R) =
-//    //import scala.concurrent.ExecutionContext.Implicits.global
-////    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
-//    val f = future(r, timeout, warningTimeout)
-//
-//    f.onComplete {
-//      case Success(r) ⇒ action(r)
-//      case _ =>
-//    }
-//
+  def futureError[O](
+     f: CoreAPIClientImpl => Future[Either[ErrorData, O]],
+     timeout: Option[FiniteDuration] = Some(60 seconds),
+     warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
+
+    OMFetch(coreAPIClient).futureError(
+      f,
+      timeout = timeout,
+      warningTimeout = warningTimeout,
+      onTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "The request timed out. Please check your connection."),
+      onWarningTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "The request is very long. Please check your connection."),
+      onFailed =
+        case OMFetch.ServerError(e) =>
+          panels.notifications.addAndShowNotificaton(NotificationLevel.Error,
+            s"""The server returned an error 500:
+               |${ErrorData.stackTrace(e)}""".stripMargin)
+        case t =>
+          panels.notifications.addAndShowNotificaton(NotificationLevel.Error,
+            s"""The server failed unexpectedly:
+               |${t}""".stripMargin)
+    )

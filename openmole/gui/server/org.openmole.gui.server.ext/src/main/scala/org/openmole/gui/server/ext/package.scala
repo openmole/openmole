@@ -1,7 +1,8 @@
-package org.openmole.gui.server
+package org.openmole.gui.server.ext
 
 import cats.effect.IO
 import endpoints4s.http4s.server
+import org.openmole.gui.shared.data.*
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -20,6 +21,14 @@ import endpoints4s.http4s.server
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object ext {
-  abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs
-}
+
+abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs:
+  implicit class EndpointDecorator[A, B](ep: Endpoint[A, Either[ErrorData, B]]):
+    def errorImplementedBy(f: A => B) =
+      ep.implementedBy { a =>
+        try Right(f(a))
+        catch
+          case t: Throwable => Left(ErrorData(t))
+      }
+
+

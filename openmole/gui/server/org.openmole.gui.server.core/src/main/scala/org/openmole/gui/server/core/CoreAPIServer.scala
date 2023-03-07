@@ -29,6 +29,7 @@ import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.gui.shared.api
+import org.openmole.gui.shared.data.ErrorData
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -40,124 +41,121 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
   val settingsRoute =
-    omSettings.implementedBy(_ => apiImpl.settings)
+    omSettings.errorImplementedBy(_ => apiImpl.settings)
 
 //  val isPasswordCorrectRoute =
-//    isPasswordCorrect.implementedBy(apiImpl.isPasswordCorrect _)
+//    isPasswordCorrect.safeImplementedBy(apiImpl.isPasswordCorrect _)
 
 //  val resetPasswordRoute =
-//    resetPassword.implementedBy(_ => apiImpl.resetPassword())
+//    resetPassword.safeImplementedBy(_ => apiImpl.resetPassword())
 
   val listPluginsRoute =
-    listPlugins.implementedBy{ _ => apiImpl.listPlugins() }
+    listPlugins.errorImplementedBy{ _ => apiImpl.listPlugins() }
 
   val guiPluginsRoute =
-    guiPlugins.implementedBy ( _ => apiImpl.getGUIPlugins() )
+    guiPlugins.errorImplementedBy (_ => apiImpl.getGUIPlugins() )
 
   val listFilesRoute =
-    listFiles.implementedBy { case(path, filter) => apiImpl.listFiles(path, filter) }
+    listFiles.errorImplementedBy { case(path, filter) => apiImpl.listFiles(path, filter) }
 
   val sizeRoute =
-    size.implementedBy { path => apiImpl.size(path) }
+    size.errorImplementedBy { path => apiImpl.size(path) }
 
   val saveFileRoute =
-    saveFile.implementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
+    saveFile.errorImplementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
 
   val copyFilesRoute =
-    copyFiles.implementedBy { case(sp, overwrite) => apiImpl.copyFiles(sp, overwrite) }
+    copyFiles.errorImplementedBy { case(sp, overwrite) => apiImpl.copyFiles(sp, overwrite) }
 
   val createFileRoute =
-    createFile.implementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
+    createFile.errorImplementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
   val extractRoute =
-    extract.implementedBy { sp => apiImpl.extract(sp) }
+    extract.errorImplementedBy { sp => apiImpl.extract(sp) }
 
   val deleteFilesRoute =
-    deleteFiles.implementedBy { sp => apiImpl.deleteFiles(sp) }
+    deleteFiles.errorImplementedBy { sp => apiImpl.deleteFiles(sp) }
 
   val existsRoute=
-    exists.implementedBy { sp => apiImpl.exists(sp) }
+    exists.errorImplementedBy { sp => apiImpl.exists(sp) }
 
   val listRecursiveRoute =
-    listRecursive.implementedBy { case(path, f) => apiImpl.recursiveListFiles(path, f) }
+    listRecursive.errorImplementedBy { case(path, f) => apiImpl.recursiveListFiles(path, f) }
 
   val moveRoute =
-    move.implementedBy { case(f, t) => apiImpl.move(f, t) }
+    move.errorImplementedBy { case(f, t) => apiImpl.move(f, t) }
 
   val mdToHtmlRoute =
-    mdToHtml.implementedBy { p => apiImpl.mdToHtml(p) }
+    mdToHtml.errorImplementedBy { p => apiImpl.mdToHtml(p) }
 
   val sequenceRoute =
-    sequence.implementedBy { p => apiImpl.sequence(p) }
+    sequence.errorImplementedBy { p => apiImpl.sequence(p) }
 
   val executionStateRoute =
-    executionState.implementedBy { (l, i) => apiImpl.executionData(l, i) }
-
-//  val staticInfosRoute =
-//    staticInfos.implementedBy { _ => apiImpl.staticInfos() }
+    executionState.errorImplementedBy { (l, i) => apiImpl.executionData(l, i) }
 
   val cancelExecutionRoute =
-    cancelExecution.implementedBy { i => apiImpl.cancelExecution(i) }
+    cancelExecution.errorImplementedBy { i => apiImpl.cancelExecution(i) }
 
   val removeExecutionRoute =
-    removeExecution.implementedBy { i => apiImpl.removeExecution(i) }
+    removeExecution.errorImplementedBy { i => apiImpl.removeExecution(i) }
 
   val compileScriptRoute =
-    compileScript.implementedBy { s => apiImpl.compileScript(s) }
+    compileScript.errorImplementedBy { s => apiImpl.compileScript(s) }
 
   val launchScriptRoute =
-    launchScript.implementedBy { case(s, b) => apiImpl.launchScript(s, b) }
+    launchScript.errorImplementedBy { (s, b) => apiImpl.launchScript(s, b) }
 
   val clearEnvironmentErrorsRoute =
-    clearEnvironmentErrors.implementedBy { i => apiImpl.clearEnvironmentErrors(i) }
+    clearEnvironmentErrors.errorImplementedBy { i => apiImpl.clearEnvironmentErrors(i) }
 
   val listEnvironmentErrorsRoute =
-    listEnvironmentErrors.implementedBy { case(e, i) => apiImpl.listEnvironmentErrors(e, i) }
+    listEnvironmentErrors.errorImplementedBy { case(e, i) => apiImpl.listEnvironmentErrors(e, i) }
 
   val modelsRoute =
-    models.implementedBy { p => apiImpl.models(p) }
+    models.errorImplementedBy { p => apiImpl.models(p) }
 
   val expandResourcesRoute =
-    expandResources.implementedBy { r => apiImpl.expandResources(r) }
+    expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
 
   val downloadHTTPRoute =
-    downloadHTTP.implementedBy { case(s, p, b) => apiImpl.downloadHTTP(s, p, b) }
+    downloadHTTP.errorImplementedBy { case(s, p, b) => apiImpl.downloadHTTP(s, p, b) }
 
   val temporaryDirectoryRoute =
-    temporaryDirectory.implementedBy { _ => apiImpl.temporaryDirectory() }
+    temporaryDirectory.errorImplementedBy { _ => apiImpl.temporaryDirectory() }
 
   val shutdownRoute =
-    shutdown.implementedBy { _ => apiImpl.shutdown() }
+    shutdown.errorImplementedBy { _ => apiImpl.shutdown() }
 
   val restartRoute =
-    restart.implementedBy { _ => apiImpl.restart() }
+    restart.errorImplementedBy { _ => apiImpl.restart() }
 
   val isAliveRoute =
-    isAlive.implementedBy { _ => apiImpl.isAlive() }
+    isAlive.errorImplementedBy { _ => apiImpl.isAlive() }
 
   val jvmInfosRoute =
-    jvmInfos.implementedBy { _ => apiImpl.jvmInfos() }
+    jvmInfos.errorImplementedBy { _ => apiImpl.jvmInfos() }
 
   val marketIndexRoute =
-    marketIndex.implementedBy { _ => apiImpl.marketIndex() }
+    marketIndex.errorImplementedBy { _ => apiImpl.marketIndex() }
 
   val getMarketEntryRoute =
-    getMarketEntry.implementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
+    getMarketEntry.errorImplementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
 
   val omrMethodRoute =
-    omrMethod.implementedBy { p => apiImpl.omrMethodName(p) }
+    omrMethod.errorImplementedBy { p => apiImpl.omrMethodName(p) }
 
   val addPluginRoute =
-    addPlugin.implementedBy { p => apiImpl.addPlugin(p) }
+    addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }
 
   val removePluginRoute =
-    removePlugin.implementedBy { p => apiImpl.removePlugin(p) }
+    removePlugin.errorImplementedBy { p => apiImpl.removePlugin(p) }
 
   val listNotificationRoute =
-    listNotification.implementedBy { p => apiImpl.listNotification }
+    listNotification.errorImplementedBy { p => apiImpl.listNotification }
 
   val clearNotificationRoute =
-    clearNotification.implementedBy { s => apiImpl.clearNotification(s) }
+    clearNotification.errorImplementedBy { s => apiImpl.clearNotification(s) }
 
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(

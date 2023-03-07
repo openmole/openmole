@@ -33,162 +33,162 @@ trait CoreAPI extends RESTAPI {
 
   // ------ Files ------------
 
-  val size: Endpoint[SafePath, Long] =
-    endpoint(post(path / "file" / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
+  val size: ErrorEndpoint[SafePath, Long] =
+    errorEndpoint(post(path / "file" / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
 
   //def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
 //  implicit lazy val saveFileRequestSchema: JsonSchema[(SafePath, String, Option[String], Boolean)] = genericJsonSchema
-  val saveFile: Endpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
-    endpoint(post(path / "file"/ "save", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
+  val saveFile: ErrorEndpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
+    errorEndpoint(post(path / "file"/ "save", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
 
   //def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
-  val copyFiles: Endpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
-    endpoint(post(path / "file" / "copy", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
+  val copyFiles: ErrorEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    errorEndpoint(post(path / "file" / "copy", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   //def addFile(safePath: SafePath, fileName: String): Boolean
-  val createFile: Endpoint[(SafePath, String, Boolean), Boolean] =
-    endpoint(post(path / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
+  val createFile: ErrorEndpoint[(SafePath, String, Boolean), Boolean] =
+    errorEndpoint(post(path / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
 
   //def extractTGZ(safePath: SafePath): ExtractResult
-  val extract: Endpoint[SafePath, Option[ErrorData]] =
-    endpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
+  val extract: ErrorEndpoint[SafePath, Option[ErrorData]] =
+    errorEndpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
-  val listFiles: Endpoint[(SafePath, FileFilter), ListFilesData] =
-    endpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileFilter)]), ok(jsonResponse[ListFilesData]))
+  val listFiles: ErrorEndpoint[(SafePath, FileFilter), ListFilesData] =
+    errorEndpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileFilter)]), ok(jsonResponse[ListFilesData]))
 
-  val listRecursive: Endpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
-    endpoint(post(path / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
+  val listRecursive: ErrorEndpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
+    errorEndpoint(post(path / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
-  val move: Endpoint[(SafePath, SafePath), Unit] =
-    endpoint(post(path / "file" / "move", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
+  val move: ErrorEndpoint[(SafePath, SafePath), Unit] =
+    errorEndpoint(post(path / "file" / "move", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
-  val duplicate: Endpoint[(SafePath, String), SafePath] =
-   endpoint(post(path / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
+  val duplicate: ErrorEndpoint[(SafePath, String), SafePath] =
+   errorEndpoint(post(path / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
 
-  val deleteFiles: Endpoint[Seq[SafePath], Unit] =
-    endpoint(post(path / "file" / "delete", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+  val deleteFiles: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / "file" / "delete", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
 
-  val exists: Endpoint[SafePath, Boolean] =
-    endpoint(post(path / "file" / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
+  val exists: ErrorEndpoint[SafePath, Boolean] =
+    errorEndpoint(post(path / "file" / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
 
-  val temporaryDirectory: Endpoint[Unit, SafePath] =
-    endpoint(get(path / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
+  val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
+    errorEndpoint(get(path / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
-  val executionState: Endpoint[(Int, Seq[ExecutionId]), Seq[ExecutionData]] =
-    endpoint(post(path / "execution" / "state", jsonRequest[(Int, Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
+  val executionState: ErrorEndpoint[(Int, Seq[ExecutionId]), Seq[ExecutionData]] =
+    errorEndpoint(post(path / "execution" / "state", jsonRequest[(Int, Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
 
 //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
-//  val staticInfos: Endpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
-//    endpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
+//  val staticInfos: SafeEndpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
+//    safeEndpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
 
 //  def cancelExecution(id: ExecutionId): Unit
-  val cancelExecution: Endpoint[ExecutionId, Unit] =
-    endpoint(post(path / "execution" / "cancel", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+  val cancelExecution: ErrorEndpoint[ExecutionId, Unit] =
+    errorEndpoint(post(path / "execution" / "cancel", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def removeExecution(id: ExecutionId): Unit
-  val removeExecution: Endpoint[ExecutionId, Unit] =
-    endpoint(post(path / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+  val removeExecution: ErrorEndpoint[ExecutionId, Unit] =
+    errorEndpoint(post(path / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def compileScript(scriptData: ScriptData): Option[ErrorData]
-  val compileScript: Endpoint[SafePath, Option[ErrorData]] =
-    endpoint(post(path / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
+  val compileScript: ErrorEndpoint[SafePath, Option[ErrorData]] =
+    errorEndpoint(post(path / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
 //  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
-  val launchScript: Endpoint[(SafePath, Boolean), ExecutionId] =
-    endpoint(post(path / "execution" / "launch", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[ExecutionId]))
+  val launchScript: ErrorEndpoint[(SafePath, Boolean), ExecutionId] =
+    errorEndpoint(post(path / "execution" / "launch", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[ExecutionId]))
 
 //  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
-  val clearEnvironmentErrors: Endpoint[EnvironmentId, Unit] =
-    endpoint(post(path / "execution" / "clear-environment-error", jsonRequest[EnvironmentId]), ok(jsonResponse[Unit]))
+  val clearEnvironmentErrors: ErrorEndpoint[EnvironmentId, Unit] =
+    errorEndpoint(post(path / "execution" / "clear-environment-error", jsonRequest[EnvironmentId]), ok(jsonResponse[Unit]))
 
 //  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
-  val listEnvironmentErrors: Endpoint[(EnvironmentId, Int), Seq[EnvironmentErrorGroup]] =
-    endpoint(post(path / "execution" / "list-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[Seq[EnvironmentErrorGroup]]))
+  val listEnvironmentErrors: ErrorEndpoint[(EnvironmentId, Int), Seq[EnvironmentErrorGroup]] =
+    errorEndpoint(post(path / "execution" / "list-environment-error", jsonRequest[(EnvironmentId, Int)]), ok(jsonResponse[Seq[EnvironmentErrorGroup]]))
 
   // ---- Plugins -----
-  val listPlugins: Endpoint[Unit, Seq[Plugin]] =
-    endpoint(get(path / "plugin" / "list"), ok(jsonResponse[Seq[Plugin]]))
+  val listPlugins: ErrorEndpoint[Unit, Seq[Plugin]] =
+    errorEndpoint(get(path / "plugin" / "list"), ok(jsonResponse[Seq[Plugin]]))
 
-  val guiPlugins: Endpoint[Unit, PluginExtensionData] =
-    endpoint(get(path / "plugin" / "gui"), ok(jsonResponse[PluginExtensionData]))
+  val guiPlugins: ErrorEndpoint[Unit, PluginExtensionData] =
+    errorEndpoint(get(path / "plugin" / "gui"), ok(jsonResponse[PluginExtensionData]))
 
-  val addPlugin: Endpoint[SafePath, Seq[ErrorData]] =
-    endpoint(post(path / "plugin" / "add", jsonRequest[SafePath]), ok(jsonResponse[Seq[ErrorData]]))
+  val addPlugin: ErrorEndpoint[SafePath, Seq[ErrorData]] =
+    errorEndpoint(post(path / "plugin" / "add", jsonRequest[SafePath]), ok(jsonResponse[Seq[ErrorData]]))
 
-  val removePlugin: Endpoint[SafePath, Unit] =
-    endpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+  val removePlugin: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
-  val omrMethod: Endpoint[SafePath, String] =
-    endpoint(post(path / "plugin" / "omr-method", jsonRequest[SafePath]), ok(jsonResponse[String]))
+  val omrMethod: ErrorEndpoint[SafePath, String] =
+    errorEndpoint(post(path / "plugin" / "omr-method", jsonRequest[SafePath]), ok(jsonResponse[String]))
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]
-  val models: Endpoint[SafePath, Seq[SafePath]] =
-    endpoint(post(path / "wizard" / "models", jsonRequest[SafePath]), ok(jsonResponse[Seq[SafePath]]))
+  val models: ErrorEndpoint[SafePath, Seq[SafePath]] =
+    errorEndpoint(post(path / "wizard" / "models", jsonRequest[SafePath]), ok(jsonResponse[Seq[SafePath]]))
 
   //def expandResources(resources: Resources): Resources
-  val expandResources: Endpoint[Resources, Resources] =
-    endpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
+  val expandResources: ErrorEndpoint[Resources, Resources] =
+    errorEndpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
 
   //def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
-  val downloadHTTP: Endpoint[(String, SafePath, Boolean), Option[ErrorData]] =
-    endpoint(post(path / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean)]), ok(jsonResponse[Option[ErrorData]]))
+  val downloadHTTP: ErrorEndpoint[(String, SafePath, Boolean), Option[ErrorData]] =
+    errorEndpoint(post(path / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean)]), ok(jsonResponse[Option[ErrorData]]))
 
   // ---------- Market ----------
 
   //def marketIndex(): MarketIndex
-  val marketIndex: Endpoint[Unit, MarketIndex] =
-    endpoint(get(path / "market" / "index"), ok(jsonResponse[MarketIndex]))
+  val marketIndex: ErrorEndpoint[Unit, MarketIndex] =
+    errorEndpoint(get(path / "market" / "index"), ok(jsonResponse[MarketIndex]))
 
 //    def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
-  val getMarketEntry: Endpoint[(MarketIndexEntry, SafePath), Unit] =
-    endpoint(post(path / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
+  val getMarketEntry: ErrorEndpoint[(MarketIndexEntry, SafePath), Unit] =
+    errorEndpoint(post(path / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
 
 
   // ---------- Application ------------
 
-  val omSettings: Endpoint[Unit, OMSettings] =
-    endpoint(get(path / "application" / "settings"), ok(jsonResponse[OMSettings]))
+  val omSettings: ErrorEndpoint[Unit, OMSettings] =
+    errorEndpoint(get(path / "application" / "settings"), ok(jsonResponse[OMSettings]))
 
   // def shutdown(): Unit
-  val shutdown: Endpoint[Unit, Unit] =
-    endpoint(get(path / "application" / "shutdown"), ok(jsonResponse[Unit]))
+  val shutdown: ErrorEndpoint[Unit, Unit] =
+    errorEndpoint(get(path / "application" / "shutdown"), ok(jsonResponse[Unit]))
 
   //  def restart(): Unit
-  val restart: Endpoint[Unit, Unit] =
-    endpoint(get(path / "application" / "restart"), ok(jsonResponse[Unit]))
+  val restart: ErrorEndpoint[Unit, Unit] =
+    errorEndpoint(get(path / "application" / "restart"), ok(jsonResponse[Unit]))
 
   //  def isAlive(): Boolean
-  val isAlive: Endpoint[Unit, Boolean] =
-    endpoint(get(path / "application" / "is-alive"), ok(jsonResponse[Boolean]))
+  val isAlive: ErrorEndpoint[Unit, Boolean] =
+    errorEndpoint(get(path / "application" / "is-alive"), ok(jsonResponse[Boolean]))
 
   //  def jvmInfos(): JVMInfos
-  val jvmInfos: Endpoint[Unit, JVMInfos] =
-    endpoint(get(path / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
+  val jvmInfos: ErrorEndpoint[Unit, JVMInfos] =
+    errorEndpoint(get(path / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
 
-  val listNotification: Endpoint[Unit, Seq[NotificationEvent]] =
-    endpoint(post(path / "application" / "list-notification", jsonRequest[Unit]), ok(jsonResponse[Seq[NotificationEvent]]))
+  val listNotification: ErrorEndpoint[Unit, Seq[NotificationEvent]] =
+    errorEndpoint(post(path / "application" / "list-notification", jsonRequest[Unit]), ok(jsonResponse[Seq[NotificationEvent]]))
 
-  val clearNotification: Endpoint[Seq[Long], Unit] =
-    endpoint(post(path / "application" / "clear-notification", jsonRequest[Seq[Long]]), ok(jsonResponse[Unit]))
+  val clearNotification: ErrorEndpoint[Seq[Long], Unit] =
+    errorEndpoint(post(path / "application" / "clear-notification", jsonRequest[Seq[Long]]), ok(jsonResponse[Unit]))
 
   //def mdToHtml(safePath: SafePath): String
-  val mdToHtml: Endpoint[SafePath, String] =
-    endpoint(post(path / "tool" / "md-to-html", jsonRequest[SafePath]), ok(jsonResponse[String]))
+  val mdToHtml: ErrorEndpoint[SafePath, String] =
+    errorEndpoint(post(path / "tool" / "md-to-html", jsonRequest[SafePath]), ok(jsonResponse[String]))
 
   //def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
 
   //def renameFile(safePath: SafePath, name: String): SafePath
 
   //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
-  val sequence: Endpoint[SafePath, SequenceData] =
-    endpoint(post(path / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
+  val sequence: ErrorEndpoint[SafePath, SequenceData] =
+    errorEndpoint(post(path / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
 
 
   //TODO ------------ refactor -------------------

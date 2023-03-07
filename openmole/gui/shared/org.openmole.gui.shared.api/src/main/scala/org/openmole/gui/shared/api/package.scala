@@ -1,4 +1,4 @@
-package org.openmole.gui.shared
+package org.openmole.gui.shared.api
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,8 +17,12 @@ package org.openmole.gui.shared
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object api {
-  trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas {
-     export io.circe.generic.auto.*
-  }
-}
+import org.openmole.gui.shared.data.*
+
+trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
+   export io.circe.generic.auto.*
+   type ErrorEndpoint[I, O] = Endpoint[I, Either[ErrorData, O]]
+   def errorEndpoint[A, B](request: Request[A], r: Response[B], docs: EndpointDocs = EndpointDocs()) =
+     endpoint(request, response(InternalServerError, jsonResponse[ErrorData]).orElse(r), docs)
+
+

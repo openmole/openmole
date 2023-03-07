@@ -24,9 +24,11 @@ import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.ErrorData
 
 object OMFetch:
   def apply[API](api: EndpointsSettings => API) = new OMFetch(api)
+  case class ServerError(data: ErrorData) extends Throwable
 
 class OMFetch[API](api: EndpointsSettings => API) {
 
@@ -36,7 +38,7 @@ class OMFetch[API](api: EndpointsSettings => API) {
     warningTimeout: Option[FiniteDuration] = Some(10 seconds),
     onTimeout: () ⇒ Unit = () ⇒ {},
     onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath) =
+    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath): scala.concurrent.Future[O] =
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { onWarningTimeout() })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
@@ -56,9 +58,43 @@ class OMFetch[API](api: EndpointsSettings => API) {
         f
     }
 
+  def futureError[O](
+    f: API => scala.concurrent.Future[Either[ErrorData, O]],
+    timeout: Option[FiniteDuration] = Some(60 seconds),
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds),
+    onTimeout: () ⇒ Unit = () ⇒ {},
+    onWarningTimeout: () ⇒ Unit = () ⇒ {},
+    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath): scala.concurrent.Future[O] =
+
+    val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) {
+      onWarningTimeout()
+    })
+
+    def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
+
+    val future = f(api(EndpointsSettings().withTimeout(timeout).withBaseUri(BasePath.value(baseURI))))
+    future.transform {
+      case Success(Right(r)) =>
+        stopTimeout
+        Success(r)
+      case Success(Left(e)) =>
+        stopTimeout
+        val throwable = OMFetch.ServerError(e)
+        onFailed(throwable)
+        Failure(throwable)
+      case Failure(t: scala.concurrent.TimeoutException) ⇒
+        stopTimeout
+        onTimeout()
+        Failure(t)
+      case Failure(t) =>
+        stopTimeout
+        onFailed(t)
+        Failure(t)
+    }
 
 
-//  def apply[O, R](
+
+  //  def apply[O, R](
 //    r: API => scala.concurrent.Future[O],
 //    timeout: FiniteDuration = 60 seconds,
 //    warningTimeout: FiniteDuration = 10 seconds,

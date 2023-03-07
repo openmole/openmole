@@ -29,6 +29,7 @@ import org.openmole.core.project.*
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl.*
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
