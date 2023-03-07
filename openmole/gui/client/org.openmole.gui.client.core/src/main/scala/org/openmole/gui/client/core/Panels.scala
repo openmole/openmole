@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
 import org.openmole.gui.shared.data.GUIPluginAsJS
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.ext.{ErrorManager, PluginServices, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.client.ext.{ErrorManager, NotificationAPI, NotificationLevel, PluginServices, ServerAPI, WizardPluginFactory}
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org
@@ -42,7 +42,6 @@ object Panels:
       case None ⇒ Some(ExpandablePanel(id, el))
     }
   }
-  
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)

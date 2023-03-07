@@ -36,7 +36,7 @@ object TopLevelExports {
 
 class EvolutionAnalysis extends MethodAnalysisPlugin {
 
-  override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath): HtmlElement = {
+  override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationAPI): HtmlElement = {
     val metadata: Var[Option[Convergence]] = Var(None)
 
     PluginFetch.future(_.analyse(safePath).future).foreach {

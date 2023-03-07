@@ -43,9 +43,9 @@ class NetlogoWizardFactory extends WizardPluginFactory {
 
   val fileType = CodeFile(NetLogoLanguage())
 
-  def parse(safePath: SafePath)(using basePath: BasePath): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
+  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Option[ModelMetadata]] = PluginFetch.future(_.parse(safePath).future)
   
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
+  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationAPI) = PluginFetch.future(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "NetLogo"
 }

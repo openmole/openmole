@@ -330,7 +330,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 @JSExportAll
 object App:
   lazy val panels = Panels()
-  lazy val fetch = Fetch(panels)
+  lazy val fetch = CoreFetch(panels)
   lazy val api = OpenMOLERESTServerAPI(fetch)
 
   lazy val pluginServices =

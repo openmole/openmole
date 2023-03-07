@@ -27,7 +27,7 @@ import scala.concurrent.duration.*
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class OpenMOLERESTServerAPI(fetch: Fetch) extends ServerAPI:
+class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)

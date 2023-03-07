@@ -1,7 +1,9 @@
-package org.openmole.gui.plugin.authentication
+package org.openmole.gui.client.ext
+
+import com.raquo.laminar.api.L.*
 
 /*
- * Copyright (C) 2022 Romain Reuillon
+ * Copyright (C) 2023 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,14 +19,8 @@ package org.openmole.gui.plugin.authentication
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+enum NotificationLevel:
+  case Info, Error
 
-import org.openmole.gui.client.ext.*
-
-package object egi {
-
- class APIClientImpl(val settings: ClientSettings)
-   extends EGIAuthenticationAPI with APIClient
-
- def PluginFetch = Fetch(new APIClientImpl(_))
-
-}
+trait NotificationAPI:
+  def notify(level: NotificationLevel, title: String, body: Div = div()): Unit

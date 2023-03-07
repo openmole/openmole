@@ -15,27 +15,25 @@ import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
 
-enum NotificationLevel:
-  case Info, Error
-
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
 //import NotificationContent._
 
-case class Notification(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
+case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
-class NotificationManager:
+class NotificationManager extends NotificationAPI:
+  override def notify(level: NotificationLevel, title: String, body: Div): Unit = addAndShowNotificaton(level, title, body)
 
   val showNotfications = Var(false)
-  val notifications: Var[Seq[Notification]] = Var(Seq())
+  val notifications: Var[Seq[NotificationLine]] = Var(Seq())
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
   val currentID: Var[Option[Long]] = Var(None)
 
-  def filteredStack(stack: Seq[Notification], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
+  def filteredStack(stack: Seq[NotificationLine], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
-  def remove(notification: Notification) = notifications.update(s => s.filterNot(_.id == notification.id))
+  def remove(notification: NotificationLine) = notifications.update(s => s.filterNot(_.id == notification.id))
 
   def addNotification(level: NotificationLevel, title: String, body: Div) =
-    val notif = Notification(level, title, div(body, cls := "notification"))
+    val notif = NotificationLine(level, title, div(body, cls := "notification"))
     notifications.update { s =>
       (s :+ notif)
     }
@@ -45,7 +43,7 @@ class NotificationManager:
     val last = addNotification(level, title, body)
     showNotification(last)
 
-  def showNotification(notification: Notification) =
+  def showNotification(notification: NotificationLine) =
     currentListType.set(Some(notification.level))
     currentID.set(notification.id)
 
@@ -54,7 +52,7 @@ class NotificationManager:
     currentListType.set(None)
 
   def showGetItNotification(level: NotificationLevel, title: String, body: Div = div()) =
-    lazy val notif: Notification =
+    lazy val notif: NotificationLine =
       addNotification(level, title,
         div(
           body.amend(cls := "getItNotification"),
@@ -83,13 +81,13 @@ class NotificationManager:
                 case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString("/")} was completed at ${e.date}""")
                 case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString("/")} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
 
-            Notification(NotificationLevel.Info, title, div(body, cls := "notification"), id = Some(NotificationEvent.id(event)))
+            NotificationLine(NotificationLevel.Info, title, div(body, cls := "notification"), id = Some(NotificationEvent.id(event)))
 
     newEvents ++ s
   }
 
   def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-    s :+ Notification(level, title, div(body, cls := "notification"))
+    s :+ NotificationLine(level, title, div(body, cls := "notification"))
   }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
@@ -143,7 +141,7 @@ class NotificationManager:
     )
 
 
-  def notifTopIcon(notifCls: String, st: Seq[Notification], notificationLevel: NotificationLevel) =
+  def notifTopIcon(notifCls: String, st: Seq[NotificationLine], notificationLevel: NotificationLevel) =
     val nList = filteredStack(st, notificationLevel)
 
     def trigger = onClick --> { _ =>
@@ -168,7 +166,7 @@ class NotificationManager:
 
   def render =
     div(flexRow, alignItems.flexEnd,
-      notifications.toObservable --> Observer[Seq[Notification]] { n => showNotfications.set(!n.isEmpty) },
+      notifications.toObservable --> Observer[Seq[NotificationLine]] { n => showNotfications.set(!n.isEmpty) },
       idAttr := "container",
       cls.toggle("alert-is-shown") <-- showNotfications.signal,
       div(display.flex, flexDirection.column,

@@ -21,5 +21,5 @@ import org.openmole.gui.client.ext.*
 
 package object r {
   class APIClientImpl(val settings: ClientSettings) extends RWizardAPI with APIClient
-  def PluginFetch = OMFetch(new APIClientImpl(_))
+  def PluginFetch = Fetch(new APIClientImpl(_))
 }

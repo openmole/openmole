@@ -22,5 +22,5 @@ import org.openmole.gui.client.ext.*
 package object netlogo {
 
  class APIClientImpl(val settings: ClientSettings) extends NetlogoWizardAPI with APIClient
- def PluginFetch = OMFetch(new APIClientImpl(_))
+ def PluginFetch = Fetch(new APIClientImpl(_))
 }

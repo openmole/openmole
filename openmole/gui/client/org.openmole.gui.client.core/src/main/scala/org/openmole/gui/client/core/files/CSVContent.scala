@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.{Fetch, Panels}
+import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.core.files.TreeNodeTab.Raw
 import org.openmole.gui.client.ext.*

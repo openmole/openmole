@@ -41,7 +41,7 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
   def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
   def name = "EGI"
-  def getData(using basePath: BasePath): Future[Seq[AuthType]] =
+  def getData(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Seq[AuthType]] =
     PluginFetch.future(_.egiAuthentications(()).future)
 }
 
@@ -63,12 +63,12 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   def factory = new EGIAuthenticationGUIFactory
 
-  def remove(onremove: () ⇒ Unit)(using basePath: BasePath) =
+  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI) =
     PluginFetch.future(_.removeAuthentications(()).future).foreach { _ ⇒
       onremove()
     }
 
-  def panel(using api: ServerAPI, basePath: BasePath) = {
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationAPI) = {
     import scaladget.tools._
       //      _.foreach { c ⇒ a.voInput.ref.value = c }
       //    }
@@ -82,7 +82,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
 
   }
 
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath) = {
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI) = {
     PluginFetch.future(_.removeAuthentications(()).future).foreach {
       d ⇒
         PluginFetch.future {
@@ -98,6 +98,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
     PluginFetch.future(_.setVOTests(voInputContent.now().split(",").map(_.trim).toSeq).future)
   }
 
-  def test(using basePath: BasePath) = PluginFetch.future(_.testAuthentication(data).future)
+  def test(using basePath: BasePath, notificationAPI: NotificationAPI) = PluginFetch.future(_.testAuthentication(data).future)
 
 }

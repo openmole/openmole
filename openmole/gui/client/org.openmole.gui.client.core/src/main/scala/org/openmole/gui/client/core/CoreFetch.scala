@@ -18,7 +18,7 @@ package org.openmole.gui.client.core
  */
 
 
-import org.openmole.gui.client.ext.OMFetch
+import org.openmole.gui.client.ext.Fetch
 
 import scala.concurrent.duration.*
 
@@ -30,40 +30,28 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
 
-class Fetch(panels: Panels):
+class CoreFetch(panels: Panels):
 
   def future[O](
     f: CoreAPIClientImpl => Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
     warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
 
-    OMFetch(coreAPIClient).future(
+    given NotificationAPI = panels.notifications
+
+    Fetch(coreAPIClient).future(
       f,
       timeout = timeout,
-      warningTimeout = warningTimeout,
-      onTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "The request timed out. Please check your connection."),
-      onWarningTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "The request is very long. Please check your connection."),
-      onFailed = t => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, s"The request failed with error $t")
-    )
+      warningTimeout = warningTimeout)
 
   def futureError[O](
      f: CoreAPIClientImpl => Future[Either[ErrorData, O]],
      timeout: Option[FiniteDuration] = Some(60 seconds),
      warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
 
-    OMFetch(coreAPIClient).futureError(
+    given NotificationAPI = panels.notifications
+
+    Fetch(coreAPIClient).futureError(
       f,
       timeout = timeout,
-      warningTimeout = warningTimeout,
-      onTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "The request timed out. Please check your connection."),
-      onWarningTimeout = () => panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "The request is very long. Please check your connection."),
-      onFailed =
-        case OMFetch.ServerError(e) =>
-          panels.notifications.addAndShowNotificaton(NotificationLevel.Error,
-            s"""The server returned an error 500:
-               |${ErrorData.stackTrace(e)}""".stripMargin)
-        case t =>
-          panels.notifications.addAndShowNotificaton(NotificationLevel.Error,
-            s"""The server failed unexpectedly:
-               |${t}""".stripMargin)
-    )
+      warningTimeout = warningTimeout)

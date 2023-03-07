@@ -44,19 +44,19 @@ class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends Auth
   def buildEmpty: AuthenticationPlugin = new LoginAuthenticationGUI
   def build(data: AuthType): AuthenticationPlugin = new LoginAuthenticationGUI(data)
   def name = "SSH Login/Password"
-  def getData(using basePath: BasePath): Future[Seq[AuthType]] = api.loginAuthentications()
+  def getData(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Seq[AuthType]] = api.loginAuthentications()
 
 class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin:
   type AuthType = LoginAuthenticationData
   def factory = new LoginAuthenticationFactory
-  def remove(onremove: () ⇒ Unit)(using basePath: BasePath) = api.removeAuthentication(data).foreach { _ ⇒ onremove() }
+  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI) = api.removeAuthentication(data).foreach { _ ⇒ onremove() }
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
   val targetInput = inputTag(data.target).amend(placeholder := "Host")
   val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  def panel(using api: ServerAPI, basePath: BasePath): HtmlElement = div(
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationAPI): HtmlElement = div(
     flexColumn, width := "400px", height := "220",
     div(cls := "verticalFormItem", div("Login", width:="150px"), loginInput),
     div(cls := "verticalFormItem", div("Password", width:="150px"), passwordInput),
@@ -64,9 +64,9 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
   )
 
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath): Unit =
+  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationAPI): Unit =
     api.removeAuthentication(data).foreach { d ⇒
       api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).foreach { b ⇒ onsave() }
     }
 
-  def test(using basePath: BasePath): Future[Seq[Test]] = api.testAuthentication(data)
+  def test(using basePath: BasePath, notificationAPI: NotificationAPI): Future[Seq[Test]] = api.testAuthentication(data)

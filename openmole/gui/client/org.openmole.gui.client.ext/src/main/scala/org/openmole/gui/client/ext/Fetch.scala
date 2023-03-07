@@ -26,20 +26,31 @@ import scala.scalajs.js.timers
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData
 
-object OMFetch:
-  def apply[API](api: EndpointsSettings => API) = new OMFetch(api)
+object Fetch:
+  def apply[API](api: EndpointsSettings => API) = new Fetch(api)
   case class ServerError(data: ErrorData) extends Throwable
 
-class OMFetch[API](api: EndpointsSettings => API) {
+  def onTimeout()(using notification: NotificationAPI) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.")
+  def onWarningTimeout()(using notification: NotificationAPI) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.")
+  def onFailed(t: Throwable)(using notification: NotificationAPI) =
+    t match
+      case Fetch.ServerError(e) =>
+        notification.notify(NotificationLevel.Error,
+          s"""The server returned an error 500:
+             |${ErrorData.stackTrace(e)}""".stripMargin)
+      case t =>
+        notification.notify(NotificationLevel.Error,
+          s"""The server failed unexpectedly:
+             |${t}""".stripMargin)
+
+
+class Fetch[API](api: EndpointsSettings => API) {
 
   def future[O](
     f: API => scala.concurrent.Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
-    warningTimeout: Option[FiniteDuration] = Some(10 seconds),
-    onTimeout: () ⇒ Unit = () ⇒ {},
-    onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath): scala.concurrent.Future[O] =
-    val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { onWarningTimeout() })
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using baseURI: BasePath, notificationAPI: NotificationAPI): scala.concurrent.Future[O] =
+    val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { Fetch.onWarningTimeout() })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
 
@@ -47,11 +58,11 @@ class OMFetch[API](api: EndpointsSettings => API) {
     future.andThen {
       case f@Failure(_: scala.concurrent.TimeoutException) ⇒
         stopTimeout
-        onTimeout()
+        Fetch.onTimeout()
         f
       case f@Failure(t) =>
         stopTimeout
-        onFailed(t)
+        Fetch.onFailed(t)
         f
       case f =>
         stopTimeout
@@ -61,13 +72,10 @@ class OMFetch[API](api: EndpointsSettings => API) {
   def futureError[O](
     f: API => scala.concurrent.Future[Either[ErrorData, O]],
     timeout: Option[FiniteDuration] = Some(60 seconds),
-    warningTimeout: Option[FiniteDuration] = Some(10 seconds),
-    onTimeout: () ⇒ Unit = () ⇒ {},
-    onWarningTimeout: () ⇒ Unit = () ⇒ {},
-    onFailed: Throwable => Unit = _ => {})(using baseURI: BasePath): scala.concurrent.Future[O] =
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using baseURI: BasePath, notificationAPI: NotificationAPI): scala.concurrent.Future[O] =
 
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) {
-      onWarningTimeout()
+      Fetch.onWarningTimeout()
     })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
@@ -79,16 +87,16 @@ class OMFetch[API](api: EndpointsSettings => API) {
         Success(r)
       case Success(Left(e)) =>
         stopTimeout
-        val throwable = OMFetch.ServerError(e)
-        onFailed(throwable)
+        val throwable = Fetch.ServerError(e)
+        Fetch.onFailed(throwable)
         Failure(throwable)
       case Failure(t: scala.concurrent.TimeoutException) ⇒
         stopTimeout
-        onTimeout()
+        Fetch.onTimeout()
         Failure(t)
       case Failure(t) =>
         stopTimeout
-        onFailed(t)
+        Fetch.onFailed(t)
         Failure(t)
     }
 
