@@ -98,7 +98,7 @@ object AuthenticationPanel {
           })
       })
 
-    val saveButton = button("Save", btn_primary_outline, onClick --> {
+    val saveButton = button("Save", btn_primary, onClick --> {
       _ ⇒ save
     })
 
@@ -198,7 +198,7 @@ object AuthenticationPanel {
                   div(flexColumn,
                     r.render,
                     r.errorOn.signal.expand(
-                      textArea(
+                      textArea(fontSize := "15px",
                         dropdownError,
                         child.text <-- r.currentStack.signal
                       )
