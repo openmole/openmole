@@ -18,6 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
+import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
@@ -27,8 +28,10 @@ import scala.concurrent.duration.*
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.io.IOException
+import scala.util.Failure
+import com.raquo.laminar.api.L.*
 
-class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
+class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationService) extends ServerAPI:
   override def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)
@@ -69,7 +72,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def upload(
     fileList: FileList,
     destinationPath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[String]] =
+    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[String]] = {
     val formData = new FormData
 
     formData.append("fileType", destinationPath.context.typeName)
@@ -99,17 +102,19 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
       p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))
 
     xhr.onabort = e =>
-      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} failed"))
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} was aborted"))
 
     xhr.ontimeout = e =>
-      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} failed"))
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} timed out"))
 
 
     xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)
     xhr.send(formData)
 
     p.future
-
+  }.andThen {
+    case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while uploading file", div(ErrorData.stackTrace(ErrorData(t))))
+  }
 
   override def download(
     safePath: SafePath,
@@ -144,6 +149,8 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
       xhr.send()
 
       p.future
+    }.andThen {
+      case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while downloading file", div(ErrorData.stackTrace(ErrorData(t))))
     }
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =

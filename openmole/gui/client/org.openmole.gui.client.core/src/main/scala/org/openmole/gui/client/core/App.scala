@@ -13,6 +13,7 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
@@ -324,7 +325,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 object App:
   lazy val panels = Panels()
   lazy val fetch = CoreFetch(panels)
-  lazy val api = OpenMOLERESTServerAPI(fetch)
+  lazy val api = OpenMOLERESTServerAPI(fetch, toService(panels.notifications))
 
   lazy val pluginServices =
     PluginServices(
