@@ -51,22 +51,18 @@ class SettingsView:
   //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, right := "20", left := "initial", right := 0)
   //
   private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
-    lazy val notif: NotificationManager.NotificationLine = panels.notifications.showAlternativeNotification(
+    lazy val notification = panels.notifications.showAlternativeNotification(
       NotificationLevel.Info,
       warnMessage,
       div(),
-      NotificationManager.Alternative("OK", () => CoreUtils.setRoute(route)),
-      NotificationManager.Alternative.cancel(notif)
+      NotificationManager.Alternative("OK", _ => CoreUtils.setRoute(route)),
+      NotificationManager.Alternative.cancel
     )
 
     div(rowLayout, lineHeight := "7px",
       glyphSpan(messageGlyph ++ omsheet.shutdownButton ++ columnLayout),
       span(message, paddingTop := "3", paddingLeft := "5", settingsItemStyle, columnLayout),
-      onClick --> { _ ⇒
-        // dropdownApp.close
-        // dropdownConnection.close
-        notif
-      }
+      onClick --> { _ ⇒ notification }
     )
 
   def docButton(using api: ServerAPI, basePath: BasePath) = a(href := "#", onClick --> { _ ⇒

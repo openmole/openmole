@@ -619,10 +619,12 @@ object TreeNodeTab {
       NotificationLevel.Error,
       s"The file ${tabData.safePath.name} has been modified on the sever",
       div("Which version do you want to keep?"),
-      Alternative("Yours", () ⇒ panels.tabContent.save(tabData, overwrite = true)),
-      Alternative("Server", ()=> panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ {
+      Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true)),
+      Alternative("Server", _ =>
+        panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ {
           tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
-        }))
+        })
+      )
     )
 
   def rawBlock(htmlContent: String) = div(panelBody, htmlContent)

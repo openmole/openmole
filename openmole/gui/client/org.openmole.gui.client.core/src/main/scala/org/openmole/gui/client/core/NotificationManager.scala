@@ -22,10 +22,10 @@ import java.text.SimpleDateFormat
 //import NotificationContent._
 object NotificationManager:
 
-  case class Alternative(name: String, action: () => Unit = () => {})
+  case class Alternative(name: String, action: String => Unit = _ => {})
 
   object Alternative:
-    def cancel(notification: NotificationLine)(using panels: Panels) = Alternative("cancel", () => panels.notifications.remove(notification))
+    def cancel(using panels: Panels) = Alternative("cancel", panels.notifications.removeById)
 
   case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: String, serverId: Option[Long] = None)
 
@@ -43,16 +43,17 @@ class NotificationManager:
 
   def filteredStack(stack: Seq[NotificationLine], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
-  def remove(notification: NotificationLine) = notifications.update(s => s.filterNot(_.id == notification.id))
+  def remove(notification: NotificationLine) = removeById(notification.id)
+  def removeById(id: String) = notifications.update(s => s.filterNot(_.id == id))
 
-  def addNotification(level: NotificationLevel, title: String, body: Div) =
+  def addNotification(level: NotificationLevel, title: String, body: String => Div) =
     val id = DataUtils.uuID
-    val notif = NotificationLine(level, title, div(body, cls := "notification"), id)
+    val notif = NotificationLine(level, title, div(body(id), cls := "notification"), id)
     notifications.update { s => s :+ notif }
     notif
 
   def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div = div()) =
-    val last = addNotification(level, title, body)
+    val last = addNotification(level, title, _ => body)
     showNotification(last)
 
   def showNotification(notification: NotificationLine) =
@@ -68,15 +69,17 @@ class NotificationManager:
       addNotification(
         level,
         title,
-        div(
-          body.amend(cls := "getItNotification"),
-          button(btn_primary, "Get it",
-            margin := "15", float.right,
-            onClick --> { _ =>
-              remove(notif)
-              hideNotificationManager
-            })
-        )
+        _ =>
+          div(
+            body.amend(cls := "getItNotification"),
+            button(btn_primary, "Get it",
+              margin := "15", float.right,
+              onClick --> { _ =>
+                remove(notif)
+                hideNotificationManager
+              }
+            )
+          )
       )
     showNotification(notif)
 
@@ -87,20 +90,23 @@ class NotificationManager:
        alt1: Alternative = Alternative("OK"),
        alt2: Alternative = Alternative("Cancel")) =
     lazy val notif: NotificationLine =
-      addNotification(level, title,
-        div(
-          body.amend(cls := "getItNotification"),
-          buttonGroup.amend(
-            button(btn_primary, alt1.name,
-              margin := "15", float.right,
-              onClick --> {_=> alt1.action()}
-            ),
-            button(btn_secondary_outline, alt2.name,
-              margin := "15", float.right,
-              onClick --> {_=> alt2.action()}
+      addNotification(
+        level,
+        title,
+        id =>
+          div(
+            body.amend(cls := "getItNotification"),
+            buttonGroup.amend(
+              button(btn_primary, alt1.name,
+                margin := "15", float.right,
+                onClick --> {_=> alt1.action(id)}
+              ),
+              button(btn_secondary_outline, alt2.name,
+                margin := "15", float.right,
+                onClick --> {_=> alt2.action(id)}
+              )
             )
           )
-        )
       )
     showNotification(notif)
     notif
