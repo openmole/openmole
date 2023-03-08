@@ -29,7 +29,7 @@ import org.openmole.core.project.*
 import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.dsl.*
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.networkservice.NetworkService
@@ -147,8 +147,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     to.listFilesSafe.map(utils.fileToSafePath).toSeq
   }
 
-  def unknownFormat(name: String) = Some(ErrorData("Unknown compression format for " + name))
-
   private def extractArchiveFromFiles(from: File, to: File) =
     Try {
       val ext = FileExtension(from.getName)
@@ -170,12 +168,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def extract(safePath: SafePath) =
     import services.*
+    def archiveFile = safePathToFile(safePath)
     FileContentType(FileExtension(safePath.name)) match
       case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-        val archiveFile = safePathToFile(safePath)
         val toFile: File = safePathToFile(safePath.parent)
         extractArchiveFromFiles(archiveFile, toFile)
-      case _ ⇒ unknownFormat(safePath.name)
+      case _ ⇒ throw UserBadDataError(s"""Unable to extract archive format of file "${archiveFile}"""")
 
   def temporaryDirectory(): SafePath =
     import services.*

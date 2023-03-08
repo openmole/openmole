@@ -239,13 +239,8 @@ object ModelWizardPanel {
 
               fileType match
                 case Archive ⇒
-                  api.extract(tempFile ++ fileName).foreach {
-                    _ match {
-                      case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
-                        panels.notifications.addAndShowNotificaton(NotificationLevel.Error, "An error occurred during extraction", div(ErrorData.stackTrace(e)))
-                      case _ ⇒
-                        copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension)
-                    }
+                  api.extract(tempFile ++ fileName).foreach { _ =>
+                    copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension)
                   }
                 case _ ⇒ copyTo(uploadPath)
 

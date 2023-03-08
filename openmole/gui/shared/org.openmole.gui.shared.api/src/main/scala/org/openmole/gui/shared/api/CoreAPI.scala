@@ -50,8 +50,8 @@ trait CoreAPI extends RESTAPI {
     errorEndpoint(post(path / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
 
   //def extractTGZ(safePath: SafePath): ExtractResult
-  val extract: ErrorEndpoint[SafePath, Option[ErrorData]] =
-    errorEndpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
+  val extract: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / "file" / "extract", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
   val listFiles: ErrorEndpoint[(SafePath, FileFilter), ListFilesData] =

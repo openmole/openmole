@@ -48,14 +48,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
   }
 
   def extract(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    api.extract(sp).foreach {
-      error ⇒
-        error match {
-          case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
-            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
-          case _ ⇒ panels.treeNodePanel.invalidCurrentCache
-        }
-    }
+    api.extract(sp).foreach { _ ⇒ panels.treeNodePanel.invalidCurrentCache }
     closeToolBox
   }
 
