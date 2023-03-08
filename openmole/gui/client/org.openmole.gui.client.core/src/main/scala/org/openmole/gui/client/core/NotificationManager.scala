@@ -24,10 +24,10 @@ object NotificationManager:
 
   case class Alternative(name: String, action: () => Unit = () => {})
 
-  object Alternative {
+  object Alternative:
     def cancel(notification: NotificationLine)(using panels: Panels) = Alternative("cancel", () => panels.notifications.remove(notification))
-  }
-  case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
+
+  case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: String, serverId: Option[Long] = None)
 
   def toService(manager: NotificationManager) =
     new NotificationService:
@@ -39,17 +39,16 @@ class NotificationManager:
   val showNotfications = Var(false)
   val notifications: Var[Seq[NotificationLine]] = Var(Seq())
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
-  val currentID: Var[Option[Long]] = Var(None)
+  val currentID: Var[Option[String]] = Var(None)
 
   def filteredStack(stack: Seq[NotificationLine], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
   def remove(notification: NotificationLine) = notifications.update(s => s.filterNot(_.id == notification.id))
 
   def addNotification(level: NotificationLevel, title: String, body: Div) =
-    val notif = NotificationLine(level, title, div(body, cls := "notification"))
-    notifications.update { s =>
-      (s :+ notif)
-    }
+    val id = DataUtils.uuID
+    val notif = NotificationLine(level, title, div(body, cls := "notification"), id)
+    notifications.update { s => s :+ notif }
     notif
 
   def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div = div()) =
@@ -58,7 +57,7 @@ class NotificationManager:
 
   def showNotification(notification: NotificationLine) =
     currentListType.set(Some(notification.level))
-    currentID.set(notification.id)
+    currentID.set(Some(notification.id))
 
   def hideNotificationManager =
     currentID.set(None)
@@ -66,7 +65,9 @@ class NotificationManager:
 
   def showGetItNotification(level: NotificationLevel, title: String, body: Div = div()) =
     lazy val notif: NotificationLine =
-      addNotification(level, title,
+      addNotification(
+        level,
+        title,
         div(
           body.amend(cls := "getItNotification"),
           button(btn_primary, "Get it",
@@ -105,7 +106,7 @@ class NotificationManager:
     notif
 
   def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
-    val currentIds = s.flatMap(_.id).toSet
+    val currentIds = s.flatMap(_.serverId).toSet
 
     val newEvents =
       for
@@ -119,20 +120,20 @@ class NotificationManager:
                 case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString("/")} was completed at ${e.date}""")
                 case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString("/")} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
 
-            NotificationLine(NotificationLevel.Info, title, div(body, cls := "notification"), id = Some(NotificationEvent.id(event)))
+            NotificationLine(NotificationLevel.Info, title, div(body, cls := "notification"), DataUtils.uuID, serverId = Some(NotificationEvent.id(event)))
 
     newEvents ++ s
   }
 
   def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-    s :+ NotificationLine(level, title, div(body, cls := "notification"))
+    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
   }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
     notifications.update {
       s =>
         val (cleared, kept) = s.partition(_.level == level)
-        val serverClear = cleared.flatMap(_.id)
+        val serverClear = cleared.flatMap(_.serverId)
         if !serverClear.isEmpty then api.clearNotification(serverClear)
         kept
     }
@@ -162,13 +163,13 @@ class NotificationManager:
                         }
                       ),
                       onClick --> { _ =>
-                        currentID.update(_ match {
-                          case Some(i) if Some(i) == s.id => None
-                          case _ => s.id
-                        }
+                        currentID.update(
+                          _ match
+                            case Some(i) if i == s.id => None
+                            case _ => Some(s.id)
                         )
                       },
-                      currentID.signal.map { i => i == s.id }.expand(s.body.amend(color := "white"))
+                      currentID.signal.map { i => i == Some(s.id) }.expand(s.body.amend(color := "white"))
                     )
                   )
                 }
