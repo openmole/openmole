@@ -175,7 +175,7 @@ class NotificationManager:
                             case _ => Some(s.id)
                         )
                       },
-                      currentID.signal.map { i => i == Some(s.id) }.expand(s.body.amend(color := "white"))
+                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }
                     )
                   )
                 }
