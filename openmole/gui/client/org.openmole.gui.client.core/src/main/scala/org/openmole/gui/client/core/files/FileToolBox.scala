@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.*
-import org.openmole.gui.client.core.alert.AbsolutePositioning.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn.*
@@ -52,7 +51,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       error ⇒
         error match {
           case Some(e: org.openmole.gui.shared.data.ErrorData) ⇒
-            panels.alertPanel.detail("An error occurred during extraction", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+            panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred during extraction", div(ErrorData.stackTrace(e)))
           case _ ⇒ panels.treeNodePanel.invalidCurrentCache
         }
     }
@@ -104,8 +103,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
     }
   }
 
-  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
-    pluginState.isPlugged match {
+  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) = 
+    pluginState.isPlugged match
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
           panels.pluginPanel.getPlugins
@@ -118,7 +117,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
       case false ⇒
         CoreUtils.addPlugin(safePath).foreach { errors ⇒
           for e <- errors
-          do panels.alertPanel.detail("An error occurred while adding plugin", ErrorData.stackTrace(e), transform = RelativeCenterPosition, zone = FileZone)
+          do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", div(ErrorData.stackTrace(e)))
           panels.pluginPanel.getPlugins
           panels.treeNodePanel.invalidCurrentCache
         }
@@ -127,8 +126,8 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTa
 //            panels.pluginPanel.getPlugins
 //            treeNodeManager.invalidCurrentCache
 //        }
-    }
-  }
+
+
 
   def withSafePath(action: SafePath ⇒ Unit)(using panels: Panels) = {
     panels.treeNodePanel.currentSafePath.now().foreach { sp ⇒

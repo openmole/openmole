@@ -12,10 +12,7 @@ import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.nodes.ReactiveHtmlElement
-import org.scalajs.dom.raw.{HTMLButtonElement, HTMLElement, HTMLInputElement, HTMLSpanElement}
 import org.openmole.gui.client.core.Waiter.*
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.openmole.gui.client.tool.*
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.ext.FileManager

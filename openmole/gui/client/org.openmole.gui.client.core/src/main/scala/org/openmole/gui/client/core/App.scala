@@ -13,7 +13,6 @@ import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.alert.{AlertPanel, BannerAlert}
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
@@ -43,10 +42,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
   def connection() =
     render(
       dom.document.body,
-      div(
-        panels.connection.render,
-        panels.alertPanel.alertDiv
-      )
+      panels.connection.render
     )
 
   def stopped(): Unit =
@@ -99,10 +95,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     val resetPassword = new ResetPassword
     render(
       dom.document.body,
-      div(
-        resetPassword.resetPassDiv,
-        panels.alertPanel.alertDiv
-      )
+      resetPassword.resetPassDiv
     )
 
   def run() =
@@ -112,6 +105,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     //import scala.concurrent.ExecutionContext.Implicits.global
     api.fetchGUIPlugins { plugins ⇒
       given GUIPlugins = plugins
+
       val authenticationPanel = AuthenticationPanel.render
       val newProjectPanel = ProjectPanel.render
 
@@ -128,7 +122,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
-          //panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
+        //panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
       }
 
 
@@ -240,7 +234,8 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       // Define the option sequence
       //Fetch(_.omSettings(())) { sets ⇒
       def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
-      def getServerNotifications = api.listNotification().foreach { n =>panels.notifications.addServerNotifications(n) }
+
+      def getServerNotifications = api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
 
       render(
         containerNode,
@@ -316,9 +311,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
                 }.getOrElse(div(top := "1000px", color.white))
               }
             )
-          ),
-
-          panels.alertPanel.alertDiv
+          )
         )
       )
     }
@@ -335,7 +328,7 @@ object App:
 
   lazy val pluginServices =
     PluginServices(
-      errorManager = (message, stack) => panels.bannerAlert.registerWithStack(message, stack)
+      errorManager = (message, stack) => panels.notifications.showGetItNotification(NotificationLevel.Error, message, div(stack))
     )
 
   val gui = OpenMOLEGUI(using panels, pluginServices, api)

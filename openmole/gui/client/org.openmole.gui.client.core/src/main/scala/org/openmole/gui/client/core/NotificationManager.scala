@@ -15,6 +15,18 @@ import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
 
+<<<<<<< Updated upstream
+=======
+enum NotificationLevel:
+  case Info, Error
+
+case class Alternative(name: String, action: () => Unit = () => {})
+
+object Alternative {
+  def cancel(notification: Notification)(using panels: Panels) = Alternative("cancel", ()=> panels.notifications.remove(notification))
+}
+
+>>>>>>> Stashed changes
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
 //import NotificationContent._
 object NotificationManager:
@@ -69,6 +81,32 @@ class NotificationManager:
         )
       )
     showNotification(notif)
+
+  def showAlternativeNotification(
+       level: NotificationLevel,
+       title: String,
+       body: Div = div(),
+       alt1: Alternative = Alternative("OK"),
+       alt2: Alternative = Alternative("Cancel")
+       ) =
+    lazy val notif: Notification =
+      addNotification(level, title,
+        div(
+          body.amend(cls := "getItNotification"),
+          buttonGroup.amend(
+            button(btn_primary, alt1.name,
+              margin := "15", float.right,
+              onClick --> {_=> alt1.action()}
+            ),
+            button(btn_secondary_outline, alt2.name,
+              margin := "15", float.right,
+              onClick --> {_=> alt2.action()}
+            )
+          )
+        )
+      )
+    showNotification(notif)
+    notif
 
   def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
     val currentIds = s.flatMap(_.id).toSet
