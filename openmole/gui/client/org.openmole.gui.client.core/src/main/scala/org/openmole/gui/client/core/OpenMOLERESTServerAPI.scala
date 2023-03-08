@@ -26,6 +26,7 @@ import org.scalajs.dom.*
 import scala.concurrent.duration.*
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.io.IOException
 
 class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
@@ -68,8 +69,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def upload(
     fileList: FileList,
     destinationPath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit,
-    onLoadEnd: Seq[String] ⇒ Unit)(using basePath: BasePath): Unit =
+    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[String]] =
     val formData = new FormData
 
     formData.append("fileType", destinationPath.context.typeName)
@@ -81,45 +81,69 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
 
     val xhr = new XMLHttpRequest
 
-    xhr.upload.onprogress = e ⇒ {
+    xhr.upload.onprogress = e ⇒
       fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
-    }
 
-    xhr.upload.onloadend = e ⇒ {
+    xhr.upload.onloadend = e ⇒
       fileTransferState(Finalizing())
-    }
 
-    xhr.onloadend = e ⇒ {
+    xhr.onloadend = e ⇒
       fileTransferState(Processed())
-      onLoadEnd(fileList.map(_.name).toSeq)
-    }
 
-    val prefix = BasePath.value(basePath).getOrElse("")
+    val p = scala.concurrent.Promise[Seq[String]]()
+
+    xhr.onload = e =>
+      p.success(fileList.map(_.name).toSeq)
+
+    xhr.onerror = e =>
+      p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))
+
+    xhr.onabort = e =>
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} failed"))
+
+    xhr.ontimeout = e =>
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} failed"))
+
 
     xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)
     xhr.send(formData)
+
+    p.future
 
 
   override def download(
     safePath: SafePath,
     fileTransferState: ProcessState ⇒ Unit = _ ⇒ (),
-    onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (),
-    hash: Boolean = false)(using basePath: BasePath): Unit =
-    size(safePath).foreach { size ⇒
+    hash: Boolean = false)(using basePath: BasePath): Future[(String, Option[String])] =
+    size(safePath).flatMap { size ⇒
       val xhr = new XMLHttpRequest
 
-      xhr.onprogress = (e: ProgressEvent) ⇒ {
+      xhr.onprogress = (e: ProgressEvent) ⇒
         fileTransferState(Processing((e.loaded.toDouble * 100 / size).toInt))
-      }
 
-      xhr.onloadend = (e: ProgressEvent) ⇒ {
+      xhr.onloadend = e ⇒
         fileTransferState(Processed())
+
+      val p = scala.concurrent.Promise[(String, Option[String])]()
+
+      xhr.onload = e =>
         val h = Option(xhr.getResponseHeader(hashHeader))
-        onLoadEnd(xhr.responseText, h)
-      }
+        p.success((xhr.responseText, h))
+
+      xhr.onerror = e =>
+        p.failure(new IOException(s"Download of file ${safePath} failed"))
+
+      xhr.onabort = e =>
+        p.failure(new IOException(s"Download of file ${safePath} was aborted"))
+
+      xhr.ontimeout = e =>
+        p.failure(new IOException(s"Download of file ${safePath} timed out"))
+
 
       xhr.open("GET", downloadFile(Utils.toURI(safePath.path.map { Encoding.encode }), hash = hash), true)
       xhr.send()
+
+      p.future
     }
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =

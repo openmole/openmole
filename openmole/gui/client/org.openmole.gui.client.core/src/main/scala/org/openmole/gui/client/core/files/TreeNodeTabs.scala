@@ -246,24 +246,18 @@ object TreeNodeTab {
       Seq((ScatterMode, ColumnPlot), (SplomMode, ColumnPlot), (HeatMapMode, LinePlot))
     }*/
 
-    def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit = editor.synchronized {
-      // val safePath = safePath
-
-      api.download(
-        safePath,
-        (p: ProcessState) ⇒ {},
-        (cont: String, hash) ⇒ {
-          editorValue.setCode(cont, hash.get)
-          if (isCSV) {
-            api.sequence(safePath).foreach {
-              seq ⇒ //switchView(seq)
-            }
-          }
-          else afterRefresh()
-        },
-        hash = true
-      )
-    }
+//    def download(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit = editor.synchronized {
+//      // val safePath = safePath
+//
+//      api.download(
+//        safePath,
+//        hash = true
+//      ).map { (cont: String, hash) ⇒
+//        editorValue.setCode(cont, hash.get)
+//        if (isCSV) { api.sequence(safePath).foreach {  seq ⇒ } }
+//        else afterRefresh()
+//      }
+//    }
 
     def saveContent(afterRefresh: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath): Unit = {
       def saveTab = {
@@ -621,9 +615,9 @@ object TreeNodeTab {
       div("Which version do you want to keep?"),
       Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true)),
       Alternative("Server", _ =>
-        panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true, onLoaded = (content: String, hash: Option[String]) ⇒ {
+        panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true).map { (content: String, hash: Option[String]) ⇒
           tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
-        })
+        }
       )
     )
 

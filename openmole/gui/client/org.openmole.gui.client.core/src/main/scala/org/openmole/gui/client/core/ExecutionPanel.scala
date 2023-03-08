@@ -296,9 +296,7 @@ class ExecutionPanel:
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
       val p = scala.concurrent.Promise[Unit]()
-      setTimeout(milliseconds) {
-        p.success(())
-      }
+      setTimeout(milliseconds) { p.success(()) }
       p.future
 
 

@@ -230,12 +230,12 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = Future.successful(SequenceData.empty)
 
-  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit, onLoadEnd: Seq[String] ⇒ Unit)(using BasePath): Unit = {}
+  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit)(using BasePath): Future[Seq[String]] = Future.successful(Seq())
 
-  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (), hash: Boolean = false)(using BasePath): Unit =
+  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])] =
     val content = files(safePath).content
     val h = if hash then Some(content.hashCode.toString) else None
-    onLoadEnd(content, h)
+    Future.successful((content, h))
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
     import org.openmole.gui.plugin.authentication.sshlogin.*

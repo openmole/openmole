@@ -204,8 +204,7 @@ object ModelWizardPanel {
         api.upload(
           fInput.ref.files,
           tempFile,
-          (p: ProcessState) ⇒ transferring.set(p),
-          uploaded ⇒ {
+          (p: ProcessState) ⇒ transferring.set(p)).map { uploaded ⇒
             def copyTo(targetPath: SafePath) =
               // Not sure why...
               val from =
@@ -238,7 +237,6 @@ object ModelWizardPanel {
 
             fInput.ref.value = ""
           }
-        )
       }
 
     val upButton =
