@@ -8,6 +8,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.NotificationManager.Alternative
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
@@ -15,21 +16,17 @@ import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
 
-<<<<<<< Updated upstream
-=======
-enum NotificationLevel:
-  case Info, Error
 
-case class Alternative(name: String, action: () => Unit = () => {})
 
-object Alternative {
-  def cancel(notification: Notification)(using panels: Panels) = Alternative("cancel", ()=> panels.notifications.remove(notification))
-}
-
->>>>>>> Stashed changes
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
 //import NotificationContent._
 object NotificationManager:
+
+  case class Alternative(name: String, action: () => Unit = () => {})
+
+  object Alternative {
+    def cancel(notification: NotificationLine)(using panels: Panels) = Alternative("cancel", ()=> panels.notifications.remove(notification))
+  }
   case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
   def toService(manager: NotificationManager) =
@@ -89,7 +86,7 @@ class NotificationManager:
        alt1: Alternative = Alternative("OK"),
        alt2: Alternative = Alternative("Cancel")
        ) =
-    lazy val notif: Notification =
+    lazy val notif: NotificationLine =
       addNotification(level, title,
         div(
           body.amend(cls := "getItNotification"),

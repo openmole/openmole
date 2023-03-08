@@ -19,6 +19,7 @@ import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.data.DataUtils
 import TreeNodeTabs.*
+import org.openmole.gui.client.core.NotificationManager.Alternative
 import org.openmole.gui.shared.api.*
 
 sealed trait TreeNodeTab {
