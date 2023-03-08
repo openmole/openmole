@@ -18,8 +18,6 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.market.*
-import org.openmole.gui.client.core.alert.{AbsolutePositioning, AlertPanel}
-import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.shared.data.{ProcessState, Processing}
 import org.openmole.gui.client.ext.*
 

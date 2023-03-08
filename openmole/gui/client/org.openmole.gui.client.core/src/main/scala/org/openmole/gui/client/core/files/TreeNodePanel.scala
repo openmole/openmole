@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter.*
 import org.openmole.gui.shared.data.*
@@ -256,8 +255,8 @@ class TreeNodePanel { panel =>
       ),
       plusFile.signal.expand(createFileTool),
       multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
-      treeNodeManager.error --> treeNodeManager.errorObserver,
-      treeNodeManager.comment --> treeNodeManager.commentObserver
+    //  treeNodeManager.error --> treeNodeManager.errorObserver,
+    //  treeNodeManager.comment --> treeNodeManager.commentObserver
     )
 
   //def filter: FileFilter = treeNodeManager.fileFilter.now
@@ -355,11 +354,11 @@ class TreeNodePanel { panel =>
       case _ ⇒
 
 
-  def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
-    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
-
-  def stringAlertWithDetails(message: String, detail: String)(using panels: Panels) =
-    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
+//  def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
+//    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
+//
+//  def stringAlertWithDetails(message: String, detail: String)(using panels: Panels) =
+//    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
 
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)

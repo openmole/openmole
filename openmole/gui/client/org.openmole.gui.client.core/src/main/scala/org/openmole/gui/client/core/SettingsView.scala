@@ -1,9 +1,7 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.scalajs.dom
 import org.openmole.gui.client.ext.Utils.*
 import scaladget.bootstrapnative.bsn.*
@@ -39,14 +37,6 @@ class SettingsView:
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  private def alertPanel(warnMessage: String, route: String)(using panels: Panels) = panels.alertPanel.string(
-    warnMessage,
-    () ⇒ {
-      /*fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {*/ CoreUtils.setRoute(route) /*})*/
-    },
-    transform = CenterPagePosition
-  )
-
   //  lazy val dropdownApp = vForm(width := "auto",
   //    jvmInfoButton,
   //    docButton,
@@ -61,13 +51,21 @@ class SettingsView:
   //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, right := "20", left := "initial", right := 0)
   //
   private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
+    lazy val notif: NotificationManager.NotificationLine = panels.notifications.showAlternativeNotification(
+      NotificationLevel.Info,
+      warnMessage,
+      div(),
+      NotificationManager.Alternative("OK", () => CoreUtils.setRoute(route)),
+      NotificationManager.Alternative.cancel(notif)
+    )
+
     div(rowLayout, lineHeight := "7px",
       glyphSpan(messageGlyph ++ omsheet.shutdownButton ++ columnLayout),
       span(message, paddingTop := "3", paddingLeft := "5", settingsItemStyle, columnLayout),
       onClick --> { _ ⇒
         // dropdownApp.close
         // dropdownConnection.close
-        alertPanel(warnMessage, route)
+        notif
       }
     )
 

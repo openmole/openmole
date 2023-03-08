@@ -8,6 +8,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.NotificationManager.Alternative
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
@@ -15,9 +16,17 @@ import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
 
+
+
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
 //import NotificationContent._
 object NotificationManager:
+
+  case class Alternative(name: String, action: () => Unit = () => {})
+
+  object Alternative {
+    def cancel(notification: NotificationLine)(using panels: Panels) = Alternative("cancel", () => panels.notifications.remove(notification))
+  }
   case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: Option[Long] = None)
 
   def toService(manager: NotificationManager) =
@@ -69,6 +78,31 @@ class NotificationManager:
         )
       )
     showNotification(notif)
+
+  def showAlternativeNotification(
+       level: NotificationLevel,
+       title: String,
+       body: Div = div(),
+       alt1: Alternative = Alternative("OK"),
+       alt2: Alternative = Alternative("Cancel")) =
+    lazy val notif: NotificationLine =
+      addNotification(level, title,
+        div(
+          body.amend(cls := "getItNotification"),
+          buttonGroup.amend(
+            button(btn_primary, alt1.name,
+              margin := "15", float.right,
+              onClick --> {_=> alt1.action()}
+            ),
+            button(btn_secondary_outline, alt2.name,
+              margin := "15", float.right,
+              onClick --> {_=> alt2.action()}
+            )
+          )
+        )
+      )
+    showNotification(notif)
+    notif
 
   def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
     val currentIds = s.flatMap(_.id).toSet
@@ -130,7 +164,7 @@ class NotificationManager:
                       onClick --> { _ =>
                         currentID.update(_ match {
                           case Some(i) if Some(i) == s.id => None
-                          case None => s.id
+                          case _ => s.id
                         }
                         )
                       },

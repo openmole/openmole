@@ -1,8 +1,10 @@
 package org.openmole.gui.client.stub
 
 import org.openmole.gui.client.core.*
-import org.openmole.gui.client.ext.PluginServices
+import org.openmole.gui.client.ext.{NotificationLevel, PluginServices}
+
 import scala.scalajs.js.annotation.*
+import com.raquo.laminar.api.L.*
 
 /*
  * Copyright (C) 2023 Romain Reuillon
@@ -27,7 +29,7 @@ object Stub:
 
   lazy val pluginServices =
     PluginServices(
-      errorManager = (message, stack) => panels.bannerAlert.registerWithStack(message, stack)
+      errorManager = (message, stack) => panels.notifications.showGetItNotification(NotificationLevel.Error, message, div(stack))
     )
 
   lazy val panels = Panels()

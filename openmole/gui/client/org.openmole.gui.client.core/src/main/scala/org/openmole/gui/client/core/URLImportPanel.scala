@@ -1,9 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{AbsolutePositioning, AlertPanel, BannerAlert}
-import AbsolutePositioning.CenterPagePosition
 import org.openmole.gui.client.ext.*
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.files.{TreeNodeManager, TreeNodePanel}
 import scaladget.bootstrapnative.bsn.*

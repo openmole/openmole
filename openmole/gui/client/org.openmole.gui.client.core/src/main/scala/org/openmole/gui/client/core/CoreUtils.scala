@@ -2,8 +2,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.*
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{FileZone, RelativeCenterPosition}
-import org.openmole.gui.client.core.alert.AlertPanel
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,7 +52,7 @@ object CoreUtils {
     api.createFile(safePath, fileName, directory).foreach { b ⇒
       if b
       then onCreated()
-      else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
+      else panels.notifications.showGetItNotification(NotificationLevel.Error, s" $fileName already exists.")
     }
 
   //  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
