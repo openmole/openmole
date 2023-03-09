@@ -80,11 +80,13 @@ ul{
 
 /* TREENODE PANEL */
 .treePathItems {
-    font-size: 15px;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-    line-height: 25px;
+    ffont-size: 18px;
+     color: white;
+     cursor: pointer;
+     font-weight: bold;
+     line-height: 25px;
+     display: flex;
+     align-items: flex-end;
 }
 
 .treePathItems:hover{
@@ -1358,7 +1360,7 @@ input:checked + .slider:before {
 .notification {
     background: white;
     color: #222;
-    margin: 10px;
+    padding: 15px;
 }
 
 .errorNotification {

@@ -34,10 +34,11 @@ import org.openmole.gui.shared.api.*
  */
 
 object TreeNodePanel:
-  extension(p: TreeNodePanel)(using api: ServerAPI, basePath: BasePath)
+  extension (p: TreeNodePanel)(using api: ServerAPI, basePath: BasePath)
     def invalidCurrentCache = p.treeNodeManager.invalidCurrentCache
 
-class TreeNodePanel { panel =>
+class TreeNodePanel {
+  panel =>
 
   val treeNodeManager: TreeNodeManager = new TreeNodeManager
   val treeWarning = Var(true)
@@ -114,10 +115,6 @@ class TreeNodePanel { panel =>
       fileInput.ref.value = ""
       treeNodeManager.invalidCurrentCache
     }
-//    , () ⇒ {
-//      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
-//      CoreUtils.appendToPluggedIfPlugin(sp)
-//    })
   })
 
   def createFileTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
@@ -170,7 +167,7 @@ class TreeNodePanel { panel =>
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
                     val target = treeNodeManager.dirNodeLine.now()
-                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)) , overwrite = true).foreach { b ⇒
+                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
                     })))
@@ -184,7 +181,7 @@ class TreeNodePanel { panel =>
               Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
                 CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
               )
-            )
+              )
             )
           },
             disabled <-- isSelectionEmpty)
@@ -218,11 +215,11 @@ class TreeNodePanel { panel =>
         val parent = curr.parent
         div(
           cls := "tree-path",
-          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, padding := "5"),
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, padding := "0 10 5 0"),
           Seq(parent.parent, parent, curr).filterNot { sp ⇒
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp ⇒
-            goToDirButton(sp, s" ${sp.name} / ")
+            goToDirButton(sp, s"${sp.name} / ")
           },
           div(glyph_plus, cls <-- plusFile.signal.map { pf ⇒
             "plus-button" + {
@@ -232,7 +229,7 @@ class TreeNodePanel { panel =>
         )
       },
       div(
-        display.flex, justifyContent.flexEnd,
+        display.flex, justifyContent.flexEnd, marginTop := "20",
         div(OMTags.glyph_search,
           cls := "filtering-files-item-selected",
           onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
@@ -254,19 +251,10 @@ class TreeNodePanel { panel =>
         })
       ),
       plusFile.signal.expand(createFileTool),
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
-    //  treeNodeManager.error --> treeNodeManager.errorObserver,
-    //  treeNodeManager.comment --> treeNodeManager.commentObserver
+      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
     )
 
-  //def filter: FileFilter = treeNodeManager.fileFilter.now
-
   def downloadFile(safePath: SafePath, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
-
-    //    if (FileExtension.isOMS(safePath.name))
-    //      OMPost()[Api].hash(safePath).call().foreach { h ⇒
-    //        HashService.set(safePath, h)
-    //      }
 
     api.download(
       safePath,
@@ -278,7 +266,7 @@ class TreeNodePanel { panel =>
 
 
   def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
-    span(cls := "treePathItems", name,
+    div(cls := "treePathItems", paddingLeft := "4px", name,
       onClick --> { _ ⇒
         treeNodeManager.switch(safePath)
       },
@@ -289,11 +277,6 @@ class TreeNodePanel { panel =>
         dropAction(safePath, true)
       }
     )
-
-  //  def computePluggables = fileToolBar.selectedTool.now match {
-  //    case Some(PluginTool) ⇒ treeNodeManager.computePluggables(() ⇒ if (!treeNodeManager.pluggables.now.isEmpty) turnSelectionTo(true))
-  //    case _                ⇒
-  //  }
 
   def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     div(cls := "file-scrollable-content",
@@ -351,13 +334,6 @@ class TreeNodePanel { panel =>
         displayNode(tnSafePath)
       case _ ⇒
 
-
-//  def stringAlert(message: String, okaction: () ⇒ Unit)(using panels: Panels) =
-//    panels.alertPanel.string(message, okaction, transform = RelativeCenterPosition, zone = FileZone)
-//
-//  def stringAlertWithDetails(message: String, detail: String)(using panels: Panels) =
-//    panels.alertPanel.detail(message, detail, transform = RelativeCenterPosition, zone = FileZone)
-
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
@@ -379,14 +355,13 @@ class TreeNodePanel { panel =>
 
     val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
 
-    // val selected = Var(false)
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
 
     def dirBox(tn: TreeNode) =
       div(
         child <-- multiTool.signal.combineWith(treeNodeManager.selected.signal).map { case (mcot, selected) ⇒
           if (mcot == CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
-              treeNodeManager.switchSelection(tnSafePath)
+            treeNodeManager.switchSelection(tnSafePath)
           })
           else {
             tn match
@@ -496,7 +471,4 @@ class TreeNodePanel { panel =>
             treeNodeManager switch (dn.name)
             treeWarning.set(true)
         )
-
-
-
 }
