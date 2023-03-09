@@ -132,7 +132,7 @@ object AuthenticationPanel {
         )
 
         test match {
-          case PassedTest(_) ⇒ lab.amend(background :="#a5be21")
+          case PassedTest(_) ⇒ lab.amend(background := "#a5be21")
           case PendingTest() ⇒ lab.amend(background := "#f1c345")
           case _ ⇒ lab.amend(
             background := "#c8102e", color := "white", cursor.pointer,
@@ -155,7 +155,7 @@ object AuthenticationPanel {
         div(flexRow,
           cls := "docEntry",
           backgroundColor := {
-            if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
+            if (i % 2 == 0) "#d1dbe4" else "#f4f4f4"
           },
           a(testedAuth.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒
             authSetting.set(Some(testedAuth.auth))
@@ -176,7 +176,7 @@ object AuthenticationPanel {
       }
     }
 
-    val authPanel = div( marginTop := "50",
+    val authPanel = div(marginTop := "50",
       child <-- authSetting.signal.map {
         _ match {
           case Some(p: AuthenticationPlugin) ⇒ div(padding := "20",

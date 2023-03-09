@@ -43,7 +43,7 @@ class PluginPanel:
             div(
               cls := "docEntry",
               backgroundColor := {
-                if (i % 2 == 0) "white" else "#ececec"
+                if (i % 2 == 0) "#d1dbe4" else "#f4f4f4"
               },
               div(p.projectSafePath.path.mkString("/"), width := "550px"),
               div(

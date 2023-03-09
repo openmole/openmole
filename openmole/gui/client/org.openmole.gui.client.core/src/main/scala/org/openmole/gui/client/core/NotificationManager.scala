@@ -143,9 +143,9 @@ class NotificationManager:
     newEvents ++ s
   }
 
-  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
-  }
+//  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
+//    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
+//  }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
     notifications.update {
@@ -193,7 +193,7 @@ class NotificationManager:
                             case _ => Some(s.id)
                         )
                       },
-                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }
+                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
                     )
                   )
                 }
