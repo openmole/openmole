@@ -1421,8 +1421,9 @@ input:checked + .slider:before {
     top: 50px;
     width: 500px;
     height: 100%;
-    padding:15px;
+    padding-left: 15px;
     background: #3f3d56;
+    padding-top: 15px;
 }
 
 .btn-purple {
