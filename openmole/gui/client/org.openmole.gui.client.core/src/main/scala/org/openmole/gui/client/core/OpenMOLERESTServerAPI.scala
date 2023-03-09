@@ -18,6 +18,7 @@ package org.openmole.gui.client.core
  */
 
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
+import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
@@ -26,8 +27,11 @@ import org.scalajs.dom.*
 import scala.concurrent.duration.*
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.io.IOException
+import scala.util.Failure
+import com.raquo.laminar.api.L.*
 
-class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
+class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationService) extends ServerAPI:
   override def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)
@@ -43,7 +47,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.cancelExecution(id).future)
   override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.removeExecution(id).future)
   override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = fetch.futureError(_.compileScript(script).future, timeout = Some(600 seconds), warningTimeout = None)
-  override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] = fetch.futureError(_.launchScript(script, validate).future, timeout = Some(120 seconds), warningTimeout = Some(30 seconds))
+  override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] = fetch.futureError(_.launchScript(script, validate).future, timeout = Some(600 seconds), warningTimeout = Some(300 seconds))
   override def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit] = fetch.futureError(_.clearEnvironmentErrors(environment).future)
   override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] = fetch.futureError(_.listEnvironmentErrors(environment, lines).future)
   override def listPlugins()(using BasePath): Future[Seq[Plugin]] = fetch.futureError(_.listPlugins(()).future)
@@ -68,8 +72,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
   override def upload(
     fileList: FileList,
     destinationPath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit,
-    onLoadEnd: Seq[String] ⇒ Unit)(using basePath: BasePath): Unit =
+    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[String]] = {
     val formData = new FormData
 
     formData.append("fileType", destinationPath.context.typeName)
@@ -81,45 +84,73 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch) extends ServerAPI:
 
     val xhr = new XMLHttpRequest
 
-    xhr.upload.onprogress = e ⇒ {
+    xhr.upload.onprogress = e ⇒
       fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
-    }
 
-    xhr.upload.onloadend = e ⇒ {
+    xhr.upload.onloadend = e ⇒
       fileTransferState(Finalizing())
-    }
 
-    xhr.onloadend = e ⇒ {
+    xhr.onloadend = e ⇒
       fileTransferState(Processed())
-      onLoadEnd(fileList.map(_.name).toSeq)
-    }
 
-    val prefix = BasePath.value(basePath).getOrElse("")
+    val p = scala.concurrent.Promise[Seq[String]]()
+
+    xhr.onload = e =>
+      p.success(fileList.map(_.name).toSeq)
+
+    xhr.onerror = e =>
+      p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))
+
+    xhr.onabort = e =>
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} was aborted"))
+
+    xhr.ontimeout = e =>
+      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} timed out"))
+
 
     xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)
     xhr.send(formData)
 
+    p.future
+  }.andThen {
+    case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while uploading file", div(ErrorData.stackTrace(ErrorData(t))))
+  }
 
   override def download(
     safePath: SafePath,
     fileTransferState: ProcessState ⇒ Unit = _ ⇒ (),
-    onLoadEnd: (String, Option[String]) ⇒ Unit = (_, _) ⇒ (),
-    hash: Boolean = false)(using basePath: BasePath): Unit =
-    size(safePath).foreach { size ⇒
+    hash: Boolean = false)(using basePath: BasePath): Future[(String, Option[String])] =
+    size(safePath).flatMap { size ⇒
       val xhr = new XMLHttpRequest
 
-      xhr.onprogress = (e: ProgressEvent) ⇒ {
+      xhr.onprogress = (e: ProgressEvent) ⇒
         fileTransferState(Processing((e.loaded.toDouble * 100 / size).toInt))
-      }
 
-      xhr.onloadend = (e: ProgressEvent) ⇒ {
+      xhr.onloadend = e ⇒
         fileTransferState(Processed())
+
+      val p = scala.concurrent.Promise[(String, Option[String])]()
+
+      xhr.onload = e =>
         val h = Option(xhr.getResponseHeader(hashHeader))
-        onLoadEnd(xhr.responseText, h)
-      }
+        p.success((xhr.responseText, h))
+
+      xhr.onerror = e =>
+        p.failure(new IOException(s"Download of file ${safePath} failed"))
+
+      xhr.onabort = e =>
+        p.failure(new IOException(s"Download of file ${safePath} was aborted"))
+
+      xhr.ontimeout = e =>
+        p.failure(new IOException(s"Download of file ${safePath} timed out"))
+
 
       xhr.open("GET", downloadFile(Utils.toURI(safePath.path.map { Encoding.encode }), hash = hash), true)
       xhr.send()
+
+      p.future
+    }.andThen {
+      case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while downloading file", div(ErrorData.stackTrace(ErrorData(t))))
     }
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =

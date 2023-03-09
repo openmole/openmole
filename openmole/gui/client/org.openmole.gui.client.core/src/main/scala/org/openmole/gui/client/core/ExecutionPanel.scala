@@ -197,7 +197,8 @@ class ExecutionPanel:
 
   def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map { c =>
-      if (c)
+      if c
+      then
         div(display.flex, flexDirection.column, alignItems.center,
           button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton"),
           button("Clean", onClick --> { _ => remove(id) }, btn_secondary, cls := "controlButton"),
@@ -223,7 +224,7 @@ class ExecutionPanel:
       simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),
       showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
       showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
-      div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }),
+      if details.state != ExecutionDetails.State.preparing then div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }) else emptyMod,
       controls(id, cancel, remove)
     )
 
@@ -296,9 +297,7 @@ class ExecutionPanel:
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
       val p = scala.concurrent.Promise[Unit]()
-      setTimeout(milliseconds) {
-        p.success(())
-      }
+      setTimeout(milliseconds) { p.success(()) }
       p.future
 
 
@@ -407,7 +406,6 @@ class ExecutionPanel:
                 details.get(idValue) match
                   case Some(st) =>
                     def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
-
                     def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
 
                     div(buildExecution(idValue, st, cancel, remove))

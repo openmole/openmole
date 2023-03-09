@@ -86,7 +86,6 @@ object ModelWizardPanel {
   val resources: Var[Resources] = Var(Resources.empty)
   val currentTab: Var[Int] = Var(0)
   val autoMode = Var(true)
-  val fileToUploadPath: Var[Option[SafePath]] = Var(None)
   val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
   //
   //  fileToUploadPath.trigger {
@@ -198,69 +197,46 @@ object ModelWizardPanel {
 
     def factory(safePath: SafePath): Option[WizardPluginFactory] =
       val fileType: FileType = FileType(safePath.name)
-      plugins.wizardFactories.filter {
-        _.fileType == fileType
-      }.headOption
+      plugins.wizardFactories.filter { _.fileType == fileType }.headOption
 
     def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
-      CoreUtils.withTmpDirectory {
-        tempFile ⇒
-          api.upload(
-            fInput.ref.files,
-            tempFile,
-            (p: ProcessState) ⇒ transferring.set(p),
-            uploaded ⇒ {
-              def copyTo(targetPath: SafePath) =
-                // Not sure why...
-                val from =
-                  CoreUtils.listFiles(tempFile).map { files =>
-                    if files.size == 1
-                    then tempFile ++ files.head.name
-                    else tempFile
+      CoreUtils.withTmpDirectory { tempFile ⇒
+        api.upload(
+          fInput.ref.files,
+          tempFile,
+          (p: ProcessState) ⇒ transferring.set(p)).map { uploaded ⇒
+            def copyTo(targetPath: SafePath) =
+              // Not sure why...
+              val from =
+                CoreUtils.listFiles(tempFile).map { files =>
+                  if files.size == 1
+                  then tempFile ++ files.head.name
+                  else tempFile
+                }
+
+              // TODO may be overwrite should be better handled
+              for
+                f <- from
+                _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
+              do
+                //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
+                factory(uploadPath).foreach { f =>
+                  f.parse(uploadPath).foreach { mmd =>
+                    modelMetadata.set(mmd)
+                    exclusiveMenu.onoff.set(Some(1))
                   }
-                // TODO may be overwrite should be better handled
-                for
-                  f <- from
-                  _ <- {
-                    api.copyFiles(Seq(f -> targetPath), overwrite = true)
-                  }
-                do
-                  fileToUploadPath.set(Some(uploadPath))
-                  //Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                  factory(uploadPath).foreach { f =>
-                    f.parse(uploadPath).foreach { mmd =>
-                      modelMetadata.set(mmd)
-                      exclusiveMenu.onoff.set(Some(1))
-                    }
-                  }
+                }
 
-              val fileType: FileType = FileType(uploadPath)
+            val fileType: FileType = FileType(uploadPath)
 
-              fileType match
-                case Archive ⇒
-                  api.extract(tempFile ++ fileName).foreach { _ =>
-                    copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension)
-                  }
-                case _ ⇒ copyTo(uploadPath)
+            fileType match
+              case Archive ⇒
+                api.extract(tempFile ++ fileName).foreach { _ => copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
+              case _ ⇒ copyTo(uploadPath)
 
 
-              // Move files from tmp to target path
-              //if (existing.isEmpty) {
-
-
-              //  }
-              //                else {
-              //                  Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/).call().foreach {
-              //                    b ⇒
-              //                      //buildForm(uploadPath)
-              //                      fileToUploadPath() = Some(uploadPath)
-              //                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-              //                  }
-              //                }
-
-              fInput.ref.value = ""
-            }
-          )
+            fInput.ref.value = ""
+          }
       }
 
     val upButton =
@@ -272,7 +248,6 @@ object ModelWizardPanel {
             div(
               fileInput((fInput: Input) ⇒ {
                 if (fInput.ref.files.length > 0) {
-                  fileToUploadPath.set(None)
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
                   val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)

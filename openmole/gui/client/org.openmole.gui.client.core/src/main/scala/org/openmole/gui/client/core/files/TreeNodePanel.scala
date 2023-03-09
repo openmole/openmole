@@ -109,11 +109,11 @@ class TreeNodePanel { panel =>
     api.upload(
       fileInput.ref.files,
       current,
-      (p: ProcessState) ⇒ transferring.set(p),
-      _ =>
-        fileInput.ref.value = ""
-        treeNodeManager.invalidCurrentCache
-    )
+      (p: ProcessState) ⇒ transferring.set(p)
+    ).map { _ =>
+      fileInput.ref.value = ""
+      treeNodeManager.invalidCurrentCache
+    }
 //    , () ⇒ {
 //      val sp: SafePath = current / fileInput.ref.value.split("\\\\").last
 //      CoreUtils.appendToPluggedIfPlugin(sp)
@@ -261,7 +261,7 @@ class TreeNodePanel { panel =>
 
   //def filter: FileFilter = treeNodeManager.fileFilter.now
 
-  def downloadFile(safePath: SafePath, onLoaded: (String, Option[String]) ⇒ Unit, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) = {
+  def downloadFile(safePath: SafePath, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
 
     //    if (FileExtension.isOMS(safePath.name))
     //      OMPost()[Api].hash(safePath).call().foreach { h ⇒
@@ -273,10 +273,9 @@ class TreeNodePanel { panel =>
       (p: ProcessState) ⇒ {
         transferring.set(p)
       },
-      hash = hash,
-      onLoadEnd = onLoaded
+      hash = hash
     )
-  }
+
 
   def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
     span(cls := "treePathItems", name,
@@ -339,12 +338,11 @@ class TreeNodePanel { panel =>
       downloadFile(
         safePath,
         saveFile = false,
-        hash = true,
-        onLoaded = (content: String, hash: Option[String]) ⇒ {
-          panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)
-          treeNodeManager.invalidCurrentCache
-        }
-      )
+        hash = true
+      ).map { (content: String, hash: Option[String]) ⇒
+        panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)
+        treeNodeManager.invalidCurrentCache
+      }
 
   def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     tn match

@@ -36,12 +36,10 @@ object ProjectPanel {
         val toDisplay = panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName
         api.download(
           toDisplay,
-          hash = true,
-          onLoadEnd = (content, hash) ⇒ {
+          hash = true).map { (content, hash) ⇒
             panels.treeNodePanel.treeNodeManager.invalidCurrentCache
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
           }
-        )
         Panels.closeExpandable
       })
     }
