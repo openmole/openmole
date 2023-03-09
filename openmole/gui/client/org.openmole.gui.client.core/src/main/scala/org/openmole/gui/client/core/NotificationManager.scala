@@ -8,14 +8,13 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.NotificationManager.Alternative
+import org.openmole.gui.client.core.NotificationManager.{Alternative, notificationContent}
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
 import java.text.SimpleDateFormat
-
 
 
 //case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
@@ -27,13 +26,16 @@ object NotificationManager:
   object Alternative:
     def cancel(using panels: Panels) = Alternative("cancel", panels.notifications.removeById)
 
-  case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: String, serverId: Option[Long] = None)
+  case class NotificationLine(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID, serverId: Option[Long] = None)
+
+  def notificationContent(notification: NotificationLine) = (notification.level, notification.title)
 
   def toService(manager: NotificationManager) =
     new NotificationService:
       override def notify(level: NotificationLevel, title: String, body: Div): Unit = manager.addAndShowNotificaton(level, title, body)
 
 class NotificationManager:
+
   import NotificationManager.NotificationLine
 
   val showNotfications = Var(false)
@@ -44,19 +46,29 @@ class NotificationManager:
   def filteredStack(stack: Seq[NotificationLine], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
   def remove(notification: NotificationLine) = removeById(notification.id)
+
   def removeById(id: String) = notifications.update(s => s.filterNot(_.id == id))
 
   def addNotification(level: NotificationLevel, title: String, body: String => Div) =
     val id = DataUtils.uuID
     val notif = NotificationLine(level, title, div(body(id), cls := "notification"), id)
-    notifications.update { s => s :+ notif }
+    notifications.update { s =>
+      val cs = s.map {
+        nl => notificationContent(nl)
+      }
+      if (cs.count(_ == notificationContent(notif)) < 1)
+      then (s :+ notif)
+      else s
+    }
     notif
 
   def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div = div()) =
     val last = addNotification(level, title, _ => body)
     showNotification(last)
+    last
 
   def showNotification(notification: NotificationLine) =
+    showNotfications.set(true)
     currentListType.set(Some(notification.level))
     currentID.set(Some(notification.id))
 
@@ -84,11 +96,11 @@ class NotificationManager:
     showNotification(notif)
 
   def showAlternativeNotification(
-       level: NotificationLevel,
-       title: String,
-       body: Div = div(),
-       alt1: Alternative = Alternative("OK"),
-       alt2: Alternative = Alternative("Cancel")) =
+                                   level: NotificationLevel,
+                                   title: String,
+                                   body: Div = div(),
+                                   alt1: Alternative = Alternative("OK"),
+                                   alt2: Alternative = Alternative("Cancel")) =
     lazy val notif: NotificationLine =
       addNotification(
         level,
@@ -99,11 +111,11 @@ class NotificationManager:
             buttonGroup.amend(
               button(btn_primary, alt1.name,
                 margin := "15", float.right,
-                onClick --> {_=> alt1.action(id)}
+                onClick --> { _ => alt1.action(id) }
               ),
               button(btn_secondary_outline, alt2.name,
                 margin := "15", float.right,
-                onClick --> {_=> alt2.action(id)}
+                onClick --> { _ => alt2.action(id) }
               )
             )
           )
@@ -144,17 +156,23 @@ class NotificationManager:
         kept
     }
 
+  case class ListColor(background: String, border:String)
+  def listColor(level: NotificationLevel) =
+    level match
+      case NotificationLevel.Error=> ListColor("#e4d1d1","#dc3545")
+      case _=> ListColor("#d1dbe4","#3086b5")
+
   def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
-      cls := "notifList",
       child <-- (currentListType.signal combineWith notifications.signal).map { case (level, stack) =>
         level match {
           case Some(n: NotificationLevel) =>
             val fStack = filteredStack(stack, n)
+            val lColor = listColor(n)
             if fStack.isEmpty
             then emptyNode
             else
-              div(padding := "15",
+              div(cls := "notifList",
                 button(cls := "btn btn-purple", "Clear",
                   onClick --> { _ => clearNotifications(fStack.head.level)
                   }, marginBottom := "15px",
@@ -163,9 +181,9 @@ class NotificationManager:
                   div(
                     div(backgroundColor := "white",
                       div(s.title,
-                        fontWeight.bold, padding := "10", cursor.pointer, fontWeight.bold, borderLeft := "15px solid #dc3545",
+                        fontWeight.bold, padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
                         backgroundColor := {
-                          if (i % 2 == 0) "#ccc" else "#f4f4f4"
+                          if (i % 2 == 0) lColor.background else "#f4f4f4"
                         }
                       ),
                       onClick --> { _ =>

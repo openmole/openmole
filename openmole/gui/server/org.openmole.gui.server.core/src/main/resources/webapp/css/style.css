@@ -1330,20 +1330,18 @@ input:checked + .slider:before {
 }
 
 /*Notifications */
-
-
- /*Notifications*/
  .notificationCount {
     position: fixed;
     top: 0px;
     right: 550px;
  }
 
-  .alert {
+ .alert {
     background: #3f3d56;
-    width: 600px;
-    height: 70px;
-  }
+    right: 0px;
+    position: absolute;
+    top: -10px;
+ }
 
 #container .alert {
   transform: translateX(130%);
@@ -1358,10 +1356,9 @@ input:checked + .slider:before {
 }
 
 .notification {
-    height: 100%;
-    padding: 5px;
     background: white;
     color: #222;
+    margin: 10px;
 }
 
 .errorNotification {
@@ -1417,13 +1414,15 @@ input:checked + .slider:before {
 }
 
 .notifList {
-     margin-top: 30;
-     background: #333;
-     position: absolute;
-     z-index: 500;
-     right: 10px;
-     top: 50px;
-     width: 500px;
+    margin-top: 20;
+    position: absolute;
+    z-index: 500;
+    right: 0px;
+    top: 50px;
+    width: 500px;
+    height: 100%;
+    padding:15px;
+    background: #3f3d56;
 }
 
 .btn-purple {
