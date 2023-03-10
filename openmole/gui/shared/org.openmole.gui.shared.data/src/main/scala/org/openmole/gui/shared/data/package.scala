@@ -21,8 +21,8 @@ import endpoints4s.algebra
 
 package data {
   val connectionRoute = "connection"
-  val shutdownRoute = "application/shutdown"
-  val restartRoute = "application/restart"
+  val shutdownRoute = "shutdown"
+  val restartRoute = "restart"
 
   val appRoute = "app"
 

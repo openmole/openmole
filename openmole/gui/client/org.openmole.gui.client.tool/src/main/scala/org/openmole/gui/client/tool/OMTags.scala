@@ -58,6 +58,8 @@ object OMTags {
   val glyph_puzzle = cls("bi-puzzle-fill")
   val glyph_unpuzzle = cls("bi-clock")
   val glyph_play = cls("bi-file-play")
+  val glyph_gear = cls("bi-gear-fill")
+  val glyph_info = cls("bi-info-circle-fill")
   val buttonOM = cls("btn btnOm")
   val btn_purple = cls("btn btn-purple")
 

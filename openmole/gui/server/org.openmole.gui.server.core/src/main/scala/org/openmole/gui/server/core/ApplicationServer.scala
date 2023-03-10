@@ -79,6 +79,12 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
       org.openmole.core.services.Services.resetPassword
       val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.resetPassword();", GUIServlet.cssFiles(webapp), extraHeader)
       Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
+    case GET -> Root / shared.data.restartRoute =>
+      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.restarted();", GUIServlet.cssFiles(webapp), extraHeader)
+      Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
+    case GET -> Root / shared.data.shutdownRoute =>
+      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.stopped();", GUIServlet.cssFiles(webapp), extraHeader)
+      Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case req @ POST -> Root / shared.data.connectionRoute =>
 
       //      response.setHeader("Access-Control-Allow-Origin", "*")

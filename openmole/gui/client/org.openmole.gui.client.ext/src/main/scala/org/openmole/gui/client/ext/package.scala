@@ -142,16 +142,6 @@ package object ext {
     left := "370",
     fontSize := "20"
   )
-  lazy val connectionTabOverlay = Seq(
-    background := "white none repeat scroll 0 0",
-    color := WHITE,
-    height := "100%",
-    left := "0",
-    absolutePosition,
-    width := "100%",
-    zIndex := 1100,
-    top := "0"
-  )
 
   lazy val displayOff = Seq(
     display := "none"
@@ -767,43 +757,10 @@ package object ext {
   )
 
   //GENERAL SETTINGS
-  lazy val highLine = Seq(
-    width := "130",
-    height := "50",
-    display := "table",
-    overflow := "hidden"
-  )
 
   lazy val generalSettings = Seq(
-    height := "185",
+    height := "200",
     marginBottom := "20"
   )
-
-  lazy val smallLine = Seq(
-    width := "130",
-    height := "15",
-    display := "table",
-    overflow := "hidden"
-  )
-  lazy val centerCell = Seq(
-    display := "table-cell",
-    verticalAlign := "middle"
-  )
-
-  lazy val mediumHalfColumn = (Seq(
-    fontSize := "18",
-    width := "60"
-  )) ++ centerCell
-
-  lazy val bigHalfColumn = (Seq(
-    fontSize := "26",
-    width := "60"
-  )) ++ centerCell
-
-  lazy val smallHalfColumn = (Seq(
-    left := "65",
-    fontSize := "10",
-    color := BS_GREY
-  )) ++ centerCell
 
 }

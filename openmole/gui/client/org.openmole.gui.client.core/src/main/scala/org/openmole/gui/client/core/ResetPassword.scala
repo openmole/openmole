@@ -57,7 +57,7 @@ class ResetPassword {
   val resetPassDiv =
     div(
       cls := "screen-center",
-      img(src := "img/openmole_light.png"),
+      img(src := "img/openmole_light.png", width := "600px"),
       setPasswordForm
     )
 

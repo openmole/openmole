@@ -109,12 +109,11 @@ class NotificationManager:
           div(
             body.amend(cls := "getItNotification"),
             buttonGroup.amend(
+              margin := "15", float.right,
               button(btn_primary, alt1.name,
-                margin := "15", float.right,
                 onClick --> { _ => alt1.action(id) }
               ),
               button(btn_secondary_outline, alt2.name,
-                margin := "15", float.right,
                 onClick --> { _ => alt2.action(id) }
               )
             )
@@ -143,9 +142,9 @@ class NotificationManager:
     newEvents ++ s
   }
 
-//  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-//    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
-//  }
+  //  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
+  //    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
+  //  }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
     notifications.update {
@@ -156,11 +155,12 @@ class NotificationManager:
         kept
     }
 
-  case class ListColor(background: String, border:String)
+  case class ListColor(background: String, border: String)
+
   def listColor(level: NotificationLevel) =
     level match
-      case NotificationLevel.Error=> ListColor("#e4d1d1","#dc3545")
-      case _=> ListColor("#d1dbe4","#3086b5")
+      case NotificationLevel.Error => ListColor("#e4d1d1", "#dc3545")
+      case _ => ListColor("#d1dbe4", "#3086b5")
 
   def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
@@ -181,7 +181,7 @@ class NotificationManager:
                   div(
                     div(backgroundColor := "white",
                       div(s.title,
-                        fontWeight.bold, padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
+                        padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
                         backgroundColor := {
                           if (i % 2 == 0) lColor.background else "#f4f4f4"
                         }
@@ -193,7 +193,9 @@ class NotificationManager:
                             case _ => Some(s.id)
                         )
                       },
-                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
+                      currentID.signal.map { i => i == Some(s.id) }.expand {
+                        s.body
+                      }.amend(borderLeft := s"15px solid ${lColor.border}")
                     )
                   )
                 }

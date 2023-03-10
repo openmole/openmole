@@ -50,13 +50,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     given BasePath = BasePath(dom.document.location)
 
     val stoppedDiv = div(
-      omsheet.connectionTabOverlay,
-      div(
-        div(
-          omsheet.centerPage(),
-          div(omsheet.shutdown, "The OpenMOLE server has been stopped")
-        )
-      )
+      cls := "screen-center",
+      img(src := "img/openmole_light.png", width := "600px"),
+      div("The OpenMOLE server has been stopped", marginTop := "30px")
     )
 
     api.shutdown()
@@ -66,13 +62,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
   def restarted(): Unit =
     given BasePath = BasePath(dom.document.location)
 
-    val restartedDiv = div(
-      omsheet.connectionTabOverlay,
+    val restartedDiv =
       div(
-        omsheet.centerPage(),
-        div(omsheet.shutdown, "The OpenMOLE server is restarting, please wait.")
+        cls := "screen-center",
+        img(src := "img/openmole_light.png", width := "600px"),
+        div("The OpenMOLE server is restarting, please wait.", marginTop := "30px")
       )
-    )
 
     api.restart()
 
@@ -109,48 +104,13 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       val authenticationPanel = AuthenticationPanel.render
       val newProjectPanel = ProjectPanel.render
+      val settingsView = SettingsView.render
 
       val openFileTree = Var(true)
-      //   val openAuthentication = Var(false)
-
-      //      val settingsItem = navItem(div(
-      //        //panels.settingsViewApp,
-      //        itemStyle), () ⇒ {}).right
-      //
-      //      val actionItem = navItem(div(
-      //        child <-- treeNodeTabs.temporaryControl.signal
-      //      ))
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
-        //panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
       }
-
-
-      //      case class MenuAction(name: String, action: () ⇒ Unit)
-      //
-      //      lazy val newEmpty = MenuAction("Empty project", () ⇒ {
-      //        val fileName = "newProject.oms"
-      //        CoreUtils.addFile(panels.treeNodeManager.dirNodeLine.now, fileName, () ⇒ {
-      //          val toDisplay = panels.treeNodeManager.dirNodeLine.now ++ fileName
-      //          FileManager.download(
-      //            toDisplay,
-      //            hash = true,
-      //            onLoaded = (content, hash) ⇒ {
-      //              treeNodeManager.invalidCurrentCache
-      //              fileDisplayer.display(toDisplay, content, hash.get, FileExtension.OMS, panels.pluginServices)
-      //            }
-      //          )
-      //        })
-      //      })
-
-
-      //      def toggleMenu(m: MainMenu) =
-      //        currentSelectedMenu.update(cmm=>
-      //          if cmm == Some(m)
-      //          then None
-      //          else Some(m)
-      //        )
 
       //START BUTTON
       lazy val theNavBar = div(
@@ -203,37 +163,27 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
               panels.pluginPanel.getPlugins
               Panels.expandTo(panels.pluginPanel.render, 1)
             }).tooltip("Plugins"),
+          div(OMTags.glyph_gear, navBarItem,
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
+              _.map {
+                _.id
+              } == Some(5)
+            },
+            onClick --> { _ ⇒
+              Panels.expandTo(settingsView, 5)
+            }).tooltip("Settings"),
+          div(OMTags.glyph_info, cursor.pointer, navBarItem,
+            onClick --> { _ ⇒
+              api.omSettings().map { sets ⇒
+                org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html", "_blank")
+              }
+            }
+          ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         ),
-        panels.notifications.render,
-        //            settingsItem
+        panels.notifications.render
       )
 
-      //      lazy val importModel = MenuAction("Import your model", () ⇒ {
-      //        panels.expandTo(modelWizardPanel(plugins.wizardFactories).render, 3)
-      //      })
-
-      //      lazy val fromURLProject = MenuAction("From URL", () ⇒ {
-      //        urlImportPanel.urlDialog.show
-      //      })
-      //
-      //      lazy val marketPlaceProject = MenuAction("From market place", () ⇒ {
-      //        marketPanel.modalDialog.show
-      //      })
-
-      // lazy val elements = Seq(newEmpty, importModel, marketPlaceProject, fromURLProject)
-
-      //      lazy val menuActions: Options[MenuAction] = elements.options(
-      //        key = btn_danger,
-      //        naming = (m: MenuAction) ⇒ m.name,
-      //        onclose = () ⇒ menuActions.content.now.foreach {
-      //          _.action()
-      //        },
-      //        fixedTitle = Some("New project")
-      //      )
-
-      // Define the option sequence
-      //Fetch(_.omSettings(())) { sets ⇒
       def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
 
       def getServerNotifications = api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
@@ -248,8 +198,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           EventStream.periodic(10000).toObservable --> Observer { _ => saveAllTabs },
           EventStream.periodic(10000).toObservable --> Observer { _ => getServerNotifications },
           cls := "app-container",
-          // panels.bannerAlert.banner,
-          //theNavBar,
           div(
             cls := "main-container",
             div(
@@ -266,35 +214,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             div(
               cls := "tab-section",
               theNavBar,
-              //openAuthentication.signal.expand(authenticationPanel),
-              // treeNodeTabs.render.amend(cls := "tab-section")
               panels.tabContent.render //.amend(cls := "tab-section")
             )
-            //                cls <-- openFileTree.signal.combineWith(panels.bannerAlert.isOpen).map {
-            //                  case (oft, io) ⇒
-            //                   // "centerpanel "
-            ////                    +
-            ////                      CoreUtils.ifOrNothing(oft, "reduce") +
-            ////                      CoreUtils.ifOrNothing(io, " banneropen")
-            //                },
-            //                  div(
-            //                    omsheet.textVersion,
-            //                    div(
-            //                      fontSize := "1em", s"${sets.version} ${sets.versionName}"),
-            //                    div(fontSize := "0.8em", s"built the ${sets.buildTime}")
-            //                  )
           ),
-          //            openExpandablePanel.signal.expand(
-          //              div(
-          //                cls := "collapse-bottom",
-          //                div(cls := "splitter"),
-          //                child <-- panels.expandablePanel.signal.map { p ⇒
-          //                  p.map {
-          //                    _.element
-          //                  }.getOrElse(div())
-          //                }
-          //              )
-          //            ),
           panels.notifications.notificationList,
           div(
             div(cls <-- panels.expandablePanel.signal.map { x =>
@@ -317,7 +239,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       )
     }
     panels.treeNodePanel.treeNodeManager.invalidCurrentCache
-//}
 
 
 @JSExportTopLevel(name = "openmole_library")

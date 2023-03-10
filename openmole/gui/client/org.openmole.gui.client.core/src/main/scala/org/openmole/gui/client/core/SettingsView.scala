@@ -32,7 +32,7 @@ import scala.scalajs.js.timers.SetIntervalHandle
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsView:
+object SettingsView:
 
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
@@ -59,22 +59,12 @@ class SettingsView:
       NotificationManager.Alternative.cancel
     )
 
-    div(rowLayout, lineHeight := "7px",
-      glyphSpan(messageGlyph ++ omsheet.shutdownButton ++ columnLayout),
-      span(message, paddingTop := "3", paddingLeft := "5", settingsItemStyle, columnLayout),
-      onClick --> { _ ⇒ notification }
-    )
+    button(btn_danger, marginBottom := "10px", message, onClick --> { _ ⇒ notification })
 
-  def docButton(using api: ServerAPI, basePath: BasePath) = a(href := "#", onClick --> { _ ⇒
-    api.omSettings().map{ sets ⇒
-      org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
-    }
-  }, span("Documentation"))
-
-  def jvmInfoButton(using api: ServerAPI, basePath: BasePath) = button("JVM stats", btn_secondary, marginLeft := "12", glyph_stats, onClick --> { _ ⇒
+  def jvmInfoButton(using api: ServerAPI, basePath: BasePath) = button("JVM stats", btn_secondary, glyph_stats, onClick --> { _ ⇒
     timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
-      case _       ⇒ setJVMTimer
+      case _ ⇒ setJVMTimer
     }
   })
 
@@ -102,60 +92,62 @@ class SettingsView:
   val jvmInfosDiv = waiter.expandDiv(div(
     generalSettings,
     child <-- jvmInfos.signal.map { oj ⇒
-      oj.map { j ⇒
-        val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
+      val readableTotalMemory = oj.map{j=> CoreUtils.readableByteCount(j.totalMemory)}
+      div(
+        div(flexRow,
+          div(cls := "bigValue", oj.map{j=> div(j.processorAvailable.toString)}.getOrElse(div())),
+          div(cls := "smallText", "Processors")
+        ),
         div(
-          div(
-            highLine,
-            div(bigHalfColumn, j.processorAvailable.toString),
-            div(smallHalfColumn, "Processors")
-          ),
-          div(
-            highLine,
-            div(bigHalfColumn, s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"),
-            div(smallHalfColumn, "Allocated memory (%)")
-          ),
-          div(
-            highLine,
-            div(bigHalfColumn, s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"),
-            div(smallHalfColumn, s"Total memory (${readableTotalMemory.units})")
-          ),
-          div(
-            smallLine,
-            div(smallHalfColumn, textCenter, paddingTop := "5"), s"${j.javaVersion}"),
-          div(
-            smallLine,
-            div(smallHalfColumn, textCenter, s"${j.jvmImplementation}")
-          )
-        )
-      }.getOrElse(div())
+          flexRow,
+          div(cls := "bigValue", oj.map{j=> div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}")}.getOrElse(div())),
+          div(cls := "smallText", "Allocated memory (%)")
+        ),
+        div(
+          flexRow,
+          div(cls := "bigValue", readableTotalMemory.map{rm=> div(s"${CoreUtils.dropDecimalIfNull(rm.bytes)}")}.getOrElse(div())),
+          div(cls := "smallText", readableTotalMemory.map{rm=> div(s"Total memory (${rm.units})")}.getOrElse(div()))
+        ),
+        oj.map{j=> div(s"${j.javaVersion}", cls := "smallText")}.getOrElse(div()),
+        oj.map{j=> div(s"${j.jvmImplementation}", cls := "smallText")}.getOrElse(div()),
+        oj.map{_=> div()}.getOrElse(Waiter.waiter.amend(flexRow, justifyContent.center))
+      )
     }
   )
   )
 
   def resetPasswordButton(using panels: Panels) =
     serverActions(
-      "reset password",
+      "Reset password",
       glyph_lock,
       "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
       s"/${resetPasswordRoute}"
     )
 
   def shutdownButton(using panels: Panels) = serverActions(
-    "shutdown",
+    "Shutdown",
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
     s"/${shutdownRoute}"
   )
 
   def restartButton(using panels: Panels) = serverActions(
-    "restart",
+    "Restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",
     s"/${restartRoute}"
   )
 
-  // val renderApp = dropdownApp
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    div(cls := "settingButtons",
+      jvmInfoButton,
+      jvmInfosDiv,
+      resetPasswordButton,
+      shutdownButton,
+      restartButton
+    )
 
-  //val renderConnection = dropdownConnection
+// val renderApp = dropdownApp
+
+//val renderConnection = dropdownConnection
 

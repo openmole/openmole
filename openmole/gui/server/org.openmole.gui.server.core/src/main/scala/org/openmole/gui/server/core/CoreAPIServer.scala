@@ -193,7 +193,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       addPluginRoute,
       removePluginRoute,
       listNotificationRoute,
-      clearNotificationRoute
+      clearNotificationRoute,
+      restartRoute,
+      shutdownRoute,
+      jvmInfosRoute,
+      isAliveRoute
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

@@ -28,6 +28,7 @@ object Panels:
   object ExpandablePanel:
     def toString(id: Int) =
       id match
+        case 5 => "SETTINGS"
         case 4 => "EXECUTIONS"
         case 2 => "AUTHENTICATIONS"
         case 1 => "PLUGINS"
@@ -50,11 +51,10 @@ object Panels:
     val fileDisplayer = new FileDisplayer
     val executionPanel = new ExecutionPanel
     val treeNodePanel = new TreeNodePanel
-    val settingsView = new SettingsView
     val connection = new Connection
     val notification = new NotificationManager
     
-    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, settingsView, executionPanel, treeNodeTabs, notification, connection, expandablePanel)
+    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, executionPanel, treeNodeTabs, notification, connection, expandablePanel)
 
 
 //  def initialize(using fetch: Fetch, api: ServerAPI, panels: Panels) =
@@ -66,7 +66,6 @@ case class Panels(
   tabContent: TabContent,
   pluginPanel: PluginPanel,
   fileDisplayer: FileDisplayer,
-  settingsView: SettingsView,
   executionPanel: ExecutionPanel,
   treeNodeTabs: TreeNodeTabs,
   notifications: NotificationManager,
