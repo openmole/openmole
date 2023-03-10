@@ -62,7 +62,14 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def omSettings()(using BasePath): Future[OMSettings] = fetch.futureError(_.omSettings(()).future)
   override def shutdown()(using BasePath): Future[Unit] = fetch.futureError(_.shutdown(()).future)
   override def restart()(using BasePath): Future[Unit] = fetch.futureError(_.restart(()).future)
-  override def isAlive()(using BasePath): Future[Boolean] = fetch.futureError(_.isAlive(()).future, timeout = Some(3 seconds), warningTimeout = None)
+
+  override def isAlive()(using BasePath): Future[Boolean] =
+    import scala.util.*
+    fetch.future(_.isAlive(()).future, timeout = Some(3 seconds), warningTimeout = None, notifyError = false).transform {
+      case Success(value) => Success(value)
+      case Failure(_) => Success(false)
+    }
+
   override def jvmInfos()(using BasePath): Future[JVMInfos] = fetch.futureError(_.jvmInfos(()).future)
   override def mdToHtml(safePath: SafePath)(using BasePath): Future[String] = fetch.futureError(_.mdToHtml(safePath).future)
   override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = fetch.futureError(_.sequence(safePath).future)

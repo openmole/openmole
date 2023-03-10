@@ -165,8 +165,8 @@ trait CoreAPI extends RESTAPI {
     errorEndpoint(get(path / "application" / "restart"), ok(jsonResponse[Unit]))
 
   //  def isAlive(): Boolean
-  val isAlive: ErrorEndpoint[Unit, Boolean] =
-    errorEndpoint(get(path / "application" / "is-alive"), ok(jsonResponse[Boolean]))
+  val isAlive: Endpoint[Unit, Boolean] =
+    endpoint(get(path / "application" / "is-alive"), ok(jsonResponse[Boolean]))
 
   //  def jvmInfos(): JVMInfos
   val jvmInfos: ErrorEndpoint[Unit, JVMInfos] =

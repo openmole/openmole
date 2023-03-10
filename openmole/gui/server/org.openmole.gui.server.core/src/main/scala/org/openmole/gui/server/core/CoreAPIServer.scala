@@ -131,7 +131,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     restart.errorImplementedBy { _ => apiImpl.restart() }
 
   val isAliveRoute =
-    isAlive.errorImplementedBy { _ => apiImpl.isAlive() }
+    isAlive.implementedBy { _ => apiImpl.isAlive() }
 
   val jvmInfosRoute =
     jvmInfos.errorImplementedBy { _ => apiImpl.jvmInfos() }

@@ -49,7 +49,8 @@ class Fetch[API](api: EndpointsSettings => API) {
   def future[O](
     f: API => scala.concurrent.Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
-    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using baseURI: BasePath, notificationAPI: NotificationService): scala.concurrent.Future[O] =
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds),
+    notifyError: Boolean = true)(using baseURI: BasePath, notificationAPI: NotificationService): scala.concurrent.Future[O] =
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { Fetch.onWarningTimeout() })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
@@ -58,11 +59,11 @@ class Fetch[API](api: EndpointsSettings => API) {
     future.andThen {
       case f@Failure(_: scala.concurrent.TimeoutException) ⇒
         stopTimeout
-        Fetch.onTimeout()
+        if notifyError then Fetch.onTimeout()
         f
       case f@Failure(t) =>
         stopTimeout
-        Fetch.onFailed(t)
+        if notifyError then Fetch.onFailed(t)
         f
       case f =>
         stopTimeout
