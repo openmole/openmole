@@ -130,46 +130,31 @@ package object archive {
     }
   }
 
-  implicit class XZFileDecorator(file: File) {
+  def extractXZ(file: File, to: File) =
+    val inputStream = new FileInputStream(file)
+    val outputStream = new FileOutputStream(to)
+    val inxz = xzInputStream(file)
 
-    def extractXZ(to: File) = {
-      if (!file.getName.endsWith(".xz")) throw new java.io.IOException(s"$file is not a XZ file")
-      else {
-        val inputStream = new FileInputStream(file)
-        val outputStream = new FileOutputStream(to)
-        val inxz = extractToStream
+    val buffer = new Array[Byte](inputStream.available)
+    Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach { outputStream.write(buffer, 0, _) }
 
-        val buffer = new Array[Byte](inputStream.available)
-        Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach {
-          outputStream.write(buffer, 0, _)
-        }
+    inxz.close
 
-        inxz.close
-      }
-    }
+  def xzInputStream(file: File): InputStream =
+    val inputStream = new FileInputStream(file)
+    new XZInputStream(inputStream, 100 * 1024)
 
-    def extractToStream: InputStream = {
-      if (!file.getName.endsWith(".xz")) throw new java.io.IOException(s"$file is not a XZ file")
-      else {
-        val inputStream = new FileInputStream(file)
-        new XZInputStream(inputStream, 100 * 1024)
-      }
-    }
+  def compressXZ(file: File, to: File) =
+    val outfile = new FileOutputStream(to)
+    val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
 
-    def compressXZ(to: File) = {
-      val outfile = new FileOutputStream(to)
-      val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
+    val infile = new FileInputStream(file)
+    val buffer = new Array[Byte](8192)
 
-      val infile = new FileInputStream(file)
-      val buffer = new Array[Byte](8192)
+    Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒ outxz.write(buffer, 0, size) }
 
-      Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒
-        outxz.write(buffer, 0, size)
-      }
+    outxz.finish
 
-      outxz.finish
-    }
-  }
 
   implicit class FileTarArchiveDecorator(file: File) {
 
@@ -195,7 +180,7 @@ package object archive {
       }
 
     def extractUncompressXZ(dest: File, overwrite: Boolean = false) = {
-      withClosable(new TarInputStream(file.extractToStream)) {
+      withClosable(new TarInputStream(xzInputStream(file))) {
         _.extract(dest, overwrite)
       }
     }
