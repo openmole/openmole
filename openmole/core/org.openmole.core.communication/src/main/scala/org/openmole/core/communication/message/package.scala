@@ -32,7 +32,7 @@ import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import util.Try
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 
 package object message {
 

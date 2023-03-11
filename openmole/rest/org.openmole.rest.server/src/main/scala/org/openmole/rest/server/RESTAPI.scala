@@ -20,7 +20,7 @@ import org.openmole.rest.message._
 import org.openmole.tool.collection._
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
-import org.openmole.tool.tar.{ TarInputStream, TarOutputStream, _ }
+import org.openmole.tool.archive.*
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
 

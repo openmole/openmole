@@ -46,7 +46,7 @@ import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{ RandomProvider, Seeder }
 import org.openmole.tool.stream._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 
 import scala.util.{ Failure, Success, Try }
 

@@ -20,7 +20,7 @@ package org.openmole.marketindex
 import java.io.File
 
 import org.openmole.tool.file._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.core.market._
 
 object Market {
