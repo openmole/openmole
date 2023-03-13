@@ -1,4 +1,4 @@
-package org.openmole.tool.tar;
+package org.openmole.tool.archive;
 
 /**
  * Contains all of the constants we use for the tar files reading and writing.

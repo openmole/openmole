@@ -1,4 +1,4 @@
-package org.openmole.tool.tar;
+package org.openmole.tool.archive;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

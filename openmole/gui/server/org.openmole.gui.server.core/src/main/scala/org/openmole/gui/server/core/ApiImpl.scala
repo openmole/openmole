@@ -20,7 +20,7 @@ import org.openmole.core.workflow.mole.{MoleExecution, MoleExecutionContext, Mol
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm.*
-import org.openmole.tool.tar.*
+import org.openmole.tool.archive.*
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
@@ -157,7 +157,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case FileContentType.TarGz ⇒
           from.extractUncompress(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case FileContentType.Zip ⇒ utils.unzip(from, to)
+        case FileContentType.Zip ⇒
+          import org.openmole.tool.archive
+          archive.unzip(from, to)
         case FileContentType.TarXz ⇒
           from.extractUncompressXZ(to, true)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))

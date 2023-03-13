@@ -35,7 +35,7 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
 import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.tar.TarInputStream
+import org.openmole.tool.archive.TarInputStream
 
 import io.circe.generic.auto.*
 import org.openmole.plugin.tool.json.given

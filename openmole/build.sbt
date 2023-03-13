@@ -119,7 +119,7 @@ def thirdPartiesDir = file("third-parties")
 def thirdPartiesSettings = scala3Settings
 def allThirdParties = Seq(
   openmoleCache,
-  openmoleTar,
+  openmoleArchive,
   openmoleDTW,
   openmoleFile,
   openmoleLock,
@@ -140,7 +140,7 @@ def allThirdParties = Seq(
   txtmark)
 
 lazy val openmoleCache = OsgiProject(thirdPartiesDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger) settings (thirdPartiesSettings: _*) settings(libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
-lazy val openmoleTar = OsgiProject(thirdPartiesDir, "org.openmole.tool.tar", imports = Seq("*")) dependsOn (openmoleFile) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.xzJava)
+lazy val openmoleArchive = OsgiProject(thirdPartiesDir, "org.openmole.tool.archive", imports = Seq("*")) dependsOn (openmoleFile) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.xzJava)
 lazy val openmoleDTW = OsgiProject(thirdPartiesDir, "org.openmole.tool.dtw", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 lazy val openmoleFile = OsgiProject(thirdPartiesDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (thirdPartiesSettings: _*)
 lazy val openmoleLock = OsgiProject(thirdPartiesDir, "org.openmole.tool.lock", imports = Seq("*")) settings (thirdPartiesSettings: _*)
@@ -250,7 +250,7 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
   libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(workspace, pluginManager, fileService, tools, openmoleTar, openmoleCompiler) settings (coreSettings: _*)
+) dependsOn(workspace, pluginManager, fileService, tools, openmoleArchive, openmoleCompiler) settings (coreSettings: _*)
 
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 
@@ -264,7 +264,7 @@ lazy val csv = OsgiProject(coreDir, "org.openmole.core.csv", imports = Seq("*"))
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang) dependsOn
-  (exception, openmoleTar, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache, openmoleRandom, openmoleNetwork, openmoleException, openmoleOutputRedirection, openmoleLogger, openmoleTypes) settings (coreSettings: _*)
+  (exception, openmoleArchive, openmoleFile, openmoleLock, openmoleThread, openmoleHash, openmoleLogger, openmoleStream, openmoleCollection, openmoleStatistics, openmoleTypes, openmoleCache, openmoleRandom, openmoleNetwork, openmoleException, openmoleOutputRedirection, openmoleLogger, openmoleTypes) settings (coreSettings: _*)
 
 lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings (coreSettings: _*)
 
@@ -303,7 +303,7 @@ lazy val pluginManager = OsgiProject(
 lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn(exception, highlight, namespace, preference) settings (coreSettings: _*)
 
 
-lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleTar, preference, threadProvider, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
+lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleArchive, preference, threadProvider, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
 
 lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings(coreSettings, libraryDependencies ++= Libraries.httpClient) settings (defaultActivator)
 
@@ -462,7 +462,7 @@ def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slur
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
-  serializer, fileService, pluginManager, openmoleTar, communication, authentication, location, services,
+  serializer, fileService, pluginManager, openmoleArchive, communication, authentication, location, services,
   openmoleByteCode, openmoleDSL
 ) settings (
   libraryDependencies ++= Seq(
@@ -653,7 +653,7 @@ lazy val server = OsgiProject(
   "org.openmole.rest.server",
   imports = Seq("org.h2", "!com.sun.*", "*"),
   dynamicImports = Seq("org.eclipse.jetty.*")
-) dependsOn(workflow, openmoleTar, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module) settings(
+) dependsOn(workflow, openmoleArchive, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module) settings(
   libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.codec, Libraries.json4s), Libraries.addScalaLang) settings (scala3Settings: _*)
 
 
@@ -815,7 +815,7 @@ def guiServerDir = guiDir / "server"
 //  workflow,
 //  openmoleBuildInfo,
 //  openmoleFile,
-//  openmoleTar,
+//  openmoleArchive,
 //  openmoleHash,
 //  openmoleCollection,
 //  project,
@@ -843,7 +843,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   workflow,
   openmoleBuildInfo,
   openmoleFile,
-  openmoleTar,
+  openmoleArchive,
   openmoleHash,
   openmoleCollection,
   openmoleProject,
@@ -1160,7 +1160,7 @@ lazy val marketIndex = Project("marketindex", binDir / "org.openmole.marketindex
     val marketBranch = defineMarketBranch.value
     runner.updated("https://gitlab.openmole.org/openmole/market.git", marketBranch, dir, ConsoleLogger())
   }
-) dependsOn(openmoleBuildInfo, openmoleFile, openmoleTar, market)
+) dependsOn(openmoleBuildInfo, openmoleFile, openmoleArchive, market)
 
 def parse(key: String, default: sbt.File, parsed: Seq[String]) = parsed.indexOf(key) match {
   case -1 => (default, parsed ++ Seq(key, default.getAbsolutePath))

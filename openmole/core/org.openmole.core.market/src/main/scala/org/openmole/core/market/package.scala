@@ -19,7 +19,7 @@ package org.openmole.core
 
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.file.*
-import org.openmole.tool.tar.*
+import org.openmole.tool.archive.*
 import org.openmole.core.context.*
 import org.openmole.core.expansion.*
 import org.openmole.core.fileservice.FileService
@@ -27,7 +27,7 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.workspace.*
 import org.openmole.tool.random.*
-import org.openmole.tool.tar.TarInputStream
+import org.openmole.tool.archive.TarInputStream
 
 import java.io.IOException
 import org.openmole.core.exception.InternalProcessingError

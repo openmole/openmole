@@ -37,7 +37,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.tool.lock._
 
 import collection.mutable.ListBuffer

@@ -24,11 +24,11 @@ import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
-import org.openmole.core.workflow.mole.{MoleExecutionContext, *}
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.validation.*
 import org.openmole.plugin.hook.file.CopyFileHook.*
 import org.openmole.tool.random.*
-import org.openmole.tool.tar.*
+import org.openmole.tool.archive.*
 
 object CopyFileHook {
 

@@ -26,7 +26,7 @@ import org.openmole.tool.hash._
 import org.openmole.core.workspace._
 import org.openmole.tool.cache.AssociativeCache
 import org.openmole.tool.hash._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.tool.file._
 import org.openmole.tool.thread._
 import squants._

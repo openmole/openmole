@@ -259,7 +259,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         else {
           if (f.isDirectory) {
             import org.openmole.tool.stream.*
-            import org.openmole.tool.tar.*
+            import org.openmole.tool.archive.*
 
             val st =
               fs2.io.readOutputStream[IO](64 * 1024) { out =>

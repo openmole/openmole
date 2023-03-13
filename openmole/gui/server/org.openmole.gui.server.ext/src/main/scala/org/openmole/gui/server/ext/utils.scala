@@ -299,42 +299,7 @@ object utils {
       }
     }
   }
-
-  // Extract .zip archive
-  def unzip(from: File, to: File) = {
-    val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
-    to.getParentFile.mkdirs
-
-    val zip = new ZipFile(from)
-    zip.entries.asScala.foreach { entry ⇒
-      val entryName = entry.getName
-      if (entryName != s"$basename/") {
-        val entryPath = {
-          if (entryName.startsWith(basename))
-            entryName.substring(basename.length)
-          else
-            entryName
-        }
-
-        val sub = new File(to, entryPath)
-        if (entry.isDirectory) {
-          if (!sub.exists) sub.mkdirs
-        }
-        else {
-          // write file to dest
-          val inputSrc = new BufferedSource(
-            zip.getInputStream(entry)
-          )(Codec.ISO8859)
-
-          val ostream = new FileOutputStream(new File(to, entryPath))
-          inputSrc foreach { (c: Char) ⇒ ostream.write(c) }
-          inputSrc.close
-          ostream.close
-
-        }
-      }
-    }
-  }
+  
 
   //  def hash(safePath: SafePath)(implicit workspace: Workspace, context: ServerFileSystemContext) = {
   //    val file: File = safePathToFile(safePath)

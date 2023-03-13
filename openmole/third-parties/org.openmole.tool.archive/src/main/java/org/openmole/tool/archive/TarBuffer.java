@@ -1,4 +1,4 @@
-package org.openmole.tool.tar;
+package org.openmole.tool.archive;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package org.openmole.tool.tar;
+package org.openmole.tool.archive;
 
 import java.io.File;
 import java.util.Date;
