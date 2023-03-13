@@ -66,7 +66,7 @@ package object message {
             verify(cache)
 
             val local = localDirectory / replicatedFile.name
-            cache.extract(local)
+            cache.extract(local, archive = ArchiveType.Tar)
             cache.delete
             local.mode = replicatedFile.mode
             local

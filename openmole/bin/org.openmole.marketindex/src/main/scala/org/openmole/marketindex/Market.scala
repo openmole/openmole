@@ -115,7 +115,7 @@ object Market {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = destination / fileName
       val projectDirectory = marketDirectory / project.directory
-      projectDirectory archiveCompress archive
+      projectDirectory archiveCompressTGZ archive
 
       GeneratedMarketEntry(
         fileName,

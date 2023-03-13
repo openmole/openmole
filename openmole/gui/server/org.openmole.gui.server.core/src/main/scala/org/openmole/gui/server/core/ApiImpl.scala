@@ -152,16 +152,16 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       val ext = FileExtension(from.getName)
       FileContentType(ext) match
         case FileContentType.Tar ⇒
-          from.extract(to)
+          from.extract(to, archive = ArchiveType.Tar)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case FileContentType.TarGz ⇒
-          from.extractUncompress(to, true)
+          from.extract(to, true, archive = ArchiveType.TarGZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case FileContentType.Zip ⇒
           import org.openmole.tool.archive
-          archive.unzip(from, to)
+          from.extract(to, true, archive = ArchiveType.Zip)
         case FileContentType.TarXz ⇒
-          from.extractUncompressXZ(to, true)
+          from.extract(to, true, archive = ArchiveType.TarXZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
     } match
