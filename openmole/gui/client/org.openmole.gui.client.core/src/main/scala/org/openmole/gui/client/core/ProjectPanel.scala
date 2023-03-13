@@ -64,29 +64,6 @@ object ProjectPanel {
     div(margin := "20px", flexRow, alignItems.flexStart,
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
       theTabs.build.render.amend(marginLeft := "40", width := "100%")
-//      div(
-//        div("Start from", padding := "10px"),
-//        button("Empty project", btn_primary, onClick --> { _ =>
-//          emptyProject
-//          Panels.closeExpandable
-//        }),
-//        div(display.flex, justifyContent.spaceAround, width := "600px",
-//          buttonStyle("Your model", 1),
-//          buttonStyle("The market Place", 2),
-//          buttonStyle("A url project", 3)
-//        ),
-//        div(cls := "close-button bi-chevron-down", onClick --> { _ ⇒ Panels.closeExpandable })
-//      ),
-//      div(
-//        child <-- currentOption.signal.map {
-//          _ match {
-//            case Some(1) => wizardPanel
-//            case Some(2) => div("marke p")
-//            case Some(3) => div("from u")
-//            case _=> emptyNode
-//          }
-//        }
-//      )
     )
   }
 

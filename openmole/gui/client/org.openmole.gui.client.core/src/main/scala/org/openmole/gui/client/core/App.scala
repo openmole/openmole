@@ -124,7 +124,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             }
           )
         },
-        //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project",
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
@@ -213,7 +212,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             div(
               cls := "tab-section",
               theNavBar,
-              panels.tabContent.render //.amend(cls := "tab-section")
+              panels.tabContent.render
             )
           ),
           panels.notifications.notificationList,

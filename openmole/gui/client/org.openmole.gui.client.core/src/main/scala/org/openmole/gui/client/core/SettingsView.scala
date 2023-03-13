@@ -162,7 +162,3 @@ object SettingsView:
       restartButton
     )
 
-// val renderApp = dropdownApp
-
-//val renderConnection = dropdownConnection
-

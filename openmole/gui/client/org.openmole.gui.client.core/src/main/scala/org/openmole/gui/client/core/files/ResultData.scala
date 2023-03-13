@@ -105,17 +105,5 @@ object ResultData {
   def fromStringToArray(s: String): Seq[String] = {
     s.drop(1).dropRight(1).split(",")
   }
-
-//  def getColumnsFrom(resultData: RowData, headersQuery: Seq[String]) = {
-//
-//    val headersQuery
-//    .flatMap { h =>
-//      resultData.headers.indexOf(h) match {
-//        case -1 => Seq()
-//        case i: Int =>
-//      }
-//    }
-//  }
-
-
+  
 }

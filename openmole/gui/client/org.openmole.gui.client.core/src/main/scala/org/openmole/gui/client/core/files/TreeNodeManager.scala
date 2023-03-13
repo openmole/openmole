@@ -36,27 +36,13 @@ class TreeNodeManager {
 
   val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
-//  val error: Var[Option[TreeNodeError]] = Var(None)
-//
-//  val comment: Var[Option[TreeNodeComment]] = Var(None)
-
   val selected: Var[Seq[SafePath]] = Var(Seq())
 
   val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val pluggables: Var[Seq[SafePath]] = Var(Seq())
-
   val fileFilter = Var(FileFilter.defaultFilter)
 
   val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
-
-//  def errorObserver(using panels: Panels) = Observer[Option[TreeNodeError]] { err ⇒
-//    err.foreach(panels.alertPanel.treeNodeErrorDiv)
-//  }
-//
-//  def commentObserver(using panels: Panels) = Observer[Option[TreeNodeComment]] { tnc ⇒
-//    tnc.foreach(panels.alertPanel.treeNodeCommentDiv)
-//  }
 
   def isSelected(tn: TreeNode) = selected.now().contains(tn)
 
@@ -80,20 +66,7 @@ class TreeNodeManager {
   }
 
   def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
-
-//  def setSelectedAsCopied = copied.set(selected.now())
-//
-//  def emptyCopied = copied.set(Seq())
-//
-//  def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error.set(Some(TreeNodeError(question, files, okaction, cancelaction)))
-//
-//  def setFilesInComment(c: String, files: Seq[SafePath], okaction: () ⇒ Unit) = comment.set(Some(TreeNodeComment(c, files, okaction)))
-//
-//  def noError = {
-//    error.set(None)
-//    comment.set(None)
-//  }
-
+  
   def switch(dir: String): Unit = switch(dirNodeLine.now().copy(path = dirNodeLine.now().path :+ dir))
 
   def switch(sp: SafePath): Unit = dirNodeLine.set(sp)

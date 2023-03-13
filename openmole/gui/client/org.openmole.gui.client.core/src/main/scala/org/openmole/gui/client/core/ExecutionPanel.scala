@@ -228,11 +228,8 @@ class ExecutionPanel:
       controls(id, cancel, remove)
     )
 
-
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
-
-  //def evironmentErrors(environmentError: EnvironmentError)
 
   def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
 
@@ -417,28 +414,3 @@ class ExecutionPanel:
       showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable --> Observer { _ => showExpander.set(None) }
     )
-
-
-  //lazy val executionTable = scaladget.bootstrapnative.Table(
-  //  //    for {
-  //  //      execMap ← executionInfo
-  //  //      staticInf ← staticInfo
-  //  //    } yield {
-  //  //      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
-  //  //        case (execID, info) ⇒
-  //  //          val duration: Duration = (info.duration milliseconds)
-  //  //          val h = (duration).toHours
-  //  //          val m = ((duration) - (h hours)).toMinutes
-  //  //          val s = (duration - (h hours) - (m minutes)).toSeconds
-  //  //
-  //  //          val durationString =
-  //  //            s"""${
-  //  //              h.formatted("%d")
-  //  //            }:${
-  //  //              m.formatted("%02d")
-  //  //            }:${
-  //  //              s.formatted("%02d")
-  //  //            }"""
-
-
-
