@@ -8,7 +8,7 @@ import org.scalajs.dom.{KeyboardEvent, document}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
@@ -124,7 +124,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             }
           )
         },
-        //   menuActions.selector,
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project",
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
@@ -172,12 +171,11 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             onClick --> { _ ⇒
               Panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
-          div(OMTags.glyph_info, cursor.pointer, navBarItem,
-            onClick --> { _ ⇒
-              api.omSettings().map { sets ⇒
-                org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html", "_blank")
-              }
-            }
+          a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+            s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html"
+          }).map {
+            _.getOrElse("")
+          }
           ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         ),
@@ -214,7 +212,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             div(
               cls := "tab-section",
               theNavBar,
-              panels.tabContent.render //.amend(cls := "tab-section")
+              panels.tabContent.render
             )
           ),
           panels.notifications.notificationList,
@@ -238,6 +236,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         )
       )
     }
+
     panels.treeNodePanel.treeNodeManager.invalidCurrentCache
 
 

@@ -12,7 +12,7 @@ import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.Utils
 import org.openmole.gui.shared.api.*
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, treeNodeTabs: TreeNodeTabs, pluginState: PluginState) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState) {
 
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })

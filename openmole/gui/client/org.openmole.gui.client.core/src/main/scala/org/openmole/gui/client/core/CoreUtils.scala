@@ -54,38 +54,14 @@ object CoreUtils {
       then onCreated()
       else panels.notifications.showGetItNotification(NotificationLevel.Error, s" $fileName already exists.")
     }
-
-  //  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-  //    Post()[Api].deleteFiles(Seq(path), ServerFileSystemContext.project).call().foreach { d ⇒
-  //      panels.treeNodePanel.invalidCacheAnd(ontrashed)
-  //    }
-  //  }
-
+  
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
     api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.invalidCurrentCache }
-
-//  def duplicate(safePath: SafePath, newName: String)(using panels: Panels, api: ServerAPI): Unit =
-//    api.duplicate(safePath, newName).foreach { y ⇒
-//      panels.treeNodePanel.treeNodeManager.invalidCurrentCache
-//    }
-
-  //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-  //    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
-
-//  def copyFiles(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean): Future[Seq[SafePath]] =
-//    Fetch.future(_.copyFiles(safePaths, to, overwrite).future)
 
   def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using api: ServerAPI, path: BasePath): Future[ListFilesData] = api.listFiles(safePath, fileFilter)
   
   def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI, path: BasePath): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
- 
-//  def appendToPluggedIfPlugin(safePath: SafePath) = {
-////    Post()[Api].appendToPluggedIfPlugin(safePath).call().foreach { _ ⇒
-////      panels.treeNodeManager.invalidCurrentCache
-////      panels.pluginPanel.getPlugins
-////    }
-//  }
-
+  
   def addPlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.addPlugin(safePath)
   def removePlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.removePlugin(safePath)
 

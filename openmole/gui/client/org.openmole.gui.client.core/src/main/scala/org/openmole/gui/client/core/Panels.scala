@@ -1,6 +1,6 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.shared.data.GUIPluginAsJS
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.{ErrorManager, NotificationService, NotificationLevel, PluginServices, ServerAPI, WizardPluginFactory}
@@ -45,7 +45,6 @@ object Panels:
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
-    val treeNodeTabs = new TreeNodeTabs
     val tabContent = new TabContent
     val pluginPanel = new PluginPanel
     val fileDisplayer = new FileDisplayer
@@ -54,7 +53,7 @@ object Panels:
     val connection = new Connection
     val notification = new NotificationManager
     
-    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, executionPanel, treeNodeTabs, notification, connection, expandablePanel)
+    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, executionPanel, notification, connection, expandablePanel)
 
 
 //  def initialize(using fetch: Fetch, api: ServerAPI, panels: Panels) =
@@ -67,7 +66,6 @@ case class Panels(
   pluginPanel: PluginPanel,
   fileDisplayer: FileDisplayer,
   executionPanel: ExecutionPanel,
-  treeNodeTabs: TreeNodeTabs,
   notifications: NotificationManager,
   connection: Connection,
   expandablePanel: Var[Option[Panels.ExpandablePanel]])

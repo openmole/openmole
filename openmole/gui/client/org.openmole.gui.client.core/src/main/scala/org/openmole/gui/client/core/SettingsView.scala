@@ -37,19 +37,6 @@ object SettingsView:
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  //  lazy val dropdownApp = vForm(width := "auto",
-  //    jvmInfoButton,
-  //    docButton,
-  //    jvmInfosDiv,
-  //    resetPasswordButton,
-  //    restartButton,
-  //    shutdownButton
-  //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.settingsBlock, Seq(left := "initial", right := 0))
-  //
-  //  lazy val dropdownConnection: Dropdown[_] = vForm(width := "auto")(
-  //    resetPasswordButton
-  //  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock, right := "20", left := "initial", right := 0)
-  //
   private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
     lazy val notification = panels.notifications.showAlternativeNotification(
       NotificationLevel.Info,
@@ -89,32 +76,59 @@ object SettingsView:
     _.isDefined
   }
 
-  val jvmInfosDiv = waiter.expandDiv(div(
-    generalSettings,
-    child <-- jvmInfos.signal.map { oj ⇒
-      val readableTotalMemory = oj.map{j=> CoreUtils.readableByteCount(j.totalMemory)}
+  def version(using api: ServerAPI, basePath: BasePath) =
+    div(color := "#333", marginBottom := "30px",
+      child <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+        div(flexColumn,
+          div(sets.version, color:= "#3086b5", fontSize := "22px", fontWeight.bold),
+          div(sets.versionName),
+          div(sets.buildTime)
+        )
+      }).map {
+        case Some(e) => e
+        case _ => Waiter.waiter
+      }
+    )
+
+  val jvmInfosDiv =
+    timer.signal.map {
+      _.isDefined
+    }.expand(
       div(
-        div(flexRow,
-          div(cls := "bigValue", oj.map{j=> div(j.processorAvailable.toString)}.getOrElse(div())),
-          div(cls := "smallText", "Processors")
-        ),
-        div(
-          flexRow,
-          div(cls := "bigValue", oj.map{j=> div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}")}.getOrElse(div())),
-          div(cls := "smallText", "Allocated memory (%)")
-        ),
-        div(
-          flexRow,
-          div(cls := "bigValue", readableTotalMemory.map{rm=> div(s"${CoreUtils.dropDecimalIfNull(rm.bytes)}")}.getOrElse(div())),
-          div(cls := "smallText", readableTotalMemory.map{rm=> div(s"Total memory (${rm.units})")}.getOrElse(div()))
-        ),
-        oj.map{j=> div(s"${j.javaVersion}", cls := "smallText")}.getOrElse(div()),
-        oj.map{j=> div(s"${j.jvmImplementation}", cls := "smallText")}.getOrElse(div()),
-        oj.map{_=> div()}.getOrElse(Waiter.waiter.amend(flexRow, justifyContent.center))
+        generalSettings,
+        child <-- jvmInfos.signal.map {
+          _ match {
+            case Some(j) =>
+              val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
+              div(flexColumn,
+                div(flexRow,
+                  div(cls := "smallText", "Processors"),
+                  div(cls := "bigValue", div(j.processorAvailable.toString))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", "Allocated memory (%)"),
+                  div(cls := "bigValue", div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", div(s"Total memory (${readableTotalMemory.units})")),
+                  div(cls := "bigValue", div(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", "Java version"),
+                  div(flexColumn,
+                    div(s"${j.javaVersion}", cls := "bigValue"),
+                    div(s"${j.jvmImplementation}", cls := "bigValue", fontSize := "22", textAlign.right)
+                  ),
+                )
+              )
+            case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
+          }
+        }
       )
-    }
-  )
-  )
+    )
 
   def resetPasswordButton(using panels: Panels) =
     serverActions(
@@ -140,14 +154,11 @@ object SettingsView:
 
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(cls := "settingButtons",
+      version,
       jvmInfoButton,
       jvmInfosDiv,
       resetPasswordButton,
       shutdownButton,
       restartButton
     )
-
-// val renderApp = dropdownApp
-
-//val renderConnection = dropdownConnection
 
