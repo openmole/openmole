@@ -1461,7 +1461,7 @@ input:checked + .slider:before {
     color: #3086b5;
     font-size: 26;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-end;
     display: flex;
     height: 35px;
     flex-grow: 1;
@@ -1473,7 +1473,7 @@ input:checked + .slider:before {
     color: #333;
     margin:5px;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     display: flex;
     height: 35px;
     flex-grow: 3;

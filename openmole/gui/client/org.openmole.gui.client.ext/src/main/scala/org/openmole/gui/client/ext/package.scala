@@ -759,7 +759,7 @@ package object ext {
   //GENERAL SETTINGS
 
   lazy val generalSettings = Seq(
-    height := "200",
+    height := "250",
     marginBottom := "20"
   )
 
