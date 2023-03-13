@@ -9,6 +9,8 @@ import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.plot.Plotter
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn
+import scaladget.bootstrapnative.bsn.*
+import com.raquo.laminar.api.L.*
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -47,35 +49,10 @@ class FileDisplayer:
             api.omrMethod(safePath).foreach { method =>
               plugins.analysisPlugins.get(method) match
                 case Some(analysis) ⇒
-                //  val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-                // treeNodeTabs add tab
                 case None ⇒
             }
-          case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, TreeNodeTab.rawBlock(content))
-
-          //          case editableFile: EditableFile ⇒
-          //            if (DataUtils.isCSV(safePath))
-          //              Post()[Api].sequence(safePath).call().foreach { seq ⇒
-          //                val tab = TreeNodeTab.Editable(
-          //                  safePath,
-          //                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
-          //                  content,
-          //                  hash,
-          //                  Plotter.default)
-          //                treeNodeTabs add tab
-          //              }
-          //            else {
-          //              val tab = TreeNodeTab.Editable(
-          //                safePath,
-          //                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
-          //                content,
-          //                hash,
-          //                Plotter.default)
-          //
-          //              treeNodeTabs add tab
-          //            }
-
-          case _ ⇒ //FIXME for GUI workflows
+          case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, div(panelBody, content))
+          case _ ⇒ //FIXME for GUI workflows
         }
     }
   }

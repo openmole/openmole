@@ -381,7 +381,7 @@ class TreeNodePanel {
 
     def toolBox(using api: ServerAPI, basePath: BasePath, panels: Panels) =
       val showExecution = () ⇒ ExecutionPanel.open
-      new FileToolBox(tnSafePath, showExecution, panels.treeNodeTabs, tn match {
+      new FileToolBox(tnSafePath, showExecution, tn match {
         case f: TreeNode.File ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
         case _ ⇒ PluginState(false, false)
       })

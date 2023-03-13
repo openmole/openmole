@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.files.TreeNodeTab.{save, serverConflictAlert}
+import org.openmole.gui.client.core.NotificationManager.Alternative
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 import scaladget.tools.Utils.uuID
@@ -88,7 +88,17 @@ class TabContent:
               editorPanelUI.onSaved(savedHash)
               true
             else
-              serverConflictAlert(tabData)
+              panels.notifications.showAlternativeNotification(
+                NotificationLevel.Error,
+                s"The file ${tabData.safePath.name} has been modified on the sever",
+                div("Which version do you want to keep?"),
+                Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true)),
+                Alternative("Server", _ =>
+                  panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true).map { (content: String, hash: Option[String]) ⇒
+                    tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
+                  }
+                )
+              )
               false
         }
   }

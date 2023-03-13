@@ -8,7 +8,7 @@ import org.scalajs.dom.{KeyboardEvent, document}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.Selector.Options
-import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel, TreeNodeTabs}
+import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*

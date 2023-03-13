@@ -8,7 +8,7 @@ import scala.scalajs.js.timers.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.ErrorData
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.client.core.files.{OMSContent, TabContent, TreeNodeTabs}
+import org.openmole.gui.client.core.files.{OMSContent, TabContent}
 import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.data.ExecutionState.Failed
 import com.raquo.laminar.api.L.*
