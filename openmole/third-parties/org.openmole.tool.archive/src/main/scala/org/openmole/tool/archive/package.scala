@@ -29,39 +29,24 @@ import scala.jdk.CollectionConverters.*
 
 
 // Extract .zip archive
-def unzip(from: File, to: File) = {
+def unzip(from: File, to: File) =
   //val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
   to.getParentFile.mkdirs
 
   val zip = new ZipFile(from)
-  zip.entries.asScala.foreach { entry ⇒
-    val entryName = entry.getName
-    val entryPath = entryName
-    //if (entryName != s"$basename/") {
-    //      val entryPath = {
-    //        if (entryName.startsWith(basename))
-    //        then entryName.substring(basename.length)
-    //        else
-    //          entryName
-    //      }
+  try
+    for
+      entry <- zip.entries.asScala
+    do
+      val toFile = new File(to, entry.getName)
+      if entry.isDirectory
+      then if !toFile.exists then toFile.mkdirs
+      else
+        val is = new BufferedSource(zip.getInputStream(entry))(Codec.ISO8859)
+        try toFile.withOutputStream { os => is foreach { (c: Char) ⇒ os.write(c) } }
+        finally is.close()
+  finally zip.close()
 
-    val sub = new File(to, entryPath)
-    if (entry.isDirectory) {
-      if (!sub.exists) sub.mkdirs
-    }
-    else {
-      // write file to dest
-      val inputSrc = new BufferedSource(zip.getInputStream(entry))(Codec.ISO8859)
-
-      val ostream = new FileOutputStream(new File(to, entryPath))
-      inputSrc foreach { (c: Char) ⇒ ostream.write(c) }
-      inputSrc.close
-      ostream.close
-
-    }
-    //}
-  }
-}
 
 
 implicit class TarOutputStreamDecorator(tos: TarOutputStream) {
