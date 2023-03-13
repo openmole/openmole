@@ -172,12 +172,11 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             onClick --> { _ ⇒
               Panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
-          div(OMTags.glyph_info, cursor.pointer, navBarItem,
-            onClick --> { _ ⇒
-              api.omSettings().map { sets ⇒
-                org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html", "_blank")
-              }
-            }
+          a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+            s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html"
+          }).map {
+            _.getOrElse("")
+          }
           ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         ),
@@ -238,6 +237,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         )
       )
     }
+
     panels.treeNodePanel.treeNodeManager.invalidCurrentCache
 
 
