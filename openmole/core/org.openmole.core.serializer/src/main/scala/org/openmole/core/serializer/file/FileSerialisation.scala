@@ -73,7 +73,7 @@ object FileSerialisation {
           if (isDirectory) {
             val dest = newFile.newDir("directoryFromArchive")
             dest.mkdirs()
-            if (exists) fromArchive.extract(dest)
+            if (exists) fromArchive.extract(dest, archive = ArchiveType.Tar)
             else dest.delete
             dest
           }

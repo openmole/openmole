@@ -27,27 +27,7 @@ import scala.collection.mutable.{ListBuffer, Stack}
 import scala.io.{BufferedSource, Codec}
 import scala.jdk.CollectionConverters.*
 
-
-// Extract .zip archive
-def unzip(from: File, to: File) =
-  //val basename = from.getName.substring(0, from.getName.lastIndexOf("."))
-  to.getParentFile.mkdirs
-
-  val zip = new ZipFile(from)
-  try
-    for
-      entry <- zip.entries.asScala
-    do
-      val toFile = new File(to, entry.getName)
-      if entry.isDirectory
-      then if !toFile.exists then toFile.mkdirs
-      else
-        val is = new BufferedSource(zip.getInputStream(entry))(Codec.ISO8859)
-        try toFile.withOutputStream { os => is foreach { (c: Char) ⇒ os.write(c) } }
-        finally is.close()
-  finally zip.close()
-
-
+case class ArchiveEntry(path: Seq[String], directory: Boolean)
 
 implicit class TarOutputStreamDecorator(tos: TarOutputStream) {
   def addFile(f: File, name: String) = {
@@ -114,72 +94,90 @@ implicit class TarInputStreamDecorator(tis: TarInputStream) {
   }
 }
 
-def extractXZ(file: File, to: File) =
-  val inputStream = new FileInputStream(file)
-  val outputStream = new FileOutputStream(to)
-  val inxz = xzInputStream(file)
+object Zip:
 
-  val buffer = new Array[Byte](inputStream.available)
-  Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach { outputStream.write(buffer, 0, _) }
-
-  inxz.close
-
-def xzInputStream(file: File): InputStream =
-  val inputStream = new FileInputStream(file)
-  new XZInputStream(inputStream, 100 * 1024)
-
-def compressXZ(file: File, to: File) =
-  val outfile = new FileOutputStream(to)
-  val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
-
-  val infile = new FileInputStream(file)
-  val buffer = new Array[Byte](8192)
-
-  Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒ outxz.write(buffer, 0, size) }
-
-  outxz.finish
+  // Extract .zip archive
+  def unzip(from: File, to: File, overwrite: Boolean = false) =
+    to.mkdirs
+    val zip = new ZipFile(from)
+    try
+      for
+        entry <- zip.entries.asScala
+      do
+        val toFile = new File(to, entry.getName)
+        if !overwrite && toFile.exists() then throw IOException(s"File $toFile already exists and overwrite is set to false")
+        if entry.isDirectory
+        then if !toFile.exists then toFile.mkdirs
+        else
+          val is = new BufferedSource(zip.getInputStream(entry))(Codec.ISO8859)
+          try toFile.withOutputStream { os => is foreach { (c: Char) ⇒ os.write(c) } }
+          finally is.close()
+    finally zip.close()
 
 
-implicit class FileTarArchiveDecorator(file: File) {
+  def zipEntries(file: File): Seq[ArchiveEntry] =
+    val zip = new ZipFile(file)
+    try zip.entries().asScala.map { e => ArchiveEntry(e.getName.split("/"), directory = e.isDirectory) }.toSeq
+    finally zip.close()
 
-  def archive(dest: File, time: Boolean = true) =
-    withClosable(new TarOutputStream(dest.bufferedOutputStream())) {
-      _.archive(file, time)
+
+object XZ:
+  def extract(file: File, to: File) =
+    to.withFileOutputStream { outputStream =>
+      val inputStream = new FileInputStream(file)
+      val inxz = XZ.inputStream(file)
+      try
+        val buffer = new Array[Byte](inputStream.available)
+        Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach { outputStream.write(buffer, 0, _) }
+      finally inxz.close
     }
 
-  //FIXME method name is ambiguous rename
-  def archiveCompress(dest: File, time: Boolean = true) =
-    withClosable(new TarOutputStream(dest.gzippedBufferedOutputStream)) {
-      _.archive(file, time)
-    }
+  def inputStream(file: File): InputStream =
+    val inputStream = new FileInputStream(file)
+    new XZInputStream(inputStream, 100 * 1024)
 
-  def extract(dest: File, overwrite: Boolean = false) =
-    withClosable(new TarInputStream(file.bufferedInputStream())) {
-      _.extract(dest, overwrite)
-    }
+  def compress(file: File, to: File) =
+    val outfile = new FileOutputStream(to)
+    val outxz = new XZOutputStream(outfile, new LZMA2Options(8), org.tukaani.xz.XZ.CHECK_SHA256)
 
-  def extractUncompress(dest: File, overwrite: Boolean = false) =
-    withClosable(new TarInputStream(file.gzippedBufferedInputStream)) {
-      _.extract(dest, overwrite)
-    }
+    val infile = new FileInputStream(file)
+    val buffer = new Array[Byte](8192)
 
-  def extractUncompressXZ(dest: File, overwrite: Boolean = false) = {
-    withClosable(new TarInputStream(xzInputStream(file))) {
-      _.extract(dest, overwrite)
-    }
-  }
+    Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒ outxz.write(buffer, 0, size) }
 
-  def copyCompress(toF: File): File = {
-    if (toF.isDirectory) file.archiveCompress(toF)
+    outxz.finish
+
+
+enum ArchiveType:
+  case Tar, TarGZ, TarXZ, Zip
+
+implicit class FileTarArchiveDecorator(file: File):
+  def archive(dest: File, time: Boolean = true, archive: ArchiveType.TarGZ.type | ArchiveType.Tar.type = ArchiveType.Tar) =
+    archive match
+      case ArchiveType.Tar => withClosable(new TarOutputStream(dest.bufferedOutputStream())) { _.archive(file, time) }
+      case ArchiveType.TarGZ => withClosable(new TarOutputStream(dest.gzippedBufferedOutputStream)) { _.archive(file, time) }
+
+  def extract(dest: File, overwrite: Boolean = false, archive: ArchiveType) =
+    def extractTAR(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(file.bufferedInputStream())) { _.extract(dest, overwrite) }
+    def extractUncompressTGZ(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(file.gzippedBufferedInputStream)) { _.extract(dest, overwrite) }
+    def extractUncompressXZ(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(XZ.inputStream(file))) { _.extract(dest, overwrite) }
+
+    archive match
+        case ArchiveType.Tar => extractTAR(dest, overwrite = overwrite)
+        case ArchiveType.TarGZ => extractUncompressTGZ(dest, overwrite = overwrite)
+        case ArchiveType.TarXZ => extractUncompressXZ(dest, overwrite = overwrite)
+        case ArchiveType.Zip => Zip.unzip(file, dest, overwrite = overwrite)
+
+  def copyCompress(toF: File): File =
+    if (toF.isDirectory) file.archive(toF, archive = ArchiveType.TarGZ)
     else file.copyCompressFile(toF)
     toF
-  }
 
   def tarOutputStream = new TarOutputStream(file.bufferedOutputStream())
 
   def withTarOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream()))(_)
   def withTarGZOutputStream[T] = withClosable[TarOutputStream, T](new TarOutputStream(file.bufferedOutputStream().toGZ))(_)
-}
+
 
 private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, directory: File, additionalCommand: TarEntry ⇒ Unit, includeDirectoryName: Boolean) = {
 
