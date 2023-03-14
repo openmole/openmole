@@ -917,6 +917,14 @@ lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wiza
   libraryDependencies += Libraries.equinoxOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
+lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.container", imports = guiStrictImports) settings(
+  guiPluginSettings,
+  scalaJSSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
+
+
+
 //lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
 //  guiPluginSettings,
 //  libraryDependencies += Libraries.equinoxOSGi,
@@ -935,6 +943,7 @@ def guiPlugins = Seq(
   guiEnvironmentEGIPlugin,
   netlogoWizardPlugin,
   rWizardPlugin,
+  containerWizardPlugin,
   evolutionAnalysisPlugin
 
   // Obsolete

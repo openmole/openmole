@@ -22,7 +22,8 @@ import org.openmole.gui.shared.data.*
 
 trait CoreAPI extends RESTAPI {
 
-
+  
+  
   // ----- Workspace -------
 
 //  val isPasswordCorrect: Endpoint[String, Boolean] =

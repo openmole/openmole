@@ -21,7 +21,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
   def download(using panels: Panels) = withSafePath { sp ⇒
     closeToolBox
-    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path))
+    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value))
   }
 
   def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒
@@ -35,11 +35,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   }
 
   def duplicate(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    val newName = {
-      val prefix = sp.path.last
+    val newName =
+      val prefix = sp.path.name
       if (prefix.contains(".")) prefix.replaceFirst("[.]", "_1.")
       else prefix + "_1"
-    }
     closeToolBox
     api.copyFiles(Seq(sp -> (sp.parent ++ newName)), false) andThen { _ =>
       panels.treeNodePanel.invalidCurrentCache

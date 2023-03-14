@@ -230,7 +230,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = Future.successful(SequenceData.empty)
 
-  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit)(using BasePath): Future[Seq[String]] = Future.successful(Seq())
+  override def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit)(using BasePath): Future[Seq[RelativePath]] = Future.successful(Seq())
 
   override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])] =
     val content = files(safePath).content

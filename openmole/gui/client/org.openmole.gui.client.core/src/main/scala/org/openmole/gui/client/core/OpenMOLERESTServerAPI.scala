@@ -79,7 +79,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def upload(
     fileList: FileList,
     destinationPath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[String]] = {
+    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[RelativePath]] = {
     val formData = new FormData
 
     formData.append("fileType", destinationPath.context.typeName)
@@ -88,8 +88,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
       i ← 0 to fileList.length - 1
     do
       val file = fileList(i)
-      formData.append(Utils.toURI(destinationPath.path ++ file.webkitRelativePath.split('/')), file)
-
+      formData.append(Utils.toURI(destinationPath.path.value ++ file.webkitRelativePath.split('/')), file)
 
     val xhr = new XMLHttpRequest
 
@@ -102,10 +101,10 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     xhr.onloadend = e ⇒
       fileTransferState(Processed())
 
-    val p = scala.concurrent.Promise[Seq[String]]()
+    val p = scala.concurrent.Promise[Seq[RelativePath]]()
 
     xhr.onload = e =>
-      p.success(fileList.map(_.webkitRelativePath).toSeq)
+      p.success(fileList.map(f => RelativePath(f.webkitRelativePath.split('/').toSeq)).toSeq)
 
     xhr.onerror = e =>
       p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))
@@ -154,7 +153,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
         p.failure(new IOException(s"Download of file ${safePath} timed out"))
 
 
-      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.map { Encoding.encode }), hash = hash), true)
+      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash), true)
       xhr.send()
 
       p.future

@@ -106,6 +106,14 @@ package data {
     val typeName = this.productPrefix.toLowerCase
     case Absolute, Project, Authentication
 
+  object RelativePath:
+    implicit def apply(s: Seq[String]): RelativePath = new RelativePath(s)
+    extension(p: RelativePath)
+      def name = p.value.lastOption.getOrElse("")
+      def mkString = p.value.mkString("/")
+
+  case class RelativePath(value: Seq[String])
+
   object SafePath:
     def leaf(name: String) = SafePath(name)
     def empty = leaf("")
@@ -115,21 +123,21 @@ package data {
     def apply(path: Iterable[String], context: ServerFileSystemContext = ServerFileSystemContext.Project): SafePath =
       new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
 
-  case class SafePath(path: Seq[String], context: ServerFileSystemContext):
-    def ++(s: String) = copy(path = this.path :++ s.split('/'))
-    def /(child: String) = copy(path = path :+ child)
-    def parent: SafePath = copy(path = path.dropRight(1))
+  case class SafePath(path: RelativePath, context: ServerFileSystemContext):
+    def ++(s: String) = copy(path = this.path.value :++ s.split('/'))
+    def /(child: String) = copy(path = path.value :+ child)
+    def parent: SafePath = copy(path = path.value.dropRight(1))
 
-    def name = path.lastOption.getOrElse("")
-    def isEmpty = path.isEmpty
-    def toNoExtention = copy(path = path.dropRight(1) :+ nameWithNoExtension)
+    def name = path.name
+    def isEmpty = path.value.isEmpty
+    def toNoExtention = copy(path = path.value.dropRight(1) :+ nameWithNoExtension)
     def nameWithNoExtension = name.split('.').head
-    def normalizedPathString = path.tail.mkString("/")
+    def normalizedPathString = path.name.tail.mkString("/")
     def extension = FileExtension(name)
 
     def startsWith(safePath: SafePath) =
       safePath.context == context &&
-        path.take(safePath.path.size) == safePath.path
+        path.value.take(safePath.path.value.size) == safePath.path.value
 
   object PluginState:
     def empty = PluginState(false, false)

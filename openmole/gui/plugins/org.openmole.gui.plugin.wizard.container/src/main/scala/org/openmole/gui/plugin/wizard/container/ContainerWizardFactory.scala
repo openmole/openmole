@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.wizard.netlogo
+package org.openmole.gui.plugin.wizard.container
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
@@ -33,17 +33,17 @@ import org.openmole.gui.shared.api.*
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("netlogo")
-  val netlogo = js.Object {
-    new org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory
+  @JSExportTopLevel("container")
+  val container = js.Object {
+    new ContainerWizardFactory
   }
 }
 
-class NetlogoWizardFactory extends WizardPluginFactory {
-  def accept(directory: SafePath, uploaded: Seq[RelativePath]) = uploaded.filter(_.value.size < 2).exists(_.name.endsWith(".nlogo"))
+class ContainerWizardFactory extends WizardPluginFactory {
+  def accept(directory: SafePath, uploaded: Seq[RelativePath]) = uploaded.filter(_.value.size < 2).exists(f => f.name.endsWith(".tar") || f.name.endsWith(".tgz"))
   def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]] = ??? //PluginFetch.futureError(_.parse(safePath).future)
   def toTask(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
 
-  def name: String = "NetLogo"
+  def name: String = "Container"
 }
 

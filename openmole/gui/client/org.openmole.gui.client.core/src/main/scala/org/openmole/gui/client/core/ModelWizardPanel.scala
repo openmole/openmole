@@ -88,9 +88,8 @@ object ModelWizardPanel:
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
     given NotificationService = NotificationManager.toService(panels.notifications)
 
-    def factory(safePath: SafePath): Option[WizardPluginFactory] =
-      val fileType: FileType = FileType(safePath.name)
-      plugins.wizardFactories.filter { _.fileType == fileType }.headOption
+    def factory(directory: SafePath, uploaded: Seq[RelativePath]): Option[WizardPluginFactory] =
+      plugins.wizardFactories.filter { _.accept(directory, uploaded) }.headOption
 
     def buildScriptFrom(fInput: Input, targetPath: SafePath) =
       api.temporaryDirectory().flatMap { tempFile ⇒
@@ -99,8 +98,7 @@ object ModelWizardPanel:
           tempFile,
           (p: ProcessState) ⇒ transferring.set(p)
         ).map { uploaded ⇒
-          
-          println(uploaded)
+          factory(tempFile, uploaded).foreach(w => println(w.name))
 //          val contentPath =
 //            if uploaded.size == 1
 //            then
@@ -193,22 +191,22 @@ object ModelWizardPanel:
     }
 
     def browseToPath(safePath: SafePath)(using panels: Panels) =
-      a(safePath.path.mkString("/"), onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
+      a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
-    def buildTask(safePath: SafePath)(using panels: Panels) = {
-      factory(safePath).foreach { f =>
-        modelMetadata.now().foreach { mmd =>
-          val modifiedMMD = mmd.copy(
-            inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-            outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-            command = commandeInput.ref.value
-          )
-          f.toTask(safePath.parent, modifiedMMD).foreach {_ =>
-            panels.treeNodePanel.treeNodeManager.invalidCache(safePath.parent)
-          }
-        }
-      }
-    }
+    def buildTask(safePath: SafePath)(using panels: Panels) = ???
+//      factory(safePath).foreach { f =>
+//        modelMetadata.now().foreach { mmd =>
+//          val modifiedMMD = mmd.copy(
+//            inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+//            outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+//            command = commandeInput.ref.value
+//          )
+//          f.toTask(safePath.parent, modifiedMMD).foreach {_ =>
+//            panels.treeNodePanel.treeNodeManager.invalidCache(safePath.parent)
+//          }
+//        }
+//      }
+
 
     val overwriteSwitch = Component.Switch("Overwrite exitsting files", true, "autoCleanExecSwitch")
 

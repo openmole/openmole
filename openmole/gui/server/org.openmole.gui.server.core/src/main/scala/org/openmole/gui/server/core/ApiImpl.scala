@@ -469,7 +469,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def addPlugin(safePath: SafePath): Seq[ErrorData] =
     import services._
     val errors = utils.addPlugin(safePath)
-    if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.mkString("/")).distinct } }
+    if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.value.mkString("/")).distinct } }
     errors
 
   def listPlugins(): Seq[Plugin] =
@@ -478,7 +478,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def removePlugin(safePath: SafePath) =
     import services.*
-    updatePluggedList { _.filterNot(_ == safePath.path.mkString("/")) }
+    updatePluggedList { _.filterNot(_ == safePath.path.value.mkString("/")) }
     utils.removePlugin(safePath)(workspace)
 
   def pluginRoutes =

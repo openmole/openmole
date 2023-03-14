@@ -77,9 +77,9 @@ object utils {
       getFile0(paths, root)
 
     s.context match
-      case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path)
-      case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path)
-      case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path)
+      case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path.value)
+      case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path.value)
+      case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path.value)
 
   def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
     val safePath = fileToSafePath(file)
@@ -152,7 +152,7 @@ object utils {
 
 
   def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath =
-    val toPath = safePath.copy(path = safePath.path.dropRight(1) :+ newName)
+    val toPath = safePath.copy(path = safePath.path.value.dropRight(1) :+ newName)
     if (toPath.toFile.isDirectory()) toPath.toFile.mkdir
 
     val from = safePath.toFile

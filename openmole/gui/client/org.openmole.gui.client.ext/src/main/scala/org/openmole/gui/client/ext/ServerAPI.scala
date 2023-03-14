@@ -79,5 +79,5 @@ trait ServerAPI:
   def mdToHtml(safePath: SafePath)(using BasePath): Future[String]
   def sequence(safePath: SafePath)(using BasePath): Future[SequenceData]
 
-  def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[String]]
+  def upload(fileList: FileList, destinationPath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[RelativePath]]
   def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]

@@ -1,4 +1,4 @@
-package org.openmole.gui.plugin.wizard.r
+package org.openmole.gui.plugin.wizard.container
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,31 +17,32 @@ package org.openmole.gui.plugin.wizard.r
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.services.Services
 import cats.effect.IO
 import org.http4s.HttpRoutes
+import org.openmole.core.services.Services
+import org.openmole.gui.server.ext.*
+import org.openmole.gui.server.ext.utils.*
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.tool.file.*
-import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.api.*
-import org.openmole.gui.server.ext.*
-import org.openmole.gui.server.ext.utils.*
 
-import util.{Failure, Success, Try}
+import scala.util.{Failure, Success, Try}
 
-class RWizardServer(s: Services) extends APIServer with RWizardAPI {
+class ContainerWizardServer(s: Services) extends APIServer with ContainerWizardAPI {
 
-  val toTaskRoute = toTask.errorImplementedBy { case (p, m) => ??? } // impl.toTask(p, m) }
+  val toTaskRoute =
+    toTask.errorImplementedBy { case (p, m) => impl.toTask(p, m) }
 
-  val parseRoute = parse.errorImplementedBy { p => ??? } //impl.parse(p) }
+  val parseRoute =
+    parse.errorImplementedBy { p => impl.parse(p) }
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(toTaskRoute, parseRoute)
   )
 
   object impl {
-    import s._
+    import s.*
 
     def toTask(target: SafePath, modelMetadata: ModelMetadata): Unit = {
 

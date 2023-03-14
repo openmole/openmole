@@ -45,7 +45,7 @@ class PluginPanel:
               backgroundColor := {
                 if (i % 2 == 0) "#d1dbe4" else "#f4f4f4"
               },
-              div(p.projectSafePath.path.mkString("/"), width := "550px"),
+              div(p.projectSafePath.path.mkString, width := "550px"),
               div(
                 cls := "badgeOM",
                 bsn.badge_dark, p.time

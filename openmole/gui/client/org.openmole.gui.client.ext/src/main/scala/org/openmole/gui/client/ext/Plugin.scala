@@ -50,9 +50,9 @@ trait WizardGUIPlugin extends GUIPlugin:
 
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
-  def fileType: FileType
-  def parse(safePath: SafePath)(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]]
-  def toTask(safePath: SafePath, modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
+  def accept(directory: SafePath, uploaded: Seq[RelativePath]): Boolean
+  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]]
+  def toTask(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement

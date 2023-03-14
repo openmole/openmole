@@ -88,9 +88,7 @@ class TreeNodePanel {
   val transferring: Var[ProcessState] = Var(Processed())
 
   def fInputMultiple(todo: Input ⇒ Unit) =
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.mozdirectory := true, OMTags.webkitdirectory := true,
-      inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } }
-    )
+    inputTag().amend(cls := "upload", `type` := "file", multiple := true, inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } })
 
   def upbtn(todo: Input ⇒ Unit): HtmlElement =
     span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 160", fInputMultiple(todo))

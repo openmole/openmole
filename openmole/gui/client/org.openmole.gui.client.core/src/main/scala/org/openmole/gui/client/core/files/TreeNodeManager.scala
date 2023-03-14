@@ -67,7 +67,7 @@ class TreeNodeManager {
 
   def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
   
-  def switch(dir: String): Unit = switch(dirNodeLine.now().copy(path = dirNodeLine.now().path :+ dir))
+  def switch(dir: String): Unit = switch(dirNodeLine.now() / dir)
 
   def switch(sp: SafePath): Unit = dirNodeLine.set(sp)
 

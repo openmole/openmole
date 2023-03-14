@@ -110,13 +110,11 @@ object OMTags:
   val webkitdirectory = new HtmlAttr[Boolean]("webkitdirectory", BooleanAsAttrPresenceCodec)
   val mozdirectory = new HtmlAttr[Boolean]("mozdirectory", BooleanAsAttrPresenceCodec)
 
-  def omFileInput(todo: Input => Unit, multiple: Boolean = true) =
-    fileInput(todo).amend(
-      if multiple
-      then
-        Seq(
-          L.multiple := true,
-          webkitdirectory := true,
-          mozdirectory := true)
+  def omFileInput(todo: Input => Unit, directory: Boolean = false) =
+    fileInput(todo).amend(L.multiple := true,
+      if directory
+      then Seq(
+        webkitdirectory := true,
+        mozdirectory := true)
       else emptyMod
     )
