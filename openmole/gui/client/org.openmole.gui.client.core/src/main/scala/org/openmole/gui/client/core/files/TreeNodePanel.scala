@@ -51,6 +51,7 @@ class TreeNodePanel {
   val fileToolBar = new FileToolBar(this, treeNodeManager)
   val tree: Var[HtmlElement] = Var(div())
 
+
   val editNodeInput = inputTag("").amend(
     placeholder := "Name",
     width := "240px",
@@ -59,26 +60,25 @@ class TreeNodePanel {
   )
 
   // New file tool
-  val newNodeInput = inputTag().amend(
-    placeholder := "File name",
-    width := "130px",
-    marginLeft := "10px",
-    onMountFocus
-  )
+  def newNodeInput =
+    inputTag().amend(
+      placeholder <-- directoryToggle.toggled.signal.map { d => if d then "Directory name" else "File name" },
+      width := "270px",
+      marginLeft := "12px",
+      onMountFocus
+    )
 
-  lazy val addRootDirButton = {
 
+  lazy val directoryToggle =
     object FileType
     val folder = ToggleState(FileType, "Folder", "btn purple-button", _ ⇒ {})
     val file = ToggleState(FileType, "File", "btn purple-button", _ ⇒ {})
-
-    toggle(folder, true, file, () ⇒ {})
-  }
+    toggle(folder, false, file, () ⇒ {})
 
   def createNewNode(using api: ServerAPI, basePath: BasePath, panels: Panels) = {
     val newFile = newNodeInput.ref.value
     val currentDirNode = treeNodeManager.dirNodeLine
-    addRootDirButton.toggled.now() match {
+    directoryToggle.toggled.now() match {
       case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
       case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
     }
@@ -88,10 +88,10 @@ class TreeNodePanel {
   val transferring: Var[ProcessState] = Var(Processed())
 
   def fInputMultiple(todo: Input ⇒ Unit) =
-    inputTag().amend(cls := "upload", `type` := "file", multiple := true, inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } })
+    inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.webkitdirectory <-- directoryToggle.toggled.signal, inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } })
 
   def upbtn(todo: Input ⇒ Unit): HtmlElement =
-    span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 160", fInputMultiple(todo))
+    span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo))
 
   private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.dirNodeLine.now()
@@ -107,7 +107,7 @@ class TreeNodePanel {
 
   def createFileTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
-      addRootDirButton.element,
+      directoryToggle.element,
       newNodeInput.amend(marginLeft := "10px"),
       upButton.amend(justifyContent.flexEnd),
       transferring.withTransferWaiter {
