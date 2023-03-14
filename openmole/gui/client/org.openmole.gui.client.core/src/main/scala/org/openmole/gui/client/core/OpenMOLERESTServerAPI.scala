@@ -84,10 +84,12 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
     formData.append("fileType", destinationPath.context.typeName)
 
-    for (i ← 0 to fileList.length - 1) {
+    for
+      i ← 0 to fileList.length - 1
+    do
       val file = fileList(i)
-      formData.append(Utils.toURI(destinationPath.path ++ Seq(file.name)), file)
-    }
+      formData.append(Utils.toURI(destinationPath.path ++ file.webkitRelativePath.split('/')), file)
+
 
     val xhr = new XMLHttpRequest
 
