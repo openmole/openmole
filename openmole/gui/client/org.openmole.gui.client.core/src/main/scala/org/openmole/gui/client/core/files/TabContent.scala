@@ -17,40 +17,36 @@ object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
 
 class TabContent:
+
   import TabContent.TabData
+
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.render.amend(margin := "10px")
 
 
-  private def buildHeader(tabData: TabData, onRemoved: SafePath => Unit, onClicked: SafePath => Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+  private def buildHeader(tabData: TabData)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
         save(tabData)
         removeTab(tabData.safePath)
-        onRemoved(tabData.safePath)
         e.stopPropagation()
-      }),
-      onClick --> { _ => onClicked(tabData.safePath) }
+      })
     )
   }
 
   def addTab(
-    tabData: TabData,
-    content: HtmlElement,
-    onClicked: SafePath => Unit = _ => {},
-    onAdded: SafePath => Unit = _ => {},
-    onRemoved: SafePath => Unit = _ => {})(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+              tabData: TabData,
+              content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     tabsUI.add(
       Tab(
         tabData,
-        buildHeader(tabData, onClicked = onClicked, onRemoved = onRemoved),
+        buildHeader(tabData),
         content
       )
     )
-    onAdded(tabData.safePath)
   }
 
   def tab(safePath: SafePath) = {
@@ -111,10 +107,14 @@ class TabContent:
     }
   }
 
-  def rename(sp: SafePath, newSafePath: SafePath) = {
-    tabsUI.tabs.update {
-      _.map { tab =>
-        tab.copy(title = span(newSafePath.name), t = tab.t.copy(safePath = newSafePath))
+  def rename(sp: SafePath, newSafePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+    tabsUI.tabs.update { ts =>
+      ts.map { tab =>
+        if tab.t.safePath == sp
+        then
+          val newT = tab.t.copy(safePath = newSafePath)
+          tab.copy(t = newT, title = buildHeader(newT))
+        else tab
       }
     }
   }
@@ -132,9 +132,6 @@ class TabContent:
     }
     )
   }
-
-  //  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
-  //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
 
   val fontSizeControl = div(cls := "file-content", display.flex, flexDirection.row, alignItems.baseline,
     fontSizeLink(17),
