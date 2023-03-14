@@ -137,6 +137,12 @@ object ModelWizardPanel:
         }.andThen(_ => api.deleteFiles(Seq(tempFile)))
       }
 
+
+    val overwriteSwitch = Component.Switch("Overwrite existing files", false, "autoCleanExecSwitch")
+    val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
+    val uploadDirectory = Var(false)
+
+
     val upButton =
       label(
         cls := "inputFileStyle",
@@ -144,15 +150,19 @@ object ModelWizardPanel:
         transferring.withTransferWaiter {
           _ ⇒
             div(
-              OMTags.omFileInput(fInput ⇒
-                if fInput.ref.files.length > 0
-                then
-                  val fileName = fInput.ref.files.item(0).name
-                  labelName.set(Some(fileName))
-                  val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)
-                  filePath.set(targetPath)
-                  buildScriptFrom(fInput, panels.treeNodePanel.treeNodeManager.dirNodeLine.now()).andThen { _ => fInput.ref.value = "" }
-              ),
+              child <--
+                uploadDirectory.signal.map { directory =>
+                  OMTags.omFileInput(fInput ⇒
+                    if fInput.ref.files.length > 0
+                    then
+                      val fileName = fInput.ref.files.item(0).name
+                      labelName.set(Some(fileName))
+                      val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)
+                      filePath.set(targetPath)
+                      buildScriptFrom(fInput, panels.treeNodePanel.treeNodeManager.dirNodeLine.now()).andThen { _ => fInput.ref.value = "" },
+                    directory = directory
+                  )
+                },
               div(
                 child <-- labelName.signal.map {
                   _ match {
@@ -208,7 +218,6 @@ object ModelWizardPanel:
 //      }
 
 
-    val overwriteSwitch = Component.Switch("Overwrite exitsting files", true, "autoCleanExecSwitch")
 
     val buildButton = button("Build", width := "150px", margin := "40 25 10 25", OMTags.btn_purple,
       onClick --> {
@@ -250,7 +259,8 @@ object ModelWizardPanel:
         "")),
       div(
         buildButton,
-        overwriteSwitch.element
+        overwriteSwitch.element,
+        uploadDirectorySwitch.element.amend(top := "60", onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) } )
       ),
       inputTags.tags --> IOObserver
     )
