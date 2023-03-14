@@ -30,7 +30,7 @@ object Link {
 
 case class Link(name: String, link: String)
 
-case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false, currentPage: Option[Page] = None) {
+case class SideMenu(links: Seq[Link], menuStyle: AttrPair = classIs(""), preText: String = "", otherTab: Boolean = false, currentPage: Option[Page] = None, topLink: Option[String] = None) {
   def insert(ls: Seq[Link]) = copy(ls ++ links)
 }
 
@@ -42,7 +42,15 @@ object SideMenu {
         extraDiv,
         for { m ← menus } yield {
           div(
-            if (m.links.isEmpty) div else div(m.preText, fontWeight := "bold", paddingBottom := 10),
+            if (m.links.isEmpty) div
+            else {
+              val text: ConcreteHtmlTag[String] =
+                m.topLink match {
+                  case Some(l) => a(href := l, m.preText)
+                  case None => a(m.preText)
+                }
+              div(text, fontWeight := "bold", paddingBottom := 10)
+            },
             for { p ← m.links } yield {
               val basicButton = div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
               currentPage match {
@@ -72,19 +80,19 @@ object SideMenu {
 
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn, btn_default), otherTab = true)
 
-  def fromStrings(title: String, stringMenus: String*) =
-    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
+//  def fromStrings(title: String, stringMenus: String*) =
+//    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
 
-  val plug = SideMenu(DocumentationPages.plugPages, classIs(btn, btn_default), "Available tasks")
-  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn, btn_default), "Available methods")
-  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn, btn_default), "Sampling methods")
-  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn, btn_default), "Available environments")
-  val language = SideMenu(DocumentationPages.languagePages, classIs(btn, btn_default), "Language")
-  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn, btn_default), "Advanced concepts")
-  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn, btn_default), "Developer's documentation")
-  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn, btn_default), "Tutorials")
-  val community = SideMenu(DocumentationPages.communityPages, classIs(btn, btn_default), "Community")
-  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn, btn_default), "Download")
+  val plug = SideMenu(DocumentationPages.plugPages, classIs(btn, btn_default), "Available tasks", topLink = Some(DocumentationPages.plug.link))
+  val explore = SideMenu(DocumentationPages.explorePages, classIs(btn, btn_default), "Available methods", topLink = Some(DocumentationPages.explore.link))
+  val sampling = SideMenu(DocumentationPages.samplingPages, classIs(btn, btn_default), "Sampling methods", topLink = Some(DocumentationPages.samplings.link))
+  val scale = SideMenu(DocumentationPages.scalePages, classIs(btn, btn_default), "Available environments", topLink = Some(DocumentationPages.scale.link))
+  val language = SideMenu(DocumentationPages.languagePages, classIs(btn, btn_default), "Language", topLink = Some(DocumentationPages.language.link))
+  val advanced = SideMenu(DocumentationPages.advancedConceptsPages, classIs(btn, btn_default), "Advanced concepts", topLink = Some(DocumentationPages.advancedConcepts.link))
+  val developers = SideMenu(DocumentationPages.developersPages, classIs(btn, btn_default), "Developer's documentation", topLink = Some(DocumentationPages.developers.link))
+  val tutorials = SideMenu(DocumentationPages.tutoPages, classIs(btn, btn_default), "Tutorials", topLink = Some(DocumentationPages.tutorials.link))
+  val community = SideMenu(DocumentationPages.communityPages, classIs(btn, btn_default), "Community", topLink = Some(DocumentationPages.OMcommunity.link))
+  val download = SideMenu(DocumentationPages.downloadPages, classIs(btn, btn_default), "Download", topLink = Some(DocumentationPages.download.link))
 
   def more(current: Page) = SideMenu(
     Seq(
