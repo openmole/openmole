@@ -88,7 +88,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     files += (path ++ name) -> MemoryFile("", directory = directory)
     Future.successful(true)
 
-  override def extract(path: SafePath)(using BasePath): Future[Unit] = Future.successful(())
+  override def extractArchive(path: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
   override def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData] =
     val simpleFiles = files.toSeq.filter(!_._2.directory)

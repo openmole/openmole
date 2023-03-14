@@ -70,8 +70,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val createFileRoute =
     createFile.errorImplementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
-  val extractRoute =
-    extract.errorImplementedBy { sp => apiImpl.extract(sp) }
+  val extractArchiveRoute =
+    extractArchive.errorImplementedBy { sp => apiImpl.extractArchive(sp) }
 
   val deleteFilesRoute =
     deleteFiles.errorImplementedBy { sp => apiImpl.deleteFiles(sp) }
@@ -168,7 +168,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       sizeRoute,
       saveFileRoute,
       createFileRoute,
-      extractRoute,
+      extractArchiveRoute,
       deleteFilesRoute,
       existsRoute,
       listRecursiveRoute,

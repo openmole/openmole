@@ -36,7 +36,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = fetch.futureError(_.createFile(path, name, directory).future)
-  override def extract(path: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.extract(path).future)
+  override def extractArchive(path: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.extractArchive(path).future)
   override def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData] = fetch.futureError(_.listFiles(path, filter).future)
   override def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]] = fetch.futureError(_.listRecursive(path, findString).future)
   override def move(from: SafePath, to: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.move(from, to).future)

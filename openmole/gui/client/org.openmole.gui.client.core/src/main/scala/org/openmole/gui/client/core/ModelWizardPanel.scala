@@ -120,7 +120,7 @@ object ModelWizardPanel:
 
             fileType match
               case Archive ⇒
-                api.extract(tempFile ++ fileName).foreach { _ => copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
+                api.extractArchive(tempFile ++ fileName).foreach { _ => copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
               case _ ⇒ copyTo(uploadPath)
 
 

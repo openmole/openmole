@@ -131,7 +131,6 @@ package data {
       safePath.context == context &&
         path.take(safePath.path.size) == safePath.path
 
-
   object PluginState:
     def empty = PluginState(false, false)
 
@@ -241,28 +240,28 @@ package data {
     case class JobStatuses(ready: Long, running: Long, completed: Long)
 
     case class Failed(
-                       capsules: Seq[ExecutionState.CapsuleExecution],
-                       error: ErrorData,
-                       environmentStates: Seq[EnvironmentState],
-                       duration: Long = 0L,
-                       clean: Boolean = true) extends ExecutionState("failed")
+      capsules: Seq[ExecutionState.CapsuleExecution],
+      error: ErrorData,
+      environmentStates: Seq[EnvironmentState],
+      duration: Long = 0L,
+      clean: Boolean = true) extends ExecutionState("failed")
 
     case class Running(
-                        capsules: Seq[ExecutionState.CapsuleExecution],
-                        duration: Long,
-                        environmentStates: Seq[EnvironmentState]) extends ExecutionState("running")
+      capsules: Seq[ExecutionState.CapsuleExecution],
+      duration: Long,
+      environmentStates: Seq[EnvironmentState]) extends ExecutionState("running")
 
     case class Finished(
-                         capsules: Seq[ExecutionState.CapsuleExecution],
-                         duration: Long = 0L,
-                         environmentStates: Seq[EnvironmentState],
-                         clean: Boolean) extends ExecutionState("finished")
+      capsules: Seq[ExecutionState.CapsuleExecution],
+      duration: Long = 0L,
+      environmentStates: Seq[EnvironmentState],
+      clean: Boolean) extends ExecutionState("finished")
 
     case class Canceled(
-                         capsules: Seq[ExecutionState.CapsuleExecution],
-                         environmentStates: Seq[EnvironmentState],
-                         duration: Long = 0L,
-                         clean: Boolean) extends ExecutionState("canceled")
+      capsules: Seq[ExecutionState.CapsuleExecution],
+      environmentStates: Seq[EnvironmentState],
+      duration: Long = 0L,
+      clean: Boolean) extends ExecutionState("canceled")
 
 //    case class Compiling() extends ExecutionInfo("compiling"):
 //      def duration: Long = 0L

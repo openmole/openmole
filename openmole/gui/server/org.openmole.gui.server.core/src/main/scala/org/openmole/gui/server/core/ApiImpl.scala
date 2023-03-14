@@ -20,7 +20,6 @@ import org.openmole.core.workflow.mole.{MoleExecution, MoleExecutionContext, Mol
 import org.openmole.tool.stream.StringPrintStream
 
 import scala.concurrent.stm.*
-import org.openmole.tool.archive.*
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
@@ -148,6 +147,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   private def extractArchiveFromFiles(from: File, to: File) =
+    import org.openmole.tool.archive.*
     Try {
       val ext = FileExtension(from.getName)
       FileContentType(ext) match
@@ -168,7 +168,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
 
-  def extract(safePath: SafePath) =
+  def extractArchive(safePath: SafePath) =
     import services.*
     def archiveFile = safePathToFile(safePath)
     FileContentType(FileExtension(safePath.name)) match
@@ -568,6 +568,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
         if extract
         then
+          import org.openmole.tool.archive.*
           val dest = safePathToFile(path)
           val tis = new TarInputStream(new GZIPInputStream(is))
           try tis.extract(dest, overwrite = overwrite)
