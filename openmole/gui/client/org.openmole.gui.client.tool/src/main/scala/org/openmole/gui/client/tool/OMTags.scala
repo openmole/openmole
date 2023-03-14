@@ -2,7 +2,9 @@ package org.openmole.gui.client.tool
 
 import org.scalajs.dom.raw._
 import scaladget.bootstrapnative.bsn._
+import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
+import com.raquo.domtypes.generic.codecs.BooleanAsAttrPresenceCodec
 
 /*
  * Copyright (C) 02/09/15 // mathieu.leclaire@openmole.org
@@ -21,7 +23,7 @@ import com.raquo.laminar.api.L._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object OMTags {
+object OMTags:
 
   def waitingSpan(text: String, button: HESetters): HtmlElement =
     span(
@@ -104,4 +106,17 @@ object OMTags {
       fileInput(todo).amend(multiple := true)
     )
   }
-}
+
+  val webkitdirectory = new HtmlAttr[Boolean]("webkitdirectory", BooleanAsAttrPresenceCodec)
+  val mozdirectory = new HtmlAttr[Boolean]("mozdirectory", BooleanAsAttrPresenceCodec)
+
+  def omFileInput(todo: Input => Unit, multiple: Boolean = true) =
+    fileInput(todo).amend(
+      if multiple
+      then
+        Seq(
+          L.multiple := true,
+          webkitdirectory := true,
+          mozdirectory := true)
+      else emptyMod
+    )

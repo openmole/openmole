@@ -71,7 +71,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     createFile.errorImplementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
 
   val extractArchiveRoute =
-    extractArchive.errorImplementedBy { sp => apiImpl.extractArchive(sp) }
+    extractArchive.errorImplementedBy { (sp, to) => apiImpl.extractArchive(sp, to) }
 
   val deleteFilesRoute =
     deleteFiles.errorImplementedBy { sp => apiImpl.deleteFiles(sp) }

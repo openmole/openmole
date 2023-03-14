@@ -168,13 +168,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
 
-  def extractArchive(safePath: SafePath) =
+  def extractArchive(safePath: SafePath, to: SafePath) =
     import services.*
     def archiveFile = safePathToFile(safePath)
+    def toFile = safePathToFile(to)
     FileContentType(FileExtension(safePath.name)) match
-      case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-        val toFile: File = safePathToFile(safePath.parent)
-        extractArchiveFromFiles(archiveFile, toFile)
+      case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒ extractArchiveFromFiles(archiveFile, toFile)
       case _ ⇒ throw UserBadDataError(s"""Unable to extract archive format of file "${archiveFile}"""")
 
   def temporaryDirectory(): SafePath =

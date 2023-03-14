@@ -41,13 +41,7 @@ object CoreUtils {
     def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
 
-
-  def withTmpDirectory(todo: SafePath ⇒ Unit)(using api: ServerAPI, path: BasePath): Unit =
-    api.temporaryDirectory().foreach { tempFile ⇒
-      try todo(tempFile)
-      finally api.deleteFiles(Seq(tempFile))
-    }
-
+  
   def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI, path: BasePath) =
     api.createFile(safePath, fileName, directory).foreach { b ⇒
       if b

@@ -47,7 +47,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   }
 
   def extract(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    api.extractArchive(sp).foreach { _ ⇒ panels.treeNodePanel.invalidCurrentCache }
+    api.extractArchive(sp, sp.parent).foreach { _ ⇒ panels.treeNodePanel.invalidCurrentCache }
     closeToolBox
   }
 

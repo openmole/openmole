@@ -21,6 +21,7 @@ import org.openmole.gui.client.core.files.*
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.data.FileType.*
 import org.scalajs.dom.html.TextArea
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
@@ -32,6 +33,7 @@ import scaladget.tools.*
 import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
+
 import scala.concurrent.Future
 
 object ModelWizardPanel:
@@ -90,42 +92,51 @@ object ModelWizardPanel:
       val fileType: FileType = FileType(safePath.name)
       plugins.wizardFactories.filter { _.fileType == fileType }.headOption
 
-    def moveFilesAndBuildForm(fInput: Input, fileName: String, uploadPath: SafePath) =
-      CoreUtils.withTmpDirectory { tempFile ⇒
+    def buildScriptFrom(fInput: Input, targetPath: SafePath) =
+      api.temporaryDirectory().flatMap { tempFile ⇒
         api.upload(
           fInput.ref.files,
           tempFile,
-          (p: ProcessState) ⇒ transferring.set(p)).map { uploaded ⇒
-            def copyTo(targetPath: SafePath) =
-              // Not sure why...
-              val from =
-                CoreUtils.listFiles(tempFile).map { files =>
-                  if files.size == 1
-                  then tempFile ++ files.head.name
-                  else tempFile
-                }
-
-              for
-                f <- from
-                _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
-              do
-                factory(uploadPath).foreach { f =>
-                  f.parse(uploadPath).foreach { mmd =>
-                    modelMetadata.set(mmd)
-                    exclusiveMenu.onoff.set(Some(1))
-                  }
-                }
-
-            val fileType: FileType = FileType(uploadPath)
-
-            fileType match
-              case Archive ⇒
-                api.extractArchive(tempFile ++ fileName).foreach { _ => copyTo(uploadPath.parent ++ uploadPath.nameWithNoExtension) }
-              case _ ⇒ copyTo(uploadPath)
-
-
-            fInput.ref.value = ""
-          }
+          (p: ProcessState) ⇒ transferring.set(p)
+        ).map { uploaded ⇒
+          
+          println(uploaded)
+//          val contentPath =
+//            if uploaded.size == 1
+//            then
+//              val uploadedFile = tempFile ++ uploaded.head
+//              val extracted =
+//                FileType(uploadedFile) match
+//                  case Archive ⇒
+//                    val extractDirectory = tempFile ++ "__extract__"
+//                    api.extractArchive(uploadedFile, extractDirector)
+//                    extractDirectory
+//                  case _ ⇒ uploadedFile
+//
+//              extracted.
+//            else tempFile
+//
+//          def copyTo(targetPath: SafePath) =
+//            // Not sure why...
+//            val from =
+//              CoreUtils.listFiles(tempFile).map { files =>
+//                if files.size == 1 && files.head.directory.isDefined
+//                then tempFile ++ files.head.name
+//                else tempFile
+//              }
+//
+//            for
+//              f <- from
+//              _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
+//            do
+//              factory(targetPath).foreach { f =>
+//                f.parse(targetPath).foreach { mmd =>
+//                  modelMetadata.set(mmd)
+//                  exclusiveMenu.onoff.set(Some(1))
+//                }
+//              }
+//
+        }.andThen(_ => api.deleteFiles(Seq(tempFile)))
       }
 
     val upButton =
@@ -135,15 +146,15 @@ object ModelWizardPanel:
         transferring.withTransferWaiter {
           _ ⇒
             div(
-              fileInput((fInput: Input) ⇒ {
-                if (fInput.ref.files.length > 0) {
+              OMTags.omFileInput(fInput ⇒
+                if fInput.ref.files.length > 0
+                then
                   val fileName = fInput.ref.files.item(0).name
                   labelName.set(Some(fileName))
                   val targetPath = Some(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName)
                   filePath.set(targetPath)
-                  targetPath.map { fp ⇒ moveFilesAndBuildForm(fInput, fileName, fp) }
-                }
-              }),
+                  buildScriptFrom(fInput, panels.treeNodePanel.treeNodeManager.dirNodeLine.now()).andThen { _ => fInput.ref.value = "" }
+              ),
               div(
                 child <-- labelName.signal.map {
                   _ match {
@@ -181,11 +192,8 @@ object ModelWizardPanel:
       }
     }
 
-    def browseToPath(safePath: SafePath)(using panels: Panels) = {
-      a(safePath.path.mkString("/"), onClick --> { _ ⇒
-        panels.treeNodePanel.treeNodeManager.switch(safePath.parent)
-      })
-    }
+    def browseToPath(safePath: SafePath)(using panels: Panels) =
+      a(safePath.path.mkString("/"), onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
     def buildTask(safePath: SafePath)(using panels: Panels) = {
       factory(safePath).foreach { f =>

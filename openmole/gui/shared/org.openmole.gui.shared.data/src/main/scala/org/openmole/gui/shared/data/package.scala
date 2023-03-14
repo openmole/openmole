@@ -116,7 +116,7 @@ package data {
       new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
 
   case class SafePath(path: Seq[String], context: ServerFileSystemContext):
-    def ++(s: String) = copy(path = this.path :+ s)
+    def ++(s: String) = copy(path = this.path :++ s.split('/'))
     def /(child: String) = copy(path = path :+ child)
     def parent: SafePath = copy(path = path.dropRight(1))
 
