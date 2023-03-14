@@ -114,7 +114,9 @@ class TabContent:
   def rename(sp: SafePath, newSafePath: SafePath) = {
     tabsUI.tabs.update {
       _.map { tab =>
-        tab.copy(title = span(newSafePath.name), t = tab.t.copy(safePath = newSafePath))
+        if tab.t.safePath == sp
+        then tab.copy(title = span(newSafePath.name), t = tab.t.copy(safePath = newSafePath))
+        else tab
       }
     }
   }
@@ -132,9 +134,6 @@ class TabContent:
     }
     )
   }
-
-  //  def setErrors(path: SafePath, errors: Seq[ErrorWithLocation]) =
-  //    find(path).foreach { tab ⇒ tab.editor.foreach { _.setErrors(errors) } }
 
   val fontSizeControl = div(cls := "file-content", display.flex, flexDirection.row, alignItems.baseline,
     fontSizeLink(17),
