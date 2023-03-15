@@ -91,7 +91,7 @@ class TreeNodePanel {
     inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.webkitdirectory <-- directoryToggle.toggled.signal, inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } })
 
   def upbtn(todo: Input ⇒ Unit): HtmlElement =
-    span(aria.hidden := true, glyph_upload, cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo))
+    span(aria.hidden := true, cls <-- directoryToggle.toggled.signal.map { d => if !d then "bi-cloud-upload" else "bi-cloud-upload-fill" }, cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo))
 
   private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.dirNodeLine.now()
