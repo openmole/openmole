@@ -9,7 +9,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import Waiter.*
-import org.openmole.gui.client.core.Panels.closeExpandable
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 
@@ -32,15 +31,15 @@ object ProjectPanel {
     // 1- Empty project
     def emptyProject = {
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.dirNodeLine.now(), fileName, onCreated = () ⇒ {
-        val toDisplay = panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ fileName
+      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.directory.now(), fileName, onCreated = () ⇒ {
+        val toDisplay = panels.treeNodePanel.treeNodeManager.directory.now() ++ fileName
         api.download(
           toDisplay,
           hash = true).map { (content, hash) ⇒
             panels.treeNodePanel.treeNodeManager.invalidCurrentCache
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
           }
-        Panels.closeExpandable
+        panels.closeExpandable
       })
     }
     val emptyProjectButton = button(btn_purple, marginTop:= "40", "Build", onClick --> {_=> emptyProject})
@@ -56,13 +55,13 @@ object ProjectPanel {
 
     lazy val theTabs = Tabs.tabs(tabStyle = navbar_pills, isClosable = false)
       .add(Tab("empty", span("Empty project"), emptyProjectButton))
-      .add(Tab("wizard", span("From your sources"), wizardPanel))
+      .add(Tab("wizard", span("From your model"), wizardPanel))
       .add(Tab("market", span("From examples"), marketPanel))
       .add(Tab("url", span("From URL"), urlPanel ))
 
     
     div(margin := "20px", flexRow, alignItems.flexStart,
-      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
       theTabs.build.render.amend(marginLeft := "40", width := "100%")
     )
   }

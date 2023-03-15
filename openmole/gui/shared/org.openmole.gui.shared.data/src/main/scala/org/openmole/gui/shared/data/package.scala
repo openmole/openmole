@@ -405,7 +405,12 @@ package data {
     def clone(newName: String, newType: PrototypeData, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
   }
 
-  case class ModelMetadata(language: Option[Language], inputs: Seq[PrototypePair], outputs: Seq[PrototypePair], command: Option[String], executableName: Option[String], sourcesDirectory: SafePath)
+  case class ModelMetadata(
+    language: Option[Language] = None,
+    inputs: Seq[PrototypePair] = Seq(),
+    outputs: Seq[PrototypePair] = Seq(),
+    command: Option[String] = None,
+    executableName: Option[String] = None)
 
   //  sealed trait LaunchingCommand {
   //    def language: Option[Language]

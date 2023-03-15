@@ -77,7 +77,7 @@ class TreeNodePanel {
 
   def createNewNode(using api: ServerAPI, basePath: BasePath, panels: Panels) = {
     val newFile = newNodeInput.ref.value
-    val currentDirNode = treeNodeManager.dirNodeLine
+    val currentDirNode = treeNodeManager.directory
     directoryToggle.toggled.now() match {
       case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
       case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
@@ -95,7 +95,7 @@ class TreeNodePanel {
       tooltip("eranu").amend(dataAttr("original-title") <-- directoryToggle.toggled.signal.map { d => if !d then "Upload files" else "Upload directories" })
 
   private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
-    val current = treeNodeManager.dirNodeLine.now()
+    val current = treeNodeManager.directory.now()
     api.upload(
       fileInput.ref.files,
       current,
@@ -147,7 +147,7 @@ class TreeNodePanel {
           button(cls := "btn btn-primary", marginLeft := "80px", "Copy", onClick --> { _ ⇒
             multiTool.set(Paste)
             confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              val target = treeNodeManager.dirNodeLine.now()
+              val target = treeNodeManager.directory.now()
               api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
                   treeNodeManager.invalidCurrentCache
@@ -155,7 +155,7 @@ class TreeNodePanel {
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    val target = treeNodeManager.dirNodeLine.now()
+                    val target = treeNodeManager.directory.now()
                     api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
                       treeNodeManager.invalidCurrentCache
                       closeMultiTool
@@ -200,7 +200,7 @@ class TreeNodePanel {
   def fileControler(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     div(
       cls := "file-content",
-      child <-- treeNodeManager.dirNodeLine.signal.map { curr ⇒
+      child <-- treeNodeManager.directory.signal.map { curr ⇒
         val parent = curr.parent
         div(
           cls := "tree-path",
@@ -269,7 +269,7 @@ class TreeNodePanel {
 
   def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     div(cls := "file-scrollable-content",
-      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.dirNodeLine.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
+      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.directory.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
         case (sons, currentDir, findString, foundFiles, multiTool) ⇒
           if (!foundFiles.isEmpty) {
             foundFiles.map { case (sp, isDir) => div(s"${sp.normalizedPathString}", cls := "findFile", onClick --> { _ =>
@@ -319,7 +319,7 @@ class TreeNodePanel {
   def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     tn match
       case tn: TreeNode.File ⇒
-        val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
+        val tnSafePath = treeNodeManager.directory.now() ++ tn.name
         displayNode(tnSafePath)
       case _ ⇒
 
@@ -342,7 +342,7 @@ class TreeNodePanel {
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
 
-    val tnSafePath = treeNodeManager.dirNodeLine.now() ++ tn.name
+    val tnSafePath = treeNodeManager.directory.now() ++ tn.name
 
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
 
@@ -387,7 +387,7 @@ class TreeNodePanel {
           onDrop --> { e ⇒
             e.dataTransfer
             e.preventDefault()
-            dropAction(treeNodeManager.dirNodeLine.now() ++ tn.name, TreeNode.isDir(tn))
+            dropAction(treeNodeManager.directory.now() ++ tn.name, TreeNode.isDir(tn))
           },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,

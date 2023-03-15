@@ -127,55 +127,43 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project",
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map {
-                _.id
-              } == Some(3)
+              _.map { _.id } == Some(3)
             },
             onClick --> { _ =>
-              Panels.expandTo(newProjectPanel, 3)
+              panels.expandTo(newProjectPanel, 3)
             }),
           div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map {
-                _.id
-              } == Some(4)
+              _.map { _.id } == Some(4)
             },
             onClick --> { _ ⇒
               ExecutionPanel.open
             }).tooltip("Executions"),
           div(glyph_lock, navBarItem,
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map {
-                _.id
-              } == Some(2)
+              _.map { _.id } == Some(2)
             },
             onClick --> { _ ⇒
-              Panels.expandTo(authenticationPanel, 2)
+              panels.expandTo(authenticationPanel, 2)
             }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem,
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map {
-                _.id
-              } == Some(1)
+              _.map { _.id } == Some(1)
             },
             onClick --> { _ ⇒
               panels.pluginPanel.getPlugins
-              Panels.expandTo(panels.pluginPanel.render, 1)
+              panels.expandTo(panels.pluginPanel.render, 1)
             }).tooltip("Plugins"),
           div(OMTags.glyph_gear, navBarItem,
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map {
-                _.id
-              } == Some(5)
+              _.map { _.id } == Some(5)
             },
             onClick --> { _ ⇒
-              Panels.expandTo(settingsView, 5)
+              panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
           a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets ⇒
             s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html"
-          }).map {
-            _.getOrElse("")
-          }
+          }).map { _.getOrElse("") }
           ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
         ),

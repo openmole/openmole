@@ -41,8 +41,8 @@ object TopLevelExports {
 
 class NetlogoWizardFactory extends WizardPluginFactory {
   def accept(directory: SafePath, uploaded: Seq[RelativePath]) = uploaded.filter(_.value.size < 2).exists(_.name.endsWith(".nlogo"))
-  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]] = ??? //PluginFetch.futureError(_.parse(safePath).future)
-  def toTask(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
+  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ??? //PluginFetch.futureError(_.parse(safePath).future)
+  def content(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "NetLogo"
 }

@@ -28,11 +28,11 @@ import scalaz.Success
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TreeNodeManager {
+class TreeNodeManager:
 
   val root = SafePath.empty
   
-  val dirNodeLine: Var[SafePath] = Var(root)
+  val directory: Var[SafePath] = Var(root)
 
   val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
@@ -66,10 +66,10 @@ class TreeNodeManager {
   }
 
   def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
-  
-  def switch(dir: String): Unit = switch(dirNodeLine.now() / dir)
 
-  def switch(sp: SafePath): Unit = dirNodeLine.set(sp)
+  def switch(dir: String): Unit = switch(directory.now() / dir)
+
+  def switch(sp: SafePath): Unit = directory.set(sp)
 
   def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
 
@@ -85,7 +85,7 @@ class TreeNodeManager {
     updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
     invalidCurrentCache
 
-  def invalidCurrentCache(using api: ServerAPI, path: BasePath) = invalidCache(dirNodeLine.now())
+  def invalidCurrentCache(using api: ServerAPI, path: BasePath) = invalidCache(directory.now())
 
   def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
     sons.update(_.filterNot(_._1.path == sp.path))
@@ -93,7 +93,7 @@ class TreeNodeManager {
   }
 
   def computeCurrentSons(using api: ServerAPI, path: BasePath) = {
-    val cur = dirNodeLine.now()
+    val cur = directory.now()
 
     def updateSons(safePath: SafePath) = {
       CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
@@ -113,7 +113,7 @@ class TreeNodeManager {
 
   def find(findString: String)(using api: ServerAPI, path: BasePath) = {
     def updateSearch = {
-      val safePath: SafePath = dirNodeLine.now()
+      val safePath: SafePath = directory.now()
       CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>
         findFilesContaining.set((Some(findString), fs))
       }
@@ -127,4 +127,3 @@ class TreeNodeManager {
     }
   }
 
-}

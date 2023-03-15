@@ -12,7 +12,6 @@ import org.openmole.core.market.MarketIndexEntry
 import com.raquo.laminar.api.L.*
 import Waiter.*
 import com.raquo.laminar.nodes.ReactiveElement.isActive
-import org.openmole.gui.client.core.Panels.closeExpandable
 import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.api.*
 
@@ -30,14 +29,14 @@ object URLImportPanel:
     lazy val downloading: Var[ProcessState] = Var(Processed())
 
     def download(url: String) =
-      val sp = manager.dirNodeLine.now()
+      val sp = manager.directory.now()
 
       def doDownload(url: String) =
         downloading.set(Processing())
         api.downloadHTTP(url, sp, extractCheckBox.isChecked, overwriteSwitch.isChecked).foreach { d ⇒
           downloading.set(Processed())
           manager.invalidCurrentCache
-          Panels.closeExpandable
+          panels.closeExpandable
         }
 
       overwriteSwitch.isChecked match {

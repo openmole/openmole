@@ -40,9 +40,20 @@ object TopLevelExports {
 }
 
 class ContainerWizardFactory extends WizardPluginFactory {
-  def accept(directory: SafePath, uploaded: Seq[RelativePath]) = uploaded.filter(_.value.size < 2).exists(f => f.name.endsWith(".tar") || f.name.endsWith(".tgz"))
-  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[Option[ModelMetadata]] = ??? //PluginFetch.futureError(_.parse(safePath).future)
-  def toTask(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
+  def accept(directory: SafePath, uploaded: Seq[RelativePath]) =
+    if uploaded.size == 1
+    then
+      val name = uploaded.head.name
+      name.endsWith(".tar") || name.endsWith(".tgz") || name.endsWith(".tar.gz")
+    else false
+
+  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
+  def content(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) =
+    Future(
+      s"""
+         |val model = ContainerTask(workDirectory / "${uploaded.head.mkString}", "echo Viva OpenMOLE")
+         |model""".stripMargin)
+    //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
 
   def name: String = "Container"
 }

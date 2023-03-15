@@ -28,7 +28,6 @@ import org.openmole.gui.shared.data.*
 import Waiter.*
 import org.openmole.gui.client.core.files.TreeNodeManager
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.Panels.closeExpandable
 import org.openmole.gui.client.ext.InputFilter
 import org.openmole.gui.shared.api.*
 
@@ -81,9 +80,9 @@ object MarketPanel:
             div(btnGroup,
               button(btn_danger, "Overwrite"), onClick --> { _ =>
                 overwriteAlert.set(None)
-                overwrite(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ entry.name, entry)
+                overwrite(panels.treeNodePanel.treeNodeManager.directory.now() ++ entry.name, entry)
                 panels.notifications.remove(notif)
-                Panels.closeExpandable
+                panels.closeExpandable
               },
               button(btn_secondary_outline, "Abort"), onClick --> { _ => overwriteAlert.set(None) }
             )
@@ -91,12 +90,12 @@ object MarketPanel:
           notif
         else 
           download(entry)
-          Panels.closeExpandable
+          panels.closeExpandable
       }
 
     def download(entry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
       val manager = panels.treeNodePanel.treeNodeManager
-      val path = manager.dirNodeLine.now() ++ entry.name
+      val path = manager.directory.now() ++ entry.name
       downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
 
       api.getMarketEntry(entry, path).foreach { d ⇒
@@ -117,7 +116,7 @@ object MarketPanel:
         entry.tags.map { e => span(cls := "badgeOM", e) }).expandOnclick(
         div(height := "200", backgroundColor := "#333", padding := "20", overflow.scroll,
           child <-- downloadButton(entry, () ⇒ {
-            exists(panels.treeNodePanel.treeNodeManager.dirNodeLine.now() ++ entry.name, entry)
+            exists(panels.treeNodePanel.treeNodeManager.directory.now() ++ entry.name, entry)
           }),
           div(cls := "mdRendering", paddingTop := "40", htmlDiv, colSpan := 12)
         )

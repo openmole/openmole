@@ -34,14 +34,14 @@ object Panels:
         case 1 => "PLUGINS"
         case _ => ""
 
-  def closeExpandable(using panels: Panels) = panels.expandablePanel.set(None)
-
-  def expandTo(el: HtmlElement, id: Int)(using panels: Panels) = panels.expandablePanel.update {
-    _ match {
-      case Some(ep: ExpandablePanel) ⇒ if (ep.id == id) None else Some(ExpandablePanel(id, el))
-      case None ⇒ Some(ExpandablePanel(id, el))
-    }
-  }
+  extension(panels: Panels)
+    def directory = panels.treeNodePanel.treeNodeManager.directory
+    def closeExpandable = panels.expandablePanel.set(None)
+    def expandTo(el: HtmlElement, id: Int) =
+      panels.expandablePanel.update {
+        case Some(ep: ExpandablePanel) ⇒ if (ep.id == id) None else Some(ExpandablePanel(id, el))
+        case None ⇒ Some(ExpandablePanel(id, el))
+      }
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)

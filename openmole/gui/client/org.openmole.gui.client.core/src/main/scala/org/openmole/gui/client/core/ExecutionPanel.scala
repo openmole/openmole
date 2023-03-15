@@ -72,7 +72,7 @@ object ExecutionPanel:
   type Executions = Map[ExecutionId, ExecutionDetails]
 
   def open(using api: ServerAPI, path: BasePath, panels: Panels) =
-    Panels.expandTo(panels.executionPanel.render, 4)
+    panels.expandTo(panels.executionPanel.render, 4)
 
   enum Expand:
     case Console, Script, ErrorLog, Computing
@@ -381,7 +381,7 @@ class ExecutionPanel:
 
     div(
       columnFlex, width := "100%", marginTop := "20",
-      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
       (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable --> Observer { _ =>
         if !queryingState
         then

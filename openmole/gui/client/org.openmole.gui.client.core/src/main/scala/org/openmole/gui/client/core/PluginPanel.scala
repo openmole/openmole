@@ -52,7 +52,7 @@ class PluginPanel:
               ), onClick --> { _ ⇒
                 panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
                 panels.treeNodePanel.treeNodeManager.computeCurrentSons
-                Panels.closeExpandable
+                panels.closeExpandable
               }
             )
           }
@@ -62,7 +62,7 @@ class PluginPanel:
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels): HtmlElement =
     div(
       div(margin := "20px", flexRow, alignItems.center,
-        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
       ),
       pluginTable
     )

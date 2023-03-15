@@ -80,9 +80,7 @@ object AuthenticationPanel {
 
     def save = {
       authSetting.now().map {
-        _.save(() ⇒ {
-          getAuthentications
-        })
+        _.save(() ⇒ { getAuthentications })
       }
       authSetting.set(None)
     }
@@ -106,10 +104,9 @@ object AuthenticationPanel {
       _ ⇒ {
         authSetting.update {
           as ⇒
-            as match {
-              case None ⇒ Panels.closeExpandable
+            as match
+              case None ⇒ panels.closeExpandable
               case _ ⇒
-            }
             None
         }
       }
@@ -213,7 +210,7 @@ object AuthenticationPanel {
 
     div(
       div(margin := "20px", flexRow, alignItems.center,
-        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ Panels.closeExpandable }),
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
         newButton
       ),
       authPanel
