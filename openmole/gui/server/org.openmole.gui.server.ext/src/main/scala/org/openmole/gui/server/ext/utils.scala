@@ -119,7 +119,15 @@ object utils {
       f.getParentFile match
         case null => computedParents
         case parent =>
-          if canonicalUntil.map(c => java.nio.file.Files.isSameFile(parent.toPath, c.toPath)).getOrElse(false)
+          def sameFile =
+            canonicalUntil.map {
+              c =>
+                if c.exists() && parent.exists()
+                then java.nio.file.Files.isSameFile(parent.toPath, c.toPath)
+                else parent.getPath == c.getPath
+            }.getOrElse(false)
+
+          if sameFile
           then computedParents
           else
             parent.getName match
