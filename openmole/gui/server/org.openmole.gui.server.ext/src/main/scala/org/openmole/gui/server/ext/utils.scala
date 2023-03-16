@@ -174,26 +174,26 @@ object utils {
     if (from.exists && to.exists) from.copy(new File(to, from.getName))
   }
 
-  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
-
-    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
-      val grouped = classes.groupBy {
-        _.head
-      }
-
-      grouped.flatMap {
-        case (k, v) ⇒
-          val flatV = v.flatten
-          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
-          else classTrees :+ ClassNode(
-            k,
-            build(v.map(_.tail), classTrees)
-          )
-      }.toSeq
-    }
-
-    build(classes, Seq())
-  }
+//  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
+//
+//    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
+//      val grouped = classes.groupBy {
+//        _.head
+//      }
+//
+//      grouped.flatMap {
+//        case (k, v) ⇒
+//          val flatV = v.flatten
+//          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
+//          else classTrees :+ ClassNode(
+//            k,
+//            build(v.map(_.tail), classTrees)
+//          )
+//      }.toSeq
+//    }
+//
+//    build(classes, Seq())
+//  }
 
 
   def exists(safePath: SafePath)(implicit workspace: Workspace) =

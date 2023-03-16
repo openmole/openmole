@@ -288,206 +288,17 @@ package data {
   // The plugin is copied in the plugin directory with the same name.
   case class Plugin(projectSafePath: SafePath, time: String, plugged: Boolean)
 
-  sealed trait Language {
-    def name: String
-    def extension: String
-    def taskType: TaskType
-  }
-
-  sealed trait TaskType {
-    def preVariable: String = ""
-
-    def postVariable: String = ""
-  }
-
-  case class CareTaskType() extends TaskType {
-    override val preVariable = """${"""
-    override val postVariable = "}"
-  }
-
-  case class NoneOSGITaskType() extends TaskType
-
-  case class OSGIJarTaskType() extends TaskType
-
-  case class ScalaTaskType() extends TaskType
-
-  case class NetLogoTaskType() extends TaskType
-
-  case class RTaskType() extends TaskType
-
-  case class UndefinedTaskType() extends TaskType
-
-  sealed trait FileType
-
-  case class CodeFile(language: Language) extends FileType
-
-  object CareArchive extends FileType
-
-  object JarArchive extends FileType
-
-  object Archive extends FileType
-
-  object UndefinedFileType extends FileType
-
-  object FileType {
-    private def extension(safePath: SafePath) = safePath.name.split('.').drop(1).mkString(".")
-
-    def apply(safePath: SafePath): FileType = apply(safePath.name)
-
-    def apply(fileName: String): FileType = {
-      if (fileName.endsWith("tar.gz.bin") || fileName.endsWith("tgz.bin")) CareArchive
-      else if (fileName.endsWith("nlogo")) CodeFile(NetLogoLanguage())
-      else if (fileName.endsWith("R")) CodeFile(RLanguage())
-      else if (fileName.endsWith("jar")) JarArchive
-      else if (fileName.endsWith("tgz") || fileName.endsWith("tar.gz") || fileName.endsWith("tar.xz")) Archive
-      else UndefinedFileType
-    }
-
-    def isSupportedLanguage(fileName: String): Boolean = {
-      apply(fileName) match {
-        case CodeFile(_) | CareArchive | JarArchive ⇒ true
-        case _ ⇒ false
-      }
-    }
-  }
-
-  case class Binary() extends Language {
-    val name: String = "Binary"
-    val extension = ""
-    val taskType = CareTaskType()
-  }
-
-  case class PythonLanguage() extends Language {
-    val name: String = "python"
-    val extension = "py"
-    val taskType = CareTaskType()
-  }
-
-  case class RLanguage() extends Language {
-    val name: String = "R"
-    val extension = "R"
-    val taskType = RTaskType()
-  }
-
-  case class NetLogoLanguage() extends Language {
-    val name: String = "NetLogo"
-    val extension = "nlogo"
-    val taskType = NetLogoTaskType()
-  }
-
-  case class JavaLikeLanguage() extends Language {
-    val name: String = "Java/Scala"
-    val extension = "jar"
-    val taskType = ScalaTaskType()
-  }
-
-  case class UndefinedLanguage() extends Language {
-    val name = ""
-    val extension = ""
-    val taskType = UndefinedTaskType()
-  }
-
-  sealed trait CommandElement {
-    def expand: String
-
-    def index: Int
-  }
-
-  case class StaticElement(index: Int, expand: String) extends CommandElement
-
-  case class VariableElement(index: Int, prototype: PrototypePair, taskType: TaskType) extends CommandElement {
-    def expand =
-      if (prototype.`type` == PrototypeData.File) prototype.mapping.getOrElse("")
-      else taskType.preVariable + prototype.name + taskType.postVariable
-
-    def clone(newPrototypePair: PrototypePair): VariableElement = copy(prototype = newPrototypePair)
-
-    def clone(newName: String, newType: PrototypeData, newMapping: Option[String]): VariableElement = clone(prototype.copy(name = newName, `type` = newType, mapping = newMapping))
-  }
-
   case class ModelMetadata(
-    language: Option[Language] = None,
     inputs: Seq[PrototypePair] = Seq(),
     outputs: Seq[PrototypePair] = Seq(),
     command: Option[String] = None,
     executableName: Option[String] = None)
 
-  //  sealed trait LaunchingCommand {
-  //    def language: Option[Language]
-  //
-  //    def arguments: Seq[CommandElement]
-  //
-  //    def outputs: Seq[VariableElement]
-  //
-  //    def fullCommand: String
-  //
-  //    def statics: Seq[StaticElement] = arguments.collect { case a: StaticElement ⇒ a }
-  //
-  //    def updateVariables(variableArgs: Seq[VariableElement]): LaunchingCommand
-  //  }
-  //
-  //  case class BasicLaunchingCommand(language: Option[Language], codeName: String, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
-  //    def fullCommand: String = language match {
-  //      case Some(NetLogoLanguage()) ⇒ "go ;; You should set your running/stopping criteria here instead"
-  //      case _ ⇒ (Seq(language.map {
-  //        _.name
-  //      }.getOrElse(""), codeName) ++ arguments.sortBy {
-  //        _.index
-  //      }.map {
-  //        _.expand
-  //      }).mkString(" ")
-  //    }
-  //
-  //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
-  //  }
-  //
-  //  case class JavaLaunchingCommand(jarMethod: JarMethod, arguments: Seq[CommandElement] = Seq(), outputs: Seq[VariableElement] = Seq()) extends LaunchingCommand {
-  //
-  //    val language = Some(JavaLikeLanguage())
-  //
-  //    def fullCommand: String = {
-  //      if (jarMethod.methodName.isEmpty) ""
-  //      else {
-  //        if (jarMethod.isStatic) jarMethod.clazz + "." else s"val constr = new ${jarMethod.clazz}() // You should initialize this constructor first\nconstr."
-  //      } +
-  //        jarMethod.methodName + "(" + arguments.sortBy {
-  //        _.index
-  //      }.map {
-  //        _.expand
-  //      }.mkString(", ") + ")"
-  //    }
-  //
-  //    def updateVariables(variableArgs: Seq[VariableElement]) = copy(arguments = statics ++ variableArgs)
-  //  }
-
   case class PrototypePair(name: String, `type`: org.openmole.gui.shared.data.PrototypeData, default: String = "", mapping: Option[String] = None)
-
-  sealed trait ClassTree {
-    def name: String
-
-    def flatten(prefix: Seq[String]): Seq[FullClass]
-
-    def flatten: Seq[FullClass]
-  }
-
-  case class ClassNode(name: String, childs: Seq[ClassTree]) extends ClassTree {
-    def flatten(prefix: Seq[String]) = childs.flatMap { c ⇒ c.flatten(prefix :+ name) }
-
-    def flatten = flatten(Seq())
-  }
-
-  case class ClassLeaf(name: String) extends ClassTree {
-    def flatten = Seq(FullClass(name))
-
-    def flatten(prefix: Seq[String]) = Seq(FullClass((prefix :+ name).mkString(".")))
-  }
-
-  case class FullClass(name: String)
 
   //Processes
   sealed trait ProcessState {
     def ratio: Int = 0
-
     def display: String = ""
   }
 
@@ -496,20 +307,10 @@ package data {
   }
 
   case class Finalizing(
-                         override val ratio: Int = 100,
-                         override val display: String = "Finalizing...") extends ProcessState
+    override val ratio: Int = 100,
+    override val display: String = "Finalizing...") extends ProcessState
 
   case class Processed(override val ratio: Int = 100) extends ProcessState
-
-  case class JarMethod(methodName: String, argumentTypes: Seq[String], returnType: String, isStatic: Boolean, clazz: String) {
-    val expand = methodName + "(" + argumentTypes.mkString(",") + "): " + returnType
-  }
-
-  //case class JarMethod(methodName: String, arguments: Seq[PrototypePair], returnType: String, isStatic: Boolean, clazz: String) {
-  //  val expand = methodName + "(" + arguments.map {
-  //    _.`type`.scalaString
-  //  }.mkString(",") + "): " + returnType
-  //}
 
 
   object Resources {
@@ -520,7 +321,6 @@ package data {
 
   case class Resources(all: Seq[Resource], implicits: Seq[Resource], number: Int) {
     def withNoImplicit = copy(implicits = Seq())
-
     def size = all.size + implicits.size
   }
 
@@ -655,24 +455,9 @@ package data {
       copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
 
 
-  case class WizardModelData(
-                              vals: String,
-                              inputs: String,
-                              outputs: String,
-                              inputFileMapping: String,
-                              outputFileMapping: String,
-                              defaults: String,
-                              //   resources: String,
-                              specificInputMapping: Option[String] = None,
-                              specificOutputMapping: Option[String] = None)
-
-  case class WizardToTask(safePath: SafePath, errors: Seq[ErrorData] = Seq())
-
 
   case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int] = None)
-
   case class ErrorFromCompiler(errorWithLocation: ErrorWithLocation = ErrorWithLocation(), lineContent: String = "")
-
   case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())
 
 

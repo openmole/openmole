@@ -19,7 +19,6 @@ package org.openmole.gui.client.core
 
 import org.openmole.gui.client.core.files.*
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.FileType.*
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -226,7 +225,7 @@ object ModelWizardPanel:
 
 
     def buildButton(tmpDirectory: SafePath) =
-      button("Build", width := "150px", margin := "40 25 10 25", OMTags.btn_purple,
+      button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
             val targetPath = panels.directory.now()
@@ -249,26 +248,30 @@ object ModelWizardPanel:
             div(flexRow, width := "100%",
               upButton(tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px",
-                child <-- modelMetadata.signal.map {
-                  case Some(md) => span(s"Uploaded ${md.files.map(_.mkString).mkString(", ")}")
-                  case _ => span(s"Task will be built in /${panels.directory.now().path.mkString}")
+                child <-- (modelMetadata.signal combineWith panels.directory.signal).map {
+                  case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_.mkString).mkString(", ")}""")
+                  case (_, d) => span(s"Task will be built in ⌂/${d.path.mkString}")
                 })
             ),
             exclusiveMenu.entry("Inputs / Ouputs", 1,
               div(height := "200px",
-                child <-- modelMetadata.signal.map {
-                  _ match {
-                    case Some(mmd) =>
-                      val text = mmd.data.language.map { _.name }.getOrElse("Unknown language")
-                      ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping))
+                child <--
+                  modelMetadata.signal.map {
+                    case Some(mmd) => ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping))
                     case _ => emptyNode
                   }
-                })),
+              )
+            ),
             exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40")),
-            div(
+            div(flexRow, width := "100%", marginTop := "40",
               buildButton(tmpDirectory),
-              uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) })
-            )
+              span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
+                child <-- (modelMetadata.signal combineWith panels.directory.signal).map {
+                  case (Some(md), d) => span(s"${md.factory.name} task will be built in ⌂/${d.path.mkString}")
+                  case _ => span()
+                }),
+            ),
+            uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) })
 //            div(
 //              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }
 //            )

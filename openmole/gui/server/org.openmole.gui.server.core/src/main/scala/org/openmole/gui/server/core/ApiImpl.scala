@@ -508,15 +508,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   //MODEL WIZARDS
 
   //Extract models from an archive
-  def models(archivePath: SafePath): Seq[SafePath] = {
-    val toDir = archivePath.toNoExtention
-    // extractTGZToAndDeleteArchive(archivePath, toDir)
-    (for {
-      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.name)
-    } yield tnd).map {
-      nd ⇒ toDir ++ nd.name
-    }
-  }
+//  def models(archivePath: SafePath): Seq[SafePath] = {
+//    val toDir = archivePath.toNoExtention
+//    // extractTGZToAndDeleteArchive(archivePath, toDir)
+//    (for {
+//      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.name)
+//    } yield tnd).map {
+//      nd ⇒ toDir ++ nd.name
+//    }
+//  }
 
   def expandResources(resources: Resources): Resources = {
     import services._

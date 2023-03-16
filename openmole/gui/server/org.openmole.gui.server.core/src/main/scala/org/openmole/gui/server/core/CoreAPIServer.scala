@@ -112,11 +112,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val listEnvironmentErrorsRoute =
     listEnvironmentErrors.errorImplementedBy { case(e, i) => apiImpl.listEnvironmentErrors(e, i) }
 
-  val modelsRoute =
-    models.errorImplementedBy { p => apiImpl.models(p) }
+//  val modelsRoute =
+//    models.errorImplementedBy { p => apiImpl.models(p) }
 
-  val expandResourcesRoute =
-    expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
+//  val expandResourcesRoute =
+//    expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
 
   val downloadHTTPRoute =
     downloadHTTP.errorImplementedBy { case(s, p, b, o) => apiImpl.downloadHTTP(s, p, b, o) }
@@ -183,8 +183,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       launchScriptRoute,
       clearEnvironmentErrorsRoute,
       listEnvironmentErrorsRoute,
-      modelsRoute,
-      expandResourcesRoute,
+//      modelsRoute,
+//      expandResourcesRoute,
       downloadHTTPRoute,
       temporaryDirectoryRoute,
       marketIndexRoute,

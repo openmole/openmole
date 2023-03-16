@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.shared.data.{FileType, Resources, SafePath}
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.tool.TagBadge
 import org.openmole.gui.client.tool.OMTags.*

@@ -130,12 +130,12 @@ trait CoreAPI extends RESTAPI {
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]
-  val models: ErrorEndpoint[SafePath, Seq[SafePath]] =
-    errorEndpoint(post(path / "wizard" / "models", jsonRequest[SafePath]), ok(jsonResponse[Seq[SafePath]]))
+//  val models: ErrorEndpoint[SafePath, Seq[SafePath]] =
+//    errorEndpoint(post(path / "wizard" / "models", jsonRequest[SafePath]), ok(jsonResponse[Seq[SafePath]]))
 
   //def expandResources(resources: Resources): Resources
-  val expandResources: ErrorEndpoint[Resources, Resources] =
-    errorEndpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
+//  val expandResources: ErrorEndpoint[Resources, Resources] =
+//    errorEndpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
 
   //def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
   val downloadHTTP: ErrorEndpoint[(String, SafePath, Boolean, Boolean), Unit] =

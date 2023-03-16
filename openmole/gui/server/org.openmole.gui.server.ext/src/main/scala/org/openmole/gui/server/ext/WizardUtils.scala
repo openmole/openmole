@@ -21,6 +21,17 @@ import org.openmole.gui.shared.data.*
 
 object WizardUtils {
 
+  case class WizardModelData(
+    vals: String,
+    inputs: String,
+    outputs: String,
+    inputFileMapping: String,
+    outputFileMapping: String,
+    defaults: String,
+    //   resources: String,
+    specificInputMapping: Option[String] = None,
+    specificOutputMapping: Option[String] = None)
+
   def wizardModelData(inputs: Seq[PrototypePair],
                       outputs: Seq[PrototypePair],
                      // resources: Seq[String],
