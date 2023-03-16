@@ -86,8 +86,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     val newNode = safePath.parent ++ to
-    api.move(safePath, safePath.parent ++ to).foreach { _ ⇒
-      println(safePath.name + " to  " + newNode.name)
+    api.move(Seq(safePath -> newNode)).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
       panels.treeNodePanel.invalidCurrentCache
       panels.tabContent.checkTabs

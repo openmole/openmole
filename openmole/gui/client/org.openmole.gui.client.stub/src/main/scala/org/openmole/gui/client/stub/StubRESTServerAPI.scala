@@ -121,9 +121,11 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     Future.successful(found)
 
-  override def move(from: SafePath, to: SafePath)(using BasePath): Future[Unit] =
-    val f = files.remove(from).get
-    files += to -> f
+  override def move(paths: Seq[(SafePath, SafePath)])(using BasePath): Future[Unit] =
+    paths.foreach { (from, to) =>
+      val f = files.remove(from).get
+      files += to -> f
+    }
     Future.successful(())
 
   override def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit] =

@@ -50,9 +50,7 @@ case class FileUploaderUI(
             val to = SafePath(Seq(fileName), Authentication)
   
             pathSet.set(false)
-            api.move(from, to).foreach { b ⇒
-              pathSet.set(true)
-            }
+            api.move(Seq(from -> to)).foreach { _ ⇒ pathSet.set(true) }
           fInput.ref.value = ""
         }
     }),

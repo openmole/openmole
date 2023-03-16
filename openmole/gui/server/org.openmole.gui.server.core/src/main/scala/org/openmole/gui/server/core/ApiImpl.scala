@@ -207,14 +207,15 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     f.isDirectoryEmpty
   }
 
-  def move(from: SafePath, to: SafePath): Unit = {
-    import services.*
-    val fromFile = safePathToFile(from)
-    val toFile = safePathToFile(to)
+  def move(moves: Seq[(SafePath, SafePath)]): Unit =
+    moves.foreach { (from, to) =>
+      import services.*
+      val fromFile = safePathToFile(from)
+      val toFile = safePathToFile(to)
 
-    fromFile.move(to.toFile)
-    //utils.move(fromFile, toFile)
-  }
+      fromFile.move(toFile)
+      //utils.move(fromFile, toFile)
+    }
 
   def duplicate(safePath: SafePath, newName: String): SafePath =
     import services._

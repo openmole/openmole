@@ -434,7 +434,7 @@ class TreeNodePanel {
         if (isDir) {
           if (dragged != to) {
             //treeNodeTabs.saveAllTabs(() ⇒ {
-            api.move(dragged, to ++ dragged.name).foreach {
+            api.move(Seq(dragged -> (to ++ dragged.name))).foreach {
               b ⇒
                 treeNodeManager.invalidCache(to)
                 treeNodeManager.invalidCache(dragged)
