@@ -60,9 +60,9 @@ object utils {
 
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): SafePath =
     context match
-      case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)))
-      case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None))
-      case ServerFileSystemContext.Authentication => SafePath(getPathArray(f, Some(authenticationKeysDirectory)))
+      case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)), context)
+      case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None), context)
+      case ServerFileSystemContext.Authentication => SafePath(getPathArray(f, Some(authenticationKeysDirectory)), context)
 
   def safePathToFile(s: SafePath)(implicit workspace: Workspace): File =
     def getFile(root: Option[File], paths: Seq[String]): File =

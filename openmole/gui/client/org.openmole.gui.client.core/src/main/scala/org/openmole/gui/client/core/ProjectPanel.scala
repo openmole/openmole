@@ -28,9 +28,9 @@ object ProjectPanel {
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
 
     // 1- Empty project
-    def emptyProject = {
+    def emptyProject =
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.directory.now(), fileName, onCreated = () ⇒ {
+      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.directory.now(), fileName).map { _ =>
         val toDisplay = panels.treeNodePanel.treeNodeManager.directory.now() ++ fileName
         api.download(
           toDisplay,
@@ -39,8 +39,8 @@ object ProjectPanel {
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
           }
         panels.closeExpandable
-      })
-    }
+      }
+
     val emptyProjectButton = button(btn_purple, marginTop:= "40", "Build", onClick --> {_=> emptyProject})
 
     // 2- Model wizard

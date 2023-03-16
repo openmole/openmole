@@ -42,11 +42,13 @@ object CoreUtils {
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
 
   
-  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false, onCreated: () ⇒ Unit = () ⇒ {})(using panels: Panels, api: ServerAPI, path: BasePath) =
-    api.createFile(safePath, fileName, directory).foreach { b ⇒
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false)(using panels: Panels, api: ServerAPI, path: BasePath): Future[Unit] =
+    api.createFile(safePath, fileName, directory).flatMap { b ⇒
       if b
-      then onCreated()
-      else panels.notifications.showGetItNotification(NotificationLevel.Error, s" $fileName already exists.")
+      then Future.successful(())
+      else
+        panels.notifications.showGetItNotification(NotificationLevel.Error, s" $fileName already exists.")
+        Future.failed(new java.io.IOException(s"File already $fileName exists in ${safePath.path.mkString}"))
     }
   
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =

@@ -116,9 +116,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   // FILES
   def createFile(safePath: SafePath, name: String, directory: Boolean): Boolean =
     import services._
+    val target = new File(safePath.toFile, name)
     if directory
-    then new File(safePath.toFile, name).mkdirs
-    else new File(safePath.toFile, name).createNewFile
+    then target.mkdirs
+    else target.createNewFile
 
   def deleteFiles(safePaths: Seq[SafePath]): Unit = {
     import services.*
@@ -230,14 +231,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val file = safePathToFile(path)
 
+    //if !file.exists() then file.content = ""
+
     file.withLock { _ ⇒
-      def save() = {
+      def save() =
         file.content = fileContent
-
         def newHash = services.fileService.hashNoCache(file).toString
-
         (true, newHash)
-      }
 
       if (overwrite) save()
       else hash match {

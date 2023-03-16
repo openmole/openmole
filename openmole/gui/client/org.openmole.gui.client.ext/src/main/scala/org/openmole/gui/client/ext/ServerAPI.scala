@@ -35,11 +35,11 @@ opaque type BasePath = Option[String]
 
 trait ServerAPI:
   def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]]
-  def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)]
+  def saveFile(safePath: SafePath, content: String, hash: Option[String] = None, overwrite: Boolean = false)(using BasePath): Future[(Boolean, String)]
   def size(safePath: SafePath)(using BasePath): Future[Long]
   def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean]
   def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit]
-  def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData]
+  def listFiles(path: SafePath, filter: FileFilter = FileFilter.defaultFilter)(using BasePath): Future[ListFilesData]
   def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]]
   def move(paths: Seq[(SafePath, SafePath)])(using BasePath): Future[Unit]
   def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit]

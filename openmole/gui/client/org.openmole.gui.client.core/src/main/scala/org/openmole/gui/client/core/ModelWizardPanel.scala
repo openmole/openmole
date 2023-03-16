@@ -85,6 +85,7 @@ object ModelWizardPanel:
     //val filePath: Var[Option[SafePath]] = Var(None)
     val transferring: Var[ProcessState] = Var(Processed())
     val modelMetadata: Var[Option[ParsedModelMetadata]] = Var(None)
+    val currentDirectory: Var[SafePath] = Var(panels.directory.now())
     //val resources: Var[Resources] = Var(Resources.empty)
 
     def factory(directory: SafePath, uploaded: Seq[RelativePath]): Option[WizardPluginFactory] =
@@ -207,7 +208,13 @@ object ModelWizardPanel:
             outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
             command = commandeInput.ref.value
           )
-        md.factory.content(tmpDirectory, md.files, modifiedMMD).foreach(println)
+
+        for
+          content <- md.factory.content(tmpDirectory, md.files, modifiedMMD)
+          _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
+          listed <- api.listFiles(tmpDirectory)
+          _ <- api.move(listed.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
+        do panels.treeNodePanel.invalidCurrentCache
       }
 //      factory(safePath).foreach { f =>
 //        modelMetadata.now().foreach { mmd =>
@@ -224,12 +231,11 @@ object ModelWizardPanel:
 
 
 
-    def buildButton(tmpDirectory: SafePath) =
+    def buildButton(directory: SafePath, tmpDirectory: SafePath) =
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
-            val targetPath = panels.directory.now()
-            buildTask(targetPath, tmpDirectory)
+            buildTask(directory, tmpDirectory)
             modelMetadata.set(None)
             panels.closeExpandable
         }
@@ -248,7 +254,7 @@ object ModelWizardPanel:
             div(flexRow, width := "100%",
               upButton(tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px",
-                child <-- (modelMetadata.signal combineWith panels.directory.signal).map {
+                child <-- (modelMetadata.signal combineWith currentDirectory).map {
                   case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_.mkString).mkString(", ")}""")
                   case (_, d) => span(s"Task will be built in ⌂/${d.path.mkString}")
                 })
@@ -264,14 +270,16 @@ object ModelWizardPanel:
             ),
             exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40")),
             div(flexRow, width := "100%", marginTop := "40",
-              buildButton(tmpDirectory),
+              buildButton(currentDirectory.now(), tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
-                child <-- (modelMetadata.signal combineWith panels.directory.signal).map {
+                child <-- (modelMetadata.signal combineWith currentDirectory).map {
                   case (Some(md), d) => span(s"${md.factory.name} task will be built in ⌂/${d.path.mkString}")
                   case _ => span()
-                }),
+                }
+              ),
             ),
-            uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) })
+            uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
+            div(onMountCallback(_ => currentDirectory.set(panels.directory.now())))
 //            div(
 //              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }
 //            )

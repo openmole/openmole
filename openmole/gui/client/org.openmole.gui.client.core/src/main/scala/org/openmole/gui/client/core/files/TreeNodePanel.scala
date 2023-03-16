@@ -60,7 +60,7 @@ class TreeNodePanel {
   )
 
   // New file tool
-  def newNodeInput =
+  val newNodeInput =
     inputTag().amend(
       placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New directory" else "New file" },
       width := "270px",
@@ -68,21 +68,17 @@ class TreeNodePanel {
       onMountFocus
     )
 
-
   lazy val directoryToggle =
     object FileType
     val folder = ToggleState(FileType, "Folder", "btn purple-button", _ ⇒ {})
     val file = ToggleState(FileType, "File", "btn purple-button", _ ⇒ {})
     toggle(folder, false, file, () ⇒ {})
 
-  def createNewNode(using api: ServerAPI, basePath: BasePath, panels: Panels) = {
-    val newFile = newNodeInput.ref.value
+  def createNewNode(newFile: String)(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     val currentDirNode = treeNodeManager.directory
-    directoryToggle.toggled.now() match {
-      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, onCreated = () ⇒ treeNodeManager.invalidCurrentCache)
-    }
-  }
+    directoryToggle.toggled.now() match
+      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true).map(_ => treeNodeManager.invalidCurrentCache)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile).map(_ => treeNodeManager.invalidCurrentCache)
 
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
@@ -116,7 +112,7 @@ class TreeNodePanel {
           div()
       }.amend(marginLeft := "10px"),
       onSubmit.preventDefault --> { _ ⇒
-        createNewNode
+        createNewNode(newNodeInput.ref.value)
         newNodeInput.ref.value = ""
         plusFile.set(false)
       })
@@ -244,12 +240,9 @@ class TreeNodePanel {
     )
 
   def downloadFile(safePath: SafePath, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
-
     api.download(
       safePath,
-      (p: ProcessState) ⇒ {
-        transferring.set(p)
-      },
+      (p: ProcessState) ⇒ { transferring.set(p) },
       hash = hash
     )
 
