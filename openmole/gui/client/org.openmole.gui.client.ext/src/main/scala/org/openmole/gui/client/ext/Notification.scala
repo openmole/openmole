@@ -23,4 +23,4 @@ enum NotificationLevel:
   case Info, Error
 
 trait NotificationService:
-  def notify(level: NotificationLevel, title: String, body: Div = div()): Unit
+  def notify(level: NotificationLevel, title: String, body: HtmlElement = div()): Unit

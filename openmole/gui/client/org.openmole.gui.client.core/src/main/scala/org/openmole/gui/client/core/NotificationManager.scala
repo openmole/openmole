@@ -32,7 +32,7 @@ object NotificationManager:
 
   def toService(manager: NotificationManager) =
     new NotificationService:
-      override def notify(level: NotificationLevel, title: String, body: Div): Unit = manager.addAndShowNotificaton(level, title, body)
+      override def notify(level: NotificationLevel, title: String, body: HtmlElement): Unit = manager.addAndShowNotificaton(level, title, body)
 
 class NotificationManager:
 
@@ -49,7 +49,7 @@ class NotificationManager:
 
   def removeById(id: String) = notifications.update(s => s.filterNot(_.id == id))
 
-  def addNotification(level: NotificationLevel, title: String, body: String => Div) =
+  def addNotification(level: NotificationLevel, title: String, body: String => HtmlElement) =
     val id = DataUtils.uuID
     val notif = NotificationLine(level, title, div(body(id), cls := "notification"), id)
     notifications.update { s =>
@@ -62,7 +62,7 @@ class NotificationManager:
     }
     notif
 
-  def addAndShowNotificaton(level: NotificationLevel, title: String, body: Div = div()) =
+  def addAndShowNotificaton(level: NotificationLevel, title: String, body: HtmlElement = div()) =
     val last = addNotification(level, title, _ => body)
     showNotification(last)
     last
@@ -182,20 +182,15 @@ class NotificationManager:
                     div(backgroundColor := "white",
                       div(s.title,
                         padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
-                        backgroundColor := {
-                          if (i % 2 == 0) lColor.background else "#f4f4f4"
-                        }
-                      ),
-                      onClick --> { _ =>
-                        currentID.update(
-                          _ match
+                        backgroundColor := { if i % 2 == 0 then lColor.background else "#f4f4f4" },
+                        onClick --> { _ =>
+                          currentID.update {
                             case Some(i) if i == s.id => None
                             case _ => Some(s.id)
-                        )
-                      },
-                      currentID.signal.map { i => i == Some(s.id) }.expand {
-                        s.body
-                      }.amend(borderLeft := s"15px solid ${lColor.border}")
+                          }
+                        },
+                      ),
+                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
                     )
                   )
                 }

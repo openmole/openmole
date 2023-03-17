@@ -230,8 +230,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
 
     val file = safePathToFile(path)
-
-    //if !file.exists() then file.content = ""
+    if !file.exists() then file.content = ""
 
     file.withLock { _ ⇒
       def save() =

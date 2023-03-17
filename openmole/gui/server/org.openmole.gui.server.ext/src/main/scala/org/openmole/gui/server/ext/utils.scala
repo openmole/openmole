@@ -78,7 +78,7 @@ object utils {
 
     s.context match
       case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path.value)
-      case ServerFileSystemContext.Absolute ⇒ getFile(None, s.path.value)
+      case ServerFileSystemContext.Absolute ⇒ getFile(Some(File("/")), s.path.value)
       case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path.value)
 
   def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =

@@ -19,6 +19,7 @@ package org.openmole.gui.client.ext
 
 import endpoints4s.xhr.EndpointsSettings
 
+import com.raquo.laminar.api.L.*
 import scala.concurrent.duration.*
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,15 +34,22 @@ object Fetch:
   def onTimeout()(using notification: NotificationService) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.")
   def onWarningTimeout()(using notification: NotificationService) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.")
   def onFailed(t: Throwable)(using notification: NotificationService) =
+    val errorStyle = Seq(width := "100%", height := "400px", whiteSpace := "pre")
+
     t match
       case Fetch.ServerError(e) =>
-        notification.notify(NotificationLevel.Error,
-          s"""The server returned an error 500:
-             |${ErrorData.stackTrace(e)}""".stripMargin)
+        notification.notify(
+          NotificationLevel.Error,
+          s"""The server returned an error 500""",
+          textArea(errorStyle, ErrorData.stackTrace(e))
+        )
+
       case t =>
-        notification.notify(NotificationLevel.Error,
-          s"""The server failed unexpectedly:
-             |${t}""".stripMargin)
+        notification.notify(
+          NotificationLevel.Error,
+          """The server failed unexpectedly""",
+          textArea(errorStyle, ErrorData.stackTrace(ErrorData(t)))
+        )
 
 
 class Fetch[API](api: EndpointsSettings => API) {
