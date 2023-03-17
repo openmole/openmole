@@ -82,11 +82,13 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
     formData.append("fileType", destinationPath.context.typeName)
 
+    def path(f: File) = if f.webkitRelativePath.isEmpty then Seq(f.name) else f.webkitRelativePath.split('/').toSeq
+
     for
       i ← 0 to fileList.length - 1
     do
       val file = fileList(i)
-      formData.append(Utils.toURI(destinationPath.path.value ++ file.webkitRelativePath.split('/')), file)
+      formData.append(Utils.toURI(destinationPath.path.value ++ path(file)), file)
 
     val xhr = new XMLHttpRequest
 
@@ -101,15 +103,8 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
     val p = scala.concurrent.Promise[Seq[RelativePath]]()
 
-
-
     xhr.onload = e =>
-      p.success(
-        fileList.map { f =>
-          val path = if f.webkitRelativePath.isEmpty then Seq(f.name) else  f.webkitRelativePath.split('/').toSeq
-          RelativePath(path)
-        }.toSeq
-      )
+      p.success(fileList.map { f => RelativePath(path(f)) }.toSeq)
 
     xhr.onerror = e =>
       p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))

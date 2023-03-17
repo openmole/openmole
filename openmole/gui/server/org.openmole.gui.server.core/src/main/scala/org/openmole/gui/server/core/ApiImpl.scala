@@ -179,8 +179,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def temporaryDirectory(): SafePath =
     import services.*
-    val dir = services.tmpDirectory.newDir("openmoleGUI")
-    dir.mkdirs()
+    val dir = services.tmpDirectory.newDir("openmoleGUI", create = true)
     dir.toSafePath(using org.openmole.gui.shared.data.ServerFileSystemContext.Absolute)
 
   def exists(safePath: SafePath): Boolean = {

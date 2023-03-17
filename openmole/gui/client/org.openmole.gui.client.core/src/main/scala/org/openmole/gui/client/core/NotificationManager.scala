@@ -68,7 +68,6 @@ class NotificationManager:
     last
 
   def showNotification(notification: NotificationLine) =
-    showNotfications.set(true)
     currentListType.set(Some(notification.level))
     currentID.set(Some(notification.id))
 
@@ -96,11 +95,11 @@ class NotificationManager:
     showNotification(notif)
 
   def showAlternativeNotification(
-                                   level: NotificationLevel,
-                                   title: String,
-                                   body: Div = div(),
-                                   alt1: Alternative = Alternative("OK"),
-                                   alt2: Alternative = Alternative("Cancel")) =
+    level: NotificationLevel,
+    title: String,
+    body: Div = div(),
+    alt1: Alternative = Alternative("OK"),
+    alt2: Alternative = Alternative("Cancel")) =
     lazy val notif: NotificationLine =
       addNotification(
         level,
@@ -110,12 +109,8 @@ class NotificationManager:
             body.amend(cls := "getItNotification"),
             buttonGroup.amend(
               margin := "15", float.right,
-              button(btn_primary, alt1.name,
-                onClick --> { _ => alt1.action(id) }
-              ),
-              button(btn_secondary_outline, alt2.name,
-                onClick --> { _ => alt2.action(id) }
-              )
+              button(btn_primary, alt1.name, onClick --> { _ => alt1.action(id) } ),
+              button(btn_secondary_outline, alt2.name, onClick --> { _ => alt2.action(id) } )
             )
           )
       )

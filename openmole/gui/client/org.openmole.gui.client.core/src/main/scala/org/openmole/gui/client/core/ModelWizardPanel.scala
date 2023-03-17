@@ -92,20 +92,23 @@ object ModelWizardPanel:
       plugins.wizardFactories.filter { _.accept(directory, uploaded) }.headOption
 
     def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
-        api.deleteFiles(Seq(tmpDirectory)).andThen(_ =>
-          api.upload(
-            fInput.ref.files,
-            tmpDirectory,
-            (p: ProcessState) ⇒ transferring.set(p)
-          ).flatMap { uploaded ⇒
-            factory(tmpDirectory, uploaded).headOption match
-              case Some(factory) =>
-                factory.parse(tmpDirectory, uploaded).map {
-                  md => modelMetadata.set(Some(ParsedModelMetadata(md, uploaded, factory)))
-                }
-              case None =>
-                panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_.mkString).mkString(", ")}"))
-                Future.successful(())
+      val cleanAndUpload: Future[Seq[RelativePath]] =
+        for
+          list <- api.listFiles(tmpDirectory)
+          _ <- api.deleteFiles(list.map(f => tmpDirectory / f.name))
+          uploaded <- api.upload(fInput.ref.files, tmpDirectory, p ⇒ transferring.set(p))
+        yield uploaded
+
+      cleanAndUpload.flatMap { uploaded =>
+        factory(tmpDirectory, uploaded) match
+          case Some(factory) =>
+            factory.parse(tmpDirectory, uploaded).map {
+              md => modelMetadata.set(Some(ParsedModelMetadata(md, uploaded, factory)))
+            }
+          case None =>
+            panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_.mkString).mkString(", ")}"))
+            Future.successful(())
+      }
   //          val contentPath =
   //            if uploaded.size == 1
   //            then
@@ -141,8 +144,6 @@ object ModelWizardPanel:
   //                }
   //              }
   //
-          }//.andThen(_ => api.deleteFiles(Seq(tempFile)))
-        )
 
     val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
     val uploadDirectory = Var(false)
@@ -231,11 +232,11 @@ object ModelWizardPanel:
 
 
 
-    def buildButton(directory: SafePath, tmpDirectory: SafePath) =
+    def buildButton(tmpDirectory: SafePath) =
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
-            buildTask(directory, tmpDirectory)
+            buildTask(currentDirectory.now(), tmpDirectory)
             modelMetadata.set(None)
             panels.closeExpandable
         }
@@ -270,7 +271,7 @@ object ModelWizardPanel:
             ),
             exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40")),
             div(flexRow, width := "100%", marginTop := "40",
-              buildButton(currentDirectory.now(), tmpDirectory),
+              buildButton(tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
                 child <-- (modelMetadata.signal combineWith currentDirectory).map {
                   case (Some(md), d) => span(s"${md.factory.name} task will be built in ⌂/${d.path.mkString}")
