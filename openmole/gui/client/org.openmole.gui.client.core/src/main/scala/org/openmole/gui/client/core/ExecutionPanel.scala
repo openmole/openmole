@@ -10,7 +10,7 @@ import org.openmole.gui.shared.data.ErrorData
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.files.{OMSContent, TabContent}
 import org.openmole.gui.client.tool.{Component, OMTags}
-import org.openmole.gui.shared.data.ExecutionState.Failed
+import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.Laminar
 import org.openmole.gui.client.core.Panels.ExpandablePanel
@@ -56,17 +56,17 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-                               path: SafePath,
-                               script: String,
-                               state: ExecutionDetails.State,
-                               startDate: Long,
-                               duration: Long,
-                               executionTime: Long,
-                               ratio: String,
-                               running: Long,
-                               error: Option[ErrorData] = None,
-                               envStates: Seq[EnvironmentState] = Seq(),
-                               output: String = "")
+    path: SafePath,
+    script: String,
+    state: ExecutionDetails.State,
+    startDate: Long,
+    duration: Long,
+    executionTime: Long,
+    ratio: String,
+    running: Long,
+    error: Option[ErrorData] = None,
+    envStates: Seq[EnvironmentState] = Seq(),
+    output: String = "")
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Executions = Map[ExecutionId, ExecutionDetails]
@@ -94,10 +94,21 @@ class ExecutionPanel:
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
+    def userCapsuleState(c: Seq[CapsuleExecution]) =
+      val userCapsules = c.filter(_.user)
+      val ready = userCapsules.map(_.statuses.ready).sum
+      val running = userCapsules.map(_.statuses.running).sum
+      val completed = userCapsules.map(_.statuses.completed).sum
+      (ready, running, completed)
+
     exec.state match
       case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
-      case f: ExecutionState.Finished ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
-      case r: ExecutionState.Running ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒
+        val (ready, running, completed) = userCapsuleState(f.capsules)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = f.environmentStates, exec.output)
+      case r: ExecutionState.Running ⇒
+        val (ready, running, completed) = userCapsuleState(r.capsules)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
 

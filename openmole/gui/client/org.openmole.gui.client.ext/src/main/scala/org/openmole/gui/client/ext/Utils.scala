@@ -48,4 +48,9 @@ object Utils {
     val factory = pluginFactory
   }
 
+  def errorTextAreaNotificationBody(content: String) =
+    val errorStyle = Seq(width := "100%", height := "400px", whiteSpace := "pre")
+    textArea(errorStyle, content)
+
+
 }
