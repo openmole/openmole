@@ -201,8 +201,8 @@ object ModelWizardPanel:
     def browseToPath(safePath: SafePath)(using panels: Panels) =
       a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
-    def buildTask(safePath: SafePath, tmpDirectory: SafePath)(using panels: Panels) =
-      modelMetadata.now().foreach { md =>
+    def buildTask(safePath: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels) =
+      mmd.foreach { md =>
         val modifiedMMD =
           md.data.copy(
             inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
@@ -236,7 +236,7 @@ object ModelWizardPanel:
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
-            buildTask(currentDirectory.now(), tmpDirectory)
+            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now())
             modelMetadata.set(None)
             panels.closeExpandable
         }

@@ -15,7 +15,7 @@
   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
   *
   */
-package org.openmole.gui.server.ext
+package org.openmole.gui.client.ext
 
 import org.openmole.gui.shared.data.*
 
@@ -32,12 +32,13 @@ object WizardUtils {
     specificInputMapping: Option[String] = None,
     specificOutputMapping: Option[String] = None)
 
-  def wizardModelData(inputs: Seq[PrototypePair],
-                      outputs: Seq[PrototypePair],
-                     // resources: Seq[String],
-                      specificInputPattern: Option[String] = None,
-                      specificOutputPattern: Option[String] = None,
-                     ) = {
+  def wizardModelData(
+    inputs: Seq[PrototypePair],
+    outputs: Seq[PrototypePair],
+    // resources: Seq[String],
+    specificInputPattern: Option[String] = None,
+    specificOutputPattern: Option[String] = None,
+    ) = {
 
     def testBoolean(protoType: PrototypePair) = protoType.`type` match {
       case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
@@ -59,12 +60,16 @@ object WizardUtils {
 
     //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
+    val defaultValues =
+      (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
+        ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+        _._2.isEmpty
+      }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
+
+
     val defaults =
-      "\n  // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" +
-        (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-          ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
-          _._2.isEmpty
-        }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
+       if !defaultValues.isEmpty then "\n  // Default values. Can be removed if OpenMOLE Vals are set by values coming from the workflow\n" else "" +
+         defaultValues
 
     val vals =
       ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>

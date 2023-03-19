@@ -20,6 +20,7 @@ package org.openmole.gui.plugin.wizard.container
 import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.core.services.Services
+import org.openmole.gui.client.ext.WizardUtils
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.shared.api.*

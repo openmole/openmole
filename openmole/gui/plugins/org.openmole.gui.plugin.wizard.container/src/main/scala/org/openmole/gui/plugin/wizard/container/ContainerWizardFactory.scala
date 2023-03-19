@@ -49,9 +49,15 @@ class ContainerWizardFactory extends WizardPluginFactory {
 
   def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
   def content(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) =
+    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
+
     Future(
       s"""
-         |val model = ContainerTask(workDirectory / "${uploaded.head.mkString}", "echo Viva OpenMOLE")
+         |${modelData.vals}
+         |val model =
+         |  ContainerTask(workDirectory / "${uploaded.head.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
+         |    ${WizardUtils.expandWizardData(modelData)}
+         |  )
          |model""".stripMargin)
     //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
 
