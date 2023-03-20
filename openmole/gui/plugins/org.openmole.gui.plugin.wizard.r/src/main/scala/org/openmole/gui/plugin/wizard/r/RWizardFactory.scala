@@ -40,8 +40,8 @@ object TopLevelExports {
 }
 
 class RWizardFactory extends WizardPluginFactory {
-  def accept(directory: SafePath, uploaded: Seq[RelativePath]) = uploaded.filter(_.value.size < 2).exists(_.name.endsWith(".R"))
-  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???  //PluginFetch.futureError(_.parse(safePath).future)
-  def content(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
+  def accept(uploaded: Seq[(RelativePath, SafePath)]) = uploaded.filter(_._1.value.size < 2).exists(_._1.name.endsWith(".R"))
+  def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???  //PluginFetch.futureError(_.parse(safePath).future)
+  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
   def name: String = "R"
 }

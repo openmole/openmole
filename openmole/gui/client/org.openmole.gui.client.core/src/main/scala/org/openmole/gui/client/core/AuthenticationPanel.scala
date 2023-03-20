@@ -142,9 +142,7 @@ object AuthenticationPanel {
       }
 
       val tests: Var[Seq[Test]] = Var(Seq(Test.pending))
-      testedAuth.tests.foreach { ts ⇒
-        tests.set(ts)
-      }
+      testedAuth.tests.foreach { ts ⇒ tests.set(ts) }
 
       def columnizer(el: HtmlElement) = div(el, width := "150px")
 
@@ -162,9 +160,7 @@ object AuthenticationPanel {
             testedAuth.auth.factory.name)),
           div(
             children <-- tests.signal.map { ts ⇒
-              ts.map { t =>
-                columnizer(toLabel(t))
-              }
+              ts.map { t => columnizer(toLabel(t)) }
             }
           ),
           div(

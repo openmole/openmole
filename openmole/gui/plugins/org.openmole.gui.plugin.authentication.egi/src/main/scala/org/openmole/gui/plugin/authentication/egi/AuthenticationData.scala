@@ -30,21 +30,3 @@ case class EGIAuthenticationData(
 ) extends AuthenticationData {
   def name = "egi.p12"
 }
-
-object EGIAuthenticationTest {
-  def apply(
-    message:  String,
-    password: Test   = Test.pending,
-    proxy:    Test   = Test.pending,
-    dirac:    Test   = Test.pending
-  ): Test = {
-    val all = Seq(password, proxy, dirac)
-    val error = all.flatMap(_.error).headOption
-
-    error match {
-      case Some(e) ⇒ Test.error("failed", e)
-      case None if all.exists { t ⇒ t == Test.pending } ⇒ Test.pending
-      case _ ⇒ Test.passed(message)
-    }
-  }
-}

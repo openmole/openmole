@@ -75,20 +75,18 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit] = fetch.futureError(_.clearNotification(ids).future)
 
   override def upload(
-    fileList: FileList,
-    destinationPath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[RelativePath]] = {
+    files: Seq[(File, SafePath)],
+    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[(RelativePath, SafePath)]] = {
     val formData = new FormData
 
-    formData.append("fileType", destinationPath.context.typeName)
+    val destinationPaths = files.unzip._2
 
-    def path(f: File) = if f.webkitRelativePath.isEmpty then Seq(f.name) else f.webkitRelativePath.split('/').toSeq
+    formData.append("fileType", destinationPaths.map(_.context.typeName).mkString(","))
 
     for
-      i ← 0 to fileList.length - 1
+      (file, destination) <- files
     do
-      val file = fileList(i)
-      formData.append(Utils.toURI(destinationPath.path.value ++ path(file)), file)
+      formData.append(Utils.toURI(destination.path.value), file)
 
     val xhr = new XMLHttpRequest
 
@@ -101,19 +99,19 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     xhr.onloadend = e ⇒
       fileTransferState(Processed())
 
-    val p = scala.concurrent.Promise[Seq[RelativePath]]()
+    val p = scala.concurrent.Promise[Seq[(RelativePath, SafePath)]]()
 
     xhr.onload = e =>
-      p.success(fileList.map { f => RelativePath(path(f)) }.toSeq)
+      p.success(files.map(_._1.path) zip destinationPaths)
 
     xhr.onerror = e =>
-      p.failure(new IOException(s"Upload of files ${fileList} to ${destinationPath} failed"))
+      p.failure(new IOException(s"Upload of files ${files} failed"))
 
     xhr.onabort = e =>
-      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} was aborted"))
+      p.failure(new IOException(s"Upload of file ${files} was aborted"))
 
     xhr.ontimeout = e =>
-      p.failure(new IOException(s"Upload of file ${fileList} to ${destinationPath} timed out"))
+      p.failure(new IOException(s"Upload of file ${files} timed out"))
 
 
     xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)

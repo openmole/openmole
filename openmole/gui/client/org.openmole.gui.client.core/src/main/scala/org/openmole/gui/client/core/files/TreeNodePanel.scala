@@ -93,8 +93,7 @@ class TreeNodePanel {
   private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.directory.now()
     api.upload(
-      fileInput.ref.files,
-      current,
+      fileInput.ref.files.toSeq.map(f => f -> current / f.path),
       (p: ProcessState) ⇒ transferring.set(p)
     ).map { _ =>
       fileInput.ref.value = ""

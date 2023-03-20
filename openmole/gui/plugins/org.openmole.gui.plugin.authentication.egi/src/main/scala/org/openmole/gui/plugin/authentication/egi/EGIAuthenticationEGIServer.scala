@@ -114,9 +114,20 @@ class EGIAuthenticationEGIServer(s: Services)
 
       val vos = services.preference(EGIAuthenticationAPIServer.voTest)
 
+      def aggregate(message: String, password: Test, proxy: Test, dirac: Test): Test = {
+        val all = Seq(password, proxy, dirac)
+        val error = all.flatMap(_.error).headOption
+
+        error match {
+          case Some(e) ⇒ Test.error("failed", e)
+          case None if all.exists { t ⇒ t == Test.pending } ⇒ Test.pending
+          case _ ⇒ Test.passed(message)
+        }
+      }
+      
       vos.map { voName ⇒
         Try {
-          EGIAuthenticationTest(
+          aggregate(
             voName,
             testPassword(data, EGIAuthentication.testPassword(_)),
             test(data, voName, EGIAuthentication.testProxy(_, _)),
@@ -124,7 +135,7 @@ class EGIAuthenticationEGIServer(s: Services)
           )
         } match {
           case Success(a) ⇒ a
-          case Failure(f) ⇒ EGIAuthenticationTest("Error")
+          case Failure(f) ⇒ Test.error("Error", ErrorData(f))
         }
       }
     }

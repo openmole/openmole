@@ -125,7 +125,9 @@ package data {
 
   case class SafePath(path: RelativePath, context: ServerFileSystemContext):
     def ++(s: String) = copy(path = this.path.value :++ s.split('/'))
-    def /(child: String) = copy(path = path.value :+ child)
+    def /(child: String): SafePath = copy(path = path.value :+ child)
+    def /(child: RelativePath): SafePath = copy(path = path.value :++ child.value)
+
     def parent: SafePath = copy(path = path.value.dropRight(1))
 
     def name = path.name
@@ -423,7 +425,6 @@ package data {
     def passed = false
     def message = "pending"
     def error = None
-
 
   case class FailedTest(message: String, errorValue: ErrorData) extends Test:
     def error = Some(errorValue)

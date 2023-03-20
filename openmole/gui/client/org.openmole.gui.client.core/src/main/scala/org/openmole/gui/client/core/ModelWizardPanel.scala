@@ -39,7 +39,7 @@ object ModelWizardPanel:
   
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
-  case class ParsedModelMetadata(data: ModelMetadata, files: Seq[RelativePath], factory: WizardPluginFactory)
+  case class ParsedModelMetadata(data: ModelMetadata, files: Seq[(RelativePath, SafePath)], factory: WizardPluginFactory)
 
   def successDiv = div(cls := "bi bi-patch-check-fill successBadge")
 
@@ -88,25 +88,25 @@ object ModelWizardPanel:
     val currentDirectory: Var[SafePath] = Var(panels.directory.now())
     //val resources: Var[Resources] = Var(Resources.empty)
 
-    def factory(directory: SafePath, uploaded: Seq[RelativePath]): Option[WizardPluginFactory] =
-      plugins.wizardFactories.filter { _.accept(directory, uploaded) }.headOption
+    def factory(uploaded: Seq[(RelativePath, SafePath)]): Option[WizardPluginFactory] =
+      plugins.wizardFactories.filter { _.accept(uploaded) }.headOption
 
     def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
-      val cleanAndUpload: Future[Seq[RelativePath]] =
+      val cleanAndUpload: Future[Seq[(RelativePath, SafePath)]] =
         for
           list <- api.listFiles(tmpDirectory)
           _ <- api.deleteFiles(list.map(f => tmpDirectory / f.name))
-          uploaded <- api.upload(fInput.ref.files, tmpDirectory, p ⇒ transferring.set(p))
+          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
         yield uploaded
 
       cleanAndUpload.flatMap { uploaded =>
-        factory(tmpDirectory, uploaded) match
+        factory(uploaded) match
           case Some(factory) =>
-            factory.parse(tmpDirectory, uploaded).map {
+            factory.parse(uploaded).map {
               md => modelMetadata.set(Some(ParsedModelMetadata(md, uploaded, factory)))
             }
           case None =>
-            panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_.mkString).mkString(", ")}"))
+            panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
             Future.successful(())
       }
   //          val contentPath =
@@ -169,7 +169,7 @@ object ModelWizardPanel:
                     case Some(mmd) ⇒
                       div(
                         flexRow,
-                        div(mmd.files.map(p => p.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
+                        div(mmd.files.map(p => p._1.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
                         successDiv
                       )
                     case x: Any =>
@@ -211,7 +211,7 @@ object ModelWizardPanel:
           )
 
         for
-          content <- md.factory.content(tmpDirectory, md.files, modifiedMMD)
+          content <- md.factory.content(md.files, modifiedMMD)
           _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
           _ <- api.move(listed.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
@@ -256,7 +256,7 @@ object ModelWizardPanel:
               upButton(tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px",
                 child <-- (modelMetadata.signal combineWith currentDirectory).map {
-                  case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_.mkString).mkString(", ")}""")
+                  case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_._1.mkString).mkString(", ")}""")
                   case (_, d) => span(s"Task will be built in ⌂/${d.path.mkString}")
                 })
             ),

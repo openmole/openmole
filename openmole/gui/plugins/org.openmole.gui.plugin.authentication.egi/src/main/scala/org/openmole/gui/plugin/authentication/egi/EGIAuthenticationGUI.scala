@@ -54,7 +54,11 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
   def shorten(path: String): String = path.split("/").last//if (path.length > 10) s"...${path.takeRight(10)}" else path
 
   val privateKey =
-    FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
+    FileUploaderUI(
+      data.privateKey.flatMap(Option(_)).map(shorten).getOrElse(""),
+      data.privateKey.isDefined,
+      Some("egi.p12")
+    )
 
   val voInputContent = Var[String]("")
   val voInput = inputTag("").amend(placeholder := "vo1,vo2", onInput.mapToValue --> voInputContent)

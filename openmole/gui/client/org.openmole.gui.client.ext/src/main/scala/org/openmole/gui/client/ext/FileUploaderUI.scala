@@ -41,18 +41,20 @@ case class FileUploaderUI(
 
   def view(using api: ServerAPI, path: BasePath) = label(
     fileInput((fInput: Input) ⇒ {
-      api.upload(fInput.ref.files, SafePath.empty.copy(context = ServerFileSystemContext.Authentication)).map { _ ⇒
-          if (fInput.ref.files.length > 0) 
-          then 
-            val leaf = fInput.ref.files.item(0).name
-            import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
-            val from = SafePath(Seq(leaf), Authentication)
-            val to = SafePath(Seq(fileName), Authentication)
-  
-            pathSet.set(false)
-            api.move(Seq(from -> to)).foreach { _ ⇒ pathSet.set(true) }
-          fInput.ref.value = ""
-        }
+      def to(name: String) = SafePath(Seq(name), ServerFileSystemContext.Authentication)
+
+      api.upload(fInput.ref.files.toSeq.map(f => f -> to(fileName))).map { _ ⇒
+//          if fInput.ref.files.length > 0
+//          then
+//            val leaf = fInput.ref.files.item(0).name
+//            import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
+//            val from = SafePath(Seq(leaf), Authentication)
+//            val to = SafePath(Seq(fileName), Authentication)
+//            pathSet.set(false)
+//            api.move(Seq(from -> to)).foreach { _ ⇒ pathSet.set(true) }
+        pathSet.set(false)
+        fInput.ref.value = ""
+      }
     }),
     child <-- pathSet.signal.map { ps ⇒
       if (ps) span(fileName, badge_success, cls := "badgeOM")
