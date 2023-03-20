@@ -54,7 +54,7 @@ object ProjectPanel {
 
     lazy val theTabs = Tabs.tabs(tabStyle = navbar_pills, isClosable = false)
       .add(Tab("empty", span("Empty project"), emptyProjectButton))
-      //.add(Tab("wizard", span("From your model"), wizardPanel))
+      .add(Tab("wizard", span("From your model"), wizardPanel))
       .add(Tab("market", span("From examples"), marketPanel))
       .add(Tab("url", span("From URL"), urlPanel ))
 
