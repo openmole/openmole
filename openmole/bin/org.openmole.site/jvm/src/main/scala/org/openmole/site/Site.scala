@@ -98,6 +98,7 @@ object Site {
         def headFrags(page: org.openmole.site.Page) =
           Seq(
             scalatags.Text.tags2.title(page.title),
+            link(rel := "icon", href := "img/favicon.svg", `type` := "img/svg+xml"),
             meta(name := "description", all.content := s"OpenMOLE: the model exploration software"),
             meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Parameter Tuning, Model Exploration, Optimization, Genetic Algorithm, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
             meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
