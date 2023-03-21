@@ -49,7 +49,8 @@ class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends Auth
 class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin:
   type AuthType = LoginAuthenticationData
   def factory = new LoginAuthenticationFactory
-  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data).foreach { _ ⇒ onremove() }
+
+  def remove(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
@@ -64,9 +65,10 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
     div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
   )
 
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit =
-    api.removeAuthentication(data).foreach { d ⇒
-      api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value)).foreach { b ⇒ onsave() }
-    }
+  def save(using basePath: BasePath, notificationAPI: NotificationService) =
+    for
+      _ <- remove
+      _ <- api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value))
+    yield ()
 
   def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)

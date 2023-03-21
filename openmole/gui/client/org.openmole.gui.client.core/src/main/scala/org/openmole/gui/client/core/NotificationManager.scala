@@ -26,7 +26,7 @@ object NotificationManager:
   object Alternative:
     def cancel(using panels: Panels) = Alternative("cancel", panels.notifications.removeById)
 
-  case class NotificationLine(level: NotificationLevel, title: String, body: HtmlElement, id: String = DataUtils.uuID, serverId: Option[Long] = None)
+  case class NotificationLine(level: NotificationLevel, title: String, body: HtmlElement, id: String = DataUtils.randomId, serverId: Option[Long] = None)
 
   def notificationContent(notification: NotificationLine) = (notification.level, notification.title)
 
@@ -50,7 +50,7 @@ class NotificationManager:
   def removeById(id: String) = notifications.update(s => s.filterNot(_.id == id))
 
   def addNotification(level: NotificationLevel, title: String, body: String => HtmlElement) =
-    val id = DataUtils.uuID
+    val id = DataUtils.randomId
     val notif = NotificationLine(level, title, div(body(id), cls := "notification"), id)
     notifications.update { s =>
       val cs = s.map {
@@ -132,7 +132,7 @@ class NotificationManager:
                 case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${e.date}""")
                 case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
 
-            NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.Utils.errorTextAreaNotificationBody(body), DataUtils.uuID, serverId = Some(NotificationEvent.id(event)))
+            NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.Utils.errorTextAreaNotificationBody(body), DataUtils.randomId, serverId = Some(NotificationEvent.id(event)))
 
     newEvents ++ s
   }

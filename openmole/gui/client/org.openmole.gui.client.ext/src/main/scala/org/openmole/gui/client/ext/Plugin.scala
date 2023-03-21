@@ -30,8 +30,8 @@ trait AuthenticationPlugin extends GUIPlugin:
   def data: AuthType
   def factory: AuthenticationPluginFactory
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
-  def remove(onremoved: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
+  def save(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
+  def remove(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
   def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
 sealed trait GUIPluginFactory

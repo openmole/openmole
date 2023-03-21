@@ -65,36 +65,24 @@ class EGIAuthenticationEGIServer(s: Services)
   )
 
   object impl {
-    private def authenticationFile(p: String) = {
-      def path = p.replace(EGIAuthenticationData.authenticationDirectory, utils.authenticationKeysDirectory.getAbsolutePath)
-
-      new java.io.File(path)
-    }
-
-    private def coreObject(data: EGIAuthenticationData) = data.privateKey.map { pk ⇒
-      P12Certificate(data.cypheredPassword, authenticationFile(pk) )
-    }
+    private def coreObject(data: EGIAuthenticationData) =
+      data.privateKey.map { pk ⇒ P12Certificate(cypher.encrypt(data.password), safePathToFile(pk)) }
 
     def egiAuthentications(): Seq[EGIAuthenticationData] =
       EGIAuthentication() match
         case Some(p12: P12Certificate) ⇒
           Seq(
             EGIAuthenticationData(
-              p12.cypheredPassword,
-              Some(p12.certificate.getPath)
+              cypher.decrypt(p12.cypheredPassword),
+              Some(p12.certificate.toSafePath(using ServerFileSystemContext.Authentication))
             )
           )
         case _ ⇒ Seq()
 
     def addAuthentication(data: EGIAuthenticationData): Unit =
-      coreObject(data).foreach { a ⇒
-        EGIAuthentication.update(a, test = false)
-      }
+      coreObject(data).foreach { a ⇒ EGIAuthentication.update(a, test = false) }
 
     def removeAuthentications() = EGIAuthentication.clear
-
-    // To be used for ssh private key
-    def deleteAuthenticationKey(keyName: String): Unit = authenticationFile(keyName).delete
 
     def testAuthentication(data: EGIAuthenticationData): Seq[Test] = {
 
@@ -114,17 +102,14 @@ class EGIAuthenticationEGIServer(s: Services)
 
       val vos = services.preference(EGIAuthenticationAPIServer.voTest)
 
-      def aggregate(message: String, password: Test, proxy: Test, dirac: Test): Test = {
+      def aggregate(message: String, password: Test, proxy: Test, dirac: Test): Test =
         val all = Seq(password, proxy, dirac)
         val error = all.flatMap(_.error).headOption
 
-        error match {
+        error match
           case Some(e) ⇒ Test.error("failed", e)
-          case None if all.exists { t ⇒ t == Test.pending } ⇒ Test.pending
           case _ ⇒ Test.passed(message)
-        }
-      }
-      
+
       vos.map { voName ⇒
         Try {
           aggregate(

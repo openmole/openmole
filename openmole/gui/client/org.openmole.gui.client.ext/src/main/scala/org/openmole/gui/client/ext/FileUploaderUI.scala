@@ -27,39 +27,21 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.DataUtils
 
-object FileUploaderUI {
-  def empty = FileUploaderUI("", false)
-}
+case class FileUploaderUI(existingKey: Option[SafePath], renaming: Option[SafePath] = None):
+  val file: Var[Option[SafePath]] = Var(existingKey)
 
-case class FileUploaderUI(
-  keyName: String,
-  keySet: Boolean,
-  renaming: Option[String] = None) {
-
-  val fileName = if (keyName == "") renaming.getOrElse(DataUtils.uuID) else keyName
-  val pathSet: Var[Boolean] = Var(keySet)
-
-  def view(using api: ServerAPI, path: BasePath) = label(
-    fileInput((fInput: Input) ⇒ {
-      def to(name: String) = SafePath(Seq(name), ServerFileSystemContext.Authentication)
-
-      api.upload(fInput.ref.files.toSeq.map(f => f -> to(fileName))).map { _ ⇒
-//          if fInput.ref.files.length > 0
-//          then
-//            val leaf = fInput.ref.files.item(0).name
-//            import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
-//            val from = SafePath(Seq(leaf), Authentication)
-//            val to = SafePath(Seq(fileName), Authentication)
-//            pathSet.set(false)
-//            api.move(Seq(from -> to)).foreach { _ ⇒ pathSet.set(true) }
-        pathSet.set(false)
-        fInput.ref.value = ""
-      }
-    }),
-    child <-- pathSet.signal.map { ps ⇒
-      if (ps) span(fileName, badge_success, cls := "badgeOM")
-      else span("No certificate", badge_secondary, cls := "badgeOM")
-    },
-    cls := "inputFileStyle"
-  )
-}
+  def view(using api: ServerAPI, path: BasePath) =
+    label(
+      fileInput((fInput: Input) ⇒ {
+        val to = renaming.orElse(existingKey).getOrElse(SafePath(Seq(DataUtils.randomId), ServerFileSystemContext.Authentication))
+        api.upload(fInput.ref.files.toSeq.map(f => f -> to)).map { _ ⇒
+          file.set(Some(to))
+          fInput.ref.value = ""
+        }
+      }),
+      child <-- file.signal.map {
+        case Some(f) => span(f.name, badge_success, cls := "badgeOM")
+        case _ => span("No certificate", badge_secondary, cls := "badgeOM")
+      },
+      cls := "inputFileStyle"
+    )

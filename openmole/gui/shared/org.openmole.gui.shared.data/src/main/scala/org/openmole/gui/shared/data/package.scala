@@ -184,12 +184,12 @@ package data {
 
   object ExecutionId:
     def apply() =
-      val id = DataUtils.uuID
+      val id = DataUtils.randomId
       new ExecutionId(id)
 
   case class ExecutionId(id: String)
 
-  case class EnvironmentId(id: String = DataUtils.uuID)
+  case class EnvironmentId(id: String = DataUtils.randomId)
 
   enum ErrorStateLevel(val name: String):
     case Debug extends ErrorStateLevel("Debug")
@@ -421,10 +421,10 @@ package data {
     def message: String
     def error: Option[ErrorData]
 
-  case class PendingTest() extends Test:
-    def passed = false
-    def message = "pending"
-    def error = None
+//  case class PendingTest() extends Test:
+//    def passed = false
+//    def message = "pending"
+//    def error = None
 
   case class FailedTest(message: String, errorValue: ErrorData) extends Test:
     def error = Some(errorValue)
@@ -437,7 +437,7 @@ package data {
 
   object Test:
     def passed(message: String = "OK") = PassedTest(message)
-    def pending = PendingTest()
+//    def pending = PendingTest()
     def error(msg: String, err: ErrorData) = FailedTest(msg, err)
 
 

@@ -127,10 +127,11 @@ object ConfigurationString {
       writer.toString
 
     override def fromString(s: String): Seq[T] =
-      val parser = new CSVParser()
       if s.trim.isEmpty
       then Seq()
-      else parser.parseLine(s).toSeq.map(cs.fromString)
+      else
+        val parser = new CSVParser()
+        parser.parseLine(s).toSeq.map(cs.fromString)
 
 }
 

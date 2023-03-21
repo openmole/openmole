@@ -25,7 +25,7 @@ import org.openmole.gui.client.ext.Utils.*
 import scala.concurrent.Future
 
 sealed trait TreeNodeType {
-  val uuid: String = DataUtils.uuID
+  val uuid: String = DataUtils.randomId
   val name: String
 }
 
@@ -48,7 +48,7 @@ case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction:
 case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
 
 sealed trait TreeNode {
-  val id = DataUtils.uuID
+  val id = DataUtils.randomId
 
   def name: String
 

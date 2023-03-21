@@ -18,7 +18,7 @@ package org.openmole.core.preference
  */
 
 
-object PreferenceLocation {
+object PreferenceLocation:
 
   //TODO Would be cleaner implemented using scala macro
   def list(t: Any): Vector[PreferenceLocation[_]] = {
@@ -38,19 +38,17 @@ object PreferenceLocation {
 
   def apply[T](group: String, name: String, default: ⇒ Option[T]) = new ClearPreferenceLocation[T](group, name, default)
   def cyphered[T](group: String, name: String, default: ⇒ Option[T]) = new CypheredPreferenceLocation[T](group, name, default)
-}
 
-sealed trait PreferenceLocation[T] {
+
+sealed trait PreferenceLocation[T]:
   def group: String
   def name: String
   def default: Option[T]
   override def toString = s"$group.$name"
-}
 
-class ClearPreferenceLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends PreferenceLocation[T] {
+class ClearPreferenceLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends PreferenceLocation[T]:
   def default = _default
-}
 
-class CypheredPreferenceLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends PreferenceLocation[T] {
+
+class CypheredPreferenceLocation[T](val group: String, val name: String, _default: ⇒ Option[T]) extends PreferenceLocation[T]:
   def default = _default
-}

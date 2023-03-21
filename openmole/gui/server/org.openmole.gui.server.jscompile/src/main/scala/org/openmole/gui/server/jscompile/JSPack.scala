@@ -63,7 +63,6 @@ object JSPack:
 
   def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
     newFile.withTmpDir { targetDir ⇒
-
       webpackJsonPackage copy targetDir / webpackJsonPackage.getName
 
       Npm.install(targetDir)

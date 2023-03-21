@@ -52,40 +52,36 @@ class PrivateKeyAuthenticationServer(s: Services)
   object impl {
     import s._
 
-    private def authenticationFile(key: String) = new java.io.File(utils.authenticationKeysDirectory, key)
-
     private def coreObject(data: PrivateKeyAuthenticationData) =
-      data.privateKey match {
-        case Some(pk: String) ⇒ Some(PrivateKey(
-          authenticationFile(pk),
+      data.privateKey match
+        case Some(pk) ⇒ Some(PrivateKey(
+          safePathToFile(pk),
           data.login,
-          cypher.encrypt(data.cypheredPassword),
+          cypher.encrypt(data.password),
           data.target,
           data.port.toInt
         ))
         case _ ⇒ None
-      }
+
 
     def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData] = SSHAuthentication().flatMap {
-      _ match {
-        case key: PrivateKey ⇒ Seq(PrivateKeyAuthenticationData(
-          Some(key.privateKey.getName),
+      case key: PrivateKey ⇒ Seq(
+        PrivateKeyAuthenticationData(
+          Some(key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)),
           key.login,
           cypher.decrypt(key.cypheredPassword),
           key.host,
           key.port.toString
-        ))
-        case _ ⇒ None
-      }
+        )
+      )
+      case _ ⇒ None
     }
 
-    def addAuthentication(data: PrivateKeyAuthenticationData): Unit = coreObject(data).foreach { co ⇒
-      SSHAuthentication += co
-    }
+    def addAuthentication(data: PrivateKeyAuthenticationData): Unit =
+      coreObject(data).foreach { co ⇒ SSHAuthentication += co }
 
-    def removeAuthentication(data: PrivateKeyAuthenticationData): Unit = coreObject(data).foreach { co ⇒
-      SSHAuthentication -= co
-    }
+    def removeAuthentication(data: PrivateKeyAuthenticationData): Unit =
+      coreObject(data).foreach { co ⇒ SSHAuthentication -= co }
 
     def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] = Seq(
       coreObject(data).map { co ⇒
