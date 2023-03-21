@@ -90,6 +90,7 @@ class ExecutionPanel:
   val showDurationOnCores = Var(false)
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
+  val showEvironmentControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
@@ -334,6 +335,20 @@ class ExecutionPanel:
         case _ => "#555"
       }
 
+
+    def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
+      child <-- showEvironmentControls.signal.map { c =>
+        if c
+        then
+          div(display.flex, flexDirection.column, alignItems.center,
+            button("Clear", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
+          )
+        else div()
+      }
+    )
+
+    def cleanEnvironmentErrors(id: EnvironmentId) = api.clearEnvironmentError(id)
+
     def jobRow(e: EnvironmentState) =
       div(columnFlex,
         div(rowFlex, justifyContent.center,
@@ -353,18 +368,19 @@ class ExecutionPanel:
                 else Some(e.envId)
               )
             }, cursor.pointer),
+          div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showEvironmentControls.update(!_) }),
+          environmentControls(e.envId, cleanEnvironmentErrors),
         ),
         openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(
           div(width := "100%",
+            overflow.scroll,
             children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map { ee =>
               ee.map {
                 _.zipWithIndex.map { case (e, i) =>
                   div(flexRow,
                     cls := "docEntry",
                     margin := "0 4 0 3",
-                    backgroundColor := {
-                      if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
-                    },
+                    backgroundColor := { if (i % 2 == 0) "#bdadc4" else "#f4f4f4" },
                     div(timeToString(e.error.date), minWidth := "100"),
                     a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                     div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
