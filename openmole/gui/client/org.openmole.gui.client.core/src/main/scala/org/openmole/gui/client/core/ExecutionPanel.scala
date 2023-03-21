@@ -369,7 +369,7 @@ class ExecutionPanel:
                     a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                     div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
                   ).expandOnclick(
-                    div(height := "200", overflow.scroll, stackTrace(e.error.stack))
+                    div(height := "200", overflow.scroll, Utils.errorTextArea(stackTrace(e.error.stack)))
                   )
                 }
               }.getOrElse(Seq())
