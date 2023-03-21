@@ -30,8 +30,8 @@ trait AuthenticationPlugin extends GUIPlugin:
   def data: AuthType
   def factory: AuthenticationPluginFactory
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
-  def remove(onremoved: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService): Unit
+  def save(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
+  def remove(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
   def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
 sealed trait GUIPluginFactory
@@ -50,9 +50,9 @@ trait WizardGUIPlugin extends GUIPlugin:
 
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
-  def accept(directory: SafePath, uploaded: Seq[RelativePath]): Boolean
-  def parse(directory: SafePath, uploaded: Seq[RelativePath])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
-  def content(directory: SafePath, uploaded: Seq[RelativePath], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[String]
+  def accept(uploaded: Seq[(RelativePath, SafePath)]): Boolean
+  def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
+  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[String]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement

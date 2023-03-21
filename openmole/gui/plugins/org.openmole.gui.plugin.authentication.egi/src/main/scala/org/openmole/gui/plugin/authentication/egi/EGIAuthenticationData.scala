@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.gui.shared.data.{ AuthenticationData, ErrorData, MessageErrorData, Test }
+import org.openmole.gui.shared.data.{AuthenticationData, ErrorData, MessageErrorData, SafePath, Test}
 import org.openmole.gui.shared.data
 
 /*
@@ -20,31 +20,9 @@ import org.openmole.gui.shared.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object EGIAuthenticationData {
-  def authenticationDirectory = "${AUTHENTICATION_DIRECTORY}"
-}
-
 case class EGIAuthenticationData(
-  cypheredPassword: String         = "",
-  privateKey:       Option[String] = None
+  password:         String         = "",
+  privateKey:       Option[SafePath] = None
 ) extends AuthenticationData {
   def name = "egi.p12"
-}
-
-object EGIAuthenticationTest {
-  def apply(
-    message:  String,
-    password: Test   = Test.pending,
-    proxy:    Test   = Test.pending,
-    dirac:    Test   = Test.pending
-  ): Test = {
-    val all = Seq(password, proxy, dirac)
-    val error = all.flatMap(_.error).headOption
-
-    error match {
-      case Some(e) ⇒ Test.error("failed", e)
-      case None if all.exists { t ⇒ t == Test.pending } ⇒ Test.pending
-      case _ ⇒ Test.passed(message)
-    }
-  }
 }

@@ -19,7 +19,7 @@ package org.openmole.gui.client
 
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.openmole.gui.shared.data.ExecutionState
+import org.openmole.gui.shared.data.{ExecutionState, RelativePath}
 import org.scalajs.dom
 import com.raquo.laminar.api.L.*
 import endpoints4s.xhr
@@ -37,6 +37,8 @@ package object ext {
   def coreAPIClient(endpointsSettings: ClientSettings) =
     new CoreAPIClientImpl(endpointsSettings)
 
+  extension (f: org.scalajs.dom.File)
+    def path: RelativePath = RelativePath(if f.webkitRelativePath.isEmpty then Seq(f.name) else f.webkitRelativePath.split('/').toSeq)
 
   lazy val omsheet = this
 

@@ -61,5 +61,5 @@ object DataUtils {
     else false
   }
 
-  def uuID = scala.util.Random.alphanumeric.take(10).mkString
+  def randomId = scala.util.Random.alphanumeric.take(10).mkString
 }

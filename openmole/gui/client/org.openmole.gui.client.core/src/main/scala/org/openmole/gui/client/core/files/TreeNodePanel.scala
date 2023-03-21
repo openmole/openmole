@@ -93,8 +93,7 @@ class TreeNodePanel {
   private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
     val current = treeNodeManager.directory.now()
     api.upload(
-      fileInput.ref.files,
-      current,
+      fileInput.ref.files.toSeq.map(f => f -> current / f.path),
       (p: ProcessState) ⇒ transferring.set(p)
     ).map { _ =>
       fileInput.ref.value = ""
@@ -391,13 +390,11 @@ class TreeNodePanel {
           i(timeOrSize(tn), cls := "file2"),
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))
-            currentLine.set(
-              if (id == currentLine.now()) -1
-              else id
-            )
+            currentLine.update( cl => if cl == id then  -1 else id)
           })
         ),
-        currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot)
+        currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),
+        treeNodeManager.directory.toObservable --> Observer { _ => currentLine.set(-1) }
       )
     }
   }

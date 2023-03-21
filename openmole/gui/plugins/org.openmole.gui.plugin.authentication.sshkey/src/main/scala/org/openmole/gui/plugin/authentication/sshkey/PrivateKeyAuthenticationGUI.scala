@@ -38,13 +38,9 @@ object TopLevelExports {
 
 class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
   type AuthType = PrivateKeyAuthenticationData
-
   def buildEmpty: AuthenticationPlugin = new PrivateKeyAuthenticationGUI
-
   def build(data: AuthType): AuthenticationPlugin = new PrivateKeyAuthenticationGUI(data)
-
   def name = "SSH Private key"
-
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.privateKeyAuthentications(()).future)
 }
 
@@ -55,11 +51,11 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     width := "130",
     `type` := "password"
   )
-  val privateKey = new FileUploaderUI(data.privateKey.getOrElse(""), data.privateKey.isDefined)
+  val privateKeyUploader = FileUploaderUI(data.privateKey)
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
 
-  val passwordInput = inputTag(data.cypheredPassword).amend(placeholder := "Password", `type` := "password")
+  val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
 
   val targetInput = inputTag(data.target).amend(placeholder := "Host")
 
@@ -67,9 +63,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   def factory = new PrivateKeyAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future).foreach { _ ⇒
-    onremove()
-  }
+  def remove(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future)
 
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = div(
     flexColumn, width := "400px", height := "220",
@@ -77,22 +71,21 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     div(cls := "verticalFormItem", div("Password", width := "150px"), passwordInput),
     div(cls := "verticalFormItem", div("Target", width := "150px"), targetInput),
     div(cls := "verticalFormItem", div("Port", width := "150px"), portInput),
-    div(cls := "verticalFormItem", div("Private key", width := "150px"), display.flex, div(privateKey.view.amend(flexRow, justifyContent.flexEnd), width := "100%"))
+    div(cls := "verticalFormItem", div("Private key", width := "150px"), display.flex, div(privateKeyUploader.view.amend(flexRow, justifyContent.flexEnd), width := "100%"))
   )
 
 
-  def save(onsave: () ⇒ Unit)(using basePath: BasePath, notificationAPI: NotificationService) = {
-    PluginFetch.futureError(_.removeAuthentication(data).future).foreach {
-      d ⇒
+  def save(using basePath: BasePath, notificationAPI: NotificationService) =
+    for
+      - <- remove
+      _ <-
         PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
-          privateKey = Some(privateKey.fileName),
+          privateKey = privateKeyUploader.file.now(),
           loginInput.ref.value,
           passwordInput.ref.value,
           targetInput.ref.value,
-          portInput.ref.value
-        )).future).foreach { b ⇒ onsave() }
-    }
-  }
+          portInput.ref.value)).future)
+    yield ()
 
   def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 

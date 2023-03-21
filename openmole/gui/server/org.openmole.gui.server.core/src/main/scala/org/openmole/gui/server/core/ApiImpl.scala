@@ -370,7 +370,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
       import services._
 
-      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(DataUtils.uuID) → env }
+      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(DataUtils.randomId) → env }
       serverState.addRunningEnvironment(execId, envIds)
 
       ex.listen(serverState.moleExecutionListener(execId, script))

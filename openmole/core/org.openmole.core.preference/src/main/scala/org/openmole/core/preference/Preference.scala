@@ -6,7 +6,7 @@ import org.openmole.tool.crypto._
 import org.openmole.tool.file._
 import org.openmole.core.exception._
 
-object Preference {
+object Preference:
 
   lazy val uniqueID = PreferenceLocation[String]("Global", "UniqueID", None)
   def passwordTest = PreferenceLocation.cyphered[String]("Preference", "passwordTest", Some(passwordTestString))
@@ -38,9 +38,9 @@ object Preference {
     preference.setPreference(passwordTest, passwordTestString)
   }
 
-}
 
-trait Preference {
+
+trait Preference:
   //  def apply[T: ConfigurationString](location: ClearConfigurationLocation[T]): T
   //  def apply[T: ConfigurationString](location: CypheredConfigurationLocation[T])(implicit cypher: Cypher)
   //
@@ -113,9 +113,9 @@ trait Preference {
 
   protected def setRawPreference(location: PreferenceLocation[_], value: String): Unit
   protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String]
-}
 
-case class FilePreference(configurationFile: ConfigurationFile) extends Preference {
+
+case class FilePreference(configurationFile: ConfigurationFile) extends Preference:
 
   protected def getRawPreference[T](location: PreferenceLocation[T]) = synchronized { configurationFile.value(location.group, location.name) }
 
@@ -133,9 +133,9 @@ case class FilePreference(configurationFile: ConfigurationFile) extends Preferen
     //      setPreference(Workspace.uniqueIDLocation, uniqueId)
     //    }
   }
-}
 
-class MemoryPreference() extends Preference {
+
+class MemoryPreference() extends Preference:
 
   lazy val map = collection.mutable.Map[(String, String), String]()
 
@@ -152,4 +152,3 @@ class MemoryPreference() extends Preference {
   override protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String] = synchronized {
     map.get((location.group, location.name))
   }
-}

@@ -110,7 +110,7 @@ object GUIServer:
     |      }, 3000);
     |    </script>
     |  </head>
-    |  <link href="/css/style.css" rel="stylesheet"/>
+    |  <link href="css/style.css" rel="stylesheet"/>
     |  <body>
     |    <div>
     |      OpenMOLE is launching...

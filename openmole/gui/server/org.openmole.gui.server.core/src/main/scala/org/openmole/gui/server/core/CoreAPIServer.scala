@@ -210,29 +210,30 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import org.openmole.gui.server.ext.utils
         import org.openmole.tool.stream.*
 
-        def move(fileParts: Vector[Part[IO]], fileType: String) =
+        def move(fileParts: Vector[Part[IO]], fileTypes: Seq[String]) =
+          import org.openmole.gui.shared.data.ServerFileSystemContext
+          def rootFile(fileType: String) =
+            fileType match
+              case ServerFileSystemContext.Project.typeName ⇒ utils.projectsDirectory
+              case ServerFileSystemContext.Authentication.typeName ⇒ utils.authenticationKeysDirectory
+              case ServerFileSystemContext.Absolute.typeName ⇒ new java.io.File("/")
 
-          def copyTo(rootFile: java.io.File) =
-            for (file ← fileParts) {
-              val path = new java.net.URI(file.name.get).getPath
-              val destination = new java.io.File(rootFile, path)
-              destination.getParentFile.mkdirs()
-              destination.setWritable(true)
-              val stream = fs2.io.toInputStreamResource(file.body) //file._2.getInputStream
-              stream.use { st =>
-                IO {
-                  st.copy(destination)
-                  destination.setExecutable(true)
-                }
-              }.unsafeRunSync()
-              //finally stream.close
+          for ((file, fileType) ← fileParts zip fileTypes) {
+            val path = new java.net.URI(file.name.get).getPath
+            val destination = new java.io.File(rootFile(fileType), path)
+            destination.getParentFile.mkdirs()
+            destination.setWritable(true)
+            val stream = fs2.io.toInputStreamResource(file.body) //file._2.getInputStream
+            stream.use { st =>
+              IO {
+                st.copy(destination)
+                destination.setExecutable(true)
+              }
+            }.unsafeRunSync()
+            //finally stream.close
             }
 
-          import org.openmole.gui.shared.data.ServerFileSystemContext
-          fileType match
-            case ServerFileSystemContext.Project.typeName        ⇒ copyTo(utils.projectsDirectory)
-            case ServerFileSystemContext.Authentication.typeName ⇒ copyTo(utils.authenticationKeysDirectory)
-            case ServerFileSystemContext.Absolute.typeName       ⇒ copyTo(new java.io.File(""))
+
 
         req.decode[Multipart[IO]] { parts =>
           def partContent(name: String) =
@@ -240,7 +241,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
           def getFileParts = parts.parts.filter(_.filename.isDefined)
 
-          move(getFileParts, partContent("fileType").get)
+          move(getFileParts, partContent("fileType").get.split(',').toSeq)
           Ok()
         }
 
