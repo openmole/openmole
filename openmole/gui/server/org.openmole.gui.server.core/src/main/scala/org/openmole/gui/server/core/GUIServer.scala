@@ -106,7 +106,7 @@ object GUIServer:
     |  <head>
     |    <script>
     |      setInterval(function(){
-    |        fetch('application/is-alive').then ( r => { if(r.status == 200) { window.location.reload(1); } } )
+    |        fetch('application/is-alive').then(r => r.text()).then((text) => { if(text.includes("true")) { window.location.reload(1); } })
     |      }, 3000);
     |    </script>
     |  </head>
