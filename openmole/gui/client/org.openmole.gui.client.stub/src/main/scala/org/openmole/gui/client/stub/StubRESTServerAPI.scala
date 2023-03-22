@@ -38,7 +38,7 @@ object AnimatedStubRESTServerAPI:
     val api = new AnimatedStubRESTServerAPI()
 
     def bigDirectory =
-      Seq(SafePath("big") -> MemoryFile("", directory = true)) ++ (0 until 10000).map { i => SafePath("big", i.toString) -> MemoryFile(i.toString) }
+      Seq(SafePath("big") -> MemoryFile("", directory = true)) ++ (0 until 2000).map { i => SafePath("big", i.toString) -> MemoryFile(i.toString) }
 
     def directory = Seq(SafePath("directory") -> MemoryFile("", directory = true), SafePath("directory", "file.txt") -> MemoryFile("text"))
 
@@ -97,7 +97,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listFiles(path: SafePath, filter: FileSorting)(using BasePath): Future[ListFilesData] =
+  override def listFiles(path: SafePath, filter: FileSorting)(using BasePath): Future[FileListData] =
     val simpleFiles = files.toSeq.filter(!_._2.directory)
 
     val fileData =
@@ -121,9 +121,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
         )
       }
 
-    def sorted = (directoryData ++ fileData).sorted(FileSorting.toOrdering(filter))
+    val sorted = (directoryData ++ fileData).sorted(FileSorting.toOrdering(filter))
+    def taken =
+      filter.size match
+        case Some(n) => FileListData(sorted.take(n), n, sorted.size)
+        case None => FileListData(sorted, sorted.size, sorted.size)
 
-    Future.successful(sorted)
+    Future.successful(taken)
 
   override def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]] =
     def found = files.toSeq.filter { (f, _) => f.startsWith(path) && findString.map(s => f.name.contains(s)).getOrElse(true) }.map { (f, m) => f -> m.directory }

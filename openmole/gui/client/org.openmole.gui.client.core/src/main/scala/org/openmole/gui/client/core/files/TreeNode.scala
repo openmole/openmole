@@ -58,7 +58,7 @@ sealed trait TreeNode {
 
 }
 
-def ListFiles(lfd: ListFilesData): TreeNode.ListFiles = lfd.map(TreeNode.treeNodeDataToTreeNode)
+def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.treeNodeDataToTreeNode)
 
 object TreeNode:
 

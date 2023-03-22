@@ -259,52 +259,64 @@ class TreeNodePanel { panel =>
     )
 
   def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
-    div(cls := "file-scrollable-content",
+    val size = Var(100)
+    div(
+      cls := "file-scrollable-content",
       children <--
-        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _) ⇒
-          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter), true).toSignal(Seq()).map { nodes =>
-            if !foundFiles.isEmpty
-            then
-              foundFiles.map { (sp, isDir) =>
-                div(s"${sp.normalizedPathString}", cls := "findFile",
-                  onClick --> { _ =>
-                    fileToolBar.filterToolOpen.set(false)
-                    treeNodeManager.resetFileFinder
-                    fileToolBar.findInput.ref.value = ""
-                    val switchTarget = if isDir then sp else sp.parent
-                    treeNodeManager.switch(switchTarget)
-                    //treeNodeManager.computeCurrentSons
-                    displayNode(sp)
-                  }
-                )
-              }
-            else if currentDir == treeNodeManager.root && nodes.isEmpty
-            then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
-            else
-              val checked =
-                if multiTool == CopyOrTrash
-                then
-                  val allCheck: Input = checkbox(false)
-                  allCheck.amend(
-                    cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
-                      treeNodeManager.switchAllSelection(nodes.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
+          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue))), true).toSignal(FileListData()).map { nodes =>
+            val content =
+              if !foundFiles.isEmpty
+              then
+                foundFiles.map { (sp, isDir) =>
+                  div(s"${sp.normalizedPathString}", cls := "findFile",
+                    onClick --> { _ =>
+                      fileToolBar.filterToolOpen.set(false)
+                      treeNodeManager.resetFileFinder
+                      fileToolBar.findInput.ref.value = ""
+                      val switchTarget = if isDir then sp else sp.parent
+                      treeNodeManager.switch(switchTarget)
+                      //treeNodeManager.computeCurrentSons
+                      displayNode(sp)
                     }
                   )
-                else emptyNode
+                }
+              else if currentDir == treeNodeManager.root && nodes.data.isEmpty
+              then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
+              else
+                val checked =
+                  if multiTool == CopyOrTrash
+                  then
+                    val allCheck: Input = checkbox(false)
+                    allCheck.amend(
+                      cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
+                        treeNodeManager.switchAllSelection(nodes.data.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+                      }
+                    )
+                  else emptyNode
 
-              checked +: nodes.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
-            //              if (sons.contains(currentDir)) {
-            //                (if (multiTool == CopyOrTrash) {
-            //                  lazy val allCheck: Input = checkbox(false).amend(cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
-            //                    treeNodeManager.switchAllSelection(sons(currentDir).map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
-            //                  })
-            //                  allCheck
-            //                } else emptyNode) +: sons(currentDir).zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
-            //              }
-            //              else Seq(div())
+                checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+
+            def more =
+              if nodes.listed < nodes.total
+              then
+                Seq(
+                  div(position := "absolute", bottom := "20", left := "250", cursor.pointer, textAlign := "center",
+                    i(cls := "bi bi-plus"),
+                    br(),
+                    i(fontSize := "12", s"${nodes.listed}/${nodes.total}"),
+                    onClick --> { _ => size.update(_ * 2) }
+                  )
+                )
+              else Seq()
+
+            content ++ more
           }
-      }
+      },
+      treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
+
+
 
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     if FileContentType.isDisplayable(FileContentType(safePath.extension))

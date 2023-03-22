@@ -366,14 +366,13 @@ package data {
         case FirstLast.Last => ordering.reverse
 
 
-  case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting)
+  case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting, size: Option[Int] = None)
 
 
-  object ListFilesData:
+  object FileListData:
     def empty = Seq()
 
-  type ListFilesData = Seq[TreeNodeData]
-
+  case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0)
 
   case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
 

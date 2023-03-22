@@ -95,7 +95,7 @@ object ModelWizardPanel:
       val cleanAndUpload: Future[Seq[(RelativePath, SafePath)]] =
         for
           list <- api.listFiles(tmpDirectory)
-          _ <- api.deleteFiles(list.map(f => tmpDirectory / f.name))
+          _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
           uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
         yield uploaded
 
@@ -214,7 +214,7 @@ object ModelWizardPanel:
           content <- md.factory.content(md.files, modifiedMMD)
           _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
-          _ <- api.move(listed.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
+          _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
         do panels.treeNodePanel.refresh
       }
 //      factory(safePath).foreach { f =>
