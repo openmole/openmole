@@ -22,14 +22,16 @@ import org.openmole.core.event.{EventDispatcher, Listner}
 import org.openmole.core.workflow.builder.DefinitionScope
 import org.openmole.core.workflow.execution.{Environment, SubmissionEnvironment}
 import org.openmole.core.workflow.mole.MoleExecution
+import org.openmole.core.workflow.task.MoleTask
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.server.ext.utils
-import org.openmole.plugin.environment.batch.environment.BatchEnvironment._
-import org.openmole.plugin.environment.batch._
+import org.openmole.plugin.environment.batch.environment.BatchEnvironment.*
+import org.openmole.plugin.environment.batch.*
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
-import scala.concurrent.stm._
+
+import scala.concurrent.stm.*
 
 case class RunningEnvironment(
   environment:       Environment,
@@ -237,11 +239,23 @@ class ServerState:
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map {
           case (k, v) ⇒
+            import org.openmole.core.dsl.extension.Task
+            def isUser(t: Task) = t.info.definitionScope == DefinitionScope.User
+
+            val task = k.task(moleExecution.mole, moleExecution.sources, moleExecution.hooks)
+
+            def cardinality(t: Task): Int =
+              t match
+                case m: MoleTask => MoleTask.tasks(m).map(cardinality).sum
+                case t if isUser(t) => 1
+                case t => 0
+
             CapsuleExecution(
-              name = k._task.simpleName,
-              scope = scopeToString(k._task.info.definitionScope),
+              name = task.simpleName,
+              scope = scopeToString(task.info.definitionScope),
               statuses = convertStatuses(v),
-              user = k._task.info.definitionScope == DefinitionScope.User
+              user = isUser(task),
+              userCardinality = cardinality(task)
             )
         }
 

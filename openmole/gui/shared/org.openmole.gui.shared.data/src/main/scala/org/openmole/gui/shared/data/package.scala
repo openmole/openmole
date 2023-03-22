@@ -246,7 +246,7 @@ package data {
 
 
   object ExecutionState:
-    case class CapsuleExecution(name: String, scope: String, statuses: ExecutionState.JobStatuses, user: Boolean)
+    case class CapsuleExecution(name: String, scope: String, statuses: ExecutionState.JobStatuses, user: Boolean, userCardinality: Int)
     case class JobStatuses(ready: Long, running: Long, completed: Long)
 
     case class Failed(

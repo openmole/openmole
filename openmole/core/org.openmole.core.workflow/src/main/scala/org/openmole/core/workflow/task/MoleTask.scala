@@ -78,6 +78,9 @@ object MoleTask {
       case _           ⇒ false
     }
 
+  def tasks(moleTask: MoleTask) =
+    moleTask.mole.capsules.map(_.task(moleTask.mole, Sources.empty, Hooks.empty))
+
 }
 
 /**

@@ -6,6 +6,7 @@ import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn.*
 
@@ -13,7 +14,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object AnyTextContent {
   def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
-
     val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
     val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, panels.tabContent.fontSizeControl, marginLeft.auto)
