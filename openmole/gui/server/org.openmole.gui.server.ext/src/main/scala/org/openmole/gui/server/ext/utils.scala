@@ -139,12 +139,13 @@ object utils {
     getParentsArray0(f, Seq()) :+ f.getName
 
 
+
   def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
     given ServerFileSystemContext = path.context
 
     val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
-    val sorted = treeNodesData.sorted(fileFilter.fileSorting)
+    val sorted = treeNodesData.sorted(FileFilter.toOrdering(fileFilter))
     //val nbFiles = treeNodesData.size
 
     fileFilter.firstLast match

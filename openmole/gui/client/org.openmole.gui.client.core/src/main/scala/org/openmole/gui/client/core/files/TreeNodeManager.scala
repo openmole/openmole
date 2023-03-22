@@ -40,7 +40,7 @@ class TreeNodeManager:
 
   val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val fileFilter = Var(FileFilter.defaultFilter)
+  val fileFilter = Var(FileFilter())
 
   val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
 

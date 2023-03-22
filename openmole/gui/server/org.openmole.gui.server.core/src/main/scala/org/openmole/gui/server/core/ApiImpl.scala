@@ -191,7 +191,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     utils.copyFiles(paths, overwrite)
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter.defaultFilter): ListFilesData = {
+  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter()): ListFilesData = {
     import services.*
     utils.listFiles(sp, fileFilter, listPlugins())
   }
