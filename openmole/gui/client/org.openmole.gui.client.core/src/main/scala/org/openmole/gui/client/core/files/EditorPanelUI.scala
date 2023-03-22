@@ -1,27 +1,28 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.FileExtension._
+import org.openmole.gui.shared.data.FileExtension.*
 
 import scala.scalajs.js
-import scaladget.ace._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.shared.data.DataUtils._
+import scaladget.ace.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.shared.data.DataUtils.*
 
-import scala.scalajs.js.JSConverters._
-import org.openmole.gui.client.ext._
+import scala.scalajs.js.JSConverters.*
+import org.openmole.gui.client.ext.*
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.builders.DomEventStreamPropBuilder
 import com.raquo.laminar.nodes.ReactiveElement
+import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.data
 import org.scalajs.dom.MouseEvent
 import scaladget.bootstrapnative.Tools.MyPopoverBuilder
-import scala.scalajs.js.timers._
 
+import scala.scalajs.js.timers.*
 import scala.scalajs.js.annotation.JSImport
 
 /*
@@ -71,6 +72,8 @@ object EditorPanelUI {
 
 class EditorPanelUI(fileExtension: FileExtension) {
 
+  val modified = Var(false)
+
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
     val ed = ace.edit(edDiv.ref)
@@ -104,6 +107,8 @@ class EditorPanelUI(fileExtension: FileExtension) {
         "enableLiveAutocompletion" -> true
       )
     )
+
+    //ed.onDocumentChange(() => {println("modif");modified.set(true)})
     ed
   }
 
@@ -153,14 +158,9 @@ class EditorPanelUI(fileExtension: FileExtension) {
     errorsWithLocation.set(ewls)
   }
 
+  def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
-  lazy val changed = Var(false)
-
-  def updateFont(lHeight: Int) = {
-    lineHeight.set(lHeight)
-  }
-
-  val view = {
+  val view =
     div(
       errorMessageOpen.signal.expand(div(
         flexRow,
@@ -172,24 +172,25 @@ class EditorPanelUI(fileExtension: FileExtension) {
           case FileContentType.OpenMOLEScript ⇒ errors --> omsErrorObserver
           case _ => emptyMod
         },
-        onClick --> { _ =>
-          setErrorMessage
-        }
+        onClick --> { _ => setErrorMessage }
       )
     )
-  }
 
   def aceDoc = editor.getSession().getDocument()
 
-  def code = editor.synchronized {
-    (editor.getSession().getValue(), contentHash)
-  }
+  def code =
+    editor.synchronized {
+      (editor.getSession().getValue(), contentHash)
+    }
 
   def setCode(content: String, hash: String) = editor.synchronized {
     contentHash = hash
     editor.getSession().setValue(content)
+    modified.set(false)
+    editor.getSession().on("change", _ => modified.set(true))
   }
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
+  def hasBeenModified = modified.now()
 }
 

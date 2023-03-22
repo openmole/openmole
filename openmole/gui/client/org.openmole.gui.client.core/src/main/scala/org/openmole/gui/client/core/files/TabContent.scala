@@ -25,7 +25,6 @@ class TabContent:
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.render.amend(margin := "10px")
 
-
   private def buildHeader(tabData: TabData)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
@@ -38,8 +37,8 @@ class TabContent:
   }
 
   def addTab(
-              tabData: TabData,
-              content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+    tabData: TabData,
+    content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
     tabsUI.add(
       Tab(
         tabData,
@@ -49,11 +48,8 @@ class TabContent:
     )
   }
 
-  def tab(safePath: SafePath) = {
-    tabsUI.tabs.now().filter { tab =>
-      tab.t.safePath == safePath
-    }.headOption
-  }
+  def tab(safePath: SafePath) =
+    tabsUI.tabs.now().filter { tab => tab.t.safePath == safePath }.headOption
 
   def tabData(safePath: SafePath) = tab(safePath).map(_.t)
 
@@ -74,8 +70,7 @@ class TabContent:
 
   def save(tabData: TabData, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
     tabData.editorPanelUI match
-      case None => concurrent.Future.successful(false)
-      case Some(editorPanelUI) =>
+      case Some(editorPanelUI) if editorPanelUI.hasBeenModified =>
         val (content, hash) = editorPanelUI.code
         api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
           case (saved, savedHash) ⇒
@@ -97,6 +92,7 @@ class TabContent:
               )
               false
         }
+      case _ => concurrent.Future.successful(false)
   }
 
 
