@@ -74,16 +74,16 @@ class TreeNodeManager:
   def updateFilter(newFilter: FileSorting) = fileFilter.set(newFilter)
 
 
-  def switchSorting(fileSorting: FileSorting, newFileSorting: ListSorting) =
+  def switchSorting(fileSorting: FileSorting, newListSorting: ListSorting) =
     val fl =
-      if fileSorting == newFileSorting
+      if fileSorting.fileSorting == newListSorting
       then
         fileSorting.firstLast match
           case FirstLast.First ⇒ FirstLast.Last
           case _ ⇒ FirstLast.First
       else FirstLast.First
 
-    fileSorting.copy(fileSorting = newFileSorting, firstLast = fl)
+    fileSorting.copy(fileSorting = newListSorting, firstLast = fl)
 
   def switchAlphaSorting =
     updateFilter(switchSorting(fileFilter.now(), ListSorting.AlphaSorting))

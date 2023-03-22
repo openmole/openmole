@@ -91,7 +91,6 @@ object utils {
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] =
     def isPlugin(file: File): Boolean = PluginManager.isBundle(file)
 
-
     if f.exists()
     then
       val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
@@ -144,19 +143,13 @@ object utils {
     given ServerFileSystemContext = path.context
 
     def treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
-    def sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
-    //val nbFiles = treeNodesData.size
+    val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
 
-    val ordered =
-      fileFilter.firstLast match
-        case FirstLast.First ⇒ sorted
-        case FirstLast.Last ⇒ sorted.reverse
-
-    val orderedSize = ordered.size
+    val sortedSize = sorted.size
 
     fileFilter.size match
-      case Some(s) => FileListData(ordered.take(s), s, orderedSize)
-      case None => FileListData(ordered, orderedSize, orderedSize)
+      case Some(s) => FileListData(sorted.take(s), s, sortedSize)
+      case None => FileListData(sorted, sortedSize, sortedSize)
 
   def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context
