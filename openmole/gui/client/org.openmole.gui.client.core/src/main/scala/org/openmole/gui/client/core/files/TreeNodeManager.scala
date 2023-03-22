@@ -34,7 +34,7 @@ class TreeNodeManager:
   
   val directory: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
+  //val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
   val selected: Var[Seq[SafePath]] = Var(Seq())
 
@@ -73,41 +73,33 @@ class TreeNodeManager:
 
   def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
 
-  def switchAlphaSorting(using api: ServerAPI, path: BasePath) =
+  def switchAlphaSorting =
     updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
-    invalidCurrentCache
 
-  def switchTimeSorting(using api: ServerAPI, path: BasePath) =
+  def switchTimeSorting =
     updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
-    invalidCurrentCache
 
-  def switchSizeSorting(using api: ServerAPI, path: BasePath) =
+  def switchSizeSorting =
     updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
-    invalidCurrentCache
 
-  def invalidCurrentCache(using api: ServerAPI, path: BasePath) = invalidCache(directory.now())
+    //directory.update(identity)//set(directory.now())
+    //invalidCache(directory.now())
 
-  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
-    sons.update(_.filterNot(_._1.path == sp.path))
-    computeCurrentSons
-  }
+//  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
+//    sons.update(_.filterNot(_._1.path == sp.path))
+//    computeCurrentSons
+//  }
 
-  def computeCurrentSons(using api: ServerAPI, path: BasePath) = {
-    val cur = directory.now()
+//  def computeCurrentSons(using api: ServerAPI, path: BasePath) =
+//    val cur = directory.now()
+//
+//    def updateSons(safePath: SafePath) =
+//      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf => sons.update { s => s.updated(cur, ListFiles(lf)) } }
+//
+//    cur match
+//      case safePath: SafePath ⇒ if !sons.now().contains(safePath) then updateSons(safePath)
+//      case _ ⇒ Future(ListFilesData.empty)
 
-    def updateSons(safePath: SafePath) = {
-      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
-        sons.update { s => s.updated(cur, ListFiles(lf)) }
-      }
-    }
-
-    cur match {
-      case safePath: SafePath ⇒
-        if (!sons.now().contains(safePath))
-          updateSons(safePath)
-      case _ ⇒ Future(ListFilesData.empty)
-    }
-  }
 
   def resetFileFinder = findFilesContaining.set((None, Seq()))
 

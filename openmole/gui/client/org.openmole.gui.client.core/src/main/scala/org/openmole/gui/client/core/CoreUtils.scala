@@ -52,7 +52,7 @@ object CoreUtils {
     }
   
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
-    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.invalidCurrentCache }
+    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.refresh }
 
   def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using api: ServerAPI, path: BasePath): Future[ListFilesData] = api.listFiles(safePath, fileFilter)
   

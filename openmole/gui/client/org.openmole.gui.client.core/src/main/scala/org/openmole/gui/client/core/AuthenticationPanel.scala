@@ -51,7 +51,7 @@ object AuthenticationPanel:
           factory.getData.map { data =>
             data.map { d =>
               val as = factory.build(d)
-              TestingAuthentication(as, EventStream.fromFuture(as.test).toSignal(Seq()))
+              TestingAuthentication(as, EventStream.fromFuture(as.test, true).toSignal(Seq()))
             }
           }.recover { e =>
             toService(panels.notifications).notify(NotificationLevel.Error,  s"Error while getting authentication", org.openmole.gui.client.ext.Utils.errorTextArea(ErrorData.toStackTrace(e)))

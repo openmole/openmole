@@ -30,7 +30,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       panels.tabContent.removeTab(safePath)
       panels.tabContent.checkTabs
       panels.pluginPanel.getPlugins
-      panels.treeNodePanel.invalidCurrentCache
+      panels.treeNodePanel.refresh
     }
   }
 
@@ -41,12 +41,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       else prefix + "_1"
     closeToolBox
     api.copyFiles(Seq(sp -> (sp.parent ++ newName)), false) andThen { _ =>
-      panels.treeNodePanel.invalidCurrentCache
+      panels.treeNodePanel.refresh
     }
   }
 
   def extract(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    api.extractArchive(sp, sp.parent).foreach { _ ⇒ panels.treeNodePanel.invalidCurrentCache }
+    api.extractArchive(sp, sp.parent).foreach { _ ⇒ panels.treeNodePanel.refresh }
     closeToolBox
   }
 
@@ -88,7 +88,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     val newNode = safePath.parent ++ to
     api.move(Seq(safePath -> newNode)).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
-      panels.treeNodePanel.invalidCurrentCache
+      panels.treeNodePanel.refresh
       panels.tabContent.checkTabs
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
@@ -100,7 +100,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
           panels.pluginPanel.getPlugins
-          panels.treeNodePanel.invalidCurrentCache
+          panels.treeNodePanel.refresh
         }
           //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
 //          panels.pluginPanel.getPlugins
@@ -111,7 +111,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
           for e <- errors
           do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", div(ErrorData.stackTrace(e)))
           panels.pluginPanel.getPlugins
-          panels.treeNodePanel.invalidCurrentCache
+          panels.treeNodePanel.refresh
         }
 //        OMPost()[Api].appendToPluggedIfPlugin(safePath).call().foreach {
 //          _ ⇒

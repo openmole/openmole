@@ -34,22 +34,21 @@ import org.openmole.gui.shared.api.*
  */
 
 object TreeNodePanel:
-  extension (p: TreeNodePanel)(using api: ServerAPI, basePath: BasePath)
-    def invalidCurrentCache = p.treeNodeManager.invalidCurrentCache
+  extension (p: TreeNodePanel)
+    def refresh = p.refresh
 
-class TreeNodePanel {
-  panel =>
+class TreeNodePanel { panel =>
 
   val treeNodeManager: TreeNodeManager = new TreeNodeManager
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
+  val update: Var[Long] = Var(0)
 
-  val selectionModeObserver = Observer[Boolean] { b ⇒
-    if (!b) treeNodeManager.clearSelection
-  }
+  def refresh = update.update(_ + 1)
+
+  //val selectionModeObserver = Observer[Boolean] { b ⇒ if !b then treeNodeManager.clearSelection }
 
   val fileToolBar = new FileToolBar(this, treeNodeManager)
-  val tree: Var[HtmlElement] = Var(div())
 
 
   val editNodeInput = inputTag("").amend(
@@ -77,8 +76,8 @@ class TreeNodePanel {
   def createNewNode(newFile: String)(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     val currentDirNode = treeNodeManager.directory
     directoryToggle.toggled.now() match
-      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true).map(_ => treeNodeManager.invalidCurrentCache)
-      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile).map(_ => treeNodeManager.invalidCurrentCache)
+      case true ⇒ CoreUtils.createFile(currentDirNode.now(), newFile, directory = true).map(_ => refresh)
+      case false ⇒ CoreUtils.createFile(currentDirNode.now(), newFile).map(_ => refresh)
 
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
@@ -97,7 +96,7 @@ class TreeNodePanel {
       (p: ProcessState) ⇒ transferring.set(p)
     ).map { _ =>
       fileInput.ref.value = ""
-      treeNodeManager.invalidCurrentCache
+      refresh
     }
   })
 
@@ -145,14 +144,14 @@ class TreeNodePanel {
               val target = treeNodeManager.directory.now()
               api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
                 if (existing.isEmpty) {
-                  treeNodeManager.invalidCurrentCache
+                  refresh
                   closeMultiTool
                 }
                 else {
                   confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
                     val target = treeNodeManager.directory.now()
                     api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
-                      treeNodeManager.invalidCurrentCache
+                      refresh
                       closeMultiTool
                     })))
                 }
@@ -217,7 +216,7 @@ class TreeNodePanel {
         div(OMTags.glyph_search,
           cls := "filtering-files-item-selected",
           onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
-        div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ treeNodeManager.invalidCurrentCache }),
+        div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ refresh }),
         div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
           multiTool.update { mcot ⇒
             mcot match {
@@ -229,7 +228,7 @@ class TreeNodePanel {
             }
           }
           multiTool.now() match {
-            case Off ⇒ treeNodeManager.invalidCurrentCache
+            case Off ⇒ refresh
             case _ ⇒
           }
         })
@@ -261,37 +260,48 @@ class TreeNodePanel {
 
   def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     div(cls := "file-scrollable-content",
-      children <-- treeNodeManager.sons.signal.combineWith(treeNodeManager.directory.signal).combineWith(treeNodeManager.findFilesContaining.signal).combineWith(multiTool.signal).map {
-        case (sons, currentDir, findString, foundFiles, multiTool) ⇒
-          if (!foundFiles.isEmpty) {
-            foundFiles.map { case (sp, isDir) => div(s"${sp.normalizedPathString}", cls := "findFile", onClick --> { _ =>
-              fileToolBar.filterToolOpen.set(false)
-              treeNodeManager.resetFileFinder
-              fileToolBar.findInput.ref.value = ""
-              val switchTarget = if (isDir) sp else sp.parent
-              treeNodeManager.switch(switchTarget)
-              treeNodeManager.computeCurrentSons
-              displayNode(sp)
-            })
-            }
-          } else {
-            if (currentDir == treeNodeManager.root && sons.isEmpty) {
-              Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
-            }
-            else {
-              if (sons.contains(currentDir)) {
-                (if (multiTool == CopyOrTrash) {
-                  lazy val allCheck: Input = checkbox(false).amend(cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
-                    treeNodeManager.switchAllSelection(sons(currentDir).map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
-                  })
-                  allCheck
-                } else emptyNode) +:
-                  sons(currentDir).zipWithIndex.flatMap { case (tn, id) =>
-                    Seq(drawNode(tn, id).render)
+      children <--
+        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _) ⇒
+          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter), true).toSignal(Seq()).map { nodes =>
+            if !foundFiles.isEmpty
+            then
+              foundFiles.map { (sp, isDir) =>
+                div(s"${sp.normalizedPathString}", cls := "findFile",
+                  onClick --> { _ =>
+                    fileToolBar.filterToolOpen.set(false)
+                    treeNodeManager.resetFileFinder
+                    fileToolBar.findInput.ref.value = ""
+                    val switchTarget = if isDir then sp else sp.parent
+                    treeNodeManager.switch(switchTarget)
+                    //treeNodeManager.computeCurrentSons
+                    displayNode(sp)
                   }
+                )
               }
-              else Seq(div())
-            }
+            else if currentDir == treeNodeManager.root && nodes.isEmpty
+            then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
+            else
+              val checked =
+                if multiTool == CopyOrTrash
+                then
+                  val allCheck: Input = checkbox(false)
+                  allCheck.amend(
+                    cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
+                      treeNodeManager.switchAllSelection(nodes.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+                    }
+                  )
+                else emptyNode
+
+              checked +: nodes.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+            //              if (sons.contains(currentDir)) {
+            //                (if (multiTool == CopyOrTrash) {
+            //                  lazy val allCheck: Input = checkbox(false).amend(cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
+            //                    treeNodeManager.switchAllSelection(sons(currentDir).map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+            //                  })
+            //                  allCheck
+            //                } else emptyNode) +: sons(currentDir).zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+            //              }
+            //              else Seq(div())
           }
       }
     )
@@ -305,7 +315,7 @@ class TreeNodePanel {
         hash = true
       ).map { (content: String, hash: Option[String]) ⇒
         panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)
-        treeNodeManager.invalidCurrentCache
+        refresh
       }
 
   def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
@@ -329,7 +339,7 @@ class TreeNodePanel {
       val currentMultiTool = multiTool.signal.now()
       if (currentMultiTool == Off || currentMultiTool == Paste) todo()
       fileToolBar.filterToolOpen.set(false)
-      treeNodeManager.computeCurrentSons
+      //treeNodeManager.computeCurrentSons
     }
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
@@ -426,9 +436,9 @@ class TreeNodePanel {
             //treeNodeTabs.saveAllTabs(() ⇒ {
             api.move(Seq(dragged -> (to ++ dragged.name))).foreach {
               b ⇒
-                treeNodeManager.invalidCache(to)
-                treeNodeManager.invalidCache(dragged)
-                treeNodeManager.invalidCurrentCache
+                //treeNodeManager.invalidCache(to)
+                //treeNodeManager.invalidCache(dragged)
+                refresh
                 panels.tabContent.checkTabs
             }
             //})

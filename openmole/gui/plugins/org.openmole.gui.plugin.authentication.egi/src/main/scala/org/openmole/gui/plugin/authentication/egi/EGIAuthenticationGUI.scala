@@ -72,7 +72,7 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       div(cls := "verticalFormItem", div("Password", width := "150px"), password),
       div(cls := "verticalFormItem", div("Certificate", width := "150px"), display.flex, div(certificateUpload.view.amend(flexRow, justifyContent.flexEnd), width := "100%")),
       div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput),
-      EventStream.fromFuture(PluginFetch.futureError(_.getVOTests(()).future)) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
+      EventStream.fromFuture(PluginFetch.futureError(_.getVOTests(()).future), true) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
     )
 
   }

@@ -215,7 +215,7 @@ object ModelWizardPanel:
           _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
           _ <- api.move(listed.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
-        do panels.treeNodePanel.invalidCurrentCache
+        do panels.treeNodePanel.refresh
       }
 //      factory(safePath).foreach { f =>
 //        modelMetadata.now().foreach { mmd =>
