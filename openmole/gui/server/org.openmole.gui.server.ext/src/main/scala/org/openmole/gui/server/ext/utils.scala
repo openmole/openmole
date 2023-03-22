@@ -140,12 +140,12 @@ object utils {
 
 
 
-  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
+  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
     given ServerFileSystemContext = path.context
 
     val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
 
-    val sorted = treeNodesData.sorted(FileFilter.toOrdering(fileFilter))
+    val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
     //val nbFiles = treeNodesData.size
 
     fileFilter.firstLast match

@@ -325,24 +325,14 @@ package data {
     def withNoImplicit = copy(implicits = Seq())
     def size = all.size + implicits.size
 
-
-
   enum FirstLast:
     case First, Last
 
-  enum ListOrdering:
-    case Ascending, Descending
-
   enum ListSorting:
-    case AlphaSorting, SizeSorting, TimeSorting //, LevelSorting
-  //case ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting, fileOrdering: ListOrdering = ListOrdering.Ascending)
+    case AlphaSorting, SizeSorting, TimeSorting
 
-  //  object ListSortingAndOrdering {
-  //    def defaultSorting = ListSorting.ListSortingAndOrdering(AlphaSorting(), Ascending())
-  //  }
-
-  object FileFilter:
-    def toOrdering(filter: FileFilter): Ordering[TreeNodeData] =
+  object FileSorting:
+    def toOrdering(filter: FileSorting): Ordering[TreeNodeData] =
       val fs = filter.fileSorting
       def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
 
@@ -376,17 +366,7 @@ package data {
         case FirstLast.Last => ordering.reverse
 
 
-  case class FileFilter(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting):
-
-    def switchTo(newFileSorting: ListSorting) =
-      val fl =
-        if (fileSorting == newFileSorting)
-        then
-          firstLast match
-            case FirstLast.First ⇒ FirstLast.Last
-            case _ ⇒ FirstLast.First
-        else FirstLast.First
-      copy(fileSorting = newFileSorting, firstLast = fl)
+  case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting)
 
 
   object ListFilesData:

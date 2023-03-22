@@ -40,7 +40,7 @@ class TreeNodeManager:
 
   val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val fileFilter = Var(FileFilter())
+  val fileFilter = Var(FileSorting())
 
   val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
 
@@ -71,16 +71,28 @@ class TreeNodeManager:
 
   def switch(sp: SafePath): Unit = directory.set(sp)
 
-  def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
+  def updateFilter(newFilter: FileSorting) = fileFilter.set(newFilter)
+
+
+  def switchSorting(fileSorting: FileSorting, newFileSorting: ListSorting) =
+    val fl =
+      if fileSorting == newFileSorting
+      then
+        fileSorting.firstLast match
+          case FirstLast.First ⇒ FirstLast.Last
+          case _ ⇒ FirstLast.First
+      else FirstLast.First
+
+    fileSorting.copy(fileSorting = newFileSorting, firstLast = fl)
 
   def switchAlphaSorting =
-    updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.AlphaSorting))
 
   def switchTimeSorting =
-    updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.TimeSorting))
 
   def switchSizeSorting =
-    updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.SizeSorting))
 
     //directory.update(identity)//set(directory.now())
     //invalidCache(directory.now())

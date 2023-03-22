@@ -97,7 +97,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData] =
+  override def listFiles(path: SafePath, filter: FileSorting)(using BasePath): Future[ListFilesData] =
     val simpleFiles = files.toSeq.filter(!_._2.directory)
 
     val fileData =
@@ -121,7 +121,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
         )
       }
 
-    def sorted = (directoryData ++ fileData).sorted(FileFilter.toOrdering(filter))
+    def sorted = (directoryData ++ fileData).sorted(FileSorting.toOrdering(filter))
 
     Future.successful(sorted)
 
