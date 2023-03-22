@@ -264,55 +264,60 @@ class TreeNodePanel { panel =>
       cls := "file-scrollable-content",
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
-          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue))), true).toSignal(FileListData()).map { nodes =>
-            val content =
-              if !foundFiles.isEmpty
-              then
-                foundFiles.map { (sp, isDir) =>
-                  div(s"${sp.normalizedPathString}", cls := "findFile",
-                    onClick --> { _ =>
-                      fileToolBar.filterToolOpen.set(false)
-                      treeNodeManager.resetFileFinder
-                      fileToolBar.findInput.ref.value = ""
-                      val switchTarget = if isDir then sp else sp.parent
-                      treeNodeManager.switch(switchTarget)
-                      //treeNodeManager.computeCurrentSons
-                      displayNode(sp)
-                    }
-                  )
-                }
-              else if currentDir == treeNodeManager.root && nodes.data.isEmpty
-              then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
-              else
-                val checked =
-                  if multiTool == CopyOrTrash
-                  then
-                    val allCheck: Input = checkbox(false)
-                    allCheck.amend(
-                      cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
-                        treeNodeManager.switchAllSelection(nodes.data.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue))).map(Some(_)), true).toSignal(None).map {
+            case None =>
+              Seq(
+                i(cls := "bi bi-hourglass-split", marginLeft := "250", textAlign := "center")
+              )
+            case Some(nodes) =>
+              val content =
+                if !foundFiles.isEmpty
+                then
+                  foundFiles.map { (sp, isDir) =>
+                    div(s"${sp.normalizedPathString}", cls := "findFile",
+                      onClick --> { _ =>
+                        fileToolBar.filterToolOpen.set(false)
+                        treeNodeManager.resetFileFinder
+                        fileToolBar.findInput.ref.value = ""
+                        val switchTarget = if isDir then sp else sp.parent
+                        treeNodeManager.switch(switchTarget)
+                        //treeNodeManager.computeCurrentSons
+                        displayNode(sp)
                       }
                     )
-                  else emptyNode
+                  }
+                else if currentDir == treeNodeManager.root && nodes.data.isEmpty
+                then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
+                else
+                  val checked =
+                    if multiTool == CopyOrTrash
+                    then
+                      val allCheck: Input = checkbox(false)
+                      allCheck.amend(
+                        cls := "file0", marginBottom := "3px", onClick --> { _ ⇒
+                          treeNodeManager.switchAllSelection(nodes.data.map { tn => currentDir ++ tn.name }, allCheck.ref.checked)
+                        }
+                      )
+                    else emptyNode
 
-                checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 
-            def more =
-              if nodes.listed < nodes.total
-              then
-                Seq(
-                  div(position := "absolute", bottom := "20", left := "250", cursor.pointer, textAlign := "center",
-                    i(cls := "bi bi-plus"),
-                    br(),
-                    i(fontSize := "12", s"${nodes.listed}/${nodes.total}"),
-                    onClick --> { _ => size.update(_ * 2) }
+              def more =
+                if nodes.listed < nodes.total
+                then
+                  Seq(
+                    div(position := "absolute", bottom := "20", left := "250", cursor.pointer, textAlign := "center",
+                      i(cls := "bi bi-plus"),
+                      br(),
+                      i(fontSize := "12", s"${nodes.listed}/${nodes.total}"),
+                      onClick --> { _ => size.update(_ * 2) }
+                    )
                   )
-                )
-              else Seq()
+                else Seq()
 
-            content ++ more
+              content ++ more
           }
-      },
+        },
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
 
