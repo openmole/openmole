@@ -35,7 +35,7 @@ object URLImportPanel:
         downloading.set(Processing())
         api.downloadHTTP(url, sp, extractCheckBox.isChecked, overwriteSwitch.isChecked).foreach { d ⇒
           downloading.set(Processed())
-          manager.invalidCurrentCache
+          panels.treeNodePanel.refresh
           panels.closeExpandable
         }
 

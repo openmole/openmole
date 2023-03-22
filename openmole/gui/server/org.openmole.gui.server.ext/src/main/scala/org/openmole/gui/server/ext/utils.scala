@@ -139,17 +139,24 @@ object utils {
     getParentsArray0(f, Seq()) :+ f.getName
 
 
-  def listFiles(path: SafePath, fileFilter: FileFilter, pluggedList: Seq[Plugin])(implicit workspace: Workspace): ListFilesData =
+
+  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin])(implicit workspace: Workspace): FileListData =
     given ServerFileSystemContext = path.context
 
-    val treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
-
-    val sorted = treeNodesData.sorted(fileFilter.fileSorting)
+    def treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
+    def sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
     //val nbFiles = treeNodesData.size
 
-    fileFilter.firstLast match
-      case FirstLast.First ⇒ sorted
-      case FirstLast.Last ⇒ sorted.reverse
+    val ordered =
+      fileFilter.firstLast match
+        case FirstLast.First ⇒ sorted
+        case FirstLast.Last ⇒ sorted.reverse
+
+    val orderedSize = ordered.size
+
+    fileFilter.size match
+      case Some(s) => FileListData(ordered.take(s), s, orderedSize)
+      case None => FileListData(ordered, orderedSize, orderedSize)
 
   def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context

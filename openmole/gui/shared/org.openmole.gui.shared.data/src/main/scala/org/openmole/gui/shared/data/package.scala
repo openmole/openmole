@@ -321,76 +321,58 @@ package data {
 
   case class Resource(safePath: SafePath, size: Long)
 
-  case class Resources(all: Seq[Resource], implicits: Seq[Resource], number: Int) {
+  case class Resources(all: Seq[Resource], implicits: Seq[Resource], number: Int):
     def withNoImplicit = copy(implicits = Seq())
     def size = all.size + implicits.size
-  }
 
   enum FirstLast:
     case First, Last
 
-  enum ListOrdering:
-    case Ascending, Descending
-
-  object ListSorting:
-    implicit def sortingToOrdering(fs: ListSorting): Ordering[TreeNodeData] =
-      fs match {
-        case AlphaSorting ⇒ alphaOrdering
-        case SizeSorting ⇒ fileSizeOrdering
-        case TimeSorting ⇒ timeOrdering
-      }
-
-    def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
-
-    def alphaOrdering = new Ordering[TreeNodeData]:
-      def isDirectory(tnd: TreeNodeData) = tnd.directory match {
-        case None ⇒ false
-        case _ ⇒ true
-      }
-
-      def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
-        if (isDirectory(tn1)) {
-          if (isDirectory(tn2)) tn1.name compare tn2.name
-          else -1
-        }
-        else {
-          if (isDirectory(tn2)) 1
-          else tn1.name compare tn2.name
-        }
-
-    def timeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.time compare tnd2.time
-
-
   enum ListSorting:
-    case AlphaSorting, SizeSorting, TimeSorting //, LevelSorting
-  //case ListSortingAndOrdering(fileSorting: ListSorting = AlphaSorting, fileOrdering: ListOrdering = ListOrdering.Ascending)
+    case AlphaSorting, SizeSorting, TimeSorting
 
-  //  object ListSortingAndOrdering {
-  //    def defaultSorting = ListSorting.ListSortingAndOrdering(AlphaSorting(), Ascending())
-  //  }
+  object FileSorting:
+    def toOrdering(filter: FileSorting): Ordering[TreeNodeData] =
+      val fs = filter.fileSorting
+      def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
+
+      def alphaOrdering = new Ordering[TreeNodeData]:
+        def isDirectory(tnd: TreeNodeData) =
+          tnd.directory match
+            case None ⇒ false
+            case _ ⇒ true
+
+        def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
+          if isDirectory(tn1)
+          then
+            if isDirectory(tn2)
+            then tn1.name compare tn2.name
+            else -1
+          else if isDirectory(tn2)
+          then 1
+          else tn1.name compare tn2.name
 
 
-  case class FileFilter(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting):
+      def timeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.time compare tnd2.time
 
-    def switchTo(newFileSorting: ListSorting) =
-      val fl =
-        if (fileSorting == newFileSorting)
-        then
-          firstLast match
-            case FirstLast.First ⇒ FirstLast.Last
-            case _ ⇒ FirstLast.First
-        else FirstLast.First
-      copy(fileSorting = newFileSorting, firstLast = fl)
+      def ordering =
+        fs match
+          case ListSorting.AlphaSorting ⇒ alphaOrdering
+          case ListSorting.SizeSorting ⇒ fileSizeOrdering
+          case ListSorting.TimeSorting ⇒ timeOrdering
+
+      filter.firstLast match
+        case FirstLast.First => ordering
+        case FirstLast.Last => ordering.reverse
 
 
-  object ListFilesData:
+  case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting, size: Option[Int] = None)
+
+
+  object FileListData:
     def empty = Seq()
 
-  type ListFilesData = Seq[TreeNodeData]
-
-  object FileFilter {
-    def defaultFilter = FileFilter()
-  }
+  case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0)
 
   case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
 

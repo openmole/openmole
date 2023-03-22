@@ -37,6 +37,11 @@ object AnimatedStubRESTServerAPI:
   def apply() =
     val api = new AnimatedStubRESTServerAPI()
 
+    def bigDirectory =
+      Seq(SafePath("big") -> MemoryFile("", directory = true)) ++ (0 until 2000).map { i => SafePath("big", i.toString) -> MemoryFile(i.toString) }
+
+    def directory = Seq(SafePath("directory") -> MemoryFile("", directory = true), SafePath("directory", "file.txt") -> MemoryFile("text"))
+
     api.files ++= Seq(
       SafePath("testLongLongLongLongLongLongLongLongLongLongLongLongLongLong.oms") -> MemoryFile("val i = Val[Int]"),
       SafePath("test2.oms") -> MemoryFile(
@@ -47,6 +52,8 @@ object AnimatedStubRESTServerAPI:
       ),
       SafePath("file.txt") -> MemoryFile("""modify me if you can!""")
     )
+
+    api.files ++= bigDirectory ++ directory
 
     api
 
@@ -90,7 +97,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listFiles(path: SafePath, filter: FileFilter)(using BasePath): Future[ListFilesData] =
+  override def listFiles(path: SafePath, filter: FileSorting)(using BasePath): Future[FileListData] =
     val simpleFiles = files.toSeq.filter(!_._2.directory)
 
     val fileData =
@@ -103,7 +110,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       }
 
     val directoryData =
-      files.toSeq.filter((p, f) => f.directory && p.startsWith(path)).map { (p, d) =>
+      files.toSeq.filter((p, f) => f.directory && p.parent == path).map { (p, d) =>
         val isEmpty: Boolean = simpleFiles.forall((sp, _) => !sp.startsWith(p))
 
         TreeNodeData(
@@ -114,7 +121,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
         )
       }
 
-    Future.successful(directoryData.toSeq ++ fileData)
+    val sorted = (directoryData ++ fileData).sorted(FileSorting.toOrdering(filter))
+    def taken =
+      filter.size match
+        case Some(n) => FileListData(sorted.take(n), n, sorted.size)
+        case None => FileListData(sorted, sorted.size, sorted.size)
+
+    Future.successful(taken)
 
   override def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]] =
     def found = files.toSeq.filter { (f, _) => f.startsWith(path) && findString.map(s => f.name.contains(s)).getOrElse(true) }.map { (f, m) => f -> m.directory }

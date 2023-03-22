@@ -182,30 +182,26 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val dir = services.tmpDirectory.newDir("openmoleGUI", create = true)
     dir.toSafePath(using org.openmole.gui.shared.data.ServerFileSystemContext.Absolute)
 
-  def exists(safePath: SafePath): Boolean = {
+  def exists(safePath: SafePath): Boolean =
     import services._
     utils.exists(safePath)
-  }
 
   def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean) =
     import services._
     utils.copyFiles(paths, overwrite)
 
-  def listFiles(sp: SafePath, fileFilter: data.FileFilter = data.FileFilter.defaultFilter): ListFilesData = {
+  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting()): FileListData =
     import services.*
     utils.listFiles(sp, fileFilter, listPlugins())
-  }
 
-   def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] = {
+   def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] =
     import services._
     utils.recursiveListFiles(sp, findString)
-  }
 
-  def isEmpty(sp: SafePath): Boolean = {
+  def isEmpty(sp: SafePath): Boolean =
     import services._
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
-  }
 
   def move(moves: Seq[(SafePath, SafePath)]): Unit =
     moves.foreach { (from, to) =>
@@ -214,12 +210,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       val toFile = safePathToFile(to)
 
       fromFile.move(toFile)
-      //utils.move(fromFile, toFile)
     }
-
-  def duplicate(safePath: SafePath, newName: String): SafePath =
-    import services._
-    utils.copyProjectFile(safePath, newName, followSymlinks = true)
 
   def mdToHtml(safePath: SafePath): String =
     import services._

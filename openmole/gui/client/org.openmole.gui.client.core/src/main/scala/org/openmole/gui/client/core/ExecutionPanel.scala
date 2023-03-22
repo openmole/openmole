@@ -90,6 +90,7 @@ class ExecutionPanel:
   val showDurationOnCores = Var(false)
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
+  val showEvironmentControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
@@ -104,11 +105,9 @@ class ExecutionPanel:
     exec.state match
       case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
       case f: ExecutionState.Finished ⇒
-        val (ready, running, completed) = userCapsuleState(f.capsules)
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = f.environmentStates, exec.output)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates, exec.output)
       case r: ExecutionState.Running ⇒
-        val (ready, running, completed) = userCapsuleState(r.capsules)
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates, exec.output)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates, exec.output)
       case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
 
@@ -312,7 +311,6 @@ class ExecutionPanel:
     val initialDelay = Signal.fromFuture(delay(1000))
     val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
-    val openEnvironmentErrors: Var[Option[EnvironmentId]] = Var(None)
 
     def jobs(envStates: Seq[EnvironmentState]) =
       div(columnFlex, marginTop := "20px",
@@ -334,7 +332,29 @@ class ExecutionPanel:
         case _ => "#555"
       }
 
+
+    def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
+      child <-- showEvironmentControls.signal.map { c =>
+        if c
+        then
+          div(display.flex, flexDirection.column, alignItems.center,
+            button("Clear", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
+          )
+        else div()
+      }
+    )
+
+
+
     def jobRow(e: EnvironmentState) =
+      val openEnvironmentErrors: Var[Boolean] = Var(false)
+
+      def cleanEnvironmentErrors(id: EnvironmentId) =
+        api.clearEnvironmentError(id).andThen { _ =>
+          showExpander.set(None)
+          showExpander.set(Some(Expand.Computing))
+        }
+
       div(columnFlex,
         div(rowFlex, justifyContent.center,
           contextBlock("Resource", e.taskName, true).amend(width := "180"),
@@ -346,47 +366,45 @@ class ExecutionPanel:
           contextBlock("Finished", e.done.toString, true),
           contextBlock("Failed", e.failed.toString, true),
           contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
-            onClick --> { _ =>
-              openEnvironmentErrors.update(id =>
-                if id == Some(e.envId)
-                then None
-                else Some(e.envId)
-              )
-            }, cursor.pointer),
+            onClick --> { _ => openEnvironmentErrors.update(!_) }, cursor.pointer),
+          div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showEvironmentControls.update(!_) }),
+          environmentControls(e.envId, cleanEnvironmentErrors),
         ),
-        openEnvironmentErrors.signal.map(eID => eID == Some(e.envId)).expand(
-          div(width := "100%",
-            children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map { ee =>
-              ee.map {
-                _.zipWithIndex.map { case (e, i) =>
-                  div(flexRow,
-                    cls := "docEntry",
-                    margin := "0 4 0 3",
-                    backgroundColor := {
-                      if (i % 2 == 0) "#bdadc4" else "#f4f4f4"
-                    },
-                    div(timeToString(e.error.date), minWidth := "100"),
-                    a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
-                    div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
-                  ).expandOnclick(
-                    div(height := "200", overflow.scroll, stackTrace(e.error.stack))
-                  )
-                }
-              }.getOrElse(Seq())
-            }
-          )
-        )
+        child <-- openEnvironmentErrors.signal.map { opened =>
+          if opened
+          then
+            div(width := "100%", height := "200px",
+              overflow.scroll,
+              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map {
+                case Some(ee) =>
+                  val errors = ee.filter(_.error.level == ErrorStateLevel.Error) ++ ee.filter(_.error.level != ErrorStateLevel.Error)
+                  errors.zipWithIndex.map { case (e, i) =>
+                    div(flexRow,
+                      cls := "docEntry",
+                      margin := "0 4 0 3",
+                      backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
+                      div(timeToString(e.error.date), minWidth := "100"),
+                      a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
+                      div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
+                    ).expandOnclick(
+                      div(height := "200", overflow.scroll, Utils.errorTextArea(stackTrace(e.error.stack)))
+                    )
+                  }
+                case None => Seq()
+              }
+            )
+          else div()
+        }
       )
 
     def expander(details: ExecutionDetails) =
       div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
         child <-- showExpander.signal.map {
-          _ match
-            case Some(Expand.Script) => div(execTextArea(details.script))
-            case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
-            case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
-            case Some(Expand.Computing) => jobs(details.envStates)
-            case None => div()
+          case Some(Expand.Script) => div(execTextArea(details.script))
+          case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
+          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
+          case Some(Expand.Computing) => jobs(details.envStates)
+          case None => div()
         }
       )
 

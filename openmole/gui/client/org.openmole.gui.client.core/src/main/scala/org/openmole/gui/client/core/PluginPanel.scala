@@ -51,7 +51,7 @@ class PluginPanel:
                 bsn.badge_dark, p.time
               ), onClick --> { _ ⇒
                 panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
-                panels.treeNodePanel.treeNodeManager.computeCurrentSons
+                //panels.treeNodePanel.treeNodeManager.computeCurrentSons
                 panels.closeExpandable
               }
             )

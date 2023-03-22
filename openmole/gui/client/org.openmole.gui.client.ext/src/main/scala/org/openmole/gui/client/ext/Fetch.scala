@@ -39,14 +39,14 @@ object Fetch:
         notification.notify(
           NotificationLevel.Error,
           s"""The server returned an error 500""",
-          Utils.errorTextAreaNotificationBody(ErrorData.stackTrace(e))
+          Utils.errorTextArea(ErrorData.stackTrace(e))
         )
 
       case t =>
         notification.notify(
           NotificationLevel.Error,
           """The server failed unexpectedly""",
-          Utils.errorTextAreaNotificationBody(ErrorData.stackTrace(ErrorData(t)))
+          Utils.errorTextArea(ErrorData.stackTrace(ErrorData(t)))
         )
 
 

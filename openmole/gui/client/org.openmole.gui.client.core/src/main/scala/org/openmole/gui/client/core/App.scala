@@ -225,7 +225,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       )
     }
 
-    panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+    panels.treeNodePanel.refresh
 
 
 @JSExportTopLevel(name = "openmole_library")

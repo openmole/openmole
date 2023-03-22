@@ -52,9 +52,9 @@ object CoreUtils {
     }
   
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
-    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.invalidCurrentCache }
+    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.refresh }
 
-  def listFiles(safePath: SafePath, fileFilter: FileFilter = FileFilter())(using api: ServerAPI, path: BasePath): Future[ListFilesData] = api.listFiles(safePath, fileFilter)
+  def listFiles(safePath: SafePath, fileFilter: FileSorting = FileSorting())(using api: ServerAPI, path: BasePath): Future[FileListData] = api.listFiles(safePath, fileFilter)
   
   def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI, path: BasePath): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
   

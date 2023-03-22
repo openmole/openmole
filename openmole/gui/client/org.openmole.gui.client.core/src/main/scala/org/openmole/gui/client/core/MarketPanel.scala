@@ -34,7 +34,6 @@ import org.openmole.gui.shared.api.*
 
 object MarketPanel:
 
-
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels): Div =
 
     val marketIndex: Var[Option[MarketIndex]] = Var(None)
@@ -100,7 +99,7 @@ object MarketPanel:
 
       api.getMarketEntry(entry, path).foreach { d ⇒
         downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
-        manager.invalidCurrentCache
+        panels.treeNodePanel.refresh
       }
 
     def row(entry: MarketIndexEntry, i: Int, selected: Boolean) =

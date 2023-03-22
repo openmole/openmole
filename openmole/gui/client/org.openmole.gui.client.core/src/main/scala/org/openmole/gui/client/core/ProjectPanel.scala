@@ -35,7 +35,7 @@ object ProjectPanel {
         api.download(
           toDisplay,
           hash = true).map { (content, hash) ⇒
-            panels.treeNodePanel.treeNodeManager.invalidCurrentCache
+            panels.treeNodePanel.refresh
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
           }
         panels.closeExpandable

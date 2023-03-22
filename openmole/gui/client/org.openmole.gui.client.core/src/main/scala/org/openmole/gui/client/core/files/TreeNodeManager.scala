@@ -34,13 +34,13 @@ class TreeNodeManager:
   
   val directory: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
+  //val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
   val selected: Var[Seq[SafePath]] = Var(Seq())
 
   val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val fileFilter = Var(FileFilter.defaultFilter)
+  val fileFilter = Var(FileSorting())
 
   val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
 
@@ -71,43 +71,47 @@ class TreeNodeManager:
 
   def switch(sp: SafePath): Unit = directory.set(sp)
 
-  def updateFilter(newFilter: FileFilter) = fileFilter.set(newFilter)
+  def updateFilter(newFilter: FileSorting) = fileFilter.set(newFilter)
 
-  def switchAlphaSorting(using api: ServerAPI, path: BasePath) =
-    updateFilter(fileFilter.now().switchTo(ListSorting.AlphaSorting))
-    invalidCurrentCache
 
-  def switchTimeSorting(using api: ServerAPI, path: BasePath) =
-    updateFilter(fileFilter.now().switchTo(ListSorting.TimeSorting))
-    invalidCurrentCache
+  def switchSorting(fileSorting: FileSorting, newFileSorting: ListSorting) =
+    val fl =
+      if fileSorting == newFileSorting
+      then
+        fileSorting.firstLast match
+          case FirstLast.First ⇒ FirstLast.Last
+          case _ ⇒ FirstLast.First
+      else FirstLast.First
 
-  def switchSizeSorting(using api: ServerAPI, path: BasePath) =
-    updateFilter(fileFilter.now().switchTo(ListSorting.SizeSorting))
-    invalidCurrentCache
+    fileSorting.copy(fileSorting = newFileSorting, firstLast = fl)
 
-  def invalidCurrentCache(using api: ServerAPI, path: BasePath) = invalidCache(directory.now())
+  def switchAlphaSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.AlphaSorting))
 
-  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
-    sons.update(_.filterNot(_._1.path == sp.path))
-    computeCurrentSons
-  }
+  def switchTimeSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.TimeSorting))
 
-  def computeCurrentSons(using api: ServerAPI, path: BasePath) = {
-    val cur = directory.now()
+  def switchSizeSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.SizeSorting))
 
-    def updateSons(safePath: SafePath) = {
-      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf =>
-        sons.update { s => s.updated(cur, ListFiles(lf)) }
-      }
-    }
+    //directory.update(identity)//set(directory.now())
+    //invalidCache(directory.now())
 
-    cur match {
-      case safePath: SafePath ⇒
-        if (!sons.now().contains(safePath))
-          updateSons(safePath)
-      case _ ⇒ Future(ListFilesData.empty)
-    }
-  }
+//  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
+//    sons.update(_.filterNot(_._1.path == sp.path))
+//    computeCurrentSons
+//  }
+
+//  def computeCurrentSons(using api: ServerAPI, path: BasePath) =
+//    val cur = directory.now()
+//
+//    def updateSons(safePath: SafePath) =
+//      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf => sons.update { s => s.updated(cur, ListFiles(lf)) } }
+//
+//    cur match
+//      case safePath: SafePath ⇒ if !sons.now().contains(safePath) then updateSons(safePath)
+//      case _ ⇒ Future(ListFilesData.empty)
+
 
   def resetFileFinder = findFilesContaining.set((None, Seq()))
 

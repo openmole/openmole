@@ -104,9 +104,10 @@ object GUIServer:
   def waitingOpenMOLEContent = """
     |<html>
     |  <head>
+    |    <div style="display:none;">launching-page</div>
     |    <script>
     |      setInterval(function(){
-    |        fetch('application/is-alive').then ( r => { if(r.status == 200) { window.location.reload(1); } } )
+    |        fetch('application/is-alive').then(r => r.text()).then((text) => { if(text.includes("true") && !text.includes("launching-page")) { window.location.reload(1); } })
     |      }, 3000);
     |    </script>
     |  </head>
