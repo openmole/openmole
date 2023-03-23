@@ -83,7 +83,7 @@ class TabContent:
                 NotificationLevel.Error,
                 s"The file ${tabData.safePath.name} has been modified on the sever",
                 div("Which version do you want to keep?"),
-                Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true)),
+                Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true, force = true)),
                 Alternative("Server", _ =>
                   panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true).map { (content: String, hash: Option[String]) ⇒
                     tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
