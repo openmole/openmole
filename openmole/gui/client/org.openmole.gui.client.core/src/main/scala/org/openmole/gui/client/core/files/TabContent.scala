@@ -68,9 +68,9 @@ class TabContent:
       _.tabID
     }
 
-  def save(tabData: TabData, overwrite: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
+  def save(tabData: TabData, overwrite: Boolean = false, force: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
     tabData.editorPanelUI match
-      case Some(editorPanelUI) if editorPanelUI.hasBeenModified =>
+      case Some(editorPanelUI) if editorPanelUI.hasBeenModified || force =>
         val (content, hash) = editorPanelUI.code
         api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
           case (saved, savedHash) ⇒
