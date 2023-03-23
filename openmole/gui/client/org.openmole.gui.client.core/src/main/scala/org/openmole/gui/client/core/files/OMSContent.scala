@@ -76,7 +76,7 @@ object OMSContent {
                       }
                   }
                 else
-                  panels.tabContent.save(tabData).map { saved ⇒
+                  panels.tabContent.save(tabData, force = true).map { saved ⇒
                     if saved
                     then
                       api.launchScript(safePath, true).foreach {execID=>
