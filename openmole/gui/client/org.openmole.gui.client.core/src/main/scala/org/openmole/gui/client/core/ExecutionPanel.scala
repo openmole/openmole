@@ -270,7 +270,7 @@ class ExecutionPanel:
       }
     )
 
-  lazy val autoRemoveFailed = Component.Switch("auto remove failed", true, "autoCleanExecSwitch")
+  lazy val autoRemoveFailed = Component.Switch("remove failed", true, "autoCleanExecSwitch")
 
   def render(using panels: Panels, api: ServerAPI, path: BasePath) =
     def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
