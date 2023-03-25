@@ -77,10 +77,12 @@ package data {
     val R = ReadableFileType("r")
     val Text = ReadableFileType("txt")
     val Scala = ReadableFileType("scala")
+    val Scilab = ReadableFileType("sce")
+    val Julia = ReadableFileType("jl")
     val Shell = ReadableFileType("sh")
     val Python = ReadableFileType("py")
 
-    def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python)
+    def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia)
 
     def apply(e: FileExtension) =
       all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
@@ -92,7 +94,7 @@ package data {
 
     def isText(e: FileContentType) =
       e match
-        case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript => true
+        case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript | Scilab | Julia => true
         case _ => false
 
 

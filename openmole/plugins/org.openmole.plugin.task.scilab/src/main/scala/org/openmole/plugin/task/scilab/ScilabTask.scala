@@ -33,14 +33,13 @@ object ScilabTask {
   def apply(
     script:                 RunnableScript,
     install:                Seq[String]                   = Seq.empty,
-    version:                String                        = "6.1.0",
+    version:                String                        = "2023.0.0",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
     stdOut:                 OptionalArgument[Val[String]] = None,
     stdErr:                 OptionalArgument[Val[String]] = None,
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
-    workDirectory:          OptionalArgument[String]      = None,
     containerSystem:        ContainerSystem               = ContainerSystem.default,
     installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
 
@@ -126,15 +125,19 @@ object ScilabTask {
     def toBoolean(s: String) = s.trim == "T"
 
     def variable = v
-    def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String ⇒ T) = {
-      val value: Array[T] = lines.head.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray
+    def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String ⇒ T) =
+      val value: Array[T] =
+        if lines.head.trim == "[]"
+        then Array.empty
+        else lines.head.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray
       Variable(v, value)
-    }
 
-    def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String ⇒ T) = {
-      val value: Array[Array[T]] = lines.map(_.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray).toArray
+    def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String ⇒ T) =
+      val value: Array[Array[T]] =
+        if lines.head.trim == "[]"
+        then Array.empty
+        else lines.map(_.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray).toArray
       Variable(v, value)
-    }
 
     v match {
       case Val.caseInt(v)               ⇒ Variable.unsecure(v, toInt(lines.head))
@@ -199,7 +202,7 @@ case class ScilabTask(
       def outputFileName(v: Val[_]) = s"/${v.name}.openmole"
       def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
       def scilabOutputMapping =
-        mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }.mkString("\n")
+        (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
 
       scriptFile.content =
         s"""
@@ -211,7 +214,7 @@ case class ScilabTask(
         """.stripMargin
 
       def launchCommand =
-        if (majorVersion >= 6) s"""scilab-cli -nb -quit -f $scriptName"""
+        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f $scriptName"""
         else s"""scilab-cli -nb -f $scriptName"""
 
       def containerTask =
