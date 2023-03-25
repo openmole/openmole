@@ -237,7 +237,7 @@ class TreeNodePanel { panel =>
       multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
     )
 
-  def downloadFile(safePath: SafePath, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
+  def downloadFile(safePath: SafePath, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
     api.download(
       safePath,
       (p: ProcessState) ⇒ { transferring.set(p) },
@@ -328,7 +328,6 @@ class TreeNodePanel { panel =>
     then
       downloadFile(
         safePath,
-        saveFile = false,
         hash = true
       ).map { (content: String, hash: Option[String]) ⇒
         panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)

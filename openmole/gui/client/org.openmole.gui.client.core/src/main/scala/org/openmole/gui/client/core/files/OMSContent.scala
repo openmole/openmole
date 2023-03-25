@@ -66,7 +66,7 @@ object OMSContent {
                   editor.editor.getSession().clearBreakpoints()
                   compileDisabled.set(true)
 
-                  panels.tabContent.save(tabData, force = true).map { saved ⇒
+                  panels.tabContent.save(tabData, saveUnmodified = true).map { saved ⇒
                     if saved
                     then
                       api.compileScript(safePath).foreach { errorDataOption ⇒
@@ -76,7 +76,7 @@ object OMSContent {
                       }
                   }
                 else
-                  panels.tabContent.save(tabData, force = true).map { saved ⇒
+                  panels.tabContent.save(tabData, saveUnmodified = true).map { saved ⇒
                     if saved
                     then
                       api.launchScript(safePath, true).foreach {execID=>
