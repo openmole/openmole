@@ -40,10 +40,9 @@ object PythonTask {
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    version:                String                             = "3.10.2",
+    version:                String                             = "3.11.2",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
-    workDirectory:          OptionalArgument[String]           = None,
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable] = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
