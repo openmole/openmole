@@ -31,7 +31,7 @@ object Fetch:
   def apply[API](api: EndpointsSettings => API) = new Fetch(api)
   case class ServerError(data: ErrorData) extends Throwable
 
-  def calling(using name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
+  def callString(using name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     s"${name.value} in file ${file.value}:${line.value}"
 
   def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.")
@@ -41,15 +41,15 @@ object Fetch:
       case Fetch.ServerError(e) =>
         notification.notify(
           NotificationLevel.Error,
-          s"""The server returned an error 500 while calling $calling""",
-          Utils.errorTextArea(ErrorData.stackTrace(e))
+          s"""The server returned an error 500""",
+          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(e))
         )
 
       case t =>
         notification.notify(
           NotificationLevel.Error,
-          s"""The server failed unexpectedly while calling $calling""",
-          Utils.errorTextArea(ErrorData.stackTrace(ErrorData(t)))
+          s"""The server failed unexpectedly""",
+          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(ErrorData(t)))
         )
 
 
