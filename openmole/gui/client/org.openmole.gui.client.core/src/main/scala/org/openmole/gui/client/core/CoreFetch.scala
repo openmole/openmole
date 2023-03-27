@@ -36,7 +36,7 @@ class CoreFetch(panels: Panels):
     f: CoreAPIClientImpl => Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
     warningTimeout: Option[FiniteDuration] = Some(10 seconds),
-    notifyError: Boolean = true)(using path: BasePath) =
+    notifyError: Boolean = true)(using path: BasePath, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
 
     given NotificationService = NotificationManager.toService(panels.notifications)
 
@@ -49,7 +49,7 @@ class CoreFetch(panels: Panels):
   def futureError[O](
      f: CoreAPIClientImpl => Future[Either[ErrorData, O]],
      timeout: Option[FiniteDuration] = Some(60 seconds),
-     warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath) =
+     warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using path: BasePath, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
 
     given NotificationService = NotificationManager.toService(panels.notifications)
 
