@@ -12,9 +12,9 @@ It provides its own high-level scripting language and can be used as a computing
 Note that it includes most of proprietary Matlab's functionalities and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
 
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("ScilabTask")
+@preliminary("ScilabTask")
 
 
 @h3{Arguments of the ScilabTask}

@@ -4,14 +4,12 @@
 @import DocumentationPages._
 
 
-@h2{Preliminary remark}
+@h2{Preliminary remarks}
 
 @a("GAMA", href := "https://gama-platform.github.io/") is a modelling and simulation development environment for building spatially explicit agent-based simulations.
 OpenMOLE supports GAMA model natively through the @code{GAMATask}.
 @br
-@usesSingularity("GAMATask")
-
-
+@preliminary("GAMATask")
 
 @h2{The GAMATask}
 @h3{GAMA by example}

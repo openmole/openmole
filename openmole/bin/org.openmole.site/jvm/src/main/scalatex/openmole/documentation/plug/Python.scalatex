@@ -7,9 +7,12 @@
 
 @h2{PythonTask syntax}
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("PythonTask")
+@preliminary("PythonTask")
+
+@br
+
 The @code{PythonTask} relies on an underlying @code{ContainerTask} but is designed to be transparent and takes only Python-related arguments.
 
 
