@@ -30,47 +30,39 @@ object FileExtension:
 opaque type FileExtension = String
 
 object FileContentType:
-  val OpenMOLEScript = ReadableFileType("oms")
-  val OpenMOLEResult = ReadableFileType("omr")
-  val MDScript = ReadableFileType("md")
-  val SVGExtension = ReadableFileType("svg")
+  val OpenMOLEScript = ReadableFileType(Seq("oms"), text = true)
+  val OpenMOLEResult = ReadableFileType(Seq("omr"))
+  val MDScript = ReadableFileType(Seq("md"), text = true)
+  val SVGExtension = ReadableFileType(Seq("svg"))
   val OpaqueFileType = org.openmole.gui.client.ext.OpaqueFileType
-  val TarGz = ReadableFileType("tgz", "tar.gz")
-  val TarXz = ReadableFileType("txz", "tar.xz")
-  val Tar = ReadableFileType("tar")
-  val Zip = ReadableFileType("zip")
-  val Jar = ReadableFileType("jar")
-  val CSV = ReadableFileType("csv")
-  val NetLogo = ReadableFileType("nlogo", "nlogo3d", "nls")
-  val Gaml = ReadableFileType("gaml")
-  val R = ReadableFileType("r")
-  val Text = ReadableFileType("txt")
-  val Scala = ReadableFileType("scala")
-  val Scilab = ReadableFileType("sce")
-  val Julia = ReadableFileType("jl")
-  val Shell = ReadableFileType("sh")
-  val Python = ReadableFileType("py")
+  val TarGz = ReadableFileType(Seq("tgz", "tar.gz"))
+  val TarXz = ReadableFileType(Seq("txz", "tar.xz"))
+  val Tar = ReadableFileType(Seq("tar"))
+  val Zip = ReadableFileType(Seq("zip"))
+  val Jar = ReadableFileType(Seq("jar"))
+  val CSV = ReadableFileType(Seq("csv"), text = true)
+  val Gaml = ReadableFileType(Seq("gaml"), text = true)
+  val R = ReadableFileType(Seq("r", "R"), text = true)
+  val Text = ReadableFileType(Seq("txt"), text = true)
+  val Scala = ReadableFileType(Seq("scala"), text = true)
+  val Scilab = ReadableFileType(Seq("sce"), text = true)
+  val Julia = ReadableFileType(Seq("jl"), text = true)
+  val Shell = ReadableFileType(Seq("sh"), text = true)
+  val Python = ReadableFileType(Seq("py"), text = true)
 
   def all(using plugins: GUIPlugins): Seq[ReadableFileType] =
-    Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia) ++
+    Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia) ++
       plugins.wizardFactories.flatMap(_.editable.collect { case r: ReadableFileType => r})
 
   def apply(e: FileExtension)(using plugins: GUIPlugins) =
     all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
 
-  def isDisplayable(e: FileContentType) =
-    e match
-      case OpaqueFileType | Jar | Tar | TarGz | Zip | TarXz => false
-      case _ => true
-
   def isText(e: FileContentType) =
     e match
-      case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript | Scilab | Julia => true
-      case _ => false
-
+      case OpaqueFileType => false
+      case r: ReadableFileType => r.text
 
 sealed trait FileContentType
 
 object OpaqueFileType extends FileContentType
-
-case class ReadableFileType(extension: String*) extends FileContentType
+case class ReadableFileType(extension: Seq[String], text: Boolean = false, highlight: Option[String] = None) extends FileContentType

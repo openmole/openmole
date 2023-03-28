@@ -56,10 +56,10 @@ object EditorPanelUI {
     FileContentType(ext) match
       case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
       case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
-      case FileContentType.NetLogo ⇒ Some(HighlightedFile("netlogo"))
       case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
       case FileContentType.CSV ⇒ Some(HighlightedFile("csv"))
       case FileContentType.Python => Some(HighlightedFile("python"))
+      case ReadableFileType(_, true, Some(hl)) => Some(HighlightedFile(hl))
       case _ ⇒ None
 
   case class HighlightedFile(highlighter: String)

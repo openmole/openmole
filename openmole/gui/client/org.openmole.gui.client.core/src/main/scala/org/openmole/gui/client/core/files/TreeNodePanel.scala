@@ -324,7 +324,13 @@ class TreeNodePanel { panel =>
 
 
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
-    if FileContentType.isDisplayable(FileContentType(FileExtension(safePath)))
+    def isDisplayable(e: FileContentType) =
+      e match
+        case FileContentType.OpaqueFileType => false
+        case FileContentType.OpenMOLEResult => true
+        case r: ReadableFileType => r.text
+
+    if isDisplayable(FileContentType(FileExtension(safePath)))
     then
       downloadFile(
         safePath,

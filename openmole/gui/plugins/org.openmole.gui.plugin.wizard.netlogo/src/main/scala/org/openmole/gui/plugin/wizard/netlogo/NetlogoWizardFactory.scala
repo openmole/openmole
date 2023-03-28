@@ -40,6 +40,10 @@ object TopLevelExports {
 }
 
 class NetlogoWizardFactory extends WizardPluginFactory {
+  override def editable: Seq[FileContentType] =
+    val NetLogo = ReadableFileType(Seq("nlogo", "nlogo3d", "nls"), text = true, highlight = Some("netlogo"))
+    Seq(NetLogo)
+
   def accept(uploaded: Seq[(RelativePath, SafePath)]) = uploaded.filter(_._1.value.size < 2).exists(_._1.name.endsWith(".nlogo"))
   def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ??? //PluginFetch.futureError(_.parse(safePath).future)
   def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
