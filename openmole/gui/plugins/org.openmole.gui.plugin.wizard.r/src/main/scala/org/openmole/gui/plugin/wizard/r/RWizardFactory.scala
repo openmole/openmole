@@ -39,9 +39,12 @@ object TopLevelExports {
   }
 }
 
-class RWizardFactory extends WizardPluginFactory {
+class RWizardFactory extends WizardPluginFactory:
+  override def editable: Seq[FileContentType] =
+    val R = ReadableFileType(Seq("r", "R"), text = true)
+    Seq(R)
+
   def accept(uploaded: Seq[(RelativePath, SafePath)]) = uploaded.filter(_._1.value.size < 2).exists(_._1.name.endsWith(".R"))
   def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???  //PluginFetch.futureError(_.parse(safePath).future)
   def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
   def name: String = "R"
-}
