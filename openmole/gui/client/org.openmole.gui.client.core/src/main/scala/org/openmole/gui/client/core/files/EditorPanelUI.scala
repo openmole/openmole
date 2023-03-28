@@ -46,13 +46,13 @@ object EditorPanelUI {
   def apply(
     fileType: FileExtension,
     initCode: String,
-    initHash: String) =
+    initHash: String)(using plugins: GUIPlugins) =
     val editor = new EditorPanelUI(fileType)
     editor.setCode(initCode, initHash)
     editor
 
 
-  def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
+  def highlightedFile(ext: FileExtension)(using plugins: GUIPlugins): Option[HighlightedFile] =
     FileContentType(ext) match
       case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
       case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
@@ -69,7 +69,7 @@ object EditorPanelUI {
   object openmolemode extends js.Object
 }
 
-class EditorPanelUI(fileExtension: FileExtension) {
+class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
 
   val modified = Var(false)
 

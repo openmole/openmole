@@ -51,9 +51,11 @@ object FileContentType:
   val Shell = ReadableFileType("sh")
   val Python = ReadableFileType("py")
 
-  def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia)
+  def all(using plugins: GUIPlugins): Seq[ReadableFileType] =
+    Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia) ++
+      plugins.wizardFactories.flatMap(_.editable.collect { case r: ReadableFileType => r})
 
-  def apply(e: FileExtension) =
+  def apply(e: FileExtension)(using plugins: GUIPlugins) =
     all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
 
   def isDisplayable(e: FileContentType) =
