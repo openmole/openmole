@@ -26,7 +26,6 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import Waiter.*
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.data.DataUtils.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
@@ -192,7 +191,11 @@ object ModelWizardPanel:
     )
 
     def inferProtoTyePair(param: String) =
-      val defaultPrototype = PrototypePair(param.clean, PrototypeData.Double, "0.0", Some(param))
+      def cleanName(s: String) =
+        val capital: String = s.split('-').reduce(_ + _.capitalize)
+        capital.replace("?", "").replace(" ", "").replace("%", "percent")
+
+      val defaultPrototype = PrototypePair(cleanName(param), PrototypeData.Double, "0.0", Some(param))
 
       modelMetadata.now() match
         case Some(mmd) => (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == param).getOrElse(defaultPrototype)

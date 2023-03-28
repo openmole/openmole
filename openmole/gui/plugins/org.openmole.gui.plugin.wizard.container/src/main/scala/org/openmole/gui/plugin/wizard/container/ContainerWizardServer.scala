@@ -25,7 +25,6 @@ import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.tool.file.*
 
 import scala.util.{Failure, Success, Try}

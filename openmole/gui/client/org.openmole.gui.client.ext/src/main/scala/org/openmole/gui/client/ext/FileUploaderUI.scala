@@ -25,7 +25,6 @@ import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
-import org.openmole.gui.shared.data.DataUtils
 
 case class FileUploaderUI(existingKey: Option[SafePath], renaming: Option[SafePath] = None):
   val file: Var[Option[SafePath]] = Var(existingKey)
@@ -33,7 +32,7 @@ case class FileUploaderUI(existingKey: Option[SafePath], renaming: Option[SafePa
   def view(using api: ServerAPI, path: BasePath) =
     label(
       fileInput((fInput: Input) ⇒ {
-        val to = renaming.orElse(existingKey).getOrElse(SafePath(Seq(DataUtils.randomId), ServerFileSystemContext.Authentication))
+        val to = renaming.orElse(existingKey).getOrElse(SafePath(Seq(randomId), ServerFileSystemContext.Authentication))
         api.upload(fInput.ref.files.toSeq.map(f => f -> to)).map { _ ⇒
           file.set(Some(to))
           fInput.ref.value = ""

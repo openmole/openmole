@@ -1,13 +1,12 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.FileExtension.*
+import org.openmole.gui.client.ext.FileExtension.*
 
 import scala.scalajs.js
 import scaladget.ace.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.openmole.gui.shared.data.DataUtils.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.client.ext.*

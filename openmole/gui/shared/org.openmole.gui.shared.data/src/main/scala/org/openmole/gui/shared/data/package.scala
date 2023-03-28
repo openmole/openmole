@@ -52,56 +52,6 @@ package data {
   import scala.collection.immutable.ArraySeq
   import scala.scalajs.js.annotation.JSExport
 
-  object FileExtension:
-    def apply(fileName: String): FileExtension = fileName.dropWhile(_ != '.').drop(1)
-
-    extension (e: FileExtension)
-      def value: String = e
-
-  opaque type FileExtension = String
-
-  object FileContentType:
-    val OpenMOLEScript = ReadableFileType("oms")
-    val OpenMOLEResult = ReadableFileType("omr")
-    val MDScript = ReadableFileType("md")
-    val SVGExtension = ReadableFileType("svg")
-    val OpaqueFileType = org.openmole.gui.shared.data.OpaqueFileType
-    val TarGz = ReadableFileType("tgz", "tar.gz")
-    val TarXz = ReadableFileType("txz", "tar.xz")
-    val Tar = ReadableFileType("tar")
-    val Zip = ReadableFileType("zip")
-    val Jar = ReadableFileType("jar")
-    val CSV = ReadableFileType("csv")
-    val NetLogo = ReadableFileType("nlogo", "nlogo3d", "nls")
-    val Gaml = ReadableFileType("gaml")
-    val R = ReadableFileType("r")
-    val Text = ReadableFileType("txt")
-    val Scala = ReadableFileType("scala")
-    val Scilab = ReadableFileType("sce")
-    val Julia = ReadableFileType("jl")
-    val Shell = ReadableFileType("sh")
-    val Python = ReadableFileType("py")
-
-    def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python, Scilab, Julia)
-
-    def apply(e: FileExtension) =
-      all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
-
-    def isDisplayable(e: FileContentType) =
-      e match
-        case OpaqueFileType | Jar | Tar | TarGz | Zip | TarXz => false
-        case _ => true
-
-    def isText(e: FileContentType) =
-      e match
-        case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript | Scilab | Julia => true
-        case _ => false
-
-
-  sealed trait FileContentType
-  object OpaqueFileType extends FileContentType
-  case class ReadableFileType(extension: String*) extends FileContentType
-
   import org.openmole.gui.shared.data.SafePath._
 
   enum ServerFileSystemContext:
@@ -134,10 +84,8 @@ package data {
 
     def name = path.name
     def isEmpty = path.value.isEmpty
-    def toNoExtention = copy(path = path.value.dropRight(1) :+ nameWithNoExtension)
     def nameWithNoExtension = name.split('.').head
     def normalizedPathString = path.name.tail.mkString("/")
-    def extension = FileExtension(name)
 
     def startsWith(safePath: SafePath) =
       safePath.context == context &&
@@ -186,12 +134,12 @@ package data {
 
   object ExecutionId:
     def apply() =
-      val id = DataUtils.randomId
+      val id = randomId
       new ExecutionId(id)
 
   case class ExecutionId(id: String)
 
-  case class EnvironmentId(id: String = DataUtils.randomId)
+  case class EnvironmentId(id: String = randomId)
 
   enum ErrorStateLevel(val name: String):
     case Debug extends ErrorStateLevel("Debug")
@@ -460,5 +408,6 @@ package data {
 
   sealed trait NotificationEvent
 
-
+  def randomId = scala.util.Random.alphanumeric.take(10).mkString
+  
 }

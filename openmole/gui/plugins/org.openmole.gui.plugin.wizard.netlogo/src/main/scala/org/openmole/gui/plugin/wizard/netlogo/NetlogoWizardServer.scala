@@ -22,7 +22,6 @@ import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.DataUtils.*
 import org.openmole.tool.file.*
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*

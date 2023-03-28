@@ -22,7 +22,7 @@ object CSVContent {
 
     val rowData: RowData = ResultData.fromCSV(initialContent)
 
-    val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
+    val editor = EditorPanelUI(FileExtension(safePath), initialContent, initialHash)
     editor.setReadOnly(true)
 
     // FIXME: this should be in css but for some reason it does not work this way

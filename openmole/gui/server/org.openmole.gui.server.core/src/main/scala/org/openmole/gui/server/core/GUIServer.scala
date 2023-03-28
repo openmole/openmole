@@ -240,7 +240,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
         server(port, localhost).
         withHttpApp(httpApp).
         withIdleTimeout(Duration.Inf).
-        withResponseHeaderTimeout(Duration.Inf),
+        withResponseHeaderTimeout(Duration.Inf).
         withServiceErrorHandler(r => t => stackError(t)).
         allocated.unsafeRunSync()._2 // feRunSync()._2
 

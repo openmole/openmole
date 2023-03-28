@@ -2,7 +2,6 @@ package org.openmole.gui.server.core
 
 import org.openmole.core.workspace.Workspace
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.DataUtils._
 
 import scala.io.Source
 
