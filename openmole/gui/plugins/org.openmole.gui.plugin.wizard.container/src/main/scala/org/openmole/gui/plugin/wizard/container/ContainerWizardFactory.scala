@@ -44,22 +44,39 @@ class ContainerWizardFactory extends WizardPluginFactory {
     if uploaded.size == 1
     then
       val name = uploaded.head._1.name
-      name.endsWith(".tar") || name.endsWith(".tgz") || name.endsWith(".tar.gz")
+      name.endsWith(".tar") || name.endsWith(".tgz") || name.endsWith(".tar.gz") || name.endsWith(".sh")
     else false
 
   def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
   def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) =
+    val file = uploaded.head._1
     val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
 
-    Future(
+    def container =
+        s"""
+           |${modelData.vals}
+           |val model =
+           |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
+           |    ${WizardUtils.expandWizardData(modelData)}
+           |  )
+           |model""".stripMargin
+
+    def script =
+      def set = WizardUtils.mkSet(
+        s"resources += (workDirectory / \"${file.mkString}\")",
+        WizardUtils.expandWizardData(modelData)
+      )
+
       s"""
          |${modelData.vals}
          |val model =
-         |  ContainerTask(workDirectory / "${uploaded.head._1.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
-         |    ${WizardUtils.expandWizardData(modelData)}
-         |  )
-         |model""".stripMargin)
-    //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
+         |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+         |
+         |model""".stripMargin
+
+    if file.name.endsWith(".sh")
+    then Future(script)
+    else Future(container)
 
   def name: String = "Container"
 }

@@ -98,4 +98,13 @@ object WizardUtils {
       modelData.outputFileMapping +
     //  modelData.resources +
       modelData.defaults
+
+  def mkSet(s: String*) =
+    val elements = s.filter(!_.trim.isEmpty).map(s => s"    $s").mkString(",\n")
+    if elements.isEmpty
+    then ""
+    else
+      s"""set (
+         |$elements
+         |  )""".stripMargin
 }
