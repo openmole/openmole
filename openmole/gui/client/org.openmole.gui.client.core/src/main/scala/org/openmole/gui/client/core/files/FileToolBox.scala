@@ -21,7 +21,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
   def download(using panels: Panels) = withSafePath { sp ⇒
     closeToolBox
-    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value))
+    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value), sp.context)
   }
 
   def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒

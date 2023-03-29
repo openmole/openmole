@@ -183,7 +183,7 @@ object ModelWizardPanel:
     val inputTags = new TagBadge()
     val outputTags = new TagBadge()
 
-    val commandeInput = inputTag("").amend(placeholder := "Launching command")
+    val commandeInput = inputTag("").amend(placeholder := "Launching command", value <-- modelMetadata.signal.map(m => m.flatMap(_.data.command).getOrElse("")))
 
     def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
       div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
@@ -191,11 +191,7 @@ object ModelWizardPanel:
     )
 
     def inferProtoTyePair(param: String) =
-      def cleanName(s: String) =
-        val capital: String = s.split('-').reduce(_ + _.capitalize)
-        capital.replace("?", "").replace(" ", "").replace("%", "percent")
-
-      val defaultPrototype = PrototypePair(cleanName(param), PrototypeData.Double, "0.0", Some(param))
+      val defaultPrototype = PrototypePair(WizardUtils.toVariableName(param), PrototypeData.Double, "0.0", Some(param))
 
       modelMetadata.now() match
         case Some(mmd) => (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == param).getOrElse(defaultPrototype)

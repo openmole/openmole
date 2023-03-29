@@ -39,9 +39,9 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
     routesFromEndpoints(toTaskRoute, parseRoute )
   )
 
-  object impl {
-
-    import s._
+//  object impl {
+//
+//    import s._
 
 //    def toTask(target: SafePath, mmd: ModelMetadata): Unit = {
 //
@@ -77,64 +77,7 @@ class NetlogoWizardServer(s: Services) extends APIServer with NetlogoWizardAPI {
 //
 //      // WizardToTask(target)
 //    }
-//
-//    def parse(safePath: SafePath): Option[ModelMetadata] = {
-//
-//      val lines = safePath.toFile.lines
-//
-//      def parse0(lines: Seq[(String, Int)], args: Seq[PrototypePair], outputs: Seq[PrototypePair]): (Seq[PrototypePair], Seq[PrototypePair]) = {
-//        if (lines.isEmpty) (PrototypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
-//        else {
-//          val (line, index) = lines.head
-//          val tail = lines.tail
-//          if (line.startsWith("SLIDER")) parse0(tail, args :+ parseSlider(index), outputs)
-//          else if (line.startsWith("SWITCH")) parse0(tail, args :+ parseSwitch(index), outputs)
-//          else if (line.startsWith("INPUTBOX")) parse0(tail, args :+ parseInputBox(index), outputs)
-//          else if (line.startsWith("CHOOSER")) parse0(tail, args :+ parseChooser(index), outputs)
-//          else if (line.startsWith("MONITOR")) parse0(tail, args, outputs ++ parseMonitor(index))
-//          // else if (line.startsWith("PLOT")) parse0(tail, args, outputs ++ parsePlot(index))
-//          else parse0(tail, args, outputs)
-//        }
-//      }
-//
-//      def parseSlider(start: Int): PrototypePair = {
-//        val name = lines(start + 5)
-//        PrototypePair(name.clean, PrototypeData.Double, lines(start + 9), Some(name))
-//      }
-//
-//      def parseSwitch(start: Int): PrototypePair = {
-//        val name = lines(start + 5)
-//        PrototypePair(name.clean, PrototypeData.Boolean, lines(start + 7), Some(name))
-//      }
-//
-//      def parseInputBox(start: Int): PrototypePair = {
-//        val name = lines(start + 5)
-//        PrototypePair(name.clean, PrototypeData.Double, lines(start + 6), Some(name))
-//      }
-//
-//      def parseMonitor(start: Int): Seq[PrototypePair] = {
-//        val name = lines(start + 6).split(' ')
-//        if (name.size == 1) Seq(PrototypePair(name.head.clean, PrototypeData.Double, mapping = Some(name.head)))
-//        else Seq()
-//      }
-//
-//      def parseChooser(start: Int): PrototypePair = {
-//        val name = lines(start + 5)
-//        PrototypePair(name.clean, PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
-//      }
-//
-//      val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())
-//
-//      Some(ModelMetadata(
-//        Some(NetLogoLanguage()),
-//        inputs,
-//        outputs,
-//        None,
-//        Some(safePath.name),
-//        safePath.parent
-//      ))
-//    }
-//
-  }
+
+
 
 }

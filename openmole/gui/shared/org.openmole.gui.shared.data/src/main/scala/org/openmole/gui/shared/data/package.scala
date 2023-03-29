@@ -30,8 +30,8 @@ package data {
   val uploadFilesRoute = "uploadFiles"
   val resetPasswordRoute = "resetPassword"
 
-  def downloadFile(uri: String, hash: Boolean = false) =
-    s"${downloadFileRoute}?path=$uri&hash=$hash"
+  def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
+    s"${downloadFileRoute}?path=$uri&hash=$hash&fileType=${fileType.typeName}"
 
   def hashHeader = "Content-Hash"
 
@@ -53,6 +53,10 @@ package data {
   import scala.scalajs.js.annotation.JSExport
 
   import org.openmole.gui.shared.data.SafePath._
+
+
+  object ServerFileSystemContext:
+    def fromTypeName(s: String): Option[ServerFileSystemContext] = ServerFileSystemContext.values.find(_.typeName == s.toLowerCase)
 
   enum ServerFileSystemContext:
     val typeName = this.productPrefix.toLowerCase
@@ -245,8 +249,7 @@ package data {
   case class ModelMetadata(
     inputs: Seq[PrototypePair] = Seq(),
     outputs: Seq[PrototypePair] = Seq(),
-    command: Option[String] = None,
-    executableName: Option[String] = None)
+    command: Option[String] = None)
 
   case class GeneratedModel(
     content: String,

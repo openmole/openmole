@@ -102,7 +102,9 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     val p = scala.concurrent.Promise[Seq[(RelativePath, SafePath)]]()
 
     xhr.onload = e =>
-      p.success(files.map(_._1.path) zip destinationPaths)
+      xhr.status match
+        case s if s < 300 => p.success(files.map(_._1.path) zip destinationPaths)
+        case s => p.failure(new IOException(s"Upload of files ${files} failed with status $s"))
 
     xhr.onerror = e =>
       p.failure(new IOException(s"Upload of files ${files} failed"))
@@ -139,7 +141,9 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
       xhr.onload = e =>
         val h = Option(xhr.getResponseHeader(hashHeader))
-        p.success((xhr.responseText, h))
+        xhr.status match
+          case s if s < 300 => p.success((xhr.responseText, h))
+          case s => p.failure(new IOException(s"Download of file ${safePath} failed with error ${s}"))
 
       xhr.onerror = e =>
         p.failure(new IOException(s"Download of file ${safePath} failed"))
@@ -151,7 +155,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
         p.failure(new IOException(s"Download of file ${safePath} timed out"))
 
 
-      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash), true)
+      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash, fileType = safePath.context), true)
       xhr.send()
 
       p.future

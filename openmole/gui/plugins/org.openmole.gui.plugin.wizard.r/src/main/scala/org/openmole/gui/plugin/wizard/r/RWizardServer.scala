@@ -40,28 +40,28 @@ class RWizardServer(s: Services) extends APIServer with RWizardAPI {
     routesFromEndpoints(toTaskRoute, parseRoute)
   )
 
-  object impl {
-    import s._
-
-    def toTask(target: SafePath, modelMetadata: ModelMetadata): Unit = {
-
-      val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
-
-      val task = s"${
-        modelMetadata.executableName.map {
-          _.split('.').toSeq
-        }.getOrElse(Seq()).head.toLowerCase
-      }Task"
-
-      val content = modelData.vals +
-        s"""\nval $task = RTask(\"\"\"\n   source("${modelMetadata.executableName.getOrElse("")}")\n   \"\"\") set(\n""".stripMargin +
-        WizardUtils.expandWizardData(modelData) +
-        s""")\n\n$task hook ToStringHook()"""
-
-      target.toFile.content = content
-    }
-
-    def parse(safePath: SafePath): Option[ModelMetadata] = None
-
-  }
+//  object impl {
+//    import s._
+//
+//    def toTask(target: SafePath, modelMetadata: ModelMetadata): Unit = {
+//
+//      val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
+//
+//      val task = s"${
+//        modelMetadata.executableName.map {
+//          _.split('.').toSeq
+//        }.getOrElse(Seq()).head.toLowerCase
+//      }Task"
+//
+//      val content = modelData.vals +
+//        s"""\nval $task = RTask(\"\"\"\n   source("${modelMetadata.executableName.getOrElse("")}")\n   \"\"\") set(\n""".stripMargin +
+//        WizardUtils.expandWizardData(modelData) +
+//        s""")\n\n$task hook ToStringHook()"""
+//
+//      target.toFile.content = content
+//    }
+//
+//    def parse(safePath: SafePath): Option[ModelMetadata] = None
+//
+//  }
 }

@@ -51,9 +51,9 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
   def editable: Seq[FileContentType] = Seq()
-  def accept(uploaded: Seq[(RelativePath, SafePath)]): Boolean
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel]
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Boolean
+  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
+  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
