@@ -33,7 +33,7 @@ import org.openmole.gui.shared.api.*
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("netlogo")
+  @JSExportTopLevel("wizard_netlogo")
   val netlogo = js.Object {
     new org.openmole.gui.plugin.wizard.netlogo.NetlogoWizardFactory
   }

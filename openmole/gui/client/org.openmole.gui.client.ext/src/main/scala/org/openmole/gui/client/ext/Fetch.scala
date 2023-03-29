@@ -34,8 +34,9 @@ object Fetch:
   def callString(using name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     s"${name.value} in file ${file.value}:${line.value}"
 
-  def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.")
-  def onWarningTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.")
+  def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
+  def onWarningTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
+
   def onFailed(t: Throwable)(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     t match
       case Fetch.ServerError(e) =>

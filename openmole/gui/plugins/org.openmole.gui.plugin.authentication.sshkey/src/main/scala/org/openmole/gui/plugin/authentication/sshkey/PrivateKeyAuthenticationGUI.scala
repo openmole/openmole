@@ -30,7 +30,7 @@ import org.openmole.gui.shared.api.*
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("sshkey")
+  @JSExportTopLevel("authentication_sshkey")
   val sshkey = js.Object {
     new org.openmole.gui.plugin.authentication.sshkey.PrivateKeyAuthenticationFactory
   }

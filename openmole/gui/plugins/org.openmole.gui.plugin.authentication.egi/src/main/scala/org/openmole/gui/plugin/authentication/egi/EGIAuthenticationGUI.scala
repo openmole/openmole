@@ -31,7 +31,7 @@ import scaladget.bootstrapnative.bsn
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("egi")
+  @JSExportTopLevel("authentication_egi")
   val egi = js.Object {
     new org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory
   }

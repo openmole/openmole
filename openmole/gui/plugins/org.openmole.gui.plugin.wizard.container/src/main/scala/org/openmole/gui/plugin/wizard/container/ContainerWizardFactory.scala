@@ -32,14 +32,11 @@ import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
 
-object TopLevelExports {
-  @JSExportTopLevel("container")
+object TopLevelExports:
+  @JSExportTopLevel("wizard_container")
   val container = js.Object {
     new ContainerWizardFactory
   }
-}
-
-
 
 class ContainerWizardFactory extends WizardPluginFactory {
   def accept(uploaded: Seq[(RelativePath, SafePath)]) =

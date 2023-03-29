@@ -33,7 +33,7 @@ import org.openmole.gui.shared.api.*
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("r")
+  @JSExportTopLevel("wizard_r")
   val r = js.Object {
     new org.openmole.gui.plugin.wizard.r.RWizardFactory
   }

@@ -27,7 +27,7 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
 
 object TopLevelExports {
-  @JSExportTopLevel("evolution")
+  @JSExportTopLevel("analysis_evolution")
   val egi = js.Object {
     new org.openmole.gui.plugin.analysis.evolution.EvolutionAnalysis
   }

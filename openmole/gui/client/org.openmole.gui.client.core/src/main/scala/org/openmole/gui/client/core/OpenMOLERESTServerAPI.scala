@@ -160,9 +160,16 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     }
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
+    def successOrNotify[T](t: util.Try[T]) =
+      t match
+        case util.Success(r) => Some(r)
+        case util.Failure(t) =>
+          notificationService.notify(NotificationLevel.Error, s"Error while instantiating plugin", div(ErrorData.stackTrace(ErrorData(t))))
+          None
+
     fetch.futureError(_.guiPlugins(()).future).map { p ⇒
-      val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
-      val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
-      val analysisFactories = p.analysis.map { (method, gp) ⇒ (method, Plugins.buildJSObject[MethodAnalysisPlugin](gp)) }.toMap
+      val authFact = p.authentications.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) }
+      val wizardFactories = p.wizards.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
+      val analysisFactories = p.analysis.flatMap { (method, gp) ⇒ successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
       f(GUIPlugins(authFact, wizardFactories, analysisFactories))
     }
