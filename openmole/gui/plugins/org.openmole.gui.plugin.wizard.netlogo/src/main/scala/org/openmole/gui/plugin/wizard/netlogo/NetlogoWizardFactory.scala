@@ -104,22 +104,20 @@ class NetlogoWizardFactory extends WizardPluginFactory:
   def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     val nlogo = findNLogoFile(uploaded).get
     val task = WizardUtils.toTaskName(nlogo._1)
-      //  val modelMetadata = parse(target)
-    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("outputs"))
     val embeddWS = WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo")).isDefined
 
     val content =
       s"""
         |${WizardUtils.preamble}
         |
-        |${modelData.vals}
+        |${WizardUtils.mkVals(modelMetadata)}
         |val mySeed = Val[Int]
         |
         |val $task = NetLogo6Task(
         |  workDirectory / "${nlogo._1.mkString}",
         |  Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }"),
         |  seed = mySeed,
-        |  embedWorkspace = $embeddWS) ${WizardUtils.mkSet(WizardUtils.expandWizardData(modelData), "mySeed := 42")}
+        |  embedWorkspace = $embeddWS) ${WizardUtils.mkSet(modelMetadata, "mySeed := 42")}
         |
         |$task
         |""".stripMargin

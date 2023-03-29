@@ -25,8 +25,7 @@ import org.openmole.gui.server.ext.{GUIPluginInfo, GUIPluginRegistry, OMRouter}
 class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
-    wizard = Some(classOf[NetlogoWizardFactory]),
-    router = Some(s ⇒ OMRouter(new NetlogoWizardServer(s).routes))
+    wizard = Some(classOf[NetlogoWizardFactory])
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

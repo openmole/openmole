@@ -17,6 +17,7 @@
   */
 package org.openmole.gui.client.ext
 
+import org.openmole.gui.client.ext.WizardUtils.mkVals
 import org.openmole.gui.shared.data.*
 
 object WizardUtils:
@@ -27,80 +28,61 @@ object WizardUtils:
     |To do all that please refer to the OpenMOLE documentation.
     |*/""".stripMargin
 
-  case class WizardModelData(
-    vals: String,
-    inputs: String,
-    outputs: String,
-    inputFileMapping: String,
-    outputFileMapping: String,
-    defaults: String,
-    //   resources: String,
-    specificInputMapping: Option[String] = None,
-    specificOutputMapping: Option[String] = None)
 
-  def wizardModelData(
-    inputs: Seq[PrototypePair],
-    outputs: Seq[PrototypePair],
-    // resources: Seq[String],
-    specificInputPattern: Option[String] = None,
-    specificOutputPattern: Option[String] = None,
-    ) = {
 
-    def testBoolean(protoType: PrototypePair) = protoType.`type` match
-      case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
-      case _ ⇒ protoType.default
-
-    def ioString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) Seq(s"    $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
-    def imapString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) protos.map { i ⇒ s"""    $keyString += ${i.name} mapped "${i.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
-    def omapString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) protos.map { o ⇒ s"""    $keyString += ${o.name} mapped "${o.mapping.get}"""" }.mkString(",\n") + ",\n" else ""
-
-    def default(key: String, value: String) = s"    $key := $value"
-
-    val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-    val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
-    val (ifilemappings, imappings) = rawimappings.partition(_.`type` == PrototypeData.File)
-    val (ofilemappings, omappings) = rawomappings.partition(_.`type` == PrototypeData.File)
-
-    //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
-
-    val defaultValues =
-      (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
-        ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot { _._2.isEmpty }.map { p ⇒ default(p._1, p._2) }.mkString(",\n")
-
-    val defaults = defaultValues
-
-    val vals =
-      ((inputs ++ outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>
+  def mkVals(modelMetadata: ModelMetadata) =
+    def vals =
+      ((modelMetadata.inputs ++ modelMetadata.outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>
         "val " + p._1 + " = Val[" + p._2 + "]"
-      }.mkString("\n")
-
-    WizardModelData(
-      vals,
-      ioString(ins, "inputs"),
-      ioString(ous, "outputs"),
-      imapString(ifilemappings, "inputFiles"),
-      omapString(ofilemappings, "outputFiles"),
-      defaults,
-   //   resourcesString,
-      specificInputPattern.map { sip => imapString(imappings, sip) },
-      specificOutputPattern.map { sop => omapString(omappings, sop) }
-    )
-  }
-
-  def expandWizardData(modelData: WizardModelData) =
-      modelData.inputs +
-      modelData.outputs +
-      modelData.specificInputMapping.getOrElse("") +
-      modelData.specificOutputMapping.getOrElse("") +
-      modelData.inputFileMapping +
-      modelData.outputFileMapping +
-    //  modelData.resources +
-      modelData.defaults
+      }
+    vals.mkString("\n")
 
   def mkTaskParameters(s: String*) = s.filter(!_.trim.isEmpty).map(s => s"    $s").mkString(",\n")
 
-  def mkSet(s: String*) =
-    val elements = s.filter(!_.trim.isEmpty).map(s => s"    $s").mkString(",\n")
+  def mkSet(modelData: ModelMetadata, s: String*) =
+    def setElements(inputs: Seq[PrototypePair], outputs: Seq[PrototypePair]) =
+      def testBoolean(protoType: PrototypePair) = protoType.`type` match
+        case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
+        case _ ⇒ protoType.default
+
+      def ioString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) Seq(Seq(s"$keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", "))) else Seq()
+
+      def imapString(protos: Seq[PrototypePair], keyString: String) = protos.flatMap { i ⇒
+        i.mapping.map { mapping => s"""$keyString += ${i.name} mapped "${mapping}"""" }
+      }
+
+      def omapString(protos: Seq[PrototypePair], keyString: String) = protos.flatMap { o ⇒
+        o.mapping.map { mapping =>
+          s"""$keyString += ${o.name} mapped "${mapping}""""
+        }
+      }
+
+      def default(key: String, value: String) = s"$key := $value"
+
+      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
+      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+      val (ifilemappings, imappings) = rawimappings.partition(_.`type` == PrototypeData.File)
+      val (ofilemappings, omappings) = rawomappings.partition(_.`type` == PrototypeData.File)
+
+      //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
+
+      val defaultValues =
+        (inputs.map { p ⇒ (p.name, testBoolean(p)) } ++
+          ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+          _._2.isEmpty
+        }.map { p ⇒ default(p._1, p._2) }
+
+      ioString(ins, "inputs") ++
+        ioString(ous, "outputs") ++
+        imapString(ifilemappings, "inputFiles") ++
+        omapString(ofilemappings, "outputFiles") ++
+        imapString(rawimappings, "inputs") ++
+        omapString(rawomappings, "outputs") ++
+        defaultValues
+
+    end setElements
+
+    val elements = (setElements(modelData.inputs, modelData.outputs) ++ s).filter(!_.trim.isEmpty).map(s => s"    $s").mkString(",\n")
     if elements.isEmpty
     then ""
     else

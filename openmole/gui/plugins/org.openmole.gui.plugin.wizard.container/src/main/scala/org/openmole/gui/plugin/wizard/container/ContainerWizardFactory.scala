@@ -50,16 +50,15 @@ class ContainerWizardFactory extends WizardPluginFactory:
       else false
 
   def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
 
+  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".sh")) match
       case Some(s) =>
         val taskName = WizardUtils.toTaskName(s._1)
 
         def set = WizardUtils.mkSet(
-          s"resources += (workDirectory / \"${s._1.parent.mkString}\")",
-          WizardUtils.expandWizardData(modelData)
+          modelMetadata,
+          s"resources += (workDirectory / \"${s._1.parent.mkString}\")"
         )
 
         def script =
@@ -67,7 +66,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
             s"""
                |${WizardUtils.preamble}
                |
-               |${modelData.vals}
+               |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
                |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${s._1.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
                |
@@ -85,26 +84,25 @@ class ContainerWizardFactory extends WizardPluginFactory:
             s"""
                |${WizardUtils.preamble}
                |
-               |${modelData.vals}
+               |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
-               |    ${WizardUtils.expandWizardData(modelData)}
-               |  )
+               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") ${WizardUtils.mkSet(modelMetadata)}
+               |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))
           )
 
         def script =
           def set = WizardUtils.mkSet(
-            s"resources += (workDirectory / \"${file.mkString}\")",
-            WizardUtils.expandWizardData(modelData)
+            modelMetadata,
+            s"resources += (workDirectory / \"${file.mkString}\")"
           )
 
           GeneratedModel(
             s"""
                |${WizardUtils.preamble}
                |
-               |${modelData.vals}
+               |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
                |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
                |

@@ -41,7 +41,7 @@ object GUIPluginRegistry:
   def register(key: AnyRef, info: GUIPluginInfo) = GUIPluginRegistry.plugins += key → info
 
 case class GUIPluginInfo(
-  router:         Option[Services ⇒ OMRouter]                        = None,
-  authentication: Option[Class[_]]    = None,
-  wizard:         Option[Class[_]]            = None,
-  analysis:       Option[(String, Class[_])] = None)
+  router:         Option[Services ⇒ OMRouter]    = None,
+  authentication: Option[Class[_]]               = None,
+  wizard:         Option[Class[_]]               = None,
+  analysis:       Option[(String, Class[_])]     = None)
