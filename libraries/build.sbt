@@ -445,6 +445,7 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
 
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
+  libraryDependencies += "com.lihaoyi" %% sjs("sourcecode") % sourcecodeVersion,
   version := sourcecodeVersion
 ) settings(settings: _*) settings(scala3Settings: _*)
 

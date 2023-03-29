@@ -13,8 +13,8 @@ import scaladget.bootstrapnative.bsn.*
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AnyTextContent {
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
-    val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) = {
+    val editor = EditorPanelUI(FileExtension(safePath), initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
     val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, panels.tabContent.fontSizeControl, marginLeft.auto)
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)

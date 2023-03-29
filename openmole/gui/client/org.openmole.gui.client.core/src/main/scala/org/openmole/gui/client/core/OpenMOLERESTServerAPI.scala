@@ -102,7 +102,9 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     val p = scala.concurrent.Promise[Seq[(RelativePath, SafePath)]]()
 
     xhr.onload = e =>
-      p.success(files.map(_._1.path) zip destinationPaths)
+      xhr.status match
+        case s if s < 300 => p.success(files.map(_._1.path) zip destinationPaths)
+        case s => p.failure(new IOException(s"Upload of files ${files} failed with status $s"))
 
     xhr.onerror = e =>
       p.failure(new IOException(s"Upload of files ${files} failed"))
@@ -139,7 +141,9 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
       xhr.onload = e =>
         val h = Option(xhr.getResponseHeader(hashHeader))
-        p.success((xhr.responseText, h))
+        xhr.status match
+          case s if s < 300 => p.success((xhr.responseText, h))
+          case s => p.failure(new IOException(s"Download of file ${safePath} failed with error ${s}"))
 
       xhr.onerror = e =>
         p.failure(new IOException(s"Download of file ${safePath} failed"))
@@ -151,7 +155,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
         p.failure(new IOException(s"Download of file ${safePath} timed out"))
 
 
-      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash), true)
+      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash, fileType = safePath.context), true)
       xhr.send()
 
       p.future
@@ -160,9 +164,16 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     }
 
   override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
+    def successOrNotify[T](t: util.Try[T]) =
+      t match
+        case util.Success(r) => Some(r)
+        case util.Failure(t) =>
+          notificationService.notify(NotificationLevel.Error, s"Error while instantiating plugin", div(ErrorData.stackTrace(ErrorData(t))))
+          None
+
     fetch.futureError(_.guiPlugins(()).future).map { p ⇒
-      val authFact = p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
-      val wizardFactories = p.wizards.map { gp ⇒ Plugins.buildJSObject[WizardPluginFactory](gp) }
-      val analysisFactories = p.analysis.map { (method, gp) ⇒ (method, Plugins.buildJSObject[MethodAnalysisPlugin](gp)) }.toMap
+      val authFact = p.authentications.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) }
+      val wizardFactories = p.wizards.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
+      val analysisFactories = p.analysis.flatMap { (method, gp) ⇒ successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
       f(GUIPlugins(authFact, wizardFactories, analysisFactories))
     }

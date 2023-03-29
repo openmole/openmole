@@ -21,7 +21,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
   def download(using panels: Panels) = withSafePath { sp ⇒
     closeToolBox
-    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value))
+    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value), sp.context)
   }
 
   def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒
@@ -197,12 +197,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                     iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
                   case _ ⇒ emptyMod
                 },
-                FileExtension(initSafePath.name) match {
-                  //FIXME discover extensions from wizard plugins
-                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
-                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
-                  case _ ⇒ emptyMod
-                },
+//                FileExtension(initSafePath.name) match {
+//                  //FIXME discover extensions from wizard plugins
+//                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
+//                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
+//                  case _ ⇒ emptyMod
+//                },
                 pluginState.isPlugin match {
                   case true ⇒
                     val (icon, text) = pluginState.isPlugged match {

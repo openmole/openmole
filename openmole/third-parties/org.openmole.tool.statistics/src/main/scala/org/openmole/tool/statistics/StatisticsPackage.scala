@@ -12,6 +12,7 @@ trait StatisticsPackage extends Stat { stat ⇒
     def meanSquaredError = stat.meanSquaredError(s.map(td.apply))
     def standardDeviation = stat.standardDeviation(s.map(td.apply))
     def rootMeanSquaredError = stat.rootMeanSquaredError(s.map(td.apply))
+    def percentile(p: Double) = stat.percentile(s.map(td.apply), Seq(p)).head
 
     def normalize = stat.normalize(s.map(td.apply))
 

@@ -12,10 +12,19 @@ It provides its own high-level scripting language and can be used as a computing
 Note that it includes most of proprietary Matlab's functionalities and that a set of conversion tools exists (@aa("doc", href:= "https://help.scilab.org/docs/6.0.1/fr_FR/mfile2sci.html")).
 
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("ScilabTask")
+@preliminary("ScilabTask")
 
+
+@h3{Arguments of the ScilabTask}
+
+It takes the following arguments :
+
+@ul
+   @li{@code{script} String or file, mandatory. The Scilab script to be executed.}
+   @li{@code{install} Sequence of strings, optional (default = empty). The commands to be executed prior to the script execution (to install libraries on the system).}
+   @li{@code{version} String, optional. The version of Scilab to run.}
 
 @h3{Simple ScilabTask}
 
@@ -42,4 +51,26 @@ Here is a dummy workflow multiplying a vector @code{dArray} by @code{i} using a 
 
     // Workflow
     m hook DisplayHook()
+""")
+
+@h3{A ScilabTask running a script}
+
+Here is a dummy workflow running the "rand.sce" script:
+
+@br@br
+
+@openmole("""
+val size = Val[Int]
+val a = Val[Array[Array[Double]]]
+
+val model =
+  ScilabTask(workDirectory / "rand.sce") set (
+    inputs += (size.mapped),
+    outputs += (a.mapped("A"), size)
+  )
+
+DirectSampling(
+  evaluation = model,
+  sampling = size in (0 to 10 by 2)
+) hook (workDirectory / "results2.csv")
 """)

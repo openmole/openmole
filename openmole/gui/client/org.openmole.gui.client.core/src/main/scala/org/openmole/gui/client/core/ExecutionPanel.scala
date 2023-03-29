@@ -259,7 +259,7 @@ class ExecutionPanel:
       cls := "simulationInfo",
       cls.toggle("statusOpenSim") <-- currentOpenSimulation.signal.map { os => os == Some(executionId) },
       div("", cls := "simulationID", backgroundColor := statusColor(executionInfo.state)),
-      div(executionInfo.path.nameWithNoExtension),
+      div(executionInfo.path.nameWithoutExtension),
       cursor.pointer,
       onClick --> { _ =>
         currentOpenSimulation.update {

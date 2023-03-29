@@ -141,30 +141,31 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     utils.deleteFiles(safePaths)
   }
 
-  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
-    import services._
-    extractArchiveFromFiles(from, to)
-    to.listFilesSafe.map(utils.fileToSafePath).toSeq
-  }
+//  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
+//    import services._
+//    extractArchiveFromFiles(from, to)
+//    to.listFilesSafe.map(utils.fileToSafePath).toSeq
+//  }
+//
 
   private def extractArchiveFromFiles(from: File, to: File) =
     import org.openmole.tool.archive.*
     Try {
-      val ext = FileExtension(from.getName)
-      FileContentType(ext) match
-        case FileContentType.Tar ⇒
+      val name = from.getName
+      name match
+        case n if n.endsWith(".tar") ⇒
           from.extract(to, archive = ArchiveType.Tar)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case FileContentType.TarGz ⇒
+        case n if n.endsWith(".tgz") | n.endsWith(".tar.gz") ⇒
           from.extract(to, true, archive = ArchiveType.TarGZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case FileContentType.Zip ⇒
+        case n if n.endsWith(".zip") ⇒
           import org.openmole.tool.archive
           from.extract(to, true, archive = ArchiveType.Zip)
-        case FileContentType.TarXz ⇒
+        case n if n.endsWith(".tar.xz") | n.endsWith("txz")  ⇒
           from.extract(to, true, archive = ArchiveType.TarXZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case _ ⇒ throw new Throwable("Unknown compression format for " + from.getName)
+        case _ ⇒ throw new Throwable("Unknown compression format for file " + from)
     } match
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
@@ -173,9 +174,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     def archiveFile = safePathToFile(safePath)
     def toFile = safePathToFile(to)
-    FileContentType(FileExtension(safePath.name)) match
-      case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒ extractArchiveFromFiles(archiveFile, toFile)
-      case _ ⇒ throw UserBadDataError(s"""Unable to extract archive format of file "${archiveFile}"""")
+
+    extractArchiveFromFiles(archiveFile, toFile)
 
   def temporaryDirectory(): SafePath =
     import services.*
@@ -361,7 +361,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
       import services._
 
-      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(DataUtils.randomId) → env }
+      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
       serverState.addRunningEnvironment(execId, envIds)
 
       ex.listen(serverState.moleExecutionListener(execId, script))

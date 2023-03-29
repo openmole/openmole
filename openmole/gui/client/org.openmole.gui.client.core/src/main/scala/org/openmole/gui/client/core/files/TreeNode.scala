@@ -17,46 +17,27 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.shared.data.{DataUtils, TreeNodeData, *}
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.Utils.*
 
 import scala.concurrent.Future
 
-sealed trait TreeNodeType {
-  val uuid: String = DataUtils.randomId
-  val name: String
-}
-
-trait DirNodeType extends TreeNodeType {
-  val name: String = "Folder"
-}
-
-trait FileNodeType extends TreeNodeType {
-  val name: String = "File"
-}
-
-object TreeNodeType {
-  def file = new FileNodeType {}
-
-  def folder = new DirNodeType {}
-}
+enum TreeNodeType(name: String):
+  val uuid: String = randomId
+  case File extends TreeNodeType("File")
+  case Folder extends TreeNodeType("Folder")
 
 case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
 
 case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
 
-sealed trait TreeNode {
-  val id = DataUtils.randomId
-
+sealed trait TreeNode:
+  val id = randomId
   def name: String
-
   val size: Long
-
   val time: Long
-
-}
 
 def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.treeNodeDataToTreeNode)
 

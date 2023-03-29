@@ -6,9 +6,12 @@
 
 @h2{JuliaTask syntax}
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("JuliaTask")
+@preliminary("JuliaTask")
+
+@br
+
 The @code{JuliaTask} relies on an underlying @code{ContainerTask}.
 
 @h3{Arguments of the JuliaTask}

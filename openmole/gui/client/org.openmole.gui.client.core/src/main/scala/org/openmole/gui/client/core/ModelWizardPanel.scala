@@ -26,7 +26,6 @@ import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import Waiter.*
 import org.openmole.gui.client.ext.FileManager
-import org.openmole.gui.shared.data.DataUtils.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
@@ -184,7 +183,7 @@ object ModelWizardPanel:
     val inputTags = new TagBadge()
     val outputTags = new TagBadge()
 
-    val commandeInput = inputTag("").amend(placeholder := "Launching command")
+    val commandeInput = inputTag("").amend(placeholder := "Launching command", value <-- modelMetadata.signal.map(m => m.flatMap(_.data.command).getOrElse("")))
 
     def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
       div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
@@ -192,7 +191,7 @@ object ModelWizardPanel:
     )
 
     def inferProtoTyePair(param: String) =
-      val defaultPrototype = PrototypePair(param.clean, PrototypeData.Double, "0.0", Some(param))
+      val defaultPrototype = PrototypePair(WizardUtils.toVariableName(param), PrototypeData.Double, "0.0", Some(param))
 
       modelMetadata.now() match
         case Some(mmd) => (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == param).getOrElse(defaultPrototype)
@@ -212,7 +211,7 @@ object ModelWizardPanel:
 
         for
           content <- md.factory.content(md.files, modifiedMMD)
-          _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
+          _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
           _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
         do panels.treeNodePanel.refresh

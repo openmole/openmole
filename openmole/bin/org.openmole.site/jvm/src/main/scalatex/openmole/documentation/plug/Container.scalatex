@@ -14,9 +14,9 @@ To call a native executable in an OpenMOLE task, you can either use:
 
 The @code{ContainerTask} runs @a(href := "https://www.docker.com/resources/what-container", "docker containers") in OpenMOLE. When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you might want to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("ContainerTask")
+@preliminary("ContainerTask")
 
 @h3{Containers from the docker hub}
 

@@ -23,13 +23,14 @@ import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.gui.shared.api
-import org.openmole.gui.shared.data.ErrorData
+import org.openmole.gui.shared.data.*
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -231,9 +232,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
               }
             }.unsafeRunSync()
             //finally stream.close
-            }
-
-
+          }
 
         req.decode[Multipart[IO]] { parts =>
           def partContent(name: String) =
@@ -249,12 +248,18 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
+        val fileType = req.params.get("fileType")
         val path = req.params("path")
         val hash = req.params.get("hash").flatMap(_.toBooleanOption).getOrElse(false)
 
         import org.typelevel.ci.*
 
-        val f = new java.io.File(utils.projectsDirectory, path)
+        def safePath =
+          fileType match
+            case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
+            case None => SafePath(path.split('/').toSeq)
+
+        val f = safePathToFile(safePath)
 
         if (!f.exists()) Status.NotFound.apply(s"The file $path does not exist.")
         else {

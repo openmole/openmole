@@ -68,9 +68,9 @@ class TabContent:
       _.tabID
     }
 
-  def save(tabData: TabData, overwrite: Boolean = false, force: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
+  def save(tabData: TabData, overwrite: Boolean = false, saveUnmodified: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
     tabData.editorPanelUI match
-      case Some(editorPanelUI) if editorPanelUI.hasBeenModified || force =>
+      case Some(editorPanelUI) if editorPanelUI.hasBeenModified || saveUnmodified =>
         val (content, hash) = editorPanelUI.code
         api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
           case (saved, savedHash) ⇒
@@ -83,9 +83,9 @@ class TabContent:
                 NotificationLevel.Error,
                 s"The file ${tabData.safePath.name} has been modified on the sever",
                 div("Which version do you want to keep?"),
-                Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true, force = true)),
+                Alternative("Yours", _ ⇒ panels.tabContent.save(tabData, overwrite = true, saveUnmodified = true)),
                 Alternative("Server", _ =>
-                  panels.treeNodePanel.downloadFile(tabData.safePath, saveFile = false, hash = true).map { (content: String, hash: Option[String]) ⇒
+                  panels.treeNodePanel.downloadFile(tabData.safePath, hash = true).map { (content: String, hash: Option[String]) ⇒
                     tabData.editorPanelUI.foreach(_.setCode(content, hash.get))
                   }
                 )

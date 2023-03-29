@@ -31,22 +31,26 @@ object Fetch:
   def apply[API](api: EndpointsSettings => API) = new Fetch(api)
   case class ServerError(data: ErrorData) extends Throwable
 
-  def onTimeout()(using notification: NotificationService) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.")
-  def onWarningTimeout()(using notification: NotificationService) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.")
-  def onFailed(t: Throwable)(using notification: NotificationService) =
+  def callString(using name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
+    s"${name.value} in file ${file.value}:${line.value}"
+
+  def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
+  def onWarningTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
+
+  def onFailed(t: Throwable)(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     t match
       case Fetch.ServerError(e) =>
         notification.notify(
           NotificationLevel.Error,
           s"""The server returned an error 500""",
-          Utils.errorTextArea(ErrorData.stackTrace(e))
+          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(e))
         )
 
       case t =>
         notification.notify(
           NotificationLevel.Error,
-          """The server failed unexpectedly""",
-          Utils.errorTextArea(ErrorData.stackTrace(ErrorData(t)))
+          s"""The server failed unexpectedly""",
+          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(ErrorData(t)))
         )
 
 
@@ -56,7 +60,7 @@ class Fetch[API](api: EndpointsSettings => API) {
     f: API => scala.concurrent.Future[O],
     timeout: Option[FiniteDuration] = Some(60 seconds),
     warningTimeout: Option[FiniteDuration] = Some(10 seconds),
-    notifyError: Boolean = true)(using baseURI: BasePath, notificationAPI: NotificationService): scala.concurrent.Future[O] =
+    notifyError: Boolean = true)(using baseURI: BasePath, notificationAPI: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line): scala.concurrent.Future[O] =
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) { Fetch.onWarningTimeout() })
 
     def stopTimeout = timeoutSet.foreach(timers.clearTimeout)
@@ -79,7 +83,7 @@ class Fetch[API](api: EndpointsSettings => API) {
   def futureError[O](
     f: API => scala.concurrent.Future[Either[ErrorData, O]],
     timeout: Option[FiniteDuration] = Some(60 seconds),
-    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using baseURI: BasePath, notificationAPI: NotificationService): scala.concurrent.Future[O] =
+    warningTimeout: Option[FiniteDuration] = Some(10 seconds))(using baseURI: BasePath, notificationAPI: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line): scala.concurrent.Future[O] =
 
     val timeoutSet = warningTimeout.map(t => timers.setTimeout(t.toMillis) {
       Fetch.onWarningTimeout()

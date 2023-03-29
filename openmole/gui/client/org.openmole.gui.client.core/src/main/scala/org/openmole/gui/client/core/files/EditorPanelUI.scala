@@ -1,13 +1,12 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.data.FileExtension.*
+import org.openmole.gui.client.ext.FileExtension.*
 
 import scala.scalajs.js
 import scaladget.ace.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.openmole.gui.shared.data.DataUtils.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.client.ext.*
@@ -47,20 +46,20 @@ object EditorPanelUI {
   def apply(
     fileType: FileExtension,
     initCode: String,
-    initHash: String) =
+    initHash: String)(using plugins: GUIPlugins) =
     val editor = new EditorPanelUI(fileType)
     editor.setCode(initCode, initHash)
     editor
 
 
-  def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
+  def highlightedFile(ext: FileExtension)(using plugins: GUIPlugins): Option[HighlightedFile] =
     FileContentType(ext) match
       case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
       case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
-      case FileContentType.NetLogo ⇒ Some(HighlightedFile("netlogo"))
       case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
       case FileContentType.CSV ⇒ Some(HighlightedFile("csv"))
       case FileContentType.Python => Some(HighlightedFile("python"))
+      case ReadableFileType(_, true, Some(hl)) => Some(HighlightedFile(hl))
       case _ ⇒ None
 
   case class HighlightedFile(highlighter: String)
@@ -70,7 +69,7 @@ object EditorPanelUI {
   object openmolemode extends js.Object
 }
 
-class EditorPanelUI(fileExtension: FileExtension) {
+class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
 
   val modified = Var(false)
 

@@ -32,7 +32,7 @@ import org.openmole.gui.shared.api.*
 import scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("sshlogin")
+  @JSExportTopLevel("authentication_sshlogin")
   val sshlogin = js.Object {
     given LoginAuthenticationServerAPI()
     new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory

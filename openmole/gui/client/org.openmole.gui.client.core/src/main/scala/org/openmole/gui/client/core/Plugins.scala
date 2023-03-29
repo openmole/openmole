@@ -24,14 +24,9 @@ import scala.scalajs.js.annotation.JSExportTopLevel
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Plugins {
+object Plugins:
+  def buildJSObject[T](obj: GUIPluginAsJS) =
+    val toBeEval = s"openmole_library.${obj.split('.').takeRight(3).dropRight(1).mkString("_")}"
+    util.Try { scalajs.js.eval(toBeEval).asInstanceOf[T] }
 
 
-
-  def buildJSObject[T](obj: GUIPluginAsJS) = {
-    val toBeEval = s"openmole_library.${obj.split('.').takeRight(2).head}"
-    scalajs.js.eval(toBeEval).asInstanceOf[T]
-  }
-
-
-}

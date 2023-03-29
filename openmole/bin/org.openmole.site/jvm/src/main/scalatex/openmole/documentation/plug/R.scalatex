@@ -11,9 +11,9 @@
 It may be convenient to use specific R libraries within a workflow, and therefore OpenMOLE provides a specific @code{RTask}.
 
 
-@h3{Preliminary remark}
+@h3{Preliminary remarks}
 
-@usesSingularity("RTask")
+@preliminary("RTask")
 
 
 @h3{RTask syntax}

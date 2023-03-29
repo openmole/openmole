@@ -18,11 +18,11 @@ object CSVContent {
 
   object Plot extends ResultView
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) = {
 
     val rowData: RowData = ResultData.fromCSV(initialContent)
 
-    val editor = EditorPanelUI(safePath.extension, initialContent, initialHash)
+    val editor = EditorPanelUI(FileExtension(safePath), initialContent, initialHash)
     editor.setReadOnly(true)
 
     // FIXME: this should be in css but for some reason it does not work this way

@@ -30,8 +30,8 @@ package data {
   val uploadFilesRoute = "uploadFiles"
   val resetPasswordRoute = "resetPassword"
 
-  def downloadFile(uri: String, hash: Boolean = false) =
-    s"${downloadFileRoute}?path=$uri&hash=$hash"
+  def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
+    s"${downloadFileRoute}?path=$uri&hash=$hash&fileType=${fileType.typeName}"
 
   def hashHeader = "Content-Hash"
 
@@ -52,55 +52,11 @@ package data {
   import scala.collection.immutable.ArraySeq
   import scala.scalajs.js.annotation.JSExport
 
-  object FileExtension:
-    def apply(fileName: String): FileExtension = fileName.dropWhile(_ != '.').drop(1)
-
-    extension (e: FileExtension)
-      def value: String = e
-
-  opaque type FileExtension = String
-
-  object FileContentType:
-    val OpenMOLEScript = ReadableFileType("oms")
-    val OpenMOLEResult = ReadableFileType("omr")
-    val MDScript = ReadableFileType("md")
-    val SVGExtension = ReadableFileType("svg")
-    val OpaqueFileType = org.openmole.gui.shared.data.OpaqueFileType
-    val TarGz = ReadableFileType("tgz", "tar.gz")
-    val TarXz = ReadableFileType("txz", "tar.xz")
-    val Tar = ReadableFileType("tar")
-    val Zip = ReadableFileType("zip")
-    val Jar = ReadableFileType("jar")
-    val CSV = ReadableFileType("csv")
-    val NetLogo = ReadableFileType("nlogo", "nlogo3d", "nls")
-    val Gaml = ReadableFileType("gaml")
-    val R = ReadableFileType("r")
-    val Text = ReadableFileType("txt")
-    val Scala = ReadableFileType("scala")
-    val Shell = ReadableFileType("sh")
-    val Python = ReadableFileType("py")
-
-    def all = Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, NetLogo, Gaml, R, Text, Scala, Shell, Python)
-
-    def apply(e: FileExtension) =
-      all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
-
-    def isDisplayable(e: FileContentType) =
-      e match
-        case OpaqueFileType | Jar | Tar | TarGz | Zip | TarXz => false
-        case _ => true
-
-    def isText(e: FileContentType) =
-      e match
-        case R | Text | CSV | Scala | Shell | Python | Gaml | NetLogo | OpenMOLEScript | MDScript => true
-        case _ => false
-
-
-  sealed trait FileContentType
-  object OpaqueFileType extends FileContentType
-  case class ReadableFileType(extension: String*) extends FileContentType
-
   import org.openmole.gui.shared.data.SafePath._
+
+
+  object ServerFileSystemContext:
+    def fromTypeName(s: String): Option[ServerFileSystemContext] = ServerFileSystemContext.values.find(_.typeName == s.toLowerCase)
 
   enum ServerFileSystemContext:
     val typeName = this.productPrefix.toLowerCase
@@ -110,7 +66,9 @@ package data {
     implicit def apply(s: Seq[String]): RelativePath = new RelativePath(s)
     extension(p: RelativePath)
       def name = p.value.lastOption.getOrElse("")
+      def nameWithoutExtension = p.name.split('.').head
       def mkString = p.value.mkString("/")
+      def parent = RelativePath(p.value.dropRight(1))
 
   case class RelativePath(value: Seq[String])
 
@@ -132,10 +90,8 @@ package data {
 
     def name = path.name
     def isEmpty = path.value.isEmpty
-    def toNoExtention = copy(path = path.value.dropRight(1) :+ nameWithNoExtension)
-    def nameWithNoExtension = name.split('.').head
+    def nameWithoutExtension = name.split('.').head
     def normalizedPathString = path.name.tail.mkString("/")
-    def extension = FileExtension(name)
 
     def startsWith(safePath: SafePath) =
       safePath.context == context &&
@@ -184,12 +140,12 @@ package data {
 
   object ExecutionId:
     def apply() =
-      val id = DataUtils.randomId
+      val id = randomId
       new ExecutionId(id)
 
   case class ExecutionId(id: String)
 
-  case class EnvironmentId(id: String = DataUtils.randomId)
+  case class EnvironmentId(id: String = randomId)
 
   enum ErrorStateLevel(val name: String):
     case Debug extends ErrorStateLevel("Debug")
@@ -293,8 +249,11 @@ package data {
   case class ModelMetadata(
     inputs: Seq[PrototypePair] = Seq(),
     outputs: Seq[PrototypePair] = Seq(),
-    command: Option[String] = None,
-    executableName: Option[String] = None)
+    command: Option[String] = None)
+
+  case class GeneratedModel(
+    content: String,
+    name: Option[String] = None)
 
   case class PrototypePair(name: String, `type`: org.openmole.gui.shared.data.PrototypeData, default: String = "", mapping: Option[String] = None)
 
@@ -458,5 +417,6 @@ package data {
 
   sealed trait NotificationEvent
 
-
+  def randomId = scala.util.Random.alphanumeric.take(10).mkString
+  
 }

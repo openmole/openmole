@@ -44,15 +44,16 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]]
 
 
-trait WizardGUIPlugin extends GUIPlugin:
-  def factory: WizardPluginFactory
-  def save(): Unit
+//trait WizardGUIPlugin extends GUIPlugin:
+//  def factory: WizardPluginFactory
+//  def save(): Unit
 
 trait WizardPluginFactory extends GUIPluginFactory:
   def name: String
-  def accept(uploaded: Seq[(RelativePath, SafePath)]): Boolean
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService): Future[String]
+  def editable: Seq[FileContentType] = Seq()
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Boolean
+  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
+  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement

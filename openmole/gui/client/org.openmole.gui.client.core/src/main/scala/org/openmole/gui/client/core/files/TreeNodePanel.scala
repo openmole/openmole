@@ -237,7 +237,7 @@ class TreeNodePanel { panel =>
       multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
     )
 
-  def downloadFile(safePath: SafePath, saveFile: Boolean, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
+  def downloadFile(safePath: SafePath, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
     api.download(
       safePath,
       (p: ProcessState) ⇒ { transferring.set(p) },
@@ -324,14 +324,19 @@ class TreeNodePanel { panel =>
 
 
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
-    if FileContentType.isDisplayable(FileContentType(safePath.extension))
+    def isDisplayable(e: FileContentType) =
+      e match
+        case FileContentType.OpaqueFileType => false
+        case FileContentType.OpenMOLEResult => true
+        case r: ReadableFileType => r.text
+
+    if isDisplayable(FileContentType(FileExtension(safePath)))
     then
       downloadFile(
         safePath,
-        saveFile = false,
         hash = true
       ).map { (content: String, hash: Option[String]) ⇒
-        panels.fileDisplayer.display(safePath, content, hash.get, safePath.extension)
+        panels.fileDisplayer.display(safePath, content, hash.get, FileExtension(safePath))
         refresh
       }
 
@@ -467,12 +472,12 @@ class TreeNodePanel { panel =>
   def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
     node match
       case fn: TreeNode.File ⇒
-        ReactiveLine(i, fn, TreeNodeType.file, () ⇒ displayNode(fn))
+        ReactiveLine(i, fn, TreeNodeType.File, () ⇒ displayNode(fn))
       case dn: TreeNode.Directory ⇒
         ReactiveLine(
           i,
           dn,
-          TreeNodeType.folder,
+          TreeNodeType.Folder,
           () ⇒
             treeNodeManager switch (dn.name)
             treeWarning.set(true)
