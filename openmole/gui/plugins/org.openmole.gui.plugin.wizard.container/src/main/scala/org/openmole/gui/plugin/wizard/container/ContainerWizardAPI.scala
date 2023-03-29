@@ -20,10 +20,4 @@ package org.openmole.gui.plugin.wizard.container
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
-trait ContainerWizardAPI extends RESTAPI {
-  val toTask: ErrorEndpoint[(SafePath, ModelMetadata), Unit] =
-    errorEndpoint(post(path / "wizard" / "container" / "to-task", jsonRequest[(SafePath, ModelMetadata)]), ok(jsonResponse[Unit]))
-
-  val parse: ErrorEndpoint[SafePath, Option[ModelMetadata]] =
-    errorEndpoint(post(path / "wizard" / "container" / "parse", jsonRequest[SafePath]), ok(jsonResponse[Option[ModelMetadata]]))
-}
+trait ContainerWizardAPI extends RESTAPI

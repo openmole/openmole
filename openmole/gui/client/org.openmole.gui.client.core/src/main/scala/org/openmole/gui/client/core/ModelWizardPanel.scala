@@ -215,7 +215,7 @@ object ModelWizardPanel:
 
         for
           content <- md.factory.content(md.files, modifiedMMD)
-          _ <- api.saveFile(tmpDirectory ++ "Model.oms", content, overwrite = true)
+          _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
           _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
         do panels.treeNodePanel.refresh

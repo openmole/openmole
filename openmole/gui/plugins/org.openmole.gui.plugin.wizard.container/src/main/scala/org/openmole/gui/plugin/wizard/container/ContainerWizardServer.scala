@@ -29,40 +29,4 @@ import org.openmole.tool.file.*
 
 import scala.util.{Failure, Success, Try}
 
-class ContainerWizardServer(s: Services) extends APIServer with ContainerWizardAPI {
-
-  val toTaskRoute =
-    toTask.errorImplementedBy { case (p, m) => impl.toTask(p, m) }
-
-  val parseRoute =
-    parse.errorImplementedBy { p => impl.parse(p) }
-
-  val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(toTaskRoute, parseRoute)
-  )
-
-  object impl {
-    import s.*
-
-    def toTask(target: SafePath, modelMetadata: ModelMetadata): Unit = {
-
-      val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
-
-      val task = s"${
-        modelMetadata.executableName.map {
-          _.split('.').toSeq
-        }.getOrElse(Seq()).head.toLowerCase
-      }Task"
-
-      val content = modelData.vals +
-        s"""\nval $task = RTask(\"\"\"\n   source("${modelMetadata.executableName.getOrElse("")}")\n   \"\"\") set(\n""".stripMargin +
-        WizardUtils.expandWizardData(modelData) +
-        s""")\n\n$task hook ToStringHook()"""
-
-      target.toFile.content = content
-    }
-
-    def parse(safePath: SafePath): Option[ModelMetadata] = None
-
-  }
-}
+class ContainerWizardServer(s: Services) extends APIServer with ContainerWizardAPI 

@@ -25,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Activator extends BundleActivator:
   def info = GUIPluginInfo(
     wizard = Some(classOf[ContainerWizardFactory]),
-    router = Some(s ⇒ OMRouter(new ContainerWizardServer(s).routes))
+    router = None
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

@@ -62,7 +62,9 @@ package data {
     implicit def apply(s: Seq[String]): RelativePath = new RelativePath(s)
     extension(p: RelativePath)
       def name = p.value.lastOption.getOrElse("")
+      def nameWithoutExtension = p.name.split('.').head
       def mkString = p.value.mkString("/")
+      def parent = RelativePath(p.value.dropRight(1))
 
   case class RelativePath(value: Seq[String])
 
@@ -84,7 +86,7 @@ package data {
 
     def name = path.name
     def isEmpty = path.value.isEmpty
-    def nameWithNoExtension = name.split('.').head
+    def nameWithoutExtension = name.split('.').head
     def normalizedPathString = path.name.tail.mkString("/")
 
     def startsWith(safePath: SafePath) =
@@ -245,6 +247,10 @@ package data {
     outputs: Seq[PrototypePair] = Seq(),
     command: Option[String] = None,
     executableName: Option[String] = None)
+
+  case class GeneratedModel(
+    content: String,
+    name: Option[String] = None)
 
   case class PrototypePair(name: String, `type`: org.openmole.gui.shared.data.PrototypeData, default: String = "", mapping: Option[String] = None)
 

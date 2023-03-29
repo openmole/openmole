@@ -19,7 +19,7 @@ package org.openmole.gui.client.ext
 
 import org.openmole.gui.shared.data.*
 
-object WizardUtils {
+object WizardUtils:
 
   case class WizardModelData(
     vals: String,
@@ -40,10 +40,9 @@ object WizardUtils {
     specificOutputPattern: Option[String] = None,
     ) = {
 
-    def testBoolean(protoType: PrototypePair) = protoType.`type` match {
+    def testBoolean(protoType: PrototypePair) = protoType.`type` match
       case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
       case _ ⇒ protoType.default
-    }
 
     def ioString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) Seq(s"  $keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")) + ",\n" else ""
 
@@ -107,4 +106,15 @@ object WizardUtils {
       s"""set (
          |$elements
          |  )""".stripMargin
-}
+
+
+  def singleFolderContaining(files: Seq[(RelativePath, SafePath)], f: ((RelativePath, SafePath)) => Boolean): Option[(RelativePath, SafePath)] =
+    val firstLevel = files.map(f => f._1.value.take(1)).distinct
+    if firstLevel.size == 1
+    then files.filter(f => f._1.value.size == 2).find(f)
+    else None
+
+  def toOMSName(r: RelativePath) =
+    r.nameWithoutExtension.capitalize + ".oms"
+
+

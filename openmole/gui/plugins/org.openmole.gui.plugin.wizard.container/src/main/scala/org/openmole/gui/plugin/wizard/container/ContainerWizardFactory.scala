@@ -39,44 +39,76 @@ object TopLevelExports {
   }
 }
 
+
+
 class ContainerWizardFactory extends WizardPluginFactory {
   def accept(uploaded: Seq[(RelativePath, SafePath)]) =
     if uploaded.size == 1
     then
       val name = uploaded.head._1.name
       name.endsWith(".tar") || name.endsWith(".tgz") || name.endsWith(".tar.gz") || name.endsWith(".sh")
-    else false
+    else
+      if WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".sh")).isDefined
+      then true
+      else false
 
   def parse(uploaded: Seq[(RelativePath, SafePath)])(using basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
   def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using basePath: BasePath, notificationAPI: NotificationService) =
-    val file = uploaded.head._1
     val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
 
-    def container =
-        s"""
-           |${modelData.vals}
-           |val model =
-           |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
-           |    ${WizardUtils.expandWizardData(modelData)}
-           |  )
-           |model""".stripMargin
+    WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".sh")) match
+      case Some(s) =>
+        def set = WizardUtils.mkSet(
+          s"resources += (workDirectory / \"${s._1.parent.mkString}\")",
+          WizardUtils.expandWizardData(modelData)
+        )
 
-    def script =
-      def set = WizardUtils.mkSet(
-        s"resources += (workDirectory / \"${file.mkString}\")",
-        WizardUtils.expandWizardData(modelData)
-      )
+        def script =
+          GeneratedModel(
+            s"""
+               |${modelData.vals}
+               |val model =
+               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${s._1.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |
+               |model""".stripMargin,
+            Some(WizardUtils.toOMSName(s._1))
+          )
 
-      s"""
-         |${modelData.vals}
-         |val model =
-         |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
-         |
-         |model""".stripMargin
+        Future.successful(script)
+      case None =>
+        val file = uploaded.head._1
 
-    if file.name.endsWith(".sh")
-    then Future(script)
-    else Future(container)
+        def container =
+          GeneratedModel(
+            s"""
+               |${modelData.vals}
+               |val model =
+               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
+               |    ${WizardUtils.expandWizardData(modelData)}
+               |  )
+               |model""".stripMargin,
+            Some(WizardUtils.toOMSName(file))
+          )
+
+        def script =
+          def set = WizardUtils.mkSet(
+            s"resources += (workDirectory / \"${file.mkString}\")",
+            WizardUtils.expandWizardData(modelData)
+          )
+
+          GeneratedModel(
+            s"""
+               |${modelData.vals}
+               |val model =
+               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |
+               |model""".stripMargin,
+            Some(WizardUtils.toOMSName(file))
+          )
+
+        if file.name.endsWith(".sh")
+        then Future.successful(script)
+        else Future.successful(container)
 
   def name: String = "Container"
 }
