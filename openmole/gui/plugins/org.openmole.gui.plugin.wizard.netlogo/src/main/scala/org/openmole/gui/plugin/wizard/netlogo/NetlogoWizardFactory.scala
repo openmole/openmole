@@ -110,13 +110,13 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     accepted match
       case AcceptedModel("nlogo", level, nlogo) =>
         val task = WizardUtils.toTaskName(nlogo._1)
-        val embeddWS = WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo")).isDefined
+        val embedWS = level == FindLevel.Level1
 
         def params = WizardUtils.mkTaskParameters(
           s"""workDirectory / "${nlogo._1.mkString}"""",
           s"""Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }")""",
           "seed = mySeed",
-          if embeddWS then "embedWorkspace = true" else ""
+          if embedWS then "embedWorkspace = true" else ""
         )
 
         val content =

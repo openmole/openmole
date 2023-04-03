@@ -42,11 +42,48 @@ object TopLevelExports {
 
 class RWizardFactory extends WizardPluginFactory:
   override def editable: Seq[FileContentType] =
-    val R = ReadableFileType(Seq("r", "R"), text = true)
+    val R = ReadableFileType(Seq("R"), text = true)
     Seq(R)
 
-  override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful(Seq())
-  override def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???
-  override def content(uploaded: Seq[(RelativePath, SafePath)], acceptedModel: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] = ???
+  override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful {
+    WizardUtils.findFileWithExtensions(
+      uploaded,
+      "R" -> FindLevel.SingleRoot,
+      "R" -> FindLevel.Level1
+    )
+  }
+
+  override def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
+    accepted match
+      case AcceptedModel("R" , _, f) => Future.successful(ModelMetadata(command = Some(s"""source("${f._1.name}")""")))
+      case _ => WizardUtils.unknownError(accepted, name)
+
+  override def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] =
+    accepted match
+      case AcceptedModel("R", level, file) =>
+        val taskName = WizardUtils.toTaskName(file._1)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          if level == FindLevel.Level1
+          then s"resources += (workDirectory / \"${file._1.parent.mkString}\")"
+          else s"resources += (workDirectory / \"${file._1.mkString}\")"
+        )
+
+        def script =
+          GeneratedModel(
+            s"""
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  RTask(\"\"\"${modelMetadata.command.getOrElse(s"source(\"${file._1.name}\")")}\"\"\") $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(file._1))
+          )
+
+        Future.successful(script)
+      case _ => WizardUtils.unknownError(accepted, name)
 
   def name: String = "R"
