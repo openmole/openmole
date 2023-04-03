@@ -25,7 +25,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import Waiter.*
-import org.openmole.gui.client.ext.FileManager
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
@@ -38,7 +39,7 @@ object ModelWizardPanel:
   
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
-  case class ParsedModelMetadata(data: ModelMetadata, files: Seq[(RelativePath, SafePath)], factory: WizardPluginFactory)
+  case class ParsedModelMetadata(acceptedModel: AcceptedModel, data: ModelMetadata, files: Seq[(RelativePath, SafePath)], factory: WizardPluginFactory)
 
   def successDiv = div(cls := "bi bi-patch-check-fill successBadge")
 
@@ -87,27 +88,30 @@ object ModelWizardPanel:
     val currentDirectory: Var[SafePath] = Var(panels.directory.now())
     //val resources: Var[Resources] = Var(Resources.empty)
 
-    def factory(uploaded: Seq[(RelativePath, SafePath)]): Option[WizardPluginFactory] =
-      plugins.wizardFactories.filter { _.accept(uploaded) }.headOption
+    def factory(uploaded: Seq[(RelativePath, SafePath)]): Future[Option[(AcceptedModel, WizardPluginFactory)]] =
+      val future =
+        Future.sequence(
+          plugins.wizardFactories.map { f => f.accept(uploaded).map(s => s.map(s => (s, f))) }
+        )
+
+      future.map(s => s.flatten.headOption)
 
     def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
-      val cleanAndUpload: Future[Seq[(RelativePath, SafePath)]] =
-        for
-          list <- api.listFiles(tmpDirectory)
-          _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
-          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
-        yield uploaded
+      for
+        list <- api.listFiles(tmpDirectory)
+        _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
+        uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
+        f <- factory(uploaded)
+        _ <-
+          f match
+            case Some((accepted, factory)) =>
+              factory.parse(uploaded, accepted).map { md => modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory))) }
+            case None =>
+              panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
+              Future.successful(())
+      yield ()
 
-      cleanAndUpload.flatMap { uploaded =>
-        factory(uploaded) match
-          case Some(factory) =>
-            factory.parse(uploaded).map {
-              md => modelMetadata.set(Some(ParsedModelMetadata(md, uploaded, factory)))
-            }
-          case None =>
-            panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
-            Future.successful(())
-      }
+
   //          val contentPath =
   //            if uploaded.size == 1
   //            then
@@ -164,16 +168,13 @@ object ModelWizardPanel:
                 },
               div(
                 child <-- modelMetadata.signal.map {
-                  _ match {
-                    case Some(mmd) ⇒
-                      div(
-                        flexRow,
-                        div(mmd.files.map(p => p._1.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
-                        successDiv
-                      )
-                    case x: Any =>
-                      div("Upload", btn_primary, cls := "badgeUploadModel")
-                  }
+                  case Some(mmd) ⇒
+                    div(
+                      flexRow,
+                      div(mmd.files.map(p => p._1.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
+                      successDiv
+                    )
+                  case x: Any => div("Upload", btn_primary, cls := "badgeUploadModel")
                 }
               )
             )
@@ -210,7 +211,7 @@ object ModelWizardPanel:
           )
 
         for
-          content <- md.factory.content(md.files, modifiedMMD)
+          content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
           _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
           listed <- api.listFiles(tmpDirectory)
           _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))

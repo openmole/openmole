@@ -26,7 +26,7 @@ class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     wizard = Some(classOf[RWizardFactory]),
-    router = Some(s ⇒ OMRouter(new RWizardServer(s).routes))
+    router = None //Some(s ⇒ OMRouter(new RWizardServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

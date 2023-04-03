@@ -21,6 +21,7 @@ import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
 import org.scalajs.dom.*
 

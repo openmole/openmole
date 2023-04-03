@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
@@ -40,7 +41,7 @@ object TopLevelExports:
 
 class NetlogoWizardFactory extends WizardPluginFactory:
 
-  def parse(content: String): ModelMetadata =
+  def parseContent(content: String): ModelMetadata =
     val lines: Array[String] = content.linesIterator.toArray
 
     def parseSlider(start: Int): PrototypePair =
@@ -87,47 +88,58 @@ class NetlogoWizardFactory extends WizardPluginFactory:
       command = Some("setup ; go")
     )
 
-
-  def findNLogoFile(uploaded: Seq[(RelativePath, SafePath)]) =
-    uploaded.filter(_._1.value.size == 1).find(_._1.name.endsWith(".nlogo")) orElse
-      WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo"))
-
   override def editable: Seq[FileContentType] =
     val NetLogo = ReadableFileType(Seq("nlogo", "nlogo3d", "nls"), text = true, highlight = Some("netlogo"))
     Seq(NetLogo)
 
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = findNLogoFile(uploaded).isDefined
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
-    val nlogo = findNLogoFile(uploaded).get
-    api.download(nlogo._2).map { (content, _) => parse(content) }
-
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    val nlogo = findNLogoFile(uploaded).get
-    val task = WizardUtils.toTaskName(nlogo._1)
-    val embeddWS = WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo")).isDefined
-
-    val content =
-      s"""
-        |${WizardUtils.preamble}
-        |
-        |${WizardUtils.mkVals(modelMetadata)}
-        |val mySeed = Val[Int]
-        |
-        |val $task = NetLogo6Task(
-        |  workDirectory / "${nlogo._1.mkString}",
-        |  Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }"),
-        |  seed = mySeed,
-        |  embedWorkspace = $embeddWS) ${WizardUtils.mkSet(modelMetadata, "mySeed := 42")}
-        |
-        |$task
-        |""".stripMargin
-
-    Future.successful(
-      GeneratedModel(
-        content,
-        Some(WizardUtils.toOMSName(nlogo._1))
-      )
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
+    WizardUtils.findFileWithExtensions(
+      uploaded,
+      "nlogo" -> FindLevel.SingleRoot,
+      "nlogo" -> FindLevel.Level1
     )
+  }
+
+  def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
+    accepted match
+      case AcceptedModel("nlogo", _, f) => api.download(f._2).map { (content, _) => parseContent(content) }
+      case _ => WizardUtils.unknownError(accepted, name)
+
+
+  def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    accepted match
+      case AcceptedModel("nlogo", level, nlogo) =>
+        val task = WizardUtils.toTaskName(nlogo._1)
+        val embeddWS = WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo")).isDefined
+
+        def params = WizardUtils.mkTaskParameters(
+          s"""workDirectory / "${nlogo._1.mkString}"""",
+          s"""Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }")""",
+          "seed = mySeed",
+          if embeddWS then "embedWorkspace = true" else ""
+        )
+
+        val content =
+          s"""
+            |${WizardUtils.preamble}
+            |
+            |${WizardUtils.mkVals(modelMetadata)}
+            |val mySeed = Val[Int]
+            |
+            |val $task = NetLogo6Task(
+            |  $params) ${WizardUtils.mkSet(modelMetadata, "mySeed := 42")}
+            |
+            |$task
+            |""".stripMargin
+
+        Future.successful(
+          GeneratedModel(
+            content,
+            Some(WizardUtils.toOMSName(nlogo._1))
+          )
+        )
+      case _ => WizardUtils.unknownError(accepted, name)
+
 
   def name: String = "NetLogo"
 

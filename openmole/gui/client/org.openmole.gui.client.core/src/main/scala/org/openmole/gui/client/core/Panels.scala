@@ -1,9 +1,9 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
-import org.openmole.gui.shared.data.GUIPluginAsJS
+import org.openmole.gui.client.core.files.*
+import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.ext.{ErrorManager, NotificationService, NotificationLevel, PluginServices, ServerAPI, WizardPluginFactory}
+import org.openmole.gui.client.ext.*
 
 /*
  * Copyright (C) 24/07/15 // mathieu.leclaire@openmole.org

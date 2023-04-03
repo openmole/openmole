@@ -15,10 +15,11 @@
   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
   *
   */
-package org.openmole.gui.client.ext
+package org.openmole.gui.client.ext.wizard
 
-import org.openmole.gui.client.ext.WizardUtils.mkVals
 import org.openmole.gui.shared.data.*
+
+import scala.concurrent.Future
 
 object WizardUtils:
   def preamble =
@@ -37,7 +38,10 @@ object WizardUtils:
       }
     vals.mkString("\n")
 
-  def mkTaskParameters(s: String*) = s.filter(!_.trim.isEmpty).map(s => s"    $s").mkString(",\n")
+  def mkTaskParameters(s: String*) =
+    s.filter(!_.trim.isEmpty).headOption match
+      case None => ""
+      case Some(h) => (Seq(h) ++ s.drop(1).map(s => s"  $s")).mkString(",\n")
 
   def mkSet(modelData: ModelMetadata, s: String*) =
     def setElements(inputs: Seq[PrototypePair], outputs: Seq[PrototypePair]) =
@@ -91,6 +95,16 @@ object WizardUtils:
          |  )""".stripMargin
 
 
+
+  def findFileWithExtensions(files: Seq[(RelativePath, SafePath)], extensions: (String, FindLevel)*): Seq[AcceptedModel] =
+    extensions.flatMap { (ext, level) =>
+      level match
+        case FindLevel.SingleRoot => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleRoot, files.head)) else None
+        case FindLevel.Root =>
+          files.filter(_._1.value.size == 1).find(_._1.name.endsWith(s".$ext")).map(f => AcceptedModel(ext, FindLevel.Root, f))
+        case FindLevel.Level1 => singleFolderContaining(files, _._1.name.endsWith(s".$ext")).map(f => AcceptedModel(ext, FindLevel.Level1, f))
+    }
+
   def singleFolderContaining(files: Seq[(RelativePath, SafePath)], f: ((RelativePath, SafePath)) => Boolean): Option[(RelativePath, SafePath)] =
     val firstLevel = files.map(f => f._1.value.take(1)).distinct
     if firstLevel.size == 1
@@ -107,6 +121,9 @@ object WizardUtils:
   def toVariableName(s: String) =
     val capital: String = s.split('-').reduce(_ + _.capitalize)
     capital.replace("?", "").replace(" ", "").replace("%", "percent")
+
+
+  def unknownError(acceptedModel: AcceptedModel, name: String) = Future.failed(new UnknownError(s"Unable to handle ${acceptedModel} in wizard $name"))
 
 
 

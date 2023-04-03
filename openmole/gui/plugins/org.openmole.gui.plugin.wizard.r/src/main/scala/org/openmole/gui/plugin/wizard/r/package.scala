@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.wizard
 
 import org.openmole.gui.client.ext.*
 
-package object r {
-  class APIClientImpl(val settings: ClientSettings) extends RWizardAPI with APIClient
-  def PluginFetch = Fetch(new APIClientImpl(_))
-}
+//package object r {
+//  class APIClientImpl(val settings: ClientSettings) extends RWizardAPI with APIClient
+//  def PluginFetch = Fetch(new APIClientImpl(_))
+//}

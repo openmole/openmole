@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
@@ -44,7 +45,8 @@ class RWizardFactory extends WizardPluginFactory:
     val R = ReadableFileType(Seq("r", "R"), text = true)
     Seq(R)
 
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = uploaded.filter(_._1.value.size < 2).exists(_._1.name.endsWith(".R"))
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???  //PluginFetch.futureError(_.parse(safePath).future)
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = ??? //PluginFetch.futureError(_.toTask(safePath, modelMetadata).future)
+  override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful(Seq())
+  override def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = ???
+  override def content(uploaded: Seq[(RelativePath, SafePath)], acceptedModel: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] = ???
+
   def name: String = "R"
