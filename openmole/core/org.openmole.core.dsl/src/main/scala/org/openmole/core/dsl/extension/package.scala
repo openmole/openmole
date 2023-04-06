@@ -1,6 +1,6 @@
 package org.openmole.core.dsl
 
-package object extension {
+package object extension:
 
   type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
   lazy val FromContext = org.openmole.core.expansion.FromContext
@@ -85,16 +85,12 @@ package object extension {
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
   type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
-  export org.openmole.core.workflow.builder.ValueAssignment
+  export org.openmole.core.workflow.builder.{ValueAssignment, InputOutputBuilder, InfoBuilder, MappedInputOutputBuilder}
 
   def On = org.openmole.core.keyword.On
   def By = org.openmole.core.keyword.By
   def Aggregate = org.openmole.core.keyword.Evaluate
 
-  type TmpDirectory = org.openmole.core.workspace.TmpDirectory
-  def TmpDirectory = org.openmole.core.workspace.TmpDirectory
-
-  type FileService = org.openmole.core.fileservice.FileService
 
   type Validate = org.openmole.core.expansion.Validate
   def Validate = org.openmole.core.expansion.Validate
@@ -112,4 +108,18 @@ package object extension {
   export org.openmole.tool.types.TypeTool.ManifestDecoration
 
   export org.openmole.core.timeservice.TimeService
-}
+  export org.openmole.core.pluginmanager.PluginManager
+  export org.openmole.core.workflow.builder.{InputOutputConfig, InfoConfig, MappedInputOutputConfig, Mapped}
+  export org.openmole.core.workflow.validation.ValidateTask
+
+  export org.openmole.core.preference.Preference
+  export org.openmole.core.threadprovider.ThreadProvider
+  export org.openmole.core.workspace.{TmpDirectory, Workspace}
+  export org.openmole.core.fileservice.FileService
+  export org.openmole.core.outputmanager.OutputManager
+  export org.openmole.tool.outputredirection.OutputRedirection
+  export org.openmole.core.networkservice.NetworkService
+  export org.openmole.core.serializer.SerializerService
+
+
+  export org.openmole.core.highlight.HighLight

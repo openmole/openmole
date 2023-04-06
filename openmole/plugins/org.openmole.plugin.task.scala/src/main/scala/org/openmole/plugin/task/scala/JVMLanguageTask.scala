@@ -15,22 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.jvm
+package org.openmole.plugin.task.scala
+
+import org.openmole.core.context.{Context, PrototypeSet, Val, Variable}
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.serializer.plugin.Plugins
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
+import org.openmole.plugin.task.external.External
 
 import java.io.File
 
-import org.openmole.core.context.{ Context, PrototypeSet, Val, Variable }
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
-import org.openmole.plugin.task.external.External
-
-object JVMLanguageTask {
+object JVMLanguageTask:
   lazy val workDirectory = Val[File]("workDirectory")
 
   def process(executionContext: TaskExecutionContext, libraries: Seq[File], external: External, processCode: FromContext[Context], outputs: PrototypeSet) = FromContext { p ⇒
-    import p._
+    import p.*
 
     newFile.withTmpDir { pwd ⇒
       val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
@@ -40,4 +40,3 @@ object JVMLanguageTask {
     }
   }
 
-}

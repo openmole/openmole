@@ -602,9 +602,8 @@ lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", 
   noNetLogoInClassPath
   )
 
-lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (pluginSettings: _*)
 
-lazy val scala = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, jvm, openmoleCompiler) settings (pluginSettings: _*) settings (
+lazy val scala = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, external, openmoleCompiler) settings (pluginSettings: _*) settings (
   libraryDependencies += Libraries.scalaXML
   )
 
@@ -620,6 +619,8 @@ lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container"
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, container, json) settings (
   libraryDependencies ++= Libraries.httpClient
   ) settings (pluginSettings: _*)
+
+lazy val jvm = OsgiProject(pluginDir, "org.openmole.plugin.task.jvm", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings: _*)
 
 lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings: _*)
 

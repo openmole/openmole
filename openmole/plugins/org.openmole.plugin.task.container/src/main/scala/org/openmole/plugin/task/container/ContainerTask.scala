@@ -147,7 +147,7 @@ object ContainerTask {
     containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService, fileService: FileService) = {
     new ContainerTask(
       containerSystem,
-      prepare(installContainerSystem, image, install),
+      prepare(installContainerSystem, image, install, clearCache = clearCache),
       command,
       workDirectory = workDirectory.option,
       relativePathRoot = relativePathRoot,
@@ -329,7 +329,7 @@ case class ContainerTask(
         val error =
           s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
              |The last lines of the standard output were:
-             |$log
+             $log
              |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
 
         throw new UserBadDataError(error)

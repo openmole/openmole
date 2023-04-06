@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.jvm
-
-import java.io.File
+package org.openmole.plugin.task.scala
 
 import monocle.Lens
+
+import java.io.File
 
 trait JVMLanguageBuilder[T] { builder ⇒
   def libraries: Lens[T, Vector[File]]

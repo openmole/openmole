@@ -7,10 +7,10 @@ LABEL maintainer="Romain Reuillon <romain.reuillon@iscpif.fr>; Juste Raimbault <
 ## Set a default user. Available via runtime flag `--user docker` 
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
 ## User should also have & own a home directory (for rstudio or linked volumes to work properly). 
-RUN useradd docker \
-	&& mkdir /home/docker \
-	&& chown docker:docker /home/docker \
-	&& adduser docker staff
+#RUN useradd docker \
+#	&& mkdir /home/docker \
+#	&& chown docker:docker /home/docker \
+#	&& adduser docker staff
 
 RUN apt-get update \ 
 	&& apt-get install -y --no-install-recommends \

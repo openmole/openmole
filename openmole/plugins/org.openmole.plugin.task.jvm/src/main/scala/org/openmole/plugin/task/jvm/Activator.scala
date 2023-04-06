@@ -17,15 +17,24 @@
 
 package org.openmole.plugin.task.jvm
 
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.pluginregistry.PluginRegistry
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.osgi.framework.{BundleActivator, BundleContext}
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   override def stop(context: BundleContext): Unit =
     PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit =
-    PluginRegistry.register(this, Vector(this.getClass.getPackage), nameSpaceTraits = Vector(classOf[JVMPackage]))
+    val keyWords: Vector[HighLight] =
+      Vector(
+        HighLight.TaskHighLight(HighLight.objectName(JVMTask))
+      )
 
-}
+    PluginRegistry.register(
+      this,
+      nameSpaces = Vector(this.getClass.getPackage),
+      highLight = keyWords)
+
+

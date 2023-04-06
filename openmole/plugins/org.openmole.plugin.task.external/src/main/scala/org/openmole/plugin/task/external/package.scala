@@ -30,45 +30,41 @@ package external {
 
   trait ExternalPackage {
 
-    class InputFilesKeyword {
+    class InputFilesKeyword:
       /**
        * Copy a file or directory from the dataflow to the task workspace
        */
       def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[File], name: FromContext[String], link: Boolean = false): T ⇒ T =
         implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(p, name, link) andThen (inputs += p)
-    }
 
     lazy val inputFiles = new InputFilesKeyword
 
-    class InputFileArraysKeyword {
+    class InputFileArraysKeyword:
       /**
        * Copy an array of files or directory from the dataflow to the task workspace. The files
        * in the array are named prefix$nSuffix where $n i the index of the file in the array.
        */
       def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[Array[File]], prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false): T ⇒ T =
         (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(p, prefix, suffix, link)) andThen (inputs += p)
-    }
 
     lazy val inputFileArrays = new InputFileArraysKeyword
 
-    class OutputFilesKeyword {
+    class OutputFilesKeyword:
       /**
        * Get a file generate by the task and inject it in the dataflow
        *
        */
       def +=[T: ExternalBuilder: InputOutputBuilder](name: FromContext[String], p: Val[File]): T ⇒ T =
         (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(name, p)) andThen (outputs += p)
-    }
 
     lazy val outputFiles = new OutputFilesKeyword
 
-    class ResourcesKeyword {
+    class ResourcesKeyword:
       /**
        * Copy a file from your computer in the workspace of the task
        */
       def +=[T: ExternalBuilder](file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()): T ⇒ T =
         implicitly[ExternalBuilder[T]].resources add External.Resource(file, name.getOrElse(file.getName), link = link, os = os)
-    }
 
     lazy val resources = new ResourcesKeyword
   }
