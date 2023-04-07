@@ -281,7 +281,7 @@ case class GAMATask(
             info = info,
             containerPoolKey = containerPoolKey) set(
             resources += (inputFile, inputFileName, true),
-            volumes.map { case (lv, cv) ⇒ resources.+=[ContainerTask](lv, cv, true) },
+            volumes.map { case (lv, cv) ⇒ resources += (lv, cv, true) },
             resources += (tmpOutputDirectory, outputDirectory, true)
           )
 

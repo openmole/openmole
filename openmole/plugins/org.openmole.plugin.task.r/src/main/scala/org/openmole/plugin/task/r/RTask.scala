@@ -207,8 +207,8 @@ case class RTask(
             resources += (scriptFile, rScriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
-            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles.+=[ContainerTask] (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles.+=[ContainerTask] (m.name, m.v) }
+            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles += (m.name, m.v) }
           )
 
         val resultContext =

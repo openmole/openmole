@@ -34,6 +34,7 @@ object JavaTask:
 
   //def chmodDaemon = """chmod 700 /root/.local/share/scalacli/bloop/daemon"""
   //def rmSocket = "rm /root/.local/share/scalacli/bloop/daemon/socket"
+  
   def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false) =
     def threadsOptions = if fewerThreads then Seq("-XX:+UseG1GC", "-XX:ParallelGCThreads=1", "-XX:CICompilerCount=2", "-XX:ConcGCThreads=1", "-XX:G1ConcRefinementThreads=1") else Seq()
     def allOptions = (threadsOptions ++ javaOptions).map("--java-opt " + _).mkString(" ")
@@ -195,10 +196,10 @@ case class JavaTask(
             containerPoolKey = containerPoolKey) set(
             resources += (scriptFile, scriptName, true),
             resources += (inputData, inputDataName, true),
-            jarResources.map((j, n) => resources.+=[ContainerTask](j, n, true)),
+            jarResources.map((j, n) => resources += (j, n, true)),
             outputFiles += (outputDataName, outputFile),
-            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles.+=[ContainerTask](m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles.+=[ContainerTask](m.name, m.v) }
+            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles += (m.name, m.v) }
           )
 
         val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)

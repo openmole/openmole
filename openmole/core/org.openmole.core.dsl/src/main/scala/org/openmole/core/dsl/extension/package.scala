@@ -85,7 +85,17 @@ package object extension:
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
   type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
-  export org.openmole.core.workflow.builder.{ValueAssignment, InputOutputBuilder, InfoBuilder, MappedInputOutputBuilder}
+  export org.openmole.core.workflow.builder.{
+      ValueAssignment,
+      InputOutputConfig,
+      InfoConfig,
+      MappedInputOutputConfig,
+      Mapped,
+      InputOutputBuilder,
+      InfoBuilder,
+      MappedInputOutputBuilder,
+      Setter
+    }
 
   def On = org.openmole.core.keyword.On
   def By = org.openmole.core.keyword.By
@@ -109,7 +119,6 @@ package object extension:
 
   export org.openmole.core.timeservice.TimeService
   export org.openmole.core.pluginmanager.PluginManager
-  export org.openmole.core.workflow.builder.{InputOutputConfig, InfoConfig, MappedInputOutputConfig, Mapped}
   export org.openmole.core.workflow.validation.ValidateTask
 
   export org.openmole.core.preference.Preference

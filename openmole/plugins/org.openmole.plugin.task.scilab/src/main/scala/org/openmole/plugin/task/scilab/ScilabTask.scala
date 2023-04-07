@@ -236,7 +236,7 @@ case class ScilabTask(
           info = info,
           containerPoolKey = containerPoolKey) set (
           resources += (scriptFile, scriptName, true),
-          mapped.outputs.map { m ⇒ outputFiles.+=[ContainerTask](outputFileName(m.v), outputValName(m.v)) }
+          mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
         )
 
       val resultContext = containerTask.process(executionContext).from(context)

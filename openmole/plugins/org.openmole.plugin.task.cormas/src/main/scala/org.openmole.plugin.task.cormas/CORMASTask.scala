@@ -139,8 +139,8 @@ case class CORMASTask(
           containerPoolKey = containerPoolKey) set (
           resources += (jsonInputs, inputJSONName, true),
           outputFiles += (outputJSONName, outputFile),
-          Mapped.files(mapped.inputs).map { m ⇒ inputFiles.+=[ContainerTask](m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { m ⇒ outputFiles.+=[ContainerTask](m.name, m.v) }
+          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
         )
 
       val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
