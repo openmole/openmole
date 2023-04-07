@@ -76,7 +76,7 @@ object Market {
       MarketEntry("Hello World in Python", "python-hello", Seq(python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
       MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
-      MarketEntry("Hello World in Java", "jvm-hello", Seq(java)),
+      MarketEntry("Hello World in Java", "hello-jvm", Seq(java)),
       MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Julia", "julia-hello", Seq(julia)),
       MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
