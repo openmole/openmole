@@ -25,12 +25,12 @@ import org.openmole.plugin.tool.json.*
 import monocle.*
 import org.openmole.core.context.ValType
 
-object JVMTask:
+object JavaTask:
 
-  given InputOutputBuilder[JVMTask] = InputOutputBuilder(Focus[JVMTask](_.config))
-  given ExternalBuilder[JVMTask] = ExternalBuilder(Focus[JVMTask](_.external))
-  given InfoBuilder[JVMTask] = InfoBuilder(Focus[JVMTask](_.info))
-  given MappedInputOutputBuilder[JVMTask] = MappedInputOutputBuilder(Focus[JVMTask](_.mapped))
+  given InputOutputBuilder[JavaTask] = InputOutputBuilder(Focus[JavaTask](_.config))
+  given ExternalBuilder[JavaTask] = ExternalBuilder(Focus[JavaTask](_.external))
+  given InfoBuilder[JavaTask] = InfoBuilder(Focus[JavaTask](_.info))
+  given MappedInputOutputBuilder[JavaTask] = MappedInputOutputBuilder(Focus[JavaTask](_.mapped))
 
   //def chmodDaemon = """chmod 700 /root/.local/share/scalacli/bloop/daemon"""
   //def rmSocket = "rm /root/.local/share/scalacli/bloop/daemon/socket"
@@ -63,7 +63,7 @@ object JVMTask:
       val deps = libraries.map(l => s"--dep $l").mkString(" ")
       Seq("touch _empty.sc", scalaCLI(version, jvmOptions, fewerThreads) + s" $deps  _empty.sc", "rm _empty.sc")
 
-    new JVMTask(
+    new JavaTask(
       script = script,
       image = ContainerTask.prepare(installContainerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache),
       jars = jars,
@@ -85,7 +85,7 @@ object JVMTask:
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
-case class JVMTask(
+case class JavaTask(
   script: RunnableScript,
   image: PreparedImage,
   jars: Seq[File],
@@ -167,7 +167,7 @@ case class JVMTask(
              |}
         """.stripMargin
 
-        val outputFile = Val[File]("outputFile", Namespace("JVMTask"))
+        val outputFile = Val[File]("outputFile", Namespace("JavaTask"))
         val jarResources = jars.map(j => (j, s"jars/${j.getName}"))
 
         def jarParameter =
@@ -179,7 +179,7 @@ case class JVMTask(
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = Seq(JVMTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
+            command = Seq(JavaTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,

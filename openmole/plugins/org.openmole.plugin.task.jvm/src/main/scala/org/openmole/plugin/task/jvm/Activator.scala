@@ -29,7 +29,7 @@ class Activator extends BundleActivator:
   override def start(context: BundleContext): Unit =
     val keyWords: Vector[HighLight] =
       Vector(
-        HighLight.TaskHighLight(HighLight.objectName(JVMTask))
+        HighLight.TaskHighLight(HighLight.objectName(JavaTask))
       )
 
     PluginRegistry.register(
