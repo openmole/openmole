@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.jvm
+package org.openmole.plugin.task.java
 
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.pluginregistry.PluginRegistry

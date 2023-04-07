@@ -1,4 +1,4 @@
-package org.openmole.plugin.task.jvm
+package org.openmole.plugin.task.java
 
 /*
  * Copyright (C) 2023 Romain Reuillon
