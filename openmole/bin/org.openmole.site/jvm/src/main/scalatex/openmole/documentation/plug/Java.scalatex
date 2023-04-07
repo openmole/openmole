@@ -23,7 +23,7 @@ It takes the following arguments :
    @li{@code{jvmOptions} Sequence of String, optional. The some options to pass to the JVM, for instance "-Xmx1G".}
    @li{@code{version} String, optional. The version of JVM to run.}
 
-@h3{Simple ScilabTask}
+@h3{Simple JavaTask}
 
 Here is a workflow calling a function found in a jar file using a @code{JavaTask}:
 
