@@ -15,59 +15,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.wizard.r
+package org.openmole.gui.plugin.wizard.java
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
-import org.openmole.gui.shared.data.*
-import org.openmole.gui.client.ext
-import org.scalajs.dom.raw.HTMLElement
-
-import scala.concurrent.Future
-import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
+import org.scalajs.dom.raw.HTMLElement
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.annotation.*
 
 object TopLevelExports {
-  @JSExportTopLevel("wizard_r")
+  @JSExportTopLevel("wizard_java")
   val r = js.Object {
-    new org.openmole.gui.plugin.wizard.r.RWizardFactory
+    new org.openmole.gui.plugin.wizard.java.JavaWizardFactory
   }
 }
 
-class RWizardFactory extends WizardPluginFactory:
-  override def editable: Seq[FileContentType] =
-    val R = ReadableFileType(Seq("R"), text = true)
-    Seq(R)
+class JavaWizardFactory extends WizardPluginFactory:
 
   override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "R" -> FindLevel.SingleRoot,
-      "R" -> FindLevel.Level1
+      "jar" -> FindLevel.SingleRoot,
+      "jar" -> FindLevel.Level1
     )
   }
 
   override def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
-      case AcceptedModel("R" , _, f :: _) => Future.successful(ModelMetadata(command = Some(s"""source("${f._1.name}")""")))
+      case AcceptedModel("jar" , _, _) => Future.successful(ModelMetadata(command = Some(s"""// Call a method here""")))
       case _ => WizardUtils.unknownError(accepted, name)
 
   override def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] =
     accepted match
-      case AcceptedModel("R", level, file :: _) =>
-        val taskName = WizardUtils.toTaskName(file._1)
+      case AcceptedModel("jar", _, files) =>
+        val taskName = WizardUtils.toTaskName(files.head._1)
 
         def set = WizardUtils.mkSet(
-          modelMetadata,
-          if level == FindLevel.Level1
-          then s"resources += (${WizardUtils.inWorkDirectory(file._1.parent)})"
-          else s"resources += (${WizardUtils.inWorkDirectory(file._1)})"
+          modelMetadata
         )
 
         def script =
@@ -77,13 +70,13 @@ class RWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  RTask(\"\"\"${modelMetadata.command.getOrElse(s"")}\"\"\") $set
+               |  JavaTask(\"\"\"${modelMetadata.command.getOrElse("")}\"\"\", jars = Seq(${files.map((f, _) => WizardUtils.inWorkDirectory(f)).mkString(", ")})) $set
                |
                |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(file._1))
+            Some(WizardUtils.toOMSName(files.head._1))
           )
 
         Future.successful(script)
       case _ => WizardUtils.unknownError(accepted, name)
 
-  def name: String = "R"
+  def name: String = "Java"

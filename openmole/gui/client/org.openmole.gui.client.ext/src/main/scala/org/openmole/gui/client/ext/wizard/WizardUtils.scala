@@ -30,7 +30,6 @@ object WizardUtils:
     |*/""".stripMargin
 
 
-
   def mkVals(modelMetadata: ModelMetadata) =
     def vals =
       ((modelMetadata.inputs ++ modelMetadata.outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>
@@ -99,24 +98,29 @@ object WizardUtils:
   def findFileWithExtensions(files: Seq[(RelativePath, SafePath)], extensions: (String, FindLevel)*): Seq[AcceptedModel] =
     extensions.flatMap { (ext, level) =>
       level match
-        case FindLevel.SingleRoot => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleRoot, files.head)) else None
+        case FindLevel.SingleRoot => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleRoot, List(files.head))) else None
         case FindLevel.Root =>
-          files.filter(_._1.value.size == 1).find(_._1.name.endsWith(s".$ext")).map(f => AcceptedModel(ext, FindLevel.Root, f))
-        case FindLevel.Level1 => singleFolderContaining(files, _._1.name.endsWith(s".$ext")).map(f => AcceptedModel(ext, FindLevel.Level1, f))
+          val f = files.filter(_._1.value.size == 1).find(_._1.name.endsWith(s".$ext")).toList
+          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.Root, f)) else None
+        case FindLevel.Level1 =>
+          val f = singleFolderContaining(files, _._1.name.endsWith(s".$ext")).toList
+          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.Level1, f)) else None
     }
 
-  def singleFolderContaining(files: Seq[(RelativePath, SafePath)], f: ((RelativePath, SafePath)) => Boolean): Option[(RelativePath, SafePath)] =
+  def singleFolderContaining(files: Seq[(RelativePath, SafePath)], f: ((RelativePath, SafePath)) => Boolean): Seq[(RelativePath, SafePath)] =
     val firstLevel = files.map(f => f._1.value.take(1)).distinct
     if firstLevel.size == 1
-    then files.filter(f => f._1.value.size == 2).find(f)
-    else None
+    then files.filter(f => f._1.value.size == 2).filter(f)
+    else Seq()
+
+  def inWorkDirectory(file: RelativePath) = s"""workDirectory / \"${file.mkString}\""""
 
   def toTaskName(r: RelativePath) =
-    def lowerCase(s: String) = s.take(1).toLowerCase ++ s.drop(1)
+    def lowerCase(s: String) = s.take(1).toLowerCase ++ s.drop(1).filter(c => c.isLetterOrDigit | c == '_')
     lowerCase(r.nameWithoutExtension) + "Task"
 
   def toOMSName(r: RelativePath) =
-    r.nameWithoutExtension.capitalize + ".oms"
+    r.nameWithoutExtension.capitalize.filter(c => c.isLetterOrDigit | c == '_') + ".oms"
 
   def toVariableName(s: String) =
     val capital: String = s.split('-').reduce(_ + _.capitalize)

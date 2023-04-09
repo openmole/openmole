@@ -36,7 +36,7 @@ case class GeneratedModel(
 enum FindLevel:
   case SingleRoot, Root, Level1
 
-case class AcceptedModel(extension: String, level: FindLevel, file: (RelativePath, SafePath))
+case class AcceptedModel(extension: String, level: FindLevel, file: List[(RelativePath, SafePath)])
 
 trait WizardPluginFactory extends GUIPluginFactory:
  def name: String

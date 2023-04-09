@@ -201,22 +201,24 @@ object ModelWizardPanel:
     def browseToPath(safePath: SafePath)(using panels: Panels) =
       a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
-    def buildTask(safePath: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels) =
-      mmd.foreach { md =>
-        val modifiedMMD =
-          md.data.copy(
-            inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-            outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-            command = commandeInput.ref.value
-          )
+    def buildTask(safePath: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels): Future[Unit] =
+      mmd match
+        case Some(md) =>
+          val modifiedMMD =
+            md.data.copy(
+              inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+              outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+              command = commandeInput.ref.value
+            )
 
-        for
-          content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
-          _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
-          listed <- api.listFiles(tmpDirectory)
-          _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
-        do panels.treeNodePanel.refresh
-      }
+          for
+            content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
+            _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
+            listed <- api.listFiles(tmpDirectory)
+            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
+          yield panels.treeNodePanel.refresh
+        case None => Future.successful(())
+
 //      factory(safePath).foreach { f =>
 //        modelMetadata.now().foreach { mmd =>
 //          val modifiedMMD = mmd.copy(
@@ -236,7 +238,10 @@ object ModelWizardPanel:
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
-            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now())
+            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now()).onComplete {
+              case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while generating code", exception)
+              case util.Success(_) =>
+            }
             modelMetadata.set(None)
             panels.closeExpandable
         }

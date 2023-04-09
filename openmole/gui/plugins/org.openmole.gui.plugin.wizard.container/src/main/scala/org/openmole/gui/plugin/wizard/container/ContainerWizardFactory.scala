@@ -56,18 +56,17 @@ class ContainerWizardFactory extends WizardPluginFactory:
   def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
       case AcceptedModel("tar" | "tgz" | "tar.gz", _, _) => Future.successful(ModelMetadata(command = Some("echo Viva OpenMOLE")))
-      case AcceptedModel("sh", _, f) => Future.successful(ModelMetadata(command = Some(s"bash ${f._1.name}")))
-      //case AcceptedModel("jar", _, f) => ModelMetadata(command = Some(s"java -jar ${f._1.name}"))
+      case AcceptedModel("sh", _, f :: _) => Future.successful(ModelMetadata(command = Some(s"bash ${f._1.name}")))
       case _ => WizardUtils.unknownError(accepted, name)
 
   def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     accepted match
-      case AcceptedModel("sh", FindLevel.Level1, shell) =>
+      case AcceptedModel("sh", FindLevel.Level1, shell :: _) =>
         val taskName = WizardUtils.toTaskName(shell._1)
 
         def set = WizardUtils.mkSet(
           modelMetadata,
-          s"resources += (workDirectory / \"${shell._1.parent.mkString}\")"
+          s"resources += (${WizardUtils.inWorkDirectory(shell._1.parent)})"
         )
 
         def script =
@@ -77,20 +76,20 @@ class ContainerWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${shell._1.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(shell._1))
           )
 
         Future.successful(script)
-      case AcceptedModel("sh", FindLevel.SingleRoot, f) =>
+      case AcceptedModel("sh", FindLevel.SingleRoot, f :: _) =>
         val file = f._1
         val taskName = WizardUtils.toTaskName(file)
         def script =
           def set = WizardUtils.mkSet(
             modelMetadata,
-            s"resources += (workDirectory / \"${file.mkString}\")"
+            s"resources += (${WizardUtils.inWorkDirectory(file)})"
           )
 
           GeneratedModel(
@@ -99,7 +98,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))
@@ -107,7 +106,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
 
         Future.successful(script)
 
-      case AcceptedModel("tar" | "tgz" | "tar.gz", FindLevel.SingleRoot, f) =>
+      case AcceptedModel("tar" | "tgz" | "tar.gz", FindLevel.SingleRoot, f :: _) =>
         val file = f._1
         val taskName = WizardUtils.toTaskName(file)
 
@@ -118,7 +117,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") ${WizardUtils.mkSet(modelMetadata)}
+               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("")}") ${WizardUtils.mkSet(modelMetadata)}
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))

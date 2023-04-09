@@ -102,13 +102,13 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
   def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
-      case AcceptedModel("nlogo", _, f) => api.download(f._2).map { (content, _) => parseContent(content) }
+      case AcceptedModel("nlogo", _, f :: _) => api.download(f._2).map { (content, _) => parseContent(content) }
       case _ => WizardUtils.unknownError(accepted, name)
 
 
   def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     accepted match
-      case AcceptedModel("nlogo", level, nlogo) =>
+      case AcceptedModel("nlogo", level, nlogo :: _) =>
         val task = WizardUtils.toTaskName(nlogo._1)
         val embedWS = level == FindLevel.Level1
 
