@@ -43,25 +43,23 @@ object ModelWizardPanel:
 
   def successDiv = div(cls := "bi bi-patch-check-fill successBadge")
 
-  object exclusiveMenu {
+  class ExclusiveMenu:
     val entrySet: Var[Seq[Int]] = Var(Seq())
     val onoff: Var[Option[Int]] = Var(None)
 
-    def onoffUpdate(currentId: Option[Int], id: Int) = {
+    def onoffUpdate(currentId: Option[Int], id: Int) = 
       if (Some(id) == currentId) None
       else Some(id)
-    }
 
-    def expandAction(i: Option[Int], butId: Int) = {
+    def expandAction(i: Option[Int], butId: Int) =
       i match {
         case Some(ii: Int) =>
           if (ii == butId) true
           else false
         case None => false
       }
-    }
 
-    def entry(name: String, id: Int, panel: HtmlElement) = {
+    def entry(name: String, id: Int, panel: HtmlElement) =
       div(flexRow,
         button(
           name,
@@ -76,11 +74,10 @@ object ModelWizardPanel:
         },
         onoff.signal.map(oo => expandAction(oo, id)).expand(panel)
       )
-    }
-  }
 
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
     given NotificationService = NotificationManager.toService(panels.notifications)
+    val exclusiveMenu = new ExclusiveMenu
 
     //val filePath: Var[Option[SafePath]] = Var(None)
     val transferring: Var[ProcessState] = Var(Processed())
@@ -116,43 +113,6 @@ object ModelWizardPanel:
         case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while parsing", exception)
         case util.Success(_) =>
       }
-
-
-  //          val contentPath =
-  //            if uploaded.size == 1
-  //            then
-  //              val uploadedFile = tempFile ++ uploaded.head
-  //              val extracted =
-  //                FileType(uploadedFile) match
-  //                  case Archive ⇒
-  //                    val extractDirectory = tempFile ++ "__extract__"
-  //                    api.extractArchive(uploadedFile, extractDirector)
-  //                    extractDirectory
-  //                  case _ ⇒ uploadedFile
-  //
-  //              extracted.
-  //            else tempFile
-  //
-  //          def copyTo(targetPath: SafePath) =
-  //            // Not sure why...
-  //            val from =
-  //              CoreUtils.listFiles(tempFile).map { files =>
-  //                if files.size == 1 && files.head.directory.isDefined
-  //                then tempFile ++ files.head.name
-  //                else tempFile
-  //              }
-  //
-  //            for
-  //              f <- from
-  //              _ <- api.copyFiles(Seq(f -> targetPath), overwrite = true)
-  //            do
-  //              factory(targetPath).foreach { f =>
-  //                f.parse(targetPath).foreach { mmd =>
-  //                  modelMetadata.set(mmd)
-  //                  exclusiveMenu.onoff.set(Some(1))
-  //                }
-  //              }
-  //
 
     val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
     val uploadDirectory = Var(false)
@@ -231,20 +191,6 @@ object ModelWizardPanel:
             panels.treeNodePanel.displayNode(directory / modelName)
         case None => Future.successful(())
 
-//      factory(safePath).foreach { f =>
-//        modelMetadata.now().foreach { mmd =>
-//          val modifiedMMD = mmd.copy(
-//            inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-//            outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-//            command = commandeInput.ref.value
-//          )
-//          f.toTask(safePath.parent, modifiedMMD).foreach {_ =>
-//            panels.treeNodePanel.treeNodeManager.invalidCache(safePath.parent)
-//          }
-//        }
-//      }
-
-
 
     def buildButton(tmpDirectory: SafePath) =
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
@@ -266,9 +212,8 @@ object ModelWizardPanel:
 
     div(flexColumn, marginTop := "20",
       children <-- Signal.fromFuture(api.temporaryDirectory()).map {
-        case None => Seq()
         case Some(tmpDirectory) =>
-          Seq(
+          def upload =
             div(flexRow, width := "100%",
               upButton(tmpDirectory),
               span(display.flex, alignItems.center, color.black, marginLeft := "10px",
@@ -276,33 +221,52 @@ object ModelWizardPanel:
                   case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_._1.mkString).mkString(", ")}""")
                   case (_, d) => span(s"Task will be built in ⌂/${d.path.mkString}")
                 })
-            ),
-            exclusiveMenu.entry("Inputs / Ouputs", 1,
-              div(height := "200px",
-                child <--
-                  modelMetadata.signal.map {
-                    case Some(mmd) => ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping))
-                    case _ => emptyNode
-                  }
-              )
-            ),
-            exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40")),
-            div(flexRow, width := "100%", marginTop := "40",
-              buildButton(tmpDirectory),
-              span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
-                child <-- (modelMetadata.signal combineWith currentDirectory).map {
-                  case (Some(md), d) => span(s"${md.factory.name} task will be built in ⌂/${d.path.mkString}")
-                  case _ => span()
-                }
-              ),
-            ),
-            uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
-            div(onMountCallback(_ => currentDirectory.set(panels.directory.now())))
-//            div(
-//              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }
-//            )
-          )
+            )
+
+          def io =
+            div (
+              child <-- modelMetadata.signal.map {
+                case Some(mmd) =>
+                  if mmd.data.inputs.nonEmpty || mmd.data.outputs.nonEmpty
+                  then
+                    exclusiveMenu.entry("Inputs / Ouputs", 1,
+                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping)))
+                    )
+                  else div()
+                case None => div()
+              }
+            )
+
+          def cmd =
+            div(
+              child <-- modelMetadata.signal.map {
+                case Some(_) => exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40"))
+                case None => div()
+              }
+            )
+
+          def build =
+            div(
+              child <-- modelMetadata.signal.map {
+                case Some(mmd) =>
+                  div(flexRow, width := "100%", marginTop := "40",
+                    buildButton(tmpDirectory),
+                    span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
+                      child <-- currentDirectory.signal.map { d => span(s"${mmd.factory.name} task will be built in ⌂/${d.path.mkString}") }
+                    ),
+                  )
+                case None => div()
+              }
+            )
+
+          Seq(upload, io, cmd, build)
+        case _ => Seq()
       },
+      uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
+      div(onMountCallback(_ => currentDirectory.set(panels.directory.now()))),
+      //            div(
+      //              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }
+      //            )
       inputTags.tags --> IOObserver
     )
 
