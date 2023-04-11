@@ -85,7 +85,9 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     ModelMetadata(
       inputs,
       outputs,
-      command = Some("setup ; go")
+      command = Some(
+        """setup
+          |go""".stripMargin)
     )
 
   override def editable: Seq[FileContentType] =
@@ -114,7 +116,7 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
         def params = WizardUtils.mkTaskParameters(
           s"""workDirectory / "${nlogo._1.mkString}"""",
-          s"""Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }")""",
+          s"""Seq("${modelMetadata.command.map { _.split('\n').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }")""",
           "seed = mySeed",
           if embedWS then "embedWorkspace = true" else ""
         )

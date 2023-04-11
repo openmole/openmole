@@ -72,6 +72,10 @@ class ContainerWizardFactory extends WizardPluginFactory:
           s"resources += (${WizardUtils.inWorkDirectory(s)})"
         )
 
+        def cmd =
+          val v = modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+          if v.size == 1 then "\"v\"" else WizardUtils.mkCommandString(v)
+
         val gm =
           GeneratedModel(
             s"""
@@ -79,7 +83,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", \"${modelMetadata.commandValue}\", install = $installBash) $set
+               |  ContainerTask("debian:stable-slim", $cmd, install = $installBash) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(s))
@@ -90,7 +94,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
         val taskName = WizardUtils.toTaskName(s)
         val directory = WizardUtils.toDirectoryName(s)
 
-        def cmd = Seq(s"cd $directory", modelMetadata.commandValue)
+        def cmd = Seq(s"cd $directory") ++ modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
 
         def set = WizardUtils.mkSet(
           modelMetadata,
@@ -120,7 +124,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
           s"resources += (${WizardUtils.inWorkDirectory(s.parent)})"
         )
 
-        def cmd = Seq(s"cd ${s.parent.name}", modelMetadata.commandValue)
+        def cmd = Seq(s"cd ${s.parent.name}") ++ modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
 
         val gm =
           GeneratedModel(
@@ -140,6 +144,10 @@ class ContainerWizardFactory extends WizardPluginFactory:
         val file = f._1
         val taskName = WizardUtils.toTaskName(file)
 
+        def cmd =
+          val v = modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+          if v.size == 1 then "\"v\"" else WizardUtils.mkCommandString(v)
+
         def container =
           GeneratedModel(
             s"""
@@ -147,7 +155,7 @@ class ContainerWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("")}") ${WizardUtils.mkSet(modelMetadata)}
+               |  ContainerTask(workDirectory / "${file.mkString}", "$cmd) ${WizardUtils.mkSet(modelMetadata)}
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))

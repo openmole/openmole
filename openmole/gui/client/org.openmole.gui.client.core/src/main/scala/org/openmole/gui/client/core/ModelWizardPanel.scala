@@ -47,7 +47,7 @@ object ModelWizardPanel:
     val entrySet: Var[Seq[Int]] = Var(Seq())
     val onoff: Var[Option[Int]] = Var(None)
 
-    def onoffUpdate(currentId: Option[Int], id: Int) = 
+    def onoffUpdate(currentId: Option[Int], id: Int) =
       if (Some(id) == currentId) None
       else Some(id)
 
@@ -150,7 +150,7 @@ object ModelWizardPanel:
     val inputTags = new TagBadge()
     val outputTags = new TagBadge()
 
-    val commandeInput = inputTag("").amend(placeholder := "Launching command", value <-- modelMetadata.signal.map(m => m.flatMap(_.data.command).getOrElse("")))
+    val commandInput = textArea(placeholder := "Launching command", height := "100", width := "400", overflow.scroll, value <-- modelMetadata.signal.map(m => m.flatMap(_.data.command).getOrElse("")))
 
     def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
       div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
@@ -174,7 +174,7 @@ object ModelWizardPanel:
             md.data.copy(
               inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
               outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-              command = commandeInput.ref.value
+              command = commandInput.ref.value
             )
 
           for
@@ -240,7 +240,7 @@ object ModelWizardPanel:
           def cmd =
             div(
               child <-- modelMetadata.signal.map {
-                case Some(_) => exclusiveMenu.entry("Command", 2, div(display.flex, commandeInput, height := "50px", margin := "10 40"))
+                case Some(_) => exclusiveMenu.entry("Command", 2, div(display.flex, commandInput, height := "120px", margin := "10 40"))
                 case None => div()
               }
             )
