@@ -188,7 +188,7 @@ object ModelWizardPanel:
             _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
           yield
             panels.treeNodePanel.refresh
-            panels.treeNodePanel.displayNode(directory / modelName)
+            panels.treeNodePanel.displayNode(directory / modelName, refresh = true)
         case None => Future.successful(())
 
 

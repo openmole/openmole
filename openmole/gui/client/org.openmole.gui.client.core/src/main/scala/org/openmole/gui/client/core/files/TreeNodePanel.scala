@@ -321,7 +321,7 @@ class TreeNodePanel { panel =>
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
 
-  def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
+  def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     def isDisplayable(e: FileContentType) =
       e match
         case FileContentType.OpaqueFileType => false
@@ -334,6 +334,7 @@ class TreeNodePanel { panel =>
         safePath,
         hash = true
       ).map { (content: String, hash: Option[String]) ⇒
+        if refresh then panels.tabContent.removeTab(safePath)
         panels.fileDisplayer.display(safePath, content, hash.get, FileExtension(safePath))
         refresh
       }

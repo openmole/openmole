@@ -55,18 +55,11 @@ class TabContent:
 
   def editorPanelUI(safePath: SafePath) = tabData(safePath).flatMap(_.editorPanelUI)
 
-  def removeTab(safePath: SafePath) = {
-    tab(safePath).foreach { t =>
-      tabsUI.remove(t.tabID)
-    }
-  }
-
+  def removeTab(safePath: SafePath) = 
+    tab(safePath).foreach { t => tabsUI.remove(t.tabID) }
+  
   def alreadyDisplayed(safePath: SafePath) =
-    tabsUI.tabs.now().find { t ⇒
-      t.t.safePath.path == safePath.path
-    }.map {
-      _.tabID
-    }
+    tabsUI.tabs.now().find { t ⇒ t.t.safePath.path == safePath.path }.map { _.tabID }
 
   def save(tabData: TabData, overwrite: Boolean = false, saveUnmodified: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath): concurrent.Future[Boolean] = editorPanelUI.synchronized {
     tabData.editorPanelUI match

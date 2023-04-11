@@ -31,8 +31,8 @@ import com.raquo.laminar.api.L.*
 
 class FileDisplayer:
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) = {
-    panels.tabContent.alreadyDisplayed(safePath) match {
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) = 
+    panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
         FileContentType(fileExtension) match {
@@ -54,6 +54,5 @@ class FileDisplayer:
           case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, div(panelBody, content))
           case _ ⇒ //FIXME for GUI workflows
         }
-    }
-  }
+
 

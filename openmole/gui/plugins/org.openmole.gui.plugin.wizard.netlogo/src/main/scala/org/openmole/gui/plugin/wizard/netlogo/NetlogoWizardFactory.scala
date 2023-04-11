@@ -98,7 +98,8 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     WizardUtils.findFileWithExtensions(
       uploaded,
       "nlogo" -> FindLevel.SingleFile,
-      "nlogo" -> FindLevel.Directory
+      "nlogo" -> FindLevel.Directory,
+      "nlogo" -> FindLevel.MultipleFile
     )
   }
 
@@ -110,13 +111,21 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
   def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     accepted match
-      case AcceptedModel("nlogo", level, nlogo :: _) =>
-        val task = WizardUtils.toTaskName(nlogo._1)
-        val embedWS = level == FindLevel.Directory
+      case AcceptedModel("nlogo", level, (nlogo, _) :: _) =>
+        val task = WizardUtils.toTaskName(nlogo)
+        val (directory, file) =
+          level match
+            case FindLevel.MultipleFile =>
+              val d = WizardUtils.toDirectoryName(nlogo)
+              (Some(d), d :: nlogo)
+            case _ => (None, nlogo)
+
+        val embedWS =
+          level == FindLevel.Directory || level == FindLevel.MultipleFile
 
         def params = WizardUtils.mkTaskParameters(
-          s"""workDirectory / "${nlogo._1.mkString}"""",
-          s"""Seq("${modelMetadata.command.map { _.split('\n').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }")""",
+          WizardUtils.inWorkDirectory(file),
+          WizardUtils.mkCommandString(modelMetadata.commandValue.split('\n')),
           "seed = mySeed",
           if embedWS then "embedWorkspace = true" else ""
         )
@@ -137,7 +146,8 @@ class NetlogoWizardFactory extends WizardPluginFactory:
         Future.successful(
           GeneratedModel(
             content,
-            Some(WizardUtils.toOMSName(nlogo._1))
+            Some(WizardUtils.toOMSName(nlogo._1)),
+            directory
           )
         )
       case _ => WizardUtils.unknownError(accepted, name)
