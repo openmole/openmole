@@ -23,6 +23,9 @@ import scala.concurrent.Future
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object ModelMetadata:
+ extension (mmd: ModelMetadata)
+  def commandValue = mmd.command.getOrElse("")
 
 case class ModelMetadata(
   inputs: Seq[PrototypePair] = Seq(),
@@ -31,10 +34,11 @@ case class ModelMetadata(
 
 case class GeneratedModel(
  content: String,
- name: Option[String] = None)
+ name: Option[String] = None,
+ directory: Option[String] = None)
 
 enum FindLevel:
-  case SingleRoot, Root, Level1
+  case SingleFile, MultipleFile, Directory
 
 case class AcceptedModel(extension: String, level: FindLevel, file: List[(RelativePath, SafePath)])
 

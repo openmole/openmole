@@ -97,19 +97,25 @@ object ModelWizardPanel:
       future.map(s => s.flatten.headOption)
 
     def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
-      for
-        list <- api.listFiles(tmpDirectory)
-        _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
-        uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
-        f <- factory(uploaded)
-        _ <-
-          f match
-            case Some((accepted, factory)) =>
-              factory.parse(uploaded, accepted).map { md => modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory))) }
-            case None =>
-              panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
-              Future.successful(())
-      yield ()
+      val ret =
+        for
+          list <- api.listFiles(tmpDirectory)
+          _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
+          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
+          f <- factory(uploaded)
+          _ <-
+            f match
+              case Some((accepted, factory)) =>
+                factory.parse(uploaded, accepted).map { md => modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory))) }
+              case None =>
+                panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
+                Future.successful(())
+        yield ()
+
+      ret.andThen {
+        case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while parsing", exception)
+        case util.Success(_) =>
+      }
 
 
   //          val contentPath =
@@ -201,7 +207,7 @@ object ModelWizardPanel:
     def browseToPath(safePath: SafePath)(using panels: Panels) =
       a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
-    def buildTask(safePath: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels): Future[Unit] =
+    def buildTask(directory: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels): Future[Unit] =
       mmd match
         case Some(md) =>
           val modifiedMMD =
@@ -213,10 +219,16 @@ object ModelWizardPanel:
 
           for
             content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
-            _ <- api.saveFile(tmpDirectory ++ content.name.getOrElse("Model.oms"), content.content, overwrite = true)
             listed <- api.listFiles(tmpDirectory)
-            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (safePath / f.name)))
-          yield panels.treeNodePanel.refresh
+            destination = content.directory match
+              case None => directory
+              case Some(d) => directory / d
+            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)))
+            modelName = content.name.getOrElse("Model.oms")
+            _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
+          yield
+            panels.treeNodePanel.refresh
+            panels.treeNodePanel.displayNode(directory / modelName)
         case None => Future.successful(())
 
 //      factory(safePath).foreach { f =>
@@ -238,7 +250,7 @@ object ModelWizardPanel:
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
           _ ⇒
-            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now()).onComplete {
+            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now()).andThen {
               case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while generating code", exception)
               case util.Success(_) =>
             }

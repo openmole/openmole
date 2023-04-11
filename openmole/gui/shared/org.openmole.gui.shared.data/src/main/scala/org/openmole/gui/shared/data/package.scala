@@ -68,7 +68,8 @@ object RelativePath:
     def mkString = p.value.mkString("/")
     def parent = RelativePath(p.value.dropRight(1))
 
-case class RelativePath(value: Seq[String])
+case class RelativePath(value: Seq[String]):
+  def ::(s: String) = RelativePath(Seq(s) ++ value)
 
 object SafePath:
   def leaf(name: String) = SafePath(name)

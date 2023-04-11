@@ -94,17 +94,19 @@ object WizardUtils:
          |  )""".stripMargin
 
 
+  def mkCommandString(s: Seq[String]) =
+    "Seq(" + s.map(s => s"\"$s\"").mkString(",") + ")"
 
   def findFileWithExtensions(files: Seq[(RelativePath, SafePath)], extensions: (String, FindLevel)*): Seq[AcceptedModel] =
     extensions.flatMap { (ext, level) =>
       level match
-        case FindLevel.SingleRoot => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleRoot, List(files.head))) else None
-        case FindLevel.Root =>
+        case FindLevel.SingleFile => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleFile, List(files.head))) else None
+        case FindLevel.MultipleFile =>
           val f = files.filter(_._1.value.size == 1).find(_._1.name.endsWith(s".$ext")).toList
-          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.Root, f)) else None
-        case FindLevel.Level1 =>
+          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.MultipleFile, f)) else None
+        case FindLevel.Directory =>
           val f = singleFolderContaining(files, _._1.name.endsWith(s".$ext")).toList
-          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.Level1, f)) else None
+          if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.Directory, f)) else None
     }
 
   def singleFolderContaining(files: Seq[(RelativePath, SafePath)], f: ((RelativePath, SafePath)) => Boolean): Seq[(RelativePath, SafePath)] =
@@ -113,11 +115,16 @@ object WizardUtils:
     then files.filter(f => f._1.value.size == 2).filter(f)
     else Seq()
 
-  def inWorkDirectory(file: RelativePath) = s"""workDirectory / \"${file.mkString}\""""
+  def inWorkDirectory(file: RelativePath | String) =
+    file match
+      case file: RelativePath => s"""workDirectory / \"${file.mkString}\""""
+      case s: String => s"""workDirectory / \"$s\""""
 
-  def toTaskName(r: RelativePath) =
-    def lowerCase(s: String) = s.take(1).toLowerCase ++ s.drop(1).filter(c => c.isLetterOrDigit | c == '_')
-    lowerCase(r.nameWithoutExtension) + "Task"
+  private def lowerCase(s: String) = s.take(1).toLowerCase ++ s.drop(1).filter(c => c.isLetterOrDigit | c == '_')
+
+  def toDirectoryName(r: RelativePath) = lowerCase(r.nameWithoutExtension)
+
+  def toTaskName(r: RelativePath) = lowerCase(r.nameWithoutExtension) + "Task"
 
   def toOMSName(r: RelativePath) =
     r.nameWithoutExtension.capitalize.filter(c => c.isLetterOrDigit | c == '_') + ".oms"

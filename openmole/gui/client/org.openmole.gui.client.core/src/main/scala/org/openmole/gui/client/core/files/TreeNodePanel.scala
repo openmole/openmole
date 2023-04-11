@@ -321,8 +321,6 @@ class TreeNodePanel { panel =>
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
 
-
-
   def displayNode(safePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     def isDisplayable(e: FileContentType) =
       e match

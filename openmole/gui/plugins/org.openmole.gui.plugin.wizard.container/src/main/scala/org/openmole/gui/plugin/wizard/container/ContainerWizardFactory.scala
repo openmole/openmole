@@ -45,11 +45,12 @@ class ContainerWizardFactory extends WizardPluginFactory:
   def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "tar" -> FindLevel.SingleRoot,
-      "tgz" -> FindLevel.SingleRoot,
-      "tar.gz" -> FindLevel.SingleRoot,
-      "sh" -> FindLevel.SingleRoot,
-      "sh" -> FindLevel.Level1
+      "tar" -> FindLevel.SingleFile,
+      "tgz" -> FindLevel.SingleFile,
+      "tar.gz" -> FindLevel.SingleFile,
+      "sh" -> FindLevel.SingleFile,
+      "sh" -> FindLevel.Directory,
+      "sh" -> FindLevel.MultipleFile,
     )
   }
 
@@ -60,53 +61,82 @@ class ContainerWizardFactory extends WizardPluginFactory:
       case _ => WizardUtils.unknownError(accepted, name)
 
   def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    def installBash = WizardUtils.mkCommandString(Seq("apt update", "apt install bash", "apt clean"))
+
     accepted match
-      case AcceptedModel("sh", FindLevel.Level1, shell :: _) =>
-        val taskName = WizardUtils.toTaskName(shell._1)
+      case AcceptedModel("sh", FindLevel.SingleFile, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
 
         def set = WizardUtils.mkSet(
           modelMetadata,
-          s"resources += (${WizardUtils.inWorkDirectory(shell._1.parent)})"
+          s"resources += (${WizardUtils.inWorkDirectory(s)})"
         )
 
-        def script =
+        val gm =
           GeneratedModel(
             s"""
                |${WizardUtils.preamble}
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask("debian:stable-slim", \"${modelMetadata.commandValue}\", install = $installBash) $set
                |
                |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(shell._1))
+            Some(WizardUtils.toOMSName(s))
           )
 
-        Future.successful(script)
-      case AcceptedModel("sh", FindLevel.SingleRoot, f :: _) =>
-        val file = f._1
-        val taskName = WizardUtils.toTaskName(file)
-        def script =
-          def set = WizardUtils.mkSet(
-            modelMetadata,
-            s"resources += (${WizardUtils.inWorkDirectory(file)})"
-          )
+        Future.successful(gm)
+      case AcceptedModel("sh", FindLevel.MultipleFile, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
+        val directory = WizardUtils.toDirectoryName(s)
 
+        def cmd = Seq(s"cd $directory", modelMetadata.commandValue)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(directory)})"
+        )
+
+        val gm =
           GeneratedModel(
             s"""
                |${WizardUtils.preamble}
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask("debian:stable-slim", ${WizardUtils.mkCommandString(cmd)}, install = $installBash) $set
                |
                |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(file))
+            Some(WizardUtils.toOMSName(s)),
+            directory = Some(directory)
           )
 
-        Future.successful(script)
+        Future.successful(gm)
+      case AcceptedModel("sh", FindLevel.Directory, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
 
-      case AcceptedModel("tar" | "tgz" | "tar.gz", FindLevel.SingleRoot, f :: _) =>
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(s.parent)})"
+        )
+
+        def cmd = Seq(s"cd ${s.parent.name}", modelMetadata.commandValue)
+
+        val gm =
+          GeneratedModel(
+            s"""
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  ContainerTask("debian:stable-slim", $cmd, install = $installBash) $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(s))
+          )
+
+        Future.successful(gm)
+      case AcceptedModel("tar" | "tgz" | "tar.gz", FindLevel.SingleFile, f :: _) =>
         val file = f._1
         val taskName = WizardUtils.toTaskName(file)
 
@@ -125,24 +155,6 @@ class ContainerWizardFactory extends WizardPluginFactory:
 
         Future.successful(container)
       case _ => WizardUtils.unknownError(accepted, name)
-//        def java =
-//          def set = WizardUtils.mkSet(
-//            modelMetadata,
-//            s"resources += (workDirectory / \"${file.mkString}\")"
-//          )
-//
-//          GeneratedModel(
-//            s"""
-//               |${WizardUtils.preamble}
-//               |
-//               |${WizardUtils.mkVals(modelMetadata)}
-//               |val $taskName =
-//               |  ContainerTask("openjdk:17-jdk-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
-//               |
-//               |$taskName""".stripMargin,
-//            Some(WizardUtils.toOMSName(file))
-//          )
-
 
   def name: String = "Container"
 

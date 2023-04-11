@@ -95,8 +95,8 @@ class NetlogoWizardFactory extends WizardPluginFactory:
   def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "nlogo" -> FindLevel.SingleRoot,
-      "nlogo" -> FindLevel.Level1
+      "nlogo" -> FindLevel.SingleFile,
+      "nlogo" -> FindLevel.Directory
     )
   }
 
@@ -110,7 +110,7 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     accepted match
       case AcceptedModel("nlogo", level, nlogo :: _) =>
         val task = WizardUtils.toTaskName(nlogo._1)
-        val embedWS = level == FindLevel.Level1
+        val embedWS = level == FindLevel.Directory
 
         def params = WizardUtils.mkTaskParameters(
           s"""workDirectory / "${nlogo._1.mkString}"""",

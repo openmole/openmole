@@ -48,8 +48,8 @@ class RWizardFactory extends WizardPluginFactory:
   override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "R" -> FindLevel.SingleRoot,
-      "R" -> FindLevel.Level1
+      "R" -> FindLevel.SingleFile,
+      "R" -> FindLevel.Directory
     )
   }
 
@@ -65,7 +65,7 @@ class RWizardFactory extends WizardPluginFactory:
 
         def set = WizardUtils.mkSet(
           modelMetadata,
-          if level == FindLevel.Level1
+          if level == FindLevel.Directory
           then s"resources += (${WizardUtils.inWorkDirectory(file._1.parent)})"
           else s"resources += (${WizardUtils.inWorkDirectory(file._1)})"
         )

@@ -44,8 +44,8 @@ class JavaWizardFactory extends WizardPluginFactory:
   override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "jar" -> FindLevel.SingleRoot,
-      "jar" -> FindLevel.Level1
+      "jar" -> FindLevel.SingleFile,
+      "jar" -> FindLevel.Directory
     )
   }
 
