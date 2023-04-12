@@ -41,15 +41,8 @@ object WizardUtils:
     s.filter(!_.trim.isEmpty).headOption match
       case None => ""
       case Some(h) =>
-        val all = Seq(h) ++ s.drop(1).map(s => s"  $s")
-        def toMultiLine(s: String) =
-          if s.contains('\n')
-          then
-            val lines = s.trim.split('\n')
-            "  \"\"\"" + lines.head + "\n" + lines.tail.map(l => s"   |$l").mkString("\n") + "\"\"\".stripMargin"
-          else s
-
-        all.map(toMultiLine).mkString(",\n")
+        val all = Seq(h) ++ s.drop(1).map(s => s"    $s")
+        all.mkString(",\n")
 
   def mkSet(modelData: ModelMetadata, s: String*) =
     def setElements(inputs: Seq[PrototypePair], outputs: Seq[PrototypePair]) =

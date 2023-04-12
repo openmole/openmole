@@ -56,7 +56,7 @@ object GAMATask {
         case _ => None
       }
 
-    ContainerTask.prepare(installContainerSystem, image, installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
+    ContainerTask.install(installContainerSystem, image, installCommands, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, error, clearCache = clearCache)
   }
 
   def apply(
@@ -170,7 +170,7 @@ case class GAMATask(
   finalStep:            FromContext[Int],
   seed:                 OptionalArgument[Val[Long]],
   frameRate:            OptionalArgument[Int],
-  image:                PreparedImage,
+  image:                InstalledImage,
   memory:               OptionalArgument[Information],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],

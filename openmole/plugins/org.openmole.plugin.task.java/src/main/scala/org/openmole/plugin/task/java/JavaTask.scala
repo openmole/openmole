@@ -66,7 +66,7 @@ object JavaTask:
 
     new JavaTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache),
+      image = ContainerTask.install(installContainerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache),
       jars = jars,
       libraries = libraries,
       jvmOptions = jvmOptions,
@@ -88,7 +88,7 @@ object JavaTask:
 
 case class JavaTask(
   script: RunnableScript,
-  image: PreparedImage,
+  image: InstalledImage,
   jars: Seq[File],
   libraries: Seq[String],
   jvmOptions: Seq[String],

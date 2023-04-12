@@ -11,7 +11,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, PreparedImage }
+import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, InstalledImage }
 import org.openmole.plugin.task.external._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -50,7 +50,7 @@ object CORMASTask {
     containerSystem:        ContainerSystem = ContainerSystem.default,
     installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask = {
 
-    val preparedImage = ContainerTask.prepare(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.install(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
     new CORMASTask(
       preparedImage,
@@ -71,7 +71,7 @@ object CORMASTask {
 }
 
 case class CORMASTask(
-  image:                PreparedImage,
+  image:                InstalledImage,
   containerSystem:      ContainerSystem,
   script:               FromContext[String],
   errorOnReturnValue:   Boolean,

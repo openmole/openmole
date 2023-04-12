@@ -57,7 +57,7 @@ object PythonTask {
     new PythonTask(
       script = script,
       arguments = arguments.option,
-      image = ContainerTask.prepare(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      image = ContainerTask.install(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -76,7 +76,7 @@ object PythonTask {
 
 case class PythonTask(
   script:                 RunnableScript,
-  image:                  PreparedImage,
+  image:                  InstalledImage,
   arguments:              Option[String],
   errorOnReturnValue:     Boolean,
   returnValue:            Option[Val[Int]],
@@ -147,7 +147,7 @@ case class PythonTask(
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"python${major.toString} $scriptName" + argumentsValue,
+            command = s"python${major.toString} /$scriptName" + argumentsValue,
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,

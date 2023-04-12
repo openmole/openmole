@@ -53,7 +53,7 @@ object JuliaTask {
    new JuliaTask(
       script = script,
       arguments = arguments.option,
-      image = ContainerTask.prepare(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
+      image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -71,7 +71,7 @@ object JuliaTask {
 
 case class JuliaTask(
   script:                 RunnableScript,
-  image:                  PreparedImage,
+  image:                  InstalledImage,
   arguments:              Option[String],
   errorOnReturnValue:     Boolean,
   returnValue:            Option[Val[Int]],

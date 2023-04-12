@@ -25,7 +25,15 @@ import scala.concurrent.Future
 
 object ModelMetadata:
  extension (mmd: ModelMetadata)
-  def commandValue = mmd.command.getOrElse("")
+   def commandValue = mmd.command.getOrElse("")
+   def quotedCommandValue =
+     def toMultiLine(s: String) =
+       val lines = s.linesIterator.toSeq
+       if lines.size > 1
+       then
+         "\"\"\"" + lines.head + "\n" + lines.tail.map(l => s"|   |$l").mkString("\n") + "\"\"\".stripMargin"
+       else s"\"\"\"$s\"\"\""
+     toMultiLine(mmd.commandValue)
 
 case class ModelMetadata(
   inputs: Seq[PrototypePair] = Seq(),

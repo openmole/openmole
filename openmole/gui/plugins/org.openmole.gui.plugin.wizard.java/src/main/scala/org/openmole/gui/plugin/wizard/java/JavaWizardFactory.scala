@@ -45,7 +45,8 @@ class JavaWizardFactory extends WizardPluginFactory:
     WizardUtils.findFileWithExtensions(
       uploaded,
       "jar" -> FindLevel.SingleFile,
-      "jar" -> FindLevel.Directory
+      "jar" -> FindLevel.Directory,
+      "jar" -> FindLevel.MultipleFile
     )
   }
 
@@ -63,6 +64,11 @@ class JavaWizardFactory extends WizardPluginFactory:
           modelMetadata
         )
 
+        def parameters = WizardUtils.mkTaskParameters(
+          modelMetadata.quotedCommandValue,
+          s"jars = Seq(${files.map((f, _) => WizardUtils.inWorkDirectory(f)).mkString(", ")})"
+        )
+
         def script =
           GeneratedModel(
             s"""
@@ -70,7 +76,7 @@ class JavaWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  JavaTask(\"\"\"${modelMetadata.command.getOrElse("")}\"\"\", jars = Seq(${files.map((f, _) => WizardUtils.inWorkDirectory(f)).mkString(", ")})) $set
+               |  JavaTask($parameters) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(files.head._1))

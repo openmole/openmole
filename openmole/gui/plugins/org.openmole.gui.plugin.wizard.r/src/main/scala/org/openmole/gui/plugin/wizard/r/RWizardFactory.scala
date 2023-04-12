@@ -49,7 +49,8 @@ class RWizardFactory extends WizardPluginFactory:
     WizardUtils.findFileWithExtensions(
       uploaded,
       "R" -> FindLevel.SingleFile,
-      "R" -> FindLevel.Directory
+      "R" -> FindLevel.Directory,
+      "R" -> FindLevel.MultipleFile
     )
   }
 
@@ -60,14 +61,12 @@ class RWizardFactory extends WizardPluginFactory:
 
   override def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] =
     accepted match
-      case AcceptedModel("R", level, file :: _) =>
-        val taskName = WizardUtils.toTaskName(file._1)
+      case AcceptedModel("R", FindLevel.SingleFile, (file, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(file)
 
         def set = WizardUtils.mkSet(
           modelMetadata,
-          if level == FindLevel.Directory
-          then s"resources += (${WizardUtils.inWorkDirectory(file._1.parent)})"
-          else s"resources += (${WizardUtils.inWorkDirectory(file._1)})"
+          s"resources += (${WizardUtils.inWorkDirectory(file)})"
         )
 
         def script =
@@ -77,12 +76,67 @@ class RWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  RTask(\"\"\"${modelMetadata.command.getOrElse(s"")}\"\"\") $set
+               |  RTask(${modelMetadata.quotedCommandValue}) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file._1))
           )
 
+        Future.successful(script)
+      case AcceptedModel("R", FindLevel.MultipleFile, (file, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(file)
+        val directory = WizardUtils.toDirectoryName(file)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(directory)})"
+        )
+
+        def parameters = WizardUtils.mkTaskParameters(
+          modelMetadata.quotedCommandValue,
+          s"prepare = ${WizardUtils.mkCommandString(Seq(s"cd $directory"))}"
+        )
+
+        def script =
+          GeneratedModel(
+            s"""
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  RTask($parameters) $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(file)),
+            Some(directory)
+          )
+
+        Future.successful(script)
+      case AcceptedModel("R", FindLevel.Directory, (file, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(file)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(file.parent)})"
+        )
+
+        def parameters = WizardUtils.mkTaskParameters(
+          modelMetadata.quotedCommandValue,
+          s"prepare = ${WizardUtils.mkCommandString(Seq(s"cd ${file.parent.value}"))}"
+        )
+
+        def script =
+          GeneratedModel(
+            s"""Future.successful(script)
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  RTask($parameters) $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(file))
+          )
         Future.successful(script)
       case _ => WizardUtils.unknownError(accepted, name)
 

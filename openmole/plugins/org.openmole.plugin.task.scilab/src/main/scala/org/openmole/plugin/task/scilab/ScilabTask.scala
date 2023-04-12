@@ -45,7 +45,7 @@ object ScilabTask {
 
     ScilabTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, scilabImage(version), install),
+      image = ContainerTask.install(installContainerSystem, scilabImage(version), install),
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -170,7 +170,7 @@ object ScilabTask {
 
 case class ScilabTask(
   script:               RunnableScript,
-  image:                PreparedImage,
+  image:                InstalledImage,
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],

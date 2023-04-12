@@ -15,7 +15,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
 import org.openmole.plugin.task.container
-import org.openmole.plugin.task.container.ContainerTask.prepare
+import org.openmole.plugin.task.container.ContainerTask.install
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.json._
@@ -66,6 +66,7 @@ object RTask {
     script:                     RunnableScript,
     install:                    Seq[String]                        = Seq.empty,
     libraries:                  Seq[InstallCommand]                = Seq.empty,
+    prepare:                    Seq[String]                        = Seq.empty,
     installSystemDependencies:  Boolean                            = true,
     image:                      String                             = "openmole/r-base",
     version:                    String                             = "4.2.1",
@@ -74,7 +75,6 @@ object RTask {
     stdOut:                     OptionalArgument[Val[String]]      = None,
     stdErr:                     OptionalArgument[Val[String]]      = None,
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
-    workDirectory:              OptionalArgument[String]           = None,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     clearContainerCache:        Boolean                          = false,
     containerSystem:            ContainerSystem                  = ContainerSystem.default,
@@ -108,7 +108,8 @@ object RTask {
 
     RTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, rImage(image, version), installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.install(installContainerSystem, rImage(image, version), installCommands, clearCache = clearContainerCache),
+      prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -127,8 +128,9 @@ object RTask {
 
 case class RTask(
   script:               RunnableScript,
-  image:                PreparedImage,
+  image:                InstalledImage,
   errorOnReturnValue:   Boolean,
+  prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
@@ -190,7 +192,7 @@ case class RTask(
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"R --slave -f $rScriptName",
+            command = prepare ++ Seq(s"R --slave -f /$rScriptName"),
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
