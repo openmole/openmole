@@ -34,18 +34,6 @@ def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean =
 
 def hashHeader = "Content-Hash"
 
-enum PrototypeData(val name: String, val scalaString: String):
-  case Int extends PrototypeData("Integer", "Int")
-  case Double extends PrototypeData("Double", "Double")
-  case Long extends PrototypeData("Long", "Long")
-  case Boolean extends PrototypeData("Boolean", "Boolean")
-  case String extends PrototypeData("String", "String")
-  case File extends PrototypeData("File", "File")
-  case Char extends PrototypeData("Char", "Char")
-  case Short extends PrototypeData("Short", "Short")
-  case Byte extends PrototypeData("Byte", "Byte")
-  case Any(override val name: String, override val scalaString: String) extends PrototypeData(name, scalaString)
-
 import java.io.{PrintWriter, StringWriter}
 import scala.collection.immutable.ArraySeq
 import scala.scalajs.js.annotation.JSExport
@@ -244,8 +232,6 @@ case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 // projectSafePath is the plugin path in the project tree.
 // The plugin is copied in the plugin directory with the same name.
 case class Plugin(projectSafePath: SafePath, time: String, plugged: Boolean)
-
-case class PrototypePair(name: String, `type`: org.openmole.gui.shared.data.PrototypeData, default: String = "", mapping: Option[String] = None)
 
 //Processes
 sealed trait ProcessState {

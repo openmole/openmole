@@ -79,7 +79,7 @@ class RWizardFactory extends WizardPluginFactory:
                |  RTask(${modelMetadata.quotedCommandValue}) $set
                |
                |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(file._1))
+            Some(WizardUtils.toOMSName(file))
           )
 
         Future.successful(script)

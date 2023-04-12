@@ -669,43 +669,7 @@ def guiSettings = scala3Settings
 
 def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!scaladget.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
 
-/* -------------------- Shared ----------------------*/
-
-lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
-  Libraries.scalajsDomJS,
-  Libraries.laminarJS,
-  libraryDependencies += Libraries.endpoints4s,
-  guiSettings,
-  scalaJSSettings)
-
-lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
-  //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
-  libraryDependencies += Libraries.endpoints4s,
-  scalaJSSettings
-)
-
-lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, networkService, dataGUI) settings(
-  guiSettings,
-  libraryDependencies += "org.scala-js" %%% "scalajs-library" % scalajsVersion % "provided" intransitive() cross CrossVersion.for3Use2_13,
-  //libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.4" % "provided" intransitive(),
-
-  libraryDependencies += Libraries.scalajsLogging cross CrossVersion.for3Use2_13,
-  libraryDependencies += Libraries.scalajsLinker cross CrossVersion.for3Use2_13,
-
-  (Compile / resourceDirectories) += (crossTarget.value / "resources"),
-  (OsgiKeys.embeddedJars) := {
-    val scalaLib =
-      (Compile / Keys.externalDependencyClasspath).value.filter {
-        d => d.data.getName startsWith "scalajs-library"
-      }.head
-
-    val dest = crossTarget.value / "resources/scalajs-library.jar"
-    dest.getParentFile.mkdirs()
-    sbt.IO.copyFile(scalaLib.data, dest)
-    Seq()
-  }
-)
-
+/* -------------------- GUI Client ----------------------*/
 
 val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
@@ -801,40 +765,9 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 ) dependsOn (clientGUI, guiEnvironmentSSHLoginPlugin)
 
 
-/* -------------------------- Server ----------------------- */
+/* -------------------------- GUI Server ----------------------- */
 
 def guiServerDir = guiDir / "server"
-
-//lazy val newServerGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.newcore", imports = Seq("*")) settings(
-//  libraryDependencies ++= Seq(Libraries.endpoints4SHTTP4SSServer, Libraries.endpoint4SJsonSchemaGeneric, Libraries.cats),
-////  excludeDependencies += ExclusionRule(organization = "org.endpoints4s", name = "algebra_3"),
-////  excludeDependencies += ExclusionRule(organization = "org.endpoints4s", name = "algebra-json-schema_3"),
-////  excludeDependencies += ExclusionRule(organization = "com.lihaoyi", name = "geny_3"),
-//  //excludeTransitiveScala2,
-//  guiSettings) dependsOn(
-//  apiGUI,
-//  dataGUI,
-//  workflow,
-//  openmoleBuildInfo,
-//  openmoleFile,
-//  openmoleArchive,
-//  openmoleHash,
-//  openmoleCollection,
-//  project,
-//  openmoleDSL,
-//  batch,
-//  omrHook,
-//  openmoleStream,
-//  txtmark,
-//  openmoleCrypto,
-//  module,
-//  market,
-//  extServer,
-//  jsCompile,
-//  services,
-//  location,
-//  serverGUI)
-
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
   libraryDependencies ++= Seq(/*Libraries.autowire, Libraries.boopickle, */ Libraries.scalaTags, /*Libraries.scalatra, */ Libraries.clapper),
@@ -863,8 +796,6 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   location)
 
 
-
-
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(apiGUI, workspace, module, services) settings(
   //  libraryDependencies += Libraries.autowire,
   //  libraryDependencies += Libraries.boopickle,
@@ -873,11 +804,64 @@ lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") de
   guiSettings,
   scalaJSSettings)
 
+
+lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, networkService, dataGUI) settings(
+  guiSettings,
+  libraryDependencies += "org.scala-js" %%% "scalajs-library" % scalajsVersion % "provided" intransitive() cross CrossVersion.for3Use2_13,
+  //libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.4" % "provided" intransitive(),
+
+  libraryDependencies += Libraries.scalajsLogging cross CrossVersion.for3Use2_13,
+  libraryDependencies += Libraries.scalajsLinker cross CrossVersion.for3Use2_13,
+
+  (Compile / resourceDirectories) += (crossTarget.value / "resources"),
+  (OsgiKeys.embeddedJars) := {
+    val scalaLib =
+      (Compile / Keys.externalDependencyClasspath).value.filter {
+        d => d.data.getName startsWith "scalajs-library"
+      }.head
+
+    val dest = crossTarget.value / "resources/scalajs-library.jar"
+    dest.getParentFile.mkdirs()
+    sbt.IO.copyFile(scalaLib.data, dest)
+    Seq()
+  }
+)
+
+/* -------------------- GUI Shared ----------------------*/
+
+lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
+  Libraries.scalajsDomJS,
+  Libraries.laminarJS,
+  libraryDependencies += Libraries.endpoints4s,
+  guiSettings,
+  scalaJSSettings)
+
+lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
+  //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
+  libraryDependencies += Libraries.endpoints4s,
+  scalaJSSettings
+)
+
 /* -------------------- GUI Plugin ----------------------- */
 
 def guiPluginSettings = guiSettings ++ Seq(defaultActivator)
 
 def guiPluginDir = guiDir / "plugins"
+
+def guiPlugins = Seq(
+  guiEnvironmentSSHLoginPlugin,
+  guiEnvironmentSSHKeyPlugin,
+  guiEnvironmentEGIPlugin,
+  netlogoWizardPlugin,
+  gamaWizardPlugin,
+  rWizardPlugin,
+  javaWizardPlugin,
+  containerWizardPlugin,
+  evolutionAnalysisPlugin
+  // Obsolete
+  //nativeWizardPlugin,
+  // jarWizardPlugin,
+) //, guiEnvironmentDesktopGridPlugin)
 
 lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi", imports = guiStrictImports) settings(
   guiPluginSettings,
@@ -913,6 +897,13 @@ lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugi
 //  libraryDependencies += Libraries.arm
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
+lazy val gamaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.gama", imports = guiStrictImports) settings(
+  guiPluginSettings,
+  scalaJSSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
+
+
 lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
@@ -945,20 +936,7 @@ lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   Libraries.plotlyJS
 ) dependsOn(serverExt, clientExt, serverExt, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
-def guiPlugins = Seq(
-  guiEnvironmentSSHLoginPlugin,
-  guiEnvironmentSSHKeyPlugin,
-  guiEnvironmentEGIPlugin,
-  netlogoWizardPlugin,
-  rWizardPlugin,
-  javaWizardPlugin,
-  containerWizardPlugin,
-  evolutionAnalysisPlugin
 
-  // Obsolete
-  //nativeWizardPlugin,
-  // jarWizardPlugin,
-) //, guiEnvironmentDesktopGridPlugin)
 
 /* -------------------- Bin ------------------------- */
 

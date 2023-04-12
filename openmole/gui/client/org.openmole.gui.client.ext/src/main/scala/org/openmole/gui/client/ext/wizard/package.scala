@@ -35,9 +35,24 @@ object ModelMetadata:
        else s"\"\"\"$s\"\"\""
      toMultiLine(mmd.commandValue)
 
+object PrototypeData:
+  sealed trait Type(val name: String, val scalaString: String)
+  case object Int extends Type("Integer", "Int")
+  case object Double extends Type("Double", "Double")
+  case object Long extends Type("Long", "Long")
+  case object Boolean extends Type("Boolean", "Boolean")
+  case object String extends Type("String", "String")
+  case object File extends Type("File", "File")
+  case object Char extends Type("Char", "Char")
+  case object Short extends Type("Short", "Short")
+  case object Byte extends Type("Byte", "Byte")
+  case class Any(override val name: String, override val scalaString: String) extends Type(name, scalaString)
+
+case class PrototypeData(name: String, `type`: PrototypeData.Type, default: String = "", mapping: Option[String] = None)
+
 case class ModelMetadata(
-  inputs: Seq[PrototypePair] = Seq(),
-  outputs: Seq[PrototypePair] = Seq(),
+  inputs: Seq[PrototypeData] = Seq(),
+  outputs: Seq[PrototypeData] = Seq(),
   command: Option[String] = None)
 
 case class GeneratedModel(

@@ -45,6 +45,7 @@ The following arguments are optional arguments for an advanced usage
    @li{@code{install} Sequence of strings, @b{optional} (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used for example if automatic system dependencies installation fails, after deactivating the option.}
    @li{@code{image} String, @b{optional} (default = "openmole/r-base"). Changes the docker image used by the RTask.}
    @li{@code{version} String, @b{optional} (default = "4.1.2"). Version of the docker image. openmole/r-base images are tagged corresponding to some R versions, check the docker hub to see which are available. If you use your own image, you will need to provide the corresponding tag.}
+   @li{@code{prepare} Sequence of strings, @b{optional} (default = empty). System commands to be executed just before to the execution of R on the execution node.}
 
 Other advanced container options are also available to build the RTask (see ContainerTask): @code{errorOnReturnValue}, @code{returnValue}, @code{stdOut}, @code{stdErr}, @code{hostFiles}, @code{workDirectory}, @code{environmentVariables}, @code{containerSystem}, @code{installContainerSystem}.
 

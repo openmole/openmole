@@ -30,10 +30,10 @@ object WizardUtils:
     |*/""".stripMargin
 
 
-  def mkVals(modelMetadata: ModelMetadata) =
+  def mkVals(modelMetadata: ModelMetadata, prototype: PrototypeData*) =
     def vals =
-      ((modelMetadata.inputs ++ modelMetadata.outputs).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>
-        "val " + p._1 + " = Val[" + p._2 + "]"
+      ((modelMetadata.inputs ++ modelMetadata.outputs ++ prototype).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map { p =>
+        s"val ${p._1} = Val[${p._2}]"
       }
     vals.mkString("\n")
 
@@ -45,18 +45,18 @@ object WizardUtils:
         all.mkString(",\n")
 
   def mkSet(modelData: ModelMetadata, s: String*) =
-    def setElements(inputs: Seq[PrototypePair], outputs: Seq[PrototypePair]) =
-      def testBoolean(protoType: PrototypePair) = protoType.`type` match
+    def setElements(inputs: Seq[PrototypeData], outputs: Seq[PrototypeData]) =
+      def testBoolean(protoType: PrototypeData) = protoType.`type` match
         case PrototypeData.Boolean ⇒ if (protoType.default == "1") "true" else "false"
         case _ ⇒ protoType.default
 
-      def ioString(protos: Seq[PrototypePair], keyString: String) = if (protos.nonEmpty) Seq(Seq(s"$keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", "))) else Seq()
+      def ioString(protos: Seq[PrototypeData], keyString: String) = if (protos.nonEmpty) Seq(Seq(s"$keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", "))) else Seq()
 
-      def imapString(protos: Seq[PrototypePair], keyString: String) = protos.flatMap { i ⇒
+      def imapString(protos: Seq[PrototypeData], keyString: String) = protos.flatMap { i ⇒
         i.mapping.map { mapping => s"""$keyString += ${i.name} mapped "${mapping}"""" }
       }
 
-      def omapString(protos: Seq[PrototypePair], keyString: String) = protos.flatMap { o ⇒
+      def omapString(protos: Seq[PrototypeData], keyString: String) = protos.flatMap { o ⇒
         o.mapping.map { mapping =>
           s"""$keyString += ${o.name} mapped "${mapping}""""
         }
@@ -117,10 +117,13 @@ object WizardUtils:
     then files.filter(f => f._1.value.size == 2).filter(f)
     else Seq()
 
+  def quoted(s: String) = s"\"$s\""
+  def tripleQuoted(s: String) = s"\"\"\"$s\"\"\""
+
   def inWorkDirectory(file: RelativePath | String) =
     file match
-      case file: RelativePath => s"""workDirectory / \"${file.mkString}\""""
-      case s: String => s"""workDirectory / \"$s\""""
+      case file: RelativePath => s"""workDirectory / ${quoted(file.mkString)}"""
+      case s: String => s"""workDirectory / ${quoted(s)}"""
 
   private def lowerCase(s: String) = s.take(1).toLowerCase ++ s.drop(1).filter(c => c.isLetterOrDigit | c == '_')
 

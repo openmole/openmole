@@ -44,30 +44,30 @@ class NetlogoWizardFactory extends WizardPluginFactory:
   def parseContent(content: String): ModelMetadata =
     val lines: Array[String] = content.linesIterator.toArray
 
-    def parseSlider(start: Int): PrototypePair =
+    def parseSlider(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 9), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 9), Some(name))
 
-    def parseSwitch(start: Int): PrototypePair =
+    def parseSwitch(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Boolean, lines(start + 7), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, lines(start + 7), Some(name))
 
-    def parseInputBox(start: Int): PrototypePair =
+    def parseInputBox(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
 
-    def parseMonitor(start: Int): Seq[PrototypePair] =
+    def parseMonitor(start: Int): Seq[PrototypeData] =
       val name = lines(start + 6).split(' ')
-      if (name.size == 1) Seq(PrototypePair(WizardUtils.toVariableName(name.head), PrototypeData.Double, mapping = Some(name.head)))
+      if (name.size == 1) Seq(PrototypeData(WizardUtils.toVariableName(name.head), PrototypeData.Double, mapping = Some(name.head)))
       else Seq()
 
-    def parseChooser(start: Int): PrototypePair =
+    def parseChooser(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
 
-    def parse0(lines: Seq[(String, Int)], args: Seq[PrototypePair], outputs: Seq[PrototypePair]): (Seq[PrototypePair], Seq[PrototypePair]) =
+    def parse0(lines: Seq[(String, Int)], args: Seq[PrototypeData], outputs: Seq[PrototypeData]): (Seq[PrototypeData], Seq[PrototypeData]) =
       if lines.isEmpty
-      then (PrototypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
+      then (PrototypeData("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
       else
         val (line, index) = lines.head
         val tail = lines.tail
