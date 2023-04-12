@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.wizard.python
+package org.openmole.gui.plugin.wizard.scilab
 
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext
@@ -33,33 +33,36 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 
 object TopLevelExports {
-  @JSExportTopLevel("wizard_python")
-  val python = js.Object {
-    new org.openmole.gui.plugin.wizard.python.PythonWizardFactory
+  @JSExportTopLevel("wizard_scilab")
+  val scilab = js.Object {
+    new org.openmole.gui.plugin.wizard.scilab.ScilabWizardFactory
   }
 }
 
-class PythonWizardFactory extends WizardPluginFactory:
+class ScilabWizardFactory extends WizardPluginFactory:
   override def editable: Seq[FileContentType] =
-    Seq(ReadableFileType(Seq("py"), text = true))
+    Seq(ReadableFileType(Seq("sce", "sci"), text = true))
 
   override def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AcceptedModel]] = Future.successful {
     WizardUtils.findFileWithExtensions(
       uploaded,
-      "py" -> FindLevel.SingleFile,
-      "py" -> FindLevel.Directory,
-      "py" -> FindLevel.MultipleFile
+      "sce" -> FindLevel.SingleFile,
+      "sce" -> FindLevel.Directory,
+      "sce" -> FindLevel.MultipleFile,
+      "sci" -> FindLevel.SingleFile,
+      "sci" -> FindLevel.Directory,
+      "sci" -> FindLevel.MultipleFile
     )
   }
 
   override def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
-      case AcceptedModel("py" , _, f :: _) => Future.successful(ModelMetadata(command = Some(s"""exec(open("${f._1.name}").read())""")))
+      case AcceptedModel("sce" | "sci", _, f :: _) => Future.successful(ModelMetadata(command = Some(s"""exec("${f._1.name}")""")))
       case _ => WizardUtils.unknownError(accepted, name)
 
   override def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel] =
     accepted match
-      case AcceptedModel("py", FindLevel.SingleFile, (file, _) :: _) =>
+      case AcceptedModel("sce" | "sci", FindLevel.SingleFile, (file, _) :: _) =>
         val taskName = WizardUtils.toTaskName(file)
 
         def set = WizardUtils.mkSet(
@@ -74,14 +77,14 @@ class PythonWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  PythonTask(${modelMetadata.quotedCommandValue}) $set
+               |  ScilabTask(${modelMetadata.quotedCommandValue}) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))
           )
 
         Future.successful(script)
-      case AcceptedModel("py", FindLevel.MultipleFile, (file, _) :: _) =>
+      case AcceptedModel("sce" | "sci", FindLevel.MultipleFile, (file, _) :: _) =>
         val taskName = WizardUtils.toTaskName(file)
         val directory = WizardUtils.toDirectoryName(file)
 
@@ -102,7 +105,7 @@ class PythonWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  PythonTask($parameters) $set
+               |  ScilabTask($parameters) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file)),
@@ -110,7 +113,7 @@ class PythonWizardFactory extends WizardPluginFactory:
           )
 
         Future.successful(script)
-      case AcceptedModel("py", FindLevel.Directory, (file, _) :: _) =>
+      case AcceptedModel("sce" | "sci", FindLevel.Directory, (file, _) :: _) =>
         val taskName = WizardUtils.toTaskName(file)
 
         def set = WizardUtils.mkSet(
@@ -130,7 +133,7 @@ class PythonWizardFactory extends WizardPluginFactory:
                |
                |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  PythonTask($parameters) $set
+               |  ScilabTask($parameters) $set
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))
@@ -138,4 +141,4 @@ class PythonWizardFactory extends WizardPluginFactory:
         Future.successful(script)
       case _ => WizardUtils.unknownError(accepted, name)
 
-  def name: String = "Python"
+  def name: String = "Scilab"

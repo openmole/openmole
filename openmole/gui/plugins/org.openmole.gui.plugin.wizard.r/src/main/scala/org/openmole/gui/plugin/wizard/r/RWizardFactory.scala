@@ -127,7 +127,7 @@ class RWizardFactory extends WizardPluginFactory:
 
         def script =
           GeneratedModel(
-            s"""Future.successful(script)
+            s"""
                |${WizardUtils.preamble}
                |
                |${WizardUtils.mkVals(modelMetadata)}
