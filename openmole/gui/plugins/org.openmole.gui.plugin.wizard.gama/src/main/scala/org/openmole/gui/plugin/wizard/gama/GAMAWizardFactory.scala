@@ -104,4 +104,4 @@ class GAMAWizardFactory extends WizardPluginFactory:
         Future.successful(script)
       case _ => WizardUtils.unknownError(accepted, name)
 
-  def name: String = "R"
+  def name: String = "GAMA"

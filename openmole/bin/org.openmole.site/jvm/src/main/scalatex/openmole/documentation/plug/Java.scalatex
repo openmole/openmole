@@ -22,6 +22,7 @@ It takes the following arguments :
    @li{@code{libraries} Sequence of String, optional. The some libraries to use, the format in the one of scala-cli, for instance "com.github.pathikrit::better-files:3.9.2".}
    @li{@code{jvmOptions} Sequence of String, optional. The some options to pass to the JVM, for instance "-Xmx1G".}
    @li{@code{version} String, optional. The version of JVM to run.}
+   @li{@code{prepare} Sequence of strings, @b{optional} (default = empty). System commands to be executed just before to the execution of Java on the execution node.}
 
 @h3{Simple JavaTask}
 

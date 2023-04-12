@@ -25,6 +25,8 @@ It takes the following arguments :
    @li{@code{script} String or file, mandatory. The Scilab script to be executed.}
    @li{@code{install} Sequence of strings, optional (default = empty). The commands to be executed prior to the script execution (to install libraries on the system).}
    @li{@code{version} String, optional. The version of Scilab to run.}
+   @li{@code{prepare} Sequence of strings, @b{optional} (default = empty). System commands to be executed just before to the execution of Scilab on the execution node.}
+
 
 @h3{Simple ScilabTask}
 

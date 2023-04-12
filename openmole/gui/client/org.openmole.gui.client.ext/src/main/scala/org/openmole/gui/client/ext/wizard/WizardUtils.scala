@@ -138,7 +138,6 @@ object WizardUtils:
     val capital: String = s.split('-').reduce(_ + _.capitalize)
     capital.replace("?", "").replace(" ", "").replace("%", "percent")
 
-
   def unknownError(acceptedModel: AcceptedModel, name: String) = Future.failed(new UnknownError(s"Unable to handle ${acceptedModel} in wizard $name"))
 
 

@@ -2,21 +2,22 @@
 package org.openmole.plugin.task.julia
 
 import monocle.Focus
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.builder.*
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.plugin.task.container._
-import org.openmole.plugin.task.external._
-import org.openmole.plugin.tool.json._
+import org.openmole.plugin.task.container.*
+import org.openmole.plugin.task.external.*
+import org.openmole.plugin.tool.json.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.plugin.task.container
 
@@ -39,8 +40,8 @@ object JuliaTask {
     arguments:              OptionalArgument[String] = None,
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
+    prepare:                Seq[String]                        = Seq.empty,
     version:                String                             = "1.6.1",
-    workDirectory:          OptionalArgument[String]           = None,
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -50,21 +51,22 @@ object JuliaTask {
     containerSystem:        ContainerSystem                    = ContainerSystem.default,
     installContainerSystem: ContainerSystem                    = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) = {
 
-   new JuliaTask(
-      script = script,
-      arguments = arguments.option,
-      image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
-      config = InputOutputConfig(),
-      external = External(),
-      info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
+  new JuliaTask(
+    script = script,
+    arguments = arguments.option,
+    image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
+    prepare = prepare,
+    errorOnReturnValue = errorOnReturnValue,
+    returnValue = returnValue,
+    stdOut = stdOut,
+    stdErr = stdErr,
+    hostFiles = hostFiles,
+    environmentVariables = environmentVariables,
+    containerSystem = containerSystem,
+    config = InputOutputConfig(),
+    external = External(),
+    info = InfoConfig(),
+    mapped = MappedInputOutputConfig()
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   }
 }
@@ -73,6 +75,7 @@ case class JuliaTask(
   script:                 RunnableScript,
   image:                  InstalledImage,
   arguments:              Option[String],
+  prepare:                Seq[String],
   errorOnReturnValue:     Boolean,
   returnValue:            Option[Val[Int]],
   stdOut:                 Option[Val[String]],
@@ -108,7 +111,7 @@ case class JuliaTask(
 
     def inputMapping(dicoName: String): String =
       noFile(mapped.inputs).zipWithIndex.map {
-        case (m,i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
+        (m, i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
       }.mkString("\n")
 
     def outputMapping: String =
@@ -123,14 +126,18 @@ case class JuliaTask(
         def outputJSONName = "_outputs_.json"
 
         writeInputsJSON(jsonInputs)
-        scriptFile.content =
+
+        def scriptContent =
           s"""
              |import JSON
              |$inputArrayName = "/$inputJSONName" |> open |> JSON.parse
              |${inputMapping(inputArrayName)}
              |${RunnableScript.content(script)}
-             |write(open("/$outputJSONName","w"),JSON.json($outputMapping))
-      """.stripMargin
+             |write(open("/$outputJSONName","w"), JSON.json($outputMapping))
+            """.stripMargin
+
+        scriptFile.content = scriptContent
+
 
         val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
 
@@ -140,7 +147,7 @@ case class JuliaTask(
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"julia $scriptName" + argumentsValue,
+            command = prepare ++ Seq(s"julia /$scriptName $argumentsValue"),
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
@@ -157,12 +164,15 @@ case class JuliaTask(
               resources += (scriptFile, scriptName, true),
               resources += (jsonInputs, inputJSONName, true),
               outputFiles += (outputJSONName, outputFile),
-              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles += (m.v, m.name, true) },
-              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles += (m.name, m.v) }
+              Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+              Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
             )
 
+        val resultContext =
+          try containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
+          catch
+            case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
 
-        val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
         resultContext ++ readOutputJSON(resultContext(outputFile))
       }
     }

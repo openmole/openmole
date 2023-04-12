@@ -33,6 +33,7 @@ object ScilabTask {
   def apply(
     script:                 RunnableScript,
     install:                Seq[String]                   = Seq.empty,
+    prepare:                Seq[String]                   = Seq.empty,
     version:                String                        = "2023.0.0",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
@@ -46,6 +47,7 @@ object ScilabTask {
     ScilabTask(
       script = script,
       image = ContainerTask.install(installContainerSystem, scilabImage(version), install),
+      prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -172,6 +174,7 @@ case class ScilabTask(
   script:               RunnableScript,
   image:                InstalledImage,
   errorOnReturnValue:   Boolean,
+  prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
@@ -214,14 +217,14 @@ case class ScilabTask(
         """.stripMargin
 
       def launchCommand =
-        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f $scriptName"""
-        else s"""scilab-cli -nb -f $scriptName"""
+        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f /$scriptName"""
+        else s"""scilab-cli -nb -f /$scriptName"""
 
       def containerTask =
         ContainerTask(
           containerSystem = containerSystem,
           image = image,
-          command = launchCommand,
+          command = prepare ++ Seq(launchCommand),
           workDirectory = None,
           relativePathRoot = None,
           errorOnReturnValue = errorOnReturnValue,

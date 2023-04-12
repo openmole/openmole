@@ -18,27 +18,26 @@ package org.openmole.plugin.task.container
  */
 
 import java.io.PrintStream
-
 import monocle.Focus
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
+import org.openmole.core.workflow.builder.{DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig}
+import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.plugin.task.container.ContainerTask.{ Commands, downloadImage, extractImage, repositoryDirectory }
-import org.openmole.plugin.task.external.{ EnvironmentVariable, External, ExternalBuilder }
-import org.openmole.tool.cache.{ CacheKey, WithInstance }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.plugin.task.container.ContainerTask.{Commands, downloadImage, extractImage, repositoryDirectory}
+import org.openmole.plugin.task.external.{EnvironmentVariable, External, ExternalBuilder}
+import org.openmole.tool.cache.{CacheKey, WithInstance}
 import org.openmole.tool.hash.hashString
-import org.openmole.tool.lock._
-import org.openmole.tool.outputredirection._
-import org.openmole.tool.stream._
+import org.openmole.tool.lock.*
+import org.openmole.tool.outputredirection.*
+import org.openmole.tool.stream.*
 
 object ContainerTask {
 
@@ -332,7 +331,7 @@ case class ContainerTask(
              $log
              |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
 
-        throw new UserBadDataError(error)
+        throw new InternalProcessingError(error)
       }
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName

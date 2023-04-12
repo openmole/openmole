@@ -47,6 +47,7 @@ object JavaTask:
     jars: Seq[File] = Seq.empty,
     libraries: Seq[String] = Seq.empty,
     install: Seq[String] = Seq.empty,
+    prepare: Seq[String] = Seq.empty,
     hostFiles: Seq[HostFile] = Vector.empty,
     environmentVariables: Seq[EnvironmentVariable] = Vector.empty,
     errorOnReturnValue: Boolean = true,
@@ -71,6 +72,7 @@ object JavaTask:
       libraries = libraries,
       jvmOptions = jvmOptions,
       fewerThreads = fewerThreads,
+      prepare = prepare,
       version = version,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -94,6 +96,7 @@ case class JavaTask(
   jvmOptions: Seq[String],
   fewerThreads: Boolean,
   version: String,
+  prepare: Seq[String],
   errorOnReturnValue: Boolean,
   returnValue: Option[Val[Int]],
   stdOut: Option[Val[String]],
@@ -152,7 +155,7 @@ case class JavaTask(
              |
              |val ${inputArrayName} =
              |  import java.io.File
-             |  __serializer__.fromXML(new File("$inputDataName")).asInstanceOf[Array[Any]]
+             |  __serializer__.fromXML(new File("/$inputDataName")).asInstanceOf[Array[Any]]
              |
              |${inputMapping(inputArrayName)}
              |
@@ -162,7 +165,7 @@ case class JavaTask(
              |  import java.io.*
              |  import java.nio.file.*
              |  val mapping = ${outputMapping}
-             |  val stream = Files.newOutputStream(new File("$outputDataName").toPath)
+             |  val stream = Files.newOutputStream(new File("/$outputDataName").toPath)
              |  try __serializer__.toXML(mapping, stream)
              |  finally stream.close()
              |}
@@ -173,14 +176,14 @@ case class JavaTask(
 
         def jarParameter =
           if jarResources.nonEmpty
-          then s"""--jars ${jarResources.map((_, n) => s"\"$n\"").mkString(";")}"""
+          then s"""--jars ${jarResources.map((_, n) => s"\"/$n\"").mkString(";")}"""
           else ""
 
         def containerTask =
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = Seq(JavaTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
+            command = prepare ++ Seq(JavaTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
