@@ -29,7 +29,9 @@ OpenMOLE is installed and works out of the box!
 
 @linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn, btn_danger))
 
+@br
 
+The version @i(org.openmole.core.buildinfo.version.value), named @i(s"${org.openmole.core.buildinfo.version.name}"), has been released on @i(org.openmole.core.buildinfo.version.generationDate).
 
 @h2{Run OpenMOLE}
 
