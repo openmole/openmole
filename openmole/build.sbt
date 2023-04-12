@@ -857,6 +857,7 @@ def guiPlugins = Seq(
   rWizardPlugin,
   javaWizardPlugin,
   juliaWizardPlugin,
+  pythonWizardPlugin,
   containerWizardPlugin,
   evolutionAnalysisPlugin
   // Obsolete
@@ -905,6 +906,13 @@ lazy val gamaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.w
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val juliaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.julia", imports = guiStrictImports) settings(
+  guiPluginSettings,
+  scalaJSSettings,
+  libraryDependencies += Libraries.equinoxOSGi
+) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
+
+
+lazy val pythonWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.python", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.equinoxOSGi
