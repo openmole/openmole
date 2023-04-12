@@ -23,16 +23,18 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
+
+import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
+import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
+import com.thoughtworks.xstream.io.json._
+import com.thoughtworks.xstream.mapper.Mapper
+import com.thoughtworks.xstream.security._
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
-import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
-import com.thoughtworks.xstream.io.json._
-import com.thoughtworks.xstream.mapper.Mapper
-import com.thoughtworks.xstream.security._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger

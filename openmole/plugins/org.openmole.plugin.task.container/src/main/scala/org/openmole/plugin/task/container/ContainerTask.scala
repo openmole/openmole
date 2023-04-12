@@ -18,27 +18,26 @@ package org.openmole.plugin.task.container
  */
 
 import java.io.PrintStream
-
 import monocle.Focus
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
-import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
+import org.openmole.core.workflow.builder.{DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig}
+import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.plugin.task.container.ContainerTask.{ Commands, downloadImage, extractImage, repositoryDirectory }
-import org.openmole.plugin.task.external.{ EnvironmentVariable, External, ExternalBuilder }
-import org.openmole.tool.cache.{ CacheKey, WithInstance }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.plugin.task.container.ContainerTask.{Commands, downloadImage, extractImage, repositoryDirectory}
+import org.openmole.plugin.task.external.{EnvironmentVariable, External, ExternalBuilder}
+import org.openmole.tool.cache.{CacheKey, WithInstance}
 import org.openmole.tool.hash.hashString
-import org.openmole.tool.lock._
-import org.openmole.tool.outputredirection._
-import org.openmole.tool.stream._
+import org.openmole.tool.lock.*
+import org.openmole.tool.outputredirection.*
+import org.openmole.tool.stream.*
 
 object ContainerTask {
 
@@ -147,7 +146,7 @@ object ContainerTask {
     containerPoolKey:       CacheKey[WithInstance[_root_.container.FlatImage]] = CacheKey())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, tmpDirectory: TmpDirectory, networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, outputRedirection: OutputRedirection, serializerService: SerializerService, fileService: FileService) = {
     new ContainerTask(
       containerSystem,
-      prepare(installContainerSystem, image, install),
+      ContainerTask.install(installContainerSystem, image, install, clearCache = clearCache),
       command,
       workDirectory = workDirectory.option,
       relativePathRoot = relativePathRoot,
@@ -166,7 +165,7 @@ object ContainerTask {
     )
   }
 
-  def prepare(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = {
+  def install(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = {
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
@@ -219,7 +218,7 @@ object ContainerTask {
         }
     }
 
-  def newCacheKey = CacheKey[WithInstance[PreparedImage]]()
+  def newCacheKey = CacheKey[WithInstance[InstalledImage]]()
 
   type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
@@ -231,7 +230,7 @@ import ContainerTask._
 
 case class ContainerTask(
   containerSystem:      ContainerSystem,
-  image:                PreparedImage,
+  image:                InstalledImage,
   command:              Commands,
   workDirectory:        Option[String],
   relativePathRoot:     Option[String],
@@ -245,7 +244,7 @@ case class ContainerTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  containerPoolKey:     CacheKey[WithInstance[PreparedImage]]) extends Task with ValidateTask { self ⇒
+  containerPoolKey:     CacheKey[WithInstance[InstalledImage]]) extends Task with ValidateTask { self ⇒
 
   def validate = validateContainer(command.value, environmentVariables, external)
 
@@ -329,10 +328,10 @@ case class ContainerTask(
         val error =
           s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
              |The last lines of the standard output were:
-             |$log
+             $log
              |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
 
-        throw new UserBadDataError(error)
+        throw new InternalProcessingError(error)
       }
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName

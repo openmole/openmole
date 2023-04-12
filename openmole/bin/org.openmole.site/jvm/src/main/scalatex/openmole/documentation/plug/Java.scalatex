@@ -1,8 +1,48 @@
 @import org.openmole.site.tools._
 @import org.openmole.site._
 @import DocumentationPages._
+@import org.openmole.site.content.Native._
 
 
+@h2("Use a JavaTask")
+
+@h3{Preliminary remarks}
+
+@preliminary("JavaTask")
+
+
+@h3{Arguments of the JavaTask}
+
+It takes the following arguments :
+
+@ul
+   @li{@code{script} String or file, mandatory. The Scilab script to be executed.}
+   @li{@code{install} Sequence of strings, optional (default = empty). The commands to be executed prior to the script execution (to install libraries on the system).}
+   @li{@code{jars} Sequence of File, optional. The some jars to add in the classpath of JVM.}
+   @li{@code{libraries} Sequence of String, optional. The some libraries to use, the format in the one of scala-cli, for instance "com.github.pathikrit::better-files:3.9.2".}
+   @li{@code{jvmOptions} Sequence of String, optional. The some options to pass to the JVM, for instance "-Xmx1G".}
+   @li{@code{version} String, optional. The version of JVM to run.}
+   @li{@code{prepare} Sequence of strings, @b{optional} (default = empty). System commands to be executed just before to the execution of Java on the execution node.}
+
+@h3{Simple JavaTask}
+
+Here is a workflow calling a function found in a jar file using a @code{JavaTask}:
+
+@br@br
+
+@openmole("""
+val name = Val[String]
+val output = Val[String]
+
+val hello = JavaTask("val output = hellocode.Hello(name)", jars = Seq(workDirectory / "hellocode_3-1.0.jar")) set (
+  inputs += name.mapped,
+  outputs += output.mapped)
+
+DirectSampling(
+  sampling = name in List("Richard", "Martin", "Benjamin"),
+  evaluation = hello
+) hook display
+""")
 
 @h2("Use a ScalaTask to plug Java code")
 

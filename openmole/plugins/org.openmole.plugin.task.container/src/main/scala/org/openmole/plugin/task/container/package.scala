@@ -137,7 +137,7 @@ package object container {
   case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
   case class Singularity(command: String = "singularity") extends ContainerSystem
 
-  type PreparedImage = _root_.container.FlatImage
+  type InstalledImage = _root_.container.FlatImage
 
   /**
    * Trait for either string scripts or script file runnable in tasks based on the container task

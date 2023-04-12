@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
@@ -40,33 +41,33 @@ object TopLevelExports:
 
 class NetlogoWizardFactory extends WizardPluginFactory:
 
-  def parse(content: String): ModelMetadata =
+  def parseContent(content: String): ModelMetadata =
     val lines: Array[String] = content.linesIterator.toArray
 
-    def parseSlider(start: Int): PrototypePair =
+    def parseSlider(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 9), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 9), Some(name))
 
-    def parseSwitch(start: Int): PrototypePair =
+    def parseSwitch(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Boolean, lines(start + 7), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, lines(start + 7), Some(name))
 
-    def parseInputBox(start: Int): PrototypePair =
+    def parseInputBox(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
 
-    def parseMonitor(start: Int): Seq[PrototypePair] =
+    def parseMonitor(start: Int): Seq[PrototypeData] =
       val name = lines(start + 6).split(' ')
-      if (name.size == 1) Seq(PrototypePair(WizardUtils.toVariableName(name.head), PrototypeData.Double, mapping = Some(name.head)))
+      if (name.size == 1) Seq(PrototypeData(WizardUtils.toVariableName(name.head), PrototypeData.Double, mapping = Some(name.head)))
       else Seq()
 
-    def parseChooser(start: Int): PrototypePair =
+    def parseChooser(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypePair(WizardUtils.toVariableName(name), PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
 
-    def parse0(lines: Seq[(String, Int)], args: Seq[PrototypePair], outputs: Seq[PrototypePair]): (Seq[PrototypePair], Seq[PrototypePair]) =
+    def parse0(lines: Seq[(String, Int)], args: Seq[PrototypeData], outputs: Seq[PrototypeData]): (Seq[PrototypeData], Seq[PrototypeData]) =
       if lines.isEmpty
-      then (PrototypePair("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
+      then (PrototypeData("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
       else
         val (line, index) = lines.head
         val tail = lines.tail
@@ -84,52 +85,73 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     ModelMetadata(
       inputs,
       outputs,
-      command = Some("setup ; go")
+      command = Some(
+        """setup
+          |go""".stripMargin)
     )
-
-
-  def findNLogoFile(uploaded: Seq[(RelativePath, SafePath)]) =
-    uploaded.filter(_._1.value.size == 1).find(_._1.name.endsWith(".nlogo")) orElse
-      WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo"))
 
   override def editable: Seq[FileContentType] =
     val NetLogo = ReadableFileType(Seq("nlogo", "nlogo3d", "nls"), text = true, highlight = Some("netlogo"))
     Seq(NetLogo)
 
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = findNLogoFile(uploaded).isDefined
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
-    val nlogo = findNLogoFile(uploaded).get
-    api.download(nlogo._2).map { (content, _) => parse(content) }
-
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    val nlogo = findNLogoFile(uploaded).get
-    val task = WizardUtils.toTaskName(nlogo._1)
-      //  val modelMetadata = parse(target)
-    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("outputs"))
-    val embeddWS = WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".nlogo")).isDefined
-
-    val content =
-      s"""
-        |${WizardUtils.preamble}
-        |
-        |${modelData.vals}
-        |val mySeed = Val[Int]
-        |
-        |val $task = NetLogo6Task(
-        |  workDirectory / "${nlogo._1.mkString}",
-        |  Seq("${modelMetadata.command.map { _.split(';').map(_.trim).toSeq.mkString("\", \"") }.getOrElse("") }"),
-        |  seed = mySeed,
-        |  embedWorkspace = $embeddWS) ${WizardUtils.mkSet(WizardUtils.expandWizardData(modelData), "mySeed := 42")}
-        |
-        |$task
-        |""".stripMargin
-
-    Future.successful(
-      GeneratedModel(
-        content,
-        Some(WizardUtils.toOMSName(nlogo._1))
-      )
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
+    WizardUtils.findFileWithExtensions(
+      uploaded,
+      "nlogo" -> FindLevel.SingleFile,
+      "nlogo" -> FindLevel.Directory,
+      "nlogo" -> FindLevel.MultipleFile
     )
+  }
+
+  def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
+    accepted match
+      case AcceptedModel("nlogo", _, f :: _) => api.download(f._2).map { (content, _) => parseContent(content) }
+      case _ => WizardUtils.unknownError(accepted, name)
+
+
+  def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    accepted match
+      case AcceptedModel("nlogo", level, (nlogo, _) :: _) =>
+        val task = WizardUtils.toTaskName(nlogo)
+        val (directory, file) =
+          level match
+            case FindLevel.MultipleFile =>
+              val d = WizardUtils.toDirectoryName(nlogo)
+              (Some(d), d :: nlogo)
+            case _ => (None, nlogo)
+
+        val embedWS =
+          level == FindLevel.Directory || level == FindLevel.MultipleFile
+
+        def params = WizardUtils.mkTaskParameters(
+          WizardUtils.inWorkDirectory(file),
+          WizardUtils.mkCommandString(modelMetadata.commandValue.split('\n')),
+          "seed = mySeed",
+          if embedWS then "embedWorkspace = true" else ""
+        )
+
+        val content =
+          s"""
+            |${WizardUtils.preamble}
+            |
+            |${WizardUtils.mkVals(modelMetadata)}
+            |val mySeed = Val[Int]
+            |
+            |val $task = NetLogo6Task(
+            |  $params) ${WizardUtils.mkSet(modelMetadata, "mySeed := 42")}
+            |
+            |$task
+            |""".stripMargin
+
+        Future.successful(
+          GeneratedModel(
+            content,
+            Some(WizardUtils.toOMSName(nlogo._1)),
+            directory
+          )
+        )
+      case _ => WizardUtils.unknownError(accepted, name)
+
 
   def name: String = "NetLogo"
 

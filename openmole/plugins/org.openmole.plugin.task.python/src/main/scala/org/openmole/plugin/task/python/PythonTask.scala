@@ -43,6 +43,7 @@ object PythonTask {
     version:                String                             = "3.11.2",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
+    prepare:                Seq[String]                        = Seq.empty,
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable] = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -57,7 +58,8 @@ object PythonTask {
     new PythonTask(
       script = script,
       arguments = arguments.option,
-      image = ContainerTask.prepare(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      image = ContainerTask.install(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -76,8 +78,9 @@ object PythonTask {
 
 case class PythonTask(
   script:                 RunnableScript,
-  image:                  PreparedImage,
+  image:                  InstalledImage,
   arguments:              Option[String],
+  prepare:                Seq[String],
   errorOnReturnValue:     Boolean,
   returnValue:            Option[Val[Int]],
   stdOut:                 Option[Val[String]],
@@ -147,7 +150,7 @@ case class PythonTask(
           ContainerTask(
             containerSystem = containerSystem,
             image = image,
-            command = s"python${major.toString} $scriptName" + argumentsValue,
+            command = prepare ++ Seq(s"python${major.toString} /$scriptName" + argumentsValue),
             workDirectory = None,
             relativePathRoot = None,
             errorOnReturnValue = errorOnReturnValue,
@@ -164,8 +167,8 @@ case class PythonTask(
               resources += (scriptFile, scriptName, true),
               resources += (jsonInputs, inputJSONName, true),
               outputFiles += (outputJSONName, outputFile),
-              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles.+=[ContainerTask] (m.v, m.name, true) },
-              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles.+=[ContainerTask] (m.name, m.v) }
+              Mapped.files(mapped.inputs).map { case m ⇒ inputFiles += (m.v, m.name, true) },
+              Mapped.files(mapped.outputs).map { case m ⇒ outputFiles += (m.name, m.v) }
             )
 
 

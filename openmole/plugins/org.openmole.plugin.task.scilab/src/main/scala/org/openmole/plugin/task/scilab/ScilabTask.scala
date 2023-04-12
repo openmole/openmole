@@ -33,6 +33,7 @@ object ScilabTask {
   def apply(
     script:                 RunnableScript,
     install:                Seq[String]                   = Seq.empty,
+    prepare:                Seq[String]                   = Seq.empty,
     version:                String                        = "2023.0.0",
     errorOnReturnValue:     Boolean                       = true,
     returnValue:            OptionalArgument[Val[Int]]    = None,
@@ -45,7 +46,8 @@ object ScilabTask {
 
     ScilabTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, scilabImage(version), install),
+      image = ContainerTask.install(installContainerSystem, scilabImage(version), install),
+      prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -170,8 +172,9 @@ object ScilabTask {
 
 case class ScilabTask(
   script:               RunnableScript,
-  image:                PreparedImage,
+  image:                InstalledImage,
   errorOnReturnValue:   Boolean,
+  prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
@@ -214,14 +217,14 @@ case class ScilabTask(
         """.stripMargin
 
       def launchCommand =
-        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f $scriptName"""
-        else s"""scilab-cli -nb -f $scriptName"""
+        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f /$scriptName"""
+        else s"""scilab-cli -nb -f /$scriptName"""
 
       def containerTask =
         ContainerTask(
           containerSystem = containerSystem,
           image = image,
-          command = launchCommand,
+          command = prepare ++ Seq(launchCommand),
           workDirectory = None,
           relativePathRoot = None,
           errorOnReturnValue = errorOnReturnValue,
@@ -236,7 +239,7 @@ case class ScilabTask(
           info = info,
           containerPoolKey = containerPoolKey) set (
           resources += (scriptFile, scriptName, true),
-          mapped.outputs.map { m ⇒ outputFiles.+=[ContainerTask](outputFileName(m.v), outputValName(m.v)) }
+          mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
         )
 
       val resultContext = containerTask.process(executionContext).from(context)

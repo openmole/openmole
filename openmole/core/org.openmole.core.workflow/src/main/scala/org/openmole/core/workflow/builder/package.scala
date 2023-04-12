@@ -28,17 +28,14 @@ import scalaz.Alpha.T
  * Part of the dsl for task properties (inputs, outputs, assignements)
  */
 
-object Setter {
-  def apply[O, T](f: O ⇒ T ⇒ T) = new Setter[O, T] {
-    def set(o: O)(t: T) = f(o)(t)
-  }
-}
+object Setter:
+  def apply[O, T](f: O ⇒ T ⇒ T) = new Setter[O, T]:
+    def set(o: O) = t => f(o)(t)
 
-trait Setter[O, T] {
-  def set(o: O)(t: T): T
-}
+trait Setter[O, T]:
+  def set(o: O): T => T
 
-object IO {
+object IO:
   implicit def valToIO[T](v: Val[T]): RawVal[T] = RawVal(v)
 
   def collectVals(xs: Iterable[IO]) =
@@ -49,7 +46,6 @@ object IO {
 
   def collectMapped(xs: Iterable[IO]) =
     xs.collect { case x: Mapped[_] ⇒ x }
-}
 
 /**
  * Wrapper for prototypes as input/output
@@ -62,7 +58,7 @@ sealed trait IO
  */
 case class RawVal[T](v: Val[T]) extends IO
 
-object Mapped {
+object Mapped:
   def files(mapped: Vector[Mapped[_]]) =
     mapped.flatMap {
       case Mapped(Val.caseFile(v), name) ⇒ Seq(Mapped[java.io.File](v, name))
@@ -74,21 +70,19 @@ object Mapped {
       case Mapped(Val.caseFile(v), _) ⇒ Seq[Mapped[_]]()
       case m                          ⇒ Seq(m)
     }
-}
 
 /**
  * Prototype mapped to a variable name
  * @param v
  * @param name
  */
-case class Mapped[T](v: Val[T], name: String) extends IO {
+case class Mapped[T](v: Val[T], name: String) extends IO:
   def toTuple = v -> name
-}
 
 /**
  * Operations on inputs
  */
-class Inputs {
+class Inputs:
   def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
     implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
   def +=[T: MappedInputBuilder: InputBuilder](mapped: IO*): T ⇒ T =
@@ -96,12 +90,11 @@ class Inputs {
 
   def ++=[T: InputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
   def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
-}
 
 /**
  * Operations on outputs
  */
-class Outputs {
+class Outputs:
   def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
     implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
 
@@ -110,9 +103,9 @@ class Outputs {
 
   def ++=[T: OutputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
   def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
-}
 
-class ExploredOutputs {
+
+class ExploredOutputs:
   def +=[T: OutputBuilder](ds: Val[_ <: Array[_]]*): T ⇒ T = (t: T) ⇒ {
     def outputs = implicitly[OutputBuilder[T]].outputs
     def add = ds.filter(d ⇒ !outputs.get(t).contains(d))
@@ -120,19 +113,16 @@ class ExploredOutputs {
   }
 
   def ++=[T: OutputBuilder](d: Iterable[Val[_ <: Array[_]]]*): T ⇒ T = +=[T](d.flatten: _*)
-}
 
-class Defaults {
+class Defaults:
   def +=[U: DefaultBuilder](d: Default[_]*): U ⇒ U =
     implicitly[DefaultBuilder[U]].defaults.modify(_.toSeq ++ d)
   def ++=[T: DefaultBuilder](d: Iterable[Default[_]]*): T ⇒ T =
     +=[T](d.flatten: _*)
-}
 
-class Name {
+class Name:
   def :=[T: NameBuilder](name: String): T ⇒ T =
     implicitly[NameBuilder[T]].name.set(Some(name))
-}
 
 /**
  * DSL for i/o in itself
@@ -155,6 +145,7 @@ trait BuilderPackage {
   }
 
   implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]): S => S = implicitly[Setter[O, S]].set(o)(_)
+  implicit def seqOfSetterToFunction[O, S](o: Seq[O])(implicit setter: Setter[O, S]): S => S = Function.chain(o.map(o => implicitly[Setter[O, S]].set(o)(_)))
 
   implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
     Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1, v.equal._2)) }
@@ -202,10 +193,9 @@ trait BuilderPackage {
 
   final lazy val name = new Name
 
-  implicit class SetBuilder[T](t: T) {
+  implicit class SetBuilder[T](t: T):
     def set(ops: (T ⇒ T)*): T =
       ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
-  }
 
   /**
    * Decorate a prototype with value assignements

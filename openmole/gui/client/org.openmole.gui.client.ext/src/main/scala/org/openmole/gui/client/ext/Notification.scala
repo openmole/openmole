@@ -1,6 +1,7 @@
 package org.openmole.gui.client.ext
 
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.data.ErrorData
 
 /*
  * Copyright (C) 2023 Romain Reuillon
@@ -23,4 +24,5 @@ enum NotificationLevel:
   case Info, Error
 
 trait NotificationService:
+  def notifyError(message: String, e: Throwable, level: NotificationLevel = NotificationLevel.Error) = notify(level, message, org.openmole.gui.client.ext.Utils.errorTextArea(ErrorData.toStackTrace(e)))
   def notify(level: NotificationLevel, title: String, body: HtmlElement = div()): Unit

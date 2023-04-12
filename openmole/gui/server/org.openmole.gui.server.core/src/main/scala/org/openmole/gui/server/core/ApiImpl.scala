@@ -208,7 +208,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       import services.*
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
-
+      toFile.getParentFile.mkdirs()
       fromFile.move(toFile)
     }
 

@@ -27,7 +27,9 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
 import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
@@ -39,82 +41,128 @@ object TopLevelExports:
   }
 
 class ContainerWizardFactory extends WizardPluginFactory:
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    if uploaded.size == 1
-    then
-      val name = uploaded.head._1.name
-      name.endsWith(".tar") || name.endsWith(".tgz") || name.endsWith(".tar.gz") || name.endsWith(".sh")
-    else
-      if WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".sh")).isDefined
-      then true
-      else false
 
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] = Future(ModelMetadata()) //PluginFetch.futureError(_.parse(safePath).future)
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    val modelData = WizardUtils.wizardModelData(modelMetadata.inputs, modelMetadata.outputs, Some("inputs"), Some("ouputs"))
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
+    WizardUtils.findFileWithExtensions(
+      uploaded,
+      "tar" -> FindLevel.SingleFile,
+      "tgz" -> FindLevel.SingleFile,
+      "tar.gz" -> FindLevel.SingleFile,
+      "sh" -> FindLevel.SingleFile,
+      "sh" -> FindLevel.Directory,
+      "sh" -> FindLevel.MultipleFile,
+    )
+  }
 
-    WizardUtils.singleFolderContaining(uploaded, _._1.name.endsWith(".sh")) match
-      case Some(s) =>
-        val taskName = WizardUtils.toTaskName(s._1)
+  def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
+    accepted match
+      case AcceptedModel("tar" | "tgz" | "tar.gz", _, _) => Future.successful(ModelMetadata(command = Some("echo Viva OpenMOLE")))
+      case AcceptedModel("sh", _, f :: _) => Future.successful(ModelMetadata(command = Some(s"bash ${f._1.name}")))
+      case _ => WizardUtils.unknownError(accepted, name)
+
+  def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    def installBash = WizardUtils.mkCommandString(Seq("apt update", "apt install bash", "apt clean"))
+
+    accepted match
+      case AcceptedModel("sh", FindLevel.SingleFile, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
 
         def set = WizardUtils.mkSet(
-          s"resources += (workDirectory / \"${s._1.parent.mkString}\")",
-          WizardUtils.expandWizardData(modelData)
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(s)})"
         )
 
-        def script =
+        def cmd =
+          val v = modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+          if v.size == 1 then "\"v\"" else WizardUtils.mkCommandString(v)
+
+        val gm =
           GeneratedModel(
             s"""
                |${WizardUtils.preamble}
                |
-               |${modelData.vals}
+               |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${s._1.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask("debian:stable-slim", $cmd, install = $installBash) $set
                |
                |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(s._1))
+            Some(WizardUtils.toOMSName(s))
           )
 
-        Future.successful(script)
-      case None =>
-        val file = uploaded.head._1
+        Future.successful(gm)
+      case AcceptedModel("sh", FindLevel.MultipleFile, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
+        val directory = WizardUtils.toDirectoryName(s)
+
+        def cmd = Seq(s"cd $directory") ++ modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(directory)})"
+        )
+
+        val gm =
+          GeneratedModel(
+            s"""
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  ContainerTask("debian:stable-slim", ${WizardUtils.mkCommandString(cmd)}, install = $installBash) $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(s)),
+            directory = Some(directory)
+          )
+
+        Future.successful(gm)
+      case AcceptedModel("sh", FindLevel.Directory, (s, _) :: _) =>
+        val taskName = WizardUtils.toTaskName(s)
+
+        def set = WizardUtils.mkSet(
+          modelMetadata,
+          s"resources += (${WizardUtils.inWorkDirectory(s.parent)})"
+        )
+
+        def cmd = Seq(s"cd ${s.parent.name}") ++ modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+
+        val gm =
+          GeneratedModel(
+            s"""
+               |${WizardUtils.preamble}
+               |
+               |${WizardUtils.mkVals(modelMetadata)}
+               |val $taskName =
+               |  ContainerTask("debian:stable-slim", $cmd, install = $installBash) $set
+               |
+               |$taskName""".stripMargin,
+            Some(WizardUtils.toOMSName(s))
+          )
+
+        Future.successful(gm)
+      case AcceptedModel("tar" | "tgz" | "tar.gz", FindLevel.SingleFile, f :: _) =>
+        val file = f._1
         val taskName = WizardUtils.toTaskName(file)
+
+        def cmd =
+          val v = modelMetadata.commandValue.split('\n').filter(_.trim.nonEmpty)
+          if v.size == 1 then "\"v\"" else WizardUtils.mkCommandString(v)
 
         def container =
           GeneratedModel(
             s"""
                |${WizardUtils.preamble}
                |
-               |${modelData.vals}
+               |${WizardUtils.mkVals(modelMetadata)}
                |val $taskName =
-               |  ContainerTask(workDirectory / "${file.mkString}", "${modelMetadata.command.getOrElse("echo Viva OpenMOLE")}") set (
-               |    ${WizardUtils.expandWizardData(modelData)}
-               |  )
-               |$taskName""".stripMargin,
-            Some(WizardUtils.toOMSName(file))
-          )
-
-        def script =
-          def set = WizardUtils.mkSet(
-            s"resources += (workDirectory / \"${file.mkString}\")",
-            WizardUtils.expandWizardData(modelData)
-          )
-
-          GeneratedModel(
-            s"""
-               |${WizardUtils.preamble}
-               |
-               |${modelData.vals}
-               |val $taskName =
-               |  ContainerTask("debian:stable-slim", ${modelMetadata.command.getOrElse(s"""\"bash '${file.mkString}'\"""")}, install = Seq("apt update", "apt install bash", "apt clean")) $set
+               |  ContainerTask(workDirectory / "${file.mkString}", "$cmd) ${WizardUtils.mkSet(modelMetadata)}
                |
                |$taskName""".stripMargin,
             Some(WizardUtils.toOMSName(file))
           )
 
-        if file.name.endsWith(".sh")
-        then Future.successful(script)
-        else Future.successful(container)
+        Future.successful(container)
+      case _ => WizardUtils.unknownError(accepted, name)
 
   def name: String = "Container"
 

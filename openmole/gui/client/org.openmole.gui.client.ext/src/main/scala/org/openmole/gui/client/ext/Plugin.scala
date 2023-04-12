@@ -34,7 +34,7 @@ trait AuthenticationPlugin extends GUIPlugin:
   def remove(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
   def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
-sealed trait GUIPluginFactory
+trait GUIPluginFactory
 
 trait AuthenticationPluginFactory extends GUIPluginFactory:
   type AuthType <: AuthenticationData
@@ -48,13 +48,6 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
 //  def factory: WizardPluginFactory
 //  def save(): Unit
 
-trait WizardPluginFactory extends GUIPluginFactory:
-  def name: String
-  def editable: Seq[FileContentType] = Seq()
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Boolean
-  def parse(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata]
-  def content(uploaded: Seq[(RelativePath, SafePath)], modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[GeneratedModel]
-
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
 
@@ -66,5 +59,5 @@ trait ErrorManager:
 
 case class GUIPlugins(
   authenticationFactories: Seq[AuthenticationPluginFactory],
-  wizardFactories: Seq[WizardPluginFactory],
+  wizardFactories: Seq[wizard.WizardPluginFactory],
   analysisPlugins: Map[String, MethodAnalysisPlugin])
