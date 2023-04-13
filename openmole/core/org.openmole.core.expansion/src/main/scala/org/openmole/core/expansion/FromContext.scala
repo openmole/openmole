@@ -41,9 +41,7 @@ trait ToFromContextLowPriorityGiven:
   given ToFromContext[String, Boolean] = FromContext.codeToFromContext[Boolean]
 
   given ToFromContext[File, String] = f ⇒ ExpandedString(f.getPath) copy (stringValue = Some(s"file:${f.getPath}"))
-  //given ToFromContext[String, String] = s ⇒ ExpandedString(s) copy(stringValue = Some(s))
   given ToFromContext[String, File] = s ⇒ ExpandedString(s).map(s ⇒ File(s)) copy (stringValue = Some(s"file:$s"))
-  //given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)) copy(stringValue = Some(s"file:${f.getPath}"))
   given ToFromContext[Int, Long] = i ⇒ FromContext.value(i.toLong) copy (stringValue = Some(i.toString))
   //given ToFromContext[Int, Int] = i ⇒ FromContext.value(i) copy(stringValue = Some(i.toString))
 
@@ -65,6 +63,7 @@ trait ToFromContextLowPriorityGiven:
     context(p).toString
   }
 object ToFromContext extends ToFromContextLowPriorityGiven:
+  given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)) copy (stringValue = Some(s"file:${f.getPath}"))
   given ToFromContext[String, String] = s => ExpandedString(s)
   given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
 
