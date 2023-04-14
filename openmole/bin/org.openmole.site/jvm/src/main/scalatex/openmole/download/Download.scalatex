@@ -17,12 +17,16 @@ Please note that the service is reset every 6 hours, so don't be surprised if yo
 
 @ul
   @li{@i{Java >= 11}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our @aa("FAQ", href := faq.file) to access your Java version information.}
+  @li{@i{Node.js}: to run on your own computer, OpenMOLE GUI requires @aa("Node.js", href := "https://nodejs.org").}
   @li{@i{Singularity}: some OpenMOLE tasks require @org.openmole.site.content.Native.singularity. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container.}
 
+@br
+
+@i{NB}: If you have docker installed on your computer, the most convient way to run OpenMOLE might be @a("to run OpenMOLE in docker", href := "#RuninDocker").
 
 @h3{Download}
 
-When Java is installed, you just need to download and extract the archive below, and you're done!
+When Java and Node.js are installed, you just need to download and extract the archive below, and you're done!
 OpenMOLE is installed and works out of the box!
 
 @br
