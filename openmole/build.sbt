@@ -207,6 +207,7 @@ def allCore = Seq(
   networkService,
   timeService,
   csv,
+  json,
   highlight,
   namespace,
   pluginRegistry)
@@ -261,6 +262,12 @@ lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports
 
 lazy val csv = OsgiProject(coreDir, "org.openmole.core.csv", imports = Seq("*")) dependsOn (context) settings (coreSettings: _*) settings (
   libraryDependencies += Libraries.opencsv)
+
+
+lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*")) dependsOn(exception, context, serializer) settings (toolsSettings: _*) settings (
+  libraryDependencies += Libraries.json4s,
+  libraryDependencies += Libraries.circe
+)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang) dependsOn
@@ -390,7 +397,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, pattern, json)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, pattern)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -429,10 +436,6 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
 
-lazy val json = OsgiProject(pluginDir, "org.openmole.plugin.tool.json", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (
-  libraryDependencies += Libraries.json4s,
-  libraryDependencies += Libraries.circe
-)
 
 
 

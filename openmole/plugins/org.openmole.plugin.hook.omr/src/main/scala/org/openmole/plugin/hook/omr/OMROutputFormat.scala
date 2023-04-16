@@ -4,7 +4,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.core.project.*
-import org.openmole.plugin.tool.json.*
+import org.openmole.core.json.*
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.format.OutputFormat.*
 import io.circe.*

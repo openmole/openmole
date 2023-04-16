@@ -1,4 +1,4 @@
-package org.openmole.plugin.tool
+package org.openmole.core
 
 import com.fasterxml.jackson.core.json.JsonReadFeature
 import org.json4s.JsonAST.{JObject, JValue}
@@ -20,7 +20,7 @@ package object json:
   def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None): org.json4s.JValue = {
     import org.json4s.*
 
-    v match 
+    v match
       case v: Int          ⇒ JInt(v)
       case v: Long         ⇒ JLong(v)
       case v: String       ⇒ JString(v)
@@ -30,14 +30,14 @@ package object json:
       case v: Array[_]     ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
       case v: java.io.File ⇒ JString(v.getAbsolutePath)
       case v: Seq[_]       ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
-      case _               ⇒ 
+      case _               ⇒
         default match
-          case None => 
-            variable match 
+          case None =>
+            variable match
               case Some(variable) => throw new UserBadDataError(s"Value $v of type ${v.getClass} from variable $variable is not convertible to JSON")
               case None => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to JSON")
           case Some(serialize) => serialize(v)
-    
+
   }
 
   def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false, default: Option[org.json4s.JValue => Any] = None): Variable[_] = {
@@ -105,7 +105,7 @@ package object json:
             case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
             case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
             case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
-            case (jValue, c) ⇒ 
+            case (jValue, c) ⇒
               (jValue, default) match
                 case (value: JValue, Some(serializer)) => serializer(value)
                 case _ => throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
@@ -125,19 +125,19 @@ package object json:
       case (value: JValue, Val.caseString(v))  ⇒ Variable(v, jValueToString(value))
       case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
       case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, new java.io.File(jValueToString(value)))
-      case (value, v) => 
-        (value, v, default) match 
+      case (value, v) =>
+        (value, v, default) match
           case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value))
           case _                                    ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
     }
   }
 
   def anyToJValue(using s: org.openmole.core.serializer.SerializerService): Any => org.json4s.JValue =
-    a => 
+    a =>
       import org.json4s.jackson.JsonMethods.*
       parse(s.serializeToString(a, json = true))
 
   def jValueToAny(using s: org.openmole.core.serializer.SerializerService): JValue => Any =
-    value => 
+    value =>
       import org.json4s.jackson.JsonMethods.*
       s.deserializeFromString[Any](compact(render(value)))

@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.task.container.*
 import org.openmole.plugin.task.external.*
-import org.openmole.plugin.tool.json.*
+import org.openmole.core.json.*
 import monocle.*
 import org.openmole.core.context.ValType
 

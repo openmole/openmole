@@ -18,7 +18,7 @@ import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container.ContainerTask.install
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
-import org.openmole.plugin.tool.json._
+import org.openmole.core.json.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.core.dsl.extension._
 

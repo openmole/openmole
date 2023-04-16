@@ -38,7 +38,7 @@ import org.openmole.core.workspace.Workspace
 import org.openmole.tool.archive.TarInputStream
 
 import io.circe.generic.auto.*
-import org.openmole.plugin.tool.json.given
+import org.openmole.core.json.given
 
 object EGIAuthentication extends JavaLogger {
 

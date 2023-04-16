@@ -26,7 +26,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.tool.crypto.Cypher
 import io.circe.generic.auto.*
-import org.openmole.plugin.tool.json.given
+import org.openmole.core.json.given
 import scala.util.Try
 
 object SSHAuthentication {

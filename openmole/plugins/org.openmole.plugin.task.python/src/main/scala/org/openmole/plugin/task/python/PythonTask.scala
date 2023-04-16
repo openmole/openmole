@@ -16,7 +16,7 @@ import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
-import org.openmole.plugin.tool.json._
+import org.openmole.core.json.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.plugin.task.container
 

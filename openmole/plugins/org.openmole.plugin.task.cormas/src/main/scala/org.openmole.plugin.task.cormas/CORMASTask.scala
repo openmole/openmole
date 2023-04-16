@@ -96,7 +96,7 @@ case class CORMASTask(
     def inputJSONName = "input.json"
     def outputJSONName = "output.json"
 
-    import org.openmole.plugin.tool.json._
+    import org.openmole.core.json.*
 
     def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
     def inputDictionary = JObject(inputsFields: _*)
