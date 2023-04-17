@@ -271,7 +271,7 @@ lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*"
   libraryDependencies += Libraries.circe
 )
 
-lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(openmoleDSL, json, openmoleBuildInfo, openmoleProject, omrHookData, replication % "test") settings(
+lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(workflow, json, openmoleBuildInfo, openmoleProject, omrHookData, replication % "test") settings(
   libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
 
 lazy val omrHookData = OsgiProject(coreDir, "org.openmole.core.omr.data", imports = Seq("*")) settings(
