@@ -23,12 +23,10 @@ object OMROutputFormat:
   object Index:
     given Codec[Import] = Codec.AsObject.derivedConfigured
     given Codec[Script] = Codec.AsObject.derivedConfigured
-    given Codec[Time] = Codec.AsObject.derivedConfigured
     given Codec[Index] = Codec.AsObject.derivedConfigured
 
     case class Import(`import`: String, content: String)
     case class Script(content: String, `import`: Option[Seq[Import]])
-    case class Time(start: Long, save: Long)
 
     enum DataMode:
       case Append, Create
@@ -39,9 +37,10 @@ object OMROutputFormat:
     `execution-id`: String,
     `data-file`: Seq[String],
     `data-mode`: Index.DataMode,
+    `data-content`: DataContent,
     script: Option[Index.Script],
-    `content-data`: ContentData,
-    time: Index.Time)
+    `time-start`: Long,
+    `time-save`: Long)
 
   def methodField = "method"
   def methodPluginField = "plugin"
@@ -63,7 +62,7 @@ object OMROutputFormat:
         case WritableOutput.Store(file) ⇒
           val directory = file.from(context)
 
-          def methodFormat(method: MD, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
+          def methodFormat(method: MD, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
             import executionContext.timeService
 
             def methodJson =
@@ -93,12 +92,10 @@ object OMROutputFormat:
                 `execution-id` = executionContext.moleExecutionId,
                  `data-file` = (existingData ++ Seq(fileName)).distinct,
                 `data-mode` = mode,
+                `data-content` = dataContentValue,
                 script = script,
-                `content-data` = contentDataValue,
-                time = Index.Time(
-                  start = executionContext.moleLaunchTime,
-                  save = TimeService.currentTime
-                )
+                `time-start` = executionContext.moleLaunchTime,
+                `time-save` = TimeService.currentTime
               )
 
             result.asJson.
@@ -145,7 +142,7 @@ object OMROutputFormat:
               ps.print(compact(render(jsonContent)))
             }
 
-            def contentData = ContentData(content.section.map { s => ContentData.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
+            def contentData = DataContent(content.section.map { s => DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
 
             methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, contentData).noSpaces))
           }

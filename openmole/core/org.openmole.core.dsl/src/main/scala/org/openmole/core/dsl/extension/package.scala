@@ -132,6 +132,6 @@ package object extension:
   export org.openmole.core.highlight.HighLight
   
   export org.openmole.core.omr.{OMROutputFormat, OMROutputFormatDefault}
-  export org.openmole.core.omr.data.{ContentData, MethodMetaData, ValData, circeDefault}
+  export org.openmole.core.omr.data.{DataContent, MethodMetaData, ValData, circeDefault}
 
   export org.openmole.core.workflow.format.{CSVOutputFormat, CSVOutputFormatDefault}
