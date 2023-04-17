@@ -1,7 +1,7 @@
-package org.openmole.plugin.hook.omrdata
+package org.openmole.core.omr
 
 /*
- * Copyright (C) 2022 Romain Reuillon
+ * Copyright (C) 2023 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,14 +17,4 @@ package org.openmole.plugin.hook.omrdata
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import io.circe.*
-
-object ContentData:
-  given Codec[ContentData] = Codec.AsObject.derivedConfigured
-
-  object SectionData:
-    given Codec[SectionData] = Codec.AsObject.derivedConfigured
-
-  case class SectionData(name: Option[String], variables: Seq[ValData])
-
-case class ContentData(section: Seq[ContentData.SectionData]) 
+export org.openmole.core.omr.data.circeDefault

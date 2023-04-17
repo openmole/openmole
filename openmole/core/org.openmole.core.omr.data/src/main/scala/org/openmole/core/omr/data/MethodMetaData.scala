@@ -1,4 +1,4 @@
-package org.openmole.plugin.hook.omrdata
+package org.openmole.core.omr.data
 
 import io.circe.*
 

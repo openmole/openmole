@@ -1,7 +1,7 @@
-package org.openmole.plugin.hook.omrdata
+package org.openmole.core.omr.data
 
 /*
- * Copyright (C) 2023 Romain Reuillon
+ * Copyright (C) 2022 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,6 +17,20 @@ package org.openmole.plugin.hook.omrdata
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-implicit def omrCirceConfiguration: io.circe.derivation.Configuration =
-  io.circe.derivation.Configuration.default.withDiscriminator("type").withKebabCaseMemberNames
+import org.openmole.core.context.*
+import org.openmole.tool.types.TypeTool
+import io.circe.*
+
+object ValData:
+  given Codec[ValData] = Codec.AsObject.derivedConfigured
+
+  def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
+
+  def toVal(data: ValData) =
+    val (ns, n) = Val.parseName(data.name)
+    new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
+
+
+case class ValData(name: String, `type`: String)
+
 

@@ -6,12 +6,11 @@ import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.generic.semiauto.*
-import org.openmole.plugin.hook.omrdata.ValData
+import org.openmole.core.omr.data.ValData
 //import io.circe.generic.extras.Configuration
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.tools.io.Prettifier._
 import Genome.GenomeBound
-import org.openmole.plugin.hook.omr.*
 import org.openmole.tool.types.TypeTool
 
 object MetadataGeneration {

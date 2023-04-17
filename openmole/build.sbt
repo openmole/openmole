@@ -206,6 +206,8 @@ def allCore = Seq(
   code,
   networkService,
   timeService,
+  omrHook,
+  omrHookData,
   csv,
   json,
   highlight,
@@ -268,6 +270,17 @@ lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*"
   libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.circe
 )
+
+lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(openmoleDSL, json, openmoleBuildInfo, openmoleProject, omrHookData, replication % "test") settings(
+  libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
+
+lazy val omrHookData = OsgiProject(coreDir, "org.openmole.core.omr.data", imports = Seq("*")) settings(
+  toolsSettings,
+  scalaJSSettings,
+  OsgiKeys.bundleActivator := None,
+  libraryDependencies += Libraries.circe
+) dependsOn context enablePlugins (ScalaJSPlugin)
+
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang) dependsOn
@@ -508,7 +521,7 @@ lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.disp
 
 /* Hook */
 
-def allHook = Seq(displayHook, fileHook, modifierHook, omrHook)
+def allHook = Seq(displayHook, fileHook, modifierHook)
 
 lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings: _*)
 
@@ -518,15 +531,6 @@ lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", impo
 lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = Seq("*")) dependsOn (openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings: _*)
 
-lazy val omrHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.omr", imports = Seq("*")) dependsOn(openmoleDSL, json, openmoleBuildInfo, openmoleProject, omrHookData, replication % "test") settings(
-  libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
-
-lazy val omrHookData = OsgiProject(pluginDir, "org.openmole.plugin.hook.omrdata", imports = Seq("*")) settings(
-  toolsSettings,
-  scalaJSSettings,
-  OsgiKeys.bundleActivator := None,
-  libraryDependencies += Libraries.circe
-) dependsOn (openmoleDSL) enablePlugins (ScalaJSPlugin)
 
 /* Method */
 

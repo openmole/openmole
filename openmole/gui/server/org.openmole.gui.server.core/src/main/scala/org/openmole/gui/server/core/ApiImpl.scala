@@ -32,13 +32,13 @@ import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.networkservice.NetworkService
+import org.openmole.core.omr.OMROutputFormat
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.GUIServer.{ApplicationControl, lockFile}
 import org.openmole.gui.shared.data
-import org.openmole.plugin.hook.omr.OMROutputFormat
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
 

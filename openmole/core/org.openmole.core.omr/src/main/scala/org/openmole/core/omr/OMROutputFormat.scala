@@ -1,4 +1,4 @@
-package org.openmole.plugin.hook.omr
+package org.openmole.core.omr
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
@@ -10,8 +10,8 @@ import org.openmole.core.workflow.format.OutputFormat.*
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
+import org.openmole.core.omr.data.*
 import org.openmole.core.project.Imports.ImportedFile
-import org.openmole.plugin.hook.omrdata.*
 
 object OMROutputFormat {
 

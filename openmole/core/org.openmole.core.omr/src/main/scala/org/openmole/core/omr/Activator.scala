@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.omr
+package org.openmole.core.omr
 
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   override def stop(context: BundleContext): Unit =
     PluginRegistry.unregister(this)
@@ -36,4 +36,3 @@ class Activator extends BundleActivator {
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
-}

@@ -1,16 +1,15 @@
 package org.openmole.plugin.method.evolution.data
 
 import io.circe.derivation
-import org.openmole.plugin.hook.omrdata.*
+import org.openmole.core.omr.data.*
 
 case class SaveOption(
   frequency: Option[Long],
   last:      Boolean)
 
-object EvolutionMetadata {
+object EvolutionMetadata:
 
   import io.circe.*
-  import org.openmole.plugin.hook.omr.*
 
   given Codec[EvolutionMetadata] = Codec.AsObject.derivedConfigured
   given MethodMetaData[EvolutionMetadata] = MethodMetaData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
@@ -96,11 +95,10 @@ object EvolutionMetadata {
     generation:     Long,
     saveOption:     SaveOption) extends EvolutionMetadata
 
-}
 
 sealed trait EvolutionMetadata
 
-object AnalysisData {
+object AnalysisData:
 
   type GenomeData = String
   type ObjectiveData = String
@@ -108,18 +106,17 @@ object AnalysisData {
   sealed trait Convergence
   sealed trait Generation
 
-  object NSGA2 {
+  object NSGA2:
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
     case class Objective(objectives: Vector[Double])
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
-  }
 
-  object StochasticNSGA2 {
+  object StochasticNSGA2:
     case class Generation(generation: Long, genome: Vector[Vector[GenomeData]], objective: Vector[Objective]) extends AnalysisData.Generation
     case class Objective(objectives: Vector[Double], samples: Int)
     case class Convergence(nadir: Option[Vector[Double]], generations: Vector[GenerationConvergence]) extends AnalysisData.Convergence
     case class GenerationConvergence(generation: Long, hypervolume: Option[Double], minimums: Option[Vector[Double]])
-  }
 
-}
+
+

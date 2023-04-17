@@ -16,14 +16,15 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.omr.OMROutputFormat
 import org.openmole.core.workflow.composition.DSL.tasks
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
-import org.openmole.core.workflow.validation._
-import org.openmole.plugin.domain.collection._
-import org.scalatest._
-import org.openmole.plugin.domain.bounds._
+import org.openmole.core.workflow.validation.*
+import org.openmole.plugin.domain.collection.*
+import org.scalatest.*
+import org.openmole.plugin.domain.bounds.*
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
@@ -459,7 +460,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   }
 
   "OMRHook" should "work with NSGA" in {
-    import org.openmole.plugin.hook.omr._
 
     val a = Val[Double]
     val b = Val[Double]

@@ -19,14 +19,13 @@ package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.core.omr.data.*
 import org.openmole.core.workflow.format.CSVOutputFormat
 import org.openmole.plugin.sampling.combine.*
 import org.openmole.plugin.domain.distribution.*
 import org.openmole.plugin.domain.modifier.*
 import org.openmole.plugin.tool.pattern.*
 import org.openmole.plugin.hook.file.*
-import org.openmole.plugin.hook.omr.*
-import org.openmole.plugin.hook.omrdata.*
 
 object DirectSamplingMetadata:
   def method = "direct sampling"
