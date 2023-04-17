@@ -133,8 +133,8 @@ object OMROutputFormat:
 
             val fileName =
               if !format.append
-              then s"data/${executionContext.jobId}.ajson.gz"
-              else s"data.ajson.gz"
+              then s"data/${executionContext.jobId}.omd"
+              else s"data.omd"
 
             val dataFile = directory / fileName
 
