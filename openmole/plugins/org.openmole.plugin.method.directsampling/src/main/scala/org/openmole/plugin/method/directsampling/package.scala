@@ -19,8 +19,7 @@ package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.omr.data.*
-import org.openmole.core.workflow.format.CSVOutputFormat
+import org.openmole.core.workflow.format.*
 import org.openmole.plugin.sampling.combine.*
 import org.openmole.plugin.domain.distribution.*
 import org.openmole.plugin.domain.modifier.*
@@ -47,7 +46,8 @@ object DirectSamplingMetadata:
 
 sealed trait DirectSamplingMetadata
 
-given CSVOutputFormat.Default[DirectSamplingMetadata] = CSVOutputFormat.Default(append = true)
+given CSVOutputFormatDefault[DirectSamplingMetadata] = CSVOutputFormatDefault(append = true)
+given OMROutputFormatDefault[DirectSamplingMetadata] = OMROutputFormatDefault(append = true)
 
 type Aggregation = AggregateTask.AggregateVal[_, _]
 

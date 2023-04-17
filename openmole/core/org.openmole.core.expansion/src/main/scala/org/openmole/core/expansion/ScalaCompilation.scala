@@ -17,18 +17,18 @@
 package org.openmole.core.expansion
 
 import java.io.File
-
-import org.openmole.core.compiler._
-import org.openmole.core.context._
-import org.openmole.core.exception._
+import org.openmole.core.compiler.*
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.pluginmanager._
-import org.openmole.tool.types.TypeTool._
+import org.openmole.core.pluginmanager.*
+import org.openmole.core.script.CodePackage
+import org.openmole.tool.types.TypeTool.*
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.cache._
-import org.openmole.tool.random._
+import org.openmole.tool.cache.*
+import org.openmole.tool.random.*
 
-import scala.util._
+import scala.util.*
 
 trait CompilationClosure[+T] { //extends ScalaCompilation.ContextClosure[T] {
   def apply(context: Context, rng: RandomProvider, newFile: TmpDirectory): T
@@ -43,7 +43,7 @@ object ScalaCompilation {
    * OpenMOLE namespace to import
    * @return
    */
-  def openMOLEImports = Seq(s"${org.openmole.core.code.CodePackage.namespace}._")
+  def openMOLEImports = Seq(s"${CodePackage.namespace}._")
 
   /**
    * Prepend OpenMOLE imports to a script

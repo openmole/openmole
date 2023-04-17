@@ -17,25 +17,24 @@
  */
 package org.openmole.core.project
 
-import org.openmole.core.compiler._
-import org.openmole.core.pluginmanager._
-import org.openmole.core.project.Imports.{ SourceFile, Tree }
-import org.openmole.tool.file._
-import monocle.function.all._
-import monocle.std.all._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.compiler.*
+import org.openmole.core.pluginmanager.*
+import org.openmole.core.script.Imports.{SourceFile, Tree}
+import org.openmole.tool.file.*
+import monocle.function.all.*
+import monocle.std.all.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.project
-import org.openmole.core.services._
+import org.openmole.core.services.*
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.hash._
+import org.openmole.tool.hash.*
 import monocle.Focus
+import org.openmole.core.script.{Imports, ScriptSourceData}
 
 object Project {
 
-  def scriptExtension = ".oms"
-  def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
   def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
 
   def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"

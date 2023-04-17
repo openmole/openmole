@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core.project
+package org.openmole.core.script
+
+import org.openmole.tool.file.*
 
 import java.io.File
-import org.openmole.tool.file._
 
 object Imports {
 
@@ -104,14 +105,14 @@ object Imports {
     def matchingFileInStableIdentifier(imp: Import): Option[ImportedFile] =
       (1 to imp.stableIdentifier.size).map { i ⇒
         val part = imp.stableIdentifier.take(i)
-        val path = toFile(directory, part.dropRight(1) ++ part.lastOption.map(_ + Project.scriptExtension))
+        val path = toFile(directory, part.dropRight(1) ++ part.lastOption.map(_ + Script.scriptExtension))
         ImportedFile(imp, part, path)
-      }.find { importedFile ⇒ Project.isScript(importedFile.file) }
+      }.find { importedFile ⇒ Script.isScript(importedFile.file) }
 
     def matchingFileInSelector(imp: Import): Seq[ImportedFile] =
       imp match {
         case Import(stableIdentifier, Alias(from, _)) ⇒
-          val file = toFile(directory, stableIdentifier) / (from + Project.scriptExtension)
+          val file = toFile(directory, stableIdentifier) / (from + Script.scriptExtension)
           if (file.exists) Seq(ImportedFile(imp, stableIdentifier, file)) else Seq.empty
         case Import(stableIdentifier, WildCard) ⇒
           listScripts(toFile(directory, stableIdentifier)) map {
@@ -167,7 +168,7 @@ object Imports {
         }
     }
 
-  def listScripts(dir: File) = dir.listFilesSafe(Project.isScript _)
+  def listScripts(dir: File) = dir.listFilesSafe(Script.isScript _)
 
   object Tree {
     def empty = Tree(Seq.empty, Seq.empty)

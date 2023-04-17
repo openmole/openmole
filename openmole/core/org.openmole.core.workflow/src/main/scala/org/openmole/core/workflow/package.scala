@@ -19,10 +19,10 @@ package org.openmole.core
 
 package workflow {
 
-  import org.openmole.core.code.CodePackage
   import org.openmole.core.context.ContextPackage
   import org.openmole.core.expansion._
   import org.openmole.core.keyword.KeyWordPackage
+  import org.openmole.core.script.CodePackage
   import org.openmole.core.workflow.builder.BuilderPackage
   import org.openmole.core.workflow.mole.MolePackage
   import org.openmole.core.workflow.composition.CompositionPackage

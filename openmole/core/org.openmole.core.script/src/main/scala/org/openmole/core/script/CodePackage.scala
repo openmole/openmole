@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core.code
+package org.openmole.core.script
 
 import org.openmole.core.workspace._
 import org.openmole.tool.file.FilePackage

@@ -8,35 +8,14 @@ import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.hook.HookExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.format.CSVOutputFormat.Default
 
 object CSVOutputFormat:
 
-  object Default:
-    given default[T]: Default[T] = Default[T]()
-    def value[T](format: CSVOutputFormat, default: Default[T]) =
-      Default[T](
-        header = OptionalArgument(format.header.option.orElse(default.header)),
-        unrollArray = format.unrollArray.getOrElse(default.unrollArray),
-        arrayOnRow = format.arrayOnRow.getOrElse(default.arrayOnRow),
-        append = format.append.getOrElse(default.append),
-        postfix = OptionalArgument(format.postfix.option.orElse(default.postfix)),
-        directory = format.directory.getOrElse(default.directory)
-      )
-
-  case class Default[T](
-    header: OptionalArgument[FromContext[String]] = None,
-    unrollArray: Boolean = false,
-    arrayOnRow: Boolean = false,
-    append: Boolean = false,
-    postfix: OptionalArgument[FromContext[String]] = None,
-    directory: Boolean = false)
-
-  implicit def format[H](using default: Default[H]): OutputFormat[CSVOutputFormat, H] = new OutputFormat[CSVOutputFormat, H] {
+  implicit def format[H](using default: CSVOutputFormatDefault[H]): OutputFormat[CSVOutputFormat, H] = new OutputFormat[CSVOutputFormat, H] {
     override def write(executionContext: HookExecutionContext)(f: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: H): FromContext[Unit] = FromContext { p ⇒
       import p._
 
-      val format = Default.value(f, default)
+      val format = CSVOutputFormatDefault.value(f, default)
 
       def headerLine(variables: Seq[Variable[_]]) = format.header.map(_.from(context)) getOrElse csv.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)
 
@@ -91,3 +70,25 @@ case class CSVOutputFormat(
   append: OptionalArgument[Boolean] = None,
   postfix: OptionalArgument[FromContext[String]] = None,
   directory: OptionalArgument[Boolean] = None)
+
+
+object CSVOutputFormatDefault:
+  given default[T]: CSVOutputFormatDefault[T] = CSVOutputFormatDefault[T]()
+
+  def value[T](format: CSVOutputFormat, default: CSVOutputFormatDefault[T]) =
+    CSVOutputFormatDefault[T](
+      header = OptionalArgument(format.header.option.orElse(default.header)),
+      unrollArray = format.unrollArray.getOrElse(default.unrollArray),
+      arrayOnRow = format.arrayOnRow.getOrElse(default.arrayOnRow),
+      append = format.append.getOrElse(default.append),
+      postfix = OptionalArgument(format.postfix.option.orElse(default.postfix)),
+      directory = format.directory.getOrElse(default.directory)
+    )
+
+case class CSVOutputFormatDefault[T](
+  header: OptionalArgument[FromContext[String]] = None,
+  unrollArray: Boolean = false,
+  arrayOnRow: Boolean = false,
+  append: Boolean = false,
+  postfix: OptionalArgument[FromContext[String]] = None,
+  directory: Boolean = false)

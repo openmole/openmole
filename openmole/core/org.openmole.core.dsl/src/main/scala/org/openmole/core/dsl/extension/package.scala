@@ -65,8 +65,7 @@ package object extension:
   type Context = org.openmole.core.context.Context
   def Context = org.openmole.core.context.Context
 
-  type WritableOutput = org.openmole.core.workflow.format.WritableOutput
-  val WritableOutput = org.openmole.core.workflow.format.WritableOutput
+  export org.openmole.core.workflow.format.WritableOutput
 
   val OutputFormat = org.openmole.core.workflow.format.OutputFormat
   type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
@@ -129,6 +128,10 @@ package object extension:
   export org.openmole.tool.outputredirection.OutputRedirection
   export org.openmole.core.networkservice.NetworkService
   export org.openmole.core.serializer.SerializerService
-
-
+  
   export org.openmole.core.highlight.HighLight
+  
+  export org.openmole.core.omr.{OMROutputFormat, OMROutputFormatDefault}
+  export org.openmole.core.omr.data.{ContentData, MethodMetaData, ValData, circeDefault}
+
+  export org.openmole.core.workflow.format.{CSVOutputFormat, CSVOutputFormatDefault}

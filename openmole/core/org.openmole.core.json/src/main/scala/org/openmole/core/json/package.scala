@@ -14,8 +14,11 @@ package object json:
   given Encoder[java.io.File] = f => Json.fromString(f.getAbsolutePath)
   given Decoder[java.io.File] = j => j.as[String].map(new java.io.File(_))
 
-  def variablesToJValue(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None) =
+  def variablesToJObject(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None) =
     JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v), default = default) })
+
+  def variablesToJValues(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None): Seq[JValue] =
+    variables.toList.map { v ⇒ toJSONValue(v.value, Some(v), default = default) }
 
   def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None): org.json4s.JValue = {
     import org.json4s.*

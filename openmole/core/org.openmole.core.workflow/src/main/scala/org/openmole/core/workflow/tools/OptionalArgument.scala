@@ -8,6 +8,8 @@ object OptionalArgument:
   implicit def valueToOptionalArgument[T](v: T): OptionalArgument[T] = OptionalArgument(v)
   implicit def noneToOptionalArgument[T](n: None.type): OptionalArgument[T] = OptionalArgument.empty[T]
 
+  given [T]: Conversion[OptionalArgument[T], Option[T]] = o => o
+
   def empty[T]: OptionalArgument[T] = None
   def apply[T](t: T): OptionalArgument[T] = Some(t)
   def apply[T](t: Option[T] = None): OptionalArgument[T] = t

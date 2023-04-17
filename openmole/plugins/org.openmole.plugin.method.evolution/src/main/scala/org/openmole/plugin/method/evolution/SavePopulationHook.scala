@@ -19,12 +19,11 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.workflow.format.WritableOutput
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
+import org.openmole.plugin.method.evolution.data.*
 
 object SavePopulationHook:
 
-  def defaultFormat = CSVOutputFormat.Default[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
+  def defaultFormat = CSVOutputFormatDefault[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._

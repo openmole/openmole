@@ -3,10 +3,11 @@ package org.openmole.core.omr
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
-import org.openmole.core.project.Imports.*
+import org.openmole.core.script.Imports.*
 import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.format.*
-import org.openmole.core.project.*
+import org.openmole.core.workflow.tools.*
+import org.openmole.core.script.*
 import org.openmole.core.json.*
 import org.openmole.core.exception.*
 import org.openmole.core.expansion.*
@@ -15,8 +16,8 @@ import org.openmole.core.omr.data.*
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file.*
 
-object OMROutputFormat {
 
+object OMROutputFormat:
   def methodFileName = "index.omr"
 
   object Index:
@@ -29,11 +30,15 @@ object OMROutputFormat {
     case class Script(content: String, `import`: Option[Seq[Import]])
     case class Time(start: Long, save: Long)
 
+    enum DataMode:
+      case Append, Create
+
   case class Index(
     `format-version`: String,
     `openmole-version`: String,
     `execution-id`: String,
     `data-file`: Seq[String],
+    `data-mode`: Index.DataMode,
     script: Option[Index.Script],
     `content-data`: ContentData,
     time: Index.Time)
@@ -42,21 +47,20 @@ object OMROutputFormat {
   def methodPluginField = "plugin"
   def omrVersion = "0.2"
 
-  implicit def outputFormat[MD](using methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
-    override def write(executionContext: HookExecutionContext)(format: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
+  implicit def outputFormat[MD](using default: OMROutputFormatDefault[MD], methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+    override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p.*
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
       import executionContext.serializerService
 
       implicit val encoder = methodData.encoder
+      val format = OMROutputFormatDefault.value(f, default)
 
       output match {
         case WritableOutput.Display(_) ⇒
           implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
         case WritableOutput.Store(file) ⇒
-          def dataDirectory = "data"
-
           val directory = file.from(context)
 
           def methodFormat(method: MD, fileName: String, existingData: Seq[String], contentDataValue: ContentData) =
@@ -77,12 +81,18 @@ object OMROutputFormat {
                   Some(Index.Script(scriptContent, imports))
                 case _ ⇒ None
 
+            def mode =
+              if format.append
+              then Index.DataMode.Append
+              else Index.DataMode.Create
+
             val result =
               Index(
                 `format-version` = omrVersion,
                 `openmole-version` = org.openmole.core.buildinfo.version.value,
                 `execution-id` = executionContext.moleExecutionId,
                  `data-file` = (existingData ++ Seq(fileName)).distinct,
+                `data-mode` = mode,
                 script = script,
                 `content-data` = contentDataValue,
                 time = Index.Time(
@@ -121,13 +131,17 @@ object OMROutputFormat {
                 case Some((_, data)) => data
                 case None => Seq()
 
-            val fileName = s"$dataDirectory/${executionContext.jobId}.json.gz"
+            val fileName =
+              if !format.append
+              then s"data/${executionContext.jobId}.ajson.gz"
+              else s"data.ajson.gz"
 
             val dataFile = directory / fileName
 
-            def jsonContent = JArray(content.section.map { s => variablesToJValue(s.variables, default = Some(anyToJValue)) }.toList)
+            def jsonContent = JArray(content.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue)).toList) }.toList)
 
-            dataFile.withPrintStream(append = false, create = true, gz = true) { ps ⇒
+            dataFile.withPrintStream(append = format.append, create = true, gz = true) { ps ⇒
+              if format.append && existingData.nonEmpty then ps.print(",\n")
               ps.print(compact(render(jsonContent)))
             }
 
@@ -153,6 +167,24 @@ object OMROutputFormat {
       downField( methodPluginField).as[String].
       toTry.get
 
-}
 
-case class OMROutputFormat(script: Boolean = true, overwrite: Boolean = true)
+case class OMROutputFormat(
+  script: OptionalArgument[Boolean] = None,
+  overwrite: OptionalArgument[Boolean] = None,
+  append: OptionalArgument[Boolean] = None)
+
+
+object OMROutputFormatDefault:
+  given default[T]: OMROutputFormatDefault[T] = OMROutputFormatDefault[T]()
+
+  def value[T](format: OMROutputFormat, default: OMROutputFormatDefault[T]) =
+    OMROutputFormatDefault[T](
+      script = format.script.getOrElse(default.script),
+      overwrite = format.overwrite.getOrElse(default.overwrite),
+      append = format.append.getOrElse(default.append)
+    )
+
+case class OMROutputFormatDefault[T](
+  script: Boolean = true,
+  overwrite: Boolean = true,
+  append: Boolean = false)

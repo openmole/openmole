@@ -203,7 +203,7 @@ def allCore = Seq(
   threadProvider,
   services,
   location,
-  code,
+  script,
   networkService,
   timeService,
   omrHook,
@@ -224,7 +224,7 @@ lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = S
 
 lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.cats)
-  ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, openmoleCompiler, code, exception) settings (coreSettings: _*)
+  ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, openmoleCompiler, script, exception) settings (coreSettings: _*)
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.math, Libraries.cats, Libraries.equinoxOSGi),
@@ -243,7 +243,7 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   preference,
   expansion,
   threadProvider,
-  code,
+  script,
   networkService,
   keyword,
   csv,
@@ -258,7 +258,7 @@ lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", globa
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 
 lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
+  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry, omrHook) settings (coreSettings: _*) settings (defaultActivator)
 
 lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings (coreSettings: _*)
 
@@ -271,7 +271,7 @@ lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*"
   libraryDependencies += Libraries.circe
 )
 
-lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(workflow, json, openmoleBuildInfo, openmoleProject, omrHookData, replication % "test") settings(
+lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(workflow, json, openmoleBuildInfo, omrHookData, replication % "test") settings(
   libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
 
 lazy val omrHookData = OsgiProject(coreDir, "org.openmole.core.omr.data", imports = Seq("*")) settings(
@@ -288,7 +288,7 @@ lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, 
 
 lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings (coreSettings: _*)
 
-lazy val code = OsgiProject(coreDir, "org.openmole.core.code", imports = Seq("*")) dependsOn(tools, workspace) settings (coreSettings: _*)
+lazy val script = OsgiProject(coreDir, "org.openmole.core.script", imports = Seq("*")) dependsOn(tools, workspace) settings (coreSettings: _*)
 
 lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.xstream, Libraries.guava)) settings (coreSettings: _*) dependsOn(db, preference, workspace, openmoleCache)
