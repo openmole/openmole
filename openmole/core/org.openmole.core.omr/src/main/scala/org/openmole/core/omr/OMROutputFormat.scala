@@ -131,7 +131,7 @@ object OMROutputFormat:
             val fileName =
               if !format.append
               then s"data/${executionContext.jobId}.omd"
-              else s"data.omd"
+              else s"data/data.omd"
 
             val dataFile = directory / fileName
 
