@@ -3,6 +3,7 @@ package org.openmole.core.omr
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
+import org.json4s.JArray
 import org.openmole.core.script.Imports.*
 import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.format.*
@@ -13,8 +14,11 @@ import org.openmole.core.exception.*
 import org.openmole.core.expansion.*
 import org.openmole.core.workflow.format.OutputFormat.*
 import org.openmole.core.omr.data.*
+import org.openmole.core.omr.data.ValData.toVal
 import org.openmole.core.timeservice.TimeService
-import org.openmole.tool.file.*
+import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
+
+import java.io.SequenceInputStream
 
 
 object OMROutputFormat:
@@ -46,7 +50,7 @@ object OMROutputFormat:
   def methodPluginField = "plugin"
   def omrVersion = "0.2"
 
-  implicit def outputFormat[MD](using default: OMROutputFormatDefault[MD], methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD] {
+  implicit def outputFormat[MD](using default: OMROutputFormatDefault[MD], methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD]:
     override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
       import p.*
       import org.json4s.*
@@ -150,12 +154,51 @@ object OMROutputFormat:
     }
 
     override def validate(format: OMROutputFormat) = Validate.success
-  }
+
 
   def indexData(file: File): Index =
     val content = file.content(gz = true)
     decode[Index](content).toTry.get
 
+  def toVariables(file: File) =
+    val index = indexData(file)
+    val data: File = file.getParentFile / index.`data-file`.last
+
+    def readOMDContent(file: File): JArray =
+      val begin = new StringInputStream("[")
+      val end = new StringInputStream("]")
+      file.withGzippedInputStream { is =>
+        val s = inputStreamSequence(begin, is, end)
+        import org.json4s.jackson.JsonMethods.*
+        parse(s).asInstanceOf[JArray]
+      }
+
+    def sectionToVariables(section: DataContent.SectionData, a: JArray) =
+      (section.variables zip a.arr).map { (v, j) =>
+        jValueToVariable(j, toVal(v))
+      }
+
+    def sectionToAggregatedVariables(section: DataContent.SectionData, sectionIndex: Int, content: JArray) =
+      val size = section.variables.size
+
+      val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
+
+      def transposed =
+        (0 until size).map { i =>
+          JArray(sectionContent.map(_.asInstanceOf[JArray](i)))
+        }
+
+      (section.variables zip transposed).map { (v, j) =>
+        jValueToVariable(j, toVal(v).toArray)
+      }
+
+    val content = readOMDContent(data)
+
+    index.`data-mode` match
+      case OMROutputFormat.Index.DataMode.Create =>
+        (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
+      case OMROutputFormat.Index.DataMode.Append =>
+        (index.`data-content`.section zipWithIndex).map((s, i) => sectionToAggregatedVariables(s, i, content))
 
   def methodName(file: File): String =
     val j = parse(file.content(gz = true)).toTry.get

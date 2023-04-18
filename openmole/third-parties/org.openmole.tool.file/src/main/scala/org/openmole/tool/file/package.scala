@@ -48,7 +48,6 @@ package file {
     p ⇒
 
     type File = java.io.File
-
     def File(s: String): File = new File(s)
 
     def currentDirectory = new File(".")
