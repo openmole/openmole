@@ -32,7 +32,8 @@ import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.omr.OMROutputFormat
+import org.openmole.core.omr.*
+import org.openmole.core.workflow.format.OMROutputFormat
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*

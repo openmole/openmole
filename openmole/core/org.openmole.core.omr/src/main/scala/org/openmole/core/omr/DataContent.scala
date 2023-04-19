@@ -1,4 +1,4 @@
-package org.openmole.core.omr.data
+package org.openmole.core.omr
 
 /*
  * Copyright (C) 2022 Romain Reuillon
@@ -17,20 +17,14 @@ package org.openmole.core.omr.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.context.*
-import org.openmole.tool.types.TypeTool
 import io.circe.*
 
-object ValData:
-  given Codec[ValData] = Codec.AsObject.derivedConfigured
+object DataContent:
+  given Codec[DataContent] = Codec.AsObject.derivedConfigured
 
-  def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
+  object SectionData:
+    given Codec[SectionData] = Codec.AsObject.derivedConfigured
 
-  def toVal(data: ValData) =
-    val (ns, n) = Val.parseName(data.name)
-    new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
+  case class SectionData(name: Option[String], variables: Seq[ValData])
 
-
-case class ValData(name: String, `type`: String)
-
-
+case class DataContent(section: Seq[DataContent.SectionData]) 

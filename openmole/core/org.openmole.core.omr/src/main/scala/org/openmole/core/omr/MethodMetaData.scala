@@ -1,5 +1,7 @@
+package org.openmole.core.omr
+
 /*
- * Copyright (C) 2015 Romain Reuillon
+ * Copyright (C) 2023 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,24 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.omr
+import io.circe.*
 
-import org.openmole.core.highlight.HighLight
-import org.openmole.core.pluginregistry.PluginRegistry
-import org.osgi.framework.{ BundleActivator, BundleContext }
-
-class Activator extends BundleActivator:
-
-  override def stop(context: BundleContext): Unit =
-    PluginRegistry.unregister(this)
-
-  override def start(context: BundleContext): Unit = {
-    import org.openmole.core.highlight.HighLight._
-
-    val keyWords: Vector[HighLight] =
-      Vector(
-        OtherHighLight(objectName(OMROutputFormat))
-      )
-
-    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
-  }
+case class MethodMetaData[T](plugin: T => String)(using val encoder: Encoder[T])

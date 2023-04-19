@@ -130,8 +130,6 @@ package object extension:
   export org.openmole.core.serializer.SerializerService
   
   export org.openmole.core.highlight.HighLight
-  
-  export org.openmole.core.omr.{OMROutputFormat, OMROutputFormatDefault}
-  export org.openmole.core.omr.data.{DataContent, MethodMetaData, ValData, circeDefault}
 
-  export org.openmole.core.workflow.format.{CSVOutputFormat, CSVOutputFormatDefault}
+  export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
+  export org.openmole.core.workflow.format.{CSVOutputFormat, CSVOutputFormatDefault, OMROutputFormat, OMROutputFormatDefault}

@@ -206,8 +206,7 @@ def allCore = Seq(
   script,
   networkService,
   timeService,
-  omrHook,
-  omrHookData,
+  omr,
   csv,
   json,
   highlight,
@@ -247,6 +246,9 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   networkService,
   keyword,
   csv,
+  omr,
+  json,
+  openmoleBuildInfo,
   pluginRegistry,
   timeService) settings (coreSettings: _*)
 
@@ -258,29 +260,23 @@ lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", globa
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 
 lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry, omrHook) settings (coreSettings: _*) settings (defaultActivator)
+  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
 
 lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings (coreSettings: _*)
 
 lazy val csv = OsgiProject(coreDir, "org.openmole.core.csv", imports = Seq("*")) dependsOn (context) settings (coreSettings: _*) settings (
   libraryDependencies += Libraries.opencsv)
 
-
 lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*")) dependsOn(exception, context, serializer) settings (toolsSettings: _*) settings (
   libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.circe
 )
 
-lazy val omrHook = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) dependsOn(workflow, json, openmoleBuildInfo, omrHookData, replication % "test") settings(
-  libraryDependencies += Libraries.scalatest, libraryDependencies += Libraries.circe, pluginSettings, scalaJSSettings) enablePlugins(ScalaJSPlugin)
-
-lazy val omrHookData = OsgiProject(coreDir, "org.openmole.core.omr.data", imports = Seq("*")) settings(
-  toolsSettings,
+lazy val omr = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) settings(
   scalaJSSettings,
   OsgiKeys.bundleActivator := None,
   libraryDependencies += Libraries.circe
 ) dependsOn context enablePlugins (ScalaJSPlugin)
-
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang) dependsOn
@@ -549,12 +545,12 @@ lazy val evolutionData = OsgiProject(pluginDir, "org.openmole.plugin.method.evol
   scalaJSSettings,
   OsgiKeys.bundleActivator := None,
   libraryDependencies += Libraries.circe
-) enablePlugins (ScalaJSPlugin) dependsOn(omrHook, omrHookData)
+) enablePlugins (ScalaJSPlugin) dependsOn(omr)
 
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, boundsDomain % "test") settings (
   libraryDependencies += Libraries.mgo) settings (pluginSettings: _*)
 
-lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, omrHook, omrHookData) settings (pluginSettings: _*)
+lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling) settings (pluginSettings: _*)
 
 lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (pluginSettings: _*)
 
@@ -791,7 +787,6 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   openmoleProject,
   openmoleDSL,
   batch,
-  omrHook,
   openmoleStream,
   txtmark,
   openmoleCrypto,

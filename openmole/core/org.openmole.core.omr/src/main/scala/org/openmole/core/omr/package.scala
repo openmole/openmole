@@ -17,4 +17,5 @@ package org.openmole.core.omr
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export org.openmole.core.omr.data.circeDefault
+implicit val omrCirceDefault: io.circe.derivation.Configuration =
+ io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type")

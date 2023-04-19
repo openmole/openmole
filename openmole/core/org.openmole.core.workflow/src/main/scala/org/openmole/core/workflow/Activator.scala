@@ -3,7 +3,7 @@ package org.openmole.core.workflow
 import org.openmole.core.highlight.HighLight.*
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.openmole.core.preference.PreferenceLocation
-import org.openmole.core.workflow.format.CSVOutputFormat
+import org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat}
 import org.openmole.core.expansion.*
 import org.openmole.core.workflow.composition.*
 import org.osgi.framework.{BundleActivator, BundleContext}
@@ -52,6 +52,7 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
         OtherHighLight(objectName(CSVOutputFormat)),
+        OtherHighLight(objectName(OMROutputFormat)),
         OtherHighLight(objectName(ScalaCode))
       )
     }
