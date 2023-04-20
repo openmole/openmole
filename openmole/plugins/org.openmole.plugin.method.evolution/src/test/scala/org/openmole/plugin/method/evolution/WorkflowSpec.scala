@@ -17,7 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl.*
-import org.openmole.core.omr.OMROutputFormat
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.composition.DSL.tasks
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
