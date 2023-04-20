@@ -171,18 +171,6 @@ package file {
 
       def recursiveDelete: Unit = wrapError { DirUtils.delete(file) }
 
-      def isJar =
-        if file.getName.endsWith(".jar")
-        then
-          Try {
-            val zip = new ZipFile(file)
-            val hasManifestEntry =
-              try zip.getEntry("META-INF/MANIFEST.MF") != null
-              finally zip.close
-            hasManifestEntry
-          }.getOrElse(false)
-        else false
-
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
       def isBrokenSymbolicLink = Files.notExists(Files.readSymbolicLink(file))
