@@ -182,7 +182,7 @@ case class GAMATask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask {
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
@@ -293,71 +293,78 @@ case class GAMATask(
             filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
             sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]"""))
 
-        (mapped.outputs.isEmpty, frameRate.option) match {
-          case (true, _) => resultContext
-          case (false, None) =>
-            import xml._
+        try {
+          (mapped.outputs.isEmpty, frameRate.option) match
+            case (true, _) => resultContext
+            case (false, None) =>
+              import xml._
 
-            def toVariable(v: Val[_], value: String) =
-              v match {
-                case Val.caseInt(v) => Variable(v, value.toInt)
-                case Val.caseDouble(v) => Variable(v, value.toDouble)
-                case Val.caseString(v) => Variable(v, value)
-                case Val.caseBoolean(v) => Variable(v, value.toBoolean)
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
-              }
+              def toVariable(v: Val[_], value: String) =
+                v match
+                  case Val.caseInt(v) => Variable(v, value.toInt)
+                  case Val.caseDouble(v) => Variable(v, value.toDouble)
+                  case Val.caseString(v) => Variable(v, value)
+                  case Val.caseBoolean(v) => Variable(v, value.toBoolean)
+                  case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
 
-            val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
-            def outputValue(e: Elem) =
-              for {
-                a <- e.attribute("name").flatMap(_.headOption)
-                value <- outputs.get(a.text)
-              } yield toVariable(value, e.child.text)
+              val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
+              def outputValue(e: Elem) =
+                for
+                  a <- e.attribute("name").flatMap(_.headOption)
+                  value <- outputs.get(a.text)
+                yield toVariable(value, e.child.text)
 
-            def extractOutputs(n: Node) =
-              (n \ "Variable").flatMap {
-                case e: Elem => outputValue(e)
-                case _ => None
-              }
+              def extractOutputs(n: Node) =
+                (n \ "Variable").flatMap {
+                  case e: Elem => outputValue(e)
+                  case _ => None
+                }
 
-            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+              val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
-            resultContext ++ extractOutputs(simulationOutput.last)
-          case (false, Some(f)) =>
-            import xml._
+              resultContext ++ extractOutputs(simulationOutput.last)
+            case (false, Some(f)) =>
+              import xml._
 
-            def toVariable(v: Val[_], value: Array[String]) =
-              v match {
-                case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
-                case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
-                case Val.caseArrayString(v) => Variable(v, value)
-                case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
-                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
-              }
+              def toVariable(v: Val[_], value: Array[String]) =
+                v match {
+                  case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
+                  case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
+                  case Val.caseArrayString(v) => Variable(v, value)
+                  case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
+                  case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
+                }
 
-            def outputValue(e: Elem, name: String) =
-              for {
-                a <- e.attribute("name").flatMap(_.headOption)
-                if a.text == name
-              } yield e.child.text
-
-            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
-
-            resultContext ++ mapped.outputs.map { m =>
-              val values =
+              def outputValue(e: Elem, name: String) =
                 for {
-                  o <- simulationOutput
-                  v <- o \ "Variable"
-                } yield
-                  v match {
-                    case o: Elem => outputValue(o, m.name)
-                    case _ => None
-                  }
+                  a <- e.attribute("name").flatMap(_.headOption)
+                  if a.text == name
+                } yield e.child.text
 
-              toVariable(m.v, values.flatten.toArray)
-            }
-          }
-        }
+              val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+
+              resultContext ++
+                mapped.outputs.map { m =>
+                  val values =
+                    for
+                      o <- simulationOutput
+                      v <- o \ "Variable"
+                    yield
+                      v match
+                        case o: Elem => outputValue(o, m.name)
+                        case _ => None
+                  toVariable(m.v, values.flatten.toArray)
+                }
+        } catch
+          case t: Throwable =>
+            def parseOutputError(t: Throwable) =
+              InternalProcessingError(
+                s"""Error parsing the result file: ${gamaOutputFile.content}
+                   |Experiment file content was: ${inputFile.content}
+                   |GAMA was launched using the command: $launchCommand
+                   |""".stripMargin, t)
+            throw parseOutputError(t)
+      }
     }
   }
-}
+
