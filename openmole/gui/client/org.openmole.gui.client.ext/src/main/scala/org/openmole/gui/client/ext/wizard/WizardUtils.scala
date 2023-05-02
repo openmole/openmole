@@ -38,10 +38,11 @@ object WizardUtils:
     vals.mkString("\n")
 
   def mkTaskParameters(s: String*) =
-    s.filter(!_.trim.isEmpty).headOption match
+    val nonEmpty = s.filter(_.trim.nonEmpty)
+    nonEmpty.headOption match
       case None => ""
       case Some(h) =>
-        val all = Seq(h) ++ s.drop(1).map(s => s"    $s")
+        val all = Seq(h) ++ nonEmpty.drop(1).map(s => s"    $s")
         all.mkString(",\n")
 
   def mkSet(modelData: ModelMetadata, s: String*) =
@@ -102,7 +103,7 @@ object WizardUtils:
   def findFileWithExtensions(files: Seq[(RelativePath, SafePath)], extensions: (String, FindLevel)*): Seq[AcceptedModel] =
     extensions.flatMap { (ext, level) =>
       level match
-        case FindLevel.SingleFile => if files.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleFile, List(files.head))) else None
+        case FindLevel.SingleFile => if files.size == 1 && files.head._1.value.size == 1 && files.head._1.name.endsWith(s".$ext") then Some(AcceptedModel(ext, FindLevel.SingleFile, List(files.head))) else None
         case FindLevel.MultipleFile =>
           val f = files.filter(_._1.value.size == 1).find(_._1.name.endsWith(s".$ext")).toList
           if f.nonEmpty then Some(AcceptedModel(ext, FindLevel.MultipleFile, f)) else None
