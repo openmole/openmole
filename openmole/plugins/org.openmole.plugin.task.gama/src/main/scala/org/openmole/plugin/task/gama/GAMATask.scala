@@ -359,7 +359,8 @@ case class GAMATask(
           case t: Throwable =>
             def parseOutputError(t: Throwable) =
               InternalProcessingError(
-                s"""Error parsing the result file: ${gamaOutputFile.content}
+                s"""Error parsing the result file, it might be caused by an error during the execution of GAMA, you should look at the standard output.
+                   |Result file content was: ${gamaOutputFile.content}
                    |Experiment file content was: ${inputFile.content}
                    |GAMA was launched using the command: $launchCommand
                    |""".stripMargin, t)
