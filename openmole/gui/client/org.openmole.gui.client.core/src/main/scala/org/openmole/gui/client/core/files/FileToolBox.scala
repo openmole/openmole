@@ -12,7 +12,7 @@ import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.Utils
 import org.openmole.gui.shared.api.*
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState) {
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState):
 
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
@@ -170,53 +170,49 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       })
     )
 
-  def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+  def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     div(
       height := "80px",
-      child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map {
-        a ⇒
-          a match {
-            case (Some(ac), _) ⇒ ac
-            case (_, Some(ae)) ⇒ ae
-            case (None, None) ⇒
-              div(
-                fileActions,
-                iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
-                iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
-                iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
-                iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
-                  initSafePath.name
-                } ?", () ⇒ trash)))),
-                FileExtension(initSafePath.name) match {
-                  case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-                    iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
-                  case _ ⇒ emptyMod
-                },
-                FileExtension(initSafePath.name) match {
-                  case FileContentType.OpenMOLEScript ⇒
-                    iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
-                  case _ ⇒ emptyMod
-                },
+      child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map { a ⇒
+        a match
+          case (Some(ac), _) ⇒ ac
+          case (_, Some(ae)) ⇒ ae
+          case (None, None) ⇒
+            div(
+              fileActions,
+              iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
+              iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
+              iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+              iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
+                initSafePath.name
+              } ?", () ⇒ trash)))),
+              FileContentType(FileExtension(initSafePath.name)) match
+                case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
+                  iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
+                case _ ⇒
+                  emptyMod
+              ,
+              FileContentType(FileExtension(initSafePath.name)) match
+                case FileContentType.OpenMOLEScript ⇒
+                  iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
+                case _ ⇒ emptyMod
+              ,
 //                FileExtension(initSafePath.name) match {
 //                  //FIXME discover extensions from wizard plugins
 //                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
 //                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
 //                  case _ ⇒ emptyMod
 //                },
-                pluginState.isPlugin match {
-                  case true ⇒
-                    val (icon, text) = pluginState.isPlugged match {
-                      case true  ⇒ (OMTags.glyph_unpuzzle, "unplug")
-                      case false ⇒ (OMTags.glyph_puzzle, "plug")
-                    }
-                    iconAction(glyphItemize(icon), text, () ⇒ plugOrUnplug(initSafePath, pluginState))
-                  case false ⇒ emptyMod
-                }
-              )
-          }
+              pluginState.isPlugin match
+                case true ⇒
+                  val (icon, text) = pluginState.isPlugged match
+                    case true  ⇒ (OMTags.glyph_unpuzzle, "unplug")
+                    case false ⇒ (OMTags.glyph_puzzle, "plug")
+                  iconAction(glyphItemize(icon), text, () ⇒ plugOrUnplug(initSafePath, pluginState))
+                case false ⇒ emptyMod
+
+            )
+
       }
-
     )
-  }
 
-}
