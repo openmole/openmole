@@ -364,7 +364,6 @@ class TreeNodePanel { panel =>
     }
 
   case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
-
     val tnSafePath = treeNodeManager.directory.now() ++ tn.name
 
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
@@ -391,14 +390,17 @@ class TreeNodePanel { panel =>
       )
 
 
-    def toolBox(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    def toolBox(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
       val showExecution = () ⇒ ExecutionPanel.open
-      new FileToolBox(tnSafePath, showExecution, tn match {
-        case f: TreeNode.File ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
-        case _ ⇒ PluginState(false, false)
-      })
+      new FileToolBox(
+        tnSafePath,
+        showExecution,
+        tn match
+          case f: TreeNode.File ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
+          case _ ⇒ PluginState(false, false)
+      )
 
-    def render(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement = {
+    def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s ⇒ if (isSelected(s)) toolBoxColor else "" },
