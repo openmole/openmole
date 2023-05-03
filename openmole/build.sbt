@@ -829,6 +829,11 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
   }
 )
 
+lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "org.openmole.gui.server.stub") settings(
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s)
+)
+
+
 /* -------------------- GUI Shared ----------------------*/
 
 lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
