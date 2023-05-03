@@ -37,11 +37,10 @@ object OMROutputFormat:
         case DataMode.Create => Encoder.encodeString("create")
       }
 
-      given Decoder[DataMode] =
-        Decoder.decodeString.map {
-          case "append" => DataMode.Append
-          case "create" => DataMode.Create
-        }
+      given Decoder[DataMode] = Decoder.decodeString.map {
+        case "append" => DataMode.Append
+        case "create" => DataMode.Create
+      }
 
     enum DataMode:
       case Append, Create
