@@ -69,7 +69,6 @@ package object extension:
 
   val OutputFormat = org.openmole.core.workflow.format.OutputFormat
   type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
-  type OutputContent = OutputFormat.OutputContent
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
@@ -132,4 +131,5 @@ package object extension:
   export org.openmole.core.highlight.HighLight
 
   export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
-  export org.openmole.core.workflow.format.{CSVOutputFormat, CSVOutputFormatDefault, OMROutputFormat, OMROutputFormatDefault}
+  export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault}
+  export org.openmole.core.workflow.format.OutputFormat.OutputContent

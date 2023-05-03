@@ -26,7 +26,6 @@ package workflow {
   import org.openmole.core.workflow.builder.BuilderPackage
   import org.openmole.core.workflow.mole.MolePackage
   import org.openmole.core.workflow.composition.CompositionPackage
-  import org.openmole.core.workflow.format.FormatPackage
   import org.openmole.core.workflow.hook.HookPackage
   import org.openmole.core.workflow.sampling.SamplingPackage
   import org.openmole.core.workflow.task.TaskPackage
@@ -44,7 +43,6 @@ package workflow {
     with ContextPackage
     with ExpansionPackage
     with KeyWordPackage
-    with FormatPackage
     with HookPackage
 
   object dsl extends ExportedPackage

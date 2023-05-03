@@ -31,6 +31,18 @@ object OMROutputFormat:
     case class Import(`import`: String, content: String)
     case class Script(content: String, `import`: Option[Seq[Import]])
 
+    object DataMode:
+      given Encoder[DataMode] = Encoder.instance {
+        case DataMode.Append => Encoder.encodeString("append")
+        case DataMode.Create => Encoder.encodeString("create")
+      }
+
+      given Decoder[DataMode] =
+        Decoder.decodeString.map {
+          case "append" => DataMode.Append
+          case "create" => DataMode.Create
+        }
+
     enum DataMode:
       case Append, Create
 
