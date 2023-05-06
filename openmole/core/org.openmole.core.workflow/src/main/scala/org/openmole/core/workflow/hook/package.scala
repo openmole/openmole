@@ -7,4 +7,6 @@ trait HookPackage {
 }
 
 def Hook = FromContextHook
+def display(implicit outputRedirection: org.openmole.tool.outputredirection.OutputRedirection): org.openmole.core.workflow.format.WritableOutput.Display = org.openmole.core.workflow.format.WritableOutput.Display(outputRedirection.output)
+
 

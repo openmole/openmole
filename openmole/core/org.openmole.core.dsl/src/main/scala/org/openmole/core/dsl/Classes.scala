@@ -31,9 +31,7 @@ trait Classes:
   lazy val ExplorationTask = task.ExplorationTask
   lazy val MoleTask = task.MoleTask
 
-  type Display = org.openmole.core.workflow.format.WritableOutput.Display
-  def display(implicit outputRedirection: org.openmole.tool.outputredirection.OutputRedirection): Display = org.openmole.core.workflow.format.WritableOutput.Display(outputRedirection.output)
-
+  export org.openmole.core.workflow.hook.display
   export org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat}
 
 

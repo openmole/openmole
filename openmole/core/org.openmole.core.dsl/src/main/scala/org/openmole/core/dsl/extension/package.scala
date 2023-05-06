@@ -12,7 +12,8 @@ package object extension:
   def CacheKey = org.openmole.tool.cache.CacheKey
 
   export org.openmole.core.workflow.tools.ScalableValue
-  
+
+  export org.openmole.core.workflow.format.WritableOutput.Display
   type Hook = org.openmole.core.workflow.hook.FromContextHook
   def Hook = org.openmole.core.workflow.hook.Hook
   def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook
@@ -127,7 +128,7 @@ package object extension:
   export org.openmole.tool.outputredirection.OutputRedirection
   export org.openmole.core.networkservice.NetworkService
   export org.openmole.core.serializer.SerializerService
-  
+
   export org.openmole.core.highlight.HighLight
 
   export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
