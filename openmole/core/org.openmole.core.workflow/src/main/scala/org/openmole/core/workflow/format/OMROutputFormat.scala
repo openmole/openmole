@@ -144,10 +144,12 @@ object OMROutputFormat:
                 case Some((_, data)) => data
                 case None => Seq()
 
+            def executionPrefix = executionId.filter(_ != '-')
+
             val fileName =
               if !format.append
-              then s"omr-data/$executionId-${executionContext.jobId}.omd"
-              else s"omr-data/$executionId-data.omd"
+              then s"omr-data/$executionPrefix-${executionContext.jobId}.omd"
+              else s"omr-data/$executionPrefix.omd"
 
             val dataFile = directory / fileName
 
