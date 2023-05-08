@@ -21,7 +21,6 @@ import java.io.SequenceInputStream
 
 
 object OMROutputFormat:
-  def methodFileName = "index.omr"
 
   object Index:
     given Codec[Import] = Codec.AsObject.derivedConfigured
@@ -74,7 +73,12 @@ object OMROutputFormat:
         case WritableOutput.Display(_) ⇒
           implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
         case WritableOutput.Store(file) ⇒
-          val directory = file.from(context)
+          def executionId = executionContext.moleExecutionId
+
+          val (methodFile, directory) =
+            file.from(context) match
+              case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
+              case f => (f / "index.omr", f)
 
           def methodFormat(method: MD, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
             import executionContext.timeService
@@ -103,7 +107,7 @@ object OMROutputFormat:
               Index(
                 `format-version` = omrVersion,
                 `openmole-version` = org.openmole.core.buildinfo.version.value,
-                `execution-id` = executionContext.moleExecutionId,
+                `execution-id` = executionId,
                  `data-file` = (existingData ++ Seq(fileName)).distinct,
                 `data-mode` = mode,
                 `data-content` = dataContentValue,
@@ -132,8 +136,6 @@ object OMROutputFormat:
             for d <- data do (directory / d).delete()
 
           directory.withLockInDirectory {
-            val methodFile = directory / methodFileName
-
             val existingData =
               parseExistingData(methodFile) match
                 case Some((id, data)) if format.overwrite && id != executionContext.moleExecutionId =>
@@ -144,8 +146,8 @@ object OMROutputFormat:
 
             val fileName =
               if !format.append
-              then s"data/${executionContext.jobId}.omd"
-              else s"data/data.omd"
+              then s"omr-data/$executionId-${executionContext.jobId}.omd"
+              else s"omr-data/$executionId-data.omd"
 
             val dataFile = directory / fileName
 
