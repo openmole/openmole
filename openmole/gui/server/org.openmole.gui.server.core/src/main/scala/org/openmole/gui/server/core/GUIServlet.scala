@@ -111,9 +111,9 @@ class GUIServerServices(implicit
   val timeService:         TimeService
 )
 
-object GUIServlet {
+object GUIServlet:
 
-  def html(javascritMethod: String, cssFiles: Seq[String], extraHeader: String) = tags.html(
+  def html(javascriptMethod: String, cssFiles: Seq[String], extraHeader: String) = tags.html(
     tags.head(
       tags.link(tags.rel := "icon", tags.href := "img/favicon.svg", tags.`type` := "img/svg+xml"),
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
@@ -127,7 +127,7 @@ object GUIServlet {
     ),
     tags.body(
       tags.div(id := "openmole-content"),
-      tags.script(javascritMethod)
+      tags.script(javascriptMethod)
     )
   )
 
@@ -135,6 +135,5 @@ object GUIServlet {
   def cssFiles(webapp: File) = (webapp / "css").listFilesSafe.map { f => s"css/${f.getName}" }.sorted.toSeq
 
   val webpackLibrary = "openmole_library.openmole_library"
-  val USER_ID = "UserID"
 
-}
+

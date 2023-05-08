@@ -25,12 +25,32 @@ import scala.concurrent.duration.Duration
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@main def server =
+
+import org.openmole.gui.server.core.GUIServlet
+import java.io.File
+
+@main def server(args: String*) =
+  val webapp = args.head
+
   implicit val runtime = cats.effect.unsafe.IORuntime.global
+
+  def css = Seq("css/bootstrap.css", "css/extrafont.css", "css/style.css")
+  def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub.run();", css, "")
+
   def hello =
     import org.http4s.headers.{`Content-Type`}
     val routes: HttpRoutes[IO] = HttpRoutes.of {
-      case _ => Ok("Hello world").map(_.withContentType(`Content-Type`(MediaType.text.html)))
+      case request@GET -> Root / "js" / "snippets" / path =>
+        StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
+      case request@GET -> Root / "js" / path =>
+        StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
+      case request@GET -> Root / "css" / path =>
+        StaticFile.fromFile(new File(webapp, s"css/$path"), Some(request)).getOrElseF(NotFound())
+      case request@GET -> Root / "img" / path =>
+        StaticFile.fromFile(new File(webapp, s"img/$path"), Some(request)).getOrElseF(NotFound())
+      case request@GET -> Root / "fonts" / path =>
+        StaticFile.fromFile(new File(webapp, s"fonts/$path"), Some(request)).getOrElseF(NotFound())
+      case request@GET -> Root => Ok(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     }
     Router("/" -> routes)
 
