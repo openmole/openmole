@@ -34,7 +34,9 @@ object GAMATask {
 
   def volumes(
     workspace: File,
-    model:     String) = (model, Seq(workspace -> workspaceDirectory))
+    model:     String) =
+    val content = workspace.listFiles.map { f => f -> s"$workspaceDirectory/${f.getName}"}.toSeq
+    (model, content)
 
   def prepare(
     workspace:              File,
