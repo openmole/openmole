@@ -64,7 +64,7 @@ object utils {
       case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None), context)
       case ServerFileSystemContext.Authentication => SafePath(getPathArray(f, Some(authenticationKeysDirectory)), context)
 
-  def safePathToFile(s: SafePath)(implicit workspace: Workspace): File =
+  def safePathToFile(s: SafePath)(using workspace: Workspace): File =
     def getFile(root: Option[File], paths: Seq[String]): File =
       @tailrec
       def getFile0(paths: Seq[String], accFile: Option[File]): File =
@@ -88,8 +88,8 @@ object utils {
     }.contains(safePath)
 
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): Option[TreeNodeData] =
-    def isPlugin(file: File): Boolean = PluginManager.isBundle(file)
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
+    def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
     if f.exists()
     then
@@ -98,13 +98,7 @@ object utils {
       Some(TreeNodeData(f.getName, f.length, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
     else None
 
-
-  def seqfileToSeqTreeNodeData(fs: Seq[File], pluggedList: Seq[Plugin])(implicit context: ServerFileSystemContext, workspace: Workspace): Seq[TreeNodeData] =
-    fs.flatMap { f ⇒
-      fileToTreeNodeData(f, pluggedList)
-    }
-
-  implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
+  //implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
 
   implicit def javaLevelToErrorLevel(level: Level): ErrorStateLevel =
     if (level.intValue >= java.util.logging.Level.WARNING.intValue) ErrorStateLevel.Error
@@ -139,10 +133,10 @@ object utils {
 
 
 
-  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin])(implicit workspace: Workspace): FileListData =
+  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(implicit workspace: Workspace): FileListData =
     given ServerFileSystemContext = path.context
 
-    def treeNodesData = seqfileToSeqTreeNodeData(safePathToFile(path).listFilesSafe.toSeq, pluggedList)
+    def treeNodesData = safePathToFile(path).listFilesSafe.toSeq.flatMap { f ⇒ fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin) }
     val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
 
     val sortedSize = sorted.size

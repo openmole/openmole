@@ -42,7 +42,7 @@ import scala.concurrent.duration.Duration
   def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub_client.run();", css, "")
 
 
-  val services =  GUIServerServices(Workspace(new File("/tmp")), None, None, None)
+  val services =  GUIServerServices(Workspace(new File("/tmp/openmole")), None, None, None)
   val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher("password")))
   val apiImpl = new ApiImpl(serviceProvider, None)
   //apiImpl.activatePlugins

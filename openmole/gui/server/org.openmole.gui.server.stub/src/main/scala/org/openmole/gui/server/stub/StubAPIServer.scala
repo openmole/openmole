@@ -44,12 +44,6 @@ class StubAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val settingsRoute =
     omSettings.errorImplementedBy(_ => apiImpl.settings)
 
-//  val isPasswordCorrectRoute =
-//    isPasswordCorrect.safeImplementedBy(apiImpl.isPasswordCorrect _)
-
-//  val resetPasswordRoute =
-//    resetPassword.safeImplementedBy(_ => apiImpl.resetPassword())
-
   val listPluginsRoute =
     listPlugins.errorImplementedBy{ _ => apiImpl.listPlugins() }
 
@@ -57,7 +51,7 @@ class StubAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     guiPlugins.errorImplementedBy (_ => apiImpl.getGUIPlugins() )
 
   val listFilesRoute =
-    listFiles.errorImplementedBy { case(path, filter) => apiImpl.listFiles(path, filter) }
+    listFiles.errorImplementedBy { case(path, filter) => apiImpl.listFiles(path, filter, testPlugin = false) }
 
   val sizeRoute =
     size.errorImplementedBy { path => apiImpl.size(path) }
@@ -161,8 +155,6 @@ class StubAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
-//      isPasswordCorrectRoute,
-//      resetPasswordRoute,
       listPluginsRoute,
       guiPluginsRoute,
       listFilesRoute,

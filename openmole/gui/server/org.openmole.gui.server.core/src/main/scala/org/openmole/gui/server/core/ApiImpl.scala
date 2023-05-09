@@ -26,7 +26,7 @@ import org.openmole.core.market
 import org.openmole.core.preference.{ConfigurationString, Preference, PreferenceLocation}
 import org.openmole.core.project.*
 import org.openmole.core.services.Services
-import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.threadprovider.{ThreadProvider, toExecutionContext}
 import org.openmole.core.dsl.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
@@ -191,9 +191,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     utils.copyFiles(paths, overwrite)
 
-  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting()): FileListData =
+  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting(), testPlugin: Boolean = false): FileListData =
     import services.*
-    utils.listFiles(sp, fileFilter, listPlugins())
+    utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin)
 
    def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] =
     import services._
