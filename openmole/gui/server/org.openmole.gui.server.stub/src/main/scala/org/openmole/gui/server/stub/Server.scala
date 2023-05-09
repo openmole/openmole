@@ -1,13 +1,5 @@
 package org.openmole.gui.server.stub
 
-import cats.effect.IO
-import org.http4s.*
-import org.http4s.blaze.server.*
-import org.http4s.server.*
-import org.http4s.dsl.io.*
-
-import scala.concurrent.duration.Duration
-
 /*
  * Copyright (C) 2023 Romain Reuillon
  *
@@ -28,6 +20,18 @@ import scala.concurrent.duration.Duration
 
 import org.openmole.gui.server.core.GUIServlet
 import java.io.File
+import cats.effect.IO
+import org.http4s.*
+import org.http4s.blaze.server.*
+import org.http4s.server.*
+import org.http4s.dsl.io.*
+import org.openmole.core.workspace.Workspace
+import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
+import org.openmole.tool.crypto.Cypher
+
+import java.util.concurrent.atomic.AtomicReference
+import scala.concurrent.duration.Duration
+
 
 @main def server(args: String*) =
   val webapp = args.head
@@ -35,7 +39,25 @@ import java.io.File
   implicit val runtime = cats.effect.unsafe.IORuntime.global
 
   def css = Seq("css/bootstrap.css", "css/extrafont.css", "css/style.css")
-  def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub.run();", css, "")
+  def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub_client.run();", css, "")
+
+
+  val services =  GUIServerServices(Workspace(new File("/tmp")), None, None, None)
+  val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher("password")))
+  val apiImpl = new ApiImpl(serviceProvider, None)
+  //apiImpl.activatePlugins
+
+  def stackError(t: Throwable) =
+    import org.openmole.core.tools.io.Prettifier.*
+    import io.circe.*
+    import io.circe.syntax.*
+    import io.circe.generic.auto.*
+    import org.openmole.gui.shared.data.*
+    import org.http4s.headers.`Content-Type`
+    InternalServerError { Left(ErrorData(t)).asJson.noSpaces }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
+
+
+  val apiServer = new StubAPIServer(apiImpl, stackError)
 
   def hello =
     import org.http4s.headers.{`Content-Type`}
@@ -52,11 +74,11 @@ import java.io.File
         StaticFile.fromFile(new File(webapp, s"fonts/$path"), Some(request)).getOrElseF(NotFound())
       case request@GET -> Root => Ok(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     }
-    Router("/" -> routes)
+    Router(Seq("/" -> routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes)*).orNotFound
 
   val shutdown =
     BlazeServerBuilder[IO].bindHttp(8080, "localhost").
-      withHttpApp(hello.orNotFound).
+      withHttpApp(hello).
       withIdleTimeout(Duration.Inf).
       withResponseHeaderTimeout(Duration.Inf).
       //withServiceErrorHandler(r => t => stackError(t)).
