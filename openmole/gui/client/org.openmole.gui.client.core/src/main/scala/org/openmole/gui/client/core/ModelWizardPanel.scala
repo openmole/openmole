@@ -48,16 +48,16 @@ object ModelWizardPanel:
     val onoff: Var[Option[Int]] = Var(None)
 
     def onoffUpdate(currentId: Option[Int], id: Int) =
-      if (Some(id) == currentId) None
+      if currentId.contains(id)
+      then None
       else Some(id)
 
     def expandAction(i: Option[Int], butId: Int) =
-      i match {
+      i match
         case Some(ii: Int) =>
           if (ii == butId) true
           else false
         case None => false
-      }
 
     def entry(name: String, id: Int, panel: HtmlElement) =
       div(flexRow,
@@ -109,10 +109,9 @@ object ModelWizardPanel:
                 Future.successful(())
         yield ()
 
-      ret.andThen {
+      ret.andThen:
         case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while parsing", exception)
         case util.Success(_) =>
-      }
 
     val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
     val uploadDirectory = Var(false)
@@ -121,19 +120,18 @@ object ModelWizardPanel:
       label(
         cls := "inputFileStyle",
         margin := "15px",
-        transferring.withTransferWaiter {
+        transferring.withTransferWaiter:
           _ ⇒
             div(
               child <--
-                uploadDirectory.signal.map { directory =>
+                uploadDirectory.signal.map: directory =>
                   OMTags.omFileInput(fInput ⇒
                     if fInput.ref.files.length > 0
                     then uploadAndParse(tmpDirectory, fInput).andThen { _ => fInput.ref.value = "" },
                     directory = directory
-                  )
-                },
+                  ),
               div(
-                child <-- modelMetadata.signal.map {
+                child <-- modelMetadata.signal.map:
                   case Some(mmd) ⇒
                     div(
                       flexRow,
@@ -141,10 +139,8 @@ object ModelWizardPanel:
                       successDiv
                     )
                   case x: Any => div("Upload", btn_primary, cls := "badgeUploadModel")
-                }
               )
             )
-        }
       )
 
     val inputTags = new TagBadge()
@@ -211,7 +207,7 @@ object ModelWizardPanel:
     )
 
     div(flexColumn, marginTop := "20",
-      children <-- Signal.fromFuture(api.temporaryDirectory()).map {
+      children <-- Signal.fromFuture(api.temporaryDirectory()).map:
         case Some(tmpDirectory) =>
           def upload =
             div(flexRow, width := "100%",
@@ -260,8 +256,7 @@ object ModelWizardPanel:
             )
 
           Seq(upload, io, cmd, build)
-        case _ => Seq()
-      },
+        case _ => Seq(),
       uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
       div(onMountCallback(_ => currentDirectory.set(panels.directory.now()))),
       //            div(

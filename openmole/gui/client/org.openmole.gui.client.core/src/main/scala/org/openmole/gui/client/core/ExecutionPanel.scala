@@ -422,7 +422,7 @@ class ExecutionPanel:
           }
       },
       children <--
-        (details.signal combineWith currentOpenSimulation.signal).map { (details, id) =>
+        (details.signal combineWith currentOpenSimulation.signal).map: (details, id) =>
           Seq(
             div(rowFlex, justifyContent.center,
               details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
@@ -440,7 +440,7 @@ class ExecutionPanel:
               }
             )
           )
-        },
+        ,
       showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable --> Observer { _ => showExpander.set(None) }
     )

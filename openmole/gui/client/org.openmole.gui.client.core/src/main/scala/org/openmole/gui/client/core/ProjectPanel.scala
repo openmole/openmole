@@ -11,21 +11,21 @@ import Waiter.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 
-object ProjectPanel {
+object ProjectPanel:
 
   val currentOption: Var[Option[Int]] = Var(None)
 
   def buttonStyle(text: String, id: Int) = {
     button(text, display.flex, alignItems.center,
-      cls <-- currentOption.signal.map { co =>
-        if (co == Some(id)) "btn btn-openmole"
-        else "btn newButton"
-      },
+      cls <-- currentOption.signal.map: co =>
+        if co.contains(id)
+        then "btn btn-openmole"
+        else "btn newButton",
       onClick --> { _ => currentOption.set(Some(id)) }
     )
   }
 
-  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) = {
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
 
     // 1- Empty project
     def emptyProject =
@@ -34,10 +34,10 @@ object ProjectPanel {
         val toDisplay = panels.treeNodePanel.treeNodeManager.directory.now() ++ fileName
         api.download(
           toDisplay,
-          hash = true).map { (content, hash) ⇒
+          hash = true).map: (content, hash) ⇒
             panels.treeNodePanel.refresh
             panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
-          }
+
         panels.closeExpandable
       }
 
@@ -63,6 +63,4 @@ object ProjectPanel {
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
       theTabs.build.render.amend(marginLeft := "40", width := "100%")
     )
-  }
 
-}

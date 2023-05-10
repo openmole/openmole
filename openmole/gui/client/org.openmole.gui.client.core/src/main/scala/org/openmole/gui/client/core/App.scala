@@ -126,38 +126,38 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         },
         div(row, justifyContent.flexStart, marginLeft := "20px",
           button(btn_danger, "New project",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map { _.id } == Some(3)
-            },
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map { _.id }.contains(3)
+            ,
             onClick --> { _ =>
               panels.expandTo(newProjectPanel, 3)
             }),
           div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map { _.id } == Some(4)
-            },
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map { _.id }.contains(4)
+            ,
             onClick --> { _ ⇒
               ExecutionPanel.open
             }).tooltip("Executions"),
           div(glyph_lock, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map { _.id } == Some(2)
-            },
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map { _.id }.contains(2)
+            ,
             onClick --> { _ ⇒
               panels.expandTo(authenticationPanel, 2)
             }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map { _.id } == Some(1)
-            },
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map { _.id }.contains(1)
+            ,
             onClick --> { _ ⇒
               panels.pluginPanel.getPlugins
               panels.expandTo(panels.pluginPanel.render, 1)
             }).tooltip("Plugins"),
           div(OMTags.glyph_gear, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map {
-              _.map { _.id } == Some(5)
-            },
+            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map { _.id }.contains(5)
+            ,
             onClick --> { _ ⇒
               panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
@@ -205,20 +205,16 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           ),
           panels.notifications.notificationList,
           div(
-            div(cls <-- panels.expandablePanel.signal.map { x =>
-              "collapse-bottom " + {
-                x match {
-                  case Some(ep: Panels.ExpandablePanel) => ""
-                  case _ => "close"
-                }
-              }
-            },
+            div(
+              cls <-- panels.expandablePanel.signal.map: x =>
+                "collapse-bottom " + {
+                  x match
+                    case Some(ep: Panels.ExpandablePanel) => ""
+                    case _ => "close"
+                },
               div(cls := "splitter"),
-              child <-- panels.expandablePanel.signal.map { p ⇒
-                p.map {
-                  _.element
-                }.getOrElse(div(top := "1000px", color.white))
-              }
+              child <-- panels.expandablePanel.signal.map: p ⇒
+                p.map { _.element }.getOrElse(div(top := "1000px", color.white))
             )
           )
         )
