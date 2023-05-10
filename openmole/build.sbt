@@ -835,6 +835,9 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "org.openmole.gui.server.stub") settings(
   guiSettings,
   libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s),
+  Compile / run / fork := true,
+  Compile / run / connectInput := true,
+  Compile / run / outputStrategy := Some(StdoutOutput),
   Compile / compile := {
     val bundlerTarget = (clientStub / target).value / ("scala-" + scalaVersion.value) / "scalajs-bundler"
 

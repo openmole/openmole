@@ -25,7 +25,8 @@ import org.http4s.*
 import org.http4s.blaze.server.*
 import org.http4s.server.*
 import org.http4s.dsl.io.*
-import org.openmole.core.workspace.Workspace
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.tool.crypto.Cypher
 
@@ -41,7 +42,7 @@ import scala.concurrent.duration.Duration
   def css = Seq("css/bootstrap.css", "css/extrafont.css", "css/style.css")
   def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub_client.run();", css, "")
 
-
+  OutputManager.uninstall
   val services =  GUIServerServices(Workspace(new File("/tmp/openmole")), None, None, None)
   val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher("password")))
   val apiImpl = new ApiImpl(serviceProvider, None)
