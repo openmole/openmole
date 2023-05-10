@@ -1,19 +1,17 @@
 package org.openmole.core.compiler.repl
 
-import dotty.tools.repl.*
-import dotty.tools.dotc
+import scala.language.unsafeNulls
 
-import java.lang.{ClassLoader, ExceptionInInitializerError}
-import java.lang.reflect.InvocationTargetException
-import dotc.core.Contexts.*
-import dotc.core.Denotations.Denotation
-import dotc.core.Flags
-import dotc.core.Flags.*
-import dotc.core.Symbols.{Symbol, defn}
-import dotc.core.StdNames.{nme, str}
-import dotc.printing.ReplPrinter
-import dotc.reporting.{Diagnostic, Message, NoExplanation}
-import dotc.transform.ValueClasses
+import dotty.tools.*                            // OM
+import repl.{AbstractFileClassLoader, State}    // OM
+import dotc.*, core.*
+import Contexts.*, Denotations.*, Flags.*, NameOps.*, StdNames.*, Symbols.*
+import printing.ReplPrinter
+import reporting.Diagnostic
+import transform.ValueClasses
+import util.StackTraceOps.*
+
+import scala.util.control.NonFatal
 
 /** This rendering object uses `ClassLoader`s to accomplish crossing the 4th
  *  wall (i.e. fetching back values from the compiled class files put into a
@@ -33,10 +31,10 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 //      hl(s"-- $diagnosticLevel:")
   }
 
-  private var myClassLoader: AbstractFileClassLoader = _
+  var myClassLoader: AbstractFileClassLoader = _
 
   /** (value, maxElements, maxCharacters) => String */
-  private var myReplStringOf: (Object, Int, Int) => String = _
+  var myReplStringOf: (Object, Int, Int) => String = _
 
   /** Class loader used to load compiled code */
   def classLoader()(using Context) = // OM
@@ -130,9 +128,11 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
       }
 
   /** OM Formats errors using the `messageRenderer` */
-  def formatError(dia: Diagnostic)(implicit state: State): Diagnostic =
+  def formatError(dia: Diagnostic)(using state: State): Diagnostic =
+    import dotty.tools.dotc.reporting.NoExplanation
+    given Context = state.context
     new Diagnostic(
-      NoExplanation(messageRenderer.messageAndPos(dia)(using state.context)),
+      NoExplanation(messageRenderer.messageAndPos(dia)),
       dia.pos,
       dia.level
     )
@@ -144,8 +144,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
    */
   private def rewrapValueClass(sym: Symbol, value: Object)(using Context): Option[Object] =
     if ValueClasses.isDerivedValueClass(sym) then
-      val valueClassName = sym.flatName.encode.toString
-      val valueClass = Class.forName(valueClassName, true, classLoader())
+      val valueClass = Class.forName(sym.binaryClassName, true, classLoader())
       valueClass.getConstructors.headOption.map(_.newInstance(value))
     else
       Some(value)
@@ -161,7 +160,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     infoDiagnostic(d.symbol.showUser, d)
 
   /** Render value definition result */
-  def renderVal(d: Denotation)(using Context): Either[InvocationTargetException, Option[Diagnostic]] =
+  def renderVal(d: Denotation)(using Context): Either[ReflectiveOperationException, Option[Diagnostic]] =
     val dcl = d.symbol.showUser
     def msg(s: String) = infoDiagnostic(s, d)
     try
@@ -169,12 +168,11 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
         if d.symbol.is(Flags.Lazy) then Some(msg(dcl))
         else valueOf(d.symbol).map(value => msg(s"$dcl = $value"))
       )
-    catch case e: InvocationTargetException => Left(e)
+    catch case e: ReflectiveOperationException => Left(e)
   end renderVal
 
   /** Force module initialization in the absence of members. */
   def forceModule(sym: Symbol)(using Context): Seq[Diagnostic] =
-    import scala.util.control.NonFatal
     def load() =
       val objectName = sym.fullName.encode.toString
       Class.forName(objectName, true, classLoader())
@@ -182,14 +180,11 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     try load()
     catch
       case e: ExceptionInInitializerError => List(renderError(e, sym.denot))
-      case NonFatal(e) => List(renderError(InvocationTargetException(e), sym.denot))
+      case NonFatal(e) => List(renderError(e, sym.denot))
 
   /** Render the stack trace of the underlying exception. */
-  def renderError(ite: InvocationTargetException | ExceptionInInitializerError, d: Denotation)(using Context): Diagnostic =
-    import dotty.tools.dotc.util.StackTraceOps._
-    val cause = ite.getCause match
-      case e: ExceptionInInitializerError => e.getCause
-      case e => e
+  def renderError(thr: Throwable, d: Denotation)(using Context): Diagnostic =
+    val cause = rootCause(thr)
     // detect
     //at repl$.rs$line$2$.<clinit>(rs$line$2:1)
     //at repl$.rs$line$2.res1(rs$line$2)
@@ -203,7 +198,6 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
   private def infoDiagnostic(msg: String, d: Denotation)(using Context): Diagnostic =
     new Diagnostic.Info(msg, d.symbol.sourcePos)
 
-
 object Rendering:
   final val REPL_WRAPPER_NAME_PREFIX = str.REPL_SESSION_LINE
 
@@ -213,3 +207,12 @@ object Rendering:
       val text = printer.dclText(s)
       text.mkString(ctx.settings.pageWidth.value, ctx.settings.printLines.value)
     }
+
+  def rootCause(x: Throwable): Throwable = x match
+    case _: ExceptionInInitializerError |
+         _: java.lang.reflect.InvocationTargetException |
+         _: java.lang.reflect.UndeclaredThrowableException |
+         _: java.util.concurrent.ExecutionException
+        if x.getCause != null =>
+      rootCause(x.getCause)
+    case _ => x
