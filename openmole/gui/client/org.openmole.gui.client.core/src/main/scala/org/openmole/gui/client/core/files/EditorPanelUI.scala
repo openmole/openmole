@@ -102,7 +102,7 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
     ed.setOptions(
       js.Dynamic.literal(
         "enableBasicAutocompletion" -> true,
-        "enableSnippets" -> true,
+//        "enableSnippets" -> true,
         "enableLiveAutocompletion" -> true
       )
     )
