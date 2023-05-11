@@ -75,7 +75,7 @@ package object tools {
     }
 
     object OptionalName {
-      implicit def fromString(s: String) = OptionalName(Some(s))
+      implicit def fromString(s: String): OptionalName = OptionalName(Some(s))
     }
 
     case class OptionalName(name: Option[String])
