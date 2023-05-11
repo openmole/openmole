@@ -42,9 +42,9 @@ object Pages {
 }
 
 object PageTree {
-  implicit def fromPage(p: Page) = PageLeaf(p)
+  implicit def fromPage(p: Page): PageLeaf = PageLeaf(p)
 
-  implicit def fromSeqPage(ps: Seq[Page]) = ps.map {
+  implicit def fromSeqPage(ps: Seq[Page]): Seq[PageLeaf] = ps.map {
     fromPage
   }
 
