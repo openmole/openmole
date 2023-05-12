@@ -1,9 +1,11 @@
 package org.openmole.site
 
-import java.util.UUID
+import org.openmole.core.exception.InternalProcessingError
 
+import java.util.UUID
 import scalatags.Text.TypedTag
 import scalatags.generic.StylePair
+
 import collection.mutable.ListBuffer
 
 /*
@@ -266,7 +268,7 @@ package object tools {
         a match {
           case s: String => (s.stripMargin: Frag)
           case f: Frag => f
-          case a => (a.toString: Frag)
+          case a => throw new InternalProcessingError(s"Cannot convert $a of type ${a.getClass} into html frag")
         }
       }
 
