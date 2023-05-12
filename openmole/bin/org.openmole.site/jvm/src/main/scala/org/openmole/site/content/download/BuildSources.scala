@@ -52,7 +52,7 @@ ${h2{"Build the OpenMOLE application"}}
 
 ${h3{"Build from sources"}}
 
-${h4{"For the first time"}}
+${h6{"For the first time"}}
 
 To build the OpenMOLE application for the first time after cloning it, execute the ${code{"build.sh"}} script inside the OpenMOLE directory that you just cloned.
 
@@ -65,7 +65,7 @@ $> ./build.sh
 Upon successful completion, the executable is placed under ${i{"openmole/bin/openmole/target/assemble"}} and is launched as any executable via the ${code{"./openmole"}} command.
 The app should then pop up in your default web browser, the URL should be something like ${code{"http://localhost:44961/app"}}.
 
-${h4{"Re-build the project after an update"}}
+${h6{"Re-build the project after an update"}}
 
 In order to apply the changes after you updated your OpenMOLE version (by doing a ${code{"git pull"}} of the project for instance), you need to run successively the ${code{"clean.sh"}} and ${code{"build.sh"}} scripts.
 

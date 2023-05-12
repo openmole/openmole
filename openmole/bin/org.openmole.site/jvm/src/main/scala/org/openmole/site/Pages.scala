@@ -326,7 +326,7 @@ object DocumentationPages {
   def downloadPages = pageNode(download, Vector(buildSources, releaseNotes))
   lazy val download = DocumentationPage.fromContent(name = "Download", content = org.openmole.site.content.download.Download)
   lazy val buildSources = DocumentationPage.fromContent(name = "Build From Sources", content = org.openmole.site.content.download.BuildSources)
-  lazy val releaseNotes = DocumentationPage.fromScalatex(name = "Release Notes", content = scalatex.download.ReleaseNotes)
+  lazy val releaseNotes = DocumentationPage.fromContent(name = "Release Notes", content = org.openmole.site.content.download.ReleaseNotes)
 
   //    val market = new DocumentationPage {
   //      override def content: Text.all.Frag = div(tagContent(marketEntries))
