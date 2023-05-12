@@ -79,6 +79,8 @@ object PageTree {
   }
 }
 
+
+
 sealed trait PageTree {
   def page: Page
   def name: String = page.name
@@ -120,11 +122,19 @@ trait Page {
   def title: Option[String] = Some(s"OpenMOLE - $name")
   def location: String = name
   def file = Pages.file(this)
-  def source: Option[String]
+  def source: Option[(String)]
   def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
 }
 
 object DocumentationPage {
+
+  def fromContent(
+    name: String,
+    content: PageContent,
+    details: ⇒ Seq[DocumentationPage] = Seq.empty,
+    location: Option[String] = None,
+    title: Option[String] = None) =
+    apply(name, content.content, details, location, title, source = Some(content.file.value.split("/").reverse.takeWhile(_ != "scala").reverse.mkString("/")))
 
   def fromScalatex[T <: Page.ScalatexContent](
     name:     String,
@@ -314,7 +324,7 @@ object DocumentationPages {
 
   // Download
   def downloadPages = pageNode(download, Vector(buildSources, releaseNotes))
-  lazy val download = DocumentationPage.fromScalatex(name = "Download", content = scalatex.download.Download)
+  lazy val download = DocumentationPage.fromContent(name = "Download", content = org.openmole.site.content.download.Download)
   lazy val buildSources = DocumentationPage.fromScalatex(name = "Build From Sources", content = scalatex.download.BuildSources)
   lazy val releaseNotes = DocumentationPage.fromScalatex(name = "Release Notes", content = scalatex.download.ReleaseNotes)
 
@@ -359,3 +369,6 @@ object DocumentationPages {
   //    }
 
 }
+
+
+case class PageContent(content: Frag)(implicit val file: sourcecode.File)

@@ -4,6 +4,7 @@ import java.util.UUID
 
 import scalatags.Text.TypedTag
 import scalatags.generic.StylePair
+import collection.mutable.ListBuffer
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
@@ -24,6 +25,7 @@ import scalatags.generic.StylePair
 
 package object tools {
 
+  import scalatags.Text.{all => tags}
   import scalatags.Text.all._
 
   def listItem(content: Frag*): Frag = li(content)
@@ -193,7 +195,8 @@ package object tools {
     )
 
   def modificationLink(source: String) =
-    s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
+    if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
+    else s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
@@ -256,4 +259,25 @@ package object tools {
   lazy val row: String = "row"
   def colMD(nb: Int): String = s"col-md-$nb"
 
+
+  implicit class HtmlHelper(val sc: StringContext) extends AnyVal {
+    def html(args: Any*): Frag = {
+      def anyToFrag(a: Any): Frag = {
+        a match {
+          case s: String => (s.stripMargin: Frag)
+          case f: Frag => f
+          case a => (a.toString: Frag)
+        }
+      }
+
+      val strings = sc.parts.iterator
+      val expressions = args.iterator
+      val buf = ListBuffer[Frag](anyToFrag(strings.next()))
+      while (strings.hasNext) {
+        buf.append(anyToFrag(expressions.next()))
+        buf.append(anyToFrag(strings.next()))
+      }
+      buf.toSeq
+    }
+  }
 }

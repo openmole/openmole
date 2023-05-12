@@ -88,6 +88,7 @@ package object shared {
     lazy val egi = "http://www.egi.eu/"
     lazy val singularity = "https://sylabs.io/"
     lazy val rcran = "https://cran.r-project.org/"
+    lazy val nodejs = "https://nodejs.org"
 
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"
