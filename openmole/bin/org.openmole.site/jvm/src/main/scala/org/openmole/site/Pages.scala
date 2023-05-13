@@ -315,12 +315,12 @@ object DocumentationPages {
   // Community
   def communityPages = pageNode(OMcommunity, Vector(howToContribute, training, communications, whoWeAre, partner))
 
-  lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.OMCommunity)
+  lazy val OMcommunity = DocumentationPage.fromContent(name = "Community", content = org.openmole.site.content.community.OMCommunity)
   lazy val howToContribute = DocumentationPage.fromContent(name = "How to Contribute", content = org.openmole.site.content.community.HowToContribute)
   lazy val training = DocumentationPage.fromScalatex(name = "Trainings", content = scalatex.community.Training)
   lazy val communications = DocumentationPage.fromContent(name = "Publications", content = org.openmole.site.content.community.Publications)
   lazy val whoWeAre = DocumentationPage.fromScalatex(name = "Who We Are", content = scalatex.community.WhoWeAre)
-  lazy val partner = DocumentationPage.fromScalatex(name = "Our Partners", content = scalatex.community.Partner)
+  lazy val partner = DocumentationPage.fromContent(name = "Our Partners", content = org.openmole.site.content.community.Partner)
 
   // Download
   def downloadPages = pageNode(download, Vector(buildSources, releaseNotes))
