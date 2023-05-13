@@ -316,9 +316,9 @@ object DocumentationPages {
   def communityPages = pageNode(OMcommunity, Vector(howToContribute, training, communications, whoWeAre, partner))
 
   lazy val OMcommunity = DocumentationPage.fromScalatex(name = "Community", content = scalatex.community.OMCommunity)
-  lazy val howToContribute = DocumentationPage.fromScalatex(name = "How to Contribute", content = scalatex.community.HowToContribute)
+  lazy val howToContribute = DocumentationPage.fromContent(name = "How to Contribute", content = org.openmole.site.content.community.HowToContribute)
   lazy val training = DocumentationPage.fromScalatex(name = "Trainings", content = scalatex.community.Training)
-  lazy val communications = DocumentationPage.fromScalatex(name = "Publications", content = scalatex.community.Communications)
+  lazy val communications = DocumentationPage.fromContent(name = "Publications", content = org.openmole.site.content.community.Publications)
   lazy val whoWeAre = DocumentationPage.fromScalatex(name = "Who We Are", content = scalatex.community.WhoWeAre)
   lazy val partner = DocumentationPage.fromScalatex(name = "Our Partners", content = scalatex.community.Partner)
 

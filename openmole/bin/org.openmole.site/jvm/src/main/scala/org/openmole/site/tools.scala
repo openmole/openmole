@@ -123,6 +123,7 @@ package object tools {
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
         case e: AttrPair ⇒ e
+        case e: SeqFrag[_] => e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
