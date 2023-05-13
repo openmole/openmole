@@ -317,7 +317,7 @@ object DocumentationPages {
 
   lazy val OMcommunity = DocumentationPage.fromContent(name = "Community", content = org.openmole.site.content.community.OMCommunity)
   lazy val howToContribute = DocumentationPage.fromContent(name = "How to Contribute", content = org.openmole.site.content.community.HowToContribute)
-  lazy val training = DocumentationPage.fromScalatex(name = "Trainings", content = scalatex.community.Training)
+  lazy val training = DocumentationPage.fromContent(name = "Trainings", content = org.openmole.site.content.community.Training)
   lazy val communications = DocumentationPage.fromContent(name = "Publications", content = org.openmole.site.content.community.Publications)
   lazy val whoWeAre = DocumentationPage.fromScalatex(name = "Who We Are", content = scalatex.community.WhoWeAre)
   lazy val partner = DocumentationPage.fromContent(name = "Our Partners", content = org.openmole.site.content.community.Partner)
