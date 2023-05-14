@@ -37,7 +37,10 @@ package object tools {
 
   def aa = a(targetBlank)
 
-  val break = br(br)
+  def break = br(br)
+
+  def mandatory = b{"mandatory"}
+  def optional = b{"optional"}
 
   object api {
 
