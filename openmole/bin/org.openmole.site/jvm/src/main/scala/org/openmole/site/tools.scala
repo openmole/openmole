@@ -42,6 +42,8 @@ package object tools {
   def mandatory = b{"mandatory"}
   def optional = b{"optional"}
 
+  def comment(c: String): Frag = ""
+
   object api {
 
     def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")

@@ -216,12 +216,12 @@ object DocumentationPages {
   lazy val plug = DocumentationPage.fromScalatex(name = "Plug", content = scalatex.documentation.plug.Plug, title = Some("Plug Your Model"))
   lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.plug.Scala)
   lazy val java = DocumentationPage.fromContent(name = "Java", content = org.openmole.site.content.plug.Java)
-  lazy val netLogo = DocumentationPage.fromScalatex(name = "NetLogo", content = scalatex.documentation.plug.NetLogo)
+  lazy val netLogo = DocumentationPage.fromContent(name = "NetLogo", content = org.openmole.site.content.plug.NetLogo)
   lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.plug.Python)
   lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.plug.R)
   lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
   lazy val gama = DocumentationPage.fromContent(name = "GAMA", content = org.openmole.site.content.plug.GAMA)
-  lazy val julia = DocumentationPage.fromScalatex(name = "Julia", content = scalatex.documentation.plug.Julia)
+  lazy val julia = DocumentationPage.fromContent(name = "Julia", content = org.openmole.site.content.plug.Julia)
   lazy val container = DocumentationPage.fromContent(name = "Any Other Executable", content = org.openmole.site.content.plug.Container)
 
   // Explore
