@@ -213,13 +213,13 @@ object DocumentationPages {
   // Plug
   def plugPages = pageNode(plug, Vector(scala, java, python, r, netLogo, gama, scilab, julia, container))
 
-  lazy val plug = DocumentationPage.fromScalatex(name = "Plug", content = scalatex.documentation.plug.Plug, title = Some("Plug Your Model"))
-  lazy val scala = DocumentationPage.fromScalatex(name = "Scala", content = scalatex.documentation.plug.Scala)
+  lazy val plug = DocumentationPage.fromContent(name = "Plug", content = org.openmole.site.content.plug.Plug, title = Some("Plug Your Model"))
+  lazy val scala = DocumentationPage.fromContent(name = "Scala", content = org.openmole.site.content.plug.Scala)
   lazy val java = DocumentationPage.fromContent(name = "Java", content = org.openmole.site.content.plug.Java)
   lazy val netLogo = DocumentationPage.fromContent(name = "NetLogo", content = org.openmole.site.content.plug.NetLogo)
-  lazy val python = DocumentationPage.fromScalatex(name = "Python", content = scalatex.documentation.plug.Python)
-  lazy val r = DocumentationPage.fromScalatex(name = "R", content = scalatex.documentation.plug.R)
-  lazy val scilab = DocumentationPage.fromScalatex(name = "Scilab", content = scalatex.documentation.plug.Scilab)
+  lazy val python = DocumentationPage.fromContent(name = "Python", content = org.openmole.site.content.plug.Python)
+  lazy val r = DocumentationPage.fromContent(name = "R", content = org.openmole.site.content.plug.R)
+  lazy val scilab = DocumentationPage.fromContent(name = "Scilab", content = org.openmole.site.content.plug.Scilab)
   lazy val gama = DocumentationPage.fromContent(name = "GAMA", content = org.openmole.site.content.plug.GAMA)
   lazy val julia = DocumentationPage.fromContent(name = "Julia", content = org.openmole.site.content.plug.Julia)
   lazy val container = DocumentationPage.fromContent(name = "Any Other Executable", content = org.openmole.site.content.plug.Container)
