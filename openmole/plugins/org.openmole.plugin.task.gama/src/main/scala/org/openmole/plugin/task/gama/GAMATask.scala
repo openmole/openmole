@@ -215,7 +215,7 @@ case class GAMATask(
             case _ => false
           }
 
-        mapped.inputs.flatMap { m =>
+        Mapped.noFile(mapped.inputs).flatMap { m =>
           gamaParameterByName(m.name) match {
             case Some(p) =>
               val gamaType = p.attribute("type").get.head.text
@@ -229,7 +229,7 @@ case class GAMATask(
         val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
         def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
 
-        mapped.outputs.flatMap { m =>
+        Mapped.noFile(mapped.outputs).flatMap { m =>
           gamaOutputByName(m.name) match {
             case Some(_) => if(!accepted(m.v.`type`.manifest)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are: ${acceptedOutputsTypes.mkString(", ")})""")) else None
             case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
@@ -247,7 +247,7 @@ case class GAMATask(
     newFile.withTmpFile("inputs", ".xml") { inputFile ⇒
       val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
-      def inputMap = mapped.inputs.map { m ⇒ m.name -> context(m.v).toString }.toMap
+      def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
       val inputXML = GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML))
       def inputFileName = "/_inputs_openmole_.xml"
       def outputDirectory = "/_output_"
@@ -284,7 +284,9 @@ case class GAMATask(
             containerPoolKey = containerPoolKey) set(
             resources += (inputFile, inputFileName, true),
             volumes.map { case (lv, cv) ⇒ resources += (lv, cv, true) },
-            resources += (tmpOutputDirectory, outputDirectory, true)
+            resources += (tmpOutputDirectory, outputDirectory, true),
+            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
           )
 
         val resultContext = containerTask.process(executionContext).from(context)
@@ -296,7 +298,7 @@ case class GAMATask(
             sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${tmpOutputDirectory.list.mkString(", ")}]"""))
 
         try {
-          (mapped.outputs.isEmpty, frameRate.option) match
+          (Mapped.noFile(mapped.outputs).isEmpty, frameRate.option) match
             case (true, _) => resultContext
             case (false, None) =>
               import xml._
@@ -309,7 +311,7 @@ case class GAMATask(
                   case Val.caseBoolean(v) => Variable(v, value.toBoolean)
                   case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
 
-              val outputs = Map[String, Val[_]]() ++ mapped.outputs.map { m => (m.name, m.v) }
+              val outputs = Map[String, Val[_]]() ++ Mapped.noFile(mapped.outputs).map { m => (m.name, m.v) }
               def outputValue(e: Elem) =
                 for
                   a <- e.attribute("name").flatMap(_.headOption)
@@ -346,7 +348,7 @@ case class GAMATask(
               val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
 
               resultContext ++
-                mapped.outputs.map { m =>
+                Mapped.noFile(mapped.outputs).map { m =>
                   val values =
                     for
                       o <- simulationOutput

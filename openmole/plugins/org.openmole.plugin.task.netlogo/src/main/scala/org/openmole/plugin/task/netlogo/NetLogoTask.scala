@@ -34,6 +34,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
+import org.openmole.core.dsl.extension.*
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
@@ -44,10 +45,9 @@ object NetLogoTask {
   /**
    * Workspace is either a script, or a full directory
    */
-  object Workspace {
+  object Workspace:
     case class Script(script: File, name: String) extends Workspace
     case class Directory(directory: File, name: String, script: String) extends Workspace
-  }
 
   /**
    * Errors as [[UserBadDataError]]
@@ -224,6 +224,29 @@ object NetLogoTask {
         }
     }
   }
+
+  def netLogoValueToVal(outputValue: => AnyRef, mapped: Mapped[_]) =
+    try {
+      if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
+      val runtimeClass = mapped.v.`type`.runtimeClass
+      if (!runtimeClass.isArray) Variable.unsecureUntyped(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
+      else {
+        val netLogoCollection: util.AbstractCollection[Any] =
+          if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
+          else {
+            val newArray = new util.LinkedList[Any]()
+            newArray.add(outputValue)
+            newArray
+          }
+        NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
+      }
+    }
+    catch {
+      case e: Throwable ⇒
+        throw new UserBadDataError(
+          s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
+        )
+    }
 }
 
 /**
@@ -281,10 +304,9 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
       NetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
+      seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
       for (cmd ← setup.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
-
-      seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
       for (inBinding ← mapped.inputs) {
         val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
@@ -293,31 +315,12 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
 
       for (cmd ← go.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
+
+
       val contextResult =
-        External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map {
-          case mapped ⇒
-            try {
-              val outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
-              if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
-              val runtimeClass = mapped.v.`type`.runtimeClass
-              if (!runtimeClass.isArray) Variable.unsecureUntyped(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
-              else {
-                val netLogoCollection: util.AbstractCollection[Any] =
-                  if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
-                  else {
-                    val newArray = new util.LinkedList[Any]()
-                    newArray.add(outputValue)
-                    newArray
-                  }
-                NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
-              }
-            }
-            catch {
-              case e: Throwable ⇒
-                throw new UserBadDataError(
-                  s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
-                )
-            }
+        External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map { mapped ⇒
+          def outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
+          NetLogoTask.netLogoValueToVal(outputValue, mapped)
         }
 
       contextResult

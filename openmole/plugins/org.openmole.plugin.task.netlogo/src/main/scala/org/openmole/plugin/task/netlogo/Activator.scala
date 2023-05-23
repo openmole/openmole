@@ -36,7 +36,8 @@ class Activator extends BundleActivator {
         WordHighLight("netLogoArrayInputs"),
         WordHighLight("netLogoOutputs"),
         WordHighLight("netLogoArrayOutputs"),
-        WordHighLight("embedWorkspace")
+        WordHighLight("embedWorkspace"),
+        TaskHighLight(classOf[NetLogoContainerTask])
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), nameSpaceTraits = Vector(classOf[NetLogoPackage]), highLight = keyWords)
