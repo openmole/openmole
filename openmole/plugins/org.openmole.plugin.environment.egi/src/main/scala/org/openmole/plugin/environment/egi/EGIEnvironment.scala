@@ -90,7 +90,7 @@ object EGIEnvironment extends JavaLogger {
     Seq(
       "topbdii.grif.fr",
       "bdii.ndgf.org",
-      "lcg-bdii.cern.ch",
+      "lcg-bdii.egi.eu",
       "bdii-fzk.gridka.de",
       "topbdii.egi.cesga.es",
       "egee-bdii.cnaf.infn.it"
