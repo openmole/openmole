@@ -130,7 +130,7 @@ object DocumentationPage {
 
   def fromContent(
     name: String,
-    content: PageContent,
+    content: => PageContent,
     details: ⇒ Seq[DocumentationPage] = Seq.empty,
     location: Option[String] = None,
     title: Option[String] = None) =
@@ -150,7 +150,7 @@ object DocumentationPage {
     details:  ⇒ Seq[DocumentationPage] = Seq.empty,
     location: Option[String]           = None,
     title:    Option[String]           = None,
-    source:   Option[String]           = None
+    source:   => Option[String]           = None
   ) = {
     def _name = name
     def _content = content
@@ -231,18 +231,18 @@ object DocumentationPages {
 
   def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, advancedSampling, aggregationSampling))
 
-  lazy val samplings = DocumentationPage.fromScalatex(name = "Samplings", content = scalatex.documentation.explore.sampling.Samplings)
-  lazy val elementarySamplings = DocumentationPage.fromScalatex(name = "Elementary Samplings", content = scalatex.documentation.explore.sampling.ElementarySamplings)
+  lazy val samplings = DocumentationPage.fromContent(name = "Samplings", content = org.openmole.site.content.explore.sampling.Samplings)
+  lazy val elementarySamplings = DocumentationPage.fromContent(name = "Elementary Samplings", content = org.openmole.site.content.explore.sampling.ElementarySampling)
   //lazy val gridSampling = DocumentationPage.fromScalatex(name = "Grid Sampling", content = scalatex.documentation.explore.sampling.GridSampling)
   //lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor at a Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)
-  lazy val uniformSampling = DocumentationPage.fromScalatex(name = "Uniform Sampling", content = scalatex.documentation.explore.sampling.UniformSampling)
-  lazy val highDimensionSamplings = DocumentationPage.fromScalatex(name = "High Dimension Samplings", content = scalatex.documentation.explore.sampling.HighDimensionSamplings, title = Some("Samplings for High Dimension Spaces"))
+  lazy val uniformSampling = DocumentationPage.fromContent(name = "Uniform Sampling", content = org.openmole.site.content.explore.sampling.UniformSampling)
+  lazy val highDimensionSamplings = DocumentationPage.fromContent(name = "High Dimension Samplings", content = org.openmole.site.content.explore.sampling.HighDimensionSampling, title = Some("Samplings for High Dimension Spaces"))
   //  lazy val lhsSampling = DocumentationPage.fromScalatex(name = "LHS Sampling", content = scalatex.documentation.explore.sampling.LHSSampling)
   //  lazy val sobolSampling = DocumentationPage.fromScalatex(name = "Sobol Sampling", content = scalatex.documentation.explore.sampling.SobolSampling)
-  lazy val customSampling = DocumentationPage.fromScalatex(name = "Custom Sampling", content = scalatex.documentation.explore.sampling.CustomSampling)
-  lazy val fileSampling = DocumentationPage.fromScalatex(name = "Sampling Over Files", content = scalatex.documentation.explore.sampling.FileSampling)
-  lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Operations on Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
-  lazy val aggregationSampling = DocumentationPage.fromScalatex(name = "Aggregate Sampling Results", content = scalatex.documentation.explore.sampling.Aggregation)
+  lazy val customSampling = DocumentationPage.fromContent(name = "Custom Sampling", content = org.openmole.site.content.explore.sampling.CustomSampling)
+  lazy val fileSampling = DocumentationPage.fromContent(name = "Sampling Over Files", content = org.openmole.site.content.explore.sampling.FileSampling)
+  lazy val advancedSampling = DocumentationPage.fromContent(name = "Operations on Samplings", content = org.openmole.site.content.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
+  lazy val aggregationSampling = DocumentationPage.fromContent(name = "Aggregate Sampling Results", content = org.openmole.site.content.explore.sampling.Aggregation)
 
   lazy val calibration = DocumentationPage.fromContent(name = "Calibration", content = org.openmole.site.content.explore.Calibration)
   lazy val sensitivity = DocumentationPage.fromContent(name = "Sensitivity", content = org.openmole.site.content.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
