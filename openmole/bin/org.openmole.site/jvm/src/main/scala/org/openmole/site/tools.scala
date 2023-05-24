@@ -42,13 +42,9 @@ package object tools {
   def mandatory = b{"mandatory"}
   def optional = b{"optional"}
 
+  def indice(v: Frag, i: Frag) = html"$v${sub{i}}"
+
   def comment(c: String): Frag = ""
-
-  object api {
-
-    def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
-    def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)
-  }
 
   object hl {
 

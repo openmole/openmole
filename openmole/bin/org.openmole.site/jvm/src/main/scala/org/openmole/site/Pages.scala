@@ -227,7 +227,7 @@ object DocumentationPages {
   // Explore
   def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))
 
-  lazy val explore = DocumentationPage.fromScalatex(name = "Explore", content = scalatex.documentation.explore.Explore, title = Some("Explore Your Model"))
+  lazy val explore = DocumentationPage.fromContent(name = "Explore", content = org.openmole.site.content.explore.Explore, title = Some("Explore Your Model"))
 
   def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, advancedSampling, aggregationSampling))
 
@@ -244,22 +244,22 @@ object DocumentationPages {
   lazy val advancedSampling = DocumentationPage.fromScalatex(name = "Operations on Samplings", content = scalatex.documentation.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
   lazy val aggregationSampling = DocumentationPage.fromScalatex(name = "Aggregate Sampling Results", content = scalatex.documentation.explore.sampling.Aggregation)
 
-  lazy val calibration = DocumentationPage.fromScalatex(name = "Calibration", content = scalatex.documentation.explore.Calibration)
-  lazy val sensitivity = DocumentationPage.fromScalatex(name = "Sensitivity", content = scalatex.documentation.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
-  lazy val profile = DocumentationPage.fromScalatex(name = "Profile", content = scalatex.documentation.explore.Profile)
-  lazy val pse = DocumentationPage.fromScalatex(name = "PSE", content = scalatex.documentation.explore.PSE, title = Some("Pattern Space Exploration"))
-  lazy val ose = DocumentationPage.fromScalatex(name = "OSE", content = scalatex.documentation.explore.OSE, title = Some("Origin Space Exploration"))
-  lazy val abc = DocumentationPage.fromScalatex(name = "ABC", content = scalatex.documentation.explore.ABC, title = Some("Approximate Bayesian computation"))
+  lazy val calibration = DocumentationPage.fromContent(name = "Calibration", content = org.openmole.site.content.explore.Calibration)
+  lazy val sensitivity = DocumentationPage.fromContent(name = "Sensitivity", content = org.openmole.site.content.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
+  lazy val profile = DocumentationPage.fromContent(name = "Profile", content = org.openmole.site.content.explore.Profile)
+  lazy val pse = DocumentationPage.fromContent(name = "PSE", content = org.openmole.site.content.explore.PSE, title = Some("Pattern Space Exploration"))
+  lazy val ose = DocumentationPage.fromContent(name = "OSE", content = org.openmole.site.content.explore.OSE, title = Some("Origin Space Exploration"))
+  lazy val abc = DocumentationPage.fromContent(name = "ABC", content = org.openmole.site.content.explore.ABC, title = Some("Approximate Bayesian computation"))
 
   // Scale
   def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi, dispatch))
 
-  lazy val scale = DocumentationPage.fromScalatex(name = "Scale Up", content = scalatex.documentation.scale.Scale, title = Some("Scale Up Your Experiments"))
-  lazy val multithread = DocumentationPage.fromScalatex(name = "Multithread", content = scalatex.documentation.scale.Multithread)
-  lazy val ssh = DocumentationPage.fromScalatex(name = "SSH", content = scalatex.documentation.scale.SSH)
-  lazy val cluster = DocumentationPage.fromScalatex(name = "Cluster", content = scalatex.documentation.scale.Cluster)
-  lazy val egi = DocumentationPage.fromScalatex(name = "EGI", content = scalatex.documentation.scale.EGI, title = Some("European Grid Infrastructure"))
-  lazy val dispatch = DocumentationPage.fromScalatex(name = "Dispatch", content = scalatex.documentation.scale.Dispatch, title = Some("Dispatch Jobs on Multiple Environments"))
+  lazy val scale = DocumentationPage.fromContent(name = "Scale Up", content = org.openmole.site.content.scale.Scale, title = Some("Scale Up Your Experiments"))
+  lazy val multithread = DocumentationPage.fromContent(name = "Multithread", content = org.openmole.site.content.scale.Multithread)
+  lazy val ssh = DocumentationPage.fromContent(name = "SSH", content = org.openmole.site.content.scale.SSH)
+  lazy val cluster = DocumentationPage.fromContent(name = "Cluster", content = org.openmole.site.content.scale.Cluster)
+  lazy val egi = DocumentationPage.fromContent(name = "EGI", content = org.openmole.site.content.scale.EGI, title = Some("European Grid Infrastructure"))
+  lazy val dispatch = DocumentationPage.fromContent(name = "Dispatch", content = org.openmole.site.content.scale.Dispatch, title = Some("Dispatch Jobs on Multiple Environments"))
 
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule))
