@@ -292,11 +292,6 @@ lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.
   ),
   version := scalaTagsVersion) settings(settings: _*) settings(scala3Settings: _*)
 
-lazy val scalatexSite =
-  OsgiProject(dir, "com.lihaoyi.scalatex-site", exports = Seq("scalatex.*", "ammonite.*", "fastparse.*"), privatePackages = Seq("META-INF.**", "pprint.*", "scalaj.*", "scalaparse.*", "geny.*"), imports = Seq("*")) settings (
-    libraryDependencies += "org.openmole" %% "scalatex-site" % "0.4.6",
-    version := "0.4.6") settings(settings: _*)
-
 //lazy val boopicklexAutowireVersion) settings(settings: _*)
 
 //lazy val jsonSimple = OsgiProject(dir, "json-simple", exports = Seq("org.json.simple.*")) settings(

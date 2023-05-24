@@ -20,7 +20,7 @@ package org.openmole.site
 import java.io.File
 import java.nio.CharBuffer
 
-import ammonite.ops._
+//import ammonite.ops._
 import org.openmole.site.tools._
 import scalatags.Text.{TypedTag, all}
 import scalatags.Text.all._
@@ -29,6 +29,8 @@ import scala.annotation.tailrec
 import spray.json._
 
 import scalaj.http._
+
+import org.openmole.tool.file.*
 
 object Site {
 
@@ -89,12 +91,7 @@ object Site {
 
       // def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
 
-      val site = new scalatex.site.Site {
-        site ⇒
-        override def siteCss = Set.empty
-
-        override def pageTitle: Option[String] = None
-
+      object Site { site ⇒
         def headFrags(page: org.openmole.site.Page) =
           Seq(
             scalatags.Text.tags2.title(page.title),
@@ -103,7 +100,6 @@ object Site {
             meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Parameter Tuning, Model Exploration, Optimization, Genetic Algorithm, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
             meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
 
-            link(rel := "stylesheet", href := stylesName),
             link(rel := "stylesheet", href := Resource.css.bootstrap.file),
             //  link(rel := "stylesheet", href := Resource.css.file),
             link(rel := "stylesheet", href := Resource.css.github.file),
@@ -167,26 +163,26 @@ object Site {
           }
         }
 
-        override def generateHtml(outputRoot: Path) = {
-          outputRoot.toIO.mkdirs()
+        def generateHtml(outputRoot: File) = {
+          import scalatags.Text.all._
+          outputRoot.mkdirs()
 
           val res = Pages.all.map { page ⇒
             val txt = html(
               head(headFrags(page)),
-              bodyFrag(bodyFrag(page))
+              bodyFrag(page)
             ).render
 
             val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
             val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
             val target = outputRoot / page.file
-            write.over(target, bytes.array())
+            target.withFileOutputStream { _.write(bytes.array()) }
             LunrIndex.Index(page.file, page.name, txt)
           }
 
           val jsDir = outputRoot / "js"
-          jsDir.toIO.mkdirs()
-
-          write.over(jsDir / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+          jsDir.mkdirs()
+          (jsDir / "index.js").content = "var index = " + JsArray(res).compactPrint
         }
 
         lazy val pagesFrag = Pages.all.map {
@@ -199,7 +195,7 @@ object Site {
 
       }
 
-      site.renderTo(Path(dest))
+      Site.generateHtml(dest)
       //    lazy val bibPapers = Publication.papers ++ Communication.papers
       //    bibPapers foreach (_.generateBibtex(dest))
       //
