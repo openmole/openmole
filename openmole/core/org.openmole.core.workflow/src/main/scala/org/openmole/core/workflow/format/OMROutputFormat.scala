@@ -44,6 +44,18 @@ object OMROutputFormat:
     enum DataMode:
       case Append, Create
 
+    object Compression:
+      given Encoder[Compression] = Encoder.instance {
+        case Compression.GZip => Encoder.encodeString("gzip")
+      }
+
+      given Decoder[Compression] = Decoder.decodeString.map {
+        case "gzip" => Compression.GZip
+      }
+
+    enum Compression:
+      case GZip
+
   case class Index(
     `format-version`: String,
     `openmole-version`: String,
@@ -51,6 +63,7 @@ object OMROutputFormat:
     `data-file`: Seq[String],
     `data-mode`: Index.DataMode,
     `data-content`: DataContent,
+    `data-compression`: Index.Compression,
     script: Option[Index.Script],
     `time-start`: Long,
     `time-save`: Long)
@@ -111,6 +124,7 @@ object OMROutputFormat:
                  `data-file` = (existingData ++ Seq(fileName)).distinct,
                 `data-mode` = mode,
                 `data-content` = dataContentValue,
+                `data-compression` = Index.Compression.GZip,
                 script = script,
                 `time-start` = executionContext.moleLaunchTime,
                 `time-save` = TimeService.currentTime
