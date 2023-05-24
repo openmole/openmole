@@ -296,7 +296,7 @@ object DocumentationPages {
   lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers, title = Some("Advanced Concepts for Developers"))
   lazy val console = DocumentationPage.fromScalatex(name = "Console Mode", content = scalatex.documentation.developers.Console)
   lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
-  lazy val restAPI = DocumentationPage.fromScalatex(name = "Rest API", content = scalatex.documentation.developers.RESTAPI)
+  lazy val restAPI = DocumentationPage.fromContent(name = "Rest API", content = org.openmole.site.content.developers.RESTAPI)
   lazy val extensionAPI = DocumentationPage.fromScalatex(name = "Extension API", content = scalatex.documentation.developers.ExtensionAPI)
 
   lazy val documentationGen = DocumentationPage.fromScalatex(name = "Documentation generation", content = scalatex.documentation.developers.DocumentationGen)
