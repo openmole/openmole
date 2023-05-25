@@ -293,13 +293,12 @@ object DocumentationPages {
   // Developers
   def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI, documentationGen))
 
-  lazy val developers = DocumentationPage.fromScalatex(name = "Developers", content = scalatex.documentation.developers.Developers, title = Some("Advanced Concepts for Developers"))
-  lazy val console = DocumentationPage.fromScalatex(name = "Console Mode", content = scalatex.documentation.developers.Console)
-  lazy val pluginDevelopment = DocumentationPage.fromScalatex(name = "Plugin Development", content = scalatex.documentation.developers.PluginDevelopment)
+  lazy val developers = DocumentationPage.fromContent(name = "Developers", content = org.openmole.site.content.developers.Developers, title = Some("Advanced Concepts for Developers"))
+  lazy val console = DocumentationPage.fromContent(name = "Console Mode", content = org.openmole.site.content.developers.Console)
+  lazy val pluginDevelopment = DocumentationPage.fromContent(name = "Plugin Development", content = org.openmole.site.content.developers.PluginDevelopment)
   lazy val restAPI = DocumentationPage.fromContent(name = "Rest API", content = org.openmole.site.content.developers.RESTAPI)
-  lazy val extensionAPI = DocumentationPage.fromScalatex(name = "Extension API", content = scalatex.documentation.developers.ExtensionAPI)
-
-  lazy val documentationGen = DocumentationPage.fromScalatex(name = "Documentation generation", content = scalatex.documentation.developers.DocumentationGen)
+  lazy val extensionAPI = DocumentationPage.fromContent(name = "Extension API", content = org.openmole.site.content.developers.ExtensionAPI)
+  lazy val documentationGen = DocumentationPage.fromContent(name = "Documentation generation", content = org.openmole.site.content.developers.DocumentationGen)
 
   // Tutorials
   def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, simpleSAFire, netLogoGA, market))
