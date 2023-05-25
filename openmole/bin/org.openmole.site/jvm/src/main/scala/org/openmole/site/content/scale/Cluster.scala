@@ -163,6 +163,8 @@ val env =
 
 $br
 
+${comment("document modules parameter")}
+
 $provideOptions:
 ${ul(
   li{html"$port,"},

@@ -94,7 +94,7 @@ def developersPages = pageNode(developers, Vector(console, pluginDevelopment, ex
 Now, leave the ${code{"Pages.scala"}} file and create a new scala content file ${code{"DocumentaionGen.scala"}} into ${code{"org/openmole/site/content/community/documentation/developers/"}}.
 
 In this file you should add some headers:
-${hl.openmole(s"""
+${hl.code(s"""
 //TODO Fix it after Scala 3 migration
 import org.openmole.site._
 import org.openmole.site.tools._
