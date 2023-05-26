@@ -160,7 +160,7 @@ val env =
   @li{@apiEntryTitle{constraints} a list of SLURM defined constraints which selected nodes must match,}
   @li{@name,}
   @li{@localSubmission,}
-  @li{@apiEntryTitle{modules} a sequence of modules to be loaded into the cluster environment.For instance @hl.openmoleNoTest{modules = Seq( "singularity", "boost" )}}
+  @li{@apiEntryTitle{modules} a sequence of modules to be loaded into the cluster environment. For instance @hl.openmoleNoTest{modules = Seq( "singularity", "boost" )}}
 
 
 
