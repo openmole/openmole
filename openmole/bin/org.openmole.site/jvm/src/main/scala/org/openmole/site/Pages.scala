@@ -264,14 +264,14 @@ object DocumentationPages {
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule))
 
-  lazy val language = DocumentationPage.fromScalatex(name = "Language", content = scalatex.documentation.language.Language, title = Some("The OpenMOLE Language"))
-  lazy val fileManagement = DocumentationPage.fromScalatex(name = "File Management", content = scalatex.documentation.language.FileManagement)
-  lazy val scalaFunction = DocumentationPage.fromScalatex(name = "Scala Functions", content = scalatex.documentation.language.ScalaFunction)
-  lazy val hook = DocumentationPage.fromScalatex(name = "Hooks", content = scalatex.documentation.language.Hook)
+  lazy val language = DocumentationPage.fromContent(name = "Language", content = org.openmole.site.content.language.Language, title = Some("The OpenMOLE Language"))
+  lazy val fileManagement = DocumentationPage.fromContent(name = "File Management", content = org.openmole.site.content.language.FileManagement)
+  lazy val scalaFunction = DocumentationPage.fromContent(name = "Scala Functions", content = org.openmole.site.content.language.ScalaFunction)
+  lazy val hook = DocumentationPage.fromContent(name = "Hooks", content = org.openmole.site.content.language.Hook)
 
-  lazy val transition = DocumentationPage.fromScalatex(name = "Transitions", content = scalatex.documentation.language.advanced.Transition)
-  lazy val source = DocumentationPage.fromScalatex(name = "Source", content = scalatex.documentation.language.advanced.Source)
-  lazy val capsule = DocumentationPage.fromScalatex(name = "Capsule", content = scalatex.documentation.language.advanced.Capsule)
+  lazy val transition = DocumentationPage.fromContent(name = "Transitions", content = org.openmole.site.content.language.advanced.Transition)
+  lazy val source = DocumentationPage.fromContent(name = "Source", content = org.openmole.site.content.language.advanced.Source)
+  lazy val capsule = DocumentationPage.fromContent(name = "Capsule", content = org.openmole.site.content.language.advanced.Capsule)
 
   def utilityTaskPages = pageNode(utilityTask, Vector(templateTask, moleTask, spatialTask))
 

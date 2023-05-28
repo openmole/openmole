@@ -1,26 +1,48 @@
-@import org.openmole.site.stylesheet._
-@import org.openmole.site.Resource._
-@import org.openmole.site._
-@import org.openmole.site.tools._
-@import DocumentationPages._
+package org.openmole.site.content.language.advanced
+
+/*
+ * Copyright (C) 2023 Romain Reuillon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
+import org.openmole.site._
+import org.openmole.site.tools.*
+import org.openmole.site.stylesheet._
+import DocumentationPages._
+import org.openmole.site.Config._
+import org.openmole.site.content.Environment.*
 
 
+object Source extends PageContent(html"""
 
 Sources have been designed as a possible way to inject data in the dataflow from diverse sources: CSV files, databases, sensors...
 
-@br
+$br
 
 At the moment, only file-based and http(s) url Sources are available in OpenMOLE.
-If you need to interface OpenMOLE with an external datasource, check the @aa("contact information page", href := whoWeAre.file) to see how to reach the OpenMOLE development team.
+If you need to interface OpenMOLE with an external datasource, check the ${a("contact information page", href := whoWeAre.file)} to see how to reach the OpenMOLE development team.
 
 
 
-@h2{Plug a source}
+${h2{"Plug a source"}}
 
-Sources are plugged in the dataflow in a similar fashion to @aa("hooks", href := DocumentationPages.hook.file ).
-Let's consider this simple workflow:
+Sources are plugged in the dataflow in a similar fashion to ${a("hooks", href := DocumentationPages.hook.file )}.
+Let's consider this simple worbflow:
 
-@hl.openmole("""
+${hl.openmole("""
 val files = Val[Array[File]]
 val result = Val[Double]
 
@@ -33,20 +55,20 @@ val hello =
 val s = ListFilesSource(workDirectory / "directory", files)
 
 (hello source s)
-""", name = "plug a source")
+""", name = "plug a source")}
 
-The source @code{s} is plugged at the beginning of the task @code{hello}.
-The source is executed prior to each execution of @code{hello}.
-You can also plug multiple sources on the same task using the syntax: @code{hello source (s1, s2, s3)}.
+The source ${code{"s"}} is plugged at the beginning of the task ${code{"hello"}}.
+The source is executed prior to each execution of ${code{"hello"}}.
+You can also plug multiple sources on the same task using the syntax: ${code{"hello source (s1, s2, s3)"}}.
 
 
 
-@h2{List files in a directory}
+${h2{"List files in a directory"}}
 
-This source lists directories and injects an array of @code{File} objects into the dataflow.
+This source lists directories and injects an array of ${code{"File"}} objects into the dataflow.
 See how the range of files selected can be filtered using a regular expression as a last parameter to the source builder.
 
-@hl.openmole("""
+${hl.openmole("""
   val someVariable = Val[String]
   val txtFiles = Val[Array[File]]
   val files = Val[Array[File]]
@@ -57,17 +79,16 @@ See how the range of files selected can be filtered using a regular expression a
     ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
       inputs += someVariable
   )
-""", name = "list file source")
+""", name = "list file source")}
 
 
-
-@h2{List directories in a directory}
+${h2{"List directories in a directory"}}
 
 Likewise, you can inject an array of directories in the dataflow.
-Directories are also represented as @code{File} objects.
+Directories are also represented as ${code{"File"}} objects.
 Again, the selection can be done either by passing a complete directory name, or a global pattern that will be matched against the names of the directories found.
 
-@hl.openmole("""
+${hl.openmole("""
 val someVariable = Val[String]
 val dirs = Val[Array[File]]
 val aaaDirs = Val[Array[File]]
@@ -80,21 +101,20 @@ val s2 =
   ListDirectoriesSource(workDirectory / "${someVariable}", aaaDirs, "^aaa.*") set (
     inputs += someVariable
   )
-""", name = "list directories source")
+""", name = "list directories source")}
 
 Sources store each entry found in an Array.
 In most cases, you will want each of the entries to feed a different task.
-Let's now see how this can be done by reusing what we've discovered with the @aa("data processing sampling", href := DocumentationPages.fileSampling.file).
+Let's now see how this can be done by reusing what we've discovered with the ${a("data processing sampling", href := DocumentationPages.fileSampling.file)}.
 
 
+${h2{"A complete example"}}
 
-@h2{A complete example}
-
-Here, we are collecting all the directories named @i{care_archive}.
-See how they are gathered in an @i{Array[File]} container and can be explored by an @aa("ExplorationTask", href := fileSampling.file) using the keyword @code{in}.
+Here, we are collecting all the directories named ${i{"care_archive"}}.
+See how they are gathered in an @i{Array[File]} container and can be explored by an ${a("ExplorationTask", href := fileSampling.file)} using the keyword ${code{"in"}}.
 This exploration generates one @code{analysisTask} per directory collected by the source.
 
-@hl.openmole("""
+${hl.openmole("""
 val directoriesToAnalyze  = Val[Array[File]]
 
 val s = ListDirectoriesSource(workDirectory / "data/care_DoE", directoriesToAnalyze, "care_archive")
@@ -109,26 +129,30 @@ SystemExecTask(s"${myWorkDirectory}/re-execute.sh") set (
 
 val exploration = ExplorationTask(inDir in directoriesToAnalyze)
 
-(exploration source s) -< analysisTask""", name = "complete example with source")
+(exploration source s) -< analysisTask""", name = "complete example with source")}
 
 
-@h2{Retrieve data from a HTTP URL}
+${h2{"Retrieve data from a HTTP URL"}}
 
-You can inject data into your workflow from a HTTP/HTTPS URL using the @code{HttpURLSource}.
+You can inject data into your workflow from a HTTP/HTTPS URL using the ${code{"HttpURLSource"}}.
 This is a preferred method to making network calls from within your model: when model runs are distributed on a cluster or the grid, such requests may fail.
 This source will retrieve raw content from the provided URL, and attribute to a String or a File prototype (in the second case, the content is written as file content).
 This is illustrated in the following example with a String prototype:
 
-@hl.openmole("""
+${hl.openmole("""
 val stringOutput = Val[String]
 val s = HttpURLSource("http://api.ipify.org",stringOutput)
 ScalaTask("println(input.stringOutput)") set ((inputs,outputs) += (stringOutput)) source s hook display
-""", name = "example http url source")
+""", name = "example http url source")}
 
 and in the following example with a File prototype.
 
-@hl.openmole("""
+${hl.openmole("""
 val fileOutput = Val[File]
 val s = HttpURLSource("http://api.ipify.org",fileOutput)
 ScalaTask("println(input.fileOutput)") set ((inputs,outputs) += (fileOutput)) source s hook CopyFileHook(fileOutput,"test.txt")
-""", name = "example http url source file")
+""", name = "example http url source file")}
+
+""")
+
+

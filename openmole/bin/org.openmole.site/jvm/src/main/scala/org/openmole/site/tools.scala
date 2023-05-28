@@ -198,6 +198,12 @@ package object tools {
       )
     )
 
+  
+  def sourceLink(source: String) = 
+    if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/tree/dev/$source"
+    else s"https://github.com/openmole/openmole/tree/${org.openmole.core.buildinfo.version.major}-dev/$source"
+
+
   def modificationLink(source: String) =
     if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
     else s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
