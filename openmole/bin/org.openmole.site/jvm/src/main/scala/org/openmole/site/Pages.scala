@@ -304,12 +304,12 @@ object DocumentationPages {
   def tutoPages = pageNode(tutorials, Vector(stepByStepIntro, exploreTuto, simpleSAFire, netLogoGA, market))
   //def menuTutoPages = Seq(stepByStepIntro, exploreTuto, netLogoGA, simpleSAFire, market)
 
-  lazy val tutorials = DocumentationPage.fromScalatex(name = "Tutorials", content = scalatex.tutorials.Tutorials)
-  lazy val stepByStepIntro = DocumentationPage.fromScalatex(name = "Step By Step Introduction", content = scalatex.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
-  lazy val exploreTuto = DocumentationPage.fromScalatex(name = "First Exploration", content = scalatex.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
-  lazy val simpleSAFire = DocumentationPage.fromScalatex(name = "Sensitivity Analysis", content = scalatex.tutorials.netLogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis of the Fire NetLogo Model"))
-  lazy val netLogoGA = DocumentationPage.fromScalatex(name = "Calibration with GA", content = scalatex.tutorials.netLogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
-  lazy val market = DocumentationPage.fromScalatex(name = "Market Place", content = scalatex.tutorials.Market)
+  lazy val tutorials = DocumentationPage.fromContent(name = "Tutorials", content = org.openmole.site.content.tutorials.Tutorials)
+  lazy val stepByStepIntro = DocumentationPage.fromContent(name = "Step By Step Introduction", content = org.openmole.site.content.tutorials.gettingStarted.StepByStepIntro, title = Some("A Step by Step Introduction to OpenMOLE"))
+  lazy val exploreTuto = DocumentationPage.fromContent(name = "First Exploration", content = org.openmole.site.content.tutorials.gettingStarted.ExploreTuto, title = Some("How to Execute an Exploration Task"))
+  lazy val simpleSAFire = DocumentationPage.fromContent(name = "Sensitivity Analysis", content = org.openmole.site.content.tutorials.netlogo.SimpleSAFire, title = Some("Simple Sensitivity Analysis of the Fire NetLogo Model"))
+  lazy val netLogoGA = DocumentationPage.fromContent(name = "Calibration with GA", content = org.openmole.site.content.tutorials.netlogo.NetLogoGA, title = Some("Using Genetic Algorithms to Calibrate a NetLogo Model"))
+  lazy val market = DocumentationPage.fromContent(name = "Market Place", content = org.openmole.site.content.tutorials.Market)
 
   // Community
   def communityPages = pageNode(OMcommunity, Vector(howToContribute, training, communications, whoWeAre, partner))
