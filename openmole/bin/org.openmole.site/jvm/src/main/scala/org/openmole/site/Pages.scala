@@ -207,7 +207,7 @@ object DocumentationPages {
   def docLonelyPages = pageNode(documentation, Vector(gui, commandOptions, faq))
 
   lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI, title = Some("Graphical User Interface"))
-  lazy val commandOptions = DocumentationPage.fromScalatex(name = "Command Options", content = scalatex.documentation.CommandOptions)
+  lazy val commandOptions = DocumentationPage.fromContent(name = "Command Options", content = org.openmole.site.content.documentation.CommandOptions)
   val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
 
   // Plug
@@ -275,10 +275,10 @@ object DocumentationPages {
 
   def utilityTaskPages = pageNode(utilityTask, Vector(templateTask, moleTask, spatialTask))
 
-  lazy val utilityTask = DocumentationPage.fromScalatex(name = "Utility Tasks", content = scalatex.documentation.utilityTask.Task)
-  lazy val templateTask = DocumentationPage.fromScalatex(name = "Template Task", content = scalatex.documentation.utilityTask.TemplateTask)
-  lazy val moleTask = DocumentationPage.fromScalatex(name = "Mole Task", content = scalatex.documentation.utilityTask.MoleTask)
-  lazy val spatialTask = DocumentationPage.fromScalatex(name = "Spatial Task", content = scalatex.documentation.utilityTask.SpatialTask)
+  lazy val utilityTask = DocumentationPage.fromContent(name = "Utility Tasks", content = org.openmole.site.content.documentation.utilityTask.Task)
+  lazy val templateTask = DocumentationPage.fromContent(name = "Template Task", content = org.openmole.site.content.documentation.utilityTask.TemplateTask)
+  lazy val moleTask = DocumentationPage.fromContent(name = "Mole Task", content = org.openmole.site.content.documentation.utilityTask.MoleTask)
+  lazy val spatialTask = DocumentationPage.fromContent(name = "Spatial Task", content = org.openmole.site.content.documentation.utilityTask.SpatialTask)
 
   // Advanced Concepts
   def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, island, stochasticityManagement))
