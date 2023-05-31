@@ -17,19 +17,15 @@ package org.openmole.site.content.tutorials.gettingStarted
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native._
 
 object ExploreTuto extends PageContent(html"""
 
 ${h2{"Overview"}}
 
 In this tutorial, you will learn how to prepare and run an experiment, in order to explore a simple model.
-The toy model is @i{Ants.nlogo}, since we already know how to import and run it from the ${a("previous tutorial", href := stepByStepIntro.file)}.
+The toy model is @i{Ants.nlogo}, since we already know how to import and run it from the ${a("previous tutorial", href := DocumentationPages.stepByStepIntro.file)}.
 
 $br
 
@@ -219,6 +215,6 @@ ${img(src := Resource.img.tutorial.gridOutput.file, width := "75%")}
 
 ${h2{"To go further"}}
 
-In the ${a("next tutorial", href := simpleSAFire.file)}, an other example of direct sampling with a NetLogo model will give a deeper insight on how to understand and analyze the results of such an experiment.
+In the ${a("next tutorial", href := DocumentationPages.simpleSAFire.file)}, an other example of direct sampling with a NetLogo model will give a deeper insight on how to understand and analyze the results of such an experiment.
 
 """)

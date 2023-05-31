@@ -17,12 +17,8 @@ package org.openmole.site.content.tutorials.netlogo
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native.*
 
 object SimpleSAFireValue {
 
@@ -45,12 +41,12 @@ Typical sensitivity analysis (in a simulation experiment context) is the study o
 
 ${img(src := Resource.img.method.sensitivityAnim.file, width := "80%")}
 
-${basicButton("Run", classIs(btn, btn_danger))(id := shared.sensitivity.button, stylesheet.svgRunButton(10))}
+${basicButton("Run", classIs(btn, btn_danger))(id := shared.sensitivity.button, svgRunButton(10))}
 
 
 ${h3{"Prerequisites"}}
 
-A plugged model in OpenMOLE: see ${a("Step By Step Introduction", href := stepByStepIntro.file + "#ImportingatoymodelAnts")}
+A plugged model in OpenMOLE: see ${a("Step By Step Introduction", href := DocumentationPages.stepByStepIntro.file + "#ImportingatoymodelAnts")}
 
 
 ${h2{"Variation of one input"}}

@@ -17,12 +17,8 @@ package org.openmole.site.content.tutorials
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native.*
 
 object Tutorials extends PageContent(html"""
 
@@ -36,20 +32,20 @@ We'll make sure to integrate it with the next release.
 
 ${h3{"Getting Started"}}
 ${ul(
-    li(a("A Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file)),
-    li(a("How to Execute an Exploration Task", href := exploreTuto.file))
+    li(a("A Step by Step Introduction to OpenMOLE", href := DocumentationPages.stepByStepIntro.file)),
+    li(a("How to Execute an Exploration Task", href := DocumentationPages.exploreTuto.file))
 )}
 
 ${h3{"NetLogo Tutorials"}}
 ${ul(
-    li(a("Simple Sensitivity Analysis of the Fire NetLogo Model", href := simpleSAFire.file)),
-    li(a("Using Genetic Algorithms to Calibrate a NetLogo Model", href := netLogoGA.file))
+    li(a("Simple Sensitivity Analysis of the Fire NetLogo Model", href := DocumentationPages.simpleSAFire.file)),
+    li(a("Using Genetic Algorithms to Calibrate a NetLogo Model", href := DocumentationPages.netLogoGA.file))
 )}
 
 
 ${h2{"Market Place"}}
 
-In the ${a("Market Place", href := market.file)} you will find several examples of OpenMOLE use cases, to demonstrate how to apply the various exploration methods.
+In the ${a("Market Place", href := DocumentationPages.market.file)} you will find several examples of OpenMOLE use cases, to demonstrate how to apply the various exploration methods.
 They are self-contained working examples, with different models written in different languages.
 
 """)

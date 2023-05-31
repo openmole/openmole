@@ -17,12 +17,8 @@ package org.openmole.site.content.tutorials.netlogo
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native.*
 
 object NetLogoGAValue {
  def model = """
@@ -64,7 +60,7 @@ import NetLogoGAValue.*
 object NetLogoGA extends PageContent(html"""
 
 This example presents how to explore a NetLogo model step by step with an Evolutionary/Genetic Algorithm (EA/GA) in OpenMOLE.
-For more generic details regarding the use of Genetic Algorithms within OpenMOLE, you can check the ${a("GA section of the methods documentation", href := explore.file + "#Geneticalgorithms")}
+For more generic details regarding the use of Genetic Algorithms within OpenMOLE, you can check the ${a("GA section of the methods documentation", href := DocumentationPages.explore.file + "#Geneticalgorithms")}
 
 
 ${h2{"The ant model"}}
@@ -189,7 +185,7 @@ NSGA2Evolution(
 
 ${h2{"Scale up"}}
 
-If you use distributed computing, it might be a good idea to opt for an island model (see ${a("this page", href := island.file)}) for more details on the island distribution scheme.
+If you use distributed computing, it might be a good idea to opt for an island model (see ${a("this page", href := DocumentationPages.island.file)}) for more details on the island distribution scheme.
 Islands are better suited to exploit distributed computing resources than classical generational genetic algorithms.
 See how the end of the script changes to implement islands in the workflow.
 Here we compute 2,000 islands in parallel, each running during 10 minutes on the European grid:

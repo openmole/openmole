@@ -17,12 +17,8 @@ package org.openmole.site.content.scale
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Environment.*
+import org.openmole.site.content.header.*
+import Environment.*
 
 
 object Scale extends PageContent(html"""
@@ -34,8 +30,8 @@ Tasks in OpenMOLE have been designed so that delegating a part of the workload t
 
 ${h2{"Setting up an Authentication"}}
 
-You first need to declare the environments you want to use and the corresponding authentication credentials, in the OpenMOLE GUI (see the ${aa("GUI guide", href := gui.file + "#Authentications")} for more information).
-Have a look ${a("here", href := console.file + "#Authentications")} to set up an authentication in console mode.
+You first need to declare the environments you want to use and the corresponding authentication credentials, in the OpenMOLE GUI (see the ${aa("GUI guide", href := DocumentationPages.gui.file + "#Authentications")} for more information).
+Have a look ${a("here", href := DocumentationPages.console.file + "#Authentications")} to set up an authentication in console mode.
 
 
 
@@ -71,7 +67,7 @@ $br
 
 You do not need to install anything or perform any kind of configuration on the target execution environment, OpenMOLE does all the work and uses the infrastructure in place.
 You will however be required to provide the authentication information in order for OpenMOLE to access the remote environment (see ${a("here", href := "#SettingupanAuthentication")}).
-In case you face authentication problems when targeting an environment through SSH, please refer to the corresponding entry in the ${aa("FAQ", href := faq.file + "#WhyismySSHauthenticationnotworking")}.
+In case you face authentication problems when targeting an environment through SSH, please refer to the corresponding entry in the ${aa("FAQ", href := DocumentationPages.faq.file + "#WhyismySSHauthenticationnotworking")}.
 
 $br
 
@@ -113,10 +109,10 @@ ${h2{"Available environments"}}
 
 Multiple environments are available to delegate your workload, depending on the kind of resources you have at your disposal.
 ${ul(
-  li{html"${a("Multi-thread", href := multithread.file)} permits to execute the tasks concurrently on your own machine,"},
-  li{html"${a("SSH", href := ssh.file)} allows to execute tasks on a remote server, connecting through SSH,"},
-  li{html"a wide variety of ${a("clusters", href := cluster.file)} are also available, such as ${aa("PBS/Torque", href := cluster.file +"#PBS")}, ${aa("SGE", href := cluster.file + "#SGE")}, ${aa("Slurm", href := cluster.file + "#Slurm")}, ${aa("Condor", href := cluster.file + "#Condor")}, or ${aa("OAR", href := cluster.file + "#OAR")},"},
-  li{html"finally, you can also use the ${aa("European Grid Infrastructure", href := egi.file)} to execute tasks."}
+  li{html"${a("Multi-thread", href := DocumentationPages.multithread.file)} permits to execute the tasks concurrently on your own machine,"},
+  li{html"${a("SSH", href := DocumentationPages.ssh.file)} allows to execute tasks on a remote server, connecting through SSH,"},
+  li{html"a wide variety of ${a("clusters", href := DocumentationPages.cluster.file)} are also available, such as ${aa("PBS/Torque", href := DocumentationPages.cluster.file +"#PBS")}, ${aa("SGE", href := DocumentationPages.cluster.file + "#SGE")}, ${aa("Slurm", href := DocumentationPages.cluster.file + "#Slurm")}, ${aa("Condor", href := DocumentationPages.cluster.file + "#Condor")}, or ${aa("OAR", href := DocumentationPages.cluster.file + "#OAR")},"},
+  li{html"finally, you can also use the ${aa("European Grid Infrastructure", href := DocumentationPages.egi.file)} to execute tasks."}
 )}
 
 """)

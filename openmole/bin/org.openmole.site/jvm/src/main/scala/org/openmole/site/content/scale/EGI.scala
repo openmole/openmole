@@ -17,12 +17,8 @@ package org.openmole.site.content.scale
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Environment.*
+import org.openmole.site.content.header.*
+import Environment.*
 
 
 object EGI extends PageContent(html"""
@@ -33,7 +29,7 @@ OpenMOLE makes it very simple to benefit from the grid.
 
 ${h2{"Setting up an EGI authentication"}}
 
-You first need to import your EGI certificate in OpenMOLE as described in the ${aa("GUI guide", href := gui.file + "#Authentications")}.
+You first need to import your EGI certificate in OpenMOLE as described in the ${aa("GUI guide", href := DocumentationPages.gui.file + "#Authentications")}.
 
 
 ${h3{"Authentication in console mode"}}

@@ -17,12 +17,8 @@ package org.openmole.site.content.tutorials
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native.*
 
 object Market extends PageContent(html"""
 
@@ -54,7 +50,7 @@ ${ul(
   li(html"${b("Approximate Bayesian Computation")}"),
 )}
 
-Some of these tutorials are also detailed in the ${a("Tutorials", href := tutorials.file)} section.
+Some of these tutorials are also detailed in the ${a("Tutorials", href := DocumentationPages.tutorials.file)} section.
 
 
 ${h3{"NetLogo examples"}}

@@ -17,13 +17,8 @@ package org.openmole.site.content.scale
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
+import Environment.*
 
 object SSH extends PageContent(html"""
 The ${code{"SSHEnvironment"}} makes it possible to delegate tasks to a remote multi-core server through an ${aa("SSH", href := shared.link.ssh)} connection.

@@ -17,12 +17,8 @@ package org.openmole.site.content.tutorials.gettingStarted
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
+import Native.*
 
 object StepByStepIntro extends PageContent(html"""
 
@@ -35,14 +31,14 @@ It offers several methods to perform experiments on a model, in order to better 
 
 $br
 
-The composition of a full exploration experiment is achieved by writing a script in the ${a("OpenMOLE language", href := language.file)}, which is an extension of the Scala language.
+The composition of a full exploration experiment is achieved by writing a script in the ${a("OpenMOLE language", href := DocumentationPages.language.file)}, which is an extension of the Scala language.
 Such a script is called a @i{workflow} and should contain:
   ${ul(
-    li(html"some ${a("tasks", href := plug.file + "#Tasks")} (the model to explore needs to be embedded in a task for instance),"),
-    li(html"their inputs and outputs as ${a("objects", href := language.file + "#Constructobjects")},"),
-    li(html"an ${a("exploration method", href := explore.file)},"),
-    li(html"some ${a("hooks", href := hook.file)} to save or display the results of the exploration,"),
-    li(html"and optionally, an ${a("execution environment", href := scale.file)}.")
+    li(html"some ${a("tasks", href := DocumentationPages.plug.file + "#Tasks")} (the model to explore needs to be embedded in a task for instance),"),
+    li(html"their inputs and outputs as ${a("objects", href := DocumentationPages.language.file + "#Constructobjects")},"),
+    li(html"an ${a("exploration method", href := DocumentationPages.explore.file)},"),
+    li(html"some ${a("hooks", href := DocumentationPages.hook.file)} to save or display the results of the exploration,"),
+    li(html"and optionally, an ${a("execution environment", href := DocumentationPages.scale.file)}.")
   )}
 
 
@@ -144,6 +140,6 @@ You can also reach us via our ${aa("RocketChat", href := shared.link.chat)}.
 
 
 ${h3{"Next tutorial"}}
-In the ${a("next tutorial", href := exploreTuto.file)}, you will learn how to prepare and run a more complex experiment, in order to explore your model with OpenMOLE.
+In the ${a("next tutorial", href := DocumentationPages.exploreTuto.file)}, you will learn how to prepare and run a more complex experiment, in order to explore your model with OpenMOLE.
 
 """)
