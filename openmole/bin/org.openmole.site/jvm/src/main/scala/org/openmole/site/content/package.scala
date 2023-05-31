@@ -1,7 +1,7 @@
-package org.openmole.site
+package org.openmole.site.content
 
 /*
- * Copyright (C) 2015 Romain Reuillon
+ * Copyright (C) 2023 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,17 +17,9 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object Config {
-  val baseURL = "http://www.openmole.org"
-
-  lazy val closedIssues = Map(
-    "12" -> "https://github.com/openmole/openmole/milestone/10",
-    "10" -> "https://github.com/openmole/openmole/milestone/8",
-    "9" -> "https://github.com/openmole/openmole/milestone/7?closed=1",
-    "8" -> "https://github.com/openmole/openmole/milestone/4?closed=1",
-    "7" → "https://github.com/openmole/openmole/milestone/3?closed=1",
-    "6.2" → "",
-    "6.1" → "https://github.com/openmole/openmole/milestone/6?closed=1",
-    "6.0" → "https://github.com/openmole/openmole/milestone/2?closed=1"
-  )
-}
+object header:
+  export scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, footer => _, SeqFrag => _, _}
+  export org.openmole.site.{DocumentationPages, PageContent, Resource, shared, Papers}
+  export org.openmole.site.tools._
+  export org.openmole.site.stylesheet._
+  export org.openmole.site.content.{Native, Environment}

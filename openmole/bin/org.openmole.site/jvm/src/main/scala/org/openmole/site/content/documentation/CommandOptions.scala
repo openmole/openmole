@@ -17,13 +17,7 @@ package org.openmole.site.content.documentation
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object CommandOptions extends PageContent(html"""
 
@@ -38,7 +32,7 @@ OpenMOLE supports Chrome and Firefox, so if you are using another default web br
 $br
 
 You should see something like below.
-The documentation concerning the GUI is provided within the GUI, some basic information can also be found ${a("here", href := gui.file)}.
+The documentation concerning the GUI is provided within the GUI, some basic information can also be found ${a("here", href := DocumentationPages.gui.file)}.
 
 ${img(src := Resource.img.mole.uiScreenshot.file, width := "100%")}
 

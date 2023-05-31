@@ -17,14 +17,7 @@ package org.openmole.site.content.advancedConcepts.GA
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
-
+import org.openmole.site.content.header.*
 
 object GeneticAlgorithmValue {
   def model = s"""
@@ -54,12 +47,12 @@ import GeneticAlgorithmValue.*
 
 object GeneticAlgorithm extends PageContent(html"""
 
-The various ${a("methods", href := explore.file)} available in OpenMOLE make an extensive use of genetic algorithms (GA).
+The various ${a("methods", href := DocumentationPages.explore.file)} available in OpenMOLE make an extensive use of genetic algorithms (GA).
 For instance, it is the case for the @aa("model calibration method", href := calibration.file), which is an optimization problem, or the search for output diversity with the @a("PSE method", href:= pse.file), which boils down to a GA with a novelty incentive.
 
 $br
 
-GAs can be smartly distributed on grid environments using an ${a("island scheme", href := island.file)}, and are able to deal with ${a("stochastic models", href:=stochasticityManagement.file)}.
+GAs can be smartly distributed on grid environments using an ${a("island scheme", href := DocumentationPages.island.file)}, and are able to deal with ${a("stochastic models", href:= DocumentationPages.stochasticityManagement.file)}.
 
 
 ${h2{"About Calibration and GA"}}
@@ -97,7 +90,7 @@ ${h2{"Dummy Model Optimization Example"}}
 
 This workflow optimizes a dummy model using the generational NSGA-II multi-objective algorithm.
 You can replace the instances of ${code{"model"}} by your own model, and adapt the variation range of the input variables.
-If you are not familiar with parameter tuning using GA, you should first consult the ${a("tutorial", href := netLogoGA.file)} explaining how to calibrate a NetLogo model with a GA.
+If you are not familiar with parameter tuning using GA, you should first consult the ${a("tutorial", href := DocumentationPages.netLogoGA.file)} explaining how to calibrate a NetLogo model with a GA.
 
 ${hl.openmole(s"""
 $model
@@ -177,6 +170,6 @@ Each csv file contains a column with the generation number, the values of parame
 
 ${h2{"Real world Example"}}
 
-This ${a("tutorial", href:=netLogoGA.file)} exposes how to use Genetic Algorithms to perform optimization on a NetLogo model.
+This ${a("tutorial", href:= DocumentationPages.netLogoGA.file)} exposes how to use Genetic Algorithms to perform optimization on a NetLogo model.
 
 """)

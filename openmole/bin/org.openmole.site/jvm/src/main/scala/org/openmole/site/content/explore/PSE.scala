@@ -17,13 +17,7 @@ package org.openmole.site.content.explore
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object PSE extends PageContent(html"""
 
@@ -65,7 +59,7 @@ ${Resource.rawFrag(Resource.img.method.pseAnim)}
 
 $br
 
-${basicButton("Run", classIs(btn, btn_danger))(id := shared.pse.button, stylesheet.svgRunButton(-50))}
+${basicButton("Run", classIs(btn, btn_danger))(id := shared.pse.button, svgRunButton(-50))}
 
 
 
@@ -98,7 +92,7 @@ ${ul(
   li(html"${code{"output"}} the directory in which to store the population files,"),
   li{html"${code{"frequency"}} ($optional, Long) the frequency at which the generations should be saved."}
 )}
-For more details about hooks, check the corresponding ${aa("Language", href := hook.file)} page.
+For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
 
 
 ${h3{"Use example"}}
@@ -149,11 +143,11 @@ The PSE method is described in the following scientific paper :
 $br
 Guillaume Chérel, Clémentine Cottineau and Romain Reuillon, « Beyond Corroboration: Strengthening Model Validation by Looking for Unexpected Patterns» published in ${i{"PLOS ONE"}} 10(9), 2015.
 $br
-${a("[online version]" , href:=shared.link.paper.beyondCorroboration)} ${a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)}
+${a("[online version]" , href:= shared.link.paper.beyondCorroboration)} ${a("[bibteX]", href:= Resource.bibtex.PSEmethodBib.file)}
 
 
 ${h3{"Stochastic models"}}
 
-You can check additional options to run PSE on stochastic models on ${aa("this page", href := stochasticityManagement.file)}.
+You can check additional options to run PSE on stochastic models on ${aa("this page", href := DocumentationPages.stochasticityManagement.file)}.
 
 """)

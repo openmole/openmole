@@ -17,13 +17,7 @@ package org.openmole.site.content.explore
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Calibration extends PageContent(html"""
 
@@ -31,7 +25,7 @@ Using Genetic Algorithms (GA), OpenMOLE finds the input set matching one or seve
 In practice, calibration is used to target ${b{"one"}} specific scenario or dynamic.
 Usually, a fitness function is used to assess the distance between obtained dynamics and your target dynamic.
 In case your model is not able to match the target dynamic, the calibration will find the parameterization producing the closest (according to your fitness function) possible dynamic.
-For more details on calibration using genetic algorithms, see the ${aa("GA detailed page", href := geneticAlgorithm.file)}.
+For more details on calibration using genetic algorithms, see the ${aa("GA detailed page", href := DocumentationPages.geneticAlgorithm.file)}.
 
 
 ${h2{"Single criterion Calibration"}}
@@ -47,7 +41,7 @@ $br
 
 For the same reason, this method is not intended to cover the entirety of the input and output spaces, and thus does not perform well regarding the input and output exploration grades.
 It concentrates the sampling of the input space towards the part which minimizes the fitness, and therefore intentionally neglects the part of the input space leading to high fitness values.
-Calibration can handle stochasticity, using a ${aa("specific method", href := stochasticityManagement.file)}.
+Calibration can handle stochasticity, using a ${aa("specific method", href := DocumentationPages.stochasticityManagement.file)}.
 
 $br
 
@@ -137,7 +131,7 @@ Where ${code{"param1"}}, ${code{"param2"}}, ${code{"param3"}} and ${code{"param4
 
 $br$br
 
-More details and advanced notions can be found on the ${aa("GA detailed page", href := geneticAlgorithm.file)}.
+More details and advanced notions can be found on the ${aa("GA detailed page", href := DocumentationPages.geneticAlgorithm.file)}.
 
 
 ${h3{"Hook"}}
@@ -154,7 +148,7 @@ ${ul(
   li{html"${code{"frequency"}}: $optional, Long, the frequency at which the generations should be saved."}
 )}
 
-For more details about hooks, check the corresponding ${aa("Language", href := hook.file)} page.
+For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
 
 
 ${h3{"Example"}}
@@ -214,5 +208,5 @@ NSGA2Evolution(
 
 ${h3{"Stochastic models"}}
 
-You can check additional options to calibrate stochastic models on ${aa("this page", href := stochasticityManagement.file)}.
+You can check additional options to calibrate stochastic models on ${aa("this page", href := DocumentationPages.stochasticityManagement.file)}.
 """)

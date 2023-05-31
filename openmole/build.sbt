@@ -778,8 +778,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(/*Libraries.autowire, Libraries.boopickle, */ Libraries.scalaTags, /*Libraries.scalatra, */ Libraries.clapper),
-  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
+  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.clapper, Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
   guiSettings) dependsOn(
   apiGUI,
   dataGUI,
@@ -1175,24 +1174,22 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
 lazy val siteJVM = site.jvm dependsOn(tools, openmoleProject, serializer, openmoleBuildInfo, marketIndex) settings(
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
   //libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
-  libraryDependencies += Libraries.json4s cross CrossVersion.for2_13Use3,
+//  libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.spray,
-  libraryDependencies += Libraries.txtmark,
+//  libraryDependencies += Libraries.txtmark,
   libraryDependencies += Libraries.scalaTags,
-  libraryDependencies += Libraries.scalajHttp,
+  //libraryDependencies += Libraries.scalajHttp,
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % scalaXMLVersion,
 
-  excludeDependencies ++= Seq(
-    ExclusionRule("com.lihaoyi", "sourcecode_3"),
-    ExclusionRule("com.lihaoyi", "geny_3"),
-    ExclusionRule("com.lihaoyi", "scalatags_2.13"),
-    //ExclusionRule("org.typelevel", "cats-kernel_3"),
-    //ExclusionRule("org.typelevel", "cats-core_3"),
-    //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
-  )
+//  excludeDependencies ++= Seq(
+//    ExclusionRule("com.lihaoyi", "sourcecode_3"),
+//    ExclusionRule("com.lihaoyi", "geny_3"),
+//    ExclusionRule("com.lihaoyi", "scalatags_2.13"),
+//    //ExclusionRule("org.typelevel", "cats-kernel_3"),
+//    //ExclusionRule("org.typelevel", "cats-core_3"),
+//    //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
+//  )
   //libraryDependencies ~= _.map(_ excludeAll (ExclusionRule(organization = "com.lihaoyi", name = "sourcecode_2.13"))),
-) settings (
-  scala2Settings
 )
 
 lazy val cloneMarket = taskKey[Unit]("cloning market place")

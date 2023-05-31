@@ -17,13 +17,7 @@ package org.openmole.site.content.explore.sampling
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object FileSampling extends PageContent(html"""
 
@@ -100,7 +94,7 @@ $br
 ${h2{"Files vs Paths"}}
 
 As its name suggests, the ${code{"files"}} selector manipulates ${code{"File"}} instances and directly injects them in the dataflow.
-If you plan to delegate your workflow to a ${aa("local cluster environment", href :=  cluster.file)} equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
+If you plan to delegate your workflow to a ${aa("local cluster environment", href :=  DocumentationPages.cluster.file)} equipped with a shared file system across all nodes, you don't need data to be automatically copied by OpenMOLE.
 
 $br
 
@@ -131,7 +125,7 @@ ${hl.openmole("""
 
 $br
 
-More details on the difference between manipulating ${code{"Files"}} and ${code{"Paths"}} can be found in the dedicated entry of the ${aa("FAQ", href:= faq.file + "#WhenshallIusePathoverFile?")}.
+More details on the difference between manipulating ${code{"Files"}} and ${code{"Paths"}} can be found in the dedicated entry of the ${aa("FAQ", href:= DocumentationPages.faq.file + "#WhenshallIusePathoverFile?")}.
 
 
 ${h2{"Going further"}}

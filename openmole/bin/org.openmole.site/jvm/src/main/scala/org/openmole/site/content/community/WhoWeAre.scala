@@ -17,13 +17,10 @@ package org.openmole.site.content.community
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
+import org.openmole.site.content.header.*
 
 object WhoWeAreTool {
+  import org.openmole.site.FileResource
   def member(image: FileResource, name: String): Frag =
     div(paddingTop := 60)(
       img(src := image.file, height := 70, paddingRight := 10),
@@ -34,7 +31,7 @@ object WhoWeAreTool {
 import WhoWeAreTool._
 
 object WhoWeAre extends PageContent(
-  div(stylesheet.centerBox100)(
+  div(centerBox100)(
     a(img(src := Resource.img.partner.iscpif.file,  partners), href := shared.link.partner.iscpif, target := "_blank"),
     a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
   ),

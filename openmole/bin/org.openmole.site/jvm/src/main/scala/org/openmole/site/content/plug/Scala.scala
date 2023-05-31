@@ -17,19 +17,13 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Scala extends PageContent(html"""
 
 ${h2("Simple ScalaTask")}
 
-You can write Scala code to be executed in the workflow using the ${code("ScalaTask")}. For instance, the following workflow sums all the elements of an array using a ${code("ScalaTask")}, and displays the result. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on @aa("hooks", href := hook.file).
+You can write Scala code to be executed in the workflow using the ${code("ScalaTask")}. For instance, the following workflow sums all the elements of an array using a ${code("ScalaTask")}, and displays the result. Similarly, you could use such a task to generate some model parameter values or perform some data analysis. To get more details on the hook part you can check the doc on ${a("hooks", href := DocumentationPages.hook.file)}.
 
 ${hl.openmole("""
     // Define variables
@@ -49,23 +43,23 @@ ${hl.openmole("""
     sum hook display
 """)}
 
-You can also plug you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE ${a("Plugin", href := pluginDevelopment.file)}.
+You can also plug you own Scala/Java code and libraries in OpenMOLE using an OpenMOLE ${a("Plugin", href := DocumentationPages.pluginDevelopment.file)}.
 
 
 ${h3("Useful functions")}
 
-In addition to Scala code, OpenMOLE provides ${aa("a few useful functions", href := scalaFunction.file)} to aggregate data, create files, create random number generators, etc.
+In addition to Scala code, OpenMOLE provides ${aa("a few useful functions", href := DocumentationPages.scalaFunction.file)} to aggregate data, create files, create random number generators, etc.
 
 
 ${h3("File Management")}
 
-To learn how to provide pre-existing files to a ${code{"ScalaTask"}}, how to write into files or use files created by previous tasks in the workflow, you can go to the ${aa("file management page", href := fileManagement.file)}.
+To learn how to provide pre-existing files to a ${code{"ScalaTask"}}, how to write into files or use files created by previous tasks in the workflow, you can go to the ${aa("file management page", href := DocumentationPages.fileManagement.file)}.
 
 
 
 ${h2("Plugins")}
 
-In order to use code from an ${a("OpenMOLE plugin", href := pluginDevelopment.file)} in a task, you need to associate the plugin to the task, otherwise, OpenMOLE will not know how to execute your task.
+In order to use code from an ${a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file)} in a task, you need to associate the plugin to the task, otherwise, OpenMOLE will not know how to execute your task.
 To do so, use the ${code{"plugins"}} keyword and the ${code{"pluginsOf"}} function.
 ${code{"pluginsOf"}} takes an object from your plugin as parameter, or a class if you use ${code{"[]"}}:
 ${ul(

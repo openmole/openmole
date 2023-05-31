@@ -17,13 +17,7 @@ package org.openmole.site.content.explore
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Profile extends PageContent(html"""
 
@@ -58,12 +52,12 @@ ${Resource.rawFrag(Resource.img.method.profileAnim)}
 
 $br
 
-${basicButton("Run", classIs(btn, btn_danger))(id := shared.profile.button, stylesheet.svgRunButton(-70))}
+${basicButton("Run", classIs(btn, btn_danger))(id := shared.profile.button, svgRunButton(-70))}
 
 $br
 
 Given a fitness function, the profile of a selected parameter ${b{"i"}} is constructed by dividing its interval into subintervals of equal size.
-For each subinterval, ${b{"i"}} is fixed, and the model is calibrated to minimise the fitness, similarly to ${a("Calibration", href :=DocumentationPages.calibration.file)}.
+For each subinterval, ${b{"i"}} is fixed, and the model is calibrated to minimise the fitness, similarly to ${a("Calibration", href := DocumentationPages.calibration.file)}.
 The optimisation is performed over the other parameters of the model.
 
 $br$br
@@ -115,7 +109,7 @@ ${ul(
   li{html"${code{"frequency"}}: ($optional, Long) the frequency at which the generations should be saved."}
 )}
 
-For more details about hooks, check the corresponding ${aa("Language", href := hook.file)} page.
+For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
 
 
 ${h3{"Use example"}}
@@ -180,6 +174,6 @@ Romain Reuillon, Clara Schmitt, Ricardo De Aldama, and Jean-Baptiste Mouret, «A
 
 ${h3{"Stochastic models"}}
 
-${a("You can check additional options to profile stochastic models on this page.", href := stochasticityManagement.file)}
+${a("You can check additional options to profile stochastic models on this page.", href := DocumentationPages.stochasticityManagement.file)}
 
 """)

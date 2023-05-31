@@ -17,13 +17,7 @@ package org.openmole.site.content.explore.sampling
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Samplings extends PageContent(html"""
 
@@ -34,12 +28,12 @@ In a model simulation context, it boils down to declaring the inputs under study
 
 $br
 
-Your model inputs can be sampled in the traditional way, by using a ${a("grid (or regular) sampling", href:= elementarySamplings.file + "#GridSampling")}, or by ${a("sampling uniformly", href:= uniformSampling.file)} inside their respective domains.
-For higher dimension input space, specific statistics techniques ensuring low discrepancy like ${a("Latin Hypercube Sampling", href := highDimensionSamplings.file + "#LatinHypercubeSampling")} and ${a("SobolSequence", href := highDimensionSamplings.file + "#SobolSequence")} are available.
+Your model inputs can be sampled in the traditional way, by using a ${a("grid (or regular) sampling", href:= DocumentationPages.elementarySamplings.file + "#GridSampling")}, or by ${a("sampling uniformly", href:= DocumentationPages.uniformSampling.file)} inside their respective domains.
+For higher dimension input space, specific statistics techniques ensuring low discrepancy like ${a("Latin Hypercube Sampling", href := DocumentationPages.highDimensionSamplings.file + "#LatinHypercubeSampling")} and ${a("SobolSequence", href := DocumentationPages.highDimensionSamplings.file + "#SobolSequence")} are available.
 
 $br
 
-You can also use your own DoE in OpenMOLE, by providing a ${a("CSV file", href := customSampling.file)} containing your samples to OpenMOLE.
+You can also use your own DoE in OpenMOLE, by providing a ${a("CSV file", href := DocumentationPages.customSampling.file)} containing your samples to OpenMOLE.
 
 
 
@@ -91,18 +85,18 @@ The arguments of the ${code{"DirectSampling"}} task are the following:
 ${ul(
     li{html"${code{"evaluation"}} is the task (or a composition of tasks) that uses your inputs, typically your model task,"},
     li{html"${code{"sampling"}} is where you define your DoE, ${i{"i.e."}} the inputs you want varied,"},
-    li{html"${code{"aggregation"}} ($optional) is ${a(href := aggregationSampling.file, "an aggregation operation")} to be performed on the outputs of your evaluation task."}
+    li{html"${code{"aggregation"}} ($optional) is ${a(href := DocumentationPages.aggregationSampling.file, "an aggregation operation")} to be performed on the outputs of your evaluation task."}
 )}
 
 The ${code{"l"}} parameter is a uniform sampling of 10 numbers of the Long type, taken in the [Long.MIN_VALUE; Long.MAX_VALUE] domain of the Long native type.
-More details can be found ${a("here", href := uniformSampling.file)}.
+More details can be found ${a("here", href := DocumentationPages.uniformSampling.file)}.
 
 $br
 
 The ${code{"m"}} parameter is a sampling over different files that have been uploaded to the @b{workDirectory}.
 The files are explored as items of a list, gathered by the ${code{"files()"}} function and applied on the ${code{"dir"}} directory.
 Optionally, this list of files can be filtered with any ${code{"String => Boolean"}} functions such as ${code{"contains(), startswith(), endswith()"}} (see the ${aa("Java Class String Documentation", href:= shared.link.javaString)} for more details.
-More information on this sampling type ${a("here", href := fileSampling.file)}.
+More information on this sampling type ${a("here", href := DocumentationPages.fileSampling.file)}.
 
 
 ${h3{"Hook"}}
@@ -142,7 +136,7 @@ val exploration =
 
 $br
 
-For more details about hooks, check the corresponding ${a("Language", href := hook.file)} page.
+For more details about hooks, check the corresponding ${a("Language", href := DocumentationPages.hook.file)} page.
 
 ${h2{"Model replication"}}
 
@@ -231,4 +225,4 @@ Replication(
 
 $br
 
-For more details about hooks, check the corresponding ${a("Language", href := hook.file)} page.""")
+For more details about hooks, check the corresponding ${a("Language", href := DocumentationPages.hook.file)} page.""")

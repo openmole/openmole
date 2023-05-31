@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object GAMA extends PageContent(html"""
 
@@ -34,7 +28,7 @@ OpenMOLE supports GAMA model natively through the ${code{"GAMATask"}}.
 
 $br
 
-${preliminary("GAMATask")}
+${Native.preliminary("GAMATask")}
 
 ${h2{"The GAMATask"}}
 ${h3{"GAMA by example"}}
@@ -44,7 +38,7 @@ The example below illustrates an exploration of the predator-prey model of the G
 
 $br$br
 
-${openmole("""
+${hl.openmole("""
 // Declare the variables
 val numberOfPreys = Val[Double]
 val nbPreysInit = Val[Int]

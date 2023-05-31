@@ -17,7 +17,7 @@
 
 package org.openmole.site
 
-package object Papers {
+object Papers {
 
   import scalatags.Text.all._
 

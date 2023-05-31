@@ -17,13 +17,7 @@ package org.openmole.site.content.language
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
+import org.openmole.site.content.header.*
 
 
 object Language extends PageContent(html"""
@@ -97,8 +91,8 @@ Unspecified parameters are set to their default value.
 ${h2{"Going further"}}
 
 What you have read so far should be sufficient in order to get started with OpenMOLE.
-To begin with the OpenMOLE syntax you should have a look at the ${a("Getting started", href := stepByStepIntro.file)}.
-You may also want to look at the ${a("Task documentation", href := plug.file)}, and more generally the ${a("Documentation", href := documentation.file)}.
+To begin with the OpenMOLE syntax you should have a look at the ${a("Getting started", href := DocumentationPages.stepByStepIntro.file)}.
+You may also want to look at the ${a("Task documentation", href := DocumentationPages.plug.file)}, and more generally the ${a("Documentation", href := DocumentationPages.documentation.file)}.
 
 $br
 

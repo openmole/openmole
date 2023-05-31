@@ -19,10 +19,10 @@
 package org.openmole.site
 
 import scalatags.Text.all._
-import com.github.rjeschke._
-import org.apache.commons.math3.genetics.GeneticAlgorithm
+//import com.github.rjeschke._
+//import org.apache.commons.math3.genetics.GeneticAlgorithm
 
-import scalatex.{ openmole ⇒ scalatex }
+//import scalatex.{ openmole ⇒ scalatex }
 import org.openmole.tool.file._
 
 import scalatags.Text
@@ -99,11 +99,6 @@ case class PageLeaf(page: Page) extends PageTree {
 
 object Page {
 
-  type ScalatexContent = { def apply(): Frag; def sourcePath: String }
-
-  def fromScalatex[T <: Page.ScalatexContent](name: String, content: T, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None) =
-    apply(name, content(), details, title, extraMenu, Some(content.sourcePath))
-
   def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None, source: Option[String] = None) = {
     val (_name, _content, _details, _title, _extraMenu, _source) = (name, content, details, title, extraMenu, source)
 
@@ -135,14 +130,6 @@ object DocumentationPage {
     location: Option[String] = None,
     title: Option[String] = None) =
     apply(name, content.content, details, location, title, source = Some(content.file.value.split("/").reverse.takeWhile(_ != "scala").reverse.mkString("/")))
-
-  def fromScalatex[T <: Page.ScalatexContent](
-    name:     String,
-    content:  T,
-    details:  ⇒ Seq[DocumentationPage] = Seq.empty,
-    location: Option[String]           = None,
-    title:    Option[String]           = None) =
-    apply(name, content(), details, location, title, source = Some(content.sourcePath))
 
   def apply(
     name:     String,

@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Plug extends PageContent(html"""
 ${h2{"Tasks"}}
@@ -75,14 +69,14 @@ Once your model is properly plugged in an OpenMOLE task, you can use an explorat
 
 ${h2{"Exploration method"}}
 
-The composition of a full exploration experiment is achieved by writing a script in the OpenMOLE ${a("language", href := language.file)}.
+The composition of a full exploration experiment is achieved by writing a script in the OpenMOLE ${a("language", href := DocumentationPages.language.file)}.
 A working OpenMOLE exploration script needs to define:
 ${ul(
    li{html"one or several ${b{"tasks"}},"},
    li{html"their ${b{"inputs"}} and ${b{"outputs"}},"},
-   li{html"an ${a("exploration method", href := explore.file)},"},
-   li{html"one or several ${a("hooks", href := hook.file)},"},
-   li{html"possibly an ${a("execution environment", href := scale.file)}."}
+   li{html"an ${a("exploration method", href := DocumentationPages.explore.file)},"},
+   li{html"one or several ${a("hooks", href := DocumentationPages.hook.file)},"},
+   li{html"possibly an ${a("execution environment", href := DocumentationPages.scale.file)}."}
 )}
 
 Let's take the previous task, that adds 2 to an input.
@@ -118,12 +112,12 @@ ${hl.openmole("""
 $br
 
 In this script, ${code{"myTask"}} will be executed for each value of ${code{"i"}} from 0 to 1,000 with a step of 5.
-Each result ${code{"j"}} is written in the ${i{"results.csv"}} file through a ${aa("hook", href := hook.file)}.
+Each result ${code{"j"}} is written in the ${i{"results.csv"}} file through a ${aa("hook", href := DocumentationPages.hook.file)}.
 
 $br$br
 
-You can find some working examples of simple exploration tasks in the ${aa("Market Place", href := market.file)}.
-Be sure to also check out our ${aa("Getting Started", href := stepByStepIntro.file)} tutorial!
+You can find some working examples of simple exploration tasks in the ${aa("Market Place", href := DocumentationPages.market.file)}.
+Be sure to also check out our ${aa("Getting Started", href := DocumentationPages.stepByStepIntro.file)} tutorial!
 """)
 
 

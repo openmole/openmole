@@ -65,7 +65,8 @@ object Libraries {
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   //lazy val arm = "org.openmole.library" %% "com-jsuereth-scala-arm" % "2.1" cross CrossVersion.for3Use2_13
-  lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
+  //lazy val scalajHttp = "org.openmole.library" %% "org-scalaj-scalaj-http" % "2.4.2"
+  //lazy val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion
@@ -136,7 +137,7 @@ object Libraries {
   lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion cross CrossVersion.for3Use2_13
-  lazy val spray = "io.spray" %% "spray-json" % "1.3.5"
+  lazy val spray = "io.spray" %% "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.18.100"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"

@@ -17,55 +17,49 @@ package org.openmole.site.content.documentation
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Documentation extends PageContent(
 
 ul(listStyleType := "none")(
   li(
-    h3(a(plug.title, href := plug.file)),
-    ol(sitemap.siteMapSection(plugPages))
+    h3(a(DocumentationPages.plug.title.get, href := DocumentationPages.plug.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.plugPages))
   ),
   li(
-    h3(a(explore.title, href := explore.file)),
+    h3(a(DocumentationPages.explore.title.get, href := DocumentationPages.explore.file)),
     ol(
       li(
-        a(samplings.title, href := samplings.file),
+        a(DocumentationPages.samplings.title.get, href := DocumentationPages.samplings.file),
         ol(listStyleType:= "lower-alpha")(
-          sitemap.siteMapSection(samplingPages)
+          sitemap.siteMapSection(DocumentationPages.samplingPages)
         )
       ),
-      sitemap.siteMapSection(explorePages.diff(Seq(samplings)))
+      sitemap.siteMapSection(DocumentationPages.explorePages.diff(Seq(DocumentationPages.samplings)))
     )
   ),
   li(
-    h3(a(scale.title, href := scale.file)),
-    ol(sitemap.siteMapSection(scalePages))
+    h3(a(DocumentationPages.scale.title.get, href := DocumentationPages.scale.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.scalePages))
   ),
   li(
-    h3(a(utilityTask.title, href := utilityTask.file)),
-    ol(sitemap.siteMapSection(utilityTaskPages))
+    h3(a(DocumentationPages.utilityTask.title.get, href := DocumentationPages.utilityTask.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.utilityTaskPages))
   ),
   li(
-    h3(a(language.title, href := language.file)),
-    ol(sitemap.siteMapSection(languagePages))
+    h3(a(DocumentationPages.language.title.get, href := DocumentationPages.language.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.languagePages))
   ),
   li(
-    h3(a("Advanced Concepts", href := geneticAlgorithm.file)),
-    ol(sitemap.siteMapSection(advancedConceptsPages))
+    h3(a("Advanced Concepts", href := DocumentationPages.geneticAlgorithm.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.advancedConceptsPages))
   ),
   li(
-    h3(a(developers.title, href := developers.file)),
-    ol(sitemap.siteMapSection(developersPages))
+    h3(a(DocumentationPages.developers.title.get, href := DocumentationPages.developers.file)),
+    ol(sitemap.siteMapSection(DocumentationPages.developersPages))
   ),
   h3("See also"),
-  sitemap.siteMapSection(docLonelyPages)
+  sitemap.siteMapSection(DocumentationPages.docLonelyPages)
 )
 
 )

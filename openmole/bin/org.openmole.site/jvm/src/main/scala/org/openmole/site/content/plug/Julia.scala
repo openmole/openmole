@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Julia extends PageContent(html"""
 
@@ -31,7 +25,7 @@ ${h2{"JuliaTask syntax"}}
 
 ${h3{"Preliminary remarks"}}
 
-${preliminary("JuliaTask")}
+${Native.preliminary("JuliaTask")}
 
 $br
 
@@ -90,6 +84,6 @@ ${hl.openmole("""
 """)}
 
 Notions from OpenMOLE are reused in this example.
-If you're not too familiar with ${a("Environments", href := scale.file)}, ${a("Groupings", href := scale.file + "#Grouping")}, ${a("Hooks", href := hook.file)} or ${a("Samplings", href := samplings.file)}, check the relevant sections of the documentation.
+If you're not too familiar with ${a("Environments", href := DocumentationPages.scale.file)}, ${a("Groupings", href := DocumentationPages.scale.file + "#Grouping")}, ${a("Hooks", href := DocumentationPages.hook.file)} or ${a("Samplings", href := DocumentationPages.samplings.file)}, check the relevant sections of the documentation.
 
 """)

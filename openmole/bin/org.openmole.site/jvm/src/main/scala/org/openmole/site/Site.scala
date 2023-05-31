@@ -28,7 +28,7 @@ import scalatags.Text.all._
 import scala.annotation.tailrec
 import spray.json._
 
-import scalaj.http._
+//import scalaj.http._
 
 import org.openmole.tool.file.*
 
@@ -68,7 +68,7 @@ object Site {
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
       case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
       case "--test" :: tail ⇒ parse(tail, c.copy(test = true))
-      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
+//      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
       case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
       case Nil ⇒ c
     }
@@ -83,9 +83,9 @@ object Site {
     if (parameters.test) {
       Test.generate(dest)
     }
-    else if (parameters.testUrls) {
-      Test.urls
-    }
+//    else if (parameters.testUrls) {
+//      Test.urls
+//    }
     else {
       case class PageFrag(page: Page, frag: Frag)
 

@@ -17,12 +17,7 @@ package org.openmole.site.content.community
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-
+import org.openmole.site.content.header.*
 
 object OMCommunity extends PageContent(html"""
 The OpenMOLE community has been steadily growing these past years, and we are always happy to welcome new users!
@@ -39,7 +34,7 @@ ${ul(
 
 $br
 
-It is also possible to ${aa("report a bug", href := shared.link.issue)} and ${a("help make OpenMOLE better", href := howToContribute.file)}.
+It is also possible to ${aa("report a bug", href := shared.link.issue)} and ${a("help make OpenMOLE better", href := DocumentationPages.howToContribute.file)}.
 So many possibilities!
 
 $br

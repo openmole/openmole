@@ -22,7 +22,6 @@ import org.openmole.site._
 import org.openmole.site.tools._
 import org.openmole.site.stylesheet._
 import DocumentationPages._
-import org.openmole.site.Config._
 import org.openmole.site.content.Native._
 
 object Tutorials extends PageContent(html"""

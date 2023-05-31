@@ -17,14 +17,8 @@ package org.openmole.site.content.scale
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
+import Environment.*
 
 object Cluster extends PageContent(html"""
 
@@ -43,7 +37,7 @@ However, not all clusters expose the same features, so options may vary from one
 
 $br$br
 
-Before being able to use a batch system, you should first provide your ${aa("authentication", href := gui.file)} information to OpenMOLE.
+Before being able to use a batch system, you should first provide your ${aa("authentication", href := DocumentationPages.gui.file)} information to OpenMOLE.
 
 
 ${h3{"Grouping"}}

@@ -17,13 +17,7 @@ package org.openmole.site.content.explore.sampling
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object ElementarySampling extends PageContent(html"""
 ${h2{"Grid sampling"}}
@@ -70,14 +64,14 @@ with
 ${ul(
   li{html"${code{"evaluation"}} is the task (or composition of tasks) that uses your inputs, typically your model task and a hook,"},
   li{html"${code{"sampling"}} is the sampling task,"},
-  li{html"${code{"aggregation"}} ($optional) ${a(href := aggregationSampling.file, "is some aggregation functions")} to be called on the outputs of your evaluation task. The format is ${code{"variable evaluate function"}}. OpenMOLE provides some aggregation functions to such as: ${code{"median, medianAbsoluteDeviation, average, meanSquaredError, rootMeanSquaredError"}}. If no a variable is listed and no aggregate function is provided, the values are aggregated in a array."}
+  li{html"${code{"aggregation"}} ($optional) ${a(href := DocumentationPages.aggregationSampling.file, "is some aggregation functions")} to be called on the outputs of your evaluation task. The format is ${code{"variable evaluate function"}}. OpenMOLE provides some aggregation functions to such as: ${code{"median, medianAbsoluteDeviation, average, meanSquaredError, rootMeanSquaredError"}}. If no a variable is listed and no aggregate function is provided, the values are aggregated in a array."}
 )}
 
 For Double sequence samplings, a convenient primitive provides logarithmic ranges the following way: ${code{"input_j in LogRangeDomain(min,max,number_of_steps)"}} where the third argument is the number of steps in the range. The syntax can be simplified with the ${code{"logSteps"}} keyword like this:  ${code("input_j in (Range(1e-2,0.1) logSteps 4")}.
 
 The ${code{"hook"}} keyword is used to save or display results generated during the execution of a workflow.
 The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.csv\")"}} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
-See ${aa("this page", href := samplings.file + "#Hook")} for more details about this hook.
+See ${aa("this page", href := DocumentationPages.samplings.file + "#Hook")} for more details about this hook.
 
 
 ${h3{"Use example"}}
@@ -157,6 +151,6 @@ $br
 
 The ${code{"hook"}} keyword is used to save or display results generated during the execution of a workflow.
 The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.csv\")"}} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
-See ${aa("this page", href := samplings.file + "#Hook")} for more details about this hook.
+See ${aa("this page", href := DocumentationPages.samplings.file + "#Hook")} for more details about this hook.
 
 """)

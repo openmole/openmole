@@ -19,7 +19,7 @@ package org.openmole.site
 
 import scalatags.Text.all._
 
-package object shared {
+object shared {
   lazy val searchDiv = "search-div"
   lazy val searchImg = "search-img"
   lazy val blogposts = "blog-posts"

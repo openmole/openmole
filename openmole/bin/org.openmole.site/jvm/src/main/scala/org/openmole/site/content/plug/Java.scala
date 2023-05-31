@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Java extends PageContent(html"""
 
@@ -31,7 +25,7 @@ ${h2("Use a JavaTask")}
 
 ${h3{"Preliminary remarks"}}
 
-${preliminary("JavaTask")}
+${Native.preliminary("JavaTask")}
 
 
 ${h3{"Arguments of the JavaTask"}}
@@ -54,7 +48,7 @@ Here is a workflow calling a function found in a jar file using a ${code{"JavaTa
 
 $br$br
 
-${openmole("""
+${hl.openmole("""
 val name = Val[String]
 val output = Val[String]
 
@@ -71,14 +65,14 @@ DirectSampling(
 ${h2("Use a ScalaTask to plug Java code")}
 
 OpenMOLE makes the inclusion of your own Java code in a workflow simple.
-Since the Scala compiler can compile Java code, Java code can be directly fed to a ${code{"ScalaTask"}} as shown in ${aa("the ScalaTask example", href := scala.file)}.
+Since the Scala compiler can compile Java code, Java code can be directly fed to a ${code{"ScalaTask"}} as shown in ${aa("the ScalaTask example", href := DocumentationPages.scala.file)}.
 Additionally, a compiled Java program can be encapsulated in a ${code{"ScalaTask"}} as a jar file through the ${code{"libraries"}} parameter as below.
 
 $br$br
 
 In this page, we present two examples on how to execute Java code in OpenMOLE.
 The first one works for simple Java programs and the second one for a more complex program that requires dependencies managed by Maven.
-For more ambitious developments, it is recommended to consider embedding your code in an ${a("OpenMOLE plugin", href := pluginDevelopment.file)}.
+For more ambitious developments, it is recommended to consider embedding your code in an ${a("OpenMOLE plugin", href := DocumentationPages.pluginDevelopment.file)}.
 It is pretty straightforward since they are simple ${a("OSGi", href:=shared.link.osgi)} bundles.
 
 
@@ -210,7 +204,7 @@ DirectSampling(
 $br
 
 This workflow will call the function ${code{"hello"}} with both arguments varying from 0 to 10, and save the results in a CSV file.
-Variables ${code{"arg1"}} and ${code{"arg2"}} are also specified as task outputs so that they are also written to the CSV file by the hook (see ${aa("Hooks", href := hook.file)}).
+Variables ${code{"arg1"}} and ${code{"arg2"}} are also specified as task outputs so that they are also written to the CSV file by the hook (see ${aa("Hooks", href := DocumentationPages.hook.file)}).
 
 
 

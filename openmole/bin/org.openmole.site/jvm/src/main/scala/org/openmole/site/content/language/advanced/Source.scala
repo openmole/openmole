@@ -17,13 +17,7 @@ package org.openmole.site.content.language.advanced
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
+import org.openmole.site.content.header.*
 
 
 object Source extends PageContent(html"""
@@ -33,7 +27,7 @@ Sources have been designed as a possible way to inject data in the dataflow from
 $br
 
 At the moment, only file-based and http(s) url Sources are available in OpenMOLE.
-If you need to interface OpenMOLE with an external datasource, check the ${a("contact information page", href := whoWeAre.file)} to see how to reach the OpenMOLE development team.
+If you need to interface OpenMOLE with an external datasource, check the ${a("contact information page", href := DocumentationPages.whoWeAre.file)} to see how to reach the OpenMOLE development team.
 
 
 
@@ -111,7 +105,7 @@ Let's now see how this can be done by reusing what we've discovered with the ${a
 ${h2{"A complete example"}}
 
 Here, we are collecting all the directories named ${i{"care_archive"}}.
-See how they are gathered in an @i{Array[File]} container and can be explored by an ${a("ExplorationTask", href := fileSampling.file)} using the keyword ${code{"in"}}.
+See how they are gathered in an @i{Array[File]} container and can be explored by an ${a("ExplorationTask", href := DocumentationPages.fileSampling.file)} using the keyword ${code{"in"}}.
 This exploration generates one @code{analysisTask} per directory collected by the source.
 
 ${hl.openmole("""

@@ -25,7 +25,7 @@ import collection.mutable.ListBuffer
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object tools {
+object tools {
 
   import scalatags.Text.{all => tags}
   import scalatags.Text.all._
@@ -36,8 +36,6 @@ package object tools {
   def paragraph(body: Frag*): Frag = Seq[Frag](body)
 
   def aa = a(targetBlank)
-
-  def break = br(br)
 
   def mandatory = b{"mandatory"}
   def optional = b{"optional"}
@@ -251,14 +249,12 @@ package object tools {
   lazy val glyph_chevron_left: String = "glyphicon glyphicon-chevron-left"
   lazy val glyph_chevron_right: String = "glyphicon glyphicon-chevron-right"
 
-  private def role(suffix: String): AttrPair = scalatags.Text.all.role := suffix
-
-  lazy val role_tablist = role("tablist")
-  lazy val role_presentation = role("presentation")
-  lazy val role_tab = role("tab")
+  lazy val role_tablist = tags.role :="tablist"
+  lazy val role_presentation = tags.role :="presentation"
+  lazy val role_tab = tags.role :="tab"
   lazy val tab_pane: String = "tab-pane"
-  lazy val tab_panel_role = role("tabpanel")
-  lazy val role_button = role("button")
+  lazy val tab_panel_role = tags.role :="tabpanel"
+  lazy val role_button = tags.role := "button"
 
   lazy val container_fluid: String = "container-fluid"
   lazy val pointer = cursor := "pointer"

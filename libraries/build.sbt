@@ -290,7 +290,7 @@ lazy val scalaTags = OsgiProject(dir, "com.scalatags", exports = Seq("scalatags.
     "com.lihaoyi" %% "scalatags" % scalaTagsVersion,
     "com.lihaoyi" %% sjs("scalatags") % scalaTagsVersion,
   ),
-  version := scalaTagsVersion) settings(settings: _*) settings(scala3Settings: _*)
+  version := scalaTagsVersion) settings(settings: _*) settings(scala3Settings: _*) 
 
 //lazy val boopicklexAutowireVersion) settings(settings: _*)
 
@@ -362,12 +362,13 @@ lazy val opencsv = OsgiProject(dir, "au.com.bytecode.opencsv") settings(
   libraryDependencies += "com.michaelpollmeier" %% "scala-arm" % "2.1",
   version := "2.1",
   exportPackage := Seq("resource.*")) settings(settings: _*)*/
-
+/*
 lazy val scalajHttp = OsgiProject(dir, "org.scalaj.scalaj-http") settings(
   libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2",
   version := "2.4.2",
   exportPackage := Seq("scalaj.http.*")
-  ) settings(settings: _*)
+  ) settings(settings: _*) settings(scala3Settings: _*)
+*/
 
 lazy val scopt = OsgiProject(dir, "com.github.scopt", exports = Seq("scopt.*")) settings(
   libraryDependencies += "com.github.scopt" %% "scopt" % scoptVersion,

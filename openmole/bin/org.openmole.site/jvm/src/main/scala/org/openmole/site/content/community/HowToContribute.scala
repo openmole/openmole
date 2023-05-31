@@ -17,11 +17,7 @@ package org.openmole.site.content.community
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
+import org.openmole.site.content.header.*
 
 object HowToContribute extends PageContent(html"""
 This page is dedicated to explaining the organization of the project, the tools you need and the procedures to follow if you want to contribute painlessly to the OpenMOLE project (software and documentation).
@@ -36,7 +32,7 @@ ${h3{"Create a pull request"}}
 
 To create a pull request, you would have to:
 ${ul(
-  li(html"""apply the ${aa("first time setup", href := buildSources.file)} of the OpenMOLE development environment,"""),
+  li(html"""apply the ${aa("first time setup", href := DocumentationPages.buildSources.file)} of the OpenMOLE development environment,"""),
   li("""fork the repository of interest in GitHub: use the fork button in the original repository and fork it into your own GitHub account,"""),
   li("add your fork as a remote repository,"),
   li("create a branch for your modifications, add your commits there, and push this branch to your GitHub fork,"),
@@ -77,7 +73,7 @@ $br
 
 By default, ${b{"website pages"}} are located in ${i{"openmole/openmole/bin/org.openmole.site/jvm/target/site/"}}.
 Sources for the @b{documentation pages} are located in ${i{"openmole/openmole/bin/org.openmole.site/jvm/src/main/scalatex/openmole"}}.
-They are written using ${aa("scalatex", href:=shared.link.scalatex)}, a DSL to generate html content.
+They are written using ${aa("scalatex", href:= shared.link.scalatex)}, a DSL to generate html content.
 
 ${h2{"Organization of the OpenMOLE project"}}
 

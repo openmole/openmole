@@ -17,16 +17,9 @@ package org.openmole.site.content
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Template extends PageContent(html"""
-
 
 See CheatsheetScalatex.txt for a reminder of the main Scalatex features needed in the OpenMOLE doc.
 

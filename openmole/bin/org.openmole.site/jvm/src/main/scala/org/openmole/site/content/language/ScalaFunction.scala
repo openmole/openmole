@@ -17,21 +17,14 @@ package org.openmole.site.content.language
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
 
 object ScalaFunction extends PageContent(html"""
 
 Some useful functions are usable anywhere in OpenMOLE where you would use Scala code.
 For instance you can use them in:
     ${ul(
-        li(html"${a("ScalaTask", href := scala.file)} code"),
+        li(html"${a("ScalaTask", href := DocumentationPages.scala.file)} code"),
         li("string expanded by OpenMOLE (${scala code})"),
         li("OpenMOLE scripts.")
     )}

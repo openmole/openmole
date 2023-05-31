@@ -17,14 +17,7 @@ package org.openmole.site.content.advancedConcepts.GA
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
-
+import org.openmole.site.content.header.*
 
 object StochasticityManagementValue {
 
@@ -107,7 +100,7 @@ Still, any number of replications, even very high, implies that some solutions a
 $br
 
 Other ${i{"ad hoc"}} methods of the literature are based on some assumptions that are hard or impossible to verify (such as the invariance of the noise distribution over the fitness space) and add parameters to the algorithm that are difficult to tune finely.
-See ${aa("this paper", href:=Resource.literature.rakshit2016.file)} for an extensive review of noisy fitness management in Evolutionary Computation.
+See ${aa("this paper", href:= Resource.literature.rakshit2016.file)} for an extensive review of noisy fitness management in Evolutionary Computation.
 
 
 ${h3{"OpenMOLE's solution"}}

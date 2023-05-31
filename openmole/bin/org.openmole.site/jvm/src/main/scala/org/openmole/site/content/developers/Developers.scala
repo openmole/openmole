@@ -17,23 +17,17 @@ package org.openmole.site.content.developers
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Developers extends PageContent(html"""
 
 In this section you will find information on:
 ${ul(
-  li{html"How to use OpenMOLE in interactive ${a("console mode", href := console.file)}"},
-  li{html"How to develop your own ${a("plugin", href := pluginDevelopment.file)} to have full control over your code, and how to integrate it in OpenMOLE"},
-  li{html"How to develop an OpenMOLE extension ${a("extension", href := extensionAPI.file)}"},
-  li{html"How to use the OpenMOLE ${a("REST API", href := restAPI.file)}"},
-  li{html"How to compile and modify the ${a("documentation", href := documentationGen.file)}"}
+  li{html"How to use OpenMOLE in interactive ${a("console mode", href := DocumentationPages.console.file)}"},
+  li{html"How to develop your own ${a("plugin", href := DocumentationPages.pluginDevelopment.file)} to have full control over your code, and how to integrate it in OpenMOLE"},
+  li{html"How to develop an OpenMOLE extension ${a("extension", href := DocumentationPages.extensionAPI.file)}"},
+  li{html"How to use the OpenMOLE ${a("REST API", href := DocumentationPages.restAPI.file)}"},
+  li{html"How to compile and modify the ${a("documentation", href := DocumentationPages.documentationGen.file)}"}
 )}
 
 """)

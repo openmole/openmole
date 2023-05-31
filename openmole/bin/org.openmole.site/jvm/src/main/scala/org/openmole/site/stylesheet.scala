@@ -20,7 +20,7 @@ import tools._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object stylesheet {
+object stylesheet {
 
   lazy val GREEN = "#a6bf26"
 

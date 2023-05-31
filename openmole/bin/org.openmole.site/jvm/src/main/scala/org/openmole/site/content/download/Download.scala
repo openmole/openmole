@@ -17,11 +17,7 @@ package org.openmole.site.content.download
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
+import org.openmole.site.content.header.*
 
 object Download extends PageContent(html"""
 ${h2("Try our demo website")}
@@ -34,7 +30,7 @@ ${h2("Install OpenMOLE")}
 
 ${h3("Prerequisites")}
 
-${ul(li(html"${i("Java >= 11")}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our ${aa("FAQ", href := faq.file)} to access your Java version information."),
+${ul(li(html"${i("Java >= 11")}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information."),
  li(html"${i("Node.js")}: to run on your own computer, OpenMOLE GUI requires ${aa("Node.js", href := shared.link.nodejs)}."),
   li(html"${i("Singularity")}: some OpenMOLE tasks require ${org.openmole.site.content.Native.singularity}. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container."))}
 
@@ -49,7 +45,7 @@ OpenMOLE is installed and works out of the box!
 
 $br
 
-${linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn, btn_danger))}
+${linkButton(s"Download ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.version.name} ", Resource.script.openmole.file, classIs(btn, btn_danger), true)}
 
 $br
 
@@ -64,8 +60,8 @@ If you are using another web browser, you will need to copy paste the OpenMOLE U
 
 ${h2("Experiment with OpenMOLE")}
 
-To get started with OpenMOLE and see a few simple use cases, you can follow our ${a("Step by Step Introduction to OpenMOLE", href := stepByStepIntro.file)}.
-Other ${a("Tutorials", href := tutorials.file)} are also available, and you should find all the info you need in our ${a("Documentation", href := documentation.file)} section.
+To get started with OpenMOLE and see a few simple use cases, you can follow our ${a("Step by Step Introduction to OpenMOLE", href := DocumentationPages.stepByStepIntro.file)}.
+Other ${a("Tutorials", href := DocumentationPages.tutorials.file)} are also available, and you should find all the info you need in our ${a("Documentation", href := DocumentationPages.documentation.file)} section.
 
 $br
 
@@ -75,7 +71,7 @@ ${h2{"Alternative Install"}}
 
 ${h3{"Build From Sources"}}
 
-If you prefer building the OpenMOLE application from sources you can do so as explained ${aa("here", href := buildSources.file)}.
+If you prefer building the OpenMOLE application from sources you can do so as explained ${aa("here", href := DocumentationPages.buildSources.file)}.
 
 ${h3{"Run in Docker"}}
 

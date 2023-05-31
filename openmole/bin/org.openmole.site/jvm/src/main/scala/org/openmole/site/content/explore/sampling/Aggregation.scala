@@ -17,13 +17,7 @@ package org.openmole.site.content.explore.sampling
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Aggregation extends PageContent(html"""
 
@@ -61,7 +55,7 @@ ${hl.openmole(s"""
 
 ${h3{"Statistic Indicators"}}
 
-OpenMOLE provides a bunch on statistic function you can use to aggregate you outputs. The list of these function is ${a("available in the doc", href := scalaFunction.file)}.
+OpenMOLE provides a bunch on statistic function you can use to aggregate you outputs. The list of these function is ${a("available in the doc", href := DocumentationPages.scalaFunction.file)}.
 
 You can use these function either in a ${code{"ScalaTask"}} to post process your results or using the ${code("evaluate")} keyword:
 ${hl.openmole(s"""

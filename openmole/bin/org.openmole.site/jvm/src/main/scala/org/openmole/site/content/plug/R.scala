@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object R extends PageContent(html"""
 
@@ -34,7 +28,7 @@ It may be convenient to use specific R libraries within a workflow, and therefor
 
 ${h3{"Preliminary remarks"}}
 
-${preliminary("RTask")}
+${Native.preliminary("RTask")}
 
 
 ${h3{"RTask syntax"}}
@@ -107,7 +101,7 @@ For our first example, we write the R script directly in the ${code{"RTask"}}.
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
     // Declare variables
     val result = Val[Int]
 
@@ -146,7 +140,7 @@ If all the R code you need is written in your R script, you just need to provide
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variables
     val result = Val[Int]
 
@@ -175,7 +169,7 @@ It will then be imported in the @code{RTask} by the R primitive ${code{"source(\
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variables
     val result = Val[Int]
 
@@ -211,7 +205,7 @@ It is possible to do so through the ${code{"inputs"}} and ${code{"outputs"}} par
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variables
     val myInput = Val[Int]
     val myOutput = Val[Int]
@@ -253,7 +247,7 @@ If you have several outputs, you can combine mapped outputs with classic outputs
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variables
     val i = Val[Int]
     val j = Val[Double]
@@ -307,7 +301,7 @@ In order to have access to this file in the ${code{"RTask"}}, we add ${code{"myF
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
     // Declare variable
     val myFile = Val[File]
     val resR = Val[Array[Double]]
@@ -347,7 +341,7 @@ We then apply the function ${code{"f"}} to that vector.
 $br
 
 The ${i{"fileForR.txt"}} file is set as an input file of the ${code{"RTask"}} following the syntax: ${code{"inputFiles += (om-fileVariable, \"filename-in-R-code\")"}}.
-For more information about file management in OpenMOLE, see ${aa("this page", href := fileManagement.file + "#ExternalTasks")}.
+For more information about file management in OpenMOLE, see ${aa("this page", href := DocumentationPages.fileManagement.file + "#ExternalTasks")}.
 $br
 The end of the workflow simply tells OpenMOLE to chain the two tasks and to display the outputs of the last task (here the OpenMOLE variable ${code{"resR"}}) in the standard output.
 
@@ -374,7 +368,7 @@ Note: the first time you use R with ${code{"libraries"}} or ${code{"packages"}},
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variable
     val area = Val[Double]
 
@@ -413,7 +407,7 @@ The ${code{"install"}} field must be used with particular commands: we prefix in
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variable
     val area = Val[Double]
 
@@ -469,7 +463,7 @@ You can do so by making a smart use of the ${code{"install"}} parameter to defin
 
 $br$br
 
-${openmole( s"""
+${hl.openmole( s"""
     // Declare variable
     val area = Val[Double]
 

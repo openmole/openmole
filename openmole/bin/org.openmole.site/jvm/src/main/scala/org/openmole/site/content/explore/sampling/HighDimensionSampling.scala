@@ -17,13 +17,7 @@ package org.openmole.site.content.explore.sampling
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object HighDimensionSampling extends PageContent(html"""
 
@@ -74,7 +68,7 @@ val my_LHS_sampling =
 
 ${h3{"Use in the DirectSampling method"}}
 
-Once a sampling is defined, you can just add it to a ${code{"DirectSampling"}} method (see ${aa("here", href:= samplings.file)} for the description of this method), under the ${code{"sampling"}} argument.
+Once a sampling is defined, you can just add it to a ${code{"DirectSampling"}} method (see ${aa("here", href:= DocumentationPages.samplings.file)} for the description of this method), under the ${code{"sampling"}} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called ${code{"myModel"}}, the sampling could be used like this:
 
 $br$br
@@ -115,7 +109,7 @@ val my_sobol_sampling =
 
 ${h3{"Use in the DirectSampling method"}}
 
-Once a sampling is defined, you can just add it to a ${code{"DirectSampling"}} method (see ${aa("here", href:= samplings.file)} for the description of this method), under the ${code{"sampling"}} argument.
+Once a sampling is defined, you can just add it to a ${code{"DirectSampling"}} method (see ${aa("here", href:= DocumentationPages.samplings.file)} for the description of this method), under the ${code{"sampling"}} argument.
 For example, supposing you have already declared inputs, outputs, and a model task called ${code{"myModel"}}, the sampling could be used like this:
 
 $br$br

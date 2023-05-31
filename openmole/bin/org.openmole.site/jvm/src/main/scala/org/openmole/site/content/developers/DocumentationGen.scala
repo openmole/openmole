@@ -17,13 +17,7 @@ package org.openmole.site.content.developers
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object DocumentationGen extends PageContent(html"""
 
@@ -73,7 +67,7 @@ ${hl.plain("""
 cd openmole/openmole/bin/org.openmole.site/jvm/src/main/scala/org/openmole/site/content
 """)}
 
-For this example, we try to add this current page "Documentation Generation" to ${a("Developers", href := developers.file)}.
+For this example, we try to add this current page "Documentation Generation" to ${a("Developers", href := DocumentationPages.developers.file)}.
 
  Into your favorite IDE :
  ${ul(
@@ -100,7 +94,6 @@ import org.openmole.site._
 import org.openmole.site.tools._
 import org.openmole.site.stylesheet._
 import DocumentationPages._
-import org.openmole.site.Config._
 import org.openmole.site.content.Native._
 
 object DocumentationGen extends PageContent(html$tq

@@ -17,14 +17,7 @@ package org.openmole.site.content.language.advanced
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
 
 object Capsule extends PageContent(html"""
 
@@ -43,7 +36,7 @@ ${hl.openmole("""
 """)}
 
 Capsules are the atomic element in the workflow which transitions are plugged to.
-Capsules also serve as an entry point on which ${a("Hooks", href := hook.file)}, ${a("Sources", href := DocumentationPages.source.file)} and ${a("Execution Environments", href := scale.file)} are specified.
+Capsules also serve as an entry point on which ${a("Hooks", href := DocumentationPages.hook.file)}, ${a("Sources", href := DocumentationPages.source.file)} and ${a("Execution Environments", href := DocumentationPages.scale.file)} are specified.
 When a task is directly linked to another without explicitly specifying a Capsule, ${b{"a single capsule is created for this task and used each time the task in mentioned in the workflow"}}.
 
 $br
@@ -60,7 +53,7 @@ ${hl.openmole("""
 """)}
 
 Other specific capsules are defined in OpenMOLE.
-They are described in the ${a("Advanced capsule", href :=  capsule.file)} section.
+They are described in the ${a("Advanced capsule", href :=  DocumentationPages.capsule.file)} section.
 
 
 ${h2{"Strainer capsule"}}

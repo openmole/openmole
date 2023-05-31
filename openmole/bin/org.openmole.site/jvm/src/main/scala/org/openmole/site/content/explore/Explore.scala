@@ -17,13 +17,7 @@ package org.openmole.site.content.explore
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Explore extends PageContent(html"""
 
@@ -60,22 +54,22 @@ $br$br
 ${ol(
     li{"What are all the possible inputs producing a given output?"},
     ul(
-      li{html"This is a ${a("Calibration", href := calibration.file)} or optimization problem, solved with genetic algorithms."}
+      li{html"This is a ${a("Calibration", href := DocumentationPages.calibration.file)} or optimization problem, solved with genetic algorithms."}
     ),
     br,
     li{"How does an input variation affect the output?"},
     ul(
-      li{html"This is addressed by performing a ${a("Sensitivity Analysis", href := sensitivity.file)}."}
+      li{html"This is addressed by performing a ${a("Sensitivity Analysis", href := DocumentationPages.sensitivity.file)}."}
     ),
     br,
     li{"How do the inputs individually participate to produce the outputs? Is every parameter necessary to produce the outputs? What are the robustness intervals of the inputs that lead to a desired output?"},
     ul(
-      li{html"This is an extension of the sensitivity analysis, it is performed through the ${a("Calibration Profiles Algorithm", href := profile.file)}."}
+      li{html"This is an extension of the sensitivity analysis, it is performed through the ${a("Calibration Profiles Algorithm", href := DocumentationPages.profile.file)}."}
     ),
     br,
     li{"What are all the possible outputs of the model?"},
     ul(
-      li{html"This can be done with the ${a("Pattern Space Exploration", href := pse.file)} (PSE) method."}
+      li{html"This can be done with the ${a("Pattern Space Exploration", href := DocumentationPages.pse.file)} (PSE) method."}
     )
 )}
 
@@ -95,8 +89,8 @@ ${b{"Nota Bene"}}: These performance scores are defined relatively to each other
 ${h3{"To go further"}}
 
 ${ul(
-  li{html"Calibration methods make an extensive use of ${a("Genetic Algorithms", href := geneticAlgorithm.file)}."},
-  li{html"Specific tasks are available to handle the ${a("stochasticity ", href := stochasticityManagement.file)} of your model."},
-  li{html"${a("Distribution schemes", href := island.file)} have been specifically designed for distributed computing environments."}
+  li{html"Calibration methods make an extensive use of ${a("Genetic Algorithms", href := DocumentationPages.geneticAlgorithm.file)}."},
+  li{html"Specific tasks are available to handle the ${a("stochasticity ", href := DocumentationPages.stochasticityManagement.file)} of your model."},
+  li{html"${a("Distribution schemes", href := DocumentationPages.island.file)} have been specifically designed for distributed computing environments."}
 )}
 """)

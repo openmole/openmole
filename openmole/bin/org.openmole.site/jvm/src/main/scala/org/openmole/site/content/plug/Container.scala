@@ -17,13 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
+import org.openmole.site.content.header.*
 
 object Container extends PageContent(html"""
 To call a native executable in an OpenMOLE task, you can either use:
@@ -38,7 +32,7 @@ The ${code{"ContainerTask"}} runs ${a(href := "https://www.docker.com/resources/
 
 ${h3{"Preliminary remarks"}}
 
-${preliminary("ContainerTask")}
+${Native.preliminary("ContainerTask")}
 
 ${h3{"Containers from the docker hub"}}
 
@@ -46,7 +40,7 @@ A simple task running a Python container would look like:
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
   val container = ContainerTask(
     "python:3.6-stretch",
     ${tq}python -c 'print("splendid!")'${tq}
@@ -113,7 +107,7 @@ $br$br
 
 
 
-${openmole(s"""
+${hl.openmole(s"""
   // Declare variables
   val dataFile = Val[File]
   val dataFileName = Val[String]
@@ -190,7 +184,7 @@ You can now upload this archive in your OpenMOLE work directory and run it with 
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
 val result = Val[String]
 
 val container = ContainerTask(
@@ -219,7 +213,7 @@ In case you set this option, a return code different from 0 won't be considered 
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
   // Declare variable
   val ret = Val[Int]
 
@@ -241,7 +235,7 @@ A ${code{"ContainerTask"}}'s standard and error outputs can be set to OpenMOLE v
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
     // Declare variable
     val myOut = Val[String]
 
@@ -269,7 +263,7 @@ This shows particularly useful to preserve the behaviour of some toolkits when e
 
 $br$br
 
-${openmole(s"""
+${hl.openmole(s"""
     // Declare variable
     val name = Val[String]
 
@@ -373,12 +367,12 @@ If you need another behaviour you can use the same advanced options as the ${cod
 ${h3{"File management"}}
 
 To provide files as input of a ${code{"ContainerTask"}} or ${code{"SystemExecTask"}} and to get files produced by these tasks, you should use the ${code{"inputFiles"}} and ${code{"outputFiles"}} keywords.
-See the ${a("documentation on file management", href := fileManagement.file)}.
+See the ${a("documentation on file management", href := DocumentationPages.fileManagement.file)}.
 
 
 ${h2{"Generate Complex Parameter Files"}}
 
-To generate complex input file for you model from OpenMOLE variable, you might want to use the ${a("TemplateFileTask", href := templateTask.file)}.
+To generate complex input file for you model from OpenMOLE variable, you might want to use the ${a("TemplateFileTask", href := DocumentationPages.templateTask.file)}.
 
 """)
 

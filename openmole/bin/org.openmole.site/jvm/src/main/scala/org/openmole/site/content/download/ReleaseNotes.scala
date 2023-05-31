@@ -17,13 +17,21 @@ package org.openmole.site.content.download
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.site.content.header.*
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
+object ReleaseNotesValue:
+  lazy val closedIssues = Map(
+    "12" -> "https://github.com/openmole/openmole/milestone/10",
+    "10" -> "https://github.com/openmole/openmole/milestone/8",
+    "9" -> "https://github.com/openmole/openmole/milestone/7?closed=1",
+    "8" -> "https://github.com/openmole/openmole/milestone/4?closed=1",
+    "7" → "https://github.com/openmole/openmole/milestone/3?closed=1",
+    "6.2" → "",
+    "6.1" → "https://github.com/openmole/openmole/milestone/6?closed=1",
+    "6.0" → "https://github.com/openmole/openmole/milestone/2?closed=1"
+  )
+
+import ReleaseNotesValue.*
 
 object ReleaseNotes extends PageContent(html"""
 

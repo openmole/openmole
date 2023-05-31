@@ -17,14 +17,7 @@ package org.openmole.site.content.plug
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Native._
-
+import org.openmole.site.content.header.*
 
 object NetLogoTools {
   def variables = """
@@ -168,7 +161,7 @@ This stays a too small sample to draw up any robust conclusion on this simple mo
 $br
 
 When designing your experiment, you will have to find a compromise between the precision on stochasticity and the number of parameter points explored.
-More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (see ${aa("this page", href := geneticAlgorithm.file)} for more info on genetic algorithms and calibration).
+More elaborated methods, in the case of a calibration of a stochastic model with a genetic algorithm for example, will automatically deal with this compromise (see ${aa("this page", href := DocumentationPages.geneticAlgorithm.file)} for more info on genetic algorithms and calibration).
 
 $br$br
 
@@ -205,7 +198,7 @@ We now need to compose this design of experiment in a complete workflow in order
 ${h3{"Storing the results"}}
 OpenMOLE usually delegates the tasks execution to many different computers. To gather the results of these remote executions, we use a mechanism called ${b{"hooks"}}. Hooks can be assimilated to a listener that saves or display results. Most of the time it is enough to use the hook keyword provided to either display or store the results of the exploration process.
 
-Hooks are more thoroughly described in a ${a("specific section of the documentation", href := hook.file)}.
+Hooks are more thoroughly described in a ${a("specific section of the documentation", href := DocumentationPages.hook.file)}.
 
 $br$br
 
@@ -325,12 +318,12 @@ ${ul(
         Second, we use this new variable in the setup procedure (it replaces the former):
         $br
         ${img(src := Resource.img.example.fireMyDensity.file, width := "55%")}
-        $break
+        $br$br
         And we update the explicit variable with the former implicit density variable
         ${img(src := Resource.img.example.fireNewFunction.file, width := "70%")}
         $br
         At this moment, your program does not work any more in NetLogo, ${b{"it's normal, don’t panic :)"}}.
-        $break"""),
+        $br$br"""),
 
     li(html"""
         Third, we call this function in our setup function, after the ${code{"clear-all"}} primitives.
@@ -349,7 +342,7 @@ The program is now ready to be parameterised and manipulated by OpenMOLE \o/
 ${h2{"Tutorials"}}
 
 More examples of working with NetLogo models can be found in specific tutorials.
-See this first tutorial on a ${aa("simple sensitivity analysis", href := simpleSAFire.file)} with the NetLogo Fire Model.
-Also check out this tutorial to learn how OpenMOLE can help you ${aa("calibrate your NetLogo model using Genetic Algorithms", href := netLogoGA.file)}.
+See this first tutorial on a ${aa("simple sensitivity analysis", href := DocumentationPages.simpleSAFire.file)} with the NetLogo Fire Model.
+Also check out this tutorial to learn how OpenMOLE can help you ${aa("calibrate your NetLogo model using Genetic Algorithms", href := DocumentationPages.netLogoGA.file)}.
 
 """)

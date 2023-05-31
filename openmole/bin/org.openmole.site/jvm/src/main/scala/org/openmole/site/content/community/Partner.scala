@@ -18,16 +18,11 @@ package org.openmole.site.content.community
  */
 
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, _}
-import org.openmole.site._
-import org.openmole.site.tools._
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-
+import org.openmole.site.content.header.*
 
 object Partner extends PageContent(html"""
 ${
-  div(stylesheet.flexRow) {
+  div(flexRow) {
     a(img(src := Resource.img.partner.iscpif.file, partners), href := shared.link.partner.iscpif, target := "_blank")
     a(img(src := Resource.img.partner.geocite.file, partners), href := shared.link.partner.parisgeo, target := "_blank")
     a(img(src := Resource.img.partner.biomedia.file, partners), href := shared.link.partner.biomedia, target := "_blank")

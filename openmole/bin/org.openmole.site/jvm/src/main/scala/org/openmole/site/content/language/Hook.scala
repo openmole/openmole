@@ -17,14 +17,7 @@ package org.openmole.site.content.language
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
 
 object Hook extends PageContent(html"""
 
@@ -81,7 +74,7 @@ To use these embedded hooks, you can directly give the required arguments (${i{"
 
 $br
 
-The specific arguments of the default hooks for each method, when they exist, are described in the corresponding documentation page in the ${a("Explore", href := explore.file)} section.
+The specific arguments of the default hooks for each method, when they exist, are described in the corresponding documentation page in the ${a("Explore", href := DocumentationPages.explore.file)} section.
 
 ${h2{"Hooks to write into files"}}
 ${h3{"Write a string"}}

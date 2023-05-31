@@ -17,14 +17,7 @@ package org.openmole.site.content.language.advanced
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, name => _, _}
-import org.openmole.site._
-import org.openmole.site.tools.*
-import org.openmole.site.stylesheet._
-import DocumentationPages._
-import org.openmole.site.Config._
-import org.openmole.site.content.Environment.*
-
+import org.openmole.site.content.header.*
 
 object Transition extends PageContent(html"""
 
@@ -212,7 +205,7 @@ ${h3{"Capsules and Slots"}}
 Tasks are not directly linked to each other by transitions.
 This has been made as transparent as possible, but two other notions are involved behind the scenes.
 Tasks are encapsulated in so called ${code{"Capsules"}}, which can have several input ${code{"Slots"}}.
-The ${a("Capsule section", href := capsule.file)} explains this in details.
+The ${a("Capsule section", href := DocumentationPages.capsule.file)} explains this in details.
 
 
 ${h3{html"Combining several workflow parts with ${code{"&"}}"}}
