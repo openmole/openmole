@@ -446,7 +446,7 @@ class TreeNodePanel { panel =>
       e.target.asInstanceOf[HTMLElement].style = style
     },
     onDragOver --> { e ⇒
-      e.dataTransfer.dropEffect = "move"
+      e.dataTransfer.dropEffect = org.scalajs.dom.DataTransferDropEffectKind.move
       e.preventDefault()
     }
   )

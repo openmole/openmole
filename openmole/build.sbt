@@ -55,25 +55,6 @@ def scala3Settings =
       excludeTransitiveScala2
     )
 
-def scala2Settings =
-  commonSettings ++ Seq(
-    scalaVersion := scalaVersionValue,
-    scalacOptions ++= Seq("-target:11", "-Ymacro-annotations", "-language:postfixOps", "-Ytasty-reader", "-Ydelambdafy:inline", "-language:higherKinds", "-Xsource:3"),
-    excludeDependencies ++= Seq(
-      ExclusionRule("com.lihaoyi", "sourcecode_3"),
-      ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
-      ExclusionRule("org.typelevel", "cats-kernel_2.13"),
-      ExclusionRule("org.typelevel", "cats-core_2.13"),
-      ExclusionRule("io.circe", "circe-parser_2.13"),
-      ExclusionRule("io.circe", "circe-core_2.13"),
-      ExclusionRule("io.circe", "circe-jawn_2.13"),
-      ExclusionRule("io.circe", "circe-generic_2.13"),
-      ExclusionRule("io.circe", "circe-number_2.13"),
-      //ExclusionRule("org.scala-lang.modules", "scala-xml_3")
-    )
-  )
-
-
 def excludeTransitiveScala2 =
   excludeDependencies ++= Seq(
     ExclusionRule("org.typelevel", "cats-free_2.13"),
@@ -100,12 +81,7 @@ def excludeTransitiveScala2 =
     //    ExclusionRule("org.typelevel", "cats-core_2.13")
   )
 
-//def excludeTransitiveScala3 =
-//  excludeDependencies ++= Seq(
-//    ExclusionRule("org.typelevel", "cats-free_3"),
-//    ExclusionRule("org.typelevel", "cats-kernel_3"),
-//    ExclusionRule("org.typelevel", "cats-core_3")
-//  )
+
 
 ThisBuild / publishTo :=
   (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
