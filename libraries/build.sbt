@@ -72,8 +72,8 @@ lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logb
 lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePackages = Seq("META-INF.*")) settings
   (libraryDependencies += "com.h2database" % "h2" % h2Version, version := h2Version) settings(settings: _*) settings(scala3Settings: _*)
 
-lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
-  (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)
+/*lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
+  (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)*/
 
 lazy val slf4j = OsgiProject(dir,"org.slf4j") settings(
   libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30",
