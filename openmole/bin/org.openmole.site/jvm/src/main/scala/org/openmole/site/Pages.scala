@@ -190,7 +190,7 @@ object DocumentationPages {
   def headPages: Seq[PageTree] = docPages ++ Seq(plugPages, explorePages, scalePages, utilityTaskPages, languagePages, developersPages, tutoPages, communityPages, downloadPages)
 
   // Documentation
-  lazy val documentation = DocumentationPage.fromScalatex(name = "Documentation", content = scalatex.documentation.Documentation)
+  lazy val documentation = DocumentationPage.fromContent(name = "Documentation", content = org.openmole.site.content.documentation.Documentation)
 
   def docPages = Seq(
     plugPages,
@@ -206,9 +206,9 @@ object DocumentationPages {
 
   def docLonelyPages = pageNode(documentation, Vector(gui, commandOptions, faq))
 
-  lazy val gui = DocumentationPage.fromScalatex(name = "GUI", content = scalatex.documentation.GUI, title = Some("Graphical User Interface"))
+  lazy val gui = DocumentationPage.fromContent(name = "GUI", content = org.openmole.site.content.documentation.GUI, title = Some("Graphical User Interface"))
   lazy val commandOptions = DocumentationPage.fromContent(name = "Command Options", content = org.openmole.site.content.documentation.CommandOptions)
-  val faq = DocumentationPage.fromScalatex(name = "FAQ", content = scalatex.FAQ, title = Some("Frequently Asked Questions"))
+  val faq = DocumentationPage.fromContent(name = "FAQ", content = org.openmole.site.content.FAQ, title = Some("Frequently Asked Questions"))
 
   // Plug
   def plugPages = pageNode(plug, Vector(scala, java, python, r, netLogo, gama, scilab, julia, container))

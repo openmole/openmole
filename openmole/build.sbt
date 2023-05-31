@@ -1173,7 +1173,6 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
 )
 
 lazy val siteJVM = site.jvm dependsOn(tools, openmoleProject, serializer, openmoleBuildInfo, marketIndex) settings(
-  scalatex.SbtPlugin.projectSettings,
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,
   //libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
   libraryDependencies += Libraries.json4s cross CrossVersion.for2_13Use3,
