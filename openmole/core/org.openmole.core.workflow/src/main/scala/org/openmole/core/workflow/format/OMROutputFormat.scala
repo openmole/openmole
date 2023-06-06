@@ -71,6 +71,7 @@ object OMROutputFormat:
   def methodField = "method"
   def methodPluginField = "plugin"
   def omrVersion = "0.2"
+  def dataDirectory = ".omr-data"
 
   implicit def outputFormat[MD](using default: OMROutputFormatDefault[MD], methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD]:
     override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext { p ⇒
@@ -162,8 +163,8 @@ object OMROutputFormat:
 
             val fileName =
               if !format.append
-              then s"omr-data/$executionPrefix-${executionContext.jobId}.omd"
-              else s"omr-data/$executionPrefix.omd"
+              then s"$dataDirectory/$executionPrefix-${executionContext.jobId}.omd"
+              else s"$dataDirectory/$executionPrefix.omd"
 
             val dataFile = directory / fileName
 
