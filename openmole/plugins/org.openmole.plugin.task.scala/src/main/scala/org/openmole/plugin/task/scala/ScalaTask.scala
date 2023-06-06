@@ -45,11 +45,11 @@ object ScalaTask {
 
   def defaultPlugins = pluginsOf(scala.xml.XML).toVector
 
-  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(source: String, libraries: Seq[File] = Vector())(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     new ScalaTask(
       source,
       plugins = defaultPlugins,
-      libraries = Vector.empty,
+      libraries = libraries.toVector,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
