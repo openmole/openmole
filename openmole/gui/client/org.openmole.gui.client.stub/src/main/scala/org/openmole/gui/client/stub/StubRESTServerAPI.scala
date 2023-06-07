@@ -210,6 +210,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def omrMethod(path: SafePath)(using BasePath): Future[String] = Future.successful("stub")
 
+  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = Future.successful(GUIOMRContent(Seq()))
+
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
 
   override def marketIndex()(using BasePath): Future[MarketIndex] =

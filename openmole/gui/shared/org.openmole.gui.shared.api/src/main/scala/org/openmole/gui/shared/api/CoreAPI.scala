@@ -78,6 +78,13 @@ trait CoreAPI extends RESTAPI {
     errorEndpoint(get(path / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
 
+  val omrMethod: ErrorEndpoint[SafePath, String] =
+    errorEndpoint(post(path / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[String]))
+
+  val omrContent: ErrorEndpoint[SafePath, GUIOMRContent] =
+    errorEndpoint(post(path / "file" / "omr" / "content", jsonRequest[SafePath]), ok(jsonResponse[GUIOMRContent]))
+
+
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
@@ -125,8 +132,6 @@ trait CoreAPI extends RESTAPI {
   val removePlugin: ErrorEndpoint[SafePath, Unit] =
     errorEndpoint(post(path / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
 
-  val omrMethod: ErrorEndpoint[SafePath, String] =
-    errorEndpoint(post(path / "plugin" / "omr-method", jsonRequest[SafePath]), ok(jsonResponse[String]))
 
   // ---- Model Wizards --------------
   //def models(archivePath: SafePath): Seq[SafePath]

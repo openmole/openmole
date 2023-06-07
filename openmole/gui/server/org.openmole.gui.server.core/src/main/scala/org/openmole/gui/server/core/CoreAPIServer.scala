@@ -146,6 +146,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val omrMethodRoute =
     omrMethod.errorImplementedBy { p => apiImpl.omrMethodName(p) }
 
+  val omrContentRoute =
+    omrContent.errorImplementedBy { p => apiImpl.omrContent(p) }
+
   val addPluginRoute =
     addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }
 
@@ -191,6 +194,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       marketIndexRoute,
       getMarketEntryRoute,
       omrMethodRoute,
+      omrContentRoute,
       addPluginRoute,
       removePluginRoute,
       listNotificationRoute,

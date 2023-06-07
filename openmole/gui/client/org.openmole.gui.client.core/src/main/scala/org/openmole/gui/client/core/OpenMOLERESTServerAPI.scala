@@ -55,6 +55,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]] = fetch.futureError(_.addPlugin(path).future)
   override def removePlugin(path: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.removePlugin(path).future)
   override def omrMethod(path: SafePath)(using BasePath): Future[String] = fetch.futureError(_.omrMethod(path).future)
+  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = fetch.futureError(_.omrContent(path).future)
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = fetch.futureError(_.downloadHTTP(url, path, extract, overwrite).future)
   override def marketIndex()(using BasePath): Future[MarketIndex] = fetch.futureError(_.marketIndex(()).future)
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.getMarketEntry(entry, safePath).future)

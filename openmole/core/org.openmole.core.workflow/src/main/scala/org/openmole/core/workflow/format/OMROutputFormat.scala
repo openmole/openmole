@@ -4,6 +4,7 @@ import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
 import org.json4s.JArray
+import org.openmole.core.context.Variable
 import org.openmole.core.script.Imports.*
 import org.openmole.core.omr.*
 import org.openmole.core.workflow.hook.*
@@ -189,14 +190,14 @@ object OMROutputFormat:
     val content = file.content(gz = true)
     decode[Index](content).toTry.get
 
-  def toVariables(file: File) =
+  def toVariables(file: File): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
     val data: File = file.getParentFile / index.`data-file`.last
 
     index.`data-mode` match
       case OMROutputFormat.Index.DataMode.Create =>
         def sectionToVariables(section: DataContent.SectionData, a: JArray) =
-          (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v)) }
+          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v)) }
 
         def readContent(file: File): JArray =
           file.withGzippedInputStream { is =>
@@ -211,7 +212,7 @@ object OMROutputFormat:
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
-          (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray) }
+          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray) }
 
         def readContent(file: File): JArray =
           val begin = new StringInputStream("[")

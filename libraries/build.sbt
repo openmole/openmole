@@ -53,7 +53,7 @@ lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq(
 ) settings(settings: _*) settings(scala3Settings: _*)
 
 lazy val circe = OsgiProject(dir, "io.circe",
-  exports = Seq("io.circe.*", "!cats.*", "!scala.*", "!shapeless3.*"),
+  exports = Seq("io.circe.*", "org.latestbit.*", "!cats.*", "!scala.*", "!shapeless3.*"),
   privatePackages = Seq("org.typelevel.jawn.*"),
   imports = Seq("scala.*", "cats.*", "shapeless3.*"))  settings (
   libraryDependencies ++= Seq(
@@ -64,6 +64,8 @@ lazy val circe = OsgiProject(dir, "io.circe",
     "io.circe" %% sjs("circe-core"),
     "io.circe" %% sjs("circe-generic"),
     "io.circe" %% sjs("circe-parser")).map(_ % circeVersion),
+  libraryDependencies += "org.latestbit" %% "circe-tagged-adt-codec" % "0.11.0",
+  libraryDependencies += "org.latestbit" %% sjs("circe-tagged-adt-codec") % "0.11.0",
   version := circeVersion) settings(settings: _*) settings(scala3Settings: _*) //dependsOn(shapeless) 
 
 lazy val logback = OsgiProject(dir, "ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl"), dynamicImports = Seq("*")) settings

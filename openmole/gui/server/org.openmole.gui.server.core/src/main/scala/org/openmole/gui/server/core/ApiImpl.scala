@@ -12,6 +12,7 @@ import java.net.URL
 import java.nio.file.*
 import java.util.zip.GZIPInputStream
 import org.openmole.core.compiler.*
+import org.openmole.core.context.Variable
 import org.openmole.core.expansion.ScalaCompilation
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
@@ -493,6 +494,20 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     val omrFile = safePathToFile(result)
     OMROutputFormat.methodName(omrFile)
+
+  def omrContent(result: SafePath): GUIOMRContent =
+    import services.*
+    val omrFile = safePathToFile(result)
+
+    def toGUIVariable(v: Variable[_]) =
+      GUIVariable(v.name, GUIVariable.ValueType.fromAny(v.value), v.prototype.`type`.toString)
+
+    def content =
+      OMROutputFormat.toVariables(omrFile).map: (s, v) =>
+        GUIOMRSectionContent(s.name, v.map(toGUIVariable))
+
+    GUIOMRContent(content)
+
 
     //GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
 

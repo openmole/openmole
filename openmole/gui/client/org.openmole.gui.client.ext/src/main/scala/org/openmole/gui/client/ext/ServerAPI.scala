@@ -59,6 +59,8 @@ trait ServerAPI:
   def removePlugin(path: SafePath)(using BasePath): Future[Unit]
 
   def omrMethod(path: SafePath)(using BasePath): Future[String]
+  def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent]
+
   def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath): Future[Unit]
 
   def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit]
