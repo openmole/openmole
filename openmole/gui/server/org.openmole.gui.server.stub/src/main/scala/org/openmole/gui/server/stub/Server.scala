@@ -43,7 +43,8 @@ import scala.concurrent.duration.Duration
   def application = GUIServlet.html(/*s"${GUIServlet.webpackLibrary}.run();"*/"openmole_stub_client.run();", css, "")
 
   OutputManager.uninstall
-  val services =  GUIServerServices(Workspace(new File("/tmp/openmole")), None, None, None)
+  val location = org.openmole.core.workspace.defaultOpenMOLEDirectory / "stub"
+  val services =  GUIServerServices(Workspace(location), None, None, None)
   val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher("password")))
   val apiImpl = new ApiImpl(serviceProvider, None)
   //apiImpl.activatePlugins
@@ -58,7 +59,7 @@ import scala.concurrent.duration.Duration
     InternalServerError { Left(ErrorData(t)).asJson.noSpaces }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
 
-  val apiServer = new StubAPIServer(apiImpl, stackError)
+  val apiServer = new org.openmole.gui.server.core.CoreAPIServer(apiImpl, stackError)
 
   def hello =
     import org.http4s.headers.{`Content-Type`}
