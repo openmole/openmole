@@ -20,7 +20,6 @@ import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 
 import java.io.SequenceInputStream
 
-
 object OMROutputFormat:
 
   object Index:
