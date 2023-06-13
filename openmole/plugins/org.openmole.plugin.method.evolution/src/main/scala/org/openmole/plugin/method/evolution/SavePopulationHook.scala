@@ -19,7 +19,6 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.plugin.method.evolution.data.*
 
 object SavePopulationHook:
 

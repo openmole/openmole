@@ -509,19 +509,12 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
-  openmoleDSL, toolsTask, pattern, evolutionData, collectionDomain % "test", boundsDomain % "test"
+  openmoleDSL, toolsTask, pattern, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,
   libraryDependencies += Libraries.circe,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13")
 ) settings (pluginSettings: _*)
-
-lazy val evolutionData = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution.data", imports = Seq("*")) settings(
-  pluginSettings,
-  scalaJSSettings,
-  OsgiKeys.bundleActivator := None,
-  libraryDependencies += Libraries.circe
-) enablePlugins (ScalaJSPlugin) dependsOn(omr)
 
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, boundsDomain % "test") settings (
   libraryDependencies += Libraries.mgo) settings (pluginSettings: _*)
@@ -843,8 +836,7 @@ lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imp
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
   libraryDependencies += Libraries.endpoints4s,
-  guiSettings,
-  scalaJSSettings) dependsOn(omr)
+  guiSettings) dependsOn(omr)
 
 lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
   //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,

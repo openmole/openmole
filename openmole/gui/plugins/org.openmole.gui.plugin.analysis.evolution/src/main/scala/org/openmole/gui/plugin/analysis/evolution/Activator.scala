@@ -18,8 +18,8 @@
 package org.openmole.gui.plugin.analysis.evolution
 
 import org.openmole.gui.server.ext.*
+import org.openmole.plugin.method.evolution.EvolutionMetadata
 import org.osgi.framework.{BundleActivator, BundleContext}
-import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

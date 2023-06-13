@@ -11,7 +11,6 @@
 //
 //import org.openmole.core.exception.InternalProcessingError
 //import org.openmole.core.outputmanager.OutputManager
-//import org.openmole.plugin.method.evolution.data._
 //
 //object Analysis {
 //

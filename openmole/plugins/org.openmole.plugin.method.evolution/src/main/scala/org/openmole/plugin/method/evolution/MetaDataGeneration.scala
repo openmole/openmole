@@ -1,6 +1,5 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.plugin.method.evolution.data.*
 import org.openmole.core.expansion.FromContext
 import io.circe.*
 import io.circe.generic.auto.*

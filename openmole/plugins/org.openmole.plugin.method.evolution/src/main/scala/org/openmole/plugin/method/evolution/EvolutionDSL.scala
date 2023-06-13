@@ -24,7 +24,6 @@ import scala.language.higherKinds
 import cats._
 import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 import org.openmole.plugin.task.tools.AssignTask
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern._

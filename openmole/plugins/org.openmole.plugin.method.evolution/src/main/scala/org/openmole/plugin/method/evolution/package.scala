@@ -22,7 +22,6 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.builder.*
 import monocle.macros.*
 import org.openmole.core.workflow.format.{CSVOutputFormat, WritableOutput}
-import org.openmole.plugin.method.evolution.data.EvolutionMetadata
 import org.openmole.plugin.task.tools.*
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern.MasterSlave

@@ -32,7 +32,6 @@ import org.openmole.plugin.method.evolution.NichedNSGA2.NichedElement
 import squants.time.Time
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 
 import monocle._
 import monocle.syntax.all._

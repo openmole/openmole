@@ -23,7 +23,6 @@ import org.openmole.core.services.Services
 import org.openmole.gui.shared.data.*
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.services.Services
-import org.openmole.plugin.method.evolution.data._
 import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.gui.shared.data.*

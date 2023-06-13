@@ -1,4 +1,4 @@
-package org.openmole.plugin.method.evolution.data
+package org.openmole.plugin.method.evolution
 
 import io.circe.derivation
 import org.openmole.core.omr.*

@@ -46,11 +46,14 @@ class FileDisplayer:
             }
           case e if FileContentType.isText(e) => AnyTextContent.addTab(safePath, content, hash)
           case FileContentType.OpenMOLEResult ⇒
-            api.omrMethod(safePath).foreach { method =>
-              plugins.analysisPlugins.get(method) match
-                case Some(analysis) ⇒
-                case None ⇒
-            }
+            api.omrContent(safePath).foreach: content =>
+              println(content)
+
+//            api.omrMethod(safePath).foreach { method =>
+//              plugins.analysisPlugins.get(method) match
+//                case Some(analysis) ⇒
+//                case None ⇒
+//            }
           case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, div(panelBody, content))
           case _ ⇒ //FIXME for GUI workflows
         }

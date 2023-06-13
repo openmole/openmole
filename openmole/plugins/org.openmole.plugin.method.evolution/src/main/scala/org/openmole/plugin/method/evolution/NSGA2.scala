@@ -22,7 +22,6 @@ import monocle.macros.{ GenLens }
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
-import org.openmole.plugin.method.evolution.data._
 import squants.time.Time
 
 import monocle._

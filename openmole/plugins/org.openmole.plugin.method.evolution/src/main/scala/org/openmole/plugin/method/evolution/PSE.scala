@@ -37,7 +37,6 @@ import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective._
-import org.openmole.plugin.method.evolution.data._
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 

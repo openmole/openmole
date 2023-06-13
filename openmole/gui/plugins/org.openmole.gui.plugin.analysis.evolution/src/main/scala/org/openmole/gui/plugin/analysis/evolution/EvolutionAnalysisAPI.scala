@@ -1,10 +1,9 @@
 package org.openmole.gui.plugin.analysis.evolution
 
 import org.openmole.gui.shared.data.*
-import org.openmole.plugin.method.evolution.data._
-
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
+import org.openmole.plugin.method.evolution.AnalysisData
 
 trait EvolutionAnalysisAPI extends RESTAPI {
   //def analyse(path: SafePath): Either[ErrorData, AnalysisData.Convergence]

@@ -4,7 +4,6 @@
 //import org.openmole.core.dsl._
 //import org.openmole.core.dsl.extension._
 //import org.openmole.plugin.method.evolution.PSE.{ DeterministicParams, PatternAxe }
-//import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 //import squants.time.Time
 //
 ///*
