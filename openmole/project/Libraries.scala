@@ -106,7 +106,7 @@ object Libraries {
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13
-  lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion
+  lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk18on" % bouncyCastleVersion
   lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.18.100"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
 
