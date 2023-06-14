@@ -650,7 +650,6 @@ val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
   //lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") dependsOn (apiGUI, clientToolGUI, market, dataGUI, clientExt) settings (
-  libraryDependencies += Libraries.async,
   libraryDependencies += Libraries.sourceCode,
   webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   webpackNodeArgs := Seq ("--openssl-legacy-provider"),
@@ -747,7 +746,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.clapper, Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
+  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
   guiSettings) dependsOn(
   apiGUI,
   dataGUI,
@@ -785,8 +784,8 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
   libraryDependencies += "org.scala-js" %%% "scalajs-library" % scalajsVersion % "provided" intransitive() cross CrossVersion.for3Use2_13,
   //libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.4" % "provided" intransitive(),
 
-  libraryDependencies += Libraries.scalajsLogging cross CrossVersion.for3Use2_13,
-  libraryDependencies += Libraries.scalajsLinker cross CrossVersion.for3Use2_13,
+  libraryDependencies += Libraries.scalajsLogging,
+  libraryDependencies += Libraries.scalajsLinker,
 
   (Compile / resourceDirectories) += (crossTarget.value / "resources"),
   (OsgiKeys.embeddedJars) := {

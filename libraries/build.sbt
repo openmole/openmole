@@ -10,7 +10,6 @@ def settings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += Resolver.sonatypeRepo("staging"),
-  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
   scalacOptions ++= Seq("-deprecation", "-Ytasty-reader"),
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
@@ -23,18 +22,14 @@ def scala3Settings = settings ++ Seq(
   scalaVersion := scala3VersionValue,
 )
 
-def scala2Settings = settings ++ Seq(
-  scalaVersion := scalaVersionValue,
-)
-
 lazy val scalatra = OsgiProject(dir, "org.scalatra",
   exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
   privatePackages = Seq("scala.xml.*", "!scala.*", "!org.slf4j.*", "**"),
   imports = Seq("scala.*", "org.slf4j.*"),
   global = true) settings(
-  scala2Settings,
-  libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion,
-  libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion,
+  scala3Settings,
+  libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion cross CrossVersion.for3Use2_13,
+  libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion cross CrossVersion.for3Use2_13,
   libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
   libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
   version := scalatraVersion) dependsOn(slf4j)
@@ -228,6 +223,7 @@ lazy val netlogo6 = OsgiProject(
   privatePackages = Seq("**"),
   imports = Seq("empty;resolution:=optional")) settings(settings) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
+  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
   libraryDependencies ++= Seq(
     //"org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
     "org.nlogo" % "netlogo" % netLogo6Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),
@@ -248,22 +244,22 @@ lazy val netlogo6 = OsgiProject(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
 
 lazy val scalajsLinker = OsgiProject(dir, "scalajs-linker", exports = Seq("org.scalajs.linker.*", "org.scalajs.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
-  scala2Settings,
-  libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalajsVersion,
+  scala3Settings,
+  libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalajsVersion cross CrossVersion.for3Use2_13,
 ////  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsVersion,
 //    //"org.scala-js" %% "scalajs-linker-interface" % scalajsVersion),
     version := scalajsVersion)
 //
 
 lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org.scalajs.logging.*")) settings(
-  scala2Settings,
-  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsLoggingVersion,
+  scala3Settings,
+  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsLoggingVersion cross CrossVersion.for3Use2_13,
   version := scalajsLoggingVersion)
   
 lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = Seq("*"), privatePackages = Seq("org.scalajs.*")) settings (
-  scala2Settings,
-  libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion,
-  libraryDependencies += "org.scala-lang" % "scala3-library_sjs1_3" % scala3VersionValue,
+  scala3Settings,
+  libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion cross CrossVersion.for3Use2_13,
+  libraryDependencies += "org.scala-lang" %% sjs("scala3-library") % scala3VersionValue,
   version := scalajsVersion
   )
 
@@ -334,9 +330,9 @@ lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),
   privatePackages = Seq("!scala.*","!org.apache.commons.math3.*","*")
 ) settings(
-  scala2Settings,
+  scala3Settings,
   //resolvers += "osgeo" at  "https://repo.osgeo.org/repository/release/",
-  libraryDependencies += "org.openmole" %% "spatialsampling" % spatialsamplingVersion,
+  libraryDependencies += "org.openmole" %% "spatialsampling" % spatialsamplingVersion cross CrossVersion.for3Use2_13,
   version := spatialsamplingVersion)
 
 lazy val opencsv = OsgiProject(dir, "au.com.bytecode.opencsv") settings(
@@ -349,13 +345,6 @@ lazy val scopt = OsgiProject(dir, "com.github.scopt", exports = Seq("scopt.*")) 
   libraryDependencies += "com.github.scopt" %% "scopt" % scoptVersion,
   version := scoptVersion
   )
-
-lazy val async =
-  OsgiProject(dir, "scala-async") settings (
-    scala2Settings,
-    libraryDependencies += "org.scala-lang.modules" %% "scala-async" % asyncVersion,
-    version := asyncVersion,
-    exportPackage := Seq("scala.async.*"))
 
 lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.apache.commons.math3.*"), privatePackages = Seq("assets.*")) settings(
   scala3Settings,
@@ -392,16 +381,11 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
 //  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r", version := "4.6.0" )
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-  scala2Settings,
-  libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13", version := "0.13" )
-
-lazy val clapperVersion = "1.5.1"
-lazy val clapper = OsgiProject(dir, "org.clapper", exports = Seq("!scala.*","!grizzled.*","!jline.*","!org.fusesource.*","!org.slf4j.*","*")) settings (
-  scala2Settings,
-  libraryDependencies += "org.clapper" %% "classutil" % clapperVersion, version := clapperVersion)
+  scala3Settings,
+  libraryDependencies += "com.github.rjeschke" % "txtmark" % txtmarkVersion, version := txtmarkVersion)
 
 lazy val scalaz = OsgiProject(dir, "org.scalaz", exports = Seq("!scala.*","*")) settings (
-  scala2Settings,
+  scala3Settings,
   libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion cross CrossVersion.for3Use2_13, version := scalazVersion)
 
 lazy val monocle = OsgiProject(dir, "monocle",

@@ -5,7 +5,6 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scalaVersionValue = "2.13.11-M2"
   def scala3VersionValue = "3.3.0"
   def scalajsVersion = "1.13.1"
 
@@ -41,13 +40,14 @@ object common {
   def jasyptVersion = "1.9.3"
   def monocleVersion = "3.2.0"
   def configuration2Version = "2.8.0"
-  def scalazVersion = "7.3.6"
+  def scalazVersion = "7.3.7"
   def mathVersion = "3.6.1"
   def asmVersion = "9.4"
   def guavaVersion = "31.1-jre"
   def scalaMetaVersion = "4.7.4"
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.21.0"
+  def txtmarkVersion = "0.13"
 
   def http4sVersion = "0.23.12"
 
@@ -57,8 +57,6 @@ object common {
   def endpoint4SXHRClientVersion = "5.3.0"
 
   def xzVersion = "1.9"
-
-  def asyncVersion = "1.0.1"
 
   def lang3Version = "3.12.0"
 
