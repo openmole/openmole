@@ -35,20 +35,35 @@ package object csv {
 
   def header(prototypes: Seq[Val[_]], values: Seq[Any], arrayOnRow: Boolean) =
     if (!arrayOnRow) prototypes.map(_.name).mkString(",")
-    else {
+    else
       def arrayHeaders(v: Any, h: String): Seq[String] =
-        v match {
-          case v: Array[_] ⇒ (v zipWithIndex).flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
-          case v: Seq[_]   ⇒ (v zipWithIndex).flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
+        v match
+          case v: Array[_] ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
+          case v: Seq[_]   ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
           case v           ⇒ Seq(h)
-        }
 
       (prototypes zip values).flatMap {
         case (p, v) ⇒ arrayHeaders(v, "").map(h ⇒ s"${p.name}$h")
       }.mkString(",")
-    }
 
   def writeVariablesToCSV(
+    file: File,
+    variables: Seq[Variable[_]],
+    unrollArray: Boolean = false,
+    arrayOnRow: Boolean = false,
+    gzip: Boolean = false,
+    append: Boolean = false): Unit =
+    def headerValue = header(variables.map(_.prototype), variables.map(_.value), arrayOnRow)
+    file.withPrintStream(create = true, append = append, gz = gzip): ps =>
+      appendVariablesToCSV(
+        output = ps,
+        header = Some(headerValue),
+        values = variables.map(_.value),
+        unrollArray = unrollArray,
+        arrayOnRow = arrayOnRow
+      )
+
+  def appendVariablesToCSV(
     output:      PrintStream,
     header:      ⇒ Option[String] = None,
     values:      Seq[Any],

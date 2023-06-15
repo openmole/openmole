@@ -27,8 +27,8 @@ object CSVOutputFormat:
           def writeFile(f: File, variables: Seq[Variable[_]]) =
             val create = !format.append || f.isEmpty
             val h = if (create || f.isEmpty) Some(headerLine(variables)) else None
-            if (create) f.atomicWithPrintStream { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
-            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.writeVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+            if (create) f.atomicWithPrintStream { ps ⇒ csv.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+            else f.withPrintStream(append = true, create = true) { ps ⇒ csv.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
 
           def directoryMode = format.directory || s.section.size > 1
 
@@ -44,11 +44,11 @@ object CSVOutputFormat:
             section match
               case None ⇒
                 val header = Some(headerLine(variables))
-                csv.writeVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
+                csv.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
               case Some(section) ⇒
                 ps.println(section + ":")
                 val header = Some(headerLine(variables))
-                csv.writeVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
+                csv.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
 
           for { (section, i) ← s.section.zipWithIndex }
             val sectionName = if s.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
