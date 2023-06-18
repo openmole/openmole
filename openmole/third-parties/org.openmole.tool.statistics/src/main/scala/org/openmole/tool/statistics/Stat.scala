@@ -234,6 +234,9 @@ trait Stat {
     recurse(BigDecimal(smin), ssorted.toList, List()).map(_.toDouble / size)
   }
 
+  def percentile(s: Seq[Double], n: Double): Double =
+    percentile(s, Seq(n)).head
+
   def percentile(s: Seq[Double], n: Seq[Double]) = 
     import org.apache.commons.math3.stat.descriptive.rank.Percentile
     val c = new Percentile()
