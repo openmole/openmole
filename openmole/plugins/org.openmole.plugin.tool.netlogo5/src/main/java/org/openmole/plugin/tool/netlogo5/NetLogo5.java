@@ -37,6 +37,8 @@ public class NetLogo5 implements NetLogo {
 
     private HeadlessWorkspace getWorkspace() {
         if(workspace == null) {
+            // Just in case same thing as NetLogo 6
+            System.setProperty("netlogo.libraries.disabled", "true");
             workspace = HeadlessWorkspace.newInstance();
         }
         return workspace;
@@ -44,8 +46,6 @@ public class NetLogo5 implements NetLogo {
 
     @Override
     public void open(String script,boolean switch3d) throws Exception {
-        // Just in case same thing as NetLogo 6
-        System.setProperty("netlogo.libraries.disabled", "true");
         // FIXME this is only a temporary fix - running simultaneously 3d and 2d models will fail anyway
         if (switch3d && script.endsWith("3d")) System.setProperty("org.nlogo.is3d", "true");
         else System.setProperty("org.nlogo.is3d", "false");
