@@ -68,7 +68,7 @@ def excludeTransitiveScala2 =
     ExclusionRule("org.scala-lang.modules", "scala-parallel-collections_2.13"),
     ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
     ExclusionRule("org.scala-lang.modules", "scala-java8-compat_2.13"),
-    //ExclusionRule("org.scala-lang.modules", "scala-xml_2.13"),
+    ExclusionRule("com.github.pathikrit", "better-files_2.13"),
 
 
     //    ExclusionRule("org.typelevel" ,"cats_2.13"),
@@ -988,7 +988,7 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
 
   def include =
     (artifact.`type` == "bundle" && m.name != "osgi" && m.organization == "org.openmole.library") ||
-      m.organization == "org.bouncycastle" ||
+      (m.organization == "org.bouncycastle" && !m.name.contains("jdk15on")) ||
       (m.name == "httpclient-osgi") ||
       (m.name == "httpcore-osgi") ||
       (m.organization == "org.osgi" && m.name != "osgi") ||
