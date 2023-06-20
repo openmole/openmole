@@ -166,37 +166,34 @@ object ContainerTask:
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
 
-  def install(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = {
+  def install(containerSystem: ContainerSystem, image: ContainerImage, install: Seq[String], volumes: Seq[(String, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) = 
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
-      image match {
+      image match
         case image: DockerImage      ⇒ Seq(image.image, image.tag, image.registry)
         case image: SavedDockerImage ⇒ Seq(image.file.hash().toString)
-      }
 
-    val volumeCacheKey = volumes.map { case (f, _) ⇒ fileService.hashNoCache(f).toString } ++ volumes.map { case (_, d) ⇒ d }
+    val volumeCacheKey = volumes.map { (f, _) ⇒ fileService.hashNoCache(f).toString } ++ volumes.map { (_, d) ⇒ d }
     val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey).mkString("\n")).toString
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
 
-    cacheDirectory.withLockInDirectory {
+    cacheDirectory.withLockInDirectory:
       val containerDirectory = cacheDirectory / "fs"
 
-      if (clearCache) {
+      if clearCache
+      then
         serializedFlatImage.delete
         containerDirectory.recursiveDelete
-      }
 
-      if (serializedFlatImage.exists) serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
-      else {
+      if serializedFlatImage.exists
+      then serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
+      else
         val img = localImage(image, containerDirectory, clearCache = clearCache)
         val installedImage = executeInstall(containerSystem, img, install, volumes = volumes, errorDetail = errorDetail)
         serializerService.serialize(installedImage, serializedFlatImage)
         installedImage
-      }
-    }
-  }
 
   def executeInstall(containerSystem: ContainerSystem, image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(String, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if (install.isEmpty) image
