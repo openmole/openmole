@@ -161,7 +161,7 @@ case class PythonTask(
           external = external,
           info = info,
           containerPoolKey = containerPoolKey) set (
-            resources += (workDirectoryFile, workDirectory, true),
+            resources += (workDirectoryFile, workDirectory, true, head = true),
             outputFiles += (outputJSONPath, outputFile),
             Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
             Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }

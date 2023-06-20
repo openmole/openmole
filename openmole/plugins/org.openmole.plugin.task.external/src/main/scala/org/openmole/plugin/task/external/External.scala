@@ -64,7 +64,7 @@ object External {
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
 
-  def validate(external: External): Validate = {
+  def validate(external: External): Validate =
     def resourceExists(resource: External.Resource) = Validate {
       if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
     }
@@ -75,7 +75,6 @@ object External {
       external.outputFiles.flatMap(_.origin.validate) ++
       external.resources.flatMap(_.destination.validate) ++
       external.resources.flatMap(resourceExists)
-  }
 
   protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map {
@@ -83,9 +82,9 @@ object External {
     }
 
   protected def listInputFileArray(inputFileArrays: Vector[InputFileArray], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[Array[File]], Seq[DeployedFile])] =
-    for {
+    for
       ifa ← inputFileArrays
-    } yield {
+    yield
       (
         ifa.prototype,
         context(ifa.prototype).zipWithIndex.map {
@@ -93,28 +92,22 @@ object External {
             DeployedFile(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, deployedFileType = DeployedFileType.InputFile)
         }.toSeq
       )
-    }
 
-  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] = {
+  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] =
     val byLocation =
-      resources groupBy {
-        case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
-      }
+      resources.zipWithIndex.groupBy: (resource, _) ⇒
+        resolver(resource.destination.from(context)).getCanonicalPath
 
     val selectedOS =
-      byLocation.toList flatMap {
-        case (_, values) ⇒ values.find { _.os.compatible }
-      }
+      byLocation.toList flatMap: (_, values) ⇒
+        values.find { _._1.os.compatible }
 
-    selectedOS.map {
-      case Resource(file, name, link, _) ⇒ DeployedFile(file, name.from(context), link, deployedFileType = DeployedFileType.Resource)
-    }
-  }
+    selectedOS.sortBy(_._2).map(_._1).map: resource =>
+       DeployedFile(resource.file, resource.destination.from(context), resource.link, deployedFileType = DeployedFileType.Resource)
 
-  def relativeResolver(workDirectory: File)(filePath: String): File = {
+  def relativeResolver(workDirectory: File)(filePath: String): File =
     def resolved = workDirectory.resolve(filePath)
     resolved.toFile
-  }
 
   private def copyFile(f: DeployedFile, to: File) =
     to.createParentDirectory
@@ -218,7 +211,6 @@ object External {
       Variable.copy(v)(value = movedFile)
     }
   }
-
 }
 
 import org.openmole.plugin.task.external.External._

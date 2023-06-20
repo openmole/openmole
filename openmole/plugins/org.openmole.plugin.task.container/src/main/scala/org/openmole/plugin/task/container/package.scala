@@ -70,7 +70,7 @@ package object container {
   type FileBinding = (String, String)
 
 
-  def outputPathResolver(fileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
+  def outputPathResolver(fileBindings: Seq[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
 
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -87,7 +87,7 @@ package object container {
 
     def resolveFile(f: String) =
       fileBindings.
-        find((_, bindPath) ⇒ isOneOfParents(bindPath, f)).
+        findLast((_, bindPath) ⇒ isOneOfParents(bindPath, f)).
         map((localPath, bindPath) => File(localPath) / relativiseFromParent(bindPath, f))
 
     def isAbsolute = File(filePath).isAbsolute

@@ -76,16 +76,19 @@ package external {
     object ResourcesKeyword:
       object ResourceSetter:
         given [T: ExternalBuilder]: Setter[ResourceSetter, T] = setter =>
-          implicitly[ExternalBuilder[T]].resources add External.Resource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
+          def resource = External.Resource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
+          if setter.head
+          then implicitly[ExternalBuilder[T]].resources add (resource, head = true)
+          else implicitly[ExternalBuilder[T]].resources add resource
 
-      case class ResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS)
+      case class ResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean)
 
 
     class ResourcesKeyword:
       /**
        * Copy a file from your computer in the workspace of the task
        */
-      def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS()) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os)
+      def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os, head = head)
 
     lazy val resources = new ResourcesKeyword
   }

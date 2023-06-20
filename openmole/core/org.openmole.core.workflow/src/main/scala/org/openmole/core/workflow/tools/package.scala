@@ -25,7 +25,10 @@ package tools {
   trait ToolsPackage {
 
     implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]) {
-      def add(u: U) = l.modify(_ ++ Seq(u))
+      def add(u: U, head: Boolean = false) =
+        if !head
+        then l.modify(_ ++ Seq(u))
+        else l.modify(Vector(u) ++ _)
     }
 
     implicit class SeqOfEndofunctorDecorator[T](f: Seq[T ⇒ T]) {
