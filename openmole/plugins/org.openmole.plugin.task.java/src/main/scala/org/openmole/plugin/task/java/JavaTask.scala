@@ -180,7 +180,7 @@ case class JavaTask(
           else ""
 
         def containerTask =
-          ContainerTask(
+          ContainerTask.internal(
             containerSystem = containerSystem,
             image = image,
             command = prepare ++ Seq(JavaTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),

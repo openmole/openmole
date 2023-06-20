@@ -116,26 +116,24 @@ object External {
     resolved.toFile
   }
 
-  private def copyFile(f: DeployedFile, to: File) = {
+  private def copyFile(f: DeployedFile, to: File) =
     to.createParentDirectory
-
-    if (f.link) to.createLinkTo(f.file.getCanonicalFile)
-    else {
+    if f.link
+    then to.createLinkTo(f.file.getCanonicalFile)
+    else
       f.file.realFile.copy(to)
       to.applyRecursive { _.deleteOnExit }
-    }
-  }
 
   private def destination(resolver: PathResolver, f: DeployedFile) = resolver(f.expandedUserPath)
 
   def deployResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    for { f ← listResources(external.resources, context, resolver) } yield {
+    for f ← listResources(external.resources, context, resolver)
+    yield
       val d = destination(resolver, f)
       copyFile(f, d)
-      (f → d)
-    }
+      f → d
 
-  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) = {
+  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) = 
     val (copiedFilesVariable, copiedFilesInfo) =
       listInputFiles(external.inputFiles, context).map {
         case (p, f) ⇒
@@ -157,16 +155,14 @@ object External {
       }.unzip
 
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, copiedFilesInfo ++ copiedFilesArrayInfo.flatten)
-  }
 
   def deployInputFilesAndResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     deployAndListInputFiles(external: External, context, resolver)._1
 
-  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
+  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = 
     val resourcesFiles = deployResources(external, context, resolver)
     val (newContext, inputFilesInfo) = deployInputFiles(external, context, resolver)
     (newContext, resourcesFiles ++ inputFilesInfo)
-  }
 
   protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     outputFiles.map {
@@ -192,10 +188,11 @@ object External {
     val fileOutputs = outputFileVariables(outputFiles, context, resolver)
     val allFiles = (fileOutputs ++ contextFiles(outputs, context)).distinct
 
-    for {
+    for
       f ← allFiles
       if !f.value.exists
-    } throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
+    do
+      throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
     // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =

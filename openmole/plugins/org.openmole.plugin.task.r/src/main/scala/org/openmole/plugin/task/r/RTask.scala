@@ -189,7 +189,7 @@ case class RTask(
         val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
         def containerTask =
-          ContainerTask(
+          ContainerTask.internal(
             containerSystem = containerSystem,
             image = image,
             command = prepare ++ Seq(s"R --slave -f /$rScriptName"),

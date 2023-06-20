@@ -63,7 +63,7 @@ object MoleServices {
     outputRedirection:             Option[OutputRedirection]  = None,
     seed:                          Option[Long]               = None,
     compilationContext:            Option[CompilationContext] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService, networkService: NetworkService, fileServiceCache: FileServiceCache, timeService: TimeService) = {
-    val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDir("execution"))
+    val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDirectory("execution"))
 
     new MoleServices(applicationExecutionDirectory, executionDirectory, compilationContext = compilationContext)(
       preference = preference,

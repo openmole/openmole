@@ -165,7 +165,7 @@ case class NetLogoContainerTask(
       val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
 
       def containerTask =
-        ContainerTask(
+        ContainerTask.internal(
           image = image,
           command = launchCommand,
           containerSystem = containerSystem,

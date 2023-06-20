@@ -60,7 +60,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                 } {
                   runningJob = Some(moleJob)
 
-                  val taskExecutionDirectory = executionJob.executionContext.moleExecutionDirectory.newDir("taskExecution")
+                  val taskExecutionDirectory = executionJob.executionContext.moleExecutionDirectory.newDirectory("taskExecution")
                   val result =
                     try {
                       val executionContext = TaskExecutionContext.complete(

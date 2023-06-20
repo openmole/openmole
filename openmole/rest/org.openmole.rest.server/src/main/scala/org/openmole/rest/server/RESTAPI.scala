@@ -74,7 +74,7 @@ trait RESTAPI extends ScalatraServlet
   val arguments: RESTLifeCycle.Arguments
   val services = arguments.services
 
-  lazy val baseDirectory = services.workspace.tmpDirectory.newDir("rest")
+  lazy val baseDirectory = services.workspace.tmpDirectory.newDirectory("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/job") {
@@ -270,7 +270,7 @@ trait RESTAPI extends ScalatraServlet
     (fileMultiParams get "file") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
       case Some(files) ⇒
-        val extractDirectory = baseDirectory.newDir("plugins")
+        val extractDirectory = baseDirectory.newDirectory("plugins")
         extractDirectory.mkdirs()
 
         val (plugins, errors) =

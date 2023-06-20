@@ -120,7 +120,7 @@ case class CORMASTask(
       jsonInputs.content = compact(render(inputDictionary))
 
       def containerTask =
-        ContainerTask(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = s"""./pharo --headless Pharo.image eval '${script.from(context)}'""",

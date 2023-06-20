@@ -221,7 +221,7 @@ case class ScilabTask(
         else s"""scilab-cli -nb -f /$scriptName"""
 
       def containerTask =
-        ContainerTask(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(launchCommand),

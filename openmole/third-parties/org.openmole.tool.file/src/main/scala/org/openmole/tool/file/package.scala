@@ -331,13 +331,13 @@ package file {
        * @param prefix String to prefix the generated UUID name.
        * @return New temporary directory
        */
-      def newDir(prefix: String, create: Boolean = false): File = {
+      def newDirectory(prefix: String, create: Boolean = false): File = {
         val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
         if (create) tempDir.mkdirs()
         tempDir.toFile
       }
 
-      /**
+        /**
        * Create instance of temporary file in directory of caller.
        * Actual file is NOT created yet.
        *

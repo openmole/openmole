@@ -22,7 +22,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.xml.XML
 
-object GAMATask {
+object GAMATask:
 
   implicit def isTask: InputOutputBuilder[GAMATask] = InputOutputBuilder(Focus[GAMATask](_.config))
   implicit def isExternal: ExternalBuilder[GAMATask] = ExternalBuilder(Focus[GAMATask](_.external))
@@ -81,7 +81,7 @@ object GAMATask {
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask = {
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
 
     if (!project.exists()) throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
     if (!(project / gaml).exists()) throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
@@ -119,10 +119,9 @@ object GAMATask {
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
       )
-  }
 
 
-  def modifyInputXML(values: Map[String, String], finalStep: Int, seed: Long, frameRate: Option[Int]) = {
+  def modifyInputXML(values: Map[String, String], finalStep: Int, seed: Long, frameRate: Option[Int]) =
     import xml._
     import xml.transform._
 
@@ -148,10 +147,9 @@ object GAMATask {
       }
 
     new RuleTransformer(rewrite)
-  }
 
 
-  def acceptedOutputType(frame: Boolean): Seq[Manifest[_]] = {
+  def acceptedOutputType(frame: Boolean): Seq[Manifest[_]] =
     def scalar =
       Seq(
         manifest[Double],
@@ -161,9 +159,7 @@ object GAMATask {
       )
 
     if(!frame) scalar else scalar.map(_.arrayManifest)
-  }
 
-}
 
 case class GAMATask(
   project:              File,
@@ -265,7 +261,7 @@ case class GAMATask(
 
       newFile.withTmpDir { tmpOutputDirectory =>
         def containerTask =
-          ContainerTask(
+          ContainerTask.internal(
             image = image,
             command = launchCommand,
             containerSystem = containerSystem,

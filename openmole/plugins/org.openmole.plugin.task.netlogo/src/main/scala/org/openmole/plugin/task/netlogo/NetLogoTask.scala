@@ -139,7 +139,7 @@ object NetLogoTask {
       dispose(instance.netLogo, ignoreErrorOnDispose)
     }
 
-    WithInstance[NetLogoTask.NetoLogoInstance] { () ⇒ createInstance }(close = destroyInstance, pooled = cached)
+    WithInstance[NetLogoTask.NetoLogoInstance](close = destroyInstance, pooled = cached) { () ⇒ createInstance }
   }
 
   /**

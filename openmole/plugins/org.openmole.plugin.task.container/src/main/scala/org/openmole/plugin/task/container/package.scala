@@ -69,20 +69,8 @@ package object container {
 
   type FileBinding = (String, String)
 
-  /**
-   * FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
-   *
-   * @param inputDirectory Directory used to store input files / folder from the dataflow
-   * @param baseDirectory
-   * @param path Target location
-   * @return
-   */
-  def inputPathResolver(inputDirectory: File, baseDirectory: String)(path: String): File = {
-    if (File(path).isAbsolute) inputDirectory / path
-    else inputDirectory / baseDirectory / path
-  }
 
-  def outputPathResolver(preparedFileBindings: Iterable[FileBinding], hostFileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File = {
+  def outputPathResolver(fileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
 
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -91,17 +79,23 @@ package object container {
      * @return true if dir is a parent of file at a level
      */
     def isOneOfParents(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
-    def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
-    def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
+
+    def relativiseFromParent(parent: String, file: String): String =
+      if isOneOfParents(parent, file)
+      then File(file).getAbsolutePath.drop(File(parent).getAbsolutePath.length)
+      else file
+
+    def resolveFile(f: String) =
+      fileBindings.
+        find((_, bindPath) ⇒ isOneOfParents(bindPath, f)).
+        map((localPath, bindPath) => File(localPath) / relativiseFromParent(bindPath, f))
+
     def isAbsolute = File(filePath).isAbsolute
+    def absolutePathInArchive: String = if isAbsolute then filePath else (File(userWorkDirectory) / filePath).getPath
 
-    val absolutePathInArchive: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-    val pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
+    def pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
 
-    if (isPreparedFile(pathToResolve)) inputPathResolver(inputDirectory, userWorkDirectory)(filePath)
-    else if (isHostFile(pathToResolve)) File("/") / absolutePathInArchive
-    else rootDirectory / absolutePathInArchive
-  }
+    resolveFile(pathToResolve) getOrElse (rootDirectory / absolutePathInArchive)
 
   def validateContainer(
     commands:             Seq[FromContext[String]],

@@ -144,7 +144,7 @@ case class JuliaTask(
         val argumentsValue = arguments.map(" " + _).getOrElse("")
 
         def containerTask =
-          ContainerTask(
+          ContainerTask.internal(
             containerSystem = containerSystem,
             image = image,
             command = prepare ++ Seq(s"julia /$scriptName $argumentsValue"),

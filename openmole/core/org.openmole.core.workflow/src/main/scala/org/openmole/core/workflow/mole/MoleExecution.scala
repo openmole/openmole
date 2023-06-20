@@ -197,7 +197,7 @@ object MoleExecution {
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
-              val taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution")
+              val taskExecutionDirectory = moleExecutionDirectory.newDirectory("taskExecution")
               val result =
                 try {
                   val taskContext =
