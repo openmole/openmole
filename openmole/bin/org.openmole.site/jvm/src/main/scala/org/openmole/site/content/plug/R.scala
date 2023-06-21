@@ -39,7 +39,7 @@ It takes the following arguments :
 
 ${ul(
    li{html"${code{"script"}} String,$mandatory. The R script to be executed, either R code directly or a R script file."},
-   li{html"${code{"libraries"}} Sequence of strings, $optional (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image. System dependencies for R libraries are by default automatically resolved and installed (see advanced arguments below)."},
+   li{html"${code{"libraries"}} Sequence of strings, $optional (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image. System dependencies for R libraries can be automatically resolved and installed (see advanced arguments below)."},
    li{html"${code{"clearContainerCache"}} Boolean, $optional (default = ${code{"false"}}). Should the R image and libraries be cleared and reinstalled (to ensure an update for example)? If ${code{"true"}}, the task will perform the installation (and thus the update) even if the library was already installed."}
 )}
 

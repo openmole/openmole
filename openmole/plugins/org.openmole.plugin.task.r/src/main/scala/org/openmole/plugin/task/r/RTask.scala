@@ -64,7 +64,7 @@ object RTask:
     install:                    Seq[String]                        = Seq.empty,
     libraries:                  Seq[InstallCommand]                = Seq.empty,
     prepare:                    Seq[String]                        = Seq.empty,
-    installSystemDependencies:  Boolean                            = true,
+    installSystemDependencies:  Boolean                            = false,
     image:                      String                             = "openmole/r-base",
     version:                    String                             = "4.2.2",
     errorOnReturnValue:         Boolean                            = true,
@@ -73,9 +73,9 @@ object RTask:
     stdErr:                     OptionalArgument[Val[String]]      = None,
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
-    clearContainerCache:        Boolean                          = false,
-    containerSystem:            ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem:     ContainerSystem                  = ContainerSystem.default,
+    clearContainerCache:        Boolean                            = false,
+    containerSystem:            ContainerSystem                    = ContainerSystem.default,
+    installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
 
     val sysdeps: String =
