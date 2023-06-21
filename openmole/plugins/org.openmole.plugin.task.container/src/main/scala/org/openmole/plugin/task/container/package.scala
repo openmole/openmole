@@ -70,7 +70,7 @@ package object container {
   type FileBinding = (String, String)
 
 
-  def outputPathResolver(fileBindings: Seq[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
+  def outputPathResolver(fileBindings: Seq[FileBinding], userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
 
     /**
      * Search for a parent, not only in level 1 subdirs

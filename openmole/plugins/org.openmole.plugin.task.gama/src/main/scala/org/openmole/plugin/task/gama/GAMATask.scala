@@ -238,13 +238,11 @@ case class GAMATask(
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
 
-    val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
+    val inputFilePath = s"${GAMATask.workspaceDirectory}/_inputs_openmole_.xml"
+    val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".xml")
 
-    val inputFileName = "_inputs_openmole_.xml"
-    val inputFile = workDirectoryFile / inputFileName
-
-    def outputDirectoryName = "_output_"
-    val outputDirectory = workDirectoryFile /> outputDirectoryName
+    def outputDirectoryPath = s"${GAMATask.workspaceDirectory}/_output_"
+    val outputDirectory = executionContext.taskExecutionDirectory.newDirectory("output", create = true)
 
     val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
@@ -258,31 +256,29 @@ case class GAMATask(
 
     def launchCommand =
       memory.option match
-        case None => s"gama-headless -hpc 1 ${GAMATask.workspaceDirectory}/$inputFileName ${GAMATask.workspaceDirectory}/$outputDirectoryName"
-        case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 ${GAMATask.workspaceDirectory}/$inputFileName ${GAMATask.workspaceDirectory}/$outputDirectoryName"
+        case None => s"gama-headless -hpc 1 $inputFilePath $outputDirectoryPath"
+        case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFilePath $outputDirectoryPath"
 
     def containerTask =
-      ContainerTask.internal(
+      ContainerTask.isolatedWorkdirectory(executionContext)(
         image = image,
         command = launchCommand,
         containerSystem = containerSystem,
-        workDirectory = Some(GAMATask.workspaceDirectory),
+        workDirectory = GAMATask.workspaceDirectory,
         relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
         environmentVariables = environmentVariables,
-        duplicateImage = false,
         stdOut = stdOut,
         stdErr = stdErr,
         config = config,
         external = external,
         info = info,
         containerPoolKey = containerPoolKey) set(
-        resources += (workDirectoryFile, GAMATask.workspaceDirectory, true, head = true),
-        //resources += (inputFile, inputFileName, true),
+        resources += (inputFile, inputFilePath, true),
+        resources += (outputDirectory, outputDirectoryPath, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
-        //resources += (tmpOutputDirectory, outputDirectory, true),
         Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
         Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
       )

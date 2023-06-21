@@ -163,22 +163,20 @@ case class RTask(
       val outputValues = parse(file.content)
       (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
-    val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
+    val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
+    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
 
     def workDirectory = "/_workdirectory_"
     def inputArrayName = "generatedomarray"
-    def rScriptName = "_generatedomscript_.R"
-    def inputJSONName = "_generatedominputs_.json"
+    def rScriptPath = s"$workDirectory/_generatedomscript_.R"
+    def inputJSONPath = s"$workDirectory/_generatedominputs_.json"
     def outputJSONPath = s"$workDirectory/_generatedomoutputs_.json"
-
-    val scriptFile = workDirectoryFile / rScriptName
-    val jsonInputs = workDirectoryFile / inputJSONName
 
     writeInputsJSON(jsonInputs)
 
     scriptFile.content = s"""
       |library("jsonlite")
-      |$inputArrayName = fromJSON("$workDirectory/$inputJSONName", simplifyMatrix = FALSE)
+      |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
       |${rInputMapping(inputArrayName)}
       |${RunnableScript.content(script)}
       |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
@@ -187,23 +185,23 @@ case class RTask(
     val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
     def containerTask =
-      ContainerTask.internal(
+      ContainerTask.isolatedWorkdirectory(executionContext)(
         containerSystem = containerSystem,
         image = image,
-        command = prepare ++ Seq(s"R --slave -f $rScriptName"),
-        workDirectory = Some(workDirectory),
+        command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
+        workDirectory = workDirectory,
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
         environmentVariables = environmentVariables,
-        duplicateImage = false,
         stdOut = stdOut,
         stdErr = stdErr,
         config = config,
         external = external,
         info = info,
         containerPoolKey = containerPoolKey) set (
-        resources += (workDirectoryFile, workDirectory, true, head = true),
+        resources += (scriptFile, rScriptPath),
+        resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),
         Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
         Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }

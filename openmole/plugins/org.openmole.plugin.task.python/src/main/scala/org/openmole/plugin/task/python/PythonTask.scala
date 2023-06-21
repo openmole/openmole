@@ -120,23 +120,22 @@ case class PythonTask(
     def outputMapping: String =
       s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
 
-    val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
-    def scriptName = "_generatescript_.py"
-    def inputJSONName = "_inputs_.json"
-
     val resultContext: Context =
-      val scriptFile = workDirectoryFile / scriptName
-      val jsonInputFile = workDirectoryFile / inputJSONName
+      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".py")
+      val jsonInputFile =  executionContext.taskExecutionDirectory.newFile("input", ".json")
 
       def workDirectory = "/_workdirectory_"
       def inputArrayName = "_generateddata_"
+
+      def scriptPath = s"$workDirectory/_generatescript_.py"
+      def inputJSONPath = s"$workDirectory/_inputs_.json"
       def outputJSONPath = s"$workDirectory/_outputs_.json"
 
       writeInputsJSON(jsonInputFile)
       scriptFile.content =
         s"""
            |import json
-           |$inputArrayName = json.load(open('$workDirectory/$inputJSONName'))
+           |$inputArrayName = json.load(open('$inputJSONPath'))
            |${inputMapping(inputArrayName)}
            |${RunnableScript.content(script)}
            |json.dump($outputMapping, open('$outputJSONPath','w'))
@@ -147,21 +146,21 @@ case class PythonTask(
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
       def containerTask =
-        ContainerTask.internal(
+        ContainerTask.isolatedWorkdirectory(executionContext)(
           containerSystem = containerSystem,
           image = image,
-          command = prepare ++ Seq(s"python${major.toString} $workDirectory/$scriptName" + argumentsValue),
-          workDirectory = Some(workDirectory),
+          command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
+          workDirectory = workDirectory,
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           environmentVariables = environmentVariables,
-          duplicateImage = false,
           stdOut = stdOut,
           stdErr = stdErr,
           external = external,
           info = info,
           containerPoolKey = containerPoolKey) set (
-            resources += (workDirectoryFile, workDirectory, true, head = true),
+            resources += (scriptFile, scriptPath, true),
+            resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),
             Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
             Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }

@@ -32,7 +32,7 @@ import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container.ContainerTask.{Commands, downloadImage, extractImage, repositoryDirectory}
-import org.openmole.plugin.task.external.{EnvironmentVariable, External, ExternalBuilder}
+import org.openmole.plugin.task.external.*
 import org.openmole.tool.cache.{CacheKey, WithInstance}
 import org.openmole.tool.hash.hashString
 import org.openmole.tool.lock.*
@@ -223,6 +223,46 @@ object ContainerTask:
   type MountPoint = (String, String)
   type ContainerId = String
 
+
+  def isolatedWorkdirectory(executionContext: TaskExecutionContext)(
+    containerSystem: ContainerSystem,
+    image: InstalledImage,
+    command: Commands,
+    workDirectory: String,
+    environmentVariables: Seq[EnvironmentVariable],
+    errorOnReturnValue: Boolean,
+    returnValue: Option[Val[Int]],
+    stdOut: Option[Val[String]],
+    stdErr: Option[Val[String]],
+    external: External,
+    info: InfoConfig,
+    containerPoolKey: CacheKey[WithInstance[InstalledImage]],
+    hostFiles: Seq[HostFile] = Seq(),
+    relativePathRoot: Option[String] = None,
+    config: InputOutputConfig = InputOutputConfig()) =
+    val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
+
+    ContainerTask.internal(
+      containerSystem = containerSystem,
+      image = image,
+      command = command,
+      workDirectory = Some(workDirectory),
+      relativePathRoot = relativePathRoot,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      duplicateImage = false,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = config,
+      external = external,
+      info = info,
+      containerPoolKey = containerPoolKey
+    ) set (
+      resources += (workDirectoryFile, workDirectory, true, head = true)
+    )
+
   def internal(
     containerSystem: ContainerSystem,
     image: InstalledImage,
@@ -387,7 +427,6 @@ case class ContainerTask(
       def outputPathResolverValue =
         outputPathResolver(
           hostFiles.map { h ⇒ h.path → h.destination } ++ preparedFilesInfo.map { (f, d) ⇒ d.toString -> f.expandedUserPath },
-          inputDirectory,
           relativeWorkDirectoryValue,
           rootDirectory
         ) _

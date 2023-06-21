@@ -25,9 +25,7 @@ import org.openmole.core.tools.service.OS
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.builder.{InputOutputBuilder, Setter}
 
-package external {
-
-
+package external:
 
   trait ExternalPackage {
 
@@ -92,9 +90,9 @@ package external {
 
     lazy val resources = new ResourcesKeyword
   }
-}
 
-package object external extends ExternalPackage {
+
+package object external extends ExternalPackage:
 
   object EnvironmentVariable {
     implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
@@ -131,4 +129,3 @@ package object external extends ExternalPackage {
     directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
   }
 
-}
