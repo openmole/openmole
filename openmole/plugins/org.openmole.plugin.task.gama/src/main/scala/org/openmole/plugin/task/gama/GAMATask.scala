@@ -74,7 +74,7 @@ object GAMATask:
     seed:                   OptionalArgument[Val[Long]]      = None,
     frameRate:              OptionalArgument[Int]            = None,
     install:                Seq[String]                      = Seq.empty,
-    containerImage:         ContainerImage                   = "gamaplatform/gama:1.9.0",
+    containerImage:         ContainerImage                   = "gamaplatform/gama:1.9.2",
     memory:                 OptionalArgument[Information]    = None,
     version:                OptionalArgument[String]         = None,
     errorOnReturnValue:     Boolean                          = true,
