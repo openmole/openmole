@@ -159,7 +159,8 @@ val env =
   @li{@apiEntryTitle{gres} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance @hl.openmoleNoTest{gres = List( Gres("resource", 1) )}}
   @li{@apiEntryTitle{constraints} a list of SLURM defined constraints which selected nodes must match,}
   @li{@name,}
-  @li{@localSubmission.}
+  @li{@localSubmission,}
+  @li{@apiEntryTitle{modules} a sequence of modules to be loaded into the cluster environment. For instance @hl.openmoleNoTest{modules = Seq( "singularity", "boost" )}}
 
 
 
