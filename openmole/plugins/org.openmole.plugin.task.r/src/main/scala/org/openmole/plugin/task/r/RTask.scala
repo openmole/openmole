@@ -33,28 +33,32 @@ object RTask:
   given InfoBuilder[RTask] = InfoBuilder(Focus[RTask](_.info))
   given MappedInputOutputBuilder[RTask] = MappedInputOutputBuilder(Focus[RTask](_.mapped))
 
-  sealed trait InstallCommand
-  object InstallCommand:
-    case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false) extends InstallCommand
+  case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false, system: Boolean = false)
 
-    def toCommand(installCommand: InstallCommand) =
+  object RLibrary:
+
+    def toCommand(installCommand: RLibrary) =
       def dependencies(d: Boolean) = if(d) "T" else "NA"
 
       installCommand match
-        case RLibrary(name, None, d) ⇒
+        case RLibrary(name, None, d, _) ⇒
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
-        case RLibrary(name, Some(version), d) ⇒
+        case RLibrary(name, Some(version), d, _) ⇒
           s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
-    implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
-    implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
-    implicit def tupleToRLibrary(tuple: (String, String, Boolean)): InstallCommand = RLibrary(tuple._1, Some(tuple._2), tuple._3)
+    implicit def stringToRLibrary(name: String): RLibrary = RLibrary(name, None)
+    implicit def stringCoupleToRLibrary(couple: (String, String)): RLibrary = RLibrary(couple._1, Some(couple._2))
+    implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): RLibrary = RLibrary(couple._1, couple._2)
+    implicit def tupleToRLibraryVersionDep(tuple: (String, String, Boolean)): RLibrary = RLibrary(tuple._1, Some(tuple._2), tuple._3)
+    implicit def tupleToRLibraryVersionDepSystem(tuple: (String, String, Boolean, Boolean)): RLibrary = RLibrary(tuple._1, Some(tuple._2), tuple._3, tuple._4)
+    implicit def tupleToRLibraryDep(tuple: (String, Boolean)): RLibrary = RLibrary(tuple._1, None, tuple._2)
+    implicit def tupleToRLibraryDepSystem(tuple: (String, Boolean, Boolean)): RLibrary = RLibrary(tuple._1, None, tuple._2, tuple._3)
+
 
     // not needed, for each package separate call to get sys
     //case class Sysdep(rpackage: String) extends InstallCommand
 
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
+    def installCommands(libraries: Vector[RLibrary]): Vector[String] = libraries.map(RLibrary.toCommand)
 
 
   def rImage(image: String, version: String) = DockerImage(image, version)
@@ -62,7 +66,7 @@ object RTask:
   def apply(
     script:                     RunnableScript,
     install:                    Seq[String]                        = Seq.empty,
-    libraries:                  Seq[InstallCommand]                = Seq.empty,
+    libraries:                  Seq[RLibrary]                      = Seq.empty,
     prepare:                    Seq[String]                        = Seq.empty,
     installSystemDependencies:  Boolean                            = false,
     image:                      String                             = "openmole/r-base",
@@ -78,13 +82,18 @@ object RTask:
     installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
 
-    val sysdeps: String =
+    val systemDependenciesForLibraries =
       if installSystemDependencies
+      then libraries
+      else libraries.filter(_.system)
+
+    val sysdeps: String =
+      if systemDependenciesForLibraries.nonEmpty
       then
         // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
         // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
         val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&" +
-          libraries.map { case InstallCommand.RLibrary(name, _, _) => "pkgname=" + name + "&" }.mkString("") +
+          systemDependenciesForLibraries.map { l => "pkgname=" + l.name + "&" }.mkString("") +
           "distribution=ubuntu&release=20.04"
         try
           val jsonDeps = NetworkService.get(apicallurl)
@@ -102,7 +111,7 @@ object RTask:
 
     val installCommands = install ++
       (if (sysdeps.nonEmpty) Seq("apt update", "apt-get -y install "+sysdeps).map(c => ContainerSystem.sudo(containerSystem, c)) else Seq.empty) ++
-      InstallCommand.installCommands(libraries.toVector)
+      RLibrary.installCommands(libraries.toVector)
 
     RTask(
       script = script,
