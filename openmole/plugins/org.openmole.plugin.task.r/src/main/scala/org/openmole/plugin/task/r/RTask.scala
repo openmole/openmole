@@ -69,7 +69,7 @@ object RTask {
     prepare:                    Seq[String]                        = Seq.empty,
     installSystemDependencies:  Boolean                            = true,
     image:                      String                             = "openmole/r-base",
-    version:                    String                             = "4.2.1",
+    version:                    String                             = "4.2.2",
     errorOnReturnValue:         Boolean                            = true,
     returnValue:                OptionalArgument[Val[Int]]         = None,
     stdOut:                     OptionalArgument[Val[String]]      = None,
