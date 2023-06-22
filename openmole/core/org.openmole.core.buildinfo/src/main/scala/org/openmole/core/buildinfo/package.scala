@@ -19,28 +19,26 @@ package org.openmole.core
 import java.text.DateFormat
 import java.util.{ Calendar, Locale }
 
-package object buildinfo {
+package object buildinfo:
 
   def name = "Volcanic Version"
 
-  case class Version(value: String, name: String, time: Long) {
+  case class Version(value: String, name: String, time: Long):
     override def toString = value
     def major = value.takeWhile(_.isDigit)
     def minor = value.drop(major.size + 1).takeWhile(_.isDigit)
     def isDevelopment = value.toLowerCase.endsWith("snapshot")
-    def generationDate = {
+    def generationDate =
       val d = Calendar.getInstance()
       d.setTimeInMillis(BuildInfo.buildTime)
       val format = DateFormat.getDateInstance(DateFormat.LONG, new Locale("EN", "en"))
       format.format(d.getTime)
-    }
-    def generationTime: String = {
+
+    def generationTime: String =
       val d = Calendar.getInstance()
       d.setTimeInMillis(BuildInfo.buildTime)
       val format = DateFormat.getTimeInstance(DateFormat.LONG, new Locale("EN", "en"))
       format.format(d.getTime)
-    }
-  }
 
   def version = Version(BuildInfo.version, name, BuildInfo.buildTime)
   def development = version.isDevelopment
@@ -48,10 +46,9 @@ package object buildinfo {
   def consoleSplash = BuildInfo.splash
 
   def siteURL =
-    development match {
+    development match
       case true  ⇒ "http://next.openmole.org"
       case false ⇒ s"http://openmole.org/all/${version.value}"
-    }
 
   def marketName = "market.json"
   def marketAddress = marketURL(marketName)
@@ -61,5 +58,6 @@ package object buildinfo {
   def moduleAddress = url(s"modules/$moduleListName")
 
   def url(entry: String): String = siteURL + "/" + entry
+  def scalaVersion = BuildInfo.scalaVersion
 
-}
+
