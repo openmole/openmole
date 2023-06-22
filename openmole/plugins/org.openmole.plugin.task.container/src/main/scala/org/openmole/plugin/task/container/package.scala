@@ -26,46 +26,42 @@ import org.openmole.core.dsl.`extension`._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.validation._
 
-package container {
+package container:
 
   import monocle.Focus
 
-  object HostFile {
+  object HostFile:
     implicit def tupleToHostFile(t: (String, String)): HostFile = HostFile(t._1, t._2)
-  }
 
   case class HostFile(path: String, destination: String)
 
-  object ContainerImage {
-    implicit def fileToContainerImage(f: java.io.File): ContainerImage = {
+  object ContainerImage:
+    implicit def fileToContainerImage(f: java.io.File): ContainerImage =
       def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
       SavedDockerImage(f, compressed)
-    }
+
     implicit def stringToContainerImage(s: String): ContainerImage =
-      if (s.contains(":")) {
+      if (s.contains(":"))
+      then
         val Vector(image, tag) = s.split(":").toVector
         DockerImage(image, tag)
-      }
       else DockerImage(s)
 
-  }
-
-  object DockerImage {
+  object DockerImage:
     def toRegistryImage(image: DockerImage) =
       _root_.container.RegistryImage(
         name = image.image,
         tag = image.tag,
         registry = image.registry
       )
-  }
 
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage
 
-}
 
-package object container {
+
+package object container:
 
   type FileBinding = (String, String)
 
@@ -101,7 +97,7 @@ package object container {
     commands:             Seq[FromContext[String]],
     environmentVariables: Seq[EnvironmentVariable],
     external:             External
-  ): Validate = Validate { p ⇒
+  ): Validate = Validate: p ⇒
     import p._
 
     val allInputs = External.PWD :: p.inputs.toList
@@ -111,21 +107,18 @@ package object container {
       validateVariables ++
       External.validate(external)(allInputs)
 
-  }
 
   def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
 
   lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
-  object ContainerSystem {
+  object ContainerSystem:
     def default = Singularity()
 
     def sudo(containerSystem: ContainerSystem, cmd: String) =
-      containerSystem match {
+      containerSystem match
         case _: Proot       ⇒ s"sudo $cmd"
         case _: Singularity ⇒ s"fakeroot $cmd"
-      }
-  }
 
   sealed trait ContainerSystem
   case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
@@ -136,19 +129,17 @@ package object container {
   /**
    * Trait for either string scripts or script file runnable in tasks based on the container task
    */
-  object RunnableScript {
+  object RunnableScript:
     implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
     implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
 
-    def content(script: RunnableScript): String = {
-      script match {
+    def content(script: RunnableScript): String =
+      script match
         case RawScript(s)  ⇒ s
         case FileScript(f) ⇒ f.content
-      }
-    }
-  }
+
 
   sealed trait RunnableScript
   case class RawScript(rawscript: String) extends RunnableScript
   case class FileScript(file: File) extends RunnableScript
-}
+

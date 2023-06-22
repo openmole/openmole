@@ -39,7 +39,7 @@ It takes the following arguments :
 
 ${ul(
    li{html"${code{"script"}} String,$mandatory. The R script to be executed, either R code directly or a R script file."},
-   li{html"${code{"libraries"}} Sequence of strings, $optional (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image. System dependencies for R libraries can be automatically resolved and installed (see advanced arguments below)."},
+   li{html"${code{"libraries"}} Sequence of strings or tuple, $optional (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image). Dependencies for R libraries can be automatically resolved and installed, for that you can write (\"ggrah\", true) instead of \"ggraph\"."},
    li{html"${code{"clearContainerCache"}} Boolean, $optional (default = ${code{"false"}}). Should the R image and libraries be cleared and reinstalled (to ensure an update for example)? If ${code{"true"}}, the task will perform the installation (and thus the update) even if the library was already installed."}
 )}
 
@@ -58,10 +58,8 @@ $br
 The following arguments are optional arguments for an advanced usage
 
 ${ul(
-   li{html"${code{"installSystemDependencies"}} Boolean, $optional (default = ${code{"true"}}). Should system dependencies for required packages be automatically installed (these are resolved using the RSTudio packagemanager API)."},
-   li{html"${code{"install"}} Sequence of strings, $optional (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used for example if automatic system dependencies installation fails, after deactivating the option."},
-   li{html"${code{"image"}} String, $optional (default = \"openmole/r-base\"). Changes the docker image used by the RTask."},
-   li{html"${code{"version"}} String, $optional (default = \"4.1.2\"). Version of the docker image. openmole/r-base images are tagged corresponding to some R versions, check the docker hub to see which are available. If you use your own image, you will need to provide the corresponding tag."},
+   li{html"${code{"install"}} Sequence of strings, $optional (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used to install system packages using apt."},
+   li{html"${code{"image"}} String, $optional (default = \"openmole/r2u:4.3.0\"). Changes the docker image used by the RTask. OpenMOLE uses ${a("r2u", href := "https://eddelbuettel.github.io/r2u/")}"},
    li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of R on the execution node."},
 )}
 

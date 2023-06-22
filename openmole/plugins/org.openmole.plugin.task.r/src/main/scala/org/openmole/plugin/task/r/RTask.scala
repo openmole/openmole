@@ -33,7 +33,7 @@ object RTask:
   given InfoBuilder[RTask] = InfoBuilder(Focus[RTask](_.info))
   given MappedInputOutputBuilder[RTask] = MappedInputOutputBuilder(Focus[RTask](_.mapped))
 
-  case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false, system: Boolean = false)
+  case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false)
 
   object RLibrary:
 
@@ -41,24 +41,32 @@ object RTask:
       def dependencies(d: Boolean) = if(d) "T" else "NA"
 
       installCommand match
-        case RLibrary(name, None, d, _) ⇒
+        case RLibrary(name, None, d) ⇒
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
-        case RLibrary(name, Some(version), d, _) ⇒
+        case RLibrary(name, Some(version), d) ⇒
           s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
 
-    implicit def stringToRLibrary(name: String): RLibrary = RLibrary(name, None)
-    implicit def stringCoupleToRLibrary(couple: (String, String)): RLibrary = RLibrary(couple._1, Some(couple._2))
-    implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): RLibrary = RLibrary(couple._1, couple._2)
-    implicit def tupleToRLibraryVersionDep(tuple: (String, String, Boolean)): RLibrary = RLibrary(tuple._1, Some(tuple._2), tuple._3)
-    implicit def tupleToRLibraryVersionDepSystem(tuple: (String, String, Boolean, Boolean)): RLibrary = RLibrary(tuple._1, Some(tuple._2), tuple._3, tuple._4)
-    implicit def tupleToRLibraryDep(tuple: (String, Boolean)): RLibrary = RLibrary(tuple._1, None, tuple._2)
-    implicit def tupleToRLibraryDepSystem(tuple: (String, Boolean, Boolean)): RLibrary = RLibrary(tuple._1, None, tuple._2, tuple._3)
+    def toCommandNoVersion(libraries: Seq[String], dependencies: Boolean): String =
+      def list = libraries.map(l => s"\"$l\"").mkString(",")
+      def dep = if dependencies then "T" else "NA"
+      def load = libraries.map(l => s"""library("$l")""")
+      def command = Seq(s"install.packages(c($list), dependencies = $dep)") ++ load
 
+      s"""R --slave -e '${command.mkString("; ")}'"""
 
-    // not needed, for each package separate call to get sys
-    //case class Sysdep(rpackage: String) extends InstallCommand
+    given Conversion[String, RLibrary] = name => RLibrary(name, None)
+    given Conversion[(String, String), RLibrary] = (name, version) => RLibrary(name, Some(version))
+    given Conversion [(String, String, Boolean), RLibrary] = (name, version, dep) => RLibrary(name, Some(version), dep)
+    given Conversion [(String, Boolean), RLibrary] = (name, dep) => RLibrary(name, None, dep)
 
-    def installCommands(libraries: Vector[RLibrary]): Vector[String] = libraries.map(RLibrary.toCommand)
+    def installCommands(libraries: Vector[RLibrary]): Seq[String] =
+      val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
+      val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
+
+      Seq(
+        toCommandNoVersion(noVersionNoDep.map(_.name), false),
+        toCommandNoVersion(noVersionWithDep.map(_.name), true)
+      ) ++ withVersion.map(RLibrary.toCommand)
 
 
   def rImage(image: String, version: String) = DockerImage(image, version)
@@ -68,9 +76,7 @@ object RTask:
     install:                    Seq[String]                        = Seq.empty,
     libraries:                  Seq[RLibrary]                      = Seq.empty,
     prepare:                    Seq[String]                        = Seq.empty,
-    installSystemDependencies:  Boolean                            = false,
-    image:                      String                             = "openmole/r-base",
-    version:                    String                             = "4.2.2",
+    image:                      String                             = "openmole/r2u:4.3.0",
     errorOnReturnValue:         Boolean                            = true,
     returnValue:                OptionalArgument[Val[Int]]         = None,
     stdOut:                     OptionalArgument[Val[String]]      = None,
@@ -81,41 +87,11 @@ object RTask:
     containerSystem:            ContainerSystem                    = ContainerSystem.default,
     installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
-
-    val systemDependenciesForLibraries =
-      if installSystemDependencies
-      then libraries
-      else libraries.filter(_.system)
-
-    val sysdeps: String =
-      if systemDependenciesForLibraries.nonEmpty
-      then
-        // Get system dependencies using the rstudio packagemanager API, inspired from https://github.com/mdneuzerling/getsysreqs
-        // API doc: https://packagemanager.rstudio.com/__api__/swagger/index.html
-        val apicallurl = "http://packagemanager.rstudio.com/__api__/repos/1/sysreqs?all=false&" +
-          systemDependenciesForLibraries.map { l => "pkgname=" + l.name + "&" }.mkString("") +
-          "distribution=ubuntu&release=20.04"
-        try
-          val jsonDeps = NetworkService.get(apicallurl)
-          val reqs = parse(jsonDeps).asInstanceOf[JObject].values
-          if (reqs.contains("requirements")) {
-            reqs("requirements").asInstanceOf[List[_]].map {
-              _.asInstanceOf[Map[String, Any]]("requirements").asInstanceOf[Map[String, Any]]("packages").asInstanceOf[List[String]].mkString(" ")
-            }.mkString(" ")
-          }
-          else throw InternalProcessingError(s"Error while fetching system dependencies for R packages $libraries\nInconsistent API response\nTry setting the autoInstallSystemDeps argument to false and adjusting customised install argument accordingly.")
-        catch
-          case t: Throwable =>
-            throw InternalProcessingError(s"Error while fetching system dependencies for R packages $libraries\nTry setting the autoInstallSystemDeps argument to false and adjusting customised install argument accordingly.", t)
-      else ""
-
-    val installCommands = install ++
-      (if (sysdeps.nonEmpty) Seq("apt update", "apt-get -y install "+sysdeps).map(c => ContainerSystem.sudo(containerSystem, c)) else Seq.empty) ++
-      RLibrary.installCommands(libraries.toVector)
+    val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.install(installContainerSystem, rImage(image, version), installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
