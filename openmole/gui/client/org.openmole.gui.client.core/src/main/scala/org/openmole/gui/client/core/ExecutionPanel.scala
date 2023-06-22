@@ -206,9 +206,9 @@ class ExecutionPanel:
       )
     )
 
-  def controls(id: ExecutionId, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
+  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map { c =>
-      if c
+      if c && state != ExecutionDetails.State.preparing
       then
         div(display.flex, flexDirection.column, alignItems.center,
           button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton"),
@@ -236,7 +236,7 @@ class ExecutionPanel:
       showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
       showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
       if details.state != ExecutionDetails.State.preparing then div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }) else emptyMod,
-      controls(id, cancel, remove)
+      controls(id, details.state, cancel, remove)
     )
 
   private def displaySize(size: Long, readable: String, operations: Int) =
@@ -262,11 +262,10 @@ class ExecutionPanel:
       div(executionInfo.path.nameWithoutExtension),
       cursor.pointer,
       onClick --> { _ =>
-        currentOpenSimulation.update {
+        currentOpenSimulation.update:
           case None => Some(executionId)
           case Some(x: ExecutionId) if x != executionId => Some(executionId)
           case _ => None
-        }
       }
     )
 
@@ -442,5 +441,8 @@ class ExecutionPanel:
           )
         ,
       showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
-      currentOpenSimulation.toObservable --> Observer { _ => showExpander.set(None) }
+      currentOpenSimulation.toObservable -->
+        Observer: _ =>
+          showControls.set(false)
+          showExpander.set(None)
     )
