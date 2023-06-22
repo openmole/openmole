@@ -356,7 +356,6 @@ We need to write the names of the libraries we need in the field ${code{"librari
 
 $br
 
-System libraries required by the R library are automatically installed by the RTask. You can deactivate this behavior by setting the option ${code{"installSystemDependencies"}} to false, and provide yourself the installation commands.
 The ${code{"RTask"}} is based on a Debian container, therefore you can use any Debian command here including ${code{"apt"}} installation tool.
 See advanced usage below for examples of custom commands in specific use cases.
 
@@ -424,7 +423,6 @@ ${hl.openmole( s"""
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        installSystemDependencies = false,
         install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
@@ -473,7 +471,6 @@ ${hl.openmole( s"""
         # your R script here
         # [...]
         $tq,
-        installSystemDependencies = false,
         install = Seq(
            // replace the initial Debian repositories by my repository
            "fakeroot sed -i 's/deb.debian.org/linux.myinstitute.org/g' /etc/apt/sources.list",
