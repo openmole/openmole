@@ -21,12 +21,12 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
-object ScilabTask {
+object ScilabTask:
 
-  implicit def isTask: InputOutputBuilder[ScilabTask] = InputOutputBuilder(Focus[ScilabTask](_.config))
-  implicit def isExternal: ExternalBuilder[ScilabTask] = ExternalBuilder(Focus[ScilabTask](_.external))
-  implicit def isInfo: InfoBuilder[ScilabTask] = InfoBuilder(Focus[ScilabTask](_.info))
-  implicit def isMapped: MappedInputOutputBuilder[ScilabTask] = MappedInputOutputBuilder(Focus[ScilabTask](_.mapped))
+  given InputOutputBuilder[ScilabTask] = InputOutputBuilder(Focus[ScilabTask](_.config))
+  given ExternalBuilder[ScilabTask] = ExternalBuilder(Focus[ScilabTask](_.external))
+  given InfoBuilder[ScilabTask] = InfoBuilder(Focus[ScilabTask](_.info))
+  given MappedInputOutputBuilder[ScilabTask] = MappedInputOutputBuilder(Focus[ScilabTask](_.mapped))
 
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
@@ -70,33 +70,29 @@ object ScilabTask {
    * @param v
    * @return
    */
-  def multiArrayScilab(v: Any): String = {
+  def multiArrayScilab(v: Any): String =
     // flatten the array after multidimensional transposition
-    def recTranspose(v: Any): Seq[_] = {
-      v match {
+    def recTranspose(v: Any): Seq[_] =
+      v match
         case v: Array[Array[Array[_]]] ⇒ v.map { a ⇒ recTranspose(a) }.toSeq.transpose.flatten
         case v: Array[Array[_]]        ⇒ v.map { _.toSeq }.toSeq.transpose.flatten
-      }
-    }
-    def getDimensions(v: Any): Seq[Int] = {
-      @tailrec def getdims(v: Any, dims: Seq[Int]): Seq[Int] = {
-        v match {
+
+    def getDimensions(v: Any): Seq[Int] =
+      @tailrec def getdims(v: Any, dims: Seq[Int]): Seq[Int] =
+        v match
           case v: Array[Array[_]] ⇒ getdims(v(0), dims ++ Seq(v.length))
           case v: Array[_]        ⇒ dims ++ Seq(v.length)
-        }
-      }
       getdims(v, Seq.empty)
-    }
+
     val scilabVals = recTranspose(v).map { vv ⇒ toScilab(vv) }
     val dimensions = getDimensions(v)
     // scilab syntax for hypermat
     // M = hypermat([2 3 2 2],data) with data being flat column vector
     // NOTE : going to string may be too large for very large arrays ? would need a proper serialization ?
     "hypermat([" + dimensions.mkString(" ") + "],[" + scilabVals.mkString(";") + "])"
-  }
 
-  def toScilab(v: Any): String = {
-    v match {
+  def toScilab(v: Any): String =
+    v match
       case v: Int                    ⇒ v.toString
       case v: Long                   ⇒ v.toString
       case v: Double                 ⇒ v.toString
@@ -111,64 +107,61 @@ object ScilabTask {
       case v: Array[_] ⇒ "[" + v.map(toScilab).mkString(", ") + "]"
       case _ ⇒
         throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to Scilab")
-    }
-  }
 
-  def fromScilab(s: String, v: Val[_]) = try {
-    val lines = s.split("\n").dropWhile(_.trim.isEmpty)
-    if (lines.isEmpty) throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
+  def fromScilab(s: String, v: Val[_]) =
+    try
+      val lines = s.split("\n").dropWhile(_.trim.isEmpty)
+      if (lines.isEmpty) throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
 
-    import org.openmole.core.context.Variable
+      import org.openmole.core.context.Variable
 
-    def toInt(s: String) = s.trim.toDouble.toInt
-    def toDouble(s: String) = s.trim.replace("D", "e").toDouble
-    def toLong(s: String) = s.trim.toDouble.toLong
-    def toString(s: String) = s.trim
-    def toBoolean(s: String) = s.trim == "T"
+      def toInt(s: String) = s.trim.toDouble.toInt
+      def toDouble(s: String) = s.trim.replace("D", "e").toDouble
+      def toLong(s: String) = s.trim.toDouble.toLong
+      def toString(s: String) = s.trim
+      def toBoolean(s: String) = s.trim == "T"
 
-    def variable = v
-    def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String ⇒ T) =
-      val value: Array[T] =
-        if lines.head.trim == "[]"
-        then Array.empty
-        else lines.head.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray
-      Variable(v, value)
+      def variable = v
+      def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String ⇒ T) =
+        val value: Array[T] =
+          if lines.head.trim == "[]"
+          then Array.empty
+          else lines.head.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray
+        Variable(v, value)
 
-    def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String ⇒ T) =
-      val value: Array[Array[T]] =
-        if lines.head.trim == "[]"
-        then Array.empty
-        else lines.map(_.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray).toArray
-      Variable(v, value)
+      def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String ⇒ T) =
+        val value: Array[Array[T]] =
+          if lines.head.trim == "[]"
+          then Array.empty
+          else lines.map(_.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray).toArray
+        Variable(v, value)
 
-    v match {
-      case Val.caseInt(v)               ⇒ Variable.unsecure(v, toInt(lines.head))
-      case Val.caseDouble(v)            ⇒ Variable.unsecure(v, toDouble(lines.head))
-      case Val.caseLong(v)              ⇒ Variable.unsecure(v, toLong(lines.head))
-      case Val.caseString(v)            ⇒ Variable.unsecure(v, toString(lines.head))
-      case Val.caseBoolean(v)           ⇒ Variable.unsecure(v, toBoolean(lines.head))
+      v match
+        case Val.caseInt(v)               ⇒ Variable.unsecure(v, toInt(lines.head))
+        case Val.caseDouble(v)            ⇒ Variable.unsecure(v, toDouble(lines.head))
+        case Val.caseLong(v)              ⇒ Variable.unsecure(v, toLong(lines.head))
+        case Val.caseString(v)            ⇒ Variable.unsecure(v, toString(lines.head))
+        case Val.caseBoolean(v)           ⇒ Variable.unsecure(v, toBoolean(lines.head))
 
-      case Val.caseArrayInt(v)          ⇒ fromArray(v, toInt)
-      case Val.caseArrayDouble(v)       ⇒ fromArray(v, toDouble)
-      case Val.caseArrayLong(v)         ⇒ fromArray(v, toLong)
-      case Val.caseArrayString(v)       ⇒ fromArray(v, toString)
-      case Val.caseArrayBoolean(v)      ⇒ fromArray(v, toBoolean)
+        case Val.caseArrayInt(v)          ⇒ fromArray(v, toInt)
+        case Val.caseArrayDouble(v)       ⇒ fromArray(v, toDouble)
+        case Val.caseArrayLong(v)         ⇒ fromArray(v, toLong)
+        case Val.caseArrayString(v)       ⇒ fromArray(v, toString)
+        case Val.caseArrayBoolean(v)      ⇒ fromArray(v, toBoolean)
 
-      case Val.caseArrayArrayInt(v)     ⇒ fromArrayArray(v, toInt)
-      case Val.caseArrayArrayDouble(v)  ⇒ fromArrayArray(v, toDouble)
-      case Val.caseArrayArrayLong(v)    ⇒ fromArrayArray(v, toLong)
-      case Val.caseArrayArrayString(v)  ⇒ fromArrayArray(v, toString)
-      case Val.caseArrayArrayBoolean(v) ⇒ fromArrayArray(v, toBoolean)
+        case Val.caseArrayArrayInt(v)     ⇒ fromArrayArray(v, toInt)
+        case Val.caseArrayArrayDouble(v)  ⇒ fromArrayArray(v, toDouble)
+        case Val.caseArrayArrayLong(v)    ⇒ fromArrayArray(v, toLong)
+        case Val.caseArrayArrayString(v)  ⇒ fromArrayArray(v, toString)
+        case Val.caseArrayArrayBoolean(v) ⇒ fromArrayArray(v, toBoolean)
 
-      case _                            ⇒ throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
-    }
-  }
-  catch {
-    case t: Throwable ⇒
-      throw new InternalProcessingError(s"Error parsing scilab value $s to OpenMOLE variable $v", t)
-  }
+        case _                            ⇒ throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
+    catch
+      case t: Throwable ⇒
+        throw new InternalProcessingError(s"Error parsing scilab value $s to OpenMOLE variable $v", t)
 
-}
+
+
 
 case class ScilabTask(
   script:               RunnableScript,
@@ -185,66 +178,64 @@ case class ScilabTask(
   external:             External,
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig,
-  version:              String) extends Task with ValidateTask {
+  version:              String) extends Task with ValidateTask:
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
 
     def majorVersion = version.takeWhile(_ != '.').toInt
-    def scriptName = "openmolescript.sci"
 
-    newFile.withTmpFile("script", ".sci") { scriptFile ⇒
+    def workDirectory = "/_workdirectory_"
+    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sci")
 
-      def scilabInputMapping =
-        mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
+    def scriptName = s"$workDirectory/openmolescript.sci"
 
-      def outputFileName(v: Val[_]) = s"/${v.name}.openmole"
-      def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
-      def scilabOutputMapping =
-        (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
+    def scilabInputMapping =
+      mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
 
-      scriptFile.content =
-        s"""
-          |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
-          |$scilabInputMapping
-          |${RunnableScript.content(script)}
-          |${scilabOutputMapping}
-          |quit
-        """.stripMargin
+    def outputFileName(v: Val[_]) = s"$workDirectory/${v.name}.openmole"
+    def outputValName(v: Val[_]) = v.withName(v.name + "File").withType[File]
+    def scilabOutputMapping =
+      (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
 
-      def launchCommand =
-        if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f /$scriptName"""
-        else s"""scilab-cli -nb -f /$scriptName"""
+    scriptFile.content =
+      s"""
+        |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
+        |$scilabInputMapping
+        |${RunnableScript.content(script)}
+        |${scilabOutputMapping}
+        |quit
+      """.stripMargin
 
-      def containerTask =
-        ContainerTask.internal(
-          containerSystem = containerSystem,
-          image = image,
-          command = prepare ++ Seq(launchCommand),
-          workDirectory = None,
-          relativePathRoot = None,
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          reuseContainer = true,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
-          resources += (scriptFile, scriptName, true),
-          mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
-        )
+    def launchCommand =
+      if (majorVersion >= 6) s"""scilab-cli -nwni -nb -quit -f $scriptName"""
+      else s"""scilab-cli -nb -f $scriptName"""
 
-      val resultContext = containerTask.process(executionContext).from(context)
-      resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
-    }
+    def containerTask =
+      ContainerTask.isolatedWorkdirectory(executionContext)(
+        containerSystem = containerSystem,
+        image = image,
+        command = prepare ++ Seq(launchCommand),
+        workDirectory = workDirectory,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info,
+        containerPoolKey = containerPoolKey) set (
+        resources += (scriptFile, scriptName, true),
+        mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
+      )
 
-  }
-}
+    val resultContext = containerTask.process(executionContext).from(context)
+    resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
+
+
