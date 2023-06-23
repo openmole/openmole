@@ -22,11 +22,10 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import scala.xml.*
 
 object NetLogoContainerTask:
-
-  implicit def isTask: InputOutputBuilder[NetLogoContainerTask] = InputOutputBuilder(Focus[NetLogoContainerTask](_.config))
-  implicit def isExternal: ExternalBuilder[NetLogoContainerTask] = ExternalBuilder(Focus[NetLogoContainerTask](_.external))
-  implicit def isInfo: InfoBuilder[NetLogoContainerTask] = InfoBuilder(Focus[NetLogoContainerTask](_.info))
-  implicit def isMapped: MappedInputOutputBuilder[NetLogoContainerTask] = MappedInputOutputBuilder(Focus[NetLogoContainerTask](_.mapped))
+  given InputOutputBuilder[NetLogoContainerTask] = InputOutputBuilder(Focus[NetLogoContainerTask](_.config))
+  given ExternalBuilder[NetLogoContainerTask] = ExternalBuilder(Focus[NetLogoContainerTask](_.external))
+  given InfoBuilder[NetLogoContainerTask] = InfoBuilder(Focus[NetLogoContainerTask](_.info))
+  given MappedInputOutputBuilder[NetLogoContainerTask] = MappedInputOutputBuilder(Focus[NetLogoContainerTask](_.mapped))
 
   def workspaceDirectory = "/_workspace_"
 
@@ -57,7 +56,7 @@ object NetLogoContainerTask:
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask = {
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
 
     val image:  ContainerImage                   = s"openmole/netlogo:${version}"
 
@@ -89,7 +88,6 @@ object NetLogoContainerTask:
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
       )
-  }
 
 
 case class NetLogoContainerTask(
@@ -115,84 +113,82 @@ case class NetLogoContainerTask(
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = Validate { p ⇒
+  override def validate = Validate: p ⇒
     import p._
     val allInputs = External.PWD :: p.inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
       NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
-  }
 
-  override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
 
-    newFile.withTmpFile("inputs", ".bin") { inputFile ⇒
-      def inputFileName = "/_inputs_openmole_.bin"
-      def outputFileName = "/_outputs_openmole_.bin"
-      val outputFileVal = Val[File]("outputFile", Namespace("NetLogoTask"))
+    val inputFile = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
+    def workspace = "/_workspace_"
+    def inputFileName = s"$workspace/_inputs_openmole_.bin"
+    def outputFileName = s"/$workspace/_outputs_openmole_.bin"
+    val outputFileVal = Val[File]("outputFile", Namespace("NetLogoTask"))
 
-      def createInputFile(inputFile: File) =
-        val model = s"${NetLogoContainerTask.workspaceDirectory}/${script.getName}"
-        val inputs =
-          val inputMap = new java.util.TreeMap[String, Any]()
-          for
-            m <- Mapped.noFile(mapped.inputs)
-          do inputMap.put(m.name, NetLogoTask.netLogoCompatibleType(context(m.v)))
-          inputMap
-        val outputs: Array[String] = mapped.outputs.map(_.name).toArray[String]
-        val goValue: Array[String] = go.map(_.from(context)).toArray[String]
-        val setupValue: Array[String] = setup.map(_.from(context)).toArray[String]
-        val seedValue: java.util.Optional[java.lang.Integer] = java.util.Optional.ofNullable[java.lang.Integer](seed.map(_.from(context)).map(new java.lang.Integer(_)).orNull)
+    def createInputFile(inputFile: File) =
+      val model = s"${NetLogoContainerTask.workspaceDirectory}/${script.getName}"
+      val inputs =
+        val inputMap = new java.util.TreeMap[String, Any]()
+        for
+          m <- Mapped.noFile(mapped.inputs)
+        do inputMap.put(m.name, NetLogoTask.netLogoCompatibleType(context(m.v)))
+        inputMap
+      val outputs: Array[String] = mapped.outputs.map(_.name).toArray[String]
+      val goValue: Array[String] = go.map(_.from(context)).toArray[String]
+      val setupValue: Array[String] = setup.map(_.from(context)).toArray[String]
+      val seedValue: java.util.Optional[java.lang.Integer] = java.util.Optional.ofNullable[java.lang.Integer](seed.map(_.from(context)).map(new java.lang.Integer(_)).orNull)
 
-        val content = Array[AnyRef](model, inputs, outputs, setupValue, goValue, seedValue)
+      val content = Array[AnyRef](model, inputs, outputs, setupValue, goValue, seedValue)
 
-        executionContext.serializerService.serialize(content, inputFile)
+      executionContext.serializerService.serialize(content, inputFile)
 
-      def readOutputData(file: File) = 
-        val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
-        (outputValues zip Mapped.noFile(mapped.outputs)).map { (value, v) ⇒
-          NetLogoTask.netLogoValueToVal(value, v)
-        }
+    def readOutputData(file: File) =
+      val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
+      (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) ⇒
+        NetLogoTask.netLogoValueToVal(value, v)
 
-      createInputFile(inputFile)
+    createInputFile(inputFile)
 
 
-      val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
+    val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
 
-      def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
-      def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
-      def paramJVM = s"-XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
-      val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
+    def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
+    def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
+    def paramJVM = s"-XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
+    val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
 
-      def containerTask =
-        ContainerTask.internal(
-          image = image,
-          command = launchCommand,
-          containerSystem = containerSystem,
-          workDirectory = None,
-          relativePathRoot = Some(NetLogoContainerTask.workspaceDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
-          reuseContainer = true,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set(
-          resources += (inputFile, inputFileName, true),
-          volumes.map { case (lv, cv) ⇒ resources += (lv, cv, true) },
-          outputFiles += (outputFileName, outputFileVal),
-          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-        )
+    def containerTask =
+      ContainerTask.isolatedWorkdirectory(executionContext)(
+        image = image,
+        command = launchCommand,
+        containerSystem = containerSystem,
+        workDirectory = workspace,
+        relativePathRoot = Some(NetLogoContainerTask.workspaceDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info,
+        containerPoolKey = containerPoolKey) set(
+        resources += (inputFile, inputFileName, true),
+        volumes.map { case (lv, cv) ⇒ resources += (lv, cv, true) },
+        outputFiles += (outputFileName, outputFileVal),
+        Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+        Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+      )
 
-      val resultContext = containerTask.process(executionContext).from(context)
+    val resultContext = containerTask.process(executionContext).from(context)
 
-      def resultFile = resultContext(outputFileVal)
-      resultContext ++ readOutputData(resultFile)
-    }
-  }
+    def resultFile = resultContext(outputFileVal)
+    resultContext ++ readOutputData(resultFile)
+
+
 
