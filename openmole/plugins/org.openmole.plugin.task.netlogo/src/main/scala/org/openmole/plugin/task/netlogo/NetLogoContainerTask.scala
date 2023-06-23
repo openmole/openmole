@@ -154,7 +154,7 @@ case class NetLogoContainerTask(
         NetLogoTask.netLogoValueToVal(value, v)
 
     createInputFile(inputFile)
-    
+
     val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
 
     def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
