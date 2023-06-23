@@ -17,6 +17,7 @@ import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container.*
 import org.openmole.plugin.task.external.*
+import org.openmole.plugin.task.netlogo.NetLogoContainerTask.netLogoWorkspace
 import org.openmole.tool.outputredirection.OutputRedirection
 
 import scala.xml.*
@@ -27,14 +28,15 @@ object NetLogoContainerTask:
   given InfoBuilder[NetLogoContainerTask] = InfoBuilder(Focus[NetLogoContainerTask](_.info))
   given MappedInputOutputBuilder[NetLogoContainerTask] = MappedInputOutputBuilder(Focus[NetLogoContainerTask](_.mapped))
 
-  def workspaceDirectory = "/_workspace_"
+  def workspace = "/_workspace_"
+  def netLogoWorkspace = s"$workspace/_netlogo_"
 
   def volumes(
     script: File,
     embedWorkspace: Boolean) =
     if embedWorkspace
-    then script.getParentFile.listFiles.map { f => f -> s"$workspaceDirectory/${f.getName}"}.toSeq
-    else Seq(script -> s"$workspaceDirectory/${script.getName}")
+    then script.getParentFile.listFiles.map { f => f -> s"$netLogoWorkspace/${f.getName}"}.toSeq
+    else Seq(script -> s"$netLogoWorkspace/${script.getName}")
 
   def apply(
     script: File,
@@ -122,15 +124,15 @@ case class NetLogoContainerTask(
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
+    import NetLogoContainerTask.{workspace, netLogoWorkspace}
 
     val inputFile = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
-    def workspace = "/_workspace_"
     def inputFileName = s"$workspace/_inputs_openmole_.bin"
-    def outputFileName = s"/$workspace/_outputs_openmole_.bin"
+    def outputFileName = s"$workspace/_outputs_openmole_.bin"
     val outputFileVal = Val[File]("outputFile", Namespace("NetLogoTask"))
 
     def createInputFile(inputFile: File) =
-      val model = s"${NetLogoContainerTask.workspaceDirectory}/${script.getName}"
+      val model = s"$netLogoWorkspace/${script.getName}"
       val inputs =
         val inputMap = new java.util.TreeMap[String, Any]()
         for
@@ -152,8 +154,7 @@ case class NetLogoContainerTask(
         NetLogoTask.netLogoValueToVal(value, v)
 
     createInputFile(inputFile)
-
-
+    
     val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
 
     def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
@@ -167,7 +168,7 @@ case class NetLogoContainerTask(
         command = launchCommand,
         containerSystem = containerSystem,
         workDirectory = workspace,
-        relativePathRoot = Some(NetLogoContainerTask.workspaceDirectory),
+        relativePathRoot = Some(netLogoWorkspace),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
@@ -179,7 +180,7 @@ case class NetLogoContainerTask(
         info = info,
         containerPoolKey = containerPoolKey) set(
         resources += (inputFile, inputFileName, true),
-        volumes.map { case (lv, cv) ⇒ resources += (lv, cv, true) },
+        volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
         outputFiles += (outputFileName, outputFileVal),
         Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
         Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
