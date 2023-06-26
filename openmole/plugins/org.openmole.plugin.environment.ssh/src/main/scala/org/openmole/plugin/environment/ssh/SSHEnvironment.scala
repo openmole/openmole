@@ -39,9 +39,7 @@ import scala.ref.WeakReference
 
 object SSHEnvironment extends JavaLogger {
 
-  val maxLocalOperations = PreferenceLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
   val maxConnections = PreferenceLocation("SSHEnvironment", "MaxConnections", Some(5))
-
   val updateInterval = PreferenceLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
   val timeOut = PreferenceLocation("SSHEnvironment", "Timeout", Some(1 minutes))
 
