@@ -63,10 +63,16 @@ object RTask:
       val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
       val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
 
-      Seq(
-        toCommandNoVersion(noVersionNoDep.map(_.name), false),
-        toCommandNoVersion(noVersionWithDep.map(_.name), true)
-      ) ++ withVersion.map(RLibrary.toCommand)
+      val update =
+        if libraries.nonEmpty
+        then  Seq("apt update")
+        else Seq()
+
+      update ++
+        Seq(
+          toCommandNoVersion(noVersionNoDep.map(_.name), false),
+          toCommandNoVersion(noVersionWithDep.map(_.name), true)
+        ) ++ withVersion.map(RLibrary.toCommand)
 
 
   def rImage(image: String, version: String) = DockerImage(image, version)
@@ -132,12 +138,12 @@ case class RTask(
     import org.json4s.jackson.JsonMethods._
     import p._
 
-    def writeInputsJSON(file: File) =
-      def values = noFile(mapped.inputs).map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
+    def writeInputsJSON(inputs: Vector[Mapped[_]], file: File) =
+      def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray[Any])))
 
-    def rInputMapping(arrayName: String) =
-      noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+    def rInputMapping(inputs: Vector[Mapped[_]], arrayName: String) =
+      inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
       s"""list(${noFile(mapped.outputs).map { _.name }.mkString(",")})"""
@@ -146,7 +152,7 @@ case class RTask(
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
     val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
     val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
@@ -157,12 +163,18 @@ case class RTask(
     def inputJSONPath = s"$workDirectory/_generatedominputs_.json"
     def outputJSONPath = s"$workDirectory/_generatedomoutputs_.json"
 
-    writeInputsJSON(jsonInputs)
+    val valueMappedInputs = noFile(mapped.inputs)
+    writeInputsJSON(valueMappedInputs, jsonInputs)
+
+    val parseInputs =
+      if valueMappedInputs.nonEmpty
+      then s"""$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
+             |${rInputMapping(valueMappedInputs, inputArrayName)}""".stripMargin
+      else ""
 
     scriptFile.content = s"""
       |library("jsonlite")
-      |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
-      |${rInputMapping(inputArrayName)}
+      |$parseInputs
       |${RunnableScript.content(script)}
       |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
       """.stripMargin
