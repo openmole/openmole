@@ -165,16 +165,11 @@ case class RTask(
 
     val valueMappedInputs = noFile(mapped.inputs)
     writeInputsJSON(valueMappedInputs, jsonInputs)
-
-    val parseInputs =
-      if valueMappedInputs.nonEmpty
-      then s"""$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
-             |${rInputMapping(valueMappedInputs, inputArrayName)}""".stripMargin
-      else ""
-
+    
     scriptFile.content = s"""
       |library("jsonlite")
-      |$parseInputs
+      |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
+      |${rInputMapping(valueMappedInputs, inputArrayName)}
       |${RunnableScript.content(script)}
       |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
       """.stripMargin
