@@ -165,7 +165,7 @@ case class RTask(
 
     val valueMappedInputs = noFile(mapped.inputs)
     writeInputsJSON(valueMappedInputs, jsonInputs)
-    
+
     scriptFile.content = s"""
       |library("jsonlite")
       |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)

@@ -32,12 +32,14 @@ import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.gui.shared.api
 import org.openmole.gui.shared.data.*
 
+
+
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
  */
 class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Response[IO]])
   extends APIServer
-    with api.CoreAPI {
+    with api.CoreAPI:
 
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
@@ -187,8 +189,6 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       launchScriptRoute,
       clearEnvironmentErrorsRoute,
       listEnvironmentErrorsRoute,
-//      modelsRoute,
-//      expandResourcesRoute,
       downloadHTTPRoute,
       temporaryDirectoryRoute,
       marketIndexRoute,
@@ -207,8 +207,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 
   val routes: HttpRoutes[IO]  =
-    HttpRoutes.of {
-      case req @ POST -> Root / org.openmole.gui.shared.data.`uploadFilesRoute` =>
+    HttpRoutes.of:
+      case req @ POST -> Root / org.openmole.gui.shared.api.`uploadFilesRoute` =>
         import apiImpl.services.*
         import cats.effect.unsafe.implicits.global
         import org.http4s.multipart.*
@@ -248,7 +248,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           Ok()
         }
 
-      case req @ GET -> Root / org.openmole.gui.shared.data.`downloadFileRoute` =>
+      case req @ GET -> Root / org.openmole.gui.shared.api.`downloadFileRoute` =>
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
@@ -265,48 +265,42 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
         val f = safePathToFile(safePath)
 
-        if (!f.exists()) Status.NotFound.apply(s"The file $path does not exist.")
-        else {
-          if (f.isDirectory) {
+        if !f.exists()
+        then Status.NotFound.apply(s"The file $path does not exist.")
+        else
+          if f.isDirectory
+          then
             import org.openmole.tool.stream.*
             import org.openmole.tool.archive.*
 
             val st =
-              fs2.io.readOutputStream[IO](64 * 1024) { out =>
-                IO.blocking[Unit] {
+              fs2.io.readOutputStream[IO](64 * 1024): out =>
+                IO.blocking[Unit]:
                   val tos = new TarOutputStream(out.toGZ, 64 * 1024)
                   try tos.archive(f, includeTopDirectoryName = true)
-                  finally tos.close
-                }
-              }
+                  finally tos.close()
 
-            Ok(st).map { r =>
+            Ok(st).map: r =>
               val r2 =
                 r.withHeaders(
                   //org.http4s.headers.`Content-Length`(test.length()),
                   org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
                 )
 
-              if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.data.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+              if hash
+              then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
               else r2
-            }
-          }
-          else {
-            f.withLock { _ ⇒
-              StaticFile.fromFile(f, Some(req)).getOrElseF(Status.NotFound.apply()).map { r =>
+          else
+            f.withLock: _ ⇒
+              StaticFile.fromFile(f, Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
                 val r2 =
                   r.withHeaders(
                     org.http4s.headers.`Content-Length`(f.length()),
                     org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}"))
                   )
 
-                if (hash) r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.data.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+                if hash
+                then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
                 else r2
-              }
-            }
-          }
-        }
-    }
 
 
-}

@@ -11,6 +11,7 @@ import scaladget.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.api.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.toService

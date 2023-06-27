@@ -118,7 +118,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
       p.failure(new IOException(s"Upload of file ${files} timed out"))
 
 
-    xhr.open("POST", org.openmole.gui.shared.data.uploadFilesRoute, true)
+    xhr.open("POST", org.openmole.gui.shared.api.uploadFilesRoute, true)
     xhr.send(formData)
 
     p.future

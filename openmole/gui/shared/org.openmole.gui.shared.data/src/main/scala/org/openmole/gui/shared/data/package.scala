@@ -23,20 +23,7 @@ import io.circe.{Decoder, Encoder}
 import scala.deriving.Mirror
 import scala.reflect.ClassTag
 
-val connectionRoute = "connection"
-val shutdownRoute = "shutdown"
-val restartRoute = "restart"
 
-val appRoute = "app"
-
-val downloadFileRoute = "downloadFile"
-val uploadFilesRoute = "uploadFiles"
-val resetPasswordRoute = "resetPassword"
-
-def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
-  s"${downloadFileRoute}?path=$uri&hash=$hash&fileType=${fileType.typeName}"
-
-def hashHeader = "Content-Hash"
 
 import java.io.{PrintWriter, StringWriter}
 import scala.collection.immutable.ArraySeq

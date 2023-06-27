@@ -19,6 +19,21 @@ package org.openmole.gui.shared.api
 
 import org.openmole.gui.shared.data.*
 
+val connectionRoute = "connection"
+val shutdownRoute = "shutdown"
+val restartRoute = "restart"
+
+val appRoute = "app"
+
+val downloadFileRoute = "downloadFile"
+val uploadFilesRoute = "uploadFiles"
+val resetPasswordRoute = "resetPassword"
+
+def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
+  s"$downloadFileRoute?path=$uri&hash=$hash&fileType=${fileType.typeName}"
+
+def hashHeader = "Content-Hash"
+
 trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
    export io.circe.generic.auto.*
    type ErrorEndpoint[I, O] = Endpoint[I, Either[ErrorData, O]]
