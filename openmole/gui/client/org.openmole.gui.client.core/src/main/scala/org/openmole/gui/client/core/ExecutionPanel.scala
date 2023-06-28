@@ -327,10 +327,9 @@ class ExecutionPanel:
         .render.render.amend(idAttr := "exec")
 
     def envErrorLevelToColor(level: ErrorStateLevel) =
-      level match {
+      level match
         case ErrorStateLevel.Error => "#c8102e"
         case _ => "#555"
-      }
 
 
     def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
@@ -360,7 +359,7 @@ class ExecutionPanel:
           contextBlock("Resource", e.taskName, true).amend(width := "180"),
           contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
           contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
-          contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
           contextBlock("Submitted", e.submitted.toString, true),
           contextBlock("Running", e.running.toString, true),
           contextBlock("Finished", e.done.toString, true),
