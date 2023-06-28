@@ -249,10 +249,9 @@ lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*"
 )
 
 lazy val omr = OsgiProject(coreDir, "org.openmole.core.omr", imports = Seq("*")) settings(
-  scalaJSSettings,
   OsgiKeys.bundleActivator := None,
   libraryDependencies += Libraries.circe
-) dependsOn context enablePlugins (ScalaJSPlugin)
+) dependsOn (context, json, csv)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings
   (libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi), Libraries.addScalaLang) dependsOn

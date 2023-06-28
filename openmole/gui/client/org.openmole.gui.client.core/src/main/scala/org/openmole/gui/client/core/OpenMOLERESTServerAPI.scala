@@ -83,7 +83,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
     val destinationPaths = files.unzip._2
 
-    formData.append("fileType", destinationPaths.map(_.context.typeName).mkString(","))
+    formData.append(org.openmole.gui.shared.api.fileTypeParam, destinationPaths.map(_.context.typeName).mkString(","))
 
     for
       (file, destination) <- files

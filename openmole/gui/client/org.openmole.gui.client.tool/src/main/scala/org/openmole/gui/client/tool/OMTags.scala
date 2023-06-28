@@ -52,6 +52,7 @@ object OMTags:
   //val options = cls("glyphicon glyphicon-option-horizontal")
   val glyph_eye_open = cls("bi-eye-fill")
   val glyph_flash = cls("bi-lightning-charge-fill")
+  val glyph_file = cls("bi-file")
   val glyph_house = cls("bi-house-door-fill")
   val glyph_arrow_left_right = cls("bi-arrow-left-right")
   val glyph_extract = cls("bi-file-earmark-zip-fill")

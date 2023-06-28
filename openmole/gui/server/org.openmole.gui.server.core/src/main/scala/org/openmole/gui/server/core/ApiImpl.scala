@@ -493,7 +493,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def omrMethodName(result: SafePath): String =
     import services.*
     val omrFile = safePathToFile(result)
-    OMROutputFormat.methodName(omrFile)
+    OMR.methodName(omrFile)
 
   def omrContent(result: SafePath): GUIOMRContent =
     import services.*
@@ -503,7 +503,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GUIVariable(v.name, GUIVariable.ValueType.fromAny(v.value), v.prototype.`type`.toString)
 
     def content =
-      OMROutputFormat.toVariables(omrFile).map: (s, v) =>
+      OMR.toVariables(omrFile).map: (s, v) =>
         GUIOMRSectionContent(s.name, v.map(toGUIVariable))
 
     GUIOMRContent(content)

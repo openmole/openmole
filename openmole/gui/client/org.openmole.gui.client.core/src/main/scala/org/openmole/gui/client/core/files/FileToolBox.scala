@@ -19,10 +19,21 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
   def closeToolBox(using panels: Panels) = panels.treeNodePanel.currentLine.set(-1)
 
-  def download(using panels: Panels) = withSafePath { sp ⇒
-    closeToolBox
-    org.scalajs.dom.document.location.href = downloadFile(Utils.toURI(sp.path.value), sp.context)
-  }
+  def download(using panels: Panels) =
+    withSafePath: sp ⇒
+      closeToolBox
+      org.scalajs.dom.window.open(
+        url = downloadFile(Utils.toURI(sp.path.value), sp.context),
+        target = "_blank"
+      )
+
+  def omrToCSV(using panels: Panels) =
+    withSafePath: sp ⇒
+      closeToolBox
+      org.scalajs.dom.window.open(
+        url = convertOMR(Utils.toURI(sp.path.value), sp.context),
+        target = "_blank"
+      )
 
   def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒
     closeToolBox
@@ -50,13 +61,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     closeToolBox
   }
 
-  def execute(using panels: Panels, api: ServerAPI, path: BasePath) = {
+  def execute(using panels: Panels, api: ServerAPI, path: BasePath) =
     import scala.concurrent.duration._
     withSafePath { sp ⇒
       api.launchScript(sp, true).foreach { _ ⇒ showExecution() }
       closeToolBox
     }
-  }
 
   def toScript(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     withSafePath { sp ⇒
@@ -84,7 +94,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
           actionConfirmation.set(None)
     }
 
-  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     val newNode = safePath.parent ++ to
     api.move(Seq(safePath -> newNode)).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
@@ -93,7 +103,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
     }
-  }
 
   def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) = 
     pluginState.isPlugged match
@@ -140,7 +149,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
 
     div(
       child <-- actionConfirmation.signal.map { ac ⇒
-        ac match {
+        ac match
           case Some(c) ⇒ c
           case None ⇒
             form(
@@ -151,7 +160,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                 }
               }
             )
-        }
       }
     )
   }
@@ -173,46 +181,48 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     div(
       height := "80px",
-      child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map { a ⇒
-        a match
-          case (Some(ac), _) ⇒ ac
-          case (_, Some(ae)) ⇒ ae
-          case (None, None) ⇒
-            div(
-              fileActions,
-              iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
-              iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
-              iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
-              iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
-                initSafePath.name
-              } ?", () ⇒ trash)))),
-              FileContentType(FileExtension(initSafePath.name)) match
-                case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-                  iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
-                case _ ⇒
-                  emptyMod
-              ,
-              FileContentType(FileExtension(initSafePath.name)) match
-                case FileContentType.OpenMOLEScript ⇒
-                  iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
-                case _ ⇒ emptyMod
-              ,
+      child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map:
+        case (Some(ac), _) ⇒ ac
+        case (_, Some(ae)) ⇒ ae
+        case (None, None) ⇒
+          div(
+            fileActions,
+            iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
+            iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
+            iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+            iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
+              initSafePath.name
+            } ?", () ⇒ trash)))),
+            FileContentType(FileExtension(initSafePath.name)) match
+              case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
+                iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
+              case _ ⇒
+                emptyMod
+            ,
+            FileContentType(FileExtension(initSafePath.name)) match
+              case FileContentType.OpenMOLEScript ⇒
+                iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
+              case _ ⇒ emptyMod
+            ,
+            FileContentType(FileExtension(initSafePath.name)) match
+              case FileContentType.OpenMOLEResult ⇒
+                iconAction(glyphItemize(OMTags.glyph_file), "csv", () ⇒ omrToCSV)
+              case _ ⇒ emptyMod
+            ,
 //                FileExtension(initSafePath.name) match {
 //                  //FIXME discover extensions from wizard plugins
 //                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
 //                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
 //                  case _ ⇒ emptyMod
 //                },
-              pluginState.isPlugin match
-                case true ⇒
-                  val (icon, text) = pluginState.isPlugged match
-                    case true  ⇒ (OMTags.glyph_unpuzzle, "unplug")
-                    case false ⇒ (OMTags.glyph_puzzle, "plug")
-                  iconAction(glyphItemize(icon), text, () ⇒ plugOrUnplug(initSafePath, pluginState))
-                case false ⇒ emptyMod
-
-            )
-
-      }
+            if pluginState.isPlugin
+            then
+              val (icon, text) =
+                if pluginState.isPlugged
+                then (OMTags.glyph_unpuzzle, "unplug")
+                else (OMTags.glyph_puzzle, "plug")
+              iconAction(glyphItemize(icon), text, () ⇒ plugOrUnplug(initSafePath, pluginState))
+            else emptyMod
+          )
     )
 

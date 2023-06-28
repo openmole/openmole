@@ -69,69 +69,60 @@ package object csv {
     values:      Seq[Any],
     unrollArray: Boolean          = false,
     arrayOnRow:  Boolean          = false,
-    margin:      String           = ""): Unit = {
+    margin:      String           = ""): Unit =
 
     header.foreach(h ⇒ output.appendLine { margin + h })
 
-    def csvLine(v: Seq[Any]): String = {
+    def csvLine(v: Seq[Any]): String =
       def format(v: Any): String =
-        v match {
+        v match
           case v: Array[_] ⇒ s"[${v.map(format).mkString(",")}]"
           case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
           case v           ⇒ v.prettify()
-        }
 
       def quote(v: Any): String =
-        v match {
+        v match
           case v: Array[_] ⇒ s""""${format(v)}""""
           case v: Seq[_]   ⇒ s""""${format(v)}""""
           case v           ⇒ v.prettify()
-        }
 
       v.map(quote).mkString(",")
-    }
 
-    def unroll(v: Seq[Any]) = {
-      def writeLines(lists: Seq[List[Any]]): Unit = {
+    def unroll(v: Seq[Any]) =
+      def writeLines(lists: Seq[List[Any]]): Unit =
         output.appendLine(margin + csvLine(lists.map(_.head)))
 
         val lastLine = lists.forall(_.tail.isEmpty)
-        if (!lastLine) {
-          val skipHead = lists.map {
-            case h :: Nil ⇒ h :: Nil
-            case _ :: t   ⇒ t
-            case Nil      ⇒ Nil
-          }
+        if !lastLine
+        then
+          val skipHead =
+            lists.map:
+              case h :: Nil ⇒ h :: Nil
+              case _ :: t   ⇒ t
+              case Nil      ⇒ Nil
 
           writeLines(skipHead)
-        }
-      }
 
       val lists: Seq[List[Any]] =
-        v map {
+        v map:
           case v: Array[_] ⇒ v.toList
           case v: Seq[_]   ⇒ v.toList
           case v           ⇒ List(v)
-        }
 
-      if (lists.forall(!_.isEmpty)) writeLines(lists)
-    }
+      if lists.forall(!_.isEmpty) then writeLines(lists)
 
-    def onRow(v: Seq[Any]) = {
+    def onRow(v: Seq[Any]) =
       def arrayValues(v: Any): Seq[Any] =
-        v match {
+        v match
           case v: Array[_] ⇒ v.flatMap(arrayValues)
           case v: Seq[_]   ⇒ v.flatMap(arrayValues)
           case v           ⇒ Seq(v)
-        }
 
       output.appendLine(margin + csvLine(arrayValues(v)))
-    }
 
     if (unrollArray) unroll(values)
     else if (arrayOnRow) onRow(values)
     else output.appendLine(margin + csvLine(values))
-  }
 
   /**
    * Builds the plan.

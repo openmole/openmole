@@ -29,10 +29,20 @@ val downloadFileRoute = "downloadFile"
 val uploadFilesRoute = "uploadFiles"
 val resetPasswordRoute = "resetPassword"
 
-def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
-  s"$downloadFileRoute?path=$uri&hash=$hash&fileType=${fileType.typeName}"
+val convertOMRRoute = "file/omr/convert"
+
+val fileTypeParam = "fileType"
+val pathParam = "path"
+val hashParam = "hash"
 
 def hashHeader = "Content-Hash"
+
+def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
+  s"$downloadFileRoute?$pathParam=$uri&$hashParam=$hash&$fileTypeParam=${fileType.typeName}"
+
+def convertOMR(uri: String, fileType: ServerFileSystemContext) =
+  s"$convertOMRRoute?$pathParam=$uri&$fileTypeParam=${fileType.typeName}"
+
 
 trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
    export io.circe.generic.auto.*

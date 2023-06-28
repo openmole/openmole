@@ -43,55 +43,50 @@ package object json:
 
   }
 
-  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false, default: Option[org.json4s.JValue => Any] = None): Variable[_] = {
+  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false, default: Option[org.json4s.JValue => Any] = None): Variable[_] =
     import org.json4s.*
 
     def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
     def jValueToInt(jv: JValue) =
-      jv match {
+      jv match
         case jv: JDouble  ⇒ jv.num.intValue
         case jv: JInt     ⇒ jv.num.intValue
         case jv: JLong    ⇒ jv.num.intValue
         case jv: JDecimal ⇒ jv.num.intValue
         case _            ⇒ cannotConvert[Int](jv)
-      }
 
     def jValueToLong(jv: JValue) =
-      jv match {
+      jv match
         case jv: JDouble  ⇒ jv.num.longValue
         case jv: JInt     ⇒ jv.num.longValue
         case jv: JLong    ⇒ jv.num.longValue
         case jv: JDecimal ⇒ jv.num.longValue
         case _            ⇒ cannotConvert[Long](jv)
-      }
 
     def jValueToDouble(jv: JValue) =
-      jv match {
+      jv match
         case jv: JDouble  ⇒ jv.num.doubleValue
         case jv: JInt     ⇒ jv.num.doubleValue
         case jv: JLong    ⇒ jv.num.doubleValue
         case jv: JDecimal ⇒ jv.num.doubleValue
         case _            ⇒ cannotConvert[Double](jv)
-      }
 
     def jValueToString(jv: JValue) =
-      jv match {
+      jv match
         case jv: JDouble  ⇒ jv.num.toString
         case jv: JInt     ⇒ jv.num.toString
         case jv: JLong    ⇒ jv.num.toString
         case jv: JDecimal ⇒ jv.num.toString
         case jv: JString  ⇒ jv.s
         case _            ⇒ cannotConvert[String](jv)
-      }
 
     def jValueToBoolean(jv: JValue) =
-      jv match {
+      jv match
         case jv: JBool ⇒ jv.value
         case _         ⇒ cannotConvert[Boolean](jv)
-      }
 
-    (jValue, v) match {
+    (jValue, v) match
       case (value: JArray, Val.caseInt(v)) if unwrapArrays     ⇒ Variable(v, jValueToInt(value.arr.head))
       case (value: JArray, Val.caseLong(v)) if unwrapArrays    ⇒ Variable(v, jValueToLong(value.arr.head))
       case (value: JArray, Val.caseDouble(v)) if unwrapArrays  ⇒ Variable(v, jValueToDouble(value.arr.head))
@@ -102,7 +97,7 @@ package object json:
         import scala.jdk.CollectionConverters._
 
         def jValueToValue(value: Any, arrayType: Class[_]) =
-          (value, arrayType) match {
+          (value, arrayType) match
             case (value: JValue, c) if c == classOf[Double] ⇒ jValueToDouble(value)
             case (value: JValue, c) if c == classOf[Int] ⇒ jValueToInt(value)
             case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
@@ -112,13 +107,11 @@ package object json:
               (jValue, default) match
                 case (value: JValue, Some(serializer)) => serializer(value)
                 case _ => throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
-          }
 
-        implicit def jArrayConstruct: Variable.ConstructArray[JArray] =
-          new Variable.ConstructArray[JArray] {
+        given Variable.ConstructArray[JArray] =
+          new Variable.ConstructArray[JArray]:
             def size(t: JArray) = t.arr.size
             def iterable(t: JArray) = t.arr.asJava.asInstanceOf[java.lang.Iterable[Any]]
-          }
 
         Variable.constructArray(v, value, jValueToValue)
 
@@ -132,8 +125,6 @@ package object json:
         (value, v, default) match
           case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value))
           case _                                    ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
-    }
-  }
 
   def anyToJValue(using s: org.openmole.core.serializer.SerializerService): Any => org.json4s.JValue =
     a =>

@@ -23,7 +23,8 @@ import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.*
-import org.openmole.core.exception.InternalProcessingError
+import org.http4s.implicits.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
@@ -31,8 +32,23 @@ import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.gui.shared.api
 import org.openmole.gui.shared.data.*
+import org.openmole.tool.file.*
 
+object CoreAPIServer:
+  def getSafePath(req: Request[IO]) =
+    val fileType = req.params.get(org.openmole.gui.shared.api.fileTypeParam)
+    val path = req.params.getOrElse(org.openmole.gui.shared.api.pathParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.pathParam} is required"))
 
+    fileType match
+      case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
+      case None => SafePath(path.split('/').toSeq)
+
+  def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
+    import org.typelevel.ci.*
+    r.withHeaders(
+      org.http4s.headers.`Content-Length`(f.length()),
+      org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
+    )
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -252,17 +268,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
-        val fileType = req.params.get("fileType")
-        val path = req.params("path")
-        val hash = req.params.get("hash").flatMap(_.toBooleanOption).getOrElse(false)
+        val hash = req.params.get(org.openmole.gui.shared.api.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
 
         import org.typelevel.ci.*
 
-        def safePath =
-          fileType match
-            case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
-            case None => SafePath(path.split('/').toSeq)
-
+        val safePath = CoreAPIServer.getSafePath(req)
         val f = safePathToFile(safePath)
 
         if !f.exists()
@@ -292,15 +302,24 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
               else r2
           else
             f.withLock: _ ⇒
-              StaticFile.fromFile(f, Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
-                val r2 =
-                  r.withHeaders(
-                    org.http4s.headers.`Content-Length`(f.length()),
-                    org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}"))
-                  )
-
+              StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
+                val r2 = CoreAPIServer.setFileHeaders(f, r)
                 if hash
                 then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
                 else r2
+      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRRoute}" =>
+        import apiImpl.services.*
+        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
+        val fileBaseName = omrFile.getName.reverse.dropWhile(_ != '.').drop(1).reverse
+        val csvFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".csv")
+
+        org.openmole.core.omr.OMR.writeCSV(omrFile, csvFile)
+        def deleteCSVFile = IO[Unit] { csvFile.delete() }
+
+        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(csvFile.toPath), Some(req))
+          .map{ req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
+          .getOrElseF(Status.NotFound.apply())
+          .map{ r => CoreAPIServer.setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+
 
 
