@@ -360,7 +360,7 @@ class ExecutionPanel:
           contextBlock("Resource", e.taskName, true).amend(width := "180"),
           contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
           contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
-          contextBlock("Downloads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
+          contextBlock("Downloads", displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
           contextBlock("Submitted", e.submitted.toString, true),
           contextBlock("Running", e.running.toString, true),
           contextBlock("Finished", e.done.toString, true),
