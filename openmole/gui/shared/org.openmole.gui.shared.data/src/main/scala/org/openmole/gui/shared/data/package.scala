@@ -451,6 +451,16 @@ object GUIVariable:
     case ValueArrayArrayBoolean(value: Array[Array[Boolean]])
 
 
-case class GUIOMRContent(variables: Seq[GUIOMRSectionContent])
+case class GUIOMRContent(
+   variables: Seq[GUIOMRSectionContent],
+   openmoleVersion: String,
+   executionId: String,
+   script: Option[GUIOMRScript],
+   timeStart: String,
+   timeSave: String)
+
+case class GUIOMRImport(`import`: String, content: String)
+case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
+
 case class GUIOMRSectionContent(name: Option[String], variables: Seq[GUIVariable])
 case class GUIVariable(name: String, value: Option[GUIVariable.ValueType], `type`: String)

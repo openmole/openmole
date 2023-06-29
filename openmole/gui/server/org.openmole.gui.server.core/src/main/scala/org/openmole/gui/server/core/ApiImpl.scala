@@ -508,25 +508,22 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       OMR.toVariables(omrFile).map: (s, v) =>
         GUIOMRSectionContent(s.name, v.map(toGUIVariable))
 
-    GUIOMRContent(content)
+    val index = OMR.indexData(omrFile)
 
+    def script =
+      def convertImport(i: Index.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
+      index.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
 
-    //GUIPluginRegistry.analysis.find(_._1 == methodName).map(_._2)
+    GUIOMRContent(
+      variables = content,
+      openmoleVersion = index.`openmole-version`,
+      executionId = index.`execution-id`,
+      script = script,
+      timeStart = utils.formatDate(index.`time-start`),
+      timeSave = utils.formatDate(index.`time-save`)
+    )
 
-  //MODEL WIZARDS
-
-  //Extract models from an archive
-//  def models(archivePath: SafePath): Seq[SafePath] = {
-//    val toDir = archivePath.toNoExtention
-//    // extractTGZToAndDeleteArchive(archivePath, toDir)
-//    (for {
-//      tnd ← listFiles(toDir) if FileType.isSupportedLanguage(tnd.name)
-//    } yield tnd).map {
-//      nd ⇒ toDir ++ nd.name
-//    }
-//  }
-
-  def expandResources(resources: Resources): Resources = {
+  def expandResources(resources: Resources): Resources =
     import services._
 
     val paths = resources.all.map(_.safePath).distinct.map {
@@ -541,7 +538,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       implicitResource,
       paths.size + implicitResource.size
     )
-  }
 
   def listNotification = serverState.listNotification()
   def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)

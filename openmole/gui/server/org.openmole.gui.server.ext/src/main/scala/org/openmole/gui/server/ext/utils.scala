@@ -41,7 +41,7 @@ object utils:
 
   implicit class SafePathDecorator(s: SafePath):
     def toFile(using Workspace) = safePathToFile(s)
-  
+
   implicit class SafePathFileDecorator(f: File):
     def toSafePath(using context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace) = fileToSafePath(f)
 
