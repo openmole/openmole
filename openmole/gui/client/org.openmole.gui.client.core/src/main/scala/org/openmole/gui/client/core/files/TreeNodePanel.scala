@@ -264,7 +264,7 @@ class TreeNodePanel { panel =>
       cls := "file-scrollable-content",
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
-          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue))).map(Some(_)), true).toSignal(None).map {
+          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue)), withHidden = false).map(Some(_)), true).toSignal(None).map {
             case None =>
               Seq(
                 i(cls := "bi bi-hourglass-split", marginLeft := "250", textAlign := "center")

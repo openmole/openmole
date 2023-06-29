@@ -75,7 +75,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     guiPlugins.errorImplementedBy (_ => apiImpl.getGUIPlugins() )
 
   val listFilesRoute =
-    listFiles.errorImplementedBy { case(path, filter) => apiImpl.listFiles(path, filter) }
+    listFiles.errorImplementedBy { (path, filter, withHidden) => apiImpl.listFiles(path, filter, withHidden = withHidden) }
 
   val sizeRoute =
     size.errorImplementedBy { path => apiImpl.size(path) }

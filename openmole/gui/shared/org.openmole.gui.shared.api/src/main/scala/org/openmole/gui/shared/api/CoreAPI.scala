@@ -55,8 +55,8 @@ trait CoreAPI extends RESTAPI {
     errorEndpoint(post(path / "file" / "extract-archive", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
 
   //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
-  val listFiles: ErrorEndpoint[(SafePath, FileSorting), FileListData] =
-    errorEndpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileSorting)]), ok(jsonResponse[FileListData]))
+  val listFiles: ErrorEndpoint[(SafePath, FileSorting, Boolean), FileListData] =
+    errorEndpoint(post(path / "file" / "list", jsonRequest[(SafePath, FileSorting, Boolean)]), ok(jsonResponse[FileListData]))
 
   val listRecursive: ErrorEndpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
     errorEndpoint(post(path / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))

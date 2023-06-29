@@ -96,7 +96,7 @@ object ModelWizardPanel:
     def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
       val ret =
         for
-          list <- api.listFiles(tmpDirectory)
+          list <- api.listFiles(tmpDirectory, withHidden = true)
           _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
           uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
           f <- factory(uploaded)
@@ -175,7 +175,7 @@ object ModelWizardPanel:
 
           for
             content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
-            listed <- api.listFiles(tmpDirectory)
+            listed <- api.listFiles(tmpDirectory, withHidden = true)
             destination = content.directory match
               case None => directory
               case Some(d) => directory / d

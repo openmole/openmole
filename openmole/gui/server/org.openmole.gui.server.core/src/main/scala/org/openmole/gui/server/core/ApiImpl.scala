@@ -192,9 +192,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     utils.copyFiles(paths, overwrite)
 
-  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting(), testPlugin: Boolean = false): FileListData =
+  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting(), testPlugin: Boolean = false, withHidden: Boolean = true): FileListData =
     import services.*
-    utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin)
+    utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin, withHidden = withHidden)
 
    def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] =
     import services._

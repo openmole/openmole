@@ -133,10 +133,11 @@ object utils {
 
 
 
-  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(implicit workspace: Workspace): FileListData =
+  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true, withHidden: Boolean = true)(implicit workspace: Workspace): FileListData =
     given ServerFileSystemContext = path.context
 
-    def treeNodesData = safePathToFile(path).listFilesSafe.toSeq.flatMap { f ⇒ fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin) }
+    def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
+    def treeNodesData = safePathToFile(path).listFilesSafe.toSeq.filter(filterHidden).flatMap { f ⇒ fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin) }
     val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
 
     val sortedSize = sorted.size
