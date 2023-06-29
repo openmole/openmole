@@ -210,7 +210,15 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def omrMethod(path: SafePath)(using BasePath): Future[String] = Future.successful("stub")
 
-  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = Future.successful(GUIOMRContent(Seq()))
+  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = Future.successful(
+    GUIOMRContent(
+      variables = Seq(),
+      openmoleVersion = org.openmole.core.buildinfo.version.toString,
+      executionId = "stub",
+      script = None,
+      timeStart = "stub",
+      timeSave = "stub")
+  )
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
 
