@@ -148,16 +148,16 @@ package file {
       }
 
       //////// modifiers ///////
-      def move(to: File) = wrapError {
+      def move(to: File) = wrapError:
+        to.getParentFile.mkdirs()
         def move = Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
-        if (!Files.isDirectory(file)) move
-        else {
-          Try(move) match {
+
+        if !Files.isDirectory(file)
+        then move
+        else
+          Try(move) match
             case Success(_) ⇒
             case Failure(_) ⇒ DirUtils.move(file, to)
-          }
-        }
-      }
 
       def forceFileDelete = wrapError {
         try Files.deleteIfExists(file)

@@ -23,7 +23,7 @@ import scala.util.{Failure, Success, Try}
 import collection.JavaConverters.*
 import scala.collection.mutable.ListBuffer
 
-object utils {
+object utils:
 
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
@@ -33,30 +33,17 @@ object utils {
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
-
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
     path.toFile.listFilesSafe.filter { f ⇒ PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
 
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath =
     parent ++ tnd.name
 
-  implicit class SafePathDecorator(s: SafePath) {
-    def toFile(implicit workspace: Workspace) =
-      given ServerFileSystemContext = s.context
-
-      safePathToFile(s)
-
-    def copy(toPath: SafePath, withName: Option[String] = None)(implicit workspace: Workspace) =
-      val from: File = s.toFile
-      val to: File = toPath.toFile
-      if (from.exists && to.exists) {
-        FileDecorator(from).copy(toF = new File(to, withName.getOrElse(from.getName)), followSymlinks = true)
-      }
-  }
-
-  implicit class SafePathFileDecorator(f: File) {
+  implicit class SafePathDecorator(s: SafePath):
+    def toFile(using Workspace) = safePathToFile(s)
+  
+  implicit class SafePathFileDecorator(f: File):
     def toSafePath(using context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace) = fileToSafePath(f)
-  }
 
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): SafePath =
     context match
@@ -132,7 +119,6 @@ object utils {
     getParentsArray0(f, Seq()) :+ f.getName
 
 
-
   def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true, withHidden: Boolean = true)(implicit workspace: Workspace): FileListData =
     given ServerFileSystemContext = path.context
 
@@ -153,123 +139,44 @@ object utils {
     val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
     allFiles.map { f => (fileToSafePath(f), f.isDirectory) }
 
-
-  def copyProjectFile(safePath: SafePath, newName: String, followSymlinks: Boolean = false)(implicit workspace: Workspace): SafePath =
-    val toPath = safePath.copy(path = safePath.path.value.dropRight(1) :+ newName)
-    if (toPath.toFile.isDirectory()) toPath.toFile.mkdir
-
-    val from = safePath.toFile
-    val replica = (safePath.parent ++ newName).toFile
-    from.copy(replica, followSymlinks = followSymlinks)
-
-    replica.toSafePath
-
-  def copyFile(from: File, to: File, create: Boolean = false): Unit = {
-    if (create) to.mkdirs()
-    if (from.exists && to.exists) from.copy(new File(to, from.getName))
-  }
-
-//  private def buildClassTrees(classes: Seq[Seq[String]]): Seq[ClassTree] = {
-//
-//    def build(classes: Seq[Seq[String]], classTrees: Seq[ClassTree]): Seq[ClassTree] = {
-//      val grouped = classes.groupBy {
-//        _.head
-//      }
-//
-//      grouped.flatMap {
-//        case (k, v) ⇒
-//          val flatV = v.flatten
-//          if (flatV.size == 1) classTrees :+ ClassLeaf(flatV.head)
-//          else classTrees :+ ClassNode(
-//            k,
-//            build(v.map(_.tail), classTrees)
-//          )
-//      }.toSeq
-//    }
-//
-//    build(classes, Seq())
-//  }
-
-
   def exists(safePath: SafePath)(implicit workspace: Workspace) =
     safePathToFile(safePath).exists
 
-  def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
+  def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
     safePaths.map { sp ⇒
       to ++ sp.name
     }.filter(exists)
-  }
-
-  //  def copyFromTmp(tmpSafePath: SafePath, filesToBeMovedTo: Seq[SafePath])(implicit workspace: Workspace): Unit = {
-  //    val tmp: File = safePathToFile(tmpSafePath)(ServerFileSystemContext.absolute, workspace)
-  //
-  //    filesToBeMovedTo.foreach { f ⇒
-  //      val from = getFile(tmp, Seq(f.name))
-  //      val toFile: File = safePathToFile(f.parent)(ServerFileSystemContext.project, workspace)
-  //      copyFile(from, toFile)
-  //    }
-  //
-  //  }
-
-  //  def copyAllFromTmp(tmpSafePath: SafePath, to: SafePath)(implicit workspace: Workspace): Unit = {
-  //    val f: File = safePathToFile(tmpSafePath)
-  //    val toFile: File = safePathToFile(to)
-  //
-  //    val dirToCopy = {
-  //      val level1 = f.listFiles.toSeq
-  //      if (level1.size == 1) level1.head
-  //      else f
-  //    }
-  //
-  //    toFile.mkdir
-  //    dirToCopy.copy(toFile)
-  //
-  //  }
-
-  //  // Test if files exist in the 'to' directory, return the lists of already existing files or copy them otherwise
-  //  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] = {
-  //
-  //  }
-
-  //copy safePaths files to 'to' folder in overwriting in they exist
-  //  def copyFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
-  //    if (overwrite)
-  //    then
-  //      val existing = ListBuffer[SafePath]()
-  //      safePaths.foreach { sp ⇒
-  //        val destination = new File(to.toFile, sp.name)
-  //        if(destination.exists()) existing.append(sp)
-  //        sp.toFile.copy(destination)
-  //      }
-  //      existing.toSeq
-  //    else
-  //      val existing = existsIn(safePaths, to)
-  //      if (existing.isEmpty) safePaths.foreach { sp ⇒ SafePathDecorator(sp).copy(to) }
-  //      existing
 
   def copyFiles(safePaths: Seq[(SafePath, SafePath)], overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
+    import org.openmole.core.omr.OMR
     val existing = ListBuffer[SafePath]()
-    safePaths.foreach { (p, d) ⇒
+    safePaths.foreach: (p, d) ⇒
       val destination = d.toFile
-      if (destination.exists())
+      def copy(): Unit =
+        val fromFile = p.toFile
+        if OMR.isOMR(fromFile)
+        then OMR.copy(fromFile, destination)
+        else fromFile.copy(destination)
+
+      if destination.exists()
       then
         existing.append(d)
-        if overwrite then p.toFile.copy(destination) else ()
-      else p.toFile.copy(destination)
-    }
+        if overwrite then copy()
+      else copy()
+
     existing.toSeq
 
 
-  def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit = {
-    implicit val ctx = safePath.context
-    safePathToFile(safePath).recursiveDelete
-  }
+  def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit =
+    import org.openmole.core.omr.OMR
+    val f = safePathToFile(safePath)
+    if OMR.isOMR(f)
+    then OMR.delete(f)
+    else f.recursiveDelete
 
-  def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit = {
-    safePaths.foreach { sp ⇒
+  def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit =
+    safePaths.foreach: sp ⇒
       deleteFile(sp)
-    }
-  }
 
   val openmoleFileName = "main.js"
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
@@ -302,12 +209,7 @@ object utils {
       }
     }
   }
-  
 
-  //  def hash(safePath: SafePath)(implicit workspace: Workspace, context: ServerFileSystemContext) = {
-  //    val file: File = safePathToFile(safePath)
-  //
-  //  }
 
   def catchAll[T](f: ⇒ T): Try[T] = {
     val res =
@@ -319,19 +221,6 @@ object utils {
   }
 
   def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.persistentDir / "keys"
-
-  //  def addPlugins(safePaths: Seq[SafePath])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
-  //    import org.openmole.gui.shared.data.ServerFileSystemContext.project
-  //    val files: Seq[File] = safePaths.map {
-  //      safePathToFile
-  //    }
-  //    addFilePlugins(files)
-  //  }
-  //
-  //  def addFilePlugins(files: Seq[File])(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] = {
-  //    val errors = org.openmole.core.module.addPluginsFiles(files, false, org.openmole.core.module.pluginDirectory)
-  //    errors.map(e ⇒ ErrorData(e._2))
-  //  }
 
   def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] =
     val file = safePathToFile(safePath)
@@ -347,4 +236,3 @@ object utils {
 
   def formatDate(t: Long) = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(t)
 
-}

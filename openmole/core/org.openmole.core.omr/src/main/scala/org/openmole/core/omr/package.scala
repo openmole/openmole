@@ -81,9 +81,40 @@ def dataDirectory = ".omr-data"
 
 
 object OMR:
+  def isOMR(file: File) = file.getName.endsWith(".omr")
+
   def indexData(file: File): Index =
     val content = file.content(gz = true)
     decode[Index](content).toTry.get
+
+  def dataFiles(file: File): Seq[(String, File)] =
+    val directory = file.getParentFile
+    indexData(file).`data-file`.map: f =>
+      (f, directory / f)
+
+  def copy(omrFile: File, destination: File) =
+    val copyData = omrFile.getParentFile != destination.getParentFile
+    if copyData
+    then
+      val destinationDataDirectory = destination.getParentFile
+      dataFiles(omrFile).foreach((name, f) => f.copy(destinationDataDirectory / name))
+    omrFile copy destination
+
+  def move(omrFile: File, destination: File) =
+    val moveData = omrFile.getParentFile != destination.getParentFile
+    if moveData
+    then
+      val destinationDataDirectory = destination.getParentFile
+      dataFiles(omrFile).foreach((name, f) => f.move(destinationDataDirectory / name))
+      val omrDataDirectory = omrFile.getParentFile / dataDirectory
+      if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
+    omrFile move destination
+
+  def delete(omrFile: File) =
+    dataFiles(omrFile).foreach((_, f) => f.delete())
+    val omrDataDirectory = omrFile.getParentFile / dataDirectory
+    if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
+    omrFile.delete()
 
   def toVariables(file: File): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)

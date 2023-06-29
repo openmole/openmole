@@ -211,7 +211,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
       toFile.getParentFile.mkdirs()
-      fromFile.move(toFile)
+      if OMR.isOMR(fromFile)
+      then OMR.move(fromFile, toFile)
+      else fromFile.move(toFile)
     }
 
   def mdToHtml(safePath: SafePath): String =
