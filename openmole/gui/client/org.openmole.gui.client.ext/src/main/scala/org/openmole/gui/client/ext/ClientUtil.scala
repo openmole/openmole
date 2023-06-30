@@ -23,26 +23,19 @@ import com.raquo.laminar.api.L.*
 import scala.scalajs.js
 import scala.scalajs.js.Date
 
-object Utils {
-  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
-
+object ClientUtil:
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
 
-  implicit class TagCollapserOnClickRX(triggerCondition: Signal[Boolean]) {
-    def expandDiv(inner: HtmlElement, onended: () ⇒ Unit = () ⇒ {}) = {
+  implicit class TagCollapserOnClickRX(triggerCondition: Signal[Boolean]):
+    def expandDiv(inner: HtmlElement, onended: () ⇒ Unit = () ⇒ {}) =
       val expanded = div(
         cls := "hidden-div",
         cls.toggle("expanded") <-- triggerCondition,
         inner
       )
 
-      expanded.ref.addEventListener("transitionend", (e: Event) ⇒ {
-        onended()
-      })
-
+      expanded.ref.addEventListener("transitionend", (e: Event) ⇒ { onended() })
       expanded
-    }
-  }
 
   def toJSObject(pluginFactory: GUIPluginFactory) = new js.Object {
     val factory = pluginFactory
@@ -52,5 +45,3 @@ object Utils {
     val errorStyle = Seq(width := "100%", height := "400px", whiteSpace := "pre")
     textArea(errorStyle, content)
 
-
-}

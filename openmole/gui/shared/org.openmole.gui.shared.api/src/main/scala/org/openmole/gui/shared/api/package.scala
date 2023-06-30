@@ -29,7 +29,8 @@ val downloadFileRoute = "downloadFile"
 val uploadFilesRoute = "uploadFiles"
 val resetPasswordRoute = "resetPassword"
 
-val convertOMRRoute = "file/omr/convert"
+val convertOMRToCSVRoute = "file/omr/csv"
+val convertOMRToJSONRoute = "file/omr/json"
 
 val fileTypeParam = "fileType"
 val pathParam = "path"
@@ -37,12 +38,49 @@ val hashParam = "hash"
 
 def hashHeader = "Content-Hash"
 
-def downloadFile(uri: String, fileType: ServerFileSystemContext, hash: Boolean = false) =
-  s"$downloadFileRoute?$pathParam=$uri&$hashParam=$hash&$fileTypeParam=${fileType.typeName}"
+object Util:
+  def toURI(path: Seq[String]): String = new java.net.URI(null, null, path.mkString("/"), null).toString
 
-def convertOMR(uri: String, fileType: ServerFileSystemContext) =
-  s"$convertOMRRoute?$pathParam=$uri&$fileTypeParam=${fileType.typeName}"
+  def encode(s: String): String =
+    val char =
+      for
+        c ← s
+      yield
+        c match
+          case '+' ⇒ "%2b"
+          case ':' ⇒ "%3a"
+          case '/' ⇒ "%2f"
+          case '?' ⇒ "%3f"
+          case '#' ⇒ "%23"
+          case '[' ⇒ "%5b"
+          case ']' ⇒ "%5d"
+          case '@' ⇒ "%40"
+          case '!' ⇒ "%21"
+          case '$' ⇒ "%24"
+          case '&' ⇒ "%26"
+          case '\'' ⇒ "%27"
+          case '(' ⇒ "%29"
+          case ')' ⇒ "%28"
+          case '*' ⇒ "%2a"
+          case ',' ⇒ "%2c"
+          case ';' ⇒ "%3b"
+          case '=' ⇒ "%3d"
+          case _ ⇒ c
+    char.mkString("")
 
+def safePathToURLParams(sp: SafePath) =
+  val uri = Util.toURI(sp.path.value.map(Util.encode))
+  val fileType = sp.context
+  s"$pathParam=$uri&$fileTypeParam=${fileType.typeName}"
+
+def downloadFile(sp: SafePath, hash: Boolean = false) =
+  s"$downloadFileRoute?${safePathToURLParams(sp)}&$hashParam=$hash"
+
+def convertOMRToCSV(sp: SafePath) =
+  s"$convertOMRToCSVRoute?${safePathToURLParams(sp)}"
+
+def convertOMRToJSON(sp: SafePath) =
+  s"$convertOMRToJSONRoute?${safePathToURLParams(sp)}"
 
 trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
    export io.circe.generic.auto.*

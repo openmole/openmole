@@ -34,8 +34,8 @@ object Fetch:
   def callString(using name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     s"${name.value} in file ${file.value}:${line.value}"
 
-  def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
-  def onWarningTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.", Utils.errorTextArea(s"Error in $callString"))
+  def onTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Error, "The request timed out. Please check your connection.", ClientUtil.errorTextArea(s"Error in $callString"))
+  def onWarningTimeout()(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) = notification.notify(NotificationLevel.Info, "The request is very long. Please check your connection.", ClientUtil.errorTextArea(s"Error in $callString"))
 
   def onFailed(t: Throwable)(using notification: NotificationService, name: sourcecode.FullName, file: sourcecode.File, line: sourcecode.Line) =
     t match
@@ -43,14 +43,14 @@ object Fetch:
         notification.notify(
           NotificationLevel.Error,
           s"""The server returned an error 500""",
-          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(e))
+          ClientUtil.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(e))
         )
 
       case t =>
         notification.notify(
           NotificationLevel.Error,
           s"""The server failed unexpectedly""",
-          Utils.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(ErrorData(t)))
+          ClientUtil.errorTextArea(s"Error in $callString:\n" + ErrorData.stackTrace(ErrorData(t)))
         )
 
 

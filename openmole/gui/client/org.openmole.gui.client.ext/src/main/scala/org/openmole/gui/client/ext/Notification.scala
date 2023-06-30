@@ -24,5 +24,5 @@ enum NotificationLevel:
   case Info, Error
 
 trait NotificationService:
-  def notifyError(message: String, e: Throwable, level: NotificationLevel = NotificationLevel.Error) = notify(level, message, org.openmole.gui.client.ext.Utils.errorTextArea(ErrorData.toStackTrace(e)))
+  def notifyError(message: String, e: Throwable, level: NotificationLevel = NotificationLevel.Error) = notify(level, message, org.openmole.gui.client.ext.ClientUtil.errorTextArea(ErrorData.toStackTrace(e)))
   def notify(level: NotificationLevel, title: String, body: HtmlElement = div()): Unit

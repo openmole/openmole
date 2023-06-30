@@ -22,10 +22,13 @@ import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
 import org.json4s.JArray
+import org.json4s.JsonAST.JField
+import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.json.*
 import org.openmole.core.context.Variable
 import org.openmole.core.omr.*
 import org.openmole.core.exception.*
+import org.openmole.core.serializer.SerializerService
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
 
@@ -190,3 +193,45 @@ object OMR:
           gzip = gzip,
           append = true
         )
+
+  def writeJSON(
+    file: File,
+    destination: File)(using SerializerService) =
+
+    val index = indexData(file)
+    def variables = toVariables(file)
+
+    case class JSONContent(
+      `openmole-version`: String,
+      `execution-id`: String,
+      script: Option[Index.Script],
+      `time-start`: Long,
+      `time-save`: Long)
+
+    import Index.given
+    given Codec[JSONContent] = Codec.AsObject.derivedConfigured
+
+    def jsonData =
+      org.json4s.JArray(
+        variables.map { (s, variables) =>
+          def content: Seq[(String, org.json4s.JValue)] =
+            s.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
+              Seq("variables" -> variablesToJObject(variables, default = Some(anyToJValue)))
+          org.json4s.JObject(content.toList)
+        }.toList
+      )
+
+    def jsonContent =
+      JSONContent(
+        `openmole-version` = index.`openmole-version`,
+        `execution-id` = index.`execution-id`,
+        script = index.script,
+        `time-start` = index.`time-start`,
+        `time-save` = index.`time-save`
+      )
+
+    val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.noSpaces).asInstanceOf[org.json4s.JObject]
+    destination.content =
+      import org.json4s.jackson
+      val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
+      jackson.prettyJson(jackson.renderJValue(fullObject))

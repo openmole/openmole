@@ -307,7 +307,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
                 if hash
                 then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
                 else r2
-      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRRoute}" =>
+      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
         val fileBaseName = omrFile.getName.reverse.dropWhile(_ != '.').drop(1).reverse
@@ -320,6 +320,19 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           .map{ req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
           .getOrElseF(Status.NotFound.apply())
           .map{ r => CoreAPIServer.setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
+        import apiImpl.services.*
+        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
+        val fileBaseName = omrFile.getName.reverse.dropWhile(_ != '.').drop(1).reverse
+        val jsonFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".json")
+
+        org.openmole.core.omr.OMR.writeJSON(omrFile, jsonFile)
+        def deleteJSONFile = IO[Unit] { jsonFile.delete() }
+
+        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(jsonFile.toPath), Some(req))
+          .map{ req => req.withBodyStream(req.body.onFinalize(deleteJSONFile)) }
+          .getOrElseF(Status.NotFound.apply())
+          .map{ r => CoreAPIServer.setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
 
 
 

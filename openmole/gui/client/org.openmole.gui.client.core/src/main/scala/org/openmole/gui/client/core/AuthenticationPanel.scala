@@ -54,7 +54,7 @@ object AuthenticationPanel:
               TestingAuthentication(as, EventStream.fromFuture(as.test, true).toSignal(Seq()))
             }
           }.recover { e =>
-            toService(panels.notifications).notify(NotificationLevel.Error,  s"Error while getting authentication", org.openmole.gui.client.ext.Utils.errorTextArea(ErrorData.toStackTrace(e)))
+            toService(panels.notifications).notify(NotificationLevel.Error,  s"Error while getting authentication", org.openmole.gui.client.ext.ClientUtil.errorTextArea(ErrorData.toStackTrace(e)))
             Seq()
           }
 

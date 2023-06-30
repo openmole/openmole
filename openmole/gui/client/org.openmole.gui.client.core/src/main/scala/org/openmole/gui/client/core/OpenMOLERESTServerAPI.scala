@@ -88,7 +88,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
     for
       (file, destination) <- files
     do
-      formData.append(Utils.toURI(destination.path.value), file)
+      formData.append(Util.toURI(destination.path.value), file)
 
     val xhr = new XMLHttpRequest
 
@@ -157,7 +157,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
         p.failure(new IOException(s"Download of file ${safePath} timed out"))
 
 
-      xhr.open("GET", downloadFile(Utils.toURI(safePath.path.value.map { Encoding.encode }), hash = hash, fileType = safePath.context), true)
+      xhr.open("GET", downloadFile(safePath, hash = hash), true)
       xhr.send()
 
       p.future

@@ -9,7 +9,7 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext
-import org.openmole.gui.client.ext.Utils
+import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 
 class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState):
@@ -23,7 +23,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       closeToolBox
       org.scalajs.dom.window.open(
-        url = downloadFile(Utils.toURI(sp.path.value), sp.context),
+        url = downloadFile(sp),
         target = "_blank"
       )
 
@@ -31,7 +31,15 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       closeToolBox
       org.scalajs.dom.window.open(
-        url = convertOMR(Utils.toURI(sp.path.value), sp.context),
+        url = convertOMRToCSV(sp),
+        target = "_blank"
+      )
+
+  def omrToJSON(using panels: Panels) =
+    withSafePath: sp ⇒
+      closeToolBox
+      org.scalajs.dom.window.open(
+        url = convertOMRToJSON(sp),
         target = "_blank"
       )
 
@@ -190,6 +198,16 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
             iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
             iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+            FileContentType(FileExtension(initSafePath.name)) match
+              case FileContentType.OpenMOLEResult ⇒
+                iconAction(glyphItemize(glyph_download), "csv", () ⇒ omrToCSV)
+              case _ ⇒ emptyMod
+            ,
+            FileContentType(FileExtension(initSafePath.name)) match
+              case FileContentType.OpenMOLEResult ⇒
+                iconAction(glyphItemize(glyph_download), "json", () ⇒ omrToJSON)
+              case _ ⇒ emptyMod
+            ,
             iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
               initSafePath.name
             } ?", () ⇒ trash)))),
@@ -204,11 +222,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                 iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
               case _ ⇒ emptyMod
             ,
-            FileContentType(FileExtension(initSafePath.name)) match
-              case FileContentType.OpenMOLEResult ⇒
-                iconAction(glyphItemize(OMTags.glyph_file), "csv", () ⇒ omrToCSV)
-              case _ ⇒ emptyMod
-            ,
+
 //                FileExtension(initSafePath.name) match {
 //                  //FIXME discover extensions from wizard plugins
 //                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒

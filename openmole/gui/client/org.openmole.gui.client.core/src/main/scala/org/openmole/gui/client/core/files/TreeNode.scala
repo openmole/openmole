@@ -20,7 +20,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.shared.data.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.ext.Utils.*
+import org.openmole.gui.client.ext.ClientUtil.*
 
 import scala.concurrent.Future
 

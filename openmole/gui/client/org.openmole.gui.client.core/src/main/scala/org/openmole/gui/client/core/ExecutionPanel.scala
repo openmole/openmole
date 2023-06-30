@@ -14,7 +14,7 @@ import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.Laminar
 import org.openmole.gui.client.core.Panels.ExpandablePanel
-import org.openmole.gui.client.ext.Utils
+import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
 
@@ -227,7 +227,7 @@ class ExecutionPanel:
   def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
-      contextBlock("Start time", Utils.longToDate(details.startDate)),
+      contextBlock("Start time", ClientUtil.longToDate(details.startDate)),
       //contextBlock("Method", "???"),
       durationBlock(details.duration, details.executionTime),
       statusBlock("Running", details.running.toString),
@@ -386,7 +386,7 @@ class ExecutionPanel:
                       a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                       div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
                     ).expandOnclick(
-                      div(height := "200", overflow.scroll, Utils.errorTextArea(stackTrace(e.error.stack)))
+                      div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.error.stack)))
                     )
                   }
                 case None => Seq()

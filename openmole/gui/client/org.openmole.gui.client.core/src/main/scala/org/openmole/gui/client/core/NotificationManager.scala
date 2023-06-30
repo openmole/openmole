@@ -132,7 +132,7 @@ class NotificationManager:
                 case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${e.date}""")
                 case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
 
-            NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.Utils.errorTextArea(body), randomId, serverId = Some(NotificationEvent.id(event)))
+            NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.ClientUtil.errorTextArea(body), randomId, serverId = Some(NotificationEvent.id(event)))
 
     newEvents ++ s
   }
