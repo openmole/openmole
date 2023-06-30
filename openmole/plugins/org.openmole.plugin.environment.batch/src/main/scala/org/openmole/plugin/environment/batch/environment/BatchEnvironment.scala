@@ -252,8 +252,7 @@ object BatchEnvironment {
     SerializedJob(inputPath, runtime, serializedStorage)
   }
 
-
-
+  
   def replicateTheRuntime(
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
@@ -275,7 +274,7 @@ object BatchEnvironment {
     serializationPlugin: Iterable[File],
     replicate: (File, TransferOptions) => ReplicatedFile,
     environment: BatchEnvironment
-  )(implicit services: BatchEnvironment.Services): ExecutionMessage = {
+  )(implicit services: BatchEnvironment.Services): ExecutionMessage =
 
     val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
     val files = shuffled(serializationFile)(services.randomProvider()).map { replicate(_, TransferOptions()) }
@@ -286,47 +285,43 @@ object BatchEnvironment {
       jobFile,
       environment.runtimeSettings
     )
-  }
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
     val environmentJobs = environment.jobs
     environmentJobs.forall(_.state == ExecutionState.KILLED)
   }
 
-  def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) = {
+  def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) =
     ExecutionJobRegistry.finished(environment.registry, job, environment)
     environment.finishedJob(job)
-  }
 
   def setExecutionJobSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState)(implicit eventDispatcher: EventDispatcher) = job.synchronized {
     import ExecutionState._
 
-    if (job.state != KILLED && newState != job.state) {
-      newState match {
-        case DONE ⇒ environment.state._done.incrementAndGet()
+    if job.state != KILLED && newState != job.state
+    then
+      newState match
+        case DONE if job.state != DONE ⇒ environment.state._done.incrementAndGet()
         case FAILED ⇒
-          if (job.state == DONE) environment.state._done.decrementAndGet()
+          if job.state == DONE then environment.state._done.decrementAndGet()
           environment.state._failed.incrementAndGet()
         case _ ⇒
-      }
 
       eventDispatcher.trigger(environment, Environment.JobStateChanged(job.id, job, newState, job.state))
       job._state = newState
-    }
   }
 
-  def submit(env: BatchEnvironment, job: JobGroup)(implicit services: BatchEnvironment.Services)  = {
+  def submit(env: BatchEnvironment, job: JobGroup)(implicit services: BatchEnvironment.Services) =
     import services.*
     val id = env.state.jobId.getAndIncrement()
     val bej = BatchExecutionJob(id, job, env.jobStore)
     ExecutionJobRegistry.register(env.registry, bej)
     JobManager ! Manage(bej, env)
     id
-  }
 
   def environmentPlugins(env: BatchEnvironment) = PluginManager.pluginsForClass(env.getClass).toSeq.distinctBy(_.getCanonicalPath)
 
-  def scriptPlugins(services: Services) = {
+  def scriptPlugins(services: Services) =
     def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
       import services._
       val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.repl.classDirectory, c.repl.classLoader)
@@ -334,7 +329,6 @@ object BatchEnvironment {
     }
 
     closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
-  }
 
 
   object ExecutionJobRegistry {

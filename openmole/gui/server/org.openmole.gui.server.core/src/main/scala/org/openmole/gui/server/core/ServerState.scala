@@ -177,15 +177,15 @@ class ServerState:
     getRunningEnvironments(id).map {
       case (envId, e) ⇒ {
         EnvironmentState(
-          envId,
-          e.environment.simpleName,
-          e.environment.running,
-          e.environment.done,
-          e.environment.submitted,
-          e.environment.failed,
-          e.networkActivity,
-          e.executionActivity,
-          environmentErrors(envId).length
+          envId = envId,
+          taskName = e.environment.simpleName,
+          running = e.environment.running,
+          done = e.environment.done,
+          submitted = e.environment.submitted,
+          failed = e.environment.failed,
+          networkActivity = e.networkActivity,
+          executionActivity = e.executionActivity,
+          numberOfErrors = environmentErrors(envId).length
         )
       }
     }

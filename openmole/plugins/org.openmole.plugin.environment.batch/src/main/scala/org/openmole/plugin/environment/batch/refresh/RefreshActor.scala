@@ -23,18 +23,18 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Bat
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object RefreshActor {
+object RefreshActor:
 
-  def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) = {
+  def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) =
     import services._
 
     val Refresh(job, environment, bj, delay, updateErrorsInARow) = refresh
 
-    JobManager.killOr(job, Kill(job, environment, Some(bj))) { () ⇒
-      try {
+    JobManager.killOr(job, Kill(job, environment, Some(bj))): () ⇒
+      try
         val oldState = job.state
         BatchEnvironment.setExecutionJobSate(environment, job, bj.updateState())
-        job.state match {
+        job.state match
           case DONE ⇒ JobManager ! GetResult(job, environment, bj.resultPath(), bj)
           case FAILED ⇒
             val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
@@ -49,20 +49,15 @@ object RefreshActor {
             JobManager ! Delay(Refresh(job, environment, bj, newDelay, 0), newDelay)
           case KILLED ⇒
           case _      ⇒ throw new InternalProcessingError(s"Job ${job} is in state ${job.state} while being refreshed")
-        }
-      }
-      catch {
+
+      catch
         case e: Throwable ⇒
-          if (updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)) {
+          if updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)
+          then
             JobManager ! Error(job, environment, e, BatchJobControl.tryStdOutErr(bj).toOption, None)
             JobManager ! Kill(job, environment, Some(bj))
-          }
-          else {
+          else
             Logger.fine(s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
             JobManager ! Delay(Refresh(job, environment, bj, delay, updateErrorsInARow + 1), delay)
-          }
-      }
-    }
-  }
-}
+
 
