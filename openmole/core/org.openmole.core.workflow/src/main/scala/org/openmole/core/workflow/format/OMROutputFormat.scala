@@ -41,7 +41,7 @@ object OMROutputFormat:
           val (methodFile, directory) =
             file.from(context) match
               case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
-              case f => (f / "index.omr", f)
+              case f => (f.getParentFile / s"${f.getName}.omr", f.getParentFile)
 
           def methodFormat(method: MD, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
             import executionContext.timeService
