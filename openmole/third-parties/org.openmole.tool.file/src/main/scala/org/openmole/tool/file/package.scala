@@ -174,26 +174,28 @@ package file {
 
       def isBrokenSymbolicLink = Files.notExists(Files.readSymbolicLink(file))
 
-      def directoryContainsNoFileRecursive: Boolean = {
-        val toProceed = new ListBuffer[File]
-        toProceed += file
+      def directoryContainsNoFileRecursive: Boolean =
+        import scala.util.boundary
+        boundary:
+          val toProceed = new ListBuffer[File]
+          toProceed += file
 
-        while (!toProceed.isEmpty) {
-          val f = toProceed.remove(0)
+          while toProceed.nonEmpty
+          do
+            val f = toProceed.remove(0)
+            // wrap with try catch in case CARE Archive generates d--------- directories
+            try
+              f.withDirectoryStream(): s ⇒
+                for
+                  f ← s.asScala
+                do
+                  if Files.isRegularFile(f)
+                  then boundary.break(false)
+                  else if (Files.isDirectory(f)) toProceed += f
+            catch
+              case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
 
-          // wrap with try catch in case CARE Archive generates d--------- directories
-          try f.withDirectoryStream() { s ⇒
-            for (f ← s.asScala) {
-              if (Files.isRegularFile(f)) return false
-              else if (Files.isDirectory(f)) toProceed += f
-            }
-          }
-          catch {
-            case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
-          }
-        }
-        true
-      }
+          true
 
       import java.io.IOException
       import java.nio.file.FileVisitResult
@@ -202,6 +204,8 @@ package file {
       import java.nio.file.attribute.BasicFileAttributes
 
       //////// general operations ///////
+      def baseName = file.getName.takeWhile(_ != '.')
+
       def size: Long = {
         def sizeOfDirectory(directory: File) = {
           val size = new AtomicLong()

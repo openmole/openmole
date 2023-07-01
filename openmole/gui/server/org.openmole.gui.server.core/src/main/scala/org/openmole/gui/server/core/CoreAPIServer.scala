@@ -275,42 +275,75 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         val safePath = CoreAPIServer.getSafePath(req)
         val f = safePathToFile(safePath)
 
+        def addHashHeader(r: org.http4s.Response[IO], f: File) =
+          if hash
+          then r.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+          else r
+
+        def directoryDownload(f: File) =
+          import org.openmole.tool.stream.*
+          import org.openmole.tool.archive.*
+
+          val st =
+            fs2.io.readOutputStream[IO](64 * 1024): out =>
+              IO.blocking[Unit]:
+                val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+                try tos.archive(f, includeTopDirectoryName = true)
+                finally tos.close()
+
+          Ok(st).map: r =>
+            val r2 =
+              r.withHeaders(
+                //org.http4s.headers.`Content-Length`(test.length()),
+                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
+              )
+
+            addHashHeader(r2, f)
+
+        def fileDownload(f: File) =
+          f.withLock: _ ⇒
+            StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
+              val r2 = CoreAPIServer.setFileHeaders(f, r)
+              addHashHeader(r2, f)
+
+        def omrDownload(f: File) =
+          import org.openmole.tool.stream.*
+          import org.openmole.tool.archive.*
+          import org.openmole.core.omr.*
+
+          val dataFiles = OMR.dataFiles(f)
+
+          val st =
+            fs2.io.readOutputStream[IO](64 * 1024): out =>
+              IO.blocking[Unit]:
+                val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+                try
+                  tos.addFile(f, f.getName)
+                  dataFiles.foreach((n, f) => tos.addFile(f, n))
+                finally tos.close()
+
+          Ok(st).map: r =>
+            val r2 =
+              r.withHeaders(
+                //org.http4s.headers.`Content-Length`(test.length()),
+                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.baseName}.tgz"))
+              )
+            addHashHeader(r2, f)
+
         if !f.exists()
         then Status.NotFound.apply(s"The file $path does not exist.")
         else
           if f.isDirectory
-          then
-            import org.openmole.tool.stream.*
-            import org.openmole.tool.archive.*
-
-            val st =
-              fs2.io.readOutputStream[IO](64 * 1024): out =>
-                IO.blocking[Unit]:
-                  val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-                  try tos.archive(f, includeTopDirectoryName = true)
-                  finally tos.close()
-
-            Ok(st).map: r =>
-              val r2 =
-                r.withHeaders(
-                  //org.http4s.headers.`Content-Length`(test.length()),
-                  org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
-                )
-
-              if hash
-              then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
-              else r2
+          then directoryDownload(f)
           else
-            f.withLock: _ ⇒
-              StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
-                val r2 = CoreAPIServer.setFileHeaders(f, r)
-                if hash
-                then r2.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
-                else r2
+            import org.openmole.core.omr.*
+            if !OMR.isOMR(f)
+            then fileDownload(f)
+            else omrDownload(f)
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        val fileBaseName = omrFile.getName.reverse.dropWhile(_ != '.').drop(1).reverse
+        val fileBaseName = omrFile.baseName
         val csvFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".csv")
 
         org.openmole.core.omr.OMR.writeCSV(omrFile, csvFile)
@@ -323,7 +356,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        val fileBaseName = omrFile.getName.reverse.dropWhile(_ != '.').drop(1).reverse
+        val fileBaseName = omrFile.baseName
         val jsonFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".json")
 
         org.openmole.core.omr.OMR.writeJSON(omrFile, jsonFile)
