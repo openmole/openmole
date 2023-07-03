@@ -30,7 +30,7 @@ class Connection {
     `type` := "password",
     width := "130px",
     marginBottom := "15",
-    name := "password",
+    nameAttr := "password",
     onMountFocus
   )
 

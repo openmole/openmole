@@ -62,7 +62,7 @@ object CoreUtils {
   def removePlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.removePlugin(safePath)
 
   def addJSScript(relativeJSPath: String) = 
-    org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).ref)
+    org.scalajs.dom.document.body.appendChild(scriptTag(src := relativeJSPath).ref)
 
   def approximatedYearMonthDay(duration: Long): String = {
     val MINUTE = 60000L

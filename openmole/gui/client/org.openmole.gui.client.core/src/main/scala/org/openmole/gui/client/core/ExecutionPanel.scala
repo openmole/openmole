@@ -309,7 +309,7 @@ class ExecutionPanel:
 
 
     val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000, emitInitial = false).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
+    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
 
     def jobs(envStates: Seq[EnvironmentState]) =

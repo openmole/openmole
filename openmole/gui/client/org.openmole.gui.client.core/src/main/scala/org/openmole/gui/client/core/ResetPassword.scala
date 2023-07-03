@@ -31,7 +31,7 @@ class ResetPassword {
     `type` := "password",
     width := "130px",
     marginBottom := "15",
-    name := "password",
+    //name := "password",
     onMountFocus
   )
 
@@ -40,7 +40,7 @@ class ResetPassword {
       placeholder := "Password again",
       `type` := "password",
       width := "130px",
-      name := "passwordagain",
+      nameAttr := "passwordagain",
     )
 
   lazy val resetButton = button("Set password", btn_primary, marginTop := "15", `type` := "submit")

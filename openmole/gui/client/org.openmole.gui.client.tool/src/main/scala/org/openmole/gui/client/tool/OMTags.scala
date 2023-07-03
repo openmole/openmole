@@ -4,7 +4,7 @@ import org.scalajs.dom.raw._
 import scaladget.bootstrapnative.bsn._
 import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
-import com.raquo.domtypes.generic.codecs.BooleanAsAttrPresenceCodec
+import com.raquo.laminar.codecs.*
 
 /*
  * Copyright (C) 02/09/15 // mathieu.leclaire@openmole.org

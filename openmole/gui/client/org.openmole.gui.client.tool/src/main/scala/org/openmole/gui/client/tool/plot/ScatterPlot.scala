@@ -1,5 +1,6 @@
 package org.openmole.gui.client.tool.plot
 
+import org.openmole.plotlyjs
 import org.openmole.plotlyjs.*
 import org.openmole.plotlyjs.all.*
 import org.openmole.plotlyjs.PlotlyImplicits.*
@@ -25,9 +26,9 @@ object ScatterPlot {
       .y(yContents.toJSArray)
       .marker(marker
         .size(12)
-        .color(all.color.rgba(60, 90, 140, 0.5))
+        .color(plotlyjs.all.color.rgba(60, 90, 140, 0.5))
         .symbol(circle)
-        .line(line.color(all.color.rgb(60, 90, 140)).width(2))
+        .line(line.color(plotlyjs.all.color.rgb(60, 90, 140)).width(2))
       )
 
     Plotly.newPlot(plotDiv.ref, js.Array(data), baseLayout, Plot.baseConfig)

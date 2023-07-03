@@ -14,7 +14,6 @@ import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
 import com.raquo.laminar.api.L.*
-import com.raquo.laminar.builders.DomEventStreamPropBuilder
 import com.raquo.laminar.nodes.ReactiveElement
 import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.data
