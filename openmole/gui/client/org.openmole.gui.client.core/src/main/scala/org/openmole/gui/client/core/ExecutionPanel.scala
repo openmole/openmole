@@ -299,7 +299,7 @@ class ExecutionPanel:
 
     def queryState =
       queryingState = true
-      try for executionData <- api.executionState(200) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
+      try for executionData <- api.executionState(1000) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
