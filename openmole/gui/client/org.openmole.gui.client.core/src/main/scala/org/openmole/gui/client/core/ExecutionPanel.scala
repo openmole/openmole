@@ -11,7 +11,8 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.files.{OMSContent, TabContent}
 import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
-import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.L.{*, given}
+import com.raquo.laminar.api.features.unitArrows
 import com.raquo.laminar.api.Laminar
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.ClientUtil
@@ -153,9 +154,8 @@ class ExecutionPanel:
       cursor.pointer
     )
 
-  def backgroundOpacityCls = cls.toggle("silentBlock") <-- showExpander.signal.map {
-    _ != None
-  }
+  def backgroundOpacityCls =
+    cls.toggle("silentBlock") <-- showExpander.signal.map { _ != None }
 
   def backgroundOpacityCls(expand: Expand) =
     cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
@@ -165,18 +165,18 @@ class ExecutionPanel:
       div(cls := "statusBlock", backgroundOpacityCls(expand),
         div(title, cls := "info"),
         div(child <--
-          showExpander.signal.map {
+          showExpander.signal.map:
             case Some(_) => messageWhenOpen
             case None => messageWhenClosed
-          }, cls := "infoContentLink"
+          ,
+          cls := "infoContentLink"
         )
       ),
-      onClick --> { _ =>
-        showExpander.update {
+      onClick -->
+        showExpander.update:
           case Some(e) if e == expand => None
           case _ => Some(expand)
-        }
-      },
+      ,
       cursor.pointer
     )
 
@@ -192,12 +192,10 @@ class ExecutionPanel:
         ),
         state match
           case ExecutionDetails.State.failed(_) =>
-            onClick --> { _ =>
-              showExpander.update {
+            onClick -->
+              showExpander.update:
                 case Some(Expand.ErrorLog) => None
                 case _ => Some(Expand.ErrorLog)
-              }
-            }
           case _ => emptyMod
             ,
           state match
@@ -207,15 +205,14 @@ class ExecutionPanel:
     )
 
   def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
-    child <-- showControls.signal.map { c =>
+    child <-- showControls.signal.map: c =>
       if c && state != ExecutionDetails.State.preparing
       then
         div(display.flex, flexDirection.column, alignItems.center,
-          button("Stop", onClick --> { _ => cancel(id) }, btn_danger, cls := "controlButton"),
-          button("Clean", onClick --> { _ => remove(id) }, btn_secondary, cls := "controlButton"),
+          button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
+          button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
         )
       else div()
-    }
   )
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${
@@ -261,12 +258,11 @@ class ExecutionPanel:
       div("", cls := "simulationID", backgroundColor := statusColor(executionInfo.state)),
       div(executionInfo.path.nameWithoutExtension),
       cursor.pointer,
-      onClick --> { _ =>
+      onClick -->
         currentOpenSimulation.update:
           case None => Some(executionId)
           case Some(x: ExecutionId) if x != executionId => Some(executionId)
           case _ => None
-      }
     )
 
   lazy val autoRemoveFailed = Component.Switch("remove failed", true, "autoCleanExecSwitch")
@@ -282,11 +278,11 @@ class ExecutionPanel:
               .map { (k, v) => k -> v.toSeq.sortBy(x => x._2.startDate) }
               .map { (_, t) => t.map(_._1) }
 
-          idsForPath.foldLeft((Seq[ExecutionId](), Seq[ExecutionId]())) { (s, execIds) =>
+          idsForPath.foldLeft((Seq[ExecutionId](), Seq[ExecutionId]())): (s, execIds) =>
             val (failedOrCanceled, otherStates) = execIds.partition(i => State.isFailedOrCanceled(execs(i).state))
             val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1), failedOrCanceled.takeRight(1))
             (s._1 ++ otherStates ++ toBeKept, s._2 ++ toBeCleaned)
-          }
+
         else (execs.map(_._1).toSeq, Seq())
 
       (ids.map(id => id -> execs(id)).toMap, cleanIds)
@@ -333,14 +329,13 @@ class ExecutionPanel:
 
 
     def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
-      child <-- showEvironmentControls.signal.map { c =>
+      child <-- showEvironmentControls.signal.map: c =>
         if c
         then
           div(display.flex, flexDirection.column, alignItems.center,
             button("Clear", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
           )
         else div()
-      }
     )
 
 
@@ -349,10 +344,9 @@ class ExecutionPanel:
       val openEnvironmentErrors: Var[Boolean] = Var(false)
 
       def cleanEnvironmentErrors(id: EnvironmentId) =
-        api.clearEnvironmentError(id).andThen { _ =>
+        api.clearEnvironmentError(id).andThen: _ =>
           showExpander.set(None)
           showExpander.set(Some(Expand.Computing))
-        }
 
       div(columnFlex,
         div(rowFlex, justifyContent.center,
@@ -365,19 +359,19 @@ class ExecutionPanel:
           contextBlock("Finished", e.done.toString, true),
           contextBlock("Failed", e.failed.toString, true),
           contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
-            onClick --> { _ => openEnvironmentErrors.update(!_) }, cursor.pointer),
-          div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showEvironmentControls.update(!_) }),
+            onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
+          div(cls := "bi-three-dots-vertical execControls", onClick --> showEvironmentControls.update(!_)),
           environmentControls(e.envId, cleanEnvironmentErrors),
         ),
-        child <-- openEnvironmentErrors.signal.map { opened =>
+        child <-- openEnvironmentErrors.signal.map: opened =>
           if opened
           then
             div(width := "100%", height := "200px",
               overflow.scroll,
-              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map {
+              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map:
                 case Some(ee) =>
                   val errors = ee.filter(_.error.level == ErrorStateLevel.Error) ++ ee.filter(_.error.level != ErrorStateLevel.Error)
-                  errors.zipWithIndex.map { case (e, i) =>
+                  errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
                       cls := "docEntry",
                       margin := "0 4 0 3",
@@ -388,37 +382,33 @@ class ExecutionPanel:
                     ).expandOnclick(
                       div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.error.stack)))
                     )
-                  }
                 case None => Seq()
-              }
             )
           else div()
-        }
       )
 
     def expander(details: ExecutionDetails) =
       div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
-        child <-- showExpander.signal.map {
+        child <-- showExpander.signal.map:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(details.envStates)
           case None => div()
-        }
       )
 
     div(
       columnFlex, width := "100%", marginTop := "20",
-      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
-      (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable --> Observer { _ =>
-        if !queryingState
-        then
-          queryState.foreach { allDetails =>
-            val (d, toClean) = filterExecutions(allDetails)
-            toClean.foreach(api.removeExecution)
-            details.set(d)
-          }
-      },
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> panels.closeExpandable),
+      (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable -->
+        Observer: _ =>
+          if !queryingState
+          then
+            queryState.foreach: allDetails =>
+              val (d, toClean) = filterExecutions(allDetails)
+              toClean.foreach(api.removeExecution)
+              details.set(d)
+      ,
       children <--
         (details.signal combineWith currentOpenSimulation.signal).map: (details, id) =>
           Seq(
@@ -427,7 +417,7 @@ class ExecutionPanel:
             ),
             autoRemoveFailed.element,
             div(
-              id.map { idValue =>
+              id.map: idValue =>
                 details.get(idValue) match
                   case Some(st) =>
                     def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
@@ -435,7 +425,6 @@ class ExecutionPanel:
 
                     div(buildExecution(idValue, st, cancel, remove))
                   case None => div()
-              }
             )
           )
         ,
