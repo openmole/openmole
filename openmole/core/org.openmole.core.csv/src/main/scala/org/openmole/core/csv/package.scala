@@ -1,4 +1,4 @@
-package org.openmole.core
+package org.openmole.core.csv
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.context.ValType
@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package object csv {
+object CSV:
   import java.io.{ FileReader, PrintStream }
   import java.math.{ BigDecimal, BigInteger }
 
@@ -32,6 +32,8 @@ package object csv {
   import org.openmole.tool.stream._
 
   import scala.annotation.tailrec
+
+  def isCSV(f: File) = f.getName.endsWith(".csv")
 
   def header(prototypes: Seq[Val[_]], values: Seq[Any], arrayOnRow: Boolean) =
     if (!arrayOnRow) prototypes.map(_.name).mkString(",")
@@ -120,9 +122,10 @@ package object csv {
 
       output.appendLine(margin + csvLine(arrayValues(v)))
 
-    if (unrollArray) unroll(values)
-    else if (arrayOnRow) onRow(values)
-    else output.appendLine(margin + csvLine(values))
+    if unrollArray then unroll(values)
+    else
+      if arrayOnRow then onRow(values)
+      else output.appendLine(margin + csvLine(values))
 
   /**
    * Builds the plan.
@@ -131,7 +134,7 @@ package object csv {
   def csvToVariables(
     file:      File,
     columns:   Seq[(String, Val[_])],
-    separator: Option[Char]          = None): Iterator[Iterable[Variable[_]]] = {
+    separator: Option[Char]          = None): Iterator[Iterable[Variable[_]]] =
     val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
     val headers = reader.readNext.toArray
 
@@ -142,21 +145,16 @@ package object csv {
         else i
     }
 
-    Iterator.continually(reader.readNext).takeWhile(_ != null).map { line ⇒
-      (columns zip columnsIndexes).map {
-        case ((name, v), i) ⇒ Variable.unsecure(v, matchConverter(v, line(i), name))
-      }
-    }
-  }
+    Iterator.continually(reader.readNext).takeWhile(_ != null).map: line ⇒
+      (columns zip columnsIndexes).map { case ((name, v), i) ⇒ Variable.unsecure(v, matchConverter(v, line(i), name)) }
 
-  def matchConverter(v: Val[_], s: String, name: String): Any = {
-    def matchArray[T: ClassTag](s: String, convert: String ⇒ T): Array[T] = {
+  def matchConverter(v: Val[_], s: String, name: String): Any =
+    def matchArray[T: ClassTag](s: String, convert: String ⇒ T): Array[T] =
       val trimed = s.trim
       if (!trimed.startsWith("[") || !trimed.endsWith("]")) throw new UserBadDataError(s"Array in CSV files should have the following format [.., .., ..], found $s")
       s.drop(1).dropRight(1).split(",").map { s ⇒ convert(s.trim) }
-    }
 
-    v match {
+    v match
       case Val.caseDouble(v)            ⇒ s.toDouble
       case Val.caseString(v)            ⇒ s
       case Val.caseBoolean(v)           ⇒ s.toBoolean
@@ -173,7 +171,4 @@ package object csv {
       case Val.caseArrayArrayString(v)  ⇒ matchArray(s, matchArray(_, identity))
       case Val.caseArrayArrayBoolean(v) ⇒ matchArray(s, matchArray(_, _.toBoolean))
       case _                            ⇒ throw new UserBadDataError(s"Unsupported type in CSV sampling prototype $v mapped to column $name")
-    }
-  }
 
-}

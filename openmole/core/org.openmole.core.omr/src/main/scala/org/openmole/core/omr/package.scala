@@ -168,12 +168,12 @@ object OMR:
     unrollArray: Boolean = true,
     arrayOnRow: Boolean = false,
     gzip: Boolean = false) =
-    import org.openmole.core.csv
+    import org.openmole.core.csv.*
     val variable = toVariables(file)
 
     if variable.size == 1
     then
-      csv.writeVariablesToCSV(
+      CSV.writeVariablesToCSV(
         destination,
         variable.head._2,
         unrollArray = unrollArray,
@@ -185,7 +185,7 @@ object OMR:
         ((section, v), i) <- variable.zipWithIndex
       do
         destination.append(s"#section: ${section.name.getOrElse(i.toString)}")
-        csv.writeVariablesToCSV(
+        CSV.writeVariablesToCSV(
           destination,
           v,
           unrollArray = unrollArray,

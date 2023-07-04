@@ -283,43 +283,52 @@ object Genome {
       Variable.unsecure(b.v.toArray, array)
   }
 
-  object ToSuggestion {
+  object ToSuggestion:
 
-    def loadFromFile(f: File, genome: Genome) = {
-      import org.openmole.core.csv.csvToVariables
+    def loadFromFile(f: File, genome: Genome) =
+      import org.openmole.core.csv.CSV
+      import org.openmole.core.omr.OMR
       import org.openmole.core.dsl._
 
       def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
 
-      val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
-      csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
-    }
+      if CSV.isCSV(f)
+      then
+        val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
+        CSV.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
+      else
+        if OMR.isOMR(f)
+        then
+          val ctx = Context(OMR.toVariables(f).head._2: _*)
+          val vals = genome.map(g => GenomeBound.toVal(g))
+          val values = vals.map(v => ctx.variable(v.array).getOrElse(throw new UserBadDataError(s"Genome component $v not found in omr file $f")))
+          def assigments =
+            for
+              line <- values.map(_.value).transpose
+            yield
+              (vals zip line).map((v, va) => toAssignment(Variable.unsecureUntyped(v, va)))
+          assigments
+        else throw new UserBadDataError(s"Unsupported file type for suggestion $f")
 
-    implicit def fromFile: ToSuggestion[File] =
-      new ToSuggestion[File] {
+    given ToSuggestion[File] =
+      new ToSuggestion[File]:
         override def apply(t: File): Suggestion = genome ⇒ loadFromFile(t, genome)
-      }
 
-    implicit def fromString: ToSuggestion[String] =
-      new ToSuggestion[String] {
-        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(new java.io.File(t), genome)
-      }
+    given ToSuggestion[String] =
+      new ToSuggestion[String]:
+        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(File(t), genome)
 
     implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
-      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]] {
+      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]]:
         override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t.map(_.map(ValueAssignment.untyped))
-      }
-  }
 
-  sealed trait ToSuggestion[T] {
+  sealed trait ToSuggestion[T]:
     def apply(t: T): Suggestion
-  }
 
   implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
 
-  object Suggestion {
+  object Suggestion:
     def empty = (genome: Genome) ⇒ Seq()
-  }
 
   type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment.Untyped]]
 

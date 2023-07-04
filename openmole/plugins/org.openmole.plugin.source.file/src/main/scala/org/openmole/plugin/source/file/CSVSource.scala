@@ -56,11 +56,11 @@ case class CSVSource(
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    import org.openmole.core.csv
+    import org.openmole.core.csv.*
 
     val file = new File(path.from(context))
     val transposed =
-      csv.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
+      CSV.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
 
     def variables =
       for {

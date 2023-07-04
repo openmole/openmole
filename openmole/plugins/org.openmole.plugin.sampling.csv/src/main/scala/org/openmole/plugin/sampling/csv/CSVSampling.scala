@@ -68,9 +68,9 @@ case class CSVSampling(
   
   def apply() = FromContext { p ⇒
     import p._
-    import org.openmole.core.csv
+    import org.openmole.core.csv.*
 
-    csv.csvToVariables(
+    CSV.csvToVariables(
       file.from(context),
       columns.map(_.toTuple.swap),
       separator)
