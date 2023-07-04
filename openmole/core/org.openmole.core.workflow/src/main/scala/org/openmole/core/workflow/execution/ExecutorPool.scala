@@ -18,23 +18,21 @@
 package org.openmole.core.workflow.execution
 
 import java.util.UUID
-
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.tool.collection._
+import org.openmole.tool.collection.*
 
+import java.util.concurrent.Semaphore
 import scala.collection.mutable
 import scala.ref.WeakReference
 
-object ExecutorPool {
+object ExecutorPool:
 
-  private def createExecutor(environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) = {
+  private def createExecutor(environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) =
     val executor = new LocalExecutor(environment)
     val t = threadProvider.newThread(executor, Some("executor" + UUID.randomUUID().toString))
     t.start
     (executor, t)
-  }
 
-}
 
 /**
  * A pool of [[LocalExecutor]] threads
@@ -43,16 +41,14 @@ object ExecutorPool {
  * @param environment
  * @param threadProvider
  */
-class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider) {
+class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider):
+  private val jobs = new java.util.ArrayDeque[LocalExecutionJob]()
+  private val semaphore = new Semaphore(0)
 
-  def priority(localExecutionJob: LocalExecutionJob) = 1
-  private val jobs = PriorityQueue[LocalExecutionJob]()
-
-  private val executorMap = {
+  private val executorMap =
     val map = mutable.HashMap[LocalExecutor, Thread]()
     (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
-  }
 
   def runningJobs = executorMap.map(_._1).flatMap(_.runningJob)
 
@@ -60,19 +56,22 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
 
-  private[execution] def takeNextJob: LocalExecutionJob = jobs.dequeue()
+  private[execution] def takeNextJob: LocalExecutionJob =
+    semaphore.acquire()
+    jobs.synchronized(jobs.pop())
 
-  def enqueue(job: LocalExecutionJob) = jobs.enqueue(job, priority(job))
+  def enqueue(job: LocalExecutionJob) =
+    jobs.synchronized(jobs.add(job))
+    semaphore.release()
 
-  def waiting: Int = jobs.size
+  def waiting: Int = jobs.synchronized(jobs.size)
 
   def running: Int =
-    executorMap.synchronized {
+    executorMap.synchronized:
       executorMap.toList.count { case (e, _) ⇒ e.runningJob.isDefined }
-    }
 
-  def stop() = {
-    executorMap.synchronized {
+  def stop() =
+    executorMap.synchronized:
       executorMap.foreach {
         case (exe, thread) ⇒
           exe.stop = true
@@ -81,9 +80,8 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
           if (thread.isAlive) thread.stop()
       }
       executorMap.clear()
-    }
 
-    jobs.clear()
-  }
+    jobs.synchronized(jobs.clear())
+    semaphore.drainPermits()
 
-}
+
