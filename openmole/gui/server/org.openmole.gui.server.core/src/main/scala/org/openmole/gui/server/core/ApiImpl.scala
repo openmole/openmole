@@ -515,8 +515,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       index.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
 
     GUIOMRContent(
-      variables = content,
-      openmoleVersion = index.`openmole-version`,
+      section = content,
+      openMoleVersion = index.`openmole-version`,
       executionId = index.`execution-id`,
       script = script,
       timeStart = utils.formatDate(index.`time-start`),

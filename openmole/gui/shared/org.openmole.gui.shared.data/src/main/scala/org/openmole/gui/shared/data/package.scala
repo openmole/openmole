@@ -452,12 +452,12 @@ object GUIVariable:
 
 
 case class GUIOMRContent(
-   variables: Seq[GUIOMRSectionContent],
-   openmoleVersion: String,
-   executionId: String,
-   script: Option[GUIOMRScript],
-   timeStart: String,
-   timeSave: String)
+  section: Seq[GUIOMRSectionContent],
+  openMoleVersion: String,
+  executionId: String,
+  script: Option[GUIOMRScript],
+  timeStart: String,
+  timeSave: String)
 
 case class GUIOMRImport(`import`: String, content: String)
 case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
