@@ -50,7 +50,7 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
     (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
 
-  def runningJobs = executorMap.map(_._1).flatMap(_.runningJob)
+  def runningJobs = executorMap.keys.flatMap(_.runningJob)
 
   override def finalize() = executorMap.foreach {
     case (exe, thread) ⇒ exe.stop = true; thread.interrupt
