@@ -33,12 +33,12 @@ object AggregationMetaData:
 
 case class AggregationMetaData(output: ValData, aggregated: ValData)
 
-object DirectSamplingMetadata:
-  def method = "direct sampling"
+
 
 type Aggregation = AggregateTask.AggregateVal[_, _]
 
 object Replication:
+  def methodName = MethodMetaData.name(Replication)
 
   object Method:
     given CSVOutputFormatDefault[Method] = CSVOutputFormatDefault(append = true)
@@ -52,7 +52,7 @@ object Replication:
         val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
         ReplicationMetaData(seed = ValData(m.seed), m.sample, aggregation)
 
-      MethodMetaData[Method, ReplicationMetaData](_ ⇒ DirectSamplingMetadata.method, data)
+      MethodMetaData[Method, ReplicationMetaData](_ ⇒ methodName, data)
 
 
   case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
@@ -116,6 +116,8 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
 
 object DirectSampling:
 
+  def methodName = MethodMetaData.name(DirectSampling)
+
   object Method:
     given CSVOutputFormatDefault[Method] = CSVOutputFormatDefault(append = true)
     given OMROutputFormatDefault[Method] = OMROutputFormatDefault(append = true)
@@ -126,7 +128,7 @@ object DirectSampling:
       def data(m: Method) =
         val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
         Metadata(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
-      MethodMetaData(_ ⇒ DirectSamplingMetadata.method, data)
+      MethodMetaData(_ ⇒ methodName, data)
 
     case class Metadata(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData])
 

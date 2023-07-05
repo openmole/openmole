@@ -22,8 +22,8 @@ import org.openmole.plugin.tool.pattern.MapReduce
  */
 
 object SensitivityMorris {
-  def methodName = "morris"
-
+  def methodName = MethodMetaData.name(SensitivityMorris)
+  
   def mu(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("mu", output.name))
   def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))

@@ -21,8 +21,9 @@ object PluginRegistry {
     nameSpaces:         Vector[ExportedNameSpace]      = Vector(),
     nameSpaceTraits:    Vector[ExportedNameSpaceTrait] = Vector(),
     highLight:          Vector[HighLight]              = Vector(),
-    preferenceLocation: Vector[PreferenceLocation[_]]  = Vector()): Unit = {
-    val info = PluginInfo(nameSpaces, nameSpaceTraits, highLight, preferenceLocation, id.getClass.getCanonicalName)
+    preferenceLocation: Vector[PreferenceLocation[_]]  = Vector(),
+    methodNames:        Vector[String]                 = Vector()): Unit = {
+    val info = PluginInfo(nameSpaces, nameSpaceTraits, highLight, preferenceLocation, methodNames, id.getClass.getCanonicalName)
     PluginRegistry.addPlugin(id, info)
   }
 
@@ -37,4 +38,5 @@ case class PluginInfo(
   namespaceTraits:     Vector[ExportedNameSpaceTrait],
   highLights:          Vector[HighLight],
   preferenceLocations: Vector[PreferenceLocation[_]],
+  methodNames:         Vector[String],
   idClassName:         String)

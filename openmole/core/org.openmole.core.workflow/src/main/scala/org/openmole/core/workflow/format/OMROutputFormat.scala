@@ -47,7 +47,7 @@ object OMROutputFormat:
             import executionContext.timeService
 
             def methodJson =
-              methodData.data(method).asJson.mapObject(_.add(methodPluginField, Json.fromString(methodData.plugin(method))))
+              methodData.data(method).asJson.mapObject(_.add(methodField, Json.fromString(methodData.name(method))))
                 //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
             val script =

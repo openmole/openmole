@@ -78,7 +78,6 @@ case class Index(
  `time-save`: Long)
 
 def methodField = "method"
-def methodPluginField = "plugin"
 def omrVersion = "0.2"
 def dataDirectory = ".omr-data"
 
@@ -158,8 +157,7 @@ object OMR:
   def methodName(file: File): String =
     val j = parse(file.content(gz = true)).toTry.get
     j.hcursor.
-      downField(methodField).
-      downField( methodPluginField).as[String].
+      downField(methodField).as[String].
       toTry.get
 
   def writeCSV(
