@@ -107,7 +107,7 @@ object SimExplorer extends JavaLogger {
             implicit val networkService: NetworkService = NetworkService(None)
             implicit val timeService: TimeService = TimeService()
 
-            try {
+            try
               PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
               PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
@@ -123,10 +123,7 @@ object SimExplorer extends JavaLogger {
                 config.debug,
                 config.transferRetry
               )
-            }
-            finally {
-              threadProvider.stop()
-            }
+            finally threadProvider.stop()
           case true ⇒ logger.info("The runtime is working")
         }
 

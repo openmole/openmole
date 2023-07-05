@@ -19,7 +19,7 @@ package org.openmole.runtime
 
 import java.io.File
 import java.io.PrintStream
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{InternalProcessingError, MultipleException}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
@@ -189,9 +189,15 @@ class Runtime {
 
       val endExecutionTime = System.currentTimeMillis
 
-      logger.fine("Results " + saver.results)
+      val results = saver.results
+      logger.fine("Results " + results)
 
-      val contextResults = ContextResults(saver.results)
+      if results.values.forall(_.isFailure)
+      then
+        val failures = results.values.collect { case Failure(e) => e }
+        throw new InternalProcessingError("All mole job executions have failed", MultipleException(failures))
+
+      val contextResults = ContextResults(results)
 
       def uploadArchive = {
         val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
