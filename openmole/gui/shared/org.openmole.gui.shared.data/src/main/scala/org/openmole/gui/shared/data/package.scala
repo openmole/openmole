@@ -134,8 +134,8 @@ case class EnvironmentError(
   errorMessage: String,
   stack: ErrorData,
   date: Long,
-  level: ErrorStateLevel) extends Ordered[EnvironmentError]:
-  def compare(that: EnvironmentError) = date compare that.date
+  dateString: String,
+  level: ErrorStateLevel)
 
 case class NetworkActivity(
   downloadingFiles: Int = 0,
@@ -147,7 +147,7 @@ case class NetworkActivity(
 
 case class ExecutionActivity(executionTime: Long = 0)
 
-case class EnvironmentErrorGroup(error: EnvironmentError, oldestDate: Long, number: Int)
+//case class EnvironmentErrorGroup(error: EnvironmentError, oldestDate: Long, number: Int)
 
 case class ExecutionData(
   id: ExecutionId,

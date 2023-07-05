@@ -52,7 +52,7 @@ trait ServerAPI:
   def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]]
   def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId]
   def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit]
-  def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]]
+  def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
 
   def listPlugins()(using BasePath): Future[Seq[Plugin]]
   def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]]

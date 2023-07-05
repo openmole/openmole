@@ -203,9 +203,23 @@ class ServerState:
             s"""${ex.exception.getMessage}
                |$detail""".stripMargin
 
-          EnvironmentError(environmentId, ex.exception.getMessage, MessageErrorData(completeMessage, Some(ErrorData.toStackTrace(ex.exception))), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
+          EnvironmentError(
+            environmentId,
+            ex.exception.getMessage,
+            MessageErrorData(completeMessage,
+            Some(ErrorData.toStackTrace(ex.exception))),
+            ex.creationTime,
+            utils.formatDate(ex.creationTime),
+            utils.javaLevelToErrorLevel(ex.level))
         case None ⇒
-          EnvironmentError(environmentId, ex.exception.getMessage, ErrorData(ex.exception), ex.creationTime, utils.javaLevelToErrorLevel(ex.level))
+          EnvironmentError(
+            environmentId,
+            ex.exception.getMessage,
+            ErrorData(ex.exception),
+            ex.creationTime,
+            utils.formatDate(ex.creationTime),
+            utils.javaLevelToErrorLevel(ex.level)
+          )
       }
     }
   }

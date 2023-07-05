@@ -368,19 +368,19 @@ class ExecutionPanel:
           then
             div(width := "100%", height := "200px",
               overflow.scroll,
-              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 100)).map:
+              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 200)).map:
                 case Some(ee) =>
-                  val errors = ee.filter(_.error.level == ErrorStateLevel.Error) ++ ee.filter(_.error.level != ErrorStateLevel.Error)
+                  val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
                       cls := "docEntry",
                       margin := "0 4 0 3",
                       backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
-                      div(timeToString(e.error.date), minWidth := "100"),
-                      a(e.error.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
-                      div(cls := "badgeOM", e.error.level.name, backgroundColor := envErrorLevelToColor(e.error.level))
+                      div(e.dateString, minWidth := "100"),
+                      a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
+                      div(cls := "badgeOM", e.level.name, backgroundColor := envErrorLevelToColor(e.level))
                     ).expandOnclick(
-                      div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.error.stack)))
+                      div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.stack)))
                     )
                 case None => Seq()
             )

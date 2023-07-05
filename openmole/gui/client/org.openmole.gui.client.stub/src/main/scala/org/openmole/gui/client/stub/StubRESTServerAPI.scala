@@ -187,13 +187,13 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentErrorGroup]] =
+  override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]] =
     Future.successful(
       Seq(
-        EnvironmentErrorGroup(EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, ErrorStateLevel.Error), 1L, 3),
-        EnvironmentErrorGroup(EnvironmentError(environment, "Something is also wrong", ErrorData("blablab"), 100L, ErrorStateLevel.Error), 3L, 5),
-        EnvironmentErrorGroup(EnvironmentError(environment, "Something is still wrong", ErrorData("blablab"), 1000L, ErrorStateLevel.Debug), 2L, 10),
-        EnvironmentErrorGroup(EnvironmentError(environment, "Something is wrong, check that", ErrorData("blablab"), 100000L, ErrorStateLevel.Debug), 6L, 15)
+        EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, "date", ErrorStateLevel.Error),
+        EnvironmentError(environment, "Something is also wrong", ErrorData("blablab"), 100L, "date", ErrorStateLevel.Error),
+        EnvironmentError(environment, "Something is still wrong", ErrorData("blablab"), 1000L, "date", ErrorStateLevel.Debug),
+        EnvironmentError(environment, "Something is wrong, check that", ErrorData("blablab"), 100000L, "date", ErrorStateLevel.Debug)
       )
     )
 
