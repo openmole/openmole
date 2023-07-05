@@ -12,7 +12,7 @@ object EvolutionMetadata:
   import io.circe.*
 
   given Codec[EvolutionMetadata] = Codec.AsObject.derivedConfigured
-  given MethodMetaData[EvolutionMetadata] = MethodMetaData[EvolutionMetadata](_ ⇒ EvolutionMetadata.method)
+  given MethodMetaData[EvolutionMetadata, EvolutionMetadata] = MethodMetaData[EvolutionMetadata, EvolutionMetadata](_ ⇒ EvolutionMetadata.method, identity)
 
   enum GenomeBoundData:
     case IntBound(value: ValData, low: Int, high: Int, intervalType: GenomeBoundData.IntervalType)

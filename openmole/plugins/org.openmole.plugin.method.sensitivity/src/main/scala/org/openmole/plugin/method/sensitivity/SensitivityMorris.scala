@@ -22,16 +22,34 @@ import org.openmole.plugin.tool.pattern.MapReduce
  */
 
 object SensitivityMorris {
+  def methodName = "morris"
 
   def mu(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("mu", output.name))
   def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
 
+  object Method:
+    object MetaData:
+
+      import io.circe.*
+
+      given Codec[MetaData] = Codec.AsObject.derivedConfigured
+
+      def apply(method: Method) =
+        new MetaData(
+          inputs = method.inputs.map(_.prototype).map(ValData.apply),
+          outputs = method.outputs.map(ValData.apply)
+        )
+
+    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
+
+    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivityMorris.methodName, MetaData.apply)
+
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
-  object MorrisHook {
+  object MorrisHook:
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat(directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
       Hook("MorrisHook") { p ⇒
         import p._
         import WritableOutput._
@@ -52,7 +70,6 @@ object SensitivityMorris {
         context
       }
 
-  }
 
   /**
    * Describes a part of the space of inputs/ouputs of a model (or actually, puzzle)

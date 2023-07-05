@@ -19,4 +19,4 @@ package org.openmole.core.omr
 
 import io.circe.*
 
-case class MethodMetaData[T](plugin: T => String)(using val encoder: Encoder[T])
+case class MethodMetaData[M, MD](plugin: M => String, data: M => MD)(using val encoder: Encoder[MD])

@@ -22,14 +22,14 @@ import java.io.SequenceInputStream
 
 object OMROutputFormat:
 
-  implicit def outputFormat[MD](using default: OMROutputFormatDefault[MD], methodData: MethodMetaData[MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, MD] = new OutputFormat[OMROutputFormat, MD]:
-    override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: MD): FromContext[Unit] = FromContext: p ⇒
+  implicit def outputFormat[M, MD](using default: OMROutputFormatDefault[M], methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, M] = new OutputFormat[OMROutputFormat, M]:
+    override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M): FromContext[Unit] = FromContext: p ⇒
       import p.*
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
       import executionContext.serializerService
 
-      implicit val encoder = methodData.encoder
+      given Encoder[MD] = methodData.encoder
       val format = OMROutputFormatDefault.value(f, default)
 
       output match
@@ -43,11 +43,11 @@ object OMROutputFormat:
               case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
               case f => (f.getParentFile / s"${f.getName}.omr", f.getParentFile)
 
-          def methodFormat(method: MD, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
+          def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
             import executionContext.timeService
 
             def methodJson =
-              method.asJson.mapObject(_.add(methodPluginField, Json.fromString(methodData.plugin(method))))
+              methodData.data(method).asJson.mapObject(_.add(methodPluginField, Json.fromString(methodData.plugin(method))))
                 //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
             val script =

@@ -31,22 +31,23 @@ object SensitivitySaltelli {
   def firstOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("firstOrder", output.name))
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
-  object MetaData:
-    import io.circe.*
 
-    given Codec[MetaData] = Codec.AsObject.derivedConfigured
-    given MethodMetaData[MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName)
-    
-    def apply(method: Method) =
-      new MetaData(
-        inputs = method.inputs.map(_.prototype).map(ValData.apply),
-        outputs = method.outputs.map(ValData.apply)
-      )
+  object Method:
+    object MetaData:
 
-  case class MetaData(
-    inputs: Seq[ValData],
-    outputs: Seq[ValData]
-  )
+      import io.circe.*
+
+      given Codec[MetaData] = Codec.AsObject.derivedConfigured
+
+      def apply(method: Method) =
+        new MetaData(
+          inputs = method.inputs.map(_.prototype).map(ValData.apply),
+          outputs = method.outputs.map(ValData.apply)
+        )
+
+    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
+
+    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName, MetaData.apply)
 
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
@@ -204,7 +205,7 @@ object SensitivitySaltelli {
 
   object SaltelliHook {
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat(directory = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, MetaData]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
       Hook("SaltelliHook") { p ⇒
         import p._
         import WritableOutput._
@@ -219,7 +220,7 @@ object SensitivitySaltelli {
             "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
-        outputFormat.write(executionContext)(format, output, sections, MetaData(method)).from(context)
+        outputFormat.write(executionContext)(format, output, sections, method).from(context)
 
         context
       }

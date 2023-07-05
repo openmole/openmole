@@ -3,13 +3,13 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.workflow.test._
 import scala.util.Random
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.domain.collection._
 import org.scalatest._
 import org.openmole.plugin.domain.bounds._
 
-class Saltelli extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
 
@@ -41,16 +41,32 @@ class Saltelli extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     outputs += (y1, y2, y3)
   )
 
-  val sen = SensitivitySaltelli(
+  val saltelli = SensitivitySaltelli(
     evaluation = model,
     sample = 10000,
     inputs = Seq(x1 in (0.0, 1.0), x2 in (0.0, 1.0)),
     outputs = Seq(y1, y2, y3)
   )
 
+  val morris = SensitivityMorris(
+    evaluation = model,
+    sample = 10000,
+    level = 5,
+    inputs = Seq(x1 in(0.0, 1.0), x2 in(0.0, 1.0)),
+    outputs = Seq(y1, y2, y3)
+  )
+
+
   "Saltelli" should "run" in {
-    sen.run()
+    saltelli.run()
   }
 
-}
+  "Saltelli" should "support OMR format" in {
+    saltelli hook("test", format = OMROutputFormat())
+  }
+
+  "Morris" should "support OMR format" in {
+    morris hook("test", format = OMROutputFormat())
+  }
+
 

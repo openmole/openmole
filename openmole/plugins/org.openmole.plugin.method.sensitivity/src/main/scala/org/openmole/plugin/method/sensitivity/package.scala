@@ -29,6 +29,9 @@ import org.openmole.core.workflow.format.WritableOutput
 
 package object sensitivity {
 
+  given CSVOutputFormatDefault[SensitivityMorris] = CSVOutputFormatDefault(unrollArray = true)
+  given CSVOutputFormatDefault[SensitivitySaltelli] = CSVOutputFormatDefault(unrollArray = true)
+
   object Sensitivity {
     /**
      * For a given input of the model, and a given output of a the model,
@@ -56,7 +59,7 @@ package object sensitivity {
     def variableResults(inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
       import p._
 
-      def results = 
+      def results =
         outputs.map { o ⇒
           val vs = inputs.map { i ⇒ coefficient(i, o) }
           Seq(o.name) ++ vs.map(v ⇒ context(v))
@@ -72,25 +75,22 @@ package object sensitivity {
    * Decorator of the Morris method to implicitely call MorrisHook in the DSL with hook.
    * @param dsl
    */
-  implicit class MorrisHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m) {
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, SensitivityMorris.Method]): Hooked[M] = {
+  implicit class MorrisHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m):
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(using OutputFormat[F, SensitivityMorris.Method]): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivityMorris.MorrisHook(dsl.method, output, format))
-    }
-  }
 
   /**
    * Decorator of the Saltelli method to implicitely call SaltelliHook in the DSL with hook.
    * @param dsl
    */
-  implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m) {
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, SensitivitySaltelli.MetaData]): Hooked[M] = {
+  implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m):
+    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(using OutputFormat[F, SensitivitySaltelli.Method]): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output, format))
-    }
-  }
+
 
 }
 
