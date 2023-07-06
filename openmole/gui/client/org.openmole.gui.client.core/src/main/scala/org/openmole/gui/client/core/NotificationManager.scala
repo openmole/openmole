@@ -13,7 +13,7 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.NotificationEvent.id
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
-
+import com.raquo.laminar.api.features.unitArrows
 import java.text.SimpleDateFormat
 
 
@@ -26,13 +26,13 @@ object NotificationManager:
   object Alternative:
     def cancel(using panels: Panels) = Alternative("cancel", panels.notifications.removeById)
 
-  case class NotificationLine(level: NotificationLevel, title: String, body: HtmlElement, id: String = randomId, serverId: Option[Long] = None)
+  case class NotificationLine(time: Long, level: NotificationLevel, title: String, body: HtmlElement, id: String = randomId, serverId: Option[Long] = None)
 
   def notificationContent(notification: NotificationLine) = (notification.level, notification.title)
 
   def toService(manager: NotificationManager) =
     new NotificationService:
-      override def notify(level: NotificationLevel, title: String, body: HtmlElement): Unit = manager.addAndShowNotificaton(level, title, body)
+      override def notify(level: NotificationLevel, title: String, body: HtmlElement, time: Option[Long]): Unit = manager.addAndShowNotificaton(level, title, body, time)
 
 class NotificationManager:
 
@@ -49,21 +49,18 @@ class NotificationManager:
 
   def removeById(id: String) = notifications.update(s => s.filterNot(_.id == id))
 
-  def addNotification(level: NotificationLevel, title: String, body: String => HtmlElement) =
+  def addNotification(level: NotificationLevel, title: String, body: String => HtmlElement, time: Option[Long] = None) =
     val id = randomId
-    val notif = NotificationLine(level, title, div(body(id), cls := "notification"), id)
-    notifications.update { s =>
-      val cs = s.map {
-        nl => notificationContent(nl)
-      }
-      if (cs.count(_ == notificationContent(notif)) < 1)
-      then (s :+ notif)
+    val notif = NotificationLine(time.getOrElse(System.currentTimeMillis()), level, title, div(body(id), cls := "notification"), id)
+    notifications.update: s =>
+      val cs = s.map { nl => notificationContent(nl) }
+      if cs.count(_ == notificationContent(notif)) < 1
+      then s :+ notif
       else s
-    }
     notif
 
-  def addAndShowNotificaton(level: NotificationLevel, title: String, body: HtmlElement = div()) =
-    val last = addNotification(level, title, _ => body)
+  def addAndShowNotificaton(level: NotificationLevel, title: String, body: HtmlElement = div(), time: Option[Long] = None) =
+    val last = addNotification(level, title, _ => body, time)
     showNotification(last)
     last
 
@@ -75,7 +72,7 @@ class NotificationManager:
     currentID.set(None)
     currentListType.set(None)
 
-  def showGetItNotification(level: NotificationLevel, title: String, body: Div = div()) =
+  def showGetItNotification(level: NotificationLevel, title: String, body: Div = div(), time: Option[Long] = None) =
     lazy val notif: NotificationLine =
       addNotification(
         level,
@@ -90,7 +87,8 @@ class NotificationManager:
                 hideNotificationManager
               }
             )
-          )
+          ),
+        time
       )
     showNotification(notif)
 
@@ -117,38 +115,37 @@ class NotificationManager:
     showNotification(notif)
     notif
 
-  def addServerNotifications(events: Seq[NotificationEvent]) = notifications.update { s =>
-    val currentIds = s.flatMap(_.serverId).toSet
+  def addServerNotifications(events: Seq[NotificationEvent]) =
+    notifications.update: s =>
+      val currentIds = s.flatMap(_.serverId).toSet
 
-    val newEvents =
-      for
-        event <- events
-        if !currentIds.contains(NotificationEvent.id(event))
-      yield
-        event match
-          case e: NotificationEvent.MoleExecutionFinished =>
-            val (title, body) =
-              e.error match
-                case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${CoreUtils.longTimeToString(e.time)}""")
-                case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${CoreUtils.longTimeToString(e.time)}""")
+      val newEvents =
+        for
+          event <- events
+          if !currentIds.contains(NotificationEvent.id(event))
+        yield
+          event match
+            case e: NotificationEvent.MoleExecutionFinished =>
+              val (title, body) =
+                e.error match
+                  case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${CoreUtils.longTimeToString(e.time)}""")
+                  case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${CoreUtils.longTimeToString(e.time)}""")
 
-            NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.ClientUtil.errorTextArea(body), randomId, serverId = Some(NotificationEvent.id(event)))
+              NotificationLine(e.time, NotificationLevel.Info, title, org.openmole.gui.client.ext.ClientUtil.errorTextArea(body), randomId, serverId = Some(NotificationEvent.id(event)))
 
-    newEvents ++ s
-  }
+      newEvents ++ s
 
   //  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
   //    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
   //  }
 
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
-    notifications.update {
-      s =>
-        val (cleared, kept) = s.partition(_.level == level)
-        val serverClear = cleared.flatMap(_.serverId)
-        if !serverClear.isEmpty then api.clearNotification(serverClear)
-        kept
-    }
+    notifications.update: s =>
+      val (cleared, kept) = s.partition(_.level == level)
+      val serverClear = cleared.flatMap(_.serverId)
+      if !serverClear.isEmpty then api.clearNotification(serverClear)
+      kept
+
 
   case class ListColor(background: String, border: String)
 
@@ -159,8 +156,8 @@ class NotificationManager:
 
   def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
-      child <-- (currentListType.signal combineWith notifications.signal).map { case (level, stack) =>
-        level match {
+      child <-- (currentListType.signal combineWith notifications.signal).map: (level, stack) =>
+        level match
           case Some(n: NotificationLevel) =>
             val fStack = filteredStack(stack, n)
             val lColor = listColor(n)
@@ -169,30 +166,26 @@ class NotificationManager:
             else
               div(cls := "notifList",
                 button(cls := "btn btn-purple", "Clear",
-                  onClick --> { _ => clearNotifications(fStack.head.level)
-                  }, marginBottom := "15px",
+                  onClick --> clearNotifications(fStack.head.level),
+                  marginBottom := "15px",
                 ),
-                fStack.zipWithIndex.map { case (s, i) =>
+                fStack.sortBy(_.time).reverse.zipWithIndex.map: (s, i) =>
                   div(
                     div(backgroundColor := "white",
-                      div(s.title,
+                      div(
+                        s"${CoreUtils.longTimeToString(s.time)} - ${s.title}",
                         padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
                         backgroundColor := { if i % 2 == 0 then lColor.background else "#f4f4f4" },
-                        onClick --> { _ =>
-                          currentID.update {
+                        onClick -->
+                          currentID.update:
                             case Some(i) if i == s.id => None
                             case _ => Some(s.id)
-                          }
-                        },
                       ),
-                      currentID.signal.map { i => i == Some(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
+                      currentID.signal.map { _.contains(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
                     )
                   )
-                }
               )
           case _ => emptyNode
-        }
-      }
     )
 
 

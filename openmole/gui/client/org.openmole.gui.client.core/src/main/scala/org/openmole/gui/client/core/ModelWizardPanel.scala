@@ -256,7 +256,8 @@ object ModelWizardPanel:
             )
 
           Seq(upload, io, cmd, build)
-        case _ => Seq(),
+        case _ => Seq()
+      ,
       uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
       div(onMountCallback(_ => currentDirectory.set(panels.directory.now()))),
       //            div(
