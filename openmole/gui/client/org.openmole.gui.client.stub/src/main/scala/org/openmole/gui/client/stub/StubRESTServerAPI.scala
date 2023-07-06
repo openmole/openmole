@@ -181,7 +181,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     val id = ExecutionId()
     executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output", 10000L)
-    notification += NotificationEvent.MoleExecutionFinished(id, script, None, "Friday 42, 2222", System.currentTimeMillis(),  notificationId.getAndIncrement())
+    notification += NotificationEvent.MoleExecutionFinished(id, script, None, System.currentTimeMillis(),  notificationId.getAndIncrement())
 
     Future.successful(id)
 
@@ -190,10 +190,10 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]] =
     Future.successful(
       Seq(
-        EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, "date", ErrorStateLevel.Error),
-        EnvironmentError(environment, "Something is also wrong", ErrorData("blablab"), 100L, "date", ErrorStateLevel.Error),
-        EnvironmentError(environment, "Something is still wrong", ErrorData("blablab"), 1000L, "date", ErrorStateLevel.Debug),
-        EnvironmentError(environment, "Something is wrong, check that", ErrorData("blablab"), 100000L, "date", ErrorStateLevel.Debug)
+        EnvironmentError(environment, "Something is wrong", ErrorData("blablab"), 0L, ErrorStateLevel.Error),
+        EnvironmentError(environment, "Something is also wrong", ErrorData("blablab"), 100L, ErrorStateLevel.Error),
+        EnvironmentError(environment, "Something is still wrong", ErrorData("blablab"), 1000L, ErrorStateLevel.Debug),
+        EnvironmentError(environment, "Something is wrong, check that", ErrorData("blablab"), 100000L, ErrorStateLevel.Debug)
       )
     )
 
@@ -201,7 +201,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     Future.successful(plugins.values.toSeq)
 
   override def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]] =
-    plugins += (path -> Plugin(path, System.currentTimeMillis().toString, true))
+    plugins += (path -> Plugin(path, System.currentTimeMillis(), true))
     Future.successful(Seq.empty)
 
   override def removePlugin(path: SafePath)(using BasePath): Future[Unit] =
@@ -216,8 +216,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       openMoleVersion = "stub",
       executionId = "stub",
       script = None,
-      timeStart = "stub",
-      timeSave = "stub")
+      timeStart = System.currentTimeMillis(),
+      timeSave = System.currentTimeMillis())
   )
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
@@ -237,7 +237,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", "0", true))
+  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", System.currentTimeMillis(), true))
 
   override def shutdown()(using BasePath): Future[Unit] = Future.successful(())
 
