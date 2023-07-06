@@ -82,7 +82,7 @@ object SettingsView:
         div(flexColumn,
           div(sets.version, color:= "#3086b5", fontSize := "22px", fontWeight.bold),
           div(sets.versionName),
-          div(sets.buildTime)
+          div(CoreUtils.longTimeToString(sets.buildTime))
         )
       }).map {
         case Some(e) => e

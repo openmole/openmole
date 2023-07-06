@@ -134,7 +134,6 @@ case class EnvironmentError(
   errorMessage: String,
   stack: ErrorData,
   date: Long,
-  dateString: String,
   level: ErrorStateLevel)
 
 case class NetworkActivity(
@@ -222,7 +221,7 @@ case class PasswordState(chosen: Boolean, hasBeenSet: Boolean)
 
 // projectSafePath is the plugin path in the project tree.
 // The plugin is copied in the plugin directory with the same name.
-case class Plugin(projectSafePath: SafePath, time: String, plugged: Boolean)
+case class Plugin(projectSafePath: SafePath, time: Long, plugged: Boolean)
 
 //Processes
 sealed trait ProcessState {
@@ -300,7 +299,7 @@ object FileListData:
 
 case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0)
 
-case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: String, isDevelopment: Boolean)
+case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: Long, isDevelopment: Boolean)
 
 sealed trait PluginExtensionType
 
@@ -379,7 +378,7 @@ object NotificationEvent:
     event match
       case e: MoleExecutionFinished => e.id
 
-  case class MoleExecutionFinished(executionId: ExecutionId, script: SafePath, error: Option[ErrorData], date: String, time: Long, id: Long) extends NotificationEvent
+  case class MoleExecutionFinished(executionId: ExecutionId, script: SafePath, error: Option[ErrorData], time: Long, id: Long) extends NotificationEvent
 
 
 sealed trait NotificationEvent
@@ -456,8 +455,8 @@ case class GUIOMRContent(
   openMoleVersion: String,
   executionId: String,
   script: Option[GUIOMRScript],
-  timeStart: String,
-  timeSave: String)
+  timeStart: Long,
+  timeSave: Long)
 
 case class GUIOMRImport(`import`: String, content: String)
 case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])

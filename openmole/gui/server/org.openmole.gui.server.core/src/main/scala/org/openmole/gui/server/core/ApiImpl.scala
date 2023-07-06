@@ -78,7 +78,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       utils.projectsDirectory.toSafePath,
       buildinfo.version.value,
       buildinfo.name,
-      utils.formatDate(buildinfo.BuildInfo.buildTime),
+      buildinfo.BuildInfo.buildTime,
       buildinfo.development
     )
   }
@@ -442,7 +442,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     currentPluginsSafePath.flatMap { csp ⇒
       val file = safePathToFile(csp)
-      val date = ext.utils.formatDate(file.lastModified)
+      val date = file.lastModified
       if file.exists
       then Some(Plugin(csp, date, PluginManager.bundle(file).isDefined))
       else None
@@ -520,8 +520,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       openMoleVersion = index.`openmole-version`,
       executionId = index.`execution-id`,
       script = script,
-      timeStart = utils.formatDate(index.`time-start`),
-      timeSave = utils.formatDate(index.`time-save`)
+      timeStart = index.`time-start`,
+      timeSave = index.`time-save`
     )
 
   def expandResources(resources: Resources): Resources =

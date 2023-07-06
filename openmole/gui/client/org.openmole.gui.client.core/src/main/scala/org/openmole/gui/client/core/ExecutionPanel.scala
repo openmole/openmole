@@ -376,7 +376,7 @@ class ExecutionPanel:
                       cls := "docEntry",
                       margin := "0 4 0 3",
                       backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
-                      div(e.dateString, minWidth := "100"),
+                      div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                       div(cls := "badgeOM", e.level.name, backgroundColor := envErrorLevelToColor(e.level))
                     ).expandOnclick(

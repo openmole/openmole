@@ -239,5 +239,3 @@ object utils:
     bundle.foreach(PluginManager.remove)
   }
 
-  def formatDate(t: Long) = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(t)
-

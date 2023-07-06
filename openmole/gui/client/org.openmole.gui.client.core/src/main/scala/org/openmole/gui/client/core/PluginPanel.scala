@@ -48,7 +48,8 @@ class PluginPanel:
               div(p.projectSafePath.path.mkString, width := "550px"),
               div(
                 cls := "badgeOM",
-                bsn.badge_dark, p.time
+                bsn.badge_dark,
+                CoreUtils.longTimeToString(p.time)
               ), onClick --> { _ ⇒
                 panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
                 //panels.treeNodePanel.treeNodeManager.computeCurrentSons

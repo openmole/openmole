@@ -129,8 +129,8 @@ class NotificationManager:
           case e: NotificationEvent.MoleExecutionFinished =>
             val (title, body) =
               e.error match
-                case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${e.date}""")
-                case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${e.date}""")
+                case None => (s"${e.script.name} completed", s"""Execution of ${e.script.path.mkString} was completed at ${CoreUtils.longTimeToString(e.time)}""")
+                case Some(t) => (s"${e.script.name} failed", s"""Execution of ${e.script.path.mkString} failed ${ErrorData.stackTrace(t)} at ${CoreUtils.longTimeToString(e.time)}""")
 
             NotificationLine(NotificationLevel.Info, title, org.openmole.gui.client.ext.ClientUtil.errorTextArea(body), randomId, serverId = Some(NotificationEvent.id(event)))
 

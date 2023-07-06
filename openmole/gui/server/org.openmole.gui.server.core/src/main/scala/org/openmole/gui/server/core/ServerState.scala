@@ -67,7 +67,6 @@ class ServerState:
             execId,
             script,
             ex.exception.map(t => ErrorData(MoleExecution.MoleExecutionFailed.exception(t))),
-            utils.formatDate(time),
             time,
             _)
         )
@@ -209,7 +208,6 @@ class ServerState:
             MessageErrorData(completeMessage,
             Some(ErrorData.toStackTrace(ex.exception))),
             ex.creationTime,
-            utils.formatDate(ex.creationTime),
             utils.javaLevelToErrorLevel(ex.level))
         case None ⇒
           EnvironmentError(
@@ -217,7 +215,6 @@ class ServerState:
             ex.exception.getMessage,
             ErrorData(ex.exception),
             ex.creationTime,
-            utils.formatDate(ex.creationTime),
             utils.javaLevelToErrorLevel(ex.level)
           )
       }
