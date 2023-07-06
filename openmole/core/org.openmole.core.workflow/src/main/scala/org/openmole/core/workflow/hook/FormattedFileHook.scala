@@ -16,6 +16,7 @@ object FormattedFileHook {
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
     metadata: M              = None,
+    append: Boolean          = false,
     name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
 
     Hook(name getOrElse "FileFormatHook") { parameters ⇒
@@ -26,7 +27,7 @@ object FormattedFileHook {
 
       val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
       val content = OutputContent(variables)
-      fileFormat.write(executionContext)(format, output, content, metadata).from(context)
+      fileFormat.write(executionContext)(format, output, content, metadata, append = append).from(context)
 
       context
     } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs ++= values)

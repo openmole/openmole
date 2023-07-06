@@ -13,5 +13,5 @@ object OutputFormat:
   case class OutputContent(section: Section*)
 
 trait OutputFormat[T, -M]:
-  def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
+  def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M, append: Boolean = false): FromContext[Unit]
   def validate(format: T): Validate

@@ -23,7 +23,7 @@ import java.io.SequenceInputStream
 object OMROutputFormat:
 
   implicit def outputFormat[M, MD](using default: OMROutputFormatDefault[M], methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, M] = new OutputFormat[OMROutputFormat, M]:
-    override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M): FromContext[Unit] = FromContext: p ⇒
+    override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M, append: Boolean): FromContext[Unit] = FromContext: p ⇒
       import p.*
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
@@ -62,7 +62,7 @@ object OMROutputFormat:
                 case _ ⇒ None
 
             def mode =
-              if format.append
+              if append
               then Index.DataMode.Append
               else Index.DataMode.Create
 
@@ -111,7 +111,7 @@ object OMROutputFormat:
             def executionPrefix = executionId.filter(_ != '-')
 
             val fileName =
-              if !format.append
+              if !append
               then s"$dataDirectory/$executionPrefix-${executionContext.jobId}.omd"
               else s"$dataDirectory/$executionPrefix.omd"
 
@@ -119,8 +119,8 @@ object OMROutputFormat:
 
             def jsonContent = JArray(content.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue)).toList) }.toList)
 
-            dataFile.withPrintStream(append = format.append, create = true, gz = true) { ps ⇒
-              if format.append && existingData.nonEmpty then ps.print(",\n")
+            dataFile.withPrintStream(append = append, create = true, gz = true) { ps ⇒
+              if append && existingData.nonEmpty then ps.print(",\n")
               ps.print(compact(render(jsonContent)))
             }
 
@@ -144,11 +144,9 @@ object OMROutputFormatDefault:
   def value[T](format: OMROutputFormat, default: OMROutputFormatDefault[T]) =
     OMROutputFormatDefault[T](
       script = format.script.getOrElse(default.script),
-      overwrite = format.overwrite.getOrElse(default.overwrite),
-      append = format.append.getOrElse(default.append)
+      overwrite = format.overwrite.getOrElse(default.overwrite)
     )
 
 case class OMROutputFormatDefault[T](
   script: Boolean = true,
-  overwrite: Boolean = true,
-  append: Boolean = false)
+  overwrite: Boolean = true)

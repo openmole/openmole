@@ -41,9 +41,6 @@ object Replication:
   def methodName = MethodMetaData.name(Replication)
 
   object Method:
-    given CSVOutputFormatDefault[Method] = CSVOutputFormatDefault(append = true)
-    given OMROutputFormatDefault[Method] = OMROutputFormatDefault(append = true)
-
     given Codec[ReplicationMetaData] = Codec.AsObject.derivedConfigured
     case class ReplicationMetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]])
 
@@ -111,7 +108,7 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = dsl.method))
+    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = dsl.method, append = true))
 
 
 object DirectSampling:
@@ -119,9 +116,6 @@ object DirectSampling:
   def methodName = MethodMetaData.name(DirectSampling)
 
   object Method:
-    given CSVOutputFormatDefault[Method] = CSVOutputFormatDefault(append = true)
-    given OMROutputFormatDefault[Method] = OMROutputFormatDefault(append = true)
-
     given Codec[Metadata] = Codec.AsObject.derivedConfigured
 
     given MethodMetaData[Method, Metadata] =
@@ -185,6 +179,6 @@ implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: Exploration
     format: F              = CSVOutputFormat())(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = dsl.method))
+    Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = dsl.method, append = true))
 
 

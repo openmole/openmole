@@ -187,7 +187,7 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
   def hook[F](
     output: WritableOutput,
     values: Seq[Val[_]]    = Vector.empty,
-    format: F              = CSVOutputFormat(append = true))(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, Any]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format))
+    format: F              = CSVOutputFormat())(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, Any]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
 }
 

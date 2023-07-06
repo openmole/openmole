@@ -12,7 +12,7 @@ import org.openmole.core.exception.UserBadDataError
 object CSVOutputFormat:
 
   implicit def format[H](using default: CSVOutputFormatDefault[H]): OutputFormat[CSVOutputFormat, H] = new OutputFormat[CSVOutputFormat, H] {
-    override def write(executionContext: HookExecutionContext)(f: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: H): FromContext[Unit] = FromContext { p ⇒
+    override def write(executionContext: HookExecutionContext)(f: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: H, append: Boolean): FromContext[Unit] = FromContext { p ⇒
       import p._
 
       val format = CSVOutputFormatDefault.value(f, default)
@@ -25,7 +25,7 @@ object CSVOutputFormat:
       (output, content) match {
         case (Store(file), s) ⇒
           def writeFile(f: File, variables: Seq[Variable[_]]) =
-            val create = !format.append || f.isEmpty
+            val create = !append || f.isEmpty
             val h = if (create || f.isEmpty) Some(headerLine(variables)) else None
             if (create) f.atomicWithPrintStream { ps ⇒ CSV.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
             else f.withPrintStream(append = true, create = true) { ps ⇒ CSV.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
@@ -67,7 +67,6 @@ case class CSVOutputFormat(
   header: OptionalArgument[FromContext[String]] = None,
   unrollArray: OptionalArgument[Boolean] = None,
   arrayOnRow: OptionalArgument[Boolean] = None,
-  append: OptionalArgument[Boolean] = None,
   postfix: OptionalArgument[FromContext[String]] = None,
   directory: OptionalArgument[Boolean] = None)
 
@@ -80,7 +79,6 @@ object CSVOutputFormatDefault:
       header = OptionalArgument(format.header.option.orElse(default.header)),
       unrollArray = format.unrollArray.getOrElse(default.unrollArray),
       arrayOnRow = format.arrayOnRow.getOrElse(default.arrayOnRow),
-      append = format.append.getOrElse(default.append),
       postfix = OptionalArgument(format.postfix.option.orElse(default.postfix)),
       directory = format.directory.getOrElse(default.directory)
     )
@@ -89,6 +87,5 @@ case class CSVOutputFormatDefault[T](
   header: OptionalArgument[FromContext[String]] = None,
   unrollArray: Boolean = false,
   arrayOnRow: Boolean = false,
-  append: Boolean = false,
   postfix: OptionalArgument[FromContext[String]] = None,
   directory: Boolean = false)
