@@ -28,10 +28,9 @@ import org.openmole.plugin.hook.file.*
 import io.circe.*
 
 object AggregationMetaData:
-  given Codec[AggregationMetaData] = Codec.AsObject.derivedConfigured
   def apply(ag: Aggregation) = new AggregationMetaData(ValData(ag.value), ValData(ag.outputVal))
 
-case class AggregationMetaData(output: ValData, aggregated: ValData)
+case class AggregationMetaData(output: ValData, aggregated: ValData) derives derivation.ConfiguredCodec
 
 
 
@@ -41,8 +40,7 @@ object Replication:
   def methodName = MethodMetaData.name(Replication)
 
   object Method:
-    given Codec[ReplicationMetaData] = Codec.AsObject.derivedConfigured
-    case class ReplicationMetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]])
+    case class ReplicationMetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
     given MethodMetaData[Method, ReplicationMetaData] =
       def data(m: Method) =
@@ -116,15 +114,13 @@ object DirectSampling:
   def methodName = MethodMetaData.name(DirectSampling)
 
   object Method:
-    given Codec[Metadata] = Codec.AsObject.derivedConfigured
-
     given MethodMetaData[Method, Metadata] =
       def data(m: Method) =
         val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
         Metadata(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
       MethodMetaData(_ ⇒ methodName, data)
 
-    case class Metadata(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData])
+    case class Metadata(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData]) derives derivation.ConfiguredCodec
 
   case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
 

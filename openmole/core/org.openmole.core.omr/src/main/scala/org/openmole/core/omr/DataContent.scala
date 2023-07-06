@@ -20,11 +20,6 @@ package org.openmole.core.omr
 import io.circe.*
 
 object DataContent:
-  given Codec[DataContent] = Codec.AsObject.derivedConfigured
+  case class SectionData(name: Option[String], variables: Seq[ValData]) derives derivation.ConfiguredCodec
 
-  object SectionData:
-    given Codec[SectionData] = Codec.AsObject.derivedConfigured
-
-  case class SectionData(name: Option[String], variables: Seq[ValData])
-
-case class DataContent(section: Seq[DataContent.SectionData]) 
+case class DataContent(section: Seq[DataContent.SectionData]) derives derivation.ConfiguredCodec

@@ -8,13 +8,11 @@ case class SaveOption(
   last:      Boolean)
 
 object EvolutionMetadata:
-
   import io.circe.*
 
-  given Codec[EvolutionMetadata] = Codec.AsObject.derivedConfigured
   given MethodMetaData[EvolutionMetadata, EvolutionMetadata] = MethodMetaData[EvolutionMetadata, EvolutionMetadata](_ ⇒ EvolutionMetadata.method, identity)
 
-  enum GenomeBoundData:
+  enum GenomeBoundData derives derivation.ConfiguredCodec:
     case IntBound(value: ValData, low: Int, high: Int, intervalType: GenomeBoundData.IntervalType)
     case DoubleBound(value: ValData, low: Double, high: Double, intervalType: GenomeBoundData.IntervalType)
     case IntSequenceBound(value: ValData, low: Seq[Int], high: Seq[Int], intervalType: GenomeBoundData.IntervalType)
@@ -22,8 +20,6 @@ object EvolutionMetadata:
     case Enumeration(value: ValData, values: Seq[String])
 
   object GenomeBoundData:
-    given Codec[GenomeBoundData] = Codec.AsObject.derivedConfigured
-
     enum IntervalType:
       case Continuous, Discrete
 
@@ -37,25 +33,18 @@ object EvolutionMetadata:
         case d: IntSequenceBound    ⇒ d.value.name
         case d: Enumeration         ⇒ d.value.name
 
-  object Objective:
-    given Codec[Objective] = Codec.AsObject.derivedConfigured
-
   case class Objective(
     name:     String,
     delta:    Option[Double],
     negative: Boolean,
-    noisy:    Boolean)
+    noisy:    Boolean) derives derivation.ConfiguredCodec
 
   def method = "evolution"
   case object none extends EvolutionMetadata
 
   object PSE:
     type Grid = Seq[PSE.GridAxe]
-
-    object GridAxe:
-      given Codec[GridAxe] = Codec.AsObject.derivedConfigured
-
-    case class GridAxe(objective: String, grid: Seq[Double])
+    case class GridAxe(objective: String, grid: Seq[Double]) derives derivation.ConfiguredCodec
 
   case class PSE(
     genome:     Seq[GenomeBoundData],
@@ -96,7 +85,7 @@ object EvolutionMetadata:
     saveOption:     SaveOption) extends EvolutionMetadata
 
 
-sealed trait EvolutionMetadata
+sealed trait EvolutionMetadata derives derivation.ConfiguredCodec
 
 object AnalysisData:
 

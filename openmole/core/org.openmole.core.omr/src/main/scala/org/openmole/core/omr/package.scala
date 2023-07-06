@@ -36,12 +36,8 @@ implicit val omrCirceDefault: io.circe.derivation.Configuration =
  io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type")
 
 object Index:
- given Codec[Import] = Codec.AsObject.derivedConfigured
- given Codec[Script] = Codec.AsObject.derivedConfigured
- given Codec[Index] = Codec.AsObject.derivedConfigured
-
- case class Import(`import`: String, content: String)
- case class Script(content: String, `import`: Option[Seq[Import]])
+ case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
+ case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
 
  object DataMode:
   given Encoder[DataMode] = Encoder.instance:
@@ -75,7 +71,7 @@ case class Index(
  `data-compression`: Option[Index.Compression],
  script: Option[Index.Script],
  `time-start`: Long,
- `time-save`: Long)
+ `time-save`: Long) derives derivation.ConfiguredCodec
 
 def methodField = "method"
 def omrVersion = "0.2"
@@ -204,10 +200,9 @@ object OMR:
       `execution-id`: String,
       script: Option[Index.Script],
       `time-start`: Long,
-      `time-save`: Long)
+      `time-save`: Long) derives derivation.ConfiguredCodec
 
     import Index.given
-    given Codec[JSONContent] = Codec.AsObject.derivedConfigured
 
     def jsonData =
       org.json4s.JArray(

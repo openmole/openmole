@@ -22,8 +22,6 @@ import org.openmole.tool.types.TypeTool
 import io.circe.*
 
 object ValData:
-  given Codec[ValData] = Codec.AsObject.derivedConfigured
-
   def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
 
   def toVal(data: ValData) =
@@ -31,6 +29,6 @@ object ValData:
     new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
 
 
-case class ValData(name: String, `type`: String)
+case class ValData(name: String, `type`: String) derives derivation.ConfiguredCodec
 
 

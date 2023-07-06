@@ -29,19 +29,16 @@ object SensitivityMorris {
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
 
   object Method:
+    import io.circe.*
+
     object MetaData:
-
-      import io.circe.*
-
-      given Codec[MetaData] = Codec.AsObject.derivedConfigured
-
       def apply(method: Method) =
         new MetaData(
           inputs = method.inputs.map(_.prototype).map(ValData.apply),
           outputs = method.outputs.map(ValData.apply)
         )
 
-    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
+    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
 
     given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivityMorris.methodName, MetaData.apply)
 
