@@ -178,11 +178,11 @@ object OMR:
         arrayOnRow = arrayOnRow,
         gzip = gzip)
     else
-      destination.delete()
+      destination.clear
       for
         ((section, v), i) <- variable.zipWithIndex
       do
-        destination.append(s"#section: ${section.name.getOrElse(i.toString)}")
+        destination.append(s"#section: ${section.name.getOrElse(i.toString)}\n")
         CSV.writeVariablesToCSV(
           destination,
           v,

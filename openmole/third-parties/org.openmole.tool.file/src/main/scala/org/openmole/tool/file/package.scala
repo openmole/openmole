@@ -266,10 +266,9 @@ package file {
         else false
       }
 
-      def content_=(content: String) = {
+      def content_=(content: String) =
         createParentDirectory
         Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
-      }
 
       def <(c: String) = content_=(c)
 
@@ -280,6 +279,9 @@ package file {
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
+
+      def clear =
+        content = ""
 
       def lines = withSource(_.getLines.toVector)
 
