@@ -76,13 +76,18 @@ object utils:
 
 
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
+    import org.openmole.core.omr.OMR
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
     if f.exists()
     then
       val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
-      Some(TreeNodeData(f.getName, f.length, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
+      def size =
+        if OMR.isOMR(f)
+        then f.length() + OMR.dataFiles(f).map(_._2.length()).sum
+        else f.length()
+      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
     else None
 
   //implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
