@@ -108,7 +108,7 @@ case class SystemExecTask private (
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
-    newFile.withTmpDir { tmpDir ⇒
+    tmpDirectory.withTmpDir { tmpDir ⇒
       val workDir =
         workDirectory match {
           case None    ⇒ tmpDir

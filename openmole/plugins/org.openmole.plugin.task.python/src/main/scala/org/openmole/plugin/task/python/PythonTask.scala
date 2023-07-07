@@ -166,7 +166,7 @@ case class PythonTask(
             Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
           )
 
-      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
+      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
       resultContext ++ readOutputJSON(resultContext(outputFile))
 
     resultContext

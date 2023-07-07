@@ -33,7 +33,6 @@ import scala.util.Failure
 import com.raquo.laminar.api.L.*
 
 class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationService) extends ServerAPI:
-  override def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = fetch.futureError(_.createFile(path, name, directory).future)
@@ -125,6 +124,8 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   }.andThen {
     case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while uploading file", div(ErrorData.stackTrace(ErrorData(t))))
   }
+
+  def size(safePath: SafePath)(using BasePath) = fetch.futureError(_.size(safePath).future)
 
   override def download(
     safePath: SafePath,

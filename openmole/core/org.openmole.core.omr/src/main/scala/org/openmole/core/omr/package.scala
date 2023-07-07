@@ -25,7 +25,7 @@ import org.json4s.JArray
 import org.json4s.JsonAST.JField
 import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.json.*
-import org.openmole.core.context.Variable
+import org.openmole.core.context.{ValType, Variable}
 import org.openmole.core.omr.*
 import org.openmole.core.exception.*
 import org.openmole.core.serializer.SerializerService
@@ -69,16 +69,26 @@ case class Index(
  `data-mode`: Index.DataMode,
  `data-content`: DataContent,
  `data-compression`: Option[Index.Compression],
+ `file-directory`: Option[String],
  script: Option[Index.Script],
  `time-start`: Long,
  `time-save`: Long) derives derivation.ConfiguredCodec
 
 def methodField = "method"
 def omrVersion = "0.2"
-def dataDirectory = ".omr-data"
-
+def dataDirectoryName = ".omr-data"
 
 object OMR:
+  def resultFileDirectoryName(executionId: String) =
+    s"$dataDirectoryName/files-${executionId.filter(_ != '-')}"
+
+  def resultFileDirectory(file: File) =
+    val index = indexData(file)
+    index.`file-directory`.map(d => file.getParentFile / d)
+
+  def dataDirectory(file: File) =
+    file.getParentFile / dataDirectoryName
+
   def isOMR(file: File) = file.getName.endsWith(".omr")
 
   def indexData(file: File): Index =
@@ -87,15 +97,29 @@ object OMR:
 
   def dataFiles(file: File): Seq[(String, File)] =
     val directory = file.getParentFile
-    indexData(file).`data-file`.map: f =>
-      (f, directory / f)
+    indexData(file).`data-file`.map { f => (f, directory / f) }
+
+//  def resultFiles(file: File): Seq[(String, File)] =
+//    val directory = file.getParentFile
+//    val files = collection.mutable.ListBuffer[(String, File)]()
+//    def listFilePath(v: org.json4s.JValue) =
+//      val path = OMR.loadFilePath(directory, v)
+//      val file = directory / path
+//      files += (path, file)
+//      f
+//
+//    toVariables(file, loadFilePath = listFilePath)
+//    files.toSeq
 
   def copy(omrFile: File, destination: File) =
     val copyData = omrFile.getParentFile != destination.getParentFile
     if copyData
     then
       val destinationDataDirectory = destination.getParentFile
+      val executionId = indexData(omrFile).`execution-id`
       dataFiles(omrFile).foreach((name, f) => f.copy(destinationDataDirectory / name))
+      resultFileDirectory(omrFile).foreach(_.copy(destinationDataDirectory / resultFileDirectoryName(executionId)))
+
     omrFile copy destination
 
   def move(omrFile: File, destination: File) =
@@ -103,25 +127,43 @@ object OMR:
     if moveData
     then
       val destinationDataDirectory = destination.getParentFile
+      val executionId = indexData(omrFile).`execution-id`
+      resultFileDirectory(omrFile).foreach(_.move(destinationDataDirectory / resultFileDirectoryName(executionId)))
       dataFiles(omrFile).foreach((name, f) => f.move(destinationDataDirectory / name))
-      val omrDataDirectory = omrFile.getParentFile / dataDirectory
+      val omrDataDirectory = dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile move destination
 
   def delete(omrFile: File) =
     dataFiles(omrFile).foreach((_, f) => f.delete())
-    val omrDataDirectory = omrFile.getParentFile / dataDirectory
+    resultFileDirectory(omrFile).foreach(_.recursiveDelete)
+    val omrDataDirectory = dataDirectory(omrFile)
     if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile.delete()
 
+  def diskUsage(omrFile: File) =
+    omrFile.size +
+      OMR.dataFiles(omrFile).map(_._2.size).sum +
+      OMR.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
+
   def toVariables(file: File): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
-    val data: File = file.getParentFile / index.`data-file`.last
+    val omrDirectory = file.getParentFile
+    val data: File = omrDirectory / index.`data-file`.last
+
+    def loadFile(v: org.json4s.JValue) =
+      import org.openmole.core.json.*
+      v match
+        case jv: org.json4s.JString =>
+          index.`file-directory` match
+            case Some(fileDirectory) => omrDirectory / fileDirectory / jv.s
+            case None => File(jv.s)
+        case _ => cannotConvertFromJSON[File](v)
 
     index.`data-mode` match
       case Index.DataMode.Create =>
         def sectionToVariables(section: DataContent.SectionData, a: JArray) =
-          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v)) }
+          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile)) }
 
         def readContent(file: File): JArray =
           file.withGzippedInputStream { is =>
@@ -136,7 +178,7 @@ object OMR:
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
-          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray) }
+          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile)) }
 
         def readContent(file: File): JArray =
           val begin = new StringInputStream("[")

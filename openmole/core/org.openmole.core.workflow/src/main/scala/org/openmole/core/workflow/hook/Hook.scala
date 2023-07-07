@@ -48,7 +48,7 @@ case class HookExecutionContext(
   val outputRedirection: OutputRedirection,
   val loggerService:     LoggerService,
   val random:            RandomProvider,
-  val newFile:           TmpDirectory,
+  val tmpDirectory:      TmpDirectory,
   val serializerService: SerializerService,
   val timeService:       TimeService)
 

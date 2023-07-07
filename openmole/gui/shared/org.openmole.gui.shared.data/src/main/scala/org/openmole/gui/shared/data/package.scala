@@ -59,7 +59,7 @@ object SafePath:
   def apply(path: Iterable[String], context: ServerFileSystemContext = ServerFileSystemContext.Project): SafePath =
     new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
 
-case class SafePath(path: RelativePath, context: ServerFileSystemContext):
+case class SafePath(path: RelativePath, context: ServerFileSystemContext) derives io.circe.Codec.AsObject:
   def ++(s: String) = copy(path = this.path.value :++ s.split('/'))
   def /(child: String): SafePath = copy(path = path.value :+ child)
   def /(child: RelativePath): SafePath = copy(path = path.value :++ child.value)
@@ -389,31 +389,6 @@ object GUIVariable:
   import org.latestbit.circe.adt.codec.*
 
   object ValueType:
-    def fromAny(x: Any): Option[ValueType] =
-      def res =
-        util.Try:
-          x match
-            case x: Int => ValueInt(x)
-            case x: Long => ValueLong(x)
-            case x: Double => ValueDouble(x)
-            case x: String => ValueString(x)
-            case x: Boolean => ValueBoolean(x)
-            case x: Array[Int] => ValueArrayInt(x)
-            case x: Array[Long] => ValueArrayLong(x)
-            case x: Array[Double] => ValueArrayDouble(x)
-            case x: Array[String] => ValueArrayString(x)
-            case x: Array[Boolean] => ValueArrayBoolean(x)
-            case x: Array[Array[Int]] => ValueArrayArrayInt(x)
-            case x: Array[Array[Long]] => ValueArrayArrayLong(x)
-            case x: Array[Array[Double]] => ValueArrayArrayDouble(x)
-            case x: Array[Array[String]] => ValueArrayArrayString(x)
-            case x: Array[Array[Boolean]] => ValueArrayArrayBoolean(x)
-
-      res match
-        case util.Failure(exception: MatchError) => None
-        case util.Success(value) => Some(value)
-        case util.Failure(e: Throwable) => throw e
-
     def unwrap(v: ValueType): Any =
       v match
         case ValueInt(x) => x
@@ -421,16 +396,21 @@ object GUIVariable:
         case ValueDouble(x) => x
         case ValueString(x) => x
         case ValueBoolean(x) => x
+        case ValueFile(x) => x
+
         case ValueArrayInt(x) => x
         case ValueArrayLong(x) => x
         case ValueArrayDouble(x) => x
         case ValueArrayString(x) => x
         case ValueArrayBoolean(x) => x
+        case ValueArrayFile(x) => x
+
         case ValueArrayArrayInt(x) => x
         case ValueArrayArrayLong(x) => x
         case ValueArrayArrayDouble(x) => x
         case ValueArrayArrayString(x) => x
         case ValueArrayArrayBoolean(x) => x
+        case ValueArrayArrayFile(x) => x
 
   enum ValueType derives JsonTaggedAdt.Codec:
     case ValueInt(value: Int)
@@ -438,16 +418,21 @@ object GUIVariable:
     case ValueDouble(value: Double)
     case ValueString(value: String)
     case ValueBoolean(value: Boolean)
+    case ValueFile(value: SafePath)
+
     case ValueArrayInt(value: Array[Int])
     case ValueArrayLong(value: Array[Long])
     case ValueArrayDouble(value: Array[Double])
     case ValueArrayString(value: Array[String])
     case ValueArrayBoolean(value: Array[Boolean])
+    case ValueArrayFile(value: Array[SafePath])
+
     case ValueArrayArrayInt(value: Array[Array[Int]])
     case ValueArrayArrayLong(value: Array[Array[Long]])
     case ValueArrayArrayDouble(value: Array[Array[Double]])
     case ValueArrayArrayString(value: Array[Array[String]])
     case ValueArrayArrayBoolean(value: Array[Array[Boolean]])
+    case ValueArrayArrayFile(value: Array[Array[SafePath]])
 
 
 case class GUIOMRContent(

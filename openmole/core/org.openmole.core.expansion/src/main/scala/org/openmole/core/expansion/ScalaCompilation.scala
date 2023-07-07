@@ -207,7 +207,7 @@ object ScalaCompilation {
 
     def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒
       val closure: ContextClosure[R] = compiled(p.context).get
-      try closure.apply(p.context, p.random, p.newFile)
+      try closure.apply(p.context, p.random, p.tmpDirectory)
       catch {
         case t: Throwable ⇒ throw new UserBadDataError(t, s"Error in execution of compiled closure in context: ${p.context}")
       }

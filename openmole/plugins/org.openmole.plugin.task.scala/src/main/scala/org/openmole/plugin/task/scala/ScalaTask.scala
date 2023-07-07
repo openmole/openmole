@@ -113,7 +113,7 @@ case class ScalaTask(
 
         val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(scalaTask.inputs.toSeq))
 
-        val map = scalaCompilation(context, p.random, p.newFile)
+        val map = scalaCompilation(context, p.random, p.tmpDirectory)
         scalaTask.outputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
         }: Context

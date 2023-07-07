@@ -67,7 +67,7 @@ case class FromContextTask(
   override def validate = v
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
-    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped)(executionContext.preference, p.random, p.newFile, p.fileService)
+    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped)(executionContext.preference, p.random, p.tmpDirectory, p.fileService)
     f(tp)
   }
 

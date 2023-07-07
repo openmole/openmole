@@ -32,7 +32,7 @@ object JVMLanguageTask:
   def process(executionContext: TaskExecutionContext, libraries: Seq[File], external: External, processCode: FromContext[Context], outputs: PrototypeSet) = FromContext { p ⇒
     import p.*
 
-    newFile.withTmpDir { pwd ⇒
+    tmpDirectory.withTmpDir { pwd ⇒
       val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(pwd)) + Variable(JVMLanguageTask.workDirectory, pwd)
       val resultContext = processCode(preparedContext)
       val resultContextWithFiles = External.fetchOutputFiles(external, outputs, resultContext, External.relativeResolver(pwd), Seq(pwd))

@@ -38,7 +38,7 @@ case class FromContextSource(
   override def validate = v
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒
-    val fcp = FromContextSource.Parameters(p.context, executionContext)(p.random, p.newFile, p.fileService)
+    val fcp = FromContextSource.Parameters(p.context, executionContext)(p.random, p.tmpDirectory, p.fileService)
     f(fcp)
   }
 

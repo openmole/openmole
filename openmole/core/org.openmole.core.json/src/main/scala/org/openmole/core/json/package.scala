@@ -17,10 +17,10 @@ package object json:
   def variablesToJObject(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None) =
     JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v), default = default) })
 
-  def variablesToJValues(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None): Seq[JValue] =
-    variables.toList.map { v ⇒ toJSONValue(v.value, Some(v), default = default) }
+  def variablesToJValues(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): Seq[JValue] =
+    variables.toList.map { v ⇒ toJSONValue(v.value, Some(v), default = default, file = file) }
 
-  def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None): org.json4s.JValue = {
+  def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): org.json4s.JValue = {
     import org.json4s.*
 
     v match
@@ -31,7 +31,7 @@ package object json:
       case v: Double       ⇒ JDouble(v)
       case v: Boolean      ⇒ JBool(v)
       case v: Array[_]     ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
-      case v: java.io.File ⇒ JString(v.getAbsolutePath)
+      case v: java.io.File ⇒ file.map(_(v)).getOrElse(JString(v.getAbsolutePath))
       case v: Seq[_]       ⇒ JArray(v.map(v => toJSONValue(v, variable)).toList)
       case _               ⇒
         default match
@@ -43,10 +43,14 @@ package object json:
 
   }
 
-  def jValueToVariable(jValue: JValue, v: Val[_], unwrapArrays: Boolean = false, default: Option[org.json4s.JValue => Any] = None): Variable[_] =
-    import org.json4s.*
+  def cannotConvertFromJSON[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
-    def cannotConvert[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
+  def jValueToVariable(
+    jValue: JValue, v: Val[_],
+    unwrapArrays: Boolean = false,
+    default: Option[JValue => Any] = None,
+    file: Option[JValue => java.io.File] = None): Variable[_] =
+    import org.json4s.*
 
     def jValueToInt(jv: JValue) =
       jv match
@@ -54,7 +58,8 @@ package object json:
         case jv: JInt     ⇒ jv.num.intValue
         case jv: JLong    ⇒ jv.num.intValue
         case jv: JDecimal ⇒ jv.num.intValue
-        case _            ⇒ cannotConvert[Int](jv)
+        case jv: JString  => jv.s.toInt
+        case _            ⇒ cannotConvertFromJSON[Int](jv)
 
     def jValueToLong(jv: JValue) =
       jv match
@@ -62,7 +67,8 @@ package object json:
         case jv: JInt     ⇒ jv.num.longValue
         case jv: JLong    ⇒ jv.num.longValue
         case jv: JDecimal ⇒ jv.num.longValue
-        case _            ⇒ cannotConvert[Long](jv)
+        case jv: JString  => jv.s.toLong
+        case _            ⇒ cannotConvertFromJSON[Long](jv)
 
     def jValueToDouble(jv: JValue) =
       jv match
@@ -70,7 +76,8 @@ package object json:
         case jv: JInt     ⇒ jv.num.doubleValue
         case jv: JLong    ⇒ jv.num.doubleValue
         case jv: JDecimal ⇒ jv.num.doubleValue
-        case _            ⇒ cannotConvert[Double](jv)
+        case jv: JString  => jv.s.toDouble
+        case _            ⇒ cannotConvertFromJSON[Double](jv)
 
     def jValueToString(jv: JValue) =
       jv match
@@ -79,12 +86,16 @@ package object json:
         case jv: JLong    ⇒ jv.num.toString
         case jv: JDecimal ⇒ jv.num.toString
         case jv: JString  ⇒ jv.s
-        case _            ⇒ cannotConvert[String](jv)
+        case _            ⇒ cannotConvertFromJSON[String](jv)
 
     def jValueToBoolean(jv: JValue) =
       jv match
         case jv: JBool ⇒ jv.value
-        case _         ⇒ cannotConvert[Boolean](jv)
+        case _         ⇒ cannotConvertFromJSON[Boolean](jv)
+
+    def jValueToFile(jv: JValue) =
+      file.map(_(jv)).getOrElse:
+        new java.io.File(jValueToString(jv))
 
     (jValue, v) match
       case (value: JArray, Val.caseInt(v)) if unwrapArrays     ⇒ Variable(v, jValueToInt(value.arr.head))
@@ -103,6 +114,7 @@ package object json:
             case (value: JValue, c) if c == classOf[Long] ⇒ jValueToLong(value)
             case (value: JValue, c) if c == classOf[Boolean] ⇒ jValueToBoolean(value)
             case (value: JValue, c) if c == classOf[String] ⇒ jValueToString(value)
+            case (value: JValue, c) if c == classOf[java.io.File] ⇒ jValueToFile(value)
             case (jValue, c) ⇒
               (jValue, default) match
                 case (value: JValue, Some(serializer)) => serializer(value)
@@ -120,7 +132,7 @@ package object json:
       case (value: JValue, Val.caseDouble(v))  ⇒ Variable(v, jValueToDouble(value))
       case (value: JValue, Val.caseString(v))  ⇒ Variable(v, jValueToString(value))
       case (value: JValue, Val.caseBoolean(v)) ⇒ Variable(v, jValueToBoolean(value))
-      case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, new java.io.File(jValueToString(value)))
+      case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, jValueToFile(value))
       case (value, v) =>
         (value, v, default) match
           case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value))

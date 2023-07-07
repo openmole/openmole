@@ -272,7 +272,7 @@ object MoleExecution {
             outputRedirection = services.outputRedirection,
             loggerService = services.loggerService,
             random = services.newRandom,
-            newFile = services.tmpDirectory,
+            tmpDirectory = services.tmpDirectory,
             serializerService = services.serializerService,
             timeService = services.timeService)
         }

@@ -28,6 +28,7 @@ object OMROutputFormat:
       import org.json4s.*
       import org.json4s.jackson.JsonMethods.*
       import executionContext.serializerService
+      import executionContext.tmpDirectory
 
       given Encoder[MD] = methodData.encoder
       val format = OMROutputFormatDefault.value(f, default)
@@ -43,7 +44,9 @@ object OMROutputFormat:
               case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
               case f => (f.getParentFile / s"${f.getName}.omr", f.getParentFile)
 
-          def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent) =
+          val resultFileDirectoryName = OMR.resultFileDirectoryName(executionId)
+
+          def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent, fileDirectory: Option[String]) =
             import executionContext.timeService
 
             def methodJson =
@@ -75,6 +78,7 @@ object OMROutputFormat:
                 `data-mode` = mode,
                 `data-content` = dataContentValue,
                 `data-compression` = Some(Index.Compression.GZip),
+                `file-directory` = fileDirectory,
                 script = script,
                 `time-start` = executionContext.moleLaunchTime,
                 `time-save` = TimeService.currentTime
@@ -95,15 +99,11 @@ object OMROutputFormat:
             catch
              case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
 
-          def clean(methodFile: File, data: Seq[String]) =
-            methodFile.delete()
-            for d <- data do (directory / d).delete()
-
           directory.withLockInDirectory:
             val existingData =
               parseExistingData(methodFile) match
                 case Some((id, data)) if format.overwrite && id != executionContext.moleExecutionId =>
-                  clean(methodFile, data)
+                  OMR.delete(methodFile) //clean(methodFile, data)
                   Seq()
                 case Some((_, data)) => data
                 case None => Seq()
@@ -112,12 +112,18 @@ object OMROutputFormat:
 
             val fileName =
               if !append
-              then s"$dataDirectory/$executionPrefix-${executionContext.jobId}.omd"
-              else s"$dataDirectory/$executionPrefix.omd"
+              then s"$dataDirectoryName/$executionPrefix-${executionContext.jobId}.omd"
+              else s"$dataDirectoryName/$executionPrefix.omd"
 
             val dataFile = directory / fileName
+            val storeFileDirectory = directory / resultFileDirectoryName
 
-            def jsonContent = JArray(content.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue)).toList) }.toList)
+            def storeFile(f: File) =
+              val destinationPath = s"${fileService.hashNoCache(f)}/${f.getName}"
+              f.copy(storeFileDirectory / destinationPath)
+              org.json4s.JString(destinationPath)
+
+            def jsonContent = JArray(content.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
 
             dataFile.withPrintStream(append = append, create = true, gz = true) { ps ⇒
               if append && existingData.nonEmpty then ps.print(",\n")
@@ -126,7 +132,15 @@ object OMROutputFormat:
 
             def contentData = DataContent(content.section.map { s => DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
 
-            methodFile.withPrintStream(create = true, gz = true)(_.print(methodFormat(method, fileName, existingData, contentData).noSpaces))
+            // Is created by variablesToJValues if it found some files
+            def fileDirectoryValue =
+              if storeFileDirectory.exists()
+              then Some(resultFileDirectoryName)
+              else None
+
+            methodFile.withPrintStream(create = true, gz = true)(
+              _.print(methodFormat(method, fileName, existingData, contentData, fileDirectoryValue).noSpaces)
+            )
 
     override def validate(format: OMROutputFormat) = Validate.success
 

@@ -117,7 +117,7 @@ object ScalableValue {
         scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
       }
 
-    FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.newFile, p.fileService) }
+    FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.tmpDirectory, p.fileService) }
   }
 
 

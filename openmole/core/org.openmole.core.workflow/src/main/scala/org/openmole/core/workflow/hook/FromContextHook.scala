@@ -33,7 +33,7 @@ object FromContextHook {
     implicit def outputRedirection: OutputRedirection = executionContext.outputRedirection
     implicit def loggerService: LoggerService = executionContext.loggerService
     implicit def random: RandomProvider = executionContext.random
-    implicit def newFile: TmpDirectory = executionContext.newFile
+    implicit def newFile: TmpDirectory = executionContext.tmpDirectory
     implicit def serializerService: SerializerService = executionContext.serializerService
   }
 

@@ -191,10 +191,10 @@ object FromContext extends LowPriorityFromContext {
    * Parameters wrap a Context and implicit services
    * @param context
    * @param random
-   * @param newFile
+   * @param tmpDirectory
    * @param fileService
    */
-  case class Parameters(val context: Context)(implicit val random: RandomProvider, val newFile: TmpDirectory, val fileService: FileService)
+  case class Parameters(val context: Context)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
   //case class ValidationParameters(inputs: Seq[Val[_]], implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
 
   /**

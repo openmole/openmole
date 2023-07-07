@@ -167,7 +167,7 @@ case class JuliaTask(
           )
 
       val resultContext =
-        try containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
+        try containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
         catch
           case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
 
