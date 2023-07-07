@@ -77,7 +77,6 @@ object OMROutputFormat:
                  `data-file` = (existingData ++ Seq(fileName)).distinct,
                 `data-mode` = mode,
                 `data-content` = dataContentValue,
-                `data-compression` = Some(Index.Compression.GZip),
                 `file-directory` = fileDirectory,
                 script = script,
                 `time-start` = executionContext.moleLaunchTime,
