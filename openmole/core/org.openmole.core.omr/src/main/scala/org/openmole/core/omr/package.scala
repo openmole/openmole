@@ -265,7 +265,7 @@ object OMR:
         `time-save` = index.`time-save`
       )
 
-    val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.noSpaces).asInstanceOf[org.json4s.JObject]
+    val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.deepDropNullValues.noSpaces).asInstanceOf[org.json4s.JObject]
     destination.content =
       import org.json4s.jackson
       val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
