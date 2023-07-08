@@ -217,6 +217,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       timeSave = System.currentTimeMillis())
   )
 
+  override def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]] = Future.successful(None)
+
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
 
   override def marketIndex()(using BasePath): Future[MarketIndex] =
