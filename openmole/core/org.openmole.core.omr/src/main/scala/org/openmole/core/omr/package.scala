@@ -112,23 +112,26 @@ object OMR:
 //    files.toSeq
 
   def copy(omrFile: File, destination: File) =
-    val copyData = omrFile.getParentFile != destination.getParentFile
+    val originDirectory = omrFile.getParentFile
+    val destinationDirectory = destination.getParentFile
+    val copyData = originDirectory != destinationDirectory
     if copyData
     then
-      val destinationDataDirectory = destination.getParentFile
-      val executionId = indexData(omrFile).`execution-id`
-      dataFiles(omrFile).foreach((name, f) => f.copy(destinationDataDirectory / name))
-      resultFileDirectory(omrFile).foreach(_.copy(destinationDataDirectory / resultFileDirectoryName(executionId)))
+      dataFiles(omrFile).foreach((name, f) => f.copy(destinationDirectory / name))
+      val index = indexData(omrFile)
+      index.`file-directory`.foreach(d => (originDirectory / d).copy(destinationDirectory / d))
 
     omrFile copy destination
 
   def move(omrFile: File, destination: File) =
-    val moveData = omrFile.getParentFile != destination.getParentFile
+    val originDirectory = omrFile.getParentFile
+    val destinationDirectory = destination.getParentFile
+    val moveData = originDirectory != destinationDirectory
     if moveData
     then
       val destinationDataDirectory = destination.getParentFile
-      val executionId = indexData(omrFile).`execution-id`
-      resultFileDirectory(omrFile).foreach(_.move(destinationDataDirectory / resultFileDirectoryName(executionId)))
+      val index = indexData(omrFile)
+      index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
       dataFiles(omrFile).foreach((name, f) => f.move(destinationDataDirectory / name))
       val omrDataDirectory = dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
