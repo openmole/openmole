@@ -167,6 +167,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val omrContentRoute =
     omrContent.errorImplementedBy { p => apiImpl.omrContent(p) }
 
+  val omrFilesRoute =
+    omrFiles.errorImplementedBy { p => apiImpl.omrFiles(p) }
+
   val addPluginRoute =
     addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }
 
@@ -211,6 +214,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       getMarketEntryRoute,
       omrMethodRoute,
       omrContentRoute,
+      omrFilesRoute,
       addPluginRoute,
       removePluginRoute,
       listNotificationRoute,
@@ -268,7 +272,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
-        val hash = req.params.get(org.openmole.gui.shared.api.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
+        val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
+        val nameParam = req.params.get(org.openmole.gui.shared.api.Download.fileNameParam)
 
         import org.typelevel.ci.*
 
@@ -284,18 +289,20 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           import org.openmole.tool.stream.*
           import org.openmole.tool.archive.*
 
+          val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
+
           val st =
             fs2.io.readOutputStream[IO](64 * 1024): out =>
               IO.blocking[Unit]:
                 val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-                try tos.archive(f, includeTopDirectoryName = true)
+                try tos.archive(f, includeTopDirectoryName = topDirectory)
                 finally tos.close()
 
           Ok(st).map: r =>
             val r2 =
               r.withHeaders(
                 //org.http4s.headers.`Content-Length`(test.length()),
-                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.getName}.tgz"))
+                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${nameParam.getOrElse(f.getName)}.tgz"))
               )
 
             addHashHeader(r2, f)
@@ -326,7 +333,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
             val r2 =
               r.withHeaders(
                 //org.http4s.headers.`Content-Length`(test.length()),
-                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${f.baseName}.tgz"))
+                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${nameParam.getOrElse(f.baseName)}.tgz"))
               )
             addHashHeader(r2, f)
 

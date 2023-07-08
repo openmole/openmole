@@ -498,6 +498,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val omrFile = safePathToFile(result)
     OMR.methodName(omrFile)
 
+  def omrFiles(omr: SafePath): Option[SafePath] =
+    import services.*
+    val omrFile = safePathToFile(omr)
+    OMR.resultFileDirectory(omrFile).map: rf =>
+      fileToSafePath(rf)
+
   def omrContent(result: SafePath): GUIOMRContent =
     import services.*
     import GUIVariable.ValueType

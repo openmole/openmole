@@ -34,7 +34,11 @@ val convertOMRToJSONRoute = "file/omr/json"
 
 val fileTypeParam = "fileType"
 val pathParam = "path"
-val hashParam = "hash"
+
+object Download:
+  val hashParam = "hash"
+  val fileNameParam = "name"
+  val topDirectoryParam = "topDirectory"
 
 def hashHeader = "Content-Hash"
 
@@ -69,18 +73,23 @@ object Util:
     char.mkString("")
 
 def safePathToURLParams(sp: SafePath) =
+  import Download.*
   val uri = Util.toURI(sp.path.value.map(Util.encode))
   val fileType = sp.context
-  s"$pathParam=$uri&$fileTypeParam=${fileType.typeName}"
+    Seq(
+      s"$pathParam=$uri",
+      s"$fileTypeParam=${fileType.typeName}")
 
-def downloadFile(sp: SafePath, hash: Boolean = false) =
-  s"$downloadFileRoute?${safePathToURLParams(sp)}&$hashParam=$hash"
+def downloadFile(sp: SafePath, hash: Boolean = false, name: Option[String] = None, includeTopDirectoryInArchive: Option[Boolean] = None) =
+  import Download.*
+  val params = safePathToURLParams(sp) ++ includeTopDirectoryInArchive.map(d => s"$topDirectoryParam=$d") ++ name.map(n => s"$fileNameParam=$n") ++ Seq(s"$hashParam=$hash")
+  s"$downloadFileRoute?${params.mkString("&")}"
 
 def convertOMRToCSV(sp: SafePath) =
-  s"$convertOMRToCSVRoute?${safePathToURLParams(sp)}"
+  s"$convertOMRToCSVRoute?${safePathToURLParams(sp).mkString("&")}"
 
 def convertOMRToJSON(sp: SafePath) =
-  s"$convertOMRToJSONRoute?${safePathToURLParams(sp)}"
+  s"$convertOMRToJSONRoute?${safePathToURLParams(sp).mkString("&")}"
 
 trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
    export io.circe.generic.auto.*
