@@ -146,7 +146,7 @@ object OMR:
       OMR.dataFiles(omrFile).map(_._2.size).sum +
       OMR.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def toVariables(file: File): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
+  def toVariables(file: File, relativePath: Boolean = false): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
     val omrDirectory = file.getParentFile
     val data: File = omrDirectory / index.`data-file`.last
@@ -156,8 +156,8 @@ object OMR:
       v match
         case jv: org.json4s.JString =>
           index.`file-directory` match
-            case Some(fileDirectory) => omrDirectory / fileDirectory / jv.s
-            case None => File(jv.s)
+            case Some(fileDirectory) if !relativePath => omrDirectory / fileDirectory / jv.s
+            case _ => File(jv.s)
         case _ => cannotConvertFromJSON[File](v)
 
     index.`data-mode` match
@@ -205,7 +205,7 @@ object OMR:
     arrayOnRow: Boolean = false,
     gzip: Boolean = false) =
     import org.openmole.core.csv.*
-    val variable = toVariables(file)
+    val variable = toVariables(file, relativePath = true)
 
     if variable.size == 1
     then
@@ -235,7 +235,7 @@ object OMR:
     destination: File)(using SerializerService) =
 
     val index = indexData(file)
-    def variables = toVariables(file)
+    def variables = toVariables(file, relativePath = true)
 
     case class JSONContent(
       `openmole-version`: String,
