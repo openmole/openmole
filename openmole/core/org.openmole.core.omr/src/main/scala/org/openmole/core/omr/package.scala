@@ -68,7 +68,7 @@ case class Index(
  `data-file`: Seq[String],
  `data-mode`: Index.DataMode,
  `data-content`: DataContent,
- `data-compression`: Option[Index.Compression],
+ `data-compression`: Option[Index.Compression] = None,
  `file-directory`: Option[String],
  script: Option[Index.Script],
  `time-start`: Long,

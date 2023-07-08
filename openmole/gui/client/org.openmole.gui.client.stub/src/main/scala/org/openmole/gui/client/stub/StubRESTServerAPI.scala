@@ -67,9 +67,6 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   val notification = scala.collection.mutable.ListBuffer[NotificationEvent]()
   val notificationId = new AtomicLong()
 
-  override def size(safePath: SafePath)(using BasePath): Future[Long] =
-    Future.successful(files(safePath).content.size)
-
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]] =
     val copies = paths.map((p, d) => d -> files(p))
     files ++= copies
