@@ -22,7 +22,7 @@ import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
 import org.json4s.JArray
-import org.json4s.JsonAST.JField
+import org.json4s.JsonAST.{JField, JString}
 import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.json.*
 import org.openmole.core.context.{ValType, Variable}
@@ -250,8 +250,9 @@ object OMR:
       org.json4s.JArray(
         variables.map { (s, variables) =>
           def content: Seq[(String, org.json4s.JValue)] =
+            def fileToJSON(f: File) = JString(f.getPath)
             s.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
-              Seq("variables" -> variablesToJObject(variables, default = Some(anyToJValue)))
+              Seq("variables" -> variablesToJObject(variables, default = Some(anyToJValue), file = Some(fileToJSON)))
           org.json4s.JObject(content.toList)
         }.toList
       )
