@@ -19,9 +19,11 @@ package org.openmole.core.authentication
 
 import java.io.File
 
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.workspace._
-import org.openmole.tool.file._
+import org.openmole.core.workspace.*
+import org.openmole.tool.file.*
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.parser.*
 
 object AuthenticationStore {
 
@@ -42,28 +44,34 @@ class AuthenticationStore(_baseDir: File) {
     _baseDir
   }
 
-  def /(name: String) = new AuthenticationStore(new File(baseDir, name))
+  def store(name: String) = new File(baseDir, name)
 
-  def save(obj: Any, name: String)(implicit serializerService: SerializerService) = {
+  def save[T: Encoder](name: String, obj: Seq[T]): Unit = synchronized {
     val file = new File(baseDir, name)
-    serializerService.serialize(obj, file)
+    file.content = obj.asJson.noSpaces
   }
 
-  def load[T](name: String)(implicit serializerService: SerializerService): T = {
-    val file = new File(baseDir, name)
-    loadFile(file)
+  def load[T: Decoder](name: String): Seq[T] = synchronized {
+    val file = store(name)
+    if file.exists()
+    then decode[Seq[T]](file.content).toTry.get
+    else Seq()
   }
 
-  def loadFile[T](file: File)(implicit serializerService: SerializerService): T =
-    serializerService.deserialize[T](file)
 
-  def delete() = {
+  def modify[T: Encoder: Decoder](name: String, m: Seq[T] => Seq[T]) = synchronized {
+    save(name, m(load(name)))
+  }
+  
+  def clear(name: String) = synchronized { 
+    store(name).delete()
+  }
+
+  def delete() = synchronized {
     baseDir.recursiveDelete
     baseDir.mkdirs
   }
 
-  def all(implicit serializerService: SerializerService) =
-    baseDir.listRecursive(_.isFile).map { loadFile }
 
 }
 

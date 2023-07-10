@@ -97,7 +97,7 @@ object NoisyNichedNSGA2Algorithm {
   import CDGenome._
   import NoisyIndividual._
   import cats.implicits._
-  import shapeless._
+  //import shapeless._
 
   def aggregatedFitness[P: Manifest](aggregation: Vector[P] ⇒ Vector[Double]): Individual[P] ⇒ Vector[Double] = NoisyNSGA2.fitness[P](aggregation)
   case class Result[N, P](continuous: Vector[Double], discrete: Vector[Int], fitness: Vector[Double], niche: N, replications: Int, individual: Individual[P])
@@ -183,15 +183,15 @@ object NoisyNichedNSGA2Algorithm {
 object NichedNSGA2 {
 
   object NichedElement {
-    implicit def fromValInt(v: Val[Int]) = Discrete(v)
+    implicit def fromValInt(v: Val[Int]): Discrete = Discrete(v)
 
-    implicit def fromAggregateString[A](a: Aggregate[Val[A], String]) = Aggregated(a.value, a.aggregate)
+    implicit def fromAggregateString[A](a: Evaluate[Val[A], String]): Aggregated = Aggregated(a.value, a.evaluate)
 
-    implicit def fromAggregate[A, V[_]: FromArray](a: Aggregate[Val[A], V[A] ⇒ Int]) = {
+    implicit def fromAggregate[A, V[_]: FromArray](a: Evaluate[Val[A], V[A] ⇒ Int]): Aggregated = {
       val f =
         FromContext { p ⇒
           import p._
-          a.aggregate(implicitly[FromArray[V]].apply(context(a.value.array)))
+          a.evaluate(implicitly[FromArray[V]].apply(context(a.value.array)))
         }
 
       Aggregated(a.value, f)
@@ -237,7 +237,7 @@ object NichedNSGA2 {
 
   sealed trait NichedElement
 
-  object DeterministicParams {
+  object DeterministicNichedNSGA2 {
 
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Exact]) = FromContext { p ⇒
       import p._
@@ -250,7 +250,7 @@ object NichedNSGA2 {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[DeterministicNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -259,7 +259,7 @@ object NichedNSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicNichedNSGA2) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -267,6 +267,11 @@ object NichedNSGA2 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
@@ -316,7 +321,7 @@ object NichedNSGA2 {
     }
   }
 
-  case class DeterministicParams(
+  case class DeterministicNichedNSGA2(
     nicheSize:           Int,
     niche:               FromContext[Niche[CDGenome.DeterministicIndividual.Individual[Phenotype], Vector[Int]]],
     genome:              Genome,
@@ -325,7 +330,7 @@ object NichedNSGA2 {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticNichedNSGA2 {
 
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Noisy]) = FromContext { p ⇒
       import p._
@@ -344,7 +349,7 @@ object NichedNSGA2 {
       }
     }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -353,7 +358,7 @@ object NichedNSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticNichedNSGA2) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -361,6 +366,11 @@ object NichedNSGA2 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
@@ -419,7 +429,7 @@ object NichedNSGA2 {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticNichedNSGA2(
     nicheSize:           Int,
     niche:               FromContext[Niche[mgo.evolution.algorithm.CDGenome.NoisyIndividual.Individual[Phenotype], Vector[Int]]],
     operatorExploration: Double,
@@ -449,11 +459,11 @@ object NichedNSGA2 {
             Objectives.validate(exactObjectives, outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(
+          DeterministicNichedNSGA2(
             genome = genome,
             objectives = exactObjectives,
             phenotypeContent = phenotypeContent,
-            niche = DeterministicParams.niche(phenotypeContent, niche.map(NichedElement.toExact)),
+            niche = DeterministicNichedNSGA2.niche(phenotypeContent, niche.map(NichedElement.toExact)),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
             reject = reject.option),
@@ -474,9 +484,9 @@ object NichedNSGA2 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(
+          StochasticNichedNSGA2(
             nicheSize = nicheSize,
-            niche = StochasticParams.niche(phenotypeContent, niche.map(NichedElement.toNoisy)),
+            niche = StochasticNichedNSGA2.niche(phenotypeContent, niche.map(NichedElement.toNoisy)),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             genome = genome,
             phenotypeContent = phenotypeContent,
@@ -500,19 +510,22 @@ import monocle.macros._
 
 object NichedNSGA2Evolution {
 
-  implicit def method: ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
+  given EvolutionMethod[NichedNSGA2Evolution] =
+    p =>
+      NichedNSGA2(
+        niche = p.niche,
+        genome = p.genome,
+        outputs = p.evaluation.outputs,
+        nicheSize = p.nicheSize,
+        objective = p.objective,
+        stochastic = p.stochastic,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          NichedNSGA2(
-            niche = p.niche,
-            genome = p.genome,
-            outputs = p.evaluation.outputs,
-            nicheSize = p.nicheSize,
-            objective = p.objective,
-            stochastic = p.stochastic,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -521,11 +534,11 @@ object NichedNSGA2Evolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[NichedNSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[NichedNSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
-@Lenses case class NichedNSGA2Evolution(
+case class NichedNSGA2Evolution(
   evaluation:   DSL,
   termination:  OMTermination,
   niche:        Seq[NichedElement],

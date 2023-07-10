@@ -34,6 +34,11 @@ class Activator extends BundleActivator {
         PatternHighLight("Replication")
       )
 
-    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
+    PluginRegistry.register(
+      this,
+      Vector(this.getClass.getPackage),
+      highLight = keyWords,
+      methodNames = Vector(Replication.methodName, DirectSampling.methodName)
+    )
   }
 }

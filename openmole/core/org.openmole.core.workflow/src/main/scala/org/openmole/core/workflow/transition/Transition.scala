@@ -18,14 +18,13 @@
 package org.openmole.core.workflow.transition
 
 import cats.implicits._
-import org.openmole.core.context.{ Context, Val, Variable, _ }
+import org.openmole.core.context.*
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.Condition
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.ContextAggregator
 import org.openmole.core.workflow.validation.TypeUtil._
 import org.openmole.core.workflow.validation._
 
@@ -283,26 +282,27 @@ object AggregationTransition {
 
   def aggregatedOutputs(moleExecution: MoleExecution, transition: AggregationTransition) = transition.start.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).toVector
 
-  def aggregateOutputs(moleExecution: MoleExecution, transition: AggregationTransition, results: AggregationTransitionRegistryRecord): Context = {
+  def aggregateOutputs(moleExecution: MoleExecution, transition: AggregationTransition, results: AggregationTransitionRegistryRecord): Context =
     val vals = aggregatedOutputs(moleExecution, transition)
+
     val resultValues = results.values.value
     val size = resultValues.size
 
-    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).unzip._1.transpose
+    def resultsArrays = (resultValues zip results.ids.value).sortBy(_._2).map(_._1).transpose
 
-    def variables = (resultsArrays zip vals).map {
-      case (values, v) ⇒
-        val result = v.`type`.manifest.newArray(values.size)
-        var i = 0
-        for { x ← values } {
-          java.lang.reflect.Array.set(result, i, x)
-          i += 1
-        }
-        Variable.unsecure(v, result)
-    }
+    def variables = (resultsArrays zip vals).map: (values, v) ⇒
+      val result = v.`type`.manifest.newArray(values.size)
+      var i = 0
+      for
+        x ← values
+      do
+        java.lang.reflect.Array.set(result, i, x)
+        i += 1
+
+      Variable.unsecure(v, result)
+
 
     new collection.mutable.WrappedArray.ofRef(variables)
-  }
 
   def aggregate(aggregationTransition: AggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket, executionContext: MoleExecutionContext) = {
     import executionContext.services._
@@ -317,40 +317,37 @@ object AggregationTransition {
 
   def hasBeenPerformed(aggregationTransition: AggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket): Boolean = !subMole.aggregationTransitionRegistry.isRegistred(aggregationTransition, ticket)
 
-  def allAggregationTransitionsPerformed(aggregationTransition: AggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket) = {
-
-    def oneAggregationTransitionNotPerformed(subMole: SubMoleExecutionState, ticket: Ticket): Boolean = {
+  def allAggregationTransitionsPerformed(aggregationTransition: AggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket) =
+    import scala.util.boundary
+    def oneAggregationTransitionNotPerformed(subMole: SubMoleExecutionState, ticket: Ticket): Boolean = boundary:
       val mole = subMole.moleExecution.mole
       val alreadySeen = new HashSet[MoleCapsule]
       val toProcess = new ListBuffer[(MoleCapsule, Int)]
       toProcess += ((aggregationTransition.start, 0))
 
-      while (!toProcess.isEmpty) {
+      while (!toProcess.isEmpty)
         val (capsule, level) = toProcess.remove(0)
 
-        if (!alreadySeen(capsule)) {
+        if !alreadySeen(capsule)
+        then
           alreadySeen += capsule
-          mole.slots(capsule).toList.flatMap { mole.inputTransitions }.foreach {
+          mole.slots(capsule).toList.flatMap { mole.inputTransitions }.foreach:
             case t if Transition.isExploration(t) ⇒ if (level > 0) toProcess += ((t.start, level - 1))
             case t: AggregationTransition ⇒
-              if (level == 0 && t != aggregationTransition && !hasBeenPerformed(t, subMole, ticket)) return true
+              if (level == 0 && t != aggregationTransition && !hasBeenPerformed(t, subMole, ticket)) boundary.break(true)
               toProcess += ((t.start, level + 1))
             case t ⇒ toProcess += ((t.start, level))
-          }
-          mole.outputTransitions(capsule).foreach {
+
+          mole.outputTransitions(capsule).foreach:
             case t if Transition.isExploration(t) ⇒ toProcess += ((t.end.capsule, level + 1))
             case t: AggregationTransition ⇒
-              if (level == 0 && t != aggregationTransition && !hasBeenPerformed(t, subMole, ticket)) return true
+              if (level == 0 && t != aggregationTransition && !hasBeenPerformed(t, subMole, ticket)) boundary.break(true)
               if (level > 0) toProcess += ((t.end.capsule, level - 1))
             case t ⇒ toProcess += ((t.end.capsule, level))
-          }
-        }
-      }
+
       false
-    }
 
     !oneAggregationTransitionNotPerformed(subMole, ticket)
-  }
 
 }
 
@@ -396,7 +393,7 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
 
   override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
     MoleExecutionMessage.PerformTransition(subMole) { subMoleState ⇒
-      def perform() {
+      def perform() = {
         val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
         val subMoleParent = subMoleState.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
         //subMoleParent.transitionLock { ITransition.submitNextJobsIfReady(this)(context.values, parentTicket, subMoleParent) }

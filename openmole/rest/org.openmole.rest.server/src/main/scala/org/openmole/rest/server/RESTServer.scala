@@ -35,11 +35,11 @@ object RESTLifeCycle {
 
 class RESTLifeCycle extends LifeCycle {
 
-  override def init(context: ServletContext) {
+  override def init(context: ServletContext) = {
     val args = context.getAttribute(RESTLifeCycle.arguments).asInstanceOf[RESTLifeCycle.Arguments]
     context.mount(
       new RESTAPI {
-        lazy val arguments = args
+        val arguments = args
       },
       "/*"
     )
@@ -76,12 +76,12 @@ class RESTServer(port: Option[Int], hostName: Option[String], services: Services
     server
   }
 
-  def run() {
+  def run()= {
     server.start
     server.join
   }
 
-  def end() {
+  def end() = {
     server.stop
     server.join
   }

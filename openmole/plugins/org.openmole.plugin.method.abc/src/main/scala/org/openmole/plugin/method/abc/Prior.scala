@@ -1,7 +1,6 @@
 package org.openmole.plugin.method.abc
 
 import mgo.abc._
-import monocle.macros.Lenses
 import org.apache.commons.math3.distribution._
 import org.apache.commons.math3.random.RandomGenerator
 import org.openmole.core.dsl._
@@ -64,7 +63,7 @@ object UnivariatePrior {
         def apply(t: T) = f(t)
       }
 
-    implicit def factorIsPrior[D](implicit bounded: BoundedFromContextDomain[D, Double]) =
+    implicit def factorIsPrior[D](implicit bounded: BoundedFromContextDomain[D, Double]): ToUnivariatePrior[Factor[D, Double]] =
       ToUnivariatePrior[Factor[D, Double]] { f ⇒
         val (min, max) = bounded(f.domain).domain
         UniformPrior(f.value, min, max)

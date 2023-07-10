@@ -17,14 +17,9 @@
 package org.openmole.core
 
 package object event {
-  trait Event[-T] {
-    val creationTime = System.currentTimeMillis()
-  }
-
-  type Listner[T] = PartialFunction[(T, Event[T]), Unit]
-
+  export EventDispatcher.Listner
   implicit class EventDispatcherDecorator[T](o: T) {
-    def listen(listener: Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
+    def listen(listener: EventDispatcher.Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
   }
-
 }
+

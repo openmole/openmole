@@ -17,21 +17,23 @@
 
 package org.openmole.console
 
-import jline.console.ConsoleReader
-import org.openmole.core.compiler.ScalaREPL
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.jline.reader.*
+import org.jline.terminal.*
+import org.jline.keymap.*
+import org.openmole.core.compiler.*
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.preference.Preference
-import org.openmole.core.project._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.project.*
+import org.openmole.core.tools.io.Prettifier.*
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.core.services._
-import org.openmole.core.workflow.mole._
+import org.openmole.core.services.*
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
 
 import scala.annotation.tailrec
-import scala.util._
+import scala.util.*
 
 object Console extends JavaLogger {
 
@@ -39,21 +41,23 @@ object Console extends JavaLogger {
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  private def passwordReader = {
-    val reader = new ConsoleReader()
-    reader.setExpandEvents(false)
-    reader
-  }
+  private def withReader[T](f: LineReader => T) =
+    val terminal = TerminalBuilder.builder.build()
+    val reader = LineReaderBuilder.builder().terminal(terminal).build()
+    try f(reader)
+    finally terminal.close()
 
-  @tailrec def askPassword(msg: String = "password"): String = {
-    val password = passwordReader.readLine(s"$msg             :", '*')
-    val confirmation = passwordReader.readLine(s"$msg confirmation:", '*')
+  @tailrec def askPassword(msg: String = "password"): String = 
+    val (password, confirmation) = 
+      withReader { reader =>
+        val password = reader.readLine(s"$msg             :", '*')
+        val confirmation = reader.readLine(s"$msg confirmation:", '*')
+        (password, confirmation)
+      }
     if (password != confirmation) {
       println("Password and confirmation don't match.")
       askPassword(msg)
-    }
-    else password
-  }
+    } else password
 
   def testPassword(password: String)(implicit preference: Preference): Boolean = {
     val cypher = Cypher(password)
@@ -69,7 +73,7 @@ object Console extends JavaLogger {
   @tailrec def initPassword(implicit preference: Preference): String =
     if (Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)) ""
     else if (Preference.passwordChosen(preference)) {
-      val password = passwordReader.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*')
+      val password = withReader(_.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*'))
       val cypher = Cypher(password)
       if (!Preference.passwordIsCorrect(cypher, preference)) initPassword(preference)
       else password
@@ -96,13 +100,25 @@ object Console extends JavaLogger {
     res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
     if (interactive && !res.isEmpty) {
       print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
-      val reader = new ConsoleReader()
-      val c = reader.readCharacter('y', 'n', 'Y', 'N').asInstanceOf[Char]
-      if (c.toLower == 'y') res.unzip._1.foreach(_.delete())
-      println()
+      val terminal = TerminalBuilder.terminal()
+      val reader = new BindingReader(terminal.reader())
+      
+      try 
+        @scala.annotation.tailrec def readChar: Char =
+          val c = reader.readCharacter().asInstanceOf[Char]
+          if(Set('y', 'n', 'Y', 'N').contains(c)) c  else readChar
+
+        val c = readChar
+        if (c.toLower == 'y') res.unzip._1.foreach(_.delete())
+
+        println()
+      finally terminal.close()
+        
     }
     res
   }
+
+  class CompiledDSL(val dsl: DSL, val compilationContext: CompilationContext, val raw: Interpreter.RawCompiled)
 
 }
 
@@ -124,63 +140,62 @@ class Console(script: Option[String] = None) {
         import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
         withREPL(variables) { loop ⇒
-          loop.storeErrors = false
-          loop.loopWithExitCode
+          //loop.storeErrors = false
+          //loop.loopWithExitCode
+          loop.loop
+          0
         }
       case Some(script) ⇒
         val scriptFile = new File(script)
-        val runServices = {
-          import services._
-          Services.copy(services)(fileServiceCache = FileServiceCache())
-        }
-
-        Project.compile(workDirectory.getOrElse(scriptFile.getParentFileSafe), scriptFile, args)(runServices) match {
-          case ScriptFileDoesNotExists() ⇒
-            println("File " + scriptFile + " doesn't exist.")
-            ExitCodes.scriptDoesNotExist
-          case e: CompilationError ⇒
-            services.tmpDirectory.directory.recursiveDelete
-            println(e.error.stackString)
-            ExitCodes.compilationError
-          case compiled: Compiled ⇒
-            Try(compiled.eval) match {
-              case Success(res) ⇒
-                import runServices._
-                val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compiled.compilationContext))
-                val ex = DSL.toPuzzle(res).toExecution()(moleServices)
-                Try(ex.run) match {
-                  case Failure(e) ⇒
-                    println(e.stackString)
-                    ExitCodes.executionError
-                  case Success(_) ⇒
-                    ExitCodes.ok
-                }
+        load(scriptFile, args, workDirectory) match
+          case Right(dsl) =>
+            Try(Command.start(dsl.dsl, dsl.compilationContext).hangOn()) match
               case Failure(e) ⇒
-                services.tmpDirectory.directory.recursiveDelete
-                println(s"Error during script evaluation: ")
-                print(e.stackString)
-                ExitCodes.compilationError
-            }
-
-        }
+                println(e.stackString)
+                ExitCodes.executionError
+              case Success(_) ⇒
+                ExitCodes.ok
+          case Left(c) => c
     }
   }
 
-  def withREPL[T](args: ConsoleVariables)(f: ScalaREPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val loop =
-      OpenMOLEREPL.newREPL(
-        args,
-        quiet = false
-      )
-
-    loop.beQuietDuring {
-      loop.bind(commandsName, new Command(loop, args))
-      loop interpret s"import $commandsName._"
+  def load(script: File, args: Seq[String], workDirectory: Option[File])(implicit services: Services): Either[Int, Console.CompiledDSL] =
+    val runServices = {
+      import services._
+      Services.copy(services)(fileServiceCache = FileServiceCache())
     }
 
-    f(loop)
-    //    try f(loop)
-    //    finally loop.close
+    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match {
+      case ScriptFileDoesNotExists() ⇒
+        println("File " + script + " doesn't exist.")
+        Left(ExitCodes.scriptDoesNotExist)
+      case e: CompilationError ⇒
+        services.tmpDirectory.directory.recursiveDelete
+        println(e.error.stackString)
+        Left(ExitCodes.compilationError)
+      case compiled: Compiled ⇒
+        Try(compiled.eval(args)) match {
+          case Success(res) ⇒ Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
+          case Failure(e) ⇒
+            services.tmpDirectory.directory.recursiveDelete
+            println(s"Error during script evaluation: ")
+            print(e.stackString)
+            Left(ExitCodes.compilationError)
+        }
+
+    }
+
+  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
+    args.workDirectory.mkdirs()
+
+    val loop = OpenMOLEREPL.newREPL(quiet = false)
+
+    ConsoleVariables.bindVariables(loop, args)
+    loop.bind(commandsName, new Command(loop, args))
+    loop.eval(s"import $commandsName._")
+
+    try f(loop)
+    finally loop.close
   }
 
 }

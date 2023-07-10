@@ -1,6 +1,6 @@
 package org.openmole.core.dsl
 
-package object extension {
+package object extension:
 
   type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
   lazy val FromContext = org.openmole.core.expansion.FromContext
@@ -11,9 +11,9 @@ package object extension {
   type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
   def CacheKey = org.openmole.tool.cache.CacheKey
 
-  type ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
-  def ScalarOrSequenceOfDouble = org.openmole.core.workflow.tools.ScalarOrSequenceOfDouble
+  export org.openmole.core.workflow.tools.ScalableValue
 
+  export org.openmole.core.workflow.format.WritableOutput.Display
   type Hook = org.openmole.core.workflow.hook.FromContextHook
   def Hook = org.openmole.core.workflow.hook.Hook
   def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook
@@ -22,9 +22,11 @@ package object extension {
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
   def Source = org.openmole.core.workflow.mole.Source
 
-  type Task = org.openmole.core.workflow.task.Task
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
-  def Task = org.openmole.core.workflow.task.FromContextTask
+  export org.openmole.core.workflow.task.ClosureTask
+  export org.openmole.core.workflow.task.Task
+
+  export org.openmole.core.workflow.task.TaskExecutionContext
 
   type Grouping = org.openmole.core.workflow.grouping.Grouping
 
@@ -64,12 +66,10 @@ package object extension {
   type Context = org.openmole.core.context.Context
   def Context = org.openmole.core.context.Context
 
-  type WritableOutput = org.openmole.core.workflow.format.WritableOutput
-  val WritableOutput = org.openmole.core.workflow.format.WritableOutput
+  export org.openmole.core.workflow.format.WritableOutput
 
   val OutputFormat = org.openmole.core.workflow.format.OutputFormat
   type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
-  type OutputContent = OutputFormat.OutputContent
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
   def ExpandedString = org.openmole.core.expansion.ExpandedString
@@ -78,22 +78,28 @@ package object extension {
   type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
   type In[+A, +B] = org.openmole.core.keyword.In[A, B]
   type :=[+A, +B] = org.openmole.core.keyword.:=[A, B]
-  type Aggregate[+A, B] = org.openmole.core.keyword.Aggregate[A, B]
+  type Evaluate[+A, B] = org.openmole.core.keyword.Evaluate[A, B]
   type Delta[+A, +B] = org.openmole.core.keyword.Delta[A, B]
   type As[+A, +B] = org.openmole.core.keyword.As[A, B]
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
   type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
-  type ValueAssignment[T] = org.openmole.core.workflow.builder.ValueAssignment[T]
+  export org.openmole.core.workflow.builder.{
+      ValueAssignment,
+      InputOutputConfig,
+      InfoConfig,
+      MappedInputOutputConfig,
+      Mapped,
+      InputOutputBuilder,
+      InfoBuilder,
+      MappedInputOutputBuilder,
+      Setter
+    }
 
   def On = org.openmole.core.keyword.On
   def By = org.openmole.core.keyword.By
-  def Aggregate = org.openmole.core.keyword.Aggregate
+  def Aggregate = org.openmole.core.keyword.Evaluate
 
-  type TmpDirectory = org.openmole.core.workspace.TmpDirectory
-  def TmpDirectory = org.openmole.core.workspace.TmpDirectory
-
-  type FileService = org.openmole.core.fileservice.FileService
 
   type Validate = org.openmole.core.expansion.Validate
   def Validate = org.openmole.core.expansion.Validate
@@ -107,4 +113,27 @@ package object extension {
 
   type JavaLogger = org.openmole.tool.logger.JavaLogger
   def Logger = org.openmole.tool.logger.LoggerService
-}
+
+  export org.openmole.tool.types.TypeTool.ManifestDecoration
+
+  export org.openmole.core.timeservice.TimeService
+  export org.openmole.core.pluginmanager.PluginManager
+  export org.openmole.core.workflow.validation.ValidateTask
+
+  export org.openmole.core.preference.Preference
+  export org.openmole.core.threadprovider.ThreadProvider
+  export org.openmole.core.workspace.{TmpDirectory, Workspace}
+  export org.openmole.core.fileservice.FileService
+  export org.openmole.core.outputmanager.OutputManager
+  export org.openmole.tool.outputredirection.OutputRedirection
+  export org.openmole.core.networkservice.NetworkService
+  export org.openmole.core.serializer.SerializerService
+
+  export org.openmole.core.highlight.HighLight
+  export org.openmole.core.pluginregistry.PluginRegistry
+
+  export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
+  export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault}
+  export org.openmole.core.workflow.format.OutputFormat.OutputContent
+
+

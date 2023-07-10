@@ -44,46 +44,53 @@ object ExplorationTask {
    * @param sampling
    * @return
    */
-  def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, sampling: IsSampling[S]) =
+  inline def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, inline isSampling: IsSampling[S]) =
+    def sampling() = isSampling(s)
+    build(sampling)
+
+  def build(sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
       val variablesValues = {
-        val samplingValue = sampling(s).sampling.from(context).toVector
+        val sValue = sampling()
+        val samplingValue = sValue.sampling.from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[_]] ++ sampling(s).outputs.map { p ⇒
-            p → p.`type`.manifest.newArray(samplingValue.size)
+          TreeMap.empty[Val[_], Array[_]] ++ sValue.outputs.map { p ⇒
+             p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
         for {
-          (sample, i) ← samplingValue.zipWithIndex
-          v ← sample
-        } values.get(v.prototype) match {
-          case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
-          case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
-        }
+           (sample, i) ← samplingValue.zipWithIndex
+           v ← sample
+         } values.get(v.prototype) match {
+           case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
+           case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
+         }
 
-        values
-      }
+         values
+       }
 
-      variablesValues.map {
-        case (k, v) ⇒
-          try Variable.unsecure(k.toArray, v)
-          catch {
-            case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
-          }
-      }: Context
-    } set (
-      inputs += (sampling(s).inputs.toSeq: _*),
-      exploredOutputs += (sampling(s).outputs.toSeq.map(_.toArray): _*)
-    ) withValidate { sampling(s).validate }
+       variablesValues.map {
+         case (k, v) ⇒
+           try Variable.unsecure(k.toArray, v)
+           catch {
+             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
+           }
+       }: Context
+     } set (
+       inputs ++= sampling().inputs.toSeq,
+       exploredOutputs ++= sampling().outputs.toSeq.map(_.toArray)
+     ) withValidate { sampling().validate }
+
+
 
   /**
    * Given a [[MoleCapsule]], function to test if a given prototype is explored by it
    * @param c
    * @return
    */
-  def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) = (p: Val[_]) ⇒ c.task(mole, sources, hooks).outputs.explored(p)
+  def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) = (p: Val[_]) ⇒ Task.outputs(c.task(mole, sources, hooks)).explored(p)
 
 }

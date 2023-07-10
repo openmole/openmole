@@ -1,12 +1,13 @@
 package org.openmole.site
 
 import scala.scalajs.js.annotation._
-import scalatags.JsDom.all._
-import rx._
-
-import scaladget.lunr.{ IIndexSearchResult, Importedjs, Index }
-import scala.scalajs.js.Dynamic.{ literal ⇒ lit }
+import scaladget.lunr.{IIndexSearchResult, Importedjs, Index}
+import scala.scalajs.js.Dynamic.{literal ⇒ lit}
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSExportTopLevel
+import com.raquo.laminar.api.L._
+import org.scalajs.dom
+import org.scalajs.dom.document
 
 /*
  * Copyright (C) 09/05/17 // mathieu.leclaire@openmole.org
@@ -25,16 +26,12 @@ import scala.scalajs.js
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@JSExportTopLevel("SiteJS")
+
+//@JSExportAll
+@JSExportTopLevel(name = "openmole_site")
+@JSExportAll
 object SiteJS {
 
-  @JSExport
-  def main(args: Array[String]): Unit = {
-    Highlighting.init
-    div.render
-  }
-
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
 
   @js.native
   trait IndexEntry extends js.Object {
@@ -48,10 +45,9 @@ object SiteJS {
   val lunrIndex: Var[Option[Index]] = Var(None)
   var entries: Entries = collection.mutable.Map.empty
 
-  @JSExport
   def loadIndex(array: js.Array[js.Any]): Unit = {
-    Search.build(() ⇒ getIndex)
-    indexArray.update(array)
+    indexArray.set(array)
+    Search.build
   }
 
   def doIndex(indexArray: js.Array[js.Any]) = {
@@ -69,16 +65,16 @@ object SiteJS {
       })
     })
 
-    lunrIndex() = Some(index)
+    lunrIndex.set(Some(index))
   }
 
   def getIndex: Option[Index] =
-    //Load index cache
-    lunrIndex.now match {
-      case None ⇒ indexArray.now.size match {
+  //Load index cache
+    lunrIndex.now() match {
+      case None ⇒ indexArray.now().size match {
         case 0 ⇒ None
         case _ ⇒
-          doIndex(indexArray.now)
+          doIndex(indexArray.now())
           getIndex
       }
       case i: Option[Index] ⇒ i
@@ -90,21 +86,9 @@ object SiteJS {
     }.getOrElse(Seq())
   }
 
-  @JSExport
-  def loadBlogPosts(): Unit = {
-    BlogPosts.fetch
-
-    Rx {
-      BlogPosts.all()
-    }
-  }
-
-  @JSExport
   def profileAnimation(): Unit = SVGStarter.decorateTrigger(shared.profile.button, shared.profile.animation, 11000)
 
-  @JSExport
   def pseAnimation(): Unit = SVGStarter.decorateTrigger(shared.pse.button, shared.pse.animation, 11000)
 
-  @JSExport
   def sensitivityAnimation(): Unit = SVGStarter.decorateTrigger(shared.sensitivity.button, shared.sensitivity.animation, 8000)
 }

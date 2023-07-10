@@ -17,7 +17,7 @@
  */
 package org.openmole.core.project
 
-import org.openmole.core.compiler.ScalaREPL
+import org.openmole.core.compiler._
 import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
@@ -27,7 +27,9 @@ import org.openmole.core.workspace.TmpDirectory
 
 object OpenMOLEREPL {
 
-  def autoImports: Seq[String] = PluginRegistry.pluginsInfo.toSeq.flatMap(_.namespaces).map(n ⇒ s"${n.value}._")
+  def autoImports: Seq[String] =
+    PluginRegistry.pluginsInfo.flatMap(_.namespaces).flatMap(n ⇒ Seq(s"${n.value}.*", s"${n.value}.given"))
+
   def keywordNamespace = "om"
 
   def autoImportTraitsCode = {
@@ -42,8 +44,8 @@ object OpenMOLEREPL {
   }
 
   def dslImport = Seq(
-    classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + "._",
-    classOf[org.openmole.core.workflow.builder.DefinitionScope].getName + ".user._"
+    classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + ".*",
+    classOf[org.openmole.core.workflow.builder.DefinitionScope].getName + ".user.*"
   ) ++ autoImports
 
   def imports = initialisationCommands(dslImport).mkString("\n")
@@ -54,20 +56,13 @@ object OpenMOLEREPL {
       autoImportTraitsCode
     )
 
-  def newREPL(args: ConsoleVariables, quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    def initialise(loop: ScalaREPL) = {
-      args.workDirectory.mkdirs()
-      loop.beQuietDuring {
-        (loop interpret imports) match {
-          case scala.tools.nsc.interpreter.Results.Error ⇒
-            throw new InternalProcessingError(s"Error while interpreting imports: ${imports}")
-          case _ ⇒
-        }
-        ConsoleVariables.bindVariables(loop, args)
-      }
-      loop
+  def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
+    def initialise(repl: REPL) = {
+      repl.eval(imports)
+      repl
     }
 
-    initialise(ScalaREPL(quiet = quiet))
+    initialise(REPL(quiet = quiet))
   }
+  
 }

@@ -14,7 +14,7 @@ object Lazy {
 
 }
 
-trait Lazy[+T] <: (() ⇒ T) {
+trait Lazy[+T] extends (() ⇒ T) {
   def content: T
   def apply() = content
 }

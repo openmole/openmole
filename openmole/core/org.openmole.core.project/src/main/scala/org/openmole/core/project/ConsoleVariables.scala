@@ -20,20 +20,21 @@ package org.openmole.core.project
 import org.openmole.core.compiler._
 import org.openmole.core.services._
 import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.tool.file._
 
 object ConsoleVariables {
 
-  def variablesName = "_variables_"
+  def variablesName = "__variables"
   def workDirectory = "workDirectory"
 
-  def bindVariables(loop: ScalaREPL, variables: ConsoleVariables, variablesName: String = variablesName) =
-    loop.beQuietDuring {
-      loop.bind(variablesName, variables)
-      loop.eval(s"""
-        |import $variablesName._
-        |import $variablesName.services._""".stripMargin)
-    }
+  def bindVariables(repl: REPL, variables: ConsoleVariables, variablesName: String = variablesName) =
+    repl.bind(variablesName, variables)
+    repl.eval(s"""
+      |import $variablesName._
+      |import $variablesName.services._""".stripMargin)
+    
 
   def experimentName(f: File) = {
     val name = f.getName
@@ -48,12 +49,23 @@ object ConsoleVariables {
     def launchDate = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date(launchTime))
   }
 
+
+  def apply(
+    args:                     Seq[String],
+    workDirectory: File,
+    experiment:    ConsoleVariables.Experiment)(implicit services: Services) = {
+    import services._
+    new ConsoleVariables(args, workDirectory, experiment)(services, moleServices = MoleServices.create(services.tmpDirectory.directory))
+  }
 }
 
-case class ConsoleVariables(
+
+
+case class ConsoleVariables private (
   args:                     Seq[String],
   @transient workDirectory: File,
   @transient experiment:    ConsoleVariables.Experiment
 )(
-  @transient implicit val services: Services
+  @transient implicit val services: Services,
+  @transient implicit val moleServices: MoleServices
 )

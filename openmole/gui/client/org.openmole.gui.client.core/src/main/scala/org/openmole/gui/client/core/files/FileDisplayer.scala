@@ -1,13 +1,16 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.client.core._
+import org.openmole.gui.client.core.*
+import org.openmole.gui.client.core.files.TabContent.TabData
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.plot.Plotter
+import org.openmole.gui.shared.api.*
+import scaladget.bootstrapnative.bsn
+import scaladget.bootstrapnative.bsn.*
+import com.raquo.laminar.api.L.*
 
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
@@ -26,68 +29,33 @@ import org.openmole.gui.client.tool.plot.Plotter
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer(val treeNodeTabs: TreeNodeTabs, showExecution: () ⇒ Unit) {
+class FileDisplayer:
 
-  def alreadyDisplayed(safePath: SafePath) =
-    treeNodeTabs.tabs.now.find { t ⇒
-      t.safePathTab.now.path == safePath.path
-    }
-
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension, pluginServices: PluginServices) = {
-    alreadyDisplayed(safePath) match {
-      case Some(t: TreeNodeTab) ⇒ treeNodeTabs.setActive(t)
+  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) = 
+    panels.tabContent.alreadyDisplayed(safePath) match
+      case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
-        fileExtension match {
-          case OpenMOLEScript ⇒
-            val tab = TreeNodeTab.OMS(
-              treeNodeTabs,
-              safePath,
-              content,
-              hash,
-              showExecution,
-              TreeNodeTabs.setErrors(treeNodeTabs, safePath, _)
-            )
-            treeNodeTabs add tab
-            tab.omsEditor.editor.focus
-          case OpenMOLEResult ⇒
-            Post()[Api].findAnalysisPlugin(safePath).call.foreach {
-              case Some(plugin) ⇒
-                val analysis = Plugins.buildJSObject[MethodAnalysisPlugin](plugin)
-                val tab = TreeNodeTab.HTML(safePath, analysis.panel(safePath, pluginServices))
-                treeNodeTabs add tab
-              case None ⇒
+        FileContentType(fileExtension) match {
+          case FileContentType.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
+          case FileContentType.CSV => CSVContent.addTab(safePath, content, hash)
+          case FileContentType.MDScript ⇒
+            api.mdToHtml(safePath).foreach { htmlString ⇒
+              val htmlDiv = com.raquo.laminar.api.L.div()
+              htmlDiv.ref.innerHTML = htmlString
+              HTMLContent.addTab(safePath, htmlDiv)
             }
-          case MDScript ⇒
-            Post()[Api].mdToHtml(safePath).call().foreach { htmlString ⇒
-              treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.mdBlock(htmlString))
-            }
-          case SVGExtension ⇒ treeNodeTabs add TreeNodeTab.HTML(safePath, TreeNodeTab.rawBlock(content))
-          case editableFile: EditableFile ⇒
-            if (DataUtils.isCSV(safePath))
-              Post()[Api].sequence(safePath).call().foreach { seq ⇒
-                val tab = TreeNodeTab.Editable(
-                  treeNodeTabs,
-                  safePath,
-                  content, hash,
-                  DataTab.build(seq, view = TreeNodeTab.Table, editing = !editableFile.onDemand),
-                  Plotter.default)
-                treeNodeTabs add tab
-              }
-            else {
-              val tab = TreeNodeTab.Editable(
-                treeNodeTabs,
-                safePath,
-                content,
-                hash,
-                DataTab.build(SequenceData(Seq(), Seq()), view = TreeNodeTab.Raw),
-                Plotter.default)
+          case e if FileContentType.isText(e) => AnyTextContent.addTab(safePath, content, hash)
+          case FileContentType.OpenMOLEResult ⇒
+            api.omrContent(safePath).foreach: content =>
+              println(content)
 
-              treeNodeTabs add tab
-            }
-
-          case _ ⇒ //FIXME for GUI workflows
+//            api.omrMethod(safePath).foreach { method =>
+//              plugins.analysisPlugins.get(method) match
+//                case Some(analysis) ⇒
+//                case None ⇒
+//            }
+          case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, div(panelBody, content))
+          case _ ⇒ //FIXME for GUI workflows
         }
-    }
-  }
 
-}
+

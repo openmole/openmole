@@ -26,20 +26,19 @@ object LockRepository {
   def apply[T]() = new LockRepository[T]()
 }
 
-// FIXME potential race condition: map update and lock.lock() can be split in two transactions
 class LockRepository[T] {
 
   val locks = new mutable.HashMap[T, (ReentrantLock, AtomicInteger)]
 
   def nbLocked(k: T) = locks.synchronized(locks.get(k).map { case (_, users) ⇒ users.get }.getOrElse(0))
 
-  def lock(obj: T) = locks.synchronized {
+  private def getLock(obj: T) = locks.synchronized {
     val (lock, users) = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
     users.incrementAndGet
     lock
-  }.lock()
+  }
 
-  def unlock(obj: T) = locks.synchronized {
+  private def cleanLock(obj: T) = locks.synchronized {
     locks.get(obj) match {
       case Some((lock, users)) ⇒
         val value = users.decrementAndGet
@@ -47,12 +46,15 @@ class LockRepository[T] {
         lock
       case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
     }
-  }.unlock()
+  }
 
   def withLock[A](obj: T)(op: ⇒ A) = {
-    lock(obj)
+    val lock = getLock(obj)
+    lock.lock()
     try op
-    finally unlock(obj)
+    finally
+      try cleanLock(obj)
+      finally lock.unlock()
   }
 
 }

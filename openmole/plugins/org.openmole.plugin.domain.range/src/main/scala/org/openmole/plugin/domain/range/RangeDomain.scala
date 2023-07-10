@@ -40,7 +40,7 @@ object RangeDomain {
       domain.validate
     )
 
-  implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]) = toRangeDomain(d)
+  implicit def toDomain[D, T](d: D)(implicit toRangeDomain: IsRangeDomain[D, T]): RangeDomain[T] = toRangeDomain(d)
 
   def apply[T: RangeValue](
     min: FromContext[T],
@@ -61,8 +61,11 @@ object RangeDomain {
   ): SizeRangeDomain[T] =
     SizeRangeDomain[T](RangeDomain[T](min, max), size)
 
-  def rangeCenter[T](r: RangeDomain[T]): FromContext[T] = (r.min, r.max) mapN { (min, max) ⇒
+  def rangeCenter[T](r: RangeDomain[T]): FromContext[T] = FromContext { p =>
+    import p.*
     import r.ops._
+    val min = r.min.from(context)
+    val max = r.max.from(context)
     min + ((max - min) / fromInt(2))
   }
 

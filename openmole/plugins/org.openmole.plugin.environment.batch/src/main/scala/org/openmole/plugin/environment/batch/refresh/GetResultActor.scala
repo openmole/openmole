@@ -103,7 +103,7 @@ object GetResultActor {
     retry(preference(BatchEnvironment.downloadResultRetry)) {
       newFile.withTmpFile { resultFile ⇒
         signalDownload(eventDispatcher.eventId, download(outputFilePath, resultFile, TransferOptions.default), outputFilePath, environment, storageId, resultFile)
-        serializerService.deserializeAndExtractFiles[RuntimeResult](resultFile, deleteFilesOnGC = true)
+        serializerService.deserializeAndExtractFiles[RuntimeResult](resultFile, deleteFilesOnGC = true, gz = true)
       }
     }
   }
@@ -129,9 +129,9 @@ object GetResultActor {
               replicated.originalPath → fileService.wrapRemoveOnGC(downloaded)
           }.toMap
 
-        serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement)
+        serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement, gz = true)
       case serializedResults: ArchiveContextResults ⇒
-        serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults, deleteFilesOnGC = true)
+        serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults, deleteFilesOnGC = true, gz = true)
     }
   }
 

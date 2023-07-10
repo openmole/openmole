@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import org.openmole.core.workflow.format.WritableOutput
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
-object SavePopulationHook {
+object SavePopulationHook:
+
+  def defaultFormat = CSVOutputFormatDefault[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
     import p._
@@ -43,7 +43,8 @@ object SavePopulationHook {
     all.filter(v ⇒ !filterSet.contains(v.name))
   }
 
-  def apply[T, F](
+
+  def apply[F](
     evolution:      EvolutionWorkflow,
     output:         WritableOutput,
     frequency:      OptionalArgument[Long] = None,
@@ -51,34 +52,30 @@ object SavePopulationHook {
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat(unrollArray = true))(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    format:         F                      = defaultFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
     import p._
 
-    val generation = evolution.operations.generationLens.get(context(evolution.stateVal))
+    val state = context(evolution.stateVal)
+    val generation = evolution.operations.generationLens.get(state)
+    val shouldBeSaved = frequency.map(generation % _ == 0).getOrElse(true)
 
-    def fileName =
-      (frequency.option, last) match {
-        case (_, true)                           ⇒ Some("population")
-        case (None, _)                           ⇒ Some("population${" + evolution.generationVal.name + "}")
-        case (Some(f), _) if generation % f == 0 ⇒ Some("population${" + evolution.generationVal.name + "}")
-        case _                                   ⇒ None
-      }
+    if shouldBeSaved
+    then
+      def saveOption = SaveOption(frequency = frequency, last = last)
+      def evolutionData = evolution.operations.metadata(state, saveOption)
 
-    fileName match {
-      case Some(fileName) ⇒
-        def saveOption = SaveOption(frequency = frequency, last = last)
-        def evolutionData = evolution.operations.metadata(generation, saveOption)
+      val augmentedContext =
+        context + (evolution.generationVal -> generation)
 
-        val augmentedContext =
-          context + (evolution.generationVal -> generation)
+      val content =
+        OutputContent(
+          "population" -> resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
+        )
 
-        val content = OutputFormat.PlainContent(resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext), Some(fileName))
-        outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
-      case None ⇒
-    }
+      outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
 
     context
   } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationVal, evolution.stateVal))
 
-}
+
 

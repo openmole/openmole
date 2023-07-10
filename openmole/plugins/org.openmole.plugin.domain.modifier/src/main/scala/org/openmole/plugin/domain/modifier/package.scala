@@ -22,18 +22,19 @@ import java.nio.file.Path
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-import scala.reflect.runtime.universe._
-
 package object modifier {
+
+  object CanGetName {
+    implicit def fileGetName: CanGetName[File] = _.getName
+    implicit def pathGetName: CanGetName[Path] = _.toFile.getName
+  }
 
   trait CanGetName[A] {
     def apply(a: A): String
   }
 
-  implicit val fileGetName = new CanGetName[File] { def apply(f: File) = f.getName }
-  implicit val pathGetName = new CanGetName[Path] { def apply(p: Path) = p.toFile.getName }
 
-  implicit def domainModifierDecorator[D, T: TypeTag](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) = new {
+  implicit class DomainModifierDecorator[D, T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
     def take(n: FromContext[Int]) = TakeDomain(domain, n)
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)

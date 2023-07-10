@@ -52,7 +52,7 @@ object Profile {
   }
 
   object ProfileElement {
-    implicit def toProfileElement[T: ToProfileElement](t: T) = implicitly[ToProfileElement[T]].apply(t)
+    implicit def toProfileElement[T: ToProfileElement](t: T): ProfileElement = implicitly[ToProfileElement[T]].apply(t)
   }
 
   abstract trait ProfileElement
@@ -60,9 +60,9 @@ object Profile {
   case class IntervalIntProfileElement(v: Val[Int]) extends ProfileElement
   case class FixDomainProfileElement(v: Val[Double], intervals: Vector[Double]) extends ProfileElement
 
-  type ProfileElements = Seq[ProfileElement]
+  type ProfileElements = Seq[ProfileElement] | ProfileElement
 
-  object DeterministicParams {
+  object DeterministicProfile {
 
     import CDGenome.DeterministicIndividual.Individual
 
@@ -95,7 +95,7 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicProfile, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicProfile, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -104,7 +104,15 @@ object Profile {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicProfile) = new Ops {
+        override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
+          EvolutionMetadata.Profile(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            generation = generationLens.get(state),
+            saveOption = saveOption
+          )
+
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -113,13 +121,18 @@ object Profile {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
+
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val niche = DeterministicParams.niche(om.genome, om.niche).from(context)
+          val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
           val res = NichedNSGA2Algorithm.result(population, niche, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
@@ -147,7 +160,7 @@ object Profile {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
 
-          val niche = DeterministicParams.niche(om.genome, om.niche).from(context)
+          val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
           val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](niche, om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
           val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
           val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
@@ -165,7 +178,7 @@ object Profile {
     }
   }
 
-  case class DeterministicParams(
+  case class DeterministicProfile(
     nicheSize:           Int,
     niche:               Seq[ProfileElement],
     genome:              Genome,
@@ -174,7 +187,7 @@ object Profile {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticProfile {
 
     def niche(genome: Genome, profiled: Seq[ProfileElement]) = {
 
@@ -207,7 +220,7 @@ object Profile {
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
     }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -216,7 +229,7 @@ object Profile {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticProfile) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -225,13 +238,18 @@ object Profile {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
+
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
           import p._
 
-          val niche = StochasticParams.niche(om.genome, om.niche).from(context)
+          val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
           val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), niche, Genome.continuous(om.genome), onlyOldest = true, keepAll = keepAll)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
@@ -262,7 +280,7 @@ object Profile {
           FromContext { p ⇒
             import p._
 
-            val niche = StochasticParams.niche(om.genome, om.niche).from(context)
+            val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
 
             val (s2, elited) = NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
               niche,
@@ -287,7 +305,7 @@ object Profile {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticProfile(
     nicheSize:           Int,
     niche:               Seq[ProfileElement],
     operatorExploration: Double,
@@ -313,7 +331,7 @@ object Profile {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(
+          DeterministicProfile(
             genome = genome,
             objectives = exactObjectives,
             phenotypeContent = phenotypeContent,
@@ -335,7 +353,7 @@ object Profile {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(
+          StochasticProfile(
             nicheSize = nicheSize,
             niche = niche,
             operatorExploration = EvolutionWorkflow.operatorExploration,
@@ -358,19 +376,27 @@ import EvolutionWorkflow._
 
 object ProfileEvolution {
 
-  implicit def method: ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
+  given EvolutionMethod[ProfileEvolution] =
+    p =>
+      def profile =
+        p.profile match
+          case p: Profile.ProfileElement => Seq(p)
+          case p: Seq[Profile.ProfileElement] => p
+
+      Profile(
+        niche = profile,
+        genome = p.genome,
+        objective = p.objective,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        nicheSize = p.nicheSize,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          Profile(
-            niche = p.profile,
-            genome = p.genome,
-            objective = p.objective,
-            outputs = p.evaluation.outputs,
-            stochastic = p.stochastic,
-            nicheSize = p.nicheSize,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -379,13 +405,13 @@ object ProfileEvolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[ProfileEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[ProfileEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
 import monocle.macros._
 
-@Lenses case class ProfileEvolution(
+case class ProfileEvolution(
   profile:      Profile.ProfileElements,
   genome:       Genome,
   objective:    Objectives,

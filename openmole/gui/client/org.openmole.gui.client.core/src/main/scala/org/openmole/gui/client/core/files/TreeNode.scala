@@ -17,82 +17,68 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.client.Utils._
-import rx._
+import org.openmole.gui.client.ext.ClientUtil.*
 
 import scala.concurrent.Future
 
-sealed trait TreeNodeType {
-  val uuid: String = getUUID
-  val name: String
-}
-
-trait DirNodeType extends TreeNodeType {
-  val name: String = "Folder"
-}
-
-trait FileNodeType extends TreeNodeType {
-  val name: String = "File"
-}
-
-object TreeNodeType {
-  def file = new FileNodeType {}
-
-  def folder = new DirNodeType {}
-}
+enum TreeNodeType(name: String):
+  val uuid: String = randomId
+  case File extends TreeNodeType("File")
+  case Folder extends TreeNodeType("Folder")
 
 case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
 
 case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
 
-sealed trait TreeNode {
-  val id = getUUID
-
-  def name: Var[String]
-
+sealed trait TreeNode:
+  val id = randomId
+  def name: String
   val size: Long
-
   val time: Long
 
-}
+def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.treeNodeDataToTreeNode)
 
-object TreeNode {
+object TreeNode:
 
-  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.dirData match {
-    case Some(dd: DirData) ⇒ DirNode(Var(tnd.name), tnd.size, tnd.time, dd.isEmpty)
-    case _                 ⇒ FileNode(Var(tnd.name), tnd.size, tnd.time)
+  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
+    case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty)
+    case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState)
   }
 
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData = TreeNodeData(tn.name.now, tn match {
-    case DirNode(_, _, _, isEmpty) ⇒ Some(DirData(isEmpty))
-    case _                         ⇒ None
-  }, tn.size, tn.time)
+  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
+    val (dOf, pluginState) = tn match {
+      case TreeNode.Directory(_, _, _, isEmpty) ⇒ (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
+      case f: TreeNode.File ⇒ (None, f.pluginState)
+    }
 
-  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map {
-    treeNodeToTreeNodeData
-  }
+    TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf)
 
+  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map { treeNodeToTreeNodeData }
   implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
-
   implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
 
-  implicit def listFilesDataToListFiles(lfd: ListFilesData): ListFiles = ListFiles(lfd.list, lfd.nbFilesOnServer)
+  type ListFiles = Seq[TreeNode]
 
-  case class ListFiles(list: Seq[TreeNode], nbFilesOnServer: Int)
 
-}
+  def isDir(node: TreeNode) =
+    node match
+      case _: Directory => true
+      case _ => false
 
-case class DirNode(
-  name:    Var[String],
-  size:    Long,
-  time:    Long,
-  isEmpty: Boolean
-) extends TreeNode
+  case class Directory(
+    name: String,
+    size: Long,
+    time: Long,
+    isEmpty: Boolean) extends TreeNode
 
-case class FileNode(
-  name: Var[String],
-  size: Long,
-  time: Long
-) extends TreeNode
+  case class File(
+    name: String,
+    size: Long,
+    time: Long,
+    pluginState: PluginState) extends TreeNode
+
+
+

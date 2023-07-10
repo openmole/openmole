@@ -17,16 +17,16 @@
  */
 package org.openmole.core.workflow.task
 
-import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.tool.random._
+import monocle.Focus
 
 object ClosureTask {
 
-  implicit def isBuilder: InputOutputBuilder[ClosureTask] = InputOutputBuilder(ClosureTask.config)
-  implicit def isInfo: InfoBuilder[ClosureTask] = InfoBuilder(ClosureTask.info)
+  given InputOutputBuilder[ClosureTask] = InputOutputBuilder(Focus[ClosureTask](_.config))
+  given InfoBuilder[ClosureTask] = InfoBuilder(Focus[ClosureTask](_.info))
 
   /**
    * Construct from a name and a function (no input-output nor info configs)
@@ -49,7 +49,7 @@ object ClosureTask {
  * @param config
  * @param info
  */
-@Lenses case class ClosureTask(
+case class ClosureTask(
   closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
   override val className: String,
   config:                 InputOutputConfig,

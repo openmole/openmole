@@ -18,21 +18,22 @@
 package org.openmole.core.workflow.task
 
 import java.io.File
-import org.openmole.core.context._
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.context.*
+import org.openmole.core.expansion.*
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{ DefinitionScope, InfoConfig, InputOutputConfig }
-import org.openmole.core.workflow.execution._
+import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig}
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.mole.MoleExecution
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.tool.cache._
+import org.openmole.core.workflow.tools.*
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.tool.cache.*
 import org.openmole.tool.types.Id
-import org.openmole.tool.lock._
+import org.openmole.tool.lock.*
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random
@@ -57,28 +58,33 @@ object TaskExecutionContext {
   case class Remote(threads: Int)
 
   def apply(
-    moleExecutionDirectory:        File,
-    taskExecutionDirectory:        File,
+    moleExecutionDirectory: File,
+    taskExecutionDirectory: File,
     applicationExecutionDirectory: File,
-    localEnvironment:              LocalEnvironment,
-    preference:                    Preference,
-    threadProvider:                ThreadProvider,
-    fileService:                   FileService,
-    fileServiceCache:              FileServiceCache,
-    workspace:                     Workspace,
-    outputRedirection:             OutputRedirection,
-    loggerService:                 LoggerService,
-    serializerService:             SerializerService,
-    networkService:                NetworkService,
-    cache:                         KeyValueCache,
-    lockRepository:                LockRepository[LockKey],
-    moleExecution:                 Option[MoleExecution]               = None,
-    remote:                        Option[TaskExecutionContext.Remote] = None) =
-    CompleteTaskExecutionContext(
+    localEnvironment: LocalEnvironment,
+    preference: Preference,
+    threadProvider: ThreadProvider,
+    fileService: FileService,
+    fileServiceCache: FileServiceCache,
+    workspace: Workspace,
+    outputRedirection: OutputRedirection,
+    loggerService: LoggerService,
+    serializerService: SerializerService,
+    networkService: NetworkService,
+    timeService: TimeService,
+    cache: KeyValueCache,
+    lockRepository: LockRepository[LockKey],
+    moleExecution: Option[MoleExecution] = None,
+    remote: Option[TaskExecutionContext.Remote] = None): TaskExecutionContext =
+    TaskExecutionContext(
       moleExecutionDirectory = moleExecutionDirectory,
       taskExecutionDirectory = taskExecutionDirectory,
       applicationExecutionDirectory = applicationExecutionDirectory,
+      cache = cache,
+      lockRepository = lockRepository,
+      moleExecution = moleExecution,
       localEnvironment = localEnvironment,
+      remote = remote)(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -88,10 +94,7 @@ object TaskExecutionContext {
       loggerService = loggerService,
       serializerService = serializerService,
       networkService = networkService,
-      cache = cache,
-      lockRepository = lockRepository,
-      moleExecution = moleExecution,
-      remote = remote
+      timeService = timeService
     )
 
   def partial(
@@ -106,13 +109,14 @@ object TaskExecutionContext {
     loggerService:                 LoggerService,
     serializerService:             SerializerService,
     networkService:                NetworkService,
+    timeService:                   TimeService,
     cache:                         KeyValueCache,
     lockRepository:                LockRepository[LockKey],
     moleExecution:                 Option[MoleExecution]               = None,
     remote:                        Option[TaskExecutionContext.Remote] = None) =
     Partial(
       moleExecutionDirectory = moleExecutionDirectory,
-      applicationExecutionDirectory = applicationExecutionDirectory,
+      applicationExecutionDirectory = applicationExecutionDirectory)(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -122,6 +126,7 @@ object TaskExecutionContext {
       loggerService = loggerService,
       serializerService = serializerService,
       networkService = networkService,
+      timeService = timeService,
       cache = cache,
       lockRepository = lockRepository,
       moleExecution = moleExecution,
@@ -129,88 +134,68 @@ object TaskExecutionContext {
     )
 
   def complete(partialTaskExecutionContext: Partial, taskExecutionDirectory: File, localEnvironment: LocalEnvironment) =
-    CompletedTaskExecutionContext(
-      partialTaskExecutionContext,
+    import partialTaskExecutionContext.*
+    TaskExecutionContext(
+      moleExecutionDirectory = moleExecutionDirectory,
       taskExecutionDirectory = taskExecutionDirectory,
-      localEnvironment = localEnvironment)
+      applicationExecutionDirectory = applicationExecutionDirectory,
+      localEnvironment = localEnvironment,
+      cache = cache,
+      lockRepository = lockRepository,
+      moleExecution = moleExecution,
+      remote = remote)(using
+      preference = preference,
+      threadProvider = threadProvider,
+      fileService = fileService,
+      fileServiceCache = fileServiceCache,
+      workspace = workspace,
+      outputRedirection = outputRedirection,
+      loggerService = loggerService,
+      serializerService = serializerService,
+      networkService = networkService,
+      timeService = timeService)
 
   case class Partial(
-    moleExecutionDirectory:         File,
-    applicationExecutionDirectory:  File,
-    implicit val preference:        Preference,
-    implicit val threadProvider:    ThreadProvider,
-    fileService:                    FileService,
-    fileServiceCache:               FileServiceCache,
-    implicit val workspace:         Workspace,
-    implicit val outputRedirection: OutputRedirection,
-    implicit val loggerService:     LoggerService,
-    implicit val serializerService: SerializerService,
-    implicit val networkService:    NetworkService,
-    cache:                          KeyValueCache,
-    lockRepository:                 LockRepository[LockKey],
-    moleExecution:                  Option[MoleExecution]               = None,
-    remote:                         Option[TaskExecutionContext.Remote] = None)
+    moleExecutionDirectory:        File,
+    applicationExecutionDirectory: File)(
+    implicit
+    val preference:        Preference,
+    val threadProvider:    ThreadProvider,
+    val fileService:       FileService,
+    val fileServiceCache:  FileServiceCache,
+    val workspace:         Workspace,
+    val outputRedirection: OutputRedirection,
+    val loggerService:     LoggerService,
+    val serializerService: SerializerService,
+    val networkService:    NetworkService,
+    val timeService:       TimeService,
+    val cache:             KeyValueCache,
+    val lockRepository:    LockRepository[LockKey],
+    val moleExecution:     Option[MoleExecution]               = None,
+    val remote:            Option[TaskExecutionContext.Remote] = None)
 
-  case class CompletedTaskExecutionContext(
-    partialTaskExecutionContext: Partial,
-    taskExecutionDirectory:      File,
-    localEnvironment:            LocalEnvironment) extends TaskExecutionContext {
-    def moleExecutionDirectory = partialTaskExecutionContext.moleExecutionDirectory
-    def applicationExecutionDirectory = partialTaskExecutionContext.applicationExecutionDirectory
-    implicit def preference = partialTaskExecutionContext.preference
-    implicit def threadProvider = partialTaskExecutionContext.threadProvider
-    def fileService = partialTaskExecutionContext.fileService
-    def fileServiceCache = partialTaskExecutionContext.fileServiceCache
-    implicit def workspace = partialTaskExecutionContext.workspace
-    implicit def outputRedirection = partialTaskExecutionContext.outputRedirection
-    implicit def loggerService = partialTaskExecutionContext.loggerService
-    implicit def serializerService = partialTaskExecutionContext.serializerService
-    implicit def networkService = partialTaskExecutionContext.networkService
-    def cache = partialTaskExecutionContext.cache
-    def lockRepository = partialTaskExecutionContext.lockRepository
-    def moleExecution = partialTaskExecutionContext.moleExecution
-    def remote = partialTaskExecutionContext.remote
-  }
-
-  case class CompleteTaskExecutionContext(
-    moleExecutionDirectory:         File,
-    taskExecutionDirectory:         File,
-    applicationExecutionDirectory:  File,
-    localEnvironment:               LocalEnvironment,
-    implicit val preference:        Preference,
-    implicit val threadProvider:    ThreadProvider,
-    fileService:                    FileService,
-    fileServiceCache:               FileServiceCache,
-    implicit val workspace:         Workspace,
-    implicit val outputRedirection: OutputRedirection,
-    implicit val loggerService:     LoggerService,
-    implicit val serializerService: SerializerService,
-    implicit val networkService:    NetworkService,
-    cache:                          KeyValueCache,
-    lockRepository:                 LockRepository[LockKey],
-    moleExecution:                  Option[MoleExecution]               = None,
-    remote:                         Option[TaskExecutionContext.Remote] = None) extends TaskExecutionContext
 }
 
-trait TaskExecutionContext {
-  def moleExecutionDirectory: File
-  def taskExecutionDirectory: File
-  def applicationExecutionDirectory: File
-  def localEnvironment: LocalEnvironment
-  implicit def preference: Preference
-  implicit def threadProvider: ThreadProvider
-  def fileService: FileService
-  def fileServiceCache: FileServiceCache
-  implicit def workspace: Workspace
-  implicit def outputRedirection: OutputRedirection
-  implicit def loggerService: LoggerService
-  implicit def serializerService: SerializerService
-  implicit def networkService: NetworkService
-  def cache: KeyValueCache
-  def lockRepository: LockRepository[LockKey]
-  def moleExecution: Option[MoleExecution]
-  def remote: Option[TaskExecutionContext.Remote]
-}
+case class TaskExecutionContext(
+  moleExecutionDirectory: File,
+  taskExecutionDirectory: File,
+  applicationExecutionDirectory: File,
+  localEnvironment: LocalEnvironment,
+  cache: KeyValueCache,
+  lockRepository: LockRepository[LockKey],
+  moleExecution: Option[MoleExecution],
+  remote: Option[TaskExecutionContext.Remote])(
+  implicit
+  val preference: Preference,
+  val threadProvider: ThreadProvider,
+  val fileService: FileService,
+  val fileServiceCache: FileServiceCache,
+  val workspace: Workspace,
+  val outputRedirection: OutputRedirection,
+  val loggerService: LoggerService,
+  val serializerService: SerializerService,
+  val networkService: NetworkService,
+  val timeService: TimeService)
 
 object Task {
 
@@ -226,13 +211,6 @@ object Task {
   def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-}
-
-/**
- * A Task is a fundamental unit for the execution of a workflow.
- */
-trait Task <: Name with Id {
-
   /**
    * Perform this task.
    *
@@ -240,10 +218,27 @@ trait Task <: Name with Id {
    * @param executionContext context of the environment in which the Task is executed
    * @return
    */
-  def perform(context: Context, executionContext: TaskExecutionContext): Context = {
+  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context = {
     lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+    InputOutputCheck.perform(
+      task,
+      Task.inputs(task),
+      Task.outputs(task),
+      Task.defaults(task),
+      task.process(executionContext)
+    )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
   }
+
+  def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
+  def outputs(task: Task): PrototypeSet = task.config.outputs
+  def defaults(task: Task): DefaultSet = task.config.defaults
+
+}
+
+/**
+ * A Task is a fundamental unit for the execution of a workflow.
+ */
+trait Task extends Name with Id {
 
   /**
    * The actual processing of the Task, wrapped by the [[perform]] method
@@ -264,9 +259,6 @@ trait Task <: Name with Id {
    */
   def info: InfoConfig
 
-  def inputs = config.inputs
-  def outputs = config.outputs
-  def defaults = config.defaults
   def name = info.name
 
   /**
@@ -275,6 +267,10 @@ trait Task <: Name with Id {
    * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
    */
   lazy val id = new Object {}
+
+  def inputs: PrototypeSet = Task.inputs(this)
+  def outputs: PrototypeSet = Task.outputs(this)
+  def defaults: DefaultSet = Task.defaults(this)
 
 }
 

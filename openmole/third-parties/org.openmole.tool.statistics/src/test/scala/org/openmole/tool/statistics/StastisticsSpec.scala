@@ -1,8 +1,8 @@
 package org.openmole.tool.statistics
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest._
 
-class StastisticsSpec extends FlatSpec with Matchers {
+class StastisticsSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "stastistic decorated methods" should "be callable on numeric types" in {
     val seqInt = Seq(1, 2)

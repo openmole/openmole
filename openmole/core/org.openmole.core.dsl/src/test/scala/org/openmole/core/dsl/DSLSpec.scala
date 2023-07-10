@@ -21,7 +21,7 @@ import org.scalatest._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-class DSLSpec extends FlatSpec with Matchers {
+class DSLSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 
@@ -34,5 +34,16 @@ class DSLSpec extends FlatSpec with Matchers {
     val testoptionlaFromContextString: OptionalArgument[FromContext[String]] = "test"
 
   }
+
+  "range of double" should "be of correct size" in {
+    val r = (0.0 to 10.0 by 0.2)
+    assert(r.size == 51)
+  }
+
+  "Settings defaults to ScalaCode" should "compile" in {
+    val i = Val[Int]
+    val code = ScalaCode("val j = i") set (i := 42)
+  }
+
 
 }

@@ -21,7 +21,7 @@ object Ticket {
   def root(content: Long) = new Ticket(content, null)
   def apply(parent: Ticket, content: Long) = new Ticket(content, parent)
 
-  implicit def ordering = Ordering.by[Ticket, Long](_.content)
+  implicit def ordering: Ordering[Ticket] = Ordering.by[Ticket, Long](_.content)
   def toString(t: Ticket): String = t.content.toString
 }
 

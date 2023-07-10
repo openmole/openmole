@@ -27,7 +27,7 @@
 //
 //import scala.util.Random
 //
-//class CSVSamplingSpec extends FlatSpec with Matchers {
+//class CSVSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 //
 //  "CSVSampling" should "detect the correct mapping between csv header defined column" in {
 //    implicit val rng = new Random(42)

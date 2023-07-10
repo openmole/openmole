@@ -17,57 +17,61 @@
 
 package org.openmole.core.expansion
 
-import org.openmole.core.context._
-import org.openmole.core.exception._
-import org.openmole.tool.cache._
-import org.openmole.tool.random._
-import org.openmole.tool.file._
-import cats._
-import cats.implicits._
+import org.openmole.core.context.*
+import org.openmole.core.exception.*
+import org.openmole.tool.cache.*
+import org.openmole.tool.random.*
+import org.openmole.tool.file.*
+
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory
 
 import scala.annotation.tailrec
 
-trait LowPriorityToFromContext {
-  implicit def fromTToContext[T] = ToFromContext[T, T](t ⇒ FromContext.value[T](t))
-}
+import cats.*
+import cats.implicits.*
 
-object ToFromContext extends LowPriorityToFromContext {
-  import FromContext._
+trait ToFromContextLowPriorityGiven:
+  given ToFromContext[String, Float] = FromContext.codeToFromContext[Float]
+  given ToFromContext[String, Double] = FromContext.codeToFromContext[Double]
+  given ToFromContext[String, Long] = FromContext.codeToFromContext[Long]
+  given ToFromContext[String, Int] = FromContext.codeToFromContext[Int]
+  given ToFromContext[String, BigDecimal] = FromContext.codeToFromContext[BigDecimal]
+  given ToFromContext[String, BigInt] = FromContext.codeToFromContext[BigInt]
+  given ToFromContext[String, Boolean] = FromContext.codeToFromContext[Boolean]
 
-  def apply[F, T](func: F ⇒ FromContext[T]): ToFromContext[F, T] = new ToFromContext[F, T] {
-    def apply(f: F) = func(f)
+  given ToFromContext[File, String] = f ⇒ ExpandedString(f.getPath) copy (stringValue = Some(s"file:${f.getPath}"))
+  given ToFromContext[String, File] = s ⇒ ExpandedString(s).map(s ⇒ File(s)) copy (stringValue = Some(s"file:$s"))
+  given ToFromContext[Int, Long] = i ⇒ FromContext.value(i.toLong) copy (stringValue = Some(i.toString))
+  //given ToFromContext[Int, Int] = i ⇒ FromContext.value(i) copy(stringValue = Some(i.toString))
+
+  given ToFromContext[Int, Double] = i ⇒
+    val v = i.toDouble
+    FromContext.value(v) copy (stringValue = Some(v.toString))
+
+  given ToFromContext[Long, Double] = i ⇒
+    val v = i.toDouble
+    FromContext.value(v) copy (stringValue = Some(v.toString))
+
+  given[T]: ToFromContext[FromContext[T], T] = identity
+
+  //given ToFromContext[Boolean, Boolean] = b ⇒ FromContext.value(b).copy(stringValue = Some(b.toString))
+  given[T]: ToFromContext[Val[T], T] = p ⇒ FromContext.prototype(p)
+
+  given[T]: ToFromContext[Val[T], String] = p => FromContext { c =>
+    import c.*
+    context(p).toString
   }
+object ToFromContext extends ToFromContextLowPriorityGiven:
+  given ToFromContext[File, File] = f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)) copy (stringValue = Some(s"file:${f.getPath}"))
+  given ToFromContext[String, String] = s => ExpandedString(s)
+  given [T]: ToFromContext[T, T] = t ⇒ FromContext.value[T](t)
 
-  implicit def functionToFromContext[T] =
-    ToFromContext[(Context ⇒ T), FromContext[T]](f ⇒ FromContext(p ⇒ f(p.context)))
-
-  implicit def codeToFromContextFloat = ToFromContext(codeToFromContext[Float])
-  implicit def codeToFromContextDouble = ToFromContext(codeToFromContext[Double])
-  implicit def codeToFromContextLong = ToFromContext(codeToFromContext[Long])
-  implicit def codeToFromContextInt = ToFromContext(codeToFromContext[Int])
-  implicit def codeToFromContextBigDecimal = ToFromContext(codeToFromContext[BigDecimal])
-  implicit def codeToFromContextBigInt = ToFromContext(codeToFromContext[BigInt])
-  implicit def codeToFromContextBoolean = ToFromContext(codeToFromContext[Boolean])
-
-  implicit def fileToString = ToFromContext[File, String](f ⇒ ExpandedString(f.getPath))
-  implicit def stringToString = ToFromContext[String, String](s ⇒ ExpandedString(s))
-  implicit def stringToFile = ToFromContext[String, File](s ⇒ ExpandedString(s).map(s ⇒ File(s)))
-  implicit def fileToFile = ToFromContext[File, File](f ⇒ ExpandedString(f.getPath).map(s ⇒ File(s)))
-  implicit def intToLong = ToFromContext[Int, Long](i ⇒ i)
-  implicit def fromContextToFromContext[T] = ToFromContext[FromContext[T], T](identity)
-
-  implicit def booleanToCondition = ToFromContext[Boolean, Boolean](b ⇒ FromContext.value(b))
-  implicit def prototypeIsFromContext[T]: ToFromContext[Val[T], T] = ToFromContext[Val[T], T](p ⇒ prototype(p))
-}
-
-trait ToFromContext[F, T] {
-  def apply(f: F): FromContext[T]
-}
+@FunctionalInterface trait ToFromContext[F, T]: 
+  def convert(f: F): FromContext[T]
 
 trait LowPriorityFromContext {
-  def contextConverter[F, T](f: F)(implicit tfc: ToFromContext[F, T]): FromContext[T] = tfc(f)
+  def contextConverter[F, T](f: F)(implicit tfc: ToFromContext[F, T]): FromContext[T] = tfc.convert(f)
 
   /**
    * implicit converter of a value to a FromContext (using implicit [[LowPriorityToFromContext]])
@@ -75,53 +79,44 @@ trait LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  implicit def fromTToContext[T](t: T): FromContext[T] = contextConverter(t)
+  implicit def fromTToContext[F, T](t: F)(implicit tfc: ToFromContext[F, T]): FromContext[T] = contextConverter[F, T](t)(tfc)
 }
 
 object FromContext extends LowPriorityFromContext {
 
-  /**
-   * A [[FromContext]] can be seen as a monad
-   */
-  object asMonad {
-    implicit val monad: Monad[FromContext] = new Monad[FromContext] {
-      def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
-
-        @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): B = {
-          f(a)(context) match {
-            case Left(a)  ⇒ computeB(a, context)
-            case Right(b) ⇒ b
-          }
-        }
-
-        FromContext { p ⇒
-          import p._
-          computeB(a, context)
-        }
-      }
-
-      override def flatMap[A, B](fa: FromContext[A])(f: A ⇒ FromContext[B]): FromContext[B] = FromContext { p ⇒
-        import p._
-        val faVal = fa(context)
-        f(faVal)(context)
-      }
-      override def pure[A](x: A): FromContext[A] = FromContext.value(x)
-    }
-  }
-
-  /**
-   * Implicitly define an Applicative on FromContext
-   */
-  implicit val applicative: Applicative[FromContext] = new Applicative[FromContext] {
+  given Applicative[FromContext] with
     override def pure[A](x: A): FromContext[A] = FromContext.value(x)
     override def ap[A, B](ff: FromContext[(A) ⇒ B])(fa: FromContext[A]): FromContext[B] =
       FromContext[B] { p ⇒
         import p._
         val res = fa.from(context)
         ff.from(context).apply(res)
-      } withValidate { fa.validate ++ ff.validate }
-  }
+      } copy(v = fa.validate ++ ff.validate, inputs = fa.inputs ++ ff.inputs)
 
+    /*object asMonad:
+      given Monad[FromContext] with
+        def tailRecM[A, B](a: A)(f: A ⇒ FromContext[Either[A, B]]): FromContext[B] = {
+
+          @tailrec def computeB(a: A, context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): B = {
+            f(a)(context) match {
+              case Left(a)  ⇒ computeB(a, context)
+              case Right(b) ⇒ b
+            }
+          }
+
+          FromContext { p ⇒
+            import p._
+            computeB(a, context)
+          }
+        }
+
+      override def flatMap[A, B](fa: FromContext[A])(f: A ⇒ FromContext[B]): FromContext[B] = FromContext { p ⇒
+        import p._
+        val faVal = fa(context)
+        f(faVal)(context)
+      }
+      override def pure[A](x: A): FromContext[A] = FromContext.value(x)*/
+  
   /**
    * Convert scala code to a FromContext (code is compiled by [[ScalaCompilation]])
    *
@@ -134,27 +129,27 @@ object FromContext extends LowPriorityFromContext {
 
     FromContext[T] { p ⇒
       import p._
-      proxy.apply.apply.from(context)
-    } withValidate proxy().validate
+      proxy()().from(context)
+    } copy(stringValue = Some(code)) withValidate(proxy().validate)
   }
 
-  implicit def functionToFromContext[T](f: (Context ⇒ T)) = contextConverter(f)
+  //implicit def functionToFromContext[T](f: (Context ⇒ T)): FromContext[T] = contextConverter(f)
 
-  implicit def codeToFromContextFloat(s: String) = contextConverter[String, Float](s)
-  implicit def codeToFromContextDouble(s: String) = contextConverter[String, Double](s)
-  implicit def codeToFromContextLong(s: String) = contextConverter[String, Long](s)
-  implicit def codeToFromContextInt(s: String) = contextConverter[String, Int](s)
-  implicit def codeToFromContextBigDecimal(s: String) = contextConverter[String, BigDecimal](s)
-  implicit def codeToFromContextBigInt(s: String) = contextConverter[String, BigInt](s)
-  implicit def codeToFromContextBoolean(s: String) = contextConverter[String, Boolean](s)
+  implicit def codeToFromContextFloat(s: String): FromContext[Float] = contextConverter[String, Float](s)
+  implicit def codeToFromContextDouble(s: String): FromContext[Double] = contextConverter[String, Double](s)
+  implicit def codeToFromContextLong(s: String): FromContext[Long] = contextConverter[String, Long](s)
+  implicit def codeToFromContextInt(s: String): FromContext[Int] = contextConverter[String, Int](s)
+  implicit def codeToFromContextBigDecimal(s: String): FromContext[BigDecimal] = contextConverter[String, BigDecimal](s)
+  implicit def codeToFromContextBigInt(s: String): FromContext[BigInt] = contextConverter[String, BigInt](s)
+  implicit def codeToFromContextBoolean(s: String): FromContext[Boolean] = contextConverter[String, Boolean](s)
 
-  implicit def fileToString(f: File) = contextConverter[File, String](f)
-  implicit def stringToString(s: String) = StringFromContext.fromString(s)
-  implicit def stringToFile(s: String) = contextConverter[String, File](s)
-  implicit def fileToFile(f: File) = contextConverter[File, File](f)
+  implicit def fileToString(f: File): FromContext[String] = contextConverter[File, String](f)
+  //implicit def stringToString(s: String): StringFromContext[String] = StringFromContext.fromString(s)
+  implicit def stringToFile(s: String): FromContext[File] = contextConverter[String, File](s)
+  implicit def fileToFile(f: File): FromContext[File] = contextConverter[File, File](f)
 
-  implicit def booleanToCondition(b: Boolean) = contextConverter[Boolean, Boolean](b)
-  implicit def prototypeIsFromContext[T](p: Val[T]) = contextConverter[Val[T], T](p)
+  implicit def booleanToCondition(b: Boolean): FromContext[Boolean] = contextConverter[Boolean, Boolean](b)
+  implicit def prototypeIsFromContext[T](p: Val[T]): FromContext[T] = contextConverter[Val[T], T](p)
 
   /**
    * FromContext for a given prototype
@@ -175,7 +170,7 @@ object FromContext extends LowPriorityFromContext {
           case Some(i)           ⇒ Seq(new UserBadDataError(s"FromContext validation failed, $v has incorrect type, should be $i, among inputs $inputs"))
         }
       }
-    } withInputs (Seq(v))
+    } withInputs (Seq(v)) copy(stringValue = Some(s"val:$v"))
 
   /**
    * From context for a given value
@@ -183,16 +178,23 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def value[T](t: T): FromContext[T] = FromContext[T] { _ ⇒ t }
+  def value[T](t: T): FromContext[T] =
+    val stringValue =
+      t match
+        case t: File => s"file:${t.getPath}"
+        case t => t.toString
+    FromContext[T] { _ ⇒ t } copy(stringValue = Some(stringValue))
+
+  def fromString(s: String): FromContext[String] = s
 
   /**
    * Parameters wrap a Context and implicit services
    * @param context
    * @param random
-   * @param newFile
+   * @param tmpDirectory
    * @param fileService
    */
-  case class Parameters(context: Context, implicit val random: RandomProvider, implicit val newFile: TmpDirectory, implicit val fileService: FileService)
+  case class Parameters(val context: Context)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
   //case class ValidationParameters(inputs: Seq[Val[_]], implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
 
   /**
@@ -201,13 +203,15 @@ object FromContext extends LowPriorityFromContext {
    * @tparam T
    * @return
    */
-  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, Validate.success)
+  def apply[T](f: Parameters ⇒ T): FromContext[T] = new FromContext[T](f, Validate.success, Seq.empty, DefaultSet.empty, None)
+
+
 
   /**
    * Operators for boolean FromContext ([[Condition]] ~ FromContext[Boolean])
    * @param f
    */
-  implicit class ConditionDecorator(f: Condition) {
+  extension (f: Condition)
     def unary_! = f.map(v ⇒ !v)
 
     def &&(d: Condition): Condition =
@@ -221,51 +225,46 @@ object FromContext extends LowPriorityFromContext {
         import p._
         f.from(context) || d.from(context)
       } withValidate { f.validate ++ d.validate }
-  }
 
-  implicit class ExpandedStringOperations(s1: FromContext[String]) {
+
+  extension (s1: FromContext[String]) {
     def +(s2: FromContext[String]) = (s1 map2 s2)(_ + _)
   }
 
-  implicit class FromContextFileDecorator(f: FromContext[File]) {
+  extension (f: FromContext[File]) {
     def exists = f.map(_.exists)
     def isEmpty = f.map(_.isEmpty)
     def /(path: FromContext[String]) = (f map2 path)(_ / _)
   }
 
-  def copy[T](f: FromContext[T])(validate: Validate = f.v, inputs: Seq[Val[_]] = f.inputs) =
-    new FromContext(c = f.c, v = validate, inputs = inputs)
-
+  extension[A](fr: FromContext[A]) 
+    def map[S](f: A => S) = fr.map(f)
+    def map2[B, C](fb: FromContext[B])(f: (A, B) => C) = fr.map2(fb)(f)
 }
 
-class FromContext[+T](val c: FromContext.Parameters ⇒ T, val v: Validate, val inputs: Seq[Val[_]] = Seq()) {
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = c(FromContext.Parameters(context, rng, tmpDirectory, fileService))
+case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs: Seq[Val[_]], defaults: DefaultSet, stringValue: Option[String]) {
+  def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T =
+    def fullContext = DefaultSet.completeContext(defaults, context)
+    val parameters: FromContext.Parameters = FromContext.Parameters(fullContext)(rng, tmpDirectory, fileService)
+    val result = c(parameters)
+    result
+
   def from(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T = apply(context)
 
-  def validate = v
+  def validate = Validate.withExtraInputs(v, i => DefaultSet.defaultVals(i, defaults))
 
-  def withValidate(validate: Validate): FromContext[T] = FromContext.copy(this)(validate = v ++ validate)
-  def withInputs(v: Seq[Val[_]]): FromContext[T] = FromContext.copy(this)(inputs = inputs ++ v)
+  def withValidate(validate: Validate): FromContext[T] = copy(v = v ++ validate)
+  def withInputs(v: Seq[Val[_]]): FromContext[T] = copy(inputs = inputs ++ v)
+
   def using(fs: FromContext[_]*): FromContext[T] =
     this.withValidate(fs.map(_.validate)).withInputs(fs.flatMap(_.inputs))
-}
 
-object StringFromContext {
 
-  implicit def fromString(s: String): StringFromContext[String] = {
-    val fc = FromContext.contextConverter[String, String](s)
-
-    new StringFromContext(
-      c = fc.c,
-      v = fc.v,
-      string = s
-    )
-  }
-
-}
-
-class StringFromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, val string: String) extends FromContext(c, v) {
-  override def toString = s"FromContext($string)"
+  override def toString =
+    stringValue match {
+      case Some(string) => s"FromContext($string)"
+      case _ => super.toString
+    }
 }
 
 object Expandable {
@@ -273,12 +272,11 @@ object Expandable {
     override def expand(s: S): FromContext[T] = f(s)
   }
 
-  implicit def stringToString = Expandable[String, String](s ⇒ s: FromContext[String])
-  implicit def stringToFile = Expandable[String, File](s ⇒ s: FromContext[File])
-  implicit def fileToFile = Expandable[File, File](f ⇒ f: FromContext[File])
+  given Expandable[String, String] = Expandable[String, String](s ⇒ s: FromContext[String])
+  given Expandable[String, File] = Expandable[String, File](s ⇒ s: FromContext[File])
+  given Expandable[File, File] = Expandable[File, File](f ⇒ f: FromContext[File])
 }
 
 trait Expandable[S, T] {
   def expand(s: S): FromContext[T]
 }
-

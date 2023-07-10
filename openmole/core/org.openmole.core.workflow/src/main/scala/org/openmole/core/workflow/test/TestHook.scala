@@ -16,18 +16,18 @@
  */
 package org.openmole.core.workflow.test
 
-import monocle.macros.Lenses
 import org.openmole.core.context.Context
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.test.Stubs._
+import monocle.Focus
 
 object TestHook {
-  implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(config)
+  implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(Focus[TestHook](_.config))
 }
 
-@Lenses case class TestHook(
+case class TestHook(
   f:      Context ⇒ Unit    = identity[Context],
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()

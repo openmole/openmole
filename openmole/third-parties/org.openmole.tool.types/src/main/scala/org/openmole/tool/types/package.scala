@@ -16,14 +16,27 @@
  */
 package org.openmole.tool
 
-import shapeless._
-
 package types {
 
   trait TypesPackage {
-    implicit def hlistToA[H <: HList, A](h: H)(implicit s: ops.hlist.Selector[H, A]): A = s(h)
-  }
 
+    object SelectTuple {
+      implicit def selectHead[H, T <: Tuple]: SelectTuple[H, H *: T] = t => t.head
+      implicit def selectInductive[H, T <: NonEmptyTuple](implicit selectTail: SelectTuple[H, Tuple.Tail[T]]): SelectTuple[H, T] = t => selectTail.select(t.tail)
+
+      def apply[H, T](t: T)(implicit select: SelectTuple[H, T]): H = select.select(t)
+    }
+
+    @FunctionalInterface trait SelectTuple[H, T] {
+      def select(t: T): H
+    }
+
+    //implicit def function1Manifest[A: Manifest, B: Manifest]: Manifest[A => B] = Manifest.classType(classOf[scala.Function1[A, B]], manifest[A], manifest[B])
+    //implicit def arrayManifest[A: Manifest]: Manifest[Array[A]] = Manifest.arrayType(manifest[A])
+    implicit def manifestOrder1[A, T[_]](implicit aManifest: Manifest[A], tClassTag: scala.reflect.ClassTag[T[A]]): Manifest[T[A]] = Manifest.classType[T[A]](tClassTag.runtimeClass.asInstanceOf[Class[T[A]]], aManifest)
+    implicit def manifestOrder2[A, B, T[_, _]](implicit aManifest: Manifest[A], bManifest: Manifest[B], tClassTag: scala.reflect.ClassTag[T[A, B]]): Manifest[T[A, B]] = Manifest.classType[T[A, B]](tClassTag.runtimeClass.asInstanceOf[Class[T[A, B]]], aManifest, bManifest)
+
+  }
 }
 
 package object types extends TypesPackage

@@ -18,21 +18,41 @@ package org.openmole.plugin.method.sensitivity
  */
 
 import org.openmole.core.dsl
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.tool.pattern.MapReduce
 
 object SensitivitySaltelli {
 
+  def methodName = MethodMetaData.name(SensitivitySaltelli)
+
   def firstOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("firstOrder", output.name))
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
-  case class Method(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
 
-  implicit def method: ExplorationMethod[SensitivitySaltelli, Method] = p => {
-    implicit def defScope = p.scope
+  object Method:
+    object MetaData:
+
+      import io.circe.*
+
+      given Codec[MetaData] = Codec.AsObject.derivedConfigured
+
+      def apply(method: Method) =
+        new MetaData(
+          inputs = method.inputs.map(_.prototype).map(ValData.apply),
+          outputs = method.outputs.map(ValData.apply)
+        )
+
+    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
+
+    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName, MetaData.apply)
+
+  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
+
+  given ExplorationMethod[SensitivitySaltelli, Method] = p => {
+    implicit def defScope: DefinitionScope = p.scope
 
     val sampling = SaltelliSampling(p.sample, p.inputs: _*)
 
@@ -104,17 +124,17 @@ object SensitivitySaltelli {
     }
 
     def apply(
-      modelInputs:  Seq[ScalarOrSequenceOfDouble],
+      modelInputs:  Seq[ScalableValue],
       modelOutputs: Seq[Val[Double]],
       firstOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("firstOrderSI"),
       totalOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
       def saltelliOutputs(
-        modelInputs:  Seq[ScalarOrSequenceOfDouble],
+        modelInputs:  Seq[ScalableValue],
         modelOutputs: Seq[Val[Double]]) =
         for {
           o ← modelOutputs
-          i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+          i ← ScalableValue.prototypes(modelInputs)
         } yield (i, o)
 
       val fOOutputs = saltelliOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ SensitivitySaltelli.firstOrder(i, o) }
@@ -161,13 +181,13 @@ object SensitivitySaltelli {
         val fosiv =
           for {
             (on, oi) ← modelOutputs.zipWithIndex
-            v ← ScalarOrSequenceOfDouble.unflatten(modelInputs, fosi(oi), scale = false).from(context)
+            v ← ScalableValue.toVariables(modelInputs, fosi(oi), scale = false).from(context)
           } yield v.value
 
         val tosiv =
           for {
             (on, oi) ← modelOutputs.zipWithIndex
-            v ← ScalarOrSequenceOfDouble.unflatten(modelInputs, tosi(oi), scale = false).from(context)
+            v ← ScalableValue.toVariables(modelInputs, tosi(oi), scale = false).from(context)
           } yield v.value
 
         context ++
@@ -190,14 +210,14 @@ object SensitivitySaltelli {
         import p._
         import WritableOutput._
 
-        val inputs = ScalarOrSequenceOfDouble.prototypes(method.inputs)
+        val inputs = ScalableValue.prototypes(method.inputs)
 
-        import OutputFormat._
+        import OutputFormat.*
 
         def sections =
-          Seq(
-            OutputSection("firstOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context)),
-            OutputSection("totalOrderIndices", Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context))
+          OutputContent(
+            "firstOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context),
+            "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
         outputFormat.write(executionContext)(format, output, sections, method).from(context)
@@ -243,7 +263,7 @@ object SensitivitySaltelli {
           m:      Namespace): List[Iterable[Variable[_]]] =
           matrix.zipWithIndex.map {
             case (l, index) ⇒
-              def line = ScalarOrSequenceOfDouble.unflatten(saltelli.factors, l).from(context)
+              def line = ScalableValue.toVariables(saltelli.factors, l).from(context)
               Variable(SaltelliSampling.matrixName, m.toString) :: Variable(SaltelliSampling.matrixIndex, index) :: line
           }.toList
 
@@ -275,7 +295,7 @@ object SensitivitySaltelli {
       )
     }
 
-    def apply(samples: FromContext[Int], factors: ScalarOrSequenceOfDouble*): SaltelliSampling =
+    def apply(samples: FromContext[Int], factors: ScalableValue*): SaltelliSampling =
       new SaltelliSampling(samples, true, factors: _*)
 
     def buildC(
@@ -293,7 +313,7 @@ object SensitivitySaltelli {
 
   }
 
-  case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalarOrSequenceOfDouble*)
+  case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalableValue*)
 
 
 }
@@ -312,7 +332,7 @@ object SensitivitySaltelli {
  */
 case class SensitivitySaltelli(
   evaluation:   DSL,
-  inputs:  Seq[ScalarOrSequenceOfDouble],
+  inputs:  Seq[ScalableValue],
   outputs: Seq[Val[Double]],
   sample:      FromContext[Int],
   scope: DefinitionScope = "sensitivity saltelli")

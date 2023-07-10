@@ -5,9 +5,8 @@ import java.util.UUID
 import org.openmole.tool.crypto._
 import org.openmole.tool.file._
 import org.openmole.core.exception._
-import org.openmole.core.preferencemacro._
 
-object Preference {
+object Preference:
 
   lazy val uniqueID = PreferenceLocation[String]("Global", "UniqueID", None)
   def passwordTest = PreferenceLocation.cyphered[String]("Preference", "passwordTest", Some(passwordTestString))
@@ -39,9 +38,9 @@ object Preference {
     preference.setPreference(passwordTest, passwordTestString)
   }
 
-}
 
-trait Preference {
+
+trait Preference:
   //  def apply[T: ConfigurationString](location: ClearConfigurationLocation[T]): T
   //  def apply[T: ConfigurationString](location: CypheredConfigurationLocation[T])(implicit cypher: Cypher)
   //
@@ -96,16 +95,27 @@ trait Preference {
     setRawPreference(location, prop)
   }
 
+  def updatePreference[T: ConfigurationString](location: PreferenceLocation[T])(value: Option[T] => Option[T])(implicit cypher: Cypher) = synchronized {
+    val v = preferenceOption(location)
+    val newValue = value(v)
+
+    newValue match
+      case None => clearPreference(location)
+      case Some(v) => setPreference(location, v)
+
+    newValue
+  }
+
   def isSet[T](location: PreferenceLocation[T]) = synchronized { getRawPreference(location).isDefined }
 
-  def clearPreference[T](location: PreferenceLocation[T])
-  def clear()
+  def clearPreference[T](location: PreferenceLocation[T]): Unit
+  def clear(): Unit
 
-  protected def setRawPreference(location: PreferenceLocation[_], value: String)
+  protected def setRawPreference(location: PreferenceLocation[_], value: String): Unit
   protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String]
-}
 
-case class FilePreference(configurationFile: ConfigurationFile) extends Preference {
+
+case class FilePreference(configurationFile: ConfigurationFile) extends Preference:
 
   protected def getRawPreference[T](location: PreferenceLocation[T]) = synchronized { configurationFile.value(location.group, location.name) }
 
@@ -123,9 +133,9 @@ case class FilePreference(configurationFile: ConfigurationFile) extends Preferen
     //      setPreference(Workspace.uniqueIDLocation, uniqueId)
     //    }
   }
-}
 
-class MemoryPreference() extends Preference {
+
+class MemoryPreference() extends Preference:
 
   lazy val map = collection.mutable.Map[(String, String), String]()
 
@@ -142,4 +152,3 @@ class MemoryPreference() extends Preference {
   override protected def getRawPreference[T](location: PreferenceLocation[T]): Option[String] = synchronized {
     map.get((location.group, location.name))
   }
-}

@@ -59,7 +59,7 @@ object PostStepTask {
       }
     } set (
       inputs += stepState,
-      inputs += (observed.map(_.v.array): _*),
+      inputs ++= observed.map(_.v.array),
       outputs += (state, stop),
       (inputs, outputs) += step
     )

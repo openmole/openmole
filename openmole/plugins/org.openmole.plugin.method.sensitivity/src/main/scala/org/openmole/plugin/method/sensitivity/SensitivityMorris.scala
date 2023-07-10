@@ -22,29 +22,44 @@ import org.openmole.plugin.tool.pattern.MapReduce
  */
 
 object SensitivityMorris {
-
+  def methodName = MethodMetaData.name(SensitivityMorris)
+  
   def mu(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("mu", output.name))
   def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
 
-  case class Method(inputs: Seq[ScalarOrSequenceOfDouble], outputs: Seq[Val[_]])
+  object Method:
+    import io.circe.*
 
-  object MorrisHook {
+    object MetaData:
+      def apply(method: Method) =
+        new MetaData(
+          inputs = method.inputs.map(_.prototype).map(ValData.apply),
+          outputs = method.outputs.map(ValData.apply)
+        )
+
+    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
+
+    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivityMorris.methodName, MetaData.apply)
+
+  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
+
+  object MorrisHook:
 
     def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
       Hook("MorrisHook") { p ⇒
         import p._
         import WritableOutput._
 
-        val inputs = ScalarOrSequenceOfDouble.prototypes(method.inputs)
+        val inputs = ScalableValue.prototypes(method.inputs)
 
-        import OutputFormat._
+        import OutputFormat.*
 
         def sections =
-          Seq(
-            OutputSection("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
-            OutputSection("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
-            OutputSection("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
+          OutputContent(
+            ("mu", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context)),
+            ("muStar", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context)),
+            ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
         outputFormat.write(executionContext)(format, output, sections, method).from(context)
@@ -52,7 +67,6 @@ object SensitivityMorris {
         context
       }
 
-  }
 
   /**
    * Describes a part of the space of inputs/ouputs of a model (or actually, puzzle)
@@ -138,14 +152,14 @@ object SensitivityMorris {
      */
 
     def apply[T](
-      modelInputs:  Seq[ScalarOrSequenceOfDouble],
+      modelInputs:  Seq[ScalableValue],
       modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
 
       def morrisOutputs(
-        modelInputs:  Seq[ScalarOrSequenceOfDouble],
+        modelInputs:  Seq[ScalableValue],
         modelOutputs: Seq[Val[Double]]) =
         for {
-          i ← ScalarOrSequenceOfDouble.prototypes(modelInputs)
+          i ← ScalableValue.prototypes(modelInputs)
           o ← modelOutputs
         } yield (i, o)
 
@@ -162,14 +176,18 @@ object SensitivityMorris {
 
         // for each part of the space we were asked to explore, compute the elementary effects and returns them
         // into the variables passed by the user
-        val List(mu, muStar, sigma) =
+        val effects: Seq[Seq[Double]] =
           morrisOutputs(modelInputs, modelOutputs).map {
             case (input, output) ⇒
               val outputValues: Array[Double] = context(output.toArray)
               MorrisSampling.Log.logger.fine("Processing the elementary change for input " + input + " on " + output)
               val (mu, muStar, sigma) = elementaryEffect(input, output, outputValues, factorChanged, deltas)
-              List(mu, muStar, sigma)
-          }.transpose.toList
+              Seq[Double](mu, muStar, sigma)
+          }.transpose
+
+        def mu = effects(0)
+        def muStar = effects(1)
+        def sigma = effects(2)
 
         context ++
           (muOutputs zip mu).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
@@ -222,7 +240,7 @@ object SensitivityMorris {
     def apply(
       repetitions: FromContext[Int],
       levels:      FromContext[Int],
-      factors:     Seq[ScalarOrSequenceOfDouble]) =
+      factors:     Seq[ScalableValue]) =
       new MorrisSampling(repetitions, levels, factors)
 
     /**
@@ -312,7 +330,7 @@ object SensitivityMorris {
   sealed class MorrisSampling(
     val repetitions: FromContext[Int],
     val levels:      FromContext[Int],
-    val factors:     Seq[ScalarOrSequenceOfDouble]) {
+    val factors:     Seq[ScalableValue]) {
 
     def validate = repetitions.validate ++ levels.validate
 
@@ -333,18 +351,19 @@ object SensitivityMorris {
       val variablesForRefRun: List[Variable[_]] = List(
         Variable(MorrisSampling.varFactorName, ""),
         Variable(MorrisSampling.varDelta, 0.0)
-      ) ++ ScalarOrSequenceOfDouble.unflatten(factors, t.seed).from(context)
+      ) ++ ScalableValue.toVariables(factors, t.seed).from(context)
 
       // forge lists of lists of variables for the runs of the trajectory
-      val variablesForElementaryEffects = (t.points, t.deltas, t.variableOrder.zipWithIndex).zipped.map(
-        (point: Array[Double], delta: Double, order2idx: (Int, Int)) ⇒ {
-          val factoridx = order2idx._1
-          val iterationId = order2idx._2 + 1
-          List(
-            Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
-            Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
-          ) ++ ScalarOrSequenceOfDouble.unflatten(factors, point).from(context)
-        })
+      val variablesForElementaryEffects = 
+        (t.points zip t.deltas zip t.variableOrder.zipWithIndex).map {
+          case ((point, delta), order2idx) ⇒ 
+            val factoridx = order2idx._1
+            val iterationId = order2idx._2 + 1
+            List(
+              Variable(MorrisSampling.varFactorName, factors(factoridx).prototype.name),
+              Variable(MorrisSampling.varDelta, point(factoridx) - t.seed(factoridx))
+            ) ++ ScalableValue.toVariables(factors, point).from(context)
+        }
 
       variablesForRefRun :: variablesForElementaryEffects
 
@@ -372,7 +391,7 @@ object SensitivityMorris {
   }
 
   implicit def method: ExplorationMethod[SensitivityMorris, Method] = m ⇒ {
-    implicit def defScope = m.scope
+    implicit def defScope: DefinitionScope = m.scope
 
     // the sampling for Morris is a One At a Time one,
     // with respect to the user settings for repetitions, levels and inputs
@@ -406,7 +425,7 @@ object SensitivityMorris {
  */
 case class SensitivityMorris(
   evaluation: DSL,
-  inputs:     Seq[ScalarOrSequenceOfDouble],
+  inputs:     Seq[ScalableValue],
   outputs:    Seq[Val[Double]],
   sample:     Int,
   level:      Int,

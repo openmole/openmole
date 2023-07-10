@@ -33,7 +33,7 @@ object Generate {
     parameters.target.get.mkdirs()
 
     def copy(f: File): String = {
-      val name = s"modules/${f.getName}"
+      val name = s"${f.getName}"
       f copy (parameters.target.get / name)
       name
     }

@@ -48,7 +48,6 @@ package file {
     p ⇒
 
     type File = java.io.File
-
     def File(s: String): File = new File(s)
 
     def currentDirectory = new File(".")
@@ -59,23 +58,21 @@ package file {
 
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
-    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
-      if (!file.exists()) {
-        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
-        if (executable) file.setExecutable(true)
-        file
-      }
+    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
+    //      if (!file.exists()) {
+    //        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
+    //        if (executable) file.setExecutable(true)
+    //        file
+    //      }
 
     // glad you were there...
-    implicit def file2Path(file: File) = file.toPath
+    implicit def file2Path(file: File): Path = file.toPath
 
-    implicit def path2File(path: Path) = path.toFile
+    implicit def path2File(path: Path): File = path.toFile
 
-    implicit val fileOrdering = Ordering.by((_: File).getPath)
+    implicit val fileOrdering: Ordering[File] = Ordering.by((_: File).getPath)
 
-    implicit def predicateToFileFilter(predicate: File ⇒ Boolean) = new FileFilter {
-      def accept(p1: File) = predicate(p1)
-    }
+    implicit def predicateToFileFilter(predicate: File ⇒ Boolean): FileFilter = p1 ⇒ predicate(p1)
 
     def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
       (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
@@ -93,9 +90,11 @@ package file {
         if (file.isDirectory) isDirectoryEmpty
         else file.size == 0L
 
-      def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty)
+      def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
 
-      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty)
+      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
+      
+      def recursiveListFilesSafe(filter: File ⇒ Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 
       def getParentFileSafe: File =
         file.getParentFile() match {
@@ -149,16 +148,16 @@ package file {
       }
 
       //////// modifiers ///////
-      def move(to: File) = wrapError {
+      def move(to: File) = wrapError:
+        to.getParentFile.mkdirs()
         def move = Files.move(file, to, StandardCopyOption.REPLACE_EXISTING)
-        if (!Files.isDirectory(file)) move
-        else {
-          Try(move) match {
+
+        if !Files.isDirectory(file)
+        then move
+        else
+          Try(move) match
             case Success(_) ⇒
             case Failure(_) ⇒ DirUtils.move(file, to)
-          }
-        }
-      }
 
       def forceFileDelete = wrapError {
         try Files.deleteIfExists(file)
@@ -171,38 +170,32 @@ package file {
 
       def recursiveDelete: Unit = wrapError { DirUtils.delete(file) }
 
-      def isJar = Try {
-        val zip = new ZipFile(file)
-        val hasManifestEntry =
-          try zip.getEntry("META-INF/MANIFEST.MF") != null
-          finally zip.close
-        hasManifestEntry
-      }.getOrElse(false)
-
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 
       def isBrokenSymbolicLink = Files.notExists(Files.readSymbolicLink(file))
 
-      def directoryContainsNoFileRecursive: Boolean = {
-        val toProceed = new ListBuffer[File]
-        toProceed += file
+      def directoryContainsNoFileRecursive: Boolean =
+        import scala.util.boundary
+        boundary:
+          val toProceed = new ListBuffer[File]
+          toProceed += file
 
-        while (!toProceed.isEmpty) {
-          val f = toProceed.remove(0)
+          while toProceed.nonEmpty
+          do
+            val f = toProceed.remove(0)
+            // wrap with try catch in case CARE Archive generates d--------- directories
+            try
+              f.withDirectoryStream(): s ⇒
+                for
+                  f ← s.asScala
+                do
+                  if Files.isRegularFile(f)
+                  then boundary.break(false)
+                  else if (Files.isDirectory(f)) toProceed += f
+            catch
+              case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
 
-          // wrap with try catch in case CARE Archive generates d--------- directories
-          try f.withDirectoryStream() { s ⇒
-            for (f ← s.asScala) {
-              if (Files.isRegularFile(f)) return false
-              else if (Files.isDirectory(f)) toProceed += f
-            }
-          }
-          catch {
-            case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
-          }
-        }
-        true
-      }
+          true
 
       import java.io.IOException
       import java.nio.file.FileVisitResult
@@ -211,6 +204,8 @@ package file {
       import java.nio.file.attribute.BasicFileAttributes
 
       //////// general operations ///////
+      def baseName = file.getName.takeWhile(_ != '.')
+
       def size: Long = {
         def sizeOfDirectory(directory: File) = {
           val size = new AtomicLong()
@@ -271,10 +266,9 @@ package file {
         else false
       }
 
-      def content_=(content: String) = {
+      def content_=(content: String) =
         createParentDirectory
         Files.write(file, content.getBytes, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
-      }
 
       def <(c: String) = content_=(c)
 
@@ -285,6 +279,9 @@ package file {
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
+
+      def clear =
+        content = ""
 
       def lines = withSource(_.getLines.toVector)
 
@@ -326,7 +323,7 @@ package file {
       }
 
       // TODO replace with DirectoryStream
-      def listRecursive(filter: File ⇒ Boolean) = {
+      def listRecursive(filter: File ⇒ Boolean = _ => true) = {
         val ret = new ListBuffer[File]
         applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
         ret
@@ -340,13 +337,13 @@ package file {
        * @param prefix String to prefix the generated UUID name.
        * @return New temporary directory
        */
-      def newDir(prefix: String, create: Boolean = false): File = {
+      def newDirectory(prefix: String, create: Boolean = false): File = {
         val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
         if (create) tempDir.mkdirs()
         tempDir.toFile
       }
 
-      /**
+        /**
        * Create instance of temporary file in directory of caller.
        * Actual file is NOT created yet.
        *

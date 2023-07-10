@@ -54,6 +54,8 @@ object MoleExecution {
   case class JobFinished(moleJob: JobId, context: Context, capsule: MoleCapsule) extends Event[MoleExecution]
   case class Cleaned() extends Event[MoleExecution]
 
+  type Id = String
+
   object MoleExecutionFailed {
     def exception(moleExecutionError: MoleExecutionFailed) = moleExecutionError.exception
     def capsule(moleExecutionError: MoleExecutionFailed) = moleExecutionError match {
@@ -105,7 +107,7 @@ object MoleExecution {
       defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      MoleExecutionContext()(moleServices),
+      MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices),
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
@@ -190,12 +192,12 @@ object MoleExecution {
           subMoleExecutionState.masterCapsuleExecutor.submit {
             try {
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
-              val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+              val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
               val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
-              val taskExecutionDirectory = moleExecutionDirectory.newDir("taskExecution")
+              val taskExecutionDirectory = moleExecutionDirectory.newDirectory("taskExecution")
               val result =
                 try {
                   val taskContext =
@@ -229,7 +231,7 @@ object MoleExecution {
           }
 
           val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
-          val runtimeTask = capsule.runtimeTask(subMoleExecutionState.moleExecution.mole, subMoleExecutionState.moleExecution.sources, subMoleExecutionState.moleExecution.hooks)
+          val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
           val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 
           eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
@@ -251,7 +253,7 @@ object MoleExecution {
   def performHooksAndTransitions(subMoleExecutionState: SubMoleExecutionState, job: JobId, context: Context, capsule: MoleCapsule, ticket: Ticket) = {
     val mole = subMoleExecutionState.moleExecution.mole
 
-    def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + context) - Variable.openMOLESeed
+    def ctxForHooks = (subMoleExecutionState.moleExecution.implicits + context) - Variable.openMOLESeed + Variable(Variable.openMOLEExperiment, ticket.content)
 
     def executeHook(h: Hook) =
       try {
@@ -260,6 +262,9 @@ object MoleExecution {
           HookExecutionContext(
             cache = cache,
             ticket = ticket,
+            moleLaunchTime = executionContext.moleLaunchTime,
+            jobId = job,
+            moleExecutionId = subMoleExecutionState.moleExecution.id)(
             preference = services.preference,
             threadProvider = services.threadProvider,
             fileService = services.fileService,
@@ -267,8 +272,9 @@ object MoleExecution {
             outputRedirection = services.outputRedirection,
             loggerService = services.loggerService,
             random = services.newRandom,
-            newFile = services.tmpDirectory,
-            serializerService = services.serializerService)
+            tmpDirectory = services.tmpDirectory,
+            serializerService = services.serializerService,
+            timeService = services.timeService)
         }
 
         h.perform(ctxForHooks, toHookExecutionContext(subMoleExecutionState.moleExecution.keyValueCache, subMoleExecutionState.moleExecution.executionContext))
@@ -366,7 +372,7 @@ object MoleExecution {
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
       moleExecution.finishedSemaphore.release()
 
-      moleExecution.executionContext.services.threadProvider.submit(ThreadProvider.maxPriority) { () ⇒
+      moleExecution.executionContext.services.threadProvider.enqueue(ThreadProvider.maxPriority) { () ⇒
         def stopEnvironments() = {
           if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
           moleExecution.environments.values.foreach(_.stop())
@@ -565,7 +571,7 @@ object MoleExecution {
   }
 
   object SynchronisationContext {
-    implicit def default = Synchronized
+    implicit def default: Synchronized.type = Synchronized
     def apply[T](th: Any, op: ⇒ T)(implicit s: SynchronisationContext) =
       s match {
         case MoleExecution.Synchronized ⇒ synchronized(op)
@@ -637,7 +643,7 @@ object MoleExecutionMessage {
 
   def dispatcher(moleExecution: MoleExecution) =
     while (!(moleExecution._cleaned)) {
-      val msg = moleExecution.messageQueue.dequeue
+      val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
     }
 
@@ -654,7 +660,7 @@ class MoleExecution(
   val implicits:                   Context,
   val executionContext:            MoleExecutionContext,
   val startStopDefaultEnvironment: Boolean,
-  val id:                          String,
+  val id:                          MoleExecution.Id,
   val keyValueCache:               KeyValueCache,
   val lockRepository:              LockRepository[LockKey]
 ) { moleExecution ⇒
@@ -720,7 +726,8 @@ class MoleExecution(
       lockRepository = lockRepository,
       moleExecution = Some(moleExecution),
       serializerService = serializerService,
-      networkService = networkService
+      networkService = networkService,
+      timeService = timeService
     )
   }
 
@@ -728,6 +735,8 @@ class MoleExecution(
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
+  lazy val runtimeTask = mole.capsules.map(c => c -> c.runtimeTask(mole, sources, hooks)).toMap
+              
   def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
 
   lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this)

@@ -26,7 +26,7 @@ import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 
-class ExplorationTransitionSpec extends FlatSpec with Matchers {
+class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

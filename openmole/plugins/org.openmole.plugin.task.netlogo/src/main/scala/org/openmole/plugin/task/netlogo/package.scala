@@ -20,24 +20,23 @@ package org.openmole.plugin.task
 import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 
-package netlogo {
-
+package netlogo:
   import org.openmole.core.workflow.builder._
 
-  trait NetLogoPackage extends external.ExternalPackage {
-    @deprecated
-    lazy val netLogoInputs = new {
-      def +=[T: MappedInputBuilder: InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n
-      def +=[T: MappedInputBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
-    }
+  trait NetLogoPackage:
+    class NetLogoInputs:
+      def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n
+      def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
 
     @deprecated
-    lazy val netLogoOutputs = new {
-      def +=[T: MappedOutputBuilder: InputOutputBuilder](n: String, p: Val[_]): T ⇒ T = outputs += p mapped n
-      def +=[T: MappedOutputBuilder: InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
-    }
+    lazy val netLogoInputs = new NetLogoInputs
 
-  }
-}
+    class NetLogoOutputs:
+      def +=[T: MappedOutputBuilder : InputOutputBuilder](n: String, p: Val[_]): T ⇒ T = outputs += p mapped n
+      def +=[T: MappedOutputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
+
+    @deprecated
+    lazy val netLogoOutputs = new NetLogoOutputs
+
 
 package object netlogo extends NetLogoPackage

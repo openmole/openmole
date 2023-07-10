@@ -1,8 +1,10 @@
 package org.openmole.ui
 
-import java.io.File
+import org.openmole.core.authentication.AuthenticationStore
+import org.openmole.core.preference.Preference
 
-import org.openmole.core.services.{ Services, ServicesContainer }
+import java.io.File
+import org.openmole.core.services.{Services, ServicesContainer}
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file._
 import org.openmole.tool.logger.LoggerService
@@ -28,23 +30,23 @@ object Test {
       import org.openmole.tool.random._
       import org.openmole.core.networkservice._
 
-      implicit val ws = Workspace(workspace)
-      implicit val cypher = Cypher(password)
-      implicit val preference = Services.preference(ws)
-      implicit val newFile = TmpDirectory(workspace)
-      implicit val seeder = Seeder()
-      implicit val serializerService = SerializerService()
-      implicit val threadProvider = ThreadProvider()
-      implicit val replicaCatalog = ReplicaCatalog(org.openmole.core.db.memory())
-      implicit val authenticationStore = Services.authenticationStore(ws)
-      implicit val fileService = FileService()
-      implicit val randomProvider = RandomProvider(seeder.newRNG)
-      implicit val eventDispatcher = EventDispatcher()
-      implicit val outputRedirection = OutputRedirection()
-      implicit val networkService = NetworkService(None)
-      implicit val fileServiceCache = FileServiceCache()
-      implicit val loggerService = LoggerService()
-      implicit val timeService = TimeService()
+      implicit val ws: Workspace = Workspace(workspace)
+      implicit val cypher: Cypher = Cypher(password)
+      implicit val preference: Preference = Services.preference(ws)
+      implicit val newFile: TmpDirectory = TmpDirectory(workspace)
+      implicit val seeder: Seeder = Seeder()
+      implicit val serializerService: SerializerService = SerializerService()
+      implicit val threadProvider: ThreadProvider = ThreadProvider()
+      implicit val replicaCatalog: ReplicaCatalog = ReplicaCatalog(org.openmole.core.db.memory())
+      implicit val authenticationStore: AuthenticationStore = Services.authenticationStore(ws)
+      implicit val fileService: FileService = FileService()
+      implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)
+      implicit val eventDispatcher: EventDispatcher = EventDispatcher()
+      implicit val outputRedirection: OutputRedirection = OutputRedirection()
+      implicit val networkService: NetworkService = NetworkService(None)
+      implicit val fileServiceCache: FileServiceCache = FileServiceCache()
+      implicit val loggerService: LoggerService = LoggerService()
+      implicit val timeService: TimeService = TimeService()
 
       new ServicesContainer()
     }

@@ -40,7 +40,6 @@ object JobManager { self ⇒
       case _: Submit    ⇒ 50
       case _: GetResult ⇒ 50
       case _: Kill      ⇒ 10
-      case _: Manage    ⇒ 75
       case _: Error     ⇒ 100 // This is very quick to process
       case _            ⇒ 1
     }
@@ -60,7 +59,7 @@ object JobManager { self ⇒
     }
   }
 
-  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.submit(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
+  def dispatch(msg: DispatchedMessage)(implicit services: BatchEnvironment.Services) = services.threadProvider.enqueue(messagePriority(msg)) { () ⇒ DispatcherActor.receive(msg) }
 
   def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit = {
     import services._
@@ -73,10 +72,8 @@ object JobManager { self ⇒
       case msg: Error       ⇒ dispatch(msg)
       case msg: Kill        ⇒ dispatch(msg)
 
-      case Manage(id, job, environment) ⇒
-        val bej = BatchExecutionJob(id, job, environment.jobStore)
-        ExecutionJobRegistry.register(environment.registry, bej)
-        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(id, bej))
+      case Manage(bej, environment) ⇒
+        services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej.id, bej))
         self ! Submit(bej, environment)
 
       case Delay(msg, delay) ⇒

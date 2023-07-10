@@ -19,6 +19,7 @@ package org.openmole.core.workflow.task
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 import org.openmole.core.context.Val
+import org.openmole.core.expansion.DefaultSet
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.domain._
@@ -26,17 +27,10 @@ import org.scalatest._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.test.TestTask
-import org.openmole.core.workflow.tools.DefaultSet
 
-class SerializationSpec extends FlatSpec with Matchers {
+class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  import org.openmole.core.workflow.test.Stubs._
-
-  def serializeDeserialize[T](o: T) = {
-    val builder = new ByteArrayOutputStream()
-    serializer.serialize(o, builder)
-    serializer.deserialize[T](new ByteArrayInputStream(builder.toByteArray))
-  }
+  import org.openmole.core.workflow.test._
 
   "Task " should "be the same after serialization and deserialization" in {
     val p = Val[Int]("p")
@@ -59,6 +53,7 @@ class SerializationSpec extends FlatSpec with Matchers {
   }
 
   // -Ydelambdafy:inline makes it work on scala 2.13
+  // inlining isSampling parameter makes it work on scala 3
   "Exploration " should "run after serialization and deserialization" in {
     val data = List("A", "B", "C")
     val i = Val[String]("i")
@@ -69,6 +64,20 @@ class SerializationSpec extends FlatSpec with Matchers {
     val t = EmptyTask() set (inputs += i)
     val t2 = serializeDeserialize(exp -< t)
     t2.run().hangOn()
+  }
+
+  "Compiled code" should "be detetected as such by the serializer" in {
+    val interpreter = org.openmole.core.compiler.Interpreter()
+    val i = interpreter.eval("""
+    class InterpretedClass {
+      def test = ""
+    }
+    new InterpretedClass()
+    """)
+    org.openmole.core.compiler.Interpreter.isInterpretedClass(i.getClass) should equal(true)
+
+    class OpenMOLEClass
+    org.openmole.core.compiler.Interpreter.isInterpretedClass(classOf[OpenMOLEClass]) should equal(false)
   }
 
 }

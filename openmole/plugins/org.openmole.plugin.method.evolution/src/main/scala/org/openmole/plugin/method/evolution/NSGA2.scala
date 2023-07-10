@@ -18,11 +18,10 @@
 package org.openmole.plugin.method.evolution
 
 import cats.implicits._
-import monocle.macros.{ GenLens, Lenses }
+import monocle.macros.{ GenLens }
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
-import org.openmole.plugin.method.evolution.data._
 import squants.time.Time
 
 import monocle._
@@ -30,10 +29,10 @@ import monocle.syntax.all._
 
 object NSGA2 {
 
-  object DeterministicParams {
+  object DeterministicNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -42,7 +41,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicNSGA2) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -50,16 +49,22 @@ object NSGA2 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
+
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState[Unit](s = ())
 
-        override def metadata(generation: Long, saveOption: SaveOption) =
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.NSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             populationSize = om.mu,
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -109,7 +114,7 @@ object NSGA2 {
 
   }
 
-  case class DeterministicParams(
+  case class DeterministicNSGA2(
     mu:                  Int,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
@@ -117,10 +122,10 @@ object NSGA2 {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 ⇒ MGONoisyNSGA2, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -129,15 +134,15 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticNSGA2) = new Ops {
 
-        override def metadata(generation: Long, saveOption: SaveOption) =
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             populationSize = om.mu,
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -148,6 +153,11 @@ object NSGA2 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
@@ -201,7 +211,7 @@ object NSGA2 {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticNSGA2(
     mu:                  Int,
     operatorExploration: Double,
     genome:              Genome,
@@ -212,7 +222,7 @@ object NSGA2 {
     reject:              Option[Condition]
   )
 
-  def apply[P](
+  def apply(
     genome:         Genome,
     objective:      Objectives,
     outputs:        Seq[Val[_]]                  = Seq(),
@@ -226,7 +236,7 @@ object NSGA2 {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicNSGA2(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -241,7 +251,7 @@ object NSGA2 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticNSGA2(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -250,24 +260,28 @@ object NSGA2 {
     }
 
 }
-import EvolutionWorkflow._
+
+import EvolutionWorkflow.*
 
 object NSGA2Evolution {
 
   import org.openmole.core.dsl.DSL
 
-  implicit def method: ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
+  given EvolutionMethod[NSGA2Evolution] =
+    p =>
+      NSGA2(
+        populationSize = p.populationSize,
+        genome = p.genome,
+        objective = p.objective,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          NSGA2(
-            populationSize = p.populationSize,
-            genome = p.genome,
-            objective = p.objective,
-            outputs = p.evaluation.outputs,
-            stochastic = p.stochastic,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -276,11 +290,11 @@ object NSGA2Evolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
-@Lenses case class NSGA2Evolution(
+case class NSGA2Evolution(
   genome:         Genome,
   objective:      Objectives,
   evaluation:     DSL,

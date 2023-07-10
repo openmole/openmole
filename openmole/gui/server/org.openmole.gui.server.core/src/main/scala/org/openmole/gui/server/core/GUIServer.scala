@@ -17,28 +17,43 @@ package org.openmole.gui.server.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.concurrent.Semaphore
-
-import javax.servlet.ServletContext
-import org.eclipse.jetty.server.{ Server, ServerConnector }
-import org.eclipse.jetty.util.resource.{ Resource ⇒ Res }
-import org.eclipse.jetty.webapp._
+import cats.effect.IO
+import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.server.Router
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.location._
-import org.openmole.core.preference.{ Preference, PreferenceLocation }
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.gui.ext.server.utils
-import org.openmole.tool.crypto.KeyStore
-import org.openmole.tool.file._
+import org.openmole.core.location.*
+import org.openmole.core.preference.{Preference, PreferenceLocation}
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.gui.server.jscompile.{JSPack, Webpack}
+import org.openmole.tool.crypto.{Cypher, KeyStore}
+import org.openmole.tool.file.*
 import org.openmole.tool.network.Network
-import org.scalatra._
-import org.scalatra.servlet.ScalatraListener
+import cats.effect.*
+import org.http4s.*
+import org.http4s.blaze.server.*
+import org.http4s.dsl.io.*
+import org.http4s.implicits.*
+import org.http4s.server.Router
+import org.openmole.core.networkservice.NetworkService
+import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
+import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
+import org.openmole.tool.crypto.Cypher
 
-object GUIServer {
+import java.io.File
+import java.util.concurrent.Semaphore
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.*
+import java.io.File
+import java.util.concurrent.atomic.AtomicReference
+
+object GUIServer:
 
   def fromWebAppLocation = openMOLELocation / "webapp"
 
-  def webapp(optimizedJS: Boolean)(implicit newFile: TmpDirectory, workspace: Workspace, fileService: FileService) = {
+  def webpackLocation = openMOLELocation / "webpack"
+
+  def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
 
@@ -46,26 +61,34 @@ object GUIServer {
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    Plugins.expandDepsFile(from / "js" / utils.openmoleGrammarName, to /> "js" / utils.openmoleGrammarMode)
-    (from / "js" / utils.githubTheme) copy (to /> "js" / utils.githubTheme)
-    (from / "js" / utils.depsFileName) copy (to /> "js" / utils.depsFileName)
-    Plugins.openmoleFile(optimizedJS) copy (to /> "js" / utils.openmoleFileName)
-    to
-  }
+    val webpacked = Plugins.openmoleFile(optimizedJS)
 
-  val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
+    val jsTarget = to /> "js"
+    webpacked copy (jsTarget / utils.webpakedOpenmoleFileName)
+    new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
+
+    Plugins.persistentWebUI / utils.openmoleGrammarMode copy jsTarget / utils.openmoleGrammarMode
+    Plugins.persistentWebUI / "node_modules/plotly.js/dist/plotly.min.js" copy jsTarget / "plotly.min.js"
+    Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
+    
+    to
+
+
+  lazy val port = PreferenceLocation("GUIServer", "Port", Some(Network.freePort))
+
+  lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) = {
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
   }
 
   def lockFile(implicit workspace: Workspace) = {
-    val file = utils.webUIDirectory() / "GUI.lock"
+    val file = utils.webUIDirectory / "GUI.lock"
     file.createNewFile
     file
   }
 
-  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory() / "GUI.url"
+  def urlFile(implicit workspace: Workspace) = utils.webUIDirectory / "GUI.url"
 
   val servletArguments = "servletArguments"
 
@@ -78,132 +101,152 @@ object GUIServer {
     subDir:             Option[String]
   )
 
+  def waitingOpenMOLEContent = """
+    |<html>
+    |  <head>
+    |    <div style="display:none;">launching-page</div>
+    |    <script>
+    |      setInterval(function(){
+    |        fetch('application/is-alive').then(r => r.text()).then((text) => { if(text.includes("true") && !text.includes("launching-page")) { window.location.reload(1); } })
+    |      }, 3000);
+    |    </script>
+    |  </head>
+    |  <link href="css/style.css" rel="stylesheet"/>
+    |  <body>
+    |    <div>
+    |      OpenMOLE is launching...
+    |      <div class="loader" style="float: right"></div><br/>
+    |    </div>
+    |    (for the first launch, and after an update, it may take several minutes)
+    |  </body>
+    |</html>""".stripMargin
+
+  def waitRouter =
+    import org.http4s.headers.{`Content-Type`}
+    val routes: HttpRoutes[IO] = HttpRoutes.of {
+      case _ =>  org.http4s.dsl.io.Ok.apply(waitingOpenMOLEContent).map(_.withContentType(`Content-Type`(MediaType.text.html)))
+    }
+    Router("/" -> routes)
+
   case class ApplicationControl(restart: () ⇒ Unit, stop: () ⇒ Unit)
 
   sealed trait ExitStatus
-
   case object Restart extends ExitStatus
-
   case object Ok extends ExitStatus
 
-}
 
-class GUIBootstrap extends LifeCycle {
-  override def init(context: ServletContext) = {
-    val args = context.get(GUIServer.servletArguments).get.asInstanceOf[GUIServer.ServletArguments]
-    context mount (GUIServlet(args), "/*")
-  }
-}
+  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) = {
+    import services.*
+    implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-class StartingPage extends ScalatraServlet with LifeCycle {
-
-  override def init(context: ServletContext) = {
-    context mount (this, "/*")
-  }
-
-  get("/*") {
-
-    def content =
-      <html>
-        <head>
-          <script>{ """setTimeout(function(){ window.location.reload(1); }, 3000);""" }</script>
-        </head>
-        <link href="/css/style.css" rel="stylesheet"/>
-        <body>
-          <div>OpenMOLE is launching...<div class="loader" style="float: right"></div><br/></div>
-          (for the first launch, and after an update, it may take several minutes)
-        </body>
-      </html>
-
-    ServiceUnavailable(content)
+    val waitingServerShutdown = server(port, localhost).withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+    val webappCache =
+      try GUIServer.webapp(optimizedJS)
+      finally waitingServerShutdown.unsafeRunSync()
+      
+    new GUIServer(
+      port,
+      localhost,
+      services,
+      password,
+      webappCache,
+      extraHeaders
+    )
   }
 
-}
+  case class Control() {
+    var cancel: () => _ = null
 
-import org.openmole.gui.server.core.GUIServer._
+    @volatile var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
+    val semaphore = new Semaphore(0)
 
-class GUIServer(port: Int, localhost: Boolean, http: Boolean, services: GUIServerServices, password: Option[String], extraHeader: String, optimizedJS: Boolean, subDir: Option[String]) {
-
-  lazy val server = new Server()
-  var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
-  val semaphore = new Semaphore(0)
-
-  import services._
-
-  def start() = {
-    //org.eclipse.jetty.util.log.Log.setLog(new log.StdErrLog())
-
-    lazy val contextFactory = {
-      val contextFactory = new org.eclipse.jetty.util.ssl.SslContextFactory()
-
-      def keyStorePassword = "openmole"
-
-      val ks = KeyStore(services.workspace.persistentDir /> "keystoregui", keyStorePassword)
-      contextFactory.setKeyStore(ks.keyStore)
-      contextFactory.setKeyStorePassword(keyStorePassword)
-      contextFactory.setKeyManagerPassword(keyStorePassword)
-      contextFactory.setTrustStore(ks.keyStore)
-      contextFactory.setTrustStorePassword(keyStorePassword)
-      contextFactory
+    def join(): GUIServer.ExitStatus = {
+      semaphore.acquire()
+      semaphore.release()
+      exitStatus
     }
 
-    val connector = if (!http) new ServerConnector(server, contextFactory) else new ServerConnector(server)
-    connector.setPort(port)
+    def stop() = {
+      cancel()
+      semaphore.release()
+    }
 
-    if (!localhost) connector.setHost("localhost")
-
-    server.addConnector(connector)
-
-    val startingContext = new WebAppContext()
-
-    startingContext.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
-
-    startingContext.setBaseResource(Res.newResource(classOf[StartingPage].getClassLoader.getResource("/")))
-    startingContext.setClassLoader(classOf[StartingPage].getClassLoader)
-    startingContext.setInitParameter(ScalatraListener.LifeCycleKey, classOf[StartingPage].getCanonicalName)
-
-    startingContext.addEventListener(new ScalatraListener)
-
-    server.setHandler(startingContext)
-    server.start()
   }
 
-  def launchApplication() = {
-    val context = new WebAppContext()
+  def server(port: Int, localhost: Boolean) =
+    val s =
+      if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
+
+    s.enableHttp2(true)
+  end server
+
+
+
+
+class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], webappCache: File, extraHeaders: String):
+
+  def start() =
+    import cats.effect.unsafe.IORuntime
+    import cats.effect.unsafe.IORuntimeConfig
+    import cats.effect.unsafe.Scheduler
+
+
+    val control = GUIServer.Control()
     val applicationControl =
-      ApplicationControl(
+      GUIServer.ApplicationControl(
         () ⇒ {
-          exitStatus = GUIServer.Restart
-          stop()
+          control.exitStatus = GUIServer.Restart
+          control.stop()
         },
-        () ⇒ stop()
+        () ⇒ control.stop()
       )
 
-    val webappCache = webapp(optimizedJS)
+    val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher(password)))
+    val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
+    apiImpl.activatePlugins
 
-    context.setAttribute(GUIServer.servletArguments, GUIServer.ServletArguments(services, password, applicationControl, webappCache, extraHeader, subDir))
+    def stackError(t: Throwable) =
+      import org.openmole.core.tools.io.Prettifier.*
+      import io.circe.*
+      import io.circe.syntax.*
+      import io.circe.generic.auto.*
+      import org.openmole.gui.shared.data.*
+      import org.http4s.headers.`Content-Type`
+      InternalServerError {
+        Left(ErrorData(t)).asJson.noSpaces
+      }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
-    context.setContextPath(subDir.map { s ⇒ "/" + s }.getOrElse("") + "/")
+    val apiServer = new CoreAPIServer(apiImpl, stackError)
+    val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
-    context.setResourceBase(webappCache.getAbsolutePath)
-    context.setClassLoader(classOf[GUIServer].getClassLoader)
-    context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[GUIBootstrap].getCanonicalName)
-    context.addEventListener(new ScalatraListener)
 
-    server.stop()
-    server.setHandler(context)
-    server.start()
-  }
+    //    implicit val runtime: IORuntime =
+    //      cats.effect.unsafe.IORuntime(
+    //        compute = services.threadProvider.executionContext,
+    //        blocking = services.threadProvider.executionContext,
+    //        scheduler = Scheduler.createDefaultScheduler()._1,
+    //        shutdown = () => (),
+    //        config = IORuntimeConfig()
+    //      )
 
-  def join(): GUIServer.ExitStatus = {
-    semaphore.acquire()
-    semaphore.release()
-    exitStatus
-  }
+    val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> r.router).toSeq
+    val httpApp = Router(Seq("/" -> applicationServer.routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes) ++ pluginsRoutes: _*).orNotFound
 
-  def stop() = {
-    semaphore.release()
-    server.stop()
-  }
+    implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-}
+    val shutdown =
+      GUIServer.
+        server(port, localhost).
+        withHttpApp(httpApp).
+        withIdleTimeout(Duration.Inf).
+        withResponseHeaderTimeout(Duration.Inf).
+        withServiceErrorHandler(r => t => stackError(t)).
+        allocated.unsafeRunSync()._2 // feRunSync()._2
+
+    control.cancel = shutdown.unsafeRunSync
+    control
+  end start
+
+
+

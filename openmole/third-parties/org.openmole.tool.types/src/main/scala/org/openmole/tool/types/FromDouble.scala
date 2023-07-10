@@ -6,10 +6,10 @@ object FromDouble {
     override def apply(s: Double) = f(s)
   }
 
-  implicit def doubleToInt = FromDouble[Int](_.toInt)
-  implicit def longToDouble = FromDouble[Long](_.toLong)
-  implicit def floatToDouble = FromDouble[Float](_.toFloat)
-  implicit def doubleToDouble = FromDouble[Double](identity)
+  implicit def doubleToInt: FromDouble[Int] = FromDouble[Int](_.toInt)
+  implicit def longToDouble: FromDouble[Long] = FromDouble[Long](_.toLong)
+  implicit def floatToDouble: FromDouble[Float] = FromDouble[Float](_.toFloat)
+  implicit def doubleToDouble: FromDouble[Double] = FromDouble[Double](identity)
 
 }
 

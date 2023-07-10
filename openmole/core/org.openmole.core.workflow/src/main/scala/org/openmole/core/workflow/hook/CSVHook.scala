@@ -22,12 +22,15 @@ object CSVHook {
     header:      OptionalArgument[FromContext[String]] = None,
     unrollArray: Boolean                               = false,
     arrayOnRow:  Boolean                               = false,
-    overwrite:   Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+    overwrite:   Boolean                               = false,
+    postfix:     OptionalArgument[FromContext[String]] = None,
+    directory:   Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
     FormattedFileHook(
-      format = CSVOutputFormat(header = header, unrollArray = unrollArray, append = !overwrite, arrayOnRow = arrayOnRow),
+      format = CSVOutputFormat(header = header, unrollArray = unrollArray, arrayOnRow = arrayOnRow, postfix = postfix, directory = directory),
       output = output,
       values = values,
       exclude = exclude,
+      append = !overwrite,
       name = Some("CSVHook")
     )
 

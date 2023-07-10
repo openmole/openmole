@@ -35,6 +35,11 @@ class Activator extends BundleActivator {
         PatternHighLight(objectName(SensitivitySaltelli)),
       )
 
-    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
+    PluginRegistry.register(
+      this,
+      Vector(this.getClass.getPackage),
+      highLight = keyWords,
+      methodNames = Vector(SensitivityMorris.methodName, SensitivitySaltelli.methodName)
+    )
   }
 }

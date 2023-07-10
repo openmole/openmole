@@ -19,7 +19,6 @@ package org.openmole.core.workflow.task
 
 import java.util.concurrent.locks.ReentrantLock
 
-import monocle.macros.Lenses
 import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
@@ -33,11 +32,12 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.lock._
 import org.openmole.tool.random.Seeder
+import monocle.Focus
 
 object MoleTask {
 
-  implicit def isTask = InputOutputBuilder(MoleTask.config)
-  implicit def isInfo = InfoBuilder(MoleTask.info)
+  given InputOutputBuilder[MoleTask] = InputOutputBuilder(Focus[MoleTask](_.config))
+  given InfoBuilder[MoleTask] = InfoBuilder(Focus[MoleTask](_.info))
 
   /**
    * Constructor used to construct the MoleTask corresponding to the full puzzle
@@ -58,9 +58,9 @@ object MoleTask {
     val mt = new MoleTask(mole, last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
-      dsl.inputs += (mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      dsl.outputs += (last.outputs(mole, Sources.empty, Hooks.empty).toSeq: _*),
-      isTask.defaults.set(mole.root.task(mole, Sources.empty, Hooks.empty).defaults)
+      dsl.inputs ++= mole.root.inputs(mole, Sources.empty, Hooks.empty).toSeq,
+      dsl.outputs ++= last.outputs(mole, Sources.empty, Hooks.empty).toSeq,
+      summon[InputOutputBuilder[MoleTask]].defaults.set(Task.defaults(mole.root.task(mole, Sources.empty, Hooks.empty)))
     )
   }
 
@@ -78,6 +78,9 @@ object MoleTask {
       case _           ⇒ false
     }
 
+  def tasks(moleTask: MoleTask) =
+    moleTask.mole.capsules.map(_.task(moleTask.mole, Sources.empty, Hooks.empty))
+
 }
 
 /**
@@ -89,7 +92,7 @@ object MoleTask {
  * @param config inputs and outputs prototypes, and defaults
  * @param info name and definition scope
  */
-@Lenses case class MoleTask(
+case class MoleTask(
   mole:      Mole,
   last:      MoleCapsule,
   implicits: Vector[String],
@@ -116,6 +119,7 @@ object MoleTask {
       import executionContext.serializerService
       import executionContext.networkService
       implicit val fileServiceCache = executionContext.fileServiceCache
+      implicit val timeService = executionContext.timeService
 
       val localEnvironment =
         LocalEnvironment(1, executionContext.localEnvironment.deinterleave)

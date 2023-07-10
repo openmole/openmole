@@ -19,18 +19,21 @@ package org.openmole.plugin.task.template
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ ExpandedString, FromContext }
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.builder.InfoBuilder
+import org.openmole.plugin.task.template.TemplateFileFromInputTask
+import org.openmole.plugin.task.template.TemplateFileFromInputTask
 
 object TemplateFileTask {
 
-  implicit def isTask: InputOutputBuilder[TemplateFileTask] = InputOutputBuilder(TemplateFileTask.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isTask: InputOutputBuilder[TemplateFileTask] = InputOutputBuilder(Focus[TemplateFileTask](_.config))
+  implicit def isInfo: InfoBuilder[TemplateFileTask] = InfoBuilder(Focus[TemplateFileTask](_.info))
 
   def apply(
     template: File,
@@ -47,7 +50,7 @@ object TemplateFileTask {
 
 }
 
-@Lenses case class TemplateFileTask(
+case class TemplateFileTask(
   template: File,
   output:   Val[File],
   config:   InputOutputConfig,
@@ -67,13 +70,11 @@ object TemplateFileTask {
 }
 
 object TemplateFileFromInputTask {
-
-  implicit def isTask: InputOutputBuilder[TemplateFileFromInputTask] = InputOutputBuilder(TemplateFileFromInputTask.config)
-  implicit def isInfo = InfoBuilder(info)
-
+  implicit def isTask: InputOutputBuilder[TemplateFileFromInputTask] = InputOutputBuilder(Focus[TemplateFileFromInputTask](_.config))
+  implicit def isInfo: InfoBuilder[TemplateFileFromInputTask] = InfoBuilder(Focus[TemplateFileFromInputTask](_.info))
 }
 
-@Lenses case class TemplateFileFromInputTask(
+case class TemplateFileFromInputTask(
   template: FromContext[File],
   output:   Val[File],
   config:   InputOutputConfig,

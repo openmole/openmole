@@ -18,15 +18,15 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
-import org.openmole.core.workflow.tools._
+import org.openmole.core.expansion.{DefaultSet, FromContext}
+import org.openmole.core.workflow.builder.{InfoConfig, InputOutputConfig}
+import org.openmole.core.workflow.tools.*
 
-trait Source <: Name {
+trait Source extends Name {
   def config: InputOutputConfig
   def info: InfoConfig
 
-  def inputs = config.inputs
+  def inputs = config.inputs ++ DefaultSet.defaultVals(config.inputs, defaults)
   def outputs = config.outputs
   def defaults = config.defaults
   def name = info.name

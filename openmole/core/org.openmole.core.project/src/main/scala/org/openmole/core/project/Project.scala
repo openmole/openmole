@@ -17,25 +17,25 @@
  */
 package org.openmole.core.project
 
-import org.openmole.core.compiler._
-import org.openmole.core.pluginmanager._
-import org.openmole.core.project.Imports.{ SourceFile, Tree }
-import org.openmole.tool.file._
-import monocle.function.all._
-import monocle.std.all._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.compiler.*
+import org.openmole.core.pluginmanager.*
+import org.openmole.core.script.Imports.{SourceFile, Tree}
+import org.openmole.tool.file.*
+import monocle.function.all.*
+import monocle.std.all.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.project
-import org.openmole.core.services._
+import org.openmole.core.services.*
 import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.hash._
+import org.openmole.tool.hash.*
+import monocle.Focus
+import org.openmole.core.script.{Imports, ScriptSourceData}
 
 object Project {
 
-  def scriptExtension = ".oms"
-  def isScript(file: File) = file.exists() && file.getName.endsWith(scriptExtension)
-  def newREPL(variables: ConsoleVariables, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(variables, quiet = quiet)
+  def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
 
   def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
 
@@ -47,9 +47,11 @@ object Project {
     def makePackage(name: String, tree: Tree): String =
       if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
       else
-        s"""@transient lazy val $name = new {
+        s"""
+            |class ${name}Clazz {
             |${makeImportTree(tree)}
-            |}""".stripMargin
+            |}
+            |@transient lazy val $name = new ${name}Clazz""".stripMargin
 
     def makeVal(identifier: String, file: File) =
       s"""@transient lazy val ${identifier} = ${uniqueName(file)}"""
@@ -60,9 +62,10 @@ object Project {
       val name = uniqueName(sourceFile.file)
 
       s"""class ${name}Class {
-           |@transient lazy val _imports = new {
+           |class _importsClazz {
            |$imports
            |}
+           |@transient final lazy val _imports = new _importsClazz
            |}
            |@transient lazy val ${name} = new ${name}Class
            """
@@ -93,9 +96,10 @@ object Project {
 
       val classContent =
         s"""object ${name} {
-           |@transient lazy val _imports = new {
+           |class _importsClazz {
            |$imports
            |}
+           |@transient lazy val _imports = new _importsClazz
            |
            |import _imports._
            |
@@ -119,80 +123,96 @@ object Project {
   }
 
   trait OMSScript {
-    def run(): DSL
+    def run(variable: ConsoleVariables): DSL
   }
 
   trait OMSScriptUnit {
-    def run(): Unit
+    def run(variable: ConsoleVariables): Unit
   }
 
-  def compile(workDirectory: File, script: File, args: Seq[String], newREPL: Option[ConsoleVariables ⇒ ScalaREPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
+  def craftedScript(workDirectory: File, script: File, returnUnit: Boolean) = {
+    val variableParameter = "_console_variable_parameter"
+    def functionPrototype =
+      if (returnUnit) s"def run($variableParameter: ${classOf[ConsoleVariables].getCanonicalName}): Unit"
+      else s"def run($variableParameter: ${classOf[ConsoleVariables].getCanonicalName}): ${classOf[DSL].getCanonicalName}"
+
+    def traitName =
+      if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
+      else s"${classOf[Project.OMSScript].getCanonicalName}"
+
+    def scriptHeader =
+      s"""new $traitName {
+         |
+         |$functionPrototype = {
+         |import $variableParameter._
+         |import $variableParameter.services._
+         |
+         |${scriptsObjects(script)}
+         |
+         |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
+         |import ${Project.uniqueName(script)}._imports._""".stripMargin
+
+    def scriptFooter =
+      s"""}
+         |}
+         """.stripMargin
+
+    def compileContent =
+      s"""$scriptHeader
+         |${script.content}
+         |$scriptFooter""".stripMargin
+
+    (compileContent, scriptHeader)
+  }
+
+  def compile(workDirectory: File, script: File, repl: Option[REPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
     import services._
 
     if (!script.exists) ScriptFileDoesNotExists()
     else {
-      def functionPrototype =
-        if (returnUnit) "def run(): Unit"
-        else s"def run(): ${classOf[DSL].getCanonicalName}"
-
-      def traitName =
-        if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
-        else s"${classOf[Project.OMSScript].getCanonicalName}"
-
-      def scriptHeader =
-        s"""${scriptsObjects(script)}
-           |
-           |new $traitName {
-           |
-           |$functionPrototype = {
-           |implicit def _scriptSourceData = ${ScriptSourceData.applySource(workDirectory, script)}
-           |import ${Project.uniqueName(script)}._imports._""".stripMargin
-
-      def scriptFooter =
-        s"""}
-           |}
-         """.stripMargin
-
-      def compileContent =
-        s"""$scriptHeader
-           |${script.content}
-           |$scriptFooter""".stripMargin
-
-      def compile(content: String, args: Seq[String]): CompileResult = {
-        def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
-        val loop = newREPL.getOrElse { (v: project.ConsoleVariables) ⇒ Project.newREPL(v) }.apply(consoleVariables)
+      def compile(content: String, scriptHeader: String): CompileResult = {
+        val loop = repl.getOrElse { Project.newREPL() }
         try {
           Option(loop.compile(content)) match {
-            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop.classDirectory, loop.classLoader))
+            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop), workDirectory = workDirectory, script = script)
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
           }
         }
         catch {
-          case ce: ScalaREPL.CompilationError ⇒
+          case ce: Interpreter.CompilationError ⇒
             def positionLens =
-              ScalaREPL.CompilationError.errorMessages composeTraversal
+              Focus[Interpreter.CompilationError](_.errorMessages) composeTraversal
                 each composeLens
-                ScalaREPL.ErrorMessage.position composePrism
+                Focus[Interpreter.ErrorMessage](_.position) composePrism
                 some
 
             def headerOffset = scriptHeader.size + 1
 
-            import ScalaREPL.ErrorPosition
+            import Interpreter.ErrorPosition
 
             def adjusted =
-              (positionLens composeLens ErrorPosition.line modify { _ - scriptHeader.split("\n").size }) andThen
-                (positionLens composeLens ErrorPosition.start modify { _ - headerOffset }) andThen
-                (positionLens composeLens ErrorPosition.end modify { _ - headerOffset }) andThen
-                (positionLens composeLens ErrorPosition.point modify { _ - headerOffset })
+              (positionLens composeLens Focus[ErrorPosition](_.line) modify { _ - scriptHeader.split("\n").size + 1 }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_ .start) modify { _ - headerOffset }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_.end) modify { _ - headerOffset }) andThen
+                (positionLens composeLens Focus[ErrorPosition](_.point) modify { _ - headerOffset })
 
             ErrorInCode(adjusted(ce))
           case e: Throwable ⇒ ErrorInCompiler(e)
         }
-        finally loop.close()
       }
 
-      compile(compileContent, args)
+      val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = returnUnit)
+      compile(compileContent, scriptHeader)
     }
+  }
+
+  def completion(workDirectory: File, script: File, position: Int, newREPL: Option[REPL] = None)(implicit services: Services) = {
+    import services._
+    if(!script.exists()) Vector()
+    else
+      val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = false)
+      val loop = newREPL.getOrElse { Project.newREPL() }
+      loop.completion(compileContent, position + scriptHeader.size + 1)
   }
 
 }
@@ -202,19 +222,24 @@ case class ScriptFileDoesNotExists() extends CompileResult
 sealed trait CompilationError extends CompileResult {
   def error: Throwable
 }
-case class ErrorInCode(error: ScalaREPL.CompilationError) extends CompilationError
+case class ErrorInCode(error: Interpreter.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: ScalaREPL.Compiled, compilationContext: CompilationContext) extends CompileResult {
+case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult {
 
-  def eval =
-    result.apply() match {
+  def eval(args: Seq[String])(implicit services: Services) =
+    import services._
+
+    compilationContext.repl.evalCompiled(result) match {
       case p: Project.OMSScript ⇒
-        p.run() match {
+        def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
+        workDirectory.mkdirs()
+
+        p.run(consoleVariables) match {
           case p: DSL ⇒ p
-          case e      ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+          case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         }
-      case e ⇒ throw new InternalProcessingError(s"Script compilation should produce an OMScript (found ${if (e == null) null else e.getClass}).")
+      case e ⇒ throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     }
 
 }

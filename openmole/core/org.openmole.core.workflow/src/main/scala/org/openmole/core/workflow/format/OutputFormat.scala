@@ -4,21 +4,14 @@ import org.openmole.core.context._
 import org.openmole.core.expansion._
 import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
-object OutputFormat {
-  object OutputContent {
-    implicit def sectionToContent(s: Seq[OutputSection]) = SectionContent(s)
-    implicit def variablesToPlainContent(v: Seq[Variable[_]]) = PlainContent(v)
-  }
+object OutputFormat:
+  object Section:
+    given Conversion[(String, Seq[Variable[_]]), Section] = s => Section(Some(s._1), s._2)
+    given Conversion[Seq[Variable[_]], Section] = s => Section(None, s)
 
-  sealed trait OutputContent
-  case class SectionContent(sections: Seq[OutputSection]) extends OutputContent
-  case class PlainContent(variables: Seq[Variable[_]], name: Option[StringFromContext[String]] = None) extends OutputContent
+  case class Section(name: Option[String], variables: Seq[Variable[_]])
+  case class OutputContent(section: Section*)
 
-  case class OutputSection(name: FromContext[String], variables: Seq[Variable[_]])
-}
-
-trait OutputFormat[T, -M] {
-  def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M): FromContext[Unit]
+trait OutputFormat[T, -M]:
+  def write(executionContext: HookExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M, append: Boolean = false): FromContext[Unit]
   def validate(format: T): Validate
-  def appendable(format: T) = false
-}

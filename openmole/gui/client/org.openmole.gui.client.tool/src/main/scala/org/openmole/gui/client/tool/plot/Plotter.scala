@@ -1,11 +1,11 @@
 package org.openmole.gui.client.tool.plot
 
-import org.openmole.gui.ext.data.{ SequenceData, SequenceHeader }
+import org.openmole.gui.shared.data.{ SequenceData, SequenceHeader }
 import Plot._
 import org.openmole.gui.client.tool.plot
-import scaladget.bootstrapnative.DataTable
-import scaladget.bootstrapnative.DataTable.DataRow
-import scalatags.JsDom.all._
+import scaladget.bootstrapnative.bsn._
+import scaladget.bootstrapnative.{ Table }
+import com.raquo.laminar.api.L._
 
 case class IndexedAxis(title: String, fullSequenceIndex: Int)
 
@@ -38,14 +38,14 @@ object Plotter {
     None
   )
 
-  def filterColumn(dataRows: Seq[DataRow], plotter: Plotter, nbLines: Int): Seq[Int] = {
+  def filterColumn(dataRows: Seq[scaladget.bootstrapnative.Table.DataRow], plotter: Plotter, nbLines: Int): Seq[Int] = {
 
     val closureFilter = plotter.closureFilter.getOrElse(ClosureFilter.empty)
 
     closureFilter.filteredAxis.map {
       _.fullSequenceIndex
     }.map { colToBeFiltered ⇒
-      DataTable.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1, colToBeFiltered)).map {
+      Table.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1, colToBeFiltered)).map {
         _._2
       }
     }.getOrElse(0 to nbLines - 1)
@@ -58,7 +58,7 @@ object Plotter {
 
     if (dataNbLines > 0) {
       val dataRows = sequenceData.content.map {
-        scaladget.bootstrapnative.DataTable.DataRow(_)
+        Table.DataRow(_)
       }
 
       val dataNbColumns = sequenceData.header.length
@@ -71,7 +71,7 @@ object Plotter {
         case ColumnPlot ⇒
           if (dataNbColumns >= nbDims) {
             indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
-              acc :+ Dim(DataTable.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map {
+              acc :+ Dim(Table.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map {
                 _._1
               }, sequenceData.header.lift(col).getOrElse(""))
             }
@@ -97,21 +97,21 @@ object Plotter {
       }
 
       if (xValues.values.isEmpty || yValues.isEmpty) nothingToplot
-      else
-        org.openmole.gui.client.tool.plot.Plot(
-          "",
-          Serie(xValues, yValues),
-          false,
-          plotter,
-          plotter.error.map { e ⇒
-            Serie(yValues = Array(Dim(DataTable.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
-          }
-        )
+      else div()
+//        org.openmole.gui.client.tool.plot.Plot(
+//          "",
+//          Serie(xValues, yValues),
+//          false,
+//          plotter,
+//          plotter.error.map { e ⇒
+//            Serie(yValues = Array(Dim(Table.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
+//          }
+//        )
     }
     else nothingToplot
   }
 
-  val nothingToplot = div("No plot to display").render
+  val nothingToplot = div("No plot to display")
 
   def toBePlotted(plotter: Plotter, data: SequenceData): (Plotter, SequenceData) = {
     val (newToBePlotted, newSequenceData) = plotter.plotDimension match {

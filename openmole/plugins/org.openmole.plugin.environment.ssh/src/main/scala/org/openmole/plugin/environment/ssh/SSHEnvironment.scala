@@ -39,9 +39,7 @@ import scala.ref.WeakReference
 
 object SSHEnvironment extends JavaLogger {
 
-  val maxLocalOperations = PreferenceLocation("ClusterEnvironment", "MaxLocalOperations", Some(100))
   val maxConnections = PreferenceLocation("SSHEnvironment", "MaxConnections", Some(5))
-
   val updateInterval = PreferenceLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
   val timeOut = PreferenceLocation("SSHEnvironment", "Timeout", Some(1 minutes))
 
@@ -142,9 +140,9 @@ class SSHEnvironment[AuthenticationType: gridscale.ssh.SSHAuthentication, ProxyA
   val services:             BatchEnvironment.Services,
   val sshProxy:             Option[SSHProxy],
   val proxyAuthentication:  Option[ProxyAuthenticationType]
-) extends BatchEnvironment { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState()(using services)) { env ⇒
 
-  implicit def servicesImplicit = services
+  implicit def servicesImplicit: BatchEnvironment.Services = services
   import services._
 
   lazy val jobUpdater = new SSHJobService.Updater(WeakReference(this))
@@ -154,9 +152,9 @@ class SSHEnvironment[AuthenticationType: gridscale.ssh.SSHAuthentication, ProxyA
 
   lazy val stateRegistry = new SSHEnvironment.SSHJobStateRegistry
 
-  implicit val sshInterpreter = gridscale.ssh.SSH()
-  implicit val systemInterpreter = System()
-  implicit val localInterpreter = gridscale.local.Local()
+  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[System] = System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
 
   def timeout = services.preference(SSHEnvironment.timeOut)
 
@@ -167,7 +165,7 @@ class SSHEnvironment[AuthenticationType: gridscale.ssh.SSHAuthentication, ProxyA
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     jobUpdater.stop = true
     BatchEnvironment.waitJobKilled(this)

@@ -25,7 +25,7 @@ case class RuntimeTask(task: Task, strain: Boolean)
 
 object Job {
 
-  implicit val moleJobOrdering = Ordering.by((_: Job).id)
+  implicit val moleJobOrdering: Ordering[Job] = Ordering.by((_: Job).id)
 
   /**
    * Construct from context and UUID
@@ -98,7 +98,7 @@ class Job(
     if (!callBack.subMoleCanceled()) {
       val ctx = context
       try {
-        val performResult = task.task.perform(ctx, executionContext)
+        val performResult = Task.perform(task.task, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
       }
       catch {

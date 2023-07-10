@@ -31,3 +31,4 @@ metals.sbt
 *.history
 **/openmole/bin/org.openmole.marketindex/src/main/resources/openmole-market
 .vscode/
+package-lock.json

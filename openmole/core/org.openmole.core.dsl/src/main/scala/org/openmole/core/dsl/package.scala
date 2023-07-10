@@ -29,23 +29,24 @@ package dsl {
 
   import scala.collection.immutable.NumericRange
 
-  trait DSLPackage <: Commands
+  trait DSLPackage extends Commands
     with Serializer
     with Classes
     with workflow.ExportedPackage
     with cats.instances.AllInstances {
 
-    implicit lazy val implicitContext = Context.empty
+    implicit lazy val implicitContext: Context = Context.empty
 
     //implicit lazy val workspace = Workspace
     lazy val logger = LoggerConfig
 
     //implicit def decrypt = Decrypt(workspace)
 
-    implicit def stringToFile(path: String) = File(path)
+    implicit def stringToFile(path: String): File = File(path)
 
-    implicit def timeConversion[N: Numeric](n: N) = squants.time.TimeConversions.TimeConversions(n)
-    implicit class singularTimeConversion[N: Numeric](n: N) {
+    export squants.time.TimeConversions.TimeConversions
+    //implicit def timeConversion[N: Numeric](n: N): squants.Time.TimeConversions = squants.time.TimeConversions.TimeConversions(n)
+    extension [N: Numeric](n: N) {
       def nanosecond = n nanoseconds
       def microsecond = n microseconds
       def millisecond = n milliseconds
@@ -55,8 +56,10 @@ package dsl {
       def day = n days
     }
 
-    implicit def informationUnitConversion[N: Numeric](n: N) = squants.information.InformationConversions.InformationConversions(n)
-    implicit class singularInformationUnitConversion[N: Numeric](n: N) {
+    export squants.information.InformationConversions.InformationConversions
+
+    //implicit def informationUnitConversion[N: Numeric](n: N): squants.information.InformationConversions.InformationConversions = squants.information.InformationConversions.InformationConversions(n)
+    extension [N: Numeric](n: N) {
       def byte = n bytes
       def kilobyte = n kilobytes
       def megabyte = n megabytes
@@ -68,18 +71,28 @@ package dsl {
       def yottabyte = n yottabytes
     }
 
-    implicit def intToMemory(i: Int): Information = (i megabytes)
-    implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
+    //implicit def intToMemory(i: Int): Information = (i megabytes)
+    //implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
 
     def encrypt(s: String)(implicit cypher: Cypher) = cypher.encrypt(s)
 
-    implicit def seqIsFunctor = new Functor[Seq] {
+    implicit def seqIsFunctor: Functor[Seq] = new Functor[Seq] {
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
     }
 
     type Data = File
 
-    implicit def doubleRange(d: Double) = new org.openmole.tool.collection.DoubleRangeDecorator(d)
+    //export org.openmole.tool.collection.DoubleRangeDecorator
+    @inline implicit class DoubleWrapper(d: Double) {
+      def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
+      def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
+    }
+
+    //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
+    export Predef.longWrapper
+    export Predef.intWrapper
+    export Predef.doubleWrapper
+
   }
 
 }

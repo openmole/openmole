@@ -1,9 +1,10 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.workflow.tools.ContextAggregator
+import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workflow.mole.ContextAggregator
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 
@@ -18,45 +19,45 @@ object Objective {
     implicit def asIsToExact[T](implicit exact: ToObjective[T]): ToObjective[As[T, String]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as))
     implicit def asValIsToExact[T, P](implicit exact: ToObjective[T]): ToObjective[As[T, Val[P]]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as.name))
 
-    implicit def aggregateStringIsObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], String]] =
-      (t: Aggregate[Val[T], String]) ⇒ {
-        val fromContext: FromContext[Double] = t.aggregate
-
-        def value(noisy: Boolean) =
-          if (!noisy) {
-            def aggregate = FromContext { p ⇒
-              import p._
-              (v: T) ⇒ fromContext.from(Context(t.value -> v))
-            }
-
-            ComputeValue(t.value, aggregate, aggregateString = true)
-          }
-          else {
-            def aggregate = FromContext { p ⇒
-              import p._
-              (v: Array[T]) ⇒ fromContext.from(Context(t.value.toArray -> v))
-            }
-
-            ComputeValue(t.value.array, aggregate, aggregateString = true)
+    def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double]) =
+      def value(noisy: Boolean) =
+        if (!noisy) {
+          def aggregate = FromContext { p ⇒
+            import p._
+            (v: T) ⇒ fromContext.from(Context(o -> v))
           }
 
-        Objective(
-          value,
-          negative = false,
-          delta = None,
-          as = None,
-          validate = fromContext.validate)
-      }
+          ComputeValue(o, aggregate, aggregateString = true)
+        }
+        else {
+          def aggregate = FromContext { p ⇒
+            import p._
+            (v: Array[T]) ⇒ fromContext.from(Context(o.toArray -> v))
+          }
 
-    implicit def aggregateIsToObjective[T: ClassTag]: ToObjective[Aggregate[Val[T], T ⇒ Double]] = a ⇒ {
-      Objective(_ ⇒ ComputeValue(a.value, a.aggregate), negative = false, delta = None, as = None)
-    }
+          ComputeValue(o.array, aggregate, aggregateString = true)
+        }
 
-    implicit def aggregateArrayIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Array[T] ⇒ Double]] = a ⇒ {
-      Objective(_ ⇒ ComputeValue(a.value.array, a.aggregate), negative = false, delta = None, as = None, noisy = true)
-    }
-    implicit def aggregateSeqIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Seq[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.aggregate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
-    implicit def aggregateVectorIsToNoisy[T: ClassTag]: ToObjective[Aggregate[Val[T], Vector[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.aggregate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+      Objective(
+        value,
+        negative = false,
+        delta = None,
+        as = None,
+        validate = fromContext.validate
+      )
+
+    implicit def evaluateScalaCodeIsObjective[T: ClassTag]: ToObjective[Evaluate[Val[T], ScalaCode | String]] = t ⇒
+      val fromContext: FromContext[Double] = ScalaCode.fromContext(t.evaluate)
+      buildAggregateCodeObjective(t.value, fromContext)
+
+    implicit def evaluateIsToObjective[T: ClassTag]: ToObjective[Evaluate[Val[T], T ⇒ Double]] = a ⇒
+      Objective(_ ⇒ ComputeValue(a.value, a.evaluate), negative = false, delta = None, as = None)
+
+    implicit def evaluateArrayIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Array[T] ⇒ Double]] = a ⇒
+      Objective(_ ⇒ ComputeValue(a.value.array, a.evaluate), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def evaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Seq[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+    implicit def evaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Vector[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
   }
 
   trait ToObjective[T] {
@@ -160,16 +161,22 @@ case class Objective(
 
 object Objectives {
 
-  def onlyExact(o: Objectives) = o.collect { case x if !x.noisy ⇒ x }.size == o.size
-  def toExact(o: Objectives) = o.map(o ⇒ Objective.toExact(o))
-  def toNoisy(o: Objectives) = o.map(o ⇒ Objective.toNoisy(o))
+  def toSeq(o: Objectives) =
+    o match {
+      case o: Objective => Seq(o)
+      case o: Seq[Objective] => o
+    }
 
-  def resultPrototypes(o: Objectives) = o.map(Objective.resultPrototype)
+  def onlyExact(o: Objectives) = toSeq(o).collect { case x if !x.noisy ⇒ x }.size == toSeq(o).size
+  def toExact(o: Objectives) = toSeq(o).map(o ⇒ Objective.toExact(o))
+  def toNoisy(o: Objectives) = toSeq(o).map(o ⇒ Objective.toNoisy(o))
+
+  def resultPrototypes(o: Objectives) = toSeq(o).map(Objective.resultPrototype)
 
   def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
     import p._
-    o flatMap { o ⇒ o.validate(inputs ++ outputs) }
+    toSeq(o) flatMap { o ⇒ o.validate(inputs ++ outputs) }
   }
 
-  def prototypes(o: Objectives) = o.map(Objective.prototype)
+  def prototypes(o: Objectives) = toSeq(o).map(Objective.prototype)
 }

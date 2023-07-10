@@ -23,17 +23,19 @@ import org.scalajs.linker.interface._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import org.scalajs.linker._
-import java.io.File
 
+import java.io.File
 import org.openmole.tool.file._
 import org.openmole.core.workspace._
-import org.scalajs.logging.{ NullLogger, ScalaConsoleLogger }
+import org.openmole.gui.server.jscompile.Webpack.ExtraModule
+import org.scalajs.logging.{NullLogger, ScalaConsoleLogger}
+import org.openmole.core.networkservice.*
 
-object JSPack {
+object JSPack:
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(implicit newFile: TmpDirectory): Unit =
+  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(using newFile: TmpDirectory): Unit =
     newFile.withTmpFile("lib", ".jar") { jar ⇒
 
       JSPack.getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
@@ -41,18 +43,37 @@ object JSPack {
       // Obtain VirtualScalaJSIRFile's from the input classpath
       val irCache = StandardImpl.irFileCache().newCache
 
-      val result = (for {
-        (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
-        sjsirFiles ← irCache.cached(containers)
-        config = StandardConfig()
-          .withOptimizer(true)
-          .withSourceMap(true)
-          .withClosureCompilerIfAvailable(optimizedJS)
+      val result =
+        for
+          (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
+          sjsirFiles ← irCache.cached(containers)
+          config = StandardConfig()
+            .withSourceMap(true)
+            .withOptimizer(optimizedJS)
+            .withClosureCompiler(optimizedJS)
+            .withModuleKind(ModuleKind.CommonJSModule)
+            .withParallel(true)
 
-        linker = StandardImpl.linker(config)
-        _ ← linker.link(sjsirFiles, Nil, LinkerOutput(PathOutputFile(outputJSFile.toPath)), NullLogger)
-      } yield ())
+          linker = StandardImpl.linker(config)
+          _ ← linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
+        yield ()
 
       Await.result(result, Duration.Inf)
     }
-}
+
+  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
+    newFile.withTmpDir { targetDir ⇒
+      webpackJsonPackage copy targetDir / webpackJsonPackage.getName
+
+      Npm.install(targetDir)
+
+      //3- build the js deps with webpack
+      Webpack.run(
+        entryJSFile,
+        webpackConfigTemplateLocation,
+        targetDir,
+        webpackOutputFile,
+        extraModules
+      )
+    }
+  }

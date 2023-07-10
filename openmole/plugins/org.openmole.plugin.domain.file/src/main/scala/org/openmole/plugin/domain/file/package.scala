@@ -25,7 +25,7 @@ import org.openmole.core.exception.UserBadDataError
 
 package object file {
 
-  implicit def domainFileDecorator(f: File) = new {
+  implicit class DomainFileDecorator(f: File) {
     def files: ListFilesDomain = files()
     def files(
       directory: OptionalArgument[FromContext[String]] = OptionalArgument(),

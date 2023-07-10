@@ -16,19 +16,20 @@
  */
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.composition.DSL.tasks
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
-import org.openmole.core.workflow.validation._
-import org.openmole.plugin.domain.collection._
-import org.scalatest._
-import org.openmole.plugin.domain.bounds._
+import org.openmole.core.workflow.validation.*
+import org.openmole.plugin.domain.collection.*
+import org.scalatest.*
+import org.openmole.plugin.domain.bounds.*
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
-class WorkflowSpec extends FlatSpec with Matchers {
+class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  import org.openmole.core.workflow.test.Stubs._
+  import org.openmole.core.workflow.test._
 
   def nsga2 = {
     import EvolutionWorkflow._
@@ -116,6 +117,19 @@ class WorkflowSpec extends FlatSpec with Matchers {
     executed should be >= 100
   }
 
+  "Evolution" should "support single objective" in {
+    val a = Val[Double]
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask(),
+      objective = a,
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 100,
+      parallelism = 10
+    )
+  }
+
+
   "Island evolution" should "run" in {
     @volatile var executed = 0
 
@@ -138,6 +152,26 @@ class WorkflowSpec extends FlatSpec with Matchers {
     nsga run
 
     executed should be >= 100
+  }
+
+  "Serialized Island Evolution" should "run" in {
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objective = Seq(a),
+      genome = Seq(a in (0.0, 1.0)),
+      termination = 10,
+      parallelism = 1
+    ) by Island(5)
+
+    serializeDeserialize(nsga) run
   }
 
   "Hook" should "be valid" in {
@@ -323,7 +357,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objective = Seq(b aggregate median delta 100),
+      objective = Seq(b evaluate median delta 100),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -369,7 +403,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += (a, b)),
-      objective = Seq(b aggregate f _ as "aggF", a aggregate "a / 2"),
+      objective = Seq(b evaluate f as "aggF", a evaluate "a / 2"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100
     )
@@ -402,7 +436,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
 
     PSEEvolution(
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f _ in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
+      objective = Seq(a evaluate f in (0.0 to 1.0 by 0.1), b in (0.2 to 0.5 by 0.1)),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -418,7 +452,7 @@ class WorkflowSpec extends FlatSpec with Matchers {
     OSEEvolution(
       origin = Seq(o in (0.0 to 1.0 by 0.1)),
       evaluation = EmptyTask(),
-      objective = Seq(a aggregate f _ under 9, b under 3.0),
+      objective = Seq(a evaluate f under 9, b under 3.0),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
@@ -426,7 +460,6 @@ class WorkflowSpec extends FlatSpec with Matchers {
   }
 
   "OMRHook" should "work with NSGA" in {
-    import org.openmole.plugin.hook.omr._
 
     val a = Val[Double]
     val b = Val[Double]
@@ -455,12 +488,12 @@ class WorkflowSpec extends FlatSpec with Matchers {
         termination = 100
       )
 
-    val wf: DSLContainer[_] = nsga hook ("/tmp/test")
-    val wf2: DSLContainer[_] = nsga hook ("/tmp/test") by Island(100)
+    val wf: DSL = nsga hook ("/tmp/test")
+    val wf2: DSL = nsga hook ("/tmp/test") by Island(100)
 
     // FIXME improve this test when more metadata are added to EvolutioWorkflow
-    tasks(wf.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
-    tasks(wf2.dsl).flatMap(_.task.name).exists(_.contains("island")) should equal(true)
+    tasks(wf).flatMap(_.task.name).exists(_.contains("island")) should equal(false)
+    tasks(wf2).flatMap(_.task.name).exists(_.contains("island")) should equal(true)
   }
 
   "by and hook" should "be supported by all evolution methods" in {

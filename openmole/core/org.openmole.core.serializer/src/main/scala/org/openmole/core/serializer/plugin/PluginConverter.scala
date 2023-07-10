@@ -33,9 +33,7 @@ import org.openmole.tool.logger.JavaLogger
 object PluginConverter extends JavaLogger {
 
   def canConvert(c: Class[_]): Boolean = {
-    classOf[Plugins].isAssignableFrom(c) ||
-      PluginManager.isClassProvidedByAPlugin(c) ||
-      (c.getClassLoader != null && classOf[REPLClassloader].isAssignableFrom(c.getClassLoader.getClass))
+    classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c) || Interpreter.isInterpretedClass(c)
   }
 
 }

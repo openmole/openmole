@@ -20,15 +20,17 @@ package org.openmole.site
 import java.io.File
 import java.nio.CharBuffer
 
-import ammonite.ops._
+//import ammonite.ops._
 import org.openmole.site.tools._
-import scalatags.Text.{ TypedTag, all }
+import scalatags.Text.{TypedTag, all}
 import scalatags.Text.all._
 
 import scala.annotation.tailrec
 import spray.json._
 
-import scalaj.http._
+//import scalaj.http._
+
+import org.openmole.tool.file.*
 
 object Site {
 
@@ -57,52 +59,47 @@ object Site {
 
   def main(args: Array[String]): Unit = {
     case class Parameters(
-      target:   Option[File] = None,
-      test:     Boolean      = false,
-      testUrls: Boolean      = false,
-      ignored:  List[String] = Nil
-    )
+                           target: Option[File] = None,
+                           test: Boolean = false,
+                           testUrls: Boolean = false,
+                           ignored: List[String] = Nil
+                         )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail    ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--test" :: tail      ⇒ parse(tail, c.copy(test = true))
-      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
-      case s :: tail             ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil                   ⇒ c
+      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail ⇒ parse(tail, c.copy(test = true))
+//      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
+      case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil ⇒ c
     }
 
     val parameters = parse(args.toList.map(_.trim))
 
     val dest = parameters.target match {
       case Some(t) ⇒ t
-      case None    ⇒ throw new RuntimeException("Missing argument --target")
+      case None ⇒ throw new RuntimeException("Missing argument --target")
     }
 
     if (parameters.test) {
       Test.generate(dest)
     }
-    else if (parameters.testUrls) {
-      Test.urls
-    }
+//    else if (parameters.testUrls) {
+//      Test.urls
+//    }
     else {
       case class PageFrag(page: Page, frag: Frag)
 
       // def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
 
-      val site = new scalatex.site.Site {
-        site ⇒
-        override def siteCss = Set.empty
-
-        override def pageTitle: Option[String] = None
-
+      object Site { site ⇒
         def headFrags(page: org.openmole.site.Page) =
           Seq(
             scalatags.Text.tags2.title(page.title),
+            link(rel := "icon", href := "img/favicon.svg", `type` := "img/svg+xml"),
             meta(name := "description", all.content := s"OpenMOLE: the model exploration software"),
             meta(name := "keywords", all.content := "Scientific Workflow Engine, Distributed Computing, Cluster, Parameter Tuning, Model Exploration, Optimization, Genetic Algorithm, Design of Experiment, Sensitivity Analysis, Data Parallelism"),
             meta(name := "viewport", all.content := "width=device-width, initial-scale=1"),
 
-            link(rel := "stylesheet", href := stylesName),
             link(rel := "stylesheet", href := Resource.css.bootstrap.file),
             //  link(rel := "stylesheet", href := Resource.css.file),
             link(rel := "stylesheet", href := Resource.css.github.file),
@@ -111,12 +108,12 @@ object Site {
             script(src := Resource.js.highlight.file),
             script("hljs.initHighlightingOnLoad();"),
 
-            script(`type` := "text/javascript", src := Resource.js.siteJS.file),
-            script(`type` := "text/javascript", src := Resource.js.depsJS.file),
+            // script(`type` := "text/javascript", src := Resource.js.depsJS.file),
 
             script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
-            piwik
+            piwik,
+            script(`type` := "text/javascript", src := Resource.js.siteJS.file)
           )
 
         /**
@@ -144,17 +141,19 @@ object Site {
             ),
             sitePage match {
               case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _                 ⇒ div()
+              case _ ⇒ div()
             },
             Footer.build,
+            //onload := "SiteJS.toto();",
+            //onload := "SiteJS.SiteJS.toto();",
             onload := onLoadString(pageTree)
           )
         }
 
         private def onLoadString(sitepage: org.openmole.site.PageTree) = {
-          def siteJS = "SiteJS"
+          def siteJS = "openmole_site"
 
-          def commonJS = s"$siteJS.main();$siteJS.loadIndex(index);"
+          def commonJS = s"$siteJS.loadIndex(index);"
 
           sitepage.page match {
             case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + commonJS
@@ -164,26 +163,26 @@ object Site {
           }
         }
 
-        override def generateHtml(outputRoot: Path) = {
-          outputRoot.toIO.mkdirs()
+        def generateHtml(outputRoot: File) = {
+          import scalatags.Text.all._
+          outputRoot.mkdirs()
 
           val res = Pages.all.map { page ⇒
             val txt = html(
               head(headFrags(page)),
-              bodyFrag(bodyFrag(page))
+              bodyFrag(page)
             ).render
 
             val cb = CharBuffer.wrap("<!DOCTYPE html>" + txt)
             val bytes = scala.io.Codec.UTF8.encoder.encode(cb)
             val target = outputRoot / page.file
-            write.over(target, bytes.array())
+            target.withFileOutputStream { _.write(bytes.array()) }
             LunrIndex.Index(page.file, page.name, txt)
           }
 
           val jsDir = outputRoot / "js"
-          jsDir.toIO.mkdirs()
-
-          write.over(jsDir / "index.js", "var index = " + JsArray(res.toVector).compactPrint)
+          jsDir.mkdirs()
+          (jsDir / "index.js").content = "var index = " + JsArray(res).compactPrint
         }
 
         lazy val pagesFrag = Pages.all.map {
@@ -196,7 +195,7 @@ object Site {
 
       }
 
-      site.renderTo(Path(dest))
+      Site.generateHtml(dest)
       //    lazy val bibPapers = Publication.papers ++ Communication.papers
       //    bibPapers foreach (_.generateBibtex(dest))
       //

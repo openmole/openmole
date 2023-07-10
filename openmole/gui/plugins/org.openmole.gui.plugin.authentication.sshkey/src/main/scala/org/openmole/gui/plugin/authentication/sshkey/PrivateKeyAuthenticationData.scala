@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.gui.ext.data.AuthenticationData
+import org.openmole.gui.shared.data.{AuthenticationData, SafePath}
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -20,9 +20,9 @@ import org.openmole.gui.ext.data.AuthenticationData
  */
 
 case class PrivateKeyAuthenticationData(
-  privateKey:       Option[String] = None,
+  privateKey:       Option[SafePath] = None,
   login:            String         = "",
-  cypheredPassword: String         = "",
+  password: String                 = "",
   target:           String         = "",
   port:             String         = "22"
 ) extends AuthenticationData {

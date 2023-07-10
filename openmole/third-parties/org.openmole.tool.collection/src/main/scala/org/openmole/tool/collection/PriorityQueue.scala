@@ -80,7 +80,7 @@ class PriorityQueue[T](fifo: Boolean) {
     inQueue.release
   }
 
-  def dequeue() = {
+  def dequeue() =
     inQueue.acquire
     synchronized {
       val (p, q) = queues.last
@@ -88,10 +88,13 @@ class PriorityQueue[T](fifo: Boolean) {
       if (PriorityQueue.isEmpty(q)) queues.remove(p)
       job
     }
-  }
 
   def all = synchronized { queues.values.toVector.flatMap(PriorityQueue.toVector) }
-  def clear() = synchronized { queues.clear() }
+
+  def clear() =
+    synchronized { queues.clear() }
+    inQueue.drainPermits()
+
   def isEmpty = synchronized(size == 0)
 
 }

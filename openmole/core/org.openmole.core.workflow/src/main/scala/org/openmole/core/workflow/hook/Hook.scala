@@ -18,38 +18,45 @@
 package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{ InfoConfig, InputOutputConfig }
-import org.openmole.core.workflow.mole.Ticket
-import org.openmole.core.workflow.tools._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workflow.builder.{InfoConfig, InputOutputConfig}
+import org.openmole.core.workflow.mole.{MoleExecution, Ticket}
+import org.openmole.core.workflow.tools.*
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
+import org.openmole.core.workflow.job.JobId
 
 case class HookExecutionContext(
-  cache:                          KeyValueCache,
-  ticket:                         Ticket,
-  implicit val preference:        Preference,
-  implicit val threadProvider:    ThreadProvider,
-  implicit val fileService:       FileService,
-  implicit val workspace:         Workspace,
-  implicit val outputRedirection: OutputRedirection,
-  implicit val loggerService:     LoggerService,
-  implicit val random:            RandomProvider,
-  implicit val newFile:           TmpDirectory,
-  implicit val serializerService: SerializerService)
+  cache:  KeyValueCache,
+  ticket: Ticket,
+  moleLaunchTime: Long,
+  jobId: JobId,
+  moleExecutionId: MoleExecution.Id)(
+  implicit
+  val preference:        Preference,
+  val threadProvider:    ThreadProvider,
+  val fileService:       FileService,
+  val workspace:         Workspace,
+  val outputRedirection: OutputRedirection,
+  val loggerService:     LoggerService,
+  val random:            RandomProvider,
+  val tmpDirectory:      TmpDirectory,
+  val serializerService: SerializerService,
+  val timeService:       TimeService)
 
-trait Hook <: Name {
+trait Hook extends Name {
 
   def config: InputOutputConfig
   def info: InfoConfig
-  def inputs = config.inputs
+  def inputs = config.inputs ++ DefaultSet.defaultVals(config.inputs, defaults)
   def outputs = config.outputs
   def defaults = config.defaults
   def name = info.name

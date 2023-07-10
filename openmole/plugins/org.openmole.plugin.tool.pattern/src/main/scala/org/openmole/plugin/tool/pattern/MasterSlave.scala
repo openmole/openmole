@@ -40,7 +40,7 @@ object MasterSlave {
     val wf =
       skel &
         (masterCapsule -<- Slot(slave) slaves slaves) &
-        (bootstrap oo masterCapsule keep (state: _*))
+        (bootstrap oo masterCapsule keepAll state)
 
     DSLContainer(wf, (), output = Some(master), delegate = DSL.tasks(slave).map(_.task))
   }

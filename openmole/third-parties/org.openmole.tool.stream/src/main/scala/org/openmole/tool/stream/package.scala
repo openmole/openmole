@@ -23,8 +23,9 @@ import java.util.concurrent.{ Callable, ThreadPoolExecutor, TimeUnit, TimeoutExc
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream }
 
 import squants.time._
+import reflect.Selectable.reflectiveSelectable
 
-package object stream {
+package object stream:
 
   val DefaultBufferSize = 16 * 1024
 
@@ -112,7 +113,7 @@ package object stream {
 
   }
 
-  def withClosable[C <: { def close() }, T](open: ⇒ C)(f: C ⇒ T): T = {
+  def withClosable[C <: { def close(): Unit }, T](open: ⇒ C)(f: C ⇒ T): T = {
     val c = open
     try f(c)
     finally c.close()
@@ -129,4 +130,5 @@ package object stream {
     }
   }
 
-}
+  def inputStreamSequence(h: InputStream, t: InputStream*): InputStream =
+    t.foldLeft(h) { (c, n) => new SequenceInputStream(c, n) }

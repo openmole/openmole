@@ -18,9 +18,9 @@
 package org.openmole.core.serializer.file
 
 import org.openmole.tool.file._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.tool.tar.TarOutputStream
+import org.openmole.tool.archive.TarOutputStream
 
 import scala.collection.immutable.HashMap
 import java.util.UUID
@@ -73,7 +73,7 @@ object FileSerialisation {
           if (isDirectory) {
             val dest = newFile.newDir("directoryFromArchive")
             dest.mkdirs()
-            if (exists) fromArchive.extract(dest)
+            if (exists) fromArchive.extract(dest, archive = ArchiveType.Tar)
             else dest.delete
             dest
           }

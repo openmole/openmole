@@ -22,16 +22,16 @@ object NSGA3 {
     case class Division(division: Int) extends References
     case class List(points: Vector[Vector[Double]]) extends References
 
-    implicit def fromInt(i: Int) = Division(i)
-    implicit def fromVector(p: Vector[Vector[Double]]) = List(p)
+    implicit def fromInt(i: Int): Division = Division(i)
+    implicit def fromVector(p: Vector[Vector[Double]]): List = List(p)
   }
 
   sealed trait References
 
-  object DeterministicParams {
+  object DeterministicNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA3 ⇒ MGONSGA3, _ }
 
-    implicit def integration: MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[DeterministicNSGA3, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA3, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -40,7 +40,7 @@ object NSGA3 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicNSGA3) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -48,6 +48,12 @@ object NSGA3 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
+
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState[Unit](s = ())
@@ -98,7 +104,7 @@ object NSGA3 {
 
   }
 
-  case class DeterministicParams(
+  case class DeterministicNSGA3(
     mu:                  Int,
     references:          ReferencePoints,
     genome:              Genome,
@@ -107,10 +113,10 @@ object NSGA3 {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 ⇒ MGONoisyNSGA3, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] {
+    implicit def integration: MGOAPI.Integration[StochasticNSGA3, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA3, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -119,7 +125,7 @@ object NSGA3 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticNSGA3) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -127,6 +133,11 @@ object NSGA3 {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
@@ -184,7 +195,7 @@ object NSGA3 {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticNSGA3(
     mu:                  Int,
     references:          ReferencePoints,
     operatorExploration: Double,
@@ -211,7 +222,7 @@ object NSGA3 {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicNSGA3(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -226,7 +237,7 @@ object NSGA3 {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticNSGA3(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -243,26 +254,28 @@ object NSGA3Evolution {
 
   import org.openmole.core.dsl.DSL
 
-  implicit def dslContainer: ExplorationMethod[NSGA3Evolution, EvolutionWorkflow] =
-    p ⇒ {
+  given EvolutionMethod[NSGA3Evolution] =
+    p =>
       val refPoints =
-        p.references match {
-          case NSGA3.References.None        ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, p.objective.size)
-          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, p.objective.size)
-          case NSGA3.References.List(p)     ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
-        }
+        p.references match
+          case NSGA3.References.None ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.toSeq(p.objective).size)
+          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.toSeq(p.objective).size)
+          case NSGA3.References.List(p) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
 
-      EvolutionPattern.build(
-        algorithm =
-          NSGA3(
-            populationSize = p.populationSize,
-            references = refPoints,
-            genome = p.genome,
-            outputs = p.evaluation.outputs,
-            objective = p.objective,
-            stochastic = p.stochastic,
-            reject = p.reject
-          ),
+      NSGA3(
+        populationSize = p.populationSize,
+        references = refPoints,
+        genome = p.genome,
+        outputs = p.evaluation.outputs,
+        objective = p.objective,
+        stochastic = p.stochastic,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[NSGA3Evolution, EvolutionWorkflow] =
+    p ⇒
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -270,13 +283,13 @@ object NSGA3Evolution {
         suggestion = p.suggestion(p.genome),
         scope = p.scope
       )
-    }
 
-  implicit def patternContainer: ExplorationMethodSetter[NSGA3Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+
+  given ExplorationMethodSetter[NSGA3Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
-@Lenses case class NSGA3Evolution(
+case class NSGA3Evolution(
   genome:         Genome,
   objective:      Objectives,
   evaluation:     DSL,

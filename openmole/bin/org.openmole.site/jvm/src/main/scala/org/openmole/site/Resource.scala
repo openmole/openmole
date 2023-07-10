@@ -162,6 +162,8 @@ object Resource {
       val paris = partnerResource("mairieParis.svg")
 
       val ign = partnerResource("ign.png")
+
+      val trempoline = partnerResource("trempoline.png")
     }
 
     object menu {
@@ -248,7 +250,7 @@ object Resource {
   object js {
     val highlight = jsResource("highlight.pack.js")
     val siteJS = jsResource("sitejs.js")
-    val depsJS = jsResource("deps.js")
+   // val depsJS = jsResource("deps.js")
     val index = jsResource("index.js")
   }
 

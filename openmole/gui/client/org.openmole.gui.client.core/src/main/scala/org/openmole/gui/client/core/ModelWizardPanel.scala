@@ -17,619 +17,252 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.alert.{ AlertPanel, BannerAlert }
-import org.openmole.gui.client.core.files._
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileType._
-import org.openmole.gui.client.core.panels._
-import autowire._
+import org.openmole.gui.client.core.files.*
+import org.openmole.gui.shared.data.*
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLInputElement }
-import org.openmole.gui.ext.client._
-import rx._
-import scalatags.JsDom.{ TypedTag, tags }
-import scalatags.JsDom.all._
-import Waiter._
-import org.openmole.gui.ext.data.DataUtils._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.client.tool.{ OMTags, OptionsDiv }
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.client.FileManager
+import org.openmole.gui.client.ext.*
+import com.raquo.laminar.api.L.*
+import Waiter.*
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.wizard.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
+import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
 
-class ModelWizardPanel(treeNodeManager: TreeNodeManager, treeNodeTabs: TreeNodeTabs, bannerAlert: BannerAlert, wizards: Seq[WizardPluginFactory]) {
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  sealed trait VariableRole[T] {
-    def content: T
-
-    def clone(t: T): VariableRole[T]
-
-    def switch: VariableRole[T]
-  }
-
-  case class Input[T](content: T) extends VariableRole[T] {
-    def clone(otherT: T) = Input(otherT)
-
-    def switch = Output(content)
-  }
-
-  case class Output[T](content: T) extends VariableRole[T] {
-    def clone(otherT: T): VariableRole[T] = Output(otherT)
-
-    def switch = Input(content)
-  }
-
-  case class CommandInput[T](content: T) extends VariableRole[T] {
-    def clone(otherT: T) = CommandInput(otherT)
-
-    def switch = CommandOutput(content)
-  }
-
-  case class CommandOutput[T](content: T) extends VariableRole[T] {
-    def clone(otherT: T): VariableRole[T] = CommandOutput(otherT)
-
-    def switch = CommandInput(content)
-  }
-
-  implicit def pairToLine(variableElement: VariableRole[VariableElement]): Reactive = buildReactive(variableElement)
-
+object ModelWizardPanel:
+  
   implicit def stringToOptionString(s: String): Option[String] = if (s.isEmpty) None else Some(s)
 
-  val filePath: Var[Option[SafePath]] = Var(None)
-  val transferring: Var[ProcessState] = Var(Processed())
-  val labelName: Var[Option[String]] = Var(None)
-  val launchingCommand: Var[Option[LaunchingCommand]] = Var(None)
-  val currentReactives: Var[Seq[Reactive]] = Var(Seq())
-  val updatableTable: Var[Boolean] = Var(true)
-  val resources: Var[Resources] = Var(Resources.empty)
-  val currentTab: Var[Int] = Var(0)
-  val autoMode = Var(true)
-  val fileToUploadPath: Var[Option[SafePath]] = Var(None)
-  val currentPluginPanel: Var[Option[WizardGUIPlugin]] = Var(None)
+  case class ParsedModelMetadata(acceptedModel: AcceptedModel, data: ModelMetadata, files: Seq[(RelativePath, SafePath)], factory: WizardPluginFactory)
 
-  fileToUploadPath.trigger {
-    fileToUploadPath.now.foreach {
-      buildForm
-    }
-  }
+  def successDiv = div(cls := "bi bi-patch-check-fill successBadge")
 
-  val modelSelector: Options[SafePath] = Seq[SafePath]().options(
-    0,
-    btn_default,
-    SafePath.naming,
-    onclose = () ⇒ {
-      fileToUploadPath() = modelSelector.get
-    }
-  )
+  class ExclusiveMenu:
+    val entrySet: Var[Seq[Int]] = Var(Seq())
+    val onoff: Var[Option[Int]] = Var(None)
 
-  val commandArea: TextArea = textArea(3).render
-  val autoModeCheckBox = checkbox(autoMode.now)(onchange := {
-    () ⇒
-      autoMode() = !autoMode.now
-  })
+    def onoffUpdate(currentId: Option[Int], id: Int) =
+      if currentId.contains(id)
+      then None
+      else Some(id)
 
-  val scriptNameInput = inputTag()(modelNameInput, placeholder := "Script name").render
+    def expandAction(i: Option[Int], butId: Int) =
+      i match
+        case Some(ii: Int) =>
+          if (ii == butId) true
+          else false
+        case None => false
 
-  launchingCommand.triggerLater {
-    if (autoMode.now) {
-      commandArea.value = launchingCommand.now.map {
-        _.fullCommand
-      }.getOrElse("")
-    }
-  }
+    def entry(name: String, id: Int, panel: HtmlElement) =
+      div(flexRow,
+        button(
+          name,
+          width := "150px", margin := "10 -5 10 25",
+          btn_primary,
+          onClick --> { _ => onoff.update(i => onoffUpdate(i, id)) }
+        ),
+        child <-- entrySet.signal.map { es =>
+          if es.contains(id)
+          then successDiv
+          else emptyNode
+        },
+        onoff.signal.map(oo => expandAction(oo, id)).expand(panel)
+      )
 
-  def buttonStyle(i: Int): ModifierSeq = {
-    if (i == currentTab.now) btn_primary
-    else btn_default
-  } +++ (marginRight := 20)
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
+    given NotificationService = NotificationManager.toService(panels.notifications)
+    val exclusiveMenu = new ExclusiveMenu
 
-  def nbInputs = inputs(currentReactives.now).size
+    //val filePath: Var[Option[SafePath]] = Var(None)
+    val transferring: Var[ProcessState] = Var(Processed())
+    val modelMetadata: Var[Option[ParsedModelMetadata]] = Var(None)
+    val currentDirectory: Var[SafePath] = Var(panels.directory.now())
+    //val resources: Var[Resources] = Var(Resources.empty)
 
-  def nbOutputs = currentReactives.now.size - nbInputs
+    def factory(uploaded: Seq[(RelativePath, SafePath)]): Future[Option[(AcceptedModel, WizardPluginFactory)]] =
+      val future =
+        Future.sequence(
+          plugins.wizardFactories.map { f => f.accept(uploaded).map(s => s.map(s => (s, f))) }
+        )
 
-  def inputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] = {
-    reactives.map {
-      _.role
-    }.collect {
-      case x: Input[VariableElement]        ⇒ x
-      case x: CommandInput[VariableElement] ⇒ x
-    }
-  }
+      future.map(s => s.flatten.headOption)
 
-  def outputs(reactives: Seq[Reactive]): Seq[VariableRole[VariableElement]] =
-    reactives.map {
-      _.role
-    }.collect {
-      case x: Output[VariableElement]        ⇒ x
-      case x: CommandOutput[VariableElement] ⇒ x
-    }
+    def uploadAndParse(tmpDirectory: SafePath, fInput: Input): Future[Unit] =
+      val ret =
+        for
+          list <- api.listFiles(tmpDirectory, withHidden = true)
+          _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
+          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
+          f <- factory(uploaded)
+          _ <-
+            f match
+              case Some((accepted, factory)) =>
+                factory.parse(uploaded, accepted).map { md => modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory))) }
+              case None =>
+                panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
+                Future.successful(())
+        yield ()
 
-  def getReactive(index: Int): Option[Reactive] = currentReactives.now.filter {
-    _.index == index
-  }.headOption
+      ret.andThen:
+        case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while parsing", exception)
+        case util.Success(_) =>
 
-  lazy val upButton =
-    div(Seq(display := "table", width := 200))(
+    val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
+    val uploadDirectory = Var(false)
+
+    def upButton(tmpDirectory: SafePath) =
       label(
-        ms("inputFileStyle"),
-        transferring.withTransferWaiter {
+        cls := "inputFileStyle",
+        margin := "15px",
+        transferring.withTransferWaiter:
           _ ⇒
             div(
-              fileInput((fInput: HTMLInputElement) ⇒ {
-                if (fInput.files.length > 0) {
-                  fileToUploadPath() = None
-                  resources() = Resources.empty
-                  val fileName = fInput.files.item(0).name
-                  labelName() = Some(fileName)
-                  filePath() = Some(treeNodeManager.current.now ++ fileName)
-                  filePath.now.map {
-                    fp ⇒
-                      moveFilesAndBuildForm(fInput, fileName, fp)
-                  }
-                }
-              }),
-              Rx {
-                labelName() match {
-                  case Some(s: String) ⇒ s
-                  case _               ⇒ "Your Model"
-                }
-              }
-            )
-        }
-      ).render,
-      Rx {
-        span(grey)(
-          filePath() match {
-            case Some(sp: SafePath) ⇒
-              val fileType: FileType = sp
-              if (fileType == Archive) modelSelector.selector else div.render
-            case _ ⇒ div.render
-          }
-        )
-      }
-    ).render
-
-  lazy val topConfiguration = Rx {
-    div(
-      upButton,
-      labelName().flatMap {
-        factory
-      } match {
-        case Some(f: WizardPluginFactory) ⇒
-          div(marginTop := 20)(
-            currentPluginPanel().map {
-              _.panel
-            }.getOrElse(div())
-          )
-        case _ ⇒ div("")
-      }
-    )
-  }
-
-  def moveFilesAndBuildForm(fInput: HTMLInputElement, fileName: String, uploadPath: SafePath) =
-    CoreUtils.withTmpFile {
-      tempFile ⇒
-        FileManager.upload(
-          fInput,
-          tempFile,
-          (p: ProcessState) ⇒ {
-            transferring() = p
-          },
-          UploadAbsolute(),
-          () ⇒ {
-            Post()[Api].extractAndTestExistence(tempFile ++ fileName, uploadPath.parent).call().foreach {
-              existing ⇒
-                val fileType: FileType = uploadPath
-                val targetPath = fileType match {
-                  case Archive ⇒ uploadPath.parent ++ uploadPath.nameWithNoExtension
-                  case _       ⇒ uploadPath
-                }
-
-                // Move files from tmp to target path
-                if (existing.isEmpty) {
-                  Post()[Api].copyAllTmpTo(tempFile, targetPath).call().foreach {
-                    b ⇒
-                      fileToUploadPath() = Some(uploadPath)
-                      Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                  }
-                }
-                else {
-                  val optionsDiv = OptionsDiv(existing, SafePath.naming)
-                  panels.alertPanel.alertDiv(
-                    tags.div(
-                      "Some files already exist, overwrite?",
-                      optionsDiv.div
-                    ),
-                    () ⇒ {
-                      Post()[Api].copyFromTmp(tempFile, optionsDiv.result /*, fp ++ fileName*/ ).call().foreach {
-                        b ⇒
-                          //buildForm(uploadPath)
-                          fileToUploadPath() = Some(uploadPath)
-                          Post()[Api].deleteFile(tempFile, ServerFileSystemContext.absolute).call()
-                      }
-                    }, () ⇒ {
-                    }, buttonGroupClass = "right"
-                  )
-                }
-            }
-          }
-        )
-    }
-
-  def fromSafePath(safePath: SafePath) = {
-    filePath() = Some(safePath)
-    fileToUploadPath() = Some(safePath)
-    labelName() = Some(safePath.name)
-  }
-
-  def factory(safePath: SafePath): Option[WizardPluginFactory] = factory(safePath.name)
-
-  def factory(fileName: String): Option[WizardPluginFactory] = {
-    val fileType: FileType = fileName
-
-    wizards.filter { _.fileType == fileType }.headOption
-  }
-
-  def buildForm(safePath: SafePath) = {
-    val pathFileType: FileType = safePath
-    pathFileType match {
-      case Archive ⇒
-        currentPluginPanel() = None
-        Post()[Api].models(safePath).call().foreach {
-          models ⇒
-            modelSelector.setContents(models, () ⇒ {
-              panels.treeNodePanel.refreshAnd(() ⇒
-                fileToUploadPath() = modelSelector.get
-              )
-            })
-        }
-      case _ ⇒
-        factory(safePath).foreach { factory ⇒
-          scriptNameInput.value = safePath.nameWithNoExtension
-          fileToUploadPath() = Some(safePath)
-          panels.treeNodePanel.refreshAndDraw
-          factory.parse(safePath).foreach { b ⇒
-            currentPluginPanel() = Some(factory.build(safePath, (lc: LaunchingCommand) ⇒ {
-              setLaunchingComand(Some(lc), safePath)
-            }))
-            setLaunchingComand(b, safePath)
-          }
-        }
-    }
-
-  }
-
-  def setLaunchingComand(lc: Option[LaunchingCommand], safePath: SafePath) = {
-    launchingCommand() = lc
-    launchingCommand.now match {
-      case Some(lc: LaunchingCommand) ⇒ setReactives(lc)
-      case _                          ⇒
-    }
-  }
-
-  def getResourceInfo = {
-    fileToUploadPath.now.foreach {
-      mp ⇒
-        val modelName = mp.name
-        val resourceDir = mp.parent
-        Post()[Api].listFiles(resourceDir).call().foreach {
-          b ⇒
-            val l = b.list.filterNot {
-              _.name == modelName
-            }.map {
-              tn ⇒
-                val sp = resourceDir ++ tn.name
-                Resource(sp, 0L)
-            }
-            resources() = resources.now.copy(implicits = l, number = l.size)
-            Post()[Api].expandResources(resources.now).call().foreach {
-              lf ⇒
-                resources() = lf
-            }
-        }
-    }
-  }
-
-  def setReactives(lc: LaunchingCommand) = {
-    val nbArgs = lc.arguments.size
-    val iReactives = lc.arguments.zipWithIndex.collect {
-      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandInput(ve), id)
-    }
-    val oReactives = lc.outputs.zipWithIndex collect {
-      case (ve: VariableElement, id: Int) ⇒ buildReactive(CommandOutput(ve), id + nbArgs)
-    }
-    currentReactives() = iReactives ++ oReactives
-  }
-
-  val step1 = tags.div(
-    tags.h4("Step 1: Code import"),
-    div(grey +++ rightBlock)(
-      "Browse for your source file. Your file can be a Java archive, a NetLogo script, or in any language you want (Python, C, C++," +
-        " R, etc)."
-    )
-  )
-
-  val step2 = div(
-    div(grey)("The system automatically detects the launching commands from your script, and offers to create the corresponding OpenMOLE variables." +
-      " This will allow you to feed values to these variables directly from the workflow you will build." +
-      " In the case of Java, Scala or NetLogo (i.e. programs working on the JVM), the OpenMOLE variables can be set directly in the command line." +
-      " Otherwise, they have to be set inside ${} statements." +
-      " By default, the system automatically detects variable changes, and updates the launching commands accordingly. However, this option can be deactivated.")
-  )
-
-  val autoModeTag = div(onecolumn +++ (paddingTop := 20))(
-    tags.b("Launching commands"),
-    div(floatRight +++ (paddingTop := 4))(
-      "Automatic ",
-      autoModeCheckBox,
-      span(grey)(" Check to automatically update the launching commands.")
-    )
-  )
-
-  lazy val buildScriptButton = {
-    tags.button("Build", btn_primary, onclick := {
-      () ⇒
-        save
-        dialog.hide
-        fileToUploadPath.now.foreach(buildScript)
-    })
-  }
-
-  def buildScript(safePath: SafePath) = factory(safePath).foreach {
-    factory ⇒
-      currentPluginPanel.now.foreach {
-        _.save(
-          treeNodeManager.current.now ++ s"${
-            scriptNameInput.value.clean
-          }.oms",
-          labelName.now.getOrElse("script"),
-          commandArea.value,
-          inputs(currentReactives.now).map {
-            _.content.prototype
-          },
-          outputs(currentReactives.now).map {
-            _.content.prototype
-          },
-          fileToUploadPath.now.map {
-            _.name
-          },
-          resources.now
-        ).foreach {
-            wtt ⇒
-              if (wtt.errors.isEmpty) {
-                treeNodeTabs remove wtt.safePath
-                treeNodePanel.displayNode(FileNode(Var(wtt.safePath.name), 0L, 0L))
-                panels.treeNodePanel.refreshAndDraw
-              }
-              else {
-                dialog.hide
-                bannerAlert.registerWithDetails("Plugin import failed", wtt.errors.map { ErrorData.stackTrace }.mkString("\n"))
-              }
-          }
-      }
-  }
-
-  def save = {
-    currentReactives.now.map {
-      _.save
-    }
-  }
-
-  def buildReactive(role: VariableRole[VariableElement], index: Int): Reactive = Reactive(role, index)
-
-  def buildReactive(role: VariableRole[VariableElement]): Reactive =
-    currentReactives.now.filter {
-      _.role == role
-    }.headOption.getOrElse(buildReactive(role, role.content.index))
-
-  def addVariableElement(p: VariableRole[VariableElement]) = {
-    save
-    currentReactives() = currentReactives.now :+ buildReactive(p, -1)
-  }
-
-  def applyOnPrototypePair(p: VariableRole[VariableElement], todo: (VariableRole[VariableElement], Int) ⇒ Unit) =
-    currentReactives.now.map {
-      _.role
-    }.zipWithIndex.filter {
-      case (ptp, index) ⇒ ptp == p
-    }.foreach {
-      case (role, index) ⇒ todo(role, index)
-    }
-
-  def updatePrototypePair(p: VariableRole[VariableElement], variableElement: VariableElement) =
-    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives.now.updated(index, buildReactive(role.clone(variableElement), index)))
-
-  def switchPrototypePair(p: VariableRole[VariableElement]) = {
-    save
-    applyOnPrototypePair(p, (role: VariableRole[VariableElement], index: Int) ⇒ currentReactives() = currentReactives.now.updated(index, buildReactive(role.switch, index)))
-  }
-
-  def addSwitchedPrototypePair(p: VariableRole[VariableElement]) = {
-    save
-    currentReactives() = (currentReactives.now :+ buildReactive(p.switch, -1)) distinct
-  }
-
-  case class Reactive(role: VariableRole[VariableElement], index: Int) {
-    val lineHovered: Var[Boolean] = Var(false)
-
-    val switchGlyph = role match {
-      case i: Input[_]         ⇒ glyph_arrow_right
-      case ci: CommandInput[_] ⇒ glyph_arrow_right
-      case _                   ⇒ glyph_arrow_left
-    }
-
-    def updateLaunchingCommand =
-      role match {
-        case CommandInput(_) | CommandOutput(_) ⇒
-          launchingCommand() = launchingCommand.now.map { lc ⇒
-            lc.updateVariables(currentReactives.now.map {
-              _.role
-            }.collect {
-              case x: CommandInput[_]  ⇒ x
-              case y: CommandOutput[_] ⇒ y
-            }.map {
-              _.content
-            })
-          }
-        case _ ⇒
-      }
-
-    def save = getReactive(index).map { reactive ⇒ updatePrototypePair(reactive.role, reactive.role.content.clone(nameInput.value, role.content.prototype.`type`, mappingInput.value)) }
-
-    def removePrototypePair = {
-      currentReactives() = currentReactives.now.filterNot(_.role == role)
-      ModelWizardPanel.this.save
-    }
-
-    def saveWithoutTableUpdate = {
-      updatableTable() = false
-      save
-      updatableTable() = true
-    }
-
-    val mappingInput: HTMLInputElement = inputTag(role.content.prototype.mapping.getOrElse(""))(oninput := { () ⇒
-      saveWithoutTableUpdate
-      updateLaunchingCommand
-    }).render
-
-    val nameInput: HTMLInputElement = inputTag(role.content.prototype.name)(oninput := { () ⇒
-      saveWithoutTableUpdate
-      updateLaunchingCommand
-    }).render
-
-    val line = {
-      val glyphModifier = grey +++ (paddingTop := 2) +++ pointer +++ (opacity := 0.5)
-      tags.tr(
-        td(colMD(3) +++ (paddingTop := 7))(nameInput),
-        td(colMD(2))(label(role.content.prototype.`type`.name.split('.').last)(label_primary)),
-        td(colMD(1) +++ grey)(role.content.prototype.default),
-        td(colMD(3))(if (role.content.prototype.mapping.isDefined) mappingInput else tags.div()),
-        td(colMD(2) +++ floatRight)(
-          tags.span(onclick := { () ⇒ switchPrototypePair(role) })(glyphModifier +++ switchGlyph),
-          tags.span(onclick := { () ⇒ addSwitchedPrototypePair(role) })(glyphModifier +++ glyph_arrow_right_and_left),
-          tags.span(pointer, onclick := { () ⇒ removePrototypePair })(glyphModifier +++ glyph_trash)
-        )
-      )
-    }
-  }
-
-  val bodyContent = div(
-    Rx {
-      val reactives = currentReactives()
-      val filePath = fileToUploadPath()
-      val tab = currentTab()
-
-      val topButtons = Rx {
-        div(paddingTop := 20)(
-          button(
-            "I/O",
-            buttonStyle(0), onclick := {
-              () ⇒
-                {
-                  currentTab() = 0
-                }
-            })(badge(s"$nbInputs/$nbOutputs")),
-          button("Resources", buttonStyle(1), onclick := {
-            () ⇒
-              {
-                currentTab() = 1
-              }
-          }
-          )(badge(s"${
-            resources().number
-          }"))
-        )
-      }
-      tags.div(
-        step1,
-        transferring.now match {
-          case _: Processing ⇒ OMTags.waitingSpan(" Uploading...", btn_danger + "certificate")
-          case _: Processed  ⇒ topConfiguration
-          case _             ⇒ topConfiguration
-        },
-        launchingCommand() match {
-          case Some(lc: LaunchingCommand) ⇒
-            div(paddingTop := 20)(
-              tags.h4("Step 2: Task configuration"), step2,
-              topButtons,
-              if (tab == 0) {
-                tags.div({
-
-                  val idiv = div(modelIO)(tags.h3("Inputs")).render
-                  val odiv = div(modelIO)(tags.h3("Outputs")).render
-
-                  val head = thead(tags.tr(
-                    for (h ← Seq("Name", "Type", "Default", "Mapped with", "", "")) yield {
-                      th(textAlign := "center", h)
-                    }
-                  ))
-                  div(paddingTop := 30)(
-                    div(twocolumns +++ (paddingRight := 10))(
-                      idiv,
-                      tags.table(striped)(
-                        head,
-                        tbody(
-                          for (ip ← inputs(reactives)) yield {
-                            ip.line
-                          }
-                        )
-                      )
-                    ),
-                    div(twocolumns)(
-                      odiv,
-                      tags.table(striped)(
-                        head,
-                        tbody(
-                          for (op ← outputs(reactives)) yield {
-                            op.line
-                          }
-                        )
-                      )
+              child <--
+                uploadDirectory.signal.map: directory =>
+                  OMTags.omFileInput(fInput ⇒
+                    if fInput.ref.files.length > 0
+                    then uploadAndParse(tmpDirectory, fInput).andThen { _ => fInput.ref.value = "" },
+                    directory = directory
+                  ),
+              div(
+                child <-- modelMetadata.signal.map:
+                  case Some(mmd) ⇒
+                    div(
+                      flexRow,
+                      div(mmd.files.map(p => p._1.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
+                      successDiv
                     )
-                  )
-                }, autoModeTag, commandArea)
-              }
-              else {
-                val body = tbody.render
-                for {
-                  i ← resources().implicits
-                } yield {
-                  body.appendChild(tags.tr(
-                    td(colMD(3))(i.safePath.name),
-                    td(colMD(2))(CoreUtils.readableByteCountAsString(i.size))
-                  ).render)
-                }
-                tags.table(striped +++ (paddingTop := 20))(body)
-              }
+                  case x: Any => div("Upload", btn_primary, cls := "badgeUploadModel")
+              )
             )
-          case _ ⇒ tags.div("")
+      )
+
+    val inputTags = new TagBadge()
+    val outputTags = new TagBadge()
+
+    val commandInput = textArea(placeholder := "Launching command", height := "100", width := "400", overflow.scroll, value <-- modelMetadata.signal.map(m => m.flatMap(_.data.command).getOrElse("")))
+
+    def ioTagBuilder(initialI: Seq[String], initialO: Seq[String]) = div(
+      div(cls := "verticalFormItem", div("Inputs", width := "100px", margin := "15px"), inputTags.render(initialI)),
+      div(cls := "verticalFormItem", div("Outputs", width := "100px", margin := "15px"), outputTags.render(initialO))
+    )
+
+    def inferProtoTyePair(param: String) =
+      val defaultPrototype = PrototypeData(WizardUtils.toVariableName(param), PrototypeData.Double, "0.0", Some(param))
+
+      modelMetadata.now() match
+        case Some(mmd) => (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == param).getOrElse(defaultPrototype)
+        case _ => defaultPrototype
+
+    def browseToPath(safePath: SafePath)(using panels: Panels) =
+      a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
+
+    def buildTask(directory: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels): Future[Unit] =
+      mmd match
+        case Some(md) =>
+          val modifiedMMD =
+            md.data.copy(
+              inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+              outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+              command = commandInput.ref.value
+            )
+
+          for
+            content <- md.factory.content(md.files, md.acceptedModel, modifiedMMD)
+            listed <- api.listFiles(tmpDirectory, withHidden = true)
+            destination = content.directory match
+              case None => directory
+              case Some(d) => directory / d
+            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)))
+            modelName = content.name.getOrElse("Model.oms")
+            _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
+          yield
+            panels.treeNodePanel.refresh
+            panels.treeNodePanel.displayNode(directory / modelName, refresh = true)
+        case None => Future.successful(())
+
+
+    def buildButton(tmpDirectory: SafePath) =
+      button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
+        onClick --> {
+          _ ⇒
+            buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now()).andThen {
+              case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while generating code", exception)
+              case util.Success(_) =>
+            }
+            modelMetadata.set(None)
+            panels.closeExpandable
         }
       )
-    }
-  )
 
-  lazy val dialog = {
-    //setBodyContent
-    ModalDialog(omsheet.panelWidth(92))
-  }
+    val IOObserver = Observer[Seq[Span]](tb =>
+      if (tb.isEmpty) exclusiveMenu.entrySet.update(_.filterNot(_ == 1))
+      else exclusiveMenu.entrySet.update(es => (es :+ 1).distinct)
+    )
 
-  dialog.header(
-    tags.span(tags.b("Model import"))
-  )
+    div(flexColumn, marginTop := "20",
+      children <-- Signal.fromFuture(api.temporaryDirectory()).map:
+        case Some(tmpDirectory) =>
+          def upload =
+            div(flexRow, width := "100%",
+              upButton(tmpDirectory),
+              span(display.flex, alignItems.center, color.black, marginLeft := "10px",
+                child <-- (modelMetadata.signal combineWith currentDirectory).map {
+                  case (Some(md), _) => span(s"""Use wizard "${md.factory.name}" for: ${md.files.map(_._1.mkString).mkString(", ")}""")
+                  case (_, d) => span(s"Task will be built in ⌂/${d.path.mkString}")
+                })
+            )
 
-  dialog.body(bodyContent)
+          def io =
+            div (
+              child <-- modelMetadata.signal.map {
+                case Some(mmd) =>
+                  if mmd.data.inputs.nonEmpty || mmd.data.outputs.nonEmpty
+                  then
+                    exclusiveMenu.entry("Inputs / Ouputs", 1,
+                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping)))
+                    )
+                  else div()
+                case None => div()
+              }
+            )
 
-  dialog.footer(buttonGroup(Seq(width := 200, right := 100))(
-    inputGroupButton(ModalDialog.closeButton(dialog, btn_default, "Close")),
-    inputGroupButton(scriptNameInput),
-    inputGroupButton(buildScriptButton)
-  ))
+          def cmd =
+            div(
+              child <-- modelMetadata.signal.map {
+                case Some(_) => exclusiveMenu.entry("Command", 2, div(display.flex, commandInput, height := "120px", margin := "10 40"))
+                case None => div()
+              }
+            )
 
-}
+          def build =
+            div(
+              child <-- modelMetadata.signal.map {
+                case Some(mmd) =>
+                  div(flexRow, width := "100%", marginTop := "40",
+                    buildButton(tmpDirectory),
+                    span(display.flex, alignItems.center, color.black, marginLeft := "10px", marginBottom := "10px",
+                      child <-- currentDirectory.signal.map { d => span(s"${mmd.factory.name} task will be built in ⌂/${d.path.mkString}") }
+                    ),
+                  )
+                case None => div()
+              }
+            )
+
+          Seq(upload, io, cmd, build)
+        case _ => Seq()
+      ,
+      uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
+      div(onMountCallback(_ => currentDirectory.set(panels.directory.now()))),
+      //            div(
+      //              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }
+      //            )
+      inputTags.tags --> IOObserver
+    )
+

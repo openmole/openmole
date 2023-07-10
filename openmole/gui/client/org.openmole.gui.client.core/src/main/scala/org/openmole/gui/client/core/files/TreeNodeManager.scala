@@ -17,124 +17,117 @@ package org.openmole.gui.client.core.files
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.gui.client.core.alert.AlertPanel
-import org.openmole.gui.client.core.{ CoreUtils, panels }
-import org.openmole.gui.ext.data.{ FileFilter, ListFilesData, SafePath }
-import rx._
+import org.openmole.gui.client.core.{CoreUtils, CoreFetch, Panels}
+import org.openmole.gui.shared.data.*
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.TreeNode.ListFiles
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.*
+import scalaz.Success
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TreeNodeManager {
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  val ROOTDIR = "projects"
-  val root = SafePath.sp(Seq(ROOTDIR))
+class TreeNodeManager:
 
-  val dirNodeLine: Var[SafePath] = Var(root)
+  val root = SafePath.empty
+  
+  val directory: Var[SafePath] = Var(root)
 
-  val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
-
-  val error: Var[Option[TreeNodeError]] = Var(None)
-
-  val comment: Var[Option[TreeNodeComment]] = Var(None)
+  //val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
   val selected: Var[Seq[SafePath]] = Var(Seq())
 
   val copied: Var[Seq[SafePath]] = Var(Seq())
 
-  val pluggables: Var[Seq[SafePath]] = Var(Seq())
+  val fileFilter = Var(FileSorting())
 
-  error.trigger {
-    error.now.foreach(panels.alertPanel.treeNodeErrorDiv)
-  }
+  val findFilesContaining: Var[(Option[String], Seq[(SafePath, Boolean)])] = Var((None, Seq()))
 
-  comment.trigger {
-    comment.now.foreach(panels.alertPanel.treeNodeCommentDiv)
-  }
+  def isSelected(tn: TreeNode) = selected.now().contains(tn)
 
-  def isSelected(tn: TreeNode) = selected.now.contains(tn)
+  def clearSelection = selected.set(Seq())
 
-  def clearSelection = selected() = Seq()
+  def clearSelectionExecpt(safePath: SafePath) = selected.set(Seq(safePath))
 
-  def clearSelectionExecpt(safePath: SafePath) = selected() = Seq(safePath)
-
-  def setSelected(sp: SafePath, b: Boolean) = b match {
-    case true  ⇒ selected() = (selected.now :+ sp).distinct
-    case false ⇒ selected() = selected.now.filterNot(_ == sp)
-  }
-
-  def setSelectedAsCopied = copied() = selected.now
-
-  def emptyCopied = copied() = Seq()
-
-  def setFilesInError(question: String, files: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit) = error() = Some(TreeNodeError(question, files, okaction, cancelaction))
-
-  def setFilesInComment(c: String, files: Seq[SafePath], okaction: () ⇒ Unit) = comment() = Some(TreeNodeComment(c, files, okaction))
-
-  def noError = {
-    error() = None
-    comment() = None
-  }
-
-  val current = dirNodeLine
-
-  def take(n: Int) = dirNodeLine.map { dn ⇒
-    SafePath.sp(dn.path.take(n))
-  }
-
-  def drop(n: Int) = dirNodeLine.map { dn ⇒
-    SafePath.sp(dn.path.drop(n))
-  }
-
-  def switch(dir: String): Unit = switch(dirNodeLine.now.copy(path = dirNodeLine.now.path :+ dir))
-
-  def switch(sp: SafePath): Unit = {
-    dirNodeLine() = sp
-  }
-
-  def invalidCurrentCache = invalidCache(current.now)
-
-  def invalidCache(sp: SafePath) = sons() = sons.now.filterNot(_._1.path == sp.path)
-
-  def computeCurrentSons(fileFilter: FileFilter): Future[ListFiles] = {
-    val cur = current.now
-
-    def getAndUpdateSons(safePath: SafePath): Future[ListFiles] = CoreUtils.listFiles(safePath, fileFilter).map { newsons ⇒
-      sons() = {
-        val ns: ListFiles = newsons
-        sons.now.updated(cur, ns)
-      }
-      newsons
-    }
-
-    cur match {
-      case safePath: SafePath ⇒
-        if (fileFilter.nameFilter.isEmpty) {
-          if (sons.now.contains(safePath)) {
-            Future(sons.now(safePath))
-          }
-          else {
-            getAndUpdateSons(safePath)
-          }
-        }
-        else getAndUpdateSons(safePath)
-      case _ ⇒ Future(ListFilesData(Seq(), 0))
+  def setSelected(sp: SafePath, b: Boolean) = {
+    b match {
+      case true ⇒ selected.update(s ⇒ (s :+ sp).distinct)
+      case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
     }
   }
 
-  def computePluggables(todo: () ⇒ Unit) = current.foreach { sp ⇒
-    CoreUtils.pluggables(
-      sp,
-      p ⇒ {
-        pluggables() = p
-        todo()
-      }
+  def switchSelection(sp: SafePath) = {
+    selected.update(s => s.contains(sp) match {
+      case true => s.filterNot(_ == sp)
+      case _ => (s :+ sp).distinct
+    }
     )
   }
 
-  def isRootCurrent = current.now == root
+  def switchAllSelection(safePaths: Seq[SafePath], b: Boolean) = safePaths.map { f => setSelected(f, b) }
 
-  def isProjectsEmpty = sons.now.getOrElse(root, ListFiles(Seq(), 0)).list.isEmpty
+  def switch(dir: String): Unit = switch(directory.now() / dir)
 
-}
+  def switch(sp: SafePath): Unit = directory.set(sp)
+
+  def updateFilter(newFilter: FileSorting) = fileFilter.set(newFilter)
+
+
+  def switchSorting(fileSorting: FileSorting, newListSorting: ListSorting) =
+    val fl =
+      if fileSorting.fileSorting == newListSorting
+      then
+        fileSorting.firstLast match
+          case FirstLast.First ⇒ FirstLast.Last
+          case _ ⇒ FirstLast.First
+      else FirstLast.First
+
+    fileSorting.copy(fileSorting = newListSorting, firstLast = fl)
+
+  def switchAlphaSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.AlphaSorting))
+
+  def switchTimeSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.TimeSorting))
+
+  def switchSizeSorting =
+    updateFilter(switchSorting(fileFilter.now(), ListSorting.SizeSorting))
+
+    //directory.update(identity)//set(directory.now())
+    //invalidCache(directory.now())
+
+//  def invalidCache(sp: SafePath)(using api: ServerAPI, path: BasePath) = {
+//    sons.update(_.filterNot(_._1.path == sp.path))
+//    computeCurrentSons
+//  }
+
+//  def computeCurrentSons(using api: ServerAPI, path: BasePath) =
+//    val cur = directory.now()
+//
+//    def updateSons(safePath: SafePath) =
+//      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf => sons.update { s => s.updated(cur, ListFiles(lf)) } }
+//
+//    cur match
+//      case safePath: SafePath ⇒ if !sons.now().contains(safePath) then updateSons(safePath)
+//      case _ ⇒ Future(ListFilesData.empty)
+
+
+  def resetFileFinder = findFilesContaining.set((None, Seq()))
+
+  def find(findString: String)(using api: ServerAPI, path: BasePath) = {
+    def updateSearch = {
+      val safePath: SafePath = directory.now()
+      CoreUtils.findFilesContaining(safePath, Some(findString)).foreach { fs =>
+        findFilesContaining.set((Some(findString), fs))
+      }
+    }
+
+    if (!findString.isEmpty) {
+      findFilesContaining.now() match {
+        case (Some(fs), _) if (fs != findString) => updateSearch
+        case (None, _) => updateSearch
+      }
+    }
+  }
+

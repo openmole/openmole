@@ -5,7 +5,6 @@ import java.io.File
 import org.openmole.tool.file._
 
 import scala.collection.mutable.ListBuffer
-import scalaj.http._
 
 object Test {
 
@@ -42,22 +41,22 @@ object Test {
     }
   }
 
-  def urls = {
-    val tests = shared.links.map { l ⇒
-      println("Testing " + l)
-      val rep = Http(l).timeout(connTimeoutMs = 5000, readTimeoutMs = 60000).asString
-      (l, rep.code)
-    }
-
-    println("\nRESULT:")
-    val failed = tests.filter { _._2 >= 400 }
-    failed.isEmpty match {
-      case true ⇒ println(s"The ${shared.links.size} external links are valid")
-      case false ⇒ failed.foreach { l ⇒
-        println(s"${l._1} is invalid | ${l._2}")
-      }
-    }
-  }
+//  def urls = {
+//    val tests = shared.links.map { l ⇒
+//      println("Testing " + l)
+//      val rep = Http(l).timeout(connTimeoutMs = 5000, readTimeoutMs = 60000).asString
+//      (l, rep.code)
+//    }
+//
+//    println("\nRESULT:")
+//    val failed = tests.filter { _._2 >= 400 }
+//    failed.isEmpty match {
+//      case true ⇒ println(s"The ${shared.links.size} external links are valid")
+//      case false ⇒ failed.foreach { l ⇒
+//        println(s"${l._1} is invalid | ${l._2}")
+//      }
+//    }
+//  }
 
 }
 

@@ -1,108 +1,76 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.{ AbsolutePositioning, AlertPanel, BannerAlert }
-import AbsolutePositioning.CenterPagePosition
-import org.openmole.gui.ext.client._
-
+import org.openmole.gui.client.ext.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.client.core.files.{ TreeNodeManager, TreeNodePanel }
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.client.core.CoreUtils._
-import org.openmole.gui.ext.data._
-import Waiter._
-import autowire._
+import org.openmole.gui.client.core.files.{TreeNodeManager, TreeNodePanel}
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.core.CoreUtils.*
+import org.openmole.gui.shared.data.*
+import Waiter.*
 import org.openmole.core.market.MarketIndexEntry
-import rx._
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
-import org.openmole.gui.ext.api.Api
-import Waiter._
+import com.raquo.laminar.api.L.*
+import Waiter.*
+import com.raquo.laminar.nodes.ReactiveElement.isActive
+import org.openmole.gui.client.tool.Component
+import org.openmole.gui.shared.api.*
 
-class URLImportPanel(manager: TreeNodeManager, bannerAlert: BannerAlert) {
+object URLImportPanel:
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
 
-  case class URLFile(name: String, extension: String) {
-    def file = s"$name.$extension"
-  }
+    val manager = panels.treeNodePanel.treeNodeManager
 
-  //private val downloadedFile: Var[Option[SafePath]] = Var(None)
-
-  lazy val downloading: Var[ProcessState] = Var(Processed())
-
-  val overwriteAlert: Var[Option[SafePath]] = Var(None)
-
-  def exists(sp: SafePath, ifNotExists: () ⇒ {}) =
-    Post()[Api].exists(sp).call().foreach { b ⇒
-      if (b) overwriteAlert.update(Some(sp))
-      else ifNotExists()
+    case class URLFile(name: String, extension: String) {
+      def file = s"$name.$extension"
     }
 
-  def download(url: String) = {
-    downloading.update(Processing())
-    Post()[Api].downloadHTTP(url, manager.current.now, extractCheckBox.checked).call().foreach { d ⇒
-      downloading.update(Processed())
-      dialog.hide
-      d match {
-        case Left(_)   ⇒ panels.treeNodePanel.refreshAndDraw
-        case Right(ex) ⇒ bannerAlert.registerWithDetails("Download failed", ErrorData.stackTrace(ex))
+    //private val downloadedFile: Var[Option[SafePath]] = Var(None)
+
+    lazy val downloading: Var[ProcessState] = Var(Processed())
+
+    def download(url: String) =
+      val sp = manager.directory.now()
+
+      def doDownload(url: String) =
+        downloading.set(Processing())
+        api.downloadHTTP(url, sp, extractCheckBox.isChecked, overwriteSwitch.isChecked).foreach { d ⇒
+          downloading.set(Processed())
+          panels.treeNodePanel.refresh
+          panels.closeExpandable
+        }
+
+      overwriteSwitch.isChecked match {
+        case true => doDownload(url)
+        case false =>
+          api.exists(sp).foreach {
+            _ match
+              case true =>
+                panels.notifications.showGetItNotification(NotificationLevel.Error, s"${sp.name}/${url.split("/").last} already exists", div("Turn overwrite to true to fix this problem"))
+              case false => doDownload(url)
+          }
       }
-    }
-  }
 
-  def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-    Post()[Api].deleteFile(sp, ServerFileSystemContext.project).call().foreach { d ⇒
-      download(url)
-    }
 
-  lazy val urlInput = input(placeholder := "Project URL (.oms / .tar.gz)", width := "100%").render
-
-  lazy val extractCheckBox = checkbox(false).render
-
-  lazy val downloadButton = button(
-    btn_primary,
-    downloading.withTransferWaiter { _ ⇒
-      tags.span("Download")
-    }(height := 20),
-    onclick := { () ⇒ download(urlInput.value) })
-
-  val dialog = ModalDialog(
-    omsheet.panelWidth(92),
-    onopen = () ⇒ {
-    }
-  )
-
-  dialog.header(
-    tags.span(tags.b("Import project from URL"))
-  )
-  dialog.body({
-    Rx {
-      overwriteAlert() match {
-        case Some(sp: SafePath) ⇒
-          panels.alertPanel.string(
-            sp.name + " already exists. Overwrite ? ",
-            () ⇒ {
-              overwriteAlert() = None
-              deleteFileAndDownloadURL(manager.current() ++ sp.name, urlInput.value)
-            }, () ⇒ {
-              overwriteAlert() = None
-            }, CenterPagePosition
-          )
-          tags.div
-        case _ ⇒
+    def deleteFileAndDownloadURL(sp: SafePath, url: String) =
+      api.deleteFiles(Seq(sp)).foreach { d ⇒
+        download(url)
       }
-    }
-    tags.div(
-      urlInput,
-      span(display.flex, flexDirection.row, alignItems.flexEnd, paddingTop := 20)(
-        extractCheckBox,
-        span("Extract archive (where applicable)", paddingLeft := 10, fontWeight.bold))
+
+    lazy val urlInput = inputTag().amend(placeholder := "Project URL (.oms / .tar.gz)", width := "400px", marginTop := "20")
+
+    lazy val extractCheckBox = Component.Switch("Extract archive (where applicable)", true, "importURL")
+    lazy val overwriteSwitch = Component.Switch("Overwrite exitsting files", true, "importURL")
+
+    val downloadButton = button(
+      cls := "btn btn-purple",
+      downloading.withTransferWaiter { _ ⇒ span("Download") },
+      height := "38", width := "150", marginTop := "20",
+      onClick --> { _ ⇒ download(urlInput.ref.value) }
     )
-  })
 
-  dialog.footer(buttonGroup()(
-    downloadButton,
-    ModalDialog.closeButton(dialog, btn_default, "Close")
-  ))
-
-}
+    div(flexColumn,
+      urlInput,
+      extractCheckBox.element.amend(marginTop := "50"),
+      overwriteSwitch.element,
+      downloadButton
+    )

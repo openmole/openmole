@@ -37,7 +37,7 @@ import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
-class MoleExecutionSpec extends FlatSpec with Matchers {
+class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

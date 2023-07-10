@@ -23,21 +23,23 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
+
+import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
+import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
+import com.thoughtworks.xstream.io.json._
+import com.thoughtworks.xstream.mapper.Mapper
+import com.thoughtworks.xstream.security._
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
 import org.openmole.tool.file._
 import org.openmole.core.serializer.converter._
 
 import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
-import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
-import com.thoughtworks.xstream.io.json._
-import com.thoughtworks.xstream.mapper.Mapper
-import com.thoughtworks.xstream.security._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.tool.lock._
 
 import collection.mutable.ListBuffer
@@ -95,6 +97,8 @@ class SerializerService { service ⇒
 
   def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
 
+  def deserializeFromString[T](s: String, json: Boolean = false): T = buildXStream(json = json).fromXML(s).asInstanceOf[T]
+
   def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T = {
     val tis = new TarInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
@@ -106,7 +110,7 @@ class SerializerService { service ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
-      deserializeReplaceFiles[T](contentFile, fileReplacement)
+      deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
     }
   }
 
@@ -139,12 +143,12 @@ class SerializerService { service ⇒
     serializer.fromXML[T](is)
   }
 
-  def serialize(obj: Any) = buildXStream().toXML(obj)
+  def serializeToString(obj: Any, json: Boolean = false) = buildXStream(json = json).toXML(obj)
 
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File, json: Boolean = false): Unit = {
-    val os = file.bufferedOutputStream()
+  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit = {
+    val os = file.bufferedOutputStream(gz = gz)
     try buildXStream(json = json).toXML(obj, os)
     finally os.close
   }

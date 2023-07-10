@@ -34,7 +34,7 @@ import org.openmole.tool.osgi.{ ClassFile, VersionedPackage, createBundle }
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import java.net.URLClassLoader
 
 object BatchExecutionJob {
 
@@ -90,17 +90,18 @@ object BatchExecutionJob {
       BatchExecutionJob.ClosuresBundle(replClassFiles, exported, packages, plugins)
     }
 
-    def bundleFile(closures: ClosuresBundle) = {
-      val bundle = newFile.newFile("closureBundle", ".jar")
-      try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
-      catch {
-        case e: Throwable ⇒
-          bundle.delete()
-          throw e
-      }
-      fileService.wrapRemoveOnGC(bundle)
-    }
-
+    def bundleFile(closures: ClosuresBundle): Option[File] = 
+      if closures.classes.isEmpty then None
+      else
+        val bundle = newFile.newFile("closureBundle", ".jar")
+        try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
+        catch {
+          case e: Throwable ⇒
+            bundle.delete()
+            throw e
+        }
+        Some(fileService.wrapRemoveOnGC(bundle))
+    
     val closuresBundle = bundle(classDirectory, classLoader)
     (closuresBundle, bundleFile(closuresBundle))
   }
@@ -109,11 +110,15 @@ object BatchExecutionJob {
     val pluginsAndFiles = serializerService.pluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
     val plugins = pluginsAndFiles.plugins.distinctBy(_.getCanonicalPath)
     val storedJob = JobStore.store(jobStore, job)
-    new BatchExecutionJob(id, storedJob, pluginsAndFiles.files, plugins)
+    new BatchExecutionJob(id, storedJob, IArray(pluginsAndFiles.files*), IArray(plugins*))
   }
 }
 
-class BatchExecutionJob(val id: Long, val storedJob: StoredJob, val files: Seq[File], val plugins: Seq[File]) extends ExecutionJob { bej ⇒
+class BatchExecutionJob(
+  val id: Long,
+  val storedJob: StoredJob,
+  val files: IArray[File],
+  val plugins: IArray[File]) extends ExecutionJob { bej ⇒
 
   def moleJobIds = storedJob.storedMoleJobs.map(_.id)
   private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)

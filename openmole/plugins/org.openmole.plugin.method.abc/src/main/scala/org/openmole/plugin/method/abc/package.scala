@@ -1,7 +1,6 @@
 package org.openmole.plugin.method
 
 import mgo.abc._
-import monocle.macros.Lenses
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.keyword.In
@@ -20,38 +19,34 @@ package object abc {
     object Observed {
 
       object Observable {
-        def apply[T](f: T ⇒ Array[Double]) = new Observable[T] {
-          def apply(t: T) = f(t)
-        }
-
-        implicit def intObservable = Observable[Int](i ⇒ Array(i.toDouble))
-        implicit def doubleObservable = Observable[Double](d ⇒ Array(d))
-        implicit def arrayDouble = Observable[Array[Double]](identity)
-        implicit def arrayInt = Observable[Array[Int]](_.map(_.toDouble))
+        given Observable[Int] = i ⇒ Array(i.toDouble)
+        given Observable[Double] = d ⇒ Array(d)
+        given arrayDouble: Observable[Array[Double]] = identity
+        given arrayInt: Observable[Array[Int]] = i => i.map(_.toDouble)
       }
 
-      trait Observable[T] {
+      @FunctionalInterface trait Observable[T] {
         def apply(t: T): Array[Double]
       }
 
-      implicit def tupleIntToObserved(t: (Val[Int], Int)) = Observed(t._1, t._2)
-      implicit def tupleDoubleToObserved(t: (Val[Double], Double)) = Observed(t._1, t._2)
-      implicit def tupleIterableIntToObserved(t: (Val[Array[Int]], Iterable[Int])) = Observed(t._1, t._2.toArray)
-      implicit def tupleIterableDoubleToObserved(t: (Val[Array[Double]], Iterable[Double])) = Observed(t._1, t._2.toArray)
-      implicit def tupleIterableArrayIntToObserved(t: (Val[Array[Int]], Array[Int])) = Observed(t._1, t._2)
-      implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])) = Observed(t._1, t._2)
+      implicit def tupleIntToObserved(t: (Val[Int], Int)): Observed[Int] = Observed(t._1, t._2)
+      implicit def tupleDoubleToObserved(t: (Val[Double], Double)): Observed[Double] = Observed(t._1, t._2)
+      implicit def tupleIterableIntToObserved(t: (Val[Array[Int]], Iterable[Int])): Observed[Array[Int]] = Observed(t._1, t._2.toArray)
+      implicit def tupleIterableDoubleToObserved(t: (Val[Array[Double]], Iterable[Double])): Observed [Array[Double]]= Observed(t._1, t._2.toArray)
+      implicit def tupleIterableArrayIntToObserved(t: (Val[Array[Int]], Array[Int])): Observed[Array[Int]] = Observed(t._1, t._2)
+      implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])): Observed[Array[Double]] = Observed(t._1, t._2)
       //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
 
       def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
       def value[T](observed: Observed[T]) = observed.obs(observed.observed)
     }
 
-    case class Observed[T](v: Val[T], observed: T)(implicit val obs: Observed.Observable[T])
+    case class Observed[T](v: Val[T], observed: T)(using val obs: Observed.Observable[T])
 
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 
     implicit def method: ExplorationMethod[ABC, ABCParameters] = m ⇒ {
-      implicit def defScope = m.scope
+      implicit def defScope: DefinitionScope = m.scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
 
@@ -96,7 +91,7 @@ package object abc {
 
   object IslandABC {
     implicit def method: ExplorationMethod[IslandABC, ABC.ABCParameters] = m ⇒ {
-      implicit def defScope = m.scope
+      implicit def defScope: DefinitionScope = m.scope
 
       val masterState = Val[MonAPMC.MonState]("masterState", ABC.abcNamespace)
       val islandState = ABC.state
@@ -165,7 +160,10 @@ package object abc {
     scope:                DefinitionScope       = "abc island"
   )
 
-  implicit class ABCContainer[M](m: M)(implicit method: ExplorationMethod[M, ABC.ABCParameters]) extends MethodHookDecorator(m) {
+  implicit class ABCContainer[M](m: M)(implicit method: ExplorationMethod[M, ABC.ABCParameters]) {
+    val decorator = new MethodHookDecorator(m)(using method)
+    export decorator.*
+    
     def hook(directory: FromContext[File], frequency: Long = 1): Hooked[M] = {
       val dsl = method(m)
       implicit val defScope = dsl.scope

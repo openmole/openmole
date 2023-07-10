@@ -20,7 +20,7 @@ package org.openmole.core.context
 import scala.collection.immutable.TreeMap
 
 object PrototypeSet {
-  implicit def traversableToProtoypeSet(ps: Iterable[Val[_]]) = PrototypeSet(ps.toSeq)
+  implicit def traversableToProtoypeSet(ps: Iterable[Val[_]]): PrototypeSet = PrototypeSet(ps.toSeq)
   val empty = PrototypeSet(Vector.empty)
 
   def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.distinct, explore)

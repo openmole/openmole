@@ -25,12 +25,13 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.builder._
+import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.composition.TaskNode
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.{ TestHook, TestTask }
 import org.scalatest._
 
-class HookSpec extends FlatSpec with Matchers {
+class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

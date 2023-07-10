@@ -1,9 +1,12 @@
 package org.openmole.site
 
-import java.util.UUID
+import org.openmole.core.exception.InternalProcessingError
 
+import java.util.UUID
 import scalatags.Text.TypedTag
 import scalatags.generic.StylePair
+
+import collection.mutable.ListBuffer
 
 /*
  * Copyright (C) 01/04/16 // mathieu.leclaire@openmole.org
@@ -22,8 +25,9 @@ import scalatags.generic.StylePair
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package object tools {
+object tools {
 
+  import scalatags.Text.{all => tags}
   import scalatags.Text.all._
 
   def listItem(content: Frag*): Frag = li(content)
@@ -33,13 +37,12 @@ package object tools {
 
   def aa = a(targetBlank)
 
-  val break = br(br)
+  def mandatory = b{"mandatory"}
+  def optional = b{"optional"}
 
-  object api {
+  def indice(v: Frag, i: Frag) = html"$v${sub{i}}"
 
-    def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
-    def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)
-  }
+  def comment(c: String): Frag = ""
 
   object hl {
 
@@ -75,7 +78,7 @@ package object tools {
     }
 
     object OptionalName {
-      implicit def fromString(s: String) = OptionalName(Some(s))
+      implicit def fromString(s: String): OptionalName = OptionalName(Some(s))
     }
 
     case class OptionalName(name: Option[String])
@@ -119,6 +122,7 @@ package object tools {
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
         case e: AttrPair ⇒ e
+        case e: SeqFrag[_] => e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
       }
 
@@ -192,8 +196,15 @@ package object tools {
       )
     )
 
+  
+  def sourceLink(source: String) = 
+    if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/tree/dev/$source"
+    else s"https://github.com/openmole/openmole/tree/${org.openmole.core.buildinfo.version.major}-dev/$source"
+
+
   def modificationLink(source: String) =
-    s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scalatex/$source"
+    if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
+    else s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
@@ -238,14 +249,12 @@ package object tools {
   lazy val glyph_chevron_left: String = "glyphicon glyphicon-chevron-left"
   lazy val glyph_chevron_right: String = "glyphicon glyphicon-chevron-right"
 
-  private def role(suffix: String): AttrPair = scalatags.Text.all.role := suffix
-
-  lazy val role_tablist = role("tablist")
-  lazy val role_presentation = role("presentation")
-  lazy val role_tab = role("tab")
+  lazy val role_tablist = tags.role :="tablist"
+  lazy val role_presentation = tags.role :="presentation"
+  lazy val role_tab = tags.role :="tab"
   lazy val tab_pane: String = "tab-pane"
-  lazy val tab_panel_role = role("tabpanel")
-  lazy val role_button = role("button")
+  lazy val tab_panel_role = tags.role :="tabpanel"
+  lazy val role_button = tags.role := "button"
 
   lazy val container_fluid: String = "container-fluid"
   lazy val pointer = cursor := "pointer"
@@ -256,4 +265,25 @@ package object tools {
   lazy val row: String = "row"
   def colMD(nb: Int): String = s"col-md-$nb"
 
+
+  implicit class HtmlHelper(val sc: StringContext) extends AnyVal {
+    def html(args: Any*): Frag = {
+      def anyToFrag(a: Any): Frag = {
+        a match {
+          case s: String => (s.stripMargin: Frag)
+          case f: Frag => f
+          case a => throw new InternalProcessingError(s"Cannot convert $a of type ${a.getClass} into html frag")
+        }
+      }
+
+      val strings = sc.parts.iterator
+      val expressions = args.iterator
+      val buf = ListBuffer[Frag](anyToFrag(strings.next()))
+      while (strings.hasNext) {
+        buf.append(anyToFrag(expressions.next()))
+        buf.append(anyToFrag(strings.next()))
+      }
+      buf.toSeq
+    }
+  }
 }

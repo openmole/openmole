@@ -28,7 +28,7 @@ import org.scalatest._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.TestTask
 
-class StrainerCapsuleSpec extends FlatSpec with Matchers {
+class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

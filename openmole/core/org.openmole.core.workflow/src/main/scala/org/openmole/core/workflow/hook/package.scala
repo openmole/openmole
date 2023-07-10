@@ -1,13 +1,12 @@
-package org.openmole.core.workflow
+package org.openmole.core.workflow.hook
 
-package hook {
-  trait HookPackage {
-    def CSVHook = hook.CSVHook
-    val FromContextHook = hook.FromContextHook
-    type FromContextHook = hook.FromContextHook
-  }
+trait HookPackage {
+  def CSVHook = org.openmole.core.workflow.hook.CSVHook
+  val FromContextHook = org.openmole.core.workflow.hook.FromContextHook
+  type FromContextHook = org.openmole.core.workflow.hook.FromContextHook
 }
 
-package object hook {
-  def Hook = FromContextHook
-}
+def Hook = FromContextHook
+def display(implicit outputRedirection: org.openmole.tool.outputredirection.OutputRedirection): org.openmole.core.workflow.format.WritableOutput.Display = org.openmole.core.workflow.format.WritableOutput.Display(outputRedirection.output)
+
+

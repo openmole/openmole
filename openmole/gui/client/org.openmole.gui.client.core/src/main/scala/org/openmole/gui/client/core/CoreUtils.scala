@@ -1,21 +1,16 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.files.{ FileNode, TreeNodePanel }
-import org.openmole.gui.ext.data._
-import autowire._
-import org.openmole.gui.client.core.alert.AbsolutePositioning.{ FileZone, RelativeCenterPosition }
-import org.openmole.gui.client.core.alert.AlertPanel
+import org.openmole.gui.client.core.files.*
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.client.OMPost
 import org.scalajs.dom
-import rx.Var
 
-import scala.util.{ Failure, Success }
-import scalatags.JsDom.all._
+import scala.util.{Failure, Success}
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.*
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -36,7 +31,7 @@ import scalatags.JsDom.all._
 
 object CoreUtils {
 
-  implicit class SeqUpdater[T](sequence: Seq[T]) {
+  implicit class SeqUpdater[T](sequence: Seq[T]):
     def updatedFirst(t: T, s: T): Seq[T] = {
       val index = sequence.indexOf(t)
       if (index != -1) sequence.updated(index, s)
@@ -45,60 +40,29 @@ object CoreUtils {
 
     def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
       sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
-  }
 
-  def withTmpFile(todo: SafePath ⇒ Unit): Unit = {
-    Post()[Api].temporaryFile.call().foreach { tempFile ⇒
-      todo(tempFile)
+  
+  def createFile(safePath: SafePath, fileName: String, directory: Boolean = false)(using panels: Panels, api: ServerAPI, path: BasePath): Future[Unit] =
+    api.createFile(safePath, fileName, directory).flatMap { b ⇒
+      if b
+      then Future.successful(())
+      else
+        panels.notifications.showGetItNotification(NotificationLevel.Error, s" $fileName already exists.")
+        Future.failed(new java.io.IOException(s"File already $fileName exists in ${safePath.path.mkString}"))
     }
-  }
+  
+  def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
+    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.refresh }
 
-  def addDirectory(in: SafePath, dirName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Post()[Api].addDirectory(in, dirName).call().foreach { b ⇒
-      if (b) onadded()
-      else panels.alertPanel.string(s"$dirName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
-    }
+  def listFiles(safePath: SafePath, fileFilter: FileSorting = FileSorting(), withHidden: Boolean = true)(using api: ServerAPI, path: BasePath): Future[FileListData] = api.listFiles(safePath, fileFilter, withHidden)
+  
+  def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI, path: BasePath): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
+  
+  def addPlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.addPlugin(safePath)
+  def removePlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.removePlugin(safePath)
 
-  def addFile(safePath: SafePath, fileName: String, onadded: () ⇒ Unit = () ⇒ {}) =
-    Post()[Api].addFile(safePath, fileName).call().foreach { b ⇒
-      if (b) onadded()
-      else panels.alertPanel.string(s" $fileName already exists.", okaction = { () ⇒ {} }, transform = RelativeCenterPosition, zone = FileZone)
-    }
-
-  def trashNode(path: SafePath)(ontrashed: () ⇒ Unit): Unit = {
-    Post()[Api].deleteFile(path, ServerFileSystemContext.project).call().foreach { d ⇒
-      panels.treeNodePanel.refreshAnd(ontrashed)
-    }
-  }
-
-  def trashNodes(paths: Seq[SafePath])(ontrashed: () ⇒ Unit): Unit = {
-    Post()[Api].deleteFiles(paths, ServerFileSystemContext.project).call().foreach { d ⇒
-      panels.treeNodePanel.refreshAnd(ontrashed)
-    }
-  }
-
-  def duplicate(safePath: SafePath, newName: String): Unit =
-    Post()[Api].duplicate(safePath, newName).call().foreach { y ⇒
-      panels.treeNodePanel.refreshAndDraw
-    }
-
-  def testExistenceAndCopyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Seq[SafePath]] =
-    Post()[Api].testExistenceAndCopyProjectFilesTo(safePaths, to).call()
-
-  def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath): Future[Unit] =
-    Post()[Api].copyProjectFilesTo(safePaths, to).call()
-
-  def listFiles(safePath: SafePath, fileFilter: FileFilter): Future[ListFilesData] = {
-    Post()[Api].listFiles(safePath, fileFilter).call()
-  }
-
-  def pluggables(safePath: SafePath, todo: Seq[SafePath] ⇒ Unit) = Post()[Api].allPluggableIn(safePath).call.foreach { p ⇒
-    todo(p)
-  }
-
-  def addJSScript(relativeJSPath: String) = {
-    org.scalajs.dom.document.body.appendChild(script(src := relativeJSPath).render)
-  }
+  def addJSScript(relativeJSPath: String) = 
+    org.scalajs.dom.document.body.appendChild(scriptTag(src := relativeJSPath).ref)
 
   def approximatedYearMonthDay(duration: Long): String = {
     val MINUTE = 60000L
@@ -121,21 +85,19 @@ object CoreUtils {
     s"$y y $m m $d d $h h"
   }
 
-  def longTimeToString(lg: Long): String = {
+  def longTimeToString(lg: Long): String =
     val date = new scalajs.js.Date(lg)
     s"${date.toLocaleDateString} ${date.toLocaleTimeString.dropRight(3)}"
-  }
 
-  case class ReadableByteCount(bytes: String, units: String) {
+  case class ReadableByteCount(bytes: String, units: String):
     def render = s"$bytes$units"
-  }
 
-  def dropDecimalIfNull(string: String) = {
+
+  def dropDecimalIfNull(string: String) =
     val cut = string.split('.')
     val avoid = Seq("0", "00", "000")
     if (avoid.contains(cut.last)) cut.head
     else string
-  }
 
   //Duplicated from server to optimize data transfer
   def readableByteCount(bytes: Long): ReadableByteCount = {
@@ -157,30 +119,5 @@ object CoreUtils {
 
   def setRoute(route: String) = dom.window.location.href = route.split("/").last
 
-  //  def buildModelScript[T<: WizardData](
-  //    wizardPluginFactory: WizardPluginFactory,
-  //    executableName:      String,
-  //    command:             String,
-  //    target:              SafePath,
-  //    resources:           Resources,
-  //    data:                T,
-  //    inputs:              Seq[ProtoTypePair]      = Seq(),
-  //    outputs:             Seq[ProtoTypePair]      = Seq(),
-  //    libraries:           Option[String]          = None) =
-  //    wizardPluginFactory.toTask(
-  //      target,
-  //      executableName,
-  //      command,
-  //      inputs,
-  //      outputs,
-  //      libraries,
-  //      resources,
-  //      data
-  //    ).foreach {
-  //      b ⇒
-  //        treeNodeTabs -- b
-  //        treeNodePanel.displayNode(FileNode(Var(b.name), 0L, 0L))
-  //        TreeNodePanel.refreshAndDraw
-  //    }
 
 }

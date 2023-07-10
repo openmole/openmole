@@ -20,7 +20,7 @@ package org.openmole.marketindex
 import java.io.File
 
 import org.openmole.tool.file._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 import org.openmole.core.market._
 
 object Market {
@@ -76,7 +76,7 @@ object Market {
       MarketEntry("Hello World in Python", "python-hello", Seq(python)),
       MarketEntry("Hello World in R", "R-hello", Seq(R)),
       MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
-      MarketEntry("Hello World in Java", "java-hello", Seq(java)),
+      MarketEntry("Hello World in Java", "hello-jvm", Seq(java)),
       MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
       MarketEntry("Hello World in Julia", "julia-hello", Seq(julia)),
       MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
@@ -115,7 +115,7 @@ object Market {
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = destination / fileName
       val projectDirectory = marketDirectory / project.directory
-      projectDirectory archiveCompress archive
+      projectDirectory archive (archive, archive = ArchiveType.TarGZ)
 
       GeneratedMarketEntry(
         fileName,

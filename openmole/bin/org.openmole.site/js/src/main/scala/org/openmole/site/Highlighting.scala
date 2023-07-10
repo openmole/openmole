@@ -58,6 +58,6 @@ object Highlighting {
   //  println("grammar " + openmoleGrammar)
 
   def init = {
-    HighlightJS.initHighlighting
+    HighlightJS.initHighlighting()
   }
 }

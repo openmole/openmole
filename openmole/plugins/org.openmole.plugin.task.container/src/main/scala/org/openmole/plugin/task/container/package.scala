@@ -26,63 +26,47 @@ import org.openmole.core.dsl.`extension`._
 import org.openmole.plugin.task.external._
 import org.openmole.core.workflow.validation._
 
-package container {
+package container:
 
-  import monocle.Lens
+  import monocle.Focus
 
-  object HostFile {
-    implicit def tupleToHostFile(t: (String, String)) = HostFile(t._1, t._2)
-  }
+  object HostFile:
+    implicit def tupleToHostFile(t: (String, String)): HostFile = HostFile(t._1, t._2)
 
   case class HostFile(path: String, destination: String)
 
-  object ContainerImage {
-    implicit def fileToContainerImage(f: java.io.File) = {
+  object ContainerImage:
+    implicit def fileToContainerImage(f: java.io.File): ContainerImage =
       def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
       SavedDockerImage(f, compressed)
-    }
-    implicit def stringToContainerImage(s: String) =
-      if (s.contains(":")) {
+
+    implicit def stringToContainerImage(s: String): ContainerImage =
+      if (s.contains(":"))
+      then
         val Vector(image, tag) = s.split(":").toVector
         DockerImage(image, tag)
-      }
       else DockerImage(s)
 
-  }
-
-  object DockerImage {
+  object DockerImage:
     def toRegistryImage(image: DockerImage) =
       _root_.container.RegistryImage(
         name = image.image,
         tag = image.tag,
         registry = image.registry
       )
-  }
 
   sealed trait ContainerImage
   case class DockerImage(image: String, tag: String = "latest", registry: String = "https://registry-1.docker.io") extends ContainerImage
   case class SavedDockerImage(file: java.io.File, compressed: Boolean) extends ContainerImage
 
-}
 
-package object container {
+
+package object container:
 
   type FileBinding = (String, String)
 
-  /**
-   * FIXME maybe make it an option to avoid passing "" when inputDirectory is empty
-   *
-   * @param inputDirectory Directory used to store input files / folder from the dataflow
-   * @param baseDirectory
-   * @param path Target location
-   * @return
-   */
-  def inputPathResolver(inputDirectory: File, baseDirectory: String)(path: String): File = {
-    if (File(path).isAbsolute) inputDirectory / path
-    else inputDirectory / baseDirectory / path
-  }
 
-  def outputPathResolver(preparedFileBindings: Iterable[FileBinding], hostFileBindings: Iterable[FileBinding], inputDirectory: File, userWorkDirectory: String, rootDirectory: File)(filePath: String): File = {
+  def outputPathResolver(fileBindings: Seq[FileBinding], userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
 
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -91,23 +75,29 @@ package object container {
      * @return true if dir is a parent of file at a level
      */
     def isOneOfParents(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
-    def isPreparedFile(f: String) = preparedFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
-    def isHostFile(f: String) = hostFileBindings.map(b ⇒ b._2).exists(b ⇒ isOneOfParents(b, f))
+
+    def relativiseFromParent(parent: String, file: String): String =
+      if isOneOfParents(parent, file)
+      then File(file).getAbsolutePath.drop(File(parent).getAbsolutePath.length)
+      else file
+
+    def resolveFile(f: String) =
+      fileBindings.
+        findLast((_, bindPath) ⇒ isOneOfParents(bindPath, f)).
+        map((localPath, bindPath) => File(localPath) / relativiseFromParent(bindPath, f))
+
     def isAbsolute = File(filePath).isAbsolute
+    def absolutePathInArchive: String = if isAbsolute then filePath else (File(userWorkDirectory) / filePath).getPath
 
-    val absolutePathInArchive: String = if (isAbsolute) filePath else (File(userWorkDirectory) / filePath).getPath
-    val pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
+    def pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
 
-    if (isPreparedFile(pathToResolve)) inputPathResolver(inputDirectory, userWorkDirectory)(filePath)
-    else if (isHostFile(pathToResolve)) File("/") / absolutePathInArchive
-    else rootDirectory / absolutePathInArchive
-  }
+    resolveFile(pathToResolve) getOrElse (rootDirectory / absolutePathInArchive)
 
   def validateContainer(
     commands:             Seq[FromContext[String]],
     environmentVariables: Seq[EnvironmentVariable],
     external:             External
-  ): Validate = Validate { p ⇒
+  ): Validate = Validate: p ⇒
     import p._
 
     val allInputs = External.PWD :: p.inputs.toList
@@ -117,44 +107,39 @@ package object container {
       validateVariables ++
       External.validate(external)(allInputs)
 
-  }
 
   def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
 
   lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
-  object ContainerSystem {
+  object ContainerSystem:
     def default = Singularity()
 
     def sudo(containerSystem: ContainerSystem, cmd: String) =
-      containerSystem match {
+      containerSystem match
         case _: Proot       ⇒ s"sudo $cmd"
         case _: Singularity ⇒ s"fakeroot $cmd"
-      }
-  }
 
   sealed trait ContainerSystem
   case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
   case class Singularity(command: String = "singularity") extends ContainerSystem
 
-  type PreparedImage = _root_.container.FlatImage
+  type InstalledImage = _root_.container.FlatImage
 
   /**
    * Trait for either string scripts or script file runnable in tasks based on the container task
    */
-  object RunnableScript {
+  object RunnableScript:
     implicit def stringToRunnableScript(s: String): RunnableScript = RawScript(s)
     implicit def fileToRunnableScript(f: File): RunnableScript = FileScript(f)
 
-    def content(script: RunnableScript): String = {
-      script match {
+    def content(script: RunnableScript): String =
+      script match
         case RawScript(s)  ⇒ s
         case FileScript(f) ⇒ f.content
-      }
-    }
-  }
+
 
   sealed trait RunnableScript
   case class RawScript(rawscript: String) extends RunnableScript
   case class FileScript(file: File) extends RunnableScript
-}
+

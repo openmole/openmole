@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.r
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{Namespace, Val}
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
@@ -15,76 +15,90 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._
 import org.openmole.plugin.task.container
-import org.openmole.plugin.task.container.ContainerTask.prepare
+import org.openmole.plugin.task.container.ContainerTask.install
 import org.openmole.plugin.task.container._
 import org.openmole.plugin.task.external._
-import org.openmole.plugin.tool.json._
+import org.openmole.core.json.*
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.core.dsl.extension._
 
-object RTask {
+import org.json4s.jackson.JsonMethods._
+import org.json4s._
+import org.openmole.core.workflow.tools.OptionalArgument
 
-  implicit def isTask: InputOutputBuilder[RTask] = InputOutputBuilder(RTask.config)
-  implicit def isExternal: ExternalBuilder[RTask] = ExternalBuilder(RTask.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(RTask.mapped)
+object RTask:
 
-  sealed trait InstallCommand
-  object InstallCommand {
-    case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false) extends InstallCommand
+  given InputOutputBuilder[RTask] = InputOutputBuilder(Focus[RTask](_.config))
+  given ExternalBuilder[RTask] = ExternalBuilder(Focus[RTask](_.external))
+  given InfoBuilder[RTask] = InfoBuilder(Focus[RTask](_.info))
+  given MappedInputOutputBuilder[RTask] = MappedInputOutputBuilder(Focus[RTask](_.mapped))
 
-    def toCommand(installCommands: InstallCommand) = {
+  case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false)
+
+  object RLibrary:
+
+    def toCommand(installCommand: RLibrary) =
       def dependencies(d: Boolean) = if(d) "T" else "NA"
 
-      installCommands match {
+      installCommand match
         case RLibrary(name, None, d) ⇒
-          //Vector(s"""R -e 'install.packages(c(${names.map(lib ⇒ '"' + s"$lib" + '"').mkString(",")}), dependencies = T)'""")
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
         case RLibrary(name, Some(version), d) ⇒
-          // need to install devtools to get older packages versions
-          //apt update; apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev;
-          s"""R --slave -e 'library(devtools); install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
-      }
-    }
+          s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
 
-    implicit def stringToRLibrary(name: String): InstallCommand = RLibrary(name, None)
-    implicit def stringCoupleToRLibrary(couple: (String, String)): InstallCommand = RLibrary(couple._1, Some(couple._2))
-    implicit def stringOptionCoupleToRLibrary(couple: (String, Option[String])): InstallCommand = RLibrary(couple._1, couple._2)
+    def toCommandNoVersion(libraries: Seq[String], dependencies: Boolean): String =
+      def list = libraries.map(l => s"\"$l\"").mkString(",")
+      def dep = if dependencies then "T" else "NA"
+      def load = libraries.map(l => s"""library("$l")""")
+      def command = Seq(s"install.packages(c($list), dependencies = $dep)") ++ load
 
-    def installCommands(libraries: Vector[InstallCommand]): Vector[String] = libraries.map(InstallCommand.toCommand)
-  }
+      s"""R --slave -e '${command.mkString("; ")}'"""
 
-  def rImage(version: String) = DockerImage("openmole/r-base", version)
+    given Conversion[String, RLibrary] = name => RLibrary(name, None)
+    given Conversion[(String, String), RLibrary] = (name, version) => RLibrary(name, Some(version))
+    given Conversion [(String, String, Boolean), RLibrary] = (name, version, dep) => RLibrary(name, Some(version), dep)
+    given Conversion [(String, Boolean), RLibrary] = (name, dep) => RLibrary(name, None, dep)
+
+    def installCommands(libraries: Vector[RLibrary]): Seq[String] =
+      val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
+      val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
+
+      val update =
+        if libraries.nonEmpty
+        then  Seq("apt update")
+        else Seq()
+
+      update ++
+        Seq(
+          toCommandNoVersion(noVersionNoDep.map(_.name), false),
+          toCommandNoVersion(noVersionWithDep.map(_.name), true)
+        ) ++ withVersion.map(RLibrary.toCommand)
+
+
+  def rImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
-    script:               RunnableScript,
-    install:              Seq[String]                        = Seq.empty,
-    libraries:            Seq[InstallCommand]                = Seq.empty,
-    version:              String                             = "4.1.2",
-    errorOnReturnValue:   Boolean                            = true,
-    returnValue:          OptionalArgument[Val[Int]]         = None,
-    stdOut:               OptionalArgument[Val[String]]      = None,
-    stdErr:               OptionalArgument[Val[String]]      = None,
-    hostFiles:            Seq[HostFile]                      = Vector.empty,
-    workDirectory:        OptionalArgument[String]           = None,
-    environmentVariables: Seq[EnvironmentVariable]           = Vector.empty,
-    clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask = {
-
-    // add additional installation of devtools only if needed
-    val installCommands =
-      if (libraries.exists { case l: InstallCommand.RLibrary ⇒ l.version.isDefined }) {
-        install ++
-          Seq("apt update", "apt-get -y install libssl-dev libxml2-dev libcurl4-openssl-dev libssh2-1-dev").map(c => ContainerSystem.sudo(containerSystem, c)) ++
-          Seq("""R --slave -e 'install.packages("devtools", dependencies = T); library(devtools);""") ++
-          InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
-      }
-      else install ++ InstallCommand.installCommands(libraries.toVector ++ Seq(InstallCommand.RLibrary("jsonlite", None)))
+    script:                     RunnableScript,
+    install:                    Seq[String]                        = Seq.empty,
+    libraries:                  Seq[RLibrary]                      = Seq.empty,
+    prepare:                    Seq[String]                        = Seq.empty,
+    image:                      String                             = "openmole/r2u:4.3.0",
+    errorOnReturnValue:         Boolean                            = true,
+    returnValue:                OptionalArgument[Val[Int]]         = None,
+    stdOut:                     OptionalArgument[Val[String]]      = None,
+    stdErr:                     OptionalArgument[Val[String]]      = None,
+    hostFiles:                  Seq[HostFile]                      = Vector.empty,
+    environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
+    clearContainerCache:        Boolean                            = false,
+    containerSystem:            ContainerSystem                    = ContainerSystem.default,
+    installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
+    val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.prepare(installContainerSystem, rImage(version), installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
+      prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -96,15 +110,14 @@ object RTask {
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig()
-    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
-  }
+    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
-}
 
-@Lenses case class RTask(
+case class RTask(
   script:               RunnableScript,
-  image:                PreparedImage,
+  image:                InstalledImage,
   errorOnReturnValue:   Boolean,
+  prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
   stdErr:               Option[Val[String]],
@@ -114,87 +127,83 @@ object RTask {
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask {
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import Mapped.noFile
     import org.json4s.jackson.JsonMethods._
     import p._
 
-    def writeInputsJSON(file: File) = {
-      def values = noFile(mapped.inputs).map { m ⇒ Array(context(m.v)) }
-      file.content = compact(render(toJSONValue(values.toArray)))
-    }
+    def writeInputsJSON(inputs: Vector[Mapped[_]], file: File) =
+      def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
+      file.content = compact(render(toJSONValue(values.toArray[Any])))
 
-    def rInputMapping(arrayName: String) =
-      noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+    def rInputMapping(inputs: Vector[Mapped[_]], arrayName: String) =
+      inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
       s"""list(${noFile(mapped.outputs).map { _.name }.mkString(",")})"""
 
-    def readOutputJSON(file: File) = {
+    def readOutputJSON(file: File) =
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v) }
-    }
+      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
-    newFile.withTmpFile("script", ".R") { scriptFile ⇒
-      newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
+    val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
+    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
 
-        def inputArrayName = "generatedomarray"
-        def rScriptName = "_generatedomscript_.R"
-        def inputJSONName = "_generatedominputs_.json"
-        def outputJSONName = "_generatedomoutputs_.json"
+    def workDirectory = "/_workdirectory_"
+    def inputArrayName = "generatedomarray"
+    def rScriptPath = s"$workDirectory/_generatedomscript_.R"
+    def inputJSONPath = s"$workDirectory/_generatedominputs_.json"
+    def outputJSONPath = s"$workDirectory/_generatedomoutputs_.json"
 
-        writeInputsJSON(jsonInputs)
-        scriptFile.content = s"""
-          |library("jsonlite")
-          |$inputArrayName = fromJSON("/$inputJSONName", simplifyMatrix = FALSE)
-          |${rInputMapping(inputArrayName)}
-          |${RunnableScript.content(script)}
-          |write_json($rOutputMapping, "/$outputJSONName", always_decimal = TRUE)
-          """.stripMargin
+    val valueMappedInputs = noFile(mapped.inputs)
+    writeInputsJSON(valueMappedInputs, jsonInputs)
 
-        val outputFile = Val[File]("outputFile", Namespace("RTask"))
+    scriptFile.content = s"""
+      |library("jsonlite")
+      |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
+      |${rInputMapping(valueMappedInputs, inputArrayName)}
+      |${RunnableScript.content(script)}
+      |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
+      """.stripMargin
 
-        def containerTask =
-          ContainerTask(
-            containerSystem = containerSystem,
-            image = image,
-            command = s"R --slave -f $rScriptName",
-            workDirectory = None,
-            relativePathRoot = None,
-            errorOnReturnValue = errorOnReturnValue,
-            returnValue = returnValue,
-            hostFiles = hostFiles,
-            environmentVariables = environmentVariables,
-            reuseContainer = true,
-            stdOut = stdOut,
-            stdErr = stdErr,
-            config = config,
-            external = external,
-            info = info,
-            containerPoolKey = containerPoolKey) set (
-            resources += (scriptFile, rScriptName, true),
-            resources += (jsonInputs, inputJSONName, true),
-            outputFiles += (outputJSONName, outputFile),
-            Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
-          )
+    val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
-        val resultContext =
-          try containerTask.process(executionContext).from(context)
-          catch {
-            case t: UserBadDataError => throw UserBadDataError(s"Error executing script:\n${scriptFile.content}", t)
-            case t: Throwable => throw InternalProcessingError(s"Error executing script:\n${scriptFile.content}", t)
-          }
-        resultContext ++ readOutputJSON(resultContext(outputFile))
-      }
-    }
-  }
-}
+    def containerTask =
+      ContainerTask.isolatedWorkdirectory(executionContext)(
+        containerSystem = containerSystem,
+        image = image,
+        command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
+        workDirectory = workDirectory,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info,
+        containerPoolKey = containerPoolKey) set (
+        resources += (scriptFile, rScriptPath),
+        resources += (jsonInputs, inputJSONPath),
+        outputFiles += (outputJSONPath, outputFile),
+        Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+        Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+      )
+
+    val resultContext =
+      try containerTask.process(executionContext).from(context)
+      catch
+        case t: UserBadDataError => throw UserBadDataError(s"Error executing script:\n${scriptFile.content}", t)
+        case t: Throwable => throw InternalProcessingError(s"Error executing script:\n${scriptFile.content}", t)
+
+    resultContext ++ readOutputJSON(resultContext(outputFile))
+

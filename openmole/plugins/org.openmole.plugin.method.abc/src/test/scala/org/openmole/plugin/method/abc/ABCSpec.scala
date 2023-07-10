@@ -6,12 +6,12 @@ import org.apache.commons.math3.linear.{ LUDecomposition, MatrixUtils }
 import org.openmole.core.dsl._
 
 import org.openmole.core.workflow.test._
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest._
 import org.openmole.plugin.domain.bounds._
 
 import scala.util.Random
 
-class ABCSpec extends FlatSpec with Matchers {
+class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

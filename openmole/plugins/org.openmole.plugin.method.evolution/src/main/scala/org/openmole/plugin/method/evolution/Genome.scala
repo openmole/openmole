@@ -11,76 +11,107 @@ import java.io.File
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
+object GenomeDouble {
+
+  def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) = {
+
+    @tailrec def toVariables0(genome: List[Genome.GenomeBound.ScalarDouble], continuousValues: List[Double], acc: List[Variable[_]]): Vector[Variable[_]] = {
+      genome match {
+        case Nil ⇒ acc.reverse.toVector
+        case (h: Genome.GenomeBound.ScalarDouble) :: t ⇒
+          val value =
+            if (scale) continuousValues.head.scale(h.low, h.high)
+            else continuousValues.head
+          val v = Variable(h.v, value)
+          toVariables0(t, continuousValues.tail, v :: acc)
+      }
+    }
+
+    toVariables0(genome.toList, continuousValues.toList, List.empty)
+  }
+
+  def toArrayVariable(genomeBound: Genome.GenomeBound.ScalarDouble, value: Seq[Any]) = genomeBound match {
+    case b: Genome.GenomeBound.ScalarDouble ⇒
+      Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
+  }
+
+  def fromVariables(variables: Seq[Variable[_]], genome: GenomeDouble) = {
+    val vContext = Context() ++ variables
+
+    @tailrec def fromVariables0(genome: List[Genome.GenomeBound.ScalarDouble], accDouble: List[Double]): Vector[Double] =
+      genome match {
+        case Nil                                       ⇒ accDouble.reverse.toVector
+        case (h: Genome.GenomeBound.ScalarDouble) :: t ⇒ fromVariables0(t, Genome.valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+      }
+
+    fromVariables0(genome.toList, List())
+  }
+}
+
 object Genome {
 
-  sealed trait GenomeBound
+  enum GenomeBound:
+    case SequenceOfDouble(v: Val[Array[Double]], low: Array[Double], high: Array[Double], size: Int)
+    case ScalarDouble(v: Val[Double], low: Double, high: Double)
+    case SequenceOfInt(v: Val[Array[Int]], low: Array[Int], high: Array[Int], size: Int)
+    case ScalarInt(v: Val[Int], low: Int, high: Int)
+    case ContinuousInt(v: Val[Int], low: Int, high: Int)
+    case Enumeration[T](v: Val[T], values: Vector[T])
+    case SequenceOfEnumeration[T](v: Val[Array[T]], values: Vector[Array[T]])
 
-  object GenomeBound {
-    case class SequenceOfDouble(v: Val[Array[Double]], low: Array[Double], high: Array[Double], size: Int) extends GenomeBound
-    case class ScalarDouble(v: Val[Double], low: Double, high: Double) extends GenomeBound
-    case class SequenceOfInt(v: Val[Array[Int]], low: Array[Int], high: Array[Int], size: Int) extends GenomeBound
-    case class ScalarInt(v: Val[Int], low: Int, high: Int) extends GenomeBound
-    case class ContinuousInt(v: Val[Int], low: Int, high: Int) extends GenomeBound
-    case class Enumeration[T](v: Val[T], values: Vector[T]) extends GenomeBound
-    case class SequenceOfEnumeration[T](v: Val[Array[T]], values: Vector[Array[T]]) extends GenomeBound
-
+  object GenomeBound:
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]) = {
+    implicit def factorIsScalarDouble[D](f: Factor[D, Double])(implicit bounded: BoundedDomain[D, Double]): ScalarDouble =
       val (min, max) = bounded(f.domain).domain
       ScalarDouble(f.value, min, max)
-    }
 
-    implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]) =
+    implicit def factorOfDoubleRangeIsScalaDouble(f: Factor[DoubleRange, Double]): ScalarDouble =
       ScalarDouble(f.value, f.domain.low, f.domain.high)
 
-    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]) = {
+    implicit def factorIsScalarInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Int]): ScalarInt =
       val (min, max) = bounded(f.domain).domain
       ScalarInt(f.value, min, max)
-    }
 
-    implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]) =
+    implicit def factorOfScalaRangeIsScalarInt(f: Factor[scala.Range, Int]): ScalarInt =
       ScalarInt(f.value, f.domain.min, f.domain.max)
 
-    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]) = {
+    implicit def factorIntIsContinuousInt[D](f: Factor[D, Int])(implicit bounded: BoundedDomain[D, Double]): ContinuousInt =
       val (min, max) = bounded(f.domain).domain
       ContinuousInt(f.value, min.toInt, max.toInt)
-    }
 
-    implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]) =
+    implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]): ContinuousInt =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]) = {
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble =
       val (min, max) = bounded(f.domain).domain
       SequenceOfDouble(f.value, min, max, sized(f.domain))
-    }
 
-    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]) = {
+    implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]): SequenceOfInt =
       val (min, max) = bounded(f.domain).domain
       SequenceOfInt(f.value, min, max, sized(f.domain))
-    }
 
-    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]) =
+    implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]): Enumeration[T] =
       Enumeration(f.value, fix(f.domain).domain.toVector)
 
-    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]) =
+    implicit def factorIsSequenceOfEnumeration[D, T](f: Factor[D, Array[T]])(implicit fix: FixDomain[D, Array[T]]): SequenceOfEnumeration[T] =
       SequenceOfEnumeration(f.value, fix(f.domain).domain.toVector)
 
-    implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]) =
+    implicit def factorOfBooleanIsSequenceOfEnumeration(f: Factor[Int, Array[Boolean]]): SequenceOfEnumeration[Boolean] =
       SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
 
-    def toVal(b: GenomeBound) = b match {
-      case b: GenomeBound.ScalarDouble             ⇒ b.v
-      case b: GenomeBound.ScalarInt                ⇒ b.v
-      case b: GenomeBound.ContinuousInt            ⇒ b.v
-      case b: GenomeBound.SequenceOfDouble         ⇒ b.v
-      case b: GenomeBound.SequenceOfInt            ⇒ b.v
-      case b: GenomeBound.Enumeration[_]           ⇒ b.v
-      case b: GenomeBound.SequenceOfEnumeration[_] ⇒ b.v
-    }
+    def toVal(b: GenomeBound) =
+      b match
+        case b: GenomeBound.ScalarDouble             ⇒ b.v
+        case b: GenomeBound.ScalarInt                ⇒ b.v
+        case b: GenomeBound.ContinuousInt            ⇒ b.v
+        case b: GenomeBound.SequenceOfDouble         ⇒ b.v
+        case b: GenomeBound.SequenceOfInt            ⇒ b.v
+        case b: GenomeBound.Enumeration[_]           ⇒ b.v
+        case b: GenomeBound.SequenceOfEnumeration[_] ⇒ b.v
 
-  }
+  end GenomeBound
 
   import _root_.mgo.evolution.{ C, D }
   import cats.implicits._
@@ -149,34 +180,33 @@ object Genome {
     indexOf0(genome.toList, 0)
   }
 
+  def valueOf(context: Context, v: Val[_]) =
+    context.get(v.name) match {
+      case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $context")
+      case Some(f) ⇒
+        if (!v.accepts(f.value)) throw new UserBadDataError(s"Values ${f.value} is incompatible with genome part of type ${v}")
+        else f.value
+    }
+
   def fromVariables(variables: Seq[Variable[_]], genome: Genome) = {
-
     val vContext = Context() ++ variables
-
-    def valueOf(v: Val[_]) =
-      vContext.get(v.name) match {
-        case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $vContext")
-        case Some(f) ⇒
-          if (!v.accepts(f.value)) throw new UserBadDataError(s"Values ${f.value} is incompatible with genome part of type ${v}")
-          else f.value
-      }
 
     @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (Vector[Double], Vector[Int]) =
       genome match {
         case Nil                                 ⇒ (accDouble.reverse.toVector, accInt.reverse.toVector)
-        case (h: GenomeBound.ScalarDouble) :: t  ⇒ fromVariables0(t, accInt, valueOf(h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
-        case (h: GenomeBound.ContinuousInt) :: t ⇒ fromVariables0(t, accInt, valueOf(h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+        case (h: GenomeBound.ScalarDouble) :: t  ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
+        case (h: GenomeBound.ContinuousInt) :: t ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
         case (h: GenomeBound.SequenceOfDouble) :: t ⇒
-          val values = (h.low zip h.high zip valueOf(h.v).asInstanceOf[Array[Double]]).map { case ((low, high), v) ⇒ v.normalize(low, high) }.toList
+          val values = (h.low zip h.high zip valueOf(vContext, h.v).asInstanceOf[Array[Double]]).map { case ((low, high), v) ⇒ v.normalize(low, high) }.toList
           fromVariables0(t, accInt, values ::: accDouble)
-        case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Int] :: accInt, accDouble)
-        case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
+        case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Int] :: accInt, accDouble)
+        case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
         case (h: GenomeBound.Enumeration[_]) :: t ⇒
-          val i = h.values.indexOf(valueOf(h.v))
-          if (i == -1) throw new UserBadDataError(s"Value ${valueOf(h.v)} doesn't match a element of enumeration ${h.values} for input ${h.v}")
+          val i = h.values.indexOf(valueOf(vContext, h.v))
+          if (i == -1) throw new UserBadDataError(s"Value ${valueOf(vContext, h.v)} doesn't match a element of enumeration ${h.values} for input ${h.v}")
           fromVariables0(t, i :: accInt, accDouble)
         case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
-          val vs = valueOf(h.v).asInstanceOf[Array[_]]
+          val vs = valueOf(vContext, h.v).asInstanceOf[Array[_]]
           val is =
             (vs zip h.values).zipWithIndex.map {
               case ((v, hv), index) ⇒
@@ -223,9 +253,8 @@ object Genome {
           val v = Variable(h.v, value)
           toVariables0(t, continuousValues, discreteValues.tail, v :: acc)
         case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
-          implicit def tag = h.v.fromArray.`type`.manifest
           val value = (h.values zip discreteValues).take(h.values.size) map { case (vs, i) ⇒ vs(i) }
-          val v = Variable(h.v, value.toArray)
+          val v = Variable(h.v, value.toArray(h.v.fromArray.`type`.manifest))
           toVariables0(t, continuousValues, discreteValues.drop(h.values.size), v :: acc)
       }
     }
@@ -254,44 +283,53 @@ object Genome {
       Variable.unsecure(b.v.toArray, array)
   }
 
-  object ToSuggestion {
+  object ToSuggestion:
 
-    def loadFromFile(f: File, genome: Genome) = {
-      import org.openmole.core.csv.csvToVariables
-      import org.openmole.core.keyword.:=
+    def loadFromFile(f: File, genome: Genome) =
+      import org.openmole.core.csv.CSV
+      import org.openmole.core.omr.OMR
+      import org.openmole.core.dsl._
 
-      def toAssignment[T](v: Variable[T]): :=[Val[T], FromContext[T]] = :=(v.prototype, v.value)
+      def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
 
-      val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
-      csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
-    }
+      if CSV.isCSV(f)
+      then
+        val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
+        CSV.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
+      else
+        if OMR.isOMR(f)
+        then
+          val ctx = Context(OMR.toVariables(f).head._2: _*)
+          val vals = genome.map(g => GenomeBound.toVal(g))
+          val values = vals.map(v => ctx.variable(v.array).getOrElse(throw new UserBadDataError(s"Genome component $v not found in omr file $f")))
+          def assigments =
+            for
+              line <- values.map(_.value).transpose
+            yield
+              (vals zip line).map((v, va) => toAssignment(Variable.unsecureUntyped(v, va)))
+          assigments
+        else throw new UserBadDataError(s"Unsupported file type for suggestion $f")
 
-    implicit def fromFile =
-      new ToSuggestion[File] {
+    given ToSuggestion[File] =
+      new ToSuggestion[File]:
         override def apply(t: File): Suggestion = genome ⇒ loadFromFile(t, genome)
-      }
 
-    implicit def fromString =
-      new ToSuggestion[String] {
-        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(new java.io.File(t), genome)
-      }
+    given ToSuggestion[String] =
+      new ToSuggestion[String]:
+        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(File(t), genome)
 
-    implicit def fromAssignment[T] =
-      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]] {
-        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t
-      }
-  }
+    implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
+      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]]:
+        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t.map(_.map(ValueAssignment.untyped))
 
-  sealed trait ToSuggestion[T] {
+  sealed trait ToSuggestion[T]:
     def apply(t: T): Suggestion
-  }
 
   implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
 
-  object Suggestion {
+  object Suggestion:
     def empty = (genome: Genome) ⇒ Seq()
-  }
 
-  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment[_]]]
+  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment.Untyped]]
 
 }

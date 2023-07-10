@@ -12,8 +12,11 @@ object WithInstance {
    * @tparam T
    * @return
    */
-  def apply[T](f: () ⇒ T)(pooled: Boolean, close: T ⇒ Unit = (_: T) ⇒ {}): WithInstance[T] =
-    if (pooled) Pool(f, close) else WithNewInstance(f, close)
+  def apply[T](pooled: Boolean, close: T ⇒ Unit = (_: T) ⇒ {}) (f: () ⇒ T): WithInstance[T] =
+    if pooled
+    then Pool(f, close)
+    else WithNewInstance(f, close)
+    
 }
 
 trait WithInstance[T] {

@@ -8,7 +8,7 @@ import org.openmole.core.market.MarketIndex
 
 import scala.annotation.tailrec
 
-object Generate extends App {
+@main def generate(args: String*) = {
 
   case class Parameters(
     target:  Option[File] = None,
@@ -33,7 +33,7 @@ object Generate extends App {
       s"${buildinfo.version.major}-dev"
     )
 
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
   val index = parameters.target.get / buildinfo.marketName
   index.content = Serialization.writePretty(MarketIndex(entries.map(_.toDeployedMarketEntry)))
 

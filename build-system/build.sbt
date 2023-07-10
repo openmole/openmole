@@ -7,7 +7,7 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
-//resolvers += Classpaths.sbtPluginSnapshots
+Global / resolvers += Resolver.sbtPluginRepo("releases")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.2")
 

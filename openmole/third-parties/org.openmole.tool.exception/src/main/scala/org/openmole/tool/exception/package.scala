@@ -1,14 +1,11 @@
 package org.openmole.tool
 
-package object exception {
+package object exception :
 
-  def tryOnError[A, B](onError: ⇒ A)(op: ⇒ B) = {
+  def tryOnError[A, B](onError: ⇒ A)(op: ⇒ B) =
     try op
-    catch {
+    catch
       case t: Throwable ⇒
         util.Try(onError)
         throw t
-    }
-  }
 
-}

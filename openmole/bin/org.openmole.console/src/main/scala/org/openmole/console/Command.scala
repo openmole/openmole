@@ -17,46 +17,60 @@
 
 package org.openmole.console
 
-import java.io.{ File, IOException, StringReader }
+import java.io.{File, IOException, StringReader}
 import java.util.logging.Level
-
 import org.openmole.core.buildinfo
-import org.openmole.core.compiler.ScalaREPL
-import org.openmole.core.dsl._
+import org.openmole.core.compiler.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fileservice.FileService
-import org.openmole.core.project._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
+import org.openmole.core.project.*
+import org.openmole.core.tools.io.Prettifier.*
 import org.openmole.core.workflow.execution.Environment
-import org.openmole.core.workflow.mole.{ Mole, MoleExecution }
+import org.openmole.core.workflow.mole.{Mole, MoleExecution, MoleServices}
 import org.openmole.core.workflow.validation.Validation
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.core.services._
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.core.services.*
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+import org.openmole.tool.random.{RandomProvider, Seeder}
 
-class Command(val console: ScalaREPL, val variables: ConsoleVariables) { commands ⇒
+object Command:
+  def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
+    val runServices = {
+      import services._
+      Services.copy(services)(fileServiceCache = FileServiceCache())
+    }
 
-  def print(environment: Environment): Unit = {
-    for {
-      (label, number) ← List(
-        "Submitted" → environment.submitted,
-        "Running" → environment.running,
-        "Done" → environment.done,
-        "Failed" → environment.failed
-      )
-    } println(s"$label: $number")
-    val errors = Environment.errors(environment)
-    def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
-    def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
-    def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
-    println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
-  }
+    import runServices._
+    val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compilationContext))
+
+    val ex = DSL.toPuzzle(dsl).toExecution()(moleServices)
+    ex.start(true)
+  end start
+
+  def load(variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+    def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services) =
+      Project.compile(variables.workDirectory, file) match {
+        case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
+        case e: CompilationError ⇒ throw e.error
+        case compiled: Compiled ⇒
+          util.Try(compiled.eval(args)) match {
+            case util.Success(res) ⇒ Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
+            case util.Failure(e) ⇒ throw UserBadDataError(s"Error during evaluation of the script $file", e)
+          }
+      }
+
+    loadAny(file)
+  end load
+
+
+class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
   def print(mole: Mole): Unit = {
     println("root: " + mole.root)
@@ -64,7 +78,50 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     mole.dataChannels.foreach(println)
   }
 
-  def print(moleExecution: MoleExecution): Unit = {
+  def print(moleExecution: MoleExecution, debug: Boolean = false): Unit = {
+
+    def environmentErrors(environment: Environment, level: Level) = {
+      def filtered =
+        Environment.clearErrors(environment).filter {
+          e ⇒ e.level.intValue() >= level.intValue()
+        }
+
+      for {
+        error ← filtered
+      } {
+        def detail =
+          error.detail match {
+            case None    ⇒ ""
+            case Some(m) ⇒ s"\n$m\n"
+          }
+
+        println(
+          s"""${error.level.toString}: ${error.exception.getMessage}$detail
+             |${exceptionToString(error.exception)}""".stripMargin
+        )
+      }
+    }
+
+    def printEnvironment(environment: Environment, debug: Boolean): Unit = {
+      println(environment.simpleName + ":")
+      for {
+        (label, number) ← List(
+          "Submitted" → environment.submitted,
+          "Running" → environment.running,
+          "Done" → environment.done,
+          "Failed" → environment.failed
+        )
+      } println(s"  $label: $number")
+      val errors = Environment.errors(environment)
+      def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
+      def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
+      def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
+      println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
+      environmentErrors(environment, (if(debug) Level.FINE else Level.INFO))
+    }
+
+    println("\n--- Execution ---\n")
+
     val statuses = moleExecution.capsuleStatuses
 
     val msg =
@@ -73,6 +130,9 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
       } yield s"${capsule}: ${stat.ready} ready, ${stat.running} running, ${stat.completed} completed"
 
     println(msg.mkString("\n"))
+
+    println("\n--- Errors ---\n")
+
     moleExecution.exception match {
       case Some(e) ⇒
         MoleExecution.MoleExecutionFailed.capsule(e) match {
@@ -82,33 +142,28 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
         System.out.println(exceptionToString(e.exception))
       case None ⇒
     }
+
+    println("\n--- Environments ---\n")
+
+    for
+      env <- moleExecution.allEnvironments
+    do
+      printEnvironment(env, debug = debug)
+      println()
   }
+
+  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
+    Command.load(variables, file, args)
+
+  def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console))
+
+  def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
   private def exceptionToString(e: Throwable) = e.stackString
 
-  implicit def stringToLevel(s: String) = Level.parse(s.toUpperCase)
+  implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
-  def errors(environment: Environment, level: Level = Level.INFO) = {
-    def filtered =
-      Environment.clearErrors(environment).filter {
-        e ⇒ e.level.intValue() >= level.intValue()
-      }
 
-    for {
-      error ← filtered
-    } {
-      def detail =
-        error.detail match {
-          case None    ⇒ ""
-          case Some(m) ⇒ s"\n$m\n"
-        }
-
-      println(
-        s"""${error.level.toString}: ${error.exception.getMessage}$detail
-        |${exceptionToString(error.exception)}""".stripMargin
-      )
-    }
-  }
 
   def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)
 
@@ -118,27 +173,6 @@ class Command(val console: ScalaREPL, val variables: ConsoleVariables) { command
     println(s"""You are running OpenMOLE ${buildinfo.version} - ${buildinfo.name}
        |built on the ${buildinfo.version.generationDate}.""".stripMargin)
 
-  def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Any =
-    try {
-      val newRepl =
-        (v: ConsoleVariables) ⇒ {
-          ConsoleVariables.bindVariables(console, v)
-          console
-        }
-
-      Project.compile(variables.workDirectory, file, args, newREPL = Some(newRepl)) match {
-        case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
-        case e: CompilationError       ⇒ throw e.error
-        case Compiled(compiled, _)     ⇒ compiled.apply()
-      }
-    }
-    finally ConsoleVariables.bindVariables(console, variables)
-
-  def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): DSL =
-    loadAny(file) match {
-      case res: DSL ⇒ res
-      case x        ⇒ throw new UserBadDataError("The result is not a puzzle")
-    }
 
   def modules(urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Unit = {
     val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet

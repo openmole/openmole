@@ -18,71 +18,57 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.client.OMPost
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import autowire._
+import org.openmole.gui.client.ext.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation._
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import scala.scalajs.js.annotation.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.*
+
 import scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("sshlogin")
+  @JSExportTopLevel("authentication_sshlogin")
   val sshlogin = js.Object {
+    given LoginAuthenticationServerAPI()
     new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory
   }
 }
 
-class LoginAuthenticationFactory extends AuthenticationPluginFactory {
+class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends AuthenticationPluginFactory:
   type AuthType = LoginAuthenticationData
-
   def buildEmpty: AuthenticationPlugin = new LoginAuthenticationGUI
-
   def build(data: AuthType): AuthenticationPlugin = new LoginAuthenticationGUI(data)
-
   def name = "SSH Login/Password"
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = api.loginAuthentications()
 
-  def getData: Future[Seq[AuthType]] = OMPost()[LoginAuthenticationAPI].loginAuthentications().call()
-}
-
-class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData()) extends AuthenticationPlugin {
+class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin:
   type AuthType = LoginAuthenticationData
-
   def factory = new LoginAuthenticationFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[LoginAuthenticationAPI].removeAuthentication(data).call().foreach { _ ⇒
-    onremove()
-  }
+  def remove(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
 
-  val loginInput = inputTag(data.login)(placeholder := "Login").render
+  val loginInput = inputTag(data.login).amend(placeholder := "Login")
+  val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
+  val targetInput = inputTag(data.target).amend(placeholder := "Host")
+  val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  val passwordInput = inputTag(data.password)(placeholder := "Password", passwordType).render
-
-  val targetInput = inputTag(data.target)(placeholder := "Host").render
-
-  val portInput = inputTag(data.port)(placeholder := "Port").render
-
-  def panel: TypedTag[HTMLElement] = hForm(
-    loginInput.withLabel("Login"),
-    passwordInput.withLabel("Password"),
-    targetInput.withLabel("Target"),
-    portInput.withLabel("Port")
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement = div(
+    flexColumn, width := "400px", height := "220",
+    div(cls := "verticalFormItem", div("Login", width:="150px"), loginInput),
+    div(cls := "verticalFormItem", div("Password", width:="150px"), passwordInput),
+    div(cls := "verticalFormItem", div("Target", width:="150px"), targetInput),
+    div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
   )
 
-  def save(onsave: () ⇒ Unit): Unit = {
-    OMPost()[LoginAuthenticationAPI].removeAuthentication(data).call().foreach { d ⇒
-      OMPost()[LoginAuthenticationAPI].addAuthentication(LoginAuthenticationData(loginInput.value, passwordInput.value, targetInput.value, portInput.value)).call().foreach { b ⇒
-        onsave()
-      }
-    }
-  }
+  def save(using basePath: BasePath, notificationAPI: NotificationService) =
+    for
+      _ <- remove
+      _ <- api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value))
+    yield ()
 
-  def test: Future[Seq[Test]] = OMPost()[LoginAuthenticationAPI].testAuthentication(data).call()
-}
+  def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)

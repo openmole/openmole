@@ -136,21 +136,21 @@ class CondorEnvironment[Authentication: gridscale.ssh.SSHAuthentication, ProxyAu
   val authentication:      Authentication,
   val sshProxy:            Option[SSHProxy],
   val proxyAuthentication: Option[ProxyAuthentication],
-  implicit val services:   BatchEnvironment.Services) extends BatchEnvironment {
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) {
   env ⇒
 
   import services._
 
-  implicit val sshInterpreter = gridscale.ssh.SSH()
-  implicit val systemInterpreter = effectaside.System()
-  implicit val localInterpreter = gridscale.local.Local()
+  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
 
   override def start() = {
     storageService
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
     sshInterpreter().close
@@ -207,16 +207,16 @@ class CondorEnvironment[Authentication: gridscale.ssh.SSHAuthentication, ProxyAu
 class CondorLocalEnvironment(
   val parameters:        CondorEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
-  implicit val localInterpreter = gridscale.local.Local()
-  implicit val systemInterpreter = effectaside.System()
+  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
 
   override def start() = { storage; space }
   override def stop() = {
-    stopped = true
+    state.stopped = true
     HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
   }

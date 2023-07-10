@@ -34,7 +34,7 @@ object Native {
 //
 //  )
 
-  val footer = paragraph(
+  lazy val footer = paragraph(
     p, "Two things should be noted from this example:",
     ul,
     li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
@@ -43,13 +43,25 @@ object Native {
     p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
   )
 
-  val singularity = a("the Singularity container system", href := org.openmole.site.shared.link.singularity )
+  def singularity = a("the Singularity container system", href := org.openmole.site.shared.link.singularity)
+
+  def preliminary(taskName: String) =
+    paragraph(
+      usesSingularity(taskName),
+      br, br,
+      supportsFiles(taskName)
+    )
 
   def usesSingularity(taskName: String) =
     paragraph(
       "The ",
       org.openmole.site.tools.code(taskName),
       s" uses ", singularity, ". You should install Singularity on your system otherwise you won't be able to use it."
+    )
+
+  def supportsFiles(taskName: String) =
+    paragraph(
+      s"The ", org.openmole.site.tools.code(taskName), " supports files and directories, in and out. Get some help on how to handle it ", a("by reading this page", href := org.openmole.site.DocumentationPages.fileManagement.file), "."
     )
 
 }

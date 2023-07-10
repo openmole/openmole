@@ -24,7 +24,7 @@ import org.openmole.plugin.domain.range._
 import org.openmole.plugin.domain.file._
 import org.scalatest._
 
-class ModifierDomainSpec extends FlatSpec with Matchers {
+class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "inputs of modified domain" should "be as expected" in {
     val size = Val[Int]

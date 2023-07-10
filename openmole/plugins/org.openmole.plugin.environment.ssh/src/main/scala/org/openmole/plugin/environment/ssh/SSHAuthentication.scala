@@ -25,11 +25,12 @@ import org.openmole.core.authentication._
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.tool.crypto.Cypher
-
+import io.circe.generic.auto.*
+import org.openmole.core.json.given
 import scala.util.Try
 
 object SSHAuthentication {
-  implicit def isGridScaleAuthentication(implicit cypher: Cypher) = new _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] {
+  implicit def isGridScaleAuthentication(implicit cypher: Cypher): _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] = new _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] {
     override def login(a: org.openmole.plugin.environment.ssh.SSHAuthentication) = a match {
       case a: LoginPassword ⇒ a.login
       case a: PrivateKey    ⇒ a.login
@@ -44,8 +45,8 @@ object SSHAuthentication {
     }
   }
 
-  def apply()(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService) =
-    Authentication.allByCategory.getOrElse(classOf[SSHAuthentication].getName, Seq.empty).map(_.asInstanceOf[SSHAuthentication])
+  def apply()(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService): Seq[SSHAuthentication] =
+    Authentication.load[SSHAuthentication]
 
   def find(login: String, host: String, port: Int = 22)(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService): SSHAuthentication = {
     val list = apply()
@@ -82,20 +83,20 @@ sealed trait SSHAuthentication {
 }
 
 case class LoginPassword(
-  val login:            String,
-  val cypheredPassword: String,
-  val host:             String,
-  val port:             Int    = 22
+  login:            String,
+  cypheredPassword: String,
+  host:             String,
+  port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword {
   override def toString = s"$login@$host:$port using password"
 }
 
 case class PrivateKey(
-  val privateKey:       File,
-  val login:            String,
-  val cypheredPassword: String,
-  val host:             String,
-  val port:             Int    = 22
+  privateKey:       File,
+  login:            String,
+  cypheredPassword: String,
+  host:             String,
+  port:             Int    = 22
 ) extends SSHAuthentication with CypheredPassword {
   override def toString = s"$login@$host:$port using private key $privateKey"
 }

@@ -19,13 +19,13 @@ package org.openmole.core.workflow.mole
 
 import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.expansion.{DefaultSet, FromContext}
 import org.openmole.core.workflow.job.RuntimeTask
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.tools.DefaultSet
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._
+import monocle.Focus
 
 object MoleCapsule {
 
@@ -115,7 +115,7 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
   def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = {
     val withInputs =
       _task match {
-        case task: MoleTask ⇒ (MoleTask.mole composeLens Mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
+        case task: MoleTask ⇒ Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
         case task           ⇒ task
       }
     RuntimeTask(withInputs, strain)
@@ -145,10 +145,10 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
     else capsuleOutputs(mole, sources, hooks)
 
   def capsuleInputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    _task.inputs -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
+    Task.inputs(_task) -- sources(this).flatMap(_.outputs) -- sources(this).flatMap(_.inputs) ++ sources(this).flatMap(_.inputs)
 
   def capsuleOutputs(mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    _task.outputs -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
+    Task.outputs(_task) -- hooks(this).flatMap(_.outputs) ++ hooks(this).flatMap(_.outputs)
 
   private def receivedInputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsInputs = capsuleInputs(mole, sources, hooks)

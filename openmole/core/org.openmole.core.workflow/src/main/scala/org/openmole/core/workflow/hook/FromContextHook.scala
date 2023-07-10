@@ -15,11 +15,12 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
+import monocle.Focus
 
 object FromContextHook {
 
-  implicit def isBuilder: InputOutputBuilder[FromContextHook] = InputOutputBuilder(config)
-  implicit def isInfo = InfoBuilder(FromContextHook.info)
+  implicit def isBuilder: InputOutputBuilder[FromContextHook] = InputOutputBuilder(Focus[FromContextHook](_.config))
+  implicit def isInfo: InfoBuilder[FromContextHook] = InfoBuilder(Focus[FromContextHook](_.info))
 
   case class Parameters(
     context:          Context,
@@ -32,7 +33,7 @@ object FromContextHook {
     implicit def outputRedirection: OutputRedirection = executionContext.outputRedirection
     implicit def loggerService: LoggerService = executionContext.loggerService
     implicit def random: RandomProvider = executionContext.random
-    implicit def newFile: TmpDirectory = executionContext.newFile
+    implicit def newFile: TmpDirectory = executionContext.tmpDirectory
     implicit def serializerService: SerializerService = executionContext.serializerService
   }
 
@@ -53,7 +54,7 @@ object FromContextHook {
  * @param config
  * @param info
  */
-@Lenses case class FromContextHook(
+case class FromContextHook(
   override val className: String,
   f:                      FromContextHook.Parameters ⇒ Context,
   v:                      Validate,

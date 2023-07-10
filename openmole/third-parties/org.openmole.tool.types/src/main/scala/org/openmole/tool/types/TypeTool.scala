@@ -18,14 +18,13 @@
 package org.openmole.tool.types
 
 import java.util
-
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
+import java.lang.reflect.{Type as JType, Array as _, *}
+import javax.swing.JToolBar.Separator
 import scala.reflect.ClassTag
-import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
-import scala.reflect.runtime.universe._
+import scala.reflect.Manifest.{arrayType, classType, intersectionType, wildcardType}
 
 object TypeTool {
 
@@ -33,6 +32,12 @@ object TypeTool {
     def isArray = m.runtimeClass.isArray
     def toArray = m.arrayManifest
     def asArray = m.asInstanceOf[Manifest[Array[T]]]
+    def toClassTag = ClassTag[T](m.runtimeClass)
+    def array(ts: T*): Array[T] = {
+      val a = m.newArray(ts.size)
+      for { (t, i) <- ts.zipWithIndex } a(i) = t
+      a
+    }
   }
 
   def manifestFromArrayUnsecure(m: Manifest[Array[_]]) = m.typeArguments.head.asInstanceOf[Manifest[Any]]
@@ -41,11 +46,11 @@ object TypeTool {
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
   }
 
-  implicit class TypeDecoration(t: Type) {
-    def isArray = t <:< typeTag[Array[_]].tpe
+  /*   implicit class TypeDecoration(t: TypeRepr) {
+    def isArray = t <:< definitions.ArrayClass.toType
     def fromArray = t.typeArgs.head
     def toArray = appliedType(definitions.ArrayClass.toType, List(t))
-  }
+  } */
 
   implicit class ClassTagDecoration[T](c: ClassTag[T]) {
     def isArray = c.runtimeClass.isArray
@@ -61,7 +66,7 @@ object TypeTool {
     else unArrayify(m1.asArray.fromArray, m2.asArray.fromArray, level + 1)
   }
 
-  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val typeTag: TypeTag[T], val manifest: Manifest[T])
+  case class NativeType[T](native: Class[_], java: Class[_], scala: Class[T])(implicit val manifest: Manifest[T])
 
   lazy val classEquivalences = Seq(
     NativeType(java.lang.Byte.TYPE, classOf[java.lang.Byte], classOf[Byte]),
@@ -78,7 +83,7 @@ object TypeTool {
     classEquivalences.find(_.java == c) orElse
       classEquivalences.find(_.scala == c)
 
-  def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
+  //def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
   def toClass(s: String) = classEquivalence(
     s match {
@@ -150,10 +155,90 @@ object TypeTool {
     values
   }
 
-  def toString[T](implicit manifest: Manifest[T]) =
-    manifest.toString.
-      replace(".package$", ".").
-      replace("$", ".")
+  def toString[T](implicit manifest: Manifest[T]) = {
+    val tpe =
+      manifest.toString.
+        replace(".package$", ".").
+        replace("$", ".").trim
+    val wildCard = "_ <: "
+    if(tpe.startsWith(wildCard)) tpe.drop(wildCard.size) else tpe
+  }
+
+  def toManifest(s: String): Manifest[_] =
+    def loadClass(c: String) = Class.forName(c, true, TypeTool.getClass.getClassLoader)
+
+    def simpleType(st: String): Manifest[_] =
+      st.trim match
+        case "Any" => Manifest.Any
+        case "AnyRef" => Manifest.AnyRef
+        case "AnyVal" => Manifest.AnyVal
+        case "Boolean" => Manifest.Boolean
+        case "Byte" => Manifest.Byte
+        case "Char" => Manifest.Char
+        case "Double" => Manifest.Double
+        case "Float" => Manifest.Float
+        case "Int" => Manifest.Int
+        case "Long" => Manifest.Long
+        case "Nothing" => Manifest.Nothing
+        case "Null" => Manifest.Null
+        case "Object" => Manifest.Object
+        case "Short" => Manifest.Short
+        case "Unit" => Manifest.Unit
+        case s => Manifest.classType(loadClass(s))
+
+    def arrayType(t: Manifest[_]): Manifest[_] =
+      Manifest.arrayType(t)
+
+    def parametricType(t: String, parameters: Seq[Manifest[_]]) =
+      parameters.headOption match
+        case Some(h) => Manifest.classType(loadClass(t), h, parameters.tail *)
+        case None => simpleType(t)
+
+    case class ParsedType(main: String, parameter: Seq[String])
+
+    def parseParametricType(t: String): ParsedType =
+      val main = t.takeWhile(_ != '[')
+      val parameters = t.drop(main.length).toArray
+
+      def recurse(pos: Int, depth: Int, separators: List[Int]): List[Int] =
+        if pos >= parameters.length
+        then separators.reverse
+        else
+          parameters(pos) match
+            case '[' => recurse(pos + 1, depth + 1, separators)
+            case ']' => recurse(pos + 1, depth - 1, separators)
+            case ',' if depth == 1 => recurse(pos + 1, depth, pos :: separators)
+            case _ => recurse(pos + 1, depth, separators)
+
+      def separators = recurse(0, 0, List())
+
+      def split(string: Array[Char], separators: List[Int], chunks: List[String], dropped: Int): List[String] =
+        separators.headOption match
+          case None => (new String(string) :: chunks).reverse
+          case Some(s) => split(string.drop(s - dropped + 1), separators.tail, new String(string.take(s - dropped)) :: chunks, dropped + s + 1)
+
+      def chunks = split(parameters.drop(1).dropRight(1), separators.map(_ - 1), List(), 0)
+
+      ParsedType(main, chunks)
+
+
+    def parseType(t: String): Manifest[_] =
+      val main = t.takeWhile(_ != '[')
+      if main.length == t.length
+      then simpleType(t)
+      else
+        val parsedType = parseParametricType(t)
+        main.trim match {
+          case "Array" =>
+            assert(parsedType.parameter.length == 1, parsedType.toString)
+            arrayType(parseType(parsedType.parameter.head))
+          case _ =>
+            val parameters = parsedType.parameter.map(parseType)
+            parametricType(main, parameters)
+        }
+
+    parseType(s)
+  end toManifest
 
 }
 

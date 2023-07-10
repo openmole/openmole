@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import java.io.File
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats.syntax.traverse._
@@ -27,12 +27,13 @@ import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.plugin.task.external._
 import org.openmole.core.tools.service.OS
+import org.openmole.core.workflow.builder.InfoBuilder
 
 object SystemExecTask {
 
-  implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(SystemExecTask.config)
-  implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(SystemExecTask.external)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isTask: InputOutputBuilder[SystemExecTask] = InputOutputBuilder(Focus[SystemExecTask](_.config))
+  implicit def isExternal: ExternalBuilder[SystemExecTask] = ExternalBuilder(Focus[SystemExecTask](_.external))
+  implicit def isInfo: InfoBuilder[SystemExecTask] = InfoBuilder(Focus[SystemExecTask](_.info))
 
   /**
    * System exec task execute an external process.
@@ -70,11 +71,11 @@ object SystemExecTask {
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
-    ) set (outputs += (Seq(returnValue.option, stdOut.option, stdErr.option).flatten: _*))
+    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 }
 
-@Lenses case class SystemExecTask(
+case class SystemExecTask private (
   command:              Vector[OSCommands],
   workDirectory:        Option[String],
   errorOnReturnValue:   Boolean,
@@ -86,7 +87,7 @@ object SystemExecTask {
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig
-) extends Task with ValidateTask {
+) extends Task with ValidateTask { systemExecTask =>
 
   override def validate = Validate { p ⇒
     import p._
@@ -107,7 +108,7 @@ object SystemExecTask {
   override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
     import p._
 
-    newFile.withTmpDir { tmpDir ⇒
+    tmpDirectory.withTmpDir { tmpDir ⇒
       val workDir =
         workDirectory match {
           case None    ⇒ tmpDir
@@ -145,7 +146,7 @@ object SystemExecTask {
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = External.fetchOutputFiles(external, outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
+      val retContext: Context = External.fetchOutputFiles(external, systemExecTask.outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
 
       retContext ++
         List(

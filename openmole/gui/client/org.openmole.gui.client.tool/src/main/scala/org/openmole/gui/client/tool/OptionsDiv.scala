@@ -19,24 +19,19 @@ package org.openmole.gui.client.tool
 
 import scaladget.bootstrapnative.bsn._
 import scaladget.tools._
-
-import org.openmole.gui.ext.client.omsheet
-import org.scalajs.dom.html.Input
-import org.scalajs.dom.raw.HTMLInputElement
-
-import scalatags.JsDom.tags
-import scalatags.JsDom.all._
+import org.openmole.gui.client.ext.omsheet
+import com.raquo.laminar.api.L._
 
 object OptionsDiv {
 
-  case class BoxedOption[T](option: T, naming: T ⇒ String, checkBox: HTMLInputElement)
+  case class BoxedOption[T](option: T, naming: T ⇒ String, checkBox: Input)
 
   def apply[T](options: Seq[T], naming: T ⇒ String) = new OptionsDiv(options, naming)
 }
 
 object CheckBox {
-  def apply(option: String = "", default: Boolean = false, classKey: ModifierSeq = Seq())(onchecked: HTMLInputElement ⇒ Unit = HTMLInputElement ⇒ {}) =
-    new CheckBox(option, default, classKey)(onchecked)
+  def apply(option: String = "", default: Boolean = false, classKey: HESetters = Seq(), onchecked: Input ⇒ Unit = HTMLInputElement ⇒ {}) =
+    new CheckBox(option, default, classKey, onchecked)
 }
 
 import OptionsDiv._
@@ -44,44 +39,38 @@ import OptionsDiv._
 class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
 
   val boxedOptions = options.map { o ⇒
-    BoxedOption(o, naming, checkbox(true).render)
+    BoxedOption(o, naming, checkbox(true))
   }
 
-  val div = tags.div(paddingTop := 20)(
+  val render = div(
+    paddingTop := "20",
     for {
       bo ← boxedOptions
-    } yield tags.div(
-      span(omsheet.optionsdiv)(naming(bo.option)),
+    } yield div(
+      span(omsheet.optionsdiv, naming(bo.option)),
       bo.checkBox
     )
   )
 
   def result: Seq[T] = boxedOptions.filter { bo ⇒
-    bo.checkBox.checked
+    bo.checkBox.ref.checked
   }.map {
     _.option
   }
 
 }
 
-class CheckBox(name: String, default: Boolean, classKey: ModifierSeq)(onchecked: HTMLInputElement ⇒ Unit) {
+class CheckBox(name: String, default: Boolean, classKey: HESetters, onchecked: Input ⇒ Unit) {
 
-  private lazy val cb: Input = inputTag()(`type` := "checkbox", if (default) checked := true else "", onclick := { () ⇒ onchecked(cb) }).render
-  private val cbSpan = tags.span(name, style := "position: relative; margin-right:5px; margin-left:5px; top: -3px;")
+  private lazy val cb: Input = checkbox(default).amend(onClick --> (_ ⇒ onchecked(cb)))
+  private val cbSpan = span(name, position.relative, marginRight := "5", marginLeft := "5", top := "-3")
 
-  lazy val withNameFirst = div(classKey)(
-    cbSpan,
-    cb
+  lazy val withNameFirst = div(classKey, cbSpan, cb)
+
+  lazy val withBoxFirst = div(classKey, cbSpan, cb
   )
 
-  lazy val withBoxFirst = div(classKey)(
-    cbSpan,
-    cb
-  )
+  lazy val onlyBox = div(classKey, cb)
 
-  lazy val onlyBox = div(classKey)(
-    cb
-  )
-
-  def result: Boolean = cb.checked
+  def result: Boolean = cb.ref.checked
 }

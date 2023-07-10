@@ -1,9 +1,9 @@
 
 cd /sources/openmole/
 cd build-system
-sbt publish-local
+sbt publishLocal
 cd ../libraries
-sbt publish-local
+sbt publishLocal
 cd ../openmole
 sbt "project openmole" assemble
 

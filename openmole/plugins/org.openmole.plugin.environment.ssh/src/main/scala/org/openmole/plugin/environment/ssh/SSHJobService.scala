@@ -17,7 +17,7 @@ object SSHJobService extends JavaLogger {
 
     var stop = false
 
-    def update() =
+    def update(): Boolean =
       if (stop) false
       else environment.get match {
         case Some(env) ⇒

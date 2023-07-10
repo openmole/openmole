@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.test.TestTask
 import org.scalatest._
 
-class MasterCapsuleSpec extends FlatSpec with Matchers {
+class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

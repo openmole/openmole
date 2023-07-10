@@ -28,7 +28,7 @@ import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.core.workflow.job.{ JobGroup, Job, JobId }
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.{ ExceptionEvent, Name }
+import org.openmole.core.workflow.tools.Name
 import org.openmole.tool.cache._
 
 import scala.ref.WeakReference
@@ -73,7 +73,7 @@ object Environment {
 
 }
 
-sealed trait Environment <: Name {
+sealed trait Environment extends Name {
   def submitted: Long
   def running: Long
   def done: Long
@@ -88,7 +88,7 @@ sealed trait Environment <: Name {
  *
  * This trait is implemented by environment plugins, and not the more generic [[Environment]]
  */
-trait SubmissionEnvironment <: Environment {
+trait SubmissionEnvironment extends Environment {
   def submit(job: JobGroup): Long
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]
@@ -103,7 +103,7 @@ object LocalEnvironment {
   def apply(
     threads:      OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
-    name:         OptionalArgument[String] = OptionalArgument()
+    name:         OptionalArgument[String] = None
   )(implicit varName: sourcecode.Name) =
     EnvironmentProvider { ms ⇒
       import ms._

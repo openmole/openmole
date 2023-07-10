@@ -18,29 +18,27 @@
 package org.openmole.ui
 
 import java.awt.Desktop
-import java.io.{ File, FileOutputStream, IOException }
+import java.io.{File, FileOutputStream, IOException}
 import java.util.logging.Level
 import java.net.URI
 import org.openmole.console.Console.ExitCodes
-import org.openmole.core.project._
-import org.openmole.core.compiler.ScalaREPL
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.project.*
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.rest.server.RESTServer
 import org.openmole.tool.logger.JavaLogger
 
 import annotation.tailrec
-import org.openmole.gui.server.core._
-import org.openmole.console._
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.core.{ location, module }
+import org.openmole.gui.server.core.*
+import org.openmole.console.*
+import org.openmole.tool.file.*
+import org.openmole.tool.hash.*
+import org.openmole.core.{location, module}
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference._
-import org.openmole.core.services._
-import org.openmole.core.networkservice._
+import org.openmole.core.preference.*
+import org.openmole.core.services.*
+import org.openmole.core.networkservice.*
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object Application extends JavaLogger {
@@ -74,7 +72,6 @@ object Application extends JavaLogger {
       loggerFileLevel:          Option[String]  = None,
       unoptimizedJS:            Boolean         = false,
       remote:                   Boolean         = false,
-      http:                     Boolean         = false,
       browse:                   Boolean         = true,
       proxyURI:                 Option[String]  = None,
       httpSubDirectory:         Option[String]  = None,
@@ -109,7 +106,6 @@ object Application extends JavaLogger {
       |[--workspace directory] run openmole with an alternative workspace location
       |[--rest] run the REST server
       |[--remote] enable remote connection to the web interface
-      |[--http] force http connection instead of https in remote mode for the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
       |[--unoptimized-js] do not optimize JS (do not use Google Closure Compiler)
       |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
@@ -149,7 +145,6 @@ object Application extends JavaLogger {
         case "--logger-level" :: tail                ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
         case "--logger-file-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerFileLevel = Some(tail.head)))
         case "--remote" :: tail                      ⇒ parse(tail, c.copy(remote = true))
-        case "--http" :: tail                        ⇒ parse(tail, c.copy(http = true))
         case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
         case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
@@ -172,7 +167,7 @@ object Application extends JavaLogger {
 
     PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
 
-    val config = parse(args.map(_.trim).toList)
+    val config = parse(args.toVector.map(_.trim).toList)
 
     val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
     logLevel.foreach(LoggerConfig.level)
@@ -182,7 +177,7 @@ object Application extends JavaLogger {
 
     val workspaceDirectory = config.workspace.getOrElse(org.openmole.core.workspace.defaultOpenMOLEDirectory)
 
-    implicit val workspace = Workspace(workspaceDirectory)
+    implicit val workspace: Workspace = Workspace(workspaceDirectory)
     import org.openmole.tool.thread._
 
     //Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
@@ -281,31 +276,30 @@ object Application extends JavaLogger {
           if (launch) {
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
-
             val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
 
-            def useHTTP = config.http || !config.remote
-
-            def protocol = if (useHTTP) "http" else "https"
-
-            val url = s"$protocol://localhost:$port"
+            val url = s"http://localhost:$port"
 
             GUIServer.urlFile.content = url
-
+            
             GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
-              val server = new GUIServer(port, config.remote, useHTTP, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
-              server.start()
+              //val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
+              val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
+
+              ///server.start()
+              val s = newServer.start()
               if (config.browse && !config.remote) browse(url)
-              server.launchApplication()
+              //server.launchApplication()
               logger.info(
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
                   s"Server listening on port $port."
               )
-              server.join() match {
+              s.join() match {
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
               }
+              //newServer.stop()
             }
           }
           else {
@@ -342,7 +336,7 @@ object Application extends JavaLogger {
 
               val res =
                 if (!success(file).exists) {
-                  file → processResult(Project.compile(file.getParentFileSafe, file, args, returnUnit = true))
+                  file → processResult(Project.compile(file.getParentFileSafe, file, returnUnit = true))
                 }
                 else {
                   file -> util.Success("Compilation succeeded (from previous test)")

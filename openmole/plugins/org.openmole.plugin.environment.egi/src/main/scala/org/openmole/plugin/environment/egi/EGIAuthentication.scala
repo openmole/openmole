@@ -35,7 +35,10 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
 import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.tar.TarInputStream
+import org.openmole.tool.archive.TarInputStream
+
+import io.circe.generic.auto.*
+import org.openmole.core.json.given
 
 object EGIAuthentication extends JavaLogger {
 
@@ -88,49 +91,19 @@ object EGIAuthentication extends JavaLogger {
     }
   }
 
-  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] = {
-    def openVOCards(implicit workspace: Workspace, preference: Preference) =
-      EGIAuthentication.getClass.getClassLoader.getResourceAsStream("/voCards.xml")
+  def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] =
+    gridscale.egi.VOMS.get(vo, preference(EGIEnvironment.VOPortalAPIKey))
 
-    val is = openVOCards
-    try getVOMS(vo, xml.XML.load(is))
-    finally is.close()
-  }
-  def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
+  def getVMOSOrError(vo: String)(implicit workspace: Workspace, preference: Preference) =
+    getVOMS(vo).getOrElse(throw new UserBadDataError(s"No ID card for VO $vo found on VO portal."))
 
-  def getVOMS(vo: String, x: xml.Node) = {
-    import xml._
-
-    def attributeIsDefined(name: String, value: String) =
-      (_: Node).attribute(name).filter(_.text == value).isDefined
-
-    val card = (x \ "IDCard" filter (attributeIsDefined("Name", vo))).headOption
-
-    card map {
-      card ⇒
-        val vomses = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server")
-
-        def vomsUrl(voms: Node) = {
-          val host = (voms \ "hostname").head.text
-          val port = (voms.attribute("VomsesPort").get.text)
-          //val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
-          //s"voms://$host:${port}${dn.getOrElse("")}"
-          s"$host:$port"
-        }
-
-        vomses.map(vomsUrl)
-    }
-  }
-
-  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) = {
+  def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore) = {
     if (test) testPassword(a).get
-    Authentication.set(a)
+    Authentication.save[EGIAuthentication](a, (_, _) => true)
   }
 
   def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
-    Authentication.allByCategory.
-      getOrElse(classOf[EGIAuthentication].getName, Seq.empty).
-      map(_.asInstanceOf[EGIAuthentication]).headOption
+    Authentication.load[EGIAuthentication].headOption
 
   def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) =
     Authentication.clear[EGIAuthentication]
@@ -219,7 +192,7 @@ object P12Certificate {
     new P12Certificate(cypheredPassword, certificate)
 }
 
-class P12Certificate(val cypheredPassword: String, val certificate: File) extends CypheredPassword with EGIAuthentication
+case class P12Certificate(cypheredPassword: String, certificate: File) extends CypheredPassword with EGIAuthentication
 
 object EGIAuthenticationInterface {
   implicit def p12CertificateIsEGIAuthentication(implicit cypher: Cypher): EGIAuthenticationInterface[EGIAuthentication] =

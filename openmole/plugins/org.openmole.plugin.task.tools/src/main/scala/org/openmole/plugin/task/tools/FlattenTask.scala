@@ -29,7 +29,7 @@ object FlattenTask {
 
   def apply[S](flatten: Val[Array[Array[S]]], in: Val[Array[S]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("FlattenTask") { (context, _, _) ⇒
-      implicit val sClassTag = ClassTag[S](in.fromArray.`type`.runtimeClass)
+      implicit val sClassTag = ClassTag[S](Val.fromArray(in).`type`.runtimeClass)
       Variable(in, context(flatten).flatten.toArray[S])
     } set (
       dsl.inputs += flatten,

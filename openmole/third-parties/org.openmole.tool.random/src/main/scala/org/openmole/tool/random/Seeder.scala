@@ -1,8 +1,7 @@
 package org.openmole.tool.random
 
 import java.util.UUID
-
-import scala.concurrent.stm._
+import java.util.concurrent.atomic.AtomicLong
 
 object Seeder {
   def apply(uuid: UUID = UUID.randomUUID): Seeder = Seeder(Random.uuid2long(uuid))
@@ -13,7 +12,7 @@ object Seeder {
  * @param seed
  */
 case class Seeder(seed: Long) {
-  private val currentSeed = Ref(seed)
-  def newSeed = atomic { implicit txn ⇒ val v = currentSeed(); currentSeed() = v + 1; v }
+  private val currentSeed = AtomicLong(seed)
+  def newSeed = currentSeed.getAndIncrement()
   def newRNG = org.openmole.tool.random.Random(newSeed).toScala
 }

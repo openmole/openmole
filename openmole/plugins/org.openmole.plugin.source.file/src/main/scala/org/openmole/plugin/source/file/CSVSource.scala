@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.source.file
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
@@ -28,11 +28,11 @@ import scala.reflect.ClassTag
 
 object CSVSource {
 
-  implicit def isIO = InputOutputBuilder(CSVSource.config)
-  implicit def isInfo = InfoBuilder(CSVSource.info)
+  implicit def isIO: InputOutputBuilder[CSVSource] = InputOutputBuilder(Focus[CSVSource](_.config))
+  implicit def isInfo: InfoBuilder[CSVSource] = InfoBuilder(Focus[CSVSource](_.info))
 
-  implicit def isCSV = new MappedOutputBuilder[CSVSource] {
-    override def mappedOutputs = CSVSource.columns
+  implicit def isCSV: MappedOutputBuilder[CSVSource] = new MappedOutputBuilder[CSVSource] {
+    override def mappedOutputs = Focus[CSVSource](_.columns)
   }
 
   def apply(path: FromContext[String], separator: OptionalArgument[Char])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
@@ -46,7 +46,7 @@ object CSVSource {
 
 }
 
-@Lenses case class CSVSource(
+case class CSVSource(
   path:      FromContext[String],
   config:    InputOutputConfig,
   info:      InfoConfig,
@@ -56,11 +56,11 @@ object CSVSource {
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    import org.openmole.core.csv
+    import org.openmole.core.csv.*
 
     val file = new File(path.from(context))
     val transposed =
-      csv.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
+      CSV.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
 
     def variables =
       for {
@@ -68,7 +68,7 @@ object CSVSource {
       } yield {
         val p = v.head.prototype
         val content =
-          if (v.isEmpty) Array.empty
+          if (v.isEmpty) Array()(ClassTag(p.`type`.runtimeClass))
           else v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass))
 
         Variable.unsecure(p.toArray, v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass)))

@@ -1,14 +1,14 @@
 package org.openmole.gui.client.core
 
 import scaladget.tools._
-import org.openmole.gui.ext.data._
+import org.openmole.gui.shared.data.*
 import org.scalajs.dom.raw.HTMLElement
-import rx._
+import com.raquo.laminar.api.L._
+import org.openmole.gui.client.ext
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
-import scala.util.{ Success, Failure }
-import scalatags.JsDom.all._
-import scalatags.JsDom.{ TypedTag, tags }
+import scala.util.{ Failure, Success }
 
 /*
  * Copyright (C) 22/12/15 // mathieu.leclaire@openmole.org
@@ -33,30 +33,28 @@ object Waiter {
   implicit def fTStateToClientTState[S](f: Future[S]): FutureWaiter[S] = new FutureWaiter(f)
 
   val waiter =
-    div(ms("spinner-wave"))(
-      tags.div(), tags.div(), tags.div()
-    )
+    div(cls := "spinner-wave", div(), div(), div())
 }
 
 import Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-  def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ TypedTag[T]): TypedTag[HTMLElement] = {
+  def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ HtmlElement): HtmlElement = {
 
     div(
-      Rx {
-        val ratio = processingState().ratio
+      child <-- processingState.signal.map { pState ⇒
+        val ratio = pState.ratio
         val waiterSpan = div(
+          ext.flexColumn, alignItems.center,
           waiter,
           if (ratio == 0 || ratio == 100) span()
-          else span(ms("spinner-wave-ratio"))(ratio + " %")
+          else span(cls := "spinner-wave-ratio", ratio + " %")
         )
 
-        processingState() match {
+        pState match {
           case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
-          case y @ (Processed(_))                     ⇒ f(processingState())
+          case y @ (Processed(_))                     ⇒ f(pState)
           case _                                      ⇒ div()
         }
       }
@@ -66,43 +64,36 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
 class FutureWaiter[S](waitingForFuture: Future[S]) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   def withFutureWaiter[T <: HTMLElement](
     waitingString:    String,
-    onsuccessElement: S ⇒ TypedTag[HTMLElement]
-  ): TypedTag[HTMLElement] = {
+    onsuccessElement: S ⇒ HtmlElement
+  ): HtmlElement = {
 
-    val processing: Var[TypedTag[HTMLElement]] = Var(waiter)
+    val processing: Var[HtmlElement] = Var(waiter)
     waitingForFuture.andThen {
-      case Success(s) ⇒ processing() = onsuccessElement(s)
-      case Failure(_) ⇒ processing() = tags.div("Failed to load data")
+      case Success(s) ⇒ processing.set(onsuccessElement(s))
+      case Failure(_) ⇒ processing.set(div("Failed to load data"))
     }
 
     div(
-      Rx {
-        processing()
-      }
+      child <-- processing.signal
     )
   }
 
   def withFutureWaiterAndSideEffect[T <: HTMLElement](
     waitingString:    String,
     onsuccessElement: S ⇒ Any
-  ): TypedTag[HTMLElement] = {
+  ): HtmlElement = {
 
-    val processing: Var[TypedTag[HTMLElement]] = Var(waiter)
+    val processing: Var[HtmlElement] = Var(waiter)
     waitingForFuture.andThen {
       case Success(s) ⇒
         onsuccessElement(s)
-        processing() = div()
-      case Failure(_) ⇒ processing() = tags.div("Failed to load data")
+        processing.set(div())
+      case Failure(_) ⇒ processing.set(div("Failed to load data"))
     }
 
-    div(
-      Rx {
-        processing()
-      }
-    )
+    div(child <-- processing.signal)
   }
 
 }

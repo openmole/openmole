@@ -1,300 +1,219 @@
 package org.openmole.gui.client.core
 
-/*
- * Copyright (C) 17/05/15 // mathieu.leclaire@openmole.org
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 import java.util.concurrent.atomic.AtomicBoolean
+import scala.util.{Failure, Success}
+import org.openmole.gui.client.ext.*
 
-import scala.util.{ Failure, Success }
-import scalatags.JsDom.all._
-import scalatags.JsDom._
-import org.openmole.gui.ext.client._
-
-import scala.scalajs.js.timers._
+import scala.scalajs.js.timers.*
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import autowire._
-import org.openmole.gui.ext.data.{ ErrorData ⇒ ExecError }
-import org.openmole.gui.ext.data._
-import org.openmole.gui.client.core.alert.{ BannerAlert, BannerLevel }
-import org.openmole.gui.client.core.files.TreeNodeTabs
-import org.openmole.gui.client.tool.OMTags
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.client.Utils
-import org.openmole.gui.ext.data.ExecutionInfo.Failed
-import org.scalajs.dom.raw.{ HTMLDivElement, HTMLElement, HTMLSpanElement }
-import rx._
-import scaladget.bootstrapnative.Table.{ BSTableStyle, FixedCell, ReactiveRow, SubRow, VarCell }
+import org.openmole.gui.shared.data.ErrorData
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.core.files.{OMSContent, TabContent}
+import org.openmole.gui.client.tool.{Component, OMTags}
+import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
+import com.raquo.laminar.api.L.{*, given}
+import com.raquo.laminar.api.features.unitArrows
+import com.raquo.laminar.api.Laminar
+import org.openmole.gui.client.core.Panels.ExpandablePanel
+import org.openmole.gui.client.ext.ClientUtil
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.ErrorData.stackTrace
 
-import concurrent.duration._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import scaladget.bootstrapnative.bsn.ScrollableTextArea.BottomScroll
+import concurrent.duration.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 
-object ExecutionPanel {
+object ExecutionPanel:
+  object ExecutionDetails:
+    object State:
+      def apply(info: ExecutionState) =
+        info match
+          case f: ExecutionState.Failed => State.failed(!f.clean)
+          case _: ExecutionState.Running => State.running
+          case f: ExecutionState.Canceled => State.canceled(!f.clean)
+          case f: ExecutionState.Finished => State.completed(!f.clean)
+          case _: ExecutionState.Preparing => State.preparing
 
-  sealed trait JobView
+      def toString(s: State) =
+        s match
+          case State.preparing => "preparing"
+          case State.running => "running"
+          case State.completed(true) => "cleaning"
+          case State.completed(false) => "completed"
+          case State.failed(true) => "cleaning"
+          case State.failed(false) => "failed"
+          case State.canceled(true) => "cleaning"
+          case State.canceled(false) => "canceled"
 
-  object CapsuleView extends JobView
+      def isFailedOrCanceled(state: State) =
+        state match
+          case (_: State.canceled) | (_: State.failed) => true
+          case _ => false
 
-  object EnvironmentView extends JobView
-
-  sealed trait Sub
-
-  object SubScript extends Sub
-
-  object SubOutput extends Sub
-
-  object SubCompile extends Sub
-
-  object SubEnvironment extends Sub
-
-  implicit def idToExecutionID(id: scaladget.tools.ID): ExecutionId = ExecutionId(id)
-
-}
-
-import ExecutionPanel._
-
-class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Unit, bannerAlert: BannerAlert) {
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
-
-  case class ExInfo(id: ExecutionId, info: Var[ExecutionInfo])
-
-  val staticInfo: Var[Map[ExecutionId, StaticExecutionInfo]] = Var(Map())
-  val executionInfo: Var[Map[ExecutionId, ExecutionInfo]] = Var(Map())
-
-  val outputInfo: Var[Seq[OutputStreamData]] = Var(Seq())
-  val jobTables: Var[Map[ExecutionId, JobTable]] = Var(Map())
-
-  val executionsDisplayedInBanner: Var[Set[ExecutionId]] = Var(Set())
-
-  val timerOn = Var(false)
-
-  val updating = new AtomicBoolean(false)
-
-  case class SubRowPanels(
-    script:      Rx[TypedTag[HTMLElement]],
-    output:      Rx[TypedTag[HTMLElement]],
-    failedStack: Rx[TypedTag[HTMLElement]],
-    environment: Rx[TypedTag[HTMLElement]])
-
-  val emptySubRowPanel = SubRowPanels(Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("")), Rx(tags.div("")))
-
-  val subRows: Var[Map[ExecutionId, SubRowPanels]] = Var(Map())
-  val expanded: Var[Map[ExecutionId, Option[Sub]]] = Var(Map())
-  val subDiv: Var[Map[ExecutionId, Rx[TypedTag[HTMLElement]]]] = Var(Map())
-
-  def subRowPanel(executionId: ExecutionId, srp: SubRowPanels, sub: Sub) = {
-    subDiv.update(subDiv.now.updated(
-      executionId,
-      sub match {
-        case SubScript      ⇒ srp.script
-        case SubOutput      ⇒ srp.output
-        case SubCompile     ⇒ srp.failedStack
-        case SubEnvironment ⇒ srp.environment
-      }
-
-    ))
-  }
-
-  def currentSub(id: ExecutionId) = expanded.now.get(id).flatten
-
-  def subLink(s: Sub, id: ExecutionId, name: String = "", glyphicon: Glyphicon = emptyMod, defaultModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := WHITE), selectedModifier: ModifierSeq = Seq(scalatags.JsDom.all.color := BLUE, fontWeight := "bold")) =
-    tags.span(Rx {
-      tags.span(glyphicon, pointer,
-        {
-          if (expanded().get(id).flatten == Some(s)) selectedModifier
-          else defaultModifier
-        },
-        onclick := { () ⇒
-          subRows.now.get(id).foreach { srp ⇒
-            subRowPanel(id, srp, s)
-          }
-
-          expanded() = expanded.now.updated(id, currentSub(id) match {
-            case Some(ss: Sub) ⇒
-              if (ss == s) None
-              else Some(s)
-            case _ ⇒ Some(s)
-          })
-
-        })(name)
-    }
-    )
-
-  def execTextArea(content: String): TypedTag[HTMLElement] = textarea(content, height := "300px", width := "100%", scalatags.JsDom.all.color := "#222")
-
-  def execTextArea(content: Rx[String]): TypedTag[HTMLElement] = {
-    val st = scrollableText(content.now, BottomScroll)
-    content.trigger {
-      st.setContent(content.now)
-      st.doScroll
-    }
-    div(st.sRender)
-  }
-
-  lazy val executionTable = scaladget.bootstrapnative.Table(
-    for {
-      execMap ← executionInfo
-      staticInf ← staticInfo
-    } yield {
-      execMap.toSeq.sortBy(e ⇒ staticInf(e._1).startDate).map {
-        case (execID, info) ⇒
-          val duration: Duration = (info.duration milliseconds)
-          val h = (duration).toHours
-          val m = ((duration) - (h hours)).toMinutes
-          val s = (duration - (h hours) - (m minutes)).toSeconds
-
-          val durationString =
-            s"""${
-              h.formatted("%d")
-            }:${
-              m.formatted("%02d")
-            }:${
-              s.formatted("%02d")
-            }"""
-
-          val (details, execStatus) = info match {
-            case f: ExecutionInfo.Failed ⇒
-              f.error match {
-                case ce: CompilationErrorData ⇒ setEditorErrors(staticInfo.now(execID).path, ce.errors)
-                case _                        ⇒
-              }
-              addToBanner(execID, failedDiv(execID), BannerLevel.Critical)
-              (ExecutionDetails("0", 0, Some(f.error), f.environmentStates), (if (!f.clean) "cleaning" else info.state))
-            case f: ExecutionInfo.Finished ⇒
-              addToBanner(execID, succesDiv(execID), BannerLevel.Regular)
-              (ExecutionDetails(ratio(f.completed, f.running, f.ready), f.running, envStates = f.environmentStates), (if (!f.clean) "cleaning" else info.state))
-            case r: ExecutionInfo.Running ⇒
-              setEditorErrors(staticInfo.now(execID).path, Seq())
-              (ExecutionDetails(ratio(r.completed, r.running, r.ready), r.running, envStates = r.environmentStates), info.state)
-            case c: ExecutionInfo.Canceled ⇒
-              hasBeenDisplayed(execID)
-              (ExecutionDetails("0", 0, envStates = c.environmentStates), (if (!c.clean) "cleaning" else info.state))
-            case r: ExecutionInfo.Compiling ⇒
-              (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
-            case r: ExecutionInfo.Preparing ⇒ (ExecutionDetails("0", 0, envStates = r.environmentStates), info.state)
-          }
-
-          val srp =
-            SubRowPanels(
-              staticInfo.map { si ⇒ execTextArea(si(execID).script)(padding := 15, fontSize := "14px") },
-              Rx(execTextArea(outputInfo.map { oi ⇒ oi.find(_.id == execID).map { _.output }.getOrElse("") })),
-              Rx(execTextArea(details.error.map(ExecError.stackTrace).getOrElse(""))(padding := 15, fontSize := "14px", monospace)),
-              jobTable(execID).render
-            )
-
-          subRows() = subRows.now.updated(execID, srp)
-
-          currentSub(execID) match {
-            case Some(SubOutput) ⇒
-              expanded.now.get(execID).flatten.foreach { sub ⇒
-                subRowPanel(execID, srp, sub)
-              }
-            case _ ⇒
-          }
-          ReactiveRow(
-            execID.id,
-            Seq(
-              VarCell(tags.span(subLink(SubScript, execID, staticInf(execID).path.name).tooltip("Original script")), 0),
-              VarCell(tags.span(tags.span(Utils.longToDate(staticInf(execID).startDate)).tooltip("Starting time")), 1),
-              VarCell(tags.span(glyphAndText(glyph_flash, details.running.toString).tooltip("Running jobs")), 2),
-              VarCell(tags.span(glyphAndText(glyph_flag, details.ratio.toString).tooltip("Finished/Total jobs")), 3),
-              VarCell(tags.span(tags.span(durationString).tooltip("Execution time")), 4),
-              VarCell(tags.span(subLink(SubCompile, execID, execStatus, defaultModifier = executionState(info)).tooltip("Execution state")), 5),
-              VarCell(tags.span(subLink(SubEnvironment, execID, "Executions").tooltip("Computation environment details")), 6),
-              VarCell(tags.span(subLink(SubOutput, execID, glyphicon = OMTags.glyph_eye_open).tooltip("Hook display & standard output")), 7),
-              FixedCell(tags.span(tags.span(glyph_remove +++ ms("removeExecution"), onclick := {
-                () ⇒
-                  cancelExecution(execID)
-              }).tooltip("Cancel execution")), 8),
-              FixedCell(tags.span(tags.span(glyph_trash +++ ms("removeExecution"), onclick := {
-                () ⇒
-                  removeExecution(execID)
-              }).tooltip("Trash execution")), 9)
-            ))
-      }.toSeq
-    },
-    subRow = Some((i: scaladget.tools.ID) ⇒
-      SubRow(
-        subDiv.flatMap {
-          _.getOrElse(ExecutionId(i), Rx {
-            div("")
-          })
-        },
-        expanded.map {
-          _.get(ExecutionId(i)).flatten.isDefined
-        }
-      )
-    ),
-    bsTableStyle = BSTableStyle(tableStyle = inverse_table)
-  )
-
-  def setTimerOn = {
-    updating.set(false)
-    timerOn() = true
-  }
-
-  def setTimerOff = {
-    timerOn() = false
-  }
-
-  def updateExecutionInfo: Unit = {
-
-    def delay = {
-      updating.set(false)
-      setTimeout(5000) {
-        Tooltip.cleanAll
-        updateExecutionInfo
-      }
-    }
-
-    if (updating.compareAndSet(false, true)) {
-      Post()[Api].allStates(200).call().andThen {
-        case Success((executionInfos, runningOutputData)) ⇒
-          executionInfo() = executionInfos.toMap
-          outputInfo() = runningOutputData
-          if (timerOn.now) delay
-        case Failure(_) ⇒ delay
-      }
-    }
-  }
-
-  def updateStaticInfos = Post()[Api].staticInfos.call().foreach {
-    s ⇒
-      staticInfo() = s.toMap
-      setTimeout(0) {
-        updateExecutionInfo
-      }
-  }
+    enum State:
+      case preparing, running
+      case completed(cleaning: Boolean) extends State
+      case failed(cleaning: Boolean) extends State
+      case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-    ratio:     String,
-    running:   Long,
-    error:     Option[ExecError]     = None,
+    path: SafePath,
+    script: String,
+    state: ExecutionDetails.State,
+    startDate: Long,
+    duration: Long,
+    executionTime: Long,
+    ratio: String,
+    running: Long,
+    error: Option[ErrorData] = None,
     envStates: Seq[EnvironmentState] = Seq(),
-    outputs:   String                = ""
-  )
+    output: String = "")
 
-  def jobTable(id: ExecutionId) = {
-    val jTable = new JobTable(id, this)
-    jobTables() = jobTables.now.updated(id, jTable)
-    jTable
-  }
+  //  type Statics = Map[ExecutionId, StaticExecutionInfo]
+  type Executions = Map[ExecutionId, ExecutionDetails]
+
+  def open(using api: ServerAPI, path: BasePath, panels: Panels) =
+    panels.expandTo(panels.executionPanel.render, 4)
+
+  enum Expand:
+    case Console, Script, ErrorLog, Computing
+
+
+class ExecutionPanel:
+
+  import ExecutionPanel.*
+
+  val currentOpenSimulation: Var[Option[ExecutionId]] = Var(None)
+
+  val rowFlex = Seq(display.flex, flexDirection.row, alignItems.center)
+  val columnFlex = Seq(display.flex, flexDirection.column, justifyContent.flexStart)
+
+  val showDurationOnCores = Var(false)
+  val showExpander: Var[Option[Expand]] = Var(None)
+  val showControls = Var(false)
+  val showEvironmentControls = Var(false)
+  val details: Var[Executions] = Var(Map())
+
+  def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
+    import ExecutionPanel.ExecutionDetails.State
+    def userCapsuleState(c: Seq[CapsuleExecution]) =
+      val ready = c.map(c => c.statuses.ready * c.userCardinality).sum
+      val running = c.map(c => c.statuses.running* c.userCardinality).sum
+      val completed = c.map(c => c.statuses.completed * c.userCardinality).sum
+      (ready, running, completed)
+
+    exec.state match
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Finished ⇒
+        val (ready, running, completed) = userCapsuleState(f.capsules)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = f.environmentStates, exec.output)
+      case r: ExecutionState.Running ⇒
+        val (ready, running, completed) = userCapsuleState(r.capsules)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates, exec.output)
+      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
+      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
+
+
+  def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
+
+
+  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false) =
+    div(columnFlex,
+      div(cls := "contextBlock",
+        if (!alwaysOpaque) backgroundOpacityCls else emptyMod,
+        div(info, cls := "info"), div(content, cls := (if !link then "infoContent" else "infoContentLink")))
+    )
+
+  def statusBlock(info: String, content: String) =
+    statusBlockFromDiv(info, div(content, cls := "infoContent"), "statusBlock")
+
+
+  def statusBlockFromDiv(info: String, contentDiv: Div, blockCls: String) =
+    div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv, backgroundOpacityCls))
+
+  def timeToString(simpleTime: Long) =
+    val duration: Duration = (simpleTime milliseconds)
+    val h = (duration).toHours
+    val m = ((duration) - (h hours)).toMinutes
+    val s = (duration - (h hours) - (m minutes)).toSeconds
+
+    s"""${
+      "%d".format(h)
+    }:${
+      "%02d".format(m)
+    }:${
+      "%02d".format(s)
+    }"""
+
+  def durationBlock(simpleTime: Long, executionTime: Long) =
+    div(columnFlex, div(cls := "statusBlock",
+      div(child <-- showDurationOnCores.signal.map { d => if d then "Execution Time" else "Duration" }, cls := "info"),
+      div(child <-- showDurationOnCores.signal.map { d => if d then timeToString(executionTime) else timeToString(simpleTime) }, cls := "infoContentLink")),
+      backgroundOpacityCls,
+      onClick --> { _ => showDurationOnCores.update(!_) },
+      cursor.pointer
+    )
+
+  def backgroundOpacityCls =
+    cls.toggle("silentBlock") <-- showExpander.signal.map { _ != None }
+
+  def backgroundOpacityCls(expand: Expand) =
+    cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
+
+  def showHideBlock(expand: Expand, title: String, messageWhenClosed: String, messageWhenOpen: String) =
+    div(columnFlex,
+      div(cls := "statusBlock", backgroundOpacityCls(expand),
+        div(title, cls := "info"),
+        div(child <--
+          showExpander.signal.map:
+            case Some(_) => messageWhenOpen
+            case None => messageWhenClosed
+          ,
+          cls := "infoContentLink"
+        )
+      ),
+      onClick -->
+        showExpander.update:
+          case Some(e) if e == expand => None
+          case _ => Some(expand)
+      ,
+      cursor.pointer
+    )
+
+  def simulationStatusBlock(state: ExecutionDetails.State) =
+    div(columnFlex,
+      div(cls := "statusBlockNoColor",
+        div("Status", cls := "info"),
+        div(
+          ExecutionDetails.State.toString(state).capitalize,
+          cls := (state match
+            case ExecutionDetails.State.failed(_) => "infoContentLink"
+            case _ => "infoContent")
+        ),
+        state match
+          case ExecutionDetails.State.failed(_) =>
+            onClick -->
+              showExpander.update:
+                case Some(Expand.ErrorLog) => None
+                case _ => Some(Expand.ErrorLog)
+          case _ => emptyMod
+            ,
+          state match
+          case ExecutionDetails.State.failed(_) => cursor.pointer
+          case _ => emptyMod
+      )
+    )
+
+  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
+    child <-- showControls.signal.map: c =>
+      if c && state != ExecutionDetails.State.preparing
+      then
+        div(display.flex, flexDirection.column, alignItems.center,
+          button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
+          button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
+        )
+      else div()
+  )
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${
     completed
@@ -302,82 +221,216 @@ class ExecutionPanel(setEditorErrors: (SafePath, Seq[ErrorWithLocation]) ⇒ Uni
     completed + running + ready
   }"
 
-  def glyphAndText(mod: ModifierSeq, text: String) = tags.div(
-    tags.span(mod),
-    badge(s" $text", Seq(backgroundColor := WHITE, scalatags.JsDom.all.color := DARK_GREY))
-  )
-
-  def hasBeenDisplayed(id: ExecutionId) = executionsDisplayedInBanner() = (executionsDisplayedInBanner.now + id)
-
-  def addToBanner(id: ExecutionId, message: TypedTag[HTMLDivElement], level: BannerLevel) = {
-    if (!executionsDisplayedInBanner.now.contains(id)) {
-      bannerAlert.registerDiv(message, level)
-      hasBeenDisplayed(id)
-    }
-  }
-
-  def failedDiv(id: ExecutionId) = div(
-    s"Your simulation ${
-      staticInfo.now(id).path.name
-    } ", a("failed", bold(WHITE) +++ pointer, onclick := {
-      () ⇒
-        bannerAlert.clear
-        dialog.show
-    })
-  )
-
-  def succesDiv(id: ExecutionId) = div(
-    s"Your simulation ${
-      staticInfo.now(id).path.name
-    } has ", a("finished", bold(WHITE) +++ pointer, onclick := {
-      () ⇒
-        bannerAlert.clear
-        dialog.show
-    })
-  )
-
-  def cancelExecution(id: ExecutionId) = {
-    // setIDTabInStandBy(id)
-    Post()[Api].cancelExecution(id).call().foreach {
-      r ⇒
-        updateExecutionInfo
-    }
-  }
-
-  def removeExecution(id: ExecutionId) = {
-    Post()[Api].removeExecution(id).call().foreach {
-      r ⇒
-        updateExecutionInfo
-    }
-    executionsDisplayedInBanner() = executionsDisplayedInBanner.now - id
-  }
-
-  val dialog = ModalDialog(
-    omsheet.panelWidth(92),
-    onopen = () ⇒ {
-      setTimerOn
-      updateStaticInfos
-    },
-    onclose = () ⇒ {
-      setTimerOff
-      Tooltip.cleanAll
-    }
-  )
-
-  dialog.header(
-    div(height := 55)(
-      b("Executions")
+  def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
+    div(rowFlex, justifyContent.center,
+      showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
+      contextBlock("Start time", ClientUtil.longToDate(details.startDate)),
+      //contextBlock("Method", "???"),
+      durationBlock(details.duration, details.executionTime),
+      statusBlock("Running", details.running.toString),
+      statusBlock("Completed", details.ratio),
+      simulationStatusBlock(details.state).amend(backgroundColor := statusColor(details.state), backgroundOpacityCls(Expand.ErrorLog)),
+      showHideBlock(Expand.Console, "Standard output", "Show", "Hide"),
+      showHideBlock(Expand.Computing, "Computing", "Show", "Hide"),
+      if details.state != ExecutionDetails.State.preparing then div(cls := "bi-three-dots-vertical execControls", onClick --> { _ => showControls.update(!_) }) else emptyMod,
+      controls(id, details.state, cancel, remove)
     )
-  )
 
-  dialog.body(
-    tags.div(ms("executionTable"))(
-      executionTable.render
+  private def displaySize(size: Long, readable: String, operations: Int) =
+    if (size > 0) s"$operations ($readable)" else s"$operations"
+
+  def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
+
+  def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
+    import ExecutionPanel.ExecutionDetails.State
+    status match
+      case State.completed(_) => "#00810a"
+      case State.failed(_) => "#c8102e"
+      case State.canceled(_) => "#d14905"
+      case State.preparing => "#f1c345"
+      case State.running => "#a5be21"
+
+
+  def simulationBlock(executionId: ExecutionId, executionInfo: ExecutionDetails) =
+    div(rowFlex, justifyContent.center, alignItems.center,
+      cls := "simulationInfo",
+      cls.toggle("statusOpenSim") <-- currentOpenSimulation.signal.map { os => os == Some(executionId) },
+      div("", cls := "simulationID", backgroundColor := statusColor(executionInfo.state)),
+      div(executionInfo.path.nameWithoutExtension),
+      cursor.pointer,
+      onClick -->
+        currentOpenSimulation.update:
+          case None => Some(executionId)
+          case Some(x: ExecutionId) if x != executionId => Some(executionId)
+          case _ => None
     )
-  )
 
-  dialog.footer(
-    ModalDialog.closeButton(dialog, btn_default, "Close")
-  )
+  lazy val autoRemoveFailed = Component.Switch("remove failed", true, "autoCleanExecSwitch")
 
-}
+  def render(using panels: Panels, api: ServerAPI, path: BasePath) =
+    def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
+      import ExecutionPanel.ExecutionDetails.State
+      val (ids, cleanIds) =
+        if autoRemoveFailed.isChecked
+        then
+          val idsForPath =
+            execs.groupBy(_._2.path).toSeq
+              .map { (k, v) => k -> v.toSeq.sortBy(x => x._2.startDate) }
+              .map { (_, t) => t.map(_._1) }
+
+          idsForPath.foldLeft((Seq[ExecutionId](), Seq[ExecutionId]())): (s, execIds) =>
+            val (failedOrCanceled, otherStates) = execIds.partition(i => State.isFailedOrCanceled(execs(i).state))
+            val (toBeCleaned, toBeKept) = (failedOrCanceled.dropRight(1), failedOrCanceled.takeRight(1))
+            (s._1 ++ otherStates ++ toBeKept, s._2 ++ toBeCleaned)
+
+        else (execs.map(_._1).toSeq, Seq())
+
+      (ids.map(id => id -> execs(id)).toMap, cleanIds)
+
+
+    val forceUpdate = Var(0)
+    @volatile var queryingState = false
+
+    def triggerStateUpdate = forceUpdate.update(_ + 1)
+
+    def queryState =
+      queryingState = true
+      try for executionData <- api.executionState(1000) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
+      finally queryingState = false
+
+    def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
+      val p = scala.concurrent.Promise[Unit]()
+      setTimeout(milliseconds) { p.success(()) }
+      p.future
+
+
+    val initialDelay = Signal.fromFuture(delay(1000))
+    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
+
+
+    def jobs(envStates: Seq[EnvironmentState]) =
+      div(columnFlex, marginTop := "20px",
+        for
+          e <- envStates
+        yield jobRow(e)
+      )
+
+    def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
+      OMSContent.setError(executionDetails.path, executionDetails.error)
+      elementTable()
+        .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(executionDetails), showExpander.signal.map(_.isDefined))
+        .unshowSelection
+        .render.render.amend(idAttr := "exec")
+
+    def envErrorLevelToColor(level: ErrorStateLevel) =
+      level match
+        case ErrorStateLevel.Error => "#c8102e"
+        case _ => "#555"
+
+
+    def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
+      child <-- showEvironmentControls.signal.map: c =>
+        if c
+        then
+          div(display.flex, flexDirection.column, alignItems.center,
+            button("Clear", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
+          )
+        else div()
+    )
+
+
+
+    def jobRow(e: EnvironmentState) =
+      val openEnvironmentErrors: Var[Boolean] = Var(false)
+
+      def cleanEnvironmentErrors(id: EnvironmentId) =
+        api.clearEnvironmentError(id).andThen: _ =>
+          showExpander.set(None)
+          showExpander.set(Some(Expand.Computing))
+
+      div(columnFlex,
+        div(rowFlex, justifyContent.center,
+          contextBlock("Resource", e.taskName, true).amend(width := "180"),
+          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
+          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Downloads", displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
+          contextBlock("Submitted", e.submitted.toString, true),
+          contextBlock("Running", e.running.toString, true),
+          contextBlock("Finished", e.done.toString, true),
+          contextBlock("Failed", e.failed.toString, true),
+          contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
+            onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
+          div(cls := "bi-three-dots-vertical execControls", onClick --> showEvironmentControls.update(!_)),
+          environmentControls(e.envId, cleanEnvironmentErrors),
+        ),
+        child <-- openEnvironmentErrors.signal.map: opened =>
+          if opened
+          then
+            div(width := "100%", height := "200px",
+              overflow.scroll,
+              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 200)).map:
+                case Some(ee) =>
+                  val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
+                  errors.zipWithIndex.map: (e, i) =>
+                    div(flexRow,
+                      cls := "docEntry",
+                      margin := "0 4 0 3",
+                      backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
+                      div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
+                      a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
+                      div(cls := "badgeOM", e.level.name, backgroundColor := envErrorLevelToColor(e.level))
+                    ).expandOnclick(
+                      div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.stack)))
+                    )
+                case None => Seq()
+            )
+          else div()
+      )
+
+    def expander(details: ExecutionDetails) =
+      div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
+        child <-- showExpander.signal.map:
+          case Some(Expand.Script) => div(execTextArea(details.script))
+          case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
+          case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
+          case Some(Expand.Computing) => jobs(details.envStates)
+          case None => div()
+      )
+
+    div(
+      columnFlex, width := "100%", marginTop := "20",
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> panels.closeExpandable),
+      (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable -->
+        Observer: _ =>
+          if !queryingState
+          then
+            queryState.foreach: allDetails =>
+              val (d, toClean) = filterExecutions(allDetails)
+              toClean.foreach(api.removeExecution)
+              details.set(d)
+      ,
+      children <--
+        (details.signal combineWith currentOpenSimulation.signal).map: (details, id) =>
+          Seq(
+            div(rowFlex, justifyContent.center,
+              details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
+            ),
+            autoRemoveFailed.element,
+            div(
+              id.map: idValue =>
+                details.get(idValue) match
+                  case Some(st) =>
+                    def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+                    def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
+
+                    div(buildExecution(idValue, st, cancel, remove))
+                  case None => div()
+            )
+          )
+        ,
+      showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
+      currentOpenSimulation.toObservable -->
+        Observer: _ =>
+          showControls.set(false)
+          showExpander.set(None)
+    )

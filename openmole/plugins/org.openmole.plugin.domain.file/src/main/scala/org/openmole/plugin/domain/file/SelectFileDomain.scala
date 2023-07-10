@@ -21,7 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 import cats.implicits._
-import org.openmole.core.workflow.tools.FileList
+import org.openmole.core.workflow.tools.FileFromContext
 
 object SelectFileDomain {
 
@@ -32,7 +32,7 @@ object SelectFileDomain {
       domain.provider.validate
     )
 
-  def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileList(base, path))
+  def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileFromContext(base, path))
 }
 
 class SelectFileDomain(val provider: FromContext[File]) {

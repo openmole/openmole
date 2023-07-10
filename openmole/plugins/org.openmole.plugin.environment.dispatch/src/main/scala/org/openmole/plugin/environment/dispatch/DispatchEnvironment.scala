@@ -3,10 +3,9 @@ package org.openmole.plugin.environment.dispatch
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
-import org.openmole.core.workflow.execution.ExecutionState
+import org.openmole.core.workflow.execution.{ExceptionEvent, ExecutionState}
 import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, JobId }
-import org.openmole.core.workflow.tools.ExceptionEvent
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
 import org.openmole.core.replication.ReplicaCatalog
@@ -19,7 +18,7 @@ object DispatchEnvironment {
   val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
 
   object DestinationProvider {
-    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]) = DestinationProvider(on.on, on.value)
+    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]): DestinationProvider = DestinationProvider(on.on, on.value)
   }
 
   case class DestinationProvider(environment: EnvironmentProvider, slot: Int)

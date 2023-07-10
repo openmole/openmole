@@ -6,14 +6,13 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.storage.EnvironmentStorage
 import org.openmole.tool.cache.TimeCache
 
-object EGIJobService {
+object EGIJobService:
 
   def apply(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]) =
     new EGIJobService(diracService, environment)
 
-}
 
-class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]) {
+class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_]):
 
   import environment._
   import interpreters._
@@ -51,20 +50,20 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
   }
 
   lazy val jobStateCache = TimeCache { () ⇒
-    val states = accessControl { gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup)) }
+    // FIXME enable again with semaphore with priority
+    val states = gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup))
+    //val states = accessControl { gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup)) }
     states.toMap -> preference(EGIEnvironment.JobGroupRefreshInterval)
   }
 
-  def state(id: gridscale.dirac.JobID) = {
+  def state(id: gridscale.dirac.JobID) =
     val state = jobStateCache().getOrElse(id.id, throw new InternalProcessingError(s"Job ${id.id} not found in group ${diracJobGroup} of DIRAC server."))
     org.openmole.plugin.environment.gridscale.GridScaleJobService.translateStatus(state)
-  }
 
-  def delete(id: gridscale.dirac.JobID) = {
+  def delete(id: gridscale.dirac.JobID) =
     accessControl { gridscale.dirac.delete(diracService, tokenCache(), id) }
-  }
 
-  def stdOutErr(id: gridscale.dirac.JobID) = {
+  def stdOutErr(id: gridscale.dirac.JobID) =
     newFile.withTmpDir { tmpDir ⇒
       import org.openmole.tool.file._
       tmpDir.mkdirs()
@@ -80,7 +79,6 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
 
       (stdOut, stdErr)
     }
-  }
 
   lazy val accessControl = AccessControl(preference(EGIEnvironment.ConnectionsToDIRAC))
-}
+

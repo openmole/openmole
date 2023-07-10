@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.task.external
 
-import monocle.macros.Lenses
 import org.openmole.core.tools.service.OS
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
@@ -65,7 +64,7 @@ object External {
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
 
-  def validate(external: External): Validate = {
+  def validate(external: External): Validate =
     def resourceExists(resource: External.Resource) = Validate {
       if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
     }
@@ -76,7 +75,6 @@ object External {
       external.outputFiles.flatMap(_.origin.validate) ++
       external.resources.flatMap(_.destination.validate) ++
       external.resources.flatMap(resourceExists)
-  }
 
   protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map {
@@ -84,9 +82,9 @@ object External {
     }
 
   protected def listInputFileArray(inputFileArrays: Vector[InputFileArray], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[Array[File]], Seq[DeployedFile])] =
-    for {
+    for
       ifa ← inputFileArrays
-    } yield {
+    yield
       (
         ifa.prototype,
         context(ifa.prototype).zipWithIndex.map {
@@ -94,49 +92,41 @@ object External {
             DeployedFile(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, deployedFileType = DeployedFileType.InputFile)
         }.toSeq
       )
-    }
 
-  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] = {
+  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] =
     val byLocation =
-      resources groupBy {
-        case Resource(_, name, _, _) ⇒ resolver(name.from(context)).getCanonicalPath
-      }
+      resources.zipWithIndex.groupBy: (resource, _) ⇒
+        resolver(resource.destination.from(context)).getCanonicalPath
 
     val selectedOS =
-      byLocation.toList flatMap {
-        case (_, values) ⇒ values.find { _.os.compatible }
-      }
+      byLocation.toList flatMap: (_, values) ⇒
+        values.find { _._1.os.compatible }
 
-    selectedOS.map {
-      case Resource(file, name, link, _) ⇒ DeployedFile(file, name.from(context), link, deployedFileType = DeployedFileType.Resource)
-    }
-  }
+    selectedOS.sortBy(_._2).map(_._1).map: resource =>
+       DeployedFile(resource.file, resource.destination.from(context), resource.link, deployedFileType = DeployedFileType.Resource)
 
-  def relativeResolver(workDirectory: File)(filePath: String): File = {
+  def relativeResolver(workDirectory: File)(filePath: String): File =
     def resolved = workDirectory.resolve(filePath)
     resolved.toFile
-  }
 
-  private def copyFile(f: DeployedFile, to: File) = {
+  private def copyFile(f: DeployedFile, to: File) =
     to.createParentDirectory
-
-    if (f.link) to.createLinkTo(f.file.getCanonicalFile)
-    else {
+    if f.link
+    then to.createLinkTo(f.file.getCanonicalFile)
+    else
       f.file.realFile.copy(to)
       to.applyRecursive { _.deleteOnExit }
-    }
-  }
 
   private def destination(resolver: PathResolver, f: DeployedFile) = resolver(f.expandedUserPath)
 
   def deployResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    for { f ← listResources(external.resources, context, resolver) } yield {
+    for f ← listResources(external.resources, context, resolver)
+    yield
       val d = destination(resolver, f)
       copyFile(f, d)
-      (f → d)
-    }
+      f → d
 
-  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
+  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) = 
     val (copiedFilesVariable, copiedFilesInfo) =
       listInputFiles(external.inputFiles, context).map {
         case (p, f) ⇒
@@ -158,16 +148,14 @@ object External {
       }.unzip
 
     (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, copiedFilesInfo ++ copiedFilesArrayInfo.flatten)
-  }
 
   def deployInputFilesAndResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     deployAndListInputFiles(external: External, context, resolver)._1
 
-  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = {
+  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = 
     val resourcesFiles = deployResources(external, context, resolver)
     val (newContext, inputFilesInfo) = deployInputFiles(external, context, resolver)
     (newContext, resourcesFiles ++ inputFilesInfo)
-  }
 
   protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     outputFiles.map {
@@ -193,10 +181,11 @@ object External {
     val fileOutputs = outputFileVariables(outputFiles, context, resolver)
     val allFiles = (fileOutputs ++ contextFiles(outputs, context)).distinct
 
-    for {
+    for
       f ← allFiles
       if !f.value.exists
-    } throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
+    do
+      throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
 
     // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =
@@ -222,12 +211,11 @@ object External {
       Variable.copy(v)(value = movedFile)
     }
   }
-
 }
 
 import org.openmole.plugin.task.external.External._
 
-@Lenses case class External(
+case class External(
   inputFileArrays: Vector[External.InputFileArray] = Vector.empty,
   inputFiles:      Vector[External.InputFile]      = Vector.empty,
   outputFiles:     Vector[External.OutputFile]     = Vector.empty,

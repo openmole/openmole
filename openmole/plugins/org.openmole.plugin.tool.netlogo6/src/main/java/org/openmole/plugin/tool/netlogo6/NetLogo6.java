@@ -40,6 +40,8 @@ public class NetLogo6 implements NetLogo {
 
     private HeadlessWorkspace getWorkspace() {
         if(workspace == null) {
+            // If enabled NetLogo create an http connection that sometime hangs forever, see LibraryInfoDownloader
+            System.setProperty("netlogo.libraries.disabled", "true");
             workspace = HeadlessWorkspace.newInstance();
         }
         return workspace;

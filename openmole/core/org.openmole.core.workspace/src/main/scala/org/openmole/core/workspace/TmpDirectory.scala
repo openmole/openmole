@@ -17,7 +17,7 @@ case class TmpDirectory(directory: File) {
     dir
   }
 
-  def newDir(prefix: String = fixedDir): File = directory.newDir(prefix)
+  def newDir(prefix: String = fixedDir, create: Boolean = false): File = directory.newDirectory(prefix, create = create)
   def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix): File = directory.newFile(prefix, suffix)
   def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T): T = {
     val file = newFile(prefix, postfix)

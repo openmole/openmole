@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.test.TestTask
 import org.scalatest._
 
-class EndExplorationTransitionSpec extends FlatSpec with Matchers {
+class EndExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

@@ -15,175 +15,166 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method
+package org.openmole.plugin.method.directsampling
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import org.openmole.plugin.sampling.combine._
-import org.openmole.plugin.domain.distribution._
-import org.openmole.plugin.domain.modifier._
-import org.openmole.plugin.tool.pattern._
-import org.openmole.plugin.hook.file._
-import org.openmole.plugin.hook.omr._
-import org.openmole.plugin.tool.methoddata._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.format.*
+import org.openmole.plugin.sampling.combine.*
+import org.openmole.plugin.domain.distribution.*
+import org.openmole.plugin.domain.modifier.*
+import org.openmole.plugin.tool.pattern.*
+import org.openmole.plugin.hook.file.*
+import io.circe.*
 
-package object directsampling {
+object AggregationMetaData:
+  def apply(ag: Aggregation) = new AggregationMetaData(ValData(ag.value), ValData(ag.outputVal))
 
-  object DirectSamplingMetadata {
-    def method = "direct sampling"
+case class AggregationMetaData(output: ValData, aggregated: ValData) derives derivation.ConfiguredCodec
 
-    import io.circe._
-    import io.circe.generic.extras.auto._
-    import io.circe.parser._
-    import io.circe.generic.extras.semiauto._
-    import org.openmole.plugin.hook.omr._
 
-    implicit def methodData = MethodData[DirectSamplingMetadata](_ ⇒ DirectSamplingMetadata.method)
-    implicit def metadataEncoder: Encoder[DirectSamplingMetadata] = deriveConfiguredEncoder[DirectSamplingMetadata]
-    implicit def metadataDecoder: Decoder[DirectSamplingMetadata] = deriveConfiguredDecoder[DirectSamplingMetadata]
 
-    case class DirectSampling(sampled: Seq[ValData], aggregation: Option[Seq[Aggregation]], output: Seq[ValData]) extends DirectSamplingMetadata
-    case class Replication(seed: ValData, sample: Int, aggregation: Option[Seq[Aggregation]]) extends DirectSamplingMetadata
+type Aggregation = AggregateTask.AggregateVal[_, _]
 
-    def aggregation(ag: directsampling.Aggregation) = Aggregation(ValData(ag.value), ValData(ag.outputVal))
+object Replication:
+  def methodName = MethodMetaData.name(Replication)
 
-    case class Aggregation(output: ValData, aggregated: ValData)
-  }
+  object Method:
+    case class ReplicationMetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
-  sealed trait DirectSamplingMetadata
+    given MethodMetaData[Method, ReplicationMetaData] =
+      def data(m: Method) =
+        val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
+        ReplicationMetaData(seed = ValData(m.seed), m.sample, aggregation)
 
-  type Aggregation = AggregateTask.AggregateVal[_, _]
+      MethodMetaData[Method, ReplicationMetaData](_ ⇒ methodName, data)
 
-  object Replication {
 
-    case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
+  case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
 
-    implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒ {
-      implicit def defScope = r.scope
+  implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
+    implicit def defScope: DefinitionScope = r.scope
 
-      val aggregateTask: OptionalArgument[DSL] =
-        r.aggregation match {
-          case Seq() ⇒ None
-          case s     ⇒ AggregateTask(s)
-        }
-
-      val s =
-        MapReduce(
-          evaluation = r.evaluation,
-          sampler = r.exploration,
-          aggregation = aggregateTask,
-          wrap = r.wrap
-        )
-
-      DSLContainer(
-        s,
-        method =
-          Method(
-            seed = r.seed,
-            sample = r.sample,
-            aggregation = r.aggregation
-          )
-      )
-    }
-  }
-
-  case class Replication[T: Distribution](
-    evaluation:       DSL,
-    seed:             Val[T],
-    sample:           Int,
-    index:            OptionalArgument[Val[Int]]          = None,
-    distributionSeed: OptionalArgument[FromContext[Long]] = None,
-    aggregation:      Seq[Aggregation]                    = Seq.empty,
-    wrap:             Boolean                             = false,
-    scope:            DefinitionScope                     = "replication"
-  ) {
-    def exploration = {
-      implicit def s = scope
-      index.option match {
-        case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](distributionSeed), sample))
-        case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](distributionSeed), sample)) withIndex index)
+    val aggregateTask: OptionalArgument[DSL] =
+      r.aggregation match {
+        case Seq() ⇒ None
+        case s     ⇒ AggregateTask(s)
       }
-    }
-  }
 
-  implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t) {
-    def hook[F](
-      output:      WritableOutput,
-      values:      Seq[Val[_]]    = Vector.empty,
-      includeSeed: Boolean        = false,
-      format:      F              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[F, DirectSamplingMetadata]): Hooked[M] = {
-      val dsl = method(t)
-      implicit val defScope = dsl.scope
-      val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-      val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
-      val metadata = DirectSamplingMetadata.Replication(seed = ValData(dsl.method.seed), dsl.method.sample, aggregation)
-      Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = metadata))
-    }
-  }
-
-  object DirectSampling {
-    case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
-
-    implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒ {
-      implicit def defScope = m.scope
-
-      val aggregateTask: OptionalArgument[DSL] =
-        m.aggregation match {
-          case Seq() ⇒ None
-          case s     ⇒ AggregateTask(s)
-        }
-
-      val s =
-        MapReduce(
-          evaluation = m.evaluation,
-          sampler = m.explorationTask,
-          condition = m.condition,
-          aggregation = aggregateTask,
-          wrap = m.wrap
-        )
-
-      DSLContainer(
-        s,
-        method =
-          Method(
-            sampled = m.sampled,
-            aggregation = m.aggregation,
-            output = s.outputs
-          )
+    val s =
+      MapReduce(
+        evaluation = r.evaluation,
+        sampler = r.exploration,
+        aggregation = aggregateTask,
+        wrap = r.wrap
       )
 
-    }
-  }
+    DSLContainer(
+      s,
+      method =
+        Method(
+          seed = r.seed,
+          sample = r.sample,
+          aggregation = r.aggregation
+        )
+    )
 
-  case class DirectSampling[S: IsSampling](
-    evaluation:  DSL,
-    sampling:    S,
-    aggregation: Seq[Aggregation] = Seq(),
-    condition:   Condition        = Condition.True,
-    wrap:        Boolean          = false,
-    scope:       DefinitionScope  = "direct sampling") {
+case class Replication[T: Distribution](
+  evaluation:       DSL,
+  seed:             Val[T],
+  sample:           Int,
+  index:            OptionalArgument[Val[Int]]          = None,
+  distributionSeed: OptionalArgument[FromContext[Long]] = None,
+  aggregation:      Seq[Aggregation]                    = Seq.empty,
+  wrap:             Boolean                             = false,
+  scope:            DefinitionScope                     = "replication"
+):
+  def exploration =
+    implicit def s: DefinitionScope = scope
+    index.option match
+      case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
+      case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
 
-    def explorationTask = {
-      implicit def s = scope
-      ExplorationTask(sampling)
-    }
 
-    def sampled = implicitly[IsSampling[S]].apply(sampling).outputs.toSeq
-  }
 
-  implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t) {
-    def hook[F](
-      output: WritableOutput,
-      values: Seq[Val[_]]    = Vector.empty,
-      format: F              = CSVOutputFormat(append = true))(implicit outputFormat: OutputFormat[F, DirectSamplingMetadata]): Hooked[M] = {
-      val dsl = method(t)
-      implicit val defScope = dsl.scope
+implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):
+  def hook[F](
+    output:      WritableOutput,
+    values:      Seq[Val[_]]    = Vector.empty,
+    includeSeed: Boolean        = false,
+    format:      F              = CSVOutputFormat())(using OutputFormat[F, Replication.Method]): Hooked[M] =
+    val dsl = method(t)
+    implicit val defScope: DefinitionScope = dsl.scope
+    val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
+    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = dsl.method, append = true))
 
-      val aggregation = if (dsl.method.aggregation.isEmpty) None else Some(dsl.method.aggregation.map(DirectSamplingMetadata.aggregation))
-      val metadata = DirectSamplingMetadata.DirectSampling(dsl.method.sampled.map(v ⇒ ValData(v)), aggregation, dsl.method.output.map(v ⇒ ValData(v)))
-      def fileName = if (outputFormat.appendable(format)) None else Some("experiment${" + FormattedFileHook.experiment.name + "}")
-      Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = metadata, fileName = fileName))
-    }
-  }
 
-}
+object DirectSampling:
+
+  def methodName = MethodMetaData.name(DirectSampling)
+
+  object Method:
+    given MethodMetaData[Method, Metadata] =
+      def data(m: Method) =
+        val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
+        Metadata(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
+      MethodMetaData(_ ⇒ methodName, data)
+
+    case class Metadata(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData]) derives derivation.ConfiguredCodec
+
+  case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
+
+  implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒
+    implicit def defScope: DefinitionScope = m.scope
+
+    val aggregateTask: OptionalArgument[DSL] =
+      m.aggregation match {
+        case Seq() ⇒ None
+        case s     ⇒ AggregateTask(s)
+      }
+
+    val s =
+      MapReduce(
+        evaluation = m.evaluation,
+        sampler = m.explorationTask,
+        condition = m.condition,
+        aggregation = aggregateTask,
+        wrap = m.wrap
+      )
+
+    DSLContainer(
+      s,
+      method =
+        Method(
+          sampled = m.sampled,
+          aggregation = m.aggregation,
+          output = s.outputs
+        )
+    )
+
+
+case class DirectSampling[S: IsSampling](
+  evaluation:  DSL,
+  sampling:    S,
+  aggregation: Seq[Aggregation] = Seq(),
+  condition:   Condition        = Condition.True,
+  wrap:        Boolean          = false,
+  scope:       DefinitionScope  = "direct sampling"):
+
+  def explorationTask =
+    implicit def s: DefinitionScope = scope
+    ExplorationTask(sampling)
+
+  def sampled = implicitly[IsSampling[S]].apply(sampling).outputs.toSeq
+
+
+implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
+  def hook[F](
+    output: WritableOutput,
+    values: Seq[Val[_]]    = Vector.empty,
+    format: F              = CSVOutputFormat())(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
+    val dsl = method(t)
+    implicit val defScope: DefinitionScope = dsl.scope
+    Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = dsl.method, append = true))
+
+

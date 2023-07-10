@@ -18,7 +18,6 @@
 package org.openmole.modules
 
 import org.openmole.core.module._
-import org.openmole.plugin.task.spatial.SpatialSampling
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
 
@@ -53,7 +52,7 @@ object module {
       ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(org.openmole.plugin.sampling.csv.CSVSampling), sampling),
       ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(org.openmole.plugin.sampling.lhs.LHS), sampling),
       ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(org.openmole.plugin.sampling.quasirandom.SobolSampling), sampling),
-      ModuleEntry("QuasiRandom", "Generate spatial samplings", components(SpatialSampling), sampling),
+      ModuleEntry("QuasiRandom", "Generate spatial samplings", components(org.openmole.plugin.task.spatial.SpatialSampling), sampling),
       ModuleEntry("Evolution", "Explore/calibrate models using evolutionary algorithms", components(org.openmole.plugin.method.evolution.NSGA2), method),
       ModuleEntry("ABC", "Calibrate models using bayesian algorithms", components(org.openmole.plugin.method.abc.ABC), method),
       ModuleEntry("Sensitivity", "Statistical sensitivity analisys", components(org.openmole.plugin.method.sensitivity.SensitivityMorris), method)
@@ -62,14 +61,24 @@ object module {
   def generate(modules: Seq[ModuleEntry], copy: File ⇒ String) = {
     def allFiles = modules.flatMap(_.components)
 
+    case class Copied(name: String, hash: String)
+
     val copied =
-      (for { f ← allFiles.distinct } yield f -> copy(f)).toMap
+      val map =
+        for { f ← allFiles.distinct } yield
+          val h = f.hash().toString
+          f -> Copied(name = copy(f), h)
+      map.toMap
 
     modules.map { m ⇒
       Module(
         m.name,
         m.description,
-        m.components.map(f ⇒ Component(copied(f), f.hash().toString))
+        m.components.map {
+          f ⇒
+            val c = copied(f)
+            Component(c.name, c.hash)
+        }
       )
     }
   }

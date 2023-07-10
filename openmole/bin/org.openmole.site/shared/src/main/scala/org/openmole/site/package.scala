@@ -19,7 +19,7 @@ package org.openmole.site
 
 import scalatags.Text.all._
 
-package object shared {
+object shared {
   lazy val searchDiv = "search-div"
   lazy val searchImg = "search-img"
   lazy val blogposts = "blog-posts"
@@ -88,6 +88,7 @@ package object shared {
     lazy val egi = "http://www.egi.eu/"
     lazy val singularity = "https://sylabs.io/"
     lazy val rcran = "https://cran.r-project.org/"
+    lazy val nodejs = "https://nodejs.org"
 
     // Models
     lazy val simpluDemo = "https://simplu.openmole.org"
@@ -146,6 +147,7 @@ package object shared {
       lazy val paris = "https://www.paris.fr/"
       lazy val ign = "http://www.ign.fr/"
       lazy val ideesrouen = "http://umr-idees.fr/"
+      lazy val trempoline = "https://trempoline.io"
     }
 
     object repo {

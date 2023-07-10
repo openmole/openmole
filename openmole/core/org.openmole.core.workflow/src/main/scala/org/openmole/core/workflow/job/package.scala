@@ -15,9 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow
+package org.openmole.core.workflow.job
 
-package object job {
-  type JobId = Long
-  type State = Byte
-}
+type JobId = Long
+type State = Byte
+

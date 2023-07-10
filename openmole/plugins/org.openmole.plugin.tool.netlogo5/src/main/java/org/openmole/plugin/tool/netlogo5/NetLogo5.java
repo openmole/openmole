@@ -37,6 +37,8 @@ public class NetLogo5 implements NetLogo {
 
     private HeadlessWorkspace getWorkspace() {
         if(workspace == null) {
+            // Just in case same thing as NetLogo 6
+            System.setProperty("netlogo.libraries.disabled", "true");
             workspace = HeadlessWorkspace.newInstance();
         }
         return workspace;

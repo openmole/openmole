@@ -44,7 +44,7 @@ package object module {
 
   import org.json4s._
   import org.json4s.jackson.Serialization
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   def modules(url: String) = Serialization.read[Seq[Module]](http.get(url))
   def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(gridscale.RemotePath.parent(url).get, m))
@@ -57,8 +57,8 @@ package object module {
     val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
     val files = downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map {
       c ⇒
-        val f = dir / gridscale.RemotePath.name(c.component.location)
-        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.location))(_.copy(f))
+        val f = dir / gridscale.RemotePath.name(c.component.name)
+        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.name))(_.copy(f))
         f
     }
     addPluginsFiles(files, true, moduleDirectory)
@@ -68,19 +68,21 @@ package object module {
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
   def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[(File, Throwable)] = synchronized {
-    val destinations = files.map { file ⇒ file → (directory / file.getName) }
+    PluginManager.tryLoad(files).toSeq
 
-    destinations.filter(_._2.exists).toList match {
-      case Nil ⇒
-        val plugins =
-          destinations.map {
-            case (file, dest) ⇒
-              if (!move) file copy dest else file move dest
-              dest
-          }
-        PluginManager.tryLoad(plugins).toSeq
-      case l ⇒
-        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
-    }
+    //    val destinations = files.map { file ⇒ file → (directory / file.getName) }
+    //
+    //    destinations.filter(_._2.exists).toList match {
+    //      case Nil ⇒
+    //        val plugins =
+    //          destinations.map {
+    //            case (file, dest) ⇒
+    //              if (!move) file copy dest else file move dest
+    //              dest
+    //          }
+    //        PluginManager.tryLoad(plugins).toSeq
+    //      case l ⇒
+    //        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
+    //    }
   }
 }

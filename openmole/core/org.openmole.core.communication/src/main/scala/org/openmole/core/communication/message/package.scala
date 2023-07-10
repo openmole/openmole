@@ -32,12 +32,12 @@ import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import util.Try
 import org.openmole.tool.file._
 import org.openmole.tool.hash._
-import org.openmole.tool.tar._
+import org.openmole.tool.archive._
 
 package object message {
 
   object FileMessage {
-    implicit def replicatedFile2FileMessage(r: ReplicatedFile) = FileMessage(r)
+    implicit def replicatedFile2FileMessage(r: ReplicatedFile): FileMessage = FileMessage(r)
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
   }
 
@@ -66,7 +66,7 @@ package object message {
             verify(cache)
 
             val local = localDirectory / replicatedFile.name
-            cache.extract(local)
+            cache.extract(local, archive = ArchiveType.Tar)
             cache.delete
             local.mode = replicatedFile.mode
             local

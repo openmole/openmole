@@ -24,7 +24,7 @@ import scala.ref.WeakReference
 
 class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable {
 
-  override def update: Boolean =
+  override def update(): Boolean =
     fileService.get match {
       case Some(fileService) ⇒
         fileService.deleteEmpty.synchronized {

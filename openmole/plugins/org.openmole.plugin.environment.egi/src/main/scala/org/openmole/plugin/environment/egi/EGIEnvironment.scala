@@ -17,29 +17,30 @@
 
 package org.openmole.plugin.environment.egi
 
-import gridscale.egi._
+import gridscale.egi.*
 import org.openmole.core.communication.storage.TransferOptions
-import org.openmole.core.exception.{ InternalProcessingError, MultipleException }
+import org.openmole.core.db.Replica
+import org.openmole.core.exception.{InternalProcessingError, MultipleException}
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{ Preference, PreferenceLocation }
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workspace.Workspace
-import org.openmole.plugin.environment.batch.environment.{ BatchJobControl, _ }
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.tool.cache._
+import org.openmole.plugin.environment.batch.environment.{BatchJobControl, *}
+import org.openmole.plugin.environment.batch.storage.*
+import org.openmole.tool.cache.*
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.exception._
+import org.openmole.tool.exception.*
 import org.openmole.tool.logger.JavaLogger
-import squants.information._
+import squants.information.*
 import squants.time.Time
-import squants.time.TimeConversions._
+import squants.time.TimeConversions.*
 
 import scala.collection.immutable.TreeSet
-import scala.collection.mutable.{ HashMap, MultiMap, Set }
-import scala.concurrent.{ Await, Future }
+import scala.collection.mutable.{HashMap, MultiMap, Set}
+import scala.concurrent.{Await, Future}
 
 object EGIEnvironment extends JavaLogger {
 
@@ -47,7 +48,9 @@ object EGIEnvironment extends JavaLogger {
   val CACertificatesSite = PreferenceLocation("EGIEnvironment", "CACertificatesSite", Some("https://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/"))
   val CACertificatesCacheTime = PreferenceLocation("EGIEnvironment", "CACertificatesCacheTime", Some(7 days))
   val CACertificatesDownloadTimeOut = PreferenceLocation("EGIEnvironment", "CACertificatesDownloadTimeOut", Some(2 minutes))
-  val VOInformationSite = PreferenceLocation("EGIEnvironment", "VOInformationSite", Some("https://operations-portal.egi.eu/xml/voIDCard/public/all/true"))
+
+  val VOPortalAPIKey = PreferenceLocation("EGIEnvironment", "VOPortalAPIKey", Some("60a6668c7ac56"))
+
   val VOCardDownloadTimeOut = PreferenceLocation("EGIEnvironment", "VOCardDownloadTimeOut", Some(2 minutes))
   val VOCardCacheTime = PreferenceLocation("EGIEnvironment", "VOCardCacheTime", Some(6 hours))
 
@@ -87,7 +90,7 @@ object EGIEnvironment extends JavaLogger {
     Seq(
       "topbdii.grif.fr",
       "bdii.ndgf.org",
-      "lcg-bdii.cern.ch",
+      "lcg-bdii.egi.eu",
       "bdii-fzk.gridka.de",
       "topbdii.egi.cesga.es",
       "egee-bdii.cnaf.infn.it"
@@ -113,7 +116,7 @@ object EGIEnvironment extends JavaLogger {
     var nbRessub = if (jobSize < minOversub) minOversub - jobSize else 0
 
     type ExecutionJobId = collection.immutable.Set[Long]
-    lazy val executionJobsMap: Map[ExecutionJobId, List[BatchExecutionJob]] = jobs.groupBy(_.storedJob.storedMoleJobs.map(_.id).toSet)
+    lazy val executionJobsMap: Map[ExecutionJobId, Seq[BatchExecutionJob]] = jobs.groupBy(_.storedJob.storedMoleJobs.map(_.id).toSet)
 
     if (nbRessub > 0) {
       // Resubmit nbRessub jobs in a fair manner
@@ -201,12 +204,12 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val debug:             Boolean,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services
-)(implicit workspace: Workspace) extends BatchEnvironment { env ⇒
+  implicit val services: BatchEnvironment.Services,
+)(implicit workspace: Workspace) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
 
   import services._
 
-  implicit val interpreters = EGI()
+  implicit val interpreters: EGI.Interpreters = EGI()
   import interpreters._
 
   lazy val proxyCache = TimeCache { () ⇒
@@ -226,7 +229,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   }
 
   override def stop() = {
-    stopped = true
+    state.stopped = true
     storages().map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
     BatchEnvironment.waitJobKilled(this)
   }
@@ -235,7 +238,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
   val storages = Lazy {
-    val webdavStorages = findFirstWorking(bdiis) { b: BDIIServer ⇒ webDAVs(b, voName) }
+    val webdavStorages = findFirstWorking(bdiis) { b ⇒ webDAVs(b, voName) }
 
     if (!webdavStorages.isEmpty) {
       webdavStorages.map { location ⇒
@@ -279,7 +282,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         val usedFilesInfo = usedFiles.map { f ⇒ f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
         val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
 
-        val onStorage = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(implicitly[EnvironmentStorage[WebDavStorage]].id)).groupBy(_.storage)
+        val onStorage: Map[String, Seq[Replica]] = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(implicitly[EnvironmentStorage[WebDavStorage]].id)).groupBy(_.storage)
 
         def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 
@@ -294,7 +297,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         //        val minAvailability = minOption(availablities)
 
         def rate(ss: WebDavStorage) = {
-          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(implicitly[EnvironmentStorage[WebDavStorage]].id(ss), Set.empty).exists(_.hash == info.hash) }.values.map {
+          val sizesOnStorage = usedFilesInfo.filter { case (_, info) ⇒ onStorage.getOrElse(implicitly[EnvironmentStorage[WebDavStorage]].id(ss), Seq.empty).exists(_.hash == info.hash) }.values.map {
             _.size
           }
           val sizeOnStorage = sizesOnStorage.sum

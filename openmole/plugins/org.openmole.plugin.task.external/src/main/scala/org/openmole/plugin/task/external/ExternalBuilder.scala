@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.external
 
-import monocle.Lens
+import monocle.{Lens, Focus}
 import org.openmole.plugin.task.external.External._
 
 /**
@@ -31,10 +31,10 @@ import org.openmole.plugin.task.external.External._
 object ExternalBuilder {
 
   def apply[T](l: Lens[T, External]): ExternalBuilder[T] = new ExternalBuilder[T] {
-    override def inputFiles = l composeLens External.inputFiles
-    override def resources = l composeLens External.resources
-    override def outputFiles = l composeLens External.outputFiles
-    override def inputFileArrays = l composeLens External.inputFileArrays
+    override def inputFiles = l composeLens Focus[External](_.inputFiles)
+    override def resources = l composeLens Focus[External](_.resources)
+    override def outputFiles = l composeLens Focus[External](_.outputFiles)
+    override def inputFileArrays = l composeLens Focus[External](_.inputFileArrays)
   }
 
 }

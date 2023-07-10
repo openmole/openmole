@@ -11,7 +11,7 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class DirectSamplingSpec extends FlatSpec with Matchers {
+class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "Direct sampling" should "transmit explored inputs" in {
@@ -261,6 +261,25 @@ class DirectSamplingSpec extends FlatSpec with Matchers {
 
     (ds hook display): DSL
     (ds hook display hook "/tmp/test.csv"): DSL
+  }
+
+  "Direct samplings" should "accept omr format" in {
+    val l = Val[Double]
+
+    DirectSampling(
+      EmptyTask(),
+      ExplicitSampling(l, Seq(1.0, 2.0))
+    ) hook ("/tmp/test", format = OMROutputFormat())
+  }
+
+  "Replication" should "accept omr format" in {
+    val l = Val[Long]
+
+    Replication(
+      EmptyTask(),
+      seed = l,
+      sample = 10
+    ) hook("/tmp/test", format = OMROutputFormat())
   }
 
 }

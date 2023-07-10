@@ -20,10 +20,11 @@ object ThreadProvider {
 
   class RunClosure(queue: PriorityQueue[Closure]) extends Runnable {
     override def run = {
-      val job = queue.dequeue
+      val job = queue.dequeue()
       job.apply()
     }
   }
+
 
   def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = new ThreadFactory {
     override def newThread(r: Runnable): Thread = {
@@ -44,7 +45,7 @@ class ThreadProvider(poolSize: Int) {
 
   lazy val parentGroup = new ThreadGroup("provider-" + UUID.randomUUID().toString)
 
-  implicit lazy val pool =
+  implicit lazy val pool: ThreadPoolExecutor =
     new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
@@ -61,12 +62,16 @@ class ThreadProvider(poolSize: Int) {
     parentGroup.interrupt()
   }
 
-  def submit(priority: Int)(task: ThreadProvider.Closure) = {
+  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit = {
     taskQueue.enqueue(task, priority)
     pool.submit(new ThreadProvider.RunClosure(taskQueue))
   }
 
   def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
+
+//  def javaSubmit[T](t: => T): java.util.Future[T] =
+//    val callable: Callable[T] = t
+//    pool.submit(callable)
 
   def newThread(runnable: Runnable, groupName: Option[String] = None) = synchronized {
     if (stopped) throw new RuntimeException("Thread provider has been stopped")

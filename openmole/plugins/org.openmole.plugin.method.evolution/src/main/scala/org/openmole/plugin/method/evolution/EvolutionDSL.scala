@@ -24,39 +24,79 @@ import scala.language.higherKinds
 import cats._
 import cats.implicits._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.plugin.method.evolution.data.{ EvolutionMetadata, SaveOption }
 import org.openmole.plugin.task.tools.AssignTask
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern._
 
-object EvolutionWorkflow {
+trait EvolutionMethod[M]:
+  def apply(m: M): EvolutionWorkflow
 
+object EvolutionWorkflow:
   val operatorExploration = 0.1
   val parallelism = 100
 
+  def apply[M](
+    method: M,
+    evaluation: DSL,
+    termination: OMTermination,
+    parallelism: Int = 1,
+    distribution: EvolutionPattern = SteadyState(),
+    suggestion: Seq[Seq[ValueAssignment.Untyped]],
+    scope: DefinitionScope)(using evolutionMethod: EvolutionMethod[M]): DSLContainer[EvolutionWorkflow] =
+    distribution match
+      case s: SteadyState ⇒
+        SteadyStateEvolution(
+          method = method,
+          evaluation = evaluation,
+          parallelism = parallelism,
+          termination = termination,
+          wrap = s.wrap,
+          suggestion = suggestion,
+          scope = scope
+        )
+      case i: Island ⇒
+        val steadyState =
+          SteadyStateEvolution(
+            method = method,
+            evaluation = evaluation,
+            termination = i.termination,
+            parallelism = i.parallelism,
+            wrap = false,
+            suggestion = suggestion,
+            scope = scope
+          )
+
+        IslandEvolution(
+          island = steadyState,
+          parallelism = parallelism,
+          termination = termination,
+          sample = i.sample,
+          scope = scope
+        )
+
+
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
-    (Objectives.onlyExact(objectives), stochastic) match {
+    (Objectives.onlyExact(objectives), stochastic) match
       case (true, None)     ⇒ None
       case (true, Some(s))  ⇒ Some(s)
       case (false, Some(s)) ⇒ Some(s)
       case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
-    }
 
-  def deterministicGAIntegration[AG](
+  def deterministicGAIntegration[AG, VA](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow = {
     val _validate = validate
     new EvolutionWorkflow {
       type MGOAG = AG
 
       def mgoAG = ag
 
-      type V = (Vector[Double], Vector[Int])
+      type V = VA
       type P = Phenotype
 
-      lazy val integration = algorithm
+      val integration = algorithm
 
       def validate = _validate
 
@@ -66,10 +106,8 @@ object EvolutionWorkflow {
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
-        val (cs, is) = operations.genomeValues(g)
-        Genome.toVariables(genome, cs, is, scale = true)
-      }
+      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
+        operations.genomeToVariables(genome)
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
     }
@@ -89,7 +127,7 @@ object EvolutionWorkflow {
       type V = (Vector[Double], Vector[Int])
       type P = Phenotype
 
-      lazy val integration = algorithm
+      val integration = algorithm
 
       def validate = _validate
 
@@ -124,48 +162,6 @@ object EvolutionWorkflow {
   case class AfterGeneration(steps: Long) extends OMTermination
   case class AfterDuration(duration: Time) extends OMTermination
 
-  object EvolutionPattern {
-    def build(
-      algorithm:    EvolutionWorkflow,
-      evaluation:   DSL,
-      termination:  OMTermination,
-      parallelism:  Int                          = 1,
-      distribution: EvolutionPattern             = SteadyState(),
-      suggestion:   Seq[Seq[ValueAssignment[_]]],
-      scope:        DefinitionScope): DSLContainer[EvolutionWorkflow] =
-      distribution match {
-        case s: SteadyState ⇒
-          SteadyStateEvolution(
-            algorithm = algorithm,
-            evaluation = evaluation,
-            parallelism = parallelism,
-            termination = termination,
-            wrap = s.wrap,
-            suggestion = suggestion,
-            scope = scope
-          )
-        case i: Island ⇒
-          val steadyState =
-            SteadyStateEvolution(
-              algorithm = algorithm,
-              evaluation = evaluation,
-              termination = i.termination,
-              parallelism = i.parallelism,
-              wrap = false,
-              suggestion = suggestion,
-              scope = scope
-            )
-
-          IslandEvolution(
-            island = steadyState,
-            parallelism = parallelism,
-            termination = termination,
-            sample = i.sample,
-            scope = scope
-          )
-      }
-  }
-
   sealed trait EvolutionPattern
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
@@ -178,22 +174,22 @@ object EvolutionWorkflow {
       keepAll:        Boolean                = false,
       includeOutputs: Boolean                = true,
       filter:         Seq[Val[_]]            = Vector.empty,
-      format:         F                      = CSVOutputFormat(unrollArray = true))(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
+      format:         F                      = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] = {
       implicit val defScope = dsl.scope
       dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter, format = format))
     }
   }
 
-  def SteadyStateEvolution(
-    algorithm:   EvolutionWorkflow,
+  def SteadyStateEvolution[M](
+    method:      M,
     evaluation:  DSL,
     termination: OMTermination,
     parallelism: Int                          = 1,
-    suggestion:  Seq[Seq[ValueAssignment[_]]] = Seq.empty,
+    suggestion:  Seq[Seq[ValueAssignment.Untyped]] = Seq.empty,
     wrap:        Boolean                      = false,
-    scope:       DefinitionScope              = "steady state evolution") = {
-    implicit def defScope = scope
-    val evolution = algorithm
+    scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) = {
+    implicit def defScope: DefinitionScope = scope
+    val evolution = evolutionMethod(method)
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
     val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationVal)
@@ -202,12 +198,12 @@ object EvolutionWorkflow {
     val toOffspring = ToOffspringTask(evolution)
     val elitism = ElitismTask(evolution, evolution.evaluatedVal) set (evolution.evaluatedVal := 1)
     val terminationTask = TerminationTask(evolution, termination)
-    val breed = BreedTask(evolution, 1)
+    val breed = BreedTask(evolution, 1, Seq())
 
     val masterFirst =
       EmptyTask() set (
         (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal),
-        (inputs, outputs) += (evolution.outputVals: _*)
+        (inputs, outputs) ++= evolution.outputVals
       )
 
     val masterLast =
@@ -220,7 +216,7 @@ object EvolutionWorkflow {
       )
 
     val master =
-      ((masterFirst -- toOffspring keep (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals: _*)) -- elitism -- terminationTask -- breed -- masterLast) &
+      ((masterFirst -- toOffspring keepAll (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals)) -- elitism -- terminationTask -- breed -- masterLast) &
         (masterFirst -- elitism keep evolution.populationVal) &
         (elitism -- breed keep evolution.populationVal) &
         (elitism -- masterLast keep evolution.populationVal) &
@@ -260,7 +256,7 @@ object EvolutionWorkflow {
     scope:       DefinitionScope                 = "island evolution"
   ) = {
 
-    implicit def defScope = scope
+    implicit def defScope: DefinitionScope = scope
 
     val t = island.method
 
@@ -329,9 +325,9 @@ object EvolutionWorkflow {
       method = t)
   }
 
-}
+end EvolutionWorkflow
 
-trait EvolutionWorkflow {
+trait EvolutionWorkflow:
 
   type MGOAG
   def mgoAG: MGOAG
@@ -356,7 +352,7 @@ trait EvolutionWorkflow {
   def stateType = ValType[S]
   def individualType = ValType[I]
 
-  def populationType: ValType[Pop] = ValType[Pop]
+  def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
 
   def buildIndividual(genome: G, context: Context): I
 
@@ -377,7 +373,7 @@ trait EvolutionWorkflow {
   def generationVal = GAIntegration.generationVal
   def evaluatedVal = GAIntegration.evaluatedVal
   def terminatedVal = Val[Boolean]("terminated", namespace)
-}
+
 
 case class Stochastic(
   seed:       SeedVariable = SeedVariable.empty,
@@ -408,6 +404,20 @@ object GAIntegration {
 
     val variables = values.map { case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
     genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+  }
+
+  def genomeDoubleToVariable(
+    genome: GenomeDouble,
+    values: Vector[Double],
+    scale:  Boolean) = GenomeDouble.toVariables(genome, values, scale)
+
+  def genomesDoubleOfPopulationToVariables[I](
+    genome: GenomeDouble,
+    values: Vector[Vector[Double]],
+    scale:  Boolean): Vector[Variable[_]] = {
+
+    val variables = values.map { case continuous ⇒ GenomeDouble.toVariables(genome, continuous, scale) }
+    genome.zipWithIndex.map { case (g, i) ⇒ GenomeDouble.toArrayVariable(g, variables.map(_(i).value)) }.toVector
   }
 
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
@@ -470,10 +480,11 @@ object MGOAPI {
     def operations(a: A): Ops
 
     trait Ops {
-      def metadata(generation: Long, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
+      def metadata(state: S, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
-      def buildGenome(values: V): G
+      def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]]
+
       def buildGenome(context: Vector[Variable[_]]): G
       def buildIndividual(genome: G, phenotype: P, context: Context): I
 

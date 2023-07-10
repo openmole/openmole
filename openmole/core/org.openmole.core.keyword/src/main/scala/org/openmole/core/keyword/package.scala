@@ -13,7 +13,7 @@ package keyword {
   case class Negative[+A](value: A)
 
   // Covariance on type B causes problem for Some implicit conversion, see: DirectSampling
-  case class Aggregate[+A, B](value: A, aggregate: B)
+  case class Evaluate[+A, B](value: A, evaluate: B)
 
   case class Delta[+A, +B](value: A, delta: B)
   case class As[+A, +B](value: A, as: B)
@@ -47,8 +47,10 @@ package keyword {
       def unary_- = Negative(a)
     }
 
-    implicit class AggregateDecorator[A](a: A) {
-      def aggregate[B](b: B) = Aggregate(a, b)
+    implicit class EvaluateDecorator[A](a: A) {
+      @deprecated("15", "use evaluate")
+      def aggregate[B](b: B): Evaluate[A, B] = evaluate(b)
+      def evaluate[B](b: B) = Evaluate(a, b)
       //def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
     }
 

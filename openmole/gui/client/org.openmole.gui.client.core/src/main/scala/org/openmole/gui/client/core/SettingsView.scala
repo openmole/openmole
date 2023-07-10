@@ -1,26 +1,19 @@
 package org.openmole.gui.client.core
 
-import org.openmole.gui.client.core.alert.AbsolutePositioning.CenterPagePosition
-import scalatags.JsDom._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import boopickle.Default._
-import org.openmole.gui.client.core.alert.AlertPanel
 import org.scalajs.dom
-import org.openmole.gui.ext.client.Utils._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.ext.api.Api
-import org.openmole.gui.ext.data.{ JVMInfos, routes }
-import org.openmole.gui.ext.client._
-import autowire._
+import org.openmole.gui.client.ext.ClientUtil.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.files.FileDisplayer
-import rx._
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
 
 import scala.scalajs.js.timers
 import scala.scalajs.js.timers.SetIntervalHandle
-import scaladget.bootstrapnative.Selector.Dropdown
-import scalatags.JsDom.all._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -39,132 +32,133 @@ import scalatags.JsDom.all._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class SettingsView(fileDisplayer: FileDisplayer) {
+object SettingsView:
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
   val jvmInfos: Var[Option[JVMInfos]] = Var(None)
   val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
-  private def alertPanel(warnMessage: String, route: String) = panels.alertPanel.string(
-    warnMessage,
-    () ⇒ { /*fileDisplayer.treeNodeTabs.saveAllTabs(() ⇒ {*/ CoreUtils.setRoute(route) /*})*/ },
-    transform = CenterPagePosition
-  )
-
-  lazy val dropdownApp: Dropdown[_] = vForm(width := "auto")(
-    jvmInfoButton,
-    docButton,
-    jvmInfosDiv,
-    resetPasswordButton.render,
-    restartButton,
-    shutdownButton
-  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.settingsBlock, Seq(left := "initial", right := 0))
-
-  lazy val dropdownConnection: Dropdown[_] = vForm(width := "auto")(
-    resetPasswordButton.render
-  ).dropdownWithTrigger(glyphSpan(glyph_menu_hamburger), omsheet.resetBlock +++ (right := 20), Seq(left := "initial", right := 0))
-
-  private def serverActions(message: String, messageGlyph: Glyphicon, warnMessage: String, route: String) =
-    div(rowLayout +++ (lineHeight := "7px"))(
-      glyphSpan(messageGlyph +++ omsheet.shutdownButton +++ columnLayout),
-      span(message, Seq(paddingTop := 3, paddingLeft := 5) +++ settingsItemStyle +++ columnLayout),
-      onclick := { () ⇒
-        dropdownApp.close
-        dropdownConnection.close
-        alertPanel(warnMessage, route)
-      }
+  private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
+    lazy val notification = panels.notifications.showAlternativeNotification(
+      NotificationLevel.Info,
+      warnMessage,
+      div(),
+      NotificationManager.Alternative("OK", _ => CoreUtils.setRoute(route)),
+      NotificationManager.Alternative.cancel
     )
 
-  val docButton = a(href := "#", onclick := { () ⇒
-    Settings.settings.map { sets ⇒
-      org.scalajs.dom.window.open(s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/GUI.html", "_blank")
-    }
-  })(tags.span("Documentation")).render
+    button(btn_danger, marginBottom := "10px", message, onClick --> { _ ⇒ notification })
 
-  val jvmInfoButton = button("JVM stats", btn_default +++ (marginLeft := 12), glyph_stats, onclick := { () ⇒
-    timer.now match {
+  def jvmInfoButton(using api: ServerAPI, basePath: BasePath) = button("JVM stats", btn_secondary, glyph_stats, onClick --> { _ ⇒
+    timer.now() match {
       case Some(t) ⇒ stopJVMTimer(t)
-      case _       ⇒ setJVMTimer
+      case _ ⇒ setJVMTimer
     }
-  }).render
+  })
 
-  def updateJVMInfos = {
-    Post()[Api].jvmInfos.call().foreach { j ⇒
-      jvmInfos() = Some(j)
+  def updateJVMInfos(using api: ServerAPI, basePath: BasePath) =
+    api.jvmInfos().foreach { j ⇒
+      jvmInfos.set(Some(j))
     }
-  }
 
-  def setJVMTimer = {
-    timer() = Some(timers.setInterval(3000) {
+
+  def setJVMTimer(using api: ServerAPI, basePath: BasePath) = {
+    timer.set(Some(timers.setInterval(3000) {
       updateJVMInfos
-    })
+    }))
   }
 
   def stopJVMTimer(t: SetIntervalHandle) = {
     timers.clearInterval(t)
-    timer() = None
+    timer.set(None)
   }
 
-  val waiter = timer.map {
+  val waiter = timer.signal.map {
     _.isDefined
   }
 
-  val jvmInfosDiv = timer.map {
-    _.isDefined
-  }.expandDiv(tags.div(generalSettings)(
-    Rx {
-      for (
-        j ← jvmInfos()
-      ) yield {
-        val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
-        tags.div(
-          tags.div(highLine)(
-            tags.div(bigHalfColumn)(j.processorAvailable.toString),
-            tags.div(smallHalfColumn)("Processors")
-          ),
-          tags.div(highLine)(
-            tags.div(bigHalfColumn)(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"),
-            tags.div(smallHalfColumn)("Allocated memory (%)")
-          ),
-          tags.div(highLine)(
-            tags.div(bigHalfColumn)(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"),
-            tags.div(smallHalfColumn)(s"Total memory (${readableTotalMemory.units})")
-          ),
-          tags.div(smallLine)(
-            tags.div(smallHalfColumn +++ textCenter +++ (paddingTop := 5))(s"${j.javaVersion}")
-          ),
-          tags.div(smallLine)(
-            tags.div(smallHalfColumn +++ textCenter)(s"${j.jvmImplementation}")
-          )
+  def version(using api: ServerAPI, basePath: BasePath) =
+    div(color := "#333", marginBottom := "30px",
+      child <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+        div(flexColumn,
+          div(sets.version, color:= "#3086b5", fontSize := "22px", fontWeight.bold),
+          div(sets.versionName),
+          div(CoreUtils.longTimeToString(sets.buildTime))
         )
+      }).map {
+        case Some(e) => e
+        case _ => Waiter.waiter
       }
-    }
-  ))
-
-  val resetPasswordButton =
-    serverActions(
-      "reset password",
-      glyph_lock,
-      "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-      routes.resetPasswordRoute
     )
 
-  val shutdownButton = serverActions(
-    "shutdown",
+  val jvmInfosDiv =
+    timer.signal.map {
+      _.isDefined
+    }.expand(
+      div(
+        generalSettings,
+        child <-- jvmInfos.signal.map {
+          _ match {
+            case Some(j) =>
+              val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
+              div(flexColumn,
+                div(flexRow,
+                  div(cls := "smallText", "Processors"),
+                  div(cls := "bigValue", div(j.processorAvailable.toString))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", "Allocated memory (%)"),
+                  div(cls := "bigValue", div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", div(s"Total memory (${readableTotalMemory.units})")),
+                  div(cls := "bigValue", div(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"))
+                ),
+                div(
+                  flexRow,
+                  div(cls := "smallText", "Java version"),
+                  div(flexColumn,
+                    div(s"${j.javaVersion}", cls := "bigValue"),
+                    div(s"${j.jvmImplementation}", cls := "bigValue", fontSize := "22", textAlign.right)
+                  ),
+                )
+              )
+            case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
+          }
+        }
+      )
+    )
+
+  def resetPasswordButton(using panels: Panels) =
+    serverActions(
+      "Reset password",
+      glyph_lock,
+      "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
+      s"/${resetPasswordRoute}"
+    )
+
+  def shutdownButton(using panels: Panels) = serverActions(
+    "Shutdown",
     glyph_off,
     "This will stop the server, the application will no longer be usable. Halt anyway?",
-    routes.shutdownRoute
-  ).render
+    s"/${shutdownRoute}"
+  )
 
-  val restartButton = serverActions(
-    "restart",
+  def restartButton(using panels: Panels) = serverActions(
+    "Restart",
     glyph_repeat,
     "This will restart the server, the application will not respond for a while. Restart anyway?",
-    routes.restartRoute
-  ).render
+    s"/${restartRoute}"
+  )
 
-  val renderApp = dropdownApp.render
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    div(cls := "settingButtons",
+      version,
+      jvmInfoButton,
+      jvmInfosDiv,
+      resetPasswordButton,
+      shutdownButton,
+      restartButton
+    )
 
-  val renderConnection = dropdownConnection.render
-
-}

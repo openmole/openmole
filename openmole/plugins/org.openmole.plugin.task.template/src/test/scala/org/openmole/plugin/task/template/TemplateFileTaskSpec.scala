@@ -22,7 +22,7 @@ import org.openmole.core.workflow.test.TestHook
 import org.openmole.tool.hash._
 import org.scalatest._
 
-class TemplateFileTaskSpec extends FlatSpec with Matchers {
+class TemplateFileTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 

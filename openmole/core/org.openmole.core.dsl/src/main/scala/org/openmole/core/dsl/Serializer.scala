@@ -23,13 +23,13 @@ import org.openmole.core.workspace.TmpDirectory
 
 trait Serializer {
   def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
-  def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true)
+  def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true, gz = true)
 
   def load(file: String)(implicit serialiserService: SerializerService): Object = load(new File(file))
   def loadArchive(file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService): Object = loadArchive(new File(file))
 
   def save(obj: Object, file: File)(implicit serialiserService: SerializerService) = serialiserService.serialize(obj, file)
-  def saveArchive(obj: Object, file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService) = serialiserService.serializeAndArchiveFiles(obj, file)
+  def saveArchive(obj: Object, file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService) = serialiserService.serializeAndArchiveFiles(obj, file, gz = true)
 
   def save(obj: Object, file: String)(implicit serialiserService: SerializerService): Unit = save(obj, new File(file))
   def saveArchive(obj: Object, file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService): Unit = saveArchive(obj, new File(file))

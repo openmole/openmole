@@ -37,7 +37,6 @@ import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective._
-import org.openmole.plugin.method.evolution.data._
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
@@ -50,8 +49,8 @@ import monocle.syntax.all._
 object PSEAlgorithm {
 
   import mgo.tools._
-  import monocle.macros.{ GenLens, Lenses }
-
+  import monocle.macros.{ GenLens }
+  
   import scala.language.higherKinds
   import cats.implicits._
   import mgo.evolution.algorithm._
@@ -59,7 +58,7 @@ object PSEAlgorithm {
   import GenomeVectorDouble._
   import CDGenome._
 
-  @Lenses case class Individual[P](
+  case class Individual[P](
     genome:        CDGenome.Genome,
     phenotype:     P,
     foundedIsland: Boolean         = false)
@@ -97,7 +96,7 @@ object PSEAlgorithm {
       discreteValues.get,
       discreteOperator.get,
       discrete,
-      Individual.phenotype[P].get _ andThen pattern,
+      i => pattern(i.phenotype),
       buildGenome,
       lambda,
       reject,
@@ -107,7 +106,7 @@ object PSEAlgorithm {
   def elitism[S, P: CanBeNaN](pattern: P ⇒ Vector[Int], continuous: Vector[C], hitmap: monocle.Lens[S, HitMap]) =
     PSEOperations.elitism[S, Individual[P], P](
       i ⇒ values(i.genome, continuous),
-      Individual.phenotype[P].get,
+      i => i.phenotype,
       pattern,
       hitmap)
 
@@ -127,7 +126,7 @@ object NoisyPSEAlgorithm {
   import algorithm._
   import algorithm.CDGenome._
 
-  @Lenses case class Individual[P](
+  case class Individual[P](
     genome:           CDGenome.Genome,
     historyAge:       Long,
     phenotypeHistory: Array[P])
@@ -173,7 +172,7 @@ object NoisyPSEAlgorithm {
       vectorPhenotype[P],
       aggregation,
       pattern,
-      Individual.historyAge,
+      Focus[Individual[P]](_.historyAge),
       historySize,
       hitmap)
 
@@ -188,7 +187,7 @@ object NoisyPSEAlgorithm {
       i.focus(_.genome) andThen discreteValues get,
       aggregation(vectorPhenotype.get(i)),
       (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
-      Individual.phenotypeHistory.get(i).size)
+      i.phenotypeHistory.size)
 
   case class Result[P](continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int, individual: Individual[P])
 
@@ -207,7 +206,7 @@ object NoisyPSEAlgorithm {
 
 object PSE {
 
-  case class DeterministicParams(
+  case class DeterministicPSE(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
@@ -217,12 +216,12 @@ object PSE {
     grid:                Seq[PatternAxe]
   )
 
-  object DeterministicParams {
+  object DeterministicPSE {
 
     import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[DeterministicPSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicPSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = PSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -231,13 +230,13 @@ object PSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
-        override def metadata(generation: Long, saveOption: SaveOption): EvolutionMetadata =
+      def operations(om: DeterministicPSE) = new Ops {
+        override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             grid = MetadataGeneration.grid(om.grid),
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -247,8 +246,13 @@ object PSE {
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
 
+        def buildGenome(vs: Vector[Variable[_]]): G = buildGenome(Genome.fromVariables(vs, om.genome))
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
@@ -303,17 +307,17 @@ object PSE {
           (s4, elited)
         }
 
-        def migrateToIsland(population: Vector[I]) = population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
+        def migrateToIsland(population: Vector[I]) = population.map(Focus[I](_.foundedIsland).set(true))
 
         def migrateFromIsland(population: Vector[I], state: S) =
-          population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
-            map(PSEAlgorithm.Individual.foundedIsland.set(false))
+          population.filter(i ⇒ !i.foundedIsland).
+            map(Focus[I](_.foundedIsland).set(false))
       }
 
     }
   }
 
-  case class StochasticParams(
+  case class StochasticPSE(
     pattern:             Vector[Double] ⇒ Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
@@ -324,12 +328,12 @@ object PSE {
     reject:              Option[Condition],
     grid:                Seq[PatternAxe])
 
-  object StochasticParams {
+  object StochasticPSE {
 
     import mgo.evolution.algorithm.{ PSE ⇒ _, NoisyPSE ⇒ _, _ }
     import cats.data._
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[StochasticPSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticPSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = NoisyPSEAlgorithm.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -338,14 +342,14 @@ object PSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
-        override def metadata(generation: Long, saveOption: SaveOption) =
+      def operations(om: StochasticPSE) = new Ops {
+        override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticPSE(
             genome = MetadataGeneration.genomeData(om.genome),
             objective = om.objectives.map(MetadataGeneration.objectiveData),
             sample = om.historySize,
             grid = MetadataGeneration.grid(om.grid),
-            generation = generation,
+            generation = generationLens.get(state),
             saveOption = saveOption
           )
 
@@ -360,6 +364,11 @@ object PSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
@@ -427,7 +436,7 @@ object PSE {
   }
 
   object PatternAxe {
-    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
+    implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]): PatternAxe = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
     //    implicit def fromInNoisyToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToNoisyObjective[T]) = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
 
     implicit def fromDoubleDomainToPatternAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): PatternAxe =
@@ -456,7 +465,7 @@ object PSE {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(
+          DeterministicPSE(
             mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome,
             phenotypeContent,
@@ -478,7 +487,7 @@ object PSE {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(
+          StochasticPSE(
             pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
             phenotypeContent = phenotypeContent,
@@ -504,17 +513,20 @@ object PSEEvolution {
 
   import org.openmole.core.dsl.DSL
 
-  implicit def method: ExplorationMethod[PSEEvolution, EvolutionWorkflow] =
+  given EvolutionMethod[PSEEvolution] =
+    p =>
+      PSE(
+        genome = p.genome,
+        objective = p.objective,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[PSEEvolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          PSE(
-            genome = p.genome,
-            objective = p.objective,
-            outputs = p.evaluation.outputs,
-            stochastic = p.stochastic,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -523,11 +535,11 @@ object PSEEvolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
-@Lenses case class PSEEvolution(
+case class PSEEvolution(
   genome:       Genome,
   objective:    Seq[PSE.PatternAxe],
   evaluation:   DSL,

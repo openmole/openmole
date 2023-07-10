@@ -2,7 +2,7 @@ package org.openmole.plugin.sampling.onefactor
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest._
 import org.openmole.plugin.domain.collection._
 
 /*
@@ -22,7 +22,7 @@ import org.openmole.plugin.domain.collection._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class OneFactorSpec extends FlatSpec with Matchers {
+class OneFactorSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
   "x keyword" should "create a complete sampling" in {

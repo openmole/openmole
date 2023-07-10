@@ -19,7 +19,7 @@ import monocle.syntax.all._
 
 object OSE {
 
-  case class DeterministicParams(
+  case class DeterministicOSE(
     mu:                  Int,
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
@@ -29,13 +29,13 @@ object OSE {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object DeterministicParams {
+  object DeterministicOSE {
 
     import cats.data._
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[DeterministicParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    implicit def integration: MGOAPI.Integration[DeterministicOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicOSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -44,7 +44,7 @@ object OSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicParams) = new Ops {
+      def operations(om: DeterministicOSE) = new Ops {
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
@@ -53,6 +53,12 @@ object OSE {
 
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
+
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
@@ -108,7 +114,7 @@ object OSE {
     }
   }
 
-  case class StochasticParams(
+  case class StochasticOSE(
     mu:                  Int,
     origin:              (Vector[Double], Vector[Int]) ⇒ Vector[Int],
     limit:               Vector[Double],
@@ -120,12 +126,12 @@ object OSE {
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticParams {
+  object StochasticOSE {
 
     import mgo.evolution.algorithm.NoisyOSE._
     import mgo.evolution.algorithm.{ NoisyOSE ⇒ MGONoisyOSE, _ }
 
-    implicit def integration = new MGOAPI.Integration[StochasticParams, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    implicit def integration: MGOAPI.Integration[StochasticOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticOSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -134,7 +140,7 @@ object OSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticParams) = new Ops {
+      def operations(om: StochasticOSE) = new Ops {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
@@ -145,6 +151,11 @@ object OSE {
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
 
@@ -272,7 +283,7 @@ object OSE {
   case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
 
   object FitnessPattern {
-    implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
+    implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToObjective[T]): FitnessPattern = FitnessPattern(te.apply(v.value), td(v.under))
     //    implicit def fromUnderNoisyToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToNoisyObjective[T]) = FitnessPattern(te.apply(v.value), td(v.under))
 
     //    implicit def fromUnderToObjective[T](v: Under[Val[T], T])(implicit td: ToDouble[T]) = FitnessPattern(v.value, td(v.under))
@@ -302,7 +313,7 @@ object OSE {
         val fg = OriginAxe.fullGenome(origin, genome)
 
         EvolutionWorkflow.deterministicGAIntegration(
-          DeterministicParams(
+          DeterministicOSE(
             mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),
             genome = fg,
@@ -326,7 +337,7 @@ object OSE {
         }
 
         EvolutionWorkflow.stochasticGAIntegration(
-          StochasticParams(
+          StochasticOSE(
             mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),
             genome = fg,
@@ -352,19 +363,22 @@ object OSEEvolution {
 
   import org.openmole.core.dsl._
 
-  implicit def dslContainer: ExplorationMethod[OSEEvolution, EvolutionWorkflow] =
+  given EvolutionMethod[OSEEvolution] =
+    p =>
+      OSE(
+        origin = p.origin,
+        genome = p.genome,
+        objective = p.objective,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        populationSize = p.populationSize,
+        reject = p.reject
+      )
+
+  given ExplorationMethod[OSEEvolution, EvolutionWorkflow] =
     p ⇒
-      EvolutionPattern.build(
-        algorithm =
-          OSE(
-            origin = p.origin,
-            genome = p.genome,
-            objective = p.objective,
-            outputs = p.evaluation.outputs,
-            stochastic = p.stochastic,
-            populationSize = p.populationSize,
-            reject = p.reject
-          ),
+      EvolutionWorkflow(
+        method = p,
         evaluation = p.evaluation,
         termination = p.termination,
         parallelism = p.parallelism,
@@ -373,13 +387,13 @@ object OSEEvolution {
         scope = p.scope
       )
 
-  implicit def patternContainer: ExplorationMethodSetter[OSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[OSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 }
 
 import monocle.macros._
 
-@Lenses case class OSEEvolution(
+case class OSEEvolution(
   origin:         Seq[OSE.OriginAxe],
   objective:      Seq[OSE.FitnessPattern],
   evaluation:     DSL,

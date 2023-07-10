@@ -21,7 +21,7 @@ import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 
-package object services {
+package services {
 
   /**
    * Methods to get implicit services (workspace, files, random provider, network, etc.)
@@ -37,7 +37,7 @@ package object services {
      * @tparam T
      * @return
      */
-    def withServices[T](workspace: File, password: String, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level])(f: Services ⇒ T) = {
+    def withServices[T](workspace: File, password: String, httpProxy: Option[String] = None, logLevel: Option[Level] = None, logFileLevel: Option[Level] = None)(f: Services ⇒ T) = {
       val services = Services(workspace, password, httpProxy, logLevel, logFileLevel)
       try f(services)
       finally dispose(services)
@@ -62,23 +62,23 @@ package object services {
       httpProxy:    Option[String],
       logLevel:     Option[Level],
       logFileLevel: Option[Level]) = {
-      implicit val ws = Workspace(workspace)
-      implicit val cypher = Cypher(password)
-      implicit val preference = Services.preference(ws)
-      implicit val tmpDirectory = TmpDirectory(ws)
-      implicit val seeder = Seeder()
-      implicit val serializerService = SerializerService()
-      implicit val threadProvider = ThreadProvider()
-      implicit val replicaCatalog = ReplicaCatalog(ws)
-      implicit val authenticationStore = Services.authenticationStore(ws)
-      implicit val fileService = FileService()
-      implicit val randomProvider = RandomProvider(seeder.newRNG)
-      implicit val eventDispatcher = EventDispatcher()
-      implicit val outputRedirection = OutputRedirection()
-      implicit val networkService = NetworkService(httpProxy)
-      implicit val fileServiceCache = FileServiceCache()
-      implicit val loggerService = LoggerService(logLevel, file = Some(workspace / Workspace.logLocation), fileLevel = logFileLevel)
-      implicit val timeService = TimeService()
+      implicit val ws: Workspace = Workspace(workspace)
+      implicit val cypher: Cypher = Cypher(password)
+      implicit val preference: Preference = Services.preference(ws)
+      implicit val tmpDirectory: TmpDirectory = TmpDirectory(ws)
+      implicit val seeder: Seeder = Seeder()
+      implicit val serializerService: SerializerService = SerializerService()
+      implicit val threadProvider: ThreadProvider = ThreadProvider()
+      implicit val replicaCatalog: ReplicaCatalog = ReplicaCatalog(ws)
+      implicit val authenticationStore: AuthenticationStore = Services.authenticationStore(ws)
+      implicit val fileService: FileService = FileService()
+      implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)
+      implicit val eventDispatcher: EventDispatcher = EventDispatcher()
+      implicit val outputRedirection: OutputRedirection = OutputRedirection()
+      implicit val networkService: NetworkService = NetworkService(httpProxy)
+      implicit val fileServiceCache: FileServiceCache = FileServiceCache()
+      implicit val loggerService: LoggerService = LoggerService(logLevel, file = Some(workspace / Workspace.logLocation), fileLevel = logFileLevel)
+      implicit val timeService: TimeService = TimeService()
 
       new ServicesContainer()
     }
@@ -91,6 +91,7 @@ package object services {
     def dispose(services: Services) = {
       util.Try(Workspace.clean(services.workspace))
       util.Try(services.threadProvider.stop())
+      util.Try(services.replicaCatalog.close())
     }
 
     /**

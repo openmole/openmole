@@ -2,8 +2,6 @@ package org.openmole.plugin.environment.batch.environment
 
 import java.util.concurrent.Semaphore
 
-import scala.tools.reflect.WrappedProperties
-
 object AccessControl {
 
   def tryWithPermit[B](accessControl: AccessControl)(f: ⇒ B) = {

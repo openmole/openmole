@@ -44,8 +44,8 @@ package object ssh {
     def home(sshServer: gssh.SSHServer)(implicit interpreter: Effect[gssh.SSH]) = gssh.home(sshServer)
     def child(parent: String, child: String) = _root_.gridscale.RemotePath.child(parent, child)
 
-    implicit def isStorage(implicit interpreter: Effect[gssh.SSH]) = new StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] {
-      implicit def toSSHServer(s: SSHStorage) = s.sshServer
+    implicit def isStorage(implicit interpreter: Effect[gssh.SSH]): StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] = new StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] {
+      implicit def toSSHServer(s: SSHStorage): _root_.gridscale.ssh.SSHServer = s.sshServer
 
       override def child(t: SSHStorage, parent: String, child: String): String = SSHStorage.child(parent, child)
       override def parent(t: SSHStorage, path: String): Option[String] = _root_.gridscale.RemotePath.parent(path)

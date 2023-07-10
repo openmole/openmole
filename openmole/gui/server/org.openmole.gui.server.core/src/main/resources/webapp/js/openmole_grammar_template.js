@@ -1,5 +1,5 @@
-define('ace/mode/openmole',function(require, exports, module) {
-
+ace.define("ace/mode/openmole",["require","exports","module","ace/lib/oop"], function(require, exports, module) {
+"use strict";
 var oop = require("ace/lib/oop");
 
 var ScalaMode = require("ace/mode/scala").Mode;
@@ -19,7 +19,7 @@ exports.Mode = Mode;
 
 
 
-define('ace/mode/openmole_highlight_rules', function(require, exports, module) {
+ace.define('ace/mode/openmole_highlight_rules', ["require","exports","module","ace/lib/oop"], function(require, exports, module) {
 
 var oop = require("ace/lib/oop");
 var ScalaHighlightRules = require("ace/mode/scala_highlight_rules").ScalaHighlightRules;
@@ -49,7 +49,7 @@ var OpenMOLEHighlightRules = function() {
         "Function|IndexedSeq|Iterator|" +
         "Map|" +
         "Range|Seq|Set|Stream|" +
-        "Vector|File" +
+        "Vector|File|" +
 
         ##OMClasses##
     );
@@ -156,3 +156,11 @@ oop.inherits(OpenMOLEHighlightRules, ScalaHighlightRules);
 exports.OpenMOLEHighlightRules = OpenMOLEHighlightRules;
 
 });
+(function() {
+    ace.require(["ace/mode/openmole"], function(m) {
+        if (typeof module == "object" && typeof exports == "object" && module) {
+            module.exports = m;
+        }
+    });
+})();
+

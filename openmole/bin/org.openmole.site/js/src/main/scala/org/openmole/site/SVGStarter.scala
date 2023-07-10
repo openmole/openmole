@@ -26,7 +26,7 @@ import scala.scalajs.js.annotation._
 
 @js.native
 @JSGlobal
-abstract class SVGAnimationElement extends org.scalajs.dom.raw.SVGElement {
+abstract class SVGAnimationElement extends org.scalajs.dom.SVGElement {
 
   /*
    * MDN

@@ -19,5 +19,5 @@ package org.openmole.plugin.task
 
 package object r {
   def RPackage(name: String, version: Option[String] = None, dependencies: Boolean = false) =
-    RTask.InstallCommand.RLibrary(name, version, dependencies)
+    RTask.RLibrary(name, version, dependencies)
 }

@@ -24,10 +24,10 @@ object BlockList {
     override def apply(t: Val[_]) = false
   }
 
-  implicit def seqOfValToKeep(s: Seq[Val[_]]) = Keep(s: _*)
+  implicit def seqOfValToKeep(s: Seq[Val[_]]): Keep = Keep(s: _*)
 }
 
-trait BlockList <: (Val[_] ⇒ Boolean)
+trait BlockList extends (Val[_] ⇒ Boolean)
 
 trait Block extends BlockList {
   def filtered: Set[String]

@@ -24,7 +24,7 @@ import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.bounds._
 
-class GenomeSpec extends FlatSpec with Matchers {
+class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "syntax x to y" should "be converted to bounds" in {
     val x = Val[Double]

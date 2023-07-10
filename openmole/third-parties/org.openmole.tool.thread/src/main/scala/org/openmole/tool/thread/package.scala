@@ -27,9 +27,9 @@ package object thread {
   object L extends JavaLogger
   import L._
 
-  implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
-  implicit def function2Callable[F](f: ⇒ F) = new Callable[F] { def call = f }
-  implicit def function2Runable(f: ⇒ Unit) = new Runnable { def run = f }
+  implicit def future2Function[A](f: Future[A]): () => A = () ⇒ f.get
+  implicit def function2Callable[F](f: ⇒ F): Callable[F] = new Callable[F] { def call = f }
+  implicit def function2Runable(f: ⇒ Unit): Runnable = new Runnable { def run = f }
   def thread(f: ⇒ Unit) = new Thread { override def run = f }
 
   def background[F](f: ⇒ F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)

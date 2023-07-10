@@ -19,40 +19,37 @@ package org.openmole.plugin.task.scala
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.builder._
-import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
-import org.openmole.plugin.task.jvm._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
 
-import scala.util._
+import _root_.scala.util._
 
 object ScalaTask {
 
-  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(ScalaTask.config)
-  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(ScalaTask.external)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(Focus[ScalaTask](_.config))
+  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(Focus[ScalaTask](_.external))
+  implicit def isInfo: InfoBuilder[ScalaTask] = InfoBuilder(Focus[ScalaTask](_.info))
 
-  implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask] {
-    override def libraries = ScalaTask.libraries
-    override def plugins = ScalaTask.plugins
-  }
+  implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask]:
+    override def libraries = Focus[ScalaTask](_.libraries)
+    override def plugins = Focus[ScalaTask](_.plugins)
 
   def defaultPlugins = pluginsOf(scala.xml.XML).toVector
 
-  def apply(source: String)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(source: String, libraries: Seq[File] = Vector())(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     new ScalaTask(
       source,
       plugins = defaultPlugins,
-      libraries = Vector.empty,
+      libraries = libraries.toVector,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig()
@@ -67,27 +64,26 @@ object ScalaTask {
 
 }
 
-@Lenses case class ScalaTask(
+case class ScalaTask(
   sourceCode: String,
   plugins:    Vector[File],
   libraries:  Vector[File],
   config:     InputOutputConfig,
   external:   External,
   info:       InfoConfig
-) extends Task with ValidateTask with Plugins {
+) extends Task with ValidateTask with Plugins { scalaTask =>
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
-  def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) = {
-    implicit def m = manifest[java.util.Map[String, Any]]
+  def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) =
+    //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,
       inputs ++ Seq(JVMLanguageTask.workDirectory),
-      ScalaCompilation.WrappedOutput(outputs),
+      ScalaCompilation.WrappedOutput(scalaTask.outputs),
       libraries = libraries,
       plugins = plugins
     )
-  }
 
   override def validate = {
     def libraryErrors = libraries.flatMap { l ⇒
@@ -115,15 +111,15 @@ object ScalaTask {
       FromContext { p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(inputs.toSeq))
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(scalaTask.inputs.toSeq))
 
-        val map = scalaCompilation(context, p.random, p.newFile)
-        outputs.toSeq.map {
+        val map = scalaCompilation(context, p.random, p.tmpDirectory)
+        scalaTask.outputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
         }: Context
       }
 
-    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, outputs)
+    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, scalaTask.outputs)
   }
 }
 

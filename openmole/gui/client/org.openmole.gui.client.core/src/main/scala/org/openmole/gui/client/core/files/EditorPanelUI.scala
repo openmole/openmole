@@ -1,23 +1,27 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.ext.data._
-import org.openmole.gui.ext.data.FileExtension._
+import org.openmole.gui.shared.data.*
+import org.openmole.gui.client.ext.FileExtension.*
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import scaladget.ace.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
 
-import scaladget.ace._
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import org.openmole.gui.ext.data.DataUtils._
-
-import scala.scalajs.js.JSConverters._
-import org.openmole.gui.ext.client._
+import scala.scalajs.js.JSConverters.*
+import org.openmole.gui.client.ext.*
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.{ Manual, PopupPosition }
-import rx._
+import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
+import com.raquo.laminar.api.L.*
+import com.raquo.laminar.nodes.ReactiveElement
+import org.openmole.gui.client.tool.Component
+import org.openmole.gui.shared.data
+import org.scalajs.dom.MouseEvent
+import scaladget.bootstrapnative.Tools.MyPopoverBuilder
+
+import scala.scalajs.js.timers.*
+import scala.scalajs.js.annotation.JSImport
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -39,169 +43,152 @@ import rx._
 object EditorPanelUI {
 
   def apply(
-    treeNodeTabs:         TreeNodeTabs,
-    safePath:             SafePath,
-    fileType:             FileExtension,
-    initCode:             String,
-    initHash:             String,
-    containerModifierSeq: ModifierSeq   = emptyMod) = {
-    val editor = {
-      fileType match {
-        case OMS   ⇒ new EditorPanelUI(treeNodeTabs, safePath, OMS, containerModifierSeq)
-        case SCALA ⇒ new EditorPanelUI(treeNodeTabs, safePath, SCALA, containerModifierSeq)
-        case _     ⇒ new EditorPanelUI(treeNodeTabs, safePath, NO_EXTENSION, containerModifierSeq)
-      }
-    }
+    fileType: FileExtension,
+    initCode: String,
+    initHash: String)(using plugins: GUIPlugins) =
+    val editor = new EditorPanelUI(fileType)
     editor.setCode(initCode, initHash)
     editor
-  }
 
-  def highlightedFile(ext: FileExtension): Option[HighlightedFile] =
-    ext match {
-      case OpenMOLEScript  ⇒ Some(HighlightedFile("openmole"))
-      case e: EditableFile ⇒ Some(HighlightedFile(e.highlighter))
-      case _               ⇒ None
-    }
+
+  def highlightedFile(ext: FileExtension)(using plugins: GUIPlugins): Option[HighlightedFile] =
+    FileContentType(ext) match
+      case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
+      case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
+      case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
+      case FileContentType.CSV ⇒ Some(HighlightedFile("csv"))
+      case FileContentType.Python => Some(HighlightedFile("python"))
+      case ReadableFileType(_, true, Some(hl)) => Some(HighlightedFile(hl))
+      case _ ⇒ None
 
   case class HighlightedFile(highlighter: String)
+
+  @js.native
+  @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
+  object openmolemode extends js.Object
 }
 
-class EditorPanelUI(treeNodeTabs: TreeNodeTabs, safePath: SafePath, fileType: FileExtension, containerModifierSeq: ModifierSeq) {
+class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
 
-  implicit val ctx: Ctx.Owner = Ctx.Owner.safe()
+  val modified = Var(false)
 
+  val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
-    val edDiv = tags.div(id := "editor").render
-    val ed = ace.edit(edDiv)
+    val ed = ace.edit(edDiv.ref)
+    val session = ed.getSession()
 
     js.Dynamic.global.ace.config.set("basePath", "js")
     js.Dynamic.global.ace.config.set("modePath", "js")
     js.Dynamic.global.ace.config.set("themePath", "js")
 
-    ed.setTheme("ace/theme/github")
-    ace.require("ace/ext/language_tools")
+    scalamode
 
-    EditorPanelUI.highlightedFile(fileType).foreach { h ⇒
-      ed.getSession().setMode("ace/mode/" + h.highlighter)
+    //EditorPanelUI.openmolemode
+
+    githubtheme
+    extLanguageTools
+
+    ed.setTheme("ace/theme/github")
+
+    EditorPanelUI.highlightedFile(fileExtension).foreach { h ⇒
+      session.setMode("ace/mode/" + h.highlighter)
     }
 
     ed.renderer.setShowGutter(true)
     ed.setShowPrintMargin(true)
-    ed.setAutoScrollEditorIntoView(true)
+    ed.setAutoScrollEditorIntoView(false)
 
     ed.setOptions(
       js.Dynamic.literal(
         "enableBasicAutocompletion" -> true,
-        "enableSnippets" -> true,
+//        "enableSnippets" -> true,
         "enableLiveAutocompletion" -> true
       )
     )
 
-    def updateScrollTop = scrollTop.update(ed.renderer.getScrollTop)
-
-    ed.getSession().on("change", (x) ⇒ {
-      changed.update(true)
-      updateScrollTop
-    })
-
-    ed.getSession().on("changeScrollTop", x ⇒ { updateScrollTop })
-
+    //ed.onDocumentChange(() => {println("modif");modified.set(true)})
     ed
   }
 
-  var initialContentHash = ""
+  var contentHash = ""
 
-  lazy val lineHeight = {
-    val h = Var(15)
-    h.trigger { v ⇒
-      editor.container.style.lineHeight = s"${v}px"
-      editor.container.style.fontSize = s"${v - 3}px"
-      editor.renderer.updateFontSize
-      ()
+  def onSaved(hash: String) = contentHash = hash
+
+  lazy val lineHeight = Var(17)
+
+  val lineHeightObserver = Observer[Int] { (i: Int) ⇒
+    editor.container.style.lineHeight = s"${i}px"
+    editor.container.style.fontSize = s"${i - 3}px"
+    editor.renderer.updateFontSize()
+  }
+
+
+  val errors = Var(EditorErrors())
+  val errorMessage = Var("")
+  val errorMessageOpen = Var(false)
+  val errorsWithLocation: Var[Seq[ErrorWithLocation]] = Var(Seq())
+
+  def setErrorMessage = {
+    errorsWithLocation.now().find { e =>
+      e.line.map(_ - 1) == Some(editor.selection.getCursor().row.toInt)
+    } match {
+      case Some(e) =>
+        val message = s"${e.line.getOrElse("")}: ${e.stackTrace}"
+        if (errorMessage.now() == message) {
+          errorMessageOpen.update(!_)
+        }
+        else {
+          errorMessage.set(message)
+          errorMessageOpen.set(true)
+        }
+      case _ => errorMessageOpen.set(false)
     }
-    h
   }
 
-  def fontDimension = lineHeight.now - 3
+  val omsErrorObserver = Observer[EditorErrors] { (ee: EditorErrors) =>
+    val ewls = ee.errorsInEditor.flatMap { i ⇒
+      ee.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
+        e.errorWithLocation.line.map { l ⇒ editor.getSession().setBreakpoint(l - 1) }
+        e.errorWithLocation
+      }
+    }
 
-  lazy val scrollTop = Var(0.0)
-  lazy val changed = Var(false)
-
-  def updateFont(lHeight: Int) = {
-    lineHeight.update(lHeight)
+    errorsWithLocation.set(ewls)
   }
 
-  val extension: FileExtension = FileExtension(safePath.name)
+  def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
-  lazy val view = {
-    div(editorContainer +++ container +++ containerModifierSeq)(
-      div(panelClass +++ panelDefault)(
-        div(panelBody)(
-          editor.container,
-          div(`class` := "gutterDecoration")(
-            Rx {
-              val scrollAsLines = scrollTop() / lineHeight()
-              val max = editor.renderer.getLastVisibleRow
-
-              def isActive =
-                treeNodeTabs.isActive(safePath)() == TreeNodeTabs.Active
-
-              if (extension == OMS && isActive) {
-                val errors = TreeNodeTabs.errors(treeNodeTabs, safePath)()
-
-                div(
-                  for {
-                    i ← errors.errorsInEditor.filter { e ⇒ e > scrollAsLines && e < max }
-                  } yield {
-                    errors.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
-                      e.errorWithLocation.line.map { l ⇒
-                        buildManualPopover(l, (i - scrollAsLines) * lineHeight() - (lineHeight() - 15), span(e.errorWithLocation.stackTrace), Popup.Right)
-                      }.getOrElse(div.render)
-                    }.getOrElse(div.render)
-                  }
-                )
-              }
-              else div("")
-
-            }).render
-        )
+  val view =
+    div(
+      errorMessageOpen.signal.expand(div(
+        flexRow,
+        child.text <-- errorMessage.signal,
+        backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "gi")),
+      edDiv.amend(
+        lineHeight --> lineHeightObserver,
+        FileContentType(fileExtension) match {
+          case FileContentType.OpenMOLEScript ⇒ errors --> omsErrorObserver
+          case _ => emptyMod
+        },
+        onClick --> { _ => setErrorMessage }
       )
     )
-  }
 
   def aceDoc = editor.getSession().getDocument()
 
-  def code = editor.synchronized { (editor.getSession().getValue(), initialContentHash) }
+  def code =
+    editor.synchronized {
+      (editor.getSession().getValue(), contentHash)
+    }
 
   def setCode(content: String, hash: String) = editor.synchronized {
-    initialContentHash = hash
+    contentHash = hash
     editor.getSession().setValue(content)
+    modified.set(false)
+    editor.getSession().on("change", _ => modified.set(true))
   }
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
-
-  def buildManualPopover(line: Int, topPosition: Double, title: String, position: PopupPosition) = {
-    lazy val pop1 =
-      div(line)(`class` := "gutterError", fontSize := s"${fontDimension}px", top := topPosition, height := s"${lineHeight.now + 3}px", width := s"${lineHeight.now + 5}px",
-        backgroundColor := Rx {
-          if (changed()) "rgba(255,204,0)"
-          else "rgba(255,128,128)"
-        }
-      ).popover(
-          title,
-          position,
-          Manual
-        )
-
-    lazy val pop1Render = pop1.render
-
-    pop1Render.onclick = { (e: Event) ⇒
-      Popover.hide
-      Popover.toggle(pop1)
-      e.stopPropagation
-    }
-    pop1Render
-  }
-
+  def hasBeenModified = modified.now()
 }
 

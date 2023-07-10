@@ -12,6 +12,7 @@ trait StatisticsPackage extends Stat { stat ⇒
     def meanSquaredError = stat.meanSquaredError(s.map(td.apply))
     def standardDeviation = stat.standardDeviation(s.map(td.apply))
     def rootMeanSquaredError = stat.rootMeanSquaredError(s.map(td.apply))
+    def percentile(p: Double) = stat.percentile(s.map(td.apply), Seq(p)).head
 
     def normalize = stat.normalize(s.map(td.apply))
 
@@ -20,5 +21,5 @@ trait StatisticsPackage extends Stat { stat ⇒
     def dynamicTimeWarpingDistance[T2](to: Seq[T2], fast: Boolean = true)(implicit td2: ToDouble[T2]) = stat.dynamicTimeWarpingDistance(s.map(td.apply), to.map(td2.apply))
   }
 
-  implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]) = new StatisticIterableOfDoubleDecorator(s.toVector)
+  implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]): StatisticIterableOfDoubleDecorator[T] = new StatisticIterableOfDoubleDecorator(s.toVector)
 }

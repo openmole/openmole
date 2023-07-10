@@ -1,6 +1,6 @@
 package org.openmole.plugin.task.cormas
 
-import monocle.macros.Lenses
+import monocle.Focus
 
 import org.openmole.core.context.{ Context, Namespace }
 import org.openmole.core.expansion.FromContext
@@ -11,7 +11,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, PreparedImage }
+import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, InstalledImage }
 import org.openmole.plugin.task.external._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -28,10 +28,10 @@ import org.openmole.core.dsl.extension._
 
 object CORMASTask {
 
-  implicit def isTask: InputOutputBuilder[CORMASTask] = InputOutputBuilder(CORMASTask.config)
-  implicit def isExternal: ExternalBuilder[CORMASTask] = ExternalBuilder(CORMASTask.external)
-  implicit def isInfo = InfoBuilder(CORMASTask.info)
-  implicit def isMapped = MappedInputOutputBuilder(CORMASTask.mapped)
+  implicit def isTask: InputOutputBuilder[CORMASTask] = InputOutputBuilder(Focus[CORMASTask](_.config))
+  implicit def isExternal: ExternalBuilder[CORMASTask] = ExternalBuilder(Focus[CORMASTask](_.external))
+  implicit def isInfo: InfoBuilder[CORMASTask] = InfoBuilder(Focus[CORMASTask](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[CORMASTask] = MappedInputOutputBuilder(Focus[CORMASTask](_.mapped))
 
   def cormasImage(image: String, version: String) = DockerImage(image, version)
 
@@ -50,7 +50,7 @@ object CORMASTask {
     containerSystem:        ContainerSystem = ContainerSystem.default,
     installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask = {
 
-    val preparedImage = ContainerTask.prepare(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.install(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
     new CORMASTask(
       preparedImage,
@@ -70,8 +70,8 @@ object CORMASTask {
 
 }
 
-@Lenses case class CORMASTask(
-  image:                PreparedImage,
+case class CORMASTask(
+  image:                InstalledImage,
   containerSystem:      ContainerSystem,
   script:               FromContext[String],
   errorOnReturnValue:   Boolean,
@@ -96,7 +96,7 @@ object CORMASTask {
     def inputJSONName = "input.json"
     def outputJSONName = "output.json"
 
-    import org.openmole.plugin.tool.json._
+    import org.openmole.core.json.*
 
     def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
     def inputDictionary = JObject(inputsFields: _*)
@@ -107,17 +107,20 @@ object CORMASTask {
       val outputValues = parse(file.content)
       val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
       noFile(mapped.outputs).map { o ⇒
-        jValueToVariable(outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], o.v)
+        jValueToVariable(
+          outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], 
+          o.v,
+          unwrapArrays = true)
       }
     }
 
     val outputFile = Val[File]("outputFile", Namespace("CormasTask"))
 
-    newFile.withTmpFile("inputs", ".json") { jsonInputs ⇒
+    tmpDirectory.withTmpFile("inputs", ".json") { jsonInputs ⇒
       jsonInputs.content = compact(render(inputDictionary))
 
       def containerTask =
-        ContainerTask(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = s"""./pharo --headless Pharo.image eval '${script.from(context)}'""",
@@ -136,11 +139,11 @@ object CORMASTask {
           containerPoolKey = containerPoolKey) set (
           resources += (jsonInputs, inputJSONName, true),
           outputFiles += (outputJSONName, outputFile),
-          Mapped.files(mapped.inputs).map { case m ⇒ inputFiles +=[ContainerTask] (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { case m ⇒ outputFiles +=[ContainerTask] (m.name, m.v) }
+          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
         )
 
-      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.newFile, p.fileService)
+      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
       resultContext ++ readOutputJSON(resultContext(outputFile))
     }
 

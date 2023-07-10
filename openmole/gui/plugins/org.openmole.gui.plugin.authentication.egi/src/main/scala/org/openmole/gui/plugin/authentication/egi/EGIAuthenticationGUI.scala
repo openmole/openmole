@@ -18,91 +18,77 @@
 package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.ext.data.{ AuthenticationPlugin, AuthenticationPluginFactory }
-import org.openmole.gui.ext.client.{ FileUploaderUI, OMPost }
-
-import scaladget.bootstrapnative.bsn._
-import boopickle.Default._
-import autowire._
+import org.openmole.gui.client.ext.*
+import scaladget.bootstrapnative.bsn.*
 
 import scala.concurrent.Future
-import scala.scalajs.js.annotation._
-import scalatags.JsDom.all._
+import scala.scalajs.js.annotation.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext}
+import scaladget.bootstrapnative.bsn
 
 import scala.scalajs.js
 
 object TopLevelExports {
-  @JSExportTopLevel("egi")
+  @JSExportTopLevel("authentication_egi")
   val egi = js.Object {
     new org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory
   }
 }
 
-class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory {
+class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory:
   type AuthType = EGIAuthenticationData
-
   def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
-
   def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
-
   def name = "EGI"
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] =
+    PluginFetch.futureError(_.egiAuthentications(()).future)
 
-  def getData: Future[Seq[AuthType]] = OMPost()[EGIAuthenticationAPI].egiAuthentications().call()
-}
 
-class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin {
+
+class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin:
   type AuthType = EGIAuthenticationData
 
-  val passwordStyle: scaladget.tools.ModifierSeq = Seq(
-    width := 130,
-    scaladget.tools.passwordType
-  )
+  val password = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
 
-  val password = inputTag(data.cypheredPassword)(placeholder := "Password", passwordStyle).render
+  val certificateUpload = FileUploaderUI(data.privateKey, Some(SafePath(Seq("egi.p12"), ServerFileSystemContext.Authentication)))
 
-  def shorten(path: String): String = if (path.length > 10) s"...${path.takeRight(10)}" else path
+  val voInputContent = Var[String]("")
+  val voInput = inputTag("").amend(placeholder := "vo1,vo2", onInput.mapToValue --> voInputContent)
+  //val voInput = input(bsn.formControl, value := voInputContent).amend(placeholder := "vo1,vo2")
 
-  val privateKey =
-    FileUploaderUI(data.privateKey.map(shorten).getOrElse(""), data.privateKey.isDefined, Some("egi.p12"))
-
-  val voInput = inputTag("")(placeholder := "vo1,vo2").render
-
-  OMPost()[EGIAuthenticationAPI].geVOTest().call().foreach {
-    _.foreach { c ⇒
-      voInput.value = c
-    }
-  }
 
   def factory = new EGIAuthenticationGUIFactory
 
-  def remove(onremove: () ⇒ Unit) = OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach { _ ⇒
-    onremove()
-  }
+  def remove(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentications(()).future)
 
-  lazy val panel = {
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = {
     import scaladget.tools._
-    vForm(
-      password.withLabel("Password"),
-      privateKey.view(marginTop := 10).render.withLabel("Certificate"),
-      voInput.withLabel("Test EGI credential on", paddingTop := 40)
+      //      _.foreach { c ⇒ a.voInput.ref.value = c }
+      //    }
+    div(
+      flexColumn, width := "400px", height := "220",
+      div(cls := "verticalFormItem", div("Password", width := "150px"), password),
+      div(cls := "verticalFormItem", div("Certificate", width := "150px"), display.flex, div(certificateUpload.view.amend(flexRow, justifyContent.flexEnd), width := "100%")),
+      div(cls := "verticalFormItem", div("Test EGI credential on", width := "150px"), voInput),
+      EventStream.fromFuture(PluginFetch.futureError(_.getVOTests(()).future), true) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
     )
+
   }
 
-  def save(onsave: () ⇒ Unit) = {
-    OMPost()[EGIAuthenticationAPI].removeAuthentication().call().foreach {
-      d ⇒
-        OMPost()[EGIAuthenticationAPI].addAuthentication(EGIAuthenticationData(
-          cypheredPassword = password.value,
-          privateKey = if (privateKey.pathSet.now) Some(EGIAuthenticationData.authenticationDirectory + "/egi.p12") else None
-        )).call().foreach {
-          b ⇒
-            onsave()
-        }
-    }
+  def save(using basePath: BasePath, notificationAPI: NotificationService) =
+    def vos =
+      voInputContent.now() match
+        case "" => Seq()
+        case s => s.trim.split(',').map(_.trim).toSeq
 
-    OMPost()[EGIAuthenticationAPI].setVOTest(voInput.value.split(",").map(_.trim).toSeq).call()
-  }
+    for
+      _ <- remove
+      _ <- PluginFetch.futureError(_.addAuthentication(EGIAuthenticationData(password = password.ref.value, privateKey = certificateUpload.file.now())).future)
+      _ <- PluginFetch.futureError(_.setVOTests(vos).future)
+    yield ()
 
-  def test = OMPost()[EGIAuthenticationAPI].testAuthentication(data).call()
+  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
-}
+

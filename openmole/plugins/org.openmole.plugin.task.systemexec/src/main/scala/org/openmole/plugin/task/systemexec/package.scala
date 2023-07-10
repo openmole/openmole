@@ -44,8 +44,10 @@ package systemexec {
 
   object Command {
     /** Make commands non-remote by default */
-    implicit def stringToCommand(s: String) = Command(s)
+    implicit def stringToCommand(s: String): Command = Command(s)
   }
+
+  implicit def seqStringToCommand(s: Seq[String]): Seq[Command] = s.map(s => Command(s))
 
   /**
    * Sequence of commands for a particular OS
@@ -60,7 +62,7 @@ package systemexec {
 
   object OSCommands {
     /** A single command can be a sequence  */
-    implicit def stringToCommands(s: String) = OSCommands(OS(), s)
+    implicit def stringToCommands(s: String): OSCommands = OSCommands(OS(), s)
 
     /** A sequence of command lines is considered local (non-remote) by default */
     implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
@@ -211,9 +213,9 @@ package object systemexec {
       val runtime = Runtime.getRuntime
 
       import scala.jdk.CollectionConverters._
-      val inheritedEnvironment = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
+      val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
-      val openmoleEnvironment = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
+      val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
       //FIXES java.io.IOException: error=26
       val process = runtime.synchronized {
@@ -292,7 +294,7 @@ package object systemexec {
         case p: Parsed ⇒ p.command.toVector
       }
 
-    implicit def stringToRaw(c: String) = Raw(c)
+    implicit def stringToRaw(c: String): Raw = Raw(c)
   }
 
   /**

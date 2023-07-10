@@ -33,13 +33,13 @@ package object range {
     def exp(t: T): T
   }
 
-  implicit lazy val doubleLog =
+  implicit lazy val doubleLog: Log[Double] =
     new Log[Double] {
       def log(t: Double) = math.log(t)
       def exp(t: Double) = math.exp(t)
     }
 
-  implicit lazy val bigDecimalLog =
+  implicit lazy val bigDecimalLog: Log[BigDecimal] =
     new Log[BigDecimal] {
       def log(t: BigDecimal) = BigDecimalOperations.ln(t, scale)
       def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
@@ -56,11 +56,11 @@ package object range {
     def step: T
   }
 
-  implicit def defaultStepInt = new DefaultStep[Int] { def step = 1 }
-  implicit def defaultStepLong = new DefaultStep[Long] { def step = 1 }
+  implicit def defaultStepInt: DefaultStep[Int] = new DefaultStep[Int] { def step = 1 }
+  implicit def defaultStepLong: DefaultStep[Long] = new DefaultStep[Long] { def step = 1 }
 
   object RangeValue {
-    implicit def fractionalIsRangeValue[T](implicit fractional: Fractional[T]) = new RangeValue[T] {
+    implicit def fractionalIsRangeValue[T](implicit fractional: Fractional[T]): RangeValue[T] = new RangeValue[T] {
       override def div(t1: T, t2: T): T = fractional.div(t1, t2)
       override def plus(t1: T, t2: T): T = fractional.plus(t1, t2)
       override def toInt(t: T): Int = fractional.toInt(t)
@@ -69,7 +69,7 @@ package object range {
       override def minus(t1: T, t2: T): T = fractional.minus(t1, t2)
     }
 
-    implicit def integralIsRangeValue[T](implicit integral: Integral[T]) = new RangeValue[T] {
+    implicit def integralIsRangeValue[T](implicit integral: Integral[T]): RangeValue[T] = new RangeValue[T] {
       override def div(t1: T, t2: T): T = integral.quot(t1, t2)
       override def plus(t1: T, t2: T): T = integral.plus(t1, t2)
       override def toInt(t: T): Int = integral.toInt(t)

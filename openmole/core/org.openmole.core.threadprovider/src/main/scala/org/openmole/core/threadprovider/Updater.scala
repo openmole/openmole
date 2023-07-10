@@ -30,7 +30,7 @@ object Updater {
 
     override def run = {
       try {
-        val resubmit = updatable.update
+        val resubmit = updatable.update()
         System.runFinalization
         if (resubmit) threadProvider.get.foreach(tp ⇒ delay(this)(tp))
       }
@@ -62,7 +62,7 @@ object Updater {
   def delay(updaterTask: UpdaterTask)(implicit threadProvider: ThreadProvider) = {
     threadProvider.scheduler.schedule(
       new Runnable {
-        override def run = threadProvider.pool.submit(updaterTask)
+        override def run() = threadProvider.pool.submit(updaterTask)
       },
       updaterTask.updatable.delay.millis, TimeUnit.MILLISECONDS
     )
@@ -72,12 +72,12 @@ object Updater {
 
 object IUpdatable {
   def apply(f: () ⇒ Boolean) = new IUpdatable {
-    override def update: Boolean = f()
+    override def update(): Boolean = f()
   }
 }
 
 trait IUpdatable {
-  def update: Boolean
+  def update(): Boolean
 }
 
 trait IUpdatableWithVariableDelay extends IUpdatable {
@@ -85,6 +85,6 @@ trait IUpdatableWithVariableDelay extends IUpdatable {
 }
 
 class UpdatableWithFixedDelay(val updatable: IUpdatable, val delay: Time) extends IUpdatableWithVariableDelay {
-  override def update = updatable.update
+  override def update() = updatable.update()
 }
 

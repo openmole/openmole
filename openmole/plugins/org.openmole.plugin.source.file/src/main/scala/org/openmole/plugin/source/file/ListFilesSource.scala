@@ -19,7 +19,7 @@ package org.openmole.plugin.source.file
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
@@ -27,8 +27,8 @@ import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.mole._
 object ListFilesSource {
 
-  implicit def isIO = InputOutputBuilder(ListFilesSource.config)
-  implicit def isInfo = InfoBuilder(info)
+  implicit def isIO: InputOutputBuilder[ListFilesSource] = InputOutputBuilder(Focus[ListFilesSource](_.config))
+  implicit def isInfo: InfoBuilder[ListFilesSource] = InfoBuilder(Focus[ListFilesSource](_.info))
 
   def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ListFilesSource(
@@ -40,7 +40,8 @@ object ListFilesSource {
     ) set (outputs += prototype)
 
 }
-@Lenses case class ListFilesSource(
+
+case class ListFilesSource(
   path:      FromContext[String],
   prototype: Val[Array[File]],
   regExp:    FromContext[String],

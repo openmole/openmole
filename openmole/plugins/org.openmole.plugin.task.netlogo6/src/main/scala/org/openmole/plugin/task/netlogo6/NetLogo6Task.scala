@@ -19,7 +19,7 @@ package org.openmole.plugin.task.netlogo6
 
 import java.io.File
 
-import monocle.macros.Lenses
+import monocle.Focus
 import org.openmole.core.context.Val
 import org.openmole.core.workflow.builder._
 import org.openmole.core.workflow.dsl._
@@ -32,13 +32,13 @@ import org.openmole.core.expansion._
 object NetLogo6Task {
 
   def factory = new NetLogoFactory {
-    def apply = new NetLogo6
+    def apply() = new NetLogo6
   }
 
-  implicit def isTask: InputOutputBuilder[NetLogo6Task] = InputOutputBuilder(NetLogo6Task.config)
-  implicit def isExternal: ExternalBuilder[NetLogo6Task] = ExternalBuilder(NetLogo6Task.external)
-  implicit def isInfo = InfoBuilder(info)
-  implicit def isMapped = MappedInputOutputBuilder(NetLogo6Task.mapped)
+  implicit def isTask: InputOutputBuilder[NetLogo6Task] = InputOutputBuilder(Focus[NetLogo6Task](_.config))
+  implicit def isExternal: ExternalBuilder[NetLogo6Task] = ExternalBuilder(Focus[NetLogo6Task](_.external))
+  implicit def isInfo: InfoBuilder[NetLogo6Task] = InfoBuilder(Focus[NetLogo6Task](_.info))
+  implicit def isMapped: MappedInputOutputBuilder[NetLogo6Task] = MappedInputOutputBuilder(Focus[NetLogo6Task](_.mapped))
 
   def workspace(
     workspace:            File,
@@ -61,8 +61,8 @@ object NetLogo6Task {
       ignoreErrorOnDispose = ignoreErrorOnDispose,
       switch3d = switch3d
     ) set (
-        inputs += (seed.option.toSeq: _*)
-      )
+      inputs ++= seed.option.toSeq
+    )
 
   def file(
     script:               File,
@@ -84,8 +84,8 @@ object NetLogo6Task {
       ignoreErrorOnDispose = ignoreErrorOnDispose,
       switch3d = switch3d
     ) set (
-        inputs += (seed.option.toSeq: _*)
-      )
+      inputs ++= seed.option.toSeq
+    )
 
   def apply(
     script:               File,
@@ -128,7 +128,7 @@ object NetLogo6Task {
 
 }
 
-@Lenses case class NetLogo6Task(
+case class NetLogo6Task(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,

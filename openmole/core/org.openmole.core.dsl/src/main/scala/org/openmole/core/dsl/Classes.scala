@@ -20,8 +20,7 @@ package org.openmole.core.dsl
 import org.openmole.core.context
 import org.openmole.core.workflow._
 
-trait Classes {
-
+trait Classes:
   lazy val Prototype = context.Val
   lazy val Val = context.Val
   type Val[T] = context.Val[T]
@@ -32,4 +31,7 @@ trait Classes {
   lazy val ExplorationTask = task.ExplorationTask
   lazy val MoleTask = task.MoleTask
 
-}
+  export org.openmole.core.workflow.hook.display
+  export org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat}
+
+

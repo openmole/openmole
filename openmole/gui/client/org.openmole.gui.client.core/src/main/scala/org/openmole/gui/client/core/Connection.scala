@@ -1,12 +1,8 @@
 package org.openmole.gui.client.core
 
 import scaladget.bootstrapnative.bsn._
-
-import org.openmole.gui.ext.client._
-import org.scalajs.dom.raw.HTMLFormElement
-
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags
+import org.openmole.gui.client.ext._
+import com.raquo.laminar.api.L._
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -27,44 +23,35 @@ import scalatags.JsDom.tags
 
 class Connection {
 
-  lazy val connectButton = tags.button("Connect", btn_primary, `type` := "submit").render
+  lazy val connectButton = button("Connect", btn_primary, `type` := "submit")
 
-  val passwordInput = inputTag("")(
+  val passwordInput = inputTag("").amend(
     placeholder := "Password",
     `type` := "password",
     width := "130px",
-    marginBottom := 15,
-    name := "password",
-    autofocus := true
-  ).render
+    marginBottom := "15",
+    nameAttr := "password",
+    onMountFocus
+  )
 
   def cleanInputs = {
-    passwordInput.value = ""
+    passwordInput.ref.value = ""
   }
 
-  private val connectionForm: HTMLFormElement =
-    tags.form(
-      method := "post",
-      passwordInput,
-      connectButton
-    ).render
+  private val connectionForm = form(
+    method := "post",
+    cls := "connection-form",
+    passwordInput,
+    connectButton
+  )
 
   val render = {
+    //panels.settingsView.renderConnection,
     div(
-      panels.settingsView.renderConnection,
-      div(omsheet.connectionTabOverlay)(
-        div(
-          img(src := "img/openmole.png", omsheet.openmoleLogo),
-          div(
-            omsheet.centerPage(),
-            div(
-              omsheet.connectionBlock,
-              connectionForm
-            )
-          )
-        )
-      )
-    ).render
+      cls := "screen-center",
+      img(src := "img/openmole_light.png", width := "600px"),
+      connectionForm
+    )
 
   }
 }

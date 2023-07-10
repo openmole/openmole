@@ -18,40 +18,39 @@
 package org.openmole.core
 
 import java.util.zip.GZIPInputStream
-
-import org.openmole.tool.file._
-import org.openmole.tool.tar._
-import gridscale.http
-import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.tool.file.*
+import org.openmole.tool.archive.*
+import org.openmole.core.context.*
+import org.openmole.core.expansion.*
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.preference.Preference
-import org.openmole.core.workspace._
-import org.openmole.tool.random._
-import org.openmole.tool.tar.TarInputStream
-import java.io.IOException
+import org.openmole.core.networkservice.NetworkService
+import org.openmole.core.preference.{Preference, PreferenceLocation}
+import org.openmole.core.workspace.*
+import org.openmole.tool.random.*
+import org.openmole.tool.archive.TarInputStream
 
+import java.io.IOException
 import org.openmole.core.exception.InternalProcessingError
 
 package object market {
 
+  lazy val marketIndexLocation = PreferenceLocation("Market", "Index", Some(buildinfo.marketAddress))
+
   import org.json4s._
   import org.json4s.jackson.Serialization
-  implicit val formats = Serialization.formats(NoTypeHints)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    ExpandedString(preference(MarketIndex.marketIndexLocation)).from(Context("version" → buildinfo.version))
+    ExpandedString(preference(marketIndexLocation)).from(Context("version" → buildinfo.version))
 
-  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    Serialization.read[MarketIndex](http.get(indexURL))
+  def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService) =
+    Serialization.read[MarketIndex](NetworkService.get(indexURL))
 
-  def downloadEntry(entry: MarketIndexEntry, path: File) = try {
-    http.getStream(entry.url) { is ⇒
-      val tis = new TarInputStream(new GZIPInputStream(is))
-      try tis.extract(path)
-      finally tis.close
-      path.applyRecursive(_.setExecutable(true))
-    }
+  def downloadEntry(entry: MarketIndexEntry, path: File)(implicit networkService: NetworkService) = try {
+    val tis = new TarInputStream(new GZIPInputStream(NetworkService.getInputStream(entry.url)))
+    try tis.extract(path)
+    finally tis.close()
+    path.applyRecursive(_.setExecutable(true))
   }
   catch {
     case e: IOException ⇒ throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)

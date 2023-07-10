@@ -32,7 +32,7 @@ object SobolSampling {
   implicit def isSampling: IsSampling[SobolSampling] = sobol ⇒ {
     def apply = FromContext { p ⇒
       import p._
-      sobolValues(sobol.factor.size, sobol.sample.from(context)).map { ScalarOrSequenceOfDouble.unflatten(sobol.factor, _)(context) }
+      sobolValues(sobol.factor.size, sobol.sample.from(context)).map { ScalableValue.toVariables(sobol.factor, _)(context) }
     }
 
     Sampling(
@@ -45,4 +45,4 @@ object SobolSampling {
 
 }
 
-case class SobolSampling(sample: FromContext[Int], factor: Seq[ScalarOrSequenceOfDouble])
+case class SobolSampling(sample: FromContext[Int], factor: Seq[ScalableValue])

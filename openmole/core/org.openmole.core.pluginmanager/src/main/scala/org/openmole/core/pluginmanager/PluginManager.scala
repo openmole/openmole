@@ -90,7 +90,7 @@ object PluginManager extends JavaLogger {
     }
   }
 
-  def updateBundles(bundles: Option[Seq[Bundle]] = None) {
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) = {
     val listener = new FrameworkListener {
       val lock = new Semaphore(0)
 
@@ -144,10 +144,26 @@ object PluginManager extends JavaLogger {
       case None    ⇒ Iterable.empty
     }
 
-  def isBundle(file: File) = {
-    def isDirectoryPlugin(file: File) = file.isDirectory && file./("META-INF")./("MANIFEST.MF").exists
-    isDirectoryPlugin(file) || (!file.isDirectory && file.isJar)
-  }
+  def isBundle(file: File): Boolean =
+    import scala.util.Using
+    def isJar(file: File): Boolean =
+      if file.getName.endsWith(".jar")
+      then
+        Using(new ZipFile(file)) { zip =>
+          val manifest = zip.getEntry("META-INF/MANIFEST.MF")
+          if manifest != null
+          then
+            Using(scala.io.Source.fromInputStream(zip.getInputStream(manifest))) { src =>
+              src.getLines().exists(_.trim.startsWith("Bundle"))
+            }.get
+          else false
+        }.getOrElse(false)
+      else false
+
+    def isDirectoryPlugin(file: File) =
+      val manifest = file./("META-INF")./("MANIFEST.MF")
+      file.isDirectory && manifest.exists && manifest.lines.exists(_.trim.startsWith("Bundle"))
+    isDirectoryPlugin(file) || (!file.isDirectory && isJar(file))
 
   def listBundles(path: File): Iterable[File] =
     if (isBundle(path)) List(path)

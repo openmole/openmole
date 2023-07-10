@@ -20,7 +20,7 @@ import org.openmole.rest.message._
 import org.openmole.tool.collection._
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream._
-import org.openmole.tool.tar.{ TarInputStream, TarOutputStream, _ }
+import org.openmole.tool.archive.*
 import org.scalatra._
 import org.scalatra.servlet.FileUploadSupport
 
@@ -74,7 +74,7 @@ trait RESTAPI extends ScalatraServlet
   val arguments: RESTLifeCycle.Arguments
   val services = arguments.services
 
-  lazy val baseDirectory = services.workspace.tmpDirectory.newDir("rest")
+  lazy val baseDirectory = services.workspace.tmpDirectory.newDirectory("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
 
   post("/job") {
@@ -113,11 +113,11 @@ trait RESTAPI extends ScalatraServlet
           )
         }
 
-        Project.compile(directory.workDirectory, directory.workDirectory / script, Seq.empty)(jobServices) match {
+        Project.compile(directory.workDirectory, directory.workDirectory / script)(jobServices) match {
           case ScriptFileDoesNotExists() ⇒ ExpectationFailed(Error("The script doesn't exist").toJson)
           case e: CompilationError       ⇒ error(e.error)
           case compiled: Compiled ⇒
-            Try(compiled.eval) match {
+            Try(compiled.eval(Seq.empty)(jobServices)) match {
               case Success(res) ⇒
                 import jobServices._
 
@@ -270,7 +270,7 @@ trait RESTAPI extends ScalatraServlet
     (fileMultiParams get "file") match {
       case None ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
       case Some(files) ⇒
-        val extractDirectory = baseDirectory.newDir("plugins")
+        val extractDirectory = baseDirectory.newDirectory("plugins")
         extractDirectory.mkdirs()
 
         val (plugins, errors) =

@@ -19,35 +19,36 @@ package org.openmole.runtime
 
 import java.io.File
 import java.io.PrintStream
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.exception.{InternalProcessingError, MultipleException}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.tool.logger.{ JavaLogger, LoggerService }
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.core.tools.service.Retry
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.execution._
-import org.openmole.core.communication.message._
-import org.openmole.core.communication.storage._
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.core.tools.service.*
+import org.openmole.core.workflow.execution.*
+import org.openmole.core.communication.message.*
+import org.openmole.core.communication.storage.*
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer._
+import org.openmole.core.serializer.*
 import org.openmole.core.threadprovider.ThreadProvider
+import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file.uniqName
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
-import util.{ Failure, Success }
+import util.{Failure, Success}
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.lock._
+import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream.MultiplexedOutputStream
-import squants._
+import squants.*
 
 object Runtime extends JavaLogger {
 
@@ -74,7 +75,7 @@ class Runtime {
     threads:           Int,
     debug:             Boolean,
     transferRetry:     Option[Int]
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) = {
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -112,6 +113,7 @@ class Runtime {
 
     val beginTime = System.currentTimeMillis
 
+    
     val result = try {
       logger.fine("Downloading plugins")
 
@@ -143,8 +145,8 @@ class Runtime {
           usedFiles.put(repliURI.originalPath, local)
         }
       }
-
-      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles)
+      
+      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles, gz = true)
 
       val saver = new ContextSaver(runnableTasks.size)
       val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
@@ -171,6 +173,7 @@ class Runtime {
           lockRepository = LockRepository[LockKey](),
           serializerService = serializerService,
           networkService = networkService,
+          timeService = timeService,
           remote = Some(TaskExecutionContext.Remote(threads))
         )
 
@@ -186,19 +189,25 @@ class Runtime {
 
       val endExecutionTime = System.currentTimeMillis
 
-      logger.fine("Results " + saver.results)
+      val results = saver.results
+      logger.fine("Results " + results)
 
-      val contextResults = ContextResults(saver.results)
+      if results.values.forall(_.isFailure)
+      then
+        val failures = results.values.collect { case Failure(e) => e }
+        throw new InternalProcessingError("All mole job executions have failed", MultipleException(failures))
+
+      val contextResults = ContextResults(results)
 
       def uploadArchive = {
         val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
+        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile, gz = true)
         ArchiveContextResults(contextResultFile)
       }
 
       def uploadIndividualFiles = {
         val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serialize(contextResults, contextResultFile)
+        serializerService.serialize(contextResults, contextResultFile, gz = true)
         val pac = serializerService.pluginsAndFiles(contextResults)
 
         val replicated =
@@ -215,7 +224,6 @@ class Runtime {
 
       val endTime = System.currentTimeMillis
       Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
-
     }
     catch {
       case t: Throwable ⇒
@@ -235,7 +243,7 @@ class Runtime {
 
     newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")
-      serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal)
+      serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal, gz = true)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
       retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)), transferRetry)
     }
