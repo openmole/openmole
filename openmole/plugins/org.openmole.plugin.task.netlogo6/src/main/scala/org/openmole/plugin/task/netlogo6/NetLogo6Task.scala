@@ -27,7 +27,7 @@ import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.tool.netlogo6._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 
 object NetLogo6Task {
 

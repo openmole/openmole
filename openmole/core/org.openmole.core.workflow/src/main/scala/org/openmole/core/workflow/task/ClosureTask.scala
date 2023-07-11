@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.task
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.setter._
 import org.openmole.tool.random._
 import monocle.Focus

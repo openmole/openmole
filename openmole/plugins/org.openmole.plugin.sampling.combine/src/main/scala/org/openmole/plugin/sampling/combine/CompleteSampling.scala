@@ -18,7 +18,7 @@
 package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.context.{ Context, PrototypeSet, Val, Variable }
-import org.openmole.core.expansion.{ FromContext, Validate }
+import org.openmole.core.fromcontext.{ FromContext, Validate }
 import org.openmole.core.workflow.sampling._
 
 object CompleteSampling {

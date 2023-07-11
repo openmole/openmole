@@ -3,7 +3,7 @@ package org.openmole.core.workflow.format
 import java.io.PrintStream
 import org.openmole.core.context.{Val, Variable}
 import org.openmole.core.csv.*
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.hook.HookExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument

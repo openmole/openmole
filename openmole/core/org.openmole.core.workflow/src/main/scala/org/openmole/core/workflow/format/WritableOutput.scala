@@ -19,7 +19,7 @@ package org.openmole.core.workflow.format
 
 import java.io._
 
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 
 object WritableOutput {
 

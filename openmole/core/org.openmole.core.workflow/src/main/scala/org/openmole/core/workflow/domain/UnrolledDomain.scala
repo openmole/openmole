@@ -17,7 +17,7 @@
 package org.openmole.core.workflow.domain
 
 import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import cats.implicits._
 
 object UnrolledDomain {

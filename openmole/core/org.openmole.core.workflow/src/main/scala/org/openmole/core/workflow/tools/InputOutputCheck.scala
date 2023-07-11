@@ -19,7 +19,7 @@ package org.openmole.core.workflow.tools
 
 import org.openmole.core.context.*
 import org.openmole.core.exception.*
-import org.openmole.core.expansion.{DefaultSet, FromContext}
+import org.openmole.core.fromcontext.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.workspace.TmpDirectory

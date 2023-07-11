@@ -20,7 +20,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.workflow.transition._
-import org.openmole.core.expansion.Validate
+import org.openmole.core.fromcontext.Validate
 
 import scala.collection._
 import monocle.Focus

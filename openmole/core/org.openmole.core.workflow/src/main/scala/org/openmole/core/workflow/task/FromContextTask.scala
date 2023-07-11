@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.task
 
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.{ FromContext, Validate }
+import org.openmole.core.fromcontext.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.setter._

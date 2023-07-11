@@ -1,4 +1,4 @@
-package org.openmole.core.expansion
+package org.openmole.core.fromcontext
 
 import org.openmole.core.context.{Val, Variable}
 

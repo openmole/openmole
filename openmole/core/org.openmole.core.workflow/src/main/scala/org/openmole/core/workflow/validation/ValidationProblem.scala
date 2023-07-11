@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.Val
-import org.openmole.core.expansion.Validate
+import org.openmole.core.fromcontext.Validate
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.hook.Hook

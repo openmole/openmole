@@ -16,7 +16,7 @@
  */
 package org.openmole.plugin.tool.pattern
 
-import org.openmole.core.expansion.Condition
+import org.openmole.core.fromcontext.Condition
 import org.openmole.core.dsl._
 import org.openmole.core.setter.DefinitionScope
 

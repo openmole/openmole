@@ -20,7 +20,7 @@ package org.openmole.plugin.task
 
 import org.openmole.core.context.PrototypeSet
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
 import org.openmole.plugin.task.external._

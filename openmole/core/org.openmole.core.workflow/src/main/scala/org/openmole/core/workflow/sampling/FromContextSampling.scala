@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.sampling
 
 import org.openmole.core.context.{ PrototypeSet, Val, Variable }
-import org.openmole.core.expansion.{ FromContext, Validate }
+import org.openmole.core.fromcontext.{ FromContext, Validate }
 
 object FromContextSampling {
   def apply(samples: FromContext.Parameters ⇒ Iterator[Iterable[Variable[_]]]) = new FromContextSampling(samples, PrototypeSet.empty, Iterable.empty, Validate.success)

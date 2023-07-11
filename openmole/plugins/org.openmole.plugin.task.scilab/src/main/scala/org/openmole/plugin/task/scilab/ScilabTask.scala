@@ -3,7 +3,7 @@ package org.openmole.plugin.task.scilab
 import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference

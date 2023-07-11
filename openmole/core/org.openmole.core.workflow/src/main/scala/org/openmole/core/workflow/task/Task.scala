@@ -19,7 +19,7 @@ package org.openmole.core.workflow.task
 
 import java.io.File
 import org.openmole.core.context.*
-import org.openmole.core.expansion.*
+import org.openmole.core.fromcontext.*
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference

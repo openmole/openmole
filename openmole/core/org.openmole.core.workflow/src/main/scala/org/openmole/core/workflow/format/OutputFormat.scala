@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.format
 
 import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.workflow.hook.{ FromContextHook, HookExecutionContext }
 
 object OutputFormat:

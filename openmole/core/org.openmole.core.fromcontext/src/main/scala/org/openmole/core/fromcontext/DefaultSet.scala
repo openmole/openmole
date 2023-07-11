@@ -15,11 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.expansion
+package org.openmole.core.fromcontext
 
 import monocle.Lens
 import org.openmole.core.context.*
-import org.openmole.core.expansion.Default
+import org.openmole.core.fromcontext.Default
 import org.openmole.tool.random.RandomProvider
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory

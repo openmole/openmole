@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook.file
 
 import monocle.Lens
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 
 trait AppendToCSVFileHookBuilder[T] {
   @deprecated("9", "use apply arguments")

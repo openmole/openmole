@@ -18,13 +18,13 @@
 package org.openmole.plugin.sampling
 
 import org.openmole.core.context.Val
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.modifier._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 
 package object combine {
 

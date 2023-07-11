@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.{DefaultSet, FromContext}
+import org.openmole.core.fromcontext.{DefaultSet, FromContext}
 import org.openmole.core.setter.{InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.tools.*
 

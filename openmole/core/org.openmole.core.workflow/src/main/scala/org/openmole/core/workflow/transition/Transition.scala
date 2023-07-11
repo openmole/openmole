@@ -20,7 +20,7 @@ package org.openmole.core.workflow.transition
 import cats.implicits._
 import org.openmole.core.context.*
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.Condition
+import org.openmole.core.fromcontext.Condition
 import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
 import org.openmole.core.workflow.mole.*

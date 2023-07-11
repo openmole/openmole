@@ -18,7 +18,7 @@
 package org.openmole.plugin.hook
 
 import org.openmole.core.workflow.mole._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.hook.Hook
 

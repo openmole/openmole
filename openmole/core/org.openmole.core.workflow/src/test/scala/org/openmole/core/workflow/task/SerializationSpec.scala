@@ -19,7 +19,7 @@ package org.openmole.core.workflow.task
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 import org.openmole.core.context.Val
-import org.openmole.core.expansion.DefaultSet
+import org.openmole.core.fromcontext.DefaultSet
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.setter._
 import org.openmole.core.workflow.domain._

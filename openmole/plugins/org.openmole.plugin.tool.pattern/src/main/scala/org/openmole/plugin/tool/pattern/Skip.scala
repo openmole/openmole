@@ -17,7 +17,7 @@
 package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.dsl._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.setter.DefinitionScope
 
 object Skip {

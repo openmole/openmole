@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.expansion
+package org.openmole.core.fromcontext
 
 import java.io.InputStream
 

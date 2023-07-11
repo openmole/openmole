@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.Context
-import org.openmole.core.expansion.{DefaultSet, FromContext}
+import org.openmole.core.fromcontext.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService

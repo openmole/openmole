@@ -2,7 +2,7 @@ package org.openmole.core.workflow.hook
 
 import monocle.macros._
 import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService

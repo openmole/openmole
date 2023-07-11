@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.csv
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.format.{ CSVOutputFormat, WritableOutput }

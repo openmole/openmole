@@ -13,7 +13,7 @@ import org.openmole.core.workflow.tools.*
 import org.openmole.core.script.*
 import org.openmole.core.json.*
 import org.openmole.core.exception.*
-import org.openmole.core.expansion.*
+import org.openmole.core.fromcontext.*
 import org.openmole.core.workflow.format.OutputFormat.*
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}

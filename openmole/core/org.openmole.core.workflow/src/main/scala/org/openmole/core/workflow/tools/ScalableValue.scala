@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.fileservice._
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._

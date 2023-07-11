@@ -18,7 +18,7 @@ package org.openmole.core.workflow.tools
 
 import java.io.File
 
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 
 object FileFromContext {
   def apply(directory: File, name: FromContext[String]) = FromContext { p ⇒

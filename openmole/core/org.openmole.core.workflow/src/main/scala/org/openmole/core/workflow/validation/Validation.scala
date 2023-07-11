@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context._
-import org.openmole.core.expansion.{Default, DefaultSet}
+import org.openmole.core.fromcontext.{Default, DefaultSet}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.mole._

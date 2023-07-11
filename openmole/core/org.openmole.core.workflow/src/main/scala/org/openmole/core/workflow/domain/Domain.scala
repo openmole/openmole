@@ -18,6 +18,6 @@ package org.openmole.core.workflow.domain
  */
 
 import org.openmole.core.context._
-import org.openmole.core.expansion.Validate
+import org.openmole.core.fromcontext.Validate
 
 case class Domain[+D](domain: D, inputs: PrototypeSet = PrototypeSet.empty, validation: Validate = Validate.success)

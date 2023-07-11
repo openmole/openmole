@@ -3,7 +3,7 @@ package org.openmole.core.setter
 import monocle.{Iso, Lens}
 import org.openmole.core.context.*
 import monocle.Focus
-import org.openmole.core.expansion.{DefaultSet, FromContext, ScalaCode}
+import org.openmole.core.fromcontext.{DefaultSet, FromContext, ScalaCode}
 
 trait InputBuilder[T] {
   def inputs: monocle.Lens[T, PrototypeSet]

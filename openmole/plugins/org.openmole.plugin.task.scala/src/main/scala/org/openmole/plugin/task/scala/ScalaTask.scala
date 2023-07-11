@@ -22,7 +22,7 @@ import java.io.File
 import monocle.Focus
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
+import org.openmole.core.fromcontext.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.setter._

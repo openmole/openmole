@@ -2,8 +2,8 @@ package org.openmole.core.dsl
 
 package object extension:
 
-  type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
-  lazy val FromContext = org.openmole.core.expansion.FromContext
+  type FromContext[+T] = org.openmole.core.fromcontext.FromContext[T]
+  lazy val FromContext = org.openmole.core.fromcontext.FromContext
 
   type DefinitionScope = org.openmole.core.setter.DefinitionScope
   def DefinitionScope = org.openmole.core.setter.DefinitionScope
@@ -72,7 +72,7 @@ package object extension:
   type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
-  def ExpandedString = org.openmole.core.expansion.ExpandedString
+  def ExpandedString = org.openmole.core.fromcontext.ExpandedString
 
   type Negative[+A] = org.openmole.core.keyword.Negative[A]
   type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
@@ -101,8 +101,8 @@ package object extension:
   def Aggregate = org.openmole.core.keyword.Evaluate
 
 
-  type Validate = org.openmole.core.expansion.Validate
-  def Validate = org.openmole.core.expansion.Validate
+  type Validate = org.openmole.core.fromcontext.Validate
+  def Validate = org.openmole.core.fromcontext.Validate
 
   type UserBadDataError = org.openmole.core.exception.UserBadDataError
   type RandomProvider = org.openmole.tool.random.RandomProvider

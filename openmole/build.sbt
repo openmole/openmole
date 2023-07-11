@@ -173,7 +173,7 @@ def allCore = Seq(
   module,
   market,
   context,
-  expansion,
+  fromContext,
   preference,
   db,
   threadProvider,
@@ -200,9 +200,9 @@ lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = S
 
 lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) settings(
   defaultActivator
-) dependsOn(context, expansion, keyword) settings (coreSettings: _*)
+) dependsOn(context, fromContext, keyword) settings (coreSettings: _*)
 
-lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
+lazy val fromContext = OsgiProject(coreDir, "org.openmole.core.fromcontext", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.cats)
   ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, openmoleCompiler, script, exception) settings (coreSettings: _*)
 
@@ -221,7 +221,7 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   openmoleCompiler,
   context,
   preference,
-  expansion,
+  fromContext,
   threadProvider,
   script,
   networkService,
@@ -308,13 +308,13 @@ lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imp
 
 lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
 
-lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(openmoleBuildInfo, expansion, openmoleHash, openmoleFile, pluginManager) settings(
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(openmoleBuildInfo, fromContext, openmoleHash, openmoleFile, pluginManager) settings(
   coreSettings,
   libraryDependencies ++= Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s,
   defaultActivator)
 
-lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, expansion, openmoleHash, openmoleFile, pluginManager, networkService) settings(
+lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, fromContext, openmoleHash, openmoleFile, pluginManager, networkService) settings(
   coreSettings,
   libraryDependencies += Libraries.json4s,
   defaultActivator,
@@ -592,7 +592,7 @@ lazy val template = OsgiProject(pluginDir, "org.openmole.plugin.task.template", 
 lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (
   libraryDependencies += Libraries.exec) settings (pluginSettings: _*)
 
-lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, expansion, exception) settings (pluginSettings: _*) settings (
+lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, fromContext, exception) settings (pluginSettings: _*) settings (
   libraryDependencies += Libraries.container)
 
 lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, container, json) settings (

@@ -17,7 +17,7 @@
  */
 package org.openmole.core
 
-package expansion:
+package fromcontext:
 
   import org.openmole.core.context.Val
   import org.openmole.core.fileservice.FileService
@@ -80,11 +80,11 @@ package expansion:
 
   trait ExpansionPackage {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext.convert(e))
-    type Condition = expansion.Condition
-    lazy val Condition = expansion.Condition
+    type Condition = fromcontext.Condition
+    lazy val Condition = fromcontext.Condition
 
-    type ScalaCode = org.openmole.core.expansion.ScalaCode
-    lazy val ScalaCode = org.openmole.core.expansion.ScalaCode
+    type ScalaCode = org.openmole.core.fromcontext.ScalaCode
+    lazy val ScalaCode = org.openmole.core.fromcontext.ScalaCode
   }
 
 

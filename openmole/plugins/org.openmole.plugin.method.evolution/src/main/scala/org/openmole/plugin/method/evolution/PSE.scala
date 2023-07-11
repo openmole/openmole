@@ -17,7 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats._

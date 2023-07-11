@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.sampling
 
 import org.openmole.core.context._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 
 object Sampling {
   implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]): Sampling = isSampling(t)

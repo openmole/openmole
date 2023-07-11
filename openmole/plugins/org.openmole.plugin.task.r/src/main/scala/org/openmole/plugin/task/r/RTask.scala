@@ -4,7 +4,7 @@ import monocle.Focus
 import org.openmole.core.context.{Namespace, Val}
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.fileservice._
 import org.openmole.core.networkservice._
 import org.openmole.core.preference._

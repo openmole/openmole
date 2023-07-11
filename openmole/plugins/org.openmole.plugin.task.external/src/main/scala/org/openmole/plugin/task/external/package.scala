@@ -18,7 +18,7 @@
 package org.openmole.plugin.task
 
 import org.openmole.core.dsl.*
-import org.openmole.core.expansion.*
+import org.openmole.core.fromcontext.*
 
 import org.openmole.core.tools.service.OS
 //import java.io._

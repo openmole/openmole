@@ -25,7 +25,7 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import org.openmole.core.expansion._
+import org.openmole.core.fromcontext._
 import org.openmole.core.context._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference

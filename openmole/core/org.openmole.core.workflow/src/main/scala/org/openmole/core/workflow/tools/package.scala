@@ -19,7 +19,7 @@ package org.openmole.core.workflow
 
 package tools {
 
-  import org.openmole.core.expansion.{ Expandable, ExpandedString, FromContext, ToFromContext }
+  import org.openmole.core.fromcontext.{ Expandable, ExpandedString, FromContext, ToFromContext }
   import org.openmole.tool.outputredirection.OutputRedirection
 
   trait ToolsPackage {

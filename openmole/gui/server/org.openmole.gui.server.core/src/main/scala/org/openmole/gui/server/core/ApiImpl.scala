@@ -13,7 +13,7 @@ import java.nio.file.*
 import java.util.zip.GZIPInputStream
 import org.openmole.core.compiler.*
 import org.openmole.core.context.Variable
-import org.openmole.core.expansion.ScalaCompilation
+import org.openmole.core.fromcontext.ScalaCompilation
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
 import scala.util.{Failure, Success, Try}

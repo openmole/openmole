@@ -25,7 +25,7 @@ package org.openmole.core.workflow.composition
 
 import java.io.PrintStream
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.expansion.{ Condition, FromContext, Validate }
+import org.openmole.core.fromcontext.{ Condition, FromContext, Validate }
 import org.openmole.core.keyword.{ By, On }
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope

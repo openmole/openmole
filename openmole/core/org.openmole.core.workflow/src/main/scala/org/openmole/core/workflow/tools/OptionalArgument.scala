@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.{ ExpandedString, FromContext, ToFromContext }
+import org.openmole.core.fromcontext.{ ExpandedString, FromContext, ToFromContext }
 
 object OptionalArgument:
   implicit def valueToOptionalOfFromContext[T1, T2](v: T1)(implicit toFromContext: ToFromContext[T1, T2]): OptionalArgument[FromContext[T2]] = OptionalArgument(FromContext.contextConverter(v))

@@ -3,7 +3,7 @@ package org.openmole.plugin.task.cormas
 import monocle.Focus
 
 import org.openmole.core.context.{ Context, Namespace }
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference

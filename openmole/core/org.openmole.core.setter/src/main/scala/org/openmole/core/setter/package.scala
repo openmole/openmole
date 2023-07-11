@@ -18,8 +18,8 @@
 package org.openmole.core.setter
 
 import org.openmole.core.context.*
-import org.openmole.core.expansion
-import org.openmole.core.expansion.*
+import org.openmole.core.fromcontext
+import org.openmole.core.fromcontext.*
 import org.openmole.core.keyword.:=
 
 /**
@@ -41,7 +41,7 @@ object Mapped:
 
   def files(mapped: Vector[Mapped[_]]) =
     mapped.flatMap:
-      case Mapped(Val.caseFile(v), name) ⇒ Seq(Mapped[java.io.File](v, name))
+      case m@Mapped(Val.caseFile(v), _) ⇒ Seq(Mapped[java.io.File](v, m.nameOption))
       case m                             ⇒ Seq()
 
 
@@ -126,16 +126,16 @@ trait BuilderPackage:
   implicit def seqOfSetterToFunction[O, S](o: Seq[O])(implicit setter: Setter[O, S]): S => S = Function.chain(o.map(o => implicitly[Setter[O, S]].set(o)(_)))
 
   implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
-    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1, v.equal._2)) }
+    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal._1, v.equal._2)) }
 
   implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder]: Setter[:=[Val[T], FromContext[T]], U] =
-    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal, false)) }
+    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal, false)) }
 
   implicit def equalToAssignDefaultValue[T, U: DefaultBuilder]: Setter[:=[Val[T], (T, Boolean)], U] =
-    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) }
+    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) }
 
   implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder]: Setter[:=[Val[T], T], U] =
-    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + expansion.Default[T](v.value, v.equal: FromContext[T], false)) }
+    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal: FromContext[T], false)) }
 
   implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
     Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] { v ⇒
@@ -166,7 +166,7 @@ trait BuilderPackage:
      * @param name
      * @return
      */
-    def mapped(name: String) = Mapped(p, name)
+    def mapped(name: String) = Mapped(p, Some(name))
 
   final lazy val name = new Name
 

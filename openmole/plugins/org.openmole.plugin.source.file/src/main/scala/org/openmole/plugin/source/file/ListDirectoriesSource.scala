@@ -22,7 +22,7 @@ import java.io.File
 import monocle.Focus
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
-import org.openmole.core.expansion.FromContext
+import org.openmole.core.fromcontext.FromContext
 import org.openmole.core.setter._
 import org.openmole.core.workflow.mole._
 
