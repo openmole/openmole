@@ -35,7 +35,7 @@ trait Setter[O, T]:
 
 
 object Mapped:
-  given [T]: Conversion[Val[T], Mapped[T]] = v => Mapped(v, v.name)
+  given [T]: Conversion[Val[T], Mapped[T]] = v => Mapped(v, None)
 
   def vals(xs: Iterable[Mapped[_]]) = xs.map(_.v)
 
@@ -55,8 +55,9 @@ object Mapped:
  * @param v
  * @param name
  */
-case class Mapped[T](v: Val[T], name: String):
+case class Mapped[T](v: Val[T], nameOption: Option[String]):
   def toTuple = v -> name
+  def name = nameOption.getOrElse(v.name)
 
 /**
  * Operations on inputs
