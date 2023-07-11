@@ -26,17 +26,17 @@ import org.openmole.plugin.task.container._
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object CORMASTask {
+object CORMASTask:
 
-  implicit def isTask: InputOutputBuilder[CORMASTask] = InputOutputBuilder(Focus[CORMASTask](_.config))
-  implicit def isExternal: ExternalBuilder[CORMASTask] = ExternalBuilder(Focus[CORMASTask](_.external))
-  implicit def isInfo: InfoBuilder[CORMASTask] = InfoBuilder(Focus[CORMASTask](_.info))
-  implicit def isMapped: MappedInputOutputBuilder[CORMASTask] = MappedInputOutputBuilder(Focus[CORMASTask](_.mapped))
+  given InputOutputBuilder[CORMASTask] = InputOutputBuilder(Focus[CORMASTask](_.config))
+  given ExternalBuilder[CORMASTask] = ExternalBuilder(Focus[CORMASTask](_.external))
+  given InfoBuilder[CORMASTask] = InfoBuilder(Focus[CORMASTask](_.info))
+  given MappedInputOutputBuilder[CORMASTask] = MappedInputOutputBuilder(Focus[CORMASTask](_.mapped))
 
   def cormasImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
-    script:               FromContext[String],
+    script:               RunnableScript,
     forceUpdate:          Boolean                       = false,
     errorOnReturnValue:   Boolean                       = true,
     returnValue:          OptionalArgument[Val[Int]]    = None,
@@ -48,7 +48,7 @@ object CORMASTask {
     clearContainerCache:    Boolean         = false,
     version:                String          = "latest",
     containerSystem:        ContainerSystem = ContainerSystem.default,
-    installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask = {
+    installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask =
 
     val preparedImage = ContainerTask.install(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
@@ -66,14 +66,12 @@ object CORMASTask {
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig())
-  }
 
-}
 
 case class CORMASTask(
   image:                InstalledImage,
   containerSystem:      ContainerSystem,
-  script:               FromContext[String],
+  script:               RunnableScript,
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
   stdOut:               Option[Val[String]],
@@ -83,13 +81,13 @@ case class CORMASTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped: MappedInputOutputConfig) extends Task with ValidateTask {
+  mapped: MappedInputOutputConfig) extends Task with ValidateTask:
 
   lazy val containerPoolKey = ContainerTask.newCacheKey
 
-  override def validate = container.validateContainer(Vector(), environmentVariables, external) ++ script.validate
+  override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
+  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p ⇒
     import p._
     import Mapped.noFile
 
@@ -101,52 +99,53 @@ case class CORMASTask(
     def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
     def inputDictionary = JObject(inputsFields: _*)
 
-    def readOutputJSON(file: File) = {
+    def readOutputJSON(file: File) =
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val outputValues = parse(file.content)
       val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
-      noFile(mapped.outputs).map { o ⇒
+      noFile(mapped.outputs).map: o ⇒
         jValueToVariable(
           outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], 
           o.v,
           unwrapArrays = true)
-      }
-    }
 
     val outputFile = Val[File]("outputFile", Namespace("CormasTask"))
+    val jsonInputs = executionContext.taskExecutionDirectory.newFile("inputs", ".json")
+    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".st")
 
-    tmpDirectory.withTmpFile("inputs", ".json") { jsonInputs ⇒
-      jsonInputs.content = compact(render(inputDictionary))
+    def scriptName = "_script_.st"
+    def workDirectory = "/_workdirectory_"
 
-      def containerTask =
-        ContainerTask.internal(
-          containerSystem = containerSystem,
-          image = image,
-          command = s"""./pharo --headless Pharo.image eval '${script.from(context)}'""",
-          workDirectory = None,
-          relativePathRoot = None,
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          reuseContainer = true,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = InputOutputConfig(),
-          external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
-          resources += (jsonInputs, inputJSONName, true),
-          outputFiles += (outputJSONName, outputFile),
-          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-        )
+    jsonInputs.content = compact(render(inputDictionary))
+    scriptFile.content = RunnableScript.content(script)
 
-      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
-      resultContext ++ readOutputJSON(resultContext(outputFile))
-    }
+    def containerTask =
+      ContainerTask.isolatedWorkdirectory(executionContext)(
+        containerSystem = containerSystem,
+        image = image,
+        command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
+        workDirectory = workDirectory,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = InputOutputConfig(),
+        external = external,
+        info = info,
+        containerPoolKey = containerPoolKey) set (
+        resources += (jsonInputs, inputJSONName, true),
+        resources += (scriptFile, scriptName, true),
+        outputFiles += (outputJSONName, outputFile),
+        Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+        Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+      )
 
-  }
+    val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+    resultContext ++ readOutputJSON(resultContext(outputFile))
 
-}
+
+
+
