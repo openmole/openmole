@@ -19,7 +19,7 @@ package org.openmole.gui.server.core
 
 import java.util.concurrent.Future
 import org.openmole.core.event.{EventDispatcher, Listner}
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.execution.{Environment, SubmissionEnvironment}
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.MoleTask

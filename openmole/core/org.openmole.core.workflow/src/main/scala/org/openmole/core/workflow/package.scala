@@ -23,7 +23,7 @@ package workflow {
   import org.openmole.core.expansion._
   import org.openmole.core.keyword.KeyWordPackage
   import org.openmole.core.script.CodePackage
-  import org.openmole.core.workflow.builder.BuilderPackage
+  import org.openmole.core.setter.BuilderPackage
   import org.openmole.core.workflow.mole.MolePackage
   import org.openmole.core.workflow.composition.CompositionPackage
   import org.openmole.core.workflow.hook.HookPackage

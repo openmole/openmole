@@ -1,8 +1,7 @@
-package org.openmole.core.workflow.builder
+package org.openmole.core.setter
 
 import monocle.{Iso, Lens}
 import org.openmole.core.context.*
-import org.openmole.core.workflow.tools.*
 import monocle.Focus
 import org.openmole.core.expansion.{DefaultSet, FromContext, ScalaCode}
 

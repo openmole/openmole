@@ -4,7 +4,7 @@ import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.builder.ValueAssignment
+import org.openmole.core.setter.ValueAssignment
 import org.openmole.tool.collection.DoubleRange
 
 import java.io.File

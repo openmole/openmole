@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core.workflow.builder
+package org.openmole.core.setter
 
 import monocle.*
 import org.openmole.core.context.{ PrototypeSet, Val }

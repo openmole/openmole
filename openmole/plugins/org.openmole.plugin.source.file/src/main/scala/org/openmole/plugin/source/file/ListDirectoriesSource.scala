@@ -23,7 +23,7 @@ import monocle.Focus
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.dsl._
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.mole._
 
 object ListDirectoriesSource {

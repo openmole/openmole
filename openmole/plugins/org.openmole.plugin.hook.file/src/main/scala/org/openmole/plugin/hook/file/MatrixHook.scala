@@ -4,7 +4,7 @@ import monocle.Focus
 import org.openmole.core.context.Context
 import org.openmole.core.dsl.*
 import org.openmole.core.expansion.*
-import org.openmole.core.workflow.builder.*
+import org.openmole.core.setter.*
 import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.validation.*

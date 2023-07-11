@@ -25,7 +25,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.serializer._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.mole._
 
 object LoadSource {

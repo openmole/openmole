@@ -33,7 +33,7 @@ import mgo.tools.CanBeNaN
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.keyword.{ In, Under }
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
+import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective._

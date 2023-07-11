@@ -9,7 +9,7 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask

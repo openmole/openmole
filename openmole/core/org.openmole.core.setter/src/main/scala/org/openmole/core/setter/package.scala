@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.builder
+package org.openmole.core.setter
 
 import org.openmole.core.context.*
 import org.openmole.core.expansion
 import org.openmole.core.expansion.*
 import org.openmole.core.keyword.:=
-import org.openmole.core.workflow.tools.*
-import scalaz.Alpha.T
 
 /**
  * Part of the dsl for task properties (inputs, outputs, assignements)
@@ -35,48 +33,29 @@ object Setter:
 trait Setter[O, T]:
   def set(o: O): T => T
 
-object IO:
-  implicit def valToIO[T](v: Val[T]): RawVal[T] = RawVal(v)
-
-  def collectVals(xs: Iterable[IO]) =
-    xs.collect {
-      case x: RawVal[_] ⇒ x.v
-      case x: Mapped[_] ⇒ x.v
-    }
-
-  def collectMapped(xs: Iterable[IO]) =
-    xs.collect { case x: Mapped[_] ⇒ x }
-
-/**
- * Wrapper for prototypes as input/output
- */
-sealed trait IO
-
-/**
- * Single prototype
- * @param v
- */
-case class RawVal[T](v: Val[T]) extends IO
 
 object Mapped:
+  given [T]: Conversion[Val[T], Mapped[T]] = v => Mapped(v, v.name)
+
+  def vals(xs: Iterable[Mapped[_]]) = xs.map(_.v)
+
   def files(mapped: Vector[Mapped[_]]) =
-    mapped.flatMap {
+    mapped.flatMap:
       case Mapped(Val.caseFile(v), name) ⇒ Seq(Mapped[java.io.File](v, name))
       case m                             ⇒ Seq()
-    }
+
 
   def noFile(mapped: Vector[Mapped[_]]) =
-    mapped.flatMap {
+    mapped.flatMap:
       case Mapped(Val.caseFile(v), _) ⇒ Seq[Mapped[_]]()
       case m                          ⇒ Seq(m)
-    }
 
 /**
  * Prototype mapped to a variable name
  * @param v
  * @param name
  */
-case class Mapped[T](v: Val[T], name: String) extends IO:
+case class Mapped[T](v: Val[T], name: String):
   def toTuple = v -> name
 
 /**
@@ -85,11 +64,11 @@ case class Mapped[T](v: Val[T], name: String) extends IO:
 class Inputs:
   def +=[T: InputBuilder](d: Val[_]*): T ⇒ T =
     implicitly[InputBuilder[T]].inputs.modify(_ ++ d)
-  def +=[T: MappedInputBuilder: InputBuilder](mapped: IO*): T ⇒ T =
-    (this ++= IO.collectVals(mapped)) andThen implicitly[MappedInputBuilder[T]].mappedInputs.modify(_ ++ IO.collectMapped(mapped))
+  def +=[T: MappedInputBuilder: InputBuilder](mapped: Mapped[_]*): T ⇒ T =
+    (this ++= Mapped.vals(mapped)) andThen implicitly[MappedInputBuilder[T]].mappedInputs.modify(_ ++ mapped)
 
   def ++=[T: InputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
-  def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
+  def ++=[T: MappedInputBuilder: InputBuilder](mapped: Iterable[Mapped[_]]*): T ⇒ T = +=[T](mapped.flatten: _*)
 
 /**
  * Operations on outputs
@@ -98,19 +77,18 @@ class Outputs:
   def +=[T: OutputBuilder](d: Val[_]*): T ⇒ T =
     implicitly[OutputBuilder[T]].outputs.modify(_ ++ d)
 
-  def +=[T: MappedOutputBuilder: OutputBuilder](mapped: IO*): T ⇒ T =
-    (this ++= IO.collectVals(mapped)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ IO.collectMapped(mapped))
+  def +=[T: MappedOutputBuilder: OutputBuilder](mapped: Mapped[_]*): T ⇒ T =
+    (this ++= Mapped.vals(mapped)) andThen implicitly[MappedOutputBuilder[T]].mappedOutputs.modify(_ ++ mapped)
 
   def ++=[T: OutputBuilder](d: Iterable[Val[_]]*): T ⇒ T = +=[T](d.flatten: _*)
-  def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[IO]*): T ⇒ T = +=[T](mapped.flatten: _*)
+  def ++=[T: MappedOutputBuilder: OutputBuilder](mapped: Iterable[Mapped[_]]*): T ⇒ T = +=[T](mapped.flatten: _*)
 
 
 class ExploredOutputs:
-  def +=[T: OutputBuilder](ds: Val[_ <: Array[_]]*): T ⇒ T = (t: T) ⇒ {
+  def +=[T: OutputBuilder](ds: Val[_ <: Array[_]]*): T ⇒ T = (t: T) ⇒
     def outputs = implicitly[OutputBuilder[T]].outputs
     def add = ds.filter(d ⇒ !outputs.get(t).contains(d))
     (outputs.modify(_ ++ add) andThen outputs.modify(_.explore(ds.map(_.name): _*)))(t)
-  }
 
   def ++=[T: OutputBuilder](d: Iterable[Val[_ <: Array[_]]]*): T ⇒ T = +=[T](d.flatten: _*)
 
@@ -127,7 +105,7 @@ class Name:
 /**
  * DSL for i/o in itself
  */
-trait BuilderPackage {
+trait BuilderPackage:
   final lazy val inputs: Inputs = new Inputs
   final lazy val outputs: Outputs = new Outputs
   final lazy val exploredOutputs: ExploredOutputs = new ExploredOutputs
@@ -137,12 +115,11 @@ trait BuilderPackage {
    * operators on both inputs and outputs
    * @param io
    */
-  implicit class InputsOutputsDecorator(io: (Inputs, Outputs)) {
+  implicit class InputsOutputsDecorator(io: (Inputs, Outputs)):
     def +=[T: InputBuilder: OutputBuilder](ps: Val[_]*): T ⇒ T =
       (inputs.+=(ps*)) andThen (outputs.+=(ps*))
     def ++=[T: InputBuilder: OutputBuilder](ps: Iterable[Val[_]]*): T ⇒ T =
       (inputs.++=(ps*)) andThen (outputs.++=(ps*))
-  }
 
   implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]): S => S = implicitly[Setter[O, S]].set(o)(_)
   implicit def seqOfSetterToFunction[O, S](o: Seq[O])(implicit setter: Setter[O, S]): S => S = Function.chain(o.map(o => implicitly[Setter[O, S]].set(o)(_)))
@@ -176,7 +153,7 @@ trait BuilderPackage {
    * @param p
    * @tparam T
    */
-  implicit class BuildMapped[T](p: Val[T]) {
+  implicit class BuildMapped[T](p: Val[T]):
     /**
      * mapped to its own simple name
      * @return
@@ -189,7 +166,6 @@ trait BuilderPackage {
      * @return
      */
     def mapped(name: String) = Mapped(p, name)
-  }
 
   final lazy val name = new Name
 
@@ -202,43 +178,25 @@ trait BuilderPackage {
    * @param v
    * @tparam T
    */
-  implicit class ValueAssignmentDecorator[T](v: Val[T]) {
+  implicit class ValueAssignmentDecorator[T](v: Val[T]):
     def :=(t: T): ValueAssignment[T] = new :=(v, t)
     def :=(t: FromContext[T]): ValueAssignment[T] = new :=(v, t)
-  }
-}
 
-object DefinitionScope {
-  case class Internal(name: String) extends DefinitionScope
-  case object User extends DefinitionScope
 
-  implicit def internal(scope: String): Internal = Internal(scope)
 
-  object user {
-    implicit def default: DefinitionScope = User
-  }
-
-}
-
-sealed trait DefinitionScope
-
-object ValueAssignment{
-
-  object Untyped {
+object ValueAssignment:
+  object Untyped:
     implicit def converter[T](v: ValueAssignment[T]): Untyped = untyped(v)
-  }
 
-  case class Untyped(v: Any) {
+  case class Untyped(v: Any):
     type T
     val assignment = v.asInstanceOf[ValueAssignment[T]]
     export assignment.*
-  }
 
   def untyped[TV](v: ValueAssignment[TV]) = 
-    new Untyped(v) {
+    new Untyped(v):
       type T = TV
-    }
-} 
+
 type ValueAssignment[T] = :=[Val[T], FromContext[T]]
 
 

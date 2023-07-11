@@ -187,7 +187,8 @@ def allCore = Seq(
   json,
   highlight,
   namespace,
-  pluginRegistry)
+  pluginRegistry,
+  setter)
 
 lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = Seq("*")) settings (coreSettings: _*) settings(
   defaultActivator,
@@ -196,6 +197,10 @@ lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = S
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless), defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings: _*)
+
+lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) settings(
+  defaultActivator
+) dependsOn(context, expansion, keyword) settings (coreSettings: _*)
 
 lazy val expansion = OsgiProject(coreDir, "org.openmole.core.expansion", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.cats)
@@ -226,7 +231,8 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   json,
   openmoleBuildInfo,
   pluginRegistry,
-  timeService) settings (coreSettings: _*)
+  timeService,
+  setter) settings (coreSettings: _*)
 
 lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,

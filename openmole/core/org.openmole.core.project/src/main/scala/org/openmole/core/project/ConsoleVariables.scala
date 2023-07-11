@@ -20,7 +20,7 @@ package org.openmole.core.project
 import org.openmole.core.compiler._
 import org.openmole.core.services._
 import org.openmole.core.timeservice.TimeService
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.tool.file._
 

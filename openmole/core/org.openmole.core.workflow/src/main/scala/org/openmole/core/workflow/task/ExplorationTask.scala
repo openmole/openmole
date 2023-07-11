@@ -26,7 +26,7 @@ import org.openmole.core.workflow.sampling._
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 import cats.implicits._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.tools._
 
 import scala.collection.mutable

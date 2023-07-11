@@ -27,7 +27,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.{DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig}
+import org.openmole.core.setter.{DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig}
 import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}

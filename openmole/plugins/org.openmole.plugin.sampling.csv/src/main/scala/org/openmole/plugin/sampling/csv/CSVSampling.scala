@@ -21,7 +21,7 @@ import java.io.File
 import monocle.{ Lens, Focus }
 import org.openmole.core.context.{ PrototypeSet, Val, Variable }
 import org.openmole.core.expansion.{ FromContext, Validate }
-import org.openmole.core.workflow.builder.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder }
+import org.openmole.core.setter.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder }
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.tools._
 

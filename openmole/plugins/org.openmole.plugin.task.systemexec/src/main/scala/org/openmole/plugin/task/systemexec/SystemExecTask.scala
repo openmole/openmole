@@ -22,12 +22,12 @@ import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats.syntax.traverse._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.plugin.task.external._
 import org.openmole.core.tools.service.OS
-import org.openmole.core.workflow.builder.InfoBuilder
+import org.openmole.core.setter.InfoBuilder
 
 object SystemExecTask {
 

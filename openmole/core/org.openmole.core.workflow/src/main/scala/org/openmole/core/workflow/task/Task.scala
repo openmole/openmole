@@ -26,7 +26,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
-import org.openmole.core.workflow.builder.{DefinitionScope, InfoConfig, InputOutputConfig}
+import org.openmole.core.setter.{DefinitionScope, InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.tools.*

@@ -22,11 +22,11 @@ import java.io.File
 import monocle.Focus
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ ExpandedString, FromContext }
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.dsl
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.builder.InfoBuilder
+import org.openmole.core.setter.InfoBuilder
 import org.openmole.plugin.task.template.TemplateFileFromInputTask
 import org.openmole.plugin.task.template.TemplateFileFromInputTask
 

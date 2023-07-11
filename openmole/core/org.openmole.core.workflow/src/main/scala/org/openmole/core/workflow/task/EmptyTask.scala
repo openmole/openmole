@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 
 object EmptyTask {
 

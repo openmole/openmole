@@ -27,7 +27,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.sampling._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.scalatest._
 
 import scala.collection.mutable.ListBuffer

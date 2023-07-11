@@ -5,9 +5,9 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
+import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
-import org.openmole.plugin.method.evolution.Objective.{ ToObjective }
+import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 

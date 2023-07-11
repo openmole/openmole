@@ -10,7 +10,7 @@ import org.openmole.core.networkservice._
 import org.openmole.core.preference._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace._

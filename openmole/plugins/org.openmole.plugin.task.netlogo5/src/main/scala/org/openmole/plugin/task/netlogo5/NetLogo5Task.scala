@@ -21,7 +21,7 @@ import java.io.File
 
 import monocle.Focus
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace

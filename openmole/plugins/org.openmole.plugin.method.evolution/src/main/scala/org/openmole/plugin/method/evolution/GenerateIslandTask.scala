@@ -21,7 +21,7 @@ import org.openmole.core.context.Variable
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 
 object GenerateIslandTask {
 

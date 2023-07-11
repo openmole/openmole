@@ -8,7 +8,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, InstalledImage }
@@ -80,7 +80,7 @@ case class CORMASTask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  config:              InputOutputConfig,
+  config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
   mapped: MappedInputOutputConfig) extends Task with ValidateTask {

@@ -23,7 +23,7 @@ import org.openmole.core.context._
 import org.openmole.core.event._
 import org.openmole.core.exception._
 import org.openmole.core.expansion._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._

@@ -19,7 +19,7 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.workflow.builder.*
+import org.openmole.core.setter.*
 import monocle.macros.*
 import org.openmole.core.workflow.format.{CSVOutputFormat, WritableOutput}
 import org.openmole.plugin.task.tools.*

@@ -5,7 +5,7 @@ import java.io.PrintStream
 import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.csv
 import org.openmole.core.expansion.FromContext
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.format.{ CSVOutputFormat, WritableOutput }
 import org.openmole.core.workflow.tools.OptionalArgument

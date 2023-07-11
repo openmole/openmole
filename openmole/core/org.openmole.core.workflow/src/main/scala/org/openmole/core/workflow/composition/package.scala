@@ -28,7 +28,7 @@ import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ Condition, FromContext, Validate }
 import org.openmole.core.keyword.{ By, On }
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ ToDestination, ToOrigin }
 import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
 import org.openmole.core.workflow.format.{ CSVOutputFormat, OutputFormat, WritableOutput }

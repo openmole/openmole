@@ -10,7 +10,7 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.builder.*
+import org.openmole.core.setter.*
 import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.validation.*
 import org.openmole.core.workspace.{TmpDirectory, Workspace}

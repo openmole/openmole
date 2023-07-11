@@ -3,7 +3,7 @@ package org.openmole.core.workflow.mole
 import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.builder.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
+import org.openmole.core.setter.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.validation.ValidateSource
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random.RandomProvider

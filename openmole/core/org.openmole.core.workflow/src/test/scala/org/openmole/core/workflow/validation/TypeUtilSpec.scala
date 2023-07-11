@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.validation
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.mole._

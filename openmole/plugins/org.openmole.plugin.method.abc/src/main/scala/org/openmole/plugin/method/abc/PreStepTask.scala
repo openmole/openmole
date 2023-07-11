@@ -7,7 +7,7 @@ import mgo.abc._
 import org.openmole.core.context.Variable
 import org.openmole.core.expansion.FromContext
 import org.openmole.core.tools.math._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 
 object PreStepTask {
 

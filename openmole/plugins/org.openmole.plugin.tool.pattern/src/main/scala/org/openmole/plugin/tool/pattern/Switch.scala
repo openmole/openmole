@@ -18,7 +18,7 @@ package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.expansion.Condition
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 
 object Case {
   def apply(dsl: DSL): Case = Case(Condition.True, dsl)

@@ -5,8 +5,8 @@ package object extension:
   type FromContext[+T] = org.openmole.core.expansion.FromContext[T]
   lazy val FromContext = org.openmole.core.expansion.FromContext
 
-  type DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
-  def DefinitionScope = org.openmole.core.workflow.builder.DefinitionScope
+  type DefinitionScope = org.openmole.core.setter.DefinitionScope
+  def DefinitionScope = org.openmole.core.setter.DefinitionScope
 
   type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
   def CacheKey = org.openmole.tool.cache.CacheKey
@@ -84,7 +84,7 @@ package object extension:
   type On[+A, +B] = org.openmole.core.keyword.On[A, B]
   type By[+A, +B] = org.openmole.core.keyword.By[A, B]
 
-  export org.openmole.core.workflow.builder.{
+  export org.openmole.core.setter.{
       ValueAssignment,
       InputOutputConfig,
       InfoConfig,

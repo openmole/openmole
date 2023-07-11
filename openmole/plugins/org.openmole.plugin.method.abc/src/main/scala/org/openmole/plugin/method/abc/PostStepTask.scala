@@ -3,8 +3,8 @@ package org.openmole.plugin.method.abc
 import mgo.abc.{ MonAPMC, APMC }
 
 import org.openmole.core.context.Variable
-import org.openmole.core.dsl.{ OptionalArgument, _ }
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.dsl.*
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task.FromContextTask
 import util._
 

@@ -23,7 +23,7 @@ import org.openmole.core.expansion.*
 import org.openmole.core.tools.service.OS
 //import java.io._
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.builder.{InputOutputBuilder, Setter}
+import org.openmole.core.setter.{InputOutputBuilder, Setter}
 
 package external:
 

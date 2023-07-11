@@ -20,7 +20,7 @@ package org.openmole.plugin.task.tools
 import org.openmole.core.context.{ Val, Variable }
 import org.openmole.core.dsl
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task._
 
 import scala.reflect.ClassTag

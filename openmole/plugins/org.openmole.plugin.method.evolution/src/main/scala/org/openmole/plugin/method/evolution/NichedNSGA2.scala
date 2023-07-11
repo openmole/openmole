@@ -9,7 +9,7 @@ import mgo.evolution.breeding._
 import mgo.evolution.elitism._
 import mgo.evolution.niche._
 import monocle.macros.GenLens
-import org.openmole.core.workflow.builder.{ DefinitionScope, ValueAssignment }
+import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }
 import org.openmole.core.workflow.domain._
 import org.openmole.core.workflow.sampling._
 import org.openmole.plugin.method.evolution.Genome.Suggestion

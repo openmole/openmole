@@ -26,7 +26,7 @@ import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion._
 import org.openmole.core.tools.io.Prettifier._
-import org.openmole.core.workflow.builder.MappedInputOutputConfig
+import org.openmole.core.setter.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.validation._

@@ -24,7 +24,7 @@ import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.composition.TaskNode
 import org.openmole.core.workflow.dsl._

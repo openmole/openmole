@@ -21,7 +21,7 @@ import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 
 package netlogo:
-  import org.openmole.core.workflow.builder._
+  import org.openmole.core.setter._
 
   trait NetLogoPackage:
     class NetLogoInputs:

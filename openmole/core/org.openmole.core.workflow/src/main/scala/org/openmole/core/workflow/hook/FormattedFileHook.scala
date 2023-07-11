@@ -2,8 +2,8 @@ package org.openmole.core.workflow.hook
 
 import org.openmole.core.context._
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.expansion.{ FromContext }
-import org.openmole.core.workflow.builder._
+import org.openmole.core.expansion.FromContext
+import org.openmole.core.setter._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.format.OutputFormat.*
 import org.openmole.core.workflow.format._

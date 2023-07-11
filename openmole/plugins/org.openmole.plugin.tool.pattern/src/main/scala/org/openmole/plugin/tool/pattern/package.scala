@@ -17,7 +17,7 @@
 package org.openmole.plugin.tool
 
 import org.openmole.core.dsl._
-import org.openmole.core.workflow.builder.DefinitionScope
+import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task.{ EmptyTask, MoleTask }
 
 package object pattern {

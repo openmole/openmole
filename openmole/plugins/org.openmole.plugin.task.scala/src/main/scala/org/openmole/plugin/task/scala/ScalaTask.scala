@@ -25,7 +25,7 @@ import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.expansion.{ FromContext, ScalaCompilation }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.validation._
 import org.openmole.plugin.task.external.{ External, ExternalBuilder }
 import org.openmole.core.dsl._

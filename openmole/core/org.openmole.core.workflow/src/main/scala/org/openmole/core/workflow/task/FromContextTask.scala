@@ -4,7 +4,7 @@ import org.openmole.core.context.{ Context, Val }
 import org.openmole.core.expansion.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.task
 import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.TmpDirectory

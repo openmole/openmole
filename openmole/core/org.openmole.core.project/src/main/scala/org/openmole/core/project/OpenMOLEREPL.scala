@@ -45,7 +45,7 @@ object OpenMOLEREPL {
 
   def dslImport = Seq(
     classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + ".*",
-    classOf[org.openmole.core.workflow.builder.DefinitionScope].getName + ".user.*"
+    classOf[org.openmole.core.setter.DefinitionScope].getName + ".user.*"
   ) ++ autoImports
 
   def imports = initialisationCommands(dslImport).mkString("\n")

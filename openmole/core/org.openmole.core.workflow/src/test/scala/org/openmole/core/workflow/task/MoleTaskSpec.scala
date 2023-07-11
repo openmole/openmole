@@ -23,7 +23,7 @@ import org.scalatest._
 import org.openmole.core.workflow.mole._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workflow.puzzle._
-import org.openmole.core.workflow.builder._
+import org.openmole.core.setter._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.test.TestTask
