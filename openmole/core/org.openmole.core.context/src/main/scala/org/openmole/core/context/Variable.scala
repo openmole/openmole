@@ -188,9 +188,8 @@ object Variable:
  * @param value the value
  * @tparam T type of the Variable
  */
-case class Variable[@specialized T](prototype: Val[T], value: T) {
+case class Variable[@specialized T](prototype: Val[T], value: T):
   override def toString: String = prettified(Int.MaxValue)
   def prettified(snipArray: Int): String = s"${prototype.name}=${if (value != null) value.prettify(snipArray) else "null"}"
   def name = prototype.name
-}
 

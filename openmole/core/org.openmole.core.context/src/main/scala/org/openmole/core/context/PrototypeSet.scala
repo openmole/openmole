@@ -23,7 +23,7 @@ object PrototypeSet {
   implicit def traversableToProtoypeSet(ps: Iterable[Val[_]]): PrototypeSet = PrototypeSet(ps.toSeq)
   val empty = PrototypeSet(Vector.empty)
 
-  def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.distinct, explore)
+  def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.reverse.distinct.reverse, explore)
   def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[_]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
 }
 
@@ -109,10 +109,9 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d
    * @return
    */
-  def --(d: Iterable[Val[_]]) = {
+  def --(d: Iterable[Val[_]]) =
     val dset = d.map(_.name).toSet
     PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
-  }
 
   /**
    * Check if a prototype is in the set by name

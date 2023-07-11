@@ -33,28 +33,28 @@ import org.openmole.core.dsl.`extension`._
 
 import _root_.scala.util._
 
-object ScalaTask {
+object ScalaTask:
+  given InputOutputBuilder[ScalaTask] = InputOutputBuilder(Focus[ScalaTask](_.config))
+  given ExternalBuilder[ScalaTask] = ExternalBuilder(Focus[ScalaTask](_.external))
+  given InfoBuilder[ScalaTask] = InfoBuilder(Focus[ScalaTask](_.info))
+  given MappedInputOutputBuilder[ScalaTask] = MappedInputOutputBuilder(Focus[ScalaTask](_.mapped))
 
-  implicit def isTask: InputOutputBuilder[ScalaTask] = InputOutputBuilder(Focus[ScalaTask](_.config))
-  implicit def isExternal: ExternalBuilder[ScalaTask] = ExternalBuilder(Focus[ScalaTask](_.external))
-  implicit def isInfo: InfoBuilder[ScalaTask] = InfoBuilder(Focus[ScalaTask](_.info))
-
-  implicit def isJVM: JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask]:
+  given JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask]:
     override def libraries = Focus[ScalaTask](_.libraries)
     override def plugins = Focus[ScalaTask](_.plugins)
 
   def defaultPlugins = pluginsOf(scala.xml.XML).toVector
 
-  def apply(source: String, libraries: Seq[File] = Vector())(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(source: String, libraries: Seq[File] = Vector())(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ScalaTask(
       source,
       plugins = defaultPlugins,
       libraries = libraries.toVector,
       config = InputOutputConfig(),
       external = External(),
-      info = InfoConfig()
+      info = InfoConfig(),
+      mapped = MappedInputOutputConfig()
     )
-  }
 
   def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
@@ -62,7 +62,6 @@ object ScalaTask {
   def apply(f: Context ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, _, _) ⇒ Context(f(ctx): _*))
 
-}
 
 case class ScalaTask(
   sourceCode: String,
@@ -70,56 +69,65 @@ case class ScalaTask(
   libraries:  Vector[File],
   config:     InputOutputConfig,
   external:   External,
-  info:       InfoConfig
-) extends Task with ValidateTask with Plugins { scalaTask =>
+  info:       InfoConfig,
+  mapped:     MappedInputOutputConfig
+) extends Task with ValidateTask with Plugins:
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
+  private def toMappedVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
+    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
+
+  lazy val mappedInputs = toMappedVals(this.inputs, mapped.inputs)
+  lazy val mappedOutputs = toMappedVals(this.outputs, mapped.outputs)
+
   def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) =
-    //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
+  //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
     ScalaCompilation.static(
       sourceCode,
-      inputs ++ Seq(JVMLanguageTask.workDirectory),
-      ScalaCompilation.WrappedOutput(scalaTask.outputs),
+      mappedInputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
+      ScalaCompilation.WrappedOutput(mappedOutputs),
       libraries = libraries,
       plugins = plugins
     )
 
-  override def validate = {
-    def libraryErrors = libraries.flatMap { l ⇒
-      l.exists() match {
-        case false ⇒ Some(new UserBadDataError(s"Library file $l does not exist"))
-        case true  ⇒ None
-      }
-    }
+  override def validate =
+    def libraryErrors: Seq[Throwable] = libraries.flatMap: l ⇒
+      if !l.exists()
+      then Some(new UserBadDataError(s"Library file $l does not exist"))
+      else None
 
     Validate { p ⇒
       import p._
 
       def compilationError =
-        Try(compile(p.inputs)) match {
+        def mappedInputs = toMappedVals(p.inputs, mapped.inputs).toSeq
+        Try(compile(mappedInputs)) match
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
-        }
 
       libraryErrors ++ compilationError
     }
-  }
 
-  override def process(taskExecutionContext: TaskExecutionContext) = {
+  override def process(taskExecutionContext: TaskExecutionContext) = FromContext: p ⇒
+    def toMappedInputContext(context: Context, mapped: Seq[Mapped[_]]) =
+      context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name)))
+
+    def toMappedOutputContext(context: Context, mapped: Seq[Mapped[_]]) =
+      context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
+
     def processCode =
-      FromContext { p ⇒
+      FromContext: p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(scalaTask.inputs.toSeq))
+        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(mappedInputs.toSeq))
 
         val map = scalaCompilation(context, p.random, p.tmpDirectory)
-        scalaTask.outputs.toSeq.map {
+        mappedOutputs.toSeq.map {
           o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
         }: Context
-      }
 
-    JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, scalaTask.outputs)
-  }
-}
-
+    import p.*
+    def mappedContext = toMappedInputContext(context, mapped.inputs)
+    def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, mappedOutputs).from(mappedContext)
+    toMappedOutputContext(resultContext, mapped.outputs)
