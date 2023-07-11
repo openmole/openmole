@@ -198,9 +198,7 @@ lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = S
   libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless), defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings: _*)
 
-lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) settings(
-  defaultActivator
-) dependsOn(context, fromContext, keyword) settings (coreSettings: _*)
+lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) dependsOn(context, fromContext, keyword) settings (coreSettings: _*)
 
 lazy val fromContext = OsgiProject(coreDir, "org.openmole.core.fromcontext", imports = Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.cats)
