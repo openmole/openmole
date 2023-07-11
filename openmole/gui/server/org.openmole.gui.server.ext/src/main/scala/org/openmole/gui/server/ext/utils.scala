@@ -85,7 +85,7 @@ object utils:
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
       def size =
         if OMR.isOMR(f)
-        then OMR.diskUsage(f)
+        then Try { OMR.diskUsage(f) }.getOrElse(f.length())
         else f.length()
       Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
     else None
