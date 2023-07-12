@@ -28,20 +28,14 @@ import org.openmole.plugin.task.external.External._
  * task after its execution.
  *
  */
-object ExternalBuilder {
+object ExternalBuilder:
+  def apply[T](l: Lens[T, External]): ExternalBuilder[T] = new ExternalBuilder[T]:
+    override def inputFiles = l andThen Focus[External](_.inputFiles)
+    override def resources = l andThen Focus[External](_.resources)
+    override def outputFiles = l andThen Focus[External](_.outputFiles)
 
-  def apply[T](l: Lens[T, External]): ExternalBuilder[T] = new ExternalBuilder[T] {
-    override def inputFiles = l composeLens Focus[External](_.inputFiles)
-    override def resources = l composeLens Focus[External](_.resources)
-    override def outputFiles = l composeLens Focus[External](_.outputFiles)
-    override def inputFileArrays = l composeLens Focus[External](_.inputFileArrays)
-  }
 
-}
-
-trait ExternalBuilder[T] { builder ⇒
+trait ExternalBuilder[T]:
   def inputFiles: Lens[T, Vector[InputFile]]
-  def inputFileArrays: Lens[T, Vector[InputFileArray]]
   def outputFiles: Lens[T, Vector[OutputFile]]
   def resources: Lens[T, Vector[Resource]]
-}

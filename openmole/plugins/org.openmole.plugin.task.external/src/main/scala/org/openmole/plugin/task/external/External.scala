@@ -34,13 +34,6 @@ object External:
     link:        Boolean
   )
 
-  case class InputFileArray(
-    prototype: Val[Array[File]],
-    prefix:    FromContext[String],
-    suffix:    FromContext[String],
-    link:      Boolean
-  )
-
   case class OutputFile(
     origin:    FromContext[String],
     prototype: Val[File]
@@ -60,36 +53,21 @@ object External:
   type PathResolver = String ⇒ File
 
   def validate(external: External): Validate =
-    def resourceExists(resource: External.Resource) = Validate {
-      if (!resource.file.exists()) Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist.""")) else Seq.empty
-    }
+    def resourceExists(resource: External.Resource) = Validate:
+      if !resource.file.exists()
+      then Seq(new UserBadDataError(s"""File resource "${resource.file} doesn't exist."""))
+      else Seq.empty
 
-    external.inputFileArrays.flatMap(_.prefix.validate) ++
-      external.inputFileArrays.flatMap(_.suffix.validate) ++
-      external.inputFiles.flatMap(_.destination.validate) ++
+    external.inputFiles.flatMap(_.destination.validate) ++
       external.outputFiles.flatMap(_.origin.validate) ++
       external.resources.flatMap(_.destination.validate) ++
       external.resources.flatMap(resourceExists)
 
   protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map {
-      case InputFile(prototype, name, link) ⇒ prototype → DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
+      case InputFile(prototype, name, link) ⇒
+        prototype → DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
     }
-
-  protected def listInputFileArray(inputFileArrays: Vector[InputFileArray], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[Array[File]], Seq[DeployedFile])] =
-    for
-      ifa ← inputFileArrays
-    yield
-      def deployed =
-        context(ifa.prototype).zipWithIndex.map: (file, i) ⇒
-          DeployedFile(
-            file,
-            s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}",
-            link = ifa.link,
-            deployedFileType = DeployedFileType.InputFile)
-
-      (ifa.prototype, deployed.toSeq)
-
   protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] =
     val byLocation =
       resources.zipWithIndex.groupBy: (resource, _) ⇒
@@ -123,33 +101,20 @@ object External:
       copyFile(f, d)
       f → d
 
-  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) = 
+  def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) =
     val (copiedFilesVariable, copiedFilesInfo) =
-      listInputFiles(external.inputFiles, context).map {
-        case (p, f) ⇒
-          val d = destination(resolver, f)
-          copyFile(f, d)
-          (Variable(p, d), f → d)
+      listInputFiles(external.inputFiles, context).map { case (p, f) ⇒
+        val d = destination(resolver, f)
+        copyFile(f, d)
+        (Variable(p, d), f → d)
       }.unzip
 
-    val (copiedArrayFilesVariable, copiedFilesArrayInfo) =
-      listInputFileArray(external.inputFileArrays, context).map {
-        case (p, fs) ⇒
-          val copied =
-            fs.map { f ⇒
-              val d = destination(resolver, f)
-              copyFile(f, d)
-              f → d
-            }
-          (Variable(p, copied.unzip._2.toArray), copied)
-      }.unzip
-
-    (context ++ copiedFilesVariable ++ copiedArrayFilesVariable, copiedFilesInfo ++ copiedFilesArrayInfo.flatten)
+    (context ++ copiedFilesVariable, copiedFilesInfo)
 
   def deployInputFilesAndResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     deployAndListInputFiles(external: External, context, resolver)._1
 
-  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) = 
+  def deployAndListInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     val resourcesFiles = deployResources(external, context, resolver)
     val (newContext, inputFilesInfo) = deployInputFiles(external, context, resolver)
     (newContext, resourcesFiles ++ inputFilesInfo)
@@ -210,7 +175,6 @@ object External:
 import org.openmole.plugin.task.external.External._
 
 case class External(
-  inputFileArrays: Vector[External.InputFileArray] = Vector.empty,
   inputFiles:      Vector[External.InputFile]      = Vector.empty,
   outputFiles:     Vector[External.OutputFile]     = Vector.empty,
   resources:       Vector[External.Resource]       = Vector.empty

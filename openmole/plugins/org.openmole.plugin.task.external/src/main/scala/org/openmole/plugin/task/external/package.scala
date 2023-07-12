@@ -27,7 +27,7 @@ import org.openmole.core.setter.{InputOutputBuilder, Setter}
 
 package external:
 
-  trait ExternalPackage {
+  trait ExternalPackage:
 
     object InputFilesKeyword:
       object InputFilesSetter:
@@ -43,17 +43,6 @@ package external:
       def +=(p: Val[File], name: FromContext[String], link: Boolean = false) = InputFilesKeyword.InputFilesSetter(p, name, link = link)
 
     lazy val inputFiles = new InputFilesKeyword
-
-    class InputFileArraysKeyword:
-      /**
-       * Copy an array of files or directory from the dataflow to the task workspace. The files
-       * in the array are named prefix$nSuffix where $n i the index of the file in the array.
-       */
-      def +=[T: ExternalBuilder: InputOutputBuilder](p: Val[Array[File]], prefix: FromContext[String], suffix: FromContext[String] = "", link: Boolean = false): T ⇒ T =
-        (implicitly[ExternalBuilder[T]].inputFileArrays add External.InputFileArray(p, prefix, suffix, link)) andThen (inputs += p)
-
-    lazy val inputFileArrays = new InputFileArraysKeyword
-
 
     object OutputFilesKeyword:
       object OutputFilesSetter:
@@ -89,33 +78,28 @@ package external:
       def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os, head = head)
 
     lazy val resources = new ResourcesKeyword
-  }
 
 
 package object external extends ExternalPackage:
 
-  object EnvironmentVariable {
+  object EnvironmentVariable:
     implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
       EnvironmentVariable(toFromContextN.convert(tuple._1), toFromContextV.convert(tuple._2))
 
-  }
-
   case class EnvironmentVariable(name: FromContext[String], value: FromContext[String])
 
-  trait EnvironmentVariables[T] {
+  trait EnvironmentVariables[T]:
     def environmentVariables: monocle.Lens[T, Vector[EnvironmentVariable]]
-  }
 
   import org.openmole.tool.file._
 
-  def directoryContentInformation(directory: File, margin: String = "  ") = {
-    def fileInformation(file: File) = {
-      def permissions = {
+  def directoryContentInformation(directory: File, margin: String = "  ") =
+    def fileInformation(file: File) =
+      def permissions =
         val w = if (file.canWrite) "w" else ""
         val r = if (file.canRead) "r" else ""
         val x = if (file.canExecute) "x" else ""
         s"$r$w$x"
-      }
 
       def fileType =
         if (file.isDirectory) "directory"
@@ -124,8 +108,6 @@ package object external extends ExternalPackage:
         else "unknown"
 
       s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
-    }
 
     directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
-  }
 

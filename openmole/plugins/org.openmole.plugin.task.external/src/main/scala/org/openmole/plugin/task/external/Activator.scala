@@ -34,8 +34,7 @@ class Activator extends BundleActivator {
         WordHighLight("as"),
         WordHighLight("inputFiles"),
         WordHighLight("outputFiles"),
-        WordHighLight("resources"),
-        WordHighLight("inputFileArrays")
+        WordHighLight("resources")
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords, nameSpaceTraits = Vector(classOf[ExternalPackage]))

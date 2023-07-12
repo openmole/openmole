@@ -94,7 +94,6 @@ object Market {
       MarketEntry("Optimise Ackley function in Python", "ackley", Seq(python, ga, native, optimisation)),
 
       MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
-      MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
       MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
       MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
       MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
@@ -102,6 +101,7 @@ object Market {
       MarketEntry("NSGA2 Test Functions", "nsga2-test-functions", Seq(calibration, optimisation, scala, ga)),
       MarketEntry("Generate Visualisation", "genetic-algos-visu", Seq(ga, R)),
 
+      //MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
     )
   )
 
