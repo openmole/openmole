@@ -17,21 +17,13 @@
 
 package org.openmole.plugin.task.scala
 
-import java.io.File
-
-import monocle.Focus
-import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.fromcontext.{ FromContext, ScalaCompilation }
-import org.openmole.core.fileservice.FileService
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.serializer.plugin.Plugins
-import org.openmole.core.setter._
-import org.openmole.core.workflow.validation._
-import org.openmole.plugin.task.external.{ External, ExternalBuilder }
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.`extension`._
+import org.openmole.plugin.task.external.*
 
-import _root_.scala.util._
+import monocle.*
+import _root_.scala.util.*
 
 object ScalaTask:
   given InputOutputBuilder[ScalaTask] = InputOutputBuilder(Focus[ScalaTask](_.config))
@@ -78,8 +70,8 @@ case class ScalaTask(
   private def toMappedVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
     ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
 
-  lazy val mappedInputs = toMappedVals(this.inputs, mapped.inputs)
-  lazy val mappedOutputs = toMappedVals(this.outputs, mapped.outputs)
+  lazy val mappedInputs = toMappedVals(this.inputs, Mapped.noFile(mapped.inputs))
+  lazy val mappedOutputs = toMappedVals(this.outputs, Mapped.noFile(mapped.outputs))
 
   def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) =
   //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
@@ -101,8 +93,7 @@ case class ScalaTask(
       import p._
 
       def compilationError =
-        def mappedInputs = toMappedVals(p.inputs, mapped.inputs).toSeq
-        Try(compile(mappedInputs)) match
+        Try(compile(mappedInputs.toSeq)) match
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
 
@@ -128,6 +119,11 @@ case class ScalaTask(
         }: Context
 
     import p.*
-    def mappedContext = toMappedInputContext(context, mapped.inputs)
-    def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, external, processCode, mappedOutputs).from(mappedContext)
-    toMappedOutputContext(resultContext, mapped.outputs)
+    def mappedContext = toMappedInputContext(context, Mapped.noFile(mapped.inputs))
+    def externalWithFiles =
+      external.copy (
+        inputFiles = external.inputFiles ++ Mapped.files(mapped.inputs).map { m => External.InputFile(m.v, m.name, true) },
+        outputFiles = external.outputFiles ++ Mapped.files(mapped.outputs).map { m => External.OutputFile(m.name, m.v) }
+      )
+    def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, externalWithFiles, processCode, mappedOutputs).from(mappedContext)
+    toMappedOutputContext(resultContext, Mapped.noFile(mapped.outputs))

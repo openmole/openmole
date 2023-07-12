@@ -1,9 +1,8 @@
 package org.openmole.core.dsl
 
 package object extension:
-
-  type FromContext[+T] = org.openmole.core.fromcontext.FromContext[T]
-  lazy val FromContext = org.openmole.core.fromcontext.FromContext
+  export org.openmole.core.fromcontext.FromContext
+  export org.openmole.core.fromcontext.ScalaCompilation
 
   type DefinitionScope = org.openmole.core.setter.DefinitionScope
   def DefinitionScope = org.openmole.core.setter.DefinitionScope
@@ -104,7 +103,8 @@ package object extension:
   type Validate = org.openmole.core.fromcontext.Validate
   def Validate = org.openmole.core.fromcontext.Validate
 
-  type UserBadDataError = org.openmole.core.exception.UserBadDataError
+  export org.openmole.core.exception.{UserBadDataError, InternalProcessingError}
+
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet
 

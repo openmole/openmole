@@ -22,12 +22,11 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
 import org.openmole.core.workflow.tools.InputOutputCheck
 
-object External {
+object External:
   val PWD = Val[String]("PWD")
 
-  trait ToInputFile[T] {
+  trait ToInputFile[T]:
     def apply(t: T): InputFile
-  }
 
   case class InputFile(
     prototype:   Val[File],
@@ -54,12 +53,8 @@ object External {
     os:          OS
   )
 
-  sealed trait DeployedFileType
-
-  object DeployedFileType {
-    case object InputFile extends DeployedFileType
-    case object Resource extends DeployedFileType
-  }
+  enum DeployedFileType:
+    case InputFile, Resource
 
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
   type PathResolver = String ⇒ File
@@ -85,13 +80,15 @@ object External {
     for
       ifa ← inputFileArrays
     yield
-      (
-        ifa.prototype,
-        context(ifa.prototype).zipWithIndex.map {
-          case (file, i) ⇒
-            DeployedFile(file, s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}", link = ifa.link, deployedFileType = DeployedFileType.InputFile)
-        }.toSeq
-      )
+      def deployed =
+        context(ifa.prototype).zipWithIndex.map: (file, i) ⇒
+          DeployedFile(
+            file,
+            s"${ifa.prefix.from(context)}$i${ifa.suffix.from(context)}",
+            link = ifa.link,
+            deployedFileType = DeployedFileType.InputFile)
+
+      (ifa.prototype, deployed.toSeq)
 
   protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] =
     val byLocation =
@@ -168,16 +165,15 @@ object External {
   def contextFiles(outputs: PrototypeSet, context: Context): Seq[Variable[File]] =
     InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
 
-  def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context = {
+  def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     val resultContext = listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectories)
     val resultDirectory = newFile.newDir("externalresult")
     val outputContext = context ++ resultContext
     val result = outputContext ++ moveFilesOutOfWorkDirectory(outputs, outputContext, workDirectories, resultDirectory)
     fileService.deleteWhenEmpty(resultDirectory)
     result
-  }
 
-  def listOutputFiles(outputFiles: Vector[External.OutputFile], outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[Variable[File]] = {
+  def listOutputFiles(outputFiles: Vector[External.OutputFile], outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[Variable[File]] =
     val fileOutputs = outputFileVariables(outputFiles, context, resolver)
     val allFiles = (fileOutputs ++ contextFiles(outputs, context)).distinct
 
@@ -192,9 +188,8 @@ object External {
       allFiles.map { v ⇒ if (workDirectories.exists(_.isAParentOf(v.value))) Variable.copy(v)(value = v.value.realFile) else v }
 
     fetchedOutputFiles
-  }
 
-  def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) = {
+  def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) =
     val newFile = TmpDirectory(resultDirectory)
 
     contextFiles(outputs, context).map { v ⇒
@@ -210,8 +205,7 @@ object External {
         else v.value
       Variable.copy(v)(value = movedFile)
     }
-  }
-}
+
 
 import org.openmole.plugin.task.external.External._
 
