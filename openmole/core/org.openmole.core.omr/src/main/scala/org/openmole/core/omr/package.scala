@@ -195,11 +195,9 @@ object OMR:
         val content = readContent(data)
         index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
 
-  def methodName(file: File): String =
+  def methodName(file: File): Option[String] =
     val j = parse(file.content(gz = true)).toTry.get
-    j.hcursor.
-      downField(methodField).as[String].
-      toTry.get
+    j.hcursor.downField(methodField).as[String].toOption
 
   def writeCSV(
     file: File,

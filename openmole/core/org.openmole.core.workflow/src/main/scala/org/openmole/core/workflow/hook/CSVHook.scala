@@ -31,7 +31,8 @@ object CSVHook {
       values = values,
       exclude = exclude,
       append = !overwrite,
-      name = Some("CSVHook")
+      name = Some("CSVHook"),
+      metadata = None
     )
 
 }

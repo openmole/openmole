@@ -24,22 +24,22 @@ package org.openmole.core.workflow.composition
  */
 
 import java.io.PrintStream
-import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.fromcontext.{ Condition, FromContext, Validate }
-import org.openmole.core.keyword.{ By, On }
+import org.openmole.core.context.{Context, Val}
+import org.openmole.core.fromcontext.{Condition, FromContext, Validate}
+import org.openmole.core.keyword.{By, On}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
-import org.openmole.core.workflow.composition.DSL.{ ToDestination, ToOrigin }
-import org.openmole.core.workflow.execution.{ EnvironmentProvider, LocalEnvironmentProvider }
-import org.openmole.core.workflow.format.{ CSVOutputFormat, OutputFormat, WritableOutput }
-import org.openmole.core.workflow.hook.{ FormattedFileHook, Hook }
-import org.openmole.core.workflow.mole.{ MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source }
+import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
+import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
+import org.openmole.core.workflow.format.{CSVOutputFormat, OutputFormat, WritableOutput}
+import org.openmole.core.workflow.hook.{FormattedFileHook, Hook}
+import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
-import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, MoleTask, Task }
+import org.openmole.core.workflow.task.{EmptyTask, ExplorationTask, MoleTask, Task}
 import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.format.WritableOutput.Display
-import org.openmole.core.workflow.grouping.{ ByGrouping, Grouping }
-import org.openmole.core.workflow.transition._
+import org.openmole.core.workflow.grouping.{ByGrouping, Grouping}
+import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil
 
 object Puzzle {
@@ -182,12 +182,18 @@ class Puzzle(
   def defaults = Task.defaults(first.task(toMole, sources, hooks))
 }
 
+object SingleTaskMethod:
+  import org.openmole.core.omr.*
+  given MethodMetaData[SingleTaskMethod, None.type] = MethodMetaData(_ => "", _ => None)
+
+case class SingleTaskMethod()
+
 case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
   def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   def hook[F](
     output: WritableOutput,
     values: Seq[Val[_]]    = Vector.empty,
-    format: F              = CSVOutputFormat())(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, Any]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true))
+    format: F              = CSVOutputFormat())(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, SingleTaskMethod]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true, metadata = SingleTaskMethod()))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
 }
 

@@ -1,21 +1,21 @@
 package org.openmole.core.workflow.hook
 
-import org.openmole.core.context._
+import org.openmole.core.context.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fromcontext.FromContext
-import org.openmole.core.setter._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.format.OutputFormat.*
-import org.openmole.core.workflow.format._
+import org.openmole.core.workflow.format.*
 
-object FormattedFileHook {
+object FormattedFileHook:
 
   def apply[T, M](
     format:   T,
     output:   WritableOutput,
+    metadata: M,
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
-    metadata: M              = None,
     append: Boolean          = false,
     name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
 
@@ -32,4 +32,4 @@ object FormattedFileHook {
       context
     } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs ++= values)
 
-}
+

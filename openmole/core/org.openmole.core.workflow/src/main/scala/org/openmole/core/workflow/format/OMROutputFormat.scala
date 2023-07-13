@@ -21,7 +21,6 @@ import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 import java.io.SequenceInputStream
 
 object OMROutputFormat:
-
   implicit def outputFormat[M, MD](using default: OMROutputFormatDefault[M], methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, M] = new OutputFormat[OMROutputFormat, M]:
     override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M, append: Boolean): FromContext[Unit] = FromContext: p ⇒
       import p.*

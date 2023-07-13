@@ -205,7 +205,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     plugins.remove(path)
     Future.successful(())
 
-  override def omrMethod(path: SafePath)(using BasePath): Future[String] = Future.successful("stub")
+  override def omrMethod(path: SafePath)(using BasePath): Future[Option[String]] = Future.successful(None)
 
   override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = Future.successful(
     GUIOMRContent(

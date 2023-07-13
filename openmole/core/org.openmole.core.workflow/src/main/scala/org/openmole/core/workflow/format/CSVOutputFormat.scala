@@ -11,8 +11,8 @@ import org.openmole.core.exception.UserBadDataError
 
 object CSVOutputFormat:
 
-  implicit def format[H](using default: CSVOutputFormatDefault[H]): OutputFormat[CSVOutputFormat, H] = new OutputFormat[CSVOutputFormat, H] {
-    override def write(executionContext: HookExecutionContext)(f: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: H, append: Boolean): FromContext[Unit] = FromContext { p ⇒
+  implicit def format[MD](using default: CSVOutputFormatDefault[MD]): OutputFormat[CSVOutputFormat, MD] = new OutputFormat[CSVOutputFormat, MD] {
+    override def write(executionContext: HookExecutionContext)(f: CSVOutputFormat, output: WritableOutput, content: OutputFormat.OutputContent, method: MD, append: Boolean): FromContext[Unit] = FromContext { p ⇒
       import p._
 
       val format = CSVOutputFormatDefault.value(f, default)

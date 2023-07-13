@@ -493,7 +493,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   }
 
   // Analysis plugins
-  def omrMethodName(result: SafePath): String =
+  def omrMethodName(result: SafePath): Option[String] =
     import services.*
     val omrFile = safePathToFile(result)
     OMR.methodName(omrFile)
