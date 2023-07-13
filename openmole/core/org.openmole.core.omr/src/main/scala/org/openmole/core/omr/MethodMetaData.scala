@@ -20,6 +20,8 @@ package org.openmole.core.omr
 import io.circe.*
 
 object MethodMetaData:
-  def name(o: Any) = o.getClass.getSimpleName
+  def name(o: Any) =
+    val n = o.getClass.getSimpleName
+    if n.endsWith("$") then n.dropRight(1) else n
 
 case class MethodMetaData[M, MD](name: M => String, data: M => MD)(using val encoder: Encoder[MD])
