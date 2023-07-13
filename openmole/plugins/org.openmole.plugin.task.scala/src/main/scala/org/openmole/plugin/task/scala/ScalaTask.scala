@@ -67,11 +67,14 @@ case class ScalaTask(
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
 
-  private def toMappedVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
+  private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
     ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name))
 
-  lazy val mappedInputs = toMappedVals(this.inputs, Mapped.noFile(mapped.inputs))
-  lazy val mappedOutputs = toMappedVals(this.outputs, Mapped.noFile(mapped.outputs))
+  private def toMappedOutputVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
+    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
+
+  lazy val mappedInputs = toMappedInputVals(this.inputs, Mapped.noFile(mapped.inputs))
+  lazy val mappedOutputs = toMappedOutputVals(this.outputs, Mapped.noFile(mapped.outputs))
 
   def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) =
   //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
@@ -105,7 +108,7 @@ case class ScalaTask(
       context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name)))
 
     def toMappedOutputContext(context: Context, mapped: Seq[Mapped[_]]) =
-      context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
+      context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
 
     def processCode =
       FromContext: p ⇒
