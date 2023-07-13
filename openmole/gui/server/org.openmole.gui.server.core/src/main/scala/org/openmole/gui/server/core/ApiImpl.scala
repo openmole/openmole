@@ -357,21 +357,28 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val content = safePathToFile(script).content
 
     serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None))
-
-    def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean) =
+    
+    import scala.util.control.Breaks
+    def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean): Unit = Breaks.breakable:
       import services._
 
-      val envIds = ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
-      serverState.addRunningEnvironment(execId, envIds)
+      val envIds =
+        try ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
+        catch
+          case e: Throwable =>
+            serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+            Breaks.break()
 
+      serverState.addRunningEnvironment(execId, envIds)
       ex.listen(serverState.moleExecutionListener(execId, script))
-      envIds.foreach { case (envId, env) ⇒ env.listen(serverState.environmentListener(envId)) }
+      envIds.foreach { (envId, env) ⇒ env.listen(serverState.environmentListener(envId)) }
 
       catchAll(ex.start(validateScript)) match
-        case Failure(e) ⇒ serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+        case Failure(e) ⇒
+          serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) ⇒
           val inserted = serverState.addMoleExecution(execId, ex)
-          if (!inserted) ex.cancel
+          if !inserted then ex.cancel
     end processRun
 
     synchronousCompilation(script, outputStream) match
