@@ -204,38 +204,35 @@ implicit class TarInputStreamDecorator(tis: TarInputStream) {
   }
   finally tis.close
 
-  def extract(directory: File, overwrite: Boolean = false) = {
-
+  def extract(directory: File, overwrite: Boolean = false) =
     if (!directory.exists()) directory.mkdirs()
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val directoryRights = ListBuffer[(Path, Int)]()
 
-    Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach {
-      e ⇒
-        val dest = Paths.get(directory.toString, e.getName)
-        if (e.isDirectory) {
-          Files.createDirectories(dest)
-          directoryRights += (dest -> e.getMode)
-        }
-        else {
-          Files.createDirectories(dest.getParent)
-
-          // has the entry been marked as a symlink in the archive?
-          if (!e.getLinkName.isEmpty) Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
+    Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach: e ⇒
+      val dest = Paths.get(directory.toString, e.getName)
+      if e.isDirectory
+      then
+        Files.createDirectories(dest)
+        directoryRights += (dest -> e.getMode)
+      else
+        Files.createDirectories(dest.getParent)
+        // has the entry been marked as a symlink in the archive?
+        if !e.getLinkName.isEmpty
+        then
+          Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
           // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
-          else {
-            Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
-            dest.toFile.mode = e.getMode
-          }
-        }
-        dest.setLastModified(e.getModTime)
-    }
+        else
+          Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
+          dest.toFile.mode = e.getMode
+
+      dest.setLastModified(e.getModTime)
 
     // Set directory right after extraction in case some directory are not writable
-    for {
+    for
       (path, mode) ← directoryRights
-    } path.toFile.mode = mode
+    do
+      path.toFile.mode = mode
 
-  }
 }

@@ -51,7 +51,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
     Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
 
   val routes: HttpRoutes[IO] = HttpRoutes.of:
-    case  GET -> Root / shared.api.appRoute =>
+    case GET -> Root / shared.api.appRoute =>
       def application = GUIServlet.html(s"${GUIServlet.webpackLibrary}.run();", GUIServlet.cssFiles(webapp), extraHeader)
 
       if(!passwordIsChosen && passwordProvided) Preference.setPasswordTest(services.preference, services.cypher)

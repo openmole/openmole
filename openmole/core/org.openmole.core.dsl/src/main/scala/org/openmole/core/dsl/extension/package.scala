@@ -136,4 +136,7 @@ package object extension:
   export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault}
   export org.openmole.core.workflow.format.OutputFormat.OutputContent
 
+  export org.openmole.core.workflow.mole.MoleExecution
+  export org.openmole.core.services.Services
+
 

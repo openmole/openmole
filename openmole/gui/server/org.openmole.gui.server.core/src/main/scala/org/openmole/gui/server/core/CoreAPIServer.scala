@@ -43,12 +43,7 @@ object CoreAPIServer:
       case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
       case None => SafePath(path.split('/').toSeq)
 
-  def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
-    import org.typelevel.ci.*
-    r.withHeaders(
-      org.http4s.headers.`Content-Length`(f.length()),
-      org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
-    )
+
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -243,28 +238,14 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
               case ServerFileSystemContext.Authentication.typeName ⇒ utils.authenticationKeysDirectory
               case ServerFileSystemContext.Absolute.typeName ⇒ new java.io.File("/")
 
-          for ((file, fileType) ← fileParts zip fileTypes) {
-            val path = new java.net.URI(file.name.get).getPath
-            val destination = new java.io.File(rootFile(fileType), path)
-            destination.getParentFile.mkdirs()
-            destination.setWritable(true)
-            val stream = fs2.io.toInputStreamResource(file.body) //file._2.getInputStream
-            stream.use { st =>
-              IO {
-                st.copy(destination)
-                destination.setExecutable(true)
-              }
-            }.unsafeRunSync()
-            //finally stream.close
-          }
+          for
+            (file, fileType) ← fileParts zip fileTypes
+          do
+            recieveFile(file, rootFile(fileType))
 
         req.decode[Multipart[IO]] { parts =>
-          def partContent(name: String) =
-            parts.parts.find(_.name.exists(_ == name)).map(_.bodyText.compile.string.unsafeRunSync())
-
           def getFileParts = parts.parts.filter(_.filename.isDefined)
-
-          move(getFileParts, partContent("fileType").get.split(',').toSeq)
+          move(getFileParts, multipartStringContent(parts, "fileType").get.split(',').toSeq)
           Ok()
         }
 
@@ -291,27 +272,16 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
           val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
 
-          val st =
-            fs2.io.readOutputStream[IO](64 * 1024): out =>
-              IO.blocking[Unit]:
-                val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-                try tos.archive(f, includeTopDirectoryName = topDirectory)
-                finally tos.close()
+          val response = sendFileStream(s"${nameParam.getOrElse(f.getName)}.tgz"): out =>
+            val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+            try tos.archive(f, includeTopDirectoryName = topDirectory)
+            finally tos.close()
 
-          Ok(st).map: r =>
-            val r2 =
-              r.withHeaders(
-                //org.http4s.headers.`Content-Length`(test.length()),
-                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${nameParam.getOrElse(f.getName)}.tgz"))
-              )
-
-            addHashHeader(r2, f)
+          response.map { r => addHashHeader(r, f) }
 
         def fileDownload(f: File) =
           f.withLock: _ ⇒
-            StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply()).map: r =>
-              val r2 = CoreAPIServer.setFileHeaders(f, r)
-              addHashHeader(r2, f)
+            sendFile(req, f).map { r => addHashHeader(r, f) }
 
         def omrDownload(f: File) =
           import org.openmole.tool.stream.*
@@ -320,22 +290,15 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
           val dataFiles = OMR.dataFiles(f)
 
-          val st =
-            fs2.io.readOutputStream[IO](64 * 1024): out =>
-              IO.blocking[Unit]:
-                val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-                try
-                  tos.addFile(f, f.getName)
-                  dataFiles.foreach((n, f) => tos.addFile(f, n))
-                finally tos.close()
+          val response =
+            sendFileStream(s"${nameParam.getOrElse(f.baseName)}.tgz"): out =>
+              val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+              try
+                tos.addFile(f, f.getName)
+                dataFiles.foreach((n, f) => tos.addFile(f, n))
+              finally tos.close()
 
-          Ok(st).map: r =>
-            val r2 =
-              r.withHeaders(
-                //org.http4s.headers.`Content-Length`(test.length()),
-                org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"${nameParam.getOrElse(f.baseName)}.tgz"))
-              )
-            addHashHeader(r2, f)
+          response.map { r => addHashHeader(r, f) }
 
         if !f.exists()
         then Status.NotFound.apply(s"The file $path does not exist.")
@@ -359,7 +322,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         StaticFile.fromPath(fs2.io.file.Path.fromNioPath(csvFile.toPath), Some(req))
           .map{ req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
           .getOrElseF(Status.NotFound.apply())
-          .map{ r => CoreAPIServer.setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+          .map{ r => setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
@@ -372,7 +335,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         StaticFile.fromPath(fs2.io.file.Path.fromNioPath(jsonFile.toPath), Some(req))
           .map{ req => req.withBodyStream(req.body.onFinalize(deleteJSONFile)) }
           .getOrElseF(Status.NotFound.apply())
-          .map{ r => CoreAPIServer.setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
+          .map{ r => setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
 
 
 

@@ -240,7 +240,7 @@ lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", globa
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 
 lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = Seq("*")) settings (
-  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry) settings (coreSettings: _*) settings (defaultActivator)
+  libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, csv, pluginRegistry, services) settings (coreSettings: _*) settings (defaultActivator)
 
 lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings (coreSettings: _*)
 
@@ -631,8 +631,9 @@ lazy val server = OsgiProject(
   "org.openmole.rest.server",
   imports = Seq("org.h2", "!com.sun.*", "*"),
   dynamicImports = Seq("org.eclipse.jetty.*")
-) dependsOn(workflow, openmoleArchive, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module) settings(
-  libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.codec, Libraries.json4s), Libraries.addScalaLang) settings (scala3Settings: _*)
+) dependsOn(workflow, openmoleArchive, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module, serverExt) settings(
+  libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.codec, Libraries.json4s, Libraries.http4s, Libraries.cats),
+  Libraries.addScalaLang) settings (scala3Settings: _*)
 
 
 /* -------------------- GUI --------------------- */
@@ -772,10 +773,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   services,
   location)
 
-
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(apiGUI, workspace, module, services) settings(
-  //  libraryDependencies += Libraries.autowire,
-  //  libraryDependencies += Libraries.boopickle,
   libraryDependencies += Libraries.equinoxOSGi,
   libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats),
   guiSettings,

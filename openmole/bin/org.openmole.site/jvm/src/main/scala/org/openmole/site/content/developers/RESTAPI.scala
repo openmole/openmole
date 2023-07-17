@@ -84,7 +84,7 @@ ${ul(
       )}
     """},
     li{html"""
-      ${b{"GET /job/:id/workDirectory/:file"}} - download a file or a directory from the server. It returns the gunziped content of the file or a tar.gz archive of the directory. It has the following parameters:
+      ${b{"GET /job/:id/workDirectory/:file"}} - download a file or a directory from the server. It returns the content of the file or a tar.gz archive if the file is a directory. It has the following parameters:
       ${ul(
         li{html"${b{"id"}} - the id of the mole execution"},
         li{html"${b{"path"}} - the path of the file to download"}
@@ -176,27 +176,27 @@ val piMed = Val[Double]
 
 // Define the model task that computes an estimation of pi
 val model =
-  ScalaTask(${tq}
-    |val random = newRNG(seed)
-    |val points = 10000
-    |val inside =
-    |  for {
-    |    i <- (0 until points).toIterator
-    |    x = random.nextDouble()
-    |    y = random.nextDouble()
-    |  } yield { (x * x) + (y * y) }
-    |val pi = (inside.count(_ < 1).toDouble / points) * 4
-    |${tq}.stripMargin) set (
-      inputs += seed,
-      outputs += pi
-    )
+ScalaTask("""
+  |val random = newRNG(mySeed)
+  |val points = 10000
+  |val inside =
+  |  for {
+  |    i <- (0 until points).toIterator
+  |    x = random.nextDouble()
+  |    y = random.nextDouble()
+  |  } yield { (x * x) + (y * y) }
+  |val pi = (inside.count(_ < 1).toDouble / points) * 4
+  |""".stripMargin) set (
+  inputs += mySeed,
+  outputs += pi
+)
 
 Replication(
   evaluation = model,
   seed = mySeed,
   sample = 100,
   aggregation = Seq(pi evaluate average as piAvg, pi evaluate median as piMed)
-) hook display hook (workDirectory / "result.json", format = JSONOutputFormat())
+) hook display hook (workDirectory / "result.omr", format = OMROutputFormat())
 
 [reuillon:/tmp/pi] $$ tar -cvzf pi.tgz *
 """)}
@@ -204,7 +204,7 @@ Replication(
 ${h3{"Submit the job"}}
 
 ${plain("""
-[reuillon:/tmp/pi] $ curl -X POST -F 'script=Pi.oms' -F 'workDirectory=@/tmp/pi.tgz' http://localhost:8080/job
+[reuillon:/tmp/pi] $ curl -X POST -F 'script=Pi.oms' -F 'workDirectory=@/tmp/pi/pi.tgz' http://localhost:8080/job
 {
   "id" : "160ba693-199c-48e8-9ee1-6a1f9ac66e62"
 }[reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/state

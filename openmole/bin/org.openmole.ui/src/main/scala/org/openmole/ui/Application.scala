@@ -64,7 +64,7 @@ object Application extends JavaLogger {
       password:                 Option[String]  = None,
       passwordFile:             Option[File]    = None,
       workspace:                Option[File]    = None,
-      hostName:                 Option[String]  = None,
+      //hostName:                 Option[String]  = None,
       launchMode:               LaunchMode      = GUIMode,
       ignored:                  List[String]    = Nil,
       port:                     Option[Int]     = None,
@@ -150,7 +150,7 @@ object Application extends JavaLogger {
         case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--extra-header" :: tail                ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
         case "--reset" :: tail                       ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
-        case "--host-name" :: tail                   ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
+        //case "--host-name" :: tail                   ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail              ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                       ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
         case "--http-sub-directory" :: tail          ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
@@ -202,7 +202,7 @@ object Application extends JavaLogger {
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
-    config.launchMode match {
+    config.launchMode match
       case VersionMode ⇒
         println(
           s"""OpenMOLE version: ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.name}
@@ -221,47 +221,45 @@ object Application extends JavaLogger {
         implicit val preference = Services.preference(workspace)
         displayErrors(loadPlugins)
 
-        val passwordString = password match {
-          case Some(p) ⇒ p
-          case None    ⇒ Console.initPassword
-        }
+        val passwordString =
+          password match
+            case Some(p) ⇒ p
+            case None    ⇒ Console.initPassword
 
         Console.chosePassword(passwordString)
 
-        if (!Console.testPassword(passwordString)) {
+        if !Console.testPassword(passwordString)
+        then
           println("Password is incorrect")
           Console.ExitCodes.incorrectPassword
-        }
-        else {
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel) { services ⇒
+        else
+          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel): services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
-            val server = new RESTServer(config.port, config.hostName, services, config.httpSubDirectory)
+            val server = new RESTServer(config.port, !config.remote, services, config.httpSubDirectory)
             server.run()
-          }
+
           Console.ExitCodes.ok
-        }
       case ConsoleMode ⇒
         implicit val preference = Services.preference(workspace)
 
-        val passwordString = password match {
-          case Some(p) ⇒ p
-          case None    ⇒ Console.initPassword
-        }
+        val passwordString =
+          password match
+            case Some(p) ⇒ p
+            case None    ⇒ Console.initPassword
 
         Console.chosePassword(passwordString)
 
-        if (!Console.testPassword(passwordString)) {
+        if (!Console.testPassword(passwordString))
+        then
           println("Password is incorrect")
           Console.ExitCodes.incorrectPassword
-        }
-        else {
+        else
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
-        }
       case GUIMode ⇒
         implicit val preference = Services.preference(workspace)
 
@@ -271,9 +269,10 @@ object Application extends JavaLogger {
         def browse(url: String) =
           if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
 
-        GUIServer.lockFile.withFileOutputStream { fos ⇒
+        GUIServer.lockFile.withFileOutputStream: fos ⇒
           val launch = (config.remote || fos.getChannel.tryLock != null)
-          if (launch) {
+          if launch
+          then
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
             val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
@@ -295,18 +294,14 @@ object Application extends JavaLogger {
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
                   s"Server listening on port $port."
               )
-              s.join() match {
+              s.join() match
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
-              }
               //newServer.stop()
             }
-          }
-          else {
+          else
             browse(GUIServer.urlFile.content)
             Console.ExitCodes.ok
-          }
-        }
       case TestCompile(files) ⇒
         import org.openmole.tool.hash._
 
@@ -360,7 +355,7 @@ object Application extends JavaLogger {
         if (errors.isEmpty) Console.ExitCodes.ok
         else Console.ExitCodes.compilationError
 
-    }
+
 
   }
 

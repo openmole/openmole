@@ -22,6 +22,13 @@ import scala.io.{BufferedSource, Codec}
 import scala.util.{Failure, Success, Try}
 import collection.JavaConverters.*
 import scala.collection.mutable.ListBuffer
+import cats.effect.*
+import org.http4s
+import org.http4s.*
+import org.http4s.dsl.io.*
+import org.http4s.headers.*
+import org.http4s.implicits.*
+import org.http4s.multipart.{Multipart, Part}
 
 object utils:
 
@@ -239,3 +246,45 @@ object utils:
     bundle.foreach(PluginManager.remove)
   }
 
+  def multipartContent(multipart: Multipart[IO], name: String) =
+    multipart.parts.find(_.name.contains(name))
+
+  def multipartStringContent(multipart: Multipart[IO], name: String)(using cats.effect.unsafe.IORuntime) =
+    multipartContent(multipart, name).map(_.bodyText.compile.string.unsafeRunSync())
+
+  def recieveFile(part: Part[IO], directory: File)(using cats.effect.unsafe.IORuntime) =
+    import org.openmole.tool.stream.*
+    val path = new java.net.URI(part.name.get).getPath
+    val destination = new java.io.File(directory, path)
+    destination.getParentFile.mkdirs()
+    destination.setWritable(true)
+    val stream = fs2.io.toInputStreamResource(part.body)
+    stream.use { st =>
+      IO:
+        st.copy(destination)
+        destination.setExecutable(true)
+    }.unsafeRunSync()
+
+  def sendFileStream(fileName: String)(stream: java.io.OutputStream => Unit) =
+    import org.typelevel.ci.*
+    val st =
+      fs2.io.readOutputStream[IO](64 * 1024): out =>
+        IO.blocking[Unit]:
+          stream(out)
+
+    Ok(st).map: r =>
+      r.withHeaders(
+        //org.http4s.headers.`Content-Length`(test.length()),
+        org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"$fileName"))
+      )
+
+  def sendFile(req: Request[IO], f: File) =
+    StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply(s"${f.getName} not found")).map: r =>
+      setFileHeaders(f, r)
+
+  def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
+    import org.typelevel.ci.*
+    r.withHeaders(
+      org.http4s.headers.`Content-Length`(f.length()),
+      org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
+    )
