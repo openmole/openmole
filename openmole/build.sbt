@@ -624,16 +624,18 @@ lazy val spatial = OsgiProject(pluginDir, "org.openmole.plugin.task.spatial", im
 
 def restDir = file("rest")
 
-lazy val message = OsgiProject(restDir, "org.openmole.rest.message") settings (scala3Settings: _*)
+lazy val message = OsgiProject(restDir, "org.openmole.rest.message") settings (
+  scala3Settings,
+  libraryDependencies += Libraries.circe)
 
 lazy val server = OsgiProject(
   restDir,
   "org.openmole.rest.server",
-  imports = Seq("org.h2", "!com.sun.*", "*"),
-  dynamicImports = Seq("org.eclipse.jetty.*")
+  imports = Seq("org.h2", "!com.sun.*", "*")
 ) dependsOn(workflow, openmoleArchive, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module, serverExt) settings(
-  libraryDependencies ++= Seq(Libraries.bouncyCastle, Libraries.logback, Libraries.scalatra, Libraries.codec, Libraries.json4s, Libraries.http4s, Libraries.cats),
-  Libraries.addScalaLang) settings (scala3Settings: _*)
+  scala3Settings,
+  libraryDependencies ++= Seq(Libraries.logback, Libraries.codec, Libraries.http4s, Libraries.cats),
+  Libraries.addScalaLang)
 
 
 /* -------------------- GUI --------------------- */

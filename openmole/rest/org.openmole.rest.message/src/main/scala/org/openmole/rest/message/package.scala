@@ -14,50 +14,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.rest
+package org.openmole.rest.message
 
 import java.io.{ PrintWriter, StringWriter }
+import io.circe.*
 
-package object message {
+implicit val derivationDefault: io.circe.derivation.Configuration =
+  io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type")
 
-  object Error {
-    def apply(e: Throwable): Error = {
-      val sw = new StringWriter()
-      e.printStackTrace(new PrintWriter(sw))
-      Error(e.getMessage, Some(sw.toString))
-    }
-  }
-  case class Error(message: String, stackTrace: Option[String] = None, level: Option[String] = None)
+object Error:
+  def apply(e: Throwable): Error =
+    val sw = new StringWriter()
+    e.printStackTrace(new PrintWriter(sw))
+    Error(e.getMessage, Some(sw.toString))
 
-  case class ExecutionId(id: String)
-  case class Output(output: String)
+case class Error(message: String, stackTrace: Option[String] = None, level: Option[String] = None) derives derivation.ConfiguredCodec
 
-  object ExecutionState {
-    type ExecutionState = String
-    val running: ExecutionState = "running"
-    val finished: ExecutionState = "finished"
-    val failed: ExecutionState = "failed"
-  }
+case class ExecutionId(id: String) derives derivation.ConfiguredCodec
+case class Output(output: String) derives derivation.ConfiguredCodec
 
-  sealed trait State {
-    def state: ExecutionState.ExecutionState
-  }
-  case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) extends State
-  case class Running(ready: Long, running: Long, completed: Long, capsules: Vector[(String, CapsuleState)], environments: Seq[EnvironmentStatus], state: ExecutionState.ExecutionState = ExecutionState.running) extends State
-  case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) extends State
+object ExecutionState:
+  type ExecutionState = String
+  val running: ExecutionState = "running"
+  val finished: ExecutionState = "finished"
+  val failed: ExecutionState = "failed"
 
-  case class EnvironmentStatus(name: Option[String], submitted: Long, running: Long, done: Long, failed: Long, errors: Seq[Error])
-  case class CapsuleState(ready: Long, running: Long, completed: Long)
+case class Failed(error: Error, state: ExecutionState.ExecutionState = ExecutionState.failed) derives derivation.ConfiguredCodec
+case class Running(ready: Long, running: Long, completed: Long, capsules: Vector[(String, CapsuleState)], environments: Seq[EnvironmentStatus], state: ExecutionState.ExecutionState = ExecutionState.running) derives derivation.ConfiguredCodec
+case class Finished(state: ExecutionState.ExecutionState = ExecutionState.finished) derives derivation.ConfiguredCodec
 
-  object FileType {
-    type FileType = String
-    val directory: FileType = "directory"
-    val file: FileType = "file"
-  }
+case class EnvironmentStatus(name: Option[String], submitted: Long, running: Long, done: Long, failed: Long, errors: Seq[Error]) derives derivation.ConfiguredCodec
+case class CapsuleState(ready: Long, running: Long, completed: Long) derives derivation.ConfiguredCodec
 
-  sealed trait Property
-  case class FileProperty(size: Long, modified: Long, `type`: FileType.FileType = FileType.file) extends Property
-  case class DirectoryProperty(entries: Vector[DirectoryEntryProperty], modified: Long, `type`: FileType.FileType = FileType.directory) extends Property
-  case class DirectoryEntryProperty(name: String, size: Option[Long], modified: Long, `type`: FileType.FileType) extends Property
+object FileType:
+  type FileType = String
+  val directory: FileType = "directory"
+  val file: FileType = "file"
 
-}
+case class FileProperty(size: Long, modified: Long, `type`: FileType.FileType = FileType.file) derives derivation.ConfiguredCodec
+case class DirectoryProperty(entries: Vector[DirectoryEntry], modified: Long, `type`: FileType.FileType = FileType.directory) derives derivation.ConfiguredCodec
+case class DirectoryEntry(name: String, size: Option[Long], modified: Long, `type`: FileType.FileType) derives derivation.ConfiguredCodec

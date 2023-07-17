@@ -33,8 +33,8 @@ import org.http4s.implicits.*
 import org.http4s.multipart.Multipart
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.json4s.*
-import org.json4s.jackson.JsonMethods.*
+//import org.json4s.*
+//import org.json4s.jackson.JsonMethods.*
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.project.*
 import org.openmole.core.workflow.mole.MoleServices
@@ -76,13 +76,16 @@ case class JobDirectory(jobDirectory: File):
 
 
 class RESTAPI(services: Services):
-  protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
+  // protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
 
   private val logger = Log.log
   private lazy val moles = collection.concurrent.TrieMap[ExecutionId, Execution]()
 
-  implicit class ToJsonDecorator(x: Any):
-    def toJson = pretty(Extraction.decompose(x))
+  implicit class ToJsonDecorator[T: io.circe.Encoder](x: T):
+    def toJson =
+      import io.circe.*
+      import io.circe.syntax.*
+      x.asJson.deepDropNullValues.spaces2 //pretty(Extraction.decompose(x))
 
   lazy val baseDirectory = services.workspace.tmpDirectory.newDirectory("rest")
   def exceptionToHttpError(e: Throwable) = InternalServerError(Error(e).toJson)
@@ -175,6 +178,39 @@ class RESTAPI(services: Services):
                 finally tos.close()
             else
               ext.utils.sendFile(req, file)
+      case req @ Method.PROPFIND -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "workDirectory" =>
+        import io.circe.generic.semiauto.*
+        val id = rest.segments(0).decoded()
+        val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
+
+        getExecution(ExecutionId(id)): ex ⇒
+          val file = ex.jobDirectory.workDirectory / path
+
+          if !file.exists()
+          then NotFound(Error("File not found").toJson)
+          else
+            if file.isDirectory
+            then
+              def filter(fs: Array[File]) =
+                req.params.get("last") match
+                  case Some(l) ⇒ fs.sortBy(-_.lastModified).take(l.toInt)
+                  case None    ⇒ fs.sortBy(-_.lastModified)
+
+              val entries =
+                filter(file.listFilesSafe).toVector.map { f ⇒
+                  val size = if (f.isFile) Some(f.size) else None
+                  val entryType = if (f.isDirectory) FileType.directory else FileType.file
+                  DirectoryEntry(f.getName, modified = f.lastModified(), size = size, `type` = entryType)
+                }
+
+              def property = DirectoryProperty(entries, modified = file.lastModified())
+              Ok(property.toJson)
+            else
+              def property = FileProperty(file.size, modified = file.lastModified())
+              Ok(property.toJson)
+      case req @ GET -> Root / "job" / id / "output" =>
+        getExecution(ExecutionId(id)): ex ⇒
+          Ok(ex.jobDirectory.readOutput)
 
   def getExecution[T](id: ExecutionId)(success: Execution ⇒ T) =
     moles.get(id) match

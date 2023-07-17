@@ -1,7 +1,7 @@
 package org.openmole.rest.server
 
 import java.util.concurrent.Semaphore
-import javax.servlet.ServletContext
+//import javax.servlet.ServletContext
 import scala.concurrent.duration.Duration
 
 //import org.eclipse.jetty.server.Server
@@ -10,7 +10,7 @@ import scala.concurrent.duration.Duration
 //import org.eclipse.jetty.webapp.WebAppContext
 import org.openmole.core.workspace._
 import org.openmole.tool.logger.JavaLogger
-import org.scalatra.ScalatraBase
+//import org.scalatra.ScalatraBase
 //import org.scalatra.servlet.ScalatraListener
 //import org.eclipse.jetty.security.{ ConstraintMapping, ConstraintSecurityHandler }
 import org.openmole.core.preference.Preference
