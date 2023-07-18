@@ -360,7 +360,7 @@ object Genome:
     def values(s: SuggestedValues) =
       s match
         case Values(v) => v
-        case _ => Seq()
+        case Error(e) => throw e
 
     def errors(s: SuggestedValues) =
       s match
