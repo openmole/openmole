@@ -230,7 +230,7 @@ object NSGA2 {
     stochastic:     OptionalArgument[Stochastic] = None,
     reject:         OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
-    EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
+    EvolutionWorkflow.stochasticity(objective, stochastic.option) match
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
@@ -245,10 +245,9 @@ object NSGA2 {
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
-        def validation: Validate = {
+        def validation: Validate =
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
-        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticNSGA2(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
@@ -257,13 +256,12 @@ object NSGA2 {
           stochasticValue,
           validate = validation
         )
-    }
 
 }
 
 import EvolutionWorkflow.*
 
-object NSGA2Evolution {
+object NSGA2Evolution:
 
   import org.openmole.core.dsl.DSL
 
@@ -292,7 +290,6 @@ object NSGA2Evolution {
 
   given ExplorationMethodSetter[NSGA2Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
-}
 
 case class NSGA2Evolution(
   genome:         Genome,

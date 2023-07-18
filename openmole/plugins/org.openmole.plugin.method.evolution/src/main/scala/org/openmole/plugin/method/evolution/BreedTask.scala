@@ -20,14 +20,14 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object BreedTask {
+object BreedTask:
 
-  def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Seq[Seq[ValueAssignment.Untyped]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Genome.SuggestedValues)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("BreedTask") { p ⇒
       import p._
 
       def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v ⇒ Variable.unsecureUntyped(v.value, v.equal.from(context))).toVector
-      val suggestedGenomes = suggestion.map(ds ⇒ evolution.operations.buildGenome(defaultSetToVariables(ds)))
+      val suggestedGenomes = Genome.SuggestedValues.values(suggestion).map(ds ⇒ evolution.operations.buildGenome(defaultSetToVariables(ds)))
 
       val population = context(evolution.populationVal)
       val s = context(evolution.stateVal)
@@ -59,9 +59,11 @@ object BreedTask {
 
     } set (
       inputs += (evolution.populationVal, evolution.stateVal),
-      outputs += (evolution.stateVal),
-      exploredOutputs += (evolution.genomeVal.array)
+      outputs += evolution.stateVal,
+      exploredOutputs += evolution.genomeVal.array
+    ) withValidate (
+      Validate:
+        Genome.SuggestedValues.errors(suggestion)
     )
 
-}
 

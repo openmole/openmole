@@ -41,7 +41,7 @@ object EvolutionWorkflow:
     termination: OMTermination,
     parallelism: Int = 1,
     distribution: EvolutionPattern = SteadyState(),
-    suggestion: Seq[Seq[ValueAssignment.Untyped]],
+    suggestion: Genome.SuggestedValues,
     scope: DefinitionScope)(using evolutionMethod: EvolutionMethod[M]): DSLContainer[EvolutionWorkflow] =
     distribution match
       case s: SteadyState ⇒
@@ -185,7 +185,7 @@ object EvolutionWorkflow:
     evaluation:  DSL,
     termination: OMTermination,
     parallelism: Int                          = 1,
-    suggestion:  Seq[Seq[ValueAssignment.Untyped]] = Seq.empty,
+    suggestion:  Genome.SuggestedValues       = Genome.SuggestedValues.empty,
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) = {
     implicit def defScope: DefinitionScope = scope
@@ -198,7 +198,7 @@ object EvolutionWorkflow:
     val toOffspring = ToOffspringTask(evolution)
     val elitism = ElitismTask(evolution, evolution.evaluatedVal) set (evolution.evaluatedVal := 1)
     val terminationTask = TerminationTask(evolution, termination)
-    val breed = BreedTask(evolution, 1, Seq())
+    val breed = BreedTask(evolution, 1, Genome.SuggestedValues.empty)
 
     val masterFirst =
       EmptyTask() set (

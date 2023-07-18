@@ -11,6 +11,8 @@ import java.io.File
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
+import org.openmole.core.dsl.extension.*
+
 object GenomeDouble {
 
   def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) = {
@@ -48,7 +50,7 @@ object GenomeDouble {
   }
 }
 
-object Genome {
+object Genome:
 
   enum GenomeBound:
     case SequenceOfDouble(v: Val[Array[Double]], low: Array[Double], high: Array[Double], size: Int)
@@ -285,38 +287,53 @@ object Genome {
 
   object ToSuggestion:
 
-    def loadFromFile(f: File, genome: Genome) =
+    import scala.util.boundary
+    def loadFromFile(f: File, genome: Genome): SuggestedValues = boundary:
       import org.openmole.core.csv.CSV
       import org.openmole.core.omr.OMR
       import org.openmole.core.dsl._
 
       def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
 
+      if !f.exists
+      then boundary.break(SuggestedValues.Error(UserBadDataError(s"File for loading suggestion $f does not exist")))
+
       if CSV.isCSV(f)
       then
         val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
-        CSV.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
-      else
-        if OMR.isOMR(f)
-        then
-          val ctx = Context(OMR.toVariables(f).head._2: _*)
-          val vals = genome.map(g => GenomeBound.toVal(g))
-          val values = vals.map(v => ctx.variable(v.array).getOrElse(throw new UserBadDataError(s"Genome component $v not found in omr file $f")))
-          def assigments =
-            for
-              line <- values.map(_.value).transpose
-            yield
-              (vals zip line).map((v, va) => toAssignment(Variable.unsecureUntyped(v, va)))
-          assigments
-        else throw new UserBadDataError(s"Unsupported file type for suggestion $f")
+        def values = CSV.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
+        boundary.break(SuggestedValues.Values(values))
+
+      if OMR.isOMR(f)
+      then
+        val ctx = Context(OMR.toVariables(f).head._2: _*)
+        val vals = genome.map(g => GenomeBound.toVal(g))
+        val values =
+          vals.map(v => ctx.variable(v.array).getOrElse:
+            boundary.break(SuggestedValues.Error(new UserBadDataError(s"Genome component $v not found in omr file $f")))
+          )
+
+        def assigments =
+          for
+            line <- values.map(_.value).transpose
+          yield
+            (vals zip line).map((v, va) => toAssignment(Variable.unsecureUntyped(v, va)))
+
+        boundary.break(SuggestedValues.Values(assigments))
+
+      SuggestedValues.Error(new UserBadDataError(s"Unsupported file type for suggestion $f"))
+
+    private def fileSuggestion(t: File) =
+      new Suggestion:
+        def apply(genome: Genome) = loadFromFile(t, genome)
 
     given ToSuggestion[File] =
       new ToSuggestion[File]:
-        override def apply(t: File): Suggestion = genome ⇒ loadFromFile(t, genome)
+        override def apply(t: File): Suggestion = fileSuggestion(t)
 
     given ToSuggestion[String] =
       new ToSuggestion[String]:
-        override def apply(t: String): Suggestion = genome ⇒ loadFromFile(File(t), genome)
+        def apply(t: String): Suggestion = fileSuggestion(File(t))
 
     implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
       new ToSuggestion[Seq[Seq[ValueAssignment[T]]]]:
@@ -328,8 +345,27 @@ object Genome {
   implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
 
   object Suggestion:
-    def empty = (genome: Genome) ⇒ Seq()
+    def empty: Suggestion = genome ⇒ Seq()
 
-  type Suggestion = Genome ⇒ Seq[Seq[ValueAssignment.Untyped]]
+  trait Suggestion:
+    def apply(g: Genome): SuggestedValues
 
-}
+  object SuggestedValues:
+    def empty = Values(Seq())
+    case class Values(values: Seq[Seq[ValueAssignment.Untyped]]) extends SuggestedValues
+    case class Error(t: Throwable) extends SuggestedValues
+
+    given Conversion[Seq[Seq[ValueAssignment.Untyped]], SuggestedValues] = v => Values(v)
+
+    def values(s: SuggestedValues) =
+      s match
+        case Values(v) => v
+        case _ => Seq()
+
+    def errors(s: SuggestedValues) =
+      s match
+        case Error(e) => Seq(e)
+        case _ => Seq()
+
+  sealed trait SuggestedValues
+
