@@ -65,8 +65,5 @@ object common {
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.0.0"
 
-  def scalatraVersion = "2.7.1"
-  def jettyVersion = "9.4.35.v20201120"
-
 }
 

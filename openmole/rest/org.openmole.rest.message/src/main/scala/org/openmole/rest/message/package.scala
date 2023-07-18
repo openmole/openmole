@@ -54,3 +54,6 @@ object FileType:
 case class FileProperty(size: Long, modified: Long, `type`: FileType.FileType = FileType.file) derives derivation.ConfiguredCodec
 case class DirectoryProperty(entries: Vector[DirectoryEntry], modified: Long, `type`: FileType.FileType = FileType.directory) derives derivation.ConfiguredCodec
 case class DirectoryEntry(name: String, size: Option[Long], modified: Long, `type`: FileType.FileType) derives derivation.ConfiguredCodec
+
+case class Plugin(name: String, active: Boolean) derives derivation.ConfiguredCodec
+case class PluginError(name: String, error: Error) derives derivation.ConfiguredCodec

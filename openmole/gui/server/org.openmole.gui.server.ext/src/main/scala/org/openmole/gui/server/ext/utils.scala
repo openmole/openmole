@@ -246,8 +246,11 @@ object utils:
     bundle.foreach(PluginManager.remove)
   }
 
-  def multipartContent(multipart: Multipart[IO], name: String) =
-    multipart.parts.find(_.name.contains(name))
+  def multipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
+    multipart.parts.find(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
+
+  def listMultipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
+    multipart.parts.filter(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
 
   def multipartStringContent(multipart: Multipart[IO], name: String)(using cats.effect.unsafe.IORuntime) =
     multipartContent(multipart, name).map(_.bodyText.compile.string.unsafeRunSync())

@@ -17,18 +17,6 @@ def settings = Seq(
   scalaVersion := scala3VersionValue
 )
 
-lazy val scalatra = OsgiProject(dir, "org.scalatra",
-  exports = Seq("org.scalatra.*, org.fusesource.*", "grizzled.*", "org.eclipse.jetty.*", "javax.*"),
-  privatePackages = Seq("scala.xml.*", "!scala.*", "!org.slf4j.*", "**"),
-  imports = Seq("scala.*", "org.slf4j.*"),
-  global = true) settings(
-  settings,
-  libraryDependencies += "org.scalatra" %% "scalatra" % scalatraVersion cross CrossVersion.for3Use2_13,
-  libraryDependencies += "org.scalatra" %% "scalatra-auth" % scalatraVersion cross CrossVersion.for3Use2_13,
-  libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
-  libraryDependencies += "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-  version := scalatraVersion) dependsOn(slf4j)
-
 lazy val json4s = OsgiProject(dir, "org.json4s",
   exports = Seq("org.json4s.*", "com.fasterxml.jackson.*"),
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),

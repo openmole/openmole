@@ -34,7 +34,6 @@ object Libraries {
   lazy val scalaMeta = "org.openmole.library" %% "org-scalameta" % scalaMetaVersion
   lazy val scalaSTM = "org.openmole.library" %% "org-scala-stm" % scalaSTMVersion
   lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
-  lazy val scalatra = "org.openmole.library" %% "org-scalatra" % scalatraVersion exclude("org.scala-lang.modules", "scala-xml_2.13")
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
