@@ -206,18 +206,8 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     apiImpl.activatePlugins
 
-    def stackError(t: Throwable) =
-      import org.openmole.core.tools.io.Prettifier.*
-      import io.circe.*
-      import io.circe.syntax.*
-      import io.circe.generic.auto.*
-      import org.openmole.gui.shared.data.*
-      import org.http4s.headers.`Content-Type`
-      InternalServerError {
-        Left(ErrorData(t)).asJson.noSpaces
-      }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
-    val apiServer = new CoreAPIServer(apiImpl, stackError)
+    val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -241,7 +231,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
         withHttpApp(httpApp).
         withIdleTimeout(Duration.Inf).
         withResponseHeaderTimeout(Duration.Inf).
-        withServiceErrorHandler(r => t => stackError(t)).
+        withServiceErrorHandler(r => t => utils.HTTP.stackError(t)).
         allocated.unsafeRunSync()._2 // feRunSync()._2
 
     control.cancel = shutdown.unsafeRunSync

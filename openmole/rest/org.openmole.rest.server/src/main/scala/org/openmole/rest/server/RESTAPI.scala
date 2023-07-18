@@ -10,6 +10,7 @@ import org.http4s.multipart.Multipart
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.fileservice.FileServiceCache
+import org.openmole.core.omr.OMR
 import org.openmole.core.project.*
 import org.openmole.core.workflow.mole.MoleServices
 
@@ -21,7 +22,7 @@ import java.util.UUID
 import java.util.zip.GZIPInputStream
 import org.openmole.tool.stream.*
 import org.openmole.tool.archive.*
-import org.openmole.gui.server.ext
+import org.openmole.gui.server.ext.utils.HTTP
 
 case class EnvironmentException(environment: Environment, error: Error)
 
@@ -67,8 +68,8 @@ class RESTAPI(services: Services):
       case req @ POST -> Root / "job" =>
         req.decode[Multipart[IO]]: parts =>
           import cats.effect.unsafe.implicits.global
-          def scriptValue = ext.utils.multipartStringContent(parts, "script")
-          def workDirectoryValue = ext.utils.multipartContent(parts, "workDirectory")
+          def scriptValue = HTTP.multipartStringContent(parts, "script")
+          def workDirectoryValue = HTTP.multipartContent(parts, "workDirectory")
 
           (scriptValue, workDirectoryValue) match
             case (_, None) ⇒ ExpectationFailed(Error("Missing mandatory workDirectory parameter.").toJson)
@@ -144,12 +145,12 @@ class RESTAPI(services: Services):
           else
             if file.isDirectory
             then
-              ext.utils.sendFileStream(s"${file.getName}.tgz"): out =>
+              HTTP.sendFileStream(s"${file.getName}.tgz"): out =>
                 val tos = new TarOutputStream(out.toGZ, 64 * 1024)
                 try tos.archive(file)
                 finally tos.close()
             else
-              ext.utils.sendFile(req, file)
+              HTTP.sendFile(req, file)
       case req @ Method.PROPFIND -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "workDirectory" =>
         import io.circe.generic.semiauto.*
         val id = rest.segments(0).decoded()
@@ -179,6 +180,41 @@ class RESTAPI(services: Services):
             else
               def property = FileProperty(file.size, modified = file.lastModified())
               Ok(property.toJson)
+      case req@ GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "omrToCSV" =>
+        import services.*
+        val id = rest.segments(0).decoded()
+        val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
+
+        getExecution(ExecutionId(id)): ex ⇒
+          val file = ex.jobDirectory.workDirectory / path
+          checkIsOMR(file):
+            HTTP.omrToCSV(req, file)
+      case req@ GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "omrToJSON" =>
+        import services.*
+        val id = rest.segments(0).decoded()
+        val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
+
+        getExecution(ExecutionId(id)): ex ⇒
+          val file = ex.jobDirectory.workDirectory / path
+          checkIsOMR(file):
+            HTTP.omrToJSON(req, file)
+      case req@GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "omrFiles" =>
+        import services.*
+        val id = rest.segments(0).decoded()
+        val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
+
+        getExecution(ExecutionId(id)): ex ⇒
+          val file = ex.jobDirectory.workDirectory / path
+
+          checkIsOMR(file):
+            OMR.resultFileDirectory(file) match
+              case Some(fileDirectory) =>
+                HTTP.sendFileStream(s"${file.baseName}-files.tgz"): out =>
+                  val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+                  try tos.archive(fileDirectory, includeTopDirectoryName = false)
+                  finally tos.close()
+              case None =>
+                ExpectationFailed(Error(s"The OMR file does not contain files").toJson)
       case req @ GET -> Root / "job" / id / "output" =>
         getExecution(ExecutionId(id)): ex ⇒
           Ok(ex.jobDirectory.readOutput)
@@ -234,7 +270,7 @@ class RESTAPI(services: Services):
         req.decode[Multipart[IO]]: parts =>
           import cats.effect.unsafe.implicits.global
           import services._
-          def fileValue = ext.utils.listMultipartContent(parts, "file", shouldBeFile = true)
+          def fileValue = HTTP.listMultipartContent(parts, "file", shouldBeFile = true)
           fileValue match
             case Seq() ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
             case files ⇒
@@ -292,5 +328,9 @@ class RESTAPI(services: Services):
       case None     ⇒ NotFound(Error("Execution not found").toJson)
       case Some(ex) ⇒ success(ex)
 
-
-
+  def checkIsOMR[T](file: File)(f: => T) =
+    if !file.exists()
+    then NotFound(Error("File not found").toJson)
+    else if !org.openmole.core.omr.OMR.isOMR(file)
+    then ExpectationFailed(Error("File is not an \".omr\" file").toJson)
+    else f

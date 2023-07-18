@@ -241,11 +241,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           for
             (file, fileType) ← fileParts zip fileTypes
           do
-            recieveFile(file, rootFile(fileType))
+            HTTP.recieveFile(file, rootFile(fileType))
 
         req.decode[Multipart[IO]] { parts =>
           def getFileParts = parts.parts.filter(_.filename.isDefined)
-          move(getFileParts, multipartStringContent(parts, "fileType").get.split(',').toSeq)
+          move(getFileParts, HTTP.multipartStringContent(parts, "fileType").get.split(',').toSeq)
           Ok()
         }
 
@@ -272,7 +272,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
           val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
 
-          val response = sendFileStream(s"${nameParam.getOrElse(f.getName)}.tgz"): out =>
+          val response = HTTP.sendFileStream(s"${nameParam.getOrElse(f.getName)}.tgz"): out =>
             val tos = new TarOutputStream(out.toGZ, 64 * 1024)
             try tos.archive(f, includeTopDirectoryName = topDirectory)
             finally tos.close()
@@ -281,7 +281,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
         def fileDownload(f: File) =
           f.withLock: _ ⇒
-            sendFile(req, f).map { r => addHashHeader(r, f) }
+            HTTP.sendFile(req, f).map { r => addHashHeader(r, f) }
 
         def omrDownload(f: File) =
           import org.openmole.tool.stream.*
@@ -291,7 +291,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           val dataFiles = OMR.dataFiles(f)
 
           val response =
-            sendFileStream(s"${nameParam.getOrElse(f.baseName)}.tgz"): out =>
+            HTTP.sendFileStream(s"${nameParam.getOrElse(f.baseName)}.tgz"): out =>
               val tos = new TarOutputStream(out.toGZ, 64 * 1024)
               try
                 tos.addFile(f, f.getName)
@@ -313,29 +313,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        val fileBaseName = omrFile.baseName
-        val csvFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".csv")
-
-        org.openmole.core.omr.OMR.writeCSV(omrFile, csvFile)
-        def deleteCSVFile = IO[Unit] { csvFile.delete() }
-
-        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(csvFile.toPath), Some(req))
-          .map{ req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
-          .getOrElseF(Status.NotFound.apply())
-          .map{ r => setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+        HTTP.omrToCSV(req, omrFile)
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        val fileBaseName = omrFile.baseName
-        val jsonFile = apiImpl.services.tmpDirectory.newFile(fileBaseName, ".json")
-
-        org.openmole.core.omr.OMR.writeJSON(omrFile, jsonFile)
-        def deleteJSONFile = IO[Unit] { jsonFile.delete() }
-
-        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(jsonFile.toPath), Some(req))
-          .map{ req => req.withBodyStream(req.body.onFinalize(deleteJSONFile)) }
-          .getOrElseF(Status.NotFound.apply())
-          .map{ r => setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
+        HTTP.omrToJSON(req, omrFile)
 
 
 

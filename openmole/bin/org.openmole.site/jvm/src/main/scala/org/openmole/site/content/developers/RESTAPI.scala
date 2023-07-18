@@ -87,14 +87,14 @@ ${ul(
       ${b{"GET /job/:id/workDirectory/:file"}} - download a file or a directory from the server. It returns the content of the file or a tar.gz archive if the file is a directory. It has the following parameters:
       ${ul(
         li{html"${b{"id"}} - the id of the mole execution"},
-        li{html"${b{"path"}} - the path of the file to download"}
+        li{html"${b{"file"}} - the path of the file to download"}
       )}
     """},
     li{html"""
       ${b{"PROPFIND /job/:id/workDirectory/:file"}} - get info of a file or a directory from the server. It has the following parameters:
           ${ul(
             li{html"${b{"id"}} - the id of the mole execution}"},
-            li{html"${b{"path"}} - the path of the file to download"},
+            li{html"${b{"file"}} - the path of the file to download"},
             li{html"${b{"last"}} - this parameter is optional - an integer to list only the last n files."}
           )}
           When successful, it returns a listing of the directory, that look like this:
@@ -123,7 +123,28 @@ ${ul(
         li{html"${b{"id"}} - the id of the mole execution"}
       )}
     """},
-    li{html"${b{"GET /job/"}} - list execution ids on the server."}
+    li{html"${b{"GET /job/"}} - list execution ids on the server."},
+    li{html"""
+      ${b{"GET /job/:id/omrToCSV/:file"}} - convert to CSV and download an omr file or a directory from the server. It returns the content of the file. It has the following parameters:
+      ${ul(
+        li{html"${b{"id"}} - the id of the mole execution"},
+        li{html"${b{"file"}} - the path of the omr file"}
+      )}
+    """},
+    li{html"""
+      ${b{"GET /job/:id/omrToJSON/:file"}} - convert to JSON and download an omr file or a directory from the server. It returns the content of the file. It has the following parameters:
+      ${ul(
+        li{html"${b{"id"}} - the id of the mole execution"},
+        li{html"${b{"file"}} - the path of the omr file"}
+      )}
+    """},
+    li{html"""
+      ${b{"GET /job/:id/omrFiles/:file"}} - download an archive of the files contained in the omr file from the server. It has the following parameters:
+      ${ul(
+        li{html"${b{"id"}} - the id of the mole execution"},
+        li{html"${b{"file"}} - the path of the omr file"}
+      )}
+    """}
 )}
 
 The API exposes the following routes to submit and manage the plugins:
@@ -176,7 +197,7 @@ val piMed = Val[Double]
 
 // Define the model task that computes an estimation of pi
 val model =
-ScalaTask("""
+ScalaTask($tq
   |val random = newRNG(mySeed)
   |val points = 10000
   |val inside =
@@ -186,7 +207,7 @@ ScalaTask("""
   |    y = random.nextDouble()
   |  } yield { (x * x) + (y * y) }
   |val pi = (inside.count(_ < 1).toDouble / points) * 4
-  |""".stripMargin) set (
+  |$tq.stripMargin) set (
   inputs += mySeed,
   outputs += pi
 )
@@ -210,9 +231,10 @@ ${plain("""
 }[reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/state
 {
   "state" : "finished"
-}[reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/output
-piAvg,piMed
-3.1415440000000006,3.1416
+}
+[reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/output
+openmole$experiment,piAvg,piMed
+1,3.1381799999999997,3.1374
 [reuillon:/tmp/pi] $ curl -X PROPFIND http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/workDirectory/
 {
   "entries" : [ {
@@ -228,18 +250,33 @@ piAvg,piMed
   } ],
   "modified" : 1584981433540,
   "type" : "directory"
-}[reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/workDirectory/result.json -O -J && gunzip result.json.gz && cat result.json
-% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                               Dload  Upload   Total   Spent    Left  Speed
-100    50    0    50    0     0   4166      0 --:--:-- --:--:-- --:--:--  4166
-curl: Saved to filename 'result.json.gz'
-{"piAvg":3.1415440000000006,"piMed":3.1416}
-""")}
+}
+ [reuillon:/tmp/pi] $ curl -X GET http://localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/omrToCSV/result.omr
+ openmole$experiment,piAvg,piMed
+ 1,3.1381799999999997,3.1374
+ [reuillon:/tmp/pi] $ curl - X GET http: //localhost:8080/job/160ba693-199c-48e8-9ee1-6a1f9ac66e62/omrToJSON/result.omr
+  {
+  "openmole-version": "16.0-SNAPSHOT",
+  "execution-id": "896c2630-f833-44ef-957d-8289e2b7b211",
+  "script": {
+  "content": "\n// Define the variables that are transmitted between the tasks\nval mySeed = Val[Long]\nval pi = Val[Double]\n\nval piAvg = Val[Double]\nval piMed = Val[Double]\n\n// Define the model task that computes an estimation of pi\nval model =\n  ScalaTask(\"\"\"\n    |val random = newRNG(mySeed)\n    |val points = 10000\n    |val inside =\n    |  for {\n    |    i <- (0 until points).toIterator\n    |    x = random.nextDouble()\n    |    y = random.nextDouble()\n    |  } yield { (x * x) + (y * y) }\n    |val pi = (inside.count(_ < 1).toDouble / points) * 4\n    |\"\"\".stripMargin) set (\n      inputs += mySeed,\n      outputs += pi\n    )\n\nReplication(\n  evaluation = model,\n  seed = mySeed,\n  sample = 100,\n  aggregation = Seq(pi evaluate average as piAvg, pi evaluate median as piMed)\n) hook display hook (workDirectory / \"result.omr\", format = OMROutputFormat())\n\n"
+  },
+  "time-start": 1689689670559,
+  "time-save": 1689689673701,
+  "data": [ {
+  "variables": {
+  "openmole$experiment": [1],
+  "piAvg": [3.1381799999999997],
+  "piMed": [3.1374]
+  }
+  }]
+
+  """)}
 
 
-${h3{"List the plugins"}}
+  ${h3{"List the plugins"}}
 
-${plain("""
+  ${plain("""
 [reuillon:~/myopenmoleplugin] $ curl -X GET http://localhost:8080/plugin/
 [ {
   "name" : "h24_2.12-1.0-SNAPSHOT.jar",

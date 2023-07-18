@@ -9,6 +9,7 @@ import org.openmole.core.fileservice.*
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.module
 import org.openmole.core.pluginmanager.*
+import org.openmole.core.serializer.SerializerService
 import org.openmole.core.services.Services
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.shared.data
@@ -22,13 +23,7 @@ import scala.io.{BufferedSource, Codec}
 import scala.util.{Failure, Success, Try}
 import collection.JavaConverters.*
 import scala.collection.mutable.ListBuffer
-import cats.effect.*
-import org.http4s
-import org.http4s.*
-import org.http4s.dsl.io.*
-import org.http4s.headers.*
-import org.http4s.implicits.*
-import org.http4s.multipart.{Multipart, Part}
+
 
 object utils:
 
@@ -246,48 +241,98 @@ object utils:
     bundle.foreach(PluginManager.remove)
   }
 
-  def multipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
-    multipart.parts.find(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
+  object HTTP:
+    import cats.effect.*
+    import org.http4s
+    import org.http4s.*
+    import org.http4s.dsl.io.*
+    import org.http4s.headers.*
+    import org.http4s.implicits.*
+    import org.http4s.multipart.{Multipart, Part}
 
-  def listMultipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
-    multipart.parts.filter(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
+    def multipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
+      multipart.parts.find(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
 
-  def multipartStringContent(multipart: Multipart[IO], name: String)(using cats.effect.unsafe.IORuntime) =
-    multipartContent(multipart, name).map(_.bodyText.compile.string.unsafeRunSync())
+    def listMultipartContent(multipart: Multipart[IO], name: String, shouldBeFile: Boolean = false) =
+      multipart.parts.filter(_.name.contains(name)).filter(f => !shouldBeFile || f.filename.isDefined)
 
-  def recieveFile(part: Part[IO], directory: File)(using cats.effect.unsafe.IORuntime) =
-    import org.openmole.tool.stream.*
-    val path = new java.net.URI(part.name.get).getPath
-    val destination = new java.io.File(directory, path)
-    destination.getParentFile.mkdirs()
-    destination.setWritable(true)
-    val stream = fs2.io.toInputStreamResource(part.body)
-    stream.use { st =>
-      IO:
-        st.copy(destination)
-        destination.setExecutable(true)
-    }.unsafeRunSync()
+    def multipartStringContent(multipart: Multipart[IO], name: String)(using cats.effect.unsafe.IORuntime) =
+      multipartContent(multipart, name).map(_.bodyText.compile.string.unsafeRunSync())
 
-  def sendFileStream(fileName: String)(stream: java.io.OutputStream => Unit) =
-    import org.typelevel.ci.*
-    val st =
-      fs2.io.readOutputStream[IO](64 * 1024): out =>
-        IO.blocking[Unit]:
-          stream(out)
+    def recieveFile(part: Part[IO], directory: File)(using cats.effect.unsafe.IORuntime) =
+      import org.openmole.tool.stream.*
+      val path = new java.net.URI(part.name.get).getPath
+      val destination = new java.io.File(directory, path)
+      destination.getParentFile.mkdirs()
+      destination.setWritable(true)
+      val stream = fs2.io.toInputStreamResource(part.body)
+      stream.use { st =>
+        IO:
+          st.copy(destination)
+          destination.setExecutable(true)
+      }.unsafeRunSync()
 
-    Ok(st).map: r =>
+    def sendFileStream(fileName: String)(stream: java.io.OutputStream => Unit) =
+      import org.typelevel.ci.*
+      val st =
+        fs2.io.readOutputStream[IO](64 * 1024): out =>
+          IO.blocking[Unit]:
+            stream(out)
+
+      Ok(st).map: r =>
+        r.withHeaders(
+          //org.http4s.headers.`Content-Length`(test.length()),
+          org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"$fileName"))
+        )
+
+    def sendFile(req: Request[IO], f: File) =
+      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply(s"${f.getName} not found")).map: r =>
+        setFileHeaders(f, r)
+
+    def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
+      import org.typelevel.ci.*
       r.withHeaders(
-        //org.http4s.headers.`Content-Length`(test.length()),
-        org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"$fileName"))
+        org.http4s.headers.`Content-Length`(f.length()),
+        org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
       )
 
-  def sendFile(req: Request[IO], f: File) =
-    StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply(s"${f.getName} not found")).map: r =>
-      setFileHeaders(f, r)
+    def omrToCSV(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory) =
+      val fileBaseName = omrFile.baseName
+      val csvFile = tmpDirectory.newFile(fileBaseName, ".csv")
 
-  def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
-    import org.typelevel.ci.*
-    r.withHeaders(
-      org.http4s.headers.`Content-Length`(f.length()),
-      org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
-    )
+      org.openmole.core.omr.OMR.writeCSV(omrFile, csvFile)
+
+      def deleteCSVFile =
+        IO[Unit]:
+          csvFile.delete()
+
+      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(csvFile.toPath), Some(req))
+        .map { req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
+        .getOrElseF(Status.NotFound.apply())
+        .map { r => HTTP.setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+
+    def omrToJSON(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
+      val fileBaseName = omrFile.baseName
+      val jsonFile = tmpDirectory.newFile(fileBaseName, ".json")
+
+      org.openmole.core.omr.OMR.writeJSON(omrFile, jsonFile)
+
+      def deleteJSONFile = IO[Unit] {
+        jsonFile.delete()
+      }
+
+      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(jsonFile.toPath), Some(req))
+        .map { req => req.withBodyStream(req.body.onFinalize(deleteJSONFile)) }
+        .getOrElseF(Status.NotFound.apply())
+        .map { r => HTTP.setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
+
+    def stackError(t: Throwable) =
+      import org.openmole.core.tools.io.Prettifier.*
+      import io.circe.*
+      import io.circe.syntax.*
+      import io.circe.generic.auto.*
+      import org.openmole.gui.shared.data.*
+      import org.http4s.headers.`Content-Type`
+      InternalServerError {
+        Left(ErrorData(t)).asJson.noSpaces
+      }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
