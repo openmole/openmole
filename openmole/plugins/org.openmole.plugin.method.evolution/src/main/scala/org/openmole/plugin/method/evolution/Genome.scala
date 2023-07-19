@@ -324,8 +324,7 @@ object Genome:
       SuggestedValues.Error(new UserBadDataError(s"Unsupported file type for suggestion $f"))
 
     private def fileSuggestion(t: File) =
-      new Suggestion:
-        def apply(genome: Genome) = loadFromFile(t, genome)
+      Suggestion(genome => loadFromFile(t, genome))
 
     given ToSuggestion[File] =
       new ToSuggestion[File]:
@@ -337,18 +336,20 @@ object Genome:
 
     implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
       new ToSuggestion[Seq[Seq[ValueAssignment[T]]]]:
-        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion = genome ⇒ t.map(_.map(ValueAssignment.untyped))
+        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion =
+          Suggestion(genome ⇒ t.map(_.map(ValueAssignment.untyped)))
 
   sealed trait ToSuggestion[T]:
     def apply(t: T): Suggestion
 
-  implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
+  inline implicit def toSuggestion[T](t: T)(implicit ts: ToSuggestion[T]): Suggestion = ts.apply(t)
 
   object Suggestion:
-    def empty: Suggestion = genome ⇒ Seq()
+    def empty: Suggestion =
+      Suggestion(g => SuggestedValues.empty)
 
-  trait Suggestion:
-    def apply(g: Genome): SuggestedValues
+  case class Suggestion(f: Genome => SuggestedValues):
+    def apply(x: Genome) = f(x)
 
   object SuggestedValues:
     def empty = Values(Seq())

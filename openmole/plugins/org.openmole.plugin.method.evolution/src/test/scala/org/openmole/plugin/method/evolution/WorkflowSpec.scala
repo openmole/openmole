@@ -172,6 +172,17 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ) by Island(5)
 
     serializeDeserialize(nsga) run
+
+    val nsga2 = NSGA2Evolution(
+      evaluation = testTask,
+      objective = Seq(a),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 10,
+      parallelism = 1,
+      suggestion = Seq(Seq(a := 0.3))
+    ) by Island(5)
+
+    serializeDeserialize(nsga2) run
   }
 
   "Hook" should "be valid" in {
