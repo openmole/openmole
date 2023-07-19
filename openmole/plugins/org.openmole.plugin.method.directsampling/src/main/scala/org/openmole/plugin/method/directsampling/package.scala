@@ -19,7 +19,6 @@ package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.workflow.format.*
 import org.openmole.plugin.sampling.combine.*
 import org.openmole.plugin.domain.distribution.*
 import org.openmole.plugin.domain.modifier.*
@@ -102,7 +101,7 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
     output:      WritableOutput,
     values:      Seq[Val[_]]    = Vector.empty,
     includeSeed: Boolean        = false,
-    format:      F              = CSVOutputFormat())(using OutputFormat[F, Replication.Method]): Hooked[M] =
+    format:      F              = defaultOutputFormat)(using OutputFormat[F, Replication.Method]): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
@@ -172,7 +171,7 @@ implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: Exploration
   def hook[F](
     output: WritableOutput,
     values: Seq[Val[_]]    = Vector.empty,
-    format: F              = CSVOutputFormat())(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
+    format: F              = defaultOutputFormat)(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = dsl.method, append = true))

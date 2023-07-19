@@ -133,7 +133,7 @@ package object extension:
   export org.openmole.core.pluginregistry.PluginRegistry
 
   export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
-  export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault}
+  export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault, defaultOutputFormat}
   export org.openmole.core.workflow.format.OutputFormat.OutputContent
 
   export org.openmole.core.workflow.mole.MoleExecution

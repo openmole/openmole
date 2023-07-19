@@ -76,7 +76,7 @@ package object sensitivity {
    * @param dsl
    */
   implicit class MorrisHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m):
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(using OutputFormat[F, SensitivityMorris.Method]): Hooked[M] =
+    def hook[F](output: WritableOutput, format: F = defaultOutputFormat)(using OutputFormat[F, SensitivityMorris.Method]): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivityMorris.MorrisHook(dsl.method, output, format))
@@ -86,7 +86,7 @@ package object sensitivity {
    * @param dsl
    */
   implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m):
-    def hook[F](output: WritableOutput, format: F = CSVOutputFormat())(using OutputFormat[F, SensitivitySaltelli.Method]): Hooked[M] =
+    def hook[F](output: WritableOutput, format: F = defaultOutputFormat)(using OutputFormat[F, SensitivitySaltelli.Method]): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output, format))

@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.setter.*
 import monocle.macros.*
-import org.openmole.core.workflow.format.{CSVOutputFormat, WritableOutput}
+import org.openmole.core.workflow.format.{WritableOutput}
 import org.openmole.plugin.task.tools.*
 import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern.MasterSlave
@@ -48,7 +48,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = CSVOutputFormat())(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] =
+    format:         F                      = defaultOutputFormat)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] =
     val m = method(t)
     implicit def scope: DefinitionScope = m.scope
 

@@ -31,7 +31,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
 import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
-import org.openmole.core.workflow.format.{CSVOutputFormat, OutputFormat, WritableOutput}
+import org.openmole.core.workflow.format.*
 import org.openmole.core.workflow.hook.{FormattedFileHook, Hook}
 import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
@@ -193,7 +193,7 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
   def hook[F](
     output: WritableOutput,
     values: Seq[Val[_]]    = Vector.empty,
-    format: F              = CSVOutputFormat())(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, SingleTaskMethod]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true, metadata = SingleTaskMethod()))
+    format: F              = defaultOutputFormat)(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, SingleTaskMethod]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true, metadata = SingleTaskMethod()))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
 }
 

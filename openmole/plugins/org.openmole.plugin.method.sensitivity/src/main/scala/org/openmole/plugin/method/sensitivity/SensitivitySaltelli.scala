@@ -205,7 +205,7 @@ object SensitivitySaltelli {
 
   object SaltelliHook {
 
-    def apply[F](method: Method, output: WritableOutput, format: F = CSVOutputFormat())(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
+    def apply[F](method: Method, output: WritableOutput, format: F = defaultOutputFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
       Hook("SaltelliHook") { p ⇒
         import p._
         import WritableOutput._
