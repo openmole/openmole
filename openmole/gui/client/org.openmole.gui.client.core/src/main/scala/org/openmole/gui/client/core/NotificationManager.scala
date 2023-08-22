@@ -171,10 +171,12 @@ class NotificationManager:
                 ),
                 fStack.sortBy(_.time).reverse.zipWithIndex.map: (s, i) =>
                   div(
-                    div(backgroundColor := "white",
+                    div(
+                      marginRight := "10px",
                       div(
+                        overflowWrap.breakWord, overflow.hidden, width := "100%", padding:="10px",
                         s"${CoreUtils.longTimeToString(s.time)} - ${s.title}",
-                        padding := "10", cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
+                         cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
                         backgroundColor := { if i % 2 == 0 then lColor.background else "#f4f4f4" },
                         onClick -->
                           currentID.update:
