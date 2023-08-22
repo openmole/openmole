@@ -22,36 +22,38 @@ import cats.effect.IO
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
-import org.http4s.headers.*
-import org.http4s.implicits.*
-import org.http4s.multipart.Multipart
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.fileservice.FileServiceCache
-import org.openmole.core.omr.OMR
-import org.openmole.core.project.*
-import org.openmole.core.workflow.mole.MoleServices
-
-import java.io.PrintStream
 
 import scala.util.{Failure, Success, Try}
-import java.util.UUID
-import java.util.zip.GZIPInputStream
-import org.openmole.tool.stream.*
-import org.openmole.tool.archive.*
 import org.openmole.gui.server.ext.utils.{HTTP, fileToSafePath}
-import io.circe.generic.auto.*
-object RESTAPIv1Server:
-  object FileEntry:
-    case class File() extends FileEntry
-    case class Directory() extends FileEntry 
-    
-  sealed trait FileEntry
-    
+import io.circe.derivation
+import io.circe.generic.semiauto.*
+import org.openmole.gui.shared.data.TreeNodeData
 
-class RESTAPIv1Server(impl: ApiImpl):
-  import impl.services.*
-  import org.openmole.gui.shared.data.ServerFileSystemContext.Project
+object RESTAPIv1Server:
+  implicit val circeDefault: io.circe.derivation.Configuration =
+    io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(_.toLowerCase)
+
+  object FileEntry:
+    def fromTreeNodeData(t: TreeNodeData) =
+      t.directory match
+        case None =>
+          FileEntry.File(
+            name = t.name,
+            size = t.size,
+            modified = t.time
+          )
+        case Some(_) =>
+          FileEntry.Directory(
+            name = t.name,
+            modified = t.time
+          )
+
+    case class File(name: String, size: Long, modified: Long) extends FileEntry
+    case class Directory(name: String, modified: Long) extends FileEntry
+    
+  sealed trait FileEntry derives derivation.ConfiguredCodec
 
   implicit class ToJsonDecorator[T: io.circe.Encoder](x: T):
     def toJson =
@@ -59,9 +61,15 @@ class RESTAPIv1Server(impl: ApiImpl):
       import io.circe.syntax.*
       x.asJson.deepDropNullValues.spaces2
 
+class RESTAPIv1Server(impl: ApiImpl):
+  import impl.services.*
+  import RESTAPIv1Server.*
+  import org.openmole.gui.shared.data.ServerFileSystemContext.Project
+
   val routes: HttpRoutes[IO] =
     HttpRoutes.of:
       case req @ GET -> "list" /: rest =>
         val path = rest.segments.drop(1).map(_.decoded()).mkString("/")
-        Ok(impl.listFiles(fileToSafePath(path)).toJson)
+        def listing = impl.listFiles(fileToSafePath(path)).data.map(FileEntry.fromTreeNodeData)
+        Ok(listing.toJson)
 
