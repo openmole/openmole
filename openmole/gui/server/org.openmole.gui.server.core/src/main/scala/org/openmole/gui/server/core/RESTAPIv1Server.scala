@@ -19,9 +19,7 @@ package org.openmole.gui.server.core
 
 
 import cats.effect.IO
-import org.http4s
-import org.http4s.*
-import org.http4s.dsl.io.*
+
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
@@ -31,9 +29,15 @@ import io.circe.derivation
 import io.circe.generic.semiauto.*
 import org.openmole.gui.shared.data.TreeNodeData
 
+import org.http4s
+import org.http4s.*
+import org.http4s.dsl.*
+import org.http4s.dsl.io.*
+
+
 object RESTAPIv1Server:
-  implicit val circeDefault: io.circe.derivation.Configuration =
-    io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(_.toLowerCase)
+  implicit val circeDefault: _root_.io.circe.derivation.Configuration =
+    _root_.io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(_.toLowerCase)
 
   object FileEntry:
     def fromTreeNodeData(t: TreeNodeData) =
@@ -55,11 +59,15 @@ object RESTAPIv1Server:
     
   sealed trait FileEntry derives derivation.ConfiguredCodec
 
-  implicit class ToJsonDecorator[T: io.circe.Encoder](x: T):
+  implicit class ToJsonDecorator[T: _root_.io.circe.Encoder](x: T):
     def toJson =
-      import io.circe.*
-      import io.circe.syntax.*
+      import _root_.io.circe.*
+      import _root_.io.circe.syntax.*
       x.asJson.deepDropNullValues.spaces2
+
+
+  object PathParam extends OptionalQueryParamDecoderMatcher[String]("path")
+  object ListParam extends FlagQueryParamMatcher("list")
 
 class RESTAPIv1Server(impl: ApiImpl):
   import impl.services.*
@@ -68,8 +76,7 @@ class RESTAPIv1Server(impl: ApiImpl):
 
   val routes: HttpRoutes[IO] =
     HttpRoutes.of:
-      case req @ GET -> "list" /: rest =>
-        val path = rest.segments.drop(1).map(_.decoded()).mkString("/")
-        def listing = impl.listFiles(fileToSafePath(path)).data.map(FileEntry.fromTreeNodeData)
+      case req @ GET -> root / "files" :? PathParam(path) +& ListParam(list) if list =>
+        def listing = impl.listFiles(fileToSafePath(path.getOrElse(""))).data.map(FileEntry.fromTreeNodeData)
         Ok(listing.toJson)
 
