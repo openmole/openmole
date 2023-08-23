@@ -25,10 +25,10 @@ import org.openmole.gui.shared.data.*
 abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs:
   implicit class EndpointDecorator[A, B](ep: Endpoint[A, Either[ErrorData, B]]):
     def errorImplementedBy(f: A => B) =
-      ep.implementedBy { a =>
+      ep.implementedBy: a =>
         try Right(f(a))
         catch
-          case t: Throwable => Left(ErrorData(t))
-      }
+          case t: Throwable =>
+            Left(ErrorData(t))
 
 

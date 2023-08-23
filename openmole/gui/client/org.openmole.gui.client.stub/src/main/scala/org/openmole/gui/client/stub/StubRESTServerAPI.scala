@@ -34,7 +34,7 @@ import concurrent.ExecutionContext.Implicits.global
 object AnimatedStubRESTServerAPI:
   case class MemoryFile(content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false, compilation: Option[CompilationErrorData] = None)
 
-  def SafePath(value: String*): SafePath = SafePath(ArraySeq.from(value), ServerFileSystemContext.Project)
+  def SafePath(value: String*): SafePath = org.openmole.gui.shared.data.SafePath(value, ServerFileSystemContext.Project)
 
 
   def apply() =
@@ -151,13 +151,15 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def temporaryDirectory()(using BasePath): Future[SafePath] =
     Future.successful(SafePath("_tmp_"))
 
-  override def executionState(line: Int, ids: Seq[ExecutionId])(using BasePath): Future[Seq[ExecutionData]] =
+  override def executionState(ids: Seq[ExecutionId])(using BasePath): Future[Seq[ExecutionData]] =
     val ex =
       ids match
         case Seq() => executions.values.toSeq
         case _ => ids.flatMap(executions.get)
     Future.successful(ex)
 
+  override def executionOutput(id: ExecutionId, lines: Int)(using BasePath): Future[String] =
+    Future.successful("stub output\n" * 1000)
 
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] =
     val execution = executions(id)
@@ -180,7 +182,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     )
 
     val id = ExecutionId()
-    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), "stub output", 10000L)
+    executions += id -> ExecutionData(id, script, files(script).content, System.currentTimeMillis(), ExecutionState.Finished(capsules, 1000L, environments, true), 10000L)
     notification += NotificationEvent.MoleExecutionFinished(id, script, None, System.currentTimeMillis(),  notificationId.getAndIncrement())
 
     Future.successful(id)
@@ -239,7 +241,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.root(ServerFileSystemContext.Project), "stub", "stub", System.currentTimeMillis(), true))
+  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(org.openmole.gui.shared.data.SafePath.root(ServerFileSystemContext.Project), "stub", "stub", System.currentTimeMillis(), true))
 
   override def shutdown()(using BasePath): Future[Unit] = Future.successful(())
 

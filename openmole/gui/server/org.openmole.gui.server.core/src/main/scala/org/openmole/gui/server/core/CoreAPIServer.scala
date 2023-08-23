@@ -147,7 +147,10 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     sequence.errorImplementedBy { p => apiImpl.sequence(p) }
 
   val executionStateRoute =
-    executionState.errorImplementedBy { (l, i) => apiImpl.executionData(l, i) }
+    executionState.errorImplementedBy { i => apiImpl.executionData(i) }
+
+  val executionOutputRoute =
+    executionOutput.errorImplementedBy { (i, l) => apiImpl.executionOutput(i, l) }
 
   val cancelExecutionRoute =
     cancelExecution.errorImplementedBy { i => apiImpl.cancelExecution(i) }
@@ -238,6 +241,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       mdToHtmlRoute,
       sequenceRoute,
       executionStateRoute,
+      executionOutputRoute,
       cancelExecutionRoute,
       removeExecutionRoute,
       compileScriptRoute,

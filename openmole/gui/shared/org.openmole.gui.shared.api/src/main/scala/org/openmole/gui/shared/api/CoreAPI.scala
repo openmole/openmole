@@ -90,10 +90,13 @@ trait CoreAPI extends RESTAPI:
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
-  val executionState: ErrorEndpoint[(Int, Seq[ExecutionId]), Seq[ExecutionData]] =
-    errorEndpoint(post(path / prefix / "execution" / "state", jsonRequest[(Int, Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
+  val executionState: ErrorEndpoint[(Seq[ExecutionId]), Seq[ExecutionData]] =
+    errorEndpoint(post(path / prefix / "execution" / "state", jsonRequest[(Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
 
-//  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
+  val executionOutput: ErrorEndpoint[(ExecutionId, Int), String] =
+    errorEndpoint(post(path / prefix / "execution" / "output", jsonRequest[(ExecutionId, Int)]), ok(jsonResponse[String]))
+
+  //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
 //  val staticInfos: SafeEndpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
 //    safeEndpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
 

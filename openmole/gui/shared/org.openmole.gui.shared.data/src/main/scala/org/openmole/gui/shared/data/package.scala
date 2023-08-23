@@ -152,7 +152,6 @@ case class ExecutionData(
   script: String,
   startDate: Long,
   state: ExecutionState,
-  output: String,
   executionTime: Long):
   def duration = state.duration
 

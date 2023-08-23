@@ -66,8 +66,7 @@ object ExecutionPanel:
     ratio: String,
     running: Long,
     error: Option[ErrorData] = None,
-    envStates: Seq[EnvironmentState] = Seq(),
-    output: String = "")
+    envStates: Seq[EnvironmentState] = Seq())
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Executions = Map[ExecutionId, ExecutionDetails]
@@ -103,15 +102,15 @@ class ExecutionPanel:
       (ready, running, completed)
 
     exec.state match
-      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates, exec.output)
+      case f: ExecutionState.Failed ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, Some(f.error), f.environmentStates)
       case f: ExecutionState.Finished ⇒
         val (ready, running, completed) = userCapsuleState(f.capsules)
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = f.environmentStates, exec.output)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = f.environmentStates)
       case r: ExecutionState.Running ⇒
         val (ready, running, completed) = userCapsuleState(r.capsules)
-        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates, exec.output)
-      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates, exec.output)
-      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, exec.output)
+        ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates)
+      case c: ExecutionState.Canceled ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates)
+      case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates)
 
 
   def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
@@ -295,7 +294,7 @@ class ExecutionPanel:
 
     def queryState =
       queryingState = true
-      try for executionData <- api.executionState(1000) yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
+      try for executionData <- api.executionState() yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
       finally queryingState = false
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
@@ -318,7 +317,7 @@ class ExecutionPanel:
     def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
       OMSContent.setError(executionDetails.path, executionDetails.error)
       elementTable()
-        .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(executionDetails), showExpander.signal.map(_.isDefined))
+        .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(id, executionDetails), showExpander.signal.map(_.isDefined))
         .unshowSelection
         .render.render.amend(idAttr := "exec")
 
@@ -387,11 +386,17 @@ class ExecutionPanel:
           else div()
       )
 
-    def expander(details: ExecutionDetails) =
+    def expander(id: ExecutionId, details: ExecutionDetails) =
       div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
         child <-- showExpander.signal.map:
           case Some(Expand.Script) => div(execTextArea(details.script))
-          case Some(Expand.Console) => div(execTextArea(details.output).amend(cls := "console"))
+          case Some(Expand.Console) =>
+            div(
+              child <--
+                Signal.fromFuture(api.executionOutput(id, 1000)).map:
+                  case Some(output) => execTextArea(output).amend(cls := "console")
+                  case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
+            )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(details.envStates)
           case None => div()
