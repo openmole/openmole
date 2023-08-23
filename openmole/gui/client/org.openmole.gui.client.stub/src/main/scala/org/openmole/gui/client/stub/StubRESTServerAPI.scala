@@ -34,6 +34,9 @@ import concurrent.ExecutionContext.Implicits.global
 object AnimatedStubRESTServerAPI:
   case class MemoryFile(content: String, time: Long = System.currentTimeMillis(), directory: Boolean = false, compilation: Option[CompilationErrorData] = None)
 
+  def SafePath(value: String*): SafePath = SafePath(ArraySeq.from(value), ServerFileSystemContext.Project)
+
+
   def apply() =
     val api = new AnimatedStubRESTServerAPI()
 
@@ -236,7 +239,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath)(using BasePath): Future[Unit] = Future.successful(())
 
-  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.empty, "stub", "stub", System.currentTimeMillis(), true))
+  override def omSettings()(using BasePath): Future[OMSettings] = Future.successful(OMSettings(SafePath.root(ServerFileSystemContext.Project), "stub", "stub", System.currentTimeMillis(), true))
 
   override def shutdown()(using BasePath): Future[Unit] = Future.successful(())
 

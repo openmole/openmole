@@ -51,12 +51,10 @@ case class RelativePath(value: Seq[String]):
   def ::(s: String) = RelativePath(Seq(s) ++ value)
 
 object SafePath:
-  def leaf(name: String) = SafePath(name)
-  def empty = leaf("")
+  def root(context: ServerFileSystemContext) = SafePath(path = Seq(""), context = context)
   def naming = (sp: SafePath) ⇒ sp.name
 
-  def apply(value: String*): SafePath = SafePath(ArraySeq.from(value))
-  def apply(path: Iterable[String], context: ServerFileSystemContext = ServerFileSystemContext.Project): SafePath =
+  def apply(path: Iterable[String], context: ServerFileSystemContext): SafePath =
     new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
 
 case class SafePath(path: RelativePath, context: ServerFileSystemContext) derives io.circe.Codec.AsObject:

@@ -82,7 +82,7 @@ object CoreAPIServer:
 
     fileType match
       case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
-      case None => SafePath(path.split('/').toSeq)
+      case None => SafePath(path.split('/').toSeq, ServerFileSystemContext.Project)
 
 
 

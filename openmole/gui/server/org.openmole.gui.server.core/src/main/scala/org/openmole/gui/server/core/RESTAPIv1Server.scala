@@ -26,7 +26,7 @@ import scala.util.{Failure, Success, Try}
 import org.openmole.gui.server.ext.utils.{HTTP, fileToSafePath}
 import io.circe.derivation
 import io.circe.generic.semiauto.*
-import org.openmole.gui.shared.data.{SafePath, TreeNodeData}
+import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext, TreeNodeData}
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.*
@@ -65,6 +65,7 @@ object RESTAPIv1Server:
       x.asJson.deepDropNullValues.spaces2
 
 
+  object MultiPath extends OptionalMultiQueryParamDecoderMatcher[String]("path")
   object PathParam extends OptionalQueryParamDecoderMatcher[String]("path")
   object ListParam extends FlagQueryParamMatcher("list")
 
@@ -79,18 +80,29 @@ class RESTAPIv1Server(impl: ApiImpl):
         def listing = impl.listFiles(fileToSafePath(path.getOrElse(""))).data.map(FileEntry.fromTreeNodeData)
         Ok(listing.toJson)
 
-      case req @ GET -> "files" /: path =>
-        // wget --content-disposition  localhost:46857/rest/v1/files/trempoline
-        val sp = fileToSafePath(path.segments.map(_.decoded()).mkString("/"))
+      case req @ GET -> root / "files" :? PathParam(path) =>
+        // wget --content-disposition  localhost:46857/rest/v1/files@path=/trempoline
+        val sp = fileToSafePath(path.getOrElse(""))
         CoreAPIServer.download(req, sp)
 
-      case req @ POST -> "files" /: path =>
-        // curl  -F "test.txt=@/tmp/test.txt" localhost:46857/rest/v1/files/trempoline/
+      case req @ POST -> root / "files" :? PathParam(path) =>
+        // curl  -F "test.txt=@/tmp/test.txt" localhost:46857/rest/v1/files?path=/trempoline/
         req.decode[Multipart[IO]] { parts =>
           def fileParts = parts.parts.filter(_.filename.isDefined)
-          val destDirectory = org.openmole.gui.server.ext.utils.projectsDirectory / path.segments.map(_.decoded()).mkString("/")
+          val destDirectory = org.openmole.gui.server.ext.utils.projectsDirectory / path.getOrElse("")
 
           for file <- fileParts
           do HTTP.recieveFile(file, destDirectory)
           Ok()
         }
+
+      case req @ DELETE -> root / "files" :? MultiPath(paths) =>
+        // curl -X DELETE "localhost:46857/rest/v1/files?path=/trempoline/test.txt"
+        paths match
+          case cats.data.Validated.Invalid(e) =>
+            import _root_.io.circe.generic.auto.*
+            ExpectationFailed(e.toJson)
+          case cats.data.Validated.Valid(ps) =>
+            val safePaths = ps.map((p: String) => SafePath(p.split("/"), ServerFileSystemContext.Project))
+            impl.deleteFiles(safePaths)
+            Ok()
