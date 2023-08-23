@@ -285,9 +285,9 @@ object utils:
           org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> s"$fileName"))
         )
 
-    def sendFile(req: Request[IO], f: File) =
+    def sendFile(req: Request[IO], f: File, name: Option[String] = None) =
       StaticFile.fromPath(fs2.io.file.Path.fromNioPath(f.toPath), Some(req)).getOrElseF(Status.NotFound.apply(s"${f.getName} not found")).map: r =>
-        setFileHeaders(f, r)
+        setFileHeaders(f, r, name = name)
 
     def setFileHeaders(f: File, r: Response[IO], name: Option[String] = None) =
       import org.typelevel.ci.*

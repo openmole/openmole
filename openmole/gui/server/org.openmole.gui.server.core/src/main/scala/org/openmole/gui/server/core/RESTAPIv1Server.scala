@@ -19,7 +19,6 @@ package org.openmole.gui.server.core
 
 
 import cats.effect.IO
-
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
@@ -27,8 +26,7 @@ import scala.util.{Failure, Success, Try}
 import org.openmole.gui.server.ext.utils.{HTTP, fileToSafePath}
 import io.circe.derivation
 import io.circe.generic.semiauto.*
-import org.openmole.gui.shared.data.TreeNodeData
-
+import org.openmole.gui.shared.data.{SafePath, TreeNodeData}
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.*
@@ -80,3 +78,6 @@ class RESTAPIv1Server(impl: ApiImpl):
         def listing = impl.listFiles(fileToSafePath(path.getOrElse(""))).data.map(FileEntry.fromTreeNodeData)
         Ok(listing.toJson)
 
+      case req @ GET -> "files" /: path =>
+        val sp = fileToSafePath(path.segments.map(_.decoded()).mkString("/"))
+        CoreAPIServer.download(req, sp)

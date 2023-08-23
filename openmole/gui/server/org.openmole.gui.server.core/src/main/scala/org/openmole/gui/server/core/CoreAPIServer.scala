@@ -26,6 +26,7 @@ import org.http4s.headers.*
 import org.http4s.implicits.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workspace.Workspace
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
@@ -35,6 +36,46 @@ import org.openmole.gui.shared.data.*
 import org.openmole.tool.file.*
 
 object CoreAPIServer:
+  def download(req: Request[IO], safePath: SafePath, name: Option[String] = None, topDirectory: Boolean = true)(using Workspace) =
+    val f = safePathToFile(safePath)
+
+    val response =
+      if !f.exists()
+      then Status.NotFound.apply(s"The file ${safePath.path.mkString} does not exist.")
+      else if f.isDirectory
+      then CoreAPIServer.directoryDownload(f, name, topDirectory = topDirectory)
+      else
+        import org.openmole.core.omr.*
+        if !OMR.isOMR(f)
+        then CoreAPIServer.fileDownload(f, req, name)
+        else CoreAPIServer.omrDownload(f, name)
+
+    response
+
+  def directoryDownload(f: File, name: Option[String] = None, topDirectory: Boolean = true): IO[Response[IO]] =
+    import org.openmole.tool.stream.*
+    import org.openmole.tool.archive.*
+
+    HTTP.sendFileStream(s"${name.getOrElse(f.getName)}.tgz"): out =>
+      val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+      try tos.archive(f, includeTopDirectoryName = topDirectory)
+      finally tos.close()
+
+  def fileDownload(f: File, req: Request[IO], name: Option[String]): IO[Response[IO]] =
+    HTTP.sendFile(req, f, name)
+
+  def omrDownload(f: File, name: Option[String]): IO[Response[IO]] =
+    import org.openmole.tool.stream.*
+    import org.openmole.tool.archive.*
+    import org.openmole.core.omr.*
+    val dataFiles = OMR.dataFiles(f)
+    HTTP.sendFileStream(s"${name.getOrElse(f.baseName)}.tgz"): out =>
+      val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+      try
+        tos.addFile(f, f.getName)
+        dataFiles.foreach((n, f) => tos.addFile(f, n))
+      finally tos.close()
+
   def getSafePath(req: Request[IO]) =
     val fileType = req.params.get(org.openmole.gui.shared.api.fileTypeParam)
     val path = req.params.getOrElse(org.openmole.gui.shared.api.pathParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.pathParam} is required"))
@@ -253,63 +294,23 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import apiImpl.services.*
         import org.openmole.tool.file.*
 
-        val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
-        val nameParam = req.params.get(org.openmole.gui.shared.api.Download.fileNameParam)
-
         import org.typelevel.ci.*
 
+        val nameParam = req.params.get(org.openmole.gui.shared.api.Download.fileNameParam)
+
         val safePath = CoreAPIServer.getSafePath(req)
-        val f = safePathToFile(safePath)
+
+        val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
+        val r = CoreAPIServer.download(req, safePath, nameParam, topDirectory = topDirectory)
 
         def addHashHeader(r: org.http4s.Response[IO], f: File) =
+          val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
           if hash
           then r.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
           else r
 
-        def directoryDownload(f: File) =
-          import org.openmole.tool.stream.*
-          import org.openmole.tool.archive.*
+        r.map { r => addHashHeader(r, safePathToFile(safePath)) }
 
-          val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
-
-          val response = HTTP.sendFileStream(s"${nameParam.getOrElse(f.getName)}.tgz"): out =>
-            val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-            try tos.archive(f, includeTopDirectoryName = topDirectory)
-            finally tos.close()
-
-          response.map { r => addHashHeader(r, f) }
-
-        def fileDownload(f: File) =
-          f.withLock: _ ⇒
-            HTTP.sendFile(req, f).map { r => addHashHeader(r, f) }
-
-        def omrDownload(f: File) =
-          import org.openmole.tool.stream.*
-          import org.openmole.tool.archive.*
-          import org.openmole.core.omr.*
-
-          val dataFiles = OMR.dataFiles(f)
-
-          val response =
-            HTTP.sendFileStream(s"${nameParam.getOrElse(f.baseName)}.tgz"): out =>
-              val tos = new TarOutputStream(out.toGZ, 64 * 1024)
-              try
-                tos.addFile(f, f.getName)
-                dataFiles.foreach((n, f) => tos.addFile(f, n))
-              finally tos.close()
-
-          response.map { r => addHashHeader(r, f) }
-
-        if !f.exists()
-        then Status.NotFound.apply(s"The file $path does not exist.")
-        else
-          if f.isDirectory
-          then directoryDownload(f)
-          else
-            import org.openmole.core.omr.*
-            if !OMR.isOMR(f)
-            then fileDownload(f)
-            else omrDownload(f)
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
