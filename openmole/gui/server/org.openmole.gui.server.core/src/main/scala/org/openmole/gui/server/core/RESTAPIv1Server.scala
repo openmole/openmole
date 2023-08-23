@@ -31,7 +31,8 @@ import org.http4s
 import org.http4s.*
 import org.http4s.dsl.*
 import org.http4s.dsl.io.*
-
+import org.http4s.multipart.Multipart
+import cats.effect.unsafe.implicits.global
 
 object RESTAPIv1Server:
   implicit val circeDefault: _root_.io.circe.derivation.Configuration =
@@ -79,5 +80,17 @@ class RESTAPIv1Server(impl: ApiImpl):
         Ok(listing.toJson)
 
       case req @ GET -> "files" /: path =>
+        // wget --content-disposition  localhost:46857/rest/v1/files/trempoline
         val sp = fileToSafePath(path.segments.map(_.decoded()).mkString("/"))
         CoreAPIServer.download(req, sp)
+
+      case req @ POST -> "files" /: path =>
+        // curl  -F "test.txt=@/tmp/test.txt" localhost:46857/rest/v1/files/trempoline/
+        req.decode[Multipart[IO]] { parts =>
+          def fileParts = parts.parts.filter(_.filename.isDefined)
+          val destDirectory = org.openmole.gui.server.ext.utils.projectsDirectory / path.segments.map(_.decoded()).mkString("/")
+
+          for file <- fileParts
+          do HTTP.recieveFile(file, destDirectory)
+          Ok()
+        }

@@ -263,6 +263,7 @@ object utils:
       import org.openmole.tool.stream.*
       val path = new java.net.URI(part.name.get).getPath
       val destination = new java.io.File(directory, path)
+
       destination.getParentFile.mkdirs()
       destination.setWritable(true)
       val stream = fs2.io.toInputStreamResource(part.body)
