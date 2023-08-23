@@ -26,7 +26,7 @@ import scala.util.{Failure, Success, Try}
 import org.openmole.gui.server.ext.utils.{HTTP, fileToSafePath}
 import io.circe.derivation
 import io.circe.generic.semiauto.*
-import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext, TreeNodeData}
+import org.openmole.gui.shared.data.{ExecutionId, SafePath, ServerFileSystemContext, TreeNodeData}
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.*
@@ -55,7 +55,7 @@ object RESTAPIv1Server:
 
     case class File(name: String, size: Long, modified: Long) extends FileEntry
     case class Directory(name: String, modified: Long) extends FileEntry
-    
+
   sealed trait FileEntry derives derivation.ConfiguredCodec
 
   implicit class ToJsonDecorator[T: _root_.io.circe.Encoder](x: T):
@@ -68,6 +68,9 @@ object RESTAPIv1Server:
   object MultiPath extends OptionalMultiQueryParamDecoderMatcher[String]("path")
   object PathParam extends OptionalQueryParamDecoderMatcher[String]("path")
   object ListParam extends FlagQueryParamMatcher("list")
+
+  object IdParam extends QueryParamDecoderMatcher[String]("id")
+  object RunParam extends FlagQueryParamMatcher("run")
 
 class RESTAPIv1Server(impl: ApiImpl):
   import impl.services.*
@@ -106,3 +109,19 @@ class RESTAPIv1Server(impl: ApiImpl):
             val safePaths = ps.map((p: String) => SafePath(p.split("/"), ServerFileSystemContext.Project))
             impl.deleteFiles(safePaths)
             Ok()
+
+      case req @ GET -> root / "executions" :? PathParam(path) +& RunParam(run) if run =>
+        // curl "localhost:46857/rest/v1/executions?path=/test/Pi%20Computation/Pi.oms&run"
+        import _root_.io.circe.generic.auto.*
+        val sp = fileToSafePath(path.getOrElse(""))
+        Ok(impl.launchScript(sp, validateScript = true).toJson)
+
+      case req@GET -> root / "executions" =>
+        // curl "localhost:46857/rest/v1/executions"
+        import _root_.io.circe.generic.auto.*
+        Ok(impl.executionIds.map(_.id).toJson)
+
+      case req @ DELETE -> root / "executions" :? IdParam(id) =>
+        // curl -X DELETE "localhost:46857/rest/v1/executions?id=ghvWZXZmKv"
+        impl.removeExecution(ExecutionId(id))
+        Ok()

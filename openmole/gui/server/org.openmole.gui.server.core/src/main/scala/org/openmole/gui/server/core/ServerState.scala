@@ -313,6 +313,8 @@ class ServerState:
     executions.toSeq.sortBy(_.startDate)
   }
 
+  def executionIds = executionInfo.single.keys
+
   def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx ⇒
     val id = notificationEventId()
     notificationEventId.update(id + 1)
