@@ -31,7 +31,7 @@ To checkout OpenMOLE you can play with to the [demo site](http://demo.openmole.o
 
   - **Expressive syntax** – A Domain Specific Language to describe your exploration processes,
   - **Transparent distributed computing** – Zero-deployment (no installation step) approach to distribute the workload transparently on your multi-core machines, desktop-grids, clusters, grids, ...
-  - **Works with your programs** – Embed user’s executables (**Java, Binary exe, NetLogo, R, Scilab, Python, C++, ...**),
+  - **Works with your programs** – Embed user’s executables (**Java, Binary exe, NetLogo, R, Scilab, Python, C++, Docker Container...**),
   - **Scalable** – Handles millions of tasks and TB of data,
   - **Advanced methods** – Advanced numerical experiments (design of experiments, optimization, calibration, sensitivity analysis, ...).
 
