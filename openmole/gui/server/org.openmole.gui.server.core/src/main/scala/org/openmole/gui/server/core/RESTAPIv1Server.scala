@@ -26,7 +26,7 @@ import scala.util.{Failure, Success, Try}
 import org.openmole.gui.server.ext.utils.{HTTP, fileToSafePath}
 import io.circe.derivation
 import io.circe.generic.semiauto.*
-import org.openmole.gui.shared.data.{ExecutionId, SafePath, ServerFileSystemContext, TreeNodeData}
+import org.openmole.gui.shared.data
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.*
@@ -39,7 +39,7 @@ object RESTAPIv1Server:
     _root_.io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(_.toLowerCase)
 
   object FileEntry:
-    def fromTreeNodeData(t: TreeNodeData) =
+    def fromTreeNodeData(t: data.TreeNodeData) =
       t.directory match
         case None =>
           FileEntry.File(
@@ -57,6 +57,18 @@ object RESTAPIv1Server:
     case class Directory(name: String, modified: Long) extends FileEntry
 
   sealed trait FileEntry derives derivation.ConfiguredCodec
+
+
+  object Execution:
+    object State:
+      import _root_.io.circe.*
+      given Encoder[State] = v => Encoder.encodeString(v.toString)
+      given Decoder[State] = Decoder.decodeString.map(State.valueOf)
+
+    enum State:
+      case failed, running, finished, canceled, preparing
+
+  case class Execution(id: String, state: Execution.State, duration: Long) derives derivation.ConfiguredCodec
 
   implicit class ToJsonDecorator[T: _root_.io.circe.Encoder](x: T):
     def toJson =
@@ -106,7 +118,7 @@ class RESTAPIv1Server(impl: ApiImpl):
             import _root_.io.circe.generic.auto.*
             ExpectationFailed(e.toJson)
           case cats.data.Validated.Valid(ps) =>
-            val safePaths = ps.map((p: String) => SafePath(p.split("/"), ServerFileSystemContext.Project))
+            val safePaths = ps.map((p: String) => data.SafePath(p.split("/"), data.ServerFileSystemContext.Project))
             impl.deleteFiles(safePaths)
             Ok()
 
@@ -119,9 +131,20 @@ class RESTAPIv1Server(impl: ApiImpl):
       case req@GET -> root / "executions" =>
         // curl "localhost:46857/rest/v1/executions"
         import _root_.io.circe.generic.auto.*
-        Ok(impl.executionIds.map(_.id).toJson)
+
+        def toExecution(d: data.ExecutionData) =
+          def state =
+            d.state match
+              case _: data.ExecutionState.Failed => Execution.State.failed
+              case _: data.ExecutionState.Running => Execution.State.running
+              case _: data.ExecutionState.Finished => Execution.State.finished
+              case _: data.ExecutionState.Canceled => Execution.State.canceled
+              case _: data.ExecutionState.Preparing => Execution.State.preparing
+          Execution(d.id.id, state, d.duration)
+
+        Ok(impl.executionData(Seq()).map(toExecution).toJson)
 
       case req @ DELETE -> root / "executions" :? IdParam(id) =>
         // curl -X DELETE "localhost:46857/rest/v1/executions?id=ghvWZXZmKv"
-        impl.removeExecution(ExecutionId(id))
+        impl.removeExecution(data.ExecutionId(id))
         Ok()
