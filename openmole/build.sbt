@@ -1328,12 +1328,15 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     copy((openmole / assemble).value, s"/openmole")
     runRaw(
       """apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
+       #apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
+       apt-get install --no-install-recommends -y ca-certificates ca-certificates-java bash tar gzip sudo locales npm wget && \
+       (cd /tmp && wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.7_7.tar.gz && tar -xvzf OpenJDK17U-jre_x64_linux_hotspot_17.0.7_7.tar.gz && mv jdk-17.0.7+7-jre /opt/java) && \
        echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
        apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
+    env("PATH", "/opt/java/bin:$PATH")
     runRaw(
       """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         |dpkg-reconfigure --frontend=noninteractive locales && \

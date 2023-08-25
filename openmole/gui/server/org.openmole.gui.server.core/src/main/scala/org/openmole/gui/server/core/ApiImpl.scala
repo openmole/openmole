@@ -399,7 +399,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
 
 
-  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(outputLines, ids)
+  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(ids)
+  def executionOutput(id: ExecutionId, lines: Int): String = serverState.executionOutput(id, lines)
+  def executionIds = serverState.executionIds.toSeq
 
   //def staticInfos() = execution.staticInfos()
 
@@ -445,7 +447,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
-    val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/")) }
+    val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/"), ServerFileSystemContext.Project) }
 
     currentPluginsSafePath.flatMap { csp ⇒
       val file = safePathToFile(csp)
@@ -457,7 +459,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def activatePlugins =
     import services.*
-    val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/")))).filter(_.exists)
+    val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/"), ServerFileSystemContext.Project))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
 //  private def isPlugged(safePath: SafePath) =

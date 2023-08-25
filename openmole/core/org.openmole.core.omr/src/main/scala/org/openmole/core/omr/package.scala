@@ -33,7 +33,7 @@ import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
 
 implicit val omrCirceDefault: io.circe.derivation.Configuration =
- io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type")
+ io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(derivation.renaming.kebabCase)
 
 object Index:
  case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec

@@ -107,7 +107,7 @@ object GUIServer:
     |    <div style="display:none;">launching-page</div>
     |    <script>
     |      setInterval(function(){
-    |        fetch('application/is-alive').then(r => r.text()).then((text) => { if(text.includes("true") && !text.includes("launching-page")) { window.location.reload(1); } })
+    |        fetch('gui/application/is-alive').then(r => r.text()).then((text) => { if(text.includes("true") && !text.includes("launching-page")) { window.location.reload(1); } })
     |      }, 3000);
     |    </script>
     |  </head>
@@ -208,6 +208,7 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
 
 
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
+    val restServer = new RESTAPIv1Server(apiImpl)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -221,7 +222,12 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     //      )
 
     val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> r.router).toSeq
-    val httpApp = Router(Seq("/" -> applicationServer.routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes) ++ pluginsRoutes: _*).orNotFound
+    val httpApp = Router(
+      Seq(
+        "/" -> applicationServer.routes,
+        "/" -> apiServer.routes,
+        "/" -> apiServer.endpointRoutes,
+        "/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 

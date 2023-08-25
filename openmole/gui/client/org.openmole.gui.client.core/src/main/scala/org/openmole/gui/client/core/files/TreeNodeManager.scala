@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TreeNodeManager:
 
-  val root = SafePath.empty
+  val root = SafePath.root(ServerFileSystemContext.Project)
   
   val directory: Var[SafePath] = Var(root)
 

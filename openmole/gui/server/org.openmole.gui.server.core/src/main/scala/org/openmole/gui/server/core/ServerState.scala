@@ -298,20 +298,26 @@ class ServerState:
   }
 
 
-  def executionData(outputLines: Int, ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
+  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
     val executions =
       for
         id <- if ids.isEmpty then executionInfo.keys else ids
         static ← executionInfo.get(id)
       yield
-        val output  = static.output.toString.lines.toArray.takeRight(outputLines).mkString("\n")
         val stateValue = state(id)
         def environments: Seq[RunningEnvironment] = environmentIds.get(id).toSeq.flatten.flatMap(runningEnvironments.get)
         val executionTime = environments.map(_.executionActivity.executionTime).sum
-        ExecutionData(id, static.path, static.script, static.startDate, stateValue, output, executionTime)
+        ExecutionData(id, static.path, static.script, static.startDate, stateValue, executionTime)
 
     executions.toSeq.sortBy(_.startDate)
   }
+
+  def executionOutput(id: ExecutionId, lines: Int): String = atomic { implicit ctx ⇒
+    val info = executionInfo.get(id)
+    info.map(_.output.toString.lines.toArray.takeRight(lines).mkString("\n")).getOrElse("")
+  }
+
+  def executionIds = executionInfo.single.keys
 
   def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx ⇒
     val id = notificationEventId()
