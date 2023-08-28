@@ -42,6 +42,6 @@ object ClientUtil:
   }
 
   def errorTextArea(content: String) =
-    val errorStyle = Seq(width := "100%", height := "400px", whiteSpace := "pre")
+    val errorStyle = Seq(height := "400px", padding := "10px", overflowWrap.breakWord, overflow.hidden, width := "100%", border := "0px")
     textArea(errorStyle, content)
 
