@@ -72,7 +72,7 @@ class NotificationManager:
     currentID.set(None)
     currentListType.set(None)
 
-  def showGetItNotification(level: NotificationLevel, title: String, body: Div = div(), time: Option[Long] = None) =
+  def showGetItNotification(level: NotificationLevel, title: String, body: HtmlElement = div(), time: Option[Long] = None) =
     lazy val notif: NotificationLine =
       addNotification(
         level,

@@ -133,7 +133,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       case false ⇒
         CoreUtils.addPlugin(safePath).foreach: errors ⇒
           for e <- errors
-          do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", div(ErrorData.stackTrace(e)))
+          do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", ClientUtil.errorTextArea(ErrorData.stackTrace(e)))
           panels.pluginPanel.getPlugins
           panels.treeNodePanel.refresh
 
