@@ -48,14 +48,7 @@ object PluginManager extends JavaLogger {
   private var bundlesInfo: Option[BundlesInfo] = None
   private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
 
-  Activator.contextOrException.addBundleListener(
-    (event: BundleEvent) ⇒
-      if (event.getType == BundleEvent.RESOLVED ||
-        event.getType == BundleEvent.UNRESOLVED ||
-        event.getType == BundleEvent.UPDATED) clearCaches()
-  )
-
-  private def clearCaches() = PluginManager.synchronized {
+  private[pluginmanager] def clearCaches() = PluginManager.synchronized {
     bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
   }

@@ -18,13 +18,26 @@
 package org.openmole.core.pluginmanager
 
 import org.openmole.core.tools.service.OSGiActivator
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.osgi.framework.{BundleActivator, BundleContext, BundleEvent, BundleListener}
 
-object Activator extends OSGiActivator {
+object Activator extends OSGiActivator:
   var context: Option[BundleContext] = None
-}
 
-class Activator extends BundleActivator {
-  override def start(context: BundleContext) = Activator.context = Some(context)
-  override def stop(context: BundleContext) = Activator.context = None
-}
+class Activator extends BundleActivator:
+  lazy val listner =
+    new BundleListener:
+      override def bundleChanged(event: BundleEvent): Unit =
+        if
+          event.getType == BundleEvent.RESOLVED ||
+          event.getType == BundleEvent.UNRESOLVED ||
+          event.getType == BundleEvent.UPDATED
+        then PluginManager.clearCaches()
+
+  override def start(context: BundleContext) =
+    Activator.context = Some(context)
+    context.addBundleListener(listner)
+
+  override def stop(context: BundleContext) =
+    context.removeBundleListener(listner)
+    Activator.context = None
+
