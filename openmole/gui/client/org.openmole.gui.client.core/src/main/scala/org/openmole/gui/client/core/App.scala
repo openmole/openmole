@@ -173,7 +173,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
 
-      def getServerNotifications = api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
+      def getServerNotifications =
+        if !panels.notifications.isOpened
+        then api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
 
       render(
         containerNode,

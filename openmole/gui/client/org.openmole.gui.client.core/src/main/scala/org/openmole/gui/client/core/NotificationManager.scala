@@ -43,6 +43,8 @@ class NotificationManager:
   val currentListType: Var[Option[NotificationLevel]] = Var(None)
   val currentID: Var[Option[String]] = Var(None)
 
+  def isOpened = currentListType.now().isDefined
+
   def filteredStack(stack: Seq[NotificationLine], notificationLevel: NotificationLevel) = stack.filter(_.level == notificationLevel)
 
   def remove(notification: NotificationLine) = removeById(notification.id)
@@ -194,16 +196,13 @@ class NotificationManager:
   def notifTopIcon(notifCls: String, st: Seq[NotificationLine], notificationLevel: NotificationLevel) =
     val nList = filteredStack(st, notificationLevel)
 
-    def trigger = onClick --> { _ =>
-      currentListType.update(_ match {
+    def trigger = onClick -->
+      currentListType.update:
         case Some(aLevel: NotificationLevel) =>
           if aLevel == notificationLevel
           then None
           else Some(notificationLevel)
         case _ => Some(notificationLevel)
-      }
-      )
-    }
 
     div(
       display.flex, flexDirection.row, marginTop := "20px",
