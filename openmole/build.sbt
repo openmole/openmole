@@ -38,13 +38,13 @@ def commonSettings =
     resolvers ++= Resolver.sonatypeOssRepos("releases"),
     resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     resolvers ++= Resolver.sonatypeOssRepos("staging"),
-    javacOptions ++= Seq("-source", "11", "-target", "11"),
+    javacOptions ++= Seq("-source", "11", "-target", "11"), //, "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
     install / packageDoc / publishArtifact := false,
     install / packageSrc / publishArtifact := false,
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
     libraryDependencies += Libraries.scalatest,
     Test / fork := true,
-    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED")
+    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED", "-Djdk.util.zip.disableZip64ExtraFieldValidation=true")
   )
 
 def scala3Settings =
@@ -408,23 +408,23 @@ lazy val netLogoAPI = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo",
 
 
 lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+  toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
-  libraryDependencies += Libraries.netlogo5,
+  netlogo5Jar,
   libraryDependencies -= Libraries.scalatest
-) settings (toolsSettings: _*)
+)
 
 
 lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+  toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
-  libraryDependencies += Libraries.netlogo6,
-  libraryDependencies -= Libraries.scalatest,
-) settings (toolsSettings: _*)
+  netlogo6Jar,
+  libraryDependencies -= Libraries.scalatest
+)
 
 lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings: _*) settings (defaultActivator)
-
-
 
 
 
@@ -572,12 +572,12 @@ lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", im
   libraryDependencies += Libraries.scalaXML)
 
 lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings: _*) settings (
-  noNetLogoInClassPath
-  )
+  noNetLogoInClassPath,
+  libraryDependencies += Libraries.netlogo5)
 
 lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings: _*) settings (
-  noNetLogoInClassPath
-  )
+  noNetLogoInClassPath,
+  libraryDependencies += Libraries.netlogo6)
 
 
 lazy val scala = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, external, openmoleCompiler) settings (pluginSettings: _*) settings (
@@ -1328,15 +1328,12 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     copy((openmole / assemble).value, s"/openmole")
     runRaw(
       """apt-get update && \
-       #apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
-       apt-get install --no-install-recommends -y ca-certificates ca-certificates-java bash tar gzip sudo locales npm wget && \
-       (cd /tmp && wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.7_7.tar.gz && tar -xvzf OpenJDK17U-jre_x64_linux_hotspot_17.0.7_7.tar.gz && mv jdk-17.0.7+7-jre /opt/java) && \
+       apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
        echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
        apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules""")
-    env("PATH", "/opt/java/bin:$PATH")
     runRaw(
       """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         |dpkg-reconfigure --frontend=noninteractive locales && \

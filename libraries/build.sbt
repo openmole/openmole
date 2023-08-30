@@ -193,11 +193,9 @@ lazy val netlogo5 = OsgiProject(
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),
   imports = Seq("!*")) settings(settings) settings(
-    libraryDependencies ++= Seq(
-      "ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
-      "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-      "asm" % "asm-all" % "3.3.1" % "provided",
-      "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"), version := netLogo5Version, scalaVersion := "2.9.2", crossPaths := false) 
+  netlogo5Jar,
+  version := netLogo5Version,
+  crossPaths := false)
 
 lazy val netlogo6 = OsgiProject(
   dir,
@@ -206,22 +204,9 @@ lazy val netlogo6 = OsgiProject(
   privatePackages = Seq("**"),
   imports = Seq("empty;resolution:=optional")) settings(settings) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
-  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
-  libraryDependencies ++= Seq(
-    //"org.nlogo" % "netlogo" % netLogo6Version % "provided" from s"https://dl.bintray.com/netlogo/NetLogo-JVM/org/nlogo/netlogo/$netLogo6Version/netlogo-$netLogo6Version.jar",
-    "org.nlogo" % "netlogo" % netLogo6Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),
-    //"org.scala-lang" % "scala-reflect" % "2.12.8" % "provided",
-    //"org.scala-lang" % "scala-compiler" % "2.12.8" % "provided",
-    
-    /*"org.scala-lang" % "scala-library" % "2.12.8" % "provided",
-     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5" % "provided",
-    "commons-codec" % "commons-codec" % "1.10" % "provided",
-    "org.ow2.asm" % "asm-all" % "5.0.4" % "provided",
-    "org.picocontainer" % "picocontainer" % "2.13.6" % "provided",
-    "org.parboiled" %% "parboiled" % "2.1.3" % "provided",
-    "com.typesafe" % "config" % "1.3.1" % "provided",
-    "net.lingala.zip4j" % "zip4j" % "1.3.2" % "provided"*/
-  ), version := netLogo6Version, scalaVersion := "2.12.8", crossPaths := false) 
+  netlogo6Jar,
+  version := netLogo6Version,
+  crossPaths := false)
 
 /*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
