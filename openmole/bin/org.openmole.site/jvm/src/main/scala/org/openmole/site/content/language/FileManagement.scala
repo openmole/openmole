@@ -228,7 +228,7 @@ ${ul(
   li{a("Documentation on data processing", href := DocumentationPages.fileSampling.file)},
   li{a("Utility functions of the ScalaTask", href := DocumentationPages.scalaFunction.file)},
   li{a("Documentation of the RTask", href := DocumentationPages.r.file)},
-  li{a("Documentation of the CARETask and the SystemExecTask", href := DocumentationPages.container.file)},
+  li{a("Documentation of the ContainerTask and the SystemExecTask", href := DocumentationPages.container.file)},
   li{a("Example in Python", href := DocumentationPages.python.file)},
   li{a("Example in R", href := DocumentationPages.r.file)}
 )}

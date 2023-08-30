@@ -105,34 +105,29 @@ case class SystemExecTask private (
     commandsError ++ variableErrors ++ External.validate(external)(allInputs)
   }
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext { p ⇒
+  override protected def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
 
-    tmpDirectory.withTmpDir { tmpDir ⇒
-      val workDir =
-        workDirectory match {
-          case None    ⇒ tmpDir
-          case Some(d) ⇒ new File(tmpDir, d)
-        }
+    tmpDirectory.withTmpDir: tmpDir ⇒
+      val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(tmpDir))
 
-      workDir.mkdirs()
+      val workDir =
+        workDirectory match
+          case None ⇒ tmpDir
+          case Some(d) ⇒ new File(tmpDir, d)
 
       val context = p.context + (External.PWD → workDir.getAbsolutePath)
 
-      val preparedContext = External.deployInputFilesAndResources(external, context, External.relativeResolver(workDir))
-
       val osCommandLines =
-        command.find { _.os.compatible }.map {
-          cmd ⇒ cmd.expanded
-        }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
+        command.find { _.os.compatible }
+          .map { cmd ⇒ cmd.expanded }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
       val expandedCommands = osCommandLines.map(_.from(preparedContext))
 
       val shellCommands =
-        shell match {
-          case Bash    ⇒ expandedCommands.map(cmd ⇒ ExecutionCommand.Parsed("bash", "-c", cmd))
+        shell match
+          case Bash ⇒ expandedCommands.map(cmd ⇒ ExecutionCommand.Parsed("bash", "-c", cmd))
           case NoShell ⇒ expandedCommands.map(ExecutionCommand.Raw(_))
-        }
 
       val executionResult =
         executeAll(
@@ -146,7 +141,7 @@ case class SystemExecTask private (
           stdErr = executionContext.outputRedirection.output
         )
 
-      val retContext: Context = External.fetchOutputFiles(external, systemExecTask.outputs, preparedContext, External.relativeResolver(workDir), Seq(tmpDir))
+      val retContext: Context = External.fetchOutputFiles(external, systemExecTask.outputs, preparedContext, External.relativeResolver(tmpDir), Seq(tmpDir))
 
       retContext ++
         List(
@@ -154,7 +149,5 @@ case class SystemExecTask private (
           stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
           returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
         ).flatten
-    }
-  }
 
 }

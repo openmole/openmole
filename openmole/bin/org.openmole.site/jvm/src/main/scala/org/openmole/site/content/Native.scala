@@ -34,14 +34,14 @@ object Native {
 //
 //  )
 
-  lazy val footer = paragraph(
-    p, "Two things should be noted from this example:",
-    ul,
-    li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
-    li(RawFrag(s"The ${hl.openmoleNoTest("CARETask")} is not different from the SystemExecTask to the extent of the archive given as a first parameter.")),
-
-    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
-  )
+//  lazy val footer = paragraph(
+//    p, "Two things should be noted from this example:",
+//    ul,
+//    li(RawFrag(s"The procedure to package an application ${b("is always the same")},  regardless of the underlying programming language / framework used.")),
+//    li(RawFrag(s"The ${hl.openmoleNoTest("ContainerTask")} is not different from the SystemExecTask to the extent of the archive given as a first parameter.")),
+//
+//    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
+//  )
 
   def singularity = a("the Singularity container system", href := org.openmole.site.shared.link.singularity)
 
