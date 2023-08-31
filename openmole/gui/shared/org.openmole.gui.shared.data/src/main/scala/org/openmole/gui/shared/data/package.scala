@@ -146,6 +146,8 @@ case class ExecutionActivity(executionTime: Long = 0)
 
 //case class EnvironmentErrorGroup(error: EnvironmentError, oldestDate: Long, number: Int)
 
+case class ExecutionOutput(output: String, listed: Int, total: Int)
+
 case class ExecutionData(
   id: ExecutionId,
   path: SafePath,

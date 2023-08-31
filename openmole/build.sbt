@@ -51,7 +51,7 @@ def scala3Settings =
   commonSettings ++
     Seq(
       Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
-      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"),
+      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50", "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
       excludeTransitiveScala2
     )
 
@@ -80,8 +80,6 @@ def excludeTransitiveScala2 =
     //    ExclusionRule("org.typelevel", "cats-effect-kernel_2.13"),
     //    ExclusionRule("org.typelevel", "cats-core_2.13")
   )
-
-
 
 ThisBuild / publishTo :=
   (if (isSnapshot.value) Some("OpenMOLE Nexus" at "https://maven.openmole.org/snapshots") else Some("OpenMOLE Nexus" at "https://maven.openmole.org/releases"))
@@ -719,8 +717,9 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   )*/
   guiSettings,
   scalaJSSettings,
-
+  Compile / javaOptions += "-Djdk.util.zip.disableZip64ExtraFieldValidation=true",
   build := {
+
     val demoResource = (Compile / resourceDirectory).value
     val demoTarget = target.value
     val bundlerTarget = demoTarget / ("scala-" + scalaVersion.value) / "scalajs-bundler"

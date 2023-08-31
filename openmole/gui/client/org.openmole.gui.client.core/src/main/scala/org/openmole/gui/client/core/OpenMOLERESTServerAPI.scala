@@ -44,7 +44,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def exists(path: SafePath)(using BasePath): Future[Boolean] = fetch.futureError(_.exists(path).future)
   override def temporaryDirectory()(using BasePath): Future[SafePath] = fetch.futureError(_.temporaryDirectory(()).future)
   override def executionState(ids: Seq[ExecutionId])(using BasePath): Future[Seq[ExecutionData]] = fetch.futureError(_.executionState(ids).future)
-  override def executionOutput(id: ExecutionId, lines: Int)(using BasePath): Future[String] = fetch.futureError(_.executionOutput(id, lines).future)
+  override def executionOutput(id: ExecutionId, lines: Int)(using BasePath): Future[ExecutionOutput] = fetch.futureError(_.executionOutput(id, lines).future)
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.cancelExecution(id).future)
   override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.removeExecution(id).future)
   override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = fetch.futureError(_.compileScript(script).future, timeout = Some(600 seconds), warningTimeout = None)

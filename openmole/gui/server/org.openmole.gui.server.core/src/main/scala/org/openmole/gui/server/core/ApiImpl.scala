@@ -400,7 +400,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
 
   def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(ids)
-  def executionOutput(id: ExecutionId, lines: Int): String = serverState.executionOutput(id, lines)
+  def executionOutput(id: ExecutionId, lines: Int) = serverState.executionOutput(id, lines)
   def executionIds = serverState.executionIds.toSeq
 
   //def staticInfos() = execution.staticInfos()

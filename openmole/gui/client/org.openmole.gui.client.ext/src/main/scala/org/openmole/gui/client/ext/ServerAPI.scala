@@ -46,7 +46,7 @@ trait ServerAPI:
   def temporaryDirectory()(using BasePath): Future[SafePath]
 
   def executionState(id: Seq[ExecutionId] = Seq())(using BasePath): Future[Seq[ExecutionData]]
-  def executionOutput(id: ExecutionId, line: Int)(using BasePath): Future[String]
+  def executionOutput(id: ExecutionId, line: Int)(using BasePath): Future[ExecutionOutput]
 
   def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit]
   def removeExecution(id: ExecutionId)(using BasePath): Future[Unit]

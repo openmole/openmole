@@ -312,9 +312,14 @@ class ServerState:
     executions.toSeq.sortBy(_.startDate)
   }
 
-  def executionOutput(id: ExecutionId, lines: Int): String = atomic { implicit ctx ⇒
+  def executionOutput(id: ExecutionId, l: Int) = atomic { implicit ctx ⇒
     val info = executionInfo.get(id)
-    info.map(_.output.toString.lines.toArray.takeRight(lines).mkString("\n")).getOrElse("")
+    val res =
+      info.map: info =>
+        val lines = info.output.toString.lines.toArray
+        val output = lines.takeRight(l)
+        ExecutionOutput(lines.takeRight(l).mkString("\n"), output.length, lines.length)
+    res.getOrElse(ExecutionOutput("", 0, 0))
   }
 
   def executionIds = executionInfo.single.keys

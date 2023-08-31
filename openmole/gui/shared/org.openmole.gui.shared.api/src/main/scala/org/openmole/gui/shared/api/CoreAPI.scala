@@ -93,8 +93,8 @@ trait CoreAPI extends RESTAPI:
   val executionState: ErrorEndpoint[(Seq[ExecutionId]), Seq[ExecutionData]] =
     errorEndpoint(post(path / prefix / "execution" / "state", jsonRequest[(Seq[ExecutionId])]), ok(jsonResponse[Seq[ExecutionData]]))
 
-  val executionOutput: ErrorEndpoint[(ExecutionId, Int), String] =
-    errorEndpoint(post(path / prefix / "execution" / "output", jsonRequest[(ExecutionId, Int)]), ok(jsonResponse[String]))
+  val executionOutput: ErrorEndpoint[(ExecutionId, Int), ExecutionOutput] =
+    errorEndpoint(post(path / prefix / "execution" / "output", jsonRequest[(ExecutionId, Int)]), ok(jsonResponse[ExecutionOutput]))
 
   //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
 //  val staticInfos: SafeEndpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =

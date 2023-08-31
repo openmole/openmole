@@ -158,8 +158,11 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
         case _ => ids.flatMap(executions.get)
     Future.successful(ex)
 
-  override def executionOutput(id: ExecutionId, lines: Int)(using BasePath): Future[String] =
-    Future.successful("stub output\n" * 1000)
+  override def executionOutput(id: ExecutionId, lines: Int)(using BasePath) =
+    val output = "stub output\n" * 10000
+    val res = output.split("\n").takeRight(lines)
+
+    Future.successful(ExecutionOutput(res.mkString("\n"), res.length, output.split("\n").length))
 
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] =
     val execution = executions(id)

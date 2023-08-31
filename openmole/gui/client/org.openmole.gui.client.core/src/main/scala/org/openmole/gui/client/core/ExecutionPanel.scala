@@ -391,11 +391,27 @@ class ExecutionPanel:
         child <-- showExpander.signal.map:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
+            val size = Var(1000)
             div(
-              child <--
-                Signal.fromFuture(api.executionOutput(id, 1000)).map:
-                  case Some(output) => execTextArea(output).amend(cls := "console")
-                  case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
+              children <--
+                size.signal.flatMap: sizeValue =>
+                  Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
+                    case Some(output) =>
+                      def more =
+                        if output.listed < output.total
+                        then
+                          Seq(
+                            div(position := "absolute", top := "310", left := "900", cursor.pointer, textAlign := "center", color := "white",
+                              i(cls := "bi bi-plus"),
+                              br(),
+                              i(fontSize := "12", s"${output.listed}/${output.total}"),
+                              onClick --> { _ => size.update(_ * 2) }
+                            )
+                          )
+                        else Seq()
+
+                      Seq(execTextArea(output.output).amend(cls := "console")) ++ more
+                    case None => Seq(i(cls := "bi bi-hourglass-split", textAlign := "center"))
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(details.envStates)
