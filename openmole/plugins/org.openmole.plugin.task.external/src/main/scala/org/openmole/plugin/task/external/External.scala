@@ -146,7 +146,11 @@ object External:
       f ← allFiles
       if !f.value.exists
     do
-      throw new UserBadDataError("Output file " + f.value.getAbsolutePath + s" (stored in variable ${f.prototype}) doesn't exist, parent directory ${f.value.getParentFileSafe} contains [" + f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ") + "]")
+      def parentMessage =
+        if f.value.getParentFileSafe.exists()
+        then s"""its parent directory ${f.value.getParentFileSafe} contains [${f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ")}"]"""
+        else s"""its parent directory ${f.value.getParentFileSafe} doesn't exist either"""
+      throw new UserBadDataError(s"""Output file ${f.value.getAbsolutePath} (stored in variable ${f.prototype}) doesn't exist, $parentMessage""")
 
     // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =
