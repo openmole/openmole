@@ -28,9 +28,9 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sourc
 RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import
 RUN chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
 
-RUN apt update && apt install -y npm nodejs sbt git git-lfs figlet unzip && apt-get clean
+RUN apt update && apt install -y npm nodejs sbt git git-lfs figlet unzip docker.io && apt-get clean
 
-RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && apt-get clean
+#RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && apt-get clean
 
 RUN (curl https://rclone.org/install.sh | bash) && apt-get clean
 
