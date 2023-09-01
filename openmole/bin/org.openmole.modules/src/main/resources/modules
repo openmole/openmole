@@ -27,7 +27,7 @@ cd "$CURDIR"
 
 CONFIGDIR=/tmp/site_`date +%s`_$RANDOM
 
-java -Dfile.encoding=UTF-8 -Xmx3G -Xss10m \
+java -Dfile.encoding=UTF-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Xmx3G -Xss10m \
    -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --run org.openmole.modules.Generate --osgi-directory "${CONFIGDIR}" -- \
    --resources "${LOCATION}/resources" $@
 
