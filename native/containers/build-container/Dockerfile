@@ -28,7 +28,17 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sourc
 RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import
 RUN chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
 
-RUN apt update && apt install -y npm nodejs sbt git git-lfs figlet unzip docker.io && apt-get clean
+RUN apt update && apt install -y npm nodejs sbt git git-lfs figlet unzip docker.io locales && apt-get clean
+
+## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+	&& locale-gen en_US.utf8 \
+	&& /usr/sbin/update-locale LANG=en_US.UTF-8 
+        #&& ln -s /etc/locale.alias /usr/share/locale/locale.alias \
+        #&& apt install locales
+
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
 
 #RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && apt-get clean
 
