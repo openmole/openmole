@@ -238,7 +238,7 @@ class ExecutionPanel:
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 
-  def execTextArea(content: String): HtmlElement = textArea(content, idAttr := "execTextArea")
+  def execTextArea(content: String) = textArea(content, idAttr := "execTextArea")
 
   def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
     import ExecutionPanel.ExecutionDetails.State
@@ -397,11 +397,13 @@ class ExecutionPanel:
                 size.signal.flatMap: sizeValue =>
                   Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
                     case Some(output) =>
+                      val textArea = execTextArea(output.output).amend(cls := "console")
+
                       def more =
                         if output.listed < output.total
                         then
                           Seq(
-                            div(position := "absolute", top := "310", left := "900", cursor.pointer, textAlign := "center", color := "white",
+                            div(position := "absolute", top := "315", left := "900", cursor.pointer, textAlign := "center", color := "white",
                               i(cls := "bi bi-plus"),
                               br(),
                               i(fontSize := "12", s"${output.listed}/${output.total}"),
@@ -410,7 +412,13 @@ class ExecutionPanel:
                           )
                         else Seq()
 
-                      Seq(execTextArea(output.output).amend(cls := "console")) ++ more
+                      def bottom =
+                        div(position := "absolute", top := "730", left := "922", cursor.pointer, textAlign := "center", color := "white",
+                          i(cls := "bi bi-caret-down"),
+                          onClick --> { _ => textArea.ref.scrollTop = textArea.ref.scrollHeight }
+                        )
+
+                      Seq(textArea) ++ more ++ Seq(bottom)
                     case None => Seq(i(cls := "bi bi-hourglass-split", textAlign := "center"))
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
