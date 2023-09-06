@@ -72,7 +72,7 @@ object Search {
               div(paddingTop := "5", fontSize := "18px",
                 a(cursor.pointer, href := r._1.ref, SiteJS.entries.get(r._1.ref), color := "white", {
                   if (r._2 == it.index) {
-                    item.set(it.copy(ref = r._1.ref, maxSize = rr.size))
+                    //item.set(it.copy(ref = r._1.ref, maxSize = rr.size))
                     backgroundColor := "rgb(164,60,60)"
                   }
                   else emptyMod
