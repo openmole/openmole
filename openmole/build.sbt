@@ -44,14 +44,14 @@ def commonSettings =
     shellPrompt := { s => Project.extract(s).currentProject.id + " > " },
     libraryDependencies += Libraries.scalatest,
     Test / fork := true,
-    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED", "-Djdk.util.zip.disableZip64ExtraFieldValidation=true")
+    Test / javaOptions ++= Seq("-Xss2M", "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED") //, "-Djdk.util.zip.disableZip64ExtraFieldValidation=true")
   )
 
 def scala3Settings =
   commonSettings ++
     Seq(
       Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
-      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50", "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
+      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"), // "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
       excludeTransitiveScala2
     )
 
@@ -717,7 +717,6 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   )*/
   guiSettings,
   scalaJSSettings,
-  Compile / javaOptions += "-Djdk.util.zip.disableZip64ExtraFieldValidation=true",
   build := {
 
     val demoResource = (Compile / resourceDirectory).value

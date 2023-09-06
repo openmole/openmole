@@ -12,6 +12,7 @@ object OsgiProject {
   protected def osgiSettings = SbtOsgi.autoImport.osgiSettings ++ Seq(
     OsgiKeys.bundleSymbolicName := (name.value + ";singleton:=" + Osgi.singleton.value),
     autoAPIMappings := true,
+    OsgiKeys.packageWithJVMJar := true,
 
     Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 

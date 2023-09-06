@@ -481,7 +481,7 @@ lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("
 )
 
 
-lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), exports = Seq("com.google.guava.*", "com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (
+lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("!com.google.appengine.*", "!com.google.apphosting.*", "*"), exports = Seq("com.google.guava.*", "com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (
   settings,
   libraryDependencies += "com.google.guava" % "guava" % guavaVersion,
   version := guavaVersion
@@ -493,7 +493,7 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("*"), export
 //  version := endpoints4SVersion
 //) settings(settings: _*) settings(settings: _*) dependsOn(circe)
 
-lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*")) settings (
+lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*", "org.objectweb.asm.*")) settings (
   settings,
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
@@ -511,7 +511,7 @@ lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.se
 ) dependsOn(cats, circe, http4s)
 
 
-lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*",  "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*", "org.typelevel.log4cats.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*")) settings (
+lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "!sun.nio.ch.*", "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*", "org.typelevel.log4cats.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*", "org.objectweb.asm.*")) settings (
   settings,
   libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
