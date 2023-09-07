@@ -32,6 +32,7 @@ trait Classes:
   lazy val MoleTask = task.MoleTask
 
   export org.openmole.core.workflow.hook.display
-  export org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat, OMR, CSV}
+  export org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat}
+  export org.openmole.core.workflow.format.{CSVOutputFormat as CSV, OMROutputFormat as OMR}
 
 
