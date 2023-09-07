@@ -289,8 +289,8 @@ object Genome:
 
     import scala.util.boundary
     def loadFromFile(f: File, genome: Genome): SuggestedValues = boundary:
-      import org.openmole.core.csv.CSV
-      import org.openmole.core.omr.OMR
+      import org.openmole.core.csv.CSVFormat
+      import org.openmole.core.omr.OMRFormat
       import org.openmole.core.dsl._
 
       def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
@@ -298,15 +298,15 @@ object Genome:
       if !f.exists
       then boundary.break(SuggestedValues.Error(UserBadDataError(s"File for loading suggestion $f does not exist")))
 
-      if CSV.isCSV(f)
+      if CSVFormat.isCSV(f)
       then
         val columns = genome.map(GenomeBound.toVal).map(v ⇒ v.name -> v)
-        def values = CSV.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
+        def values = CSVFormat.csvToVariables(f, columns).map(_.map(v ⇒ toAssignment(v)).toVector).toVector
         boundary.break(SuggestedValues.Values(values))
 
-      if OMR.isOMR(f)
+      if OMRFormat.isOMR(f)
       then
-        val ctx = Context(OMR.toVariables(f).head._2: _*)
+        val ctx = Context(OMRFormat.toVariables(f).head._2: _*)
         val vals = genome.map(g => GenomeBound.toVal(g))
         val values =
           vals.map(v => ctx.variable(v.array).getOrElse:

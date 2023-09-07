@@ -75,10 +75,10 @@ case class Index(
  `time-save`: Long) derives derivation.ConfiguredCodec
 
 def methodField = "method"
-def omrVersion = "0.2"
+def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
-object OMR:
+object OMRFormat:
   def resultFileDirectoryName(executionId: String) =
     s"$dataDirectoryName/files-${executionId.filter(_ != '-')}"
 
@@ -146,8 +146,8 @@ object OMR:
 
   def diskUsage(omrFile: File) =
     omrFile.size +
-      OMR.dataFiles(omrFile).map(_._2.size).sum +
-      OMR.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
+      OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
+      OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
   def toVariables(file: File, relativePath: Boolean = false): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
@@ -210,7 +210,7 @@ object OMR:
 
     if variable.size == 1
     then
-      CSV.writeVariablesToCSV(
+      CSVFormat.writeVariablesToCSV(
         destination,
         variable.head._2,
         unrollArray = unrollArray,
@@ -222,7 +222,7 @@ object OMR:
         ((section, v), i) <- variable.zipWithIndex
       do
         destination.append(s"#section: ${section.name.getOrElse(i.toString)}\n")
-        CSV.writeVariablesToCSV(
+        CSVFormat.writeVariablesToCSV(
           destination,
           v,
           unrollArray = unrollArray,

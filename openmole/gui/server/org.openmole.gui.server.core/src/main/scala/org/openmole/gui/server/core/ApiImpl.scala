@@ -215,8 +215,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
       toFile.getParentFile.mkdirs()
-      if OMR.isOMR(fromFile)
-      then OMR.move(fromFile, toFile)
+      if OMRFormat.isOMR(fromFile)
+      then OMRFormat.move(fromFile, toFile)
       else fromFile.move(toFile)
     }
 
@@ -509,12 +509,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def omrMethodName(result: SafePath): Option[String] =
     import services.*
     val omrFile = safePathToFile(result)
-    OMR.methodName(omrFile)
+    OMRFormat.methodName(omrFile)
 
   def omrFiles(omr: SafePath): Option[SafePath] =
     import services.*
     val omrFile = safePathToFile(omr)
-    OMR.resultFileDirectory(omrFile).map: rf =>
+    OMRFormat.resultFileDirectory(omrFile).map: rf =>
       fileToSafePath(rf)
 
   def omrContent(result: SafePath): GUIOMRContent =
@@ -559,10 +559,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GUIVariable(v.name, valueTypeFromAny(v.value), v.prototype.`type`.toString)
 
     def content =
-      OMR.toVariables(omrFile).map: (s, v) =>
+      OMRFormat.toVariables(omrFile).map: (s, v) =>
         GUIOMRSectionContent(s.name, v.map(toGUIVariable))
 
-    val index = OMR.indexData(omrFile)
+    val index = OMRFormat.indexData(omrFile)
 
     def script =
       def convertImport(i: Index.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)

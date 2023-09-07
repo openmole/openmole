@@ -43,7 +43,7 @@ object OMROutputFormat:
               case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
               case f => (f.getParentFile / s"${f.getName}.omr", f.getParentFile)
 
-          val resultFileDirectoryName = OMR.resultFileDirectoryName(executionId)
+          val resultFileDirectoryName = OMRFormat.resultFileDirectoryName(executionId)
 
           def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent, fileDirectory: Option[String]) =
             import executionContext.timeService
@@ -91,7 +91,7 @@ object OMROutputFormat:
             try
               if file.exists
               then
-                val data = OMR.indexData(file)
+                val data = OMRFormat.indexData(file)
                 Some((data.`execution-id`, data.`data-file`))
               else None
             catch
@@ -101,7 +101,7 @@ object OMROutputFormat:
             val existingData =
               parseExistingData(methodFile) match
                 case Some((id, data)) if format.overwrite && id != executionContext.moleExecutionId =>
-                  OMR.delete(methodFile) //clean(methodFile, data)
+                  OMRFormat.delete(methodFile) //clean(methodFile, data)
                   Seq()
                 case Some((_, data)) => data
                 case None => Seq()

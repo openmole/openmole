@@ -5,7 +5,7 @@ import java.io.PrintStream
 import org.openmole.tool.stream.StringOutputStream
 import org.scalatest._
 import org.openmole.core.context._
-import CSV.*
+import CSVFormat.*
 
 class CSVSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 

@@ -70,7 +70,7 @@ case class CSVSampling(
     import p._
     import org.openmole.core.csv.*
 
-    CSV.csvToVariables(
+    CSVFormat.csvToVariables(
       file.from(context),
       columns.map(_.toTuple.swap),
       separator)

@@ -60,7 +60,7 @@ case class CSVSource(
 
     val file = new File(path.from(context))
     val transposed =
-      CSV.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
+      CSVFormat.csvToVariables(file, columns.map(_.toTuple.swap), separator).toSeq.transpose
 
     def variables =
       for {

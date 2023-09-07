@@ -78,7 +78,7 @@ object utils:
 
 
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
-    import org.openmole.core.omr.OMR
+    import org.openmole.core.omr.OMRFormat
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
     if f.exists()
@@ -86,8 +86,8 @@ object utils:
       val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
       def size =
-        if OMR.isOMR(f)
-        then Try { OMR.diskUsage(f) }.getOrElse(f.length())
+        if OMRFormat.isOMR(f)
+        then Try { OMRFormat.diskUsage(f) }.getOrElse(f.length())
         else f.length()
 
       Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
@@ -156,14 +156,14 @@ object utils:
     }.filter(exists)
 
   def copyFiles(safePaths: Seq[(SafePath, SafePath)], overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
-    import org.openmole.core.omr.OMR
+    import org.openmole.core.omr.OMRFormat
     val existing = ListBuffer[SafePath]()
     safePaths.foreach: (p, d) ⇒
       val destination = d.toFile
       def copy(): Unit =
         val fromFile = p.toFile
-        if OMR.isOMR(fromFile)
-        then OMR.copy(fromFile, destination)
+        if OMRFormat.isOMR(fromFile)
+        then OMRFormat.copy(fromFile, destination)
         else fromFile.copy(destination)
 
       if destination.exists()
@@ -176,10 +176,10 @@ object utils:
 
 
   def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit =
-    import org.openmole.core.omr.OMR
+    import org.openmole.core.omr.OMRFormat
     val f = safePathToFile(safePath)
-    if OMR.isOMR(f)
-    then OMR.delete(f)
+    if OMRFormat.isOMR(f)
+    then OMRFormat.delete(f)
     else f.recursiveDelete
 
   def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit =
@@ -302,7 +302,7 @@ object utils:
       val fileBaseName = omrFile.baseName
       val csvFile = tmpDirectory.newFile(fileBaseName, ".csv")
 
-      org.openmole.core.omr.OMR.writeCSV(omrFile, csvFile)
+      org.openmole.core.omr.OMRFormat.writeCSV(omrFile, csvFile)
 
       def deleteCSVFile =
         IO[Unit]:
@@ -317,7 +317,7 @@ object utils:
       val fileBaseName = omrFile.baseName
       val jsonFile = tmpDirectory.newFile(fileBaseName, ".json")
 
-      org.openmole.core.omr.OMR.writeJSON(omrFile, jsonFile)
+      org.openmole.core.omr.OMRFormat.writeJSON(omrFile, jsonFile)
 
       def deleteJSONFile = IO[Unit] {
         jsonFile.delete()

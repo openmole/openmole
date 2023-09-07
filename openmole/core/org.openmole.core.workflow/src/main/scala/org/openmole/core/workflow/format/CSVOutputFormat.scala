@@ -17,7 +17,7 @@ object CSVOutputFormat:
 
       val format = CSVOutputFormatDefault.value(f, default)
 
-      def headerLine(variables: Seq[Variable[_]]) = format.header.map(_.from(context)) getOrElse CSV.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)
+      def headerLine(variables: Seq[Variable[_]]) = format.header.map(_.from(context)) getOrElse CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = format.arrayOnRow)
 
       import OutputFormat.*
       import WritableOutput.*
@@ -27,8 +27,8 @@ object CSVOutputFormat:
           def writeFile(f: File, variables: Seq[Variable[_]]) =
             val create = !append || f.isEmpty
             val h = if (create || f.isEmpty) Some(headerLine(variables)) else None
-            if (create) f.atomicWithPrintStream { ps ⇒ CSV.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
-            else f.withPrintStream(append = true, create = true) { ps ⇒ CSV.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+            if (create) f.atomicWithPrintStream { ps ⇒ CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
+            else f.withPrintStream(append = true, create = true) { ps ⇒ CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow) }
 
           def directoryMode = format.directory || s.section.size > 1
 
@@ -44,11 +44,11 @@ object CSVOutputFormat:
             section match
               case None ⇒
                 val header = Some(headerLine(variables))
-                CSV.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow)
               case Some(section) ⇒
                 ps.println(section + ":")
                 val header = Some(headerLine(variables))
-                CSV.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = format.unrollArray, arrayOnRow = format.arrayOnRow, margin = "  ")
 
           for { (section, i) ← s.section.zipWithIndex }
             val sectionName = if s.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None

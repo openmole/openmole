@@ -10,7 +10,7 @@ import org.http4s.multipart.Multipart
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.fileservice.FileServiceCache
-import org.openmole.core.omr.OMR
+import org.openmole.core.omr.OMRFormat
 import org.openmole.core.project.*
 import org.openmole.core.workflow.mole.MoleServices
 
@@ -207,7 +207,7 @@ class RESTAPI(services: Services):
           val file = ex.jobDirectory.workDirectory / path
 
           checkIsOMR(file):
-            OMR.resultFileDirectory(file) match
+            OMRFormat.resultFileDirectory(file) match
               case Some(fileDirectory) =>
                 HTTP.sendFileStream(s"${file.baseName}-files.tgz"): out =>
                   val tos = new TarOutputStream(out.toGZ, 64 * 1024)
@@ -331,6 +331,6 @@ class RESTAPI(services: Services):
   def checkIsOMR[T](file: File)(f: => T) =
     if !file.exists()
     then NotFound(Error("File not found").toJson)
-    else if !org.openmole.core.omr.OMR.isOMR(file)
+    else if !org.openmole.core.omr.OMRFormat.isOMR(file)
     then ExpectationFailed(Error("File is not an \".omr\" file").toJson)
     else f

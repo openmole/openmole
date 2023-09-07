@@ -17,4 +17,7 @@ package org.openmole.core.workflow.format
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-def defaultOutputFormat = CSVOutputFormat()
+
+
+export org.openmole.core.workflow.format.{CSVOutputFormat as CSV, OMROutputFormat as OMR}
+def defaultOutputFormat = CSV()
