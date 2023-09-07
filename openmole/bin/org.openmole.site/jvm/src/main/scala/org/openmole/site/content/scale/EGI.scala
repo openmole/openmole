@@ -97,7 +97,7 @@ ${ul(
   li{html"${apiEntryTitle{"service"}} a DIRAC REST API,"},
   li{html"${apiEntryTitle{"group"}} the name of the DIRAC group,"},
   li{html"${apiEntryTitle{"bdii"}} the BDII to use for listing resources accessible from this VO. The BDII in your preference file is used, when this field is left unspecified."},
-  li{html"${apiEntryTitle{"vomsURL"}} the URL of the VOMS server used for the authentication,"},
+  li{html"${apiEntryTitle{"voms"}} the VOMS server used for the authentication,"},
   li{html"${apiEntryTitle{"fqan"}} additional flags for authentication,"},
   li{html"${apiEntryTitle{"setup"}} setup to use on the DIRAC server. It is set to \"Dirac-Production\" by default."}
 )}

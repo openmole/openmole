@@ -133,7 +133,7 @@ object EGIAuthentication extends JavaLogger {
   def proxy[A: EGIAuthenticationInterface](
     a:      A,
     voName: String,
-    voms:   Option[Seq[String]],
+    voms:   Option[String],
     fqan:   Option[String])(implicit workspace: Workspace, preference: Preference): util.Try[gridscale.egi.VOMS.VOMSCredential] = EGI { implicits ⇒
     import implicits._
 
@@ -147,7 +147,7 @@ object EGIAuthentication extends JavaLogger {
         timeout = preference(EGIEnvironment.VOMSTimeout)
       )
 
-    def vomses = voms orElse getVOMS(voName)
+    def vomses = voms.map(v => Seq(v)) orElse getVOMS(voName)
 
     vomses match {
       case Some(vomses) ⇒ util.Try(findFirstWorking(vomses)(queryProxy, "VOMS server"))

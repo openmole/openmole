@@ -164,7 +164,7 @@ object EGIEnvironment extends JavaLogger {
     service:        OptionalArgument[String]      = None,
     group:          OptionalArgument[String]      = None,
     bdii:           OptionalArgument[String]      = None,
-    vomsURLs:       OptionalArgument[Seq[String]] = None,
+    voms:           OptionalArgument[String]      = None,
     fqan:           OptionalArgument[String]      = None,
     cpuTime:        OptionalArgument[Time]        = None,
     openMOLEMemory: OptionalArgument[Information] = None,
@@ -178,7 +178,7 @@ object EGIEnvironment extends JavaLogger {
         service = service,
         group = group,
         bdiiURL = bdii,
-        vomsURLs = vomsURLs,
+        voms = voms,
         fqan = fqan,
         cpuTime = cpuTime,
         openMOLEMemory = openMOLEMemory,
@@ -197,7 +197,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val service:           Option[String],
   val group:             Option[String],
   val bdiiURL:           Option[String],
-  val vomsURLs:          Option[Seq[String]],
+  val voms:              Option[String],
   val fqan:              Option[String],
   val cpuTime:           Option[Time],
   val openMOLEMemory:    Option[Information],
@@ -213,7 +213,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   import interpreters._
 
   lazy val proxyCache = TimeCache { () ⇒
-    val proxy = EGIAuthentication.proxy(authentication, voName, vomsURLs, fqan).get
+    val proxy = EGIAuthentication.proxy(authentication, voName, voms, fqan).get
     (proxy, preference(EGIEnvironment.ProxyRenewalTime))
   }
 
