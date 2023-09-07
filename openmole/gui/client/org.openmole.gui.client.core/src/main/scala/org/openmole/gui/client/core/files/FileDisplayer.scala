@@ -12,6 +12,8 @@ import scaladget.bootstrapnative.bsn
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 
+import scala.concurrent.Future
+
 /*
  * Copyright (C) 07/05/15 // mathieu.leclaire@openmole.org
  *
@@ -29,22 +31,25 @@ import com.raquo.laminar.api.L.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileDisplayer:
+object FileDisplayer:
 
-  def display(safePath: SafePath, content: String, hash: String, fileExtension: FileExtension)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) = 
+  def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
+    val fileExtension = FileExtension(safePath)
     panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
-        FileContentType(fileExtension) match {
-          case FileContentType.OpenMOLEScript ⇒ OMSContent.addTab(safePath, content, hash)
-          case FileContentType.CSV => CSVContent.addTab(safePath, content, hash)
+        FileContentType(fileExtension) match
+          case FileContentType.OpenMOLEScript ⇒
+            api.download(safePath, hash = true).foreach: (content, hash) ⇒
+              OMSContent.addTab(safePath, content, hash.get)
+          case FileContentType.CSV =>
+            api.download(safePath, hash = true).foreach: (content, hash) ⇒
+              CSVContent.addTab(safePath, content, hash.get)
           case FileContentType.MDScript ⇒
-            api.mdToHtml(safePath).foreach { htmlString ⇒
+            api.mdToHtml(safePath).foreach: htmlString ⇒
               val htmlDiv = com.raquo.laminar.api.L.div()
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
-            }
-          case e if FileContentType.isText(e) => AnyTextContent.addTab(safePath, content, hash)
           case FileContentType.OpenMOLEResult ⇒
             api.omrContent(safePath).foreach: content =>
               println(content)
@@ -54,8 +59,16 @@ class FileDisplayer:
 //                case Some(analysis) ⇒
 //                case None ⇒
 //            }
-          case FileContentType.SVGExtension ⇒ HTMLContent.addTab(safePath, div(panelBody, content))
-          case _ ⇒ //FIXME for GUI workflows
-        }
+          case FileContentType.SVGExtension ⇒
+            api.download(safePath, hash = false).foreach: (content, _) ⇒
+              HTMLContent.addTab(safePath, div(panelBody, content))
+          case e: ReadableFileType if e.text =>
+            api.download(safePath, hash = true).foreach: (content, hash) ⇒
+              AnyTextContent.addTab(safePath, content, hash.get)
+          case UnknownFileType =>
+            api.isTextFile(safePath).foreach: text =>
+              api.download(safePath, hash = true).foreach: (content, hash) ⇒
+                if text then AnyTextContent.addTab(safePath, content, hash.get)
+          case _ =>
 
 

@@ -188,6 +188,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     utils.exists(safePath)
 
+  def isTextFile(safePath: SafePath): Boolean =
+    import services._
+    safePathToFile(safePath).isTextFile()
+
   def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean) =
     import services._
     utils.copyFiles(paths, overwrite)

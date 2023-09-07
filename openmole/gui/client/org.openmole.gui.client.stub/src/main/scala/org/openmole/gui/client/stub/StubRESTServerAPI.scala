@@ -148,6 +148,9 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   override def exists(path: SafePath)(using BasePath): Future[Boolean] =
     Future.successful(files.contains(path))
 
+  override def isTextFile(path: SafePath)(using BasePath): Future[Boolean] =
+    Future.successful(true)
+
   override def temporaryDirectory()(using BasePath): Future[SafePath] =
     Future.successful(SafePath("_tmp_"))
 

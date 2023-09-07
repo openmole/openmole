@@ -30,16 +30,13 @@ object ProjectPanel:
     // 1- Empty project
     def emptyProject =
       val fileName = "newProject.oms"
-      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.directory.now(), fileName).map { _ =>
+      CoreUtils.createFile(panels.treeNodePanel.treeNodeManager.directory.now(), fileName).foreach: _ =>
         val toDisplay = panels.treeNodePanel.treeNodeManager.directory.now() ++ fileName
-        api.download(
-          toDisplay,
-          hash = true).map: (content, hash) ⇒
-            panels.treeNodePanel.refresh
-            panels.fileDisplayer.display(toDisplay, content, hash.get, FileExtension("oms"))
+        panels.treeNodePanel.refresh
+        files.FileDisplayer.display(toDisplay)
 
         panels.closeExpandable
-      }
+
 
     val emptyProjectButton = button(btn_purple, marginTop:= "40", "Build", onClick --> {_=> emptyProject})
 

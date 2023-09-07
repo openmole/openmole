@@ -43,6 +43,7 @@ trait ServerAPI:
   def move(paths: Seq[(SafePath, SafePath)])(using BasePath): Future[Unit]
   def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit]
   def exists(path: SafePath)(using BasePath): Future[Boolean]
+  def isTextFile(path: SafePath)(using BasePath): Future[Boolean]
   def temporaryDirectory()(using BasePath): Future[SafePath]
 
   def executionState(id: Seq[ExecutionId] = Seq())(using BasePath): Future[Seq[ExecutionData]]

@@ -38,22 +38,20 @@ object Panels:
     def directory = panels.treeNodePanel.treeNodeManager.directory
     def closeExpandable = panels.expandablePanel.set(None)
     def expandTo(el: HtmlElement, id: Int) =
-      panels.expandablePanel.update {
+      panels.expandablePanel.update:
         case Some(ep: ExpandablePanel) ⇒ if (ep.id == id) None else Some(ExpandablePanel(id, el))
         case None ⇒ Some(ExpandablePanel(id, el))
-      }
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)
     val tabContent = new TabContent
     val pluginPanel = new PluginPanel
-    val fileDisplayer = new FileDisplayer
     val executionPanel = new ExecutionPanel
     val treeNodePanel = new TreeNodePanel
     val connection = new Connection
     val notification = new NotificationManager
     
-    new Panels(treeNodePanel, tabContent, pluginPanel, fileDisplayer, executionPanel, notification, connection, expandablePanel)
+    new Panels(treeNodePanel, tabContent, pluginPanel, executionPanel, notification, connection, expandablePanel)
 
 
 //  def initialize(using fetch: Fetch, api: ServerAPI, panels: Panels) =
@@ -64,7 +62,6 @@ case class Panels(
   treeNodePanel: TreeNodePanel,
   tabContent: TabContent,
   pluginPanel: PluginPanel,
-  fileDisplayer: FileDisplayer,
   executionPanel: ExecutionPanel,
   notifications: NotificationManager,
   connection: Connection,

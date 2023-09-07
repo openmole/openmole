@@ -206,7 +206,7 @@ package file {
       //////// general operations ///////
       def baseName = file.getName.takeWhile(_ != '.')
 
-      def size: Long = {
+      def size: Long =
         def sizeOfDirectory(directory: File) = {
           val size = new AtomicLong()
 
@@ -229,33 +229,29 @@ package file {
           catch {
             case e: NoSuchFileException ⇒ 0L
           }
-      }
 
-      def mode = {
+      def mode =
         val f = file.realPath
         (if (Files.isReadable(f)) READ_MODE else 0) |
           (if (Files.isWritable(f)) WRITE_MODE else 0) |
           (if (Files.isExecutable(f)) EXEC_MODE else 0)
-      }
 
       /** set mode from an integer as retrieved from a Tar archive */
-      def mode_=(m: Int) = {
+      def mode_=(m: Int) =
         val f = file.realFile
         f.setReadable((m & READ_MODE) != 0)
         f.setWritable((m & WRITE_MODE) != 0)
         f.setExecutable((m & EXEC_MODE) != 0)
-      }
 
       /** Copy mode from another file */
-      def mode_=(other: File) = {
+      def mode_=(other: File) =
         val f = file.realFile
         val o = other.realPath
         f.setReadable(Files.isReadable(o))
         f.setWritable(Files.isWritable(o))
         f.setExecutable(Files.isExecutable(o))
-      }
 
-      def setPosixMode(m: String) = {
+      def setPosixMode(m: String) =
         def isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix")
 
         if (isPosix) {
@@ -264,7 +260,6 @@ package file {
           true
         }
         else false
-      }
 
       def content_=(content: String) =
         createParentDirectory
@@ -287,20 +282,25 @@ package file {
 
       def contentOption =
         try Some(file.content)
-        catch {
+        catch
           case e: IOException ⇒ None
-        }
+
+      def isTextFile(bytes: Int = 10240) =
+        withInputStream: is =>
+          val res = Try:
+            val rBytes = is.readNBytes(bytes)
+            java.nio.charset.Charset.availableCharsets().get("UTF-8").newDecoder().decode(java.nio.ByteBuffer.wrap(rBytes))
+          res.isSuccess
 
       def /(s: String): File = Paths.get(file.toString, s)
 
-      def />(s: String): File = {
+      def />(s: String): File =
         val dir = file / s
         dir.mkdirs()
         dir
-      }
 
       // TODO implement using NIO getLastModifiedTime
-      def lastModification = {
+      def lastModification =
         var lastModification = file.lastModified
 
         if (file.isDirectory) {
@@ -320,14 +320,12 @@ package file {
           }
         }
         lastModification
-      }
 
       // TODO replace with DirectoryStream
-      def listRecursive(filter: File ⇒ Boolean = _ => true) = {
+      def listRecursive(filter: File ⇒ Boolean = _ => true) =
         val ret = new ListBuffer[File]
         applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
         ret
-      }
 
       ///////// creation of new elements ////////
       /**
@@ -337,11 +335,10 @@ package file {
        * @param prefix String to prefix the generated UUID name.
        * @return New temporary directory
        */
-      def newDirectory(prefix: String, create: Boolean = false): File = {
+      def newDirectory(prefix: String, create: Boolean = false): File =
         val tempDir = Paths.get(file.toString, prefix + UUID.randomUUID)
         if (create) tempDir.mkdirs()
         tempDir.toFile
-      }
 
         /**
        * Create instance of temporary file in directory of caller.
@@ -351,10 +348,9 @@ package file {
        * @param suffix String to suffix the generated UUID name.
        * @return New temporary file
        */
-      def newFile(prefix: String, suffix: String): File = {
+      def newFile(prefix: String, suffix: String): File =
         val f = Paths.get(file.toString, prefix + UUID.randomUUID + suffix)
         f.toFile
-      }
 
       /**
        * Try to create a symbolic link at the calling emplacement.
@@ -365,59 +361,54 @@ package file {
        */
       def createLinkTo(target: String): Path = createLinkTo(Paths.get(target))
 
-      def createLinkTo(target: Path): Path = {
-        def unsupported = {
+      def createLinkTo(target: Path): Path =
+        def unsupported =
           Logger.getLogger(getClass.getName).warning("File system doesn't support symbolic link, make a file copy instead")
           val fileTarget = if (target.isAbsolute) target else Paths.get(file.getParentFileSafe.getPath, target.getPath)
           Files.copy(fileTarget, file, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING)
           file
-        }
 
         try Files.createSymbolicLink(file, target)
-        catch {
+        catch
           case _: UnsupportedOperationException ⇒ unsupported
           case e: FileAlreadyExistsException    ⇒ throw e
           case _: FileSystemException           ⇒ unsupported
           case e: IOException                   ⇒ throw e
-        }
-      }
+
 
       def createParentDirectory = wrapError {
         file.getCanonicalFile.getParentFileSafe.mkdirs
       }
 
-      def withLock[T](f: OutputStream ⇒ T): T = jvmLevelFileLock.withLock(file.getCanonicalPath) {
-        withClosable(new FileOutputStream(file, true)) { fos ⇒
-          withClosable(new BufferedOutputStream(fos)) { bfos ⇒
-            val lock = fos.getChannel.lock
-            try f(bfos)
-            finally lock.release
+      def withLock[T](f: OutputStream ⇒ T): T =
+        jvmLevelFileLock.withLock(file.getCanonicalPath):
+          withClosable(new FileOutputStream(file, true)) { fos ⇒
+            withClosable(new BufferedOutputStream(fos)) { bfos ⇒
+              val lock = fos.getChannel.lock
+              try f(bfos)
+              finally lock.release
+            }
           }
-        }
-      }
 
-      def withLockInDirectory[T](f: ⇒ T, lockName: String = ".lock"): T = {
+      def withLockInDirectory[T](f: ⇒ T, lockName: String = ".lock"): T =
         file.mkdirs()
         val lockFile = file / lockName
         lockFile.createNewFile()
         try lockFile.withLock { _ ⇒ f }
         finally lockFile.delete()
-      }
 
       def bufferedInputStream(gz: Boolean = false) =
         if (!gz) new BufferedInputStream(Files.newInputStream(file))
         else new GZIPInputStream(new BufferedInputStream(Files.newInputStream(file)))
 
-      private def writeOptions(append: Boolean) = {
+      private def writeOptions(append: Boolean) =
         import StandardOpenOption._
         if (append) Seq(CREATE, APPEND, WRITE) else Seq(CREATE, TRUNCATE_EXISTING, WRITE)
-      }
 
-      def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) = {
+      def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) =
         file.createParentDirectory
         if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
         else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
-      }
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream())
 
@@ -428,12 +419,11 @@ package file {
 
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
-      def withPrintStream[T](append: Boolean = false, create: Boolean = false, gz: Boolean = false) = {
+      def withPrintStream[T](append: Boolean = false, create: Boolean = false, gz: Boolean = false) =
         if (create) file.createParentDirectory
         withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append, gz = gz))) _
-      }
 
-      def atomicWithPrintStream[T](f: PrintStream ⇒ T) = {
+      def atomicWithPrintStream[T](f: PrintStream ⇒ T) =
         file.createParentDirectory
         val tmpFile = java.io.File.createTempFile("stream", ".tmp", file.getParentFile)
         try {
@@ -443,7 +433,6 @@ package file {
         }
         finally Files.move(tmpFile.toPath, file.toPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
 
-      }
 
       def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)
 
@@ -545,7 +534,7 @@ package file {
   }
 
   object FileTools {
-    private val allPerms = {
+    private val allPerms =
       import java.nio.file.attribute.PosixFilePermission
       val perms = new util.HashSet[PosixFilePermission]()
       //add owners permission
@@ -561,12 +550,10 @@ package file {
       perms.add(PosixFilePermission.OTHERS_WRITE)
       perms.add(PosixFilePermission.OTHERS_EXECUTE)
       perms
-    }
 
-    private val isPosix = {
+    private val isPosix =
       import java.nio.file.FileSystems
       FileSystems.getDefault.supportedFileAttributeViews.contains("posix")
-    }
 
     def setAllPermissions(path: Path) =
       if (isPosix) Files.setPosixFilePermissions(path, allPerms)

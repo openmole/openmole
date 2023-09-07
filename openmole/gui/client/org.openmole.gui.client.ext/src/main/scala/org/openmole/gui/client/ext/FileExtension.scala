@@ -34,7 +34,6 @@ object FileContentType:
   val OpenMOLEResult = ReadableFileType(Seq("omr"))
   val MDScript = ReadableFileType(Seq("md"), text = true)
   val SVGExtension = ReadableFileType(Seq("svg"))
-  val OpaqueFileType = org.openmole.gui.client.ext.OpaqueFileType
   val TarGz = ReadableFileType(Seq("tgz", "tar.gz"))
   val TarXz = ReadableFileType(Seq("txz", "tar.xz"))
   val Tar = ReadableFileType(Seq("tar"))
@@ -55,14 +54,11 @@ object FileContentType:
       plugins.wizardFactories.flatMap(_.editable.collect { case r: ReadableFileType => r})
 
   def apply(e: FileExtension)(using plugins: GUIPlugins) =
-    all.find(_.extension.contains(e.value)).getOrElse(OpaqueFileType)
+    all.find(_.extension.contains(e.value)).getOrElse(UnknownFileType)
 
-  def isText(e: FileContentType) =
-    e match
-      case OpaqueFileType => false
-      case r: ReadableFileType => r.text
+  def isText(e: ReadableFileType) = e.text
 
 sealed trait FileContentType
 
-object OpaqueFileType extends FileContentType
+object UnknownFileType extends FileContentType
 case class ReadableFileType(extension: Seq[String], text: Boolean = false, highlight: Option[String] = None) extends FileContentType

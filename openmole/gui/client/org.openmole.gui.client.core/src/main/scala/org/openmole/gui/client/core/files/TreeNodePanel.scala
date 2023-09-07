@@ -322,22 +322,8 @@ class TreeNodePanel { panel =>
     )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
-    def isDisplayable(e: FileContentType) =
-      e match
-        case FileContentType.OpaqueFileType => false
-        case FileContentType.OpenMOLEResult => true
-        case r: ReadableFileType => r.text
-
-    if isDisplayable(FileContentType(FileExtension(safePath)))
-    then
-      downloadFile(
-        safePath,
-        hash = true
-      ).map { (content: String, hash: Option[String]) ⇒
-        if refresh then panels.tabContent.removeTab(safePath)
-        panels.fileDisplayer.display(safePath, content, hash.get, FileExtension(safePath))
-        refresh
-      }
+    if refresh then panels.tabContent.removeTab(safePath)
+    files.FileDisplayer.display(safePath)
 
   def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     tn match
