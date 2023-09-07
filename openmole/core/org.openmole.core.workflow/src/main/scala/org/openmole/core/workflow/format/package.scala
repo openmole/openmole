@@ -18,3 +18,5 @@ package org.openmole.core.workflow.format
  */
 
 def defaultOutputFormat = CSVOutputFormat()
+
+export org.openmole.core.workflow.format.{CSVOutputFormat as CSV, OMROutputFormat as OMR}
