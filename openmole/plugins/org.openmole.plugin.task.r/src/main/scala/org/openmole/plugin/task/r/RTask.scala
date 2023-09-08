@@ -48,7 +48,7 @@ object RTask:
 
     def toCommandNoVersion(libraries: Seq[String], dependencies: Boolean): String =
       def list = libraries.map(l => s"\"$l\"").mkString(",")
-      def dep = if dependencies then "T" else "NA"
+      def dep = if dependencies then "T" else "F"
       def load = libraries.map(l => s"""library("$l")""")
       def command = Seq(s"install.packages(c($list), dependencies = $dep)") ++ load
 
@@ -94,7 +94,7 @@ object RTask:
     installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
     val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
-
+    
     RTask(
       script = script,
       image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
