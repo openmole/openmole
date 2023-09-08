@@ -409,7 +409,7 @@ lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
-  netlogo5Jar,
+  libraryDependencies += Libraries.netlogo5,
   libraryDependencies -= Libraries.scalatest
 )
 
@@ -418,7 +418,7 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
-  netlogo6Jar,
+  libraryDependencies += Libraries.netlogo6,
   libraryDependencies -= Libraries.scalatest
 )
 

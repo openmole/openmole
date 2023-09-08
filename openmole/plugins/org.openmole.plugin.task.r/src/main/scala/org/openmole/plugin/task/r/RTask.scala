@@ -38,7 +38,7 @@ object RTask:
   object RLibrary:
 
     def toCommand(installCommand: RLibrary) =
-      def dependencies(d: Boolean) = if(d) "T" else "NA"
+      def dependencies(d: Boolean) = if(d) "T" else "F"
 
       installCommand match
         case RLibrary(name, None, d) ⇒
@@ -48,7 +48,7 @@ object RTask:
 
     def toCommandNoVersion(libraries: Seq[String], dependencies: Boolean): String =
       def list = libraries.map(l => s"\"$l\"").mkString(",")
-      def dep = if dependencies then "T" else "NA"
+      def dep = if dependencies then "T" else "F"
       def load = libraries.map(l => s"""library("$l")""")
       def command = Seq(s"install.packages(c($list), dependencies = $dep)") ++ load
 
@@ -63,16 +63,12 @@ object RTask:
       val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
       val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
 
-      val update =
-        if libraries.nonEmpty
-        then  Seq("apt update")
-        else Seq()
+      val update = if libraries.nonEmpty then Seq("apt update") else Seq()
 
       update ++
-        Seq(
-          toCommandNoVersion(noVersionNoDep.map(_.name), false),
-          toCommandNoVersion(noVersionWithDep.map(_.name), true)
-        ) ++ withVersion.map(RLibrary.toCommand)
+        (if noVersionNoDep.nonEmpty then Seq(toCommandNoVersion(noVersionNoDep.map(_.name), false)) else Seq()) ++
+        (if noVersionWithDep.nonEmpty then Seq(toCommandNoVersion(noVersionWithDep.map(_.name), true)) else Seq()) ++
+        withVersion.map(RLibrary.toCommand)
 
 
   def rImage(image: String, version: String) = DockerImage(image, version)

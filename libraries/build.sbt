@@ -193,7 +193,12 @@ lazy val netlogo5 = OsgiProject(
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),
   imports = Seq("!*")) settings(settings) settings(
-  netlogo5Jar,
+  libraryDependencies ++= Seq(
+    "ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
+    "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
+    "asm" % "asm-all" % "3.3.1" % "provided",
+    "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"),
+  scalaVersion := "2.9.2",
   version := netLogo5Version,
   crossPaths := false)
 
@@ -204,7 +209,9 @@ lazy val netlogo6 = OsgiProject(
   privatePackages = Seq("**"),
   imports = Seq("empty;resolution:=optional")) settings(settings) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
-  netlogo6Jar,
+  scalaVersion := "2.12.8",
+  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
+  libraryDependencies += "org.nlogo" % "netlogo" % netLogo6Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),
   version := netLogo6Version,
   crossPaths := false)
 

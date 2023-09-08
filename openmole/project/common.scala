@@ -67,22 +67,5 @@ object common {
 
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.0.0"
-
-  lazy val netlogo6Jar =
-    Seq(
-      scalaVersion := "2.12.8",
-      resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
-      libraryDependencies += "org.nlogo" % "netlogo" % netLogo6Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt")
-    )
-
-  lazy val netlogo5Jar =
-    Seq(
-      libraryDependencies ++= Seq(
-        "ccl.northwestern.edu" % "netlogo" % netLogo5Version % "provided" from s"https://github.com/NetLogo/NetLogo/releases/download/$netLogo5Version/NetLogo.jar",
-        "org.scala-lang" % "scala-library" % "2.9.2" % "provided",
-        "asm" % "asm-all" % "3.3.1" % "provided",
-        "org.picocontainer" % "picocontainer" % "2.13.6" % "provided"),
-      scalaVersion := "2.9.2"
-    )
 }
 
