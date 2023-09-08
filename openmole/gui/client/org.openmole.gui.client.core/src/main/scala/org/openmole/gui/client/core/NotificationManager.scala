@@ -109,8 +109,8 @@ class NotificationManager:
             body.amend(cls := "getItNotification"),
             buttonGroup.amend(
               margin := "15", float.right,
-              button(btn_primary, alt1.name, onClick --> { _ => alt1.action(id) } ),
-              button(btn_secondary_outline, alt2.name, onClick --> { _ => alt2.action(id) } )
+              button(btn_primary, alt1.name, onClick --> { _ => alt1.action(id); removeById(id) } ),
+              button(btn_secondary_outline, alt2.name, onClick --> { _ => alt2.action(id); removeById(id) } )
             )
           )
       )
