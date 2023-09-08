@@ -38,7 +38,7 @@ object RTask:
   object RLibrary:
 
     def toCommand(installCommand: RLibrary) =
-      def dependencies(d: Boolean) = if(d) "T" else "NA"
+      def dependencies(d: Boolean) = if(d) "T" else "F"
 
       installCommand match
         case RLibrary(name, None, d) ⇒
