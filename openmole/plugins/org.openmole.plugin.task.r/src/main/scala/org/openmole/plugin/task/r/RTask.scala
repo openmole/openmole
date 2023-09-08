@@ -63,16 +63,12 @@ object RTask:
       val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
       val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
 
-      val update =
-        if libraries.nonEmpty
-        then  Seq("apt update")
-        else Seq()
+      val update = if libraries.nonEmpty then Seq("apt update") else Seq()
 
       update ++
-        Seq(
-          toCommandNoVersion(noVersionNoDep.map(_.name), false),
-          toCommandNoVersion(noVersionWithDep.map(_.name), true)
-        ) ++ withVersion.map(RLibrary.toCommand)
+        (if noVersionNoDep.nonEmpty then Seq(toCommandNoVersion(noVersionNoDep.map(_.name), false)) else Seq()) ++
+        (if noVersionWithDep.nonEmpty then Seq(toCommandNoVersion(noVersionWithDep.map(_.name), true)) else Seq()) ++
+        withVersion.map(RLibrary.toCommand)
 
 
   def rImage(image: String, version: String) = DockerImage(image, version)
@@ -94,7 +90,7 @@ object RTask:
     installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
     val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
-    
+
     RTask(
       script = script,
       image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
