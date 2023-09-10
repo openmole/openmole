@@ -63,7 +63,7 @@ object RTask:
       val (noVersion, withVersion) = libraries.partition(l => l.version.isEmpty)
       val (noVersionNoDep, noVersionWithDep) = noVersion.partition(l => !l.dependencies)
 
-      val update = if libraries.nonEmpty then Seq("apt update") else Seq()
+      val update = if libraries.nonEmpty then Seq("rm -rf /var/lib/apt/lists", "apt update") else Seq()
 
       update ++
         (if noVersionNoDep.nonEmpty then Seq(toCommandNoVersion(noVersionNoDep.map(_.name), false)) else Seq()) ++
