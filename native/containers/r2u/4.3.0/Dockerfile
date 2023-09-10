@@ -39,4 +39,6 @@ RUN cp /bin/fakeroot /bin/sudo && \
       echo "options(bspm.sudo=TRUE)" | cat - /etc/R/Rprofile.site > /tmp/out && mv /tmp/out /etc/R/Rprofile.site && \
       R --slave -e 'install.packages(c("jsonlite", "remotes"))'
 
+RUN rm -rf /var/lib/apt/lists/*
+
 CMD ["R"]
