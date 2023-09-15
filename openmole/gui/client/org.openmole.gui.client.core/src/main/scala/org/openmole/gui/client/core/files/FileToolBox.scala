@@ -193,18 +193,18 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
             iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
             iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
-            FileContentType(FileExtension(initSafePath.name)) match
+            FileContentType(initSafePath) match
               case FileContentType.OpenMOLEResult ⇒
                 iconAction(glyphItemize(glyph_download), "csv", () ⇒ omrToCSV)
               case _ ⇒ emptyMod
             ,
-            FileContentType(FileExtension(initSafePath.name)) match
+            FileContentType(initSafePath) match
               case FileContentType.OpenMOLEResult ⇒
                 iconAction(glyphItemize(glyph_download), "json", () ⇒ omrToJSON)
               case _ ⇒ emptyMod
             ,
             child <-- {
-              FileContentType(FileExtension(initSafePath.name)) match
+              FileContentType(initSafePath) match
                 case FileContentType.OpenMOLEResult =>
                   Signal.fromFuture(api.omrFiles(initSafePath), None).map:
                     case Some(p) => iconAction(glyphItemize(glyph_download), "files", () ⇒ omrFiles(p))
@@ -214,18 +214,18 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
               initSafePath.name
             } ?", () ⇒ trash)))),
-            FileContentType(FileExtension(initSafePath.name)) match
+            FileContentType(initSafePath) match
               case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
                 iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
               case _ ⇒ emptyMod
             ,
-            FileContentType(FileExtension(initSafePath.name)) match
+            FileContentType(initSafePath) match
               case FileContentType.OpenMOLEScript ⇒
                 iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
               case _ ⇒ emptyMod
             ,
 
-//                FileExtension(initSafePath.name) match {
+//                FileContentType(initSafePath) match {
 //                  //FIXME discover extensions from wizard plugins
 //                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
 //                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)

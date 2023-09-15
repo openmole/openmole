@@ -53,6 +53,9 @@ object FileContentType:
     Seq(OpenMOLEScript, OpenMOLEResult, MDScript, SVGExtension, TarGz, TarXz, Tar, Zip, Jar, CSV, Gaml, Text, Scala, Shell, Python, Scilab, Julia) ++
       plugins.wizardFactories.flatMap(_.editable.collect { case r: ReadableFileType => r})
 
+
+  def apply(path: SafePath)(using plugins: GUIPlugins): FileContentType = apply(FileExtension(path))
+
   def apply(e: FileExtension)(using plugins: GUIPlugins) =
     all.find(_.extension.contains(e.value)).getOrElse(UnknownFileType)
 

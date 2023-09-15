@@ -34,11 +34,10 @@ import scala.concurrent.Future
 object FileDisplayer:
 
   def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
-    val fileExtension = FileExtension(safePath)
     panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
-        FileContentType(fileExtension) match
+        FileContentType(safePath) match
           case FileContentType.OpenMOLEScript ⇒
             api.download(safePath, hash = true).foreach: (content, hash) ⇒
               OMSContent.addTab(safePath, content, hash.get)
@@ -51,14 +50,8 @@ object FileDisplayer:
               htmlDiv.ref.innerHTML = htmlString
               HTMLContent.addTab(safePath, htmlDiv)
           case FileContentType.OpenMOLEResult ⇒
-            api.omrContent(safePath).foreach: content =>
-              println(content)
-
-//            api.omrMethod(safePath).foreach { method =>
-//              plugins.analysisPlugins.get(method) match
-//                case Some(analysis) ⇒
-//                case None ⇒
-//            }
+            api.omrContent(safePath).foreach: guiContent =>
+              OMRContent.addTab(safePath, guiContent.section)
           case FileContentType.SVGExtension ⇒
             api.download(safePath, hash = false).foreach: (content, _) ⇒
               HTMLContent.addTab(safePath, div(panelBody, content))

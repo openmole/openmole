@@ -43,7 +43,7 @@ import scala.scalajs.js.annotation.JSImport
 object EditorPanelUI {
 
   def apply(
-    fileType: FileExtension,
+    fileType: FileContentType,
     initCode: String,
     initHash: String)(using plugins: GUIPlugins) =
     val editor = new EditorPanelUI(fileType)
@@ -51,8 +51,8 @@ object EditorPanelUI {
     editor
 
 
-  def highlightedFile(ext: FileExtension)(using plugins: GUIPlugins): Option[HighlightedFile] =
-    FileContentType(ext) match
+  def highlightedFile(fileContentType: FileContentType)(using plugins: GUIPlugins): Option[HighlightedFile] =
+    fileContentType match
       case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
       case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
       case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
@@ -68,7 +68,7 @@ object EditorPanelUI {
   object openmolemode extends js.Object
 }
 
-class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
+class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins) {
 
   val modified = Var(false)
 
@@ -90,7 +90,7 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
 
     ed.setTheme("ace/theme/github")
 
-    EditorPanelUI.highlightedFile(fileExtension).foreach { h ⇒
+    EditorPanelUI.highlightedFile(fileContentType).foreach { h ⇒
       session.setMode("ace/mode/" + h.highlighter)
     }
 
@@ -166,7 +166,7 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
         backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "gi")),
       edDiv.amend(
         lineHeight --> lineHeightObserver,
-        FileContentType(fileExtension) match {
+        fileContentType match {
           case FileContentType.OpenMOLEScript ⇒ errors --> omsErrorObserver
           case _ => emptyMod
         },

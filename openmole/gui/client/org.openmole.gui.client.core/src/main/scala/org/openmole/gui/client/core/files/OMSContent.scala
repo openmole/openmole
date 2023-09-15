@@ -39,7 +39,7 @@ object OMSContent {
 
   def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) = {
 
-    val editor = EditorPanelUI(FileExtension(safePath), initialContent, initialHash)
+    val editor = EditorPanelUI(FileContentType(safePath), initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
 
     lazy val controlElement = {

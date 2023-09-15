@@ -10,8 +10,7 @@ import org.openmole.plotlyjs.*
 
 object ResultPlot {
 
-  def
-  fromCSV(plotData: ColumnData) = {
+  def fromColumnData(plotData: ColumnData) = {
 
     val headers = plotData.columns.map {
       _.header
