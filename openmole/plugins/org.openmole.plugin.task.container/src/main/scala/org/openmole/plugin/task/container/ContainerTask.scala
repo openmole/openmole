@@ -403,13 +403,13 @@ case class ContainerTask(
           environmentVariables = containerEnvironmentVariables
         )
 
-      if (errorOnReturnValue && !returnValue.isDefined && retCode != 0) {
-        def log = {
+      if errorOnReturnValue && !returnValue.isDefined && retCode != 0
+      then
+        def log =
           // last line might have been truncated
           val lst = tailBuilder.toString
           if (lst.size >= tailSize) lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
           else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
-        }
 
         def command = commandValue.mkString(" ; ")
 
@@ -420,7 +420,6 @@ case class ContainerTask(
              |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
 
         throw new InternalProcessingError(error)
-      }
 
       val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
 
