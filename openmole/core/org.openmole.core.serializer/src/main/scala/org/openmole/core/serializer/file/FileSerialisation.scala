@@ -20,7 +20,7 @@ package org.openmole.core.serializer.file
 import org.openmole.tool.file._
 import org.openmole.tool.archive._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
-import org.openmole.tool.archive.TarOutputStream
+import org.openmole.tool.archive.*
 
 import scala.collection.immutable.HashMap
 import java.util.UUID
@@ -29,14 +29,14 @@ import com.thoughtworks.xstream.XStream
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.converter.Serialiser
 
-object FileSerialisation {
+object FileSerialisation:
   case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
   type FilesInfo = HashMap[String, FileInfo]
 
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarOutputStream, xStream: XStream)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDir ⇒
+  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, xStream: XStream)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDir ⇒
     val fileInfo = HashMap() ++ files.map {
       file ⇒
         val name = UUID.randomUUID
@@ -90,4 +90,4 @@ object FileSerialisation {
 
   }
 
-}
+

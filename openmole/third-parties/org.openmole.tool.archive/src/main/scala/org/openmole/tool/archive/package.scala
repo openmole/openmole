@@ -16,11 +16,14 @@
  */
 package org.openmole.tool.archive
 
+import org.apache.commons.compress.archivers.tar
+
 import java.io.*
 import java.nio.file.*
 import org.openmole.tool.file.*
 import org.openmole.tool.stream.*
 import org.tukaani.xz.{LZMA2Options, XZInputStream, XZOutputStream}
+import org.apache.commons.compress.archivers.tar.*
 
 import java.util.zip.ZipFile
 import scala.collection.mutable.{ListBuffer, Stack}
@@ -57,14 +60,13 @@ object Zip:
 
 object XZ:
   def extract(file: File, to: File) =
-    to.withFileOutputStream { outputStream =>
+    to.withFileOutputStream: outputStream =>
       val inputStream = new FileInputStream(file)
       val inxz = XZ.inputStream(file)
       try
         val buffer = new Array[Byte](inputStream.available)
         Iterator.continually(inxz.read(buffer)).takeWhile(_ != -1).foreach { outputStream.write(buffer, 0, _) }
       finally inxz.close
-    }
 
   def inputStream(file: File): InputStream =
     val inputStream = new FileInputStream(file)
@@ -84,27 +86,41 @@ object XZ:
 
 case class ArchiveEntry(path: Seq[String], directory: Boolean)
 
+export org.apache.commons.compress.archivers.tar.{TarArchiveOutputStream, TarArchiveInputStream}
+
+def TarArchiveOutputStream(os: OutputStream, blockSize: Option[Int] = None) =
+  val tos =
+    blockSize match
+      case None => new TarArchiveOutputStream(os)
+      case Some(b) => new TarArchiveOutputStream(os, b)
+  tos.setLongFileMode(org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU)
+  tos
+
+def TarArchiveInputStream(os: InputStream) =
+  new TarArchiveInputStream(os)
+
+
 enum ArchiveType:
   case Tar, TarGZ, TarXZ, Zip
 
 extension(file: File)
   def listArchive(archive: ArchiveType): Seq[ArchiveEntry] =
-    def tarEntryToArchiveEntry(e: TarEntry) = ArchiveEntry(e.getName.split('/'), e.isDirectory)
+    def tarEntryToArchiveEntry(e: TarArchiveEntry) = ArchiveEntry(e.getName.split('/'), e.isDirectory)
     archive match
-      case ArchiveType.Tar => withClosable(new TarInputStream(file.bufferedInputStream())) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
-      case ArchiveType.TarGZ => withClosable(new TarInputStream(file.gzippedBufferedInputStream)) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
-      case ArchiveType.TarXZ => withClosable(new TarInputStream(XZ.inputStream(file))) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
+      case ArchiveType.Tar => withClosable(TarArchiveInputStream(file.bufferedInputStream())) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
+      case ArchiveType.TarGZ => withClosable(TarArchiveInputStream(file.gzippedBufferedInputStream)) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
+      case ArchiveType.TarXZ => withClosable(TarArchiveInputStream(XZ.inputStream(file))) { _.entryIterator.map(tarEntryToArchiveEntry).toSeq }
       case ArchiveType.Zip => Zip.zipEntries(file)
 
   def archive(dest: File, time: Boolean = true, archive: ArchiveType.TarGZ.type | ArchiveType.Tar.type = ArchiveType.Tar) =
     archive match
-      case ArchiveType.Tar => withClosable(new TarOutputStream(dest.bufferedOutputStream())) { _.archive(file, time) }
-      case ArchiveType.TarGZ => withClosable(new TarOutputStream(dest.gzippedBufferedOutputStream)) { _.archive(file, time) }
+      case ArchiveType.Tar => withClosable(TarArchiveOutputStream(dest.bufferedOutputStream())) { _.archive(file, time) }
+      case ArchiveType.TarGZ => withClosable(TarArchiveOutputStream(dest.gzippedBufferedOutputStream)) { _.archive(file, time) }
 
   def extract(dest: File, overwrite: Boolean = false, archive: ArchiveType) =
-    def extractTAR(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(file.bufferedInputStream())) { _.extract(dest, overwrite) }
-    def extractUncompressTGZ(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(file.gzippedBufferedInputStream)) { _.extract(dest, overwrite) }
-    def extractUncompressXZ(dest: File, overwrite: Boolean = false) = withClosable(new TarInputStream(XZ.inputStream(file))) { _.extract(dest, overwrite) }
+    def extractTAR(dest: File, overwrite: Boolean = false) = withClosable(TarArchiveInputStream(file.bufferedInputStream())) { _.extract(dest, overwrite) }
+    def extractUncompressTGZ(dest: File, overwrite: Boolean = false) = withClosable(TarArchiveInputStream(file.gzippedBufferedInputStream)) { _.extract(dest, overwrite) }
+    def extractUncompressXZ(dest: File, overwrite: Boolean = false) = withClosable(TarArchiveInputStream(XZ.inputStream(file))) { _.extract(dest, overwrite) }
 
     archive match
         case ArchiveType.Tar => extractTAR(dest, overwrite = overwrite)
@@ -117,122 +133,157 @@ extension(file: File)
     else file.copyCompressFile(toF)
     toF
 
-  //def tarOutputStream = new TarOutputStream(file.bufferedOutputStream())
 
-
-
-implicit class TarOutputStreamDecorator(tos: TarOutputStream):
+implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
   def addFile(f: File, name: String) =
-    val entry = new TarEntry(name)
+    val entry = new TarArchiveEntry(name)
     entry.setSize(Files.size(f))
     entry.setMode(f.mode)
-    tos.putNextEntry(entry)
-    try Files.copy(f, tos) finally tos.closeEntry
+    tos.putArchiveEntry(entry)
+    try Files.copy(f, tos) finally tos.closeArchiveEntry()
 
 
   def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
-    createDirArchiveWithRelativePathWithAdditionalCommand(tos, directory, if (time) identity(_) else _.setModTime(0), includeTopDirectoryName)
+    createDirArchiveWithRelativePathWithAdditionalCommand(
+      tos,
+      directory,
+      if time then identity else _.setModTime(0),
+      includeTopDirectoryName)
 
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarOutputStream, directory: File, additionalCommand: TarEntry ⇒ Unit, includeDirectoryName: Boolean) =
+  // TODO detect hard links and tar them as so not as separated files
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarArchiveOutputStream, directory: File, additionalCommand: TarArchiveEntry ⇒ Unit, includeDirectoryName: Boolean) =
 
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
     if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
 
-    while (!toArchive.isEmpty) {
-
+    while toArchive.nonEmpty
+    do
       val (source, entryName) = toArchive.pop
       val isSymbolicLink = Files.isSymbolicLink(source)
       val isDirectory = Files.isDirectory(source)
 
       // tar structure distinguishes symlinks
       val e =
-        if (isDirectory && !isSymbolicLink) {
+        if isDirectory && !isSymbolicLink
+        then
           // walk the directory tree to add all its entries to stack
-          source.withDirectoryStream() { stream ⇒
-            for (f ← stream.asScala) {
+          source.withDirectoryStream(): stream ⇒
+            for (f ← stream.asScala)
+            do
               val newSource = source.resolve(f.getFileName)
               val newEntryName = entryName + '/' + f.getFileName
               toArchive.push((newSource, newEntryName))
-            }
-          }
+
           // create the actual tar entry for the directory
-          val e = new TarEntry(entryName + '/')
+          val e = new TarArchiveEntry(entryName + '/')
           e
-        }
         // tar distinguishes symlinks
-        else if (isSymbolicLink) {
-          val e = new TarEntry(entryName, TarConstants.LF_SYMLINK)
-          e.setLinkName(Files.readSymbolicLink(source).toString)
-          e
-        }
-        // plain files
-        else {
-          val e = new TarEntry(entryName)
-          e.setSize(Files.size(source))
-          e
-        }
+        else
+          if isSymbolicLink
+            then
+            val e = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK)
+            e.setLinkName(Files.readSymbolicLink(source).toString)
+            e
+          // plain files
+          else
+            val e = new TarArchiveEntry(entryName)
+            e.setSize(Files.size(source))
+            e
 
       // complete current entry by fixing its modes and writing it to the archive
-      if (source != directory) {
-        if (!isSymbolicLink) e.setMode(source.mode)
+      if source != directory
+      then
+        if !isSymbolicLink then e.setMode(source.mode)
         e.setModTime(source.lastModified)
-
         additionalCommand(e)
-        tos.putNextEntry(e)
-
-        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) try Files.copy(source, tos)
-        finally tos.closeEntry
-      }
-    }
+        tos.putArchiveEntry(e)
+        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) Files.copy(source, tos)
+        tos.closeArchiveEntry()
 
 
-implicit class TarInputStreamDecorator(tis: TarInputStream) {
-  def entryIterator: Iterator[TarEntry] =
-    Iterator.continually(tis.getNextEntry).takeWhile(_ != null)
+implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
+  def entryIterator: Iterator[TarArchiveEntry] =
+    Iterator.continually(tis.getNextTarEntry).takeWhile(_ != null)
 
-  def applyAndClose[T](f: TarEntry ⇒ T): Iterable[T] = try {
-    val ret = new ListBuffer[T]
+  def applyAndClose[T](f: TarArchiveEntry ⇒ T): Iterable[T] =
+    try
+      val ret = new ListBuffer[T]
 
-    var e = tis.getNextEntry
-    while (e != null) {
-      ret += f(e)
-      e = tis.getNextEntry
-    }
-    ret
-  }
-  finally tis.close
+      var e = tis.getNextTarEntry
+      while (e != null)
+      do
+        ret += f(e)
+        e = tis.getNextTarEntry
+      ret
+    finally tis.close
 
   def extract(directory: File, overwrite: Boolean = false) =
-    if (!directory.exists()) directory.mkdirs()
-    if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
+    if !directory.exists() then directory.mkdirs()
+    if !Files.isDirectory(directory) then throw new IOException(directory.toString + " is not a directory.")
 
-    val directoryRights = ListBuffer[(Path, Int)]()
+    /** set mode from an integer as retrieved from a Tar archive */
+    def setMode(file: Path, m: Int) =
+      val f = file.toRealPath().toFile
+      f.setReadable((m & READ_MODE) != 0)
+      f.setWritable((m & WRITE_MODE) != 0)
+      f.setExecutable((m & EXEC_MODE) != 0)
 
-    Iterator.continually(tis.getNextEntry).takeWhile(_ != null).foreach: e ⇒
+    case class DirectoryMetaData(path: Path, mode: Int, time: Long)
+    val directoryData = ListBuffer[DirectoryMetaData]()
+
+    case class LinkData(dest: Path, linkName: String, hard: Boolean)
+    val linkData = ListBuffer[LinkData]()
+
+    Iterator.continually(tis.getNextTarEntry).takeWhile(_ != null).foreach: e ⇒
       val dest = Paths.get(directory.toString, e.getName)
+
+      //if dest.toFile.getName.contains(".opq") then println("create " + dest)
+
       if e.isDirectory
       then
         Files.createDirectories(dest)
-        directoryRights += (dest -> e.getMode)
+        directoryData += DirectoryMetaData(dest, e.getMode, e.getModTime.getTime)
       else
         Files.createDirectories(dest.getParent)
+
         // has the entry been marked as a symlink in the archive?
-        if !e.getLinkName.isEmpty
-        then
-          Files.createSymbolicLink(dest, Paths.get(e.getLinkName))
-          // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
+        if e.getLinkName.nonEmpty
+        then linkData += LinkData(dest, e.getLinkName, e.isLink)
+        // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
         else
           Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
-          dest.toFile.mode = e.getMode
+          setMode(dest, e.getMode)
 
-      dest.setLastModified(e.getModTime)
+      dest.toFile.setLastModified(e.getModTime.getTime)
+
+
+    // Process links
+    for l <- linkData
+      do
+        if !l.hard
+        then
+          val link = Paths.get(l.linkName)
+          try Files.createSymbolicLink(l.dest, link)
+          catch
+            case e: java.nio.file.FileAlreadyExistsException if overwrite =>
+              l.dest.toFile.delete()
+              Files.createSymbolicLink(l.dest, link)
+        else
+          val link = Paths.get(directory.toString, l.linkName)
+          try Files.createLink(l.dest, link)
+          catch
+            case e: java.nio.file.FileAlreadyExistsException if overwrite =>
+              l.dest.toFile.delete()
+              Files.createLink(l.dest, link)
 
     // Set directory right after extraction in case some directory are not writable
-    for
-      (path, mode) ← directoryRights
-    do
-      path.toFile.mode = mode
+    for r ← directoryData
+      do
+        setMode(r.path, r.mode)
+        r.path.toFile.setLastModified(r.time)
 
-}
+
+
+

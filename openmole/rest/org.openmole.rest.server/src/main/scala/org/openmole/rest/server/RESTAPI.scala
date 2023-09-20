@@ -83,7 +83,7 @@ class RESTAPI(services: Services):
               val stream = fs2.io.toInputStreamResource(archive.body)
               stream.use { st =>
                 IO:
-                  val is = new TarInputStream(new GZIPInputStream(st))
+                  val is = TarArchiveInputStream(new GZIPInputStream(st))
                   try is.extract(directory.workDirectory)
                   finally is.close()
               }.unsafeRunSync()
@@ -146,7 +146,7 @@ class RESTAPI(services: Services):
             if file.isDirectory
             then
               HTTP.sendFileStream(s"${file.getName}.tgz"): out =>
-                val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+                val tos = TarArchiveOutputStream(out.toGZ, Some(64 * 1024))
                 try tos.archive(file)
                 finally tos.close()
             else
@@ -210,7 +210,7 @@ class RESTAPI(services: Services):
             OMRFormat.resultFileDirectory(file) match
               case Some(fileDirectory) =>
                 HTTP.sendFileStream(s"${file.baseName}-files.tgz"): out =>
-                  val tos = new TarOutputStream(out.toGZ, 64 * 1024)
+                  val tos = TarArchiveOutputStream(out.toGZ, Some(64 * 1024))
                   try tos.archive(fileDirectory, includeTopDirectoryName = false)
                   finally tos.close()
               case None =>
