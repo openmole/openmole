@@ -39,15 +39,14 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
-import org.openmole.tool.archive._
+import org.openmole.tool.archive.*
 import org.openmole.tool.lock._
 
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{ FileInjection, FileSerialisation, FileWithGCConverter }
 
-object SerializerService {
+object SerializerService:
   def apply() = new SerializerService
-}
 
 /**
  * Serializer
@@ -99,58 +98,52 @@ class SerializerService { service ⇒
 
   def deserializeFromString[T](s: String, json: Boolean = false): T = buildXStream(json = json).fromXML(s).asInstanceOf[T]
 
-  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T = {
-    val tis = new TarInputStream(file.bufferedInputStream(gz = gz))
+  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
+    val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
-  }
 
-  def deserializeAndExtractFiles[T](tis: TarInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T = {
-    newFile.withTmpDir { archiveExtractDir ⇒
+
+  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T =
+    newFile.withTmpDir: archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
       deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
-    }
-  }
 
-  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(implicit newFile: TmpDirectory): Unit = {
-    val os = new TarOutputStream(f.bufferedOutputStream(gz = gz))
+
+  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(implicit newFile: TmpDirectory): Unit =
+    val os = TarArchiveOutputStream(f.bufferedOutputStream(gz = gz))
     try serializeAndArchiveFiles(obj, os)
     finally os.close
-  }
 
-  def serializeAndArchiveFiles(obj: Any, tos: TarOutputStream)(implicit newFile: TmpDirectory): Unit = {
-    newFile.withTmpFile { objSerial ⇒
+  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(implicit newFile: TmpDirectory): Unit =
+    newFile.withTmpFile: objSerial ⇒
       serialize(obj, objSerial)
       tos.addFile(objSerial, content)
-    }
+
     val serializationResult = pluginsAndFiles(obj)
     FileSerialisation.serialiseFiles(serializationResult.files, tos, fileSerialisation())
-  }
 
   def pluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
 
-  def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T = {
+  def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)
     try deserializeReplaceFiles[T](is, files)
     finally is.close
-  }
 
-  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T = {
+  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
     val serializer = deserializerWithFileInjection()
     serializer.injectedFiles = files
     serializer.fromXML[T](is)
-  }
 
   def serializeToString(obj: Any, json: Boolean = false) = buildXStream(json = json).toXML(obj)
 
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit = {
+  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit =
     val os = file.bufferedOutputStream(gz = gz)
     try buildXStream(json = json).toXML(obj, os)
     finally os.close
-  }
 
 }

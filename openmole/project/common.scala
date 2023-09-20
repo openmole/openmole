@@ -43,6 +43,7 @@ object common {
   def jasyptVersion = "1.9.3"
   def monocleVersion = "3.2.0"
   def configuration2Version = "2.8.0"
+  def compressVersion = "1.24.0"
   def scalazVersion = "7.3.7"
   def mathVersion = "3.6.1"
   def asmVersion = "9.4"

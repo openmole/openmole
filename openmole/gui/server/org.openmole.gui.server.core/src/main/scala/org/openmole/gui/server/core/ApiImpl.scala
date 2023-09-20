@@ -627,9 +627,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         then
           import org.openmole.tool.archive.*
           val dest = safePathToFile(path)
-          val tis = new TarInputStream(new GZIPInputStream(is))
+          val tis = TarArchiveInputStream(new GZIPInputStream(is))
           try tis.extract(dest, overwrite = overwrite)
-          finally tis.close
+          finally tis.close()
         else
           val dest = safePathToFile(path / name)
           if !dest.exists() || overwrite

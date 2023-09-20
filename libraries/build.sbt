@@ -387,6 +387,13 @@ lazy val config = OsgiProject(dir, "org.apache.commons.configuration2",
   libraryDependencies += "commons-beanutils" % "commons-beanutils" % "1.9.4",
   version := configuration2Version) dependsOn (logging)
 
+lazy val compress = OsgiProject(dir, "org.apache.commons.compress",
+  privatePackages = Seq("!scala.*", "!org.apache.commons.logging.*","*"),
+  imports = Seq("org.apache.commons.logging.*")) settings (
+  settings,
+  libraryDependencies += "org.apache.commons" % "commons-compress" % compressVersion,
+  version := compressVersion) dependsOn logging
+
 lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
   settings,
   libraryDependencies += "com.lihaoyi" %% "sourcecode" % sourcecodeVersion,

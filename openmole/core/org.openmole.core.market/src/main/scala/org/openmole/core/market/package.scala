@@ -27,12 +27,12 @@ import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.workspace.*
 import org.openmole.tool.random.*
-import org.openmole.tool.archive.TarInputStream
+import org.openmole.tool.archive.*
 
 import java.io.IOException
 import org.openmole.core.exception.InternalProcessingError
 
-package object market {
+package object market:
 
   lazy val marketIndexLocation = PreferenceLocation("Market", "Index", Some(buildinfo.marketAddress))
 
@@ -47,7 +47,7 @@ package object market {
     Serialization.read[MarketIndex](NetworkService.get(indexURL))
 
   def downloadEntry(entry: MarketIndexEntry, path: File)(implicit networkService: NetworkService) = try {
-    val tis = new TarInputStream(new GZIPInputStream(NetworkService.getInputStream(entry.url)))
+    val tis = TarArchiveInputStream(new GZIPInputStream(NetworkService.getInputStream(entry.url)))
     try tis.extract(path)
     finally tis.close()
     path.applyRecursive(_.setExecutable(true))
@@ -56,4 +56,4 @@ package object market {
     case e: IOException ⇒ throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)
   }
 
-}
+

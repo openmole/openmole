@@ -35,7 +35,7 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream._
 import org.openmole.core.preference._
 import org.openmole.core.workspace.Workspace
-import org.openmole.tool.archive.TarInputStream
+import org.openmole.tool.archive.*
 
 import io.circe.generic.auto.*
 import org.openmole.core.json.given
@@ -59,20 +59,20 @@ object EGIAuthentication extends JavaLogger {
     val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
 
     def downloadCertificate(entryName: String)(is: InputStream) = {
-      val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
+      val tis = TarArchiveInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 
       try {
-        val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
+        val links = Iterator.continually(tis.getNextTarEntry).drop(1).takeWhile(_ != null).flatMap {
           tarEntry ⇒
             val destForName = new File(dir, tarEntry.getName)
             val dest = new File(dir, destForName.getName)
 
             if (dest.exists) dest.delete
-            if (!tarEntry.getLinkName.isEmpty) Some(dest → tarEntry.getLinkName)
-            else {
+            if !tarEntry.getLinkName.nonEmpty
+            then Some(dest → tarEntry.getLinkName)
+            else
               tis.copy(dest)
               None
-            }
         }.toList
 
         links.foreach {
@@ -80,7 +80,7 @@ object EGIAuthentication extends JavaLogger {
         }
       }
       catch {
-        case (e: IOException) ⇒ logger.log(WARNING, s"Unable to untar ${entryName} from $site", e)
+        case e: IOException ⇒ logger.log(WARNING, s"Unable to untar ${entryName} from $site", e)
       }
     }
 

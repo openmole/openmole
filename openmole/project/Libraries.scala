@@ -49,6 +49,7 @@ object Libraries {
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % lang3Version
   lazy val codec = "org.openmole.library" %% "org-apache-commons-codec" % codecVersion
+  lazy val compress = "org.openmole.library" %% "org-apache-commons-compress" % compressVersion
   lazy val cats = "org.openmole.library" %% "cats" % catsVersion
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
