@@ -56,17 +56,22 @@ object Interpreter {
   def isInterpretedClass(c: Class[_]) = 
     c.getClassLoader != null && classOf[dotty.tools.repl.AbstractFileClassLoader].isAssignableFrom(c.getClassLoader.getClass)
 
-  def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0) = {
+  def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0, fullCode: Option[String] = None) =
     def readableErrorMessages(error: ErrorMessage) =
       error.position.map(p ⇒ s"(line ${p.line - lineOffset}) ").getOrElse("") + error.decoratedMessage
 
     val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
 
-    (if (!codeErrors.isEmpty) codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
-      (if (!importsErrors.filter(_.error).isEmpty) "Error in imports header:\n" + importsErrors.filter(_.error).map(readableErrorMessages).mkString("\n") + "\n" else "") +
+    def fullCodePart =
+      fullCode.map: fc =>
+        s"""Complete encapsulated code was:
+          |$fc""".stripMargin
+
+    (if codeErrors.nonEmpty then codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +
+      (if importsErrors.filter(_.error).nonEmpty then "Error in imports header:\n" + importsErrors.filter(_.error).map(readableErrorMessages).mkString("\n") + "\n" else "") +
       s"""Compiling code:
-        |${code}""".stripMargin
-  }
+        |${code}""".stripMargin +
+      fullCodePart.getOrElse("")
 
   def errorMessagesToException(messages: List[ErrorMessage], code: String): Throwable = CompilationError(messages, code)
 

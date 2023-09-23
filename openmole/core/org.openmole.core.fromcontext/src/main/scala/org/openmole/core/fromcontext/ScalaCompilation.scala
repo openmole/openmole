@@ -77,14 +77,16 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) =
     val osgiMode = org.openmole.core.compiler.Activator.osgi
     val interpreter =
-      if (osgiMode) Interpreter(priorityBundles(plugins), libraries)
+      if osgiMode
+      then Interpreter(priorityBundles(plugins), libraries)
       else Interpreter(jars = libraries)
 
     def errorMsg =
-      if (osgiMode) s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${Interpreter.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
+      if osgiMode
+      then s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${Interpreter.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
       else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
 
     Try {
@@ -96,10 +98,10 @@ object ScalaCompilation {
       )
 
       (evaluated.asInstanceOf[RETURN], interpreter)
-    } match {
+    } match
       case util.Success(s) ⇒ Success(s)
       case util.Failure(e: Interpreter.CompilationError) ⇒
-        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2)
+        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = Some(script.code))
         val userBadDataError =
           new UserBadDataError(
             s"""${errors}
@@ -108,8 +110,6 @@ object ScalaCompilation {
           )
         util.Failure(userBadDataError)
       case util.Failure(e) ⇒ util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
-    }
-  }
 
   def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
@@ -153,14 +153,23 @@ object ScalaCompilation {
          |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")}: ${manifest[TmpDirectory].toString} = ${prefix}NewFile
          |"""
 
+    def alignedSource =
+      val lines = source.split('\n')
+      if lines.nonEmpty
+        then
+        val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
+        val addedSpace = math.max(4 - minSpace, 0)
+        lines.map(l => " " * addedSpace + l).mkString("\n")
+      else source
+
     val code =
       s"""$header
-       |    $source
+       |    $alignedSource
        |    ${wrapping.wrapOutput}
        |  }
        |}""".stripMargin
 
-    Script(code, source, header.split("\n").size + 1)
+    Script(code, source, header.split("\n").length + 1)
   }
 
   case class Script(code: String, originalCode: String, headerLines: Int)
@@ -231,22 +240,17 @@ object ScalaCompilation {
     def apply(context: Context, randomProvider: RandomProvider, tmpDirectory: TmpDirectory): R = f(context, randomProvider, tmpDirectory)
   }
 
-  trait OutputWrapping[+R] {
+  trait OutputWrapping[+R]:
     def wrapOutput: String
-  }
 
   /**
    * Wraps a prototype set as compilable code (used to build the [[script]])
    * @param outputs
    */
-  case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]] {
-
+  case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]]:
     def wrapOutput =
-      s"""
-         |scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava
-         |""".stripMargin
+      s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava"""
 
-  }
 
   case class RawOutput[T]() extends OutputWrapping[T] { compilation ⇒
     def wrapOutput = ""
