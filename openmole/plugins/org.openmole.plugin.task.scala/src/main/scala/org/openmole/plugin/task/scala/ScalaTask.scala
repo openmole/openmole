@@ -48,7 +48,7 @@ object ScalaTask:
       mapped = MappedInputOutputConfig()
     )
 
-  def apply(f: (Context, ⇒ Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(f: (Context, ⇒ _root_.scala.util.Random) ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()): _*))
 
   def apply(f: Context ⇒ Seq[Variable[_]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
