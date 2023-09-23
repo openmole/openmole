@@ -21,10 +21,14 @@ import org.openmole.tool.file.FilePackage
 import org.openmole.tool.random.RandomProvider
 import org.openmole.tool.statistics.StatisticsPackage
 
-trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
+trait CodePackage extends FilePackage with StatisticsPackage with MathPackage:
+  export java.util.Random
+
   def Random(seed: Long): java.util.Random = org.openmole.tool.random.Random.apply(seed)
   def Random()(implicit randomProvider: RandomProvider): java.util.Random = newRandom(randomProvider().nextLong())
   def random(implicit randomProvider: RandomProvider) = randomProvider()
+
+  given Conversion[java.util.Random, scala.util.Random] = scala.util.Random.javaRandomToRandom
 
   @deprecated("8.0")
   def newRNG(seed: Long): java.util.Random = Random(seed)
@@ -68,7 +72,6 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage {
 
   def hypot(a: Double, b: Double) = math.hypot(a, b)
 
-}
 
 object CodePackage extends CodePackage {
   def namespace = s"${this.getClass.getPackage.getName}.${classOf[CodePackage].getSimpleName}"
