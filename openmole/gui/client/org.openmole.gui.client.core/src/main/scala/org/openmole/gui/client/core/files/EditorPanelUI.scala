@@ -122,39 +122,30 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
     editor.renderer.updateFontSize()
   }
 
-
   val errors = Var(EditorErrors())
   val errorMessage = Var("")
   val errorMessageOpen = Var(false)
   val errorsWithLocation: Var[Seq[ErrorWithLocation]] = Var(Seq())
 
-  def setErrorMessage = {
-    errorsWithLocation.now().find { e =>
-      e.line.map(_ - 1) == Some(editor.selection.getCursor().row.toInt)
-    } match {
+  def unsetErrors =
+    errors.set(EditorErrors())
+    errorMessage.set("")
+    errorMessageOpen.set(false)
+
+  def setErrorMessage =
+    errors.now().errorsFromCompiler.map(_.errorWithLocation).find { e =>
+      e.line.map(_ - 1).contains(editor.selection.getCursor().row.toInt)
+    } match
       case Some(e) =>
         val message = s"${e.line.getOrElse("")}: ${e.stackTrace}"
-        if (errorMessage.now() == message) {
+        if errorMessage.now() == message
+        then
           errorMessageOpen.update(!_)
-        }
-        else {
+        else
           errorMessage.set(message)
           errorMessageOpen.set(true)
-        }
       case _ => errorMessageOpen.set(false)
-    }
-  }
 
-  val omsErrorObserver = Observer[EditorErrors] { (ee: EditorErrors) =>
-    val ewls = ee.errorsInEditor.flatMap { i ⇒
-      ee.errorsFromCompiler.find(_.errorWithLocation.line == Some(i)).map { e ⇒
-        e.errorWithLocation.line.map { l ⇒ editor.getSession().setBreakpoint(l - 1) }
-        e.errorWithLocation
-      }
-    }
-
-    errorsWithLocation.set(ewls)
-  }
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
@@ -167,7 +158,13 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
       edDiv.amend(
         lineHeight --> lineHeightObserver,
         FileContentType(fileExtension) match {
-          case FileContentType.OpenMOLEScript ⇒ errors --> omsErrorObserver
+          case FileContentType.OpenMOLEScript ⇒
+            errors -->
+              Observer[EditorErrors]: ee =>
+                editor.getSession().clearBreakpoints()
+                ee.errorsInEditor.foreach: i ⇒
+                  ee.errorsFromCompiler.find(_.errorWithLocation.line.contains(i)).foreach: e ⇒
+                    e.errorWithLocation.line.map { l ⇒ editor.getSession().setBreakpoint(l - 1) }
           case _ => emptyMod
         },
         onClick --> { _ => setErrorMessage }
