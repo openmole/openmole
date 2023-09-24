@@ -151,25 +151,29 @@ object ScalaCompilation {
          |    import ${inputObject}._
          |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")}: ${manifest[RandomProvider].toString} = ${prefix}RNG
          |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")}: ${manifest[TmpDirectory].toString} = ${prefix}NewFile
-         |"""
+         |
+         |    /* --- User Code --- */"""
 
     def alignedSource =
       val lines = source.split('\n')
       if lines.nonEmpty
         then
-        val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
-        val addedSpace = math.max(4 - minSpace, 0)
-        lines.map(l => " " * addedSpace + l).mkString("\n")
+        val minSpace = lines.filter(!_.trim.isEmpty).map(_.takeWhile(_ == ' ').length).min
+        val addedSpace = 4 - minSpace
+        if addedSpace >= 0
+        then lines.map(l => " " * addedSpace + l).mkString("\n")
+        else lines.map(_.drop(-addedSpace)).mkString("\n")
       else source
 
     val code =
       s"""$header
        |    $alignedSource
+       |    /* --- End of User Code --- */
        |    ${wrapping.wrapOutput}
        |  }
        |}""".stripMargin
 
-    Script(code, source, header.split("\n").length + 1)
+    Script(code, source, header.split("\n").length)
   }
 
   case class Script(code: String, originalCode: String, headerLines: Int)
