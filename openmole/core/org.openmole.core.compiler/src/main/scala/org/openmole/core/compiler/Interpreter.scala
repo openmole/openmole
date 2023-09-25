@@ -95,12 +95,11 @@ object Interpreter {
         val offset = compiled.take(firstLine).map(_.length + 1).sum
 
         def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
-        def decoratedMessage = {
-          val offsetOfError = pos.point - compiled.take(pos.line).map(_.length + 1).sum
+        def decoratedMessage =
+          val offsetOfError = pos.column() // - compiled.take(pos.line).map(_.length + 1).sum
           s"""${diagnostic.message}
                 |${compiled(pos.line)}
                 |${(" " * offsetOfError)}^""".stripMargin
-        }
 
         ErrorMessage(decoratedMessage, diagnostic.message, Some(errorPos), diagnostic.level() == dotty.tools.dotc.interfaces.Diagnostic.ERROR)
         
