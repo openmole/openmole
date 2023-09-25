@@ -56,8 +56,21 @@ object Objective {
     implicit def evaluateArrayIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Array[T] ⇒ Double]] = a ⇒
       Objective(_ ⇒ ComputeValue(a.value.array, a.evaluate), negative = false, delta = None, as = None, noisy = true)
 
-    implicit def evaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Seq[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
-    implicit def evaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Vector[T] ⇒ Double]] = a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+    implicit def evaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Seq[T] ⇒ Double]] =
+      a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def evaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Vector[T] ⇒ Double]] =
+      a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def evaluateArrayToDoubleIsToNoisy[T: ClassTag](using toDouble: ToDouble[T]): ToObjective[Evaluate[Val[T], Array[Double] ⇒ Double]] = a ⇒
+      Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) => a.evaluate(v.map(toDouble.apply))), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def evaluateSeqToDoubleIsToNoisy[T: ClassTag](using toDouble: ToDouble[T]): ToObjective[Evaluate[Val[T], Seq[Double] ⇒ Double]] =
+      a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.map(toDouble.apply).toVector)), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def evaluateVectorToDoubleIsToNoisy[T: ClassTag](using toDouble: ToDouble[T]): ToObjective[Evaluate[Val[T], Vector[Double] ⇒ Double]] =
+      a ⇒ Objective(_ ⇒ ComputeValue(a.value.array, (v: Array[T]) ⇒ a.evaluate(v.map(toDouble.apply).toVector)), negative = false, delta = None, as = None, noisy = true)
+
   }
 
   trait ToObjective[T] {
