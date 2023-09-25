@@ -238,7 +238,7 @@ class ExecutionPanel:
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 
-  def execTextArea(content: String) = textArea(content, idAttr := "execTextArea")
+  def execTextArea(content: String) = textArea(content, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium")
 
   def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
     import ExecutionPanel.ExecutionDetails.State
