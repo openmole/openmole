@@ -15,6 +15,7 @@ class Activator extends BundleActivator {
         WordHighLight("under"),
         WordHighLight("in"),
         WordHighLight("aggregate"),
+        WordHighLight("evaluate"),
         WordHighLight("delta"),
         WordHighLight("as"),
         WordHighLight(":=")
