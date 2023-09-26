@@ -123,25 +123,18 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     then target.mkdirs
     else target.createNewFile
 
-  def deleteFiles(safePaths: Seq[SafePath]): Unit = {
+
+
+  def deleteFiles(safePaths: Seq[SafePath]): Unit =
     import services.*
     import org.openmole.tool.file.*
-
-    val allPlugins = listPlugins()
-
-    def unplug(f: File) =
-      if utils.isPlugged(f, allPlugins.toSeq)(workspace) then removePlugin(utils.fileToSafePath(f))
 
     for
       safePath <- safePaths
       file = safePathToFile(safePath)
-    do
-     if file.isDirectory
-     then file.applyRecursive(unplug)
-     else unplug(file)
+    do unplug(file)
 
     utils.deleteFiles(safePaths)
-  }
 
 //  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
 //    import services._
@@ -210,15 +203,16 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     f.isDirectoryEmpty
 
   def move(moves: Seq[(SafePath, SafePath)]): Unit =
-    moves.foreach { (from, to) =>
+    moves.foreach: (from, to) =>
       import services.*
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
       toFile.getParentFile.mkdirs()
       if OMRFormat.isOMR(fromFile)
       then OMRFormat.move(fromFile, toFile)
-      else fromFile.move(toFile)
-    }
+      else
+        unplug(fromFile)
+        fromFile.move(toFile)
 
   def mdToHtml(safePath: SafePath): String =
     import services._
@@ -488,6 +482,20 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     updatePluggedList { _.filterNot(_ == safePath.path.value.mkString("/")) }
     utils.removePlugin(safePath)(workspace)
+
+  def unplug(file: File) =
+    import services.*
+    import org.openmole.tool.file.*
+
+    val allPlugins = listPlugins()
+
+    def unplugFile(f: File) =
+      if utils.isPlugged(f, allPlugins)(workspace)
+      then removePlugin(utils.fileToSafePath(f))
+
+    if file.isDirectory
+    then file.applyRecursive(unplugFile)
+    else unplugFile(file)
 
   def pluginRoutes =
     GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
