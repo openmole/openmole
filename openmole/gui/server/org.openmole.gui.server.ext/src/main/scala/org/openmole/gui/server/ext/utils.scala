@@ -235,6 +235,8 @@ object utils:
     val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
     errors.map(e ⇒ ErrorData(e._2)).toSeq
 
+  
+  
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
     import org.openmole.core.module
     val file: File = safePathToFile(safePath)
