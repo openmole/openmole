@@ -413,7 +413,7 @@ class ExecutionPanel:
                         else Seq()
 
                       def bottom =
-                        div(position := "absolute", top := "730", left := "922", cursor.pointer, textAlign := "center", color := "white",
+                        div(position := "absolute", top := "737", left := "922", cursor.pointer, textAlign := "center", color := "white",
                           i(cls := "bi bi-caret-down"),
                           onClick --> { _ => textArea.ref.scrollTop = textArea.ref.scrollHeight }
                         )
