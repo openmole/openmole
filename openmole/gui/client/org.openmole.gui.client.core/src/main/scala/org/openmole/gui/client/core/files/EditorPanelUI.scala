@@ -67,7 +67,7 @@ object EditorPanelUI:
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
 
-class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
+class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins):
 
   val modified = Var(false)
 
@@ -162,7 +162,7 @@ class EditorPanelUI(fileExtension: FileExtension)(using plugins: GUIPlugins) {
       ,
       edDiv.amend(
         lineHeight --> lineHeightObserver,
-        FileContentType(fileExtension) match {
+        FileContentType(fileExtension) match
           case FileContentType.OpenMOLEScript ⇒
             errors -->
               Observer[Option[ErrorData]]:
