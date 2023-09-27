@@ -35,18 +35,11 @@ import org.openmole.gui.shared.api.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager) {
+class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager):
   def manager = treeNodePanel.treeNodeManager
-
-  val message = Var[Div](div())
-
-  implicit def someIntToString(i: Option[Int]): String = i.map {
-    _.toString
-  }.getOrElse("")
 
   // Filter tool
   val nameTag = "names"
-  val thresholdChanged = Var(false)
 
   val findInput = inputTag("").amend(
     width := "180px",
@@ -69,71 +62,33 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
     })
   )
 
-  //  val pluginButton =
-  //    button(
-  //      "Plug",
-  //      btn_secondary,
-  //      onClick --> { _ ⇒
-  //        val directoryName = s"uploadPlugin${java.util.UUID.randomUUID().toString}"
-  //        Post()[Api].copyToPluginUploadDir(directoryName, manager.selected.now).call().foreach { _ ⇒
-  //          import scala.concurrent.duration._
-  //          val names = manager.selected.now.map(_.name)
-  //          Post(timeout = 5 minutes)[Api].addUploadedPlugins(directoryName, names).call().foreach {
-  //            errs ⇒
-  //              if (errs.isEmpty) pluginPanel.pluginDialog.show
-  //              else panels.alertPanel.detail("Plugin import failed", ErrorData.stackTrace(errs.head), transform = RelativeCenterPosition, zone = FileZone)
-  //          }
-  //        //  unselectToolAndRefreshTree
-  //        }
-  //      }
-  //    )
-
-  //Filter
-  implicit def stringToIntOption(s: String): Option[Int] = Try(s.toInt).toOption
-
-  def sortingGroup(using api: ServerAPI, basePath: BasePath) = {
-    trait Sorting
-    object Name extends Sorting
-    object Size extends Sorting
-    object Time extends Sorting
-
-    trait State
-    object Up extends State
-    object Down extends State
-
-    case class SortingState(sorting: Sorting, state: State)
-    val sortingState: Var[SortingState] = Var(SortingState(Name, Up))
-
-    def item(sorting: Sorting, sState: SortingState) = {
-      val isSelected = sorting == sState.sorting
+  def sortingGroup(using api: ServerAPI, basePath: BasePath) =
+    def item(sorting: ListSorting) =
       div(
         centerInDiv,
         div(
-          sorting match {
-            case Name ⇒ "Aa"
-            case Time ⇒ OMTags.glyph_clock
-            case Size ⇒ OMTags.glyph_data
-          },
-          cls := "sorting-files-item" + {
-            if (isSelected) "-selected" else ""
-          }
+          sorting match
+            case ListSorting.AlphaSorting ⇒ "Aa"
+            case ListSorting.TimeSorting ⇒ OMTags.glyph_clock
+            case ListSorting.SizeSorting ⇒ OMTags.glyph_data
+          ,
+          cls <-- treeNodeManager.fileSorting.signal.map: s =>
+            if s.fileSorting == sorting
+            then "sorting-files-item-selected"
+            else "sorting-files-item"
         ),
         onClick --> { _ ⇒
-          sortingState.update(ss ⇒ SortingState(
-            sorting,
-            if (isSelected) {
-              if (ss.state == Up) Down
-              else Up
-            }
-            else Up))
-          sorting match {
-            case Name ⇒ manager.switchAlphaSorting
-            case Size ⇒ manager.switchSizeSorting
-            case Time ⇒ manager.switchTimeSorting
-          }
+          val currentSorting = treeNodeManager.fileSorting.now()
+          if currentSorting.fileSorting == sorting
+          then
+            val reverse =
+              currentSorting.firstLast match
+                case FirstLast.First => FirstLast.Last
+                case FirstLast.Last => FirstLast.First
+            treeNodeManager.fileSorting.set(currentSorting.copy(firstLast = reverse))
+          else treeNodeManager.fileSorting.set(FileSorting(fileSorting = sorting))
         }
       )
-    }
 
     div(
       centerInDiv, backgroundColor := "#3f3d56",
@@ -146,23 +101,21 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
         )),
         div(
           cls := "sorting-files",
-          children <-- sortingState.signal.map { ss ⇒
+          children <-- treeNodeManager.fileSorting.signal.map: fs ⇒
             Seq(
-              item(Name, ss),
-              item(Time, ss),
-              item(Size, ss),
+              item(ListSorting.AlphaSorting),
+              item(ListSorting.TimeSorting),
+              item(ListSorting.SizeSorting),
               div(
                 cls := "sorting-file-item-caret",
-                ss.state match {
-                  case Up ⇒ glyph_triangle_up
-                  case Down ⇒ glyph_triangle_down
-                }
+                marginTop := "4",
+                fs.firstLast match
+                  case FirstLast.Last ⇒ glyph_triangle_up
+                  case FirstLast.First ⇒ glyph_triangle_down
               )
             )
-          }
+
         )
       )
 
-  }
 
-}
