@@ -16,9 +16,8 @@
  */
 package org.openmole.core.workflow.tools
 
-trait Name {
+trait Name:
   def name: Option[String]
   def className = getClass.getSimpleName
   def simpleName = name.getOrElse(className)
   override def toString = s"$simpleName@$hashCode"
-}

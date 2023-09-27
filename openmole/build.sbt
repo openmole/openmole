@@ -51,7 +51,7 @@ def scala3Settings =
   commonSettings ++
     Seq(
       Global / scalaVersion := scala3VersionValue, // + "-bin-typelevel-4",
-      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:50"), // "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
+      scalacOptions ++= Seq("-java-output-version:11", "-language:higherKinds", "-language:postfixOps", "-language:implicitConversions", "-Xmax-inlines:100"), // "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
       excludeTransitiveScala2
     )
 

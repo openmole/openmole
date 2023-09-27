@@ -48,7 +48,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def executionOutput(id: ExecutionId, lines: Int)(using BasePath): Future[ExecutionOutput] = fetch.futureError(_.executionOutput(id, lines).future)
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.cancelExecution(id).future)
   override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] = fetch.futureError(_.removeExecution(id).future)
-  override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = fetch.futureError(_.compileScript(script).future, timeout = Some(600 seconds), warningTimeout = None)
+  override def validateScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = fetch.futureError(_.validateScript(script).future, timeout = Some(600 seconds), warningTimeout = None)
   override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] = fetch.futureError(_.launchScript(script, validate).future, timeout = Some(600 seconds), warningTimeout = Some(300 seconds))
   override def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit] = fetch.futureError(_.clearEnvironmentErrors(environment).future)
   override def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]] = fetch.futureError(_.listEnvironmentErrors(environment, lines).future)

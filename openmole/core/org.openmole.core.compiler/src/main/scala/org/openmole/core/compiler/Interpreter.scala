@@ -64,7 +64,7 @@ object Interpreter {
 
     def fullCodePart =
       fullCode.map: fc =>
-        s"""Complete encapsulated code was:
+        s"""\nComplete encapsulated code was:
           |$fc""".stripMargin
 
     (if codeErrors.nonEmpty then codeErrors.map(readableErrorMessages).mkString("\n") + "\n" else "") +

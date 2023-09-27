@@ -96,7 +96,7 @@ object ErrorData:
     t.printStackTrace(new PrintWriter(sw))
     sw.toString
 
-  def apply(errors: Seq[ErrorWithLocation], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
+  def apply(errors: Seq[ScriptError], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
 
   def apply(t: Throwable): MessageErrorData = MessageErrorData(t.getMessage, Some(toStackTrace(t)))
 
@@ -110,9 +110,7 @@ object ErrorData:
 
 sealed trait ErrorData
 case class MessageErrorData(message: String, stackTrace: Option[String]) extends ErrorData
-case class CompilationErrorData(errors: Seq[ErrorWithLocation], stackTrace: String) extends ErrorData
-
-case class Token(token: String, duration: Long)
+case class CompilationErrorData(errors: Seq[ScriptError], stackTrace: String) extends ErrorData
 
 object ExecutionId:
   def apply() =
@@ -362,11 +360,10 @@ case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Seq[String]
     copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
 
 
+object ScriptError:
+  case class Position(line: Int, point: Int, start: Int, end: Int)
 
-case class ErrorWithLocation(stackTrace: String = "", line: Option[Int] = None, start: Option[Int] = None, end: Option[Int] = None)
-case class ErrorFromCompiler(errorWithLocation: ErrorWithLocation = ErrorWithLocation(), lineContent: String = "")
-case class EditorErrors(errorsFromCompiler: Seq[ErrorFromCompiler] = Seq(), errorsInEditor: Seq[Int] = Seq())
-
+case class ScriptError(message: String, position: Option[ScriptError.Position] = None)
 
 object NotificationEvent:
   def time(event: NotificationEvent) =

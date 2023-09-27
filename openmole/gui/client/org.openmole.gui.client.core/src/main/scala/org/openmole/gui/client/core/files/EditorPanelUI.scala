@@ -40,7 +40,7 @@ import scala.scalajs.js.annotation.JSImport
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object EditorPanelUI {
+object EditorPanelUI:
 
   def apply(
     fileType: FileContentType,
@@ -66,9 +66,8 @@ object EditorPanelUI {
   @js.native
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
-}
 
-class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins) {
+class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins):
 
   val modified = Var(false)
 
@@ -122,53 +121,65 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
     editor.renderer.updateFontSize()
   }
 
-  val errors = Var(EditorErrors())
-  val errorMessage = Var("")
-  val errorMessageOpen = Var(false)
-  val errorsWithLocation: Var[Seq[ErrorWithLocation]] = Var(Seq())
+  val errors: Var[Option[ErrorData]] = Var(None)
+  val errorMessage: Var[Option[String]] = Var(None)
 
   def unsetErrors =
-    errors.set(EditorErrors())
-    errorMessage.set("")
-    errorMessageOpen.set(false)
+    errors.set(None)
+    errorMessage.set(None)
 
-  def setErrorMessage =
-    errors.now().errorsFromCompiler.map(_.errorWithLocation).find { e =>
-      e.line.map(_ - 1).contains(editor.selection.getCursor().row.toInt)
-    } match
-      case Some(e) =>
-        val message = s"${e.line.getOrElse("")}: ${e.stackTrace}"
-        if errorMessage.now() == message
-        then
-          errorMessageOpen.update(!_)
-        else
-          errorMessage.set(message)
-          errorMessageOpen.set(true)
-      case _ => errorMessageOpen.set(false)
+//  def setErrorMessage(message: String) =
+//    errorMessage.set(Some(message))
+//    errorMessageOpen.set(true)
+
+  def errorMessage(e: ScriptError) =
+    s"${e.position.map(p => s"${p.line}: ").getOrElse("")}${e.message}"
+
+  def updateErrorMessage =
+    errors.now().foreach:
+      case error: CompilationErrorData =>
+        val selected =
+          error.errors.find: e =>
+            e.position.map(_.line - 1).contains(editor.selection.getCursor().row.toInt)
+        selected match
+          case Some(e) =>
+            errorMessage.set(Some(errorMessage(e)))
+          case _ =>
+      case _ =>
 
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
   val view =
     div(
-      errorMessageOpen.signal.expand(div(
-        flexRow,
-        child.text <-- errorMessage.signal,
-        backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "gi")),
+      children <--
+        errorMessage.signal.map: em =>
+          em.toSeq.map: message =>
+            textArea(
+              flexRow,
+              message,
+              width := "100%", overflow.scroll, backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "monospace", fontSize := "medium")
+      ,
       edDiv.amend(
         lineHeight --> lineHeightObserver,
         fileContentType match
           case FileContentType.OpenMOLEScript ⇒
             errors -->
-              Observer[EditorErrors]: ee =>
-                editor.getSession().clearBreakpoints()
-                ee.errorsInEditor.foreach: i ⇒
-                  ee.errorsFromCompiler.find(_.errorWithLocation.line.contains(i)).foreach: e ⇒
-                    e.errorWithLocation.line.map { l ⇒ editor.getSession().setBreakpoint(l - 1) }
+              Observer[Option[ErrorData]]:
+                case Some(errors: CompilationErrorData) =>
+                  editor.getSession().clearBreakpoints()
+                  errors.errors.foreach: e ⇒
+                    e.position.foreach: p =>
+                      editor.getSession().setBreakpoint(p.line - 1)
+                  errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>
+                    errorMessage.set(Some(errorMessage(e)))
+                case Some(e: MessageErrorData) =>
+                  errorMessage.set(Some(e.message))
+                case _ =>
 
           case _ => emptyMod
         ,
-        onClick --> { _ => setErrorMessage }
+        onClick --> { _ => updateErrorMessage }
       )
     )
 
@@ -188,5 +199,3 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
 
   def setReadOnly(b: Boolean) = editor.setReadOnly(b)
   def hasBeenModified = modified.now()
-}
-

@@ -176,7 +176,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     executions -= id
     Future.successful(())
 
-  override def compileScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] =
+  override def validateScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] =
     Future.successful(files.get(script).flatMap(_.compilation))
 
   override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] =

@@ -584,6 +584,9 @@ object MoleExecution {
   case object Synchronized extends SynchronisationContext
   case object UnsafeAccess extends SynchronisationContext
 
+  def validationErrors(moleExecution: MoleExecution) =
+    import moleExecution.executionContext.services._
+    Validation(moleExecution.mole, moleExecution.implicits, moleExecution.sources, moleExecution.hooks)
 }
 
 sealed trait MoleExecutionMessage
@@ -646,6 +649,8 @@ object MoleExecutionMessage {
       val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
     }
+
+
 
 }
 
@@ -761,13 +766,12 @@ class MoleExecution(
 
   def run: Unit = run(None)
 
-  def validate = {
-    import executionContext.services._
-    val validationErrors = Validation(mole, implicits, sources, hooks)
-    if (!validationErrors.isEmpty) throw new UserBadDataError(s"Formal validation of your mole has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
-  }
+  def validate =
+    val validationErrors = MoleExecution.validationErrors(this)
+    if validationErrors.nonEmpty
+    then throw new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
 
-  def run(context: Option[Context] = None, validate: Boolean = true) = {
+  def run(context: Option[Context] = None, validate: Boolean = true) =
     if (!_started) {
       if (validate) this.validate
       MoleExecutionMessage.send(this)(MoleExecutionMessage.StartMoleExecution(context))
@@ -776,15 +780,13 @@ class MoleExecution(
       this
     }
     else this
-  }
 
-  def start(doValidation: Boolean) = {
+  def start(doValidation: Boolean) =
     import executionContext.services._
     if (doValidation) validate
     val t = threadProvider.newThread { () ⇒ run(None, validate = doValidation) }
     t.start()
     this
-  }
 
   def hangOn(cleaned: Boolean = true) = {
     if (cleaned) cleanedSemaphore.acquireAndRelease()
