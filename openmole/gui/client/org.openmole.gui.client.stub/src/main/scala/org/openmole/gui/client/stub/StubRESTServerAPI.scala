@@ -51,7 +51,7 @@ object AnimatedStubRESTServerAPI:
         """val j = Val[Double]
           |val i = Val[error]
           |""".stripMargin,
-        compilation = Some(CompilationErrorData(Seq(ErrorWithLocation("stub", Some(2), None, None)), "stub"))
+        compilation = Some(CompilationErrorData(Seq(ScriptError("stub", Some(ScriptError.Position(2, 0, 0, 0)))), "stub"))
       ),
       SafePath("file.txt") -> MemoryFile("""modify me if you can!""")
     )
