@@ -161,8 +161,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val removeExecutionRoute =
     removeExecution.errorImplementedBy { i => apiImpl.removeExecution(i) }
 
-  val compileScriptRoute =
-    compileScript.errorImplementedBy { s => apiImpl.compileScript(s) }
+  val validateScriptRoute =
+    validateScript.errorImplementedBy { s => apiImpl.validateScript(s) }
 
   val launchScriptRoute =
     launchScript.errorImplementedBy { (s, b) => apiImpl.launchScript(s, b) }
@@ -248,7 +248,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       executionOutputRoute,
       cancelExecutionRoute,
       removeExecutionRoute,
-      compileScriptRoute,
+      validateScriptRoute,
       launchScriptRoute,
       clearEnvironmentErrorsRoute,
       listEnvironmentErrorsRoute,

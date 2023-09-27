@@ -261,13 +261,17 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def removeExecution(id: ExecutionId): Unit = serverState.remove(id)
 
-  def compileScript(script: SafePath) =
+  def validateScript(script: SafePath) =
     import services.*
     val outputStream = StringPrintStream(Some(preference(outputSize)))
     synchronousCompilation(script, outputStream) match
       case e: ErrorData => Some(e)
-      case _ => None
-
+      case e: MoleExecution =>
+        Try:
+          e.validate
+        match
+          case util.Failure(e) => Some(ErrorData(e))
+          case _ => None
 
 //  def runScript(script: SafePath, validateScript: Boolean) =
 //    val (execId, outputStream) = compilationData(script)
@@ -284,45 +288,38 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def synchronousCompilation(
     scriptPath:   SafePath,
-    outputStream: StringPrintStream): ErrorData | MoleExecution = {
+    outputStream: StringPrintStream): ErrorData | MoleExecution =
 
-    def error(t: Throwable): ErrorData = {
-      t match {
+    def scriptError(t: Throwable): ErrorData =
+      t match
         case ce: Interpreter.CompilationError ⇒
           def toErrorWithLocation(em: Interpreter.ErrorMessage) =
-            ErrorWithLocation(em.rawMessage, em.position.map {
-              _.line
-            }, em.position.map {
-              _.start
-            }, em.position.map {
-              _.end
-            })
+            ScriptError(
+              em.rawMessage,
+              position = em.position.map { p => ScriptError.Position(p.line, p.point, p.start, p.end) }
+            )
 
           ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
         case _ ⇒ ErrorData(t)
-      }
-    }
 
     def message(message: String) = MessageErrorData(message, None)
 
-    val script: File = {
+    val script: File =
       import services._
       safePathToFile(scriptPath)
-    }
 
     val executionOutputRedirection = OutputRedirection(outputStream)
     val executionTmpDirectory = services.tmpDirectory.newDir("execution")
 
-    val runServices = {
+    val runServices =
       import services._
       Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory), fileServiceCache = FileServiceCache())
-    }
 
     try
-      Project.compile(script.getParentFileSafe, script)(runServices) match {
-        case ScriptFileDoesNotExists() ⇒ message("Script file does not exist")
-        case ErrorInCode(e)            ⇒ error(e)
-        case ErrorInCompiler(e)        ⇒ error(e)
+      Project.compile(script.getParentFileSafe, script)(runServices) match
+        case ScriptFileDoesNotExists() ⇒ ErrorData("Script file does not exist")
+        case ErrorInCode(e)            ⇒ scriptError(e)
+        case ErrorInCompiler(e)        ⇒ scriptError(e)
         case compiled: Compiled ⇒
           import runServices._
 
@@ -333,22 +330,19 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               outputRedirection = Some(executionOutputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match {
-            case Failure(e) ⇒ error(e)
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
+            case Failure(e) ⇒ scriptError(e)
             case Success(dsl) ⇒
-              Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match {
+              Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match
                 case Success(ex) ⇒ ex
                 case Failure(e) ⇒
                   MoleServices.clean(executionServices)
-                  error(e)
-              }
-          }
-      }
-    catch {
-      case t: Throwable ⇒ error(t)
-    }
+                  scriptError(e)
 
-  }
+    catch
+      case t: Throwable ⇒ scriptError(t)
+
+
 
   def launchScript(script: SafePath, validateScript: Boolean) =
     import services.*

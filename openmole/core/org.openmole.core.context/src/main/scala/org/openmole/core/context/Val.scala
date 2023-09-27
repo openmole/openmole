@@ -267,7 +267,7 @@ case class Namespace(names: String*) {
  * @param namespace
  * @tparam T the type of the prototype. Values associated to this prototype should always be a subtype of T.
  */
-class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Namespace) extends Id {
+class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Namespace) extends Id:
   /**
    * Get the name of the prototype.
    *
@@ -329,6 +329,6 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    */
   override def id = (name, `type`)
 
-  override def toString = s"($name: ${`type`.toString})"
-}
+  override def toString = s"$name: ${`type`.toString}"
+
 

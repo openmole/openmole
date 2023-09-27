@@ -113,7 +113,7 @@ class ExecutionPanel:
       case r: ExecutionState.Preparing ⇒ ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates)
 
 
-  def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
+  //def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
 
   def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false) =

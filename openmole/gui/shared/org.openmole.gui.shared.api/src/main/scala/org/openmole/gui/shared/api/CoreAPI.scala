@@ -111,7 +111,7 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
 
 //  def compileScript(scriptData: ScriptData): Option[ErrorData]
-  val compileScript: ErrorEndpoint[SafePath, Option[ErrorData]] =
+  val validateScript: ErrorEndpoint[SafePath, Option[ErrorData]] =
     errorEndpoint(post(path / prefix / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
 
 //  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
