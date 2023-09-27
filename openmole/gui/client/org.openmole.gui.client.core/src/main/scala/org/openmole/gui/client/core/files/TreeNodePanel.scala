@@ -263,7 +263,7 @@ class TreeNodePanel { panel =>
     div(
       cls := "file-scrollable-content",
       children <--
-        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileFilter.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
+        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
           EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue)), withHidden = false).map(Some(_)), true).toSignal(None).map {
             case None =>
               Seq(
@@ -335,7 +335,7 @@ class TreeNodePanel { panel =>
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
-  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileFilter.now().fileSorting match {
+  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileSorting.now().fileSorting match {
     case ListSorting.TimeSorting ⇒ CoreUtils.longTimeToString(tn.time)
     case _ ⇒ CoreUtils.readableByteCountAsString(tn.size)
   }
