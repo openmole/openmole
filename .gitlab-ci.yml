@@ -45,7 +45,7 @@ assemble:
     - '(cd ./build-system && sbt --version)'
     - '(cd ./build-system && sbt publishLocal)'
     - '(cd ./libraries && sbt publishLocal)'
-    - '(cd ./openmole && ./generateSite $PWD/site)'
+    - '(export SBT_OPTS="-Xmx4G" && cd ./openmole && ./generateSite $PWD/site)'
     - rclone sync -v --create-empty-src-dirs --links ./openmole/site/ next:next/
     #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     #- echo "put -r ./openmole/site/* next" >./tonext     
