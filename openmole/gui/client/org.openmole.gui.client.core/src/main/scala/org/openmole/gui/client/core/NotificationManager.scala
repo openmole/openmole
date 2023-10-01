@@ -153,8 +153,8 @@ class NotificationManager:
 
   def listColor(level: NotificationLevel) =
     level match
-      case NotificationLevel.Error => ListColor("#e4d1d1", "#dc3545")
-      case _ => ListColor("#d1dbe4", "#3086b5")
+      case NotificationLevel.Error => ListColor("#d35f5f", "#d35f5f")
+      case _ => ListColor("#3086b5", "#3086b5")
 
   def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
@@ -180,6 +180,7 @@ class NotificationManager:
                         s"${CoreUtils.longTimeToString(s.time)} - ${s.title}",
                          cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
                         backgroundColor := { if i % 2 == 0 then lColor.background else "#f4f4f4" },
+                        color := "white",
                         onClick -->
                           currentID.update:
                             case Some(i) if i == s.id => None
