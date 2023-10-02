@@ -4,53 +4,52 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.files.PlotContent.ResultView.{Plot, Raw, Table}
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.shared.api.*
 
 
 object PlotContent:
 
-  sealed trait ResultView
+  case class PlotContentSection(section: String, rawContent: String, rowData: RowData, initialHash: String)
 
-  object Raw extends ResultView
+  enum ResultView:
+    case Raw, Table, Plot
 
-  object Table extends ResultView
+  case class Section(name: String)
 
-  object Plot extends ResultView
+  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement)
 
-  def addTab( safePath: SafePath, rowData: RowData, initialContent: String, initialHash: String, extension: FileContentType)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) = {
+  case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-    val editor = EditorPanelUI(extension, initialContent, initialHash)
-    editor.setReadOnly(true)
+  def addTab(safePath: SafePath, extension: FileContentType, sections: Seq[PlotContentSection])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) = {
 
-    // FIXME: this should be in css but for some reason it does not work this way
-    val headerStyle = Seq(position := "sticky",
-      top := "0",
-      background := "#dbdbdb",
-      color := "#3f3d56"
-    )
+    import ResultView.*
+    val sectionMap =
+      (sections.map: s =>
+        val editor = EditorPanelUI(extension, s.rawContent, "initialHash")
+        editor.setReadOnly(true)
 
-    val table = div(idAttr := "editor",
-      dataTable(rowData.content)
-        .addHeaders(rowData.headers: _*)
-        .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
-        .sortable
-        .render.render.amend(borderCollapse.collapse)
-    )
+        // FIXME: this should be in css but for some reason it does not work this way
+        val headerStyle = Seq(position := "sticky",
+          top := "0",
+          background := "#dbdbdb",
+          color := "#3f3d56"
+        )
 
-    val tabData = TabData(safePath, Some(editor))
-    val view: Var[HtmlElement] = Var(table)
+        val table = div(idAttr := "editor",
+          dataTable(s.rowData.content)
+            .addHeaders(s.rowData.headers: _*)
+            .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
+            .sortable
+            .render.render.amend(borderCollapse.collapse)
+        )
 
-    def switchView(resultView: ResultView) =
-      resultView match
-        case Raw => view.set(editor.view)
-        case Table => view.set(table)
-        case _ =>
-          val columns = rowData.content.transpose
+        val plot =
+          val columns = s.rowData.content.transpose
           //We only keep data of dimension 0 or 1
-          val plotData = ColumnData(rowData.headers.zip(columns).zip(rowData.dimensions).flatMap { case ((h, c), d) =>
+          val plotData = ColumnData(s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap { case ((h, c), d) =>
             d match {
               case 0 => Some(Column(h, ScalarColumn(c)))
               case 1 => Some(Column(h, ArrayColumn(c.map {
@@ -59,20 +58,52 @@ object PlotContent:
               case _ => None
             }
           })
-          view.set(ResultPlot.fromColumnData(plotData))
+          ResultPlot.fromColumnData(plotData)
 
+        s.section -> RawTablePlot(editor, table, plot)
+        ).toMap
 
-    object DataDisplay
-    val rawState = ToggleState(DataDisplay, "Raw", btn_primary_string, _ ⇒ switchView(Raw))
-    val tableState = ToggleState(DataDisplay, "Table", btn_primary_string, _ ⇒ switchView(Table))
-    val plotState = ToggleState(DataDisplay, "Plot", btn_primary_string, _ ⇒ switchView(Plot))
+    val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, sectionMap.keys.headOption.map(s => Section(s))))
 
+    val tabData = TabData(safePath, None)
 
+    def switchView(resultView: ResultView): Unit = currentResultViewAndSection.update(rvs => rvs.copy(resultView = resultView))
+
+    def switchSection(section: Section): Unit = currentResultViewAndSection.update(rvs => rvs.copy(section = Some(section)))
+
+    def toView(resultViewAndSection: ResultViewAndSection) =
+      val rawTablePlot =
+        resultViewAndSection.section match
+          case Some(s: Section) => sectionMap(s.name)
+          case _ => sectionMap.values.head
+
+      resultViewAndSection.resultView match
+        case Raw => rawTablePlot.editor.view
+        case Table => rawTablePlot.table
+        case Plot => rawTablePlot.plot
+        case _ => div()
+
+    val rawState = ToggleState(ResultView, "Raw", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
+    val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
+    val plotState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
     val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, 1)
-      .element
-      .amend(margin := "10", width := "150px")
 
-    val content = div(display.flex, flexDirection.column, switchButton, child <-- view)
+    val sectionStates: Seq[ToggleState[Section]] =
+      sectionMap.keys.map(name =>
+        val section = Section(name)
+        ToggleState(Section(name), name, s"btn ${btn_success_string}", _ => switchSection(section))
+      ).toSeq
+    lazy val sectionSwitchButton = exclusiveRadio(sectionStates, btn_secondary_string, 0)
+
+    val content = div(display.flex, flexDirection.column,
+      div(display.flex, flexDirection.row,
+        (sectionStates.size match
+          case 1 => div()
+          case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")),
+        switchButton.element.amend(margin := "10", width := "150px", marginLeft := "50")
+      ),
+      child <-- currentResultViewAndSection.signal.map(rvs => toView(rvs))
+    )
 
     panels.tabContent.addTab(tabData, content)
 

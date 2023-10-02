@@ -1365,7 +1365,7 @@ input:checked + .slider:before {
 
 .errorNotification {
     width: 25px;
-    color: #dc3545;
+    color: #d35f5f;
     font-size: 25;
     height: 25px;
     cursor:pointer;
@@ -1424,7 +1424,7 @@ input:checked + .slider:before {
     width: 500px;
     height: 100%;
     padding-left: 15px;
-    background: #3f3d56;
+    background: #cac9df;
     padding-top: 15px;
 }
 
@@ -1432,6 +1432,12 @@ input:checked + .slider:before {
   color: #fff;
   background-color: #795c85;
   border-color: #795c85;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #d35f5f;
+  border-color: #d35f5f;
 }
 
 .importURL {
