@@ -153,8 +153,8 @@ class NotificationManager:
 
   def listColor(level: NotificationLevel) =
     level match
-      case NotificationLevel.Error => ListColor("#d35f5f", "#d35f5f")
-      case _ => ListColor("#3086b5", "#3086b5")
+      case NotificationLevel.Error => "#d35f5f"
+      case _ => "#3086b5"
 
   def notificationList(using api: ServerAPI, basePath: BasePath) =
     div(
@@ -176,17 +176,18 @@ class NotificationManager:
                     div(
                       marginRight := "10px",
                       div(
-                        overflowWrap.breakWord, overflow.hidden, width := "100%", padding:="10px",
+                        overflowWrap.breakWord, overflow.hidden, width := "100%", padding:="10px", overflowY.auto,
                         s"${CoreUtils.longTimeToString(s.time)} - ${s.title}",
-                         cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor.border}",
-                        backgroundColor := { if i % 2 == 0 then lColor.background else "#f4f4f4" },
+                         cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor}",
+                        if (i > 0) borderTop := "1px solid white" else emptyMod,
+                        backgroundColor := lColor,
                         color := "white",
                         onClick -->
                           currentID.update:
                             case Some(i) if i == s.id => None
                             case _ => Some(s.id)
                       ),
-                      currentID.signal.map { _.contains(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor.border}")
+                      currentID.signal.map { _.contains(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor}")
                     )
                   )
               )
