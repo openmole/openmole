@@ -8,6 +8,7 @@ import org.openmole.gui.client.core.files.PlotContent.ResultView.{Plot, Raw, Tab
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.tool.plot.Plot.OneColumn
 
 
 object PlotContent:
