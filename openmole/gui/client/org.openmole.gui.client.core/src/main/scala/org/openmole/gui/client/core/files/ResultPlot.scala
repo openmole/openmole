@@ -8,6 +8,8 @@ import org.openmole.gui.client.tool.plot.{PlotSettings, Plotter, ScatterPlot, Sp
 import org.openmole.gui.shared.data.SequenceData
 import org.openmole.plotlyjs.*
 
+import scala.scalajs.js.timers
+
 object ResultPlot {
 
   def fromColumnData(plotData: ColumnData) = {
@@ -92,23 +94,26 @@ object ResultPlot {
       exclusiveRadio[NumberOfColumToBePlotted](plotModeStates, btn_secondary_string, 0)
     }
 
-    val plotObserver = Observer[(HtmlElement, Seq[String])] { case (p, hs) =>
-      oneTwoNRadio.selected.now().map(_.t).head match {
+    val plotObserver = Observer[(HtmlElement, Seq[String], NumberOfColumToBePlotted)] { case (p, hs, n) =>
+      n match
         case NColumn => Plotly.relayout(p.ref, splomLayout)
         case _ => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("Records")))
-      }
+    }
+
+    timers.setTimeout(1500) {
+      axisCheckBoxes(OneColumn)
+      doPlot(OneColumn)
     }
 
     div(
-      child <-- oneTwoNRadio.selected.signal.combineWith(axisRadios.signal).map { (oneTwoNSelected, aRadio) =>
-
+      child <-- axisRadios.signal.map { aRadio =>
         div(display.flex, flexDirection.column,
           div(display.flex, flexDirection.row,
             oneTwoNRadio.element.amend(margin := "10", height := "38"),
             aRadio.element.amend(display.block, margin := "10")
           ),
-          child <-- plot.signal,
-          plot.signal.combineWith(aRadio.selected.signal.map(_.map(_.t))) --> plotObserver
+          plot.signal.combineWith(aRadio.selected.signal.map(_.map(_.t))).combineWith(oneTwoNRadio.selected.signal.map(_.map(_.t).head)) --> plotObserver,
+          child <-- plot.signal
         )
       }
     )
