@@ -175,6 +175,8 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
                     errorMessage.set(Some(errorMessage(e)))
                 case Some(e: MessageErrorData) =>
                   errorMessage.set(Some(e.message))
+                case None =>
+                  editor.getSession().clearBreakpoints()
                 case _ =>
 
           case _ => emptyMod
