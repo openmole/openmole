@@ -331,34 +331,28 @@ object BatchEnvironment {
     closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
 
 
-  object ExecutionJobRegistry {
-
-    def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized {
+  object ExecutionJobRegistry:
+    def register(registry: ExecutionJobRegistry, ejob: BatchExecutionJob) = registry.synchronized:
       registry.executionJobs = ejob :: registry.executionJobs
       registry.empty.drainPermits()
-    }
 
-    def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized {
-      def pruneJobs(registry: ExecutionJobRegistry) = registry.executionJobs.filter(j => j != job)
-      registry.executionJobs = pruneJobs(registry)
+    def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized:
+      def pruneJobs(registry: ExecutionJobRegistry, job: BatchExecutionJob) = registry.executionJobs.filter(j => j.id != job.id)
+      registry.executionJobs = pruneJobs(registry, job)
       if(registry.executionJobs.isEmpty) registry.empty.release(1)
-    }
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
-  }
 
-  class ExecutionJobRegistry {
-    var executionJobs = List[BatchExecutionJob]()
-    val empty = new Semaphore(1)
-  }
+    def waitEmpty(registry: ExecutionJobRegistry) = registry.empty.acquireAndRelease()
+    def isEmpty(registry: ExecutionJobRegistry) = registry.empty.availablePermits() == 0
 
-  def registryIsEmpty(environment: BatchEnvironment) = {
-    environment.registry.empty.availablePermits() == 0
-  }
 
-  def waitJobKilled(environment: BatchEnvironment) = {
-    environment.registry.empty.acquireAndRelease()
-  }
+  class ExecutionJobRegistry:
+    private var executionJobs = List[BatchExecutionJob]()
+    private val empty = new Semaphore(1)
+
+  def registryIsEmpty(environment: BatchEnvironment) = ExecutionJobRegistry.isEmpty(environment.registry)
+  def waitJobKilled(environment: BatchEnvironment) = ExecutionJobRegistry.waitEmpty(environment.registry)
 
   def defaultUpdateInterval(implicit preference: Preference) =
     UpdateInterval(
@@ -406,25 +400,21 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 }
 
 
-object BatchEnvironmentState  {
-  def apply()(implicit services: BatchEnvironment.Services) = {
+object BatchEnvironmentState:
+  def apply()(implicit services: BatchEnvironment.Services) =
     val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
-    val jobStore = {
+    val jobStore =
       val storeDirectory = services.newFile.makeNewDir("jobstore")
       JobStore(storeDirectory)
-    }
 
     new BatchEnvironmentState(_errors, jobStore)
-  }
-}
 
 class BatchEnvironmentState(
   val _errors: RingBuffer[ExceptionEvent],
-  val jobStore: JobStore) {
+  val jobStore: JobStore):
   @volatile var stopped = false
   val registry = new ExecutionJobRegistry()
   val jobId = new AtomicLong(0L)
   val _done = new AtomicLong(0L)
   val _failed = new AtomicLong(0L)
-}
 
