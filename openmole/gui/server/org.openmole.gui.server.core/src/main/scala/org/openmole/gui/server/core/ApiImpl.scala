@@ -226,7 +226,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     file.withLock { _ ⇒
       def save() =
-        val tmpFile = Files.createTempFile(file.getParentFile, file.getName, ".tmp").toFile
+        val tmpFile = Files.createTempFile(file.getParentFile, s".${file.getName}", ".tmp").toFile
         tmpFile.mode = file
         try
           tmpFile.content = fileContent
