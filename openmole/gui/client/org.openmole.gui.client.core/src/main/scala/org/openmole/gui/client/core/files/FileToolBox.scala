@@ -95,7 +95,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       }
     }
 
-  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
+  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newSafePath = safePath.parent ++ to
 
     api.exists(newSafePath).foreach: exists ⇒
@@ -109,12 +109,11 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
         actionConfirmation.set(None)
 
 
-  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
+  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newNode = safePath.parent ++ to
     api.move(Seq(safePath -> newNode)).foreach { _ ⇒
       panels.tabContent.rename(safePath, newNode)
       panels.treeNodePanel.refresh
-      panels.tabContent.checkTabs
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
     }
@@ -147,7 +146,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)
 
-  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath): Div =
+  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     val renameInput = inputTag(sp.name).amend(
       placeholder := "File name",
       onMountFocus

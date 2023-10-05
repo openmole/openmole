@@ -22,7 +22,7 @@ object OMSContent:
     val editorPanelUI = panels.tabContent.editorPanelUI(safePath)
     editorPanelUI.foreach(_.errors.set(errorDataOption))
 
-  def addTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) =
+  def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) =
 
     val editor = EditorPanelUI(FileContentType(safePath), initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
@@ -71,8 +71,6 @@ object OMSContent:
         div(row, panels.tabContent.fontSizeControl, marginLeft.auto)
       )
 
-
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
 
-    panels.tabContent.addTab(tabData, content)
-
+    (tabData, content)

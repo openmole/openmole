@@ -16,16 +16,19 @@ import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
 
+
+
+
 class TabContent:
 
-  import TabContent.TabData
+  import TabContent.*
 
   val tabsUI = Tabs.tabs[TabData](Seq()).build
 
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.render.amend(margin := "10px")
 
-  private def buildHeader(tabData: TabData)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
+  private def buildHeader(tabData: TabData)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     span(display.flex, flexDirection.row, alignItems.center,
       span(tabData.safePath.name),
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
@@ -34,22 +37,22 @@ class TabContent:
         e.stopPropagation()
       })
     )
-  }
+
+  def buildTab(tabData: TabData, content: HtmlElement, copyAttributes: Option[Tab[TabData]] = None)(using Panels, ServerAPI, BasePath) =
+    copyAttributes match
+      case None => Tab(tabData, buildHeader(tabData), content)
+      case Some(tab) => Tab(tabData, buildHeader(tabData), content, tabID = tab.tabID, refID = tab.refID, active = tab.active)
 
   def addTab(
     tabData: TabData,
-    content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
-    tabsUI.add(
-      Tab(
-        tabData,
-        buildHeader(tabData),
-        content
-      )
-    )
-  }
+    content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
+    tabsUI.add(buildTab(tabData, content))
 
   def tab(safePath: SafePath) =
-    tabsUI.tabs.now().filter { tab => tab.t.safePath == safePath }.headOption
+    tabsUI.tabs.now().find { tab => tab.t.safePath == safePath }
+
+  def tabIndex(safePath: SafePath) =
+    tabsUI.tabs.now().zipWithIndex.find{ (tab, _) => tab.t.safePath == safePath }
 
   def tabData(safePath: SafePath) = tab(safePath).map(_.t)
 
@@ -87,27 +90,21 @@ class TabContent:
       case _ => concurrent.Future.successful(false)
   }
 
+  def checkTabs(using api: ServerAPI, basePath: BasePath) =
+    tabsUI.tabs.now().foreach: tab =>
+      api.exists(tab.t.safePath).foreach: e ⇒
+        if !e then removeTab(tab.t.safePath)
 
-  def checkTabs(using api: ServerAPI, basePath: BasePath) = tabsUI.tabs.now().foreach { tab =>
-    api.exists(tab.t.safePath).foreach {
-      e ⇒
-        if (!e) removeTab(tab.t.safePath)
-    }
-  }
+  def rename(sp: SafePath, newSafePath: SafePath)(using Panels, ServerAPI, GUIPlugins, BasePath) =
+    tabIndex(sp).foreach: (ot, i) =>
+      save(ot.t).foreach: _ =>
+        FileDisplayer.buildTab(newSafePath).foreach:
+          case Some((nt, c)) =>
+            tabsUI.tabs.update: tabs =>
+              tabs.patch(i, Seq(buildTab(nt, c, Some(ot))), 1)
+          case None =>
 
-  def rename(sp: SafePath, newSafePath: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath) = {
-    tabsUI.tabs.update { ts =>
-      ts.map { tab =>
-        if tab.t.safePath == sp
-        then
-          val newT = tab.t.copy(safePath = newSafePath)
-          tab.copy(t = newT, title = buildHeader(newT))
-        else tab
-      }
-    }
-  }
-
-  def fontSizeLink(size: Int) = {
+  def fontSizeLink(size: Int) =
     div("A", fontSize := s"${
       size
     }px", cursor.pointer, padding := "3", onClick --> {
@@ -119,7 +116,6 @@ class TabContent:
         }
     }
     )
-  }
 
   val fontSizeControl = div(cls := "file-content", display.flex, flexDirection.row, alignItems.baseline,
     fontSizeLink(17),

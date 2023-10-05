@@ -11,8 +11,8 @@ import org.openmole.gui.shared.api.*
 
 object OMRContent:
 
-  def addTab(safePath: SafePath, sections: Seq[GUIOMRSectionContent])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
+  def buildTab(safePath: SafePath, sections: Seq[GUIOMRSectionContent])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
     val (rowData: RowData, rawContent: String) = ResultData.fromOMR(sections)
-    val pcSections = sections.map: s=>
+    val pcSections = sections.map: s =>
       PlotContentSection(s.name.getOrElse("section"), rawContent, rowData, "initialHash")
-    PlotContent.addTab(safePath, FileContentType.OpenMOLEResult, pcSections)
+    PlotContent.buildTab(safePath, FileContentType.OpenMOLEResult, pcSections)
