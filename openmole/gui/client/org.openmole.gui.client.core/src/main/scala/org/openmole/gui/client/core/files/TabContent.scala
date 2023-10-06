@@ -90,7 +90,7 @@ class TabContent:
       case _ => concurrent.Future.successful(false)
   }
 
-  def checkTabs(using api: ServerAPI, basePath: BasePath) =
+  def closeNonExstingFiles(using api: ServerAPI, basePath: BasePath) =
     tabsUI.tabs.now().foreach: tab =>
       api.exists(tab.t.safePath).foreach: e ⇒
         if !e then removeTab(tab.t.safePath)

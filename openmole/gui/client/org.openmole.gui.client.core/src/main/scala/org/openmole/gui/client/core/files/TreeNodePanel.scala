@@ -378,12 +378,14 @@ class TreeNodePanel { panel =>
 
     def toolBox(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
       val showExecution = () ⇒ ExecutionPanel.open
-      new FileToolBox(
+      FileToolBox(
         tnSafePath,
         showExecution,
         tn match
           case f: TreeNode.File ⇒ PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
           case _ ⇒ PluginState(false, false)
+        ,
+        isDirectory = tn.directory.isDefined
       )
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
@@ -448,7 +450,7 @@ class TreeNodePanel { panel =>
                 //treeNodeManager.invalidCache(to)
                 //treeNodeManager.invalidCache(dragged)
                 refresh
-                panels.tabContent.checkTabs
+                panels.tabContent.closeNonExstingFiles
             }
             //})
           }

@@ -12,7 +12,7 @@ import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState):
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState, isDirectory: Boolean):
 
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
@@ -54,8 +54,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   def trash(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { safePath ⇒
     closeToolBox
     CoreUtils.trashNodes(panels.treeNodePanel, Seq(safePath)).andThen { _ ⇒
-      panels.tabContent.removeTab(safePath)
-      panels.tabContent.checkTabs
+      if isDirectory
+      then panels.tabContent.closeNonExstingFiles
+      else panels.tabContent.removeTab(safePath)
       panels.pluginPanel.getPlugins
       panels.treeNodePanel.refresh
     }
@@ -112,7 +113,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newNode = safePath.parent ++ to
     api.move(Seq(safePath -> newNode)).foreach { _ ⇒
-      panels.tabContent.rename(safePath, newNode)
+      if !isDirectory
+      then panels.tabContent.rename(safePath, newNode)
+      else panels.tabContent.closeNonExstingFiles
       panels.treeNodePanel.refresh
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
       replacing()
