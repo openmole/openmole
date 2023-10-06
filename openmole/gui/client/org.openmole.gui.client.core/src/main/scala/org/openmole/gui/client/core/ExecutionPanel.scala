@@ -445,7 +445,7 @@ class ExecutionPanel:
         (details.signal combineWith currentOpenSimulation.signal).map: (details, id) =>
           Seq(
             div(rowFlex, justifyContent.center,
-              details.toSeq.sortBy(_._2.startDate).reverse.map { (id, detailValue) => simulationBlock(id, detailValue) }
+              details.toSeq.sortBy(_._2.startDate).map { (id, detailValue) => simulationBlock(id, detailValue) }
             ),
             autoRemoveFailed.element,
             div(
