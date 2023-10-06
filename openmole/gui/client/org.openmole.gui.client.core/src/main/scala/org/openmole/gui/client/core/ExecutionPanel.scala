@@ -47,8 +47,14 @@ object ExecutionPanel:
 
       def isFailedOrCanceled(state: State) =
         state match
-          case (_: State.canceled) | (_: State.failed) => true
+          case _: State.canceled | _: State.failed => true
           case _ => false
+
+      def isFailed(state: State) =
+        state match
+          case _: State.failed => true
+          case _ => false
+
 
     enum State:
       case preparing, running
@@ -315,7 +321,6 @@ class ExecutionPanel:
       )
 
     def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
-      OMSContent.setError(executionDetails.path, executionDetails.error)
       elementTable()
         .addRow(executionRow(id, executionDetails, cancel, remove)).expandTo(expander(id, executionDetails), showExpander.signal.map(_.isDefined))
         .unshowSelection
@@ -326,7 +331,6 @@ class ExecutionPanel:
         case ErrorStateLevel.Error => "#c8102e"
         case _ => "#555"
 
-
     def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
       child <-- showEvironmentControls.signal.map: c =>
         if c
@@ -336,7 +340,6 @@ class ExecutionPanel:
           )
         else div()
     )
-
 
 
     def jobRow(e: EnvironmentState) =
