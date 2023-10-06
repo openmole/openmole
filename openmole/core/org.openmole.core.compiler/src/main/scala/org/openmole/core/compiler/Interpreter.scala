@@ -89,16 +89,13 @@ object Interpreter {
     diagnostic.position.toScala match 
       case None => ErrorMessage(diagnostic.message, diagnostic.message, None, diagnostic.level() == dotty.tools.dotc.interfaces.Diagnostic.ERROR)
       case Some(pos) =>
-        val compiled = new String(pos.source.content).split("\n")
-
         val firstLine = 0 //compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
-        val offset = compiled.take(firstLine).map(_.length + 1).sum
 
-        def errorPos = ErrorPosition(pos.line - firstLine, pos.start - offset, pos.end - offset, pos.point - offset)
+        def errorPos = ErrorPosition(pos.line - firstLine, pos.startColumn(), pos.endColumn(), pos.column())
         def decoratedMessage =
           val offsetOfError = pos.column() // - compiled.take(pos.line).map(_.length + 1).sum
           s"""${diagnostic.message}
-                |${compiled(pos.line)}
+                |${pos.lineContent()}
                 |${(" " * offsetOfError)}^""".stripMargin
 
         ErrorMessage(decoratedMessage, diagnostic.message, Some(errorPos), diagnostic.level() == dotty.tools.dotc.interfaces.Diagnostic.ERROR)
