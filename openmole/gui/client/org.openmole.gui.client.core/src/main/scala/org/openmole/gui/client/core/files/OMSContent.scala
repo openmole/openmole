@@ -62,8 +62,8 @@ object OMSContent:
 
               }),
               child <--
-                editor.errors.signal.map: e =>
-                  if e.isDefined
+                (editor.errors.signal combineWith editor.errorMessage).map: (e, em) =>
+                  if e.isDefined || em.isDefined
                   then button("CLEAR", btn_secondary, marginLeft := "10", onClick --> editor.unsetErrors)
                   else div()
             )
