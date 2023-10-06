@@ -207,6 +207,9 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     apiImpl.activatePlugins
 
 
+
+    import org.http4s.server.middleware.*
+
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
@@ -221,12 +224,12 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     //        config = IORuntimeConfig()
     //      )
 
-    val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> r.router).toSeq
+    val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> GZip(r.router)).toSeq
     val httpApp = Router(
       Seq(
-        "/" -> applicationServer.routes,
-        "/" -> apiServer.routes,
-        "/" -> apiServer.endpointRoutes,
+        "/" -> GZip(applicationServer.routes),
+        "/" -> GZip(apiServer.routes),
+        "/" -> GZip(apiServer.endpointRoutes),
         "/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
