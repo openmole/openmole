@@ -53,43 +53,32 @@ object EGIAuthentication extends JavaLogger {
         downloadCACertificates(preference(EGIEnvironment.CACertificatesSite), caDir)
     }
 
-  def downloadCACertificates(address: String, dir: File)(implicit preference: Preference) = {
+  def downloadCACertificates(address: String, dir: File)(implicit preference: Preference) =
     implicit val httpIntepreter = gridscale.http.HTTP()
 
     val site = gridscale.http.Server(address, preference(EGIEnvironment.CACertificatesDownloadTimeOut))
 
-    def downloadCertificate(entryName: String)(is: InputStream) = {
+    def downloadCertificate(entryName: String)(is: InputStream) =
       val tis = TarArchiveInputStream(new GZIPInputStream(new BufferedInputStream(is)))
-
-      try {
-        val links = Iterator.continually(tis.getNextTarEntry).drop(1).takeWhile(_ != null).flatMap {
-          tarEntry ⇒
-            val destForName = new File(dir, tarEntry.getName)
-            val dest = new File(dir, destForName.getName)
-
-            if (dest.exists) dest.delete
-            if !tarEntry.getLinkName.nonEmpty
-            then Some(dest → tarEntry.getLinkName)
-            else
-              tis.copy(dest)
-              None
-        }.toList
-
-        links.foreach {
-          case (file, linkTo) ⇒ file.createLinkTo(linkTo)
-        }
-      }
-      catch {
-        case e: IOException ⇒ logger.log(WARNING, s"Unable to untar ${entryName} from $site", e)
-      }
-    }
+      try tis.extract(dir)
+      finally tis.close()
 
     val tarEntries = gridscale.http.list(site, "/")
-    tarEntries.foreach { tarEntry ⇒
+    tarEntries.foreach: tarEntry ⇒
       if (tarEntry.`type` != gridscale.FileType.Directory)
         gridscale.http.readStream[Unit](site, tarEntry.name, downloadCertificate(tarEntry.name))
-    }
-  }
+
+    // Flatten extracted archives
+    for
+      file <- dir.listFiles()
+      if file.isDirectory
+    do
+      val tmpDirectory = file.getParentFile / (file.getName  + ".tmp")
+      file move tmpDirectory
+      tmpDirectory.listFiles.foreach: f =>
+        f move (dir / f.getName)
+      tmpDirectory.delete()
+
 
   def getVOMS(vo: String)(implicit workspace: Workspace, preference: Preference): Option[Seq[String]] =
     gridscale.egi.VOMS.get(vo, preference(EGIEnvironment.VOPortalAPIKey))
