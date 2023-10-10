@@ -87,19 +87,6 @@ ThisBuild / publishTo :=
 def scalaJSSettings = Seq(Test / fork := false)
 
 
-import ReleaseTransformations._
-
-releaseProcess := Seq[ReleaseStep](
-  inquireVersions,                        // : ReleaseStep
-  setReleaseVersion,                      // : ReleaseStep
-  commitReleaseVersion,                   // : ReleaseStep, performs the initial git checks
-  tagRelease,                             // : ReleaseStep
-  setNextVersion,                         // : ReleaseStep
-  commitNextVersion,                      // : ReleaseStep
-  pushChanges                             // : ReleaseStep, also checks that an upstream branch is properly configured
-)
-
-
 /* ------ Third parties ---------- */
 
 def thirdPartiesDir = file("third-parties")
