@@ -57,7 +57,7 @@ object SavePopulationHook:
 
     val state = context(evolution.stateVal)
     val generation = evolution.operations.generationLens.get(state)
-    val shouldBeSaved = frequency.map(generation % _ == 0).getOrElse(true)
+    val shouldBeSaved = frequency.map(generation % _ == 0).getOrElse(true) || context(evolution.terminatedVal)
 
     if shouldBeSaved
     then
