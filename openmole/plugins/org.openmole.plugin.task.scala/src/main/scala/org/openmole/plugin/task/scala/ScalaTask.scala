@@ -92,7 +92,12 @@ case class ScalaTask(
       then Some(new UserBadDataError(s"Library file $l does not exist"))
       else None
 
-    Validate { p ⇒
+    def pluginsErrors: Seq[Throwable] = plugins.flatMap: l ⇒
+      if !l.exists()
+      then Some(new UserBadDataError(s"Plugin file $l does not exist"))
+      else None
+
+    Validate: p ⇒
       import p._
 
       def compilationError =
@@ -100,8 +105,7 @@ case class ScalaTask(
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
 
-      libraryErrors ++ compilationError
-    }
+      libraryErrors ++ pluginsErrors ++ compilationError
 
   override def process(taskExecutionContext: TaskExecutionContext) = FromContext: p ⇒
     def toMappedInputContext(context: Context, mapped: Seq[Mapped[_]]) =
