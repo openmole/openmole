@@ -33,4 +33,6 @@ class TagBadge {
       div(display.flex, flexDirection.row, flexWrap.wrap, width := "100%", children <-- tags.signal)
     )
   }
+  
+  def clear = tags.set(Seq())
 }
