@@ -106,17 +106,14 @@ object Interpreter {
         case Some(p) if p.line >= 0 ⇒ errorMessage ::= error
         case _                      ⇒
       }*/
-  
 
 
-
-  def classLoader(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile]) = {
+  def classLoader(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile]) =
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
         List(classOf[Interpreter].getClassLoader): _*
     )
-  }
 
   def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {
     def toPath(b: Bundle) = new URL(b.getLocation).getPath
@@ -127,50 +124,54 @@ object Interpreter {
       Activator.context.get.getBundles.filter(!_.isSystem).map(toPath)
   }.distinct
 
-  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean): repl.REPLDriver =
+  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean): (repl.REPLDriver, ClassLoader) =
     def commonOptions = Seq("-language:postfixOps", "-language:implicitConversions", "-nowarn")
 
     classDirectory.mkdirs()
 
-    Activator.context match {
-      case Some(_) =>
-        new repl.REPLDriver(
-          Array(
-            "-classpath", classPath(priorityBundles, jars).mkString(":"),
-            //"-usejavacp",
-            "-color:never",
-            "-d", classDirectory.getAbsolutePath
-          ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
-          Console.out,
-          Some(classLoader(priorityBundles, jars))
-        )
-      case None =>
-        new repl.REPLDriver(
-          Array(
-            "-classpath", System.getProperty("java.class.path"),
-            //"-usejavacp",
-            "-color:never",
-            "-d", classDirectory.getAbsolutePath,
-          ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
-          Console.out,
-          Some(classLoader(priorityBundles, jars))
-          //Some (classOf[Test].getClassLoader)
-        )
-    }
+    val classLoaderValue = classLoader(priorityBundles, jars)
+
+    val driver =
+      Activator.context match
+        case Some(_) =>
+          new repl.REPLDriver(
+            Array(
+              "-classpath", classPath(priorityBundles, jars).mkString(":"),
+              //"-usejavacp",
+              "-color:never",
+              "-d", classDirectory.getAbsolutePath
+            ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
+            Console.out,
+            Some(classLoaderValue)
+          )
+        case None =>
+          new repl.REPLDriver(
+            Array(
+              "-classpath", System.getProperty("java.class.path"),
+              //"-usejavacp",
+              "-color:never",
+              "-d", classDirectory.getAbsolutePath,
+            ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
+            Console.out,
+            Some(classLoaderValue)
+            //Some (classOf[Test].getClassLoader)
+          )
+
+    (driver, classLoaderValue)
 
   type Compiled = () ⇒ Any
   case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
-    val drv = driver(classDirectory, priorityBundles, jars, quiet = quiet)
+    val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet)
     //    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     //    new Interpreter(priorityBundles, jars, quiet, classDirectory, settings)
-    new Interpreter(drv, classDirectory)
+    new Interpreter(drv, classDirectory, cl)
   }
 }
 
-class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File) {
+class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File, val classLoaderValue: ClassLoader) {
 
   def initialState = driver.initialState 
 
