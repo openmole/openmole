@@ -46,7 +46,7 @@ object BatchExecutionJob:
         PluginManager.bundleForClass(c).map { b ⇒ VersionedPackage(p, Some(b.getVersion.toString)) }
 
       val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
-      val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass)
+      val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass).distinct
 
       val exported =
         allClassFiles.flatMap(c ⇒ Option(new File(c.path).getParent)).distinct.
