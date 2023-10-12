@@ -18,32 +18,15 @@
 package org.openmole.tool
 
 import java.io.{ ByteArrayInputStream, File }
-import java.util.jar._
+import java.util.jar.*
 import java.util.zip.ZipEntry
 
-import org.openmole.tool.file._
-import org.openmole.tool.stream._
+import org.openmole.tool.file.*
+import org.openmole.tool.stream.*
+import org.openmole.tool.bytecode.*
 import org.osgi.framework.{ Bundle, Constants }
 
-package object osgi {
-
-  object ClassSource {
-    def path(c: ClassSource) =
-      c match {
-        case ClassFile(path, _)     ⇒ path
-        case ClassByteCode(path, _) ⇒ path
-      }
-
-    def openInputStream(c: ClassSource) =
-      c match {
-        case ClassFile(_, file)         ⇒ file.bufferedInputStream()
-        case ClassByteCode(_, byteCode) ⇒ new ByteArrayInputStream(byteCode)
-      }
-  }
-
-  sealed class ClassSource
-  case class ClassFile(path: String, file: File) extends ClassSource
-  case class ClassByteCode(path: String, byteCode: Array[Byte]) extends ClassSource
+package object osgi:
 
   case class VersionedPackage(name: String, version: Option[String])
 
@@ -82,4 +65,3 @@ package object osgi {
     finally os.close
   }
 
-}
