@@ -173,8 +173,8 @@ class ServerState:
 
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
-    getRunningEnvironments(id).map {
-      case (envId, e) ⇒ {
+    getRunningEnvironments(id).map:
+      case (envId, e) ⇒
         EnvironmentState(
           envId = envId,
           taskName = e.environment.simpleName,
@@ -184,12 +184,16 @@ class ServerState:
           failed = e.environment.failed,
           networkActivity = e.networkActivity,
           executionActivity = e.executionActivity,
-          numberOfErrors = environmentErrors(envId).length
+          numberOfErrors = environmentErrorSize(envId)
         )
-      }
-    }
 
-  def environmentErrors(environmentId: EnvironmentId): Seq[EnvironmentError] = {
+
+  def environmentErrorSize(environmentId: EnvironmentId) =
+    val errorMap = getRunningEnvironments(environmentId).toMap
+    val info = errorMap(environmentId)
+    Environment.errors(info.environment).size
+
+  def environmentErrors(environmentId: EnvironmentId): Seq[EnvironmentError] =
     val errorMap = getRunningEnvironments(environmentId).toMap
     val info = errorMap(environmentId)
 
@@ -198,15 +202,18 @@ class ServerState:
     errors.map { ex ⇒
       ex.detail match {
         case Some(detail) ⇒
+          val exceptionMessage = ex.exception.getMessage
+
           def completeMessage =
-            s"""${ex.exception.getMessage}
-               |$detail""".stripMargin
+            s"""$exceptionMessage\n$detail"""
 
           EnvironmentError(
             environmentId,
-            ex.exception.getMessage,
-            MessageErrorData(completeMessage,
-            Some(ErrorData.toStackTrace(ex.exception))),
+            exceptionMessage,
+            MessageErrorData(
+              completeMessage,
+              Some(ErrorData.toStackTrace(ex.exception))
+            ),
             ex.creationTime,
             utils.javaLevelToErrorLevel(ex.level))
         case None ⇒
@@ -219,7 +226,6 @@ class ServerState:
           )
       }
     }
-  }
 
   def state(key: ExecutionId): ExecutionState = atomic { implicit ctx ⇒
 

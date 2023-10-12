@@ -20,20 +20,18 @@ package org.openmole.plugin.sampling.quasirandom
 import org.apache.commons.math3.random.SobolSequenceGenerator
 import org.openmole.core.dsl.extension._
 
-object SobolSampling {
+object SobolSampling:
 
-  def sobolValues(dimension: Int, samples: Int) = {
+  def sobolValues(dimension: Int, samples: Int): Iterator[Seq[Double]] =
     val sequence = new SobolSequenceGenerator(dimension)
-    for {
-      v ← Iterator.continually(sequence.nextVector()).take(samples)
-    } yield v.toSeq
-  }
+    for
+      v ← Iterator.continually(sequence.nextVector()).slice(1, 1 + samples)
+    yield v.toSeq
 
-  implicit def isSampling: IsSampling[SobolSampling] = sobol ⇒ {
-    def apply = FromContext { p ⇒
+  given IsSampling[SobolSampling] = sobol ⇒
+    def apply = FromContext: p ⇒
       import p._
       sobolValues(sobol.factor.size, sobol.sample.from(context)).map { ScalableValue.toVariables(sobol.factor, _)(context) }
-    }
 
     Sampling(
       apply,
@@ -41,8 +39,6 @@ object SobolSampling {
       sobol.factor.flatMap(_.inputs),
       sobol.sample.validate
     )
-  }
 
-}
 
 case class SobolSampling(sample: FromContext[Int], factor: Seq[ScalableValue])

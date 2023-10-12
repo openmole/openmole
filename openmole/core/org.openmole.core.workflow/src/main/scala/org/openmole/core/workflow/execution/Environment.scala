@@ -33,7 +33,7 @@ import org.openmole.tool.cache._
 
 import scala.ref.WeakReference
 
-object Environment {
+object Environment:
   val maxExceptionsLog = PreferenceLocation("Environment", "MaxExceptionsLog", Some(200))
 
   case class JobSubmitted(id: Long, job: ExecutionJob) extends Event[Environment]
@@ -47,33 +47,28 @@ object Environment {
   case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 
   def errors(environment: Environment) =
-    environment match {
+    environment match
       case e: SubmissionEnvironment ⇒ e.errors
       case _: LocalEnvironment      ⇒ Seq()
-    }
 
   def clearErrors(environment: Environment) =
-    environment match {
+    environment match
       case e: SubmissionEnvironment ⇒ e.clearErrors
       case _                        ⇒ Seq()
-    }
 
-  def submit(environment: Environment, job: JobGroup): Long = {
+  def submit(environment: Environment, job: JobGroup): Long =
     val moleExecution = JobGroup.moleExecution(job)
 
-    environment match {
+    environment match
       case env: SubmissionEnvironment ⇒ env.submit(job)
       case env: LocalEnvironment ⇒
         env.submit(
           job,
           moleExecution.partialTaskExecutionContext
         )
-    }
-  }
 
-}
 
-sealed trait Environment extends Name {
+sealed trait Environment extends Name:
   def submitted: Long
   def running: Long
   def done: Long
@@ -81,7 +76,6 @@ sealed trait Environment extends Name {
 
   def start(): Unit
   def stop(): Unit
-}
 
 /**
  * An environment with the properties of submitting jobs, getting jobs, and cleaning.

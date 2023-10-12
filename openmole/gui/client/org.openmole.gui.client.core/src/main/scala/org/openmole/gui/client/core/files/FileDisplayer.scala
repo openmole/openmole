@@ -11,6 +11,8 @@ import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.bsn
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.nodes.ReactiveElement
+import org.scalajs.dom.HTMLDivElement
 
 import scala.concurrent.Future
 
@@ -33,35 +35,44 @@ import scala.concurrent.Future
 
 object FileDisplayer:
 
+  def buildTab(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins): Future[Option[(TabData, HtmlElement)]] =
+    FileContentType(safePath) match
+      case FileContentType.OpenMOLEScript ⇒
+        api.download(safePath, hash = true).map: (content, hash) ⇒
+          Some(OMSContent.buildTab(safePath, content, hash.get))
+      case FileContentType.CSV =>
+        api.download(safePath, hash = true).map: (content, hash) ⇒
+          Some(CSVContent.buildTab(safePath, content, hash.get))
+      case FileContentType.MDScript ⇒
+        api.mdToHtml(safePath).map: htmlString ⇒
+          val htmlDiv = com.raquo.laminar.api.L.div()
+          htmlDiv.ref.innerHTML = htmlString
+          Some(HTMLContent.buildTab(safePath, htmlDiv))
+      case FileContentType.OpenMOLEResult ⇒
+        api.omrContent(safePath).map: guiContent =>
+          Some(OMRContent.buildTab(safePath, guiContent.section))
+      case FileContentType.SVGExtension ⇒
+        api.download(safePath, hash = false).map: (content, _) ⇒
+          Some(HTMLContent.buildTab(safePath, div(panelBody, content)))
+      case e: ReadableFileType if e.text =>
+        api.download(safePath, hash = true).map: (content, hash) ⇒
+          Some(AnyTextContent.buildTab(safePath, content, hash.get))
+      case UnknownFileType =>
+        api.isTextFile(safePath).flatMap: text =>
+          api.download(safePath, hash = true).map: (content, hash) ⇒
+            if text
+            then
+              Some(AnyTextContent.buildTab(safePath, content, hash.get))
+            else None
+      case _ => Future.successful(None)
+
+
   def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
     panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
-        FileContentType(safePath) match
-          case FileContentType.OpenMOLEScript ⇒
-            api.download(safePath, hash = true).foreach: (content, hash) ⇒
-              OMSContent.addTab(safePath, content, hash.get)
-          case FileContentType.CSV =>
-            api.download(safePath, hash = true).foreach: (content, hash) ⇒
-              CSVContent.addTab(safePath, content, hash.get)
-          case FileContentType.MDScript ⇒
-            api.mdToHtml(safePath).foreach: htmlString ⇒
-              val htmlDiv = com.raquo.laminar.api.L.div()
-              htmlDiv.ref.innerHTML = htmlString
-              HTMLContent.addTab(safePath, htmlDiv)
-          case FileContentType.OpenMOLEResult ⇒
-            api.omrContent(safePath).foreach: guiContent =>
-              OMRContent.addTab(safePath, guiContent.section)
-          case FileContentType.SVGExtension ⇒
-            api.download(safePath, hash = false).foreach: (content, _) ⇒
-              HTMLContent.addTab(safePath, div(panelBody, content))
-          case e: ReadableFileType if e.text =>
-            api.download(safePath, hash = true).foreach: (content, hash) ⇒
-              AnyTextContent.addTab(safePath, content, hash.get)
-          case UnknownFileType =>
-            api.isTextFile(safePath).foreach: text =>
-              api.download(safePath, hash = true).foreach: (content, hash) ⇒
-                if text then AnyTextContent.addTab(safePath, content, hash.get)
+        val tab = buildTab(safePath)
+        tab.foreach:
+          case Some((tabData, content)) => panels.tabContent.addTab(tabData, content)
           case _ =>
-
 

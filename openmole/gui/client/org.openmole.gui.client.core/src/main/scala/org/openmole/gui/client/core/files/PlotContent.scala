@@ -24,8 +24,7 @@ object PlotContent:
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-  def addTab(safePath: SafePath, extension: FileContentType, sections: Seq[PlotContentSection])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) = {
-
+  def buildTab(safePath: SafePath, extension: FileContentType, sections: Seq[PlotContentSection])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
@@ -50,15 +49,12 @@ object PlotContent:
         val plot =
           val columns = s.rowData.content.transpose
           //We only keep data of dimension 0 or 1
-          val plotData = ColumnData(s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap { case ((h, c), d) =>
-            d match {
-              case 0 => Some(Column(h, ScalarColumn(c)))
-              case 1 => Some(Column(h, ArrayColumn(c.map {
-                ResultData.fromStringToArray(_)
-              })))
+          val plotData = ColumnData(
+            s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap:
+              case ((h, c), d) if d == 0 => Some(Column(h, ScalarColumn(c)))
+              case ((h, c), d) if d ==1 => Some(Column(h, ArrayColumn(c.map(ResultData.fromStringToArray))))
               case _ => None
-            }
-          })
+            )
           ResultPlot.fromColumnData(plotData)
 
         s.section -> RawTablePlot(editor, table, plot)
@@ -82,7 +78,6 @@ object PlotContent:
         case Raw => rawTablePlot.editor.view
         case Table => rawTablePlot.table
         case Plot => rawTablePlot.plot
-        case _ => div()
 
     val rawState = ToggleState(ResultView, "Raw", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
     val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
@@ -106,8 +101,7 @@ object PlotContent:
       child <-- currentResultViewAndSection.signal.map(rvs => toView(rvs))
     )
 
-    panels.tabContent.addTab(tabData, content)
+    (tabData, content)
 
-  }
 
 

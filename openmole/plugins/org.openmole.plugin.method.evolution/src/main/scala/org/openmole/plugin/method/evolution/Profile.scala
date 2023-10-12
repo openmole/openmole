@@ -62,12 +62,23 @@ object Profile {
 
   type ProfileElements = Seq[ProfileElement] | ProfileElement
 
+
+  def indexesOfProfiledTry(profiled: Seq[ProfileElement], genome: Genome) =
+    def notFoundInGenome(v: Val[_]) = new UserBadDataError(s"Variable \"$v\" has not been found in the genome, you should add it to the genome to be able to profile it.")
+    def toTry[T](o: Option[T], v: Val[_]): util.Try[T] = o.map(util.Success.apply).getOrElse(util.Failure(notFoundInGenome(v)))
+
+    profiled.toVector.map:
+      case c: IntervalDoubleProfileElement ⇒ toTry(Genome.continuousIndex(genome, c.v), c.v)
+      case c: IntervalIntProfileElement ⇒ toTry(Genome.discreteIndex(genome, c.v), c.v)
+      case c: FixDomainProfileElement ⇒ toTry(Genome.continuousIndex(genome, c.v), c.v)
+
+  def indexesOfProfiled(profiled: Seq[ProfileElement], genome: Genome) = indexesOfProfiledTry(profiled, genome).map(_.get)
+
   object DeterministicProfile {
 
     import CDGenome.DeterministicIndividual.Individual
 
-    def niche(genome: Genome, profiled: Seq[ProfileElement]) = {
-      def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
+    def niche(genome: Genome, profiled: Seq[ProfileElement]) =
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
         mgo.evolution.niche.continuousProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.continuousValues get, x, nX)
@@ -78,20 +89,12 @@ object Profile {
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
         mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
 
-      val niches = profiled.toVector.map {
-        case c: IntervalDoubleProfileElement ⇒
-          val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-          continuousProfile(index, c.n)
-        case c: IntervalIntProfileElement ⇒
-          val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-          discreteProfile(index)
-        case c: FixDomainProfileElement ⇒
-          val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-          gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
-      }
+      val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
+        case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(index, c.n)
+        case (c: IntervalIntProfileElement, index) ⇒ discreteProfile(index)
+        case (c: FixDomainProfileElement, index) ⇒ gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.DeterministicIndividual.Individual[Phenotype], Int](niches))
-    }
 
     import CDGenome.DeterministicIndividual
 
@@ -189,10 +192,7 @@ object Profile {
 
   object StochasticProfile {
 
-    def niche(genome: Genome, profiled: Seq[ProfileElement]) = {
-
-      def notFoundInGenome(v: Val[_]) = throw new UserBadDataError(s"Variable $v not found in the genome")
-
+    def niche(genome: Genome, profiled: Seq[ProfileElement]) =
       import CDGenome.NoisyIndividual.Individual
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
@@ -205,20 +205,12 @@ object Profile {
         mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
 
       val niches =
-        profiled.toVector.map {
-          case c: IntervalDoubleProfileElement ⇒
-            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-            continuousProfile(index, c.n)
-          case c: IntervalIntProfileElement ⇒
-            val index = Genome.discreteIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-            discreteProfile(index)
-          case c: FixDomainProfileElement ⇒
-            val index = Genome.continuousIndex(genome, c.v).getOrElse(notFoundInGenome(c.v))
-            gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
-        }
+        (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
+          case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(index, c.n)
+          case (c: IntervalIntProfileElement, index) ⇒ discreteProfile(index)
+          case (c: FixDomainProfileElement, index) ⇒ gridContinuousProfile(Genome.continuous(genome), index, c.intervals)
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
-    }
 
     given MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] {
       type G = CDGenome.Genome
@@ -330,6 +322,11 @@ object Profile {
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
+        def validation: Validate =
+          Objectives.validate(objective, outputs) ++
+            indexesOfProfiledTry(niche, genome).collect:
+              case util.Failure(t) => t
+
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicProfile(
             genome = genome,
@@ -341,16 +338,17 @@ object Profile {
             reject = reject.option),
           genome,
           phenotypeContent,
-          validate = Objectives.validate(objective, outputs)
+          validate = validation
         )
       case Some(stochasticValue) ⇒
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
-        def validation: Validate = {
+        def validation: Validate =
           val aOutputs = outputs.map(_.toArray)
-          Objectives.validate(noisyObjectives, aOutputs)
-        }
+          Objectives.validate(noisyObjectives, aOutputs) ++
+            indexesOfProfiledTry(niche, genome).collect:
+              case util.Failure(t) => t
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticProfile(
