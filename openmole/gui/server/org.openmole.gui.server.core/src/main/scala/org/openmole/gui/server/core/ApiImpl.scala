@@ -273,11 +273,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     synchronousCompilation(script, outputStream) match
       case e: ErrorData => Some(e)
       case e: MoleExecution =>
-        Try:
+        try
           e.validate
-        match
-          case util.Failure(e) => Some(ErrorData(e))
-          case _ => None
+          None
+        catch
+          case e: Throwable => Some(ErrorData(e))
+        finally
+          MoleExecution.clean(e)  
 
 //  def runScript(script: SafePath, validateScript: Boolean) =
 //    val (execId, outputStream) = compilationData(script)
