@@ -17,22 +17,23 @@
 
 package org.openmole.core.workflow.validation
 
-import org.openmole.core.context._
+import org.openmole.core.context.*
 import org.openmole.core.fromcontext.{Default, DefaultSet}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.DataflowProblem._
-import org.openmole.core.workflow.validation.TopologyProblem._
-import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation.ValidationProblem.{ HookValidationProblem, MoleValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem }
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.task.*
+import org.openmole.core.workflow.validation.DataflowProblem.*
+import org.openmole.core.workflow.validation.TopologyProblem.*
+import org.openmole.core.workflow.validation.TypeUtil.*
+import org.openmole.core.workflow.validation.ValidationProblem.{HookValidationProblem, MoleValidationProblem, SourceValidationProblem, TaskValidationProblem, TransitionValidationProblem}
 import org.openmole.core.workspace.TmpDirectory
+import org.openmole.tool.cache.KeyValueCache
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable
-import scala.collection.mutable.{ HashMap, Queue }
-import scala.util.{ Failure, Success, Try }
+import scala.collection.mutable.{HashMap, Queue}
+import scala.util.{Failure, Success, Try}
 
 object Validation {
 
@@ -105,7 +106,7 @@ object Validation {
     }).flatten
   }
 
-  def taskValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def taskValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache) =
     def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask ⇒ v }
 
     taskValidates.flatMap { t ⇒
@@ -114,9 +115,8 @@ object Validation {
         case e   ⇒ Some(TaskValidationProblem(t, e))
       }
     }
-  }
 
-  def sourceErrors(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def sourceErrors(mole: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache) = {
     val implicitMap = prototypesToMap(implicits)
 
     def inputErrors =
@@ -225,7 +225,7 @@ object Validation {
     }
   }
 
-  def transitionValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def transitionValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache) =
     val errors =
       for {
         transition ← mole.transitions.collect { case x: ValidateTransition ⇒ x }
@@ -238,7 +238,6 @@ object Validation {
       }
 
     errors.flatten
-  }
 
   def incoherentTypeAggregation(mole: Mole, sources: Sources, hooks: Hooks) =
     for {
@@ -273,17 +272,17 @@ object Validation {
     moleTask.implicits.filterNot(inputs.contains).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
-  def hookErrors(m: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService): Iterable[Problem] = {
+  def hookErrors(m: Mole, implicits: Iterable[Val[_]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Iterable[Problem] =
     val implicitMap = prototypesToMap(implicits)
 
     def inputsErrors =
-      for {
+      for
         c ← m.capsules
         outputs = c.outputs(m, sources, Hooks.empty).toMap
         h ← hooks(c)
         (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
         i ← h.inputs
-      } yield {
+      yield
         val inputName = i.name
 
         val defaultOverride = defaultsOverride.get(inputName)
@@ -292,41 +291,35 @@ object Validation {
         val defaultNonOverride = defaultsNonOverride.get(inputName)
 
         val computed =
-          (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match {
+          (defaultOverride, receivedInput, receivedImplicit, defaultNonOverride) match
             case (Some(parameter), _, _, _)      ⇒ Some(parameter)
             case (None, Some(received), _, _)    ⇒ Some(received)
             case (None, None, Some(impl), _)     ⇒ Some(impl)
             case (None, None, None, Some(param)) ⇒ Some(param)
             case (None, None, None, None)        ⇒ None
-          }
 
         def checkPrototypeMatch(p: Val[_]) =
           if (!i.isAssignableFrom(p)) Some(WrongHookType(c, h, i, p)) else None
 
-        computed match {
+        computed match
           case None    ⇒ Some(MissingHookInput(c, h, i))
           case Some(c) ⇒ checkPrototypeMatch(c)
-        }
-      }
 
     def validationErrors =
-      for {
+      for
         c ← m.capsules
         outputs = c.outputs(m, sources, Hooks.empty).toMap
         h ← hooks(c).collect { case v: ValidateHook ⇒ v }
         (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
-      } yield {
+      yield
         val inputs = (defaultsNonOverride ++ implicitMap ++ outputs ++ defaultsOverride).toSeq.map(_._2)
-        h.validate(inputs).toList match {
+        h.validate(inputs).toList match
           case Nil ⇒ None
           case e   ⇒ Some(HookValidationProblem(h, e))
-        }
-      }
 
     inputsErrors.flatten ++ validationErrors.flatten
-  }
 
-  def dataChannelErrors(mole: Mole) = {
+  def dataChannelErrors(mole: Mole) =
     val noTransitionProblems =
       mole.dataChannels.flatMap { dc ⇒ List(dc → dc.start, dc → dc.end.capsule) }.flatMap {
         case (dc, capsule) ⇒
@@ -344,15 +337,14 @@ object Validation {
       }.map(DataChannelNegativeLevelProblem(_))
 
     noTransitionProblems ++ negativeLevelProblem
-  }
 
-  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService) =
-    mole.validate(Seq.empty) match {
+  def moleValidateErrors(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache) =
+    mole.validate(Seq.empty) match
       case s if !s.isEmpty ⇒ Seq(MoleValidationProblem(mole, s))
       case _               ⇒ Seq()
-    }
 
-  def apply(dsl: org.openmole.core.workflow.composition.DSL)(implicit tmpDirectory: TmpDirectory, fileService: FileService): List[Problem] = {
+
+  def apply(dsl: org.openmole.core.workflow.composition.DSL)(implicit tmpDirectory: TmpDirectory, fileService: FileService, cache: KeyValueCache): List[Problem] = {
     import org.openmole.core.workflow.dsl._
     val puzzle = DSL.toPuzzle(dsl)
     apply(
@@ -362,7 +354,7 @@ object Validation {
     )
   }
 
-  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService): List[Problem] =
+  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): List[Problem] =
     allMoles(mole, sources, hooks).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: MoleTask) = {

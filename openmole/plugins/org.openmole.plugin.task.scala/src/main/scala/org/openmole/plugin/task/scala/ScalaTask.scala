@@ -101,7 +101,7 @@ case class ScalaTask(
       import p._
 
       def compilationError =
-        Try(compile(mappedInputs.toSeq)) match
+        Try(cache.getOrElseUpdate(compilation, compile(mappedInputs.toSeq))) match
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
 

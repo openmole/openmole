@@ -584,6 +584,7 @@ object MoleExecution {
 
   def validationErrors(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
+    given KeyValueCache = moleExecution.keyValueCache
     Validation(moleExecution.mole, moleExecution.implicits, moleExecution.sources, moleExecution.hooks)
 }
 

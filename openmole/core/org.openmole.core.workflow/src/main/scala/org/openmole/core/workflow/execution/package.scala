@@ -23,8 +23,9 @@ import org.openmole.core.workflow.mole.MoleServices
 
 
 def display(stream: PrintStream, label: String, content: String) =
-  if (!content.isEmpty) {
-    stream.synchronized {
+  if content.nonEmpty
+  then
+    stream.synchronized:
       val fullLength = 40
       val dashes = fullLength - label.length / 2
       val header = ("-" * dashes) + label + ("-" * (dashes - (label.length % 2)))
@@ -32,8 +33,7 @@ def display(stream: PrintStream, label: String, content: String) =
       stream.println(header)
       stream.print(content)
       stream.println(footer)
-    }
-  }
+
 
 object EnvironmentProvider {
 

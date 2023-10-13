@@ -22,6 +22,7 @@ package fromcontext:
   import org.openmole.core.context.Val
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.TmpDirectory
+  import org.openmole.tool.cache.KeyValueCache
 
   object ScalaCode:
     def fromContext[T: Manifest](code: ScalaCode | String) =
@@ -31,33 +32,28 @@ package fromcontext:
   
   case class ScalaCode(source: String, defaults: DefaultSet = DefaultSet.empty)
 
-  sealed trait Validate {
-    def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable]
+  sealed trait Validate:
+    def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
-  }
 
-  object Validate {
+  object Validate:
 
-    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService)
+    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache)
 
-    case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate {
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate(new Parameters(inputs))
-    }
+    case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate:
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = validate(new Parameters(inputs))
 
-    case class SeqValidate(validate: Seq[Validate]) extends Validate {
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = validate.flatMap(_.apply(inputs))
-    }
+    case class SeqValidate(validate: Seq[Validate]) extends Validate:
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = validate.flatMap(_.apply(inputs))
 
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
 
-    def withExtraInputs(v: Validate, extraInputs: Seq[Val[_]] => Seq[Val[_]]): Validate = new Validate {
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = v(inputs ++ extraInputs(inputs))
-    }
+    def withExtraInputs(v: Validate, extraInputs: Seq[Val[_]] => Seq[Val[_]]): Validate = new Validate:
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = v(inputs ++ extraInputs(inputs))
 
-    case object success extends Validate {
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Seq[Throwable] = Seq()
-    }
+    case object success extends Validate:
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = Seq()
 
     def ++(v1: Validate, v2: Validate) =
       (v1, v2) match {
@@ -71,12 +67,10 @@ package fromcontext:
     implicit def fromThrowables(t: Seq[Throwable]): Validate = Validate { _ ⇒ t }
 
     implicit def toIterable(v: Validate): Iterable[Validate] =
-      v match {
+      v match
         case s: SeqValidate  ⇒ s.validate
         case l: LeafValidate ⇒ Iterable(l)
         case success         ⇒ Iterable.empty
-      }
-  }
 
   trait ExpansionPackage {
     implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext.convert(e))

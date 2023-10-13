@@ -10,6 +10,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
@@ -39,6 +40,7 @@ object Stubs {
   implicit val fileServiceCache: FileServiceCache = FileServiceCache()
   implicit val loggerService: LoggerService = LoggerService()
   implicit val timeService: TimeService = TimeService()
+  implicit val cache: KeyValueCache = KeyValueCache()
 
   implicit val moleServices: MoleServices = MoleServices.create(dir)
 
