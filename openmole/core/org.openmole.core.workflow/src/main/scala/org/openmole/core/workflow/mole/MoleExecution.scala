@@ -383,17 +383,15 @@ object MoleExecution {
       }
     }
 
-  def clean(moleExecution: MoleExecution) = {
+  def clean(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
     LoggerService.log(Level.FINE, s"clean mole execution $moleExecution")
 
     try if (moleExecution.cleanOnFinish) MoleServices.clean(moleExecution.executionContext.services)
-    finally {
+    finally
       moleExecution._cleaned = true
       moleExecution.cleanedSemaphore.release()
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
-    }
-  }
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit = {
     if (!moleExecution._canceled) {
