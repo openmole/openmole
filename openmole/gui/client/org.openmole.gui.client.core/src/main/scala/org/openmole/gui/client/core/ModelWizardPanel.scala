@@ -197,6 +197,8 @@ object ModelWizardPanel:
               case util.Success(_) =>
             }
             modelMetadata.set(None)
+            inputTags.clear
+            outputTags.clear
             panels.closeExpandable
         }
       )
