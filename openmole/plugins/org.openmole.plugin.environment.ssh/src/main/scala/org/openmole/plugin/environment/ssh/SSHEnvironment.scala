@@ -56,7 +56,8 @@ object SSHEnvironment extends JavaLogger {
     storageSharedLocally: Boolean                       = false,
     name:                 OptionalArgument[String]      = None,
     modules:              Seq[String]                   = Vector(),
-    debug:                Boolean                       = false
+    debug:                Boolean                       = false,
+    sshProxy:             OptionalArgument[SSHProxy]    = None
   )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     EnvironmentProvider { ms ⇒
@@ -75,7 +76,9 @@ object SSHEnvironment extends JavaLogger {
         authentication = SSHAuthentication.find(user, host, port),
         modules = modules,
         debug = debug,
-        services = BatchEnvironment.Services(ms)
+        services = BatchEnvironment.Services(ms),
+        sshProxy = sshProxy,
+        proxyAuthentication = if (sshProxy.isDefined) Some(SSHAuthentication.find(sshProxy.get.user, sshProxy.get.host, sshProxy.get.port)) else None
       )
     }
   }
@@ -119,7 +122,7 @@ object SSHEnvironment extends JavaLogger {
 
 }
 
-class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
+class SSHEnvironment[AuthenticationType: gridscale.ssh.SSHAuthentication, ProxyAuthenticationType: gridscale.ssh.SSHAuthentication](
   val user:                 String,
   val host:                 String,
   val slots:                Int,
@@ -131,10 +134,12 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
   val killAfter:            Option[Time],
   val storageSharedLocally: Boolean,
   val name:                 Option[String],
-  val authentication:       A,
+  val authentication:       AuthenticationType,
   val modules:              Seq[String],
   val debug:                Boolean,
-  val services:             BatchEnvironment.Services
+  val services:             BatchEnvironment.Services,
+  val sshProxy:             Option[SSHProxy],
+  val proxyAuthentication:  Option[ProxyAuthenticationType]
 ) extends BatchEnvironment(BatchEnvironmentState()(using services)) { env ⇒
 
   implicit def servicesImplicit: BatchEnvironment.Services = services
@@ -171,7 +176,11 @@ class SSHEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
-  lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
+  lazy val sshServer = if (sshProxy.isDefined && env.proxyAuthentication.isDefined) {
+    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = env.timeout)(env.proxyAuthentication.get)
+    gridscale.ssh.SSHServer(host = env.host, port = env.port, timeout = env.timeout, sshProxy = Some(proxyServer))(env.authentication)
+  }
+  else gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
 
   lazy val storageService =
     if (storageSharedLocally) Left {

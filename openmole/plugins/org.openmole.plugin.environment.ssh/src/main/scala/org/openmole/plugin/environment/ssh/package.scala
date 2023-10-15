@@ -35,6 +35,8 @@ package object ssh {
   case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
   case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
+  case class SSHProxy(user: String, host: String, port: Int = 22)
+
   import _root_.gridscale.{ssh => gssh}
 
   object SSHStorage {

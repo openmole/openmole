@@ -30,7 +30,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentHighLight(classOf[SGEEnvironment[_]])
+        EnvironmentHighLight(classOf[SGEEnvironment[_, _]])
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)

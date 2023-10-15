@@ -50,7 +50,8 @@ object PBSEnvironment extends JavaLogger {
     flavour:              gridscale.pbs.PBSFlavour      = Torque,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
-    modules: Seq[String] = Vector(),
+    modules:              Seq[String]                   = Vector(),
+    sshProxy:             OptionalArgument[SSHProxy]    = None
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
 
     val parameters = Parameters(
@@ -84,6 +85,8 @@ object PBSEnvironment extends JavaLogger {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          sshProxy = sshProxy,
+          proxyAuthentication = if (sshProxy.isDefined) Some(SSHAuthentication.find(sshProxy.get.user, sshProxy.get.host, sshProxy.get.port)) else None,
           services = BatchEnvironment.Services(ms)
         )
       }
@@ -123,14 +126,16 @@ object PBSEnvironment extends JavaLogger {
 
 }
 
-class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
-  val user:              String,
-  val host:              String,
-  val port:              Int,
-  val timeout:           Time,
-  val parameters:        PBSEnvironment.Parameters,
-  val name:              Option[String],
-  val authentication:    A,
+class PBSEnvironment[Authentication: gridscale.ssh.SSHAuthentication, ProxyAuthentication: gridscale.ssh.SSHAuthentication](
+  val user:                String,
+  val host:                String,
+  val port:                Int,
+  val timeout:             Time,
+  val parameters:          PBSEnvironment.Parameters,
+  val name:                Option[String],
+  val authentication:      Authentication,
+  val sshProxy:            Option[SSHProxy],
+  val proxyAuthentication: Option[ProxyAuthentication],
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
   import services._
 
@@ -153,7 +158,11 @@ class PBSEnvironment[A: gridscale.ssh.SSHAuthentication](
   import org.openmole.plugin.environment.ssh._
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+  lazy val sshServer = if (sshProxy.isDefined && proxyAuthentication.isDefined) {
+    val proxyServer = gridscale.ssh.SSHServer(host = sshProxy.get.host, port = sshProxy.get.port, timeout = timeout)(proxyAuthentication.get)
+    gridscale.ssh.SSHServer(host = host, port = port, timeout = timeout, sshProxy = Some(proxyServer))(authentication)
+  }
+  else gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
     if (parameters.storageSharedLocally) Left {

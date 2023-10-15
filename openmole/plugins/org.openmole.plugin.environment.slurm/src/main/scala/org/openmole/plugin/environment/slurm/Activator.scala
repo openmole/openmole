@@ -31,7 +31,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentHighLight(classOf[SLURMEnvironment[_]])
+        EnvironmentHighLight(classOf[SLURMEnvironment[_, _]])
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
