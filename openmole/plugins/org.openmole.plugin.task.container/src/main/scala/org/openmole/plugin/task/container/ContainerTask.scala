@@ -342,7 +342,7 @@ case class ContainerTask(
               _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
           else noImageDuplication
 
-    val pool = executionContext.cache.getOrElseUpdate(containerPoolKey, createPool)
+    val pool = executionContext.cache.getOrElseUpdate(containerPoolKey)(createPool)
 
     val outBuilder = new StringOutputStream
     val errBuilder = new StringOutputStream

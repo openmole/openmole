@@ -17,8 +17,12 @@
 
 package org.openmole.core.serializer.plugin
 
+import org.openmole.core.fileservice.*
+import org.openmole.core.workspace.*
+import org.openmole.tool.cache.*
+
 import java.io.File
 
-trait Plugins {
-  def plugins: Seq[File]
-}
+trait Plugins:
+  def plugins(using TmpDirectory, FileService, KeyValueCache): Seq[File]
+

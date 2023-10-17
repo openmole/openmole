@@ -139,4 +139,4 @@ package object extension:
   export org.openmole.core.workflow.mole.MoleExecution
   export org.openmole.core.services.Services
 
-
+  export org.openmole.tool.cache.KeyValueCache

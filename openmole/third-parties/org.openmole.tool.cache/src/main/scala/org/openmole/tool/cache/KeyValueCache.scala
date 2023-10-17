@@ -13,17 +13,13 @@ case class CacheValue(value: Any, clean: () ⇒ Unit)
 /**
  * A Cache based on a HashMap
  */
-case class KeyValueCache() {
-  self ⇒
+case class KeyValueCache():
 
   private lazy val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
 
-  def getOrElseUpdate[T](key: CacheKey[T], t: ⇒ T, clean: () ⇒ Unit = () ⇒ {}): T = synchronized {
+  def getOrElseUpdate[T](key: CacheKey[T], clean: () ⇒ Unit = () ⇒ {})(t: ⇒ T): T = synchronized:
     cache.getOrElseUpdate(key, CacheValue(t, clean)).value.asInstanceOf[T]
-  }
 
-  def clean() = synchronized {
-    cache.foreach { case (_, v) ⇒ v.clean() }
-  }
+  def clean() = synchronized:
+    cache.foreach { (_, v) ⇒ v.clean() }
 
-}

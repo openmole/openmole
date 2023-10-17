@@ -96,27 +96,26 @@ object DispatchEnvironment {
 
   def apply(
     slot: Seq[DestinationProvider],
-    name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+    name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentProvider.multiple { (ms, c1) ⇒
+    EnvironmentProvider.multiple: (ms, cache, c1) ⇒
       import ms._
 
-      val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, c1)
+      val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, cache, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(
           destination = slot.map(e ⇒ Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
 
-      for {
+      for
         env ← slot.map(_.environment)
-      } c2(env) listen stateChangedListener(WeakReference(dispatchEnvironment))
+      do c2(env) listen stateChangedListener(WeakReference(dispatchEnvironment))
 
       (dispatchEnvironment, c2)
-    }
-  }
+
 
 }
 

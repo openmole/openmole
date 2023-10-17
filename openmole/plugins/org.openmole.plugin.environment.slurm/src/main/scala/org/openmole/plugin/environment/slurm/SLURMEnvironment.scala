@@ -60,7 +60,7 @@ object SLURMEnvironment {
     refresh:              OptionalArgument[Time]        = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
-  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       partition = partition,
@@ -84,10 +84,11 @@ object SLURMEnvironment {
       modules = modules,
       debug = debug)
 
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission) {
+      if (!localSubmission)
+      then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
         val portValue = port.mustBeDefined("port")
@@ -100,18 +101,15 @@ object SLURMEnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-      }
       else
         new SLURMLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-    }
 
-  }
 
   case class Parameters(
     partition:            Option[String],

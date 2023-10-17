@@ -49,7 +49,7 @@ object OAREnvironment {
     timeout:              OptionalArgument[Time]        = None,
     localSubmission:      Boolean                       = false,
     modules: Seq[String] = Vector(),
-  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       queue = queue,
@@ -65,10 +65,11 @@ object OAREnvironment {
       modules = modules
     )
 
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission) {
+      if !localSubmission
+      then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
         val portValue = port.mustBeDefined("port")
@@ -81,17 +82,15 @@ object OAREnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-      }
       else
         new OARLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-    }
-  }
+
 
   case class Parameters(
     queue:                Option[String],

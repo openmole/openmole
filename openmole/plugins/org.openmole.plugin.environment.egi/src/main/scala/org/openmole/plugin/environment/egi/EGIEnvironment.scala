@@ -170,9 +170,9 @@ object EGIEnvironment extends JavaLogger {
     openMOLEMemory: OptionalArgument[Information] = None,
     debug:          Boolean                       = false,
     name:           OptionalArgument[String]      = None
-  )(implicit authentication: EGIAuthentication, cypher: Cypher, workspace: Workspace, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+  )(implicit authentication: EGIAuthentication, cypher: Cypher, workspace: Workspace, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: (ms, cache) ⇒
       new EGIEnvironment(
         voName = voName,
         service = service,
@@ -185,10 +185,9 @@ object EGIEnvironment extends JavaLogger {
         debug = debug,
         name = name,
         authentication = authentication,
-        services = BatchEnvironment.Services(ms)
+        services = BatchEnvironment.Services(ms, cache)
       )
-    }
-  }
+
 
 }
 
