@@ -19,8 +19,8 @@ object KeyValueCache:
 case class KeyValueCache():
   import KeyValueCache.*
 
-  private lazy val lock = LockRepository[UUID]()
-  private lazy val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
+  private val lock = LockRepository[UUID]()
+  private val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
 
   def getOrElseUpdate[T](key: CacheKey[T])(t: ⇒ T): T = lock.withLock(key.id):
     cache.getOrElseUpdate(key, CacheValue(t)).value.asInstanceOf[T]
