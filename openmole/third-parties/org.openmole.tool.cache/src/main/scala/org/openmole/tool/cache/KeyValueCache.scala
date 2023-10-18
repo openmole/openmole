@@ -23,5 +23,9 @@ case class KeyValueCache():
   private val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
 
   def getOrElseUpdate[T](key: CacheKey[T])(t: ⇒ T): T = lock.withLock(key.id):
-    cache.getOrElseUpdate(key, CacheValue(t)).value.asInstanceOf[T]
-
+    cache.synchronized(cache.get(key)) match
+      case Some(v) => v.value.asInstanceOf[T]
+      case None =>
+        val value: T = t
+        cache.synchronized(cache.update(key, CacheValue(value)))
+        value
