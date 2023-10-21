@@ -10,7 +10,7 @@
   "devDependencies": {
     "concat-with-sourcemaps": "1.1.0",
     "source-map-loader": "4.0.1",
-    "webpack": "5.86.0",
-    "webpack-cli": "5.1.0"
+    "webpack": "5.89.0",
+    "webpack-cli": "5.1.4"
   }
 }
