@@ -119,4 +119,6 @@ object Libraries {
   lazy val endpoints4s = "org.openmole.library" %% "org-endpoints4s" % endpoints4SVersion //cross CrossVersion.for2_13Use3
   lazy val http4s = "org.openmole.library" %% "org-http4s" % http4sVersion
   //lazy val endpoint4SJsonSchemaGeneric = "org.openmole.library" %% "org-endpoints4s-json-schema-generic" % endpoints4SVersion //cross CrossVersion.for3Use2_13
+
+  lazy val wepackVersion = "5.89.0"
 }

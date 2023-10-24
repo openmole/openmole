@@ -657,7 +657,7 @@ lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") e
   libraryDependencies += Libraries.sourceCode,
   webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   webpackNodeArgs := Seq ("--openssl-legacy-provider"),
-
+  webpack / version := Libraries.wepackVersion,
     // Compile / npmDeps += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
   // Compile / npmDeps += Dep("sortablejs", "1.10.2", List("Sortable.min.js"))
   guiSettings,
@@ -789,6 +789,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
   libraryDependencies += Libraries.scalajsLinker,
 
   (Compile / resourceDirectories) += (crossTarget.value / "resources"),
+
   (OsgiKeys.embeddedJars) := {
     val scalaLib =
       (Compile / Keys.externalDependencyClasspath).value.filter {
@@ -1073,6 +1074,34 @@ lazy val openmoleNaked =
     },
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
     resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble += {
+      IO.withTemporaryDirectory { modules =>
+        import sys.process._
+
+        val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
+        val cacheFile = target.value / "node_modules-hash"
+        val zip = target.value / "node_modules.zip"
+        val packageJsonHash = FileInfo.hash(packageJson).hash.mkString(",")
+
+        if(!zip.exists || !cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
+          IO.copyFile(packageJson, modules / "package.json")
+          Process("npm install", Some(modules)) !!
+          def content = {
+            import _root_.java.nio.file.*
+            import _root_.scala.collection.JavaConverters.*
+
+            val path = modules.toPath
+            Files.walk(path).iterator.asScala.map(f => f.toFile -> path.relativize(f).toString).toTraversable
+            //sbt.Path.contentOf(modules)
+          }
+          IO.zip(content, zip, None)
+          IO.write(cacheFile, packageJsonHash)
+        }
+
+        zip -> (assemblyPath.value / "webpack" / "node_modules.zip")
+      }
+    },
+
     libraryDependencies ++= requieredRuntimeLibraries,
     dependencyFilter := bundleFilter,
     dependencyName := rename,
@@ -1129,6 +1158,7 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
   webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   scalaJSLinkerConfig := scalaJSLinkerConfig.value.withSourceMap(true),
   webpackNodeArgs := Seq("--openssl-legacy-provider"),
+  webpack / version := Libraries.wepackVersion,
   scala3Settings,
   test := {},
   Libraries.laminarJS,

@@ -50,7 +50,6 @@ import java.util.concurrent.atomic.AtomicReference
 object GUIServer:
 
   def fromWebAppLocation = openMOLELocation / "webapp"
-
   def webpackLocation = openMOLELocation / "webpack"
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =

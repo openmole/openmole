@@ -87,14 +87,14 @@ object Plugins extends JavaLogger {
 
       Log.logger.info("Webpacking ...")
       val webpackConfigTemplateLocation = GUIServer.webpackLocation / utils.webpackConfigTemplateName
-      val webpackJsonPackage = GUIServer.webpackLocation / utils.webpackJsonPackage
+      val nodeModulesFile = GUIServer.webpackLocation / utils.nodeModulesFileName
       val webpackOutput = webui / utils.webpakedOpenmoleFileName
 
       val modeOpenMOLE = Plugins.expandDepsFile(GUIServer.fromWebAppLocation /> "js" / utils.openmoleGrammarName, webui / utils.openmoleGrammarMode)
 
       JSPack.webpack(
         jsFile,
-        webpackJsonPackage,
+        nodeModulesFile,
         webpackConfigTemplateLocation,
         webpackOutput,
         Seq(

@@ -25,7 +25,7 @@ import org.openmole.tool.stream.*
 import org.tukaani.xz.{LZMA2Options, XZInputStream, XZOutputStream}
 import org.apache.commons.compress.archivers.tar.*
 
-import java.util.zip.ZipFile
+import java.util.zip.{ZipFile, ZipInputStream}
 import scala.collection.mutable.{ListBuffer, Stack}
 import scala.io.{BufferedSource, Codec}
 import scala.jdk.CollectionConverters.*
@@ -33,24 +33,25 @@ import scala.jdk.CollectionConverters.*
 
 object Zip:
 
-  // Extract .zip archive
-  def unzip(from: File, to: File, overwrite: Boolean = false) =
+  def unzipStream(is: InputStream, to: File,  overwrite: Boolean = false) =
     to.mkdirs
-    val zip = new ZipFile(from)
+    val zip = new ZipInputStream(is)
     try
-      for
-        entry <- zip.entries.asScala
-      do
+      Iterator.continually(zip.getNextEntry).takeWhile(_ != null).foreach: entry =>
         val toFile = new File(to, entry.getName)
         if !overwrite && toFile.exists() then throw IOException(s"File $toFile already exists and overwrite is set to false")
+
         if entry.isDirectory
-        then if !toFile.exists then toFile.mkdirs
+        then 
+          if !toFile.exists then toFile.mkdirs()
         else
-          val is = new BufferedSource(zip.getInputStream(entry))(Codec.ISO8859)
-          try toFile.withOutputStream { os => is foreach { (c: Char) ⇒ os.write(c) } }
-          finally is.close()
+          toFile.getParentFile.mkdir()
+          toFile.withOutputStream(zip.transferTo)
     finally zip.close()
 
+  // Extract .zip archive
+  def unzip(from: File, to: File, overwrite: Boolean = false) = from.withInputStream: is =>
+    unzipStream(is, to, overwrite)
 
   def zipEntries(file: File): Seq[ArchiveEntry] =
     val zip = new ZipFile(file)
