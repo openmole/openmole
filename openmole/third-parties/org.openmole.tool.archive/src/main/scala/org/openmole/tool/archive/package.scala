@@ -42,7 +42,7 @@ object Zip:
         if !overwrite && toFile.exists() then throw IOException(s"File $toFile already exists and overwrite is set to false")
 
         if entry.isDirectory
-        then 
+        then
           if !toFile.exists then toFile.mkdirs()
         else
           toFile.getParentFile.mkdir()
