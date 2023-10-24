@@ -102,7 +102,8 @@ object Plugins extends JavaLogger {
         )
       )
 
-
+    // Include these info in plugin hash
+    (GUIServer.webpackLocation / utils.webpackJsonPackage) copy (jsPluginDirectory / utils.webpackJsonPackage)
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
     if !jsFile.exists
