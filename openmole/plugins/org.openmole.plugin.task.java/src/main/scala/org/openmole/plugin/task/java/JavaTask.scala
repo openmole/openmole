@@ -32,12 +32,10 @@ object JavaTask:
   given InfoBuilder[JavaTask] = InfoBuilder(Focus[JavaTask](_.info))
   given MappedInputOutputBuilder[JavaTask] = MappedInputOutputBuilder(Focus[JavaTask](_.mapped))
 
-  //def chmodDaemon = """chmod 700 /root/.local/share/scalacli/bloop/daemon"""
-  //def rmSocket = "rm /root/.local/share/scalacli/bloop/daemon/socket"
-  
   def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false) =
     def threadsOptions = if fewerThreads then Seq("-XX:+UseG1GC", "-XX:ParallelGCThreads=1", "-XX:CICompilerCount=2", "-XX:ConcGCThreads=1", "-XX:G1ConcRefinementThreads=1") else Seq()
     def allOptions = (threadsOptions ++ javaOptions).map("--java-opt " + _).mkString(" ")
+    //def offlineOption = if offline then "--power --offline" else ""
     s"scala-cli run --server=$server -j $jvmVersion $allOptions"
 
   def dockerImage(version: String) = DockerImage("openmole/jvm", version)
@@ -57,13 +55,14 @@ object JavaTask:
     clearContainerCache: Boolean = false,
     jvmOptions: Seq[String] = Seq.empty,
     fewerThreads: Boolean = true,
-    version: String = "17",
+    version: String = "17.1",
+    jvmVersion: String = "17",
     containerSystem: ContainerSystem = ContainerSystem.default,
     installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     def cacheLibraries =
       val deps = libraries.map(l => s"--dep $l").mkString(" ")
-      Seq("touch _empty.sc", scalaCLI(version, jvmOptions, fewerThreads) + s" $deps  _empty.sc", "rm _empty.sc")
+      Seq("cd /tmp", "touch _empty.sc", scalaCLI(jvmVersion, jvmOptions, fewerThreads) + s" $deps  _empty.sc", "rm _empty.sc")
 
     new JavaTask(
       script = script,
@@ -74,6 +73,7 @@ object JavaTask:
       fewerThreads = fewerThreads,
       prepare = prepare,
       version = version,
+      jvmVersion = jvmVersion,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       stdOut = stdOut,
@@ -96,6 +96,7 @@ case class JavaTask(
   jvmOptions: Seq[String],
   fewerThreads: Boolean,
   version: String,
+  jvmVersion: String,
   prepare: Seq[String],
   errorOnReturnValue: Boolean,
   returnValue: Option[Val[Int]],
@@ -143,9 +144,9 @@ case class JavaTask(
       val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sc")
 
 
-      def inputDataName = s"$workspace/_inputs_.bin"
+      def inputDataName = s"${workspace}/_inputs_.bin"
       val inputData = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
-      def outputDataName = s"$workspace/_outputs_.bin"
+      def outputDataName = s"${workspace}/_outputs_.bin"
 
       writeInputData(inputData)
       scriptFile.content =
@@ -176,18 +177,18 @@ case class JavaTask(
       """.stripMargin
 
       val outputFile = Val[File]("outputFile", Namespace("JavaTask"))
-      val jarResources = jars.map(j => (j, s"jars/${j.getName}"))
+      val jarResources = jars.map(j => (j, s"/jars/${j.getName}"))
 
       def jarParameter =
         if jarResources.nonEmpty
-        then s"""--jars ${jarResources.map((_, n) => s"\"/$n\"").mkString(";")}"""
+        then s"""--jars ${jarResources.map((_, n) => s"\"$n\"").mkString(";")}"""
         else ""
 
       def containerTask =
         ContainerTask.isolatedWorkdirectory(executionContext)(
           containerSystem = containerSystem,
           image = image,
-          command = prepare ++ Seq(JavaTask.scalaCLI(version, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
+          command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
           workDirectory = workspace,
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
