@@ -111,13 +111,13 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
       }
     case request@GET -> Root / "js" / "snippets" / path =>
       StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
-    case request @ GET -> Root / "js" / path =>
-      StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
-    case request @ GET -> Root / "css" / path =>
-      StaticFile.fromFile(new File(webapp, s"css/$path"), Some(request)).getOrElseF(NotFound())
-    case request @ GET -> Root / "img" / path =>
-      StaticFile.fromFile(new File(webapp, s"img/$path"), Some(request)).getOrElseF(NotFound())
-    case request @ GET -> Root / "fonts" / path =>
-      StaticFile.fromFile(new File(webapp, s"fonts/$path"), Some(request)).getOrElseF(NotFound())
+    case request @ GET -> "js" /: path =>
+      StaticFile.fromFile(new File(webapp, s"js/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
+    case request @ GET -> "css" /: path =>
+      StaticFile.fromFile(new File(webapp, s"css/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
+    case request @ GET -> "img" /: path =>
+      StaticFile.fromFile(new File(webapp, s"img/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
+    case request @ GET -> "fonts" /: path =>
+      StaticFile.fromFile(new File(webapp, s"fonts/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
     case GET -> Root => ApplicationServer.redirect(shared.api.appRoute)
 

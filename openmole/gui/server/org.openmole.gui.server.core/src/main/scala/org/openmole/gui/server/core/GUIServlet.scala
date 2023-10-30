@@ -122,7 +122,7 @@ object GUIServlet:
       tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
       //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
-      tags.link(tags.rel := "stylesheet", href := "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"),
+      tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/font/bootstrap-icons.min.css"),
       RawFrag(extraHeader)
     ),
     tags.body(

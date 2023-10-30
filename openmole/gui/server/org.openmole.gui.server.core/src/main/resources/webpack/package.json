@@ -5,7 +5,8 @@
     "ace-builds": "1.15.2",
     "bootstrap.native": "3.0.14-f",
     "highlight.js": "10.4.1",
-    "plotly.js": "2.13.3"
+    "plotly.js": "2.13.3",
+    "bootstrap-icons": "1.11.1"
   },
   "devDependencies": {
     "concat-with-sourcemaps": "1.1.0",
