@@ -711,7 +711,8 @@ class MoleExecution(
   /* Caches to speedup workflow execution */
   private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
   private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
-
+  
+  
   lazy val partialTaskExecutionContext = {
     import executionContext.services._
 
