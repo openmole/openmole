@@ -112,14 +112,13 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
 
   def task(mole: Mole, sources: Sources, hooks: Hooks) = runtimeTask(mole, sources, hooks).task
 
-  def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = {
+  def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = 
     val withInputs =
       _task match {
         case task: MoleTask ⇒ Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
         case task           ⇒ task
       }
     RuntimeTask(withInputs, strain)
-  }
 
   /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule

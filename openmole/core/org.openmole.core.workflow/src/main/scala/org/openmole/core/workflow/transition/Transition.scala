@@ -203,13 +203,12 @@ object ExplorationTransition {
     }
   }
 
-  def factors(capsule: MoleCapsule, moleExecution: MoleExecution) = {
-    def explored = ExplorationTask.explored(capsule, moleExecution.mole, moleExecution.sources, moleExecution.hooks)
+  def factors(capsule: MoleCapsule, moleExecution: MoleExecution) =
+    val explored = ExplorationTask.explored(capsule, moleExecution.mole, moleExecution.sources, moleExecution.hooks)
     capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val (factors, outputs) = capsule.outputs(moleExecution.mole, moleExecution.sources, moleExecution.hooks).partition(explored)
     val typedFactors = factors.map(_.asInstanceOf[Val[Array[_]]])
     (typedFactors, outputs)
-  }
 
   object CompactedSampleList {
     def apply(vs: Iterable[Val[Array[_]]], context: Context) =
