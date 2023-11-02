@@ -136,7 +136,7 @@ object GUIServer:
   case object Ok extends ExitStatus
 
 
-  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) = {
+  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) =
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
@@ -153,26 +153,22 @@ object GUIServer:
       webappCache,
       extraHeaders
     )
-  }
 
-  case class Control() {
+  case class Control():
     var cancel: () => _ = null
 
     @volatile var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
     val semaphore = new Semaphore(0)
 
-    def join(): GUIServer.ExitStatus = {
+    def join(): GUIServer.ExitStatus =
       semaphore.acquire()
       semaphore.release()
       exitStatus
-    }
 
-    def stop() = {
+    def stop() =
       cancel()
       semaphore.release()
-    }
 
-  }
 
   def server(port: Int, localhost: Boolean) =
     val s =

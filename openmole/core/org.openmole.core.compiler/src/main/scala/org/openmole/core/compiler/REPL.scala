@@ -7,17 +7,14 @@ import org.openmole.core.fileservice.FileService
 import cats.instances.int
 import org.openmole.core.exception.InternalProcessingError
 
-object REPL {
-  
-  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[File] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
+object REPL:
+  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[File] = Seq.empty, quiet: Boolean = true)(using TmpDirectory, FileService) =
     val interpreter = Interpreter(priorityBundles, jars, quiet)
     new REPL(interpreter)
-  }
 
-}
+  def warmup()(using TmpDirectory, FileService) = REPL().eval("val i: Int = 42")
 
-
-class REPL(interpreter: Interpreter) {
+class REPL(interpreter: Interpreter):
   export interpreter.classDirectory
 
   var state = interpreter.initialState
@@ -26,17 +23,16 @@ class REPL(interpreter: Interpreter) {
     val compiled = compile(code)
     evalCompiled(compiled)
 
-  def evalCompiled(compiled: Interpreter.RawCompiled) = synchronized {
+  def evalCompiled(compiled: Interpreter.RawCompiled) = synchronized:
     val (result, s1) = interpreter.run(compiled)
     //println("res " + result.getClass.getDeclaredMethods.toSeq)
     state = s1
     result
-  }
 
   def compile(code: String): Interpreter.RawCompiled = interpreter.dottyCompile(code, state)
   def completion(code: String, position: Int): Vector[Interpreter.CompletionCandidate] = synchronized(interpreter.completion(code, position, state))
 
-  def bind[T: Manifest](name: String, value: T) = synchronized {
+  def bind[T: Manifest](name: String, value: T) = synchronized:
     val mutableName = s"__${name}_mutable_value"
 
     def findClass = {
@@ -48,12 +44,11 @@ class REPL(interpreter: Interpreter) {
 //    val mutableClass = findClass.getOrElse(throw new InternalProcessingError("Mutable value class not found"))
 
     val mutableClass =
-      findClass match {
+      findClass match
         case Some(cl) => cl
         case None =>
           eval(s"""var $mutableName: ${manifest[T].toString} = null""")
           findClass.getOrElse(throw new InternalProcessingError("Mutable value class not found"))
-      }
 
     // FIXME add assertion about type of mutable value
 
@@ -61,14 +56,12 @@ class REPL(interpreter: Interpreter) {
     //mutableField.setAccessible(true)
     eqMethod.invoke(null, value)
     eval(s"val $name = $mutableName: ${manifest[T].toString}")
-  }
 
-  def loop = synchronized {
+  def loop = synchronized:
     state = interpreter.driver.runUntilQuit(using state)()
-  }
 
-  def classLoader = synchronized { interpreter.classLoader(state.context) }
+  def classLoader = synchronized:
+    interpreter.classLoader(state.context)
 
   def close = interpreter.close
 
-}
