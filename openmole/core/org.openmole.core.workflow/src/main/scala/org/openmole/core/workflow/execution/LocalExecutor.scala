@@ -36,94 +36,87 @@ object LocalExecutor extends JavaLogger
  *
  * @param environment
  */
-class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable {
+class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnable:
 
   import LocalExecutor.Log._
 
   var stop: Boolean = false
   @volatile var runningJob: Option[Job] = None
 
-  override def run = try {
-    while (!stop) {
-      environment.get match {
-        case Some(environment) ⇒
-          val executionJob = environment.pool().takeNextJob
-          val beginTime = System.currentTimeMillis
+  override def run =
+    try
+      while !stop
+      do
+        environment.get match
+          case Some(environment) ⇒
+            val executionJob = environment.pool().takeNextJob
+            val beginTime = System.currentTimeMillis
 
-          try {
-            val (log, output) =
-              withRedirectedOutput(executionJob, environment.deinterleave) {
-                environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
+            try
+              val (log, output) =
+                withRedirectedOutput(executionJob, environment.deinterleave):
+                  environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
 
-                for {
-                  moleJob ← executionJob.jobs
-                } {
-                  runningJob = Some(moleJob)
+                  for
+                    moleJob ← executionJob.jobs
+                  do
+                    runningJob = Some(moleJob)
 
-                  val taskExecutionDirectory = executionJob.executionContext.moleExecutionDirectory.newDirectory("taskExecution")
-                  val result =
-                    try {
-                      val executionContext = TaskExecutionContext.complete(
-                        partialTaskExecutionContext = executionJob.executionContext,
-                        taskExecutionDirectory = taskExecutionDirectory,
-                        localEnvironment = environment
-                      )
+                    val taskExecutionDirectory = executionJob.executionContext.moleExecutionDirectory.newDirectory("taskExecution")
+                    val result =
+                      try
+                        val executionContext =
+                          TaskExecutionContext.complete(
+                            partialTaskExecutionContext = executionJob.executionContext,
+                            taskExecutionDirectory = taskExecutionDirectory,
+                            localEnvironment = environment
+                          )
 
-                      try moleJob.perform(executionContext)
-                      finally runningJob = None
-                    }
-                    finally taskExecutionDirectory.recursiveDelete
+                        try moleJob.perform(executionContext)
+                        finally runningJob = None
+                      finally taskExecutionDirectory.recursiveDelete
 
-                  Job.finish(moleJob, result)
+                    Job.finish(moleJob, result)
 
-                  result match {
-                    case Right(_: Job.SubMoleCanceled) ⇒
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
-                    case Right(e) ⇒
-                      environment._failed.incrementAndGet()
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
-                      environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id, None))
-                    case _ ⇒
-                      environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
-                      environment._done.incrementAndGet()
+                    result match
+                      case Right(_: Job.SubMoleCanceled) ⇒
+                        environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
+                      case Right(e) ⇒
+                        environment._failed.incrementAndGet()
+                        environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
+                        environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id, None))
+                      case _ ⇒
+                        environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
+                        environment._done.incrementAndGet()
 
-                  }
-                }
+                  val endTime = System.currentTimeMillis
+                  RuntimeLog(beginTime, beginTime, endTime, endTime)
 
-                val endTime = System.currentTimeMillis
-                RuntimeLog(beginTime, beginTime, endTime, endTime)
-              }
 
-            output.foreach {
-              case Output(stream, output, error) ⇒
-                display(stream, s"Output of local execution", output)
-                display(stream, s"Error of local execution", error)
-            }
+              output.foreach:
+                case Output(stream, output, error) ⇒
+                  display(stream, s"Output of local execution", output)
+                  display(stream, s"Error of local execution", error)
 
-            environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
-          }
-          catch {
-            case e: InterruptedException ⇒ throw e
-            case e: ThreadDeath          ⇒ throw e
-            case e: Throwable ⇒
-              logger.log(SEVERE, "Error in execution", e)
-              executionJob.moleExecution.foreach { me ⇒ MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
-              val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE, None)
-              environment.eventDispatcherService.trigger(environment: Environment, er)
-          }
-        case None ⇒ stop = true
-      }
-    }
-  }
-  catch {
-    case e: InterruptedException ⇒
-    case e: ThreadDeath          ⇒
-  }
+              environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
+            catch
+              case e: InterruptedException ⇒ throw e
+              case e: ThreadDeath          ⇒ throw e
+              case e: Throwable ⇒
+                logger.log(SEVERE, "Error in execution", e)
+                executionJob.moleExecution.foreach { me ⇒ MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
+                val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE, None)
+                environment.eventDispatcherService.trigger(environment: Environment, er)
+          case None ⇒ stop = true
+    catch
+      case e: InterruptedException ⇒
+      case e: ThreadDeath          ⇒
+
 
   case class Output(stream: PrintStream, output: String, error: String)
 
   private def withRedirectedOutput[T](executionJob: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) =
-    executionJob.moleExecution match {
+    executionJob.moleExecution match
       case Some(execution) if deinterleave ⇒
         val (res, out) = OutputManager.withStringOutput(f)
         res → Some(Output(execution.executionContext.services.outputRedirection.output, out.output, out.error))
@@ -132,6 +125,5 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
         res → None
       case _ ⇒
         f → None
-    }
 
-}
+
