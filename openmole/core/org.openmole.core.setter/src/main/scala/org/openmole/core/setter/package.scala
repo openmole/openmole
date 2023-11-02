@@ -40,9 +40,8 @@ object Mapped:
   def vals(xs: Iterable[Mapped[_]]) = xs.map(_.v)
 
   def files(mapped: Vector[Mapped[_]]) =
-    mapped.flatMap:
-      case m@Mapped(Val.caseFile(v), _) ⇒ Seq(Mapped[java.io.File](v, m.nameOption))
-      case m                             ⇒ Seq()
+    mapped.collect:
+      case m@Mapped(Val.caseFile(v), _) ⇒ Mapped[java.io.File](v, m.nameOption)
 
 
   def noFile(mapped: Vector[Mapped[_]]) =

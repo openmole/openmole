@@ -74,8 +74,16 @@ case class ScalaTask(
   private def toMappedOutputVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
     ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
 
-  lazy val mappedInputs = toMappedInputVals(this.inputs, Mapped.noFile(mapped.inputs))
-  lazy val mappedOutputs = toMappedOutputVals(this.outputs, Mapped.noFile(mapped.outputs))
+  lazy val noFileInputs = Mapped.noFile(mapped.inputs)
+  lazy val noFileOutputs = Mapped.noFile(mapped.outputs)
+  lazy val mappedInputs = toMappedInputVals(this.inputs, noFileInputs)
+  lazy val mappedOutputs = toMappedOutputVals(this.outputs, noFileOutputs)
+
+  lazy val externalWithFiles =
+    external.copy(
+      inputFiles = external.inputFiles ++ Mapped.files(mapped.inputs).map { m => External.InputFile(m.v, m.name, true) },
+      outputFiles = external.outputFiles ++ Mapped.files(mapped.outputs).map { m => External.OutputFile(m.name, m.v) }
+    )
 
   def plugins(using tmpDirectory: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[File] =
     val detectedPlugins =
@@ -138,11 +146,6 @@ case class ScalaTask(
         }: Context
 
     import p.*
-    def mappedContext = toMappedInputContext(context, Mapped.noFile(mapped.inputs))
-    def externalWithFiles =
-      external.copy (
-        inputFiles = external.inputFiles ++ Mapped.files(mapped.inputs).map { m => External.InputFile(m.v, m.name, true) },
-        outputFiles = external.outputFiles ++ Mapped.files(mapped.outputs).map { m => External.OutputFile(m.name, m.v) }
-      )
+    def mappedContext = toMappedInputContext(context, noFileInputs)
     def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, externalWithFiles, processCode, mappedOutputs).from(mappedContext)
-    toMappedOutputContext(resultContext, Mapped.noFile(mapped.outputs))
+    toMappedOutputContext(resultContext, noFileOutputs)
