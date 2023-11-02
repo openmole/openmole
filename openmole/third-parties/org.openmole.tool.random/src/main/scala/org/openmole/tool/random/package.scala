@@ -70,6 +70,8 @@ package object random {
   }
 
   class SynchronizedRandom(generator: RandomGenerator) extends java.util.Random {
+    val initialized = true
+
     override def nextBoolean = synchronized { generator.nextBoolean }
     override def nextBytes(bytes: Array[Byte]) = synchronized { generator.nextBytes(bytes) }
     override def nextDouble = synchronized { generator.nextDouble }
@@ -79,12 +81,8 @@ package object random {
     override def nextInt(n: Int) = synchronized { generator.nextInt(n) }
     override def nextLong = synchronized { generator.nextLong }
     override def setSeed(seed: Long) = synchronized {
-      def isCalledFromInitRandom() = {
-        def isRandomInit(stackTraceElement: StackTraceElement) = stackTraceElement.getMethodName == "<init>" && stackTraceElement.getClassName == "java.util.Random"
-        Thread.currentThread().getStackTrace.exists(isRandomInit)
-      }
-
-      if (!isCalledFromInitRandom()) generator.setSeed(seed)
+      // Skip the call from Random.init
+      if initialized then generator.setSeed(seed)
     }
     def toScala = new util.Random(this)
   }
