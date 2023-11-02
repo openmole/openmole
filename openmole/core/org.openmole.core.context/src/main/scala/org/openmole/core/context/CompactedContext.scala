@@ -20,9 +20,10 @@ object CompactedContext:
   def compact(context: Context): CompactedContext =
     compact(context.variables.toSeq.map(_._2))
 
-  def expandVariables(compacted: CompactedContext) = 
-    val (prototypes, values) = compacted.splitAt(compacted.size / 2)
-    (prototypes zip values).map { case (p, v) ⇒ Variable(p.asInstanceOf[Val[Any]], v) }
+  def expandVariables(compacted: CompactedContext) =
+    val middle = compacted.length / 2
+    (0 until middle).map: i =>
+      Variable(compacted(i).asInstanceOf[Val[Any]], compacted(middle + i))
 
   def expand(compacted: CompactedContext): Context = Context(expandVariables(compacted): _*)
 
