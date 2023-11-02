@@ -12,8 +12,6 @@ object REPL:
     val interpreter = Interpreter(priorityBundles, jars, quiet)
     new REPL(interpreter)
 
-  def warmup()(using TmpDirectory, FileService) = REPL().eval("val i: Int = 42")
-
 class REPL(interpreter: Interpreter):
   export interpreter.classDirectory
 
@@ -35,10 +33,9 @@ class REPL(interpreter: Interpreter):
   def bind[T: Manifest](name: String, value: T) = synchronized:
     val mutableName = s"__${name}_mutable_value"
 
-    def findClass = {
+    def findClass = 
       val index = (1 to state.objectIndex).findLast(i => interpreter.resultClass(state, Some(i)).getDeclaredMethods.exists(_.getName.contains(s"${mutableName}_$$eq")))
       index.map(i => interpreter.resultClass(state, Some(i)))
-    }
 
 //    eval(s"""var $mutableName: ${manifest[T].toString} = null""")
 //    val mutableClass = findClass.getOrElse(throw new InternalProcessingError("Mutable value class not found"))

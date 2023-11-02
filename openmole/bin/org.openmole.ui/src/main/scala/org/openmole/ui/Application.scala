@@ -296,7 +296,7 @@ object Application extends JavaLogger {
               // warmup the scala compiler
               def warmup() =
                 import services.*
-                org.openmole.core.compiler.REPL.warmup()
+                org.openmole.core.project.OpenMOLEREPL.warmup()
 
               warmup()
 

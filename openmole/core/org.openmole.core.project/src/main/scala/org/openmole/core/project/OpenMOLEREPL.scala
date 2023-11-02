@@ -25,23 +25,22 @@ import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.TmpDirectory
 
-object OpenMOLEREPL {
+object OpenMOLEREPL:
 
   def autoImports: Seq[String] =
     PluginRegistry.pluginsInfo.flatMap(_.namespaces).flatMap(n ⇒ Seq(s"${n.value}.*", s"${n.value}.given"))
 
   def keywordNamespace = "om"
 
-  def autoImportTraitsCode = {
-    def withPart = {
+  def autoImportTraitsCode =
+    def withPart =
       val namespaceTraits = PluginRegistry.pluginsInfo.flatMap(_.namespaceTraits)
       if (namespaceTraits.isEmpty) ""
       else s"""with ${namespaceTraits.map(_.value).mkString(" with ")}"""
-    }
+
     s"""
        |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} $withPart
      """.stripMargin
-  }
 
   def dslImport = Seq(
     classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + ".*",
@@ -56,13 +55,16 @@ object OpenMOLEREPL {
       autoImportTraitsCode
     )
 
-  def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    def initialise(repl: REPL) = {
+  def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =
+    def initialise(repl: REPL) =
       repl.eval(imports)
       repl
-    }
 
     initialise(REPL(quiet = quiet))
-  }
-  
-}
+
+
+  def warmup()(using TmpDirectory, FileService) =
+    val repl = newREPL(true)
+    try repl.eval("EmptyTask(): DSL")
+    finally repl.close
+
