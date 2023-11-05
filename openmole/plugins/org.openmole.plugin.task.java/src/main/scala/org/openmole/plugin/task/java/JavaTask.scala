@@ -32,11 +32,11 @@ object JavaTask:
   given InfoBuilder[JavaTask] = InfoBuilder(Focus[JavaTask](_.info))
   given MappedInputOutputBuilder[JavaTask] = MappedInputOutputBuilder(Focus[JavaTask](_.mapped))
 
-  def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false) =
+  def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false, offline: Boolean = false) =
     def threadsOptions = if fewerThreads then Seq("-XX:+UseG1GC", "-XX:ParallelGCThreads=1", "-XX:CICompilerCount=2", "-XX:ConcGCThreads=1", "-XX:G1ConcRefinementThreads=1") else Seq()
     def allOptions = (threadsOptions ++ javaOptions).map("--java-opt " + _).mkString(" ")
-    //def offlineOption = if offline then "--power --offline" else ""
-    s"scala-cli run --server=$server -j $jvmVersion $allOptions"
+    def offlineOption = if offline then "--suppress-experimental-warning --power --offline" else ""
+    s"scala-cli run $offlineOption --server=$server -j $jvmVersion $allOptions"
 
   def dockerImage(version: String) = DockerImage("openmole/jvm", version)
 
@@ -188,7 +188,7 @@ case class JavaTask(
         ContainerTask.isolatedWorkdirectory(executionContext)(
           containerSystem = containerSystem,
           image = image,
-          command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads) + s""" $jarParameter $scriptName"""),
+          command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
           workDirectory = workspace,
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
