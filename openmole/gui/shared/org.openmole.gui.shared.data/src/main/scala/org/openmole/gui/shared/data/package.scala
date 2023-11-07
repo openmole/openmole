@@ -67,7 +67,7 @@ case class SafePath(path: RelativePath, context: ServerFileSystemContext) derive
   def name = path.name
   def isEmpty = path.value.isEmpty
   def nameWithoutExtension = name.split('.').head
-  def normalizedPathString = path.name.tail.mkString("/")
+  def normalizedPathString = path.name
 
   def startsWith(safePath: SafePath) =
     safePath.context == context &&
