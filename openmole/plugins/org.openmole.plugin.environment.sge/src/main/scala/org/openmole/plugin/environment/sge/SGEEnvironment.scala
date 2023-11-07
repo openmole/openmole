@@ -45,7 +45,7 @@ object SGEEnvironment {
     timeout:              OptionalArgument[Time]        = None,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
-    modules:              Seq[String]                   = Vector())(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+    modules:              Seq[String]                   = Vector())(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       queue = queue,
@@ -58,10 +58,11 @@ object SGEEnvironment {
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission) {
+      if !localSubmission
+      then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
         val portValue = port.mustBeDefined("port")
@@ -74,17 +75,15 @@ object SGEEnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-      }
       else
         new SGELocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-    }
-  }
+
 
   case class Parameters(
     queue:                Option[String],

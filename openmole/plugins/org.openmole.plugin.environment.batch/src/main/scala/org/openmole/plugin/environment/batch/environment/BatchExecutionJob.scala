@@ -20,12 +20,13 @@ package org.openmole.plugin.environment.batch.environment
 import org.openmole.core.communication.message.RunnableTask
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.{ PluginAndFilesListing, SerializerService }
-import org.openmole.core.workflow.execution.{ ExecutionJob, ExecutionState }
+import org.openmole.core.serializer.{PluginAndFilesListing, SerializerService}
+import org.openmole.core.workflow.execution.{ExecutionJob, ExecutionState}
 import org.openmole.core.workflow.job.JobGroup
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.JobStore.StoredJob
 import org.openmole.tool.bytecode.*
+import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.file.*
 import org.openmole.tool.osgi.*
 
@@ -71,12 +72,12 @@ object BatchExecutionJob:
     val closuresBundle = bundle(classDirectory, classLoader)
     (closuresBundle, bundleFile(closuresBundle))
 
-  def apply(id: Long, job: JobGroup, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService) = 
-    val pluginsAndFiles = serializerService.pluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
+  def apply(id: Long, job: JobGroup, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService, cache: KeyValueCache) =
+    val pluginsAndFiles = serializerService.listPluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
     val plugins = pluginsAndFiles.plugins.distinctBy(_.getCanonicalPath)
     val storedJob = JobStore.store(jobStore, job)
     new BatchExecutionJob(id, storedJob, IArray(pluginsAndFiles.files*), IArray(plugins*))
-
+    
 
 class BatchExecutionJob(
   val id: Long,

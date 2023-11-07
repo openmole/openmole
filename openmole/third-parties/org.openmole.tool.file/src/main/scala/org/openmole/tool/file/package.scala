@@ -168,7 +168,7 @@ package file {
         }
       }
 
-      def recursiveDelete: Unit = wrapError { DirUtils.delete(file) }
+      def recursiveDelete: Unit = wrapError { DirUtils.deleteIfExists(file) }
 
       def isSymbolicLink = Files.isSymbolicLink(Paths.get(file.getAbsolutePath))
 

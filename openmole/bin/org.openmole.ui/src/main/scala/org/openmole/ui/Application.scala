@@ -281,24 +281,30 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
             
-            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel) { services ⇒
+            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel): services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
-              //val server = new GUIServer(port, config.remote, services, config.password, extraHeader, !config.unoptimizedJS, config.httpSubDirectory)
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
-              ///server.start()
               val s = newServer.start()
               if (config.browse && !config.remote) browse(url)
-              //server.launchApplication()
+
               logger.info(
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
                   s"Server listening on port $port."
               )
+
+              // warmup the scala compiler
+              def warmup() =
+                import services.*
+                org.openmole.core.project.OpenMOLEREPL.warmup()
+
+              warmup()
+
               s.join() match
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
                 case GUIServer.Restart ⇒ Console.ExitCodes.restart
+
               //newServer.stop()
-            }
           else
             browse(GUIServer.urlFile.content)
             Console.ExitCodes.ok

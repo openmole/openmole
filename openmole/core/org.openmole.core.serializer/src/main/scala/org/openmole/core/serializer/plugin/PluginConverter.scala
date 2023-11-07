@@ -25,31 +25,32 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.compiler._
-
+import org.openmole.core.compiler.*
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.PluginAndFilesListing
+import org.openmole.core.workspace.TmpDirectory
+import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.JavaLogger
 
-object PluginConverter extends JavaLogger {
-
-  def canConvert(c: Class[_]): Boolean = {
+object PluginConverter extends JavaLogger:
+  def canConvert(c: Class[_]): Boolean =
     classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c) || Interpreter.isInterpretedClass(c)
-  }
 
-}
 
-class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: ReflectionConverter) extends Converter {
+class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: ReflectionConverter) extends Converter:
 
-  override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
+  override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) =
     serializer.classUsed(o.getClass)
-    if (classOf[Plugins].isAssignableFrom(o.getClass)) o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
+    if classOf[Plugins].isAssignableFrom(o.getClass)
+    then
+      given TmpDirectory = serializer.tmpDirectory
+      given FileService = serializer.fileService
+      given KeyValueCache = serializer.cache
+      o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
-  }
 
-  override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
+  override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object =
     throw new UnsupportedOperationException("Bug: Should never be called.")
-  }
 
   override def canConvert(c: Class[_]): Boolean = PluginConverter.canConvert(c)
 
-}

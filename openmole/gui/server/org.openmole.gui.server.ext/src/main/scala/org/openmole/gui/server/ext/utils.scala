@@ -195,6 +195,7 @@ object utils:
   val githubTheme = "theme-github.js"
   val webpackConfigTemplateName = "template.webpack.config.js"
   val webpackJsonPackage = "package.json"
+  val nodeModulesFileName = "node_modules.zip"
 
   def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
     import org.openmole.core.fileservice._

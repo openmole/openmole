@@ -75,7 +75,7 @@ class Runtime {
     threads:           Int,
     debug:             Boolean,
     transferRetry:     Option[Int]
-  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) = {
+  )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) =
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[String, File]
@@ -83,10 +83,9 @@ class Runtime {
     logger.fine("Downloading input message")
 
     val executionMessage =
-      newFile.withTmpFile { executionMessageFileCache ⇒
+      newFile.withTmpFile: executionMessageFileCache ⇒
         retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
         serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
-      }
 
     val systemOut = OutputManager.systemOutput
     val systemErr = OutputManager.systemError
@@ -103,152 +102,143 @@ class Runtime {
     val outputRedirection = OutputRedirection(multiplexedOut)
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
-      ReplicatedFile.download(replicatedFile) {
+      ReplicatedFile.download(replicatedFile):
         (path, file) ⇒
           try retry(storage.download(path, file, transferOptions), transferRetry)
-          catch {
+          catch
             case e: Exception ⇒ throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
-          }
-      }
 
     val beginTime = System.currentTimeMillis
 
     
-    val result = try {
-      logger.fine("Downloading plugins")
+    val result =
+      try
+        logger.fine("Downloading plugins")
 
-      //val pluginDir = Workspace.newDir
+        //val pluginDir = Workspace.newDir
 
-      val plugins =
-        for {
-          plugin ← executionMessage.plugins
-        } yield {
-          val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
-          plugin → pluginFile
-        }
+        val plugins =
+          for
+            plugin ← executionMessage.plugins
+          yield
+            val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
+            plugin → pluginFile
 
-      logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
+        logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 
-      PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+        PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
 
-      logger.fine("Loaded plugins: " + PluginManager.bundles.map(_.getSymbolicName).mkString(", "))
+        logger.fine("Loaded plugins: " + PluginManager.bundles.map(_.getSymbolicName).mkString(", "))
 
-      for { (p, f) ← plugins } usedFiles.put(p.originalPath, f)
+        for
+          (p, f) ← plugins
+        do usedFiles.put(p.originalPath, f)
 
-      /* --- Download the files for the local file cache ---*/
-      logger.fine("Downloading files")
+        /* --- Download the files for the local file cache ---*/
+        logger.fine("Downloading files")
 
-      for (repliURI ← executionMessage.files) {
-        // To avoid getting twice the same plugin
-        if (!usedFiles.contains(repliURI.originalPath)) {
-          val local = getReplicatedFile(repliURI, TransferOptions())
-          usedFiles.put(repliURI.originalPath, local)
-        }
-      }
-      
-      val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles, gz = true)
+        for
+          repliURI ← executionMessage.files
+        do
+          // To avoid getting twice the same plugin
+          if !usedFiles.contains(repliURI.originalPath)
+          then
+            val local = getReplicatedFile(repliURI, TransferOptions())
+            usedFiles.put(repliURI.originalPath, local)
 
-      val saver = new ContextSaver(runnableTasks.size)
-      val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
+        val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles, gz = true)
 
-      val beginExecutionTime = System.currentTimeMillis
+        val saver = new ContextSaver(runnableTasks.size)
+        val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
 
-      /* --- Submit all jobs to the local environment --*/
-      logger.fine("Run the jobs")
-      val environment = new LocalEnvironment(threads = threads, false, Some("runtime local"))
-      environment.start()
+        val beginExecutionTime = System.currentTimeMillis
 
-      try {
-        val taskExecutionContext = TaskExecutionContext.partial(
-          applicationExecutionDirectory = newFile.makeNewDir("application"),
-          moleExecutionDirectory = newFile.makeNewDir("runtime"),
-          preference = preference,
-          threadProvider = threadProvider,
-          fileService = fileService,
-          fileServiceCache = fileServiceCache,
-          workspace = workspace,
-          outputRedirection = outputRedirection,
-          loggerService = loggerService,
-          cache = KeyValueCache(),
-          lockRepository = LockRepository[LockKey](),
-          serializerService = serializerService,
-          networkService = networkService,
-          timeService = timeService,
-          remote = Some(TaskExecutionContext.Remote(threads))
-        )
+        /* --- Submit all jobs to the local environment --*/
+        logger.fine("Run the jobs")
+        val environment = new LocalEnvironment(threads = threads, false, Some("runtime local"))
+        environment.start()
 
-        for (toProcess ← allMoleJobs)
-          environment.submit(
-            toProcess,
-            taskExecutionContext
+        try
+          val taskExecutionContext = TaskExecutionContext.partial(
+            applicationExecutionDirectory = newFile.makeNewDir("application"),
+            moleExecutionDirectory = newFile.makeNewDir("runtime"),
+            preference = preference,
+            threadProvider = threadProvider,
+            fileService = fileService,
+            fileServiceCache = fileServiceCache,
+            workspace = workspace,
+            outputRedirection = outputRedirection,
+            loggerService = loggerService,
+            cache = KeyValueCache(),
+            lockRepository = LockRepository[LockKey](),
+            serializerService = serializerService,
+            networkService = networkService,
+            timeService = timeService,
+            remote = Some(TaskExecutionContext.Remote(threads))
           )
 
-        saver.waitAllFinished
-      }
-      finally environment.stop()
+          for
+            toProcess ← allMoleJobs
+          do
+            environment.submit(toProcess, taskExecutionContext)
 
-      val endExecutionTime = System.currentTimeMillis
+          saver.waitAllFinished
+        finally environment.stop()
 
-      val results = saver.results
-      logger.fine("Results " + results)
+        val endExecutionTime = System.currentTimeMillis
 
-      if results.values.forall(_.isFailure)
-      then
-        val failures = results.values.collect { case Failure(e) => e }
-        throw new InternalProcessingError("All mole job executions have failed", MultipleException(failures))
+        val results = saver.results
+        logger.fine("Results " + results)
 
-      val contextResults = ContextResults(results)
+        if results.values.forall(_.isFailure)
+        then
+          val failures = results.values.collect { case Failure(e) => e }
+          throw new InternalProcessingError("All mole job executions have failed", MultipleException(failures))
 
-      def uploadArchive = {
-        val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serializeAndArchiveFiles(contextResults, contextResultFile, gz = true)
-        ArchiveContextResults(contextResultFile)
-      }
+        val contextResults = ContextResults(results)
 
-      def uploadIndividualFiles = {
-        val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
-        serializerService.serialize(contextResults, contextResultFile, gz = true)
-        val pac = serializerService.pluginsAndFiles(contextResults)
+        def uploadArchive =
+          val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
+          serializerService.serializeAndArchiveFiles(contextResults, contextResultFile, gz = true)
+          ArchiveContextResults(contextResultFile)
 
-        val replicated =
-          pac.files.map { file ⇒
-            def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)), transferRetry)
-            ReplicatedFile.upload(file, uploadOnStorage)
-          }
+        def uploadIndividualFiles =
+          val contextResultFile = fileService.wrapRemoveOnGC(newFile.newFile("contextResult", "res"))
+          serializerService.serialize(contextResults, contextResultFile, gz = true)
+          val files = serializerService.listFiles(contextResults)
 
-        IndividualFilesContextResults(contextResultFile, replicated)
-      }
+          val replicated =
+            files.map: file ⇒
+              def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)), transferRetry)
+              ReplicatedFile.upload(file, uploadOnStorage)
 
-      val result =
-        if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
+          IndividualFilesContextResults(contextResultFile, replicated)
 
-      val endTime = System.currentTimeMillis
-      Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
-    }
-    catch {
-      case t: Throwable ⇒
-        if (debug) logger.log(SEVERE, "", t)
-        Failure(t)
-    }
-    finally {
-      multiplexedOut.close()
-      multiplexedErr.close()
-      outSt.close()
-      OutputManager.uninstall
-    }
+        val result =
+          if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
+
+        val endTime = System.currentTimeMillis
+        Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
+      catch
+        case t: Throwable ⇒
+          if (debug) logger.log(SEVERE, "", t)
+          Failure(t)
+      finally
+        multiplexedOut.close()
+        multiplexedErr.close()
+        outSt.close()
+        OutputManager.uninstall
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
     val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
 
-    newFile.withTmpFile("output", ".tgz") { outputLocal ⇒
+    newFile.withTmpFile("output", ".tgz"): outputLocal ⇒
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal, gz = true)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")
       retry(storage.upload(outputLocal, Some(outputMessagePath), TransferOptions(noLink = true, canMove = true)), transferRetry)
-    }
 
     result
-  }
 
 }

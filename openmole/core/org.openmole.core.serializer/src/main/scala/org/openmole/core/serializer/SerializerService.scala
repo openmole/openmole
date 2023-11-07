@@ -23,27 +23,27 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.OutputStream
-
 import com.thoughtworks.xstream.XStream
-import com.thoughtworks.xstream.core.{ Caching, ClassLoaderReference, DefaultConverterLookup }
-import com.thoughtworks.xstream.converters.{ Converter, ConverterRegistry }
-import com.thoughtworks.xstream.io.json._
+import com.thoughtworks.xstream.core.{Caching, ClassLoaderReference, DefaultConverterLookup}
+import com.thoughtworks.xstream.converters.{Converter, ConverterRegistry}
+import com.thoughtworks.xstream.io.json.*
 import com.thoughtworks.xstream.mapper.Mapper
-import com.thoughtworks.xstream.security._
+import com.thoughtworks.xstream.security.*
 import com.thoughtworks.xstream.io.binary.BinaryStreamDriver
-import org.openmole.tool.file._
-import org.openmole.core.serializer.converter._
+import org.openmole.tool.file.*
+import org.openmole.core.serializer.converter.*
 
-import java.util.concurrent.locks.{ ReadWriteLock, ReentrantReadWriteLock }
+import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock}
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
 import org.openmole.tool.archive.*
-import org.openmole.tool.lock._
+import org.openmole.tool.lock.*
 
 import collection.mutable.ListBuffer
-import org.openmole.core.serializer.file.{ FileInjection, FileSerialisation, FileWithGCConverter }
+import org.openmole.core.serializer.file.{FileInjection, FileSerialisation, FileWithGCConverter}
+import org.openmole.tool.cache.KeyValueCache
 
 object SerializerService:
   def apply() = new SerializerService
@@ -85,24 +85,25 @@ class SerializerService { service ⇒
   private val content = "content.xml"
 
   private def fileSerialisation() = buildXStream()
-  private def pluginAndFileListing() = new Serialiser(service) with PluginAndFilesListing
+  private def fileListing() = new Serialiser(service) with FilesListing
+  private def pluginAndFileListing()(using TmpDirectory, FileService, KeyValueCache) = new Serialiser(service) with PluginAndFilesListing
   private def deserializerWithFileInjection() = new Serialiser(service) with FileInjection
 
-  def deserialize[T](file: File): T = {
+  def deserialize[T](file: File): T =
     val is = new FileInputStream(file)
     try deserialize(is)
     finally is.close
-  }
 
-  def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
+  def deserialize[T](is: InputStream): T = 
+    buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeFromString[T](s: String, json: Boolean = false): T = buildXStream(json = json).fromXML(s).asInstanceOf[T]
+  def deserializeFromString[T](s: String, json: Boolean = false): T = 
+    buildXStream(json = json).fromXML(s).asInstanceOf[T]
 
   def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
     val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
-
 
   def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T =
     newFile.withTmpDir: archiveExtractDir ⇒
@@ -122,10 +123,11 @@ class SerializerService { service ⇒
       serialize(obj, objSerial)
       tos.addFile(objSerial, content)
 
-    val serializationResult = pluginsAndFiles(obj)
-    FileSerialisation.serialiseFiles(serializationResult.files, tos, fileSerialisation())
+    val files = fileListing().list(obj)
+    FileSerialisation.serialiseFiles(files, tos, fileSerialisation())
 
-  def pluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
+  def listFiles(obj: Any) = fileListing().list(obj)
+  def listPluginsAndFiles(obj: Any)(using TmpDirectory, FileService, KeyValueCache) = pluginAndFileListing().list(obj)
 
   def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)

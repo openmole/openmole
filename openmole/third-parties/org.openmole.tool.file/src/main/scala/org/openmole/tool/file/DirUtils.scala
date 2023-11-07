@@ -21,7 +21,7 @@ import java.util.{ EnumSet, Objects, Set }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object DirUtils {
+object DirUtils:
   /**
    * Copies a directory tree
    *
@@ -31,10 +31,9 @@ object DirUtils {
    *
    */
   @throws[IOException]
-  def copy(from: Path, to: Path, visitOption: Set[FileVisitOption], copyOptions: Array[CopyOption]): Path = {
+  def copy(from: Path, to: Path, visitOption: Set[FileVisitOption], copyOptions: Array[CopyOption]): Path =
     validate(from)
     Files.walkFileTree(from, visitOption, Integer.MAX_VALUE, new CopyDirVisitor(from, to, copyOptions))
-  }
 
   /**
    * Copies a directory tree with the following default options:
@@ -48,10 +47,9 @@ object DirUtils {
    *
    */
   @throws[IOException]
-  def copy(from: Path, to: Path, followSymlinks: Boolean = false): Path = {
+  def copy(from: Path, to: Path, followSymlinks: Boolean = false): Path =
     val copyOptions = getCopyOptions(followSymlinks)
     copy(from, to, EnumSet.noneOf(classOf[FileVisitOption]), copyOptions.toArray)
-  }
 
   /**
    * Moves one directory tree to another.  Not a true move operation in that the
@@ -64,12 +62,11 @@ object DirUtils {
    * @see DirUtils.copy
    */
   @throws[IOException]
-  def move(from: Path, to: Path): Path = {
+  def move(from: Path, to: Path): Path =
     validate(from)
     DirUtils.copy(from, to)
     DirUtils.delete(from)
     to
-  }
 
   /**
    *
@@ -79,40 +76,36 @@ object DirUtils {
    * @throws IOException
    */
   @throws[IOException]
-  def delete(p: Path) = {
+  def delete(p: Path) =
     val file = p.toFile
-    if (file.exists()) {
-      if (!file.toFile.isSymbolicLink && file.isDirectory) {
-        val list =
-          try file.listFilesSafe
-          catch {
-            case t: IOException ⇒
-              FileTools.setAllPermissions(file)
-              file.listFilesSafe
-          }
+    if !file.toFile.isSymbolicLink && file.isDirectory
+    then
+      val list =
+        try file.listFilesSafe
+        catch
+          case t: IOException ⇒
+            FileTools.setAllPermissions(file)
+            file.listFilesSafe
 
-        for (s ← list) {
-          s.isDirectory match {
-            case true ⇒
-              s.recursiveDelete
-              s.forceFileDelete
-            case false ⇒ s.forceFileDelete
-          }
-        }
-      }
-      file.forceFileDelete
-    }
-  }
+      for
+        s ← list
+      do
+        s.isDirectory match
+          case true ⇒
+            s.recursiveDelete
+            s.forceFileDelete
+          case false ⇒ s.forceFileDelete
+
+    file.forceFileDelete
 
   @throws[IOException]
-  def deleteIfExists(path: Path) = {
-    if (Files.exists(path)) delete(path)
-  }
+  def deleteIfExists(path: Path) =
+    if Files.exists(path) then delete(path)
 
-  private def validate(paths: Path*) = {
-    for (path ← paths) {
+  private def validate(paths: Path*) =
+    for
+      path ← paths
+    do
       Objects.requireNonNull(path)
       if (!Files.isDirectory(path)) throw new IllegalArgumentException(s"${path.toString} is not a directory")
-    }
-  }
-}
+

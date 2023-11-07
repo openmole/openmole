@@ -33,13 +33,13 @@ import org.openmole.tool.hash.*
 import monocle.Focus
 import org.openmole.core.script.{Imports, ScriptSourceData}
 
-object Project {
+object Project:
 
   def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
 
   def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
 
-  def scriptsObjects(script: File) = {
+  def scriptsObjects(script: File) = 
 
     def makeImportTree(tree: Tree): String =
       tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")
@@ -56,7 +56,7 @@ object Project {
     def makeVal(identifier: String, file: File) =
       s"""@transient lazy val ${identifier} = ${uniqueName(file)}"""
 
-    def makeScriptWithImports(sourceFile: SourceFile) = {
+    def makeScriptWithImports(sourceFile: SourceFile) = 
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
@@ -69,10 +69,9 @@ object Project {
            |}
            |@transient lazy val ${name} = new ${name}Class
            """
-    }
 
-    def makeImportedScript(sourceFile: SourceFile) = {
-      def removeTerms(classContent: String) = {
+    def makeImportedScript(sourceFile: SourceFile) = 
+      def removeTerms(classContent: String) = 
         import _root_.scala.meta._
 
         val source = classContent.parse[Source].get
@@ -80,15 +79,13 @@ object Project {
         val lastStat = cls.templ.stats.last
 
         def filterTermAndAddLazy(stat: Stat) =
-          stat match {
+          stat match 
             case _: Term ⇒ None
             case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
             case s ⇒ Some(s)
-          }
 
         val newCls = cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.flatMap(filterTermAndAddLazy)))
         source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
-      }
 
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
@@ -110,7 +107,6 @@ object Project {
         """.stripMargin
 
       removeTerms(classContent)
-    }
 
     val allImports = Imports.importedFiles(script)
 
@@ -120,17 +116,14 @@ object Project {
     s"""
        |$importHeader
      """.stripMargin
-  }
 
-  trait OMSScript {
+  trait OMSScript:
     def run(variable: ConsoleVariables): DSL
-  }
 
-  trait OMSScriptUnit {
+  trait OMSScriptUnit:
     def run(variable: ConsoleVariables): Unit
-  }
 
-  def craftedScript(workDirectory: File, script: File, returnUnit: Boolean) = {
+  def craftedScript(workDirectory: File, script: File, returnUnit: Boolean) = 
     val variableParameter = "_console_variable_parameter"
     def functionPrototype =
       if (returnUnit) s"def run($variableParameter: ${classOf[ConsoleVariables].getCanonicalName}): Unit"
@@ -163,22 +156,20 @@ object Project {
          |$scriptFooter""".stripMargin
 
     (compileContent, scriptHeader)
-  }
 
-  def compile(workDirectory: File, script: File, repl: Option[REPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult = {
+  def compile(workDirectory: File, script: File, repl: Option[REPL] = None, returnUnit: Boolean = false)(implicit services: Services): CompileResult =
     import services._
 
-    if (!script.exists) ScriptFileDoesNotExists()
-    else {
-      def compile(content: String, scriptHeader: String): CompileResult = {
+    if !script.exists
+    then ScriptFileDoesNotExists()
+    else 
+      def compile(content: String, scriptHeader: String): CompileResult = 
         val loop = repl.getOrElse { Project.newREPL() }
-        try {
-          Option(loop.compile(content)) match {
+        try 
+          Option(loop.compile(content)) match 
             case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop), workDirectory = workDirectory, script = script)
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
-          }
-        }
-        catch {
+        catch 
           case ce: Interpreter.CompilationError ⇒
             def positionLens =
               Focus[Interpreter.CompilationError](_.errorMessages) composeTraversal
@@ -198,39 +189,35 @@ object Project {
 
             ErrorInCode(adjusted(ce))
           case e: Throwable ⇒ ErrorInCompiler(e)
-        }
-      }
+        
 
       val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = returnUnit)
       compile(compileContent, scriptHeader)
-    }
-  }
 
-  def completion(workDirectory: File, script: File, position: Int, newREPL: Option[REPL] = None)(implicit services: Services) = {
+  def completion(workDirectory: File, script: File, position: Int, newREPL: Option[REPL] = None)(implicit services: Services) = 
     import services._
     if(!script.exists()) Vector()
     else
       val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = false)
       val loop = newREPL.getOrElse { Project.newREPL() }
       loop.completion(compileContent, position + scriptHeader.size + 1)
-  }
 
-}
+
 
 sealed trait CompileResult
 case class ScriptFileDoesNotExists() extends CompileResult
-sealed trait CompilationError extends CompileResult {
+sealed trait CompilationError extends CompileResult:
   def error: Throwable
-}
+
 case class ErrorInCode(error: Interpreter.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult {
+case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult:
 
   def eval(args: Seq[String])(implicit services: Services) =
     import services._
 
-    compilationContext.repl.evalCompiled(result) match {
+    compilationContext.repl.evalCompiled(result) match 
       case p: Project.OMSScript ⇒
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
         workDirectory.mkdirs()
@@ -240,6 +227,6 @@ case class Compiled(result: Interpreter.RawCompiled, compilationContext: Compila
           case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         }
       case e ⇒ throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
-    }
+    
 
-}
+

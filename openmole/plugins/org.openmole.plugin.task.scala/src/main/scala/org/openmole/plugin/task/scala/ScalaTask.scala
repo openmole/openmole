@@ -33,14 +33,14 @@ object ScalaTask:
 
   given JVMLanguageBuilder[ScalaTask] = new JVMLanguageBuilder[ScalaTask]:
     override def libraries = Focus[ScalaTask](_.libraries)
-    override def plugins = Focus[ScalaTask](_.plugins)
+    override def plugins = Focus[ScalaTask](_.userPlugins)
 
   def defaultPlugins = pluginsOf(scala.xml.XML).toVector
 
   def apply(source: String, libraries: Seq[File] = Vector(), plugins: Seq[File] = Vector())(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     new ScalaTask(
       source,
-      plugins = defaultPlugins ++ plugins,
+      userPlugins = defaultPlugins ++ plugins,
       libraries = libraries.toVector,
       config = InputOutputConfig(),
       external = External(),
@@ -56,16 +56,17 @@ object ScalaTask:
 
 
 case class ScalaTask(
-  sourceCode: String,
-  plugins:    Vector[File],
-  libraries:  Vector[File],
-  config:     InputOutputConfig,
-  external:   External,
-  info:       InfoConfig,
-  mapped:     MappedInputOutputConfig
+  sourceCode:  String,
+  userPlugins: Vector[File],
+  libraries:   Vector[File],
+  config:      InputOutputConfig,
+  external:    External,
+  info:        InfoConfig,
+  mapped:      MappedInputOutputConfig
 ) extends Task with ValidateTask with Plugins:
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
+  lazy val pluginsCache = CacheKey[Seq[File]]()
 
   private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
     ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name))
@@ -73,8 +74,26 @@ case class ScalaTask(
   private def toMappedOutputVals(ps: PrototypeSet, mapped: Seq[Mapped[_]]) =
     ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
 
-  lazy val mappedInputs = toMappedInputVals(this.inputs, Mapped.noFile(mapped.inputs))
-  lazy val mappedOutputs = toMappedOutputVals(this.outputs, Mapped.noFile(mapped.outputs))
+  lazy val noFileInputs = Mapped.noFile(mapped.inputs)
+  lazy val noFileOutputs = Mapped.noFile(mapped.outputs)
+  lazy val mappedInputs = toMappedInputVals(this.inputs, noFileInputs)
+  lazy val mappedOutputs = toMappedOutputVals(this.outputs, noFileOutputs)
+
+  lazy val externalWithFiles =
+    external.copy(
+      inputFiles = external.inputFiles ++ Mapped.files(mapped.inputs).map { m => External.InputFile(m.v, m.name, true) },
+      outputFiles = external.outputFiles ++ Mapped.files(mapped.outputs).map { m => External.OutputFile(m.name, m.v) }
+    )
+
+  def plugins(using tmpDirectory: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[File] =
+    val detectedPlugins =
+      cache.getOrElseUpdate(pluginsCache):
+        import org.openmole.tool.bytecode.*
+        val compiled = cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))
+        val mentionedClasses = allMentionedClasses(compiled.interpreter.classDirectory, compiled.interpreter.classLoaderValue)
+        mentionedClasses.flatMap(PluginManager.pluginsForClass).distinct
+
+    (userPlugins ++ detectedPlugins).distinct
 
   def compile(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService) =
   //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
@@ -83,7 +102,7 @@ case class ScalaTask(
       mappedInputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
       ScalaCompilation.WrappedOutput(mappedOutputs),
       libraries = libraries,
-      plugins = plugins
+      plugins = userPlugins
     )
 
   override def validate =
@@ -92,7 +111,7 @@ case class ScalaTask(
       then Some(new UserBadDataError(s"Library file $l does not exist"))
       else None
 
-    def pluginsErrors: Seq[Throwable] = plugins.flatMap: l ⇒
+    def pluginsErrors: Seq[Throwable] = userPlugins.flatMap: l ⇒
       if !l.exists()
       then Some(new UserBadDataError(s"Plugin file $l does not exist"))
       else None
@@ -101,7 +120,7 @@ case class ScalaTask(
       import p._
 
       def compilationError =
-        Try(compile(mappedInputs.toSeq)) match
+        Try(cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))) match
           case Success(_) ⇒ Seq.empty
           case Failure(e) ⇒ Seq(e)
 
@@ -118,7 +137,8 @@ case class ScalaTask(
       FromContext: p ⇒
         import p._
 
-        val scalaCompilation = taskExecutionContext.cache.getOrElseUpdate(compilation, compile(mappedInputs.toSeq))
+        val scalaCompilation =
+          taskExecutionContext.cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))
 
         val map = scalaCompilation(context, p.random, p.tmpDirectory)
         mappedOutputs.toSeq.map {
@@ -126,11 +146,6 @@ case class ScalaTask(
         }: Context
 
     import p.*
-    def mappedContext = toMappedInputContext(context, Mapped.noFile(mapped.inputs))
-    def externalWithFiles =
-      external.copy (
-        inputFiles = external.inputFiles ++ Mapped.files(mapped.inputs).map { m => External.InputFile(m.v, m.name, true) },
-        outputFiles = external.outputFiles ++ Mapped.files(mapped.outputs).map { m => External.OutputFile(m.name, m.v) }
-      )
+    def mappedContext = toMappedInputContext(context, noFileInputs)
     def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, externalWithFiles, processCode, mappedOutputs).from(mappedContext)
-    toMappedOutputContext(resultContext, Mapped.noFile(mapped.outputs))
+    toMappedOutputContext(resultContext, noFileOutputs)

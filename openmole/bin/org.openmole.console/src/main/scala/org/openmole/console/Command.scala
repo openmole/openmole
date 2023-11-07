@@ -37,6 +37,7 @@ import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.services.*
+import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
 
@@ -164,8 +165,10 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
   implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
 
-
-  def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = Validation(mole).foreach(println)
+  def validate(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = verify(mole)
+  def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit =
+    given KeyValueCache = KeyValueCache()
+    Validation(mole).foreach(println)
 
   def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 

@@ -10,7 +10,8 @@ organization := "org.openmole"
 Global / resolvers += Resolver.sbtPluginRepo("releases")
 Global / resolvers += Resolver.sonatypeRepo("staging")
 
-addSbtPlugin("org.openmole" % "sbt-osgi" % "0.9.11")
+addSbtPlugin("com.github.sbt" % "sbt-osgi" % "0.9.9")
+//addSbtPlugin("org.openmole" % "sbt-osgi" % "0.9.13")
 
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "2.0",

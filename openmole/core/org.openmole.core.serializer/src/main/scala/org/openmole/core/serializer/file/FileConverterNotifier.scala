@@ -22,15 +22,16 @@ import java.io.File
 
 import org.openmole.core.serializer.PluginAndFilesListing
 
-class FileConverterNotifier(serializer: PluginAndFilesListing) extends FileConverter {
 
-  override def toString(obj: Object): String = {
+
+class FileConverterNotifier(fileUsed: File => Unit) extends FileConverter:
+
+  override def toString(obj: Object): String =
     val file = obj.asInstanceOf[File]
-    serializer.fileUsed(file)
+    fileUsed(file)
     file.getPath
-  }
 
   override def canConvert(`type`: Class[_]): Boolean = classOf[File].isAssignableFrom(`type`)
 
-}
+
 

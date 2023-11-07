@@ -61,11 +61,9 @@ object JSPack:
       Await.result(result, Duration.Inf)
     }
 
-  def webpack(entryJSFile: File, webpackJsonPackage: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
+  def webpack(entryJSFile: File, nodeModulesFile: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
     newFile.withTmpDir { targetDir ⇒
-      webpackJsonPackage copy targetDir / webpackJsonPackage.getName
-
-      Npm.install(targetDir)
+      org.openmole.tool.archive.Zip.unzip(nodeModulesFile, targetDir, overwrite = true)
 
       //3- build the js deps with webpack
       Webpack.run(

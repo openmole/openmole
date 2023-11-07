@@ -383,17 +383,15 @@ object MoleExecution {
       }
     }
 
-  def clean(moleExecution: MoleExecution) = {
+  def clean(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
     LoggerService.log(Level.FINE, s"clean mole execution $moleExecution")
 
     try if (moleExecution.cleanOnFinish) MoleServices.clean(moleExecution.executionContext.services)
-    finally {
+    finally
       moleExecution._cleaned = true
       moleExecution.cleanedSemaphore.release()
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
-    }
-  }
 
   def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit = {
     if (!moleExecution._canceled) {
@@ -586,6 +584,7 @@ object MoleExecution {
 
   def validationErrors(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
+    given KeyValueCache = moleExecution.keyValueCache
     Validation(moleExecution.mole, moleExecution.implicits, moleExecution.sources, moleExecution.hooks)
 }
 
@@ -713,7 +712,8 @@ class MoleExecution(
   /* Caches to speedup workflow execution */
   private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
   private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
-
+  
+  
   lazy val partialTaskExecutionContext = {
     import executionContext.services._
 
@@ -736,7 +736,7 @@ class MoleExecution(
     )
   }
 
-  lazy val environments = EnvironmentProvider.build(environmentProviders.values.toVector, executionContext.services)
+  lazy val environments = EnvironmentProvider.build(environmentProviders.values.toVector, executionContext.services, keyValueCache)
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
 

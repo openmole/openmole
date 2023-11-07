@@ -53,7 +53,7 @@ object CondorEnvironment {
     localSubmission:      Boolean                       = false,
     modules:              Seq[String]                   = Vector(),
     name:                 OptionalArgument[String]      = None
-  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) = {
+  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       openMOLEMemory = openMOLEMemory,
@@ -67,10 +67,11 @@ object CondorEnvironment {
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission) {
+      if !localSubmission
+      then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
         val portValue = port.mustBeDefined("port")
@@ -83,19 +84,15 @@ object CondorEnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-      }
-      else {
+      else
         new CondorLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          services = BatchEnvironment.Services(ms, cache)
         )
-      }
-    }
 
-  }
 
   case class Parameters(
     openMOLEMemory:       Option[Information],

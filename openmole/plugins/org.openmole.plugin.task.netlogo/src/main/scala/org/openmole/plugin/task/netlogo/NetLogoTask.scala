@@ -292,12 +292,13 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
       NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
   }
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: TaskExecutionContext) = FromContext: parameters ⇒
     import parameters._
 
-    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey, NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d))
+    val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey):
+      NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
 
-    pool { instance ⇒
+    pool: instance ⇒
 
       val resolver = External.relativeResolver(instance.workspaceDirectory)(_)
       val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
@@ -324,7 +325,5 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
         }
 
       contextResult
-    }
-  }
 
 }

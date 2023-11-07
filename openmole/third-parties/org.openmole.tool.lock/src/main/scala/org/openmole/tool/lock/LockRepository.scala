@@ -22,39 +22,35 @@ import java.util.concurrent.locks.{ Lock, ReentrantLock }
 
 import scala.collection.mutable
 
-object LockRepository {
+object LockRepository:
   def apply[T]() = new LockRepository[T]()
-}
 
-class LockRepository[T] {
+class LockRepository[T]:
 
   val locks = new mutable.HashMap[T, (ReentrantLock, AtomicInteger)]
 
-  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { case (_, users) ⇒ users.get }.getOrElse(0))
+  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { (_, users) ⇒ users.get }.getOrElse(0))
 
-  private def getLock(obj: T) = locks.synchronized {
+  private def getLock(obj: T) = locks.synchronized:
     val (lock, users) = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
     users.incrementAndGet
     lock
-  }
 
-  private def cleanLock(obj: T) = locks.synchronized {
-    locks.get(obj) match {
+  private def cleanLock(obj: T) = locks.synchronized:
+    locks.get(obj) match
       case Some((lock, users)) ⇒
         val value = users.decrementAndGet
         if (value <= 0) locks.remove(obj)
         lock
       case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
-    }
-  }
 
-  def withLock[A](obj: T)(op: ⇒ A) = {
+
+  def withLock[A](obj: T)(op: ⇒ A) =
     val lock = getLock(obj)
     lock.lock()
     try op
     finally
       try cleanLock(obj)
       finally lock.unlock()
-  }
 
-}
+

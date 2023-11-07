@@ -19,21 +19,37 @@ package org.openmole.core.serializer
 
 import java.io.File
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.converter.Serialiser
-import org.openmole.core.serializer.file.{ FileConverterNotifier, FileWithGCConverter }
-import org.openmole.core.serializer.plugin.{ PluginClassConverter, PluginConverter }
+import org.openmole.core.serializer.file.{FileConverterNotifier, FileWithGCConverter}
+import org.openmole.core.serializer.plugin.{PluginClassConverter, PluginConverter}
 import org.openmole.core.serializer.structure.PluginClassAndFiles
-import org.openmole.tool.file._
+import org.openmole.core.workspace.TmpDirectory
+import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.file.*
 import org.openmole.tool.stream.NullOutputStream
 
-import scala.collection.immutable.{ HashSet, TreeSet }
+import scala.collection.immutable.{HashSet, TreeSet}
 
-object PluginAndFilesListing {
+object PluginAndFilesListing:
   def looksLikeREPLClassName(p: String) = p.startsWith("$line")
+
+trait FilesListing { this: Serialiser ⇒
+  private var listedFiles: TreeSet[File] = null
+  xStream.registerConverter(new FileConverterNotifier(fileUsed))
+
+  def fileUsed(file: File) = listedFiles += file
+
+  def list(obj: Any) = synchronized:
+    listedFiles = TreeSet[File]()(fileOrdering)
+    xStream.toXML(obj, new NullOutputStream())
+    val retFile = listedFiles
+    listedFiles = null
+    retFile.toVector
 }
 
-trait PluginAndFilesListing { this: Serialiser ⇒
+trait PluginAndFilesListing(using val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache) { this: Serialiser ⇒
 
   lazy val reflectionConverter: ReflectionConverter =
     new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
@@ -43,27 +59,25 @@ trait PluginAndFilesListing { this: Serialiser ⇒
   private var seenClasses: HashSet[Class[_]] = null
   private var replClasses: HashSet[Class[_]] = null
 
-  xStream.registerConverter(new FileConverterNotifier(this))
+  xStream.registerConverter(new FileConverterNotifier(fileUsed))
   xStream.registerConverter(new PluginConverter(this, reflectionConverter))
   xStream.registerConverter(new PluginClassConverter(this))
 
-  def classUsed(c: Class[_]) = {
-
-    if (!seenClasses.contains(c)) {
+  def classUsed(c: Class[_]) =
+    if !seenClasses.contains(c)
+    then
       PluginManager.pluginsForClass(c).foreach(pluginUsed)
 
-      if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) &&
-        !PluginManager.bundleForClass(c).isDefined) replClasses += c
+      if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) && !PluginManager.bundleForClass(c).isDefined)
+      then replClasses += c
 
       seenClasses += c
-    }
-  }
 
   def pluginUsed(f: File) = plugins += f
 
   def fileUsed(file: File) = listedFiles += file
 
-  def list(obj: Any) = synchronized {
+  def list(obj: Any) = synchronized:
     plugins = TreeSet[File]()(fileOrdering)
     listedFiles = TreeSet[File]()(fileOrdering)
     seenClasses = HashSet()
@@ -77,6 +91,5 @@ trait PluginAndFilesListing { this: Serialiser ⇒
     listedFiles = null
     replClasses = null
     PluginClassAndFiles(retFile.toVector, retPlugins.toVector, retReplClasses.toVector)
-  }
 
 }

@@ -70,7 +70,7 @@ object BatchEnvironment {
     def size = file.size
   }
 
-  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String = {
+  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String = 
     val size = file.size
     eventDispatcher.trigger(environment, BeginUpload(id, file, storageId))
     val path =
@@ -83,9 +83,8 @@ object BatchEnvironment {
 
     eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Success(path), size))
     path
-  }
 
-  def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = {
+  def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = 
     eventDispatcher.trigger(environment, BeginDownload(id, file, path, storageId))
     val res =
       try download
@@ -96,7 +95,6 @@ object BatchEnvironment {
       }
     eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, None))
     res
-  }
 
   val MemorySizeForRuntime = PreferenceLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
   
@@ -125,16 +123,15 @@ object BatchEnvironment {
   def defaultRuntimeMemory(implicit preference: Preference) = preference(BatchEnvironment.MemorySizeForRuntime)
   def getTokenInterval(implicit preference: Preference, randomProvider: RandomProvider) = preference(GetTokenInterval) * randomProvider().nextDouble
 
-  def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match {
+  def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match 
     case None    ⇒ preference(MemorySizeForRuntime)
     case Some(m) ⇒ m
-  }
 
   def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
 
-  object Services {
+  object Services:
 
-    def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
+    def apply(ms: MoleServices, cache: KeyValueCache)(implicit replicaCatalog: ReplicaCatalog) =
       new Services(ms.compilationContext) (
         threadProvider = ms.threadProvider,
         preference = ms.preference,
@@ -147,11 +144,11 @@ object BatchEnvironment {
         eventDispatcher = ms.eventDispatcher,
         fileServiceCache = ms.fileServiceCache,
         outputRedirection = ms.outputRedirection,
-        loggerService = ms.loggerService
+        loggerService = ms.loggerService,
+        cache = cache
       )
 
-  }
-
+  
   class Services(val compilationContext: Option[CompilationContext])(
     implicit
     val threadProvider:    ThreadProvider,
@@ -166,6 +163,7 @@ object BatchEnvironment {
     val fileServiceCache:  FileServiceCache,
     val outputRedirection: OutputRedirection,
     val loggerService: LoggerService,
+    val cache: KeyValueCache
   )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =

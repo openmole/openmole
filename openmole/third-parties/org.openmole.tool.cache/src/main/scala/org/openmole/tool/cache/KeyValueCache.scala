@@ -1,29 +1,31 @@
 package org.openmole.tool.cache
 
 import java.util.UUID
+import org.openmole.tool.lock.LockRepository
 
-/**
- * Wrapper for uuid key (random uuid by default)
- * @param id
- * @tparam T
- */
-case class CacheKey[T](id: UUID = java.util.UUID.randomUUID())
-case class CacheValue(value: Any, clean: () ⇒ Unit)
+case class CacheKey[T](id: UUID = java.util.UUID.randomUUID()) extends AnyVal
+
+object KeyValueCache:
+  /**
+   * Wrapper for uuid key (random uuid by default)
+   * @param id
+   * @tparam T
+   */
+  case class CacheValue(value: Any) extends AnyVal
 
 /**
  * A Cache based on a HashMap
  */
-case class KeyValueCache() {
-  self ⇒
+case class KeyValueCache():
+  import KeyValueCache.*
 
-  private lazy val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
+  private val lock = LockRepository[UUID]()
+  private val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
 
-  def getOrElseUpdate[T](key: CacheKey[T], t: ⇒ T, clean: () ⇒ Unit = () ⇒ {}): T = synchronized {
-    cache.getOrElseUpdate(key, CacheValue(t, clean)).value.asInstanceOf[T]
-  }
-
-  def clean() = synchronized {
-    cache.foreach { case (_, v) ⇒ v.clean() }
-  }
-
-}
+  def getOrElseUpdate[T](key: CacheKey[T])(t: ⇒ T): T = lock.withLock(key.id):
+    cache.synchronized(cache.get(key)) match
+      case Some(v) => v.value.asInstanceOf[T]
+      case None =>
+        val value: T = t
+        cache.synchronized(cache.update(key, CacheValue(value)))
+        value

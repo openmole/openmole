@@ -50,13 +50,13 @@ import java.util.concurrent.atomic.AtomicReference
 object GUIServer:
 
   def fromWebAppLocation = openMOLELocation / "webapp"
-
   def webpackLocation = openMOLELocation / "webpack"
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
     val to = newFile.newDir("webapp")
 
+    val cssTarget = to / "css"
     from / "css" copy to / "css"
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
@@ -64,13 +64,14 @@ object GUIServer:
     val webpacked = Plugins.openmoleFile(optimizedJS)
 
     val jsTarget = to /> "js"
+
     webpacked copy (jsTarget / utils.webpakedOpenmoleFileName)
     new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
 
     Plugins.persistentWebUI / utils.openmoleGrammarMode copy jsTarget / utils.openmoleGrammarMode
     Plugins.persistentWebUI / "node_modules/plotly.js/dist/plotly.min.js" copy jsTarget / "plotly.min.js"
     Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
-    
+    Plugins.persistentWebUI / "node_modules/bootstrap-icons/" copy cssTarget / "bootstrap-icons"
     to
 
 
@@ -135,7 +136,7 @@ object GUIServer:
   case object Ok extends ExitStatus
 
 
-  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) = {
+  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) =
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
@@ -152,26 +153,22 @@ object GUIServer:
       webappCache,
       extraHeaders
     )
-  }
 
-  case class Control() {
+  case class Control():
     var cancel: () => _ = null
 
     @volatile var exitStatus: GUIServer.ExitStatus = GUIServer.Ok
     val semaphore = new Semaphore(0)
 
-    def join(): GUIServer.ExitStatus = {
+    def join(): GUIServer.ExitStatus =
       semaphore.acquire()
       semaphore.release()
       exitStatus
-    }
 
-    def stop() = {
+    def stop() =
       cancel()
       semaphore.release()
-    }
 
-  }
 
   def server(port: Int, localhost: Boolean) =
     val s =

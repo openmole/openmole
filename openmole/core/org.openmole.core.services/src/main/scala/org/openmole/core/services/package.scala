@@ -23,6 +23,8 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 package services {
 
+  import org.openmole.tool.cache.KeyValueCache
+
   /**
    * Methods to get implicit services (workspace, files, random provider, network, etc.)
    */
@@ -88,21 +90,19 @@ package services {
      * @param services
      * @return
      */
-    def dispose(services: Services) = {
+    def dispose(services: Services) =
       util.Try(Workspace.clean(services.workspace))
       util.Try(services.threadProvider.stop())
       util.Try(services.replicaCatalog.close())
-    }
 
     /**
      * reset user password
      * @param authenticationStore
      * @param preference
      */
-    def resetPassword(implicit authenticationStore: AuthenticationStore, preference: Preference) = {
+    def resetPassword(implicit authenticationStore: AuthenticationStore, preference: Preference) =
       authenticationStore.delete()
       preference.clear()
-    }
 
     def copy(services: Services)(
       workspace:           Workspace           = services.workspace,
@@ -148,7 +148,7 @@ package services {
   /**
    * Trait for services
    */
-  trait Services {
+  trait Services:
     implicit def workspace: Workspace
     implicit def preference: Preference
     implicit def cypher: Cypher
@@ -166,7 +166,6 @@ package services {
     implicit def fileServiceCache: FileServiceCache
     implicit def loggerService: LoggerService
     implicit def timeService: TimeService
-  }
 
   /**
    * A container for services, constructed with implicit arguments
@@ -188,21 +187,21 @@ package services {
    */
   class ServicesContainer(implicit
     val workspace: Workspace,
-                          val preference:          Preference,
-                          val cypher:              Cypher,
-                          val threadProvider:      ThreadProvider,
-                          val seeder:              Seeder,
-                          val replicaCatalog:      ReplicaCatalog,
-                          val tmpDirectory:        TmpDirectory,
-                          val authenticationStore: AuthenticationStore,
-                          val serializerService:   SerializerService,
-                          val fileService:         FileService,
-                          val randomProvider:      RandomProvider,
-                          val eventDispatcher:     EventDispatcher,
-                          val outputRedirection:   OutputRedirection,
-                          val networkService:      NetworkService,
-                          val fileServiceCache:    FileServiceCache,
-                          val loggerService:       LoggerService,
-                          val timeService:         TimeService) extends Services
+    val preference:          Preference,
+    val cypher:              Cypher,
+    val threadProvider:      ThreadProvider,
+    val seeder:              Seeder,
+    val replicaCatalog:      ReplicaCatalog,
+    val tmpDirectory:        TmpDirectory,
+    val authenticationStore: AuthenticationStore,
+    val serializerService:   SerializerService,
+    val fileService:         FileService,
+    val randomProvider:      RandomProvider,
+    val eventDispatcher:     EventDispatcher,
+    val outputRedirection:   OutputRedirection,
+    val networkService:      NetworkService,
+    val fileServiceCache:    FileServiceCache,
+    val loggerService:       LoggerService,
+    val timeService:         TimeService) extends Services
 
 }
