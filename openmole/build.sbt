@@ -312,7 +312,7 @@ lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq
 
 lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, fromContext, openmoleHash, openmoleFile, pluginManager, networkService) settings(
   coreSettings,
-  libraryDependencies += Libraries.json4s,
+  libraryDependencies ++= Seq(Libraries.json4s, Libraries.circe),
   defaultActivator,
   scalaJSSettings)
 

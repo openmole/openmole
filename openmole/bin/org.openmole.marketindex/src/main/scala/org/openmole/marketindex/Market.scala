@@ -23,95 +23,93 @@ import org.openmole.tool.file._
 import org.openmole.tool.archive._
 import org.openmole.core.market._
 
-object Market {
+object Market:
 
   lazy val githubMarket =
-    new Repository {
+    new Repository:
       def url = "https://github.com/openmole/openmole-market.git"
       def viewURL(name: String, branch: String) =
         Some(s"https://github.com/openmole/openmole-market/tree/$branch/$name")
-    }
 
-  object Tags {
-    lazy val abc = Tag("ABC")
-    lazy val stochastic = Tag("Stochastic")
-    lazy val simulation = Tag("Simulation")
-    lazy val machineLearning = Tag("Machine Learning")
-    lazy val R = Tag("R")
-    lazy val julia = Tag("Julia")
-    lazy val scilab = Tag("Scilab")
-    lazy val fsl = Tag("FSL")
-    lazy val neuroscience = Tag("Neuro Science")
-    lazy val gama = Tag("GAMA")
-    lazy val data = Tag("Data")
-    lazy val native = Tag("Native Code")
-    lazy val netlogo = Tag("NetLogo")
-    lazy val java = Tag("Java")
-    lazy val ga = Tag("Genetic Algorithm")
-    lazy val scala = Tag("Scala")
-    lazy val plugin = Tag("Plugin")
-    lazy val python = Tag("Python")
-    lazy val calibration = Tag("Calibration")
-    lazy val optimisation = Tag("Optimisation")
-    lazy val diversity = Tag("diversity")
-    lazy val tutorial = Tag("Tutorial")
-    lazy val workflow = Tag("Workflow")
-    lazy val sensitivity = Tag("Sensitivity")
-  }
 
-  case class Tag(label: String)
-  trait Repository {
+//  object Tags:
+//    lazy val abc = "ABC"
+//    lazy val stochastic = "Stochastic"
+//    lazy val simulation = "Simulation"
+//    lazy val machineLearning = "Machine Learning"
+//    lazy val R = "R"
+//    lazy val julia = "Julia"
+//    lazy val scilab = "Scilab"
+//    lazy val fsl = "FSL"
+//    lazy val neuroscience = "Neuro Science"
+//    lazy val gama = "GAMA"
+//    lazy val data = "Data"
+//    lazy val native = "Native Code"
+//    lazy val netlogo = "NetLogo"
+//    lazy val java = "Java"
+//    lazy val ga = "Genetic Algorithm"
+//    lazy val scala = "Scala"
+//    lazy val plugin = "Plugin"
+//    lazy val python = "Python"
+//    lazy val calibration = "Calibration"
+//    lazy val optimisation =  "Optimisation"
+//    lazy val diversity = "Diversity"
+//    lazy val tutorial = "Tutorial"
+//    lazy val workflow = "Workflow"
+//    lazy val sensitivity = "Sensitivity"
+
+  type Tag = String
+  trait Repository:
     def url: String
     def viewURL(name: String, branch: String): Option[String]
-  }
 
-  import Tags._
+//  import Tags._
 
   case class MarketRepository(repository: Repository, entries: MarketEntry*)
   case class MarketEntry(name: String, directory: String, tags: Seq[Tag] = Seq.empty)
 
-  def entries = Seq(
-    MarketRepository(
-      githubMarket,
-      MarketEntry("Hello World in Python", "python-hello", Seq(python)),
-      MarketEntry("Hello World in R", "R-hello", Seq(R)),
-      MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
-      MarketEntry("Hello World in Java", "hello-jvm", Seq(java)),
-      MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
-      MarketEntry("Hello World in Julia", "julia-hello", Seq(julia)),
-      MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
-      MarketEntry("Hello World in a Container", "hello-container", Seq(native)),
-      MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
+//  def entries = Seq(
+//    MarketRepository(
+//      githubMarket,
+//      MarketEntry("Hello World in Python", "python-hello", Seq(python)),
+//      MarketEntry("Hello World in R", "R-hello", Seq(R)),
+//      MarketEntry("Hello World in Scilab", "scilab-hello", Seq(scilab)),
+//      MarketEntry("Hello World in Java", "hello-jvm", Seq(java)),
+//      MarketEntry("Hello World in NetLogo", "fire", Seq(netlogo, stochastic, simulation)),
+//      MarketEntry("Hello World in Julia", "julia-hello", Seq(julia)),
+//      MarketEntry("Hello World in GAMA", "gama", Seq(gama, stochastic, simulation)),
+//      MarketEntry("Hello World in a Container", "hello-container", Seq(native)),
+//      MarketEntry("Hello with OpenMOLE plugin", "hello-plugin", Seq(scala, java, plugin)),
+//
+//      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity, diversity)),
+//      MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
+//      MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
+//
+//      MarketEntry("Morris Sensitivity Analysis", "sensitivity/morris", Seq(netlogo, sensitivity, simulation)),
+//      MarketEntry("Saltelli Sensitivity Analysis", "sensitivity/saltelli", Seq(sensitivity, simulation)),
+//      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
+//      MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
+//      MarketEntry("Optimise Ackley function in Python", "ackley", Seq(python, ga, native, optimisation)),
+//
+//      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
+//      MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
+//      MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
+//      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
+//
+//      MarketEntry("NSGA2 Test Functions", "nsga2-test-functions", Seq(calibration, optimisation, scala, ga)),
+//      MarketEntry("Generate Visualisation", "genetic-algos-visu", Seq(ga, R)),
+//
+//      //MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
+//    )
+//  )
 
-      MarketEntry("Model Exploration Tutorial", "tutorials/method", Seq(netlogo, ga, simulation, calibration, tutorial, sensitivity, diversity)),
-      MarketEntry("Native Application Tutorial", "tutorials/native", Seq(tutorial, native, data, python)),
-      MarketEntry("Workflow Tutorial", "tutorials/workflow", Seq(tutorial, scala, workflow)),
-
-      MarketEntry("Morris Sensitivity Analysis", "sensitivity/morris", Seq(netlogo, sensitivity, simulation)),
-      MarketEntry("Saltelli Sensitivity Analysis", "sensitivity/saltelli", Seq(sensitivity, simulation)),
-      MarketEntry("ABC", "abc", Seq(abc, stochastic, calibration, tutorial)),
-      MarketEntry("Calibration of Ants", "ants", Seq(netlogo, ga, simulation, calibration)),
-      MarketEntry("Optimise Ackley function in Python", "ackley", Seq(python, ga, native, optimisation)),
-
-      MarketEntry("Pi Computation", "pi", Seq(stochastic, simulation, scala)),
-      MarketEntry("SimpopLocal", "simpoplocal", Seq(stochastic, simulation, ga, scala, calibration)),
-      MarketEntry("Metamimetic Networks", "metamimetic-networks", Seq(stochastic, simulation, netlogo)),
-      MarketEntry("Segmentation with FSL", "fsl-fast", Seq(fsl, data, native, neuroscience)),
-
-      MarketEntry("NSGA2 Test Functions", "nsga2-test-functions", Seq(calibration, optimisation, scala, ga)),
-      MarketEntry("Generate Visualisation", "genetic-algos-visu", Seq(ga, R)),
-
-      //MarketEntry("Random Forest", "randomforest", Seq(stochastic, machineLearning, native, data, python)),
-    )
-  )
-
-  def generate(repositories: Seq[MarketRepository], destination: File, marketDirectory: File, branchName: String): Seq[GeneratedMarketEntry] = {
+  def generate(repositories: Seq[MarketRepository], destination: File, marketDirectory: File, branchName: String): Seq[GeneratedMarketEntry] =
     destination.mkdirs()
-    for {
+    for
       marketRepository ← repositories
       repository = marketRepository.repository
       project ← marketRepository.entries
-    } yield {
+    yield
       val fileName = s"${project.name}.tgz".replace(" ", "_")
       val archive = destination / fileName
       val projectDirectory = marketDirectory / project.directory
@@ -123,11 +121,9 @@ object Market {
         projectDirectory,
         marketRepository.repository.viewURL(project.directory, branchName)
       )
-    }
 
-  }
 
-}
+
 
 import org.openmole.marketindex.Market._
 
@@ -146,7 +142,7 @@ case class GeneratedMarketEntry(
       name = entry.name,
       archive = archive,
       readme = readme,
-      tags = tags.map(_.label)
+      tags = tags
     )
 }
 

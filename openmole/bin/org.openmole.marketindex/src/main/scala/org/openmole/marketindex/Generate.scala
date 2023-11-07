@@ -5,11 +5,12 @@ import org.json4s._
 import org.json4s.jackson._
 import org.openmole.core.buildinfo
 import org.openmole.core.market.MarketIndex
+import org.openmole.tool.file.*
 
 import scala.annotation.tailrec
 
-@main def generate(args: String*) = {
-
+@main def generate(args: String*) =
+  
   case class Parameters(
     target:  Option[File] = None,
     market:  Option[File] = None,
@@ -25,9 +26,20 @@ import scala.annotation.tailrec
 
   val parameters = parse(args.toList.map(_.trim))
 
+
+  def marketEntries(indexString: String) =
+    import io.circe.yaml
+    import io.circe.*
+    import io.circe.generic.auto.*
+
+    Market.MarketRepository(
+      repository = Market.githubMarket,
+      entries = yaml.parser.parse(indexString).toTry.get.as[Seq[Market.MarketEntry]].toTry.get: _*
+    )
+
   val entries =
     Market.generate(
-      Market.entries,
+      Seq(marketEntries((parameters.market.get / "index.yml").content)),
       parameters.target.get,
       parameters.market.get,
       s"${buildinfo.version.major}-dev"
@@ -37,4 +49,3 @@ import scala.annotation.tailrec
   val index = parameters.target.get / buildinfo.marketName
   index.content = Serialization.writePretty(MarketIndex(entries.map(_.toDeployedMarketEntry)))
 
-}
