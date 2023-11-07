@@ -193,9 +193,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin, withHidden = withHidden)
 
-   def recursiveListFiles(sp: SafePath, findString: Option[String]): Seq[(SafePath, Boolean)] =
+   def recursiveListFiles(sp: SafePath, findString: Option[String], withHidden: Boolean): Seq[(SafePath, Boolean)] =
     import services._
-    utils.recursiveListFiles(sp, findString)
+    utils.recursiveListFiles(sp, findString, withHidden)
 
   def isEmpty(sp: SafePath): Boolean =
     import services._

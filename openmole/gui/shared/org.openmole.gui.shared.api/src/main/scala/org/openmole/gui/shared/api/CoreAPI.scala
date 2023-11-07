@@ -58,8 +58,8 @@ trait CoreAPI extends RESTAPI:
   val listFiles: ErrorEndpoint[(SafePath, FileSorting, Boolean), FileListData] =
     errorEndpoint(post(path / prefix / "file" / "list", jsonRequest[(SafePath, FileSorting, Boolean)]), ok(jsonResponse[FileListData]))
 
-  val listRecursive: ErrorEndpoint[(SafePath, Option[String]), Seq[(SafePath, Boolean)]] =
-    errorEndpoint(post(path / prefix / "file" / "list-recursive", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
+  val listRecursive: ErrorEndpoint[(SafePath, Option[String], Boolean), Seq[(SafePath, Boolean)]] =
+    errorEndpoint(post(path / prefix / "file" / "list-recursive", jsonRequest[(SafePath, Option[String], Boolean)]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
   val move: ErrorEndpoint[Seq[(SafePath, SafePath)], Unit] =

@@ -138,7 +138,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     isText.errorImplementedBy { sp => apiImpl.isTextFile(sp) }
 
   val listRecursiveRoute =
-    listRecursive.errorImplementedBy { case(path, f) => apiImpl.recursiveListFiles(path, f) }
+    listRecursive.errorImplementedBy { case(path, f, hidden) => apiImpl.recursiveListFiles(path, f, hidden) }
 
   val moveRoute =
     move.errorImplementedBy { p => apiImpl.move(p) }

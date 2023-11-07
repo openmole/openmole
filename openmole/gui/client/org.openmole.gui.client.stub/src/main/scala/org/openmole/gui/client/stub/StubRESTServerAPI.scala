@@ -129,7 +129,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
     Future.successful(taken)
 
-  override def listRecursive(path: SafePath, findString: Option[String])(using BasePath): Future[Seq[(SafePath, Boolean)]] =
+  override def listRecursive(path: SafePath, findString: Option[String], withHidden: Boolean)(using BasePath): Future[Seq[(SafePath, Boolean)]] =
     def found = files.toSeq.filter { (f, _) => f.startsWith(path) && findString.map(s => f.name.contains(s)).getOrElse(true) }.map { (f, m) => f -> m.directory }
 
     Future.successful(found)

@@ -140,11 +140,13 @@ object utils:
       case Some(s) => FileListData(sorted.take(s), s, sortedSize)
       case None => FileListData(sorted, sortedSize, sortedSize)
 
-  def recursiveListFiles(path: SafePath, findString: Option[String])(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
+  def recursiveListFiles(path: SafePath, findString: Option[String], withHidden: Boolean = true)(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context
 
+    def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
+
     val fPath = safePathToFile(path).getAbsolutePath
-    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
+    val allFiles = safePathToFile(path).recursiveListFilesSafe((f: File) => filterHidden(f) && fPath != f.getAbsolutePath && findString.map(s => f.getName.contains(s)).getOrElse(true))
     allFiles.map { f => (fileToSafePath(f), f.isDirectory) }
 
   def exists(safePath: SafePath)(implicit workspace: Workspace) =
