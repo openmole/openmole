@@ -96,8 +96,9 @@ object ResultPlot {
 
     val plotObserver = Observer[(HtmlElement, Seq[String], NumberOfColumToBePlotted)] { case (p, hs, n) =>
       n match
+        case OneColumn => Plotly.relayout(p.ref, baseLayout("", hs.headOption.getOrElse("")))
+        case TwoColumn => Plotly.relayout(p.ref, baseLayout(hs.lastOption.getOrElse("Records"), hs.headOption.getOrElse("")))
         case NColumn => Plotly.relayout(p.ref, splomLayout)
-        case _ => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("Records")))
     }
 
     timers.setTimeout(1500) {
