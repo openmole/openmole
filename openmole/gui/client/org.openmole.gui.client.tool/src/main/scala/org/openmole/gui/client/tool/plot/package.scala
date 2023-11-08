@@ -82,8 +82,8 @@ object Plot {
 
   val splomLayout = Layout
     .showlegend(false)
-    .height(800)
-    .width(800)
+    .height(600)
+    .autosize(true)
     .font(Font.family("gi").size(14))
 
 
