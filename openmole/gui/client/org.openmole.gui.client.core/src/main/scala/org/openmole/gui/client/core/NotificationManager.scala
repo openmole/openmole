@@ -81,13 +81,14 @@ class NotificationManager:
         title,
         _ =>
           div(
-            body.amend(cls := "getItNotification"),
-            button(btn_primary, "Get it",
-              margin := "15", float.right,
-              onClick --> { _ =>
-                remove(notif)
-                hideNotificationManager
-              }
+            body.amend(cls := "getItNotification",
+              button(btn_primary, "Get it",
+                marginTop := "20",
+                onClick --> { _ =>
+                  remove(notif)
+                  hideNotificationManager
+                }
+              )
             )
           ),
         time
@@ -95,11 +96,11 @@ class NotificationManager:
     showNotification(notif)
 
   def showAlternativeNotification(
-    level: NotificationLevel,
-    title: String,
-    body: Div = div(),
-    alt1: Alternative = Alternative("OK"),
-    alt2: Alternative = Alternative("Cancel")) =
+                                   level: NotificationLevel,
+                                   title: String,
+                                   body: Div = div(),
+                                   alt1: Alternative = Alternative("OK"),
+                                   alt2: Alternative = Alternative("Cancel")) =
     lazy val notif: NotificationLine =
       addNotification(
         level,
@@ -109,8 +110,8 @@ class NotificationManager:
             body.amend(cls := "getItNotification"),
             buttonGroup.amend(
               margin := "15", float.right,
-              button(btn_primary, alt1.name, onClick --> { _ => alt1.action(id); removeById(id) } ),
-              button(btn_secondary_outline, alt2.name, onClick --> { _ => alt2.action(id); removeById(id) } )
+              button(btn_primary, alt1.name, onClick --> { _ => alt1.action(id); removeById(id) }),
+              button(btn_secondary_outline, alt2.name, onClick --> { _ => alt2.action(id); removeById(id) })
             )
           )
       )
@@ -176,9 +177,9 @@ class NotificationManager:
                     div(
                       marginRight := "10px",
                       div(
-                        overflowWrap.breakWord, overflow.hidden, width := "100%", padding:="10px", overflowY.auto,
+                        overflowWrap.breakWord, overflow.hidden, width := "100%", padding := "10px", overflowY.auto,
                         s"${CoreUtils.longTimeToString(s.time)} - ${s.title}",
-                         cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor}",
+                        cursor.pointer, fontWeight.bold, borderLeft := s"15px solid ${lColor}",
                         if (i > 0) borderTop := "1px solid white" else emptyMod,
                         backgroundColor := lColor,
                         color := "white",
@@ -187,7 +188,11 @@ class NotificationManager:
                             case Some(i) if i == s.id => None
                             case _ => Some(s.id)
                       ),
-                      currentID.signal.map { _.contains(s.id) }.expand { s.body }.amend(borderLeft := s"15px solid ${lColor}")
+                      currentID.signal.map {
+                        _.contains(s.id)
+                      }.expand {
+                        s.body
+                      }.amend(borderLeft := s"15px solid ${lColor}")
                     )
                   )
               )
