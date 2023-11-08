@@ -368,19 +368,18 @@ class ExecutionPanel:
         child <-- openEnvironmentErrors.signal.map: opened =>
           if opened
           then
-            div(width := "100%", height := "200px",
+            div(width := "100%", height := "400px",
               overflow.scroll,
               children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 200)).map:
                 case Some(ee) =>
                   val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
-                      cls := "docEntry",
-                      margin := "0 4 0 3",
+                      cls := "docEntry", width := "1140", margin := "0 4 0 3",
                       backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
-                      div(cls := "badgeOM", e.level.name, backgroundColor := envErrorLevelToColor(e.level))
+                      div(btn_danger, e.level.name)
                     ).expandOnclick(
                       div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.stack)))
                     )
