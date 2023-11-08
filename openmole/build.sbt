@@ -1085,7 +1085,7 @@ lazy val openmoleNaked =
         val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
         val cacheFile = target.value / "node_modules-hash"
         val zip = target.value / "node_modules.zip"
-        val packageJsonHash = FileInfo.hash(packageJson).hash.mkString(" ")
+        val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
 
         if(!zip.exists || !cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
           IO.copyFile(packageJson, modules / "package.json")
