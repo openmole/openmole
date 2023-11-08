@@ -1076,6 +1076,8 @@ padding-bottom: 90px;
       font-weight: bold;
       padding: 10px;
       text-decoration: underline;
+      justify-content: center;
+      display: flex;
 }
 
 .info {
@@ -1090,7 +1092,7 @@ padding-bottom: 90px;
   color: white;
   padding: 10px;
   min-height: 77px;
-  min-width: 80px;
+  min-width: 120px;
 }
 
 .statusBlockNoColor,
@@ -1445,14 +1447,16 @@ input:checked + .slider:before {
 }
 
 .getItNotification {
-    background: white;
-    color: #222;
-    margin: 20px;
+  background: white;
+  color: #222;
+  margin: 20px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-
 /*SETTINGS*/
-
 .settingButtons {
     width: 250px;
     display: flex;
