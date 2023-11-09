@@ -1,8 +1,8 @@
 package org.openmole.buildsystem
 
-import sbt._
-import Keys._
-import OMKeys._
+import sbt.*
+import Keys.*
+import OMKeys.*
 import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
 
 object OsgiProject {
@@ -13,7 +13,7 @@ object OsgiProject {
     OsgiKeys.bundleSymbolicName := (name.value + ";singleton:=" + Osgi.singleton.value),
     autoAPIMappings := true,
     OsgiKeys.packageWithJVMJar := true,
-    OsgiKeys.cacheBundle := true,
+    OsgiKeys.cacheStrategy := Some(OsgiKeys.CacheStrategy.LastModified),
 
     Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 

@@ -11,7 +11,7 @@ Global / resolvers += Resolver.sbtPluginRepo("releases")
 Global / resolvers += Resolver.sonatypeRepo("staging")
 
 //addSbtPlugin("com.github.sbt" % "sbt-osgi" % "0.9.9")
-addSbtPlugin("org.openmole" % "sbt-osgi" % "0.9.15")
+addSbtPlugin("org.openmole" % "sbt-osgi" % "0.9.16-SNAPSHOT")
 
 libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "2.0",
