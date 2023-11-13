@@ -52,13 +52,15 @@ object OMSContent:
                 editor.editor.getSession().clearBreakpoints()
                 compileDisabled.set(true)
 
-                panels.tabContent.save(tabData, saveUnmodified = true).map: saved ⇒
+                panels.tabContent.save(tabData, saveUnmodified = true).flatMap: saved ⇒
                   if saved
                   then
-                    api.validateScript(safePath).foreach: errorDataOption ⇒
-                      compileDisabled.set(false)
+                    api.validateScript(safePath).map: errorDataOption =>
                       setError(safePath, errorDataOption)
                       editor.editor.focus()
+                  else concurrent.Future.successful(())
+                .onComplete: _ =>
+                  compileDisabled.set(false)
 
               }),
               child <--
