@@ -143,24 +143,34 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 //  }
 //
 
+  private def archiveType(f: File) =
+    import org.openmole.tool.archive.*
+    val name = f.getName
+    name match
+      case n if n.endsWith(".tar") ⇒ Some(ArchiveType.Tar)
+      case n if n.endsWith(".tgz") | n.endsWith(".tar.gz") ⇒ Some(ArchiveType.TarGZ)
+      case n if n.endsWith(".zip") ⇒ Some(ArchiveType.Zip)
+      case n if n.endsWith(".tar.xz") | n.endsWith("txz") ⇒ Some(ArchiveType.TarXZ)
+      case _ ⇒ None
+
   private def extractArchiveFromFiles(from: File, to: File) =
     import org.openmole.tool.archive.*
     Try {
       val name = from.getName
-      name match
-        case n if n.endsWith(".tar") ⇒
+      archiveType(name) match
+        case Some(ArchiveType.Tar) ⇒
           from.extract(to, archive = ArchiveType.Tar)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case n if n.endsWith(".tgz") | n.endsWith(".tar.gz") ⇒
+        case Some(ArchiveType.TarGZ) ⇒
           from.extract(to, true, archive = ArchiveType.TarGZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case n if n.endsWith(".zip") ⇒
+        case Some(ArchiveType.Zip) ⇒
           import org.openmole.tool.archive
           from.extract(to, true, archive = ArchiveType.Zip)
-        case n if n.endsWith(".tar.xz") | n.endsWith("txz")  ⇒
+        case Some(ArchiveType.TarXZ)  ⇒
           from.extract(to, true, archive = ArchiveType.TarXZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case _ ⇒ throw new Throwable("Unknown compression format for file " + from)
+        case None ⇒ throw new Throwable("Unknown compression format for file " + from)
     } match
       case Success(_) ⇒ None
       case Failure(t) ⇒ Some(ErrorData(t))
@@ -633,7 +643,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
         val is = response.getEntity.getContent
 
-        if extract
+        if
+          extract && (archiveType(safePathToFile(path)) contains org.openmole.tool.archive.ArchiveType.TarGZ)
         then
           import org.openmole.tool.archive.*
           val dest = safePathToFile(path)
