@@ -103,7 +103,8 @@ ${ul(
  li{html"$threads,"},
  li{html"${apiEntryTitle{"coreByNodes"}} An alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified."},
  li{html"${apiEntryTitle{"flavour"}} Specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}}. Defaults to ${hl.openmoleNoTest{"flavour = Torque"}}"},
- li{html"$localSubmission."}
+ li{html"$modules,"},
+ li{html"$localSubmission."},
 )}
 
 
@@ -134,7 +135,8 @@ ${ul(
   li{html"$memory,"},
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
-  li{html"$localSubmission."}
+  li{html"$modules,"},
+  li{html"$localSubmission."},
 )}
 
 
@@ -176,6 +178,7 @@ ${ul(
   li{html"${apiEntryTitle{"qos"}} Quality of Service (QOS) as defined in the Slurm database"},
   li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance ${hl.openmoleNoTest{"gres = List( Gres(\"resource\", 1) )"}}"},
   li{html"${apiEntryTitle{"constraints"}} a list of SLURM defined constraints which selected nodes must match,"},
+  li{html"$modules,"},
   li{html"$localSubmission."}
 )}
 
@@ -204,6 +207,7 @@ ${ul(
   li{html"$memory,"},
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
+  li{html"$modules,"},
   li{html"$localSubmission."}
 )}
 
@@ -236,6 +240,7 @@ ${ul(
   li{html"${apiEntryTitle{"core"}} number of cores allocated for each job,"},
   li{html"${apiEntryTitle{"cpu"}} number of CPUs allocated for each job,"},
   li{html"${apiEntryTitle{"bestEffort"}} a boolean for setting the best effort mode (true by default),"},
+  li{html"$modules,"},
   li{html"$localSubmission."}
 )}
 
