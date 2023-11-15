@@ -154,6 +154,7 @@ case class PythonTask(
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           environmentVariables = environmentVariables,
+          hostFiles = hostFiles,
           stdOut = stdOut,
           stdErr = stdErr,
           external = external,
