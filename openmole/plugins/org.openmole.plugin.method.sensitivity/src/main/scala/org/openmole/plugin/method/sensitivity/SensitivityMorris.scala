@@ -409,7 +409,13 @@ object SensitivityMorris {
         aggregation = aggregation
       )
 
-    DSLContainer(w, method = Method(m.inputs, m.outputs))
+    def validate =
+      val nonContinuous = m.inputs.filter(v => !ScalableValue.isContinuous(v))
+      if nonContinuous.nonEmpty
+      then Seq(new UserBadDataError(s"Factor of Morris should be continuous values, but some are not: ${nonContinuous.map(_.prototype.quotedString).mkString(", ")}"))
+      else Seq()
+
+    DSLContainer(w, method = Method(m.inputs, m.outputs), validate = validate)
   }
 
 }

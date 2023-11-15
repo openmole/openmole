@@ -51,7 +51,7 @@ object SensitivitySaltelli {
 
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
-  given ExplorationMethod[SensitivitySaltelli, Method] = p => {
+  given ExplorationMethod[SensitivitySaltelli, Method] = p =>
     implicit def defScope: DefinitionScope = p.scope
 
     val sampling = SaltelliSampling(p.sample, p.inputs: _*)
@@ -69,8 +69,14 @@ object SensitivitySaltelli {
         aggregation = aggregation
       )
 
-    DSLContainer(w, method = Method(p.inputs, p.outputs))
-  }
+    def validate =
+      val nonContinuous = p.inputs.filter(v => !ScalableValue.isContinuous(v))
+      if nonContinuous.nonEmpty
+      then Seq(new UserBadDataError(s"Factor of Saltelli should be continuous values, but some are not: ${nonContinuous.map(_.prototype.quotedString).mkString(", ")}"))
+      else Seq()
+
+    DSLContainer(w, method = Method(p.inputs, p.outputs), validate = validate)
+
 
   object SaltelliAggregation {
 

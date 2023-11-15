@@ -72,8 +72,8 @@ object Objective {
       case true  ⇒ throw new UserBadDataError(s"Objective $o aggregation has been defined for a stochastic fitness function.")
     }
 
-  def toNoisy(o: Objective) = {
-    o.noisy match {
+  def toNoisy(o: Objective) =
+    o.noisy match
       case true ⇒ o
       case false ⇒
         if (!o.computeValue.aggregateString) {
@@ -90,8 +90,7 @@ object Objective {
           Objective(_ ⇒ medianAggregation(o.computeValue), o.negative, o.delta, o.as, noisy = true)
         }
         else o.copy(noisy = true)
-    }
-  }
+
 
   def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[Objective]) = FromContext { p ⇒
     import p._

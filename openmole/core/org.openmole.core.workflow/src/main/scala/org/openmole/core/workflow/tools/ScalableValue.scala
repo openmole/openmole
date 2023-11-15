@@ -31,41 +31,38 @@ import org.openmole.core.tools.math._
 
 import scala.reflect.ClassTag
 
-object ScalableValue {
+object ScalableValue:
 
   object Scaled:
     def toVariable(s: Scaled, values: List[Double], inputSize: Int) =
-      s match {
+      s match
         case s: ScaledScalar[_]   ⇒ Variable(s.prototype, s.v) → values.tail
         case s: ScaledSequence[_] ⇒ Variable(s.prototype, s.s) → values.drop(inputSize)
-      }
   
   enum Scaled:
     case ScaledSequence[T](prototype: Val[Array[T]], s: Array[T])
     case ScaledScalar[T](prototype: Val[T], v: T) 
 
   object ScalableType :
-    given ScalableType[Double] = new ScalableType[Double] {
+    given ScalableType[Double] = new ScalableType[Double]:
       def scale(v: Double, min: Double, max: Double) = v.scale(min, max)
       def convert(v: Double) = v
-    }
 
-    given ScalableType[Int] = new ScalableType[Int] {
+    given ScalableType[Int] = new ScalableType[Int]:
       def scale(v: Double, min: Int, max: Int) = v.scale(min.toDouble, max.toDouble + 1).toInt
       def convert(v: Double) = v.toInt
-    }
 
-    given ScalableType[Long] = new ScalableType[Long] {
+
+    given ScalableType[Long] = new ScalableType[Long]:
       def scale(v: Double, min: Long, max: Long) = v.scale(min.toDouble, max.toDouble + 1).toLong
       def convert(v: Double) = v.toLong
-    }
 
-  
 
-  trait ScalableType[T] {
+
+  trait ScalableType[T]:
     def scale(v: Double, min: T, max: T): T
     def convert(v: Double): T
-  }
+
 
   implicit def fromFactor[D, T: ScalableType](s: Factor[D,T])(implicit bounded: BoundedFromContextDomain[D, T]): ScalableValue =
     def unflatten(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p ⇒
@@ -147,9 +144,18 @@ object ScalableValue {
         case s: ScalarValue => true
         case s: SeqValue => false
 
+  def isContinuous(s: ScalableValue) =
+    def continuousType(t: Val[_]) =
+      t match
+        case Val.caseDouble(_) => true
+        case _ => false
+
+    s match
+      case s: ScalarValue => continuousType(s.prototype)
+      case s: SeqValue => continuousType(Val.fromArray(s.prototype))
 
   type Unflatten = (Seq[Double], Boolean) => FromContext[Scaled]
-}
+
 
 enum ScalableValue:
   case ScalarValue(inputs: PrototypeSet, prototype: Val[_], unflatten: ScalableValue.Unflatten)

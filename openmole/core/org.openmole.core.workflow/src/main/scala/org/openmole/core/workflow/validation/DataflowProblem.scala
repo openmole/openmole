@@ -25,8 +25,6 @@ import org.openmole.core.workflow.validation.TypeUtil.InvalidType
 
 object DataflowProblem:
 
-  private def string(v: Val[_]) = s"\"${v}\""
-
   trait SlotDataflowProblem extends DataflowProblem:
     def slot: TransitionSlot
     def capsule = slot.capsule
@@ -43,14 +41,14 @@ object DataflowProblem:
     expected: Val[_],
     provided: Val[_]
   ) extends SlotDataflowProblem:
-    override def toString = "Wrong type received at " + slot + ", " + string(expected) + " is expected but " + string(provided) + " is provided."
+    override def toString = "Wrong type received at " + slot + ", " + expected.quotedString + " is expected but " + provided.quotedString + " is provided."
 
   case class MissingInput(
     slot:    TransitionSlot,
     data:    Val[_],
     reaches: Seq[Val[_]]
   ) extends SlotDataflowProblem:
-    override def toString = s"Input ${string(data)} is missing when reaching the " + slot + s""", available inputs are: ${reaches.map(string).mkString(",")}."""
+    override def toString = s"Input ${data.quotedString} is missing when reaching the " + slot + s""", available inputs are: ${reaches.map(_.quotedString).mkString(",")}."""
 
 
   case class DuplicatedName(
@@ -59,7 +57,7 @@ object DataflowProblem:
     prototype: Iterable[Val[_]],
     slotType:  SlotType
   ) extends DataflowProblem:
-    override def toString = name + " has been found several time with different types in " + slotType + " of capsule " + capsule + ": " + prototype.map(string).mkString(", ") + "."
+    override def toString = name + " has been found several time with different types in " + slotType + " of capsule " + capsule + ": " + prototype.map(_.quotedString).mkString(", ") + "."
 
   case class IncoherentTypesBetweenSlots(
     capsule: MoleCapsule,
@@ -81,7 +79,7 @@ object DataflowProblem:
     source: Source,
     input:  Val[_]
   ) extends SourceProblem:
-    override def toString = s"Input ${string(input)} is missing for source $source at $slot"
+    override def toString = s"Input ${input.quotedString} is missing for source $source at $slot"
 
   case class WrongSourceType(
     slot:     TransitionSlot,
@@ -89,7 +87,7 @@ object DataflowProblem:
     expected: Val[_],
     provided: Val[_]
   ) extends SourceProblem:
-    override def toString = s"Wrong type received for source $source at $slot, ${string(expected)} is expected but ${string(provided)} is provided."
+    override def toString = s"Wrong type received for source $source at $slot, ${expected.quotedString} is expected but ${provided.quotedString} is provided."
 
   sealed trait HookProblem extends DataflowProblem
 
@@ -98,7 +96,7 @@ object DataflowProblem:
     hook:    Hook,
     input:   Val[_]
   ) extends HookProblem :
-    override def toString = s"Input ${string(input)} is missing for hook $hook"
+    override def toString = s"Input ${input.quotedString} is missing for hook $hook"
 
   case class WrongHookType(
     capsule: MoleCapsule,
@@ -106,7 +104,7 @@ object DataflowProblem:
     input:   Val[_],
     found:   Val[_]
   ) extends HookProblem:
-    override def toString = s"Input has incompatible type ${string{found}} whereas ${string(input)} was expected for hook $hook of capsule $capsule"
+    override def toString = s"Input has incompatible type ${found.quotedString} whereas ${input.quotedString} was expected for hook $hook of capsule $capsule"
 
   case class MissingMoleTaskImplicit(
     capsule:    MoleCapsule,

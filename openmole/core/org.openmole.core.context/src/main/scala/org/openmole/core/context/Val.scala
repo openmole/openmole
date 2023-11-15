@@ -137,7 +137,7 @@ trait ValType[T] extends Id {
   def runtimeClass = manifest.runtimeClass
 }
 
-object Val {
+object Val:
 
   /**
    * methods to convert a prototype to a prototype with type as array of the same type.
@@ -237,7 +237,9 @@ object Val {
 
   def copyWithType[T](v: Val[_], `type`: ValType[T]) = new Val(v.simpleName, `type`, v.namespace)
 
-}
+  extension (v: Val[_])
+    def quotedString = s"\"${v}\""
+
 
 object Namespace {
   def empty = Namespace()
