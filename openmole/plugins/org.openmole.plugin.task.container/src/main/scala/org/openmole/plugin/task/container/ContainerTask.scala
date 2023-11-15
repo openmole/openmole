@@ -236,10 +236,10 @@ object ContainerTask:
     stdErr: Option[Val[String]],
     external: External,
     info: InfoConfig,
+    config: InputOutputConfig,
     containerPoolKey: CacheKey[WithInstance[InstalledImage]],
     hostFiles: Seq[HostFile] = Seq(),
-    relativePathRoot: Option[String] = None,
-    config: InputOutputConfig = InputOutputConfig()) =
+    relativePathRoot: Option[String] = None) =
     val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
 
     ContainerTask.internal(

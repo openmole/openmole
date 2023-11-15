@@ -120,12 +120,11 @@ object External:
     (newContext, resourcesFiles ++ inputFilesInfo)
 
   protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    outputFiles.map {
+    outputFiles.map:
       case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
         val file = resolver(fileName)
         Variable(prototype, file)
-    }
 
   def contextFiles(outputs: PrototypeSet, context: Context): Seq[Variable[File]] =
     InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
@@ -161,19 +160,19 @@ object External:
   def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) =
     val newFile = TmpDirectory(resultDirectory)
 
-    contextFiles(outputs, context).map { v ⇒
+    contextFiles(outputs, context).map: v ⇒
       val movedFile =
-        if (workDirectories.exists(_.isAParentOf(v.value))) {
+        if workDirectories.exists(_.isAParentOf(v.value))
+        then
           val newDir = newFile.newDir("outputFile")
           newDir.mkdirs()
           val moved = fileService.wrapRemoveOnGC(newDir / v.value.getName)
           v.value.move(moved)
           fileService.deleteWhenEmpty(newDir)
           moved
-        }
         else v.value
       Variable.copy(v)(value = movedFile)
-    }
+
 
 
 import org.openmole.plugin.task.external.External._

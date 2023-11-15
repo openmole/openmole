@@ -158,6 +158,7 @@ case class PythonTask(
           stdOut = stdOut,
           stdErr = stdErr,
           external = external,
+          config = config,
           info = info,
           containerPoolKey = containerPoolKey) set (
             resources += (scriptFile, scriptPath, true),
