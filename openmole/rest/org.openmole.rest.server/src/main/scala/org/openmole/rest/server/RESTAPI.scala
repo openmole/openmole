@@ -126,7 +126,7 @@ class RESTAPI(services: Services):
                           compilationContext = Some(compiled.compilationContext)
                         )
                       Try:
-                        DSL.toPuzzle(res).toExecution()(moleServices)
+                        MoleExecution(res)(moleServices)
                       match
                         case Success(ex) ⇒ start(ex)
                         case Failure(e) ⇒

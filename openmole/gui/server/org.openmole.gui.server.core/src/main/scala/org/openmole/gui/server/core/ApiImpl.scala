@@ -351,7 +351,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
             case Failure(e) ⇒ scriptError(e)
             case Success(dsl) ⇒
-              Try(DSL.toPuzzle(dsl).toExecution()(executionServices)) match
+              Try(MoleExecution(dsl)(executionServices)) match
                 case Success(ex) ⇒ ex
                 case Failure(e) ⇒
                   MoleServices.clean(executionServices)

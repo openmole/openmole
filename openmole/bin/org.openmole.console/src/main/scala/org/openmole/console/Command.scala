@@ -43,15 +43,14 @@ import org.openmole.tool.random.{RandomProvider, Seeder}
 
 object Command:
   def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
-    val runServices = {
+    val runServices =
       import services._
       Services.copy(services)(fileServiceCache = FileServiceCache())
-    }
 
     import runServices._
     val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compilationContext))
 
-    val ex = DSL.toPuzzle(dsl).toExecution()(moleServices)
+    val ex = MoleExecution(dsl)(moleServices)
     ex.start(true)
   end start
 

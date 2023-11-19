@@ -18,32 +18,33 @@
 package org.openmole.core.workflow.mole
 
 import java.util.UUID
-import java.util.concurrent.{ Executors, Semaphore }
+import java.util.concurrent.{Executors, Semaphore}
 import java.util.logging.Level
-import org.openmole.core.context.{ CompactedContext, Context, PrototypeSet, Variable }
-import org.openmole.core.event._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
+import org.openmole.core.context.{CompactedContext, Context, PrototypeSet, Variable}
+import org.openmole.core.event.*
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.workflow.composition.Puzzle
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.grouping.Grouping
-import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
-import org.openmole.core.workflow.job.State._
-import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
+import org.openmole.core.workflow.job.State.*
+import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole
-import org.openmole.core.workflow.mole.MoleExecution.{ Cleaned, MoleExecutionFailed, SubMoleExecutionState }
+import org.openmole.core.workflow.mole.MoleExecution.{Cleaned, MoleExecutionFailed, SubMoleExecutionState}
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.{ OptionalArgument ⇒ _, _ }
-import org.openmole.core.workflow.transition.{ AggregationTransition, DataChannel, Transition, TransitionSlot }
-import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.tools.{OptionalArgument as _, *}
+import org.openmole.core.workflow.transition.{AggregationTransition, DataChannel, Transition, TransitionSlot}
+import org.openmole.core.workflow.validation.*
 import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.collection.{ PriorityQueue, StaticArrayBuffer }
-import org.openmole.tool.lock._
-import org.openmole.tool.thread._
-import org.openmole.tool.logger.{ JavaLogger, LoggerService }
+import org.openmole.tool.collection.{PriorityQueue, StaticArrayBuffer}
+import org.openmole.tool.lock.*
+import org.openmole.tool.thread.*
+import org.openmole.tool.logger.{JavaLogger, LoggerService}
 
 import scala.collection.mutable
-import scala.collection.mutable.{ Buffer, ListBuffer }
+import scala.collection.mutable.{Buffer, ListBuffer}
 
 object MoleExecution {
 
@@ -82,6 +83,11 @@ object MoleExecution {
 
   private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) }
 
+
+  def apply(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
+    val p = DSL.toPuzzle(dsl)
+    MoleExecution(Puzzle.toMole(p), p.sources, p.hooks, p.environments, p.grouping)
+
   def apply(
     mole:                        Mole,
     sources:                     Iterable[(MoleCapsule, Source)]            = Iterable.empty,
@@ -94,7 +100,7 @@ object MoleExecution {
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
     lockRepository:              LockRepository[LockKey]                    = LockRepository()
-  )(implicit moleServices: MoleServices): MoleExecution = {
+  )(implicit moleServices: MoleServices): MoleExecution =
 
     def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
 
@@ -113,7 +119,6 @@ object MoleExecution {
       keyValueCache = taskCache,
       lockRepository = lockRepository
     )
-  }
 
   type CapsuleStatuses = Map[MoleCapsule, JobStatuses]
 

@@ -18,21 +18,21 @@
 package org.openmole.core.workflow.task
 
 import java.util.concurrent.locks.ReentrantLock
-
-import org.openmole.core.context._
-import org.openmole.core.event._
-import org.openmole.core.exception._
-import org.openmole.core.fromcontext._
-import org.openmole.core.setter._
-import org.openmole.core.workflow._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.execution._
+import org.openmole.core.context.*
+import org.openmole.core.event.*
+import org.openmole.core.exception.*
+import org.openmole.core.fromcontext.*
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.*
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.job.Job
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.lock._
+import org.openmole.tool.lock.*
 import org.openmole.tool.random.Seeder
 import monocle.Focus
+import org.openmole.core.workflow.composition.Puzzle
 
 object MoleTask {
 
@@ -45,16 +45,15 @@ object MoleTask {
    * @param dsl
    * @return
    */
-  def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+  def apply(dsl: DSL)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask =
     val puzzle = DSL.toPuzzle(dsl)
-    apply(puzzle.toMole, puzzle.lasts.head)
-  }
+    apply(Puzzle.toMole(puzzle), puzzle.lasts.head)
 
   /**
    * @param mole the mole executed by this task.
    * @param last the capsule which returns the results
    */
-  def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask = {
+  def apply(mole: Mole, last: MoleCapsule)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): MoleTask =
     val mt = new MoleTask(mole, last, Vector.empty, InputOutputConfig(), InfoConfig())
 
     mt set (
@@ -62,7 +61,6 @@ object MoleTask {
       dsl.outputs ++= last.outputs(mole, Sources.empty, Hooks.empty).toSeq,
       summon[InputOutputBuilder[MoleTask]].defaults.set(Task.defaults(mole.root.task(mole, Sources.empty, Hooks.empty)))
     )
-  }
 
   /**
    * Check if a given [[Job]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
@@ -73,10 +71,9 @@ object MoleTask {
   def containsMoleTask(moleJob: Job) = isMoleTask(moleJob.task.task)
 
   def isMoleTask(task: Task) =
-    task match {
+    task match
       case _: MoleTask ⇒ true
       case _           ⇒ false
-    }
 
   def tasks(moleTask: MoleTask) =
     moleTask.mole.capsules.map(_.task(moleTask.mole, Sources.empty, Hooks.empty))

@@ -21,6 +21,7 @@ import org.openmole.core.context.*
 import org.openmole.core.fromcontext.{Default, DefaultSet}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.outputmanager.OutputManager
+import org.openmole.core.workflow.composition.Puzzle
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.validation.DataflowProblem.*
@@ -348,7 +349,7 @@ object Validation {
     import org.openmole.core.workflow.dsl._
     val puzzle = DSL.toPuzzle(dsl)
     apply(
-      mole = puzzle.toMole,
+      mole = Puzzle.toMole(puzzle),
       sources = puzzle.sources,
       hooks = puzzle.hooks
     )

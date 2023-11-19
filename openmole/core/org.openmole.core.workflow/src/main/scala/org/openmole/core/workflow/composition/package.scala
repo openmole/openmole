@@ -132,6 +132,8 @@ object Puzzle {
       validate = p.validate ++ validate
     )
 
+  def toMole(p: Puzzle) = new Mole(p.firstSlot.capsule, p.transitions, p.dataChannels, validate = p.validate)
+
 }
 
 /**
@@ -156,31 +158,30 @@ class Puzzle(
   val hooks:        Iterable[(MoleCapsule, Hook)],
   val environments: Map[MoleCapsule, EnvironmentProvider],
   val grouping:     Map[MoleCapsule, Grouping],
-  val validate:     Validate) {
+  val validate:     Validate):
 
-  def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
-
-  def toExecution(implicit moleServices: MoleServices): MoleExecution =
-    MoleExecution(toMole, sources, hooks, environments, grouping)
-
-  def toExecution(
-    implicits:          Context                                    = Context.empty,
-    defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
-    MoleExecution(
-      mole = toMole,
-      sources = sources,
-      hooks = hooks,
-      environments = environments,
-      grouping = grouping,
-      implicits = implicits,
-      defaultEnvironment = defaultEnvironment
-    )
+//  def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
+//
+//  def toExecution(implicit moleServices: MoleServices): MoleExecution =
+//    MoleExecution(toMole, sources, hooks, environments, grouping)
+//
+//  def toExecution(
+//    implicits:          Context                                    = Context.empty,
+//    defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
+//    MoleExecution(
+//      mole = toMole,
+//      sources = sources,
+//      hooks = hooks,
+//      environments = environments,
+//      grouping = grouping,
+//      implicits = implicits,
+//      defaultEnvironment = defaultEnvironment
+//    )
 
   def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
   def first = firstSlot.capsule
-  def inputs = first.inputs(toMole, sources, hooks).toSeq
-  def defaults = Task.defaults(first.task(toMole, sources, hooks))
-}
+  def inputs = first.inputs(Puzzle.toMole(this), sources, hooks).toSeq
+  def defaults = Task.defaults(first.task(Puzzle.toMole(this), sources, hooks))
 
 object SingleTaskMethod:
   import org.openmole.core.omr.*
@@ -318,28 +319,24 @@ object DSL {
     def apply(t: T): TaskNode
   }
 
-  object ToDSL {
+  object ToDSL:
     given ToDSL[DSL] = t => t
     given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, _]): ToDSL[T] = t ⇒ tc(t)
     given [T: ToNode]: ToDSL[T] = t ⇒ TaskNodeDSL(summon[ToNode[T]](t))
     given [T](using dslSelector: DSLSelector[T]): ToDSL[T] = t ⇒ dslSelector.select(t)
-  }
 
-  @FunctionalInterface trait ToDSL[-T] {
+  @FunctionalInterface trait ToDSL[-T]:
     def apply(t: T): DSL
-  }
 
-  object ToMole {
-    given ToMole[DSL] = t ⇒ DSL.toPuzzle(t).toMole
+  object ToMole:
+    given ToMole[DSL] = t ⇒ Puzzle.toMole(DSL.toPuzzle(t))
     given [T: ToDSL]: ToMole[T] = t ⇒ summon[ToMole[DSL]](summon[ToDSL[T]](t))
-  }
 
-  @FunctionalInterface trait ToMole[-T] {
+  @FunctionalInterface trait ToMole[-T]:
     def apply(t: T): Mole
-  }
 
   object ToMoleExecution {
-    given [T: ToDSL](using moleServices: MoleServices): ToMoleExecution[T] = t ⇒ DSL.toPuzzle(implicitly[ToDSL[T]].apply(t)).toExecution
+    given [T: ToDSL](using moleServices: MoleServices): ToMoleExecution[T] = t ⇒ MoleExecution(implicitly[ToDSL[T]].apply(t))
   }
 
   @FunctionalInterface trait ToMoleExecution[-T] {
@@ -645,20 +642,18 @@ trait CompositionPackage {
   implicit def toMole[T](t: T)(using toMole: org.openmole.core.workflow.composition.DSL.ToMole[T]): Mole = toMole.apply(t)
   implicit def toMoleExecution[T](t: T)(using toMoleExecution: org.openmole.core.workflow.composition.DSL.ToMoleExecution[T]): MoleExecution = toMoleExecution.apply(t)
 
-  implicit class DSLDecorator(t1: DSL) {
+  implicit class DSLDecorator(t1: DSL):
     def &(t2: DSL) = new &(t1, t2)
     def and(t2: DSL) = new &(t1, t2)
   
     def outputs: Seq[Val[_]] = outputs(false)
-    def outputs(explore: Boolean): Seq[Val[_]] = {
+    def outputs(explore: Boolean): Seq[Val[_]] =
       given DefinitionScope.Internal("outputs")
       val last = EmptyTask()
       val p = if (!explore) DSL.toPuzzle(t1 -- last) else DSL.toPuzzle(t1 -< last)
-      val mole = p.toMole
+      val mole = Puzzle.toMole(p)
       val slot = p.slots.toSeq.find(_.capsule._task == last).head
       TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
-    }
-  }
  
   /* ----------------- Patterns ------------------- */
  
@@ -671,20 +666,18 @@ trait CompositionPackage {
     def apply(task: Task) = TaskNode(task, strain = true)
     def apply(task: TaskNode) = task.copy(strain = true)
  
-    def apply(dsl: DSL)(implicit scope: DefinitionScope = "strain"): DSL = {
+    def apply(dsl: DSL)(implicit scope: DefinitionScope = "strain"): DSL =
       val first = Strain(EmptyTask())
       val last = Strain(EmptyTask())
  
       val p = first -- dsl -- last
  
-      val receivedFromDSL = {
+      val receivedFromDSL =
         val puzzle: Puzzle = DSL.toPuzzle(p)
-        val mole = puzzle.toMole
+        val mole = Puzzle.toMole(puzzle)
         TypeUtil.receivedTypes(mole, puzzle.sources, puzzle.hooks)(mole.slots(puzzle.lasts.head).head)
-      }
   
       p & (first oo last).block(receivedFromDSL.toSeq*)
-    }
   
   }
   
