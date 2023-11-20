@@ -150,7 +150,6 @@ class ServerState:
     executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(moleExecution))) }.isDefined
   }
 
-
   def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
     executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(error))) }.isDefined
   }
@@ -235,7 +234,7 @@ class ServerState:
 //      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
     executionInfo(key).moleExecution match
-      case None => Preparing()
+      case None => Preparing(exist = false)
       case Some(error: Failed) ⇒ error
       case Some(moleExecution: MoleExecution) ⇒
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
@@ -268,7 +267,7 @@ class ServerState:
             )
         }
 
-        moleExecution.exception match {
+        moleExecution.exception match
           case Some(t) ⇒
             Failed(
               capsules = statuses,
@@ -298,8 +297,7 @@ class ServerState:
                 duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(key)
               )
-            else Preparing()
-        }
+            else Preparing(exist = true)
 
   }
 

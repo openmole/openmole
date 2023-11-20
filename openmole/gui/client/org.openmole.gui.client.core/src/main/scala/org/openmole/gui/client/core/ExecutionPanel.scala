@@ -32,11 +32,12 @@ object ExecutionPanel:
           case _: ExecutionState.Running => State.running
           case f: ExecutionState.Canceled => State.canceled(!f.clean)
           case f: ExecutionState.Finished => State.completed(!f.clean)
-          case _: ExecutionState.Preparing => State.preparing
+          case ExecutionState.Preparing(e) => State.preparing(e)
 
       def toString(s: State) =
         s match
-          case State.preparing => "preparing"
+          case State.preparing(false) => "compiling"
+          case State.preparing(false) => "preparing"
           case State.running => "running"
           case State.completed(true) => "cleaning"
           case State.completed(false) => "completed"
@@ -57,7 +58,8 @@ object ExecutionPanel:
 
 
     enum State:
-      case preparing, running
+      case running
+      case preparing(exist: Boolean) extends State
       case completed(cleaning: Boolean) extends State
       case failed(cleaning: Boolean) extends State
       case canceled(cleaning: Boolean) extends State
@@ -211,7 +213,7 @@ class ExecutionPanel:
 
   def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
     child <-- showControls.signal.map: c =>
-      if c && state != ExecutionDetails.State.preparing
+      if c && state != ExecutionDetails.State.preparing(false)
       then
         div(display.flex, flexDirection.column, alignItems.center,
           button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
@@ -252,7 +254,7 @@ class ExecutionPanel:
       case State.completed(_) => "#00810a"
       case State.failed(_) => "#c8102e"
       case State.canceled(_) => "#d14905"
-      case State.preparing => "#f1c345"
+      case State.preparing(_) => "#f1c345"
       case State.running => "#a5be21"
 
 

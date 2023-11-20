@@ -347,7 +347,8 @@ object MoleExecution {
   /* -------------- Mole Execution ----------------- */
 
   def start(moleExecution: MoleExecution, context: Option[Context]) =
-    if (!moleExecution._started) {
+    if !moleExecution._started && !moleExecution._canceled
+    then
       import moleExecution.executionContext.services._
       LoggerService.fine("Starting mole execution")
 
@@ -365,10 +366,10 @@ object MoleExecution {
       startEnvironments()
       submit(moleExecution.rootSubMoleExecution, moleExecution.mole.root, context.getOrElse(Context.empty), nextTicket(moleExecution, moleExecution.rootTicket))
       checkAllWaiting(moleExecution)
-    }
 
   private def finish(moleExecution: MoleExecution, canceled: Boolean = false) =
-    if (!moleExecution._finished) {
+    if !moleExecution._finished
+    then
       import moleExecution.executionContext.services._
       LoggerService.fine(s"finish mole execution $moleExecution, canceled ${canceled}")
 
@@ -378,15 +379,13 @@ object MoleExecution {
       moleExecution.finishedSemaphore.release()
 
       moleExecution.executionContext.services.threadProvider.enqueue(ThreadProvider.maxPriority) { () ⇒
-        def stopEnvironments() = {
+        def stopEnvironments() =
           if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
           moleExecution.environments.values.foreach(_.stop())
-        }
 
         try stopEnvironments()
         finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExecution())
       }
-    }
 
   def clean(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
@@ -398,8 +397,9 @@ object MoleExecution {
       moleExecution.cleanedSemaphore.release()
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Cleaned())
 
-  def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit = {
-    if (!moleExecution._canceled) {
+  def cancel(moleExecution: MoleExecution, t: Option[MoleExecutionFailed]): Unit =
+    if !moleExecution._canceled
+    then
       import moleExecution.executionContext.services._
       LoggerService.log(Level.FINE, s"cancel mole execution $moleExecution, with error $t")
 
@@ -407,8 +407,6 @@ object MoleExecution {
       cancel(moleExecution.rootSubMoleExecution)
       moleExecution._canceled = true
       finish(moleExecution, canceled = true)
-    }
-  }
 
   def nextTicket(moleExecution: MoleExecution, parent: Ticket): Ticket = {
     val ticket = Ticket(parent, moleExecution.ticketNumber)
@@ -624,10 +622,11 @@ object MoleExecutionMessage {
     import moleExecution.executionContext.services._
     LoggerService.log(Level.FINE, s"processing message $msg in mole execution $moleExecution")
 
-    try {
-      msg match {
+    try
+      msg match
         case msg: PerformTransition ⇒
-          if (!moleExecution._canceled)
+          if !moleExecution._canceled
+          then
             moleExecution.subMoleExecutions.get(msg.subMoleExecution) foreach { state ⇒
               if (!state.canceled) msg.operation(state)
               MoleExecution.checkIfSubMoleIsFinished(state)
@@ -638,11 +637,8 @@ object MoleExecutionMessage {
         case msg: WithMoleExecutionSate ⇒ msg.operation(moleExecution)
         case msg: CleanMoleExecution    ⇒ MoleExecution.clean(moleExecution)
         case msg: MoleExecutionError    ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(msg.t)))
-      }
-    }
-    catch {
+    catch
       case t: Throwable ⇒ MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(t)))
-    }
 
     MoleExecution.checkAllWaiting(moleExecution)
     MoleExecution.checkMoleExecutionIsFinished(moleExecution)
@@ -793,21 +789,19 @@ class MoleExecution(
     t.start()
     this
 
-  def hangOn(cleaned: Boolean = true) = {
+  def hangOn(cleaned: Boolean = true) =
     if (cleaned) cleanedSemaphore.acquireAndRelease()
     else finishedSemaphore.acquireAndRelease()
     this
-  }
 
   def cancel = MoleExecutionMessage.send(this)(MoleExecutionMessage.CancelMoleExecution())
 
-  def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses = {
+  def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses =
     val (jobs, capsules, cmp) =
       sync {
         val (jobs, capsules) = moleExecution.jobs.toSeq.unzip
         (jobs.toArray, capsules.toArray, completed.toMap)
       }
     MoleExecution.capsuleStatuses(this, jobs, capsules, cmp)
-  }
 
 }

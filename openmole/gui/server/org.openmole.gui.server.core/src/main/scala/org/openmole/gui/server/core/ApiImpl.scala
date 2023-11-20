@@ -289,20 +289,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         catch
           case e: Throwable => Some(ErrorData(e))
         finally
-          MoleExecution.clean(e)  
-
-//  def runScript(script: SafePath, validateScript: Boolean) =
-//    val (execId, outputStream) = compilationData(script)
-//    val content = safePathToFile(script).content
-//
-//    execution.addStaticInfo(execId, StaticExecutionInfo(script, content, System.currentTimeMillis()))
-//    execution.addOutputStreams(execId, outputStream)
-//
-//    val errorData = synchronousCompilation(execId, script, outputStream, onEvaluated, onCompiled)
-//    errorData.foreach { ed ⇒ execution.addError(execId, Failed(Vector.empty, ed, Seq.empty)) }
-//
-//    execution.addCompilation(execId, compilationFuture)
-
+          MoleExecution.clean(e)
 
   def synchronousCompilation(
     scriptPath:   SafePath,
@@ -393,7 +380,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case Success(_) ⇒
           val inserted = serverState.addMoleExecution(execId, ex)
           if !inserted then ex.cancel
-    end processRun
 
     synchronousCompilation(script, outputStream) match
       case e: MoleExecution => processRun(execId, e, validateScript)

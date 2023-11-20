@@ -214,7 +214,7 @@ case class ErrorInCompiler(error: Throwable) extends CompilationError
 
 case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult:
 
-  def eval(args: Seq[String])(implicit services: Services) =
+  def eval(args: Seq[String])(implicit services: Services): DSL =
     import services._
 
     compilationContext.repl.evalCompiled(result) match 

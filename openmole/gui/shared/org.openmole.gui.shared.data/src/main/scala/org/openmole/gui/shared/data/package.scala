@@ -208,7 +208,7 @@ object ExecutionState:
 //      def capsules = Vector.empty
 //      def environmentStates: Seq[EnvironmentState] = Seq()
 
-  case class Preparing() extends ExecutionState("preparing"):
+  case class Preparing(exist: Boolean) extends ExecutionState("preparing"):
     def duration: Long = 0L
     def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()
