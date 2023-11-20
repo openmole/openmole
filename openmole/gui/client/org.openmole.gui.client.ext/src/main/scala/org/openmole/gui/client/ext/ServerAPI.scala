@@ -53,8 +53,8 @@ trait ServerAPI:
   def removeExecution(id: ExecutionId)(using BasePath): Future[Unit]
   def validateScript(script: SafePath)(using BasePath): Future[Option[ErrorData]]
   def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId]
-  def clearEnvironmentError(environment: EnvironmentId)(using BasePath): Future[Unit]
-  def listEnvironmentError(environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
+  def clearEnvironmentError(id: ExecutionId, environment: EnvironmentId)(using BasePath): Future[Unit]
+  def listEnvironmentError(id: ExecutionId, environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
 
 
   def listPlugins()(using BasePath): Future[Seq[Plugin]]

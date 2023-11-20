@@ -40,20 +40,31 @@ case class RunningEnvironment(
 
 
 object ServerState:
-  case class ExecutionInfo(path: SafePath, script: String, startDate: Long, output: StringPrintStream, moleExecution: Option[ExecutionState.Failed | MoleExecution])
+  case class ExecutionInfo(
+    path: SafePath,
+    script: String,
+    startDate: Long,
+    output: StringPrintStream,
+    moleExecution: Option[ExecutionState.Failed | MoleExecution],
+    environments: Map[EnvironmentId, RunningEnvironment])
 
 class ServerState:
 
   import ExecutionState._
 
   private val executionInfo = TMap[ExecutionId, ServerState.ExecutionInfo]()
-  private val environmentIds = TMap[ExecutionId, Seq[EnvironmentId]]()
-  private val runningEnvironments = TMap[EnvironmentId, RunningEnvironment]()
+
   private val notificationEvents = TSet[NotificationEvent]()
   private val notificationEventId = Ref[Long](0)
 
-  private def updateRunningEnvironment(envId: EnvironmentId)(update: RunningEnvironment ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
-    runningEnvironments.get(envId).foreach { env ⇒ runningEnvironments(envId) = update(env) }
+  private def updateRunningEnvironment(executionId: ExecutionId, envId: EnvironmentId)(update: RunningEnvironment ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+    for
+      info <- executionInfo.get(executionId)
+      environment <- info.environments.get(envId)
+    do
+      val newEnvironment = update(environment)
+      val newInfo = info.copy(environments = info.environments.updated(envId, newEnvironment))
+      executionInfo(executionId) = newInfo
   }
 
   def moleExecutionListener(execId: ExecutionId, script: SafePath): EventDispatcher.Listner[MoleExecution] =
@@ -71,14 +82,14 @@ class ServerState:
             _)
         )
 
-  def environmentListener(envId: EnvironmentId): EventDispatcher.Listner[Environment] =
+  def environmentListener(executionId: ExecutionId, envId: EnvironmentId): EventDispatcher.Listner[Environment] =
     case (env: Environment, bdl: BeginDownload) ⇒
-      updateRunningEnvironment(envId): env =>
+      updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(networkActivity = na.copy(downloadingFiles = na.downloadingFiles + 1))
 
     case (env: Environment, edl: EndDownload) ⇒
-      updateRunningEnvironment(envId): env =>
+      updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(
           networkActivity =
@@ -92,12 +103,12 @@ class ServerState:
         )
 
     case (env: Environment, bul: BeginUpload) ⇒
-      updateRunningEnvironment(envId): env =>
+      updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(networkActivity = na.copy(uploadingFiles = na.uploadingFiles + 1))
 
     case (env: Environment, eul: EndUpload) ⇒
-      updateRunningEnvironment(envId): env =>
+      updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(
           networkActivity =
@@ -111,35 +122,23 @@ class ServerState:
         )
 
     case (env: Environment, j: Environment.JobCompleted) ⇒
-      updateRunningEnvironment(envId): env =>
+      updateRunningEnvironment(executionId, envId): env =>
         val ex = env.executionActivity
         env.copy(executionActivity = ex.copy(executionTime = ex.executionTime + j.log.executionEndTime - j.log.executionBeginTime))
 
-  def addRunningEnvironment(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
-    environmentIds(id) = Seq()
-    envIds.foreach {
-      case (envId, env) ⇒
-        environmentIds(id) = environmentIds(id) :+ envId
-        runningEnvironments(envId) = RunningEnvironment(env)
-    }
+  def setEnvironments(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
+    executionInfo.updateWith(id): execution =>
+      execution.map: e =>
+        e.copy(environments = envIds.toMap.mapValues(env => RunningEnvironment(env)).toMap)
   }
 
-  def getRunningEnvironments(id: ExecutionId): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    getRunningEnvironments(environmentIds.getOrElse(id, Seq.empty): _*)
-  }
-
-  def getRunningEnvironments(envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
-    envIds.flatMap { id ⇒ runningEnvironments.get(id).map(r ⇒ id → r) }
-  }
-
-  def deleteEnvironmentErrors(id: EnvironmentId): Unit = atomic { implicit ctx ⇒
-    runningEnvironments.get(id).map { case RunningEnvironment(e, _, _) ⇒ e }
-  }.foreach(Environment.clearErrors)
-
-  def removeRunningEnvironments(id: ExecutionId) = atomic { implicit ctx ⇒
-    environmentIds.remove(id).foreach {
-      _.foreach { runningEnvironments.remove }
-    }
+  def getEnvironments(executionId: ExecutionId, envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
+    executionInfo.get(executionId) match
+      case Some(info) =>
+        if envIds.nonEmpty
+        then envIds.flatMap(id => info.environments.get(id).map(id -> _))
+        else info.environments.toSeq.sortBy(_._2.environment.name)
+      case None => Seq()
   }
 
   def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) = atomic { implicit ctx ⇒
@@ -160,11 +159,7 @@ class ServerState:
       case _ =>
 
   def remove(key: ExecutionId) =
-    val exec =
-      atomic { implicit ctx ⇒
-        removeRunningEnvironments(key)
-        executionInfo.remove(key)
-      }
+    val exec = atomic { implicit ctx ⇒ executionInfo.remove(key) }
 
     exec.flatMap(_.moleExecution) match
       case Some(e: MoleExecution) => e.cancel
@@ -172,7 +167,7 @@ class ServerState:
 
 
   def environmentState(id: ExecutionId): Seq[EnvironmentState] =
-    getRunningEnvironments(id).map:
+    getEnvironments(id).map:
       case (envId, e) ⇒
         EnvironmentState(
           envId = envId,
@@ -183,23 +178,17 @@ class ServerState:
           failed = e.environment.failed,
           networkActivity = e.networkActivity,
           executionActivity = e.executionActivity,
-          numberOfErrors = environmentErrorSize(envId)
+          numberOfErrors = Environment.errors(e.environment).length
         )
 
-
-  def environmentErrorSize(environmentId: EnvironmentId) =
-    val errorMap = getRunningEnvironments(environmentId).toMap
-    val info = errorMap(environmentId)
-    Environment.errors(info.environment).size
-
-  def environmentErrors(environmentId: EnvironmentId): Seq[EnvironmentError] =
-    val errorMap = getRunningEnvironments(environmentId).toMap
+  def environmentErrors(id: ExecutionId, environmentId: EnvironmentId): Seq[EnvironmentError] =
+    val errorMap = getEnvironments(id, environmentId).toMap
     val info = errorMap(environmentId)
 
     val errors = Environment.errors(info.environment)
 
-    errors.map { ex ⇒
-      ex.detail match {
+    errors.map: ex ⇒
+      ex.detail match
         case Some(detail) ⇒
           val exceptionMessage = ex.exception.getMessage
 
@@ -223,8 +212,9 @@ class ServerState:
             ex.creationTime,
             utils.javaLevelToErrorLevel(ex.level)
           )
-      }
-    }
+
+  def clearEnvironmentErrors(id: ExecutionId, environmentId: EnvironmentId) =
+    getEnvironments(id, environmentId).map(e => Environment.clearErrors(e._2.environment))
 
   def state(key: ExecutionId): ExecutionState = atomic { implicit ctx ⇒
 
@@ -240,12 +230,11 @@ class ServerState:
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
 
         def scopeToString(scope: DefinitionScope) =
-          scope match {
+          scope match
             case DefinitionScope.User           ⇒ "user"
             case DefinitionScope.Internal(name) ⇒ name
-          }
 
-        lazy val statuses = moleExecution.capsuleStatuses.toVector.map {
+        lazy val statuses = moleExecution.capsuleStatuses.toVector.map:
           case (k, v) ⇒
             import org.openmole.core.dsl.extension.Task
             def isUser(t: Task) = t.info.definitionScope == DefinitionScope.User
@@ -265,7 +254,6 @@ class ServerState:
               user = isUser(task),
               userCardinality = cardinality(task)
             )
-        }
 
         moleExecution.exception match
           case Some(t) ⇒
@@ -306,12 +294,11 @@ class ServerState:
     val executions =
       for
         id <- if ids.isEmpty then executionInfo.keys else ids
-        static ← executionInfo.get(id)
+        info ← executionInfo.get(id)
       yield
         val stateValue = state(id)
-        def environments: Seq[RunningEnvironment] = environmentIds.get(id).toSeq.flatten.flatMap(runningEnvironments.get)
-        val executionTime = environments.map(_.executionActivity.executionTime).sum
-        ExecutionData(id, static.path, static.script, static.startDate, stateValue, executionTime)
+        val executionTime = info.environments.values.map(_.executionActivity.executionTime).sum
+        ExecutionData(id, info.path, info.script, info.startDate, stateValue, executionTime)
 
     executions.toSeq.sortBy(_.startDate)
   }

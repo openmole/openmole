@@ -315,11 +315,11 @@ class ExecutionPanel:
     val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
 
-    def jobs(envStates: Seq[EnvironmentState]) =
+    def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
       div(columnFlex, marginTop := "20px",
         for
           e <- envStates
-        yield jobRow(e)
+        yield jobRow(executionId, e)
       )
 
     def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
@@ -344,11 +344,11 @@ class ExecutionPanel:
     )
 
 
-    def jobRow(e: EnvironmentState) =
+    def jobRow(executionId: ExecutionId, e: EnvironmentState) =
       val openEnvironmentErrors: Var[Boolean] = Var(false)
 
-      def cleanEnvironmentErrors(id: EnvironmentId) =
-        api.clearEnvironmentError(id).andThen: _ =>
+      def cleanEnvironmentErrors(executionId: ExecutionId, id: EnvironmentId) =
+        api.clearEnvironmentError(executionId, id).andThen: _ =>
           showExpander.set(None)
           showExpander.set(Some(Expand.Computing))
 
@@ -365,14 +365,14 @@ class ExecutionPanel:
           contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
             onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
           div(cls := "bi-three-dots-vertical execControls", onClick --> showEvironmentControls.update(!_)),
-          environmentControls(e.envId, cleanEnvironmentErrors),
+          environmentControls(e.envId, id => cleanEnvironmentErrors(executionId, id)),
         ),
         child <-- openEnvironmentErrors.signal.map: opened =>
           if opened
           then
             div(width := "100%", height := "400px",
               overflow.scroll,
-              children <-- Signal.fromFuture(api.listEnvironmentError(e.envId, 200)).map:
+              children <-- Signal.fromFuture(api.listEnvironmentError(executionId, e.envId, 200)).map:
                 case Some(ee) =>
                   val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
                   errors.zipWithIndex.map: (e, i) =>
@@ -426,7 +426,7 @@ class ExecutionPanel:
                     case None => Seq(i(cls := "bi bi-hourglass-split", textAlign := "center"))
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
-          case Some(Expand.Computing) => jobs(details.envStates)
+          case Some(Expand.Computing) => jobs(id, details.envStates)
           case None => div()
       )
 

@@ -357,7 +357,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val content = safePathToFile(script).content
 
-    serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None))
+    serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None, Map.empty))
     
     import scala.util.control.Breaks
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean): Unit = Breaks.breakable:
@@ -370,9 +370,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
             Breaks.break()
 
-      serverState.addRunningEnvironment(execId, envIds)
+      serverState.setEnvironments(execId, envIds)
       ex.listen(serverState.moleExecutionListener(execId, script))
-      envIds.foreach { (envId, env) ⇒ env.listen(serverState.environmentListener(envId)) }
+      envIds.foreach { (envId, env) ⇒ env.listen(serverState.environmentListener(execId, envId)) }
 
       catchAll(ex.start(validateScript)) match
         case Failure(e) ⇒
@@ -401,11 +401,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   //def staticInfos() = execution.staticInfos()
 
-  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit = serverState.deleteEnvironmentErrors(environmentId)
+  def clearEnvironmentErrors(executionId: ExecutionId, environmentId: EnvironmentId): Unit = serverState.clearEnvironmentErrors(executionId: ExecutionId, environmentId)
 
-  def listEnvironmentErrors(environmentId: EnvironmentId, lines: Int): Seq[EnvironmentError] = atomic {
+  def listEnvironmentErrors(executionId: ExecutionId, environmentId: EnvironmentId, lines: Int): Seq[EnvironmentError] = atomic {
     implicit ctx ⇒
-      val environmentErrors = serverState.environmentErrors(environmentId)
+      val environmentErrors = serverState.environmentErrors(executionId, environmentId)
 
 //      def groupedErrors =
 //          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
@@ -422,7 +422,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     //    ))
   }
 
-  def marketIndex() = {
+  def marketIndex() =
     import services._
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
@@ -433,7 +433,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       })
 
     mapToMd(market.marketIndex)
-  }
 
   def getMarketEntry(entry: MarketIndexEntry, path: SafePath) = {
     import services._

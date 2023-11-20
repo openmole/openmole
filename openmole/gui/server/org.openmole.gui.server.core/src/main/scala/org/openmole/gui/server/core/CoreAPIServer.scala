@@ -168,10 +168,10 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     launchScript.errorImplementedBy { (s, b) => apiImpl.launchScript(s, b) }
 
   val clearEnvironmentErrorsRoute =
-    clearEnvironmentErrors.errorImplementedBy { i => apiImpl.clearEnvironmentErrors(i) }
+    clearEnvironmentErrors.errorImplementedBy { case (eid, i) => apiImpl.clearEnvironmentErrors(eid, i) }
 
   val listEnvironmentErrorsRoute =
-    listEnvironmentErrors.errorImplementedBy { case(e, i) => apiImpl.listEnvironmentErrors(e, i) }
+    listEnvironmentErrors.errorImplementedBy { case(eid, e, i) => apiImpl.listEnvironmentErrors(eid, e, i) }
 
 //  val modelsRoute =
 //    models.errorImplementedBy { p => apiImpl.models(p) }
