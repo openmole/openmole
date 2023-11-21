@@ -290,7 +290,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           for
             (file, fileType) ← fileParts zip fileTypes
           do
-            HTTP.recieveFile(file, rootFile(fileType))
+            val destination = rootFile(fileType)
+            apiImpl.unplug(destination)
+            HTTP.recieveFile(file, destination)
 
         req.decode[Multipart[IO]] { parts =>
           def getFileParts = parts.parts.filter(_.filename.isDefined)

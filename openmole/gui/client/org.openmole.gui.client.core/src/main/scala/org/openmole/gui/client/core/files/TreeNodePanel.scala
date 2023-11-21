@@ -46,8 +46,6 @@ class TreeNodePanel { panel =>
 
   def refresh = update.update(_ + 1)
 
-  //val selectionModeObserver = Observer[Boolean] { b ⇒ if !b then treeNodeManager.clearSelection }
-
   val fileToolBar = new FileToolBar(this, treeNodeManager)
 
 
@@ -85,11 +83,11 @@ class TreeNodePanel { panel =>
   def fInputMultiple(todo: Input ⇒ Unit) =
     inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.webkitdirectory <-- directoryToggle.toggled.signal, inContext { thisNode ⇒ onChange --> { _ ⇒ todo(thisNode) } })
 
-  def upbtn(todo: Input ⇒ Unit): HtmlElement =
+  def upldoadButton(todo: Input ⇒ Unit): HtmlElement =
     span(aria.hidden := true, cls <-- directoryToggle.toggled.signal.map { d => if !d then "bi-cloud-upload" else "bi-cloud-upload-fill" }, cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo)).
       tooltip("eranu").amend(dataAttr("original-title") <-- directoryToggle.toggled.signal.map { d => if !d then "Upload files" else "Upload directories" })
 
-  private def upButton(using api: ServerAPI, basePath: BasePath) = upbtn((fileInput: Input) ⇒ {
+  private def upButton(using api: ServerAPI, basePath: BasePath) = upldoadButton((fileInput: Input) ⇒
     val current = treeNodeManager.directory.now()
     api.upload(
       fileInput.ref.files.toSeq.map(f => f -> current / f.path),
@@ -98,7 +96,7 @@ class TreeNodePanel { panel =>
       fileInput.ref.value = ""
       refresh
     }
-  })
+  )
 
   def createFileTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
