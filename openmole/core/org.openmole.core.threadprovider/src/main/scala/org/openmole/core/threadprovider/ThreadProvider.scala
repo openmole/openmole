@@ -8,7 +8,7 @@ import org.openmole.tool.collection._
 
 import scala.concurrent.ExecutionContext
 
-object ThreadProvider {
+object ThreadProvider:
 
   val maxPriority = Int.MaxValue
   val maxPoolSize = PreferenceLocation("ThreadProvider", "MaxPoolSize", Some(50))
@@ -26,20 +26,21 @@ object ThreadProvider {
   }
 
 
-  def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = new ThreadFactory {
-    override def newThread(r: Runnable): Thread = {
-      val t = parentGroup match {
+  def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = new ThreadFactory:
+    override def newThread(r: Runnable): Thread =
+      val t = parentGroup match
         case Some(p) ⇒ new Thread(p, r)
         case None    ⇒ new Thread(r)
-      }
+
       t.setDaemon(true)
       t
-    }
-  }
+
 
   def apply(poolSize: Int) = new ThreadProvider(poolSize)
 
-}
+  extension (t: ThreadProvider)
+    def newSingleThreadExecutor = Executors.newSingleThreadExecutor(t.threadFactory)
+
 
 class ThreadProvider(poolSize: Int) {
 
@@ -62,10 +63,9 @@ class ThreadProvider(poolSize: Int) {
     parentGroup.interrupt()
   }
 
-  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit = {
+  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit =
     taskQueue.enqueue(task, priority)
     pool.submit(new ThreadProvider.RunClosure(taskQueue))
-  }
 
   def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
 

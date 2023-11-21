@@ -98,7 +98,7 @@ object ErrorData:
 
   def apply(errors: Seq[ScriptError], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
 
-  def apply(t: Throwable): MessageErrorData = MessageErrorData(t.getMessage, Some(toStackTrace(t)))
+  def apply(t: Throwable): MessageErrorData = MessageErrorData(Option(t.getMessage).getOrElse(""), Some(toStackTrace(t)))
 
   def apply(message: String) = MessageErrorData(message, None)
 
@@ -208,7 +208,7 @@ object ExecutionState:
 //      def capsules = Vector.empty
 //      def environmentStates: Seq[EnvironmentState] = Seq()
 
-  case class Preparing(exist: Boolean) extends ExecutionState("preparing"):
+  case class Preparing() extends ExecutionState("preparing"):
     def duration: Long = 0L
     def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()

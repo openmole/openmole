@@ -40,12 +40,24 @@ case class RunningEnvironment(
 
 
 object ServerState:
+  object MoleExecutionState:
+    given Conversion[ExecutionState.Failed | ExecutionState.Canceled | java.util.concurrent.Future[_] | MoleExecution, MoleExecutionState] =
+      case s: ExecutionState.Failed => ServerState.Terminated(s)
+      case s: ExecutionState.Canceled => ServerState.Terminated(s)
+      case f: java.util.concurrent.Future[_] => ServerState.Preparing(f)
+      case m: MoleExecution => ServerState.Active(m)
+
+  sealed trait MoleExecutionState
+  case class Terminated(state:  ExecutionState.Failed | ExecutionState.Canceled) extends MoleExecutionState
+  case class Preparing(future: java.util.concurrent.Future[_]) extends MoleExecutionState
+  case class Active(moleExecution: MoleExecution) extends MoleExecutionState
+
   case class ExecutionInfo(
     path: SafePath,
     script: String,
     startDate: Long,
     output: StringPrintStream,
-    moleExecution: Option[ExecutionState.Failed | MoleExecution],
+    moleExecution: MoleExecutionState,
     environments: Map[EnvironmentId, RunningEnvironment])
 
 class ServerState:
@@ -145,41 +157,34 @@ class ServerState:
     executionInfo(key) = info
   }
 
-  def addMoleExecution(key: ExecutionId, moleExecution: MoleExecution) = atomic { implicit ctx ⇒
-    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(moleExecution))) }.isDefined
-  }
 
-  def addError(key: ExecutionId, error: Failed) = atomic { implicit ctx ⇒
-    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = Some(error))) }.isDefined
+  def modifyState(key: ExecutionId, state: ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
+    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = state)) }.isDefined
   }
 
   def cancel(key: ExecutionId) =
-    executionInfo.single.get(key).flatMap(_.moleExecution) match
-      case Some(e: MoleExecution) => e.cancel
-      case _ =>
+    val moleExecution =
+      atomic { implicit ctx ⇒
+        val moleExecution = executionInfo.get(key).map(_.moleExecution)
+        moleExecution match
+          case None | Some(_: ServerState.Preparing) => modifyState(key, ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
+          case _ =>
+        moleExecution
+      }
+
+    moleExecution match
+      case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
+      case Some(ServerState.Active(e: MoleExecution)) => e.cancel
+      case _ | None =>
+
 
   def remove(key: ExecutionId) =
-    val exec = atomic { implicit ctx ⇒ executionInfo.remove(key) }
+    val moleExecution = atomic { implicit ctx ⇒ executionInfo.remove(key) }
 
-    exec.flatMap(_.moleExecution) match
-      case Some(e: MoleExecution) => e.cancel
-      case _ =>
-
-
-  def environmentState(id: ExecutionId): Seq[EnvironmentState] =
-    getEnvironments(id).map:
-      case (envId, e) ⇒
-        EnvironmentState(
-          envId = envId,
-          taskName = e.environment.simpleName,
-          running = e.environment.running,
-          done = e.environment.done,
-          submitted = e.environment.submitted,
-          failed = e.environment.failed,
-          networkActivity = e.networkActivity,
-          executionActivity = e.executionActivity,
-          numberOfErrors = Environment.errors(e.environment).length
-        )
+    moleExecution.map(_.moleExecution) match
+      case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
+      case Some(ServerState.Active(e: MoleExecution)) => e.cancel
+      case _ | None =>
 
   def environmentErrors(id: ExecutionId, environmentId: EnvironmentId): Seq[EnvironmentError] =
     val errorMap = getEnvironments(id, environmentId).toMap
@@ -216,17 +221,31 @@ class ServerState:
   def clearEnvironmentErrors(id: ExecutionId, environmentId: EnvironmentId) =
     getEnvironments(id, environmentId).map(e => Environment.clearErrors(e._2.environment))
 
-  def state(key: ExecutionId): ExecutionState = atomic { implicit ctx ⇒
+  def state(info: ServerState.ExecutionInfo): ExecutionState =
+    def environmentState(env: Map[EnvironmentId, RunningEnvironment]): Seq[EnvironmentState] =
+      env.toSeq.sortBy(_._2.environment.name).map:
+        case (envId, e) ⇒
+          EnvironmentState(
+            envId = envId,
+            taskName = e.environment.simpleName,
+            running = e.environment.running,
+            done = e.environment.done,
+            submitted = e.environment.submitted,
+            failed = e.environment.failed,
+            networkActivity = e.networkActivity,
+            executionActivity = e.executionActivity,
+            numberOfErrors = Environment.errors(e.environment).length
+          )
 
     implicit def moleExecutionAccess: MoleExecution.SynchronisationContext = MoleExecution.UnsafeAccess
 
 //    def launchStatus =
 //      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
-    executionInfo(key).moleExecution match
-      case None => Preparing(exist = false)
-      case Some(error: Failed) ⇒ error
-      case Some(moleExecution: MoleExecution) ⇒
+    info.moleExecution match
+      case ServerState.Preparing(_) => Preparing()
+      case ServerState.Terminated(s) ⇒ s
+      case ServerState.Active(moleExecution) ⇒
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
 
         def scopeToString(scope: DefinitionScope) =
@@ -260,7 +279,7 @@ class ServerState:
             Failed(
               capsules = statuses,
               error = ErrorData(t.exception),
-              environmentStates = environmentState(key),
+              environmentStates = environmentState(info.environments),
               duration = moleExecution.duration.getOrElse(0L),
               clean = moleExecution.cleaned
             )
@@ -268,7 +287,7 @@ class ServerState:
             if (moleExecution.canceled)
               Canceled(
                 capsules = statuses,
-                environmentStates = environmentState(key),
+                environmentStates = environmentState(info.environments),
                 duration = moleExecution.duration.getOrElse(0L),
                 clean = moleExecution.cleaned
               )
@@ -276,18 +295,17 @@ class ServerState:
               Finished(
                 capsules = statuses,
                 duration = moleExecution.duration.getOrElse(0L),
-                environmentStates = environmentState(key),
+                environmentStates = environmentState(info.environments),
                 clean = moleExecution.cleaned
               )
             else if (moleExecution.started)
               Running(
                 capsules = statuses,
                 duration = moleExecution.duration.getOrElse(0L),
-                environmentStates = environmentState(key)
+                environmentStates = environmentState(info.environments)
               )
-            else Preparing(exist = true)
-
-  }
+            else Preparing()
+  
 
 
   def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
@@ -296,7 +314,7 @@ class ServerState:
         id <- if ids.isEmpty then executionInfo.keys else ids
         info ← executionInfo.get(id)
       yield
-        val stateValue = state(id)
+        val stateValue = state(info)
         val executionTime = info.environments.values.map(_.executionActivity.executionTime).sum
         ExecutionData(id, info.path, info.script, info.startDate, stateValue, executionTime)
 

@@ -71,7 +71,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   val serverState = new ServerState
 
   //GENERAL
-  def settings: OMSettings = {
+  def settings: OMSettings =
     import services._
 
     OMSettings(
@@ -81,7 +81,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       buildinfo.BuildInfo.buildTime,
       buildinfo.development
     )
-  }
 
   def shutdown() = applicationControl.foreach(_.stop())
   def restart() = applicationControl.foreach(_.restart())
@@ -326,6 +325,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case ErrorInCode(e)            ⇒ scriptError(e)
         case ErrorInCompiler(e)        ⇒ scriptError(e)
         case compiled: Compiled ⇒
+          if Thread.interrupted() then throw new InterruptedIOException()
           import runServices._
 
           val executionServices =
@@ -348,7 +348,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case t: Throwable ⇒ scriptError(t)
 
 
-
   def launchScript(script: SafePath, validateScript: Boolean) =
     import services.*
 
@@ -357,8 +356,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val content = safePathToFile(script).content
 
-    serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, None, Map.empty))
-    
     import scala.util.control.Breaks
     def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean): Unit = Breaks.breakable:
       import services._
@@ -367,7 +364,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         try ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
         catch
           case e: Throwable =>
-            serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+            serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
             Breaks.break()
 
       serverState.setEnvironments(execId, envIds)
@@ -376,23 +373,26 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
       catchAll(ex.start(validateScript)) match
         case Failure(e) ⇒
-          serverState.addError(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+          serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) ⇒
-          val inserted = serverState.addMoleExecution(execId, ex)
-          if !inserted then ex.cancel
+          val inserted = serverState.modifyState(execId, ex)
+          if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
-    synchronousCompilation(script, outputStream) match
-      case e: MoleExecution => processRun(execId, e, validateScript)
-      case ed: ErrorData => serverState.addError(execId, Failed(Vector.empty, ed, Seq.empty))
+    def compileAndRun =
+      synchronousCompilation(script, outputStream) match
+        case e: MoleExecution =>
+          if Thread.interrupted() then throw new InterruptedIOException()
+          processRun(execId, e, validateScript)
+        case ed: ErrorData => serverState.modifyState(execId, Failed(Vector.empty, ed, Seq.empty))
+
+
+    val future =
+      threadProvider.newSingleThreadExecutor.submit:
+        () => compileAndRun
+
+    serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, future, Map.empty))
 
     execId
-
-
-//  def asynchronousCompilation(script: SafePath, outputStream: StringPrintStream): java.util.concurrent.Future[MoleExecution | ErrorData] = {
-//    import services._
-//    threadProvider.javaSubmit { () ⇒ id -> synchronousCompilation(script, outputStream) }
-//  }
-
 
 
   def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(ids)
