@@ -171,11 +171,10 @@ class TreeNodePanel { panel =>
     }
   )
 
-  def closeMultiTool = {
+  def closeMultiTool =
     multiTool.set(Off)
     confirmationDiv.set(None)
     treeNodeManager.clearSelection
-  }
 
   val plusFile = Var(false)
 
@@ -203,10 +202,8 @@ class TreeNodePanel { panel =>
             goToDirButton(sp, s"${sp.name} / ")
           },
           div(glyph_plus, cls <-- plusFile.signal.map { pf ⇒
-            "plus-button" + {
-              if (pf) " selected" else ""
-            }
-          }, onClick --> { _ ⇒ plusFile.update(!_) })
+            "plus-button" + { if (pf) " selected" else "" }
+          }, onClick --> { _ ⇒ plusFile.update(!_) }),
         )
       },
       div(
@@ -232,7 +229,9 @@ class TreeNodePanel { panel =>
         })
       ),
       plusFile.signal.expand(createFileTool),
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool)
+      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
+      plusFile.toObservable --> Observer[Boolean]: v =>
+        if !v then directoryToggle.toggled.set(false)
     )
 
   def downloadFile(safePath: SafePath, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
