@@ -490,9 +490,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       if utils.isPlugged(f, allPlugins)(workspace)
       then removePlugin(utils.fileToSafePath(f))
 
-    if file.isDirectory
-    then file.applyRecursive(unplugFile)
-    else unplugFile(file)
+    if file.exists()
+    then
+      if file.isDirectory
+      then file.applyRecursive(unplugFile)
+      else unplugFile(file)
 
   def pluginRoutes =
     GUIPluginRegistry.all.flatMap(_.router).map(p => p(services))
