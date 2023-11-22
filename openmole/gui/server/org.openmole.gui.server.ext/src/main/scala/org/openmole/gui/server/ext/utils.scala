@@ -265,10 +265,13 @@ object utils:
     def multipartStringContent(multipart: Multipart[IO], name: String)(using cats.effect.unsafe.IORuntime) =
       multipartContent(multipart, name).map(_.bodyText.compile.string.unsafeRunSync())
 
+    def recieveDestination(part: Part[IO], directory: File) =
+      val path = new java.net.URI(part.name.get).getPath
+      new java.io.File(directory, path)
+
     def recieveFile(part: Part[IO], directory: File)(using cats.effect.unsafe.IORuntime) =
       import org.openmole.tool.stream.*
-      val path = new java.net.URI(part.name.get).getPath
-      val destination = new java.io.File(directory, path)
+      val destination = recieveDestination(part, directory)
 
       destination.getParentFile.mkdirs()
       destination.setWritable(true)
