@@ -182,7 +182,7 @@ object Application extends JavaLogger {
 
     //Runtime.getRuntime.addShutdownHook(thread(Workspace.clean(workspace)))
 
-    def loadPlugins(implicit workspace: Workspace) = {
+    def loadPlugins(implicit workspace: Workspace) =
       val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
@@ -193,7 +193,6 @@ object Application extends JavaLogger {
       logger.fine(s"Loading user plugins " + userPlugins)
 
       PluginManager.tryLoad(userPlugins)
-    }
 
     def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
       load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
@@ -353,10 +352,9 @@ object Application extends JavaLogger {
         }
 
         val errors =
-          results.filter {
+          results.filter:
             case (_, util.Success(_)) ⇒ false
             case _                    ⇒ true
-          }
 
         if (errors.isEmpty) Console.ExitCodes.ok
         else Console.ExitCodes.compilationError

@@ -21,27 +21,30 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.jasypt.util.text._
-import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.tool.types._
+import org.jasypt.util.text.*
+import org.openmole.core.event.{Event, EventDispatcher}
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.tool.types.*
 import org.openmole.tool.crypto.Certificate
-import org.openmole.tool.file._
-import org.openmole.core.tools.service._
-import org.openmole.core.workspace.Workspace.{ fixedDir, fixedPostfix, fixedPrefix }
+import org.openmole.tool.file.*
+import org.openmole.core.tools.service.*
+import org.openmole.core.workspace.Workspace.{fixedDir, fixedPostfix, fixedPrefix}
 import org.openmole.tool.network.fixHostName
 import org.openmole.tool.random
 import org.openmole.tool.random.Random
-import org.openmole.tool.random.Random._
+import org.openmole.tool.random.Random.*
 
-import scala.concurrent.stm.{ Ref, atomic }
-import squants.information._
+import scala.concurrent.stm.{Ref, atomic}
+import squants.information.*
 
-object Workspace {
+import java.io.FileOutputStream
+
+object Workspace:
 
   case object PasswordRequired extends Event[Workspace]
 
   def tmpLocation = "tmp"
+  def tmpLock = ".tmp.lock"
   def persistentLocation = "persistent"
   def logLocation = "openmole.log.gz"
 
@@ -49,15 +52,27 @@ object Workspace {
   def fixedPostfix = ".bin"
   def fixedDir = "dir"
 
+  case class Lock(os: FileOutputStream)
+
   // Workspace should be cleaned after use
-  def apply(location: File): Workspace = {
+  def apply(location: File): Workspace =
     val tmpDir = location / tmpLocation /> UUID.randomUUID.toString
     val persistentDir = location /> persistentLocation
-    new Workspace(location, tmpDir, persistentDir)
-  }
 
-  def clean(ws: Workspace) = ws.tmpDirectory.recursiveDelete
-}
+    val os = (tmpDir / tmpLock).fileOutputStream
+    os.getChannel.tryLock
 
-class Workspace(val location: File, val tmpDirectory: File, val persistentDir: File)
+    new Workspace(location, tmpDir, persistentDir, os)
+
+  def clean(ws: Workspace) =
+    ws.os.close()
+
+    (ws.location / tmpLocation).listFilesSafe.foreach: f =>
+      val lockFile = f / tmpLock
+      if !lockFile.exists() || lockFile.withFileOutputStream(_.getChannel.tryLock() != null)
+      then f.recursiveDelete
+
+    ws.tmpDirectory.recursiveDelete
+
+case class Workspace(location: File, tmpDirectory: File, persistentDir: File, os: FileOutputStream)
 

@@ -83,11 +83,10 @@ object GUIServer:
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
   }
 
-  def lockFile(implicit workspace: Workspace) = {
+  def lockFile(implicit workspace: Workspace) = 
     val file = utils.webUIDirectory / "GUI.lock"
     file.createNewFile
     file
-  }
 
   def urlFile(implicit workspace: Workspace) = utils.webUIDirectory / "GUI.url"
 

@@ -405,13 +405,14 @@ package file {
         import StandardOpenOption._
         if (append) Seq(CREATE, APPEND, WRITE) else Seq(CREATE, TRUNCATE_EXISTING, WRITE)
 
+      def fileOutputStream = new FileOutputStream(file)
+
       def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) =
         file.createParentDirectory
         if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
         else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream())
-
       def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
 
       def withGzippedOutputStream[T] = withClosable[GZIPOutputStream, T](gzippedBufferedOutputStream)(_)
@@ -434,7 +435,7 @@ package file {
         finally Files.move(tmpFile.toPath, file.toPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
 
 
-      def withFileOutputStream[T] = withClosable[FileOutputStream, T](new FileOutputStream(file))(_)
+      def withFileOutputStream[T] = withClosable[FileOutputStream, T](fileOutputStream)(_)
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream())(_)
 

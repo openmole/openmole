@@ -79,10 +79,9 @@ object GUIServerServices {
     new GUIServerServices()
   }
 
-  def dispose(services: GUIServerServices) = {
+  def dispose(services: GUIServerServices) =
     scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
-  }
 
   def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
     val services = GUIServerServices(workspace, httpProxy, logLevel, logFileLevel)

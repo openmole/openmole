@@ -88,9 +88,7 @@ object External:
     to.createParentDirectory
     if f.link
     then to.createLinkTo(f.file.getCanonicalFile)
-    else
-      f.file.realFile.copy(to)
-      to.applyRecursive { _.deleteOnExit }
+    else f.file.realFile.copy(to)
 
   private def destination(resolver: PathResolver, f: DeployedFile) = resolver(f.expandedUserPath)
 
