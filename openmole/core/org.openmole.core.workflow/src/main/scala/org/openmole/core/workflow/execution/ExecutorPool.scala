@@ -76,8 +76,6 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
         case (exe, thread) ⇒
           exe.stop = true
           thread.interrupt()
-          Thread.sleep(10)
-          if (thread.isAlive) thread.stop()
       }
       executorMap.clear()
 

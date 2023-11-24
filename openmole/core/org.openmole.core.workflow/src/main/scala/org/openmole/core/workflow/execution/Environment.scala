@@ -82,7 +82,7 @@ sealed trait Environment extends Name:
  *
  * This trait is implemented by environment plugins, and not the more generic [[Environment]]
  */
-trait SubmissionEnvironment extends Environment {
+trait SubmissionEnvironment extends Environment:
   def submit(job: JobGroup): Long
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]
@@ -90,9 +90,8 @@ trait SubmissionEnvironment extends Environment {
   def clean: Boolean
   def errors: Seq[ExceptionEvent]
   def clearErrors: Seq[ExceptionEvent]
-}
 
-object LocalEnvironment {
+object LocalEnvironment:
 
   def apply(
     threads:      OptionalArgument[Int]    = None,
@@ -110,8 +109,6 @@ object LocalEnvironment {
       new LocalEnvironment(threads, deinterleave, None)
     }
 
-}
-
 /**
  * Local environment
  * @param threads number of parallel threads
@@ -128,23 +125,20 @@ class LocalEnvironment(
   def runningJobs = pool().runningJobs
   def nbJobInQueue = pool().waiting
 
-  def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Long = {
+  def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
     submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
     id
-  }
 
-  def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Long = {
+  def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
     submit(LocalExecutionJob(id, executionContext, List(moleJob), None))
     id
-  }
 
-  private def submit(ejob: LocalExecutionJob): Unit = {
+  private def submit(ejob: LocalExecutionJob): Unit =
     pool().enqueue(ejob)
     eventDispatcherService.trigger(this, Environment.JobSubmitted(ejob.id, ejob))
     eventDispatcherService.trigger(this, Environment.JobStateChanged(ejob.id, ejob, SUBMITTED, READY))
-  }
 
   def submitted: Long = pool().waiting
   def running: Long = pool().running
