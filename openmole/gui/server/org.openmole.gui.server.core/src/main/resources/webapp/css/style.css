@@ -1488,3 +1488,16 @@ input:checked + .slider:before {
     height: 35px;
     flex-grow: 3;
 }
+
+.scriptError {
+  width: 100%;
+  overflow: scroll;
+  background-color: rgb(211, 95, 95);
+  color: white;
+  padding: 10px;
+  font-family: monospace;
+  font-size: medium;
+  border: 1px solid rgb(211,95,95);
+  border-radius: 4px;
+  margin-bottom: 10px;
+}

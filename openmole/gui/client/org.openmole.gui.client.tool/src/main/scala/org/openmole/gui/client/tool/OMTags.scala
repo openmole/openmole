@@ -65,6 +65,7 @@ object OMTags:
   val glyph_info = cls("bi-info-circle-fill")
   val buttonOM = cls("btn btnOm")
   val btn_purple = cls("btn btn-purple")
+  val down = cls("bi bi-arrow-down-square")
 
   case class AlertAction(action: () ⇒ Unit)
 
