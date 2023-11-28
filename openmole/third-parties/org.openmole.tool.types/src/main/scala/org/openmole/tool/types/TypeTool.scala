@@ -149,20 +149,32 @@ object TypeTool {
     m.invoke(c, args: _*)
   }
 
-  def fillArray(m: Manifest[_], s: Seq[_]) = {
+  def fillArray(m: Manifest[_], s: Seq[_]) =
     val values = m.newArray(s.size)
     s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
     values
-  }
 
-  def toString[T](implicit manifest: Manifest[T]) = {
+  def toString[T](implicit manifest: Manifest[T]) =
+
+    def manifestToString(m: Manifest[_]): String =
+      val rc = m.runtimeClass
+      if rc.isArray
+      then s"Array[${manifestToString(m.typeArguments.head)}]"
+      else
+        if rc.isPrimitive
+        then m.toString
+        else s"_root_.${m.toString()}"
+
     val tpe =
-      manifest.toString.
+      manifestToString(manifest).
         replace(".package$", ".").
         replace("$", ".").trim
+
     val wildCard = "_ <: "
-    if(tpe.startsWith(wildCard)) tpe.drop(wildCard.size) else tpe
-  }
+
+    if tpe.startsWith(wildCard)
+    then tpe.drop(wildCard.size)
+    else tpe
 
   def toManifest(s: String): Manifest[_] =
     def loadClass(c: String) = Class.forName(c, true, TypeTool.getClass.getClassLoader)

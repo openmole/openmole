@@ -28,32 +28,30 @@ import scala.reflect._
 /**
  * Methods to deal with ValType
  */
-object ValType {
+object ValType:
 
   /**
    * Extract the atomic ValType of a (potentially multidimensional) Array
    * @param t
    * @return
    */
-  def unArrayify(t: ValType[_]): (ValType[_], Int) = {
+  def unArrayify(t: ValType[_]): (ValType[_], Int) =
     @tailrec def rec(c: ValType[_], level: Int = 0): (ValType[_], Int) =
       if (!c.isArray) (c, level)
       else rec(c.asArray.fromArray, level + 1)
     rec(t)
-  }
 
-  def unsecureFromArray(t: ValType[_]): ValType[_] = {
+  def unsecureFromArray(t: ValType[_]): ValType[_] =
     val (res, level) = unArrayify(t)
     if (level == 0) throw new UserBadDataError(s"ValType $t is no an array type")
     res
-  }
 
   /**
    * Decorate ValType for implicit conversions to array type
    * @param p
    * @tparam T
    */
-  implicit class ValTypeDecorator[T](p: ValType[T]) {
+  implicit class ValTypeDecorator[T](p: ValType[T]):
     /**
      * convert to array
      * @return
@@ -77,7 +75,7 @@ object ValType {
      * @return
      */
     def asArray = p.asInstanceOf[ValType[Array[T]]]
-  }
+
 
   def fromArrayUnsecure(t: ValType[Array[_]]) = ValType[Any](manifestFromArrayUnsecure(t.manifest))
 
@@ -86,9 +84,8 @@ object ValType {
    * @param p
    * @tparam T
    */
-  implicit class ValTypeArrayDecorator[T](t: ValType[Array[T]]) {
+  implicit class ValTypeArrayDecorator[T](t: ValType[Array[T]]):
     def fromArray = ValType[T](t.manifest.fromArray)
-  }
 
   implicit def buildValType[T: Manifest]: ValType[T] = ValType[T]
 
@@ -99,9 +96,8 @@ object ValType {
    * @return
    */
   def apply[T](implicit m: Manifest[T]): ValType[T] =
-    new ValType[T] {
+    new ValType[T]:
       val manifest = m
-    }
 
   /**
    * Force conversion
@@ -110,32 +106,28 @@ object ValType {
    */
   def unsecure(c: Manifest[_]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
-  def toNativeType(t: ValType[_]): ValType[_] = {
-    def native = {
+  def toNativeType(t: ValType[_]): ValType[_] =
+    def native =
       val (contentType, level) = ValType.unArrayify(t)
       for {
         m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
       } yield (0 until level).foldLeft(ValType.unsecure(m)) {
         (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
       }
-    }
     native getOrElse t
-  }
 
   def toTypeString(t: ValType[_]): String = TypeTool.toString(toNativeType(t).manifest)
-}
 
 /**
  * Trait storing the type of prototypes, wrapping a [[scala.reflect.Manifest]]
  *  (types are not known before runtime)
  * @tparam T
  */
-trait ValType[T] extends Id {
+trait ValType[T] extends Id:
   def manifest: Manifest[T]
   override def toString = manifest.toString
   def id = manifest
   def runtimeClass = manifest.runtimeClass
-}
 
 object Val:
 
@@ -146,18 +138,16 @@ object Val:
    * @tparam T
    */
   implicit class ValToArrayDecorator[T](prototype: Val[T]) {
-    def toArray(level: Int): Val[_] = {
-      def toArrayRecursive[A](prototype: Val[A], level: Int): Val[_] = {
-        if (level <= 0) prototype
-        else {
+    def toArray(level: Int): Val[_] =
+      def toArrayRecursive[A](prototype: Val[A], level: Int): Val[_] =
+        if (level <= 0)
+        then prototype
+        else
           val arrayProto = Val.copyWithType(prototype, prototype.`type`.toArray)
           if (level <= 1) arrayProto
           else toArrayRecursive(arrayProto, level - 1)
-        }
-      }
 
       toArrayRecursive(prototype, level)
-    }
 
     def toArray: Val[Array[T]] = Val.copyWithType(prototype, prototype.`type`.toArray)
 
