@@ -10,6 +10,7 @@ import scaladget.tools.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.tool.OMTags
 import org.scalajs.dom.raw.Event
 import scaladget.bootstrapnative.Popup
 import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
@@ -123,6 +124,7 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
 
   val errors: Var[Option[ErrorData]] = Var(None)
   val errorMessage: Var[Option[String]] = Var(None)
+  val errorAreaSize: Var[String] = Var("100px")
 
   def unsetErrors =
     errors.set(None)
@@ -150,16 +152,37 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
+  def switchAreaSize =
+    errorAreaSize.update(eas=>
+    eas match {
+      case "100px"=> "500px"
+      case "500px"=> "100px"
+    })
+
+  val errorViewSizeButton = button(
+    cls := "btn",
+    background := "white",
+    OMTags.down,
+    onClick --> { _ => switchAreaSize},
+    position.absolute,
+    margin := "20px",
+    right := "20px"
+  )
+
   val view =
     div(
       children <--
         errorMessage.signal.map: em =>
           em.toSeq.map: message =>
-            textArea(
-              flexRow,
-              message,
-              width := "100%", overflow.scroll, backgroundColor := "#d35f5f", color := "white", height := "100", padding := "10", fontFamily := "monospace", fontSize := "medium")
-      ,
+            div( display.flex,
+              errorViewSizeButton,
+              textArea(
+                flexRow,
+                message,
+                cls := "scriptError",
+                height <-- errorAreaSize,
+              )
+          ),
       edDiv.amend(
         lineHeight --> lineHeightObserver,
         fileContentType match
@@ -179,8 +202,7 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
                   editor.getSession().clearBreakpoints()
                 case _ =>
 
-          case _ => emptyMod
-        ,
+          case _ => emptyMod,
         onClick --> { _ => updateErrorMessage }
       )
     )
