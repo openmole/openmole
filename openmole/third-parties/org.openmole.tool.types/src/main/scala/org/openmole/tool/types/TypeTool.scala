@@ -161,7 +161,7 @@ object TypeTool {
       if rc.isArray
       then s"Array[${manifestToString(m.typeArguments.head)}]"
       else
-        if rc.isPrimitive || rc == classOf[Any]
+        if rc.isPrimitive || rc == classOf[Any] || rc == classOf[AnyRef] || rc == classOf[Nothing]
         then m.toString
         else s"_root_.${m.toString()}"
 
