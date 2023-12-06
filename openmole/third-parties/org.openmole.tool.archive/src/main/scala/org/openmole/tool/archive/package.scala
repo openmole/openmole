@@ -26,6 +26,7 @@ import org.tukaani.xz.{LZMA2Options, XZInputStream, XZOutputStream}
 import org.apache.commons.compress.archivers.tar.*
 
 import java.util.zip.{ZipFile, ZipInputStream}
+import scala.collection.mutable
 import scala.collection.mutable.{ListBuffer, Stack}
 import scala.io.{BufferedSource, Codec}
 import scala.jdk.CollectionConverters.*
@@ -157,6 +158,8 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
+    val inodes = new mutable.HashMap[Long, String]()
+
     if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
 
     while toArchive.nonEmpty
@@ -164,34 +167,47 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
       val (source, entryName) = toArchive.pop
       val isSymbolicLink = Files.isSymbolicLink(source)
       val isDirectory = Files.isDirectory(source)
+      val inode = source.inode
 
-      // tar structure distinguishes symlinks
-      val e =
-        if isDirectory && !isSymbolicLink
-        then
-          // walk the directory tree to add all its entries to stack
-          source.withDirectoryStream(): stream ⇒
-            for (f ← stream.asScala)
-            do
-              val newSource = source.resolve(f.getFileName)
-              val newEntryName = entryName + '/' + f.getFileName
-              toArchive.push((newSource, newEntryName))
+      def archiveHardLink(target: String) =
+        val e = new TarArchiveEntry(entryName, TarConstants.LF_LINK)
+        val targetName = if target.startsWith("/") then target.drop(1) else target
+        e.setLinkName(targetName)
+        (e, false)
 
-          // create the actual tar entry for the directory
-          val e = new TarArchiveEntry(entryName + '/')
-          e
-        // tar distinguishes symlinks
-        else
-          if isSymbolicLink
-            then
-            val e = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK)
-            e.setLinkName(Files.readSymbolicLink(source).toString)
-            e
-          // plain files
-          else
-            val e = new TarArchiveEntry(entryName)
-            e.setSize(Files.size(source))
-            e
+      def archiveDirectory =
+        // walk the directory tree to add all its entries to stack
+        source.withDirectoryStream(): stream ⇒
+          for f ← stream.asScala
+          do
+            val newSource = source.resolve(f.getFileName)
+            val newEntryName = entryName + '/' + f.getFileName
+            toArchive.push((newSource, newEntryName))
+
+        // create the actual tar entry for the directory
+        val e = new TarArchiveEntry(entryName + '/', TarConstants.LF_DIR)
+        (e, false)
+
+      def archiveSymbolicLink =
+        val e = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK)
+        e.setLinkName(Files.readSymbolicLink(source).toString)
+        (e, false)
+
+      def archivePlainFile =
+        val e = new TarArchiveEntry(entryName)
+        e.setSize(Files.size(source))
+        (e, true)
+
+      val (e, put) =
+        inode.flatMap(inodes.get) match
+          case Some(name) => archiveHardLink(name)
+          case _ =>
+            if isDirectory && !isSymbolicLink
+            then archiveDirectory
+            else
+              if isSymbolicLink
+              then archiveSymbolicLink
+              else archivePlainFile
 
       // complete current entry by fixing its modes and writing it to the archive
       if source != directory
@@ -200,9 +216,12 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
         e.setModTime(source.lastModified)
         additionalCommand(e)
         tos.putArchiveEntry(e)
-        if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) Files.copy(source, tos)
+        if put then Files.copy(source, tos)
         tos.closeArchiveEntry()
 
+      // Add source to inode map
+      inode.foreach: in =>
+        inodes += in -> entryName
 
 implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
   def entryIterator: Iterator[TarArchiveEntry] =

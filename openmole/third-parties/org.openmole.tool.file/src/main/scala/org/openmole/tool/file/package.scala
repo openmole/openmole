@@ -44,7 +44,7 @@ package file {
 
   import java.util
 
-  trait FilePackage {
+  trait FilePackage:
     p ⇒
 
     type File = java.io.File
@@ -77,7 +77,7 @@ package file {
     def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
       (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
 
-    implicit class FileDecorator(file: File) {
+    implicit class FileDecorator(file: File):
 
       def realFile = file.toPath.toRealPath().toFile
 
@@ -488,32 +488,40 @@ package file {
         recurse(file)(operation, stopPath)
 
       def isAParentOf(f: File) = f.getCanonicalPath.startsWith(file.getCanonicalPath)
-    }
+
+      def inode: Option[Long] =
+        try
+          Files.getAttribute(file.toPath, "unix:ino") match
+            case inode: Long => Some(inode)
+            case _ => None
+        catch
+          case _: UnsupportedOperationException => None
+          case _: IllegalArgumentException => None
+
 
     private def block(file: File, stopPath: Iterable[File]) =
-      stopPath.exists {
-        f ⇒ if (f.exists() && file.exists()) Files.isSameFile(f, file) else false
-      }
+      stopPath.exists: f ⇒
+        if f.exists() && file.exists() then Files.isSameFile(f, file) else false
 
-    private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit = if (!block(file, stopPath)) {
-      def authorizeListFiles[T](f: File)(g: ⇒ T): T = {
-        val originalMode = f.mode
-        f.setExecutable(true)
-        f.setReadable(true)
-        f.setWritable(true)
-        try g
-        finally if (f.exists) f.mode = originalMode
-      }
+    private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
+      if !block(file, stopPath)
+      then
+        def authorizeListFiles[T](f: File)(g: ⇒ T): T =
+          val originalMode = f.mode
+          f.setExecutable(true)
+          f.setReadable(true)
+          f.setWritable(true)
+          try g
+          finally if (f.exists) f.mode = originalMode
 
-      if (file.isDirectory && !file.isSymbolicLink) authorizeListFiles(file) {
-        for (f ← file.listFilesSafe) {
-          recurse(f)(operation, stopPath)
-        }
-      }
-      operation(file)
-    }
+        if file.isDirectory && !file.isSymbolicLink
+        then authorizeListFiles(file):
+          for (f ← file.listFilesSafe)
+          do recurse(f)(operation, stopPath)
 
-    def readableByteCount(bytes: Long): String = {
+        operation(file)
+
+    def readableByteCount(bytes: Long): String =
       val kb = 1024L
       val mB = kb * kb
       val gB = mB * kb
@@ -524,15 +532,15 @@ package file {
       else if (bytes < gB) (doubleBytes / mB).formatted("%.2f").toString + "MB"
       else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
-    }
 
     def uniqName(prefix: String, sufix: String, separator: String = "_") = prefix + separator + UUID.randomUUID.toString + sufix
 
-    def acceptDirectory = new Filter[Path] {
-      def accept(entry: Path): Boolean = Files.isDirectory(entry)
-    }
 
-  }
+    def acceptDirectory = new Filter[Path]:
+      def accept(entry: Path): Boolean = Files.isDirectory(entry)
+
+
+
 
   object FileTools {
     private val allPerms =
