@@ -34,7 +34,7 @@ import scala.collection.mutable
 /**
  * ExplorationTask is a wrapper for a sampling
  */
-object ExplorationTask {
+object ExplorationTask:
 
   /**
    * Explore a given sampling: gets the prototype values in the sampling from the context to construct the context with all values,
@@ -44,15 +44,15 @@ object ExplorationTask {
    * @param sampling
    * @return
    */
-  inline def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, inline isSampling: IsSampling[S]) =
+  inline def apply[S](s: S)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, inline isSampling: IsSampling[S]): FromContextTask =
     def sampling() = isSampling(s)
     build(sampling)
 
-  def build(sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  inline def build(inline sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("ExplorationTask") { p ⇒
       import p._
 
-      val variablesValues = {
+      val variablesValues =
         val sValue = sampling()
         val samplingValue = sValue.sampling.from(context).toVector
 
@@ -61,23 +61,20 @@ object ExplorationTask {
              p → p.`type`.manifest.newArray(samplingValue.size)
           }
 
-        for {
+        for
            (sample, i) ← samplingValue.zipWithIndex
            v ← sample
-         } values.get(v.prototype) match {
-           case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
-           case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
-         }
+        do
+          values.get(v.prototype) match
+            case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
+            case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
 
-         values
-       }
+        values
 
-       variablesValues.map {
-         case (k, v) ⇒
-           try Variable.unsecure(k.toArray, v)
-           catch {
-             case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
-           }
+       variablesValues.map { (k, v) ⇒
+         try Variable.unsecure(k.toArray, v)
+         catch
+           case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
        }: Context
      } set (
        inputs ++= sampling().inputs.toSeq,
@@ -94,5 +91,3 @@ object ExplorationTask {
   def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) =
     val taskOutputs = Task.outputs(c.task(mole, sources, hooks))
     (p: Val[_]) ⇒ taskOutputs.explored(p)
-
-}
