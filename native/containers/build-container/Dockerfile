@@ -17,7 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 #	&& rm netselect.deb \
 #	&& sed -r -i -e "s#http://(archive|security)\.ubuntu\.com/ubuntu/?#$(netselect -v -s1 -t20 `wget -q -O- https://launchpad.net/ubuntu/+archivemirrors | grep -P -B8 "statusUP|statusSIX" | grep -o -P "http://[^\"]*"`|grep -P -o 'http://.+$')#g" /etc/apt/sources.list 
 
-RUN apt update && apt install -y openjdk-21-jdk curl gnupg2 apt-transport-https && apt-get clean
+RUN apt update && apt install -y openjdk-17-jdk curl gnupg2 apt-transport-https && apt-get clean
 
 #RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
 #RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
