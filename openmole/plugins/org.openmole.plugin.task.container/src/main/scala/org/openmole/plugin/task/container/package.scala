@@ -64,7 +64,7 @@ package container:
 package object container:
 
   type FileBinding = (String, String)
-  
+
   def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, containerPathResolver: String => File )(filePath: String): File =
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -82,8 +82,8 @@ package object container:
     def resolveFile(f: File) =
       fileBindings.
         map((local, bind) => (local, containerPathResolver(bind))).
-        sortBy((_, bind) => bind.getPath.split("/").length).reverse.
-        find((_, bind) ⇒ isOneOfParents(bind, f)).
+        sortBy((_, bind) => bind.getPath.split("/").length).
+        findLast((_, bind) ⇒ isOneOfParents(bind, f)).
         map: (local, bind) =>
           File(local) / relativiseFromParent(bind, f).getPath
 
