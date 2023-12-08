@@ -66,32 +66,33 @@ package object container:
   type FileBinding = (String, String)
 
 
-  def outputPathResolver(fileBindings: Seq[FileBinding], userWorkDirectory: String, rootDirectory: File)(filePath: String): File =
-
+  def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, containerPathResolver: String => File )(filePath: String): File =
     /**
      * Search for a parent, not only in level 1 subdirs
      * @param dir potential parent
      * @param file target file
      * @return true if dir is a parent of file at a level
      */
-    def isOneOfParents(dir: String, file: String) = File(file).getAbsolutePath.startsWith(File(dir).getAbsolutePath)
+    def isOneOfParents(dir: File, file: File) = file.getAbsolutePath.startsWith(dir.getAbsolutePath)
 
-    def relativiseFromParent(parent: String, file: String): String =
+    def relativiseFromParent(parent: File, file: File): File =
       if isOneOfParents(parent, file)
-      then File(file).getAbsolutePath.drop(File(parent).getAbsolutePath.length)
+      then file.getAbsolutePath.drop(parent.getAbsolutePath.length)
       else file
 
-    def resolveFile(f: String) =
+    def resolveFile(f: File) =
       fileBindings.
-        findLast((_, bindPath) ⇒ isOneOfParents(bindPath, f)).
-        map((localPath, bindPath) => File(localPath) / relativiseFromParent(bindPath, f))
+        map((local, bind) => (local, containerPathResolver(bind))).
+        sortBy((_, bind) => bind.getPath.split("/").length).reverse.
+        find((_, bind) ⇒ isOneOfParents(bind, f)).
+        map: (local, bind) =>
+          File(local) / relativiseFromParent(bind, f).getPath
 
-    def isAbsolute = File(filePath).isAbsolute
-    def absolutePathInArchive: String = if isAbsolute then filePath else (File(userWorkDirectory) / filePath).getPath
+    def absolutePathInArchive = containerPathResolver(filePath)
+    def pathToResolve = containerPathResolver(filePath) //(File("/") / absolutePathInArchive).getAbsolutePath
 
-    def pathToResolve = (File("/") / absolutePathInArchive).getAbsolutePath
+    resolveFile(absolutePathInArchive) getOrElse (rootDirectory / absolutePathInArchive.getPath)
 
-    resolveFile(pathToResolve) getOrElse (rootDirectory / absolutePathInArchive)
 
   def validateContainer(
     commands:             Seq[FromContext[String]],

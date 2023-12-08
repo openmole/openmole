@@ -260,7 +260,7 @@ object ContainerTask:
       info = info,
       containerPoolKey = containerPoolKey
     ) set (
-      resources += (workDirectoryFile, workDirectory, true, head = true)
+      resources += (workDirectoryFile, workDirectory, head = true)
     )
 
   def internal(
@@ -426,8 +426,8 @@ case class ContainerTask(
       def outputPathResolverValue =
         outputPathResolver(
           hostFiles.map { h ⇒ h.path → h.destination } ++ preparedFilesInfo.map { (f, d) ⇒ d.toString -> f.expandedUserPath },
-          relativeWorkDirectoryValue,
-          rootDirectory
+          rootDirectory,
+          containerPathResolver
         ) _
 
       val retContext =
