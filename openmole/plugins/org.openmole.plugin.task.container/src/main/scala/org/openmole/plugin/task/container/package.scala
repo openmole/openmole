@@ -64,8 +64,7 @@ package container:
 package object container:
 
   type FileBinding = (String, String)
-
-
+  
   def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, containerPathResolver: String => File )(filePath: String): File =
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -89,7 +88,7 @@ package object container:
           File(local) / relativiseFromParent(bind, f).getPath
 
     def absolutePathInArchive = containerPathResolver(filePath)
-    def pathToResolve = containerPathResolver(filePath) //(File("/") / absolutePathInArchive).getAbsolutePath
+    def pathToResolve = containerPathResolver(filePath)
 
     resolveFile(absolutePathInArchive) getOrElse (rootDirectory / absolutePathInArchive.getPath)
 
