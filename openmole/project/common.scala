@@ -25,7 +25,7 @@ object common {
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.3.0"
   def scaladgetVersion = "1.10.0"
-  def plotlyVersion = "1.8.0"
+  def plotlyVersion = "1.8.1"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.6"
   def circeVersion = "0.14.6"
