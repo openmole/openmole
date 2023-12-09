@@ -4,7 +4,7 @@ import org.openmole.gui.client.tool.plot.Plot.*
 import org.openmole.plotlyjs.PlotlyImplicits.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.tool.plot.{PlotSettings, Plotter, ScatterPlot, SplomPlot, Tools, XYPlot}
+import org.openmole.gui.client.tool.plot.{ParallelPlot, PlotSettings, Plotter, ScatterPlot, SplomPlot, Tools, XYPlot}
 import org.openmole.gui.shared.data.SequenceData
 import org.openmole.plotlyjs.*
 
@@ -23,21 +23,26 @@ object ResultPlot {
     def doPlot(numberOfColumToBePlotted: NumberOfColumToBePlotted) = {
       val axisSelected = axisRadios.now().selected.now().map(_.t)
       numberOfColumToBePlotted match {
-        case OneColumn =>
+        case NumberOfColumToBePlotted.One =>
           val hIndex = headers.indexOf(axisSelected.head)
           val header = plotData.columns(hIndex).header
           val columnContents = Column.contentToSeqOfSeq(plotData.columns(hIndex).content)
           plot.set(XYPlot(columnContents, ("Records", header), PlotSettings())) // case Array)
-        case TwoColumn =>
+        case NumberOfColumToBePlotted.Two =>
           val contents = axisSelected.map { sh =>
             Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
           }
           plot.set(ScatterPlot(contents.head, contents.last, (axisSelected.head, axisSelected.last), PlotSettings()))
-        case NColumn =>
+        case NumberOfColumToBePlotted.N =>
           val contents = axisSelected.map { sh =>
             Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
           }
           plot.set(SplomPlot(contents, axisSelected, PlotSettings()))
+        case NumberOfColumToBePlotted.Parallel=>
+          val contents = axisSelected.map{sh=>
+            Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
+          }
+          plot.set(ParallelPlot(contents, axisSelected, PlotSettings()))
       }
     }
 
@@ -64,8 +69,8 @@ object ResultPlot {
       }
 
       val (availableHeaders, initialIndexes) = numberOfColumToBePlotted match {
-        case OneColumn => (allHeaders, Seq(0))
-        case TwoColumn | NColumn => (scalarColumn.map {
+        case NumberOfColumToBePlotted.One => (allHeaders, Seq(0))
+        case NumberOfColumToBePlotted.Two | NumberOfColumToBePlotted.N | NumberOfColumToBePlotted.Parallel => (scalarColumn.map {
           _.header
         }, Seq(0, 1))
       }
@@ -77,7 +82,7 @@ object ResultPlot {
       lazy val axisToggleStates = availableHeaders.map { ah => ToggleState[String](ah, ah, s"btn ${btn_danger_string}", todo) }
 
       val selectionMode = numberOfColumToBePlotted match {
-        case NColumn => SelectionSize.Infinite
+        case NumberOfColumToBePlotted.N | NumberOfColumToBePlotted.Parallel => SelectionSize.Infinite
         case _ => SelectionSize.DefaultLength
       }
 
@@ -85,7 +90,7 @@ object ResultPlot {
     }
 
     val oneTwoNRadio = {
-      val plotModeStates = Seq(OneColumn, TwoColumn, NColumn).zip(Seq("1", "2", "N")).map { case (pm, name) =>
+      val plotModeStates = Seq(NumberOfColumToBePlotted.One, NumberOfColumToBePlotted.Two, NumberOfColumToBePlotted.N, NumberOfColumToBePlotted.Parallel).zip(Seq("1", "2", "N", "//")).map { case (pm, name) =>
         ToggleState(pm, name, "btn " + btn_danger_string, pm => {
           axisCheckBoxes(pm)
           doPlot(pm)
@@ -96,14 +101,14 @@ object ResultPlot {
 
     val plotObserver = Observer[(HtmlElement, Seq[String], NumberOfColumToBePlotted)] { case (p, hs, n) =>
       n match
-        case OneColumn => Plotly.relayout(p.ref, baseLayout("", hs.headOption.getOrElse("")))
-        case TwoColumn => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("")))
-        case NColumn => Plotly.relayout(p.ref, splomLayout)
+        case NumberOfColumToBePlotted.One => Plotly.relayout(p.ref, baseLayout("", hs.headOption.getOrElse("")))
+        case NumberOfColumToBePlotted.Two => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("")))
+        case NumberOfColumToBePlotted.N | NumberOfColumToBePlotted.Parallel => Plotly.relayout(p.ref, splomLayout)
     }
 
     timers.setTimeout(1500) {
-      axisCheckBoxes(OneColumn)
-      doPlot(OneColumn)
+      axisCheckBoxes(NumberOfColumToBePlotted.One)
+      doPlot(NumberOfColumToBePlotted.One)
     }
 
     div(

@@ -59,10 +59,8 @@ object Plot {
     def name = "Heat map"
   }
 
-  sealed trait NumberOfColumToBePlotted
-  object OneColumn extends NumberOfColumToBePlotted
-  object TwoColumn extends NumberOfColumToBePlotted
-  object NColumn extends NumberOfColumToBePlotted
+  enum NumberOfColumToBePlotted:
+    case One, Two, N, Parallel
   
   def baseDiv:Div = div()
 

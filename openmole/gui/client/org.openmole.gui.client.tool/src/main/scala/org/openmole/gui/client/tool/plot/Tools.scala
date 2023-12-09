@@ -36,4 +36,6 @@ object Tools {
       }.head.tail.dropRight(1).split(',').toSeq
     }
   }
+
+  def parseDouble(s: String): Option[Double] = Try { s.toDouble }.toOption
 }
