@@ -22,7 +22,8 @@ import org.openmole.tool.types.TypeTool
 import io.circe.*
 
 object ValData:
-  def apply[T](v: Val[T]) = new ValData(v.name, ValType.toTypeString(v.`type`))
+  def apply[T](v: Val[T]) = 
+    new ValData(v.name, ValType.toTypeString(v.`type`, rootPrefix = false))
 
   def toVal(data: ValData) =
     val (ns, n) = Val.parseName(data.name)

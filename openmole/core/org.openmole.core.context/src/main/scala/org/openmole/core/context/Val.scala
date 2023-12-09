@@ -116,7 +116,8 @@ object ValType:
       }
     native getOrElse t
 
-  def toTypeString(t: ValType[_]): String = TypeTool.toString(toNativeType(t).manifest)
+  def toTypeString(t: ValType[_], rootPrefix: Boolean = true): String =
+    TypeTool.toString(rootPrefix = rootPrefix)(toNativeType(t).manifest)
 
 /**
  * Trait storing the type of prototypes, wrapping a [[scala.reflect.Manifest]]

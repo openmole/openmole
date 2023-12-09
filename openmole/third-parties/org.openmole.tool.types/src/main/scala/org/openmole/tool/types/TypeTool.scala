@@ -154,14 +154,15 @@ object TypeTool {
     s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
     values
 
-  def toString[T](implicit manifest: Manifest[T]) =
+  def toString[T](rootPrefix: Boolean = true)(implicit manifest: Manifest[T]) =
 
     def manifestToString(m: Manifest[_]): String =
       val rc = m.runtimeClass
       if rc.isArray
       then s"Array[${manifestToString(m.typeArguments.head)}]"
       else
-        if rc.isPrimitive ||
+        if !rootPrefix ||
+          rc.isPrimitive ||
           rc == classOf[Any] ||
           rc == classOf[AnyRef] ||
           rc == classOf[Nothing] ||
