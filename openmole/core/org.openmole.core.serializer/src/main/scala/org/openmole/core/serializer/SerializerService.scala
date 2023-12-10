@@ -51,7 +51,7 @@ object SerializerService:
 /**
  * Serializer
  */
-class SerializerService { service ⇒
+class SerializerService:
 
   private[serializer] def buildXStream(json: Boolean = false) = {
     val lookup = new DefaultConverterLookup()
@@ -85,9 +85,9 @@ class SerializerService { service ⇒
   private val content = "content.xml"
 
   private def fileSerialisation() = buildXStream()
-  private def fileListing() = new Serialiser(service) with FilesListing
-  private def pluginAndFileListing()(using TmpDirectory, FileService, KeyValueCache) = new Serialiser(service) with PluginAndFilesListing
-  private def deserializerWithFileInjection() = new Serialiser(service) with FileInjection
+  private def fileListing() = new FilesListing(buildXStream())
+  private def pluginAndFileListing()(using TmpDirectory, FileService, KeyValueCache) = new PluginAndFilesListing(buildXStream())
+  private def deserializerWithFileInjection() = new FileInjection(buildXStream())
 
   def deserialize[T](file: File): T =
     val is = new FileInputStream(file)
@@ -116,7 +116,7 @@ class SerializerService { service ⇒
   def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(implicit newFile: TmpDirectory): Unit =
     val os = TarArchiveOutputStream(f.bufferedOutputStream(gz = gz))
     try serializeAndArchiveFiles(obj, os)
-    finally os.close
+    finally os.close()
 
   def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(implicit newFile: TmpDirectory): Unit =
     newFile.withTmpFile: objSerial ⇒
@@ -132,12 +132,13 @@ class SerializerService { service ⇒
   def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)
     try deserializeReplaceFiles[T](is, files)
-    finally is.close
+    finally is.close()
 
   def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
     val serializer = deserializerWithFileInjection()
     serializer.injectedFiles = files
-    serializer.fromXML[T](is)
+    try serializer.fromXML[T](is)
+    finally serializer.injectedFiles = null
 
   def serializeToString(obj: Any, json: Boolean = false) = buildXStream(json = json).toXML(obj)
 
@@ -146,6 +147,6 @@ class SerializerService { service ⇒
   def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit =
     val os = file.bufferedOutputStream(gz = gz)
     try buildXStream(json = json).toXML(obj, os)
-    finally os.close
+    finally os.close()
 
-}
+

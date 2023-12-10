@@ -21,7 +21,7 @@ import org.openmole.core.dsl.extension.FileService
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workspace.TmpDirectory
 
-trait Serializer {
+trait Serializer:
   def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
   def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true, gz = true)
 
@@ -33,4 +33,3 @@ trait Serializer {
 
   def save(obj: Object, file: String)(implicit serialiserService: SerializerService): Unit = save(obj, new File(file))
   def saveArchive(obj: Object, file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService): Unit = saveArchive(obj, new File(file))
-}

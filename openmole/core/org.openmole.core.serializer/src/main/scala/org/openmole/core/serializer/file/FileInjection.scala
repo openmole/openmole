@@ -17,12 +17,12 @@
 
 package org.openmole.core.serializer.file
 
+import com.thoughtworks.xstream.XStream
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.serializer.converter.Serialiser
 
-import java.io.{ File, InputStream }
+import java.io.{File, InputStream}
 
-trait FileInjection extends Serialiser {
+class FileInjection(xStream: XStream):
   var injectedFiles: Map[String, File] = Map.empty
 
   xStream.registerConverter(new FileConverterInjecter(this))
@@ -32,8 +32,4 @@ trait FileInjection extends Serialiser {
 
   def fromXML[T](is: InputStream): T = xStream.fromXML(is).asInstanceOf[T]
 
-  override def clean = {
-    super.clean
-    injectedFiles = null
-  }
-}
+

@@ -18,10 +18,10 @@
 package org.openmole.core.serializer
 
 import java.io.File
+import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.serializer.converter.Serialiser
 import org.openmole.core.serializer.file.{FileConverterNotifier, FileWithGCConverter}
 import org.openmole.core.serializer.plugin.{PluginClassConverter, PluginConverter}
 import org.openmole.core.serializer.structure.PluginClassAndFiles
@@ -35,7 +35,7 @@ import scala.collection.immutable.{HashSet, TreeSet}
 object PluginAndFilesListing:
   def looksLikeREPLClassName(p: String) = p.startsWith("$line")
 
-trait FilesListing { this: Serialiser ⇒
+class FilesListing(xStream: XStream):
   private var listedFiles: TreeSet[File] = null
   xStream.registerConverter(new FileConverterNotifier(fileUsed))
 
@@ -47,9 +47,9 @@ trait FilesListing { this: Serialiser ⇒
     val retFile = listedFiles
     listedFiles = null
     retFile.toVector
-}
 
-trait PluginAndFilesListing(using val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache) { this: Serialiser ⇒
+
+class PluginAndFilesListing(xStream: XStream)(using val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache):
 
   lazy val reflectionConverter: ReflectionConverter =
     new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
@@ -68,7 +68,7 @@ trait PluginAndFilesListing(using val tmpDirectory: TmpDirectory, val fileServic
     then
       PluginManager.pluginsForClass(c).foreach(pluginUsed)
 
-      if (Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) && !PluginManager.bundleForClass(c).isDefined)
+      if Option(c.getName).map(PluginAndFilesListing.looksLikeREPLClassName).getOrElse(false) && !PluginManager.bundleForClass(c).isDefined
       then replClasses += c
 
       seenClasses += c
@@ -92,4 +92,4 @@ trait PluginAndFilesListing(using val tmpDirectory: TmpDirectory, val fileServic
     replClasses = null
     PluginClassAndFiles(retFile.toVector, retPlugins.toVector, retReplClasses.toVector)
 
-}
+

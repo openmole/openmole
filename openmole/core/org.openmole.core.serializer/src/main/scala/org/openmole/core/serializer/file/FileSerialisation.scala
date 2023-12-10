@@ -27,7 +27,6 @@ import java.util.UUID
 import java.io.{ File, FileOutputStream }
 import com.thoughtworks.xstream.XStream
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.serializer.converter.Serialiser
 
 object FileSerialisation:
   case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
@@ -42,15 +41,15 @@ object FileSerialisation:
         val name = UUID.randomUUID
 
         val toArchive =
-          if (file.isDirectory) {
+          if file.isDirectory
+          then
             val toArchive = tmpDir.newFile("archive", ".tar")
             file.archive(toArchive)
             toArchive
-          }
           else file
 
-        if (toArchive.exists)
-          tos.addFile(toArchive, fileDir + "/" + name.toString)
+        if toArchive.exists
+        then tos.addFile(toArchive, fileDir + "/" + name.toString)
 
         (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
     }
@@ -61,33 +60,33 @@ object FileSerialisation:
     }
   }
 
-  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] = {
+  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
     val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
 
-    HashMap() ++ fi.map {
+    HashMap() ++ fi.map:
       case (name, FileInfo(originalPath, isDirectory, exists)) ⇒
         val fromArchive = new File(archiveExtractDir, fileDir + "/" + name)
 
         def fileContent =
-          if (isDirectory) {
+          if isDirectory
+          then
             val dest = newFile.newDir("directoryFromArchive")
             dest.mkdirs()
-            if (exists) fromArchive.extract(dest, archive = ArchiveType.Tar)
+            if exists
+            then fromArchive.extract(dest, archive = ArchiveType.Tar)
             else dest.delete
             dest
-          }
-          else {
+          else
             val dest = newFile.newFile("fileFromArchive", ".bin")
             dest.createParentDirectory
-            if (exists) fromArchive.move(dest)
+            if exists
+            then fromArchive.move(dest)
             else dest.delete
             dest
-          }
 
-        originalPath → (if (!deleteOnGC) fileContent else fileService.wrapRemoveOnGC(fileContent))
-    }
+        originalPath → (if !deleteOnGC then fileContent else fileService.wrapRemoveOnGC(fileContent))
 
-  }
+
 
 
