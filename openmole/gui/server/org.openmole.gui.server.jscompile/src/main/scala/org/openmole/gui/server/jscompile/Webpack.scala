@@ -5,7 +5,7 @@ import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.networkservice.*
 
-object Webpack extends JavaLogger {
+object Webpack extends JavaLogger:
 
   case class ExtraModule(jsFile: java.io.File, nodeModuleSubdirectory: String)
 
@@ -47,24 +47,22 @@ object Webpack extends JavaLogger {
     External.run("node", cmd, workingDirectory, env = nodeEnv ++ NetworkService.proxyVariables)
   }
 
-  def setConfigFile(entry: java.io.File, depsOutput: java.io.File, template: java.io.File, to: java.io.File) = {
+  def setConfigFile(entry: java.io.File, depsOutput: java.io.File, template: java.io.File, to: java.io.File) =
+    def escape(s: String) = s.replace("\\", "\\\\")
 
     to.content =
       template.content
         .replace(
           "##openmoleJS##",
-          entry.getAbsolutePath)
+          escape(entry.getAbsolutePath))
         .replace(
           "##webuiDir##",
-          entry.getParentFile.getAbsolutePath
+          escape(entry.getParentFile.getAbsolutePath)
         )
         .replace(
           "##bundleOutputDir##",
-          depsOutput.getParentFile.getAbsolutePath)
+          escape(depsOutput.getParentFile.getAbsolutePath))
         .replace(
           "##bundleName##",
           depsOutput.getName
         )
-
-  }
-}
