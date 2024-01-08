@@ -164,6 +164,7 @@ object EGIEnvironment extends JavaLogger {
     service:        OptionalArgument[String]      = None,
     group:          OptionalArgument[String]      = None,
     bdii:           OptionalArgument[String]      = None,
+    storage:        OptionalArgument[Seq[String]] = None,
     voms:           OptionalArgument[String]      = None,
     fqan:           OptionalArgument[String]      = None,
     cpuTime:        OptionalArgument[Time]        = None,
@@ -178,6 +179,7 @@ object EGIEnvironment extends JavaLogger {
         service = service,
         group = group,
         bdiiURL = bdii,
+        storage = storage.option,
         voms = voms,
         fqan = fqan,
         cpuTime = cpuTime,
@@ -196,6 +198,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val service:           Option[String],
   val group:             Option[String],
   val bdiiURL:           Option[String],
+  val storage:           Option[Seq[String]],
   val voms:              Option[String],
   val fqan:              Option[String],
   val cpuTime:           Option[Time],
@@ -237,9 +240,11 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
   val storages = Lazy {
-    val webdavStorages = findFirstWorking(bdiis) { b ⇒ webDAVs(b, voName) }
+    val webdavStorages =
+      (storage getOrElse findFirstWorking(bdiis) { b ⇒ webDAVs(b, voName) }).toVector
 
-    if (!webdavStorages.isEmpty) {
+    if webdavStorages.nonEmpty
+    then
       webdavStorages.map { location ⇒
         threadProvider.submit {
           def isConnectionError(t: Throwable) = {
@@ -255,7 +260,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
           storageSpace.map { s ⇒ (s, storage) }
         }
       }.map(Await.result(_, scala.concurrent.duration.Duration.Inf))
-    }
+
     else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
 
   }
@@ -265,7 +270,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     import org.openmole.core.tools.math._
     import org.openmole.tool.file._
 
-    def selectStorage = {
+    def selectStorage =
       val sss = storages().map(_.toOption).flatten
       if (sss.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
 
@@ -325,10 +330,9 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         }
 
         val weighted = sss.map(s ⇒ math.max(rate(s._2), preference(EGIEnvironment.MinValueForSelectionExploration)) -> s)
-        val storage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
-        storage
+        val selectedStorage = org.openmole.tool.random.multinomialDraw(weighted)(randomProvider())
+        selectedStorage
       }
-    }
 
     val (space, storage) = selectStorage
 
