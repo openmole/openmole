@@ -25,9 +25,9 @@ object OMROutputFormat:
     override def write(executionContext: HookExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M, append: Boolean): FromContext[Unit] = FromContext: p ⇒
       import p.*
       import org.json4s.*
-      import org.json4s.jackson.JsonMethods.*
       import executionContext.serializerService
       import executionContext.tmpDirectory
+      import executionContext.timeService
 
       given Encoder[MD] = methodData.encoder
       val format = OMROutputFormatDefault.value(f, default)
@@ -38,107 +38,41 @@ object OMROutputFormat:
         case WritableOutput.Store(file) ⇒
           def executionId = executionContext.moleExecutionId
 
-          val (methodFile, directory) =
+          def methodFile =
             file.from(context) match
-              case f if f.getName.endsWith(".omr") => (f, f.getParentFile)
-              case f => (f.getParentFile / s"${f.getName}.omr", f.getParentFile)
+              case f if f.getName.endsWith(".omr") => f
+              case f => f.getParentFile / s"${f.getName}.omr"
 
-          val resultFileDirectoryName = OMRFormat.resultFileDirectoryName(executionId)
+          def sectionData = content.section.map: s =>
+            OMRFormat.SectionData(s.name, s.variables)
 
-          def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent, fileDirectory: Option[String]) =
-            import executionContext.timeService
+          def methodJson =
+            methodData.data(method).asJson.mapObject(_.add(methodField, Json.fromString(methodData.name(method))))
 
-            def methodJson =
-              methodData.data(method).asJson.mapObject(_.add(methodField, Json.fromString(methodData.name(method))))
-                //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+          def script =
+            scriptData match
+              case data: ScriptSourceData.ScriptData if format.script ⇒
+                val scriptContent = ScriptSourceData.scriptContent(scriptData)
+                val imports =
+                  val is = Imports.directImportedFiles(data.script).map(i ⇒ Index.Import(ImportedFile.identifier(i), i.file.content))
+                  if is.isEmpty then None else Some(is)
 
-            val script =
-              scriptData match
-                case data: ScriptSourceData.ScriptData if format.script ⇒
-                  val scriptContent = ScriptSourceData.scriptContent(scriptData)
-                  val imports =
-                    val is = Imports.directImportedFiles(data.script).map(i ⇒ Index.Import(ImportedFile.identifier(i), i.file.content))
-                    if is.isEmpty then None else Some(is)
+                Some(Index.Script(scriptContent, imports))
+              case _ ⇒ None
 
-                  Some(Index.Script(scriptContent, imports))
-                case _ ⇒ None
 
-            def mode =
-              if append
-              then Index.DataMode.Append
-              else Index.DataMode.Create
-
-            val result =
-              Index(
-                `format-version` = omrVersion,
-                `openmole-version` = org.openmole.core.buildinfo.version.value,
-                `execution-id` = executionId,
-                 `data-file` = (existingData ++ Seq(fileName)).distinct,
-                `data-mode` = mode,
-                `data-content` = dataContentValue,
-                `file-directory` = fileDirectory,
-                script = script,
-                `time-start` = executionContext.moleLaunchTime,
-                `time-save` = TimeService.currentTime
-              )
-
-            result.asJson.
-              mapObject(_.add(methodField, methodJson)).
-              asJson.
-              deepDropNullValues
-
-          def parseExistingData(file: File): Option[(String, Seq[String])] =
-            try
-              if file.exists
-              then
-                val data = OMRFormat.indexData(file)
-                Some((data.`execution-id`, data.`data-file`))
-              else None
-            catch
-             case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
-
-          directory.withLockInDirectory:
-            val existingData =
-              parseExistingData(methodFile) match
-                case Some((id, data)) if format.overwrite && id != executionContext.moleExecutionId =>
-                  OMRFormat.delete(methodFile) //clean(methodFile, data)
-                  Seq()
-                case Some((_, data)) => data
-                case None => Seq()
-
-            def executionPrefix = executionId.filter(_ != '-')
-
-            val fileName =
-              if !append
-              then s"$dataDirectoryName/$executionPrefix-${executionContext.jobId}.omd"
-              else s"$dataDirectoryName/$executionPrefix.omd"
-
-            val dataFile = directory / fileName
-            val storeFileDirectory = directory / resultFileDirectoryName
-
-            def storeFile(f: File) =
-              val destinationPath = s"${fileService.hashNoCache(f)}/${f.getName}"
-              f.copy(storeFileDirectory / destinationPath)
-              org.json4s.JString(destinationPath)
-
-            def jsonContent = JArray(content.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
-
-            dataFile.withPrintStream(append = append, create = true, gz = true) { ps ⇒
-              if append && existingData.nonEmpty then ps.print(",\n")
-              ps.print(compact(render(jsonContent)))
-            }
-
-            def contentData = DataContent(content.section.map { s => DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
-
-            // Is created by variablesToJValues if it found some files
-            def fileDirectoryValue =
-              if storeFileDirectory.exists()
-              then Some(resultFileDirectoryName)
-              else None
-
-            methodFile.withPrintStream(create = true, gz = true)(
-              _.print(methodFormat(method, fileName, existingData, contentData, fileDirectoryValue).noSpaces)
-            )
+          OMRFormat.write(
+            data = sectionData,
+            methodFile = methodFile,
+            executionId = executionId,
+            jobId = executionContext.jobId,
+            methodJson = methodJson,
+            script = script,
+            timeStart = executionContext.moleLaunchTime,
+            openMOLEVersion = org.openmole.core.buildinfo.version.value,
+            append = append,
+            overwrite = format.overwrite
+          )
 
     override def validate(format: OMROutputFormat) = Validate.success
 

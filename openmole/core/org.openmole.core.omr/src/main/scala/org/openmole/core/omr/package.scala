@@ -28,7 +28,10 @@ import org.openmole.core.json.*
 import org.openmole.core.context.{ValType, Variable}
 import org.openmole.core.omr.*
 import org.openmole.core.exception.*
+import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.SerializerService
+import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
 
@@ -98,6 +101,104 @@ object OMRFormat:
   def dataFiles(file: File): Seq[(String, File)] =
     val directory = file.getParentFile
     indexData(file).`data-file`.map { f => (f, directory / f) }
+
+  case class SectionData(name: Option[String], variables: Seq[Variable[_]])
+
+  def write(
+    data: Seq[SectionData],
+    methodFile: File,
+    executionId: String,
+    jobId: Long,
+    methodJson: Json,
+    script: Option[Index.Script],
+    timeStart: Long,
+    openMOLEVersion: String,
+    append: Boolean,
+    overwrite: Boolean)(using TimeService, FileService, TmpDirectory, SerializerService) =
+    val resultFileDirectoryName = OMRFormat.resultFileDirectoryName(executionId)
+
+    //def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent, fileDirectory: Option[String]) =
+
+      //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+
+    def methodFormat(existingData: Seq[String], fileName: String, dataContent: DataContent, fileDirectory: Option[String]) =
+      def mode =
+        if append
+        then Index.DataMode.Append
+        else Index.DataMode.Create
+
+      val result =
+        Index(
+          `format-version` = omrVersion,
+          `openmole-version` = openMOLEVersion,
+          `execution-id` = executionId,
+          `data-file` = (existingData ++ Seq(fileName)).distinct,
+          `data-mode` = mode,
+          `data-content` = dataContent,
+          `file-directory` = fileDirectory,
+          script = script,
+          `time-start` = timeStart,
+          `time-save` = TimeService.currentTime
+        )
+
+      result.asJson.
+        mapObject(_.add(methodField, methodJson)).
+        asJson.
+        deepDropNullValues
+
+    def parseExistingData(file: File): Option[(String, Seq[String])] =
+      try
+        if file.exists
+        then
+          val data = OMRFormat.indexData(file)
+          Some((data.`execution-id`, data.`data-file`))
+        else None
+      catch
+        case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
+
+    val directory = methodFile.getParentFile
+
+    directory.withLockInDirectory:
+      val existingData =
+        parseExistingData(methodFile) match
+          case Some((id, data)) if overwrite && id != executionId =>
+            OMRFormat.delete(methodFile) //clean(methodFile, data)
+            Seq()
+          case Some((_, data)) => data
+          case None => Seq()
+
+      def executionPrefix = executionId.filter(_ != '-')
+
+      val fileName =
+        if !append
+        then s"$dataDirectoryName/$executionPrefix-${jobId}.omd"
+        else s"$dataDirectoryName/$executionPrefix.omd"
+
+      val dataFile = directory / fileName
+      val storeFileDirectory = directory / resultFileDirectoryName
+
+      def storeFile(f: File) =
+        val destinationPath = s"${summon[FileService].hashNoCache(f)}/${f.getName}"
+        f.copy(storeFileDirectory / destinationPath)
+        org.json4s.JString(destinationPath)
+
+      def jsonContent = JArray(data.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
+
+      dataFile.withPrintStream(append = append, create = true, gz = true): ps ⇒
+        if append && existingData.nonEmpty then ps.print(",\n")
+        ps.print(compact(render(jsonContent)))
+
+      def contentData = DataContent(data.map { s => DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
+
+      // Is created by variablesToJValues if it found some files
+      def fileDirectoryValue =
+        if storeFileDirectory.exists()
+        then Some(resultFileDirectoryName)
+        else None
+
+      methodFile.withPrintStream(create = true, gz = true)(
+        _.print(methodFormat(existingData, fileName, contentData, fileDirectoryValue).noSpaces)
+      )
 
 //  def resultFiles(file: File): Seq[(String, File)] =
 //    val directory = file.getParentFile
