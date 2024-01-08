@@ -127,7 +127,7 @@ enum ErrorStateLevel(val name: String):
 
 case class EnvironmentError(
   environmentId: EnvironmentId,
-  errorMessage: String,
+  errorMessage: Option[String],
   stack: ErrorData,
   date: Long,
   level: ErrorStateLevel)

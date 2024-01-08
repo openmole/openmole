@@ -195,7 +195,7 @@ class ServerState:
     errors.map: ex ⇒
       ex.detail match
         case Some(detail) ⇒
-          val exceptionMessage = ex.exception.getMessage
+          val exceptionMessage = Option(ex.exception.getMessage)
 
           def completeMessage =
             s"""$exceptionMessage\n$detail"""
@@ -212,7 +212,7 @@ class ServerState:
         case None ⇒
           EnvironmentError(
             environmentId,
-            ex.exception.getMessage,
+            Option(ex.exception.getMessage),
             ErrorData(ex.exception),
             ex.creationTime,
             utils.javaLevelToErrorLevel(ex.level)
