@@ -13,31 +13,28 @@ object Preference:
   def passwordTestString = "test"
   def preferences = "preferences"
 
-  def memory() = {
+  def memory() =
     val pref = new MemoryPreference
     pref setPreference (uniqueID, UUID.randomUUID.toString)
     pref
-  }
 
-  def apply(directory: File): Preference = {
+  def apply(directory: File): Preference =
     val pref = FilePreference(ConfigurationFile(directory / preferences))
     //if (!passwordIsCorrect(cypher, pref)) throw new UserBadDataError("Password is incorrect.")
     //setPasswordTest(pref, cypher)
     if (!pref.isSet(uniqueID)) pref setPreference (uniqueID, UUID.randomUUID.toString)
     pref
-  }
 
-  def passwordIsCorrect(cypher: Cypher, preference: Preference) = {
+  def passwordIsCorrect(cypher: Cypher, preference: Preference) =
     util.Try(cypher.decrypt(preference.getRawPreference(passwordTest).getOrElse(passwordTestString)) == passwordTestString).getOrElse(false)
-  }
 
   def passwordChosen(preference: Preference) = preference.getRawPreference(passwordTest).isDefined
 
-  def setPasswordTest(preference: Preference, cypher: Cypher) = {
+  def setPasswordTest(preference: Preference, cypher: Cypher) =
     implicit val _cypher = cypher
     preference.setPreference(passwordTest, passwordTestString)
-  }
 
+  def stub() = memory()
 
 
 trait Preference:

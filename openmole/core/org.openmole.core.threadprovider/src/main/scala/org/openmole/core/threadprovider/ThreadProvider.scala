@@ -16,6 +16,8 @@ object ThreadProvider:
   def apply(maxPoolSize: Option[Int] = None)(implicit preference: Preference) =
     new ThreadProvider(maxPoolSize.getOrElse(preference(ThreadProvider.maxPoolSize)))
 
+  def stub() = apply()(Preference.stub())
+
   type Closure = () ⇒ Unit
 
   class RunClosure(queue: PriorityQueue[Closure]) extends Runnable {

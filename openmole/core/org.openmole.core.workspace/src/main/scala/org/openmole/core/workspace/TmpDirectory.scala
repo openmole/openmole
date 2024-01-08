@@ -5,10 +5,15 @@ import java.util.UUID
 import org.openmole.core.workspace.Workspace._
 import org.openmole.tool.file._
 
-object TmpDirectory {
+object TmpDirectory:
   def apply(workspace: Workspace): TmpDirectory = TmpDirectory(workspace.tmpDirectory)
   def dispose(newFile: TmpDirectory) = newFile.directory.recursiveDelete
-}
+
+  def stub() =
+    val tmpDirectory = java.io.File.createTempFile("tmp", "directory")
+    tmpDirectory.delete()
+    TmpDirectory(tmpDirectory)
+
 
 case class TmpDirectory(directory: File):
   def makeNewDir(prefix: String = fixedDir): File =

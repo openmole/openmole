@@ -47,6 +47,7 @@ import org.openmole.tool.cache.KeyValueCache
 
 object SerializerService:
   def apply() = new SerializerService
+  def stub() = apply()
 
 /**
  * Serializer

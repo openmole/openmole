@@ -35,7 +35,7 @@ import squants.time.TimeConversions._
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 import scala.ref.{ PhantomReference, ReferenceQueue, WeakReference }
 
-object FileService {
+object FileService:
   val GCInterval = PreferenceLocation("FileService", "GCInterval", Some(1 minutes))
 
   val hashCacheSize = PreferenceLocation("FileService", "HashCacheSize", Some(1000L))
@@ -58,11 +58,12 @@ object FileService {
   class FileWithGC(path: String, fileService: FileService) extends java.io.File(path) {
     override protected def finalize() = fileService.asynchronousRemove(new java.io.File(getPath))
   }
-}
 
-object FileServiceCache {
+  def stub() = apply()(Preference.stub(), ThreadProvider.stub())
+
+
+object FileServiceCache:
   def apply()(implicit preference: Preference) = new FileServiceCache()
-}
 
 class FileServiceCache(implicit preference: Preference) {
   private[fileservice] val hashCache =
@@ -76,7 +77,7 @@ class FileServiceCache(implicit preference: Preference) {
       build[String, File]()
 }
 
-class FileService(implicit preference: Preference) {
+class FileService(implicit preference: Preference):
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
@@ -113,5 +114,5 @@ class FileService(implicit preference: Preference) {
 
   def asynchronousRemove(file: File): Boolean = emptyDeleter.asynchronousRemove(file)
 
-}
+
 
