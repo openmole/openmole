@@ -497,6 +497,7 @@ package file {
         catch
           case _: UnsupportedOperationException => None
           case _: IllegalArgumentException => None
+          case _: NoSuchFileException => None
 
 
     private def block(file: File, stopPath: Iterable[File]) =
