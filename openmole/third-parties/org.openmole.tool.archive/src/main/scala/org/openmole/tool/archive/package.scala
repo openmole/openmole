@@ -297,6 +297,10 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
             case e: java.nio.file.FileAlreadyExistsException if overwrite =>
               l.dest.toFile.delete()
               Files.createLink(l.dest, link)
+            case e: java.nio.file.FileSystemException =>
+              Files.copy(link, l.dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
+              setMode(l.dest, link.toFile.mode)
+
 
     // Set directory right after extraction in case some directory are not writable
     for r ← directoryData
