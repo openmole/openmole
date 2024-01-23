@@ -158,7 +158,7 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
-    val inodes = new mutable.HashMap[Long, String]()
+    //val inodes = new mutable.HashMap[Long, String]()
 
     if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
 
@@ -167,8 +167,11 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
       val (source, entryName) = toArchive.pop
       val isSymbolicLink = Files.isSymbolicLink(source)
       val isDirectory = Files.isDirectory(source)
-      val inode = source.inode
 
+      //val inode = source.inode
+
+      // Hard links support has been disabled for now
+      // it raises too many levels of symbolic links after extraction
       def archiveHardLink(target: String) =
         val e = new TarArchiveEntry(entryName, TarConstants.LF_LINK)
         val targetName = if target.startsWith("/") then target.drop(1) else target
@@ -198,16 +201,13 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
         e.setSize(Files.size(source))
         (e, true)
 
-      val (e, put) =
-        inode.flatMap(inodes.get) match
-          case Some(name) => archiveHardLink(name)
-          case _ =>
-            if isDirectory && !isSymbolicLink
-            then archiveDirectory
-            else
-              if isSymbolicLink
-              then archiveSymbolicLink
-              else archivePlainFile
+      val (e, copyInArchive) =
+        if isDirectory && !isSymbolicLink
+        then archiveDirectory
+        else
+          if isSymbolicLink
+          then archiveSymbolicLink
+          else archivePlainFile
 
       // complete current entry by fixing its modes and writing it to the archive
       if source != directory
@@ -216,12 +216,12 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
         e.setModTime(source.lastModified)
         additionalCommand(e)
         tos.putArchiveEntry(e)
-        if put then Files.copy(source, tos)
+        if copyInArchive then Files.copy(source, tos)
         tos.closeArchiveEntry()
 
       // Add source to inode map
-      inode.foreach: in =>
-        inodes += in -> entryName
+      /*inode.foreach: in =>
+        inodes += in -> entryName*/
 
 implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
   def entryIterator: Iterator[TarArchiveEntry] =
