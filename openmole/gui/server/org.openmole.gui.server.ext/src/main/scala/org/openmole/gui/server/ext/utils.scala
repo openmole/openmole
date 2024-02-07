@@ -306,7 +306,7 @@ object utils:
         org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
       )
 
-    def omrToCSV(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory) =
+    def omrToCSV(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
       val fileBaseName = omrFile.baseName
       val csvFile = tmpDirectory.newFile(fileBaseName, ".csv")
 

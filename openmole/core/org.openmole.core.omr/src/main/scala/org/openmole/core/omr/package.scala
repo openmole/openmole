@@ -250,7 +250,7 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def toVariables(file: File, relativePath: Boolean = false): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
+  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
     val omrDirectory = file.getParentFile
     val data: File = omrDirectory / index.`data-file`.last
@@ -267,7 +267,7 @@ object OMRFormat:
     index.`data-mode` match
       case Index.DataMode.Create =>
         def sectionToVariables(section: DataContent.SectionData, a: JArray) =
-          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile)) }
+          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(file: File): JArray =
           file.withGzippedInputStream { is =>
@@ -282,7 +282,7 @@ object OMRFormat:
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
-          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile)) }
+          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(file: File): JArray =
           val begin = new StringInputStream("[")
@@ -305,7 +305,7 @@ object OMRFormat:
     destination: File,
     unrollArray: Boolean = true,
     arrayOnRow: Boolean = false,
-    gzip: Boolean = false) =
+    gzip: Boolean = false)(using SerializerService) =
     import org.openmole.core.csv.*
     val variable = toVariables(file, relativePath = true)
 

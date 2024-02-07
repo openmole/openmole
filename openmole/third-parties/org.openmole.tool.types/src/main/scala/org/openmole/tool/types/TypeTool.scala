@@ -154,7 +154,7 @@ object TypeTool {
     s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
     values
 
-  def toString[T](rootPrefix: Boolean = true)(implicit manifest: Manifest[T]) =
+  def toString[T](replaceObject$: Boolean = true, rootPrefix: Boolean = true)(implicit manifest: Manifest[T]) =
 
     def manifestToString(m: Manifest[_]): String =
       val rc = m.runtimeClass
@@ -172,9 +172,12 @@ object TypeTool {
         else s"_root_.${m.toString()}"
 
     val tpe =
-      manifestToString(manifest).
-        replace(".package$", ".").
-        replace("$", ".").trim
+      if !replaceObject$
+      then manifestToString(manifest)
+      else
+        manifestToString(manifest).
+          replace(".package$", ".").
+          replace("$", ".").trim
 
     val wildCard = "_ <: "
 

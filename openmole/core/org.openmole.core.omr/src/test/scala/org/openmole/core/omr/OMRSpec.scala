@@ -29,6 +29,9 @@ import org.openmole.tool.file.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object OMRSpec:
+  enum Test:
+    case T1, T2
 
 class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
@@ -40,9 +43,11 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     given SerializerService = SerializerService.stub()
 
     val p = Val[String]
+    val t = Val[OMRSpec.Test]
     val file = tmpDirectory.newFile("test", ".omr")
 
-    val data = Seq(OMRFormat.SectionData(Some("test"), Seq(p -> "test")))
+    val vs = Seq[Variable[_]](p -> "test", t -> OMRSpec.Test.T1)
+    val data = Seq(OMRFormat.SectionData(Some("test"), vs))
 
     OMRFormat.write(
       data = data,
@@ -57,6 +62,5 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       overwrite = true
     )
 
-    OMRFormat.toVariables(file)
-  
+    OMRFormat.toVariables(file).head._2 should equal(vs)
 

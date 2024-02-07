@@ -144,4 +144,4 @@ package object json:
   def jValueToAny(using s: org.openmole.core.serializer.SerializerService): JValue => Any =
     value =>
       import org.json4s.jackson.JsonMethods.*
-      s.deserializeFromString[Any](compact(render(value)))
+      s.deserializeFromString[Any](compact(render(value)), json = true)

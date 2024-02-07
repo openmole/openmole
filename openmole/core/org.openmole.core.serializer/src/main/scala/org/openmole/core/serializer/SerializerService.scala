@@ -58,7 +58,9 @@ class SerializerService:
     val lookup = new DefaultConverterLookup()
 
     val driver =
-      if (json) new JsonHierarchicalStreamDriver() else new BinaryStreamDriver()
+      if json
+      then new com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver()
+      else new BinaryStreamDriver()
 
     val xs =
       new XStream(
