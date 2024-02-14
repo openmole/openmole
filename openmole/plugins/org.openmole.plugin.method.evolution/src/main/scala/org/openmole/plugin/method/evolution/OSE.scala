@@ -225,62 +225,64 @@ object OSE {
 
   import org.openmole.core.dsl._
 
-  object OriginAxe {
+  object OriginAxe:
 
-    implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe = {
+    implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe =
       val domain = fix(f.domain).domain.toVector
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.value, domain.min, domain.max), domain)
-    }
 
-    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: FixDomain[D, Array[Double]]): OriginAxe = {
+    implicit def fromSeqOfDoubleDomainToOriginAxe[D](f: Factor[D, Array[Double]])(implicit fix: FixDomain[D, Array[Double]]): OriginAxe =
       val domain = fix(f.domain).domain
       ContinuousSequenceOriginAxe(
         GenomeBound.SequenceOfDouble(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
-    }
 
-    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): OriginAxe = {
+    implicit def fromIntDomainToPatternAxe[D](f: Factor[D, Int])(implicit fix: FixDomain[D, Int]): OriginAxe =
       val domain = fix(f.domain).domain.toVector
       DiscreteOriginAxe(GenomeBound.ScalarInt(f.value, domain.min, domain.max), domain)
-    }
 
-    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: FixDomain[D, Array[Int]]): OriginAxe = {
+    implicit def fromSeqOfIntDomainToOriginAxe[D](f: Factor[D, Array[Int]])(implicit fix: FixDomain[D, Array[Int]]): OriginAxe =
       val domain = fix(f.domain).domain
       DiscreteSequenceOriginAxe(
         GenomeBound.SequenceOfInt(f.value, domain.map(_.min).toArray, domain.map(_.max).toArray, domain.size),
         domain.toVector.map(_.toVector))
-    }
 
-    def genomeBound(originAxe: OriginAxe) = originAxe match {
+
+    implicit def fromEnumerationToOriginAxe[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]): OriginAxe =
+      val domain = fix(f.domain).domain.toVector
+      EnumerationOriginAxe(GenomeBound.Enumeration(f.value, domain))
+
+    def genomeBound(originAxe: OriginAxe) = originAxe match
       case c: ContinuousOriginAxe          ⇒ c.p
       case d: DiscreteOriginAxe            ⇒ d.p
       case cs: ContinuousSequenceOriginAxe ⇒ cs.p
       case ds: DiscreteSequenceOriginAxe   ⇒ ds.p
-    }
+      case en: EnumerationOriginAxe => en.p
+
 
     def fullGenome(origin: Seq[OriginAxe], genome: Genome): Genome =
       origin.map(genomeBound) ++ genome
 
-    def toOrigin(origin: Seq[OriginAxe], genome: Genome) = {
+    def toOrigin(origin: Seq[OriginAxe], genome: Genome) =
       val fg = fullGenome(origin, genome)
       def grid(continuous: Vector[Double], discrete: Vector[Int]): Vector[Int] =
-        origin.toVector.flatMap {
+        origin.toVector.flatMap:
           case ContinuousOriginAxe(p, scale)         ⇒ Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
           case DiscreteOriginAxe(p, scale)           ⇒ Vector(mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
           case ContinuousSequenceOriginAxe(p, scale) ⇒ mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
           case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
-        }
+          case EnumerationOriginAxe(p) => Vector(Genome.discreteValue(fg, p.v, discrete))
+
 
       grid(_, _)
-    }
 
-  }
 
   sealed trait OriginAxe
   case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, scale: Vector[Double]) extends OriginAxe
   case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, scale: Vector[Vector[Double]]) extends OriginAxe
   case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, scale: Vector[Int]) extends OriginAxe
   case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, scale: Vector[Vector[Int]]) extends OriginAxe
+  case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[_]) extends OriginAxe
 
   object FitnessPattern {
     implicit def fromUnderExactToPattern[T, V](v: Under[T, V])(implicit td: ToDouble[V], te: ToObjective[T]): FitnessPattern = FitnessPattern(te.apply(v.value), td(v.under))

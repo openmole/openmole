@@ -27,6 +27,10 @@ import org.scalatest.*
 import org.openmole.plugin.domain.bounds.*
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
+object WorkflowSpec:
+  enum En:
+    case E1, E2
+
 class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test._
@@ -559,5 +563,24 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         termination = 100
       ) on LocalEnvironment(1) by Island(10) by 10
   }
+
+
+  "OSE" should "support enumerations" in {
+    val e = Val[WorkflowSpec.En]
+    val a = Val[Double]
+    val b = Val[Double]
+
+    def f(v: Vector[Double]) = v.head
+
+    OSEEvolution(
+      origin = Seq(e in WorkflowSpec.En.values),
+      evaluation = EmptyTask(),
+      objective = Seq(a evaluate f under 9, b under 3.0),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+  }
+
 
 }

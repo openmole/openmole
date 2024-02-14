@@ -143,44 +143,38 @@ object Genome:
     continuous.slice(index, index + size)
   }
 
-  def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) = {
+  def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete(index)
-  }
 
-  def discreteSequenceValue(genome: Genome, v: Val[_], size: Int, discrete: Vector[Int]) = {
+  def discreteSequenceValue(genome: Genome, v: Val[_], size: Int, discrete: Vector[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete.slice(index, index + size)
-  }
 
   def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
 
-  def continuousIndex(genome: Genome, v: Val[_]): Option[Int] = {
-    def indexOf0(l: List[GenomeBound], index: Int): Option[Int] = {
-      l match {
+  def continuousIndex(genome: Genome, v: Val[_]): Option[Int] =
+    def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
+      l match
         case Nil                                    ⇒ None
         case (h: GenomeBound.ScalarDouble) :: t     ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
         case (h: GenomeBound.ContinuousInt) :: t    ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
         case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
         case h :: t                                 ⇒ indexOf0(t, index)
-      }
-    }
-    indexOf0(genome.toList, 0)
-  }
 
-  def discreteIndex(genome: Genome, v: Val[_]): Option[Int] = {
-    def indexOf0(l: List[GenomeBound], index: Int): Option[Int] = {
-      l match {
+    indexOf0(genome.toList, 0)
+
+  def discreteIndex(genome: Genome, v: Val[_]): Option[Int] =
+    def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
+      l match
         case Nil ⇒ None
         case (h: GenomeBound.ScalarInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
         case (h: GenomeBound.Enumeration[_]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
         case (h: GenomeBound.SequenceOfInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
         case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.values.size)
         case h :: t ⇒ indexOf0(t, index)
-      }
-    }
+
     indexOf0(genome.toList, 0)
-  }
 
   def valueOf(context: Context, v: Val[_]) =
     context.get(v.name) match {
