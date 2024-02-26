@@ -19,10 +19,12 @@ package org.openmole.plugin.source.file
 
 import monocle.Focus
 import org.openmole.core.context.Variable
-import org.openmole.core.dsl._
-import org.openmole.core.fromcontext.FromContext
-import org.openmole.core.setter._
-import org.openmole.core.workflow.mole.{ MoleExecutionContext, Source }
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.format.*
+import org.openmole.core.argument.FromContext
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.mole.{MoleExecutionContext, Source}
 
 import scala.reflect.ClassTag
 
@@ -56,7 +58,6 @@ case class CSVSource(
 
   override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
     import parameters._
-    import org.openmole.core.csv.*
 
     val file = new File(path.from(context))
     val transposed =

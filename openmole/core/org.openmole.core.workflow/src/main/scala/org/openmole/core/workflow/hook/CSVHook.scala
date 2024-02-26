@@ -3,12 +3,10 @@ package org.openmole.core.workflow.hook
 import java.io.PrintStream
 
 import org.openmole.core.context.{ Val, Variable }
-import org.openmole.core.csv
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.{FromContext, OptionalArgument}
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.format.{ CSVOutputFormat, WritableOutput }
-import org.openmole.core.workflow.tools.OptionalArgument
+import org.openmole.core.format.{ CSVOutputFormat, WritableOutput }
 
 object CSVHook {
 

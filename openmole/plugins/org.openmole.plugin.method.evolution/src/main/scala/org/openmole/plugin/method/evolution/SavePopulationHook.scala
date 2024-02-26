@@ -24,24 +24,24 @@ object SavePopulationHook:
 
   def defaultFormat = CSVOutputFormatDefault[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
 
-  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) = FromContext { p ⇒
-    import p._
-    val state = context(t.stateVal)
+  def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) =
+    FromContext: p ⇒
+      import p._
+      val state = context(t.stateVal)
 
-    def all =
-      Seq[Variable[_]](
-        t.generationVal -> t.operations.generationLens.get(state),
-        t.evaluatedVal -> t.operations.evaluatedLens.get(state)
-      ) ++
-        t.operations.result(
-          context(t.populationVal).toVector,
-          state,
-          keepAll = keepAll,
-          includeOutputs = includeOutputs).from(context)
+      def all =
+        Seq[Variable[_]](
+          t.generationVal -> t.operations.generationLens.get(state),
+          t.evaluatedVal -> t.operations.evaluatedLens.get(state)
+        ) ++
+          t.operations.result(
+            context(t.populationVal).toVector,
+            state,
+            keepAll = keepAll,
+            includeOutputs = includeOutputs).from(context)
 
-    val filterSet = filter.toSet
-    all.filter(v ⇒ !filterSet.contains(v.name))
-  }
+      val filterSet = filter.toSet
+      all.filter(v ⇒ !filterSet.contains(v.name))
 
 
   def apply[F](
@@ -69,7 +69,11 @@ object SavePopulationHook:
 
       val content =
         OutputContent(
-          "population" -> resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext)
+          SectionContent(
+            Some("population"),
+            resultVariables(evolution, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter.map(_.name)).from(augmentedContext),
+            Seq(evolution.generationVal.name, evolution.evaluatedVal.name)
+          )
         )
 
       outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)

@@ -10,7 +10,7 @@ import org.http4s.multipart.Multipart
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.fileservice.FileServiceCache
-import org.openmole.core.omr.OMRFormat
+import org.openmole.core.format.OMRFormat
 import org.openmole.core.project.*
 import org.openmole.core.workflow.mole.MoleServices
 
@@ -331,6 +331,6 @@ class RESTAPI(services: Services):
   def checkIsOMR[T](file: File)(f: => T) =
     if !file.exists()
     then NotFound(Error("File not found").toJson)
-    else if !org.openmole.core.omr.OMRFormat.isOMR(file)
+    else if !org.openmole.core.format.OMRFormat.isOMR(file)
     then ExpectationFailed(Error("File is not an \".omr\" file").toJson)
     else f

@@ -1,7 +1,7 @@
 package org.openmole.plugin.method.evolution
 
 import io.circe.derivation
-import org.openmole.core.omr.*
+import org.openmole.core.dsl.extension.*
 
 case class SaveOption(
   frequency: Option[Long],

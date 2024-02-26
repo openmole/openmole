@@ -18,8 +18,8 @@
 package org.openmole.core.setter
 
 import org.openmole.core.context.*
-import org.openmole.core.fromcontext
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument
+import org.openmole.core.argument.*
 import org.openmole.core.keyword.:=
 
 /**
@@ -125,16 +125,16 @@ trait BuilderPackage:
   implicit def seqOfSetterToFunction[O, S](o: Seq[O])(implicit setter: Setter[O, S]): S => S = Function.chain(o.map(o => implicitly[Setter[O, S]].set(o)(_)))
 
   implicit def equalToAssignDefaultFromContext[T, U: DefaultBuilder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
-    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal._1, v.equal._2)) }
+    Setter[:=[Val[T], (FromContext[T], Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + argument.Default[T](v.value, v.equal._1, v.equal._2)) }
 
   implicit def equalToAssignDefaultFromContext2[T, U: DefaultBuilder]: Setter[:=[Val[T], FromContext[T]], U] =
-    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal, false)) }
+    Setter[:=[Val[T], FromContext[T]], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + argument.Default[T](v.value, v.equal, false)) }
 
   implicit def equalToAssignDefaultValue[T, U: DefaultBuilder]: Setter[:=[Val[T], (T, Boolean)], U] =
-    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) }
+    Setter[:=[Val[T], (T, Boolean)], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + argument.Default[T](v.value, v.equal._1: FromContext[T], v.equal._2)) }
 
   implicit def equalToAssignDefaultValue2[T, U: DefaultBuilder]: Setter[:=[Val[T], T], U] =
-    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + fromcontext.Default[T](v.value, v.equal: FromContext[T], false)) }
+    Setter[:=[Val[T], T], U] { v ⇒ implicitly[DefaultBuilder[U]].defaults.modify(_ + argument.Default[T](v.value, v.equal: FromContext[T], false)) }
 
   implicit def equalToAssignDefaultSeqValue[T, U: DefaultBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
     Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] { v ⇒

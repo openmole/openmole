@@ -27,7 +27,7 @@ import org.openmole.tool.outputredirection.OutputRedirection
 
 package file {
 
-  import org.openmole.core.fromcontext.FromContext
+  import org.openmole.core.argument.FromContext
   import org.openmole.core.workflow.hook.CSVHook
 
   trait FilePackage {

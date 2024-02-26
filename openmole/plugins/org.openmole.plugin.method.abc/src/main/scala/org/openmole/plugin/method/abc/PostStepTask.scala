@@ -4,6 +4,7 @@ import mgo.abc.{ MonAPMC, APMC }
 
 import org.openmole.core.context.Variable
 import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task.FromContextTask
 import util._

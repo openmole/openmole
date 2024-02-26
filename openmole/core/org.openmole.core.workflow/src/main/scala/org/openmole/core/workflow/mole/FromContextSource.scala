@@ -1,7 +1,7 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.{ Context, Val }
-import org.openmole.core.fromcontext.{ FromContext, Validate }
+import org.openmole.core.argument.{ FromContext, Validate }
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.setter.{ DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig }
 import org.openmole.core.workflow.validation.ValidateSource

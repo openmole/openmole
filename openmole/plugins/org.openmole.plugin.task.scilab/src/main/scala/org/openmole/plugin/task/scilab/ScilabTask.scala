@@ -1,17 +1,15 @@
 package org.openmole.plugin.task.scilab
 
 import monocle.Focus
-import org.openmole.core.dsl._
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.fromcontext._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.argument._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.setter._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation._
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.plugin.task.container
 import org.openmole.plugin.task.container._

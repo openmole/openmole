@@ -21,11 +21,9 @@ import gridscale.egi.*
 import org.openmole.core.communication.storage.TransferOptions
 import org.openmole.core.db.Replica
 import org.openmole.core.exception.{InternalProcessingError, MultipleException}
-import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.execution.*
 import org.openmole.core.workspace.Workspace
 import org.openmole.plugin.environment.batch.environment.{BatchJobControl, *}
@@ -34,6 +32,8 @@ import org.openmole.tool.cache.*
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.exception.*
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import squants.information.*
 import squants.time.Time
 import squants.time.TimeConversions.*

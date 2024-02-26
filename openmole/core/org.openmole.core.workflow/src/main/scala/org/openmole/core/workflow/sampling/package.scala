@@ -23,7 +23,7 @@ package org.openmole.core.workflow.sampling
  */
 
 import org.openmole.core.context._
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 import org.openmole.tool.types._
 import org.openmole.core.workflow.domain._
 import cats.implicits._

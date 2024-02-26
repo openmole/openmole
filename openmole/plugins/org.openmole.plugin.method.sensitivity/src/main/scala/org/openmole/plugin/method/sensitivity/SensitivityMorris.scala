@@ -1,7 +1,8 @@
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.sampling.ScalableValue
 import org.openmole.plugin.tool.pattern.MapReduce
 
 /*

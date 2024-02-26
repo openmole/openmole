@@ -18,8 +18,9 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.argument.OptionalArgument
 
 object ListFilesDomain extends JavaLogger {
 

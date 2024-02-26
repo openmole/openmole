@@ -22,12 +22,13 @@ import java.io.File
 import monocle.Focus
 import org.openmole.core.context.Val
 import org.openmole.core.setter._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.task.external._
 import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
 import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.tool.netlogo5._
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 
 object NetLogo5Task {
 

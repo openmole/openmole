@@ -25,22 +25,22 @@ package org.openmole.core.workflow.composition
 
 import java.io.PrintStream
 import org.openmole.core.context.{Context, Val}
-import org.openmole.core.fromcontext.{Condition, FromContext, Validate}
+import org.openmole.core.argument.{Condition, FromContext, OptionalArgument, Validate}
 import org.openmole.core.keyword.{By, On}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
 import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
-import org.openmole.core.workflow.format.*
 import org.openmole.core.workflow.hook.{FormattedFileHook, Hook}
 import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
 import org.openmole.core.workflow.task.{EmptyTask, ExplorationTask, MoleTask, Task}
-import org.openmole.core.workflow.tools.OptionalArgument
-import org.openmole.core.workflow.format.WritableOutput.Display
 import org.openmole.core.workflow.grouping.{ByGrouping, Grouping}
 import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil
+
+import org.openmole.core.format.*
+import org.openmole.core.format.WritableOutput.Display
 
 object Puzzle {
 
@@ -184,7 +184,6 @@ class Puzzle(
   def defaults = Task.defaults(first.task(Puzzle.toMole(this), sources, hooks))
 
 object SingleTaskMethod:
-  import org.openmole.core.omr.*
   given MethodMetaData[SingleTaskMethod, None.type] = MethodMetaData(_ => "", _ => None)
 
 case class SingleTaskMethod()

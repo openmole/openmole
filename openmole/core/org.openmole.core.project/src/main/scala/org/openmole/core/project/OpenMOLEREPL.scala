@@ -22,7 +22,6 @@ import org.openmole.core.dsl._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
-import org.openmole.core.workflow.tools._
 import org.openmole.core.workspace.TmpDirectory
 
 object OpenMOLEREPL:

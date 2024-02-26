@@ -1,7 +1,7 @@
 package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.dsl._
-import org.openmole.core.fromcontext.Condition
+import org.openmole.core.argument.Condition
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task.{ ClosureTask, FromContextTask }
 

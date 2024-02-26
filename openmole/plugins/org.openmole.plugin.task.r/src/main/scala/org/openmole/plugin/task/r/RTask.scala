@@ -4,7 +4,7 @@ import monocle.Focus
 import org.openmole.core.context.{Namespace, Val}
 import org.openmole.core.dsl._
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument.{OptionalArgument, *}
 import org.openmole.core.fileservice._
 import org.openmole.core.networkservice._
 import org.openmole.core.preference._
@@ -24,7 +24,6 @@ import org.openmole.core.dsl.extension._
 
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
-import org.openmole.core.workflow.tools.OptionalArgument
 
 object RTask:
 

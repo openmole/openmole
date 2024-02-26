@@ -1,8 +1,7 @@
 package org.openmole.core.dsl
 
 package object extension:
-  export org.openmole.core.fromcontext.FromContext
-  export org.openmole.core.fromcontext.ScalaCompilation
+  export org.openmole.core.argument.{FromContext, ScalaCompilation, ToFromContext, OptionalArgument}
 
   type DefinitionScope = org.openmole.core.setter.DefinitionScope
   def DefinitionScope = org.openmole.core.setter.DefinitionScope
@@ -10,9 +9,8 @@ package object extension:
   type CacheKey[T] = org.openmole.tool.cache.CacheKey[T]
   def CacheKey = org.openmole.tool.cache.CacheKey
 
-  export org.openmole.core.workflow.tools.ScalableValue
+  export org.openmole.core.workflow.sampling.ScalableValue
 
-  export org.openmole.core.workflow.format.WritableOutput.Display
   type Hook = org.openmole.core.workflow.hook.FromContextHook
   def Hook = org.openmole.core.workflow.hook.Hook
   def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook
@@ -65,13 +63,18 @@ package object extension:
   type Context = org.openmole.core.context.Context
   def Context = org.openmole.core.context.Context
 
-  export org.openmole.core.workflow.format.WritableOutput
+  export org.openmole.core.format.WritableOutput
+  export org.openmole.core.format.WritableOutput.Display
+  export org.openmole.core.format.{DataContent, MethodMetaData, ValData, omrCirceDefault}
+  export org.openmole.core.format.{CSVOutputFormatDefault, OMROutputFormatDefault, defaultOutputFormat}
+  export org.openmole.core.format.OutputFormat.{OutputContent, SectionContent}
 
-  val OutputFormat = org.openmole.core.workflow.format.OutputFormat
-  type OutputFormat[T, D] = org.openmole.core.workflow.format.OutputFormat[T, D]
+  val OutputFormat = org.openmole.core.format.OutputFormat
+  type OutputFormat[T, D] = org.openmole.core.format.OutputFormat[T, D]
+
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
-  def ExpandedString = org.openmole.core.fromcontext.ExpandedString
+  def ExpandedString = org.openmole.core.argument.ExpandedString
 
   type Negative[+A] = org.openmole.core.keyword.Negative[A]
   type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
@@ -100,8 +103,8 @@ package object extension:
   def Aggregate = org.openmole.core.keyword.Evaluate
 
 
-  type Validate = org.openmole.core.fromcontext.Validate
-  def Validate = org.openmole.core.fromcontext.Validate
+  type Validate = org.openmole.core.argument.Validate
+  def Validate = org.openmole.core.argument.Validate
 
   export org.openmole.core.exception.{UserBadDataError, InternalProcessingError}
 
@@ -116,6 +119,8 @@ package object extension:
 
   export org.openmole.tool.types.TypeTool.ManifestDecoration
 
+  export org.openmole.core.replication.ReplicaCatalog
+  export org.openmole.core.workflow.execution.EnvironmentProvider
   export org.openmole.core.timeservice.TimeService
   export org.openmole.core.pluginmanager.PluginManager
   export org.openmole.core.workflow.validation.ValidateTask
@@ -131,12 +136,11 @@ package object extension:
 
   export org.openmole.core.highlight.HighLight
   export org.openmole.core.pluginregistry.PluginRegistry
-
-  export org.openmole.core.omr.{DataContent, MethodMetaData, ValData, omrCirceDefault}
-  export org.openmole.core.workflow.format.{CSVOutputFormatDefault, OMROutputFormatDefault, defaultOutputFormat}
-  export org.openmole.core.workflow.format.OutputFormat.OutputContent
-
+  
   export org.openmole.core.workflow.mole.MoleExecution
   export org.openmole.core.services.Services
 
   export org.openmole.tool.cache.KeyValueCache
+  export org.openmole.tool.collection.DoubleRange
+
+

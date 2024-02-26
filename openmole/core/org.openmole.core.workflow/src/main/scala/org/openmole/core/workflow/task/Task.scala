@@ -19,7 +19,7 @@ package org.openmole.core.workflow.task
 
 import java.io.File
 import org.openmole.core.context.*
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -29,7 +29,6 @@ import org.openmole.core.timeservice.TimeService
 import org.openmole.core.setter.{DefinitionScope, InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.mole.MoleExecution
-import org.openmole.core.workflow.tools.*
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.cache.*
 import org.openmole.tool.types.Id
@@ -197,7 +196,7 @@ case class TaskExecutionContext(
   val networkService: NetworkService,
   val timeService: TimeService)
 
-object Task {
+object Task:
 
   /**
    * Construct a Random Number Generator for the task. The rng is constructed by [[org.openmole.tool.random.Random]] with the seed provided from the context (seed being defined as an OpenMOLE variable)
@@ -218,7 +217,7 @@ object Task {
    * @param executionContext context of the environment in which the Task is executed
    * @return
    */
-  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context = {
+  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context =
     lazy val rng = Lazy(Task.buildRNG(context))
     InputOutputCheck.perform(
       task,
@@ -227,18 +226,15 @@ object Task {
       Task.defaults(task),
       task.process(executionContext)
     )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
-  }
 
   def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
   def outputs(task: Task): PrototypeSet = task.config.outputs
   def defaults(task: Task): DefaultSet = task.config.defaults
 
-}
-
 /**
  * A Task is a fundamental unit for the execution of a workflow.
  */
-trait Task extends Name with Id {
+trait Task extends Name with Id:
 
   /**
    * The actual processing of the Task, wrapped by the [[perform]] method
@@ -272,5 +268,4 @@ trait Task extends Name with Id {
   def outputs: PrototypeSet = Task.outputs(this)
   def defaults: DefaultSet = Task.defaults(this)
 
-}
 

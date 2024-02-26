@@ -18,10 +18,11 @@
 package org.openmole.plugin.domain
 
 import java.io.File
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import cats.implicits._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import cats.implicits.*
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.argument.OptionalArgument
 
 package object file {
 

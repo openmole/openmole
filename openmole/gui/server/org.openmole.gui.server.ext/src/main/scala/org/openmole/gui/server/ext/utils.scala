@@ -78,7 +78,7 @@ object utils:
 
 
   def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
-    import org.openmole.core.omr.OMRFormat
+    import org.openmole.core.format.OMRFormat
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
     if f.exists()
@@ -158,7 +158,7 @@ object utils:
     }.filter(exists)
 
   def copyFiles(safePaths: Seq[(SafePath, SafePath)], overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
-    import org.openmole.core.omr.OMRFormat
+    import org.openmole.core.format.OMRFormat
     val existing = ListBuffer[SafePath]()
     safePaths.foreach: (p, d) ⇒
       val destination = d.toFile
@@ -178,7 +178,7 @@ object utils:
 
 
   def deleteFile(safePath: SafePath)(implicit workspace: Workspace): Unit =
-    import org.openmole.core.omr.OMRFormat
+    import org.openmole.core.format.OMRFormat
     val f = safePathToFile(safePath)
     if OMRFormat.isOMR(f)
     then OMRFormat.delete(f)
@@ -310,7 +310,7 @@ object utils:
       val fileBaseName = omrFile.baseName
       val csvFile = tmpDirectory.newFile(fileBaseName, ".csv")
 
-      org.openmole.core.omr.OMRFormat.writeCSV(omrFile, csvFile)
+      org.openmole.core.format.OMRFormat.writeCSV(omrFile, csvFile)
 
       def deleteCSVFile =
         IO[Unit]:
@@ -325,7 +325,7 @@ object utils:
       val fileBaseName = omrFile.baseName
       val jsonFile = tmpDirectory.newFile(fileBaseName, ".json")
 
-      org.openmole.core.omr.OMRFormat.writeJSON(omrFile, jsonFile)
+      org.openmole.core.format.OMRFormat.writeJSON(omrFile, jsonFile)
 
       def deleteJSONFile = IO[Unit] {
         jsonFile.delete()

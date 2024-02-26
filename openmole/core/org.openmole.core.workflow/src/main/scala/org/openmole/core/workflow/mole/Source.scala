@@ -18,11 +18,11 @@
 package org.openmole.core.workflow.mole
 
 import org.openmole.core.context.Context
-import org.openmole.core.fromcontext.{DefaultSet, FromContext}
+import org.openmole.core.argument.{DefaultSet, FromContext}
 import org.openmole.core.setter.{InfoConfig, InputOutputConfig}
-import org.openmole.core.workflow.tools.*
+import org.openmole.core.workflow.task.{InputOutputCheck, Name}
 
-trait Source extends Name {
+trait Source extends Name:
   def config: InputOutputConfig
   def info: InfoConfig
 
@@ -33,11 +33,8 @@ trait Source extends Name {
 
   protected def process(executionContext: MoleExecutionContext): FromContext[Context]
 
-  def perform(context: Context, executionContext: MoleExecutionContext): Context = {
+  def perform(context: Context, executionContext: MoleExecutionContext): Context = 
     implicit val rng = executionContext.services.newRandom
     import executionContext.services.tmpDirectory
     import executionContext.services.fileService
     InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
-  }
-
-}

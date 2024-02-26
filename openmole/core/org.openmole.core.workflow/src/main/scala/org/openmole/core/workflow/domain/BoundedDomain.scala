@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 import scala.annotation.implicitNotFound
 
 /**

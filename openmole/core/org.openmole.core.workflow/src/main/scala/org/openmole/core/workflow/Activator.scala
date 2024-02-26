@@ -3,8 +3,7 @@ package org.openmole.core.workflow
 import org.openmole.core.highlight.HighLight.*
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.openmole.core.preference.PreferenceLocation
-import org.openmole.core.workflow.format.{CSVOutputFormat, OMROutputFormat}
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.workflow.composition.*
 import org.osgi.framework.{BundleActivator, BundleContext}
 
@@ -12,9 +11,9 @@ class Activator extends BundleActivator {
 
   override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
+  override def start(context: BundleContext): Unit = 
 
-    val highLight = {
+    val highLight = 
       import org.openmole.core.context._
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
@@ -51,14 +50,12 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(ClosureTask)),
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
-        OtherHighLight(objectName(CSVOutputFormat)),
-        OtherHighLight(objectName(OMROutputFormat)),
+        OtherHighLight("OMR"),
+        OtherHighLight("CSV"),
         OtherHighLight(objectName(ScalaCode))
       )
-    }
 
     PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))
 
-  }
 
 }

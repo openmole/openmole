@@ -19,7 +19,7 @@ package org.openmole.core.setter
 
 import monocle.*
 import org.openmole.core.context.{ PrototypeSet, Val }
-import org.openmole.core.fromcontext.DefaultSet
+import org.openmole.core.argument.DefaultSet
 
 object InputOutputConfig {
 

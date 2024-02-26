@@ -25,13 +25,13 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace.{ TmpDirectory, Workspace }
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 import org.openmole.core.context._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
 import org.openmole.tool.random.RandomProvider
 
-package object module {
+package object module:
 
   def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
@@ -51,38 +51,22 @@ package object module {
 
   case class SelectableModule(baseURL: String, module: Module)
 
-  def install(modules: Seq[SelectableModule])(implicit newFile: TmpDirectory, workspace: Workspace) = newFile.withTmpDir { dir ⇒
-    case class DownloadableComponent(baseURL: String, component: Component)
-    val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
-    val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
-    val files = downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map {
-      c ⇒
-        val f = dir / gridscale.RemotePath.name(c.component.name)
-        http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.name))(_.copy(f))
-        f
-    }
-    addPluginsFiles(files, true, moduleDirectory)
-  }
+  def install(modules: Seq[SelectableModule])(implicit newFile: TmpDirectory, workspace: Workspace) =
+    newFile.withTmpDir: dir ⇒
+      case class DownloadableComponent(baseURL: String, component: Component)
+      val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
+      val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
+      val files =
+        downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map: c ⇒
+          val f = dir / gridscale.RemotePath.name(c.component.name)
+          http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.name))(_.copy(f))
+          f
+
+      addPluginsFiles(files, true, moduleDirectory)
 
   def components[T](implicit m: Manifest[T]) = PluginManager.pluginsForClass(m.erasure).toSeq
   def components(o: Object) = PluginManager.pluginsForClass(o.getClass).toSeq
 
-  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[(File, Throwable)] = synchronized {
+  def addPluginsFiles(files: Seq[File], move: Boolean, directory: File)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[(File, Throwable)] =
     PluginManager.tryLoad(files).toSeq
 
-    //    val destinations = files.map { file ⇒ file → (directory / file.getName) }
-    //
-    //    destinations.filter(_._2.exists).toList match {
-    //      case Nil ⇒
-    //        val plugins =
-    //          destinations.map {
-    //            case (file, dest) ⇒
-    //              if (!move) file copy dest else file move dest
-    //              dest
-    //          }
-    //        PluginManager.tryLoad(plugins).toSeq
-    //      case l ⇒
-    //        l.map(l ⇒ l._1 → new FileAlreadyExistsException(s"Plugin with file name ${l._1.getName} is already present in the plugin directory"))
-    //    }
-  }
-}

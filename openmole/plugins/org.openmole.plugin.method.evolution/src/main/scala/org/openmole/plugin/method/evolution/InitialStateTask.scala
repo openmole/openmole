@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Variable }
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.dsl._

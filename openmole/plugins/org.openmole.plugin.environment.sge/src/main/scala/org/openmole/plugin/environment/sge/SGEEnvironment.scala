@@ -25,6 +25,8 @@ import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.tool.crypto.Cypher
 import squants.Time
 import squants.information._

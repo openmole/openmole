@@ -45,7 +45,7 @@ object CoreAPIServer:
       else if f.isDirectory
       then CoreAPIServer.directoryDownload(f, name, topDirectory = topDirectory)
       else
-        import org.openmole.core.omr.*
+        import org.openmole.core.format.*
         if !OMRFormat.isOMR(f)
         then CoreAPIServer.fileDownload(f, req, name)
         else CoreAPIServer.omrDownload(f, name)
@@ -67,7 +67,7 @@ object CoreAPIServer:
   def omrDownload(f: File, name: Option[String]): IO[Response[IO]] =
     import org.openmole.tool.stream.*
     import org.openmole.tool.archive.*
-    import org.openmole.core.omr.*
+    import org.openmole.core.format.*
     val dataFiles = OMRFormat.dataFiles(f)
     HTTP.sendFileStream(s"${name.getOrElse(f.baseName)}.tgz"): out =>
       val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))

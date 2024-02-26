@@ -32,6 +32,8 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.crypto._
 import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import squants.information._
 import squants.time.TimeConversions._
 import squants.time.Time

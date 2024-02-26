@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 
 trait SizeStep[T] {
 

@@ -24,7 +24,7 @@ import java.util
 import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 import org.openmole.core.tools.io.Prettifier._
 import org.openmole.core.setter.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._

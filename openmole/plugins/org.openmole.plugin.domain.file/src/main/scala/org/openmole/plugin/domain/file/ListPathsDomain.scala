@@ -18,9 +18,10 @@
 package org.openmole.plugin.domain.file
 
 import java.nio.file.Path
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import cats.implicits._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import cats.implicits.*
+import org.openmole.core.argument.OptionalArgument
 
 object ListPathsDomain {
 

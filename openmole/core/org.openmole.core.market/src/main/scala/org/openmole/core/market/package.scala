@@ -21,7 +21,7 @@ import java.util.zip.GZIPInputStream
 import org.openmole.tool.file.*
 import org.openmole.tool.archive.*
 import org.openmole.core.context.*
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.{Preference, PreferenceLocation}

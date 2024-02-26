@@ -1,6 +1,6 @@
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import io.circe.*
 import io.circe.generic.auto.*
 import io.circe.parser.*

@@ -21,11 +21,9 @@ package org.openmole.plugin.method
 import java.io.PrintStream
 
 import org.openmole.core.dsl
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.tool.pattern._
-import org.openmole.core.csv
-import org.openmole.core.workflow.format.WritableOutput
 
 package object sensitivity {
 

@@ -2,7 +2,7 @@ package org.openmole.plugin.task.timing
 
 import monocle.Focus
 import org.openmole.core.context.Val
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.setter._
 import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.dsl._

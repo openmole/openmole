@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.tools
 
 import org.openmole.core.context.*
-import org.openmole.core.fromcontext.{ExpandedString, FromContext}
+import org.openmole.core.argument.{ExpandedString, FromContext}
 import org.scalatest.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.tool.cache.Lazy

@@ -20,9 +20,6 @@ package org.openmole.plugin.environment.slurm
 
 import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
-import org.openmole.core.preference.Preference
-import org.openmole.core.replication.ReplicaCatalog
-import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.ssh._
@@ -30,6 +27,8 @@ import org.openmole.tool.crypto.Cypher
 import squants.{ Time, _ }
 import squants.information._
 import org.openmole.plugin.environment.batch.storage._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 object SLURMEnvironment {
 

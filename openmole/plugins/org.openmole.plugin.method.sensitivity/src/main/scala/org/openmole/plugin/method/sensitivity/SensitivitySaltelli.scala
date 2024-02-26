@@ -20,6 +20,7 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.dsl
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.sampling.ScalableValue
 import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.tool.pattern.MapReduce

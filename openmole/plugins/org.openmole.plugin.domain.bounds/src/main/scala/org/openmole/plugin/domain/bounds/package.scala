@@ -1,6 +1,6 @@
 package org.openmole.plugin.domain
 
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.workflow.domain.*
 import org.openmole.tool.types.*
 

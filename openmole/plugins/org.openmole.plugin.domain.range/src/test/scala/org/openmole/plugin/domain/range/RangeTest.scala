@@ -17,9 +17,10 @@
  */
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-import org.scalatest._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.sampling.ScalableValue
+import org.scalatest.*
 
 class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 

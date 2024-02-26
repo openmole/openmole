@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.distribution
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.workflow.tools.OptionalArgument
+import org.openmole.core.argument.OptionalArgument
 
 object UniformDistribution:
   given[T]: DiscreteFromContextDomain[UniformDistribution[T], T] = domain ⇒

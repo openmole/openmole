@@ -2,11 +2,11 @@ package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.*
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.setter.*
 import org.openmole.core.workflow.dsl.*
-import org.openmole.core.workflow.format.OutputFormat.*
-import org.openmole.core.workflow.format.*
+import org.openmole.core.format.OutputFormat.*
+import org.openmole.core.format.*
 
 object FormattedFileHook:
 

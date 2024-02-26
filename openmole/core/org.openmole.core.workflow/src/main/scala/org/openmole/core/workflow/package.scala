@@ -20,7 +20,7 @@ package org.openmole.core
 package workflow {
 
   import org.openmole.core.context.ContextPackage
-  import org.openmole.core.fromcontext._
+  import org.openmole.core.argument._
   import org.openmole.core.keyword.KeyWordPackage
   import org.openmole.core.script.CodePackage
   import org.openmole.core.setter.BuilderPackage
@@ -29,21 +29,32 @@ package workflow {
   import org.openmole.core.workflow.hook.HookPackage
   import org.openmole.core.workflow.sampling.SamplingPackage
   import org.openmole.core.workflow.task.TaskPackage
-  import org.openmole.core.workflow.tools.ToolsPackage
   import org.openmole.tool.types.TypesPackage
 
   trait ExportedPackage extends MolePackage
     with CompositionPackage
     with SamplingPackage
     with TaskPackage
-    with ToolsPackage
     with BuilderPackage
     with TypesPackage
     with CodePackage
     with ContextPackage
     with ExpansionPackage
     with KeyWordPackage
-    with HookPackage
+    with HookPackage:
+
+    implicit class VectorLensDecorator[T, U](l: monocle.Lens[T, Vector[U]]):
+      def add(u: U, head: Boolean = false) =
+        if !head
+        then l.modify(_ ++ Seq(u))
+        else l.modify(Vector(u) ++ _)
+
+    implicit class SeqOfEndofunctorDecorator[T](f: Seq[T ⇒ T]):
+      def sequence: T ⇒ T = { (t: T) ⇒ f.foldLeft(t)((a, f) ⇒ f(a)) }
+
+    implicit def seqOfFunction[T](s: Seq[T ⇒ T]): T => T = s.sequence
+
+    implicit def arrayOfFunction[T](s: Array[T ⇒ T]): T => T = s.toSeq.sequence
 
   object dsl extends ExportedPackage
 

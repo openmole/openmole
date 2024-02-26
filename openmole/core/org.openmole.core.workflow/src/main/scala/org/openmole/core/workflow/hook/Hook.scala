@@ -18,21 +18,31 @@
 package org.openmole.core.workflow.hook
 
 import org.openmole.core.context.Context
-import org.openmole.core.fromcontext.{DefaultSet, FromContext}
+import org.openmole.core.argument.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.format.OutputFormat.FormatExecutionContext
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.setter.{InfoConfig, InputOutputConfig}
 import org.openmole.core.workflow.mole.{MoleExecution, Ticket}
-import org.openmole.core.workflow.tools.*
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.RandomProvider
 import org.openmole.core.workflow.job.JobId
+import org.openmole.core.workflow.task.{InputOutputCheck, Name}
+
+object HookExecutionContext:
+  given Conversion[HookExecutionContext, FormatExecutionContext] = executionContext =>
+    import executionContext.*
+    FormatExecutionContext(
+      moleExecutionId = executionContext.moleExecutionId,
+      jobId = executionContext.jobId,
+      moleLaunchTime = executionContext.moleLaunchTime
+    )
 
 case class HookExecutionContext(
   cache:  KeyValueCache,
@@ -52,7 +62,7 @@ case class HookExecutionContext(
   val serializerService: SerializerService,
   val timeService:       TimeService)
 
-trait Hook extends Name {
+trait Hook extends Name:
 
   def config: InputOutputConfig
   def info: InfoConfig
@@ -61,10 +71,9 @@ trait Hook extends Name {
   def defaults = config.defaults
   def name = info.name
 
-  def perform(context: Context, executionContext: HookExecutionContext): Context = {
-    import executionContext._
+  def perform(context: Context, executionContext: HookExecutionContext): Context = 
+    import executionContext.*
     InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(preference).from(context)
-  }
 
   protected def process(executionContext: HookExecutionContext): FromContext[Context]
-}
+

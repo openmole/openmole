@@ -18,7 +18,8 @@
 package org.openmole.plugin.sampling.quasirandom
 
 import org.apache.commons.math3.random.SobolSequenceGenerator
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.workflow.sampling.ScalableValue
 
 object SobolSampling:
 

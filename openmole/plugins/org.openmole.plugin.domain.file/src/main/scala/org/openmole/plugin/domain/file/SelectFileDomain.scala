@@ -21,7 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 import cats.implicits._
-import org.openmole.core.workflow.tools.FileFromContext
+import org.openmole.core.argument.FileFromContext
 
 object SelectFileDomain {
 

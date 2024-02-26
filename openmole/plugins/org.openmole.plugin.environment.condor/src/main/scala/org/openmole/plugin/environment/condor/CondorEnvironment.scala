@@ -25,6 +25,8 @@ import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import squants.Time
 import squants.information._
 import _root_.gridscale.effectaside

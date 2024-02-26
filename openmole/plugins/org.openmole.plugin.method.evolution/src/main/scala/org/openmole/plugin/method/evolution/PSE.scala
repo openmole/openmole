@@ -17,7 +17,7 @@
 package org.openmole.plugin.method.evolution
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.{FromContext, OptionalArgument}
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats._
@@ -34,7 +34,6 @@ import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.keyword.{ In, Under }
 import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }
-import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
 import org.openmole.plugin.method.evolution.Objective._
 import org.openmole.tool.types.ToDouble

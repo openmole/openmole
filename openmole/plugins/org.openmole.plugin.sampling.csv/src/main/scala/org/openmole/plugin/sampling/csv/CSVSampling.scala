@@ -18,12 +18,14 @@
 package org.openmole.plugin.sampling.csv
 
 import java.io.File
-import monocle.{ Lens, Focus }
-import org.openmole.core.context.{ PrototypeSet, Val, Variable }
-import org.openmole.core.fromcontext.{ FromContext, Validate }
-import org.openmole.core.setter.{ InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder }
-import org.openmole.core.workflow.sampling._
-import org.openmole.core.workflow.tools._
+import monocle.{Focus, Lens}
+import org.openmole.core.context.{PrototypeSet, Val, Variable}
+import org.openmole.core.argument.{FileFromContext, FromContext, Validate}
+import org.openmole.core.setter.{InputOutputBuilder, InputOutputConfig, Mapped, MappedOutputBuilder}
+import org.openmole.core.workflow.sampling.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.core.format.CSVFormat
 
 object CSVSampling {
 
@@ -68,7 +70,6 @@ case class CSVSampling(
   
   def apply() = FromContext { p ⇒
     import p._
-    import org.openmole.core.csv.*
 
     CSVFormat.csvToVariables(
       file.from(context),

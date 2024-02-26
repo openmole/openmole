@@ -5,13 +5,13 @@ import monocle.Focus
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.argument.OptionalArgument
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.setter._
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.OptionalArgument
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container._

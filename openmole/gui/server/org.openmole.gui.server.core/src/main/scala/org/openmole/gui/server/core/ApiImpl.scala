@@ -13,7 +13,7 @@ import java.nio.file.*
 import java.util.zip.GZIPInputStream
 import org.openmole.core.compiler.*
 import org.openmole.core.context.Variable
-import org.openmole.core.fromcontext.ScalaCompilation
+import org.openmole.core.argument.ScalaCompilation
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 
 import scala.util.{Failure, Success, Try}
@@ -33,8 +33,8 @@ import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.FileServiceCache
 import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.omr.*
-import org.openmole.core.workflow.format.OMROutputFormat
+import org.openmole.core.format.*
+import org.openmole.core.format.OMROutputFormat
 import org.openmole.core.workflow.mole.MoleExecution.MoleExecutionFailed
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*

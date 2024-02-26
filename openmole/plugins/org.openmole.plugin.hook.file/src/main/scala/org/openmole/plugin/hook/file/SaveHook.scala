@@ -22,7 +22,7 @@ import monocle.Focus
 import java.io.File
 import org.openmole.core.context.*
 import org.openmole.core.exception.*
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.serializer.*
 import org.openmole.core.setter.*
 import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}

@@ -34,7 +34,6 @@ import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{Cleaned, MoleExecutionFailed, SubMoleExecutionState}
 import org.openmole.core.workflow.task.TaskExecutionContext
-import org.openmole.core.workflow.tools.{OptionalArgument as _, *}
 import org.openmole.core.workflow.transition.{AggregationTransition, DataChannel, Transition, TransitionSlot}
 import org.openmole.core.workflow.validation.*
 import org.openmole.tool.cache.KeyValueCache
@@ -42,6 +41,7 @@ import org.openmole.tool.collection.{PriorityQueue, StaticArrayBuffer}
 import org.openmole.tool.lock.*
 import org.openmole.tool.thread.*
 import org.openmole.tool.logger.{JavaLogger, LoggerService}
+import org.openmole.core.argument.*
 
 import scala.collection.mutable
 import scala.collection.mutable.{Buffer, ListBuffer}

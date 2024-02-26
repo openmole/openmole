@@ -20,7 +20,7 @@ package org.openmole.plugin.hook.file
 import java.io.File
 import monocle.{Focus, Lens}
 import org.openmole.core.context.{Context, Val, Variable}
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.setter.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}

@@ -18,7 +18,7 @@
 package org.openmole.core.workflow.sampling
 
 import org.openmole.core.context.{ PrototypeSet, Val, Variable }
-import org.openmole.core.fromcontext.{ FromContext, Validate }
+import org.openmole.core.argument.{ FromContext, Validate }
 
 /**
  * An explicit sampling associates a prototype to an explicit set of values given through an iterable.

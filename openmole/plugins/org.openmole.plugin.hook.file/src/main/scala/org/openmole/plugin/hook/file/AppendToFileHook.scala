@@ -19,7 +19,7 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.tool.stream._

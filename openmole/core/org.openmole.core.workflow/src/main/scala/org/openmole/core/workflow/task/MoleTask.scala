@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock
 import org.openmole.core.context.*
 import org.openmole.core.event.*
 import org.openmole.core.exception.*
-import org.openmole.core.fromcontext.*
+import org.openmole.core.argument.*
 import org.openmole.core.setter.*
 import org.openmole.core.workflow.*
 import org.openmole.core.workflow.dsl.*

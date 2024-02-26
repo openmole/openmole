@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.scala
 
 import org.openmole.core.context.{Context, PrototypeSet, Val, Variable}
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.serializer.plugin.Plugins
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.task.{Task, TaskExecutionContext}

@@ -23,14 +23,14 @@ import monocle.Lens
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.context._
 import org.openmole.core.exception._
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.tools.service.OS
 import org.openmole.core.tools.service.ProcessUtil._
 import org.openmole.core.workflow.dsl._
 import org.openmole.plugin.task.external._
 import org.openmole.tool.random._
 import org.openmole.tool.stream._
-import org.openmole.core.fromcontext._
+import org.openmole.core.argument._
 import cats.implicits._
 
 package systemexec {

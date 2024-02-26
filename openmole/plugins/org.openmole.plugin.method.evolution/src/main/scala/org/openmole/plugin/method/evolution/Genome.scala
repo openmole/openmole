@@ -2,10 +2,12 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.fromcontext.FromContext
+import org.openmole.core.argument.FromContext
 import org.openmole.core.tools.math._
 import org.openmole.core.setter.ValueAssignment
-import org.openmole.tool.collection.DoubleRange
+
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 import java.io.File
 import scala.annotation.tailrec
@@ -15,7 +17,7 @@ import org.openmole.core.dsl.extension.*
 
 object GenomeDouble {
 
-  def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) = {
+  def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) =
 
     @tailrec def toVariables0(genome: List[Genome.GenomeBound.ScalarDouble], continuousValues: List[Double], acc: List[Variable[_]]): Vector[Variable[_]] = {
       genome match {
@@ -30,7 +32,6 @@ object GenomeDouble {
     }
 
     toVariables0(genome.toList, continuousValues.toList, List.empty)
-  }
 
   def toArrayVariable(genomeBound: Genome.GenomeBound.ScalarDouble, value: Seq[Any]) = genomeBound match {
     case b: Genome.GenomeBound.ScalarDouble ⇒
@@ -118,14 +119,14 @@ object Genome:
   import _root_.mgo.evolution.{ C, D }
   import cats.implicits._
 
-  def continuous(genome: Genome) =
+  def continuous(genome: Genome): Vector[C] =
     genome.toVector.collect {
       case s: GenomeBound.ScalarDouble     ⇒ Vector(C(s.low, s.high))
       case s: GenomeBound.SequenceOfDouble ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ C(l, h) }
       case s: GenomeBound.ContinuousInt    ⇒ Vector(C(s.low, s.high))
     }.flatten
 
-  def discrete(genome: Genome) =
+  def discrete(genome: Genome): Vector[D] =
     genome.toVector.collect {
       case s: GenomeBound.ScalarInt                ⇒ Vector(D(s.low, s.high))
       case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ D(l, h) }
@@ -283,8 +284,8 @@ object Genome:
 
     import scala.util.boundary
     def loadFromFile(f: File, genome: Genome)(using SerializerService): SuggestedValues = boundary:
-      import org.openmole.core.csv.CSVFormat
-      import org.openmole.core.omr.OMRFormat
+      import org.openmole.core.format.CSVFormat
+      import org.openmole.core.format.OMRFormat
       import org.openmole.core.dsl._
 
       def toAssignment[T](v: Variable[T]) = ValueAssignment.untyped(v.prototype := v.value)
