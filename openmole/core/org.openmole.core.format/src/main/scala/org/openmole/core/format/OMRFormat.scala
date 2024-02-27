@@ -28,6 +28,7 @@ import org.openmole.core.json.*
 import org.openmole.core.context.{ValType, Variable}
 import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
+import org.openmole.core.format.OutputFormat.SectionContent
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
@@ -64,13 +65,18 @@ object Index:
  enum Compression:
   case GZip
 
+ object DataContent:
+   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None)derives derivation.ConfiguredCodec
+
+ case class DataContent(section: Seq[DataContent.SectionData])derives derivation.ConfiguredCodec
+
 case class Index(
  `format-version`: String,
  `openmole-version`: String,
  `execution-id`: String,
  `data-file`: Seq[String],
  `data-mode`: Index.DataMode,
- `data-content`: DataContent,
+ `data-content`: Index.DataContent,
  `data-compression`: Option[Index.Compression] = None,
  `file-directory`: Option[String],
  script: Option[Index.Script],
@@ -102,10 +108,8 @@ object OMRFormat:
     val directory = file.getParentFile
     indexData(file).`data-file`.map { f => (f, directory / f) }
 
-  case class SectionData(name: Option[String], variables: Seq[Variable[_]])
-
   def write(
-    data: Seq[SectionData],
+    data: OutputFormat.OutputContent,
     methodFile: File,
     executionId: String,
     jobId: Long,
@@ -121,7 +125,7 @@ object OMRFormat:
 
       //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
-    def methodFormat(existingData: Seq[String], fileName: String, dataContent: DataContent, fileDirectory: Option[String]) =
+    def methodFormat(existingData: Seq[String], fileName: String, dataContent: Index.DataContent, fileDirectory: Option[String]) =
       def mode =
         if append
         then Index.DataMode.Append
@@ -182,13 +186,13 @@ object OMRFormat:
         f.copy(storeFileDirectory / destinationPath)
         org.json4s.JString(destinationPath)
 
-      def jsonContent = JArray(data.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
+      def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
 
       dataFile.withPrintStream(append = append, create = true, gz = true): ps ⇒
         if append && existingData.nonEmpty then ps.print(",\n")
         ps.print(compact(render(jsonContent)))
 
-      def contentData = DataContent(data.map { s => DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
+      def contentData = Index.DataContent(data.section.map { s => Index.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
 
       // Is created by variablesToJValues if it found some files
       def fileDirectoryValue =
@@ -250,7 +254,7 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(DataContent.SectionData, Seq[Variable[_]])] =
+  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(Index.DataContent.SectionData, Seq[Variable[_]])] =
     val index = indexData(file)
     val omrDirectory = file.getParentFile
     val data: File = omrDirectory / index.`data-file`.last
@@ -266,7 +270,7 @@ object OMRFormat:
 
     index.`data-mode` match
       case Index.DataMode.Create =>
-        def sectionToVariables(section: DataContent.SectionData, a: JArray) =
+        def sectionToVariables(section: Index.DataContent.SectionData, a: JArray) =
           section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(file: File): JArray =
@@ -278,7 +282,7 @@ object OMRFormat:
         val content = readContent(data)
         (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
       case Index.DataMode.Append =>
-        def sectionToAggregatedVariables(section: DataContent.SectionData, sectionIndex: Int, content: JArray) =
+        def sectionToAggregatedVariables(section: Index.DataContent.SectionData, sectionIndex: Int, content: JArray) =
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }

@@ -40,9 +40,6 @@ object OMROutputFormat:
               case f if f.getName.endsWith(".omr") => f
               case f => f.getParentFile / s"${f.getName}.omr"
 
-          def sectionData = content.section.map: s =>
-            OMRFormat.SectionData(s.name, s.variables)
-
           def methodJson =
             methodData.data(method).asJson.mapObject(_.add(methodField, Json.fromString(methodData.name(method))))
 
@@ -59,7 +56,7 @@ object OMROutputFormat:
 
 
           OMRFormat.write(
-            data = sectionData,
+            data = content,
             methodFile = methodFile,
             executionId = executionId,
             jobId = executionContext.jobId,

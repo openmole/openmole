@@ -65,7 +65,7 @@ package object extension:
 
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
-  export org.openmole.core.format.{DataContent, MethodMetaData, ValData, omrCirceDefault}
+  export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}
   export org.openmole.core.format.{CSVOutputFormatDefault, OMROutputFormatDefault, defaultOutputFormat}
   export org.openmole.core.format.OutputFormat.{OutputContent, SectionContent}
 
