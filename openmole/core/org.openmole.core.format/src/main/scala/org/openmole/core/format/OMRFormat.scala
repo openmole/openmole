@@ -192,7 +192,11 @@ object OMRFormat:
         if append && existingData.nonEmpty then ps.print(",\n")
         ps.print(compact(render(jsonContent)))
 
-      def contentData = Index.DataContent(data.section.map { s => Index.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype))) })
+      def contentData =
+        Index.DataContent:
+          data.section.map: s =>
+            def sectionIndex = if s.indexes.nonEmpty then Some(s.indexes) else None
+            Index.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
 
       // Is created by variablesToJValues if it found some files
       def fileDirectoryValue =
