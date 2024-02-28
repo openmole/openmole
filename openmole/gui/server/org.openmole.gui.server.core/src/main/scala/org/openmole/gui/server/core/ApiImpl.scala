@@ -571,10 +571,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       OMRFormat.toVariables(omrFile).map: (s, v) =>
         GUIOMRSectionContent(s.name, v.map(toGUIVariable))
 
-    val index = OMRFormat.indexData(omrFile)
+    val index = OMRFormat.omrContent(omrFile)
 
     def script =
-      def convertImport(i: Index.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
+      def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
       index.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
 
     GUIOMRContent(

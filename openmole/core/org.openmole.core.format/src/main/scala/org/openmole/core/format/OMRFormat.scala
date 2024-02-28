@@ -38,7 +38,7 @@ import org.openmole.tool.file.*
 implicit val omrCirceDefault: io.circe.derivation.Configuration =
  io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(derivation.renaming.kebabCase)
 
-object Index:
+object OMRContent:
  case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
  case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
 
@@ -70,18 +70,18 @@ object Index:
 
  case class DataContent(section: Seq[DataContent.SectionData])derives derivation.ConfiguredCodec
 
-case class Index(
- `format-version`: String,
- `openmole-version`: String,
- `execution-id`: String,
- `data-file`: Seq[String],
- `data-mode`: Index.DataMode,
- `data-content`: Index.DataContent,
- `data-compression`: Option[Index.Compression] = None,
- `file-directory`: Option[String],
- script: Option[Index.Script],
- `time-start`: Long,
- `time-save`: Long) derives derivation.ConfiguredCodec
+case class OMRContent(
+  `format-version`: String,
+  `openmole-version`: String,
+  `execution-id`: String,
+  `data-file`: Seq[String],
+  `data-mode`: OMRContent.DataMode,
+  `data-content`: OMRContent.DataContent,
+  `data-compression`: Option[OMRContent.Compression] = None,
+  `file-directory`: Option[String],
+  script: Option[OMRContent.Script],
+  `time-start`: Long,
+  `time-save`: Long) derives derivation.ConfiguredCodec
 
 def methodField = "method"
 def omrVersion = "1.0"
@@ -92,7 +92,7 @@ object OMRFormat:
     s"$dataDirectoryName/files-${executionId.filter(_ != '-')}"
 
   def resultFileDirectory(file: File) =
-    val index = indexData(file)
+    val index = omrContent(file)
     index.`file-directory`.map(d => file.getParentFile / d)
 
   def dataDirectory(file: File) =
@@ -100,13 +100,13 @@ object OMRFormat:
 
   def isOMR(file: File) = file.getName.endsWith(".omr")
 
-  def indexData(file: File): Index =
+  def omrContent(file: File): OMRContent =
     val content = file.content(gz = true)
-    decode[Index](content).toTry.get
+    decode[OMRContent](content).toTry.get
 
   def dataFiles(file: File): Seq[(String, File)] =
     val directory = file.getParentFile
-    indexData(file).`data-file`.map { f => (f, directory / f) }
+    omrContent(file).`data-file`.map { f => (f, directory / f) }
 
   def write(
     data: OutputFormat.OutputContent,
@@ -114,7 +114,7 @@ object OMRFormat:
     executionId: String,
     jobId: Long,
     methodJson: Json,
-    script: Option[Index.Script],
+    script: Option[OMRContent.Script],
     timeStart: Long,
     openMOLEVersion: String,
     append: Boolean,
@@ -125,14 +125,14 @@ object OMRFormat:
 
       //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
-    def methodFormat(existingData: Seq[String], fileName: String, dataContent: Index.DataContent, fileDirectory: Option[String]) =
+    def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
       def mode =
         if append
-        then Index.DataMode.Append
-        else Index.DataMode.Create
+        then OMRContent.DataMode.Append
+        else OMRContent.DataMode.Create
 
       val result =
-        Index(
+        OMRContent(
           `format-version` = omrVersion,
           `openmole-version` = openMOLEVersion,
           `execution-id` = executionId,
@@ -154,7 +154,7 @@ object OMRFormat:
       try
         if file.exists
         then
-          val data = OMRFormat.indexData(file)
+          val data = OMRFormat.omrContent(file)
           Some((data.`execution-id`, data.`data-file`))
         else None
       catch
@@ -193,10 +193,10 @@ object OMRFormat:
         ps.print(compact(render(jsonContent)))
 
       def contentData =
-        Index.DataContent:
+        OMRContent.DataContent:
           data.section.map: s =>
             def sectionIndex = if s.indexes.nonEmpty then Some(s.indexes) else None
-            Index.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
+            OMRContent.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
 
       // Is created by variablesToJValues if it found some files
       def fileDirectoryValue =
@@ -227,7 +227,7 @@ object OMRFormat:
     if copyData
     then
       dataFiles(omrFile).foreach((name, f) => f.copy(destinationDirectory / name))
-      val index = indexData(omrFile)
+      val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).copy(destinationDirectory / d))
 
     omrFile copy destination
@@ -239,7 +239,7 @@ object OMRFormat:
     if moveData
     then
       val destinationDataDirectory = destination.getParentFile
-      val index = indexData(omrFile)
+      val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
       dataFiles(omrFile).foreach((name, f) => f.move(destinationDataDirectory / name))
       val omrDataDirectory = dataDirectory(omrFile)
@@ -258,8 +258,8 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(Index.DataContent.SectionData, Seq[Variable[_]])] =
-    val index = indexData(file)
+  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    val index = omrContent(file)
     val omrDirectory = file.getParentFile
     val data: File = omrDirectory / index.`data-file`.last
 
@@ -273,8 +273,8 @@ object OMRFormat:
         case _ => cannotConvertFromJSON[File](v)
 
     index.`data-mode` match
-      case Index.DataMode.Create =>
-        def sectionToVariables(section: Index.DataContent.SectionData, a: JArray) =
+      case OMRContent.DataMode.Create =>
+        def sectionToVariables(section: OMRContent.DataContent.SectionData, a: JArray) =
           section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(file: File): JArray =
@@ -285,8 +285,8 @@ object OMRFormat:
 
         val content = readContent(data)
         (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
-      case Index.DataMode.Append =>
-        def sectionToAggregatedVariables(section: Index.DataContent.SectionData, sectionIndex: Int, content: JArray) =
+      case OMRContent.DataMode.Append =>
+        def sectionToAggregatedVariables(section: OMRContent.DataContent.SectionData, sectionIndex: Int, content: JArray) =
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
@@ -343,17 +343,17 @@ object OMRFormat:
     file: File,
     destination: File)(using SerializerService) =
 
-    val index = indexData(file)
+    val index = omrContent(file)
     def variables = toVariables(file, relativePath = true)
 
     case class JSONContent(
       `openmole-version`: String,
       `execution-id`: String,
-      script: Option[Index.Script],
+      script: Option[OMRContent.Script],
       `time-start`: Long,
       `time-save`: Long) derives derivation.ConfiguredCodec
 
-    import Index.given
+    import OMRContent.given
 
     def jsonData =
       org.json4s.JArray(
