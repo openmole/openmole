@@ -207,17 +207,16 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         objective = Seq(a),
         genome = Seq(a in (0.0, 1.0)),
         termination = 100
-      ) hook ("/tmp/test.txt")
+      ) hook ("/tmp/test.txt", frequency = 2)
 
-    Validation(nsga) match {
+    Validation(nsga) match 
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
 
-    Validation(nsga by Island(10)) match {
+    Validation(nsga by Island(10)) match 
       case Nil ⇒
       case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
+    
   }
 
   "Steady state workflow" should "have no validation error" in {
