@@ -47,7 +47,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val file = tmpDirectory.newFile("test", ".omr")
 
     val vs = Seq[Variable[_]](p -> "test", t -> OMRSpec.Test.T1)
-    val data = Seq(OMRFormat.SectionData(Some("test"), vs))
+    val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
 
     OMRFormat.write(
       data = data,
