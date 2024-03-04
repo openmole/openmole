@@ -568,7 +568,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GUIVariable(v.name, valueTypeFromAny(v.value), v.prototype.`type`.toString)
 
     def content =
-      OMRFormat.toVariables(omrFile).map: (s, v) =>
+      OMRFormat.variables(omrFile).map: (s, v) =>
         GUIOMRSectionContent(s.name, v.map(toGUIVariable))
 
     val index = OMRFormat.omrContent(omrFile)

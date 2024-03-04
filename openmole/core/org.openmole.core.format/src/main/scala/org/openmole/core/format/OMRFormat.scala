@@ -258,10 +258,13 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def toVariables(file: File, relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+  def variables(
+    file: File,
+    relativePath: Boolean = false,
+    dataFile: Option[String] = None)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(file)
     val omrDirectory = file.getParentFile
-    val data: File = omrDirectory / index.`data-file`.last
+    val data: File = omrDirectory / (dataFile getOrElse index.`data-file`.last)
 
     def loadFile(v: org.json4s.JValue) =
       import org.openmole.core.json.*
@@ -304,6 +307,27 @@ object OMRFormat:
         val content = readContent(data)
         index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
 
+
+  object IndexedData:
+    type DataIndex = String
+
+  case class IndexedData(sectionIndex: Int, variable: Variable[_], index: IndexedData.DataIndex)
+
+  def indexes(file: File)(using SerializerService): Seq[Seq[IndexedData]] =
+    val content = omrContent(file)
+    for
+      (f, _) <- dataFiles(file)
+    yield
+      val sectionVariables = variables(file, dataFile = Some(f))
+      sectionVariables.zipWithIndex.flatMap:
+        case ((section, variables), i) =>
+          val names = section.indexes.getOrElse(Seq()).toSet
+          variables.filter(v => names.contains(v.name)).map: v =>
+            IndexedData(i, v, f)
+
+  def variablesAtIndex(file: File, index: IndexedData.DataIndex)(using SerializerService) =
+    variables(file, dataFile = Some(index))
+
   def methodName(file: File): Option[String] =
     val j = parse(file.content(gz = true)).toTry.get
     j.hcursor.downField(methodField).as[String].toOption
@@ -314,7 +338,7 @@ object OMRFormat:
     unrollArray: Boolean = true,
     arrayOnRow: Boolean = false,
     gzip: Boolean = false)(using SerializerService) =
-    val variable = toVariables(file, relativePath = true)
+    val variable = variables(file, relativePath = true)
 
     if variable.size == 1
     then
@@ -344,7 +368,7 @@ object OMRFormat:
     destination: File)(using SerializerService) =
 
     val index = omrContent(file)
-    def variables = toVariables(file, relativePath = true)
+    def variablesValues = variables(file, relativePath = true)
 
     case class JSONContent(
       `openmole-version`: String,
@@ -357,13 +381,13 @@ object OMRFormat:
 
     def jsonData =
       org.json4s.JArray(
-        variables.map { (s, variables) =>
+        variablesValues.map: (s, variables) =>
           def content: Seq[(String, org.json4s.JValue)] =
             def fileToJSON(f: File) = JString(f.getPath)
             s.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
               Seq("variables" -> variablesToJObject(variables, default = Some(anyToJValue), file = Some(fileToJSON)))
           org.json4s.JObject(content.toList)
-        }.toList
+        .toList
       )
 
     def jsonContent =

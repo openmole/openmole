@@ -64,5 +64,5 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     println(file.content(gz = true))
 
-    OMRFormat.toVariables(file).head._2 should equal(vs)
+    OMRFormat.variables(file).head._2 should equal(vs)
 
