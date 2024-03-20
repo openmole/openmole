@@ -35,13 +35,13 @@ object OMRSpec:
 
 class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  "OMR" should "support enum" in:
-    given TimeService = TimeService.stub()
-    given Preference = Preference.stub()
-    given FileService = FileService.stub()
-    given tmpDirectory: TmpDirectory = TmpDirectory.stub()
-    given SerializerService = SerializerService.stub()
+  given TimeService = TimeService.stub()
+  given Preference = Preference.stub()
+  given FileService = FileService.stub()
+  given tmpDirectory: TmpDirectory = TmpDirectory.stub()
+  given SerializerService = SerializerService.stub()
 
+  "OMR" should "support enum" in:
     val p = Val[String]
     val t = Val[OMRSpec.Test]
     val file = tmpDirectory.newFile("test", ".omr")
@@ -62,7 +62,4 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       overwrite = true
     )
 
-    println(file.content(gz = true))
-
     OMRFormat.variables(file).head._2 should equal(vs)
-

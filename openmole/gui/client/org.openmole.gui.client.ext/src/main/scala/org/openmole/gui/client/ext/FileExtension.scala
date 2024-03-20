@@ -21,13 +21,13 @@ import org.openmole.gui.shared.data.SafePath
 
 
 object FileExtension:
-  def apply(fileName: String): FileExtension = fileName.dropWhile(_ != '.').drop(1)
+  def apply(fileName: String): FileExtension = fileName.split('.').drop(1)
   def apply(path: SafePath): FileExtension = FileExtension(path.name)
 
   extension (e: FileExtension)
-    def value: String = e
+    def value: Seq[String] = e
 
-opaque type FileExtension = String
+opaque type FileExtension = Seq[String]
 
 object FileContentType:
   val OpenMOLEScript = ReadableFileType(Seq("oms"), text = true)
@@ -57,7 +57,10 @@ object FileContentType:
   def apply(path: SafePath)(using plugins: GUIPlugins): FileContentType = apply(FileExtension(path))
 
   def apply(e: FileExtension)(using plugins: GUIPlugins) =
-    all.find(_.extension.contains(e.value)).getOrElse(UnknownFileType)
+    all.find: f =>
+      f.extension.exists: ke =>
+        e.value.endsWith(ke.split('.'))
+    .getOrElse(UnknownFileType)
 
   def isText(e: ReadableFileType) = e.text
 

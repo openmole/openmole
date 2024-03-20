@@ -557,7 +557,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             case x: Array[Array[String]] => ValueArrayArrayString(x)
             case x: Array[Array[Boolean]] => ValueArrayArrayBoolean(x)
             case x: Array[Array[File]] => ValueArrayArrayFile(x.map(_.map(fileToSafePath)))
-
       res match
         case util.Failure(exception: MatchError) => None
         case util.Success(value) => Some(value)
