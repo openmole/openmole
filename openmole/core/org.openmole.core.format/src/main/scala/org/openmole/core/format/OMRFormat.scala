@@ -35,6 +35,8 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
 
+import java.util.UUID
+
 implicit val omrCirceDefault: io.circe.derivation.Configuration =
  io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(derivation.renaming.kebabCase)
 
@@ -173,12 +175,6 @@ object OMRFormat:
 
       def executionPrefix = executionId.filter(_ != '-')
 
-      val fileName =
-        if !append
-        then s"$dataDirectoryName/$executionPrefix-${jobId}.omd"
-        else s"$dataDirectoryName/$executionPrefix.omd"
-
-      val dataFile = directory / fileName
       val storeFileDirectory = directory / resultFileDirectoryName
 
       def storeFile(f: File) =
@@ -187,6 +183,16 @@ object OMRFormat:
         org.json4s.JString(destinationPath)
 
       def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
+
+      val fileName =
+        if !append
+        then s"$dataDirectoryName/$executionPrefix-${jobId}.omd"
+        else
+          existingData.headOption match
+            case Some(h) => h
+            case None => s"$dataDirectoryName/${UUID.randomUUID().toString}.omd"
+
+      val dataFile = directory / fileName
 
       dataFile.withPrintStream(append = append, create = true, gz = true): ps ⇒
         if append && existingData.nonEmpty then ps.print(",\n")
