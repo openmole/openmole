@@ -322,7 +322,7 @@ object BatchEnvironment {
   def scriptPlugins(services: Services) =
     def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
       import services._
-      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.repl.classDirectory, c.repl.classLoader)
+      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
       cb.plugins ++ file.toSeq
     }
 

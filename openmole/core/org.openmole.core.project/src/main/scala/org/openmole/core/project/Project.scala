@@ -167,7 +167,7 @@ object Project:
         val loop = repl.getOrElse { Project.newREPL() }
         try 
           Option(loop.compile(content)) match 
-            case Some(compiled) ⇒ Compiled(compiled, CompilationContext(loop), workDirectory = workDirectory, script = script)
+            case Some(compiled) ⇒ Compiled(compiled, loop, CompilationContext(loop.classDirectory, loop.classLoader), workDirectory = workDirectory, script = script)
             case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
         catch 
           case ce: Interpreter.CompilationError ⇒
@@ -212,12 +212,12 @@ sealed trait CompilationError extends CompileResult:
 case class ErrorInCode(error: Interpreter.CompilationError) extends CompilationError
 case class ErrorInCompiler(error: Throwable) extends CompilationError
 
-case class Compiled(result: Interpreter.RawCompiled, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult:
+case class Compiled(result: Interpreter.RawCompiled, repl: REPL, compilationContext: CompilationContext, workDirectory: File, script: File) extends CompileResult:
 
   def eval(args: Seq[String])(implicit services: Services): DSL =
     import services._
 
-    compilationContext.repl.evalCompiled(result) match 
+    repl.evalCompiled(result) match
       case p: Project.OMSScript ⇒
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
         workDirectory.mkdirs()

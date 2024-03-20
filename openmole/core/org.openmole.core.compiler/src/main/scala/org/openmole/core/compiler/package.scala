@@ -1,4 +1,4 @@
-package org.openmole.core
+package org.openmole.core.compiler
 
 /*
  * Copyright (C) 2021 Romain Reuillon
@@ -20,6 +20,4 @@ package org.openmole.core
 import org.openmole.tool.file.File
 import org.openmole.core.compiler.*
 
-package object compiler {
-  case class CompilationContext(repl: REPL)
-}
+case class CompilationContext(classDirectory: File, classLoader: ClassLoader)

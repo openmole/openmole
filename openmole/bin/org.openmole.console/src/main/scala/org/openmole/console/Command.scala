@@ -155,7 +155,7 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
   def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
     Command.load(variables, file, args)
 
-  def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console))
+  def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console.classDirectory, console.classLoader))
 
   def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
