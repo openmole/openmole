@@ -173,8 +173,6 @@ object OMRFormat:
           case Some((_, data)) => data
           case None => Seq()
 
-      def executionPrefix = executionId.filter(_ != '-')
-
       val storeFileDirectory = directory / resultFileDirectoryName
 
       def storeFile(f: File) =
@@ -185,12 +183,14 @@ object OMRFormat:
       def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
 
       val fileName =
+        def executionPrefix = executionId.filter(_ != '-')
+        def newUUID = UUID.randomUUID().toString.filter(_ != '-')
         if !append
-        then s"$dataDirectoryName/$executionPrefix-${jobId}.omd"
+        then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
         else
           existingData.headOption match
             case Some(h) => h
-            case None => s"$dataDirectoryName/${UUID.randomUUID().toString}.omd"
+            case None => s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
 
       val dataFile = directory / fileName
 
