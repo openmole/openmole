@@ -315,23 +315,21 @@ object OMRFormat:
 
 
   object IndexedData:
-    type DataIndex = String
+    type FileIndex = String
 
-  case class IndexedData(sectionIndex: Int, variable: Variable[_], index: IndexedData.DataIndex)
+  case class IndexedData(fileIndex: IndexedData.FileIndex, sectionIndex: Int, variable: Variable[_])
 
-  def indexes(file: File)(using SerializerService): Seq[Seq[IndexedData]] =
+  def indexes(file: File)(using SerializerService): Seq[IndexedData] =
     val content = omrContent(file)
-    for
-      (f, _) <- dataFiles(file)
-    yield
+    dataFiles(file).flatMap: (f, _) =>
       val sectionVariables = variables(file, dataFile = Some(f))
       sectionVariables.zipWithIndex.flatMap:
         case ((section, variables), i) =>
           val names = section.indexes.getOrElse(Seq()).toSet
           variables.filter(v => names.contains(v.name)).map: v =>
-            IndexedData(i, v, f)
+            IndexedData(f, i, v)
 
-  def variablesAtIndex(file: File, index: IndexedData.DataIndex)(using SerializerService) =
+  def variablesAtIndex(file: File, index: IndexedData.FileIndex)(using SerializerService) =
     variables(file, dataFile = Some(index))
 
   def methodName(file: File): Option[String] =

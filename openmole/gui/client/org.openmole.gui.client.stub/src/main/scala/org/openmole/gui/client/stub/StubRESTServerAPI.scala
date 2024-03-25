@@ -218,7 +218,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
 
   override def omrMethod(path: SafePath)(using BasePath): Future[Option[String]] = Future.successful(None)
 
-  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = Future.successful(
+  override def omrContent(path: SafePath, d: Option[String])(using BasePath): Future[GUIOMRContent] = Future.successful(
     GUIOMRContent(
       section = Seq(),
       openMoleVersion = "stub",
@@ -229,6 +229,7 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
   )
 
   override def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]] = Future.successful(None)
+  override def omrDataIndex(path: SafePath)(using BasePath): Future[Seq[GUIOMRDataIndex]] = Future.successful(Seq())
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = Future.successful(None)
 

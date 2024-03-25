@@ -201,16 +201,19 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     marketIndex.errorImplementedBy { _ => apiImpl.marketIndex() }
 
   val getMarketEntryRoute =
-    getMarketEntry.errorImplementedBy { case(e, p) => apiImpl.getMarketEntry(e, p) }
+    getMarketEntry.errorImplementedBy { case (e, p) => apiImpl.getMarketEntry(e, p) }
 
   val omrMethodRoute =
     omrMethod.errorImplementedBy { p => apiImpl.omrMethodName(p) }
 
   val omrContentRoute =
-    omrContent.errorImplementedBy { p => apiImpl.omrContent(p) }
+    omrContent.errorImplementedBy { (p, d) => apiImpl.omrContent(p, d) }
 
   val omrFilesRoute =
     omrFiles.errorImplementedBy { p => apiImpl.omrFiles(p) }
+
+  val omrDataIndexRoute =
+    omrDataIndex.errorImplementedBy { p => apiImpl.omrDataIndex(p) }
 
   val addPluginRoute =
     addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }

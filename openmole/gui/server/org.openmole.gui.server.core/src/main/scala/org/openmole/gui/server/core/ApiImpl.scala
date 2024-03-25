@@ -526,12 +526,46 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     OMRFormat.resultFileDirectory(omrFile).map: rf =>
       fileToSafePath(rf)
 
-  def omrContent(result: SafePath): GUIOMRContent =
+  def omrContent(result: SafePath, dataFile: Option[String]): GUIOMRContent =
     import services.*
     import GUIVariable.ValueType
     import GUIVariable.ValueType.*
     val omrFile = safePathToFile(result)
 
+    def content =
+      OMRFormat.variables(omrFile, dataFile = dataFile).map: (s, v) =>
+        GUIOMRSectionContent(s.name, v.map(toGUIVariable))
+
+    val omrContent = OMRFormat.omrContent(omrFile)
+
+    def script =
+      def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
+      omrContent.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
+
+    GUIOMRContent(
+      section = content,
+      openMoleVersion = omrContent.`openmole-version`,
+      executionId = omrContent.`execution-id`,
+      script = script,
+      timeStart = omrContent.`time-start`,
+      timeSave = omrContent.`time-save`
+    )
+
+  def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =
+    import services.*
+    import GUIVariable.ValueType
+    import GUIVariable.ValueType.*
+    val omrFile = safePathToFile(result)
+    def indexes =
+      OMRFormat.indexes(omrFile).map: id =>
+        GUIOMRDataIndex(id.fileIndex, id.sectionIndex, toGUIVariable(id.variable))
+
+    indexes
+
+  def toGUIVariable(v: Variable[_]) =
+    import services.*
+    import GUIVariable.ValueType
+    import GUIVariable.ValueType.*
     def valueTypeFromAny(x: Any): Option[ValueType] =
       import ServerFileSystemContext.Project
       def res =
@@ -557,33 +591,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
             case x: Array[Array[String]] => ValueArrayArrayString(x)
             case x: Array[Array[Boolean]] => ValueArrayArrayBoolean(x)
             case x: Array[Array[File]] => ValueArrayArrayFile(x.map(_.map(fileToSafePath)))
+
       res match
         case util.Failure(exception: MatchError) => None
         case util.Success(value) => Some(value)
         case util.Failure(e: Throwable) => throw e
 
-
-    def toGUIVariable(v: Variable[_]) =
-      GUIVariable(v.name, valueTypeFromAny(v.value), v.prototype.`type`.toString)
-
-    def content =
-      OMRFormat.variables(omrFile).map: (s, v) =>
-        GUIOMRSectionContent(s.name, v.map(toGUIVariable))
-
-    val index = OMRFormat.omrContent(omrFile)
-
-    def script =
-      def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
-      index.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
-
-    GUIOMRContent(
-      section = content,
-      openMoleVersion = index.`openmole-version`,
-      executionId = index.`execution-id`,
-      script = script,
-      timeStart = index.`time-start`,
-      timeSave = index.`time-save`
-    )
+    GUIVariable(v.name, valueTypeFromAny(v.value), v.prototype.`type`.toString)
 
   def expandResources(resources: Resources): Resources =
     import services._

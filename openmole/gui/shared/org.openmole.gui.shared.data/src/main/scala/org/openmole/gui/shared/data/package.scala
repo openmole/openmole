@@ -439,6 +439,8 @@ case class GUIOMRContent(
   timeStart: Long,
   timeSave: Long)
 
+case class GUIOMRDataIndex(dataFile: String, sectionIndex: Int, variable: GUIVariable)
+
 case class GUIOMRImport(`import`: String, content: String)
 case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
 

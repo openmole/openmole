@@ -83,11 +83,15 @@ trait CoreAPI extends RESTAPI:
   val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
 
-  val omrContent: ErrorEndpoint[SafePath, GUIOMRContent] =
-    errorEndpoint(post(path / prefix / "file" / "omr" / "content", jsonRequest[SafePath]), ok(jsonResponse[GUIOMRContent]))
+  val omrContent: ErrorEndpoint[(SafePath, Option[String]), GUIOMRContent] =
+    errorEndpoint(post(path / prefix / "file" / "omr" / "content", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[GUIOMRContent]))
 
   val omrFiles: ErrorEndpoint[SafePath, Option[SafePath]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "files", jsonRequest[SafePath]), ok(jsonResponse[Option[SafePath]]))
+
+  val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
+    errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
+
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
