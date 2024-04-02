@@ -135,7 +135,13 @@ object GUIServer:
   case object Ok extends ExitStatus
 
 
-  def apply(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], optimizedJS: Boolean, extraHeaders: String) =
+  def apply(
+    port: Int,
+    localhost: Boolean,
+    services: GUIServerServices,
+    password: Option[String],
+    optimizedJS: Boolean,
+    extraHeaders: String) =
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
@@ -178,15 +184,18 @@ object GUIServer:
   end server
 
 
-
-
-class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, password: Option[String], webappCache: File, extraHeaders: String):
+class GUIServer(
+  port: Int,
+  localhost: Boolean,
+  services: GUIServerServices,
+  password: Option[String],
+  webappCache: File,
+  extraHeaders: String):
 
   def start() =
     import cats.effect.unsafe.IORuntime
     import cats.effect.unsafe.IORuntimeConfig
     import cats.effect.unsafe.Scheduler
-
 
     val control = GUIServer.Control()
     val applicationControl =
@@ -220,13 +229,13 @@ class GUIServer(port: Int, localhost: Boolean, services: GUIServerServices, pass
     //        config = IORuntimeConfig()
     //      )
 
-    val pluginsRoutes = apiImpl.pluginRoutes.map(r => "/" -> GZip(r.router)).toSeq
+    val pluginsRoutes = apiImpl.pluginRoutes.map(r => s"/" -> GZip(r.router)).toSeq
     val httpApp = Router(
       Seq(
-        "/" -> GZip(applicationServer.routes),
-        "/" -> GZip(apiServer.routes),
-        "/" -> GZip(apiServer.endpointRoutes),
-        "/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
+        s"/" -> GZip(applicationServer.routes),
+        s"/" -> GZip(apiServer.routes),
+        s"/" -> GZip(apiServer.endpointRoutes),
+        s"/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 

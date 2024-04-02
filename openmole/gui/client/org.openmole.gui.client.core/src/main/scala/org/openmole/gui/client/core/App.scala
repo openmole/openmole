@@ -41,6 +41,10 @@ import scala.scalajs.js.timers.*
 
 class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: ServerAPI):
 
+  def basePath =
+    val basePath = dom.document.location.pathname.split("/").dropRight(1).mkString("/")
+    BasePath(if basePath.isEmpty then None else Some(basePath))
+
   def connection() =
     render(
       dom.document.body,
@@ -48,7 +52,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
   def stopped(): Unit =
-    given BasePath = BasePath(dom.document.location)
+    given BasePath = basePath
 
     val stoppedDiv = div(
       cls := "screen-center",
@@ -61,7 +65,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
 
   def restarted(): Unit =
-    given BasePath = BasePath(dom.document.location)
+    given BasePath = basePath
 
     val restartedDiv =
       div(
@@ -96,7 +100,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     )
 
   def run() =
-    given BasePath = BasePath(dom.document.location)
+    given BasePath = basePath
 
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global

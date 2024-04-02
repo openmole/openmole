@@ -26,9 +26,8 @@ import scala.concurrent.Future
 
 
 object BasePath:
-  def apply(location: dom.Location): BasePath =
-    val basePath = location.pathname.split("/").dropRight(1).mkString("/")
-    if basePath.isEmpty then None else Some(basePath)
+  def apply(path: Option[String]): BasePath = path
+
   implicit def value(p: BasePath): Option[String] = p
 
 opaque type BasePath = Option[String]

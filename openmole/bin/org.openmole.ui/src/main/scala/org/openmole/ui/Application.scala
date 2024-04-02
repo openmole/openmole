@@ -64,7 +64,6 @@ object Application extends JavaLogger {
       password:                 Option[String]  = None,
       passwordFile:             Option[File]    = None,
       workspace:                Option[File]    = None,
-      //hostName:                 Option[String]  = None,
       launchMode:               LaunchMode      = GUIMode,
       ignored:                  List[String]    = Nil,
       port:                     Option[Int]     = None,
@@ -74,23 +73,21 @@ object Application extends JavaLogger {
       remote:                   Boolean         = false,
       browse:                   Boolean         = true,
       proxyURI:                 Option[String]  = None,
-      httpSubDirectory:         Option[String]  = None,
       debugNoOutputRedirection: Boolean         = false,
       args:                     List[String]    = Nil,
-      extraHeader:              Option[File]    = None
+      guiExtraHeader:           Option[String]  = None,
+      guiExtraHeaderFile:       Option[File]    = None
     )
 
     def takeArg(args: List[String]) =
-      args match {
+      args match
         case h :: t ⇒ h
         case Nil    ⇒ ""
-      }
 
     def dropArg(args: List[String]) =
-      args match {
+      args match
         case h :: t ⇒ t
         case Nil    ⇒ Nil
-      }
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -108,7 +105,6 @@ object Application extends JavaLogger {
       |[--remote] enable remote connection to the web interface
       |[--no-browser] don't automatically launch the browser in GUI mode
       |[--unoptimized-js] do not optimize JS (do not use Google Closure Compiler)
-      |[--extra-header path] specify a file containing a piece of html code to be inserted in the GUI html header file
       |[--load-workspace-plugins] load the plugins of the OpenMOLE workspace (these plugins are always loaded in GUI mode)
       |[--console-work-directory] specify the workDirectory variable in console mode (it is set to the current directory by default)
       |[--reset] reset all preferences and authentications
@@ -116,19 +112,21 @@ object Application extends JavaLogger {
       |[--mem memory] allocate more memory to the JVM (not supported on windows yes), for instance --mem 2G
       |[--logger-level level] set the level of logging (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
       |[--logger-file-level level] set the level of logging if log file (OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL)
-      |[--proxy hostname] set the proxy to use to install containers or R packages, in the form http://myproxy.org:3128
-      |[--http-sub-directory] set the subdirectory for openmole app (for non-root path). No '/' is required (Example: "user1")
+      |[--proxy hostname] set the proxy in the form http://myproxy.org:3128
+      |[--gui-extra-header ] specify a piece of html code to be inserted in the GUI html header file
+      |[--gui-extra-header-file] specify a file containing a piece of html code to be inserted in the GUI html header file
+      |[--gui-base-path] specify base path for GUI, can be used when OpenMOLE runs behind a reverse proxy
       |[--debug-no-output-redirection] deactivate system output redirection
       |[--] end of options the remaining arguments are provided to the console in the args array
       |[-h | --help] print help
       |[--version] print version information""".stripMargin
 
-    def parse(args: List[String], c: Config = Config()): Config = {
+    def parse(args: List[String], c: Config = Config()): Config =
       def plugins(tail: List[String]) = parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
       def help(tail: List[String]) = parse(tail, c.copy(launchMode = HelpMode))
       def script(tail: List[String]) = parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
       def console(tail: List[String]) = parse(tail, c.copy(launchMode = ConsoleMode))
-      args match {
+      args match
         case "-p" :: tail                            ⇒ plugins(tail)
         case "--plugins" :: tail                     ⇒ plugins(tail)
         case "-c" :: tail                            ⇒ console(tail)
@@ -148,12 +146,11 @@ object Application extends JavaLogger {
         case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
         case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
         case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--extra-header" :: tail                ⇒ parse(dropArg(tail), c.copy(extraHeader = Some(new File(takeArg(tail)))))
+        case "--gui-extra-header" :: tail            ⇒ parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
+        case "--gui-extra-header-file" :: tail       ⇒ parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
         case "--reset" :: tail                       ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
-        //case "--host-name" :: tail                   ⇒ parse(tail.tail, c.copy(hostName = Some(tail.head)))
         case "--reset-password" :: tail              ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                       ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
-        case "--http-sub-directory" :: tail          ⇒ parse(tail.tail, c.copy(httpSubDirectory = Some(tail.head)))
         case "--debug-no-output-redirection" :: tail ⇒ parse(tail, c.copy(debugNoOutputRedirection = true))
         case "--" :: tail                            ⇒ parse(Nil, c.copy(args = tail))
         case "-h" :: tail                            ⇒ help(tail)
@@ -162,8 +159,6 @@ object Application extends JavaLogger {
         case "--test-compile" :: tail                ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
         case s :: tail                               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil                                     ⇒ c
-      }
-    }
 
     PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
 
@@ -234,7 +229,7 @@ object Application extends JavaLogger {
         else
           Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel): services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
-            val server = new RESTServer(config.port, !config.remote, services, config.httpSubDirectory)
+            val server = new RESTServer(config.port, !config.remote, services)
             server.run()
 
           Console.ExitCodes.ok
@@ -274,9 +269,11 @@ object Application extends JavaLogger {
           then
             GUIServer.initialisePreference(preference)
             val port = config.port.getOrElse(preference(GUIServer.port))
-            val extraHeader = config.extraHeader.map { _.content }.getOrElse("")
+            val extraHeader =
+              config.guiExtraHeader.getOrElse("") +
+              config.guiExtraHeaderFile.map { _.content }.getOrElse("")
 
-            val url = s"http://localhost:$port"
+            val url =  s"http://localhost:$port"
 
             GUIServer.urlFile.content = url
             

@@ -28,7 +28,7 @@ object RESTServer extends JavaLogger:
   def isPasswordCorrect(cypher: Cypher)(implicit preference: Preference) =
     Preference.passwordIsCorrect(cypher, preference)
 
-class RESTServer(port: Option[Int], localhost: Boolean/*, hostName: Option[String]*/, services: Services, subDir: Option[String]):
+class RESTServer(port: Option[Int], localhost: Boolean/*, hostName: Option[String]*/, services: Services):
 
   def portValue = port getOrElse 8080
 

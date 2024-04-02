@@ -226,7 +226,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
   val clearNotificationRoute =
     clearNotification.errorImplementedBy { s => apiImpl.clearNotification(s) }
-
+  
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,

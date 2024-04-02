@@ -1355,7 +1355,6 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
   docker / dockerfile := new Dockerfile {
     from("debian:testing")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
-    copy((openmole / assemble).value, s"/openmole")
     runRaw(
       """apt-get update && \
        apt-get install --no-install-recommends -y ca-certificates default-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
@@ -1376,6 +1375,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
       """groupadd -r openmole && \
          useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
          chown openmole:openmole -R /var/openmole""")
+    copy((openmole / assemble).value, s"/openmole")
     runRaw(
       """chmod +x /openmole/openmole && \
         |ln -s /openmole/openmole /usr/bin/openmole""".stripMargin)

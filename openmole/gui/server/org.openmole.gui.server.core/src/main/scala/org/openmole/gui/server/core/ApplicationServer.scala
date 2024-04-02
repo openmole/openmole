@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 object ApplicationServer:
   def redirect(s: String) =
-    SeeOther.apply(Location.apply(Uri.fromString(s"$s").right.get))
+    SeeOther.apply(Location(Uri.unsafeFromString(s)))
 
 class ApplicationServer(webapp: File, extraHeader: String, password: Option[String], services: GUIServerServices.ServicesProvider):
   
@@ -90,15 +90,14 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
 //      response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
 //      response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
 
-      req.decode[UrlForm] { m =>
+      req.decode[UrlForm]: m =>
         val password = m.getFirstOrElse("password", "")
         services.cypherProvider.set(Cypher(password))
         passwordIsCorrect match
           case true ⇒ ApplicationServer.redirect(shared.api.appRoute)
           case _ ⇒ ApplicationServer.redirect(shared.api.connectionRoute)
-      }
     case req@POST -> Root / org.openmole.gui.shared.api.`resetPasswordRoute` =>
-      req.decode[UrlForm] { m =>
+      req.decode[UrlForm]: m =>
         val password = m.getFirstOrElse("password", "")
         val passwordAgain = m.getFirstOrElse("passwordagain", "")
 
@@ -108,7 +107,6 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
           services.cypherProvider.set(Cypher(password))
 
         ApplicationServer.redirect(shared.api.connectionRoute)
-      }
     case request@GET -> Root / "js" / "snippets" / path =>
       StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
     case request @ GET -> "js" /: path =>
