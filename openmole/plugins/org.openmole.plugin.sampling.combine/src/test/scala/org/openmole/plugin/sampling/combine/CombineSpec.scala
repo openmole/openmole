@@ -19,15 +19,14 @@ import org.scalatest._
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.domain.collection.*
 
-import org.openmole.plugin.domain.collection._
-
-class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.Stubs._
 
-  "x keyword" should "create a complete sampling" in {
+  "x keyword" should "create a complete sampling" in:
     val x1 = Val[Int]
     val x2 = Val[Double]
     val x3 = Val[String]
@@ -35,11 +34,9 @@ class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val s = (x1 in (0 until 2)) x (x2 in (0.0 until 1.0 by 0.1)) x (x3 in List("a", "b"))
 
     (s: Sampling).outputs.toSet should equal(Set(x1, x2, x3))
-
     (s: Sampling).sampling.from(Context.empty).size should equal(40)
-  }
-
-  "++ keyword" should "concatenate samplings" in {
+  
+  "++ keyword" should "concatenate samplings" in:
     val x1 = Val[Int]
     val x2 = Val[Double]
 
@@ -47,9 +44,8 @@ class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     (s: Sampling).outputs.toSet should equal(Set(x1))
     (s: Sampling).sampling.from(Context.empty).size should equal(8)
-  }
 
-  "zip keyword" should "zip samplings" in {
+  "zip keyword" should "zip samplings" in:
     val x1 = Val[Int]
     val x2 = Val[Double]
     val x3 = Val[String]
@@ -58,6 +54,17 @@ class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     (s: Sampling).outputs.toSet should equal(Set(x1, x2, x3))
     (s: Sampling).sampling.from(Context.empty).size should equal(2)
-  }
 
-}
+
+  "tuple sampling" should "zip samplings" in:
+    val x1 = Val[Int]
+    val x2 = Val[Double]
+    val x3 = Val[String]
+
+    val s = (x1, x2) in Seq((0, 0.0), (2, 5.0))
+    (s: Sampling).sampling.from(Context.empty).size should equal(2)
+
+    val s2 = (x1, x2, x3) in Seq((0, 0.0, "teira"), (2, 5.0, "esiurna"))
+    (s2: Sampling).sampling.from(Context.empty).size should equal(2)
+
+

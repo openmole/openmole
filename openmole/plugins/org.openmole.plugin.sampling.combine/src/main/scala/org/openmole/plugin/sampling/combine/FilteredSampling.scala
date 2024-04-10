@@ -20,16 +20,15 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object FilteredSampling {
+object FilteredSampling:
 
-  implicit def isSampling[S]: IsSampling[FilteredSampling[S]] = s ⇒ {
+  implicit def isSampling[S]: IsSampling[FilteredSampling[S]] = s ⇒
     def validate: Validate = s.sampling(s.s).validate ++ s.keep.validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
     def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext: p ⇒
       import p._
       s.sampling(s.s).sampling.from(context).filter(sample ⇒ s.keep.from(context ++ sample))
-    }
 
     Sampling(
       apply,
@@ -37,9 +36,6 @@ object FilteredSampling {
       inputs = inputs,
       validate = validate
     )
-  }
-
-}
 
 case class FilteredSampling[S](s: S, keep: Condition)(implicit val sampling: IsSampling[S])
 

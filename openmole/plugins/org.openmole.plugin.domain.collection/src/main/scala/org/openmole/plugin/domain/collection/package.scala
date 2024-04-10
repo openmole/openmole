@@ -26,11 +26,11 @@ import scala.reflect.ClassTag
 package collection {
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
-  trait LowPriorityImplicits {
-    implicit def iterableIsDiscrete[T]: DiscreteFromContextDomain[Iterable[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
+  trait LowPriorityImplicits:
+    implicit def iterableIsDiscrete[T]: DiscreteDomain[Iterable[T], T] = domain ⇒ Domain(domain.iterator)
+    implicit def iterableIsDiscreteFromContext[T]: DiscreteFromContextDomain[Iterable[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
     implicit def iterableIsFix[T]: FixDomain[Iterable[T], T] = domain ⇒ Domain(domain)
     implicit def iterableIsSized[T]: DomainSize[Iterable[T]] = domain ⇒ domain.size
-  }
 }
 
 package object collection extends LowPriorityImplicits {

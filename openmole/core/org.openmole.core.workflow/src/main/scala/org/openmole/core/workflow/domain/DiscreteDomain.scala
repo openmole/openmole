@@ -26,19 +26,14 @@ import scala.annotation.implicitNotFound
  * @tparam T
  */
 @implicitNotFound("${D} is not a discrete variation domain of type ${T}")
-trait DiscreteDomain[-D, +T] {
+trait DiscreteDomain[-D, +T]:
   def apply(domain: D): Domain[Iterator[T]]
-}
 
-object DiscreteFromContextDomain {
-  implicit def discreteIsContextDiscrete[D, T](implicit d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] =
-    domain ⇒ {
-      val dv = d(domain)
-      dv.copy(domain = FromContext.value(dv.domain))
-    }
-}
+object DiscreteFromContextDomain:
+  implicit def discreteIsContextDiscrete[D, T](implicit d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] = domain ⇒
+    val dv = d(domain)
+    dv.copy(domain = FromContext.value(dv.domain))
 
 @implicitNotFound("${D} is not a discrete variation domain of type T | FromContext[${T}]")
-trait DiscreteFromContextDomain[-D, +T] {
+trait DiscreteFromContextDomain[-D, +T]:
   def apply(domain: D): Domain[FromContext[Iterator[T]]]
-}

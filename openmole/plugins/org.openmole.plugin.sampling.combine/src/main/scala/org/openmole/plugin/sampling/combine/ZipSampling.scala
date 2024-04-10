@@ -20,16 +20,15 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object ZipSampling {
+object ZipSampling:
 
-  implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = s ⇒ {
+  implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = s ⇒
     def validate: Validate = s.sampling1(s.s1).validate ++ s.sampling2(s.s2).validate
     def inputs: PrototypeSet = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
     def outputs: Iterable[Val[_]] = s.sampling1(s.s1).outputs ++ s.sampling2(s.s2).outputs
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext: p ⇒
       import p._
       (s.sampling1(s.s1).sampling.from(context) zip s.sampling2(s.s2).sampling.from(context)).map { case (v1, v2) ⇒ v1 ++ v2 }
-    }
 
     Sampling(
       apply,
@@ -37,9 +36,7 @@ object ZipSampling {
       inputs = inputs,
       validate = validate
     )
-  }
 
-}
 
 case class ZipSampling[S1, S2](s1: S1, s2: S2)(implicit val sampling1: IsSampling[S1], val sampling2: IsSampling[S2])
 
