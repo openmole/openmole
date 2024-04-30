@@ -1167,7 +1167,7 @@ padding-bottom: 90px;
     cursor: pointer;
 }
 
-textarea#execTextArea {
+.execTextArea {
   padding: 20px;
   border: 3px solid #6b6b6b66;
   border-radius: 3px;

@@ -72,6 +72,7 @@ object GUIServer:
     Plugins.persistentWebUI / "node_modules/plotly.js/dist/plotly.min.js" copy jsTarget / "plotly.min.js"
     Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
     Plugins.persistentWebUI / "node_modules/bootstrap-icons/" copy cssTarget / "bootstrap-icons"
+
     to
 
 

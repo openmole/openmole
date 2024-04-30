@@ -6,7 +6,8 @@
     "bootstrap.native": "3.0.14-f",
     "highlight.js": "10.4.1",
     "plotly.js": "2.13.3",
-    "bootstrap-icons": "1.11.1"
+    "bootstrap-icons": "1.11.1",
+    "ansi-to-html": "0.7.2"
   },
   "devDependencies": {
     "concat-with-sourcemaps": "1.1.0",

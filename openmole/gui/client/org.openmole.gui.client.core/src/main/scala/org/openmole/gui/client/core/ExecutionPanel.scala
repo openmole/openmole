@@ -245,7 +245,7 @@ class ExecutionPanel:
   private def displaySize(size: Long, readable: String, operations: Int) =
     if (size > 0) s"$operations ($readable)" else s"$operations"
 
-  def execTextArea(content: String) = textArea(content, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium")
+  def execTextArea(content: String) = textArea(content, cls := "execTextArea", fontFamily := "monospace", fontSize := "medium")
 
   def statusColor(status: ExecutionPanel.ExecutionDetails.State) =
     import ExecutionPanel.ExecutionDetails.State
@@ -400,7 +400,15 @@ class ExecutionPanel:
                 size.signal.flatMap: sizeValue =>
                   Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
                     case Some(output) =>
-                      val textArea = execTextArea(output.output).amend(cls := "console")
+                      val Convert = scalajs.js.Dynamic.global.require("./node_modules/ansi-to-html/lib/ansi_to_html.js")
+                      val convert = scalajs.js.Dynamic.newInstance(Convert)()
+                      convert.options.newline = true
+
+                      val outputDiv = com.raquo.laminar.api.L.div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll")
+
+                      outputDiv.ref.innerHTML = convert.toHtml(output.output).asInstanceOf[String]
+
+                      //val textArea = execTextArea(output.output).amend(cls := "console")
 
                       def more =
                         if output.listed < output.total
@@ -415,13 +423,14 @@ class ExecutionPanel:
                           )
                         else Seq()
 
+
                       def bottom =
                         div(position := "absolute", top := "737", left := "922", cursor.pointer, textAlign := "center", color := "white",
                           i(cls := "bi bi-caret-down"),
-                          onClick --> { _ => textArea.ref.scrollTop = textArea.ref.scrollHeight }
+                          onClick --> { _ => outputDiv.ref.scrollTop = outputDiv.ref.scrollHeight }
                         )
 
-                      Seq(textArea) ++ more ++ Seq(bottom)
+                      Seq(outputDiv) ++ more ++ Seq(bottom)
                     case None => Seq(i(cls := "bi bi-hourglass-split", textAlign := "center"))
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
