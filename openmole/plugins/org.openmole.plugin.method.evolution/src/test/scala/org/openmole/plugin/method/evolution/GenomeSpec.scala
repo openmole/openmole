@@ -42,6 +42,7 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val vx = Val[Array[Double]]
     val g4: Genome = Seq(vx in Seq.fill(10)(0.0 to 1.0))
+    g4.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble] should equal(true)
   }
 
 }
