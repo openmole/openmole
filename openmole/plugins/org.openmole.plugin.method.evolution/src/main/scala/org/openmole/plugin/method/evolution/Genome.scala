@@ -87,6 +87,9 @@ object Genome:
     implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]): ContinuousInt =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
+    implicit def factorSeqOfDoubleRangeIsSequenceOfDouble[D](f: Factor[Seq[DoubleRange], Array[Double]]): SequenceOfDouble =
+      SequenceOfDouble(f.value, f.domain.map(_.low).toArray, f.domain.map(_.high).toArray, f.domain.size)
+
     implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble =
       val (min, max) = bounded(f.domain).domain
       SequenceOfDouble(f.value, min, max, sized(f.domain))
