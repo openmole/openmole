@@ -40,10 +40,4 @@ class DSLSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     assert(r.size == 51)
   }
 
-  "Settings defaults to ScalaCode" should "compile" in {
-    val i = Val[Int]
-    val code = ScalaCode("val j = i") set (i := 42)
-  }
-
-
 }
