@@ -406,7 +406,9 @@ class ExecutionPanel:
 
                       val outputDiv = com.raquo.laminar.api.L.div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll")
 
-                      outputDiv.ref.innerHTML = convert.toHtml(output.output).asInstanceOf[String]
+                      def replaceSpace(s: String) = s.replace(" ", "&nbsp;")
+
+                      outputDiv.ref.innerHTML = convert.toHtml(replaceSpace(output.output)).asInstanceOf[String]
 
                       //val textArea = execTextArea(output.output).amend(cls := "console")
 
