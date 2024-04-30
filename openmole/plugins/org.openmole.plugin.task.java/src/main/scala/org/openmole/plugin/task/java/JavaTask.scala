@@ -181,7 +181,7 @@ case class JavaTask(
 
       def jarParameter =
         if jarResources.nonEmpty
-        then s"""--jars ${jarResources.map((_, n) => s"\"$n\"").mkString(";")}"""
+        then jarResources.map(j => s"""--jar \"${j._2}\"""").mkString(" ")
         else ""
 
       def containerTask =
