@@ -51,8 +51,7 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
         OtherHighLight("OMR"),
-        OtherHighLight("CSV"),
-        OtherHighLight(objectName(ScalaCode))
+        OtherHighLight("CSV")
       )
 
     PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))

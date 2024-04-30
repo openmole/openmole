@@ -7,7 +7,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workflow.mole.ContextAggregator
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
-
+import org.openmole.plugin.task.scala.ScalaCode
 import scala.reflect.ClassTag
 
 object Objective:

@@ -3,7 +3,7 @@ package org.openmole.core.setter
 import monocle.{Iso, Lens}
 import org.openmole.core.context.*
 import monocle.Focus
-import org.openmole.core.argument.{DefaultSet, FromContext, ScalaCode}
+import org.openmole.core.argument.{DefaultSet, FromContext}
 
 trait InputBuilder[T]:
   def inputs: monocle.Lens[T, PrototypeSet]
@@ -24,9 +24,6 @@ object DefaultBuilder:
 
   given[T]: DefaultBuilder[FromContext[T]] with
     def defaults = Focus[FromContext[T]](_.defaults)
-
-  given DefaultBuilder[ScalaCode] with
-    def defaults = Focus[ScalaCode](_.defaults)
 
 
 trait DefaultBuilder[T]:

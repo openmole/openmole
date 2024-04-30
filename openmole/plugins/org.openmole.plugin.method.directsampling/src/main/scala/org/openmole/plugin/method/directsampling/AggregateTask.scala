@@ -20,6 +20,7 @@ package org.openmole.plugin.method.directsampling
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.tool.types.{ FromArray, ToDouble }
+import org.openmole.plugin.task.scala.ScalaCode
 
 object AggregateTask {
 

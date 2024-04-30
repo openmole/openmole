@@ -1,7 +1,7 @@
 package org.openmole.core.dsl
 
 package object extension:
-  export org.openmole.core.argument.{FromContext, ScalaCompilation, ToFromContext, OptionalArgument}
+  export org.openmole.core.argument.{FromContext, ScalaCompilation, ToFromContext, OptionalArgument, DefaultSet}
 
   type DefinitionScope = org.openmole.core.setter.DefinitionScope
   def DefinitionScope = org.openmole.core.setter.DefinitionScope
@@ -142,5 +142,7 @@ package object extension:
 
   export org.openmole.tool.cache.KeyValueCache
   export org.openmole.tool.collection.DoubleRange
+
+  export org.openmole.core.setter.DefaultBuilder
 
 

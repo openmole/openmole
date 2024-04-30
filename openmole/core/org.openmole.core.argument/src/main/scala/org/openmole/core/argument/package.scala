@@ -24,14 +24,6 @@ package argument:
   import org.openmole.core.workspace.TmpDirectory
   import org.openmole.tool.cache.KeyValueCache
 
-  object ScalaCode:
-    def fromContext[T: Manifest](code: ScalaCode | String) =
-      code match 
-        case code: ScalaCode => FromContext.codeToFromContext[T](code.source) copy (defaults = code.defaults)
-        case code: String => FromContext.codeToFromContext[T](code)
-  
-  case class ScalaCode(source: String, defaults: DefaultSet = DefaultSet.empty)
-
   sealed trait Validate:
     def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
@@ -78,9 +70,6 @@ package argument:
 
     type Condition = argument.Condition
     lazy val Condition = argument.Condition
-
-    type ScalaCode = org.openmole.core.argument.ScalaCode
-    lazy val ScalaCode = org.openmole.core.argument.ScalaCode
 
     class ExpressionClass[T]:
       def apply[S](s: S)(implicit expandable: Expandable[S, T]) = expandable.expand(s)
