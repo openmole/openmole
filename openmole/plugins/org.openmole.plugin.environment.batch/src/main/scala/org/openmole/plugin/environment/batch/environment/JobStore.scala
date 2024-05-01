@@ -13,35 +13,31 @@ import org.openmole.tool.file._
 
 object JobStore {
 
-  def store(jobStore: JobStore, job: JobGroup)(implicit serializer: SerializerService): StoredJob = {
+  def store(jobStore: JobStore, job: JobGroup)(implicit serializer: SerializerService): StoredJob =
     val moleJobs = JobGroup.moleJobs(job)
     new StoredJob(JobGroup.moleExecution(job), moleJobs.toArray.map(mj ⇒ store(jobStore, mj)))
-  }
 
-  def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob = {
-    val f = TmpDirectory(jobStore.store).newFile("storedjob", ".bin.gz")
-    f.withGzippedOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
+  def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob =
+    val f = TmpDirectory(jobStore.store).newFile("storedjob", ".bin")
+    f.withOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
       f,
       moleJob.task,
       moleJob.id,
       moleJob.callBack)
-  }
 
-  def load(storedJob: StoredJob)(implicit serializerService: SerializerService): JobGroup = {
+  def load(storedJob: StoredJob)(implicit serializerService: SerializerService): JobGroup =
     val moleJobs = storedJob.storedMoleJobs.map(load)
     JobGroup(storedJob.moleExecution, moleJobs)
-  }
 
-  def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): Job = {
-    val context = storedMoleJob.context.withGzippedInputStream { is ⇒ serializerService.deserialize[Context](is) }
+  def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): Job =
+    val context = storedMoleJob.context.withInputStream { is ⇒ serializerService.deserialize[Context](is) }
     Job(
       task = storedMoleJob.task,
       context = context,
       id = storedMoleJob.id,
       callBack = storedMoleJob.callBack
     )
-  }
 
   def clean(job: StoredJob): Unit = job.storedMoleJobs.foreach(clean)
   def clean(job: StoredMoleJob): Unit = job.context.delete()
@@ -51,8 +47,7 @@ object JobStore {
     val context:  File,
     val task:     RuntimeTask,
     val id:       Long,
-    val callBack: Job.CallBack) {
-  }
+    val callBack: Job.CallBack)
 
   def subMoleCanceled(storedMoleJob: StoredMoleJob) = storedMoleJob.callBack.subMoleCanceled()
   def finish(storedMoleJob: StoredMoleJob, result: Either[Context, Throwable]) = storedMoleJob.callBack.jobFinished(storedMoleJob.id, result)
