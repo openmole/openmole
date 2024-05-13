@@ -131,13 +131,24 @@ case class PythonTask(
       def inputJSONPath = s"$workDirectory/_inputs_.json"
       def outputJSONPath = s"$workDirectory/_outputs_.json"
 
+      def alignedUserCode =
+        val source = RunnableScript.content(script)
+        val lines = source.split('\n')
+        if lines.nonEmpty
+        then
+          val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
+          if minSpace > 0
+          then lines.map(_.drop(minSpace)).mkString("\n")
+          else source
+        else source
+
       writeInputsJSON(jsonInputFile)
       scriptFile.content =
         s"""
            |import json
            |$inputArrayName = json.load(open('$inputJSONPath'))
            |${inputMapping(inputArrayName)}
-           |${RunnableScript.content(script)}
+           |${alignedUserCode}
            |json.dump($outputMapping, open('$outputJSONPath','w'))
         """.stripMargin
 

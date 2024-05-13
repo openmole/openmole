@@ -158,7 +158,7 @@ object ScalaCompilation {
       val lines = source.split('\n')
       if lines.nonEmpty
         then
-        val minSpace = lines.filter(!_.trim.isEmpty).map(_.takeWhile(_ == ' ').length).min
+        val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
         val addedSpace = 4 - minSpace
         if addedSpace >= 0
         then lines.map(l => " " * addedSpace + l).mkString("\n")
