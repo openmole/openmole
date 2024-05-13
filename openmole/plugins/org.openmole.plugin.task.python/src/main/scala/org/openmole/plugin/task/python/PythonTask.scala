@@ -38,7 +38,7 @@ object PythonTask:
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    version:                String                             = "3.11.2",
+    version:                String                             = "3.12.3",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
