@@ -268,10 +268,9 @@ object NichedNSGA2 {
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
         def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
-        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[Unit](s = ())
@@ -447,8 +446,8 @@ object NichedNSGA2 {
     nicheSize:  Int,
     outputs:    Seq[Val[_]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow = {
-    EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
+    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
+    EvolutionWorkflow.stochasticity(objective, stochastic.option) match
       case None ⇒
         val exactObjectives = Objectives.toExact(objective)
         val nicheVals = niche.map(NichedElement.valContent)
@@ -477,11 +476,10 @@ object NichedNSGA2 {
         val nicheVals = niche.map(NichedElement.valContent)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives) ++ nicheVals, outputs)
 
-        def validation: Validate = {
+        def validation: Validate =
           val aOutputs = outputs.map(_.toArray)
           niche.map(n ⇒ NichedElement.validate(n, aOutputs)) ++
             Objectives.validate(noisyObjectives, aOutputs)
-        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticNichedNSGA2(
@@ -500,8 +498,7 @@ object NichedNSGA2 {
           validate = validation
         )
 
-    }
-  }
+
 
 }
 
