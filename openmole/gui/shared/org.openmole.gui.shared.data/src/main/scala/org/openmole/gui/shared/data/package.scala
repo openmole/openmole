@@ -19,6 +19,7 @@ package org.openmole.gui.shared.data
 
 import endpoints4s.algebra
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto.*
 
 import scala.deriving.Mirror
 import scala.reflect.ClassTag
