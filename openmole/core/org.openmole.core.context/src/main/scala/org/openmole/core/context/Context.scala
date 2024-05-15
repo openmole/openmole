@@ -17,27 +17,27 @@
 
 package org.openmole.core.context
 
-import org.openmole.core.exception._
-import org.openmole.core.preference._
+import org.openmole.core.exception.*
+import org.openmole.core.preference.*
 
-import scala.collection._
+import scala.collection.*
 import scala.collection.immutable.TreeMap
 
-object Context {
+object Context:
 
   def ErrorArraySnipSize = PreferenceLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
 
-  implicit def variableToContextConverter(variable: Variable[_]): Context = Context(variable)
-  implicit def variablesToContextConverter(variables: Iterable[Variable[_]]): Context = Context(variables.toSeq: _*)
+  given Conversion[Variable[_], Context] = variable => Context(variable)
+  given Conversion[Iterable[Variable[_]], Context] = variables => Context(variables.toSeq: _*)
 
-  def fromMap(v: Iterable[(String, Variable[_])]) = new Context {
-    val variables = TreeMap.empty[String, Variable[_]] ++ v
-  }
+  def fromMap(v: Iterable[(String, Variable[_])]) =
+    new Context:
+      val variables = TreeMap.empty[String, Variable[_]] ++ v
+
 
   def apply(v: Variable[_]*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
 
   val empty = apply()
-}
 
 /**
  * Context represents a set of variables used by the task executions.

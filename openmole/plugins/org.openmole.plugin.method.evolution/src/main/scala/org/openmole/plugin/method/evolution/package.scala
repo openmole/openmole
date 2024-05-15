@@ -65,5 +65,5 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     )
 
 
-def Island = EvolutionWorkflow.Island
-
+export EvolutionWorkflow.Island
+export Genome.Suggestion

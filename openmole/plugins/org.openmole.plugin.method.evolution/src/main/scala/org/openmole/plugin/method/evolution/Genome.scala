@@ -324,18 +324,19 @@ object Genome:
     private def fileSuggestion(t: File)(using SerializerService) =
       Suggestion(genome => loadFromFile(t, genome))
 
-    implicit def suggestionFromFile(using SerializerService): ToSuggestion[File] =
-      new ToSuggestion[File]:
-        override def apply(t: File): Suggestion = fileSuggestion(t)
+    given suggestionFromFile(using SerializerService): ToSuggestion[File] with
+      def apply(t: File): Suggestion = fileSuggestion(t)
 
-    implicit def suggestionFromString(using SerializerService): ToSuggestion[String] =
-      new ToSuggestion[String]:
-        def apply(t: String): Suggestion = fileSuggestion(File(t))
+    given suggestionFromString(using SerializerService): ToSuggestion[String] with
+      def apply(t: String): Suggestion = fileSuggestion(File(t))
 
-    implicit def fromAssignment[T]: ToSuggestion[Seq[Seq[ValueAssignment[T]]]] =
-      new ToSuggestion[Seq[Seq[ValueAssignment[T]]]]:
-        override def apply(t: Seq[Seq[ValueAssignment[T]]]): Suggestion =
-          Suggestion(genome ⇒ t.map(_.map(ValueAssignment.untyped)))
+    given fromAssignmen: ToSuggestion[Seq[ValueAssignment[Any]]] with
+      def apply(t: Seq[ValueAssignment[Any]]): Suggestion =
+        Suggestion(genome ⇒ Seq(t.map(ValueAssignment.untyped)))
+
+    given fromAssignmentSeq: ToSuggestion[Seq[Seq[ValueAssignment[Any]]]] with
+      def apply(t: Seq[Seq[ValueAssignment[Any]]]): Suggestion =
+        Suggestion(genome ⇒ t.map(_.map(ValueAssignment.untyped)))
 
   sealed trait ToSuggestion[T]:
     def apply(t: T): Suggestion
@@ -345,6 +346,9 @@ object Genome:
   object Suggestion:
     def empty: Suggestion =
       Suggestion(g => SuggestedValues.empty)
+
+    def apply(vs: :=[Val[_], Any]*): Seq[ValueAssignment[Any]] =
+      vs.map(v => ValueAssignment.untyped(v.asInstanceOf[ValueAssignment[Any]]).assignment)
 
   case class Suggestion(f: Genome => SuggestedValues):
     def apply(x: Genome) = f(x)

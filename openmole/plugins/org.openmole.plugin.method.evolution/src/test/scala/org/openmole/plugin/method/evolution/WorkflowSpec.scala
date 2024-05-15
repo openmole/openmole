@@ -183,7 +183,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       genome = Seq(a in(0.0, 1.0)),
       termination = 10,
       parallelism = 1,
-      suggestion = Seq(Seq(a := 0.3))
+      suggestion = Suggestion(a := 0.3)
     ) by Island(5)
 
     serializeDeserialize(nsga2) run
@@ -398,13 +398,14 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "Suggestion" should "be possible" in {
     val a = Val[Double]
+    val b = Val[Int]
 
     NSGA2Evolution(
       evaluation = EmptyTask(),
       objective = Seq(a),
-      genome = Seq(a in (0.0, 1.0)),
+      genome = Seq(a in (0.0, 1.0), b in (1 to 10)),
       termination = 100,
-      suggestion = Seq(Seq(a := 0.5))
+      suggestion = Seq(Suggestion(a := 0.5, b := 8))
     )
   }
 
