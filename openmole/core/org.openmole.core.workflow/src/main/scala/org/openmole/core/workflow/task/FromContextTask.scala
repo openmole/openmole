@@ -62,7 +62,7 @@ case class FromContextTask(
   config:                 InputOutputConfig,
   mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
-) extends Task with ValidateTask {
+) extends Task with ValidateTask:
 
   override def validate = v
 
@@ -72,4 +72,3 @@ case class FromContextTask(
   }
 
   def withValidate(validate: Validate) = copy(v = v ++ validate)
-}

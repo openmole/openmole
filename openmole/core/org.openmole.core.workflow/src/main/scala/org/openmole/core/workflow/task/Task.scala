@@ -227,6 +227,8 @@ object Task:
       task.process(executionContext)
     )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
 
+  def process(task: Task, executionContext: TaskExecutionContext): FromContext[Context] = task.process(executionContext)
+
   def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
   def outputs(task: Task): PrototypeSet = task.config.outputs
   def defaults(task: Task): DefaultSet = task.config.defaults

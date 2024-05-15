@@ -19,7 +19,7 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.setter._
 
-object EmptyTask {
+object EmptyTask:
 
   /**
    * The empty Task does nothing ([[ClosureTask]] with identity function)
@@ -29,5 +29,3 @@ object EmptyTask {
    */
   def apply()(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     ClosureTask("EmptyTask") { (ctx, _, _) ⇒ ctx }
-
-}

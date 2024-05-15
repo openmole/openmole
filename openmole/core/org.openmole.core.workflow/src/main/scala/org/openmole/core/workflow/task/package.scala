@@ -22,15 +22,13 @@ import monocle.Focus
 
 import org.openmole.core.context._
 
-trait TaskPackage {
+trait TaskPackage:
 
   def newRNG(context: Context) = Task.buildRNG(context)
 
-  object implicits {
+  object implicits:
     def +=(p: Val[_]) = Focus[MoleTask](_.implicits).modify(_ ++ Seq(p.name))
-  }
 
-}
 
 
 import scala.quoted._

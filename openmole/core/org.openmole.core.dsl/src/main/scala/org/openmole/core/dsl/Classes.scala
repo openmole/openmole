@@ -25,11 +25,12 @@ trait Classes:
   lazy val Val = context.Val
   type Val[T] = context.Val[T]
 
-  lazy val LocalEnvironment = org.openmole.core.workflow.execution.LocalEnvironment
+  export org.openmole.core.workflow.execution.LocalEnvironment
 
-  lazy val EmptyTask = task.EmptyTask
-  lazy val ExplorationTask = task.ExplorationTask
-  lazy val MoleTask = task.MoleTask
+  export task.EmptyTask
+  export task.ExplorationTask
+  export task.MoleTask
+  export task.TryTask
 
   export org.openmole.core.workflow.hook.display
   export org.openmole.core.format.{CSVOutputFormat, OMROutputFormat, OMR, CSV}

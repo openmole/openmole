@@ -5,9 +5,10 @@ import org.openmole.core.pluginregistry.PluginRegistry
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.argument.*
 import org.openmole.core.workflow.composition.*
+import org.openmole.core.workflow.task.TryTask
 import org.osgi.framework.{BundleActivator, BundleContext}
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
@@ -50,6 +51,7 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(ClosureTask)),
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
+        TaskHighLight(objectName(TryTask)),
         OtherHighLight("OMR"),
         OtherHighLight("CSV")
       )
@@ -57,4 +59,3 @@ class Activator extends BundleActivator {
     PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))
 
 
-}

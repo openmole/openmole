@@ -23,7 +23,7 @@ import org.openmole.core.setter._
 import org.openmole.tool.random._
 import monocle.Focus
 
-object ClosureTask {
+object ClosureTask:
 
   given InputOutputBuilder[ClosureTask] = InputOutputBuilder(Focus[ClosureTask](_.config))
   given InfoBuilder[ClosureTask] = InfoBuilder(Focus[ClosureTask](_.info))
@@ -40,7 +40,7 @@ object ClosureTask {
     config = InputOutputConfig(),
     info = InfoConfig()
   )
-}
+
 
 /**
  * A Task executing a provided function from a [[org.openmole.core.context.Context]] to a context, given additional [[RandomProvider]] and [[TaskExecutionContext]] parameters
@@ -54,8 +54,8 @@ case class ClosureTask(
   override val className: String,
   config:                 InputOutputConfig,
   info:                   InfoConfig
-) extends Task {
+) extends Task:
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
     closure(p.context, p.random, executionContext)
   }
-}
+
