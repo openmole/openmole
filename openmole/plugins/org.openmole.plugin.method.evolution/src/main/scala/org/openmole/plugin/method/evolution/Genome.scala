@@ -330,7 +330,7 @@ object Genome:
     given suggestionFromString(using SerializerService): ToSuggestion[String] with
       def apply(t: String): Suggestion = fileSuggestion(File(t))
 
-    given fromAssignmen: ToSuggestion[Seq[ValueAssignment[Any]]] with
+    given fromAssignment: ToSuggestion[Seq[ValueAssignment[Any]]] with
       def apply(t: Seq[ValueAssignment[Any]]): Suggestion =
         Suggestion(genome ⇒ Seq(t.map(ValueAssignment.untyped)))
 
