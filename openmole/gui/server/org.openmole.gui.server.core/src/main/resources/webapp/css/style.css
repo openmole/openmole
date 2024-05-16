@@ -1176,6 +1176,7 @@ padding-bottom: 90px;
   width : 800px;
   color : "#222";
   font-size:16px;
+  user-select: text;
 }
 
 /*Switchs*/
