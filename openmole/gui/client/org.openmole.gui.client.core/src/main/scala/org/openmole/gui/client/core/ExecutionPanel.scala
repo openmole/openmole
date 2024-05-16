@@ -416,7 +416,7 @@ class ExecutionPanel:
                         if output.listed < output.total
                         then
                           Seq(
-                            div(position := "absolute", top := "315", left := "900", cursor.pointer, textAlign := "center", color := "white",
+                            div(position := "absolute", top := "270", left := "950", cursor.pointer, textAlign := "center",
                               i(cls := "bi bi-plus"),
                               br(),
                               i(fontSize := "12", s"${output.listed}/${output.total}"),
@@ -427,7 +427,7 @@ class ExecutionPanel:
 
 
                       def bottom =
-                        div(position := "absolute", top := "737", left := "922", cursor.pointer, textAlign := "center", color := "white",
+                        div(position := "absolute", top := "760", left := "973", cursor.pointer, textAlign := "center",
                           i(cls := "bi bi-caret-down"),
                           onClick --> { _ => outputDiv.ref.scrollTop = outputDiv.ref.scrollHeight }
                         )
