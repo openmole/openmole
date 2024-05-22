@@ -48,7 +48,7 @@ object NetLogoContainerTask:
     //steps:                  Option[FromContext[Int]]         = None,
     install:                Seq[String]                      = Seq.empty,
     memory:                 Information                      = 1.gigabyte,
-    version:                String                           = "6.3.0",
+    version:                String                           = "6.4.0",
     errorOnReturnValue:     Boolean                          = true,
     returnValue:            OptionalArgument[Val[Int]]       = None,
     stdOut:                 OptionalArgument[Val[String]]    = None,
