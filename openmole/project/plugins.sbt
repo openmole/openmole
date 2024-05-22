@@ -10,7 +10,7 @@ addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % scalajsVersion)
 
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.12.0")
 
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.11.0")
 
