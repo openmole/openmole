@@ -25,7 +25,7 @@ import org.openmole.core.setter._
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.task.external._
-import org.openmole.plugin.task.netlogo.NetLogoTask.Workspace
+import org.openmole.plugin.task.netlogo.AbstractNetLogoTask.Workspace
 import org.openmole.plugin.task.netlogo._
 import org.openmole.plugin.tool.netlogo5._
 import org.openmole.core.argument._
@@ -103,14 +103,14 @@ object NetLogo5Task {
     else file(script, go = go, setup = setup, seed = seed, ignoreError = ignoreError, reuseWorkspace = reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
 
   private def withDefaultArgs(
-    workspace:            NetLogoTask.Workspace,
-    go:                   Seq[FromContext[String]],
-    setup:                Seq[FromContext[String]],
-    seed:                 Option[Val[Int]],
-    ignoreError:          Boolean,
-    reuseWorkspace:       Boolean,
-    ignoreErrorOnDispose: Boolean,
-    switch3d:             Boolean
+                               workspace:            AbstractNetLogoTask.Workspace,
+                               go:                   Seq[FromContext[String]],
+                               setup:                Seq[FromContext[String]],
+                               seed:                 Option[Val[Int]],
+                               ignoreError:          Boolean,
+                               reuseWorkspace:       Boolean,
+                               ignoreErrorOnDispose: Boolean,
+                               switch3d:             Boolean
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     NetLogo5Task(
       config = InputOutputConfig(),
@@ -130,19 +130,19 @@ object NetLogo5Task {
 }
 
 case class NetLogo5Task(
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  workspace:            NetLogoTask.Workspace,
-  go:                   Seq[FromContext[String]],
-  setup:                Seq[FromContext[String]],
-  seed:                 Option[Val[Int]],
-  ignoreError:          Boolean,
-  reuseWorkspace:       Boolean,
-  ignoreErrorOnDispose: Boolean,
-  switch3d:             Boolean
-) extends NetLogoTask {
+                         config:               InputOutputConfig,
+                         external:             External,
+                         info:                 InfoConfig,
+                         mapped:               MappedInputOutputConfig,
+                         workspace:            AbstractNetLogoTask.Workspace,
+                         go:                   Seq[FromContext[String]],
+                         setup:                Seq[FromContext[String]],
+                         seed:                 Option[Val[Int]],
+                         ignoreError:          Boolean,
+                         reuseWorkspace:       Boolean,
+                         ignoreErrorOnDispose: Boolean,
+                         switch3d:             Boolean
+) extends AbstractNetLogoTask {
   override def netLogoFactory: NetLogoFactory = NetLogo5Task.factory
 }
 

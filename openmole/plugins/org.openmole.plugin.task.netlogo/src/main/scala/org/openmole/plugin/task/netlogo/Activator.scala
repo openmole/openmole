@@ -21,25 +21,18 @@ import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   override def stop(context: BundleContext): Unit =
     PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
-    import org.openmole.core.highlight.HighLight._
+  override def start(context: BundleContext): Unit =
+    import org.openmole.core.highlight.HighLight.*
 
     val keyWords: Vector[HighLight] =
       Vector(
-        WordHighLight("launchingCommands"),
-        WordHighLight("netLogoInputs"),
-        WordHighLight("netLogoArrayInputs"),
-        WordHighLight("netLogoOutputs"),
-        WordHighLight("netLogoArrayOutputs"),
-        WordHighLight("embedWorkspace"),
-        TaskHighLight(classOf[NetLogoContainerTask])
+        TaskHighLight(classOf[NetLogoContainerTask]),
+        TaskHighLight("NetLogoTask")
       )
 
-    PluginRegistry.register(this, Vector(this.getClass.getPackage), nameSpaceTraits = Vector(classOf[NetLogoPackage]), highLight = keyWords)
-  }
-}
+    PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

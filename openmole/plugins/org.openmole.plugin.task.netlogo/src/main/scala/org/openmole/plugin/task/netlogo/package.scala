@@ -15,28 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package org.openmole.plugin.task.netlogo
 
 import org.openmole.core.context.Val
 import org.openmole.core.dsl._
 
-package netlogo:
-  import org.openmole.core.setter._
+import org.openmole.core.setter.*
 
-  trait NetLogoPackage:
-    class NetLogoInputs:
-      def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n
-      def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
+class NetLogoInputs:
+  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_], n: String): T ⇒ T = inputs += p mapped n
+  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p, p.name)
 
-    @deprecated
-    lazy val netLogoInputs = new NetLogoInputs
+@deprecated
+lazy val netLogoInputs = new NetLogoInputs
 
-    class NetLogoOutputs:
-      def +=[T: MappedOutputBuilder : InputOutputBuilder](n: String, p: Val[_]): T ⇒ T = outputs += p mapped n
-      def +=[T: MappedOutputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
+class NetLogoOutputs:
+  def +=[T: MappedOutputBuilder : InputOutputBuilder](n: String, p: Val[_]): T ⇒ T = outputs += p mapped n
+  def +=[T: MappedOutputBuilder : InputOutputBuilder](p: Val[_]): T ⇒ T = this.+=[T](p.name, p)
 
-    @deprecated
-    lazy val netLogoOutputs = new NetLogoOutputs
+@deprecated
+lazy val netLogoOutputs = new NetLogoOutputs
 
-
-package object netlogo extends NetLogoPackage
+export org.openmole.plugin.task.netlogo.{NetLogoContainerTask as NetLogoTask}

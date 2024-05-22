@@ -39,7 +39,7 @@ import org.openmole.core.dsl.extension.*
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
-object NetLogoTask {
+object AbstractNetLogoTask {
   sealed trait Workspace
 
   /**
@@ -69,10 +69,10 @@ object NetLogoTask {
 
     val resolver = External.relativeResolver(directory)(_)
     workspace match {
-      case s: NetLogoTask.Workspace.Script ⇒
+      case s: AbstractNetLogoTask.Workspace.Script ⇒
         s.script.realFile.copy(resolver(s.name))
         (directory, directory / s.name)
-      case w: NetLogoTask.Workspace.Directory ⇒
+      case w: AbstractNetLogoTask.Workspace.Directory ⇒
         w.directory.realFile.copy(resolver(w.name))
         (directory / w.name, directory / w.name / w.script)
     }
@@ -128,18 +128,18 @@ object NetLogoTask {
       }
     }
 
-  def createPool(netLogoFactory: NetLogoFactory, workspace: NetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: TmpDirectory) = {
+  def createPool(netLogoFactory: NetLogoFactory, workspace: AbstractNetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: TmpDirectory) = {
     def createInstance = {
       val workspaceDirectory = newFile.newDir("netlogoworkpsace")
-      NetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
+      AbstractNetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
     }
 
-    def destroyInstance(instance: NetLogoTask.NetoLogoInstance) = {
+    def destroyInstance(instance: AbstractNetLogoTask.NetoLogoInstance) = {
       instance.directory.recursiveDelete
       dispose(instance.netLogo, ignoreErrorOnDispose)
     }
 
-    WithInstance[NetLogoTask.NetoLogoInstance](close = destroyInstance, pooled = cached) { () ⇒ createInstance }
+    WithInstance[AbstractNetLogoTask.NetoLogoInstance](close = destroyInstance, pooled = cached) { () ⇒ createInstance }
   }
 
   /**
@@ -229,7 +229,7 @@ object NetLogoTask {
     try {
       if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
       val runtimeClass = mapped.v.`type`.runtimeClass
-      if (!runtimeClass.isArray) Variable.unsecureUntyped(mapped.v, NetLogoTask.cast(outputValue, runtimeClass))
+      if (!runtimeClass.isArray) Variable.unsecureUntyped(mapped.v, AbstractNetLogoTask.cast(outputValue, runtimeClass))
       else {
         val netLogoCollection: util.AbstractCollection[Any] =
           if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)) outputValue.asInstanceOf[AbstractCollection[Any]]
@@ -238,7 +238,7 @@ object NetLogoTask {
             newArray.add(outputValue)
             newArray
           }
-        NetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
+        AbstractNetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
       }
     }
     catch {
@@ -252,15 +252,15 @@ object NetLogoTask {
 /**
  * Generic NetLogoTask
  */
-trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
+trait AbstractNetLogoTask extends Task with ValidateTask { netlogoTask =>
 
-  lazy val netLogoInstanceKey = CacheKey[WithInstance[NetLogoTask.NetoLogoInstance]]()
+  lazy val netLogoInstanceKey = CacheKey[WithInstance[AbstractNetLogoTask.NetoLogoInstance]]()
 
   /**
    * Workspace (either file or directory)
    * @return
    */
-  def workspace: NetLogoTask.Workspace
+  def workspace: AbstractNetLogoTask.Workspace
 
   /**
    * Commands to run
@@ -289,14 +289,14 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
     val allInputs = External.PWD :: p.inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
-      NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
+      AbstractNetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
   }
 
   override protected def process(executionContext: TaskExecutionContext) = FromContext: parameters ⇒
     import parameters._
 
     val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey):
-      NetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
+      AbstractNetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
 
     pool: instance ⇒
 
@@ -304,24 +304,24 @@ trait NetLogoTask extends Task with ValidateTask { netlogoTask =>
       val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
-      NetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
-      seed.foreach { s ⇒ NetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
+      AbstractNetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
+      seed.foreach { s ⇒ AbstractNetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
-      for (cmd ← setup.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+      for (cmd ← setup.map(_.from(context))) AbstractNetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
       for (inBinding ← mapped.inputs) {
-        val v = NetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
-        NetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
+        val v = AbstractNetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
+        AbstractNetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
       }
 
-      for (cmd ← go.map(_.from(context))) NetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
+      for (cmd ← go.map(_.from(context))) AbstractNetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
 
 
       val contextResult =
         External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map { mapped ⇒
-          def outputValue = NetLogoTask.report(instance.netLogo, mapped.name)
-          NetLogoTask.netLogoValueToVal(outputValue, mapped)
+          def outputValue = AbstractNetLogoTask.report(instance.netLogo, mapped.name)
+          AbstractNetLogoTask.netLogoValueToVal(outputValue, mapped)
         }
 
       contextResult

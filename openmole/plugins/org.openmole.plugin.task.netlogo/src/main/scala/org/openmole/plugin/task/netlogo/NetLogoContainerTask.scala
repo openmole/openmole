@@ -120,7 +120,7 @@ case class NetLogoContainerTask(
     val allInputs = External.PWD :: p.inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
-      NetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
+      AbstractNetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
@@ -137,7 +137,7 @@ case class NetLogoContainerTask(
         val inputMap = new java.util.TreeMap[String, Any]()
         for
           m <- Mapped.noFile(mapped.inputs)
-        do inputMap.put(m.name, NetLogoTask.netLogoCompatibleType(context(m.v)))
+        do inputMap.put(m.name, AbstractNetLogoTask.netLogoCompatibleType(context(m.v)))
         inputMap
       val outputs: Array[String] = mapped.outputs.map(_.name).toArray[String]
       val goValue: Array[String] = go.map(_.from(context)).toArray[String]
@@ -151,7 +151,7 @@ case class NetLogoContainerTask(
     def readOutputData(file: File) =
       val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
       (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) ⇒
-        NetLogoTask.netLogoValueToVal(value, v)
+        AbstractNetLogoTask.netLogoValueToVal(value, v)
 
     createInputFile(inputFile)
 
