@@ -339,10 +339,11 @@ object OMRFormat:
   def writeCSV(
     file: File,
     destination: File,
+    dataFile: Option[String] = None,
     unrollArray: Boolean = true,
     arrayOnRow: Boolean = false,
     gzip: Boolean = false)(using SerializerService) =
-    val variable = variables(file, relativePath = true)
+    val variable = variables(file, relativePath = true, dataFile = dataFile)
 
     if variable.size == 1
     then
@@ -369,10 +370,11 @@ object OMRFormat:
 
   def writeJSON(
     file: File,
-    destination: File)(using SerializerService) =
+    destination: File,
+    dataFile: Option[String] = None)(using SerializerService) =
 
     val index = omrContent(file)
-    def variablesValues = variables(file, relativePath = true)
+    def variablesValues = variables(file, relativePath = true, dataFile = dataFile)
 
     case class JSONContent(
       `openmole-version`: String,
