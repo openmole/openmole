@@ -31,6 +31,7 @@ trait Classes:
   export task.ExplorationTask
   export task.MoleTask
   export task.TryTask
+  export task.RetryTask
 
   export org.openmole.core.workflow.hook.display
   export org.openmole.core.format.{CSVOutputFormat, OMROutputFormat, OMR, CSV}
