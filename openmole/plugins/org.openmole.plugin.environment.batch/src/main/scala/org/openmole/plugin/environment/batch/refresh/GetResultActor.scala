@@ -22,7 +22,7 @@ import org.openmole.core.communication.message._
 import org.openmole.core.communication.storage._
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.tools.service.Retry._
+import org.openmole.tool.exception.Retry._
 import org.openmole.core.workflow.execution
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment._

@@ -24,7 +24,6 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.{JavaLogger, LoggerService}
-import org.openmole.core.tools.service.Retry
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.tools.service.*
 import org.openmole.core.workflow.execution.*
@@ -45,6 +44,7 @@ import util.{Failure, Success}
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
+import org.openmole.tool.exception.Retry
 import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream.MultiplexedOutputStream

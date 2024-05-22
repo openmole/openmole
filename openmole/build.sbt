@@ -134,7 +134,7 @@ lazy val openmoleByteCode = OsgiProject(thirdPartiesDir, "org.openmole.tool.byte
 lazy val openmoleOSGi = OsgiProject(thirdPartiesDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn (openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.equinoxOSGi) settings (thirdPartiesSettings: _*)
 lazy val openmoleRandom = OsgiProject(thirdPartiesDir, "org.openmole.tool.random", imports = Seq("*")) settings (thirdPartiesSettings: _*) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
 lazy val openmoleNetwork = OsgiProject(thirdPartiesDir, "org.openmole.tool.network", imports = Seq("*")) settings (thirdPartiesSettings: _*)
-lazy val openmoleException = OsgiProject(thirdPartiesDir, "org.openmole.tool.exception", imports = Seq("*")) settings (thirdPartiesSettings: _*)
+lazy val openmoleException = OsgiProject(thirdPartiesDir, "org.openmole.tool.exception", imports = Seq("*")) settings (thirdPartiesSettings, libraryDependencies += Libraries.squants)
 lazy val openmoleOutputRedirection = OsgiProject(thirdPartiesDir, "org.openmole.tool.outputredirection", imports = Seq("*")) settings (thirdPartiesSettings: _*)
 
 lazy val txtmark = OsgiProject(thirdPartiesDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings (thirdPartiesSettings: _*)

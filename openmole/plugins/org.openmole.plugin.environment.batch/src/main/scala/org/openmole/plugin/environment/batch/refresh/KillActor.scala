@@ -1,6 +1,6 @@
 package org.openmole.plugin.environment.batch.refresh
 
-import org.openmole.core.tools.service.Retry.retry
+import org.openmole.tool.exception.Retry.retry
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, BatchJobControl, JobStore }
 

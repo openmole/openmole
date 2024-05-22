@@ -15,35 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.service
+package org.openmole.tool.exception
 
-import java.util.concurrent.TimeoutException
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
+import squants.time.*
 
-import squants.time.Time
+import scala.annotation.tailrec
 
-object Retry {
+object Retry:
 
-  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T = {
+  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T =
     def retryOrElse[T](f: ⇒ T): T = if (nbTry > 1) retryOnTimeout(f, nbTry - 1) else f
     try f
-    catch {
+    catch
       case t: TimeoutException       ⇒ retryOrElse(throw t)
       case t: SocketTimeoutException ⇒ retryOrElse(throw t)
-    }
-  }
 
-  def retry[T](f: ⇒ T, nbTry: Int, coolDown: Option[Time] = None): T =
+  @tailrec def retry[T](f: ⇒ T, nbTry: Int, coolDown: Option[Time] = None): T =
     try f
-    catch {
+    catch
       case t: Throwable ⇒
-        if (nbTry > 1) {
+        if nbTry > 1
+        then
           coolDown.foreach(c ⇒ Thread.sleep(c.millis))
           retry(f, nbTry - 1)
-        }
         else throw t
-    }
 
   def retry[T](nbTry: Int)(f: ⇒ T): T = retry(f, nbTry)
 
-}

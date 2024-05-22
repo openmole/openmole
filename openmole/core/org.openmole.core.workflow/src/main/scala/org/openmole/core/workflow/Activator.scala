@@ -5,7 +5,7 @@ import org.openmole.core.pluginregistry.PluginRegistry
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.argument.*
 import org.openmole.core.workflow.composition.*
-import org.openmole.core.workflow.task.TryTask
+import org.openmole.core.workflow.task.*
 import org.osgi.framework.{BundleActivator, BundleContext}
 
 class Activator extends BundleActivator:
@@ -52,6 +52,7 @@ class Activator extends BundleActivator:
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
         TaskHighLight(objectName(TryTask)),
+        TaskHighLight(objectName(RetryTask)),
         OtherHighLight("OMR"),
         OtherHighLight("CSV")
       )
