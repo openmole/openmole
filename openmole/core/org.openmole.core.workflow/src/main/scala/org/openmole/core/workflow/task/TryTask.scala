@@ -54,10 +54,7 @@ case class TryTask(
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Task with ValidateTask:
 
-  override def validate: Validate =
-    task match
-      case t: ValidateTask => t.validate
-      case _ => Validate.success
+  override def validate: Validate = ValidateTask.validate(task)
 
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p =>
     import p._

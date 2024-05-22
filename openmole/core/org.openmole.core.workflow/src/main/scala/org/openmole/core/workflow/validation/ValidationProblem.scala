@@ -27,21 +27,23 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.workflow.transition._
 import org.openmole.core.workspace.TmpDirectory
 
-trait ValidateTask {
-  def validate: Validate
-}
+object ValidateTask:
+  def validate(task: Task): Validate =
+    task match
+      case t: ValidateTask => t.validate
+      case _ => Validate.success
 
-trait ValidateSource {
+trait ValidateTask:
   def validate: Validate
-}
 
-trait ValidateHook {
+trait ValidateSource:
   def validate: Validate
-}
 
-trait ValidateTransition {
+trait ValidateHook:
   def validate: Validate
-}
+
+trait ValidateTransition:
+  def validate: Validate
 
 object ValidationProblem {
 
