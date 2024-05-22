@@ -169,7 +169,7 @@ abstract class DocumentationPage extends Page {
 
 import PageTree._
 
-object DocumentationPages {
+object DocumentationPages:
   index ⇒
 
   def allPages = docPages.flatMap { _.sons } ++ tutoPages.sons ++ communityPages.sons ++ downloadPages.sons ++ headPages
@@ -260,11 +260,12 @@ object DocumentationPages {
   lazy val source = DocumentationPage.fromContent(name = "Source", content = org.openmole.site.content.language.advanced.Source)
   lazy val capsule = DocumentationPage.fromContent(name = "Capsule", content = org.openmole.site.content.language.advanced.Capsule)
 
-  def utilityTaskPages = pageNode(utilityTask, Vector(templateTask, moleTask, spatialTask))
+  def utilityTaskPages = pageNode(utilityTask, Vector(templateTask, moleTask, tryTask, spatialTask))
 
   lazy val utilityTask = DocumentationPage.fromContent(name = "Utility Tasks", content = org.openmole.site.content.documentation.utilityTask.Task)
   lazy val templateTask = DocumentationPage.fromContent(name = "Template Task", content = org.openmole.site.content.documentation.utilityTask.TemplateTask)
   lazy val moleTask = DocumentationPage.fromContent(name = "Mole Task", content = org.openmole.site.content.documentation.utilityTask.MoleTask)
+  lazy val tryTask = DocumentationPage.fromContent(name = "Try Task", content = org.openmole.site.content.documentation.utilityTask.TryTask)
   lazy val spatialTask = DocumentationPage.fromContent(name = "Spatial Task", content = org.openmole.site.content.documentation.utilityTask.SpatialTask)
 
   // Advanced Concepts
@@ -354,7 +355,6 @@ object DocumentationPages {
   //
   //    }
 
-}
 
 
 case class PageContent(content: Frag*)(implicit val file: sourcecode.File)

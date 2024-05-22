@@ -83,10 +83,9 @@ object tools {
 
     case class OptionalName(name: Option[String])
 
-    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) = {
+    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) =
       if (Test.testing) Test.allTests += Test(header + "\n" + code, name.name)
       apply(code, "scala")
-    }
 
     def code(code: String) = openmoleNoTest(code)
 
