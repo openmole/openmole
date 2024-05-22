@@ -18,7 +18,7 @@ addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.11.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-git" % "2.0.1")
 
-addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject"      % "1.2.0")
 
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
