@@ -111,6 +111,11 @@ object OMRFormat:
     val directory = file.getParentFile
     omrContent(file).`data-file`.map { f => (f, directory / f) }
 
+  def writeOMRContent(file: File, content: OMRContent) =
+    file.withPrintStream(create = true, gz = true)(
+      _.print(content.asJson.deepDropNullValues.noSpaces)
+    )
+
   def write(
     data: OutputFormat.OutputContent,
     methodFile: File,
@@ -124,32 +129,26 @@ object OMRFormat:
     overwrite: Boolean)(using TimeService, FileService, TmpDirectory, SerializerService) =
     val resultFileDirectoryName = OMRFormat.resultFileDirectoryName(executionId)
 
-    //def methodFormat(method: M, fileName: String, existingData: Seq[String], dataContentValue: DataContent, fileDirectory: Option[String]) =
-
-      //.asObject.get.toList.head._2.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
-
     def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
       def mode =
         if append
         then OMRContent.DataMode.Append
         else OMRContent.DataMode.Create
 
-      val result =
-        OMRContent(
-          `format-version` = omrVersion,
-          `openmole-version` = openMOLEVersion,
-          `execution-id` = executionId,
-          `data-file` = (existingData ++ Seq(fileName)).distinct,
-          `data-mode` = mode,
-          `data-content` = dataContent,
-          `file-directory` = fileDirectory,
-          script = script,
-          `time-start` = timeStart,
-          `time-save` = TimeService.currentTime,
-          method = Some(methodJson)
-        )
+      OMRContent(
+        `format-version` = omrVersion,
+        `openmole-version` = openMOLEVersion,
+        `execution-id` = executionId,
+        `data-file` = (existingData ++ Seq(fileName)).distinct,
+        `data-mode` = mode,
+        `data-content` = dataContent,
+        `file-directory` = fileDirectory,
+        script = script,
+        `time-start` = timeStart,
+        `time-save` = TimeService.currentTime,
+        method = Some(methodJson)
+      )
 
-      result.asJson.deepDropNullValues
 
     def parseExistingData(file: File): Option[(String, Seq[String])] =
       try
@@ -209,8 +208,9 @@ object OMRFormat:
         then Some(resultFileDirectoryName)
         else None
 
-      methodFile.withPrintStream(create = true, gz = true)(
-        _.print(methodFormat(existingData, fileName, contentData, fileDirectoryValue).noSpaces)
+      writeOMRContent(
+        methodFile,
+        methodFormat(existingData, fileName, contentData, fileDirectoryValue)
       )
 
 //  def resultFiles(file: File): Seq[(String, File)] =
@@ -263,12 +263,13 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-//  def pruneHistory(omrFile: File) =
-//    val df = dataFiles(omrFile)
-//    val keep = df.last
-//    val content = omrContent(omrFile)
-//    val newContent = content.copy(`data-file` = Seq(keep._1))
-//    df.dropRight(1).foreach((_, f) => f.delete())
+  def pruneHistory(omrFile: File) =
+    val df = dataFiles(omrFile)
+    val keep = df.last
+    val content = omrContent(omrFile)
+    val newContent = content.copy(`data-file` = Seq(keep._1))
+    df.dropRight(1).foreach((_, f) => f.delete())
+
 
   def variables(
     file: File,
