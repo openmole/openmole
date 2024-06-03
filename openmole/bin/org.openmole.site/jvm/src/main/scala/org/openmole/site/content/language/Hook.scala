@@ -42,7 +42,7 @@ The ${code{"hook"}} keyword is used to save or display results generated during 
 There is only one mandatory argument to specify, the kind of ${code{"output"}} you want:
 ${ul(
     li{html"${code{"hook display"}} to display the results in the standard output, note that it is completely equivalent to writing ${code{"hook(display)"}} or ${code{"hook(output = display)"}}"},
-    li{html"${code{"hook(workDirectory / \"path/to/a/file.csv\")"}} to save the results in a CSV file"}
+    li{html"${code{"hook(workDirectory / \"path/to/a/file\")"}} to save the results in a file"}
 )}
 
 Let's consider this simple workflow:
@@ -58,25 +58,35 @@ ${hl.openmole("""
 
   // Define an exploration task
   DirectSampling(
-    evaluation = hello hook (workDirectory / "results/helloTask_${i}.csv"),
+    evaluation = hello,
     sampling = i in (0 to 9)
-  )
+  ) hook (workDirectory / "results")
   """, name = "plug a hook")}
 
 The ${code{"hook"}} is plugged to the end of the ${code{"hello"}} task in the ${code{"DirectSampling"}}, which means that every time ${code{"hello"}} finishes, the hook is executed.
-Here it means that for each ${code{"i"}} value, the dataflow will be printed in even numbered files named ${b{"helloTask_0.csv"}}, ${b{"helloTask_2.csv"}}, etc., located in the ${b{"results"}} repository (which will be automatically created if it does not exist yet).
+At the end of the execution you will find a file calle ${code("results.omr")} in the same directory as your script that contains all the results produced by the execution of the task.
+In the interface you can then open this file and export it in CSV or JSON format.
+
+$br
+
+These default hook are able to store files and directories. If some of you output variables are files there values are stored in the OMR file along with the others variables.
 
 
 ${h3{"Default hooks"}}
 
-Most OpenMOLE methods come with a default hook to save their results in a properly formatted file.
-To use these embedded hooks, you can directly give the required arguments (${i{"e.g."}} the path of the created file) to the ${code{"hook"}} keyword.
+OpenMOLE methods come with a default hook to save their results in a properly formatted file.
+To use these embedded hooks, you can directly give the required arguments (${i{"e.g."}} the path of the created file) to the ${code("hook")} keyword.
 
 $br
 
 The specific arguments of the default hooks for each method, when they exist, are described in the corresponding documentation page in the ${a("Explore", href := DocumentationPages.explore.file)} section.
 
-${h2{"Hooks to write into files"}}
+
+
+${h2{"Advanced hook usage"}}
+
+Appart from the default hook for each method OpenMOLE provide several hook to store results in specific maners.
+
 ${h3{"Write a string"}}
 
 Any string can be appended to a file using the hook ${code{"AppendToFileHook"}}.
@@ -127,7 +137,6 @@ ${hl.openmole("""
 
     val h = CSVHook(workDirectory / "path/to/a/file/or/dir${i}.csv", values = Seq(i, j), header = "i, j", arrayOnRow = true)""", name = "csv hook with options")}
 
-
 ${h3{"Write a matrix into a file"}}
 
 Some workflows may output two dimensional data, which can be understood as a matrix.
@@ -142,7 +151,7 @@ ${hl.openmole("""
 Output format will be a CSV file.
 Data understood as matrix are one and two dimensional arrays of double, int and long.
 
-${h2{"Hook to copy a file"}}
+${h3{"Hook to copy a file"}}
 
 The ${code{"CopyFileHook"}} makes it possible to copy a file or directory from the data flow to a given location on the machine running OpenMOLE.
 
@@ -153,9 +162,6 @@ ${hl.openmole("""
   val h = CopyFileHook(file, workDirectory / "path/to/copy/the/file${i}.txt")
 """, name = "copy file hook")}
 
-
-
-${h2{"Hooks to display results"}}
 
 ${h3{"Display variables"}}
 
@@ -184,6 +190,20 @@ ${hl.openmole("""
 """, name = "display hook")}
 
 
+${h3{"Conditional hooking"}}
+
+You may want to filter outputs that are redirected to a hook, ${i{"i.e."}} do conditional hooking.
+You can use for that the ${code{"when"}} keyword, built from a hook and a condition:
+
+${hl.openmole("""
+  val i = Val[Int]
+
+  val display = DisplayHook("The value of i is ${i}.") when "i > 0"
+  """, name = "condition hook")}
+
+Decorators exist for a simpler syntax: ${code{"ConditionHook(myHook,myCondition)"}} is equivalent to ${code{"myHook when myCondition"}} and ${code{"myHook condition myCondition"}} (where the condition can be given as a condition or a string).
+
+
 ${h2{"Variable restriction"}}
 You may want to restrict the hooked variables to a subset, like a variable filter.
 You can use the following notation in the hook function {${code{"hook(yourHookHere, values = Seq(i,j))"}}}
@@ -197,24 +217,9 @@ ${hl.openmole("""
     outputs += (i, j, k)
   )
 
-  task hook(display, values = Seq(i, j)) // only i and j are hooked
-  task hook(workDirectory / "results/res.csv", values = Seq(j,k)) // only j and k are appended to the file
+  task hook(display, values = Seq(i, j)) // only i and j are displayed
+  task hook(workDirectory / "results/res", values = Seq(j,k)) // only j and k are stored into the file
 """, name = "variable restriction")}
 
 
-${h2{"Conditional hooking"}}
-
-You may want to filter outputs that are redirected to a hook, ${i{"i.e."}} do conditional hooking.
-You can use for that the ${code{"when"}} keyword, built from a hook and a condition:
-
-${hl.openmole("""
-  val i = Val[Int]
-
-  val display = DisplayHook("The value of i is ${i}.") when "i > 0"
-  """, name = "condition hook")}
-
-Decorators exist for a simpler syntax: ${code{"ConditionHook(myHook,myCondition)"}} is equivalent to ${code{"myHook when myCondition"}} and ${code{"myHook condition myCondition"}} (where the condition can be given as a condition or a string).
-
 """)
-
-
