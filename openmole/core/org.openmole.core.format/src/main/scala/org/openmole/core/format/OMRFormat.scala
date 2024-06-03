@@ -268,9 +268,9 @@ object OMRFormat:
     val keep = df.last
     val content = omrContent(omrFile)
     val newContent = content.copy(`data-file` = Seq(keep._1))
-    df.dropRight(1).foreach((_, f) => f.delete())
-
-
+    try writeOMRContent(omrFile, newContent)
+    finally df.dropRight(1).foreach((_, f) => f.delete())
+  
   def variables(
     file: File,
     relativePath: Boolean = false,
