@@ -83,9 +83,10 @@ case class OMRContent(
   `file-directory`: Option[String],
   script: Option[OMRContent.Script],
   `time-start`: Long,
-  `time-save`: Long) derives derivation.ConfiguredCodec
+  `time-save`: Long,
+  method: Option[Json]) derives derivation.ConfiguredCodec
 
-def methodField = "method"
+def methodNameField = "method-name"
 def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
@@ -144,13 +145,11 @@ object OMRFormat:
           `file-directory` = fileDirectory,
           script = script,
           `time-start` = timeStart,
-          `time-save` = TimeService.currentTime
+          `time-save` = TimeService.currentTime,
+          method = Some(methodJson)
         )
 
-      result.asJson.
-        mapObject(_.add(methodField, methodJson)).
-        asJson.
-        deepDropNullValues
+      result.asJson.deepDropNullValues
 
     def parseExistingData(file: File): Option[(String, Seq[String])] =
       try
@@ -264,6 +263,13 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
+//  def pruneHistory(omrFile: File) =
+//    val df = dataFiles(omrFile)
+//    val keep = df.last
+//    val content = omrContent(omrFile)
+//    val newContent = content.copy(`data-file` = Seq(keep._1))
+//    df.dropRight(1).foreach((_, f) => f.delete())
+
   def variables(
     file: File,
     relativePath: Boolean = false,
@@ -333,8 +339,9 @@ object OMRFormat:
     variables(file, dataFile = Some(index))
 
   def methodName(file: File): Option[String] =
-    val j = parse(file.content(gz = true)).toTry.get
-    j.hcursor.downField(methodField).as[String].toOption
+    val content = omrContent(file)
+    content.method.flatMap: j =>
+      j.hcursor.downField(methodNameField).as[String].toOption
 
   def writeCSV(
     file: File,

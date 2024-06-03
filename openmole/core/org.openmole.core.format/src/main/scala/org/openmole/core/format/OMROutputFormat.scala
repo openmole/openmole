@@ -41,7 +41,7 @@ object OMROutputFormat:
               case f => f.getParentFile / s"${f.getName}.omr"
 
           def methodJson =
-            methodData.data(method).asJson.mapObject(_.add(methodField, Json.fromString(methodData.name(method))))
+            methodData.data(method).asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
           def script =
             scriptData match
