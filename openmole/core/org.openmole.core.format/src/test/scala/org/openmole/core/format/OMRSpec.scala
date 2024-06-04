@@ -63,3 +63,29 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     )
 
     OMRFormat.variables(file).head._2 should equal(vs)
+
+
+  "OMR" should "store file" in:
+    val p = Val[File]
+    val file = tmpDirectory.newFile("test", ".omr")
+    val storedFile = tmpDirectory.newFile("stored", ".txt")
+
+    storedFile.content = "indeed\n"
+
+    val vs = Seq[Variable[_]](p -> storedFile)
+    val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
+
+    OMRFormat.write(
+      data = data,
+      methodFile = file,
+      executionId = "test",
+      jobId = 0,
+      methodJson = Json.Null,
+      script = None,
+      timeStart = 1000,
+      openMOLEVersion = "test",
+      append = false,
+      overwrite = true
+    )
+
+    OMRFormat.variables(file).head._2.head.value.asInstanceOf[File].content should equal(storedFile.content)

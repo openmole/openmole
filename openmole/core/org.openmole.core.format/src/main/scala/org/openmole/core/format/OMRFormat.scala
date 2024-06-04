@@ -91,9 +91,6 @@ def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
 object OMRFormat:
-  def resultFileDirectoryName(executionId: String) =
-    s"$dataDirectoryName/files-${executionId.filter(_ != '-')}"
-
   def resultFileDirectory(file: File) =
     val index = omrContent(file)
     index.`file-directory`.map(d => file.getParentFile / d)
@@ -127,7 +124,7 @@ object OMRFormat:
     openMOLEVersion: String,
     append: Boolean,
     overwrite: Boolean)(using TimeService, FileService, TmpDirectory, SerializerService) =
-    val resultFileDirectoryName = OMRFormat.resultFileDirectoryName(executionId)
+    def newUUID = UUID.randomUUID().toString.filter(_ != '-')
 
     def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
       def mode =
@@ -149,7 +146,6 @@ object OMRFormat:
         method = Some(methodJson)
       )
 
-
     def parseExistingData(file: File): Option[(String, Seq[String])] =
       try
         if file.exists
@@ -163,13 +159,25 @@ object OMRFormat:
     val directory = methodFile.getParentFile
 
     directory.withLockInDirectory:
-      val existingData =
-        parseExistingData(methodFile) match
-          case Some((id, data)) if overwrite && id != executionId =>
-            OMRFormat.delete(methodFile) //clean(methodFile, data)
-            Seq()
-          case Some((_, data)) => data
-          case None => Seq()
+
+      val existingContent =
+        if methodFile.exists()
+        then
+          val content = OMRFormat.omrContent(methodFile)
+          if overwrite && content.`execution-id` != executionId
+          then
+            OMRFormat.delete(methodFile)
+            None
+          else Some(content)
+        else None
+
+      val existingData = existingContent.toSeq.flatMap(_.`data-file`)
+
+      val resultFileDirectoryName =
+        def name = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-$newUUID"
+        existingContent match
+          case Some(c) => c.`file-directory`.getOrElse(name)
+          case None => name
 
       val storeFileDirectory = directory / resultFileDirectoryName
 
@@ -182,7 +190,6 @@ object OMRFormat:
 
       val fileName =
         def executionPrefix = executionId.filter(_ != '-')
-        def newUUID = UUID.randomUUID().toString.filter(_ != '-')
         if !append
         then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
         else
@@ -263,14 +270,14 @@ object OMRFormat:
       OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
-  def pruneHistory(omrFile: File) =
-    val df = dataFiles(omrFile)
-    val keep = df.last
-    val content = omrContent(omrFile)
-    val newContent = content.copy(`data-file` = Seq(keep._1))
-    try writeOMRContent(omrFile, newContent)
-    finally df.dropRight(1).foreach((_, f) => f.delete())
-  
+//  def keepLastDataFile(omrFile: File) =
+//    val df = dataFiles(omrFile)
+//    val keep = df.last
+//    val content = omrContent(omrFile)
+//    val newContent = content.copy(`data-file` = Seq(keep._1))
+//    try writeOMRContent(omrFile, newContent)
+//    finally df.dropRight(1).foreach((_, f) => f.delete())
+
   def variables(
     file: File,
     relativePath: Boolean = false,
