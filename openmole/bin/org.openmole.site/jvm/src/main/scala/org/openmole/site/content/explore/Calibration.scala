@@ -137,7 +137,7 @@ More details and advanced notions can be found on the ${aa("GA detailed page", h
 ${h3{"Hook"}}
 
 The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
-The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/directory\")"}} to save the results as CSV files in a specific directory, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.omr\")"}} to save the results as an OMR file, or ${code{"hook display"}} to display the results in the standard output.
 
 $br
 
@@ -177,7 +177,7 @@ NSGA2Evolution(
     param4 in List("apple", "banana", "strawberry")),
   termination = 100,
   parallelism = 10
-) hook (workDirectory / "path/to/a/directory")
+) hook (workDirectory / "path/to/a/file.omr")
 """, header = "val modelTask = EmptyTask()", name = "Calibration")}
 
 

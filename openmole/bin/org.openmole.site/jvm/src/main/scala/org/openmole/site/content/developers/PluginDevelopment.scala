@@ -112,9 +112,9 @@ val hello = ScalaTask("val j = myopenmoleplugin.Hello.world(i)") set (
 )
 
 DirectSampling(
-  evaluation = hello hook DisplayHook(),
+  evaluation = hello,
   sampling = i in (0 to 2)
-)
+) hook display
 """, header = "object myopenmoleplugin { object Hello {} }")}
 
 """)

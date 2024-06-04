@@ -52,7 +52,7 @@ OSEEvolution(
     output1 under 5.0,
     output2 under 50.0),
   stochastic = Stochastic(seed = myseed)
-) hook (workDirectory / "results", frequency = 100)
+) hook (workDirectory / "results.omr", frequency = 100)
 """, name = "OSE", header = "val modelTask = EmptyTask()")}
 
 

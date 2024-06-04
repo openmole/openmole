@@ -218,8 +218,25 @@ ${hl.openmole("""
   )
 
   task hook(display, values = Seq(i, j)) // only i and j are displayed
-  task hook(workDirectory / "results/res", values = Seq(j,k)) // only j and k are stored into the file
+  task hook(workDirectory / "results/res.omr", values = Seq(j,k)) // only j and k are stored into the file
 """, name = "variable restriction")}
+
+
+${h2{"Default hook format"}}
+
+When you use the default hook, you can switch to writing csv files using the format argument.
+
+${hl.openmole("""
+  val i = Val[Int]
+  val j = Val[Int]
+  val k = Val[Double]
+
+  val task = EmptyTask() set (
+    outputs += (i, j, k)
+  )
+
+  task hook(workDirectory / "results/res", format = CSV())
+""", name = "CSV Format")}
 
 
 """)
