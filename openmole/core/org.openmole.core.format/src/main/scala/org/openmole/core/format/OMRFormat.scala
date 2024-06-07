@@ -283,7 +283,7 @@ object OMRFormat:
     dataFile: Option[String] = None)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(file)
     val omrDirectory = file.getParentFile
-    val data: File = omrDirectory / (dataFile getOrElse index.`data-file`.last)
+    val data: File = OMRFormat.dataFile(file, dataFile getOrElse index.`data-file`.last)
 
     def loadFile(v: org.json4s.JValue) =
       import org.openmole.core.json.*

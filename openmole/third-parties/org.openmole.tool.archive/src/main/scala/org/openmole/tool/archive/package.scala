@@ -138,11 +138,15 @@ extension(file: File)
 
 implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
   def addFile(f: File, name: String) =
+    f.withInputStream: is =>
+      addStream(is, name, Files.size(f), f.mode)
+
+  def addStream(is: InputStream, name: String, size: Long, mode: Int) =
     val entry = new TarArchiveEntry(name)
-    entry.setSize(Files.size(f))
-    entry.setMode(f.mode)
+    entry.setSize(size)
+    entry.setMode(mode)
     tos.putArchiveEntry(entry)
-    try Files.copy(f, tos) 
+    try is.copy(tos)
     finally tos.closeArchiveEntry()
 
   def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
