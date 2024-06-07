@@ -1502,3 +1502,12 @@ input:checked + .slider:before {
   border-radius: 4px;
   margin-bottom: 10px;
 }
+
+.metadata {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-top: 30px;
+    font-size: 16px;
+    margin-left: 30px;
+}

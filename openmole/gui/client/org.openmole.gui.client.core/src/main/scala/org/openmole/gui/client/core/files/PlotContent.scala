@@ -14,15 +14,22 @@ object PlotContent:
   case class PlotContentSection(section: String, rawContent: String, rowData: RowData, initialHash: String)
 
   enum ResultView:
-    case Raw, Table, Plot
+    case Raw, Table, Plot, Metadata
 
   case class Section(name: String)
 
-  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement)
+  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, metadata: HtmlElement)
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-  def buildTab(safePath: SafePath, extension: FileContentType, sections: Seq[PlotContentSection])(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
+  case class OMRMetadata(script: String, openmoleVersion: String)
+
+  def buildTab(
+                safePath: SafePath,
+                extension: FileContentType,
+                sections: Seq[PlotContentSection],
+                omrMetadata: Option[OMRMetadata] = None
+              )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
@@ -50,12 +57,23 @@ object PlotContent:
           val plotData = ColumnData(
             s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap:
               case ((h, c), d) if d == 0 => Some(Column(h, ScalarColumn(c)))
-              case ((h, c), d) if d ==1 => Some(Column(h, ArrayColumn(c.map(ResultData.fromStringToArray))))
+              case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(ResultData.fromStringToArray))))
               case _ => None
-            )
+          )
           ResultPlot.fromColumnData(plotData)
 
-        s.section -> RawTablePlot(editor, table, plot)
+        val metadata =
+          omrMetadata match
+            case Some(md) =>
+              div(
+                cls := "metadata",
+                div(display.flex, flexDirection.row, span("Version: ", fontWeight.bold), md.openmoleVersion),
+                div("Script: ", fontWeight.bold, marginTop := "10", marginBottom := "10"),
+                textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
+              )
+            case _=> div("Unvailable metadata")
+
+        s.section -> RawTablePlot(editor, table, plot, metadata)
         ).toMap
 
     val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, sectionMap.keys.headOption.map(s => Section(s))))
@@ -76,11 +94,13 @@ object PlotContent:
         case Raw => rawTablePlot.editor.view
         case Table => rawTablePlot.table
         case Plot => rawTablePlot.plot
+        case Metadata=> rawTablePlot.metadata
 
     val rawState = ToggleState(ResultView, "Raw", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
     val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
     val plotState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
-    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState), btn_secondary_string, 1)
+    val metadataState = ToggleState(ResultView, "Metadata", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
+    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState, metadataState), btn_secondary_string, 1)
 
     val sectionStates: Seq[ToggleState[Section]] =
       sectionMap.keys.map(name =>

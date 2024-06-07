@@ -50,7 +50,7 @@ object FileDisplayer:
           Some(HTMLContent.buildTab(safePath, htmlDiv))
       case FileContentType.OpenMOLEResult ⇒
         api.omrContent(safePath).map: guiContent =>
-          Some(OMRContent.buildTab(safePath, guiContent.section))
+          Some(OMRContent.buildTab(safePath, guiContent))
       case FileContentType.SVGExtension ⇒
         api.download(safePath, hash = false).map: (content, _) ⇒
           Some(HTMLContent.buildTab(safePath, div(panelBody, content)))

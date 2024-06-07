@@ -146,7 +146,6 @@ object ResultData {
                | ValueArrayArrayFile(_) | ValueArrayArrayString(_) => 1
 
 
-    println("Sections " + sections.size)
     (sections map : sec =>
       val headers = sec.variables map (_.name)
       val columns = sec.variables.flatMap(_.value.map(_.beautify))
