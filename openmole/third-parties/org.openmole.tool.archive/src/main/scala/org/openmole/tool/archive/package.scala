@@ -142,8 +142,8 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
     entry.setSize(Files.size(f))
     entry.setMode(f.mode)
     tos.putArchiveEntry(entry)
-    try Files.copy(f, tos) finally tos.closeArchiveEntry()
-
+    try Files.copy(f, tos) 
+    finally tos.closeArchiveEntry()
 
   def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
     createDirArchiveWithRelativePathWithAdditionalCommand(

@@ -104,9 +104,8 @@ object OMRFormat:
     val content = file.content(gz = true)
     decode[OMRContent](content).toTry.get
 
-  def dataFiles(file: File): Seq[(String, File)] =
-    val directory = file.getParentFile
-    omrContent(file).`data-file`.map { f => (f, directory / f) }
+  def dataFiles(file: File): Seq[String] = omrContent(file).`data-file`
+  def dataFile(omrFile: File, name: String) = omrFile.getParentFile / name
 
   def writeOMRContent(file: File, content: OMRContent) =
     file.withPrintStream(create = true, gz = true)(
@@ -238,7 +237,7 @@ object OMRFormat:
     val copyData = originDirectory != destinationDirectory
     if copyData
     then
-      dataFiles(omrFile).foreach((name, f) => f.copy(destinationDirectory / name))
+      dataFiles(omrFile).foreach(name => dataFile(omrFile, name).copy(destinationDirectory / name))
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).copy(destinationDirectory / d))
 
@@ -253,13 +252,13 @@ object OMRFormat:
       val destinationDataDirectory = destination.getParentFile
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
-      dataFiles(omrFile).foreach((name, f) => f.move(destinationDataDirectory / name))
+      dataFiles(omrFile).foreach(name => dataFile(omrFile, name).move(destinationDataDirectory / name))
       val omrDataDirectory = dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile move destination
 
   def delete(omrFile: File) =
-    dataFiles(omrFile).foreach((_, f) => f.delete())
+    dataFiles(omrFile).foreach(name => dataFile(omrFile, name).delete())
     resultFileDirectory(omrFile).foreach(_.recursiveDelete)
     val omrDataDirectory = dataDirectory(omrFile)
     if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
@@ -267,7 +266,7 @@ object OMRFormat:
 
   def diskUsage(omrFile: File) =
     omrFile.size +
-      OMRFormat.dataFiles(omrFile).map(_._2.size).sum +
+      OMRFormat.dataFiles(omrFile).map(n => dataFile(omrFile, n).size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
 //  def keepLastDataFile(omrFile: File) =
@@ -335,13 +334,13 @@ object OMRFormat:
 
   def indexes(file: File)(using SerializerService): Seq[IndexedData] =
     val content = omrContent(file)
-    dataFiles(file).flatMap: (f, _) =>
-      val sectionVariables = variables(file, dataFile = Some(f))
+    dataFiles(file).flatMap: name =>
+      val sectionVariables = variables(file, dataFile = Some(name))
       sectionVariables.zipWithIndex.flatMap:
         case ((section, variables), i) =>
           val names = section.indexes.getOrElse(Seq()).toSet
           variables.filter(v => names.contains(v.name)).map: v =>
-            IndexedData(f, i, v)
+            IndexedData(name, i, v)
 
   def variablesAtIndex(file: File, index: IndexedData.FileIndex)(using SerializerService) =
     variables(file, dataFile = Some(index))

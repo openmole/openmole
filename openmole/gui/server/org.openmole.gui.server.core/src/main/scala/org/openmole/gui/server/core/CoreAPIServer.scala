@@ -73,7 +73,7 @@ object CoreAPIServer:
       val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
       try
         tos.addFile(f, f.getName)
-        dataFiles.foreach((n, f) => tos.addFile(f, n))
+        dataFiles.foreach(n => tos.addFile(OMRFormat.dataFile(f, n), n))
       finally tos.close()
 
   def getSafePath(req: Request[IO]) =
