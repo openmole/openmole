@@ -106,6 +106,7 @@ object OMRFormat:
 
   def dataFiles(file: File): Seq[String] = omrContent(file).`data-file`
   def dataFile(omrFile: File, name: String) = omrFile.getParentFile / name
+  def withDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) = dataFile(omrFile, name).withGzippedInputStream(f)
 
   def writeOMRContent(file: File, content: OMRContent) =
     file.withPrintStream(create = true, gz = true)(
@@ -283,7 +284,7 @@ object OMRFormat:
     dataFile: Option[String] = None)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(file)
     val omrDirectory = file.getParentFile
-    val data: File = OMRFormat.dataFile(file, dataFile getOrElse index.`data-file`.last)
+    val dataFileValue = dataFile getOrElse index.`data-file`.last
 
     def loadFile(v: org.json4s.JValue) =
       import org.openmole.core.json.*
@@ -299,13 +300,12 @@ object OMRFormat:
         def sectionToVariables(section: OMRContent.DataContent.SectionData, a: JArray) =
           section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
 
-        def readContent(file: File): JArray =
-          file.withGzippedInputStream { is =>
+        def readContent(): JArray =
+          OMRFormat.withDataStream(file, dataFileValue): is =>
             import org.json4s.jackson.JsonMethods.*
             parse(is).asInstanceOf[JArray]
-          }
 
-        val content = readContent(data)
+        val content = readContent()
         (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
       case OMRContent.DataMode.Append =>
         def sectionToAggregatedVariables(section: OMRContent.DataContent.SectionData, sectionIndex: Int, content: JArray) =
@@ -314,16 +314,15 @@ object OMRFormat:
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
           section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny)) }
 
-        def readContent(file: File): JArray =
+        def readContent(): JArray =
           val begin = new StringInputStream("[")
           val end = new StringInputStream("]")
-          file.withGzippedInputStream { is =>
+          OMRFormat.withDataStream(file, dataFileValue): is =>
             val s = inputStreamSequence(begin, is, end)
             import org.json4s.jackson.JsonMethods.*
             parse(s).asInstanceOf[JArray]
-          }
-
-        val content = readContent(data)
+        
+        val content = readContent()
         index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
 
 
