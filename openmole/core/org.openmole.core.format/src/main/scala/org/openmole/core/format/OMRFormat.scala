@@ -57,18 +57,11 @@ object OMRContent:
  enum DataMode:
   case Append, Create
 
- object Compression:
-  given Encoder[Compression] = Encoder.instance:
-   case Compression.GZip => Encoder.encodeString("gzip")
-
-  given Decoder[Compression] = Decoder.decodeString.map:
-   case "gzip" => Compression.GZip
-
- enum Compression:
-  case GZip
+ enum DataStore derives derivation.ConfiguredCodec:
+  case GZipFile
 
  object DataContent:
-   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None)derives derivation.ConfiguredCodec
+   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
 
  case class DataContent(section: Seq[DataContent.SectionData])derives derivation.ConfiguredCodec
 
@@ -79,7 +72,7 @@ case class OMRContent(
   `data-file`: Seq[String],
   `data-mode`: OMRContent.DataMode,
   `data-content`: OMRContent.DataContent,
-  `data-compression`: Option[OMRContent.Compression] = None,
+  `data-store`: Option[OMRContent.DataStore] = None,
   `file-directory`: Option[String],
   script: Option[OMRContent.Script],
   `time-start`: Long,
@@ -105,6 +98,8 @@ object OMRFormat:
     decode[OMRContent](content).toTry.get
 
   def dataFiles(file: File): Seq[String] = omrContent(file).`data-file`
+  def storeFiles(omrFile: File): Seq[(String, File)] = dataFiles(omrFile).map(n => (n, dataFile(omrFile, n)))
+
   def dataFile(omrFile: File, name: String) = omrFile.getParentFile / name
   def withDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) = dataFile(omrFile, name).withGzippedInputStream(f)
 
@@ -238,7 +233,7 @@ object OMRFormat:
     val copyData = originDirectory != destinationDirectory
     if copyData
     then
-      dataFiles(omrFile).foreach(name => dataFile(omrFile, name).copy(destinationDirectory / name))
+      storeFiles(omrFile).foreach((name, file) => file.copy(destinationDirectory / name))
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).copy(destinationDirectory / d))
 
@@ -253,13 +248,13 @@ object OMRFormat:
       val destinationDataDirectory = destination.getParentFile
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
-      dataFiles(omrFile).foreach(name => dataFile(omrFile, name).move(destinationDataDirectory / name))
+      storeFiles(omrFile).foreach((name, file) => file.move(destinationDataDirectory / name))
       val omrDataDirectory = dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile move destination
 
   def delete(omrFile: File) =
-    dataFiles(omrFile).foreach(name => dataFile(omrFile, name).delete())
+    storeFiles(omrFile).foreach((_, file) => file.delete())
     resultFileDirectory(omrFile).foreach(_.recursiveDelete)
     val omrDataDirectory = dataDirectory(omrFile)
     if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
@@ -267,7 +262,7 @@ object OMRFormat:
 
   def diskUsage(omrFile: File) =
     omrFile.size +
-      OMRFormat.dataFiles(omrFile).map(n => dataFile(omrFile, n).size).sum +
+      OMRFormat.storeFiles(omrFile).map((_, file) => file.size).sum +
       OMRFormat.resultFileDirectory(omrFile).map(_.size).getOrElse(0L)
 
 //  def keepLastDataFile(omrFile: File) =
@@ -321,7 +316,7 @@ object OMRFormat:
             val s = inputStreamSequence(begin, is, end)
             import org.json4s.jackson.JsonMethods.*
             parse(s).asInstanceOf[JArray]
-        
+
         val content = readContent()
         index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
 
