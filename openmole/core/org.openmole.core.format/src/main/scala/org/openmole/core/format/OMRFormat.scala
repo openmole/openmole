@@ -101,7 +101,13 @@ object OMRFormat:
   def storeFiles(omrFile: File): Seq[(String, File)] = dataFiles(omrFile).map(n => (n, dataFile(omrFile, n)))
 
   def dataFile(omrFile: File, name: String) = omrFile.getParentFile / name
-  def withDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) = dataFile(omrFile, name).withGzippedInputStream(f)
+
+  def readDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) =
+    dataFile(omrFile, name).withGzippedInputStream(f)
+
+//  def readAllDataStreams[T](omrFile: File)(f: (String, java.io.InputStream) => T): Seq[T] =
+//    dataFiles(omrFile).map: name =>
+//      readDataStream(omrFile, name)(is => f(name, is))
 
   def writeOMRContent(file: File, content: OMRContent) =
     file.withPrintStream(create = true, gz = true)(
@@ -274,12 +280,20 @@ object OMRFormat:
 //    finally df.dropRight(1).foreach((_, f) => f.delete())
 
   def variables(
-    file: File,
+    omrFile: File,
     relativePath: Boolean = false,
     dataFile: Option[String] = None)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
-    val index = omrContent(file)
-    val omrDirectory = file.getParentFile
+    val index = omrContent(omrFile)
     val dataFileValue = dataFile getOrElse index.`data-file`.last
+    OMRFormat.readDataStream(omrFile, dataFileValue): is =>
+      variablesFromStream(omrFile, is, relativePath)
+
+  def variablesFromStream(
+    omrFile: File,
+    is: java.io.InputStream,
+    relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    val index = omrContent(omrFile)
+    val omrDirectory = omrFile.getParentFile
 
     def loadFile(v: org.json4s.JValue) =
       import org.openmole.core.json.*
@@ -296,9 +310,8 @@ object OMRFormat:
           section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(): JArray =
-          OMRFormat.withDataStream(file, dataFileValue): is =>
-            import org.json4s.jackson.JsonMethods.*
-            parse(is).asInstanceOf[JArray]
+          import org.json4s.jackson.JsonMethods.*
+          parse(is).asInstanceOf[JArray]
 
         val content = readContent()
         (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
@@ -306,16 +319,17 @@ object OMRFormat:
         def sectionToAggregatedVariables(section: OMRContent.DataContent.SectionData, sectionIndex: Int, content: JArray) =
           val size = section.variables.size
           val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
+
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
+
           section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny)) }
 
         def readContent(): JArray =
           val begin = new StringInputStream("[")
           val end = new StringInputStream("]")
-          OMRFormat.withDataStream(file, dataFileValue): is =>
-            val s = inputStreamSequence(begin, is, end)
-            import org.json4s.jackson.JsonMethods.*
-            parse(s).asInstanceOf[JArray]
+          val s = inputStreamSequence(begin, is, end)
+          import org.json4s.jackson.JsonMethods.*
+          parse(s).asInstanceOf[JArray]
 
         val content = readContent()
         index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
