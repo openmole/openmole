@@ -7,6 +7,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.core.CoreUtils
 
 
 object PlotContent:
@@ -22,14 +23,13 @@ object PlotContent:
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-  case class OMRMetadata(script: String, openmoleVersion: String)
+  case class OMRMetadata(script: String, openmoleVersion: String, timeStart: Long)
 
   def buildTab(
-                safePath: SafePath,
-                extension: FileContentType,
-                sections: Seq[PlotContentSection],
-                omrMetadata: Option[OMRMetadata] = None
-              )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
+    safePath: SafePath,
+    extension: FileContentType,
+    sections: Seq[PlotContentSection],
+    omrMetadata: Option[OMRMetadata] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
@@ -67,14 +67,15 @@ object PlotContent:
             case Some(md) =>
               div(
                 cls := "metadata",
-                div(display.flex, flexDirection.row, span("Version: ", fontWeight.bold), md.openmoleVersion),
+                div(display.flex, flexDirection.row, span("OpenMOLE Version:", nbsp, fontWeight.bold), md.openmoleVersion),
+                div(display.flex, flexDirection.row, marginTop := "10", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
                 div("Script: ", fontWeight.bold, marginTop := "10", marginBottom := "10"),
                 textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
               )
-            case _=> div("Unvailable metadata")
+            case _=> div("Unavailable metadata")
 
         s.section -> RawTablePlot(editor, table, plot, metadata)
-        ).toMap
+      ).toMap
 
     val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, sectionMap.keys.headOption.map(s => Section(s))))
 

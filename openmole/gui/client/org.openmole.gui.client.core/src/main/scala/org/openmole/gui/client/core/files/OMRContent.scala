@@ -18,5 +18,10 @@ object OMRContent:
     val scriptText =
       guiOMRContent.script match
         case Some(gos: GUIOMRScript)=> s"""${gos.`import`.map(_.content + "\n")} \n\n ${gos.content}"""
-        case _=> "Scrit unvailable"
-    PlotContent.buildTab(safePath, FileContentType.OpenMOLEResult, pcSections, Some(OMRMetadata(scriptText, guiOMRContent.openMoleVersion)))
+        case _=> "Script not available"
+    PlotContent.buildTab(
+      safePath,
+      FileContentType.OpenMOLEResult,
+      pcSections,
+      Some(OMRMetadata(scriptText, guiOMRContent.openMoleVersion, guiOMRContent.timeStart))
+    )
