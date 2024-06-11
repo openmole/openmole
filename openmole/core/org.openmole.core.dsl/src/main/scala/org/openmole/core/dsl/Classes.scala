@@ -34,6 +34,5 @@ trait Classes:
   export task.RetryTask
 
   export org.openmole.core.workflow.hook.display
-  export org.openmole.core.format.{CSVOutputFormat, OMROutputFormat, OMR, CSV}
-
+  export org.openmole.core.format.{OMROutputFormat, OMROption}
 

@@ -55,10 +55,9 @@ object Replication:
     implicit def defScope: DefinitionScope = r.scope
 
     val aggregateTask: OptionalArgument[DSL] =
-      r.aggregation match {
+      r.aggregation match
         case Seq() ⇒ None
         case s     ⇒ AggregateTask(s)
-      }
 
     val s =
       MapReduce(
@@ -100,12 +99,11 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
   def hook[F](
     output:      WritableOutput,
     values:      Seq[Val[_]]    = Vector.empty,
-    includeSeed: Boolean        = false,
-    format:      F              = defaultOutputFormat)(using OutputFormat[F, Replication.Method]): Hooked[M] =
+    includeSeed: Boolean        = false)(using OutputFormat[F, Replication.Method]): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, format = format, metadata = dsl.method, append = true))
+    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, metadata = dsl.method, option = OMROption(append = true)))
 
 
 object DirectSampling:
@@ -170,10 +168,9 @@ case class DirectSampling[S: IsSampling](
 implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
   def hook[F](
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty,
-    format: F              = defaultOutputFormat)(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
+    values: Seq[Val[_]]    = Vector.empty)(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, format = format, metadata = dsl.method, append = true))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = dsl.method, option = OMROption(append = true)))
 
 

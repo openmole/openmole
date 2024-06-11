@@ -8,18 +8,17 @@ import org.openmole.core.workflow.dsl.*
 import org.openmole.core.format.OutputFormat.*
 import org.openmole.core.format.*
 
-object FormattedFileHook:
+object OMRFileHook:
 
-  def apply[T, M](
-    format:   T,
+  def apply[M, MD](
     output:   WritableOutput,
     metadata: M,
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
-    append: Boolean          = false,
-    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, fileFormat: OutputFormat[T, M]): FromContextHook =
+    option: OMROption = OMROption(),
+    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, methodData: MethodMetaData[M, MD]): FromContextHook =
 
-    Hook(name getOrElse "FileFormatHook") { parameters ⇒
+    Hook(name getOrElse "OMRFileHook") { parameters ⇒
       import parameters._
 
       val excludeSet = exclude.map(_.name).toSet
@@ -27,9 +26,9 @@ object FormattedFileHook:
 
       val variables = ps.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p not found in hook $this")))
       val content = OutputContent(variables)
-      fileFormat.write(executionContext)(format, output, content, metadata, append = append).from(context)
 
+      OMROutputFormat.write(executionContext, output, content, metadata, option)
       context
-    } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) ++ fileFormat.validate(format) } set (inputs ++= values)
+    } withValidate { WritableOutput.file(output).toSeq.flatMap(_.validate) } set (inputs ++= values)
 
 

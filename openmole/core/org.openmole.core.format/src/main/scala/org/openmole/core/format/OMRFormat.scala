@@ -160,7 +160,6 @@ object OMRFormat:
     val directory = methodFile.getParentFile
 
     directory.withLockInDirectory:
-
       val existingContent =
         if methodFile.exists()
         then
@@ -432,6 +431,3 @@ object OMRFormat:
       import org.json4s.jackson
       val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
       jackson.prettyJson(jackson.renderJValue(fullObject))
-
-export org.openmole.core.format.{CSVOutputFormat as CSV, OMROutputFormat as OMR}
-def defaultOutputFormat = OMR()

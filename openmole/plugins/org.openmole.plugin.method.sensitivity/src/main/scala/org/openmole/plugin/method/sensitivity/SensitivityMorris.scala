@@ -47,8 +47,8 @@ object SensitivityMorris {
 
   object MorrisHook:
 
-    def apply[F](method: Method, output: WritableOutput, format: F = defaultOutputFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
-      Hook("MorrisHook") { p ⇒
+    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+      Hook("MorrisHook"): p ⇒
         import p._
         import WritableOutput._
 
@@ -63,10 +63,9 @@ object SensitivityMorris {
             ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
-        outputFormat.write(executionContext)(format, output, sections, method).from(context)
+        OMROutputFormat.write(executionContext, output, sections, method).from(context)
 
         context
-      }
 
 
   /**

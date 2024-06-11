@@ -173,10 +173,9 @@ object EvolutionWorkflow:
       last:           Boolean                = false,
       keepAll:        Boolean                = false,
       includeOutputs: Boolean                = true,
-      filter:         Seq[Val[_]]            = Vector.empty,
-      format:         F                      = defaultOutputFormat)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): DSLContainer[EvolutionWorkflow] =
+      filter:         Seq[Val[_]]            = Vector.empty): DSLContainer[EvolutionWorkflow] =
       implicit val defScope = dsl.scope
-      dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter, format = format))
+      dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter))
 
   def SteadyStateEvolution[M](
     method:      M,

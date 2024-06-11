@@ -27,9 +27,6 @@ import org.openmole.plugin.tool.pattern._
 
 package object sensitivity {
 
-  given CSVOutputFormatDefault[SensitivityMorris] = CSVOutputFormatDefault(unrollArray = true)
-  given CSVOutputFormatDefault[SensitivitySaltelli] = CSVOutputFormatDefault(unrollArray = true)
-
   object Sensitivity {
     /**
      * For a given input of the model, and a given output of a the model,
@@ -49,10 +46,9 @@ package object sensitivity {
      * (value containing a Double), and throws a nice
      * exception in case it's not possible
      */
-    def toValDouble(v: Val[_]): Val[Double] = v match {
+    def toValDouble(v: Val[_]): Val[Double] = v match
       case Val.caseDouble(vd) ⇒ vd
       case _                  ⇒ throw new IllegalArgumentException("expect inputs of type Double, but received " + v)
-    }
 
     def variableResults(inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
       import p._
@@ -74,20 +70,20 @@ package object sensitivity {
    * @param dsl
    */
   implicit class MorrisHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m):
-    def hook[F](output: WritableOutput, format: F = defaultOutputFormat)(using OutputFormat[F, SensitivityMorris.Method]): Hooked[M] =
+    def hook(output: WritableOutput): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
-      Hooked(m, SensitivityMorris.MorrisHook(dsl.method, output, format))
+      Hooked(m, SensitivityMorris.MorrisHook(dsl.method, output))
 
   /**
    * Decorator of the Saltelli method to implicitely call SaltelliHook in the DSL with hook.
    * @param dsl
    */
   implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m):
-    def hook[F](output: WritableOutput, format: F = defaultOutputFormat)(using OutputFormat[F, SensitivitySaltelli.Method]): Hooked[M] =
+    def hook(output: WritableOutput): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
-      Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output, format))
+      Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output))
 
 
 }

@@ -13,7 +13,7 @@ package object extension:
 
   type Hook = org.openmole.core.workflow.hook.FromContextHook
   def Hook = org.openmole.core.workflow.hook.Hook
-  def FormattedFileHook = org.openmole.core.workflow.hook.FormattedFileHook
+  def FormattedFileHook = org.openmole.core.workflow.hook.OMRFileHook
 
   type Source = org.openmole.core.workflow.mole.Source
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
@@ -66,7 +66,6 @@ package object extension:
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}
-  export org.openmole.core.format.{CSVOutputFormatDefault, OMROutputFormatDefault, defaultOutputFormat}
   export org.openmole.core.format.OutputFormat.{OutputContent, SectionContent}
 
   val OutputFormat = org.openmole.core.format.OutputFormat

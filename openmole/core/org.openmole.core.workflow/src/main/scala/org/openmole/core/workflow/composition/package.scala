@@ -31,7 +31,7 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
 import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
-import org.openmole.core.workflow.hook.{FormattedFileHook, Hook}
+import org.openmole.core.workflow.hook.{OMRFileHook, Hook}
 import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
 import org.openmole.core.workflow.task.{EmptyTask, ExplorationTask, MoleTask, Task}
@@ -188,30 +188,28 @@ object SingleTaskMethod:
 
 case class SingleTaskMethod()
 
-case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty) {
+case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[_]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty):
   def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
-  def hook[F](
+  def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty,
-    format: F              = defaultOutputFormat)(implicit definitionScope: DefinitionScope, fileFormat: OutputFormat[F, SingleTaskMethod]): TaskNode = hook(FormattedFileHook(output = output, values = values, format = format, append = true, metadata = SingleTaskMethod()))
+    values: Seq[Val[_]]    = Vector.empty)(implicit definitionScope: DefinitionScope): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = SingleTaskMethod()))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
-}
 
-object TransitionOrigin {
 
+object TransitionOrigin:
   def tasks(d: TransitionOrigin) =
     d match 
       case TaskOrigin(n)          ⇒ Vector(n)
       case TransitionDSLOrigin(o) ⇒ DSL.tasks(o)
 
   def dsl(o: TransitionOrigin) =
-    o match {
+    o match 
       case TransitionDSLOrigin(d) ⇒ Some(d)
       case _                      ⇒ None
-    }
-}
+    
 
-sealed trait TransitionOrigin {
+
+sealed trait TransitionOrigin:
   def --(d1: TransitionDestination, d: TransitionDestination*) = new --(this, (Seq(d1) ++ d).toVector)
   def --(d: Seq[TransitionDestination]) = new --(this, d.toVector)
 
@@ -221,7 +219,6 @@ sealed trait TransitionOrigin {
   def -<-(d: TransitionDestination*) = new -<-(this, d.toVector)
 
   def oo(d: TransitionDestination*) = new oo(this, d.toVector)
-}
 
 case class TaskOrigin(node: TaskNode) extends TransitionOrigin
 case class TransitionDSLOrigin(t: DSL) extends TransitionOrigin

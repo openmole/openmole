@@ -210,10 +210,10 @@ object SensitivitySaltelli {
   }
 
 
-  object SaltelliHook {
+  object SaltelliHook:
 
-    def apply[F](method: Method, output: WritableOutput, format: F = defaultOutputFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, Method]) =
-      Hook("SaltelliHook") { p ⇒
+    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+      Hook("SaltelliHook"): p ⇒
         import p._
         import WritableOutput._
 
@@ -227,13 +227,9 @@ object SensitivitySaltelli {
             "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
-        outputFormat.write(executionContext)(format, output, sections, method).from(context)
+        OMROutputFormat.write(executionContext, output, sections, method).from(context)
 
         context
-      }
-
-  }
-
 
 
   object SaltelliSampling {
@@ -244,7 +240,7 @@ object SensitivitySaltelli {
 
     def matrix = Seq(matrixName, matrixIndex)
 
-    implicit def isSampling: IsSampling[SaltelliSampling] = saltelli => {
+    implicit def isSampling: IsSampling[SaltelliSampling] = saltelli =>
       def apply = FromContext { p =>
         import p._
 
@@ -300,7 +296,7 @@ object SensitivitySaltelli {
         saltelli.factors.flatMap(_.inputs),
         saltelli.samples.validate
       )
-    }
+
 
     def apply(samples: FromContext[Int], factors: ScalableValue*): SaltelliSampling =
       new SaltelliSampling(samples, true, factors: _*)

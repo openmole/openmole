@@ -34,8 +34,6 @@ implicit def intToCounterTerminationConverter(n: Long): EvolutionWorkflow.AfterE
 implicit def durationToDurationTerminationConverter(d: Time): EvolutionWorkflow.AfterDuration = EvolutionWorkflow.AfterDuration(d)
 implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v ⇒ method(patternContainer(v.value, v.by))
 
-given CSVOutputFormatDefault[EvolutionMetadata] = SavePopulationHook.defaultFormat
-
 implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]):
   val decorator = new MethodHookDecorator(t)(using method)
   export decorator.*
@@ -46,8 +44,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     last:           Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = defaultOutputFormat)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] =
+    filter:         Seq[Val[_]]            = Vector.empty)(implicit outputFormat: OutputFormat[F, EvolutionMetadata]): Hooked[T] =
     val m = method(t)
     implicit def scope: DefinitionScope = m.scope
 
@@ -60,8 +57,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
         last = last,
         keepAll = keepAll,
         includeOutputs = includeOutputs,
-        filter = filter,
-        format = format)
+        filter = filter)
     )
 
 

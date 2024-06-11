@@ -15,11 +15,49 @@ import org.openmole.core.format.OutputFormat.*
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 
-import java.io.SequenceInputStream
+import java.io.{PrintStream, SequenceInputStream}
+
+case class OMROption(script: Boolean = true, overwrite: Boolean = true, append: Boolean = false)
 
 object OMROutputFormat:
-  implicit def outputFormat[M, MD](using default: OMROutputFormatDefault[M], methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): OutputFormat[OMROutputFormat, M] = new OutputFormat[OMROutputFormat, M]:
-    override def write(executionContext: FormatExecutionContext)(f: OMROutputFormat, output: WritableOutput, content: OutputContent, method: M, append: Boolean): FromContext[Unit] = FromContext: p ⇒
+
+  def write[M, MD](
+    executionContext: FormatExecutionContext,
+    output: WritableOutput,
+    content: OutputContent,
+    method: M,
+    option: OMROption = OMROption())(using methodData: MethodMetaData[M, MD]): FromContext[Unit] =
+    FromContext: p =>
+      import p.*
+      output match
+        case WritableOutput.Display(ps) ⇒
+          def writeStream(ps: java.io.PrintStream, section: Option[String], variables: Seq[Variable[_]]) =
+            def headerLine(variables: Seq[Variable[_]]) = CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = false)
+
+            section match
+              case None ⇒
+                val header = Some(headerLine(variables))
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value))
+              case Some(section) ⇒
+                ps.println(section + ":")
+                val header = Some(headerLine(variables))
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), margin = "  ")
+
+          for {(section, i) ← content.section.zipWithIndex}
+            val sectionName = if content.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
+            writeStream(ps, sectionName, section.variables)
+        case WritableOutput.Store(file) ⇒
+          OMROutputFormat.write(executionContext, file.from(p.context), content, method, append = option.append, option = option).from(context)
+
+
+  def write[M, MD](
+    executionContext: FormatExecutionContext,
+    omrFile: File,
+    content: OutputContent,
+    method: M,
+    append: Boolean,
+    option: OMROption)(using methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): FromContext[Unit] =
+    FromContext: p =>
       import p.*
       import org.json4s.*
       import executionContext.serializerService
@@ -27,66 +65,40 @@ object OMROutputFormat:
       import executionContext.timeService
 
       given Encoder[MD] = methodData.encoder
-      val format = OMROutputFormatDefault.value(f, default)
 
-      output match
-        case WritableOutput.Display(_) ⇒
-          implicitly[OutputFormat[CSVOutputFormat, Any]].write(executionContext)(CSVOutputFormat(), output, content, method).from(context)
-        case WritableOutput.Store(file) ⇒
-          def executionId = executionContext.moleExecutionId
+      def executionId = executionContext.moleExecutionId
 
-          def methodFile =
-            file.from(context) match
-              case f if f.getName.endsWith(".omr") => f
-              case f => f.getParentFile / s"${f.getName}.omr"
+      def methodFile =
+        omrFile match
+          case f if f.getName.endsWith(".omr") => f
+          case f => f.getParentFile / s"${f.getName}.omr"
 
-          def methodJson =
-            methodData.data(method).asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+      def methodJson =
+        methodData.data(method).asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
 
-          def script =
-            scriptData match
-              case data: ScriptSourceData.ScriptData if format.script ⇒
-                val scriptContent = ScriptSourceData.scriptContent(scriptData)
-                val imports =
-                  val is = Imports.directImportedFiles(data.script).map(i ⇒ OMRContent.Import(ImportedFile.identifier(i), i.file.content))
-                  if is.isEmpty then None else Some(is)
+      def script =
+        scriptData match
+          case data: ScriptSourceData.ScriptData if option.script ⇒
+            val scriptContent = ScriptSourceData.scriptContent(scriptData)
+            val imports =
+              val is = Imports.directImportedFiles(data.script).map(i ⇒ OMRContent.Import(ImportedFile.identifier(i), i.file.content))
+              if is.isEmpty then None else Some(is)
 
-                Some(OMRContent.Script(scriptContent, imports))
-              case _ ⇒ None
+            Some(OMRContent.Script(scriptContent, imports))
+          case _ ⇒ None
 
 
-          OMRFormat.write(
-            data = content,
-            methodFile = methodFile,
-            executionId = executionId,
-            jobId = executionContext.jobId,
-            methodJson = methodJson,
-            script = script,
-            timeStart = executionContext.moleLaunchTime,
-            openMOLEVersion = org.openmole.core.buildinfo.version.value,
-            append = append,
-            overwrite = format.overwrite
-          )
-
-    override def validate(format: OMROutputFormat) = Validate.success
+      OMRFormat.write(
+        data = content,
+        methodFile = methodFile,
+        executionId = executionId,
+        jobId = executionContext.jobId,
+        methodJson = methodJson,
+        script = script,
+        timeStart = executionContext.moleLaunchTime,
+        openMOLEVersion = org.openmole.core.buildinfo.version.value,
+        append = append,
+        overwrite = option.overwrite
+      )
 
 
-
-case class OMROutputFormat(
-  script: OptionalArgument[Boolean] = None,
-  overwrite: OptionalArgument[Boolean] = None,
-  append: OptionalArgument[Boolean] = None)
-
-
-object OMROutputFormatDefault:
-  given default[T]: OMROutputFormatDefault[T] = OMROutputFormatDefault[T]()
-
-  def value[T](format: OMROutputFormat, default: OMROutputFormatDefault[T]) =
-    OMROutputFormatDefault[T](
-      script = format.script.getOrElse(default.script),
-      overwrite = format.overwrite.getOrElse(default.overwrite)
-    )
-
-case class OMROutputFormatDefault[T](
-  script: Boolean = true,
-  overwrite: Boolean = true)

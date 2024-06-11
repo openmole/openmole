@@ -22,8 +22,6 @@ import org.openmole.core.dsl.extension.*
 
 object SavePopulationHook:
 
-  def defaultFormat = CSVOutputFormatDefault[EvolutionMetadata](unrollArray = true, postfix = GAIntegration.generationVal, directory = true)
-
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) =
     FromContext: p ⇒
       import p._
@@ -51,8 +49,7 @@ object SavePopulationHook:
     last:           Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[_]]            = Vector.empty,
-    format:         F                      = defaultFormat)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, outputFormat: OutputFormat[F, EvolutionMetadata]) = Hook("SavePopulationHook") { p ⇒
+    filter:         Seq[Val[_]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = Hook("SavePopulationHook") { p ⇒
     import p._
 
     val state = context(evolution.stateVal)
@@ -76,10 +73,10 @@ object SavePopulationHook:
           )
         )
 
-      outputFormat.write(executionContext)(format, output, content, evolutionData).from(augmentedContext)
+      OMROutputFormat.write(executionContext, output, content, evolutionData).from(augmentedContext)
 
     context
-  } withValidate { outputFormat.validate(format) } set (inputs += (evolution.populationVal, evolution.stateVal))
+  } set (inputs += (evolution.populationVal, evolution.stateVal))
 
 
 
