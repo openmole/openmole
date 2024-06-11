@@ -225,7 +225,9 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       executionId = "stub",
       script = None,
       timeStart = System.currentTimeMillis(),
-      timeSave = System.currentTimeMillis())
+      timeSave = System.currentTimeMillis(),
+      index = None
+    )
   )
 
   override def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]] = Future.successful(None)
