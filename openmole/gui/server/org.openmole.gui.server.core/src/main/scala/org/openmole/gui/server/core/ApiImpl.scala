@@ -542,13 +542,21 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
       omrContent.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
 
+    def index =
+      val names = omrContent.`data-content`.section.flatMap(_.indexes)
+      val size = omrContent.`data-file`.size
+      if names.flatten.isEmpty || size <= 1
+      then None
+      else Some(GUIOMRContent.Index(size, names))
+
     GUIOMRContent(
       section = content,
       openMoleVersion = omrContent.`openmole-version`,
       executionId = omrContent.`execution-id`,
       script = script,
       timeStart = omrContent.`time-start`,
-      timeSave = omrContent.`time-save`
+      timeSave = omrContent.`time-save`,
+      index = index
     )
 
   def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =

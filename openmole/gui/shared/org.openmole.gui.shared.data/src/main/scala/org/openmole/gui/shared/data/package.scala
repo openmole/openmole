@@ -431,6 +431,8 @@ object GUIVariable:
     case ValueArrayArrayBoolean(value: Array[Array[Boolean]])
     case ValueArrayArrayFile(value: Array[Array[SafePath]])
 
+object GUIOMRContent:
+  case class Index(size: Int, variables: Seq[Seq[String]])
 
 case class GUIOMRContent(
   section: Seq[GUIOMRSectionContent],
@@ -438,7 +440,8 @@ case class GUIOMRContent(
   executionId: String,
   script: Option[GUIOMRScript],
   timeStart: Long,
-  timeSave: Long)
+  timeSave: Long,
+  index: Option[GUIOMRContent.Index])
 
 case class GUIOMRDataIndex(dataFile: String, sectionIndex: Int, variable: GUIVariable)
 

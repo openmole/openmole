@@ -329,7 +329,6 @@ object OMRFormat:
   case class IndexedData(fileIndex: IndexedData.FileIndex, sectionIndex: Int, variable: Variable[_])
 
   def indexes(file: File)(using SerializerService): Seq[IndexedData] =
-    val content = omrContent(file)
     dataFiles(file).flatMap: name =>
       val sectionVariables = variables(file, dataFile = Some(name))
       sectionVariables.zipWithIndex.flatMap:
