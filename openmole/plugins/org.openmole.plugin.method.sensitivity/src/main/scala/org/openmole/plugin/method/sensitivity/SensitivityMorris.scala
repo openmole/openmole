@@ -42,7 +42,7 @@ object SensitivityMorris {
 
   case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
 
-    
+
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
   object MorrisHook:
@@ -63,7 +63,7 @@ object SensitivityMorris {
             ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
-        OMROutputFormat.writeFile(executionContext, output, sections, MetaData(method)).from(context)
+        OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
 
         context
 
@@ -119,7 +119,7 @@ object SensitivityMorris {
       output:        Val[_],
       outputValues:  Array[Double],
       factorChanged: Array[String],
-      deltas:        Array[Double]): (Double, Double, Double) = 
+      deltas:        Array[Double]): (Double, Double, Double) =
 
       // indices of results in which the input had been changed
       val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
@@ -152,7 +152,7 @@ object SensitivityMorris {
 
     def apply[T](
       modelInputs:  Seq[ScalableValue],
-      modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = 
+      modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
 
       def morrisOutputs(
         modelInputs:  Seq[ScalableValue],
