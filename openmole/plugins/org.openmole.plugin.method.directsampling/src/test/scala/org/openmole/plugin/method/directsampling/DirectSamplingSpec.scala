@@ -263,23 +263,4 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     (ds hook display hook "/tmp/test.csv"): DSL
   }
 
-  "Direct samplings" should "accept omr format" in {
-    val l = Val[Double]
-
-    DirectSampling(
-      EmptyTask(),
-      ExplicitSampling(l, Seq(1.0, 2.0))
-    ) hook ("/tmp/test", format = OMROutputFormat())
-  }
-
-  "Replication" should "accept omr format" in {
-    val l = Val[Long]
-
-    Replication(
-      EmptyTask(),
-      seed = l,
-      sample = 10
-    ) hook("/tmp/test", format = OMROutputFormat())
-  }
-
 }

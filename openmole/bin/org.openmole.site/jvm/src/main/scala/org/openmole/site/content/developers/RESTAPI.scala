@@ -217,7 +217,7 @@ Replication(
   seed = mySeed,
   sample = 100,
   aggregation = Seq(pi evaluate average as piAvg, pi evaluate median as piMed)
-) hook display hook (workDirectory / "result.omr", format = OMROutputFormat())
+) hook display hook (workDirectory / "result.omr")
 
 [reuillon:/tmp/pi] $$ tar -cvzf pi.tgz *
 """)}
