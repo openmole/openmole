@@ -265,24 +265,22 @@ object tools {
   def colMD(nb: Int): String = s"col-md-$nb"
 
 
-  implicit class HtmlHelper(val sc: StringContext) extends AnyVal {
-    def html(args: Any*): Frag = {
-      def anyToFrag(a: Any): Frag = {
-        a match {
+  implicit class HtmlHelper(val sc: StringContext) extends AnyVal:
+    def html(args: Any*): Frag =
+      def anyToFrag(a: Any): Frag =
+        a match
           case s: String => (s.stripMargin: Frag)
           case f: Frag => f
           case a => throw new InternalProcessingError(s"Cannot convert $a of type ${a.getClass} into html frag")
-        }
-      }
 
       val strings = sc.parts.iterator
       val expressions = args.iterator
       val buf = ListBuffer[Frag](anyToFrag(strings.next()))
-      while (strings.hasNext) {
+      while strings.hasNext
+      do
         buf.append(anyToFrag(expressions.next()))
         buf.append(anyToFrag(strings.next()))
-      }
+
       buf.toSeq
-    }
-  }
+
 }

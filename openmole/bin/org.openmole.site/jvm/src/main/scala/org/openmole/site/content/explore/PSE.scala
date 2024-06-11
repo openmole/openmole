@@ -82,16 +82,13 @@ ${ul(
 ${h3{"Hook"}}
 
 The outputs of PSE must be captured with a hook.
-The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.csv\")"}} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file\")"}} to save the results in a OMR file, or ${code{"hook display"}} to display the results in the standard output.
 
 $br
 
-The hook arguments which can be specified to the ${code{"PSEEvolution"}} constructor are:
+The hook arguments for the ${code{"PSEEvolution"}} are:
+${Evolution.hookOptions}
 
-${ul(
-  li(html"${code{"output"}} the directory in which to store the population files,"),
-  li{html"${code{"frequency"}} ($optional, Long) the frequency at which the generations should be saved."}
-)}
 For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
 
 
