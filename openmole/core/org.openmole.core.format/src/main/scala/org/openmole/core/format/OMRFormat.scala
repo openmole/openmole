@@ -146,16 +146,6 @@ object OMRFormat:
         method = Some(methodJson)
       )
 
-    def parseExistingData(file: File): Option[(String, Seq[String])] =
-      try
-        if file.exists
-        then
-          val data = OMRFormat.omrContent(file)
-          Some((data.`execution-id`, data.`data-file`))
-        else None
-      catch
-        case e: Throwable => throw new InternalProcessingError(s"Error parsing existing method file ${file}", e)
-
     val directory = methodFile.getParentFile
 
     directory.withLockInDirectory:
@@ -163,7 +153,7 @@ object OMRFormat:
         if methodFile.exists()
         then
           val content = OMRFormat.omrContent(methodFile)
-          if option.overwrite && content.`execution-id` != executionId
+          if option.overwrite && content.`execution-id` != executionId || option.replace
           then
             OMRFormat.delete(methodFile)
             None
@@ -189,7 +179,7 @@ object OMRFormat:
 
       val fileName =
         def executionPrefix = executionId.filter(_ != '-')
-        if !option.append && !option.replace
+        if !option.append
         then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
         else
           existingData.headOption match
