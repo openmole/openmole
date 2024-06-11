@@ -19,7 +19,7 @@ object PlotContent:
 
   case class Section(name: String)
 
-  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, metadata: HtmlElement, metadataHistory: HtmlElement)
+  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, metadata: HtmlElement)
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
