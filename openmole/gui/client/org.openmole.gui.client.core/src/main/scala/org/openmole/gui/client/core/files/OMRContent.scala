@@ -17,8 +17,27 @@ object OMRContent:
       PlotContentSection(s.name.getOrElse("section"), rawContent, rowData, "initialHash")
     val scriptText =
       guiOMRContent.script match
-        case Some(gos: GUIOMRScript)=> s"""${gos.`import`.map(_.content + "\n")} \n\n ${gos.content}"""
+        case Some(gos: GUIOMRScript)=>
+          if gos.`import`.isEmpty
+          then gos.content
+          else
+            def importedScript(imp: GUIOMRImport) =
+              s"""Imported file ${imp.`import`}:
+                 |${imp.content}
+                 |${"-"* 20}""".stripMargin
+
+            def imported = gos.`import`.map(importedScript).mkString("\n\n")
+
+            def script =
+              s"""Script:
+                 |${gos.content}""".stripMargin
+
+            s"""$imported
+               |
+               |$script
+               |""".stripMargin
         case _=> "Script not available"
+
     PlotContent.buildTab(
       safePath,
       FileContentType.OpenMOLEResult,

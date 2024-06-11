@@ -141,12 +141,8 @@ The generic way to use it is to write either ${code{"hook(workDirectory / \"path
 
 $br
 
-The hook arguments which can be specified to the ${code{"NSGA2Evolution"}} constructor are:
-
-${ul(
-  li{html"${code{"output"}}: the directory in which to store the population files,"},
-  li{html"${code{"frequency"}}: $optional, Long, the frequency at which the generations should be saved."}
-)}
+The hook arguments fore the ${code{"NSGA2Evolution"}} are:
+${Evolution.hookOptions}
 
 For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
 

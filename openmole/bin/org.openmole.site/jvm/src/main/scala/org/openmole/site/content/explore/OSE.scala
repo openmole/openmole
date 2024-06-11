@@ -25,7 +25,10 @@ ${h2{"OSE description"}}
 
 The Origin Space Exploration (OSE) method is used to ${b{"explore the multiples antecedents of a pattern"}}. Input parameter values which produce a given pattern are selected. OSE optimize the fitness and when it founds solutions that are good enough it keep them and blacklist the part of the inputs space containing these solution. The optimization process keep going in order to find multiple solution producing the pattern.
 
-${h3{"Exemple"}}
+The hook arguments for the ${code{"OSEEvolution"}} are:
+${Evolution.hookOptions}
+
+${h3{"Example"}}
 
 Here is a use example of the OSE method in an OpenMOLE script:
 
