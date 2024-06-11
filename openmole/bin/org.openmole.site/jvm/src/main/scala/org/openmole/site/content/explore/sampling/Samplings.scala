@@ -106,13 +106,11 @@ The generic way to use it is to write either @code{hook(workDirectory / "path/of
 
 @br@br
 
-There are some arguments specific to the ${code{"DirectSampling"}} task which can be added to the hook:
+There are some arguments specific to the ${code{"DirectSampling"}} method which can be added to the hook:
 
 ${ul(
   li{html"${code{"output"}} is to choose what to do with the results as shown above, either a file path or the word @code{display},"},
-  li{html"${code{"values = Seq(i, j)"}} specifies which variables from the data flow should be saved or displayed, by default all variables from the dataflow are used,"},
-  li{html"${code{"header = \"Col1, Col2, ColZ\""}} customises the header of the CSV file to be created with the string it receives as a parameter, please note that this only happens if the file doesn't exist when the hook is executed,"},
-  li{html"${code{"arrayOnRow = true"}} forces the flattening of input lists such that all list variables are written to a single row/line of the CSV file, it defaults to ${code{"false"}}."}
+  li{html"${code{"values = Seq(i, j)"}} specifies which variables from the data flow should be saved or displayed, by default all variables from the dataflow are used,"}
 )}
 Here is a use example:
 
@@ -130,8 +128,8 @@ val exploration =
       (j in (0.0 to 5.0 by 0.5))
   ) hook(
     output = display,
-    values = Seq(i),
-    format = CSVOutputFormat(arrayOnRow = true))
+    values = Seq(i)
+  )
 """, header = "val myModel = EmptyTask()", name = "hook direct sampling")}
 
 $br
