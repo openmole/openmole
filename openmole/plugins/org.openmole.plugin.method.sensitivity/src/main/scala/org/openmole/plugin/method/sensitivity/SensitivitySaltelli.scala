@@ -225,7 +225,7 @@ object SensitivitySaltelli {
             "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
-        OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
+        OMROutputFormat.writeFile(executionContext, output, sections, MetaData(method)).from(context)
 
         context
 

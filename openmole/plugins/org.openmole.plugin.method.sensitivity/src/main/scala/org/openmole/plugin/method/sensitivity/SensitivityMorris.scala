@@ -63,7 +63,7 @@ object SensitivityMorris {
             ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
-        OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
+        OMROutputFormat.writeFile(executionContext, output, sections, MetaData(method)).from(context)
 
         context
 

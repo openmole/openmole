@@ -58,8 +58,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       script = None,
       timeStart = 1000,
       openMOLEVersion = "test",
-      append = false,
-      overwrite = true
+      option = OMROption()
     )
 
     OMRFormat.variables(file).head._2 should equal(vs)
@@ -84,8 +83,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       script = None,
       timeStart = 1000,
       openMOLEVersion = "test",
-      append = false,
-      overwrite = true
+      option = OMROption()
     )
 
     OMRFormat.variables(file).head._2.head.value.asInstanceOf[File].content should equal(storedFile.content)

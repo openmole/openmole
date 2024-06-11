@@ -46,7 +46,7 @@ object SavePopulationHook:
     evolution:      EvolutionWorkflow,
     output:         WritableOutput,
     frequency:      OptionalArgument[Long] = None,
-    last:           Boolean                = false,
+    keepHistory:    Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[_]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) = Hook("SavePopulationHook") { p ⇒
@@ -54,11 +54,13 @@ object SavePopulationHook:
 
     val state = context(evolution.stateVal)
     val generation = evolution.operations.generationLens.get(state)
-    val shouldBeSaved = frequency.map(generation % _ == 0).getOrElse(true) || context(evolution.terminatedVal)
+    val shouldBeSaved =
+      frequency.map(generation % _ == 0).getOrElse(true) || 
+        context(evolution.terminatedVal)
 
     if shouldBeSaved
     then
-      def saveOption = SaveOption(frequency = frequency, last = last)
+      def saveOption = SaveOption(frequency = frequency, keepAll = keepAll, keepHistory = keepHistory)
       def evolutionData = evolution.operations.metadata(state, saveOption)
 
       val augmentedContext =
@@ -73,7 +75,9 @@ object SavePopulationHook:
           )
         )
 
-      OMROutputFormat.write(executionContext, output, content, evolutionData).from(augmentedContext)
+      def replace = !keepHistory && !frequency.isDefined
+       
+      OMROutputFormat.write(executionContext, output, content, evolutionData, OMROption(replace = replace)).from(augmentedContext)
 
     context
   } set (inputs += (evolution.populationVal, evolution.stateVal))

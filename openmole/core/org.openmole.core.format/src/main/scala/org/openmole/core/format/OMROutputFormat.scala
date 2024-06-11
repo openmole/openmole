@@ -17,7 +17,7 @@ import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 
 import java.io.{PrintStream, SequenceInputStream}
 
-case class OMROption(script: Boolean = true, overwrite: Boolean = true, append: Boolean = false)
+case class OMROption(script: Boolean = true, overwrite: Boolean = true, append: Boolean = false, replace: Boolean = false)
 
 object OMROutputFormat:
 
@@ -47,15 +47,14 @@ object OMROutputFormat:
             val sectionName = if content.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
             writeStream(ps, sectionName, section.variables)
         case WritableOutput.Store(file) ⇒
-          OMROutputFormat.write(executionContext, file.from(p.context), content, method, append = option.append, option = option).from(context)
+          OMROutputFormat.writeFile(executionContext, file.from(p.context), content, method, option = option).from(context)
 
 
-  def write[M](
+  def writeFile[M](
     executionContext: FormatExecutionContext,
     omrFile: File,
     content: OutputContent,
     method: M,
-    append: Boolean,
     option: OMROption)(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
     FromContext: p =>
       import p.*
@@ -97,8 +96,7 @@ object OMROutputFormat:
         script = script,
         timeStart = executionContext.moleLaunchTime,
         openMOLEVersion = org.openmole.core.buildinfo.version.value,
-        append = append,
-        overwrite = option.overwrite
+        option = option
       )
 
 

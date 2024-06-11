@@ -474,8 +474,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
   }
 
-  "OMRHook" should "work with NSGA" in {
-
+  "OMRHook" should "work with NSGA" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -488,8 +487,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         stochastic = Stochastic()
       )
 
-    nsga hook ("/tmp/test", format = OMROutputFormat())
-  }
+    nsga hook ("/tmp/test")
 
   "By" should "generate island" in {
     val a = Val[Double]

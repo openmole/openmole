@@ -123,13 +123,12 @@ object OMRFormat:
     script: Option[OMRContent.Script],
     timeStart: Long,
     openMOLEVersion: String,
-    append: Boolean,
-    overwrite: Boolean)(using TimeService, FileService, TmpDirectory, SerializerService) =
+    option: OMROption)(using TimeService, FileService, TmpDirectory, SerializerService) =
     def newUUID = UUID.randomUUID().toString.filter(_ != '-')
 
     def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
       def mode =
-        if append
+        if option.append
         then OMRContent.DataMode.Append
         else OMRContent.DataMode.Create
 
@@ -164,7 +163,7 @@ object OMRFormat:
         if methodFile.exists()
         then
           val content = OMRFormat.omrContent(methodFile)
-          if overwrite && content.`execution-id` != executionId
+          if option.overwrite && content.`execution-id` != executionId
           then
             OMRFormat.delete(methodFile)
             None
@@ -190,7 +189,7 @@ object OMRFormat:
 
       val fileName =
         def executionPrefix = executionId.filter(_ != '-')
-        if !append
+        if !option.append && !option.replace
         then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
         else
           existingData.headOption match
@@ -199,8 +198,8 @@ object OMRFormat:
 
       val dataFile = directory / fileName
 
-      dataFile.withPrintStream(append = append, create = true, gz = true): ps ⇒
-        if append && existingData.nonEmpty then ps.print(",\n")
+      dataFile.withPrintStream(append = option.append, create = true, gz = true): ps ⇒
+        if option.append && existingData.nonEmpty then ps.print(",\n")
         ps.print(compact(render(jsonContent)))
 
       def contentData =

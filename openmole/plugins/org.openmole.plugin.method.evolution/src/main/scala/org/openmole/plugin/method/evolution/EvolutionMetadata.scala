@@ -7,7 +7,8 @@ import io.circe.generic.auto.*
 
 case class SaveOption(
   frequency: Option[Long],
-  last:      Boolean)
+  keepAll: Boolean,
+  keepHistory: Boolean)
 
 object EvolutionMetadata:
   import io.circe.*
