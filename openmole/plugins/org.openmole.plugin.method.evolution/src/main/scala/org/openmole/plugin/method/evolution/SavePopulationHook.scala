@@ -49,7 +49,7 @@ object SavePopulationHook:
     last:           Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[_]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = Hook("SavePopulationHook") { p ⇒
+    filter:         Seq[Val[_]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) = Hook("SavePopulationHook") { p ⇒
     import p._
 
     val state = context(evolution.stateVal)

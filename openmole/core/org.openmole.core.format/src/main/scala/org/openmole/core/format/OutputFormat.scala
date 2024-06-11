@@ -22,7 +22,3 @@ object OutputFormat:
 
   case class SectionContent(name: Option[String], variables: Seq[Variable[_]], indexes: Seq[String] = Seq())
   case class OutputContent(section: SectionContent*)
-
-trait OutputFormat[T, -M]:
-  def write(executionContext: OutputFormat.FormatExecutionContext)(format: T, output: WritableOutput, content: OutputFormat.OutputContent, method: M, append: Boolean = false): FromContext[Unit]
-  def validate(format: T): Validate

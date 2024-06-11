@@ -31,16 +31,16 @@ import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
 import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
-import org.openmole.core.workflow.hook.{OMRFileHook, Hook}
+import org.openmole.core.workflow.hook.{Hook, OMRFileHook}
 import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
 import org.openmole.core.workflow.task.{EmptyTask, ExplorationTask, MoleTask, Task}
 import org.openmole.core.workflow.grouping.{ByGrouping, Grouping}
 import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil
-
 import org.openmole.core.format.*
 import org.openmole.core.format.WritableOutput.Display
+import org.openmole.core.script.ScriptSourceData
 
 object Puzzle {
 
@@ -190,7 +190,7 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
   def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty)(implicit definitionScope: DefinitionScope): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = None))
+    values: Seq[Val[_]]    = Vector.empty)(using DefinitionScope, ScriptSourceData): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = None))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
 
 

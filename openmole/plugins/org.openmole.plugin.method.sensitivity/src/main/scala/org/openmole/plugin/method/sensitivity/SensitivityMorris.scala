@@ -47,7 +47,7 @@ object SensitivityMorris {
 
   object MorrisHook:
 
-    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) =
       Hook("MorrisHook"): p ⇒
         import p._
         import WritableOutput._

@@ -37,6 +37,8 @@ object SensitivitySaltelli {
     import io.circe.*
 
     given Codec[MetaData] = Codec.AsObject.derivedConfigured
+    given MethodMetaData[MetaData] = MethodMetaData(SensitivitySaltelli.methodName)
+
 
     def apply(method: Method) =
       new MetaData(
@@ -45,8 +47,6 @@ object SensitivitySaltelli {
       )
 
   case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
-
-    given MethodMetaData[MetaData] = MethodMetaData(SensitivitySaltelli.methodName)
 
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
@@ -210,7 +210,7 @@ object SensitivitySaltelli {
 
   object SaltelliHook:
 
-    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    def apply(method: Method, output: WritableOutput)(using name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) =
       Hook("SaltelliHook"): p ⇒
         import p._
         import WritableOutput._

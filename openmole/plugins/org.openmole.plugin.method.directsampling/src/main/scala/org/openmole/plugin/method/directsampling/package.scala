@@ -98,7 +98,7 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
   def hook(
     output:      WritableOutput,
     values:      Seq[Val[_]]    = Vector.empty,
-    includeSeed: Boolean        = false): Hooked[M] =
+    includeSeed: Boolean        = false)(using scriptSourceData: ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
@@ -167,7 +167,7 @@ case class DirectSampling[S: IsSampling](
 implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
   def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty): Hooked[M] =
+    values: Seq[Val[_]]    = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), option = OMROption(append = true)))

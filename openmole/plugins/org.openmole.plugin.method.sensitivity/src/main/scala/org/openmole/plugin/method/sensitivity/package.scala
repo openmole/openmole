@@ -69,8 +69,8 @@ package object sensitivity {
    * Decorator of the Morris method to implicitely call MorrisHook in the DSL with hook.
    * @param dsl
    */
-  implicit class MorrisHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m):
-    def hook(output: WritableOutput): Hooked[M] =
+  implicit class MorrisHookDecorator[M](m: M)(using method: ExplorationMethod[M, SensitivityMorris.Method]) extends MethodHookDecorator[M, SensitivityMorris.Method](m):
+    def hook(output: WritableOutput)(using ScriptSourceData): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivityMorris.MorrisHook(dsl.method, output))
@@ -80,7 +80,7 @@ package object sensitivity {
    * @param dsl
    */
   implicit class SaltelliHookDecorator[M](m: M)(implicit method: ExplorationMethod[M, SensitivitySaltelli.Method]) extends MethodHookDecorator[M, SensitivitySaltelli.Method](m):
-    def hook(output: WritableOutput): Hooked[M] =
+    def hook(output: WritableOutput)(using ScriptSourceData): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
       Hooked(m, SensitivitySaltelli.SaltelliHook(dsl.method, output))

@@ -26,7 +26,7 @@ object OMROutputFormat:
     output: WritableOutput,
     content: OutputContent,
     method: M,
-    option: OMROption = OMROption())(using methodData: MethodMetaData[M]): FromContext[Unit] =
+    option: OMROption = OMROption())(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
     FromContext: p =>
       import p.*
       output match

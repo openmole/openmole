@@ -7,6 +7,7 @@ import org.openmole.core.setter.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.format.OutputFormat.*
 import org.openmole.core.format.*
+import org.openmole.core.script.ScriptSourceData
 
 object OMRFileHook:
 
@@ -16,7 +17,7 @@ object OMRFileHook:
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
     option: OMROption = OMROption(),
-    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, methodData: MethodMetaData[M]): FromContextHook =
+    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContextHook =
 
     Hook(name getOrElse "OMRFileHook") { parameters ⇒
       import parameters._

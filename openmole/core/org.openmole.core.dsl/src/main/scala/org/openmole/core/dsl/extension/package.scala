@@ -67,9 +67,7 @@ package object extension:
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}
   export org.openmole.core.format.OutputFormat.{OutputContent, SectionContent}
-
-  val OutputFormat = org.openmole.core.format.OutputFormat
-  type OutputFormat[T, D] = org.openmole.core.format.OutputFormat[T, D]
+  export org.openmole.core.format.OutputFormat
 
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
@@ -143,5 +141,6 @@ package object extension:
   export org.openmole.tool.collection.DoubleRange
 
   export org.openmole.core.setter.DefaultBuilder
+  export org.openmole.core.script.ScriptSourceData
 
 

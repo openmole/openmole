@@ -167,13 +167,13 @@ object EvolutionWorkflow:
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
   implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends MethodHookDecorator(dsl):
-    def hook[F](
+    def hook(
       output:         WritableOutput,
       frequency:      OptionalArgument[Long] = None,
       last:           Boolean                = false,
       keepAll:        Boolean                = false,
       includeOutputs: Boolean                = true,
-      filter:         Seq[Val[_]]            = Vector.empty): DSLContainer[EvolutionWorkflow] =
+      filter:         Seq[Val[_]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): DSLContainer[EvolutionWorkflow] =
       implicit val defScope = dsl.scope
       dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, last = last, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter))
 
