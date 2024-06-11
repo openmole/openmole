@@ -33,7 +33,8 @@ import org.scalatest._
 
 class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  import org.openmole.core.workflow.test.Stubs._
+  import org.openmole.core.workflow.test.*
+
 
   "A hook" should "intercept the execution of a task" in {
     val executed = new AtomicInteger(0)
