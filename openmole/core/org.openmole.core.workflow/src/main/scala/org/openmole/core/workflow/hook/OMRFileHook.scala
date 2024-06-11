@@ -10,13 +10,13 @@ import org.openmole.core.format.*
 
 object OMRFileHook:
 
-  def apply[M, MD](
+  def apply[M](
     output:   WritableOutput,
     metadata: M,
     values:   Seq[Val[_]]    = Vector.empty,
     exclude:  Seq[Val[_]]    = Vector.empty,
     option: OMROption = OMROption(),
-    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, methodData: MethodMetaData[M, MD]): FromContextHook =
+    name:     Option[String] = None)(implicit valName: sourcecode.Name, definitionScope: DefinitionScope, methodData: MethodMetaData[M]): FromContextHook =
 
     Hook(name getOrElse "OMRFileHook") { parameters ⇒
       import parameters._

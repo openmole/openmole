@@ -38,15 +38,14 @@ type Aggregation = AggregateTask.AggregateVal[_, _]
 object Replication:
   def methodName = MethodMetaData.name(Replication)
 
-  object Method:
-    case class ReplicationMetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
+  object MetaData:
+    given MethodMetaData[MetaData] = MethodMetaData[MetaData](methodName)
 
-    given MethodMetaData[Method, ReplicationMetaData] =
-      def data(m: Method) =
-        val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
-        ReplicationMetaData(seed = ValData(m.seed), m.sample, aggregation)
+    def apply(m: Method): MetaData =
+      val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
+      MetaData(seed = ValData(m.seed), m.sample, aggregation)
 
-      MethodMetaData[Method, ReplicationMetaData](_ ⇒ methodName, data)
+  case class MetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
 
   case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
@@ -96,28 +95,28 @@ case class Replication[T: Distribution](
 
 
 implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):
-  def hook[F](
+  def hook(
     output:      WritableOutput,
     values:      Seq[Val[_]]    = Vector.empty,
-    includeSeed: Boolean        = false)(using OutputFormat[F, Replication.Method]): Hooked[M] =
+    includeSeed: Boolean        = false): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, metadata = dsl.method, option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, metadata = Replication.MetaData(dsl.method), option = OMROption(append = true)))
 
 
 object DirectSampling:
 
   def methodName = MethodMetaData.name(DirectSampling)
 
-  object Method:
-    given MethodMetaData[Method, Metadata] =
-      def data(m: Method) =
-        val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
-        Metadata(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
-      MethodMetaData(_ ⇒ methodName, data)
+  object MetaData:
+    def apply(m: Method): MetaData =
+      val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
+      MetaData(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
 
-    case class Metadata(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData]) derives derivation.ConfiguredCodec
+    given MethodMetaData[MetaData] = MethodMetaData(methodName)
+
+  case class MetaData(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData]) derives derivation.ConfiguredCodec
 
   case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
 
@@ -166,11 +165,11 @@ case class DirectSampling[S: IsSampling](
 
 
 implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
-  def hook[F](
+  def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty)(using OutputFormat[F, DirectSampling.Method]): Hooked[M] =
+    values: Seq[Val[_]]    = Vector.empty): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, metadata = dsl.method, option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), option = OMROption(append = true)))
 
 

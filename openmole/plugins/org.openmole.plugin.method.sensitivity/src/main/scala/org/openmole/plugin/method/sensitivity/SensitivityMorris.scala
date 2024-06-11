@@ -29,20 +29,20 @@ object SensitivityMorris {
   def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
   def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
 
-  object Method:
-    import io.circe.*
+  import io.circe.*
 
-    object MetaData:
-      def apply(method: Method) =
-        new MetaData(
-          inputs = method.inputs.map(_.prototype).map(ValData.apply),
-          outputs = method.outputs.map(ValData.apply)
-        )
+  object MetaData:
+    given MethodMetaData[MetaData] = MethodMetaData(SensitivityMorris.methodName)
 
-    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
+    def apply(method: Method) =
+      new MetaData(
+        inputs = method.inputs.map(_.prototype).map(ValData.apply),
+        outputs = method.outputs.map(ValData.apply)
+      )
 
-    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivityMorris.methodName, MetaData.apply)
+  case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
 
+    
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
   object MorrisHook:
@@ -63,7 +63,7 @@ object SensitivityMorris {
             ("sigma", Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context))
           )
 
-        OMROutputFormat.write(executionContext, output, sections, method).from(context)
+        OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
 
         context
 
@@ -119,7 +119,7 @@ object SensitivityMorris {
       output:        Val[_],
       outputValues:  Array[Double],
       factorChanged: Array[String],
-      deltas:        Array[Double]): (Double, Double, Double) = {
+      deltas:        Array[Double]): (Double, Double, Double) = 
 
       // indices of results in which the input had been changed
       val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
@@ -142,7 +142,6 @@ object SensitivityMorris {
 
       (mu, muStar, sigma)
 
-    }
 
     /**
      * Takes from the user the list of subspaces to analyze,
@@ -153,7 +152,7 @@ object SensitivityMorris {
 
     def apply[T](
       modelInputs:  Seq[ScalableValue],
-      modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+      modelOutputs: Seq[Val[Double]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = 
 
       def morrisOutputs(
         modelInputs:  Seq[ScalableValue],
@@ -209,7 +208,6 @@ object SensitivityMorris {
           outputs ++= (muOutputs, muStarOutputs, sigmaOutputs)
       )
 
-    }
   }
 
   /**

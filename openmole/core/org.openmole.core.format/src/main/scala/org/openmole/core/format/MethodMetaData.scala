@@ -24,4 +24,6 @@ object MethodMetaData:
     val n = o.getClass.getSimpleName
     if n.endsWith("$") then n.dropRight(1) else n
 
-case class MethodMetaData[M, MD](name: M => String, data: M => MD)(using val encoder: Encoder[MD])
+  given MethodMetaData[None.type] = MethodMetaData("No method")
+
+case class MethodMetaData[D](name: String)(using val encoder: Encoder[D])

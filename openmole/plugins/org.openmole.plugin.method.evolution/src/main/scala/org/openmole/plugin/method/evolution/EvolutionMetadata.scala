@@ -12,7 +12,7 @@ case class SaveOption(
 object EvolutionMetadata:
   import io.circe.*
 
-  given MethodMetaData[EvolutionMetadata, EvolutionMetadata] = MethodMetaData[EvolutionMetadata, EvolutionMetadata](_ ⇒ EvolutionMetadata.method, identity)
+  given MethodMetaData[ EvolutionMetadata] = MethodMetaData(EvolutionMetadata.method)
 
   enum GenomeBoundData derives derivation.ConfiguredCodec:
     case IntBound(value: ValData, low: Int, high: Int, intervalType: GenomeBoundData.IntervalType)

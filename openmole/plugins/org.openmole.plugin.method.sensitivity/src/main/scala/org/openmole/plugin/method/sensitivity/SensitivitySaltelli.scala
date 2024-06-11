@@ -33,22 +33,20 @@ object SensitivitySaltelli {
   def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
 
 
-  object Method:
-    object MetaData:
+  object MetaData:
+    import io.circe.*
 
-      import io.circe.*
+    given Codec[MetaData] = Codec.AsObject.derivedConfigured
 
-      given Codec[MetaData] = Codec.AsObject.derivedConfigured
+    def apply(method: Method) =
+      new MetaData(
+        inputs = method.inputs.map(_.prototype).map(ValData.apply),
+        outputs = method.outputs.map(ValData.apply)
+      )
 
-      def apply(method: Method) =
-        new MetaData(
-          inputs = method.inputs.map(_.prototype).map(ValData.apply),
-          outputs = method.outputs.map(ValData.apply)
-        )
+  case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
 
-    case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
-
-    given MethodMetaData[Method, MetaData] = MethodMetaData(_ => SensitivitySaltelli.methodName, MetaData.apply)
+    given MethodMetaData[MetaData] = MethodMetaData(SensitivitySaltelli.methodName)
 
   case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
 
@@ -227,7 +225,7 @@ object SensitivitySaltelli {
             "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
           )
 
-        OMROutputFormat.write(executionContext, output, sections, method).from(context)
+        OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
 
         context
 

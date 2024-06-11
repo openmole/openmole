@@ -21,12 +21,12 @@ case class OMROption(script: Boolean = true, overwrite: Boolean = true, append: 
 
 object OMROutputFormat:
 
-  def write[M, MD](
+  def write[M](
     executionContext: FormatExecutionContext,
     output: WritableOutput,
     content: OutputContent,
     method: M,
-    option: OMROption = OMROption())(using methodData: MethodMetaData[M, MD]): FromContext[Unit] =
+    option: OMROption = OMROption())(using methodData: MethodMetaData[M]): FromContext[Unit] =
     FromContext: p =>
       import p.*
       output match
@@ -50,13 +50,13 @@ object OMROutputFormat:
           OMROutputFormat.write(executionContext, file.from(p.context), content, method, append = option.append, option = option).from(context)
 
 
-  def write[M, MD](
+  def write[M](
     executionContext: FormatExecutionContext,
     omrFile: File,
     content: OutputContent,
     method: M,
     append: Boolean,
-    option: OMROption)(using methodData: MethodMetaData[M, MD], scriptData: ScriptSourceData): FromContext[Unit] =
+    option: OMROption)(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
     FromContext: p =>
       import p.*
       import org.json4s.*
@@ -64,7 +64,7 @@ object OMROutputFormat:
       import executionContext.tmpDirectory
       import executionContext.timeService
 
-      given Encoder[MD] = methodData.encoder
+      given Encoder[M] = methodData.encoder
 
       def executionId = executionContext.moleExecutionId
 
@@ -74,7 +74,7 @@ object OMROutputFormat:
           case f => f.getParentFile / s"${f.getName}.omr"
 
       def methodJson =
-        methodData.data(method).asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name(method))))
+        method.asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name)))
 
       def script =
         scriptData match

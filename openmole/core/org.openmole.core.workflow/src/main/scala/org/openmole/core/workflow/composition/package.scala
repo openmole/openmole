@@ -183,8 +183,6 @@ class Puzzle(
   def inputs = first.inputs(Puzzle.toMole(this), sources, hooks).toSeq
   def defaults = Task.defaults(first.task(Puzzle.toMole(this), sources, hooks))
 
-object SingleTaskMethod:
-  given MethodMetaData[SingleTaskMethod, None.type] = MethodMetaData(_ => "", _ => None)
 
 case class SingleTaskMethod()
 
@@ -192,7 +190,7 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
   def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty)(implicit definitionScope: DefinitionScope): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = SingleTaskMethod()))
+    values: Seq[Val[_]]    = Vector.empty)(implicit definitionScope: DefinitionScope): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = None))
   def source(sources: Source*) = copy(sources = this.sources ++ sources)
 
 
@@ -203,10 +201,10 @@ object TransitionOrigin:
       case TransitionDSLOrigin(o) ⇒ DSL.tasks(o)
 
   def dsl(o: TransitionOrigin) =
-    o match 
+    o match
       case TransitionDSLOrigin(d) ⇒ Some(d)
       case _                      ⇒ None
-    
+
 
 
 sealed trait TransitionOrigin:
