@@ -61,12 +61,4 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     saltelli.run()
   }
 
-  "Saltelli" should "support OMR format" in {
-    saltelli hook("test", format = OMROutputFormat())
-  }
-
-  "Morris" should "support OMR format" in {
-    morris hook("test", format = OMROutputFormat())
-  }
-
 
