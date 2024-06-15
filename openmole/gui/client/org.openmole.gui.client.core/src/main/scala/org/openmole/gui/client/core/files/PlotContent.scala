@@ -23,7 +23,7 @@ object PlotContent:
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-  case class OMRMetadata(script: String, openmoleVersion: String, timeStart: Long)
+  case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long)
 
   def buildTab(
     safePath: SafePath,
@@ -65,15 +65,12 @@ object PlotContent:
         val metadata =
           omrMetadata match
             case Some(md) =>
-              val scriptDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px")
-              scriptDiv.ref.innerHTML = md.script
-
               div(
                 cls := "metadata",
                 div(display.flex, flexDirection.row, span("OpenMOLE Version:", nbsp, fontWeight.bold), md.openmoleVersion),
                 div(display.flex, flexDirection.row, marginTop := "10", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
                 div("Script: ", fontWeight.bold, marginTop := "10", marginBottom := "10"),
-                scriptDiv
+                div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px", md.script)
                 //textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
               )
             case _=> div("Unavailable metadata")

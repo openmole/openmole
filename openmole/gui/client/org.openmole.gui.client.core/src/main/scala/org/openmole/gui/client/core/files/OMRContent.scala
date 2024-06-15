@@ -3,6 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.DomApi
 import org.openmole.gui.client.core.files.PlotContent.{OMRMetadata, PlotContentSection}
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
@@ -39,7 +40,9 @@ object OMRContent:
 
         case _=> "<i>Script not available</i>"
 
-    def replaceWithHTML(s: String) = s.replace(" ", "&nbsp;").replace("\n", "<br/>")
+    def replaceWithHTML(s: String): HtmlElement =
+      val html = s"<div>${s.replace(" ", "&nbsp;").replace("\n", "<br/>")}</div>"
+      foreignHtmlElement(DomApi.unsafeParseHtmlString(html))
 
     PlotContent.buildTab(
       safePath,
