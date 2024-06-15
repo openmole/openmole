@@ -163,8 +163,7 @@ NSGA2Evolution(
 
 ${h2{"Outputs of NSGA2Evolution"}}
 
-As an output, the method produces a population file for each generation, in the directory provided to the hook, named with the generation number as ${code{"populationN.csv"}}.
-Each csv file contains a column with the generation number, the values of parameters, the median value of the objectives at each point, and in the variable ${code{"evolution$samples"}}, the number of runs of the model used for the evaluation (in the case of stochastic models).
+As an output, the method produces a result file updated at each generation. This file contains the generation number, the values of parameters and the value or the median value of the objectives at each point. When optimizing a stochastic model, it also contain the variable ${code{"evolution$samples"}}, the number of runs of the model used for the evaluation.
 
 
 

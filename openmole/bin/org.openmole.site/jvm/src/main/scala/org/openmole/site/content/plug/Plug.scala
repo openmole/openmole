@@ -106,13 +106,13 @@ ${hl.openmole("""
     )
 
     // Execute the workflow
-    myExploration hook (workDirectory / "results.csv")
+    myExploration hook (workDirectory / "results")
 """)}
 
 $br
 
 In this script, ${code{"myTask"}} will be executed for each value of ${code{"i"}} from 0 to 1,000 with a step of 5.
-Each result ${code{"j"}} is written in the ${i{"results.csv"}} file through a ${aa("hook", href := DocumentationPages.hook.file)}.
+Each result ${code("j")} is written in the ${i("results.omr")} file through a ${aa("hook", href := DocumentationPages.hook.file)}.
 
 $br$br
 
