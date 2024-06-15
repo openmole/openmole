@@ -22,25 +22,28 @@ object OMRContent:
           then gos.content
           else
             def importedScript(imp: GUIOMRImport) =
-              s"""Imported file ${imp.`import`}:
-                 |${imp.content}
-                 |${"-"* 20}""".stripMargin
+              s"""<i><b>Imported file ${imp.`import`}:</b></i>
+                 |${imp.content}""".stripMargin
 
             def imported = gos.`import`.map(importedScript).mkString("\n\n")
 
             def script =
-              s"""Script:
+              s"""<i><b>Script:</b></i>
                  |${gos.content}""".stripMargin
 
             s"""$imported
                |
                |$script
                |""".stripMargin
-        case _=> "Script not available"
+
+
+        case _=> "<i>Script not available</i>"
+
+    def replaceWithHTML(s: String) = s.replace(" ", "&nbsp;").replace("\n", "<br/>")
 
     PlotContent.buildTab(
       safePath,
       FileContentType.OpenMOLEResult,
       pcSections,
-      Some(OMRMetadata(scriptText, guiOMRContent.openMoleVersion, guiOMRContent.timeStart))
+      Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart))
     )
