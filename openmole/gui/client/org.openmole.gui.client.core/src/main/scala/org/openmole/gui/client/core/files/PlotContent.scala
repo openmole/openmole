@@ -101,11 +101,11 @@ object PlotContent:
         case Plot => rawTablePlot.plot
         case Metadata=> rawTablePlot.metadata
 
-    val rawState = ToggleState(ResultView, "Raw", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
+    val rawState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
     val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
     val plotState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
-    val metadataState = ToggleState(ResultView, "Metadata", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
-    val switchButton = exclusiveRadio(Seq(rawState, tableState, plotState, metadataState), btn_secondary_string, 1)
+    val metadataState = ToggleState(ResultView, "Info", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
+    val switchButton = exclusiveRadio(Seq(tableState, plotState, rawState, metadataState), btn_secondary_string, 0)
 
     val sectionStates: Seq[ToggleState[Section]] =
       sectionMap.keys.map(name =>
