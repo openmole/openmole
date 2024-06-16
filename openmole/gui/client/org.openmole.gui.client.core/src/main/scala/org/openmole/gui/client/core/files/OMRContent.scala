@@ -48,5 +48,5 @@ object OMRContent:
       safePath,
       FileContentType.OpenMOLEResult,
       pcSections,
-      Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart))
+      Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined))
     )

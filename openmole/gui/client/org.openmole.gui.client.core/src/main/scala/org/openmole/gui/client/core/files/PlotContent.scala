@@ -23,7 +23,7 @@ object PlotContent:
 
   case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
 
-  case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long)
+  case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
 
   def buildTab(
     safePath: SafePath,
@@ -70,7 +70,14 @@ object PlotContent:
                 div(display.flex, flexDirection.row, span("OpenMOLE Version:", nbsp, fontWeight.bold), md.openmoleVersion),
                 div(display.flex, flexDirection.row, marginTop := "10", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
                 div("Script: ", fontWeight.bold, marginTop := "10", marginBottom := "10"),
-                div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px", md.script)
+                div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px", md.script),
+                if md.history
+                then div(
+                  fileActions, backgroundColor := "white", width := "800px",
+                  a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "JSON History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.JSON, true)),
+                  a(div(fileActionItems, marginLeft := "20px", FileToolBox.glyphItemize(glyph_download), "CSV History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.CSV, true))
+                )
+                else div()
                 //textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
               )
             case _=> div("Unavailable metadata")
@@ -101,7 +108,7 @@ object PlotContent:
     val rawState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
     val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
     val plotState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
-    val metadataState = ToggleState(ResultView, "Info", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
+    val metadataState = ToggleState(ResultView, "More", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
     val switchButton = exclusiveRadio(Seq(tableState, plotState, rawState, metadataState), btn_secondary_string, 0)
 
     val sectionStates: Seq[ToggleState[Section]] =

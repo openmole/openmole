@@ -297,11 +297,10 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
             apiImpl.unplug(HTTP.recieveDestination(file, destination))
             HTTP.recieveFile(file, destination)
 
-        req.decode[Multipart[IO]] { parts =>
+        req.decode[Multipart[IO]]: parts =>
           def getFileParts = parts.parts.filter(_.filename.isDefined)
           move(getFileParts, HTTP.multipartStringContent(parts, "fileType").get.split(',').toSeq)
           Ok()
-        }
 
       case req @ GET -> Root / org.openmole.gui.shared.api.`downloadFileRoute` =>
         import apiImpl.services.*
@@ -328,7 +327,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
         val format = req.params.getOrElse(org.openmole.gui.shared.api.formatParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.formatParam} is required"))
-        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format))
+        val history = req.params.get(org.openmole.gui.shared.api.historyParam).map(_.toBoolean).getOrElse(false)
+
+        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format), history)
 
 
 

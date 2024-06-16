@@ -12,10 +12,15 @@ import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 
-class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState, isDirectory: Boolean):
-
+object FileToolBox:
   def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
+
+  def glyphItemize(icon: HESetter) = icon.appended(cls := "glyphitem popover-item")
+
+
+class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState, isDirectory: Boolean):
+  import FileToolBox.{iconAction, glyphItemize}
 
   def closeToolBox(using panels: Panels) = panels.treeNodePanel.currentLine.set(-1)
 
@@ -144,7 +149,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     panels.treeNodePanel.currentSafePath.now().foreach: sp ⇒
       action(sp)
 
-  def glyphItemize(icon: HESetter) = icon.appended(cls := "glyphitem popover-item")
 
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)

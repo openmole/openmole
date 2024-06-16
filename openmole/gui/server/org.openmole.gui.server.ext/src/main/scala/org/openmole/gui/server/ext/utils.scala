@@ -303,26 +303,51 @@ object utils:
         org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
       )
 
-    def convertOMR(req: Request[IO], omrFile: File, format: GUIOMRContent.ExportFormat)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
-      val fileBaseName = omrFile.baseName
-      val (exportFile, exportName) =
-        format match
-          case GUIOMRContent.ExportFormat.JSON =>
-            val f = tmpDirectory.newFile(fileBaseName, ".json")
-            org.openmole.core.format.OMRFormat.writeJSON(omrFile, f)
-            (f, s"$fileBaseName.json")
-          case GUIOMRContent.ExportFormat.CSV =>
-            val f = tmpDirectory.newFile(fileBaseName, ".csv")
-            org.openmole.core.format.OMRFormat.writeCSV(omrFile, f)
-            (f, s"$fileBaseName.csv")
+    def convertOMRHistory(omrFile: File, format: GUIOMRContent.ExportFormat)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
+      import org.openmole.tool.archive.*
+      import org.openmole.tool.stream.*
 
-      def deleteExportFile = IO[Unit]:
-        exportFile.delete()
+      val history = org.openmole.core.format.OMRFormat.dataFiles(omrFile)
 
-      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(exportFile.toPath), Some(req))
-        .map { req => req.withBodyStream(req.body.onFinalize(deleteExportFile)) }
-        .getOrElseF(Status.NotFound.apply())
-        .map { r => HTTP.setFileHeaders(exportFile, r, Some(exportName)) }
+      HTTP.sendFileStream(s"${omrFile.baseName}.tgz"): out =>
+        val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
+        try
+          history.zipWithIndex.foreach: (h, i) =>
+            val f = tmpDirectory.newFile(s"history$i")
+            try
+              format match
+                case GUIOMRContent.ExportFormat.JSON =>
+                  org.openmole.core.format.OMRFormat.writeJSON(omrFile, f, dataFile = Some(h))
+                  tos.addFile(f, s"$i.json")
+                case GUIOMRContent.ExportFormat.CSV =>
+                  org.openmole.core.format.OMRFormat.writeCSV(omrFile, f, dataFile = Some(h))
+                  tos.addFile(f, s"$i.csv")
+            finally f.delete()
+        finally tos.close()
+
+    def convertOMR(req: Request[IO], omrFile: File, format: GUIOMRContent.ExportFormat, history: Boolean)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
+      if !history
+      then
+        val fileBaseName = omrFile.baseName
+        val (exportFile, exportName) =
+          format match
+            case GUIOMRContent.ExportFormat.JSON =>
+              val f = tmpDirectory.newFile(fileBaseName, ".json")
+              org.openmole.core.format.OMRFormat.writeJSON(omrFile, f)
+              (f, s"$fileBaseName.json")
+            case GUIOMRContent.ExportFormat.CSV =>
+              val f = tmpDirectory.newFile(fileBaseName, ".csv")
+              org.openmole.core.format.OMRFormat.writeCSV(omrFile, f)
+              (f, s"$fileBaseName.csv")
+
+        def deleteExportFile = IO[Unit]:
+          exportFile.delete()
+
+        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(exportFile.toPath), Some(req))
+          .map { req => req.withBodyStream(req.body.onFinalize(deleteExportFile)) }
+          .getOrElseF(Status.NotFound.apply())
+          .map { r => HTTP.setFileHeaders(exportFile, r, Some(exportName)) }
+      else convertOMRHistory(omrFile, format)
 
     def stackError(t: Throwable) =
       import org.openmole.core.tools.io.Prettifier.*
