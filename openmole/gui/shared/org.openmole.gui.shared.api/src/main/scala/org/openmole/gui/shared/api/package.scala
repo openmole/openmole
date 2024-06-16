@@ -18,6 +18,7 @@ package org.openmole.gui.shared.api
  */
 
 import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.GUIOMRContent.ExportFormat
 
 val connectionRoute = "connection"
 val shutdownRoute = "shutdown"
@@ -29,11 +30,11 @@ val downloadFileRoute = "downloadFile"
 val uploadFilesRoute = "uploadFiles"
 val resetPasswordRoute = "resetPassword"
 
-val convertOMRToCSVRoute = "file/omr/csv"
-val convertOMRToJSONRoute = "file/omr/json"
+val convertOMRRoute = "file/omr/csv"
 
 val fileTypeParam = "fileType"
 val pathParam = "path"
+val formatParam = "format"
 
 object Download:
   val hashParam = "hash"
@@ -85,11 +86,9 @@ def downloadFile(sp: SafePath, hash: Boolean = false, name: Option[String] = Non
   val params = safePathToURLParams(sp) ++ includeTopDirectoryInArchive.map(d => s"$topDirectoryParam=$d") ++ name.map(n => s"$fileNameParam=$n") ++ Seq(s"$hashParam=$hash")
   s"$downloadFileRoute?${params.mkString("&")}"
 
-def convertOMRToCSV(sp: SafePath) =
-  s"$convertOMRToCSVRoute?${safePathToURLParams(sp).mkString("&")}"
-
-def convertOMRToJSON(sp: SafePath) =
-  s"$convertOMRToJSONRoute?${safePathToURLParams(sp).mkString("&")}"
+def convertOMR(sp: SafePath, format: GUIOMRContent.ExportFormat) =
+  def params = safePathToURLParams(sp) ++ Seq(s"$formatParam=${GUIOMRContent.ExportFormat.toString(format)}")
+  s"$convertOMRRoute?${params.mkString("&")}"
 
 trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
    export io.circe.generic.auto.*

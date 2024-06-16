@@ -324,14 +324,11 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
         r.map { r => addHashHeader(r, safePathToFile(safePath)) }
 
-      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
+      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        HTTP.omrToCSV(req, omrFile)
-      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
-        import apiImpl.services.*
-        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        HTTP.omrToJSON(req, omrFile)
+        val format = req.params.getOrElse(org.openmole.gui.shared.api.formatParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.formatParam} is required"))
+        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format))
 
 
 

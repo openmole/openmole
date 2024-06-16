@@ -31,7 +31,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       closeToolBox
       org.scalajs.dom.window.open(
-        url = convertOMRToCSV(sp),
+        url = convertOMR(sp, GUIOMRContent.ExportFormat.CSV),
         target = "_blank"
       )
 
@@ -39,7 +39,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       closeToolBox
       org.scalajs.dom.window.open(
-        url = convertOMRToJSON(sp),
+        url = convertOMR(sp, GUIOMRContent.ExportFormat.JSON),
         target = "_blank"
       )
 
