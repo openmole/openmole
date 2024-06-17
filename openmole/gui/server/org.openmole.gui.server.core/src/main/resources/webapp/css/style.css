@@ -664,7 +664,7 @@ padding-bottom: 90px;
 .file-confirmation,
 .file-actions,
 .close-button,
-.plugin-file {
+.specific-file {
     display: flex;
     align-items : center;
     justify-content: center;
@@ -859,21 +859,37 @@ padding-bottom: 90px;
     padding: 10 10 10 20;
   }
 
-.plugin-file {
-    border-radius: 20px;
+.specific-file {
+    font-size: 15px;
+    border-radius: 4px;
     height: 20px;
     font-weight: bold;
  }
 
-.plugin-file.plugged {
+.specific-file.plugged {
      background: #fc0;
      color: #444;
   }
 
-.plugin-file.unplugged {
+.specific-file.unplugged {
        background: lightgray;
        color: #444;
  }
+
+.specific-file.unplugged {
+       background: lightgray;
+       color: #444;
+ }
+
+.specific-file.oms {
+        background: #a4bd26;
+        color: white;
+}
+
+.specific-file.omr {
+    color: white;
+    background: #d35f5f;
+}
 
  .findFile{
   fontStyle:italic;
