@@ -24,6 +24,6 @@ object Evolution:
   val hookOptions: Frag = ul(
     li{html"${code{"output"}}: the file in which to store the result,"},
     li{html"${code{"keepHistory"}}: $optional, Boolean, keep the history of the results for future analysis,"},
-    li{html"${code{"frequency"}}: $optional, Long, the frequency in generations where the result should be saved in the history, it is generally set to avoid using too much disk space,"},
+    li{html"${code{"frequency"}}: $optional, Long, the frequency in generations where the result should be saved, it is generally set to avoid using too much disk space,"},
     li{html"${code{"keepAll"}}: $optional, Boolean, save all the individuals of the population not only the optimal ones."},
   )

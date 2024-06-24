@@ -70,7 +70,7 @@ ${ul(
 For Double sequence samplings, a convenient primitive provides logarithmic ranges the following way: ${code{"input_j in LogRangeDomain(min,max,number_of_steps)"}} where the third argument is the number of steps in the range. The syntax can be simplified with the ${code{"logSteps"}} keyword like this:  ${code("input_j in (Range(1e-2,0.1) logSteps 4")}.
 
 The ${code{"hook"}} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.csv\")"}} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file\")"}} to save the results in a file, or ${code{"hook display"}} to display the results in the standard output.
 See ${aa("this page", href := DocumentationPages.samplings.file + "#Hook")} for more details about this hook.
 
 
@@ -150,7 +150,7 @@ DirectSampling(
 $br
 
 The ${code{"hook"}} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file.csv\")"}} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file\")"}} to save the results in a file, or ${code{"hook display"}} to display the results in the standard output.
 See ${aa("this page", href := DocumentationPages.samplings.file + "#Hook")} for more details about this hook.
 
 """)

@@ -90,7 +90,7 @@ val model =
 DirectSampling(
   evaluation = model,
   sampling = size in (0 to 10 by 2)
-) hook (workDirectory / "results2.csv")
+) hook (workDirectory / "results2")
 """)}
 
 """)

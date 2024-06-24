@@ -75,7 +75,7 @@ object SavePopulationHook:
           )
         )
 
-      def replace = !keepHistory && !frequency.isDefined
+      def replace = !keepHistory
        
       OMROutputFormat.write(executionContext, output, content, evolutionData, OMROption(replace = replace)).from(augmentedContext)
 

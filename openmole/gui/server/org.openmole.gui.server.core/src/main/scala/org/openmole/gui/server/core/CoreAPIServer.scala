@@ -297,11 +297,10 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
             apiImpl.unplug(HTTP.recieveDestination(file, destination))
             HTTP.recieveFile(file, destination)
 
-        req.decode[Multipart[IO]] { parts =>
+        req.decode[Multipart[IO]]: parts =>
           def getFileParts = parts.parts.filter(_.filename.isDefined)
           move(getFileParts, HTTP.multipartStringContent(parts, "fileType").get.split(',').toSeq)
           Ok()
-        }
 
       case req @ GET -> Root / org.openmole.gui.shared.api.`downloadFileRoute` =>
         import apiImpl.services.*
@@ -324,14 +323,13 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
         r.map { r => addHashHeader(r, safePathToFile(safePath)) }
 
-      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToCSVRoute}" =>
+      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRRoute}" =>
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        HTTP.omrToCSV(req, omrFile)
-      case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRToJSONRoute}" =>
-        import apiImpl.services.*
-        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
-        HTTP.omrToJSON(req, omrFile)
+        val format = req.params.getOrElse(org.openmole.gui.shared.api.formatParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.formatParam} is required"))
+        val history = req.params.get(org.openmole.gui.shared.api.historyParam).map(_.toBoolean).getOrElse(false)
+
+        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format), history)
 
 
 

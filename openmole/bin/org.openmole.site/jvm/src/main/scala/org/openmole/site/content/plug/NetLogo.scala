@@ -215,9 +215,9 @@ $netlogo
 DirectSampling(
   evaluation = fireTask,
   sampling = sampling
-) hook (workDirectory / "result.csv")""", name = "netlogo full workflow")}
+) hook (workDirectory / "result")""", name = "netlogo full workflow")}
 
-At the end of the execution, you will find the output values in a file called ${i{"result.csv"}}.
+At the end of the execution, you will find the output values in a file called ${i{"result.omr"}}.
 
 ${h2{"Import wizard"}}
 

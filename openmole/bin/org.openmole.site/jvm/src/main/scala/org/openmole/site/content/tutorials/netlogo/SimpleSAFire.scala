@@ -127,7 +127,7 @@ A slight modification of the model code would do the trick, hint: @code{any? pat
 
 $br
 
-For completeness sake, here is the R code snippet to produce plots from your results file (RStudio version 1.0.153, ggplot2 version 2.2.1).
+For completeness sake, here is the R code snippet to produce plots from a CSV export of your results file (RStudio version 1.0.153, ggplot2 version 2.2.1).
 The result files correspond to the experiments above in the same order.
 
 ${hl("""

@@ -188,7 +188,7 @@ class RESTAPI(services: Services):
         getExecution(ExecutionId(id)): ex ⇒
           val file = ex.jobDirectory.workDirectory / path
           checkIsOMR(file):
-            HTTP.omrToCSV(req, file)
+            HTTP.convertOMR(req, file, org.openmole.gui.shared.data.GUIOMRContent.ExportFormat.CSV, history = false)
       case req@ GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "omrToJSON" =>
         import services.*
         val id = rest.segments(0).decoded()
@@ -197,7 +197,7 @@ class RESTAPI(services: Services):
         getExecution(ExecutionId(id)): ex ⇒
           val file = ex.jobDirectory.workDirectory / path
           checkIsOMR(file):
-            HTTP.omrToJSON(req, file)
+            HTTP.convertOMR(req, file, org.openmole.gui.shared.data.GUIOMRContent.ExportFormat.JSON, history = false)
       case req@GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "omrFiles" =>
         import services.*
         val id = rest.segments(0).decoded()

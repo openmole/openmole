@@ -108,12 +108,11 @@ object utils:
         case null => computedParents
         case parent =>
           def sameFile =
-            canonicalUntil.map {
-              c =>
-                if c.exists() && parent.exists()
-                then java.nio.file.Files.isSameFile(parent.toPath, c.toPath)
-                else parent.getPath == c.getPath
-            }.getOrElse(false)
+            canonicalUntil.map: c =>
+              if c.exists() && parent.exists()
+              then java.nio.file.Files.isSameFile(parent.toPath, c.toPath)
+              else parent.getPath == c.getPath
+            .getOrElse(false)
 
           if sameFile
           then computedParents
@@ -199,37 +198,35 @@ object utils:
   val webpackJsonPackage = "package.json"
   val nodeModulesFileName = "node_modules.zip"
 
-  def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) = {
+  def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) =
     import org.openmole.core.fileservice._
 
     def hash(f: File) = hashFile.getOrElse(new File(f.toString + "-hash"))
-    lockFile(file).withLock { _ ⇒
+    lockFile(file).withLock: _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
       val upToDate =
         if (!file.exists || !hashFile.exists) false
         else
-          Try(hashFile.content) match {
+          Try(hashFile.content) match
             case Success(v) ⇒ currentHash == v
-            case Failure(_) ⇒ hashFile.delete; false
-          }
+            case Failure(_) ⇒
+              hashFile.delete
+              false
 
-      if (!upToDate) {
+      if !upToDate
+      then
         update(file)
         hashFile.content = currentHash
-      }
-    }
-  }
 
 
-  def catchAll[T](f: ⇒ T): Try[T] = {
+
+  def catchAll[T](f: ⇒ T): Try[T] =
     val res =
       try Success(f)
-      catch {
+      catch
         case t: Throwable ⇒ Failure(t)
-      }
     res
-  }
 
   def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.persistentDir / "keys"
 
@@ -306,35 +303,51 @@ object utils:
         org.http4s.headers.`Content-Disposition`("attachment", Map(ci"filename" -> name.getOrElse(f.getName)))
       )
 
-    def omrToCSV(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
-      val fileBaseName = omrFile.baseName
-      val csvFile = tmpDirectory.newFile(fileBaseName, ".csv")
+    def convertOMRHistory(omrFile: File, format: GUIOMRContent.ExportFormat)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
+      import org.openmole.tool.archive.*
+      import org.openmole.tool.stream.*
 
-      org.openmole.core.format.OMRFormat.writeCSV(omrFile, csvFile)
+      val history = org.openmole.core.format.OMRFormat.dataFiles(omrFile)
 
-      def deleteCSVFile =
-        IO[Unit]:
-          csvFile.delete()
+      HTTP.sendFileStream(s"${omrFile.baseName}.tgz"): out =>
+        val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
+        try
+          history.zipWithIndex.foreach: (h, i) =>
+            val f = tmpDirectory.newFile(s"history$i")
+            try
+              format match
+                case GUIOMRContent.ExportFormat.JSON =>
+                  org.openmole.core.format.OMRFormat.writeJSON(omrFile, f, dataFile = Some(h))
+                  tos.addFile(f, s"$i.json")
+                case GUIOMRContent.ExportFormat.CSV =>
+                  org.openmole.core.format.OMRFormat.writeCSV(omrFile, f, dataFile = Some(h))
+                  tos.addFile(f, s"$i.csv")
+            finally f.delete()
+        finally tos.close()
 
-      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(csvFile.toPath), Some(req))
-        .map { req => req.withBodyStream(req.body.onFinalize(deleteCSVFile)) }
-        .getOrElseF(Status.NotFound.apply())
-        .map { r => HTTP.setFileHeaders(csvFile, r, Some(s"$fileBaseName.csv")) }
+    def convertOMR(req: Request[IO], omrFile: File, format: GUIOMRContent.ExportFormat, history: Boolean)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
+      if !history
+      then
+        val fileBaseName = omrFile.baseName
+        val (exportFile, exportName) =
+          format match
+            case GUIOMRContent.ExportFormat.JSON =>
+              val f = tmpDirectory.newFile(fileBaseName, ".json")
+              org.openmole.core.format.OMRFormat.writeJSON(omrFile, f)
+              (f, s"$fileBaseName.json")
+            case GUIOMRContent.ExportFormat.CSV =>
+              val f = tmpDirectory.newFile(fileBaseName, ".csv")
+              org.openmole.core.format.OMRFormat.writeCSV(omrFile, f)
+              (f, s"$fileBaseName.csv")
 
-    def omrToJSON(req: Request[IO], omrFile: File)(using tmpDirectory: TmpDirectory, serializerService: SerializerService) =
-      val fileBaseName = omrFile.baseName
-      val jsonFile = tmpDirectory.newFile(fileBaseName, ".json")
+        def deleteExportFile = IO[Unit]:
+          exportFile.delete()
 
-      org.openmole.core.format.OMRFormat.writeJSON(omrFile, jsonFile)
-
-      def deleteJSONFile = IO[Unit] {
-        jsonFile.delete()
-      }
-
-      StaticFile.fromPath(fs2.io.file.Path.fromNioPath(jsonFile.toPath), Some(req))
-        .map { req => req.withBodyStream(req.body.onFinalize(deleteJSONFile)) }
-        .getOrElseF(Status.NotFound.apply())
-        .map { r => HTTP.setFileHeaders(jsonFile, r, Some(s"$fileBaseName.json")) }
+        StaticFile.fromPath(fs2.io.file.Path.fromNioPath(exportFile.toPath), Some(req))
+          .map { req => req.withBodyStream(req.body.onFinalize(deleteExportFile)) }
+          .getOrElseF(Status.NotFound.apply())
+          .map { r => HTTP.setFileHeaders(exportFile, r, Some(exportName)) }
+      else convertOMRHistory(omrFile, format)
 
     def stackError(t: Throwable) =
       import org.openmole.core.tools.io.Prettifier.*

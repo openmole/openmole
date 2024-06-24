@@ -70,13 +70,13 @@ val exploration =
       (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
       (l in (UniformDistribution[Long]() take 10)) x
       (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
-  ) hook(workDirectory / "path/of/a/file.csv")
+  ) hook(workDirectory / "path/of/a/file")
 """, header = "val myModel = EmptyTask()", name = "several inputs")}
 
 $br
 
 The ${code{"DirectSampling"}} task executes the model ${b{"myModel"}} for every possible combination of the 5 inputs provided in the ${code{"sampling"}} parameter.
-The ${code{"hook"}} provided after the task will save the results of your sampling in a CSV file, see the ${a("next section", href := "#Hook")} for more details about this hook.
+The ${code{"hook"}} provided after the task will save the results of your sampling in a file, see the ${a("next section", href := "#Hook")} for more details about this hook.
 
 $br$br
 
@@ -102,7 +102,7 @@ More information on this sampling type ${a("here", href := DocumentationPages.fi
 ${h3{"Hook"}}
 
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file.csv")} to save the results in a CSV file, or @code{hook display} to display the results in the standard output.
+The generic way to use it is to write either @code{hook(workDirectory / "path/of/a/file")} to save the results in a file, or @code{hook display} to display the results in the standard output.
 
 @br@br
 

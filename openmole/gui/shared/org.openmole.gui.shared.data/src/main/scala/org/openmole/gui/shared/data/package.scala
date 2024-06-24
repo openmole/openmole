@@ -20,17 +20,14 @@ package org.openmole.gui.shared.data
 import endpoints4s.algebra
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto.*
+import org.openmole.core.exception.UserBadDataError
 
 import scala.deriving.Mirror
 import scala.reflect.ClassTag
-
-
-
 import java.io.{PrintWriter, StringWriter}
 import scala.collection.immutable.ArraySeq
 import scala.scalajs.js.annotation.JSExport
-
-import org.openmole.gui.shared.data.SafePath._
+import org.openmole.gui.shared.data.SafePath.*
 
 
 object ServerFileSystemContext:
@@ -433,6 +430,18 @@ object GUIVariable:
 
 object GUIOMRContent:
   case class Index(size: Int, variables: Seq[Seq[String]])
+
+  object ExportFormat:
+    def fromString(s: String): ExportFormat =
+      s.toLowerCase match
+        case "csv" => ExportFormat.CSV
+        case "json" => ExportFormat.JSON
+        case f => throw UserBadDataError(s"Unsupported export format $f")
+
+    def toString(f: ExportFormat) = f.toString.toLowerCase
+
+  enum ExportFormat:
+    case CSV, JSON
 
 case class GUIOMRContent(
   section: Seq[GUIOMRSectionContent],

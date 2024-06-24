@@ -164,9 +164,9 @@ ${ul(
 ${h3{"Hook"}}
 
 The @code{hook} keyword is used to save or display results generated during the execution of a workflow.
-The generic way to use it is to write either ${code("hook(workDirectory / \"path/of/a/directory\")")} to save the results in a CSV file, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code("hook(workDirectory / \"path/of/a/file\")")} to save the results, or ${code{"hook display"}} to display the results in the standard output.
 
-In the output directory are stored files for each index: ${code{"firstOrderIndices.csv"}} and ${code{"totalOrderIndices.csv"}}, which contain each the matrices of indices for each factor and each indicator.
+In the output file contains for each index 2 parts: the ${code{"firstOrderIndices"}} and the ${code{"totalOrderIndices"}}, which contain each the matrices of indices for each factor and each indicator.
 
 ${h3{"Use example"}}
 

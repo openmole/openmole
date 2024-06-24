@@ -102,7 +102,7 @@ val replications = Replication(
 
 // Workflow
 // Note: here we use a hook which gathers all the outputs of the replication and writes them into a csv file
-replications hook (workDirectory / "replications_results.csv")
+replications hook (workDirectory / "replications_results")
 """)}
 
 You can run this workflow by clicking on the Run button in the GUI.
@@ -111,7 +111,7 @@ You can run this workflow by clicking on the Run button in the GUI.
 ${h3{"Results"}}
 
 Once the execution is over, refresh your workspace by clicking on the second-to-last icon on the left of the GUI (circle with two arrows).
-A new file will appear named ${i{"replications_results.csv"}}, this is the file that our workflow created, containing the replication results!
+A new file will appear named ${i{"replications_results.omr"}}, this is the file that our workflow created, containing the replication results!
 You can click on it.
 
 ${img(src := Resource.img.tutorial.repliOutput.file)}
@@ -200,13 +200,13 @@ val exploration = DirectSampling(
 )
 
 // Workflow
-exploration hook (workDirectory / "grid_results.csv")
+exploration hook (workDirectory / "grid_results")
 """)}
 
 
 ${h3{"Results"}}
 
-In the same way we did before, after refreshing your workspace you will find a new file named @i{grid_results.csv}, containing the results of our grid sampling.
+In the same way we did before, after refreshing your workspace you will find a new file named @i{grid_results.omr}, containing the results of our grid sampling.
 You can then use the results to better understand how your model behaves.
 
 ${img(src := Resource.img.tutorial.gridOutput.file, width := "75%")}
