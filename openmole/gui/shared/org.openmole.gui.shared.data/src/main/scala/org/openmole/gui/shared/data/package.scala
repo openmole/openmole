@@ -21,6 +21,7 @@ import endpoints4s.algebra
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto.*
 import org.openmole.core.exception.UserBadDataError
+import org.openmole.gui.shared.data
 
 import scala.deriving.Mirror
 import scala.reflect.ClassTag
@@ -452,7 +453,7 @@ case class GUIOMRContent(
   timeSave: Long,
   index: Option[GUIOMRContent.Index])
 
-case class GUIOMRDataIndex(dataFile: String, sectionIndex: Int, variable: GUIVariable)
+case class GUIOMRDataIndex(sectionIndex: Int, variableName: String, values: Seq[data.GUIVariable.ValueType], fileIndex: Seq[String])
 
 case class GUIOMRImport(`import`: String, content: String)
 case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])

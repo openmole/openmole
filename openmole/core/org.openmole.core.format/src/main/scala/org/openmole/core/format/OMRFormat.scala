@@ -25,7 +25,7 @@ import org.json4s.JArray
 import org.json4s.JsonAST.{JField, JString}
 import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.json.*
-import org.openmole.core.context.{ValType, Variable}
+import org.openmole.core.context.{Val, ValType, Variable}
 import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.format.OutputFormat.SectionContent
@@ -344,16 +344,25 @@ object OMRFormat:
   object IndexedData:
     type FileIndex = String
 
-  case class IndexedData(fileIndex: IndexedData.FileIndex, sectionIndex: Int, variable: Variable[_])
+  case class IndexedData(variableName: String, sectionIndex: Int, values: Array[Any], fileIndex: Array[IndexedData.FileIndex])
 
   def indexes(file: File)(using SerializerService): Seq[IndexedData] =
-    dataFiles(file).flatMap: name =>
-      val sectionIndexes = variables(file, dataFile = Some(name), indexOnly = true)
-      sectionIndexes.zipWithIndex.flatMap:
-        case ((section, variables), i) =>
-          val names = section.indexes.getOrElse(Seq()).toSet
-          variables.filter(v => names.contains(v.name)).map: v =>
-            IndexedData(name, i, v)
+    val content = omrContent(file)
+    val indexes = content.`data-content`.section.zipWithIndex.flatMap((s, i) => s.indexes.toSeq.flatten.map(id => i -> id))
+
+    val indexedValues = indexes.map(i => i -> new collection.mutable.ArrayBuffer[(IndexedData.FileIndex, Any)](content.`data-file`.size)).toMap
+
+    for
+      fileName <- dataFiles(file)
+      sectionIndexes = variables(file, dataFile = Some(fileName), indexOnly = true)
+      ((section, variables), i) <- sectionIndexes.zipWithIndex
+      v <- variables
+    do
+      indexedValues((i, v.name)) += ((fileName, v.value))
+
+    indexes.map: i =>
+      val values = indexedValues(i).toArray
+      IndexedData(i._2, i._1, values.map(_._2), values.map(_._1))
 
   def variablesAtIndex(file: File, index: IndexedData.FileIndex)(using SerializerService) =
     variables(file, dataFile = Some(index))
