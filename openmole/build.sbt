@@ -676,6 +676,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.scalajsDomJS,
   Libraries.ace,
   Libraries.bootstrapnative,
+  Libraries.nouiSlider,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
   //Libraries.endpoints4SJS,

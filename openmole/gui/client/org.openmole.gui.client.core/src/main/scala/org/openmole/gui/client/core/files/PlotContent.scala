@@ -3,11 +3,17 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
+import scaladget.nouislider.*
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scaladget.nouislider.NoUISliderImplicits.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.CoreUtils
+import org.openmole.gui.shared.data.GUIVariable.ValueType
+import org.openmole.gui.shared.data.GUIVariable.ValueType.unwrap
 
 
 object PlotContent:
@@ -15,21 +21,22 @@ object PlotContent:
   case class PlotContentSection(section: String, rawContent: String, rowData: RowData, initialHash: String)
 
   enum ResultView:
-    case Raw, Table, Plot, Metadata
+    case Raw, Table, Plot, Metadata, HistoryMetadata
 
   case class Section(name: String)
 
   case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, metadata: HtmlElement)
 
-  case class ResultViewAndSection(resultView: ResultView, section: Option[Section])
+  case class ResultViewAndSection(resultView: ResultView, historyView: Option[ResultView], section: Option[Section])
 
   case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
 
   def buildTab(
-    safePath: SafePath,
-    extension: FileContentType,
-    sections: Seq[PlotContentSection],
-    omrMetadata: Option[OMRMetadata] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
+                safePath: SafePath,
+                extension: FileContentType,
+                sections: Seq[PlotContentSection],
+                omrMetadata: Option[OMRMetadata] = None,
+                currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
@@ -62,14 +69,51 @@ object PlotContent:
           )
           ResultPlot.fromColumnData(plotData)
 
+        val metadataHistory =
+          div(
+            child <--
+              Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
+                val dIndex = dataIndex.map(d => d.map(_.variable)).getOrElse(Seq()).groupBy(_.name).filter(_._1 == "evolution$generation").values.flatten.toSeq
+                val dIndexValues = dIndex.flatMap(_.value.map(unwrap(_).toString.toDouble))
+                val first2 = dIndexValues.slice(0, 2)
+                val indexStep = math.abs(first2.reduce(_ - _))
+
+                val maxIndex = dIndexValues.lastOption.getOrElse(0.0)
+                val element = div(width := "500", marginRight := "50", marginTop := "20")
+                noUiSlider.create(
+                  element.ref, Options
+                    .range(Range.min(dIndexValues.headOption.getOrElse(0.0)).max(maxIndex))
+                    .start(currentIndex.map(_.toDouble).getOrElse(maxIndex))
+                    .step(indexStep)
+                    .connect(Options.Lower)
+                    .tooltips(true)
+                )
+
+                val loadDataButton =
+                  button(
+                    btn_primary, "Load data",
+                    onClick --> { _ =>
+                      val newCurrentIndex = element.ref.noUiSlider.get() match
+                        case i: String => i.toDouble.toLong
+                        case _ => maxIndex.toLong
+                      val dataFile = dataIndex.map(d => d.filter(x=> x.variable.value == Some(ValueType.ValueLong(newCurrentIndex))).head.dataFile)
+                      api.omrContent(safePath, dataFile).map: guiContent =>
+                        panels.tabContent.removeTab(safePath)
+                        val (tabData,content) = OMRContent.buildTab(safePath, guiContent, Some(newCurrentIndex.toInt))
+                        panels.tabContent.addTab(tabData, content)
+                    })
+                div(flexRow, element, loadDataButton)
+          )
+
         val metadata =
           omrMetadata match
             case Some(md) =>
               div(
                 cls := "metadata",
                 div(display.flex, flexDirection.row, span("OpenMOLE Version:", nbsp, fontWeight.bold), md.openmoleVersion),
-                div(display.flex, flexDirection.row, marginTop := "10", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
-                div("Script: ", fontWeight.bold, marginTop := "10", marginBottom := "10"),
+                div(display.flex, flexDirection.row, marginTop := "20", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
+                div(display.flex, flexDirection.column, marginTop := "20", span("Exploration history:", nbsp, fontWeight.bold), metadataHistory),
+                div("Script: ", fontWeight.bold, marginTop := "20", marginBottom := "10"),
                 div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px", md.script),
                 if md.history
                 then div(
@@ -80,12 +124,12 @@ object PlotContent:
                 else div()
                 //textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
               )
-            case _=> div("Unavailable metadata")
+            case _ => div("Unavailable metadata")
 
         s.section -> RawTablePlot(editor, table, plot, metadata)
-      ).toMap
+        ).toMap
 
-    val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, sectionMap.keys.headOption.map(s => Section(s))))
+    val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, None, sectionMap.keys.headOption.map(s => Section(s))))
 
     val tabData = TabData(safePath, None)
 
@@ -93,17 +137,20 @@ object PlotContent:
 
     def switchSection(section: Section): Unit = currentResultViewAndSection.update(rvs => rvs.copy(section = Some(section)))
 
+    def rawTablePlot(resultViewAndSection: ResultViewAndSection) =
+      resultViewAndSection.section match
+        case Some(s: Section) => sectionMap(s.name)
+        case _ => sectionMap.values.head
+
     def toView(resultViewAndSection: ResultViewAndSection) =
-      val rawTablePlot =
-        resultViewAndSection.section match
-          case Some(s: Section) => sectionMap(s.name)
-          case _ => sectionMap.values.head
+      val rTP = rawTablePlot(resultViewAndSection)
 
       resultViewAndSection.resultView match
-        case Raw => rawTablePlot.editor.view
-        case Table => rawTablePlot.table
-        case Plot => rawTablePlot.plot
-        case Metadata=> rawTablePlot.metadata
+        case Raw => rTP.editor.view
+        case Table => rTP.table
+        case Plot => rTP.plot
+        case Metadata => rTP.metadata
+        case _ => div()
 
     val rawState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
     val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
@@ -118,15 +165,18 @@ object PlotContent:
       ).toSeq
     lazy val sectionSwitchButton = exclusiveRadio(sectionStates, btn_secondary_string, 0)
 
-    val content = div(display.flex, flexDirection.column,
+    val content =
       div(display.flex, flexDirection.row,
-        (sectionStates.size match
-          case 1 => div()
-          case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")),
-        switchButton.element.amend(margin := "10", width := "150px", marginLeft := "50")
-      ),
-      child <-- currentResultViewAndSection.signal.map(rvs => toView(rvs))
-    )
+        div(display.flex, flexDirection.column,
+          div(display.flex, flexDirection.row,
+            (sectionStates.size match
+              case 1 => div()
+              case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")),
+            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "50")
+          ),
+          child <-- currentResultViewAndSection.signal.map(rvs => toView(rvs))
+        )
+      )
 
     (tabData, content)
 

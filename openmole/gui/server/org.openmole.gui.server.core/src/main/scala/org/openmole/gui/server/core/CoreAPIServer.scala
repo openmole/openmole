@@ -262,6 +262,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       omrMethodRoute,
       omrContentRoute,
       omrFilesRoute,
+      omrDataIndexRoute,
       addPluginRoute,
       removePluginRoute,
       listNotificationRoute,

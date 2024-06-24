@@ -1528,3 +1528,7 @@ input:checked + .slider:before {
     font-size: 16px;
     margin-left: 30px;
 }
+
+div.noUi-connect {
+  background: #3086b5;
+}
