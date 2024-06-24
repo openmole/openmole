@@ -60,12 +60,12 @@ object GUIServerServices {
 
   def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level]) = {
     implicit val ws: Workspace = workspace
-    implicit val preference: Preference = Preference(ws.persistentDir)
+    implicit val preference: Preference = org.openmole.core.services.Services.preference(ws)
     implicit val newFile: TmpDirectory = TmpDirectory(workspace)
     implicit val seeder: Seeder = Seeder()
     implicit val serializerService: SerializerService = SerializerService()
     implicit val threadProvider: ThreadProvider = ThreadProvider()
-    implicit val authenticationStore: AuthenticationStore = AuthenticationStore(ws.persistentDir)
+    implicit val authenticationStore: AuthenticationStore = AuthenticationStore(ws)
     implicit val fileService: FileService = FileService()
     implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)
     implicit val eventDispatcher: EventDispatcher = EventDispatcher()

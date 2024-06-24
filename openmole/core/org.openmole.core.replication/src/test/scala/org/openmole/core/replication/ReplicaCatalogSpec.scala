@@ -6,19 +6,16 @@ import org.openmole.tool.hash._
 import org.openmole.core.preference._
 import org.openmole.core.workspace._
 
-class ReplicaCatalogSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class ReplicaCatalogSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  "ReplicaCatalog" should "store replicas" in {
-    val workspace =  {
+  "ReplicaCatalog" should "store replicas" in:
+    val workspace =
       val dir = java.io.File.createTempFile("test", "")
       dir.delete()
       dir.mkdirs()
       Workspace(dir)
-    }
 
-    implicit val preference: Preference = Preference(workspace.persistentDir)
-
-
+    given Preference = Preference.memory()
     val catalog = ReplicaCatalog(workspace)
     val tmp = TmpDirectory(workspace)
 
@@ -38,6 +35,4 @@ class ReplicaCatalogSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     catalog.remove(replica.id)
 
     catalog.forHashes(Seq(hash), Seq(storageID)).isEmpty should equal(true)
-  }
 
-}

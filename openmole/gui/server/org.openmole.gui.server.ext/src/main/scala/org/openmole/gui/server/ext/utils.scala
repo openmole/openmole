@@ -31,7 +31,11 @@ object utils:
 
   def webUIDirectory(implicit workspace: Workspace) = workspace.location /> "webui"
 
-  def projectsDirectory(implicit workspace: Workspace) = webUIDirectory /> "projects"
+  def projectsDirectory(implicit workspace: Workspace) =
+    val old = webUIDirectory / "projects"
+    val newProjects = workspace.userDir / "projects"
+    if old.exists() then old.move(newProjects)
+    newProjects
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
 

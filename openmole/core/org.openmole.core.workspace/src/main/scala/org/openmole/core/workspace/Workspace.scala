@@ -46,6 +46,8 @@ object Workspace:
   def tmpLocation = "tmp"
   def tmpLock = ".tmp.lock"
   def persistentLocation = "persistent"
+  def userLocation = "user"
+
   def logLocation = "openmole.log.gz"
 
   def fixedPrefix = "file"
@@ -58,11 +60,12 @@ object Workspace:
   def apply(location: File): Workspace =
     val tmpDir = location / tmpLocation /> UUID.randomUUID.toString
     val persistentDir = location /> persistentLocation
+    val userDir = location /> userLocation
 
     val os = (tmpDir / tmpLock).fileOutputStream
     os.getChannel.tryLock
 
-    new Workspace(location, tmpDir, persistentDir, os)
+    new Workspace(location, tmpDir, persistentDir, userDir , os)
 
   def clean(ws: Workspace) =
     ws.os.close()
@@ -74,5 +77,5 @@ object Workspace:
 
     ws.tmpDirectory.recursiveDelete
 
-case class Workspace(location: File, tmpDirectory: File, persistentDir: File, os: FileOutputStream)
+case class Workspace(location: File, tmpDirectory: File, persistentDir: File, userDir: File, os: FileOutputStream)
 

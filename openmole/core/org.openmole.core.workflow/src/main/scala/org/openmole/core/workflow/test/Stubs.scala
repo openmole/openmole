@@ -16,7 +16,7 @@ import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.random.{RandomProvider, Seeder}
 
-object Stubs {
+object Stubs:
 
   implicit val scope: org.openmole.core.setter.DefinitionScope = org.openmole.core.setter.DefinitionScope.User
 
@@ -27,7 +27,7 @@ object Stubs {
   implicit val workspace: Workspace = Workspace(dir)
 
   implicit lazy val cypher: Cypher = Cypher("")
-  implicit lazy val preference: Preference = Preference(workspace.persistentDir)
+  implicit lazy val preference: Preference = Preference.memory()
   implicit lazy val tmpDirectory: TmpDirectory = TmpDirectory(dir)
   implicit lazy val seeder: Seeder = Seeder()
   implicit val serializer: SerializerService = SerializerService()
@@ -44,4 +44,3 @@ object Stubs {
 
   implicit val moleServices: MoleServices = MoleServices.create(dir)
 
-}
