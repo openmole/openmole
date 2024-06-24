@@ -10,6 +10,7 @@ object Libraries {
 
   lazy val bootstrapnative = libraryDependencies += "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion
   lazy val lunr = libraryDependencies += "org.openmole.scaladget" %%% "lunr" % scaladgetVersion
+  lazy val nouiSlider = libraryDependencies += "org.openmole.scaladget" %%% "nouislider" % scaladgetVersion
 
   lazy val ace = libraryDependencies += "org.openmole.scaladget" %%% "ace" % scaladgetVersion
   lazy val scaladgetTools = libraryDependencies += "org.openmole.scaladget" %%% "tools" % scaladgetVersion

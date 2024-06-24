@@ -119,6 +119,7 @@ object GUIServlet:
       cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
       tags.script(tags.`type` := "text/javascript", tags.src := "js/plotly.min.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
+      tags.script(tags.`type` := "text/javascript", tags.src := "js/nouislider.min.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
       //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
       tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/font/bootstrap-icons.min.css"),

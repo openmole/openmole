@@ -16,6 +16,8 @@ import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.api.*
 
+import scala.collection.immutable.ArraySeq
+
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
  *
@@ -351,7 +353,7 @@ class TreeNodePanel { panel =>
 
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
 
-    def dirBox(tn: TreeNode) =
+    def dirBox(tn: TreeNode)(using plugins: GUIPlugins) =
       div(
         child <-- multiTool.signal.combineWith(treeNodeManager.selected.signal).map { case (mcot, selected) ⇒
           if (mcot == CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
@@ -361,13 +363,17 @@ class TreeNodePanel { panel =>
             tn match
               case _: TreeNode.Directory ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
               case f: TreeNode.File ⇒
-                if (f.pluginState.isPlugin) {
-                  div("P", cls := "plugin-file" + {
+                if (f.pluginState.isPlugin)
+                then
+                  div("P", cls := "specific-file" + {
                     if (f.pluginState.isPlugged) " plugged"
                     else " unplugged"
                   })
-                }
-                else emptyNode
+                else
+                  FileContentType(tnSafePath) match
+                    case FileContentType.OpenMOLEScript=> div("S", cls := "specific-file oms")
+                    case FileContentType.OpenMOLEResult=> div("R", cls := "specific-file omr")
+                    case _=> emptyNode
           }
         }
       )
