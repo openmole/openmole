@@ -1264,6 +1264,13 @@ input:checked + .slider:before {
     color: #222;
 }
 
+.removeInactive{
+ position: absolute;
+  top: 70;
+  right: 30;
+  color: #222;
+}
+
 .btnOm {
     color: #fff;
     background-color: #a3bc26;

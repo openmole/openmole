@@ -64,16 +64,16 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-    path: SafePath,
-    script: String,
-    state: ExecutionDetails.State,
-    startDate: Long,
-    duration: Long,
-    executionTime: Long,
-    ratio: String,
-    running: Long,
-    error: Option[ErrorData] = None,
-    envStates: Seq[EnvironmentState] = Seq())
+                               path: SafePath,
+                               script: String,
+                               state: ExecutionDetails.State,
+                               startDate: Long,
+                               duration: Long,
+                               executionTime: Long,
+                               ratio: String,
+                               running: Long,
+                               error: Option[ErrorData] = None,
+                               envStates: Seq[EnvironmentState] = Seq())
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Executions = Map[ExecutionId, ExecutionDetails]
@@ -98,13 +98,14 @@ class ExecutionPanel:
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
   val showEvironmentControls = Var(false)
+  val showExecutionSettings = Var(false)
   val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
     import ExecutionPanel.ExecutionDetails.State
     def userCapsuleState(c: Seq[CapsuleExecution]) =
       val ready = c.map(c => c.statuses.ready * c.userCardinality).sum
-      val running = c.map(c => c.statuses.running* c.userCardinality).sum
+      val running = c.map(c => c.statuses.running * c.userCardinality).sum
       val completed = c.map(c => c.statuses.completed * c.userCardinality).sum
       (ready, running, completed)
 
@@ -161,7 +162,9 @@ class ExecutionPanel:
     )
 
   def backgroundOpacityCls =
-    cls.toggle("silentBlock") <-- showExpander.signal.map { _ != None }
+    cls.toggle("silentBlock") <-- showExpander.signal.map {
+      _ != None
+    }
 
   def backgroundOpacityCls(expand: Expand) =
     cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
@@ -203,8 +206,8 @@ class ExecutionPanel:
                 case Some(Expand.ErrorLog) => None
                 case _ => Some(Expand.ErrorLog)
           case _ => emptyMod
-            ,
-          state match
+        ,
+        state match
           case ExecutionDetails.State.failed(_) => cursor.pointer
           case _ => emptyMod
       )
@@ -306,12 +309,14 @@ class ExecutionPanel:
 
     def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
       val p = scala.concurrent.Promise[Unit]()
-      setTimeout(milliseconds) { p.success(()) }
+      setTimeout(milliseconds) {
+        p.success(())
+      }
       p.future
 
 
-    val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
+    val initialDelay = Signal.fromFuture(delay(100000))
+    val periodicUpdate = EventStream.periodic(1000000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
@@ -377,7 +382,9 @@ class ExecutionPanel:
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
                       cls := "docEntry", width := "1140", margin := "0 4 0 3",
-                      backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
+                      backgroundColor := {
+                        if i % 2 == 0 then "#bdadc4" else "#f4f4f4"
+                      },
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                       div(btn_danger, e.level.name)
@@ -458,19 +465,31 @@ class ExecutionPanel:
             div(rowFlex, justifyContent.center,
               details.toSeq.sortBy(_._2.startDate).map { (id, detailValue) => simulationBlock(id, detailValue) }
             ),
-            autoRemoveFailed.element,
+            div(display.flex, flexDirection.column, alignItems.flexEnd,
+              div(display.flex, flexDirection.column,
+                autoRemoveFailed.element,
+                button(btn_danger, "Clean inactive", cls := "removeInactive",
+                  width := "160",
+                  onClick --> { _ =>
+                    details.foreach: d =>
+                      api.removeExecution(d._1).andThen { case Success(_) => triggerStateUpdate }
+                  })
+
+              )
+            ),
             div(
               id.map: idValue =>
                 details.get(idValue) match
                   case Some(st) =>
                     def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
+
                     def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
 
                     div(buildExecution(idValue, st, cancel, remove))
                   case None => div()
             )
           )
-        ,
+      ,
       showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable -->
         Observer: _ =>
