@@ -1,5 +1,5 @@
 -J-Xmx2500M
-#-J-Xss2M
+-J-Xss2M
 -J-Dfile.encoding=UTF-8
 #-J-XX:MetaspaceSize=200m
 #-J-XX:MaxMetaspaceSize=1G
