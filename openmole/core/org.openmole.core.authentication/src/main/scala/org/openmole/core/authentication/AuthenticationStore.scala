@@ -25,53 +25,45 @@ import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.*
 
-object AuthenticationStore {
+object AuthenticationStore:
 
   def authenticationsLocation = "authentications"
 
-  def apply(directory: File): AuthenticationStore = {
-    val dir = directory / authenticationsLocation
-    if (dir.mkdirs) dir.setPosixMode("rwx------")
-    new AuthenticationStore(dir)
-  }
+  def apply(workspace: Workspace): AuthenticationStore =
+    val oldDirectory = workspace.persistentDir / authenticationsLocation
+    val newDirectory = workspace.userDir / authenticationsLocation
+    if oldDirectory.exists() then oldDirectory.move(newDirectory)
+    if newDirectory.mkdirs then newDirectory.setPosixMode("rwx------")
+    new AuthenticationStore(newDirectory)
 
-}
 
-class AuthenticationStore(_baseDir: File) {
+class AuthenticationStore(_baseDir: File):
 
-  def baseDir = {
+  def baseDir =
     _baseDir.mkdirs
     _baseDir
-  }
 
   def store(name: String) = new File(baseDir, name)
 
-  def save[T: Encoder](name: String, obj: Seq[T]): Unit = synchronized {
+  def save[T: Encoder](name: String, obj: Seq[T]): Unit = synchronized:
     val file = new File(baseDir, name)
     file.content = obj.asJson.noSpaces
-  }
 
-  def load[T: Decoder](name: String): Seq[T] = synchronized {
+  def load[T: Decoder](name: String): Seq[T] = synchronized:
     val file = store(name)
     if file.exists()
     then decode[Seq[T]](file.content).toTry.get
     else Seq()
-  }
 
 
-  def modify[T: Encoder: Decoder](name: String, m: Seq[T] => Seq[T]) = synchronized {
+  def modify[T: Encoder: Decoder](name: String, m: Seq[T] => Seq[T]) = synchronized:
     save(name, m(load(name)))
-  }
   
-  def clear(name: String) = synchronized { 
+  def clear(name: String) = synchronized:
     store(name).delete()
-  }
 
-  def delete() = synchronized {
+  def delete() = synchronized:
     baseDir.recursiveDelete
     baseDir.mkdirs
-  }
 
-
-}
 

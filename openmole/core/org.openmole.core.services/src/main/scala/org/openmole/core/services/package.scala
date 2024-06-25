@@ -45,8 +45,13 @@ package services {
       finally dispose(services)
     }
 
-    def preference(workspace: Workspace) = Preference(workspace.persistentDir)
-    def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace.persistentDir)
+    def preference(workspace: Workspace) = 
+      val oldPreferences = workspace.persistentDir / Preference.location
+      val newPreferences = workspace.userDir / Preference.location
+      if oldPreferences.exists() then oldPreferences.move(newPreferences)
+      Preference(newPreferences)
+      
+    def authenticationStore(workspace: Workspace) = AuthenticationStore(workspace)
 
     /**
      * Construct Service from user modifiable options

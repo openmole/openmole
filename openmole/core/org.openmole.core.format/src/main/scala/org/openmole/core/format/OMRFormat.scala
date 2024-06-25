@@ -270,16 +270,18 @@ object OMRFormat:
   def variables(
     omrFile: File,
     relativePath: Boolean = false,
-    dataFile: Option[String] = None)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    dataFile: Option[String] = None,
+    indexOnly: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(omrFile)
     val dataFileValue = dataFile getOrElse index.`data-file`.last
     OMRFormat.readDataStream(omrFile, dataFileValue): is =>
-      variablesFromStream(omrFile, is, relativePath)
+      variablesFromStream(omrFile, is, relativePath, indexOnly = indexOnly)
 
   def variablesFromStream(
     omrFile: File,
     is: java.io.InputStream,
-    relativePath: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    relativePath: Boolean = false,
+    indexOnly: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(omrFile)
     val omrDirectory = omrFile.getParentFile
 
@@ -295,14 +297,23 @@ object OMRFormat:
     index.`data-mode` match
       case OMRContent.DataMode.Create =>
         def sectionToVariables(section: OMRContent.DataContent.SectionData, a: JArray) =
-          section -> (section.variables zip a.arr).map { (v, j) => jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny)) }
+          lazy val isIndex = section.indexes.getOrElse(Seq()).toSet
+          def indexFilter(v: ValData) = if !indexOnly then true else isIndex.contains(v.name)
+
+          val variables =
+            (section.variables zip a.arr).filter((v, _) => indexFilter(v)).map: (v, j) =>
+              jValueToVariable(j, ValData.toVal(v), file = Some(loadFile), default = Some(jValueToAny))
+
+          (section, variables)
 
         def readContent(): JArray =
           import org.json4s.jackson.JsonMethods.*
           parse(is).asInstanceOf[JArray]
 
         val content = readContent()
-        (index.`data-content`.section zip content.arr).map((s, c) => sectionToVariables(s, c.asInstanceOf[JArray]))
+
+        (index.`data-content`.section zip content.arr).map: (s, c) =>
+          sectionToVariables(s, c.asInstanceOf[JArray])
       case OMRContent.DataMode.Append =>
         def sectionToAggregatedVariables(section: OMRContent.DataContent.SectionData, sectionIndex: Int, content: JArray) =
           val size = section.variables.size
@@ -310,8 +321,14 @@ object OMRFormat:
 
           def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
 
-          section -> (section.variables zip transposed).map { (v, j) => jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny)) }
+          lazy val isIndex = section.indexes.getOrElse(Seq()).toSet
+          def indexFilter(v: ValData) = if !indexOnly then true else isIndex.contains(v.name)
 
+          val variables =
+            (section.variables zip transposed).filter((v, _) => indexFilter(v)).map: (v, j) =>
+              jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
+
+          (section, variables)
         def readContent(): JArray =
           val begin = new StringInputStream("[")
           val end = new StringInputStream("]")
@@ -320,7 +337,8 @@ object OMRFormat:
           parse(s).asInstanceOf[JArray]
 
         val content = readContent()
-        index.`data-content`.section.zipWithIndex.map((s, i) => sectionToAggregatedVariables(s, i, content))
+        index.`data-content`.section.zipWithIndex.map: (s, i) =>
+          sectionToAggregatedVariables(s, i, content)
 
 
   object IndexedData:
@@ -330,8 +348,8 @@ object OMRFormat:
 
   def indexes(file: File)(using SerializerService): Seq[IndexedData] =
     dataFiles(file).flatMap: name =>
-      val sectionVariables = variables(file, dataFile = Some(name))
-      sectionVariables.zipWithIndex.flatMap:
+      val sectionIndexes = variables(file, dataFile = Some(name), indexOnly = true)
+      sectionIndexes.zipWithIndex.flatMap:
         case ((section, variables), i) =>
           val names = section.indexes.getOrElse(Seq()).toSet
           variables.filter(v => names.contains(v.name)).map: v =>
