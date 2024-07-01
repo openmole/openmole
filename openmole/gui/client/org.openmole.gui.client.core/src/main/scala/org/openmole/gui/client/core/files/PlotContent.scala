@@ -70,39 +70,60 @@ object PlotContent:
           ResultPlot.fromColumnData(plotData)
 
         val metadataHistory =
+          val sliderValueText = Var("")
           div(
             child <--
               Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
-                val dIndex = dataIndex.map(d => d.map(_.variable)).getOrElse(Seq()).groupBy(_.name).filter(_._1 == "evolution$generation").values.flatten.toSeq
-                val dIndexValues = dIndex.flatMap(_.value.map(unwrap(_).toString.toDouble))
-                val first2 = dIndexValues.slice(0, 2)
-                val indexStep = math.abs(first2.reduce(_ - _))
+                def valueTypeToInt(vt: ValueType): Int = unwrap(vt).toString.toInt
+                def sliderValueToInt(s: Any) = s.toString.toDouble.toInt
 
-                val maxIndex = dIndexValues.lastOption.getOrElse(0.0)
+                val dIndexValues = dataIndex.map(d => d.map(_.values)).getOrElse(Seq()).flatten
+                val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
+
+                val first2 = dIndexValues.slice(0, 2)
+
+                val sortedKeys = indexMap.keys.toSeq.sorted
+                val maxIndex = sortedKeys.last
+                sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
+
                 val element = div(width := "500", marginRight := "50", marginTop := "20")
                 noUiSlider.create(
                   element.ref, Options
-                    .range(Range.min(dIndexValues.headOption.getOrElse(0.0)).max(maxIndex))
-                    .start(currentIndex.map(_.toDouble).getOrElse(maxIndex))
-                    .step(indexStep)
+                    .range(Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
+                    .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
+                    .step(1.0)
                     .connect(Options.Lower)
-                    .tooltips(true)
+                    .tooltips(false)
+                )
+
+                element.noUiSlider.on(event.ChangeEvent, (value, handle) =>
+                  sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
+                )
+
+                val sliderValueDiv = div(
+                  child <--
+                    sliderValueText.signal.map(t=>
+                      div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
+                    )
                 )
 
                 val loadDataButton =
                   button(
                     btn_primary, "Load data",
                     onClick --> { _ =>
-                      val newCurrentIndex = element.ref.noUiSlider.get() match
-                        case i: String => i.toDouble.toLong
-                        case _ => maxIndex.toLong
-                      val dataFile = dataIndex.map(d => d.filter(x=> x.variable.value == Some(ValueType.ValueLong(newCurrentIndex))).head.dataFile)
+                      val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
+
+                      val dataFile =
+                        dataIndex flatMap: dis=>
+                          (dis.map : di=>
+                            di.fileIndex(newCurrentIndex)).headOption
+
                       api.omrContent(safePath, dataFile).map: guiContent =>
                         panels.tabContent.removeTab(safePath)
-                        val (tabData,content) = OMRContent.buildTab(safePath, guiContent, Some(newCurrentIndex.toInt))
+                        val (tabData, content) = OMRContent.buildTab(safePath, guiContent, Some(newCurrentIndex.toInt))
                         panels.tabContent.addTab(tabData, content)
                     })
-                div(flexRow, element, loadDataButton)
+                div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
           )
 
         val metadata =

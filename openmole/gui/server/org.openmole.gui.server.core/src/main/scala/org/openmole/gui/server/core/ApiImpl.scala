@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
 import org.openmole.core.event.*
 import org.openmole.core.pluginmanager.*
-import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.{ServerFileSystemContext, *}
 
 import java.io.*
 import java.net.URL
@@ -508,11 +508,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GUIPluginRegistry.wizards,
       GUIPluginRegistry.analysis)
 
-  def isOSGI(safePath: SafePath): Boolean = {
+  def isOSGI(safePath: SafePath): Boolean =
     import services._
-
     PluginManager.isOSGI(safePathToFile(safePath))
-  }
 
   // Analysis plugins
   def omrMethodName(result: SafePath): Option[String] =
@@ -566,56 +564,59 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val omrFile = safePathToFile(result)
     def indexes =
       OMRFormat.indexes(omrFile).map: id =>
-        GUIOMRDataIndex(id.fileIndex, id.sectionIndex, toGUIVariable(id.variable))
+        GUIOMRDataIndex(id.sectionIndex, id.variableName, id.values.flatMap(toValueTypeFromAny), id.fileIndex.toSeq)
 
     indexes
 
-  def toGUIVariable(v: Variable[_]) =
+  def toValueTypeFromAny(x: Any): Option[GUIVariable.ValueType] =
     import services.*
     import GUIVariable.ValueType
     import GUIVariable.ValueType.*
-    def valueTypeFromAny(x: Any): Option[ValueType] =
-      import ServerFileSystemContext.Project
-      def res =
-        util.Try:
-          x match
-            case x: Int => ValueInt(x)
-            case x: Long => ValueLong(x)
-            case x: Double => ValueDouble(x)
-            case x: String => ValueString(x)
-            case x: Boolean => ValueBoolean(x)
-            case x: File => ValueFile(fileToSafePath(x))
+    import ServerFileSystemContext.Project
 
-            case x: Array[Int] => ValueArrayInt(x)
-            case x: Array[Long] => ValueArrayLong(x)
-            case x: Array[Double] => ValueArrayDouble(x)
-            case x: Array[String] => ValueArrayString(x)
-            case x: Array[Boolean] => ValueArrayBoolean(x)
-            case x: Array[File] => ValueArrayFile(x.map(fileToSafePath))
+    def res =
+      util.Try:
+        x match
+          case x: Int => ValueInt(x)
+          case x: Long => ValueLong(x)
+          case x: Double => ValueDouble(x)
+          case x: String => ValueString(x)
+          case x: Boolean => ValueBoolean(x)
+          case x: File => ValueFile(fileToSafePath(x))
 
-            case x: Array[Array[Int]] => ValueArrayArrayInt(x)
-            case x: Array[Array[Long]] => ValueArrayArrayLong(x)
-            case x: Array[Array[Double]] => ValueArrayArrayDouble(x)
-            case x: Array[Array[String]] => ValueArrayArrayString(x)
-            case x: Array[Array[Boolean]] => ValueArrayArrayBoolean(x)
-            case x: Array[Array[File]] => ValueArrayArrayFile(x.map(_.map(fileToSafePath)))
+          case x: Array[Int] => ValueArrayInt(x)
+          case x: Array[Long] => ValueArrayLong(x)
+          case x: Array[Double] => ValueArrayDouble(x)
+          case x: Array[String] => ValueArrayString(x)
+          case x: Array[Boolean] => ValueArrayBoolean(x)
+          case x: Array[File] => ValueArrayFile(x.map(fileToSafePath))
 
-      res match
-        case util.Failure(exception: MatchError) => None
-        case util.Success(value) => Some(value)
-        case util.Failure(e: Throwable) => throw e
+          case x: Array[Array[Int]] => ValueArrayArrayInt(x)
+          case x: Array[Array[Long]] => ValueArrayArrayLong(x)
+          case x: Array[Array[Double]] => ValueArrayArrayDouble(x)
+          case x: Array[Array[String]] => ValueArrayArrayString(x)
+          case x: Array[Array[Boolean]] => ValueArrayArrayBoolean(x)
+          case x: Array[Array[File]] => ValueArrayArrayFile(x.map(_.map(fileToSafePath)))
 
-    GUIVariable(v.name, valueTypeFromAny(v.value), v.prototype.`type`.toString)
+    res match
+      case util.Failure(exception: MatchError) => None
+      case util.Success(value) => Some(value)
+      case util.Failure(e: Throwable) => throw e
+
+
+  def toGUIVariable(v: Variable[_]) =
+    GUIVariable(v.name, toValueTypeFromAny(v.value), v.prototype.`type`.toString)
 
   def expandResources(resources: Resources): Resources =
     import services._
 
-    val paths = resources.all.map(_.safePath).distinct.map {
-      sp ⇒ Resource(sp, sp.toFile.length)
-    }
-    val implicitResource = resources.implicits.map {
-      r ⇒ Resource(r.safePath, r.safePath.toFile.length)
-    }
+    val paths =
+      resources.all.map(_.safePath).distinct.map: sp ⇒
+        Resource(sp, sp.toFile.length)
+
+    val implicitResource =
+      resources.implicits.map: r ⇒
+        Resource(r.safePath, r.safePath.toFile.length)
 
     Resources(
       paths,
