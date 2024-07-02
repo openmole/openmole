@@ -23,6 +23,8 @@ import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 
+import scala.concurrent.Future
+
 object ExecutionPanel:
   object ExecutionDetails:
     object State:
@@ -55,6 +57,9 @@ object ExecutionPanel:
           case _: State.failed => true
           case _ => false
 
+      def isFinished(state: State) =
+        state == State.failed(false) || state == State.completed(false) || state == State.canceled(false)
+
 
     enum State:
       case running
@@ -64,16 +69,16 @@ object ExecutionPanel:
       case canceled(cleaning: Boolean) extends State
 
   case class ExecutionDetails(
-                               path: SafePath,
-                               script: String,
-                               state: ExecutionDetails.State,
-                               startDate: Long,
-                               duration: Long,
-                               executionTime: Long,
-                               ratio: String,
-                               running: Long,
-                               error: Option[ErrorData] = None,
-                               envStates: Seq[EnvironmentState] = Seq())
+    path: SafePath,
+    script: String,
+    state: ExecutionDetails.State,
+    startDate: Long,
+    duration: Long,
+    executionTime: Long,
+    ratio: String,
+    running: Long,
+    error: Option[ErrorData] = None,
+    envStates: Seq[EnvironmentState] = Seq())
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Executions = Map[ExecutionId, ExecutionDetails]
@@ -98,7 +103,6 @@ class ExecutionPanel:
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
   val showEvironmentControls = Var(false)
-  val showExecutionSettings = Var(false)
   val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
@@ -162,12 +166,10 @@ class ExecutionPanel:
     )
 
   def backgroundOpacityCls =
-    cls.toggle("silentBlock") <-- showExpander.signal.map {
-      _ != None
-    }
+    cls.toggle("silentBlock") <-- showExpander.signal.map { _.isDefined }
 
   def backgroundOpacityCls(expand: Expand) =
-    cls.toggle("silentBlock") <-- showExpander.signal.map { se => se != Some(expand) && se != None }
+    cls.toggle("silentBlock") <-- showExpander.signal.map { se => !se.contains(expand) && se.isDefined }
 
   def showHideBlock(expand: Expand, title: String, messageWhenClosed: String, messageWhenOpen: String) =
     div(columnFlex,
@@ -315,9 +317,8 @@ class ExecutionPanel:
       p.future
 
 
-    val initialDelay = Signal.fromFuture(delay(100000))
-    val periodicUpdate = EventStream.periodic(1000000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
-
+    val initialDelay = Signal.fromFuture(delay(100))
+    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
       div(columnFlex, marginTop := "20px",
@@ -382,9 +383,7 @@ class ExecutionPanel:
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
                       cls := "docEntry", width := "1140", margin := "0 4 0 3",
-                      backgroundColor := {
-                        if i % 2 == 0 then "#bdadc4" else "#f4f4f4"
-                      },
+                      backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                       div(btn_danger, e.level.name)
@@ -471,8 +470,11 @@ class ExecutionPanel:
                 button(btn_danger, "Clean inactive", cls := "removeInactive",
                   width := "160",
                   onClick --> { _ =>
-                    details.foreach: d =>
-                      api.removeExecution(d._1).andThen { case Success(_) => triggerStateUpdate }
+                    Future.sequence:
+                      details.filter((_, d) => ExecutionDetails.State.isFinished(d.state)).map :(e, _) =>
+                        api.removeExecution(e)
+                    .andThen: _ =>
+                      triggerStateUpdate
                   })
 
               )
