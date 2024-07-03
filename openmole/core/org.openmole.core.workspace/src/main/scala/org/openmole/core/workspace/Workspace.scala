@@ -68,7 +68,7 @@ object Workspace:
     new Workspace(location, tmpDir, persistentDir, userDir , os)
 
   def clean(ws: Workspace) =
-    ws.os.close()
+    ws.tmpLock.close()
 
     (ws.location / tmpLocation).listFilesSafe.foreach: f =>
       val lockFile = f / tmpLock
@@ -77,5 +77,10 @@ object Workspace:
 
     ws.tmpDirectory.recursiveDelete
 
-case class Workspace(location: File, tmpDirectory: File, persistentDir: File, userDir: File, os: FileOutputStream)
+case class Workspace(
+  location: File,
+  tmpDirectory: File,
+  persistentDir: File,
+  userDir: File,
+  tmpLock: FileOutputStream)
 

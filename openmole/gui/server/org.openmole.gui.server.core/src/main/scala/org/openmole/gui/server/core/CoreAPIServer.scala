@@ -226,7 +226,10 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
   val clearNotificationRoute =
     clearNotification.errorImplementedBy { s => apiImpl.clearNotification(s) }
-  
+
+  val removeContainerCacheRoute =
+    removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache())
+
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       settingsRoute,
@@ -267,6 +270,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       removePluginRoute,
       listNotificationRoute,
       clearNotificationRoute,
+      removeContainerCacheRoute,
       restartRoute,
       shutdownRoute,
       jvmInfosRoute,

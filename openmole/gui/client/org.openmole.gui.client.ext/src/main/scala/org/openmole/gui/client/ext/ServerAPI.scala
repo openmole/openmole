@@ -79,6 +79,7 @@ trait ServerAPI:
   def jvmInfos()(using BasePath): Future[JVMInfos]
   def listNotification()(using BasePath): Future[Seq[NotificationEvent]]
   def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit]
+  def removeContainerCache()(using BasePath): Future[Unit]
 
   def mdToHtml(safePath: SafePath)(using BasePath): Future[String]
   def sequence(safePath: SafePath)(using BasePath): Future[SequenceData]

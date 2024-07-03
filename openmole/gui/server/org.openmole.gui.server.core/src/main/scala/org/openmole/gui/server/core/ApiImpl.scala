@@ -627,6 +627,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def listNotification = serverState.listNotification()
   def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)
 
+  def removeContainerCache(): Unit =
+    org.openmole.plugin.task.container.ContainerTask.repositoryDirectory(services.workspace).recursiveDelete
+
   def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean): Unit =
     import services.*
     import org.openmole.tool.stream.*

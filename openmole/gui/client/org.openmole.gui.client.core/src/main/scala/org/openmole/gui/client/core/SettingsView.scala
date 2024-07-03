@@ -9,11 +9,11 @@ import scaladget.tools.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.files.FileDisplayer
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
 import scala.scalajs.js.timers
-import scala.scalajs.js.timers.SetIntervalHandle
 
 /*
  * Copyright (C) 07/11/16 // mathieu.leclaire@openmole.org
@@ -34,8 +34,6 @@ import scala.scalajs.js.timers.SetIntervalHandle
 
 object SettingsView:
 
-  val jvmInfos: Var[Option[JVMInfos]] = Var(None)
-  val timer: Var[Option[SetIntervalHandle]] = Var(None)
 
   private def serverActions(message: String, messageGlyph: HESetter, warnMessage: String, route: String)(using panels: Panels) =
     lazy val notification = panels.notifications.showAlternativeNotification(
@@ -47,34 +45,6 @@ object SettingsView:
     )
 
     button(btn_danger, marginBottom := "10px", message, onClick --> { _ ⇒ notification })
-
-  def jvmInfoButton(using api: ServerAPI, basePath: BasePath) = button("JVM stats", btn_secondary, glyph_stats, onClick --> { _ ⇒
-    timer.now() match {
-      case Some(t) ⇒ stopJVMTimer(t)
-      case _ ⇒ setJVMTimer
-    }
-  })
-
-  def updateJVMInfos(using api: ServerAPI, basePath: BasePath) =
-    api.jvmInfos().foreach { j ⇒
-      jvmInfos.set(Some(j))
-    }
-
-
-  def setJVMTimer(using api: ServerAPI, basePath: BasePath) = {
-    timer.set(Some(timers.setInterval(3000) {
-      updateJVMInfos
-    }))
-  }
-
-  def stopJVMTimer(t: SetIntervalHandle) = {
-    timers.clearInterval(t)
-    timer.set(None)
-  }
-
-  val waiter = timer.signal.map {
-    _.isDefined
-  }
 
   def version(using api: ServerAPI, basePath: BasePath) =
     div(color := "#333", marginBottom := "30px",
@@ -90,45 +60,40 @@ object SettingsView:
       }
     )
 
-  val jvmInfosDiv =
-    timer.signal.map {
-      _.isDefined
-    }.expand(
-      div(
-        generalSettings,
-        child <-- jvmInfos.signal.map {
-          _ match {
-            case Some(j) =>
-              val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
-              div(flexColumn,
-                div(flexRow,
-                  div(cls := "smallText", "Processors"),
-                  div(cls := "bigValue", div(j.processorAvailable.toString))
+  def jvmInfosDiv(using api: ServerAPI, basePath: BasePath) =
+    div(
+      generalSettings,
+      child <--
+        Signal.fromFuture(api.jvmInfos()).map:
+          case Some(j) =>
+            val readableTotalMemory = CoreUtils.readableByteCount(j.totalMemory)
+            div(flexColumn,
+              div(flexRow,
+                div(cls := "smallText", "Processors"),
+                div(cls := "bigValue", div(j.processorAvailable.toString))
+              ),
+              div(
+                flexRow,
+                div(cls := "smallText", "Allocated memory (%)"),
+                div(cls := "bigValue", div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"))
+              ),
+              div(
+                flexRow,
+                div(cls := "smallText", div(s"Total memory (${readableTotalMemory.units})")),
+                div(cls := "bigValue", div(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"))
+              ),
+              div(
+                flexRow,
+                div(cls := "smallText", "Java version"),
+                div(flexColumn,
+                  div(s"${j.javaVersion}", cls := "bigValue"),
+                  div(s"${j.jvmImplementation}", cls := "bigValue", fontSize := "22", textAlign.right)
                 ),
-                div(
-                  flexRow,
-                  div(cls := "smallText", "Allocated memory (%)"),
-                  div(cls := "bigValue", div(s"${(j.allocatedMemory.toDouble / j.totalMemory * 100).toInt}"))
-                ),
-                div(
-                  flexRow,
-                  div(cls := "smallText", div(s"Total memory (${readableTotalMemory.units})")),
-                  div(cls := "bigValue", div(s"${CoreUtils.dropDecimalIfNull(readableTotalMemory.bytes)}"))
-                ),
-                div(
-                  flexRow,
-                  div(cls := "smallText", "Java version"),
-                  div(flexColumn,
-                    div(s"${j.javaVersion}", cls := "bigValue"),
-                    div(s"${j.jvmImplementation}", cls := "bigValue", fontSize := "22", textAlign.right)
-                  ),
-                )
               )
-            case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
-          }
-        }
-      )
+            )
+          case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
     )
+
 
   def resetPasswordButton(using panels: Panels) =
     serverActions(
@@ -152,13 +117,36 @@ object SettingsView:
     s"/${restartRoute}"
   )
 
+  def removeContainerCacheButton(using api: ServerAPI, basePath: BasePath) =
+    val disableButton = Var(false)
+    button(
+      btn_danger,
+      marginBottom := "10px",
+      "Remove Container Cache",
+      disabled <-- disableButton,
+      onClick --> { _ =>
+        disableButton.set(true)
+        api.removeContainerCache().andThen: _ =>
+          disableButton.set(false)
+      }
+    )
+
+
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    val jvmInfos: Var[Boolean] = Var(false)
+    def jvmInfoButton(using api: ServerAPI, basePath: BasePath) =
+      button("JVM stats", btn_secondary, marginBottom := "10px", glyph_stats, onClick --> jvmInfos.update(!_))
+
     div(cls := "settingButtons",
       version,
       jvmInfoButton,
-      jvmInfosDiv,
+      child <--
+        jvmInfos.signal.map:
+          case true => jvmInfosDiv
+          case false => emptyNode,
+      removeContainerCacheButton,
       resetPasswordButton,
       shutdownButton,
-      restartButton
+      restartButton,
     )
 

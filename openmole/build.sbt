@@ -766,6 +766,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   openmoleProject,
   openmoleDSL,
   batch,
+  container,
   openmoleStream,
   txtmark,
   openmoleCrypto,

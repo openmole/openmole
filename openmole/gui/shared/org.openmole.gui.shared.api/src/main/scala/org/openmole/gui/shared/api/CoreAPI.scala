@@ -80,6 +80,7 @@ trait CoreAPI extends RESTAPI:
   val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
     errorEndpoint(get(path / prefix / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
+
   val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
 
@@ -194,6 +195,10 @@ trait CoreAPI extends RESTAPI:
 
   val clearNotification: ErrorEndpoint[Seq[Long], Unit] =
     errorEndpoint(post(path / prefix / "application" / "clear-notification", jsonRequest[Seq[Long]]), ok(jsonResponse[Unit]))
+
+  val removeContainerCache: ErrorEndpoint[Unit, Unit] =
+    errorEndpoint(post(path / prefix / "application" / "remove-container-cache", jsonRequest[Unit]), ok(jsonResponse[Unit]))
+
 
   //def mdToHtml(safePath: SafePath): String
   val mdToHtml: ErrorEndpoint[SafePath, String] =

@@ -285,3 +285,6 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
     notification.clear()
     notification.addAll(kept)
     Future.successful(())
+
+  override def removeContainerCache()(using BasePath): Future[Unit] = Future.successful(())
+
