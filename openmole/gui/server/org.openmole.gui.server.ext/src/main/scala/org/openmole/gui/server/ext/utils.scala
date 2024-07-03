@@ -29,10 +29,8 @@ object utils:
 
   def pluginUpdoadDirectory(tmpDirectory: String)(implicit newFile: TmpDirectory) = newFile.directory / tmpDirectory
 
-  def webUIDirectory(implicit workspace: Workspace) = workspace.location /> "webui"
-
   def projectsDirectory(implicit workspace: Workspace) =
-    val old = webUIDirectory / "projects"
+    val old = workspace.location / "webui" / "projects"
     val newProjects = workspace.userDir / "projects"
     if old.exists() then old.move(newProjects)
     newProjects
