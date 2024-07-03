@@ -108,9 +108,15 @@ function run {
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
      --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
-     "${ARGS[@]}" "${SCRIPT_ARGS[@]}"
+     "${ARGS[@]}" "${SCRIPT_ARGS[@]}" &
 
+  OM_PID=$!
+
+  trap 'kill -TERM $OM_PID' TERM INT
+
+  wait $OM_PID
   RET=$?
+
   rm -rf "${CONFIGDIR}"
 }
 

@@ -257,9 +257,11 @@ object Application extends JavaLogger {
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               val s = newServer.start()
-              registerSignalCatcher(() => s.stop())
+              registerSignalCatcher: si =>
+                logger.info(s"Received signal $si, shutting down")
+                s.stop()
 
-              if (config.browse && !config.remote) browse(url)
+              if config.browse && !config.remote then browse(url)
 
               logger.info(
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
@@ -272,7 +274,6 @@ object Application extends JavaLogger {
                 org.openmole.core.project.OpenMOLEREPL.warmup()
 
               warmup()
-
 
               s.join() match
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
@@ -337,9 +338,9 @@ object Application extends JavaLogger {
   }
 
 
-  def registerSignalCatcher(f: () => Unit): Unit =
+  def registerSignalCatcher(f: sun.misc.Signal => Unit): Unit =
     import sun.misc.*
-    val handler: SignalHandler = _ => f()
+    val handler: SignalHandler = s => f(s)
     sun.misc.Signal.handle(new Signal("TERM"), handler)
     sun.misc.Signal.handle(new Signal("INT"), handler)
 
