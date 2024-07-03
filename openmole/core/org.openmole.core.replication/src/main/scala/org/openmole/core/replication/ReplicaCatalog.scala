@@ -40,10 +40,9 @@ object ReplicaCatalog extends JavaLogger {
   val LockTimeout = PreferenceLocation("ReplicaCatalog", "LockTimeout", Some(1 minutes))
   val CheckFileExistsInterval = PreferenceLocation("ReplicaCatalog", "CheckFileExistsInterval", Some(30 minutes))
 
-  def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog = {
-    val dbDirectory = org.openmole.core.db.dbDirectory(workspace.location)
+  def apply(workspace: Workspace)(implicit preference: Preference): ReplicaCatalog =
+    val dbDirectory = org.openmole.core.db.dbDirectory(workspace.persistentDir)
     new ReplicaCatalog(org.openmole.core.db.databaseServer(dbDirectory, preference(LockTimeout)), preference)
-  }
 
   def apply(database: Database)(implicit preference: Preference): ReplicaCatalog =
     new ReplicaCatalog(database, preference)
