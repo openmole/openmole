@@ -299,26 +299,11 @@ class ExecutionPanel:
       (ids.map(id => id -> execs(id)).toMap, cleanIds)
 
 
-    val forceUpdate = Var(0)
     @volatile var queryingState = false
-
-    def triggerStateUpdate = forceUpdate.update(_ + 1)
-
     def queryState =
       queryingState = true
       try for executionData <- api.executionState() yield executionData.map { e => e.id -> toExecDetails(e, panels) }.toMap
       finally queryingState = false
-
-    def delay(milliseconds: Int): scala.concurrent.Future[Unit] =
-      val p = scala.concurrent.Promise[Unit]()
-      setTimeout(milliseconds) {
-        p.success(())
-      }
-      p.future
-
-
-    val initialDelay = Signal.fromFuture(delay(1000))
-    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined).toSignal(0)
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
       div(columnFlex, marginTop := "20px",
@@ -446,12 +431,18 @@ class ExecutionPanel:
           case None => div()
       )
 
+    val forceUpdate = Var(0)
+    def triggerStateUpdate = forceUpdate.update(_ + 1)
+
+    val initialUpdate = EventStream.delay(500)
+    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined)
+
     div(
       columnFlex, width := "100%", marginTop := "20",
       div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> panels.closeExpandable),
-      (initialDelay combineWith periodicUpdate combineWith forceUpdate.signal).toObservable -->
-        Observer: _ =>
-          if !queryingState
+      (initialUpdate.startWithNone combineWith periodicUpdate.startWithNone combineWith forceUpdate.signal).toObservable -->
+        Observer[(Option[Unit], Option[Int], Int)]: (i, p, u) =>
+          if !queryingState && (u >= 1 || i.isDefined)
           then
             queryState.foreach: allDetails =>
               val (d, toClean) = filterExecutions(allDetails)
@@ -492,7 +483,7 @@ class ExecutionPanel:
             )
           )
       ,
-      showExpander.toObservable --> Observer { e => if e == None then triggerStateUpdate },
+      showExpander.toObservable.distinct --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable -->
         Observer: _ =>
           showControls.set(false)
