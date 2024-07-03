@@ -127,13 +127,13 @@ class Console(script: Option[String] = None) {
 
   def commandsName = "_commands_"
 
-  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(implicit services: Services): Int = {
-    if (splash) {
+  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(implicit services: Services): Int =
+    if splash
+    then
       println(consoleSplash)
       println(consoleUsage)
-    }
 
-    script match {
+    script match
       case None ⇒
         import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
@@ -154,8 +154,6 @@ class Console(script: Option[String] = None) {
               case Success(_) ⇒
                 ExitCodes.ok
           case Left(c) => c
-    }
-  }
 
   def load(script: File, args: Seq[String], workDirectory: Option[File])(implicit services: Services): Either[Int, Console.CompiledDSL] =
     val runServices = {
