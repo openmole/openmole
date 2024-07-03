@@ -52,13 +52,11 @@ import scala.util.{ Failure, Success, Try }
 
 object GUIServerServices {
 
-  case class ServicesProvider(guiServices: GUIServerServices, cypherProvider: AtomicReference[Cypher]) extends Services {
+  case class ServicesProvider(guiServices: GUIServerServices) extends Services:
     implicit def services: GUIServerServices = guiServices
-    implicit def cypher: Cypher = cypherProvider.get()
     export guiServices.*
-  }
 
-  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level]) = {
+  def apply(workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level], password: Option[String]) =
     implicit val ws: Workspace = workspace
     implicit val preference: Preference = org.openmole.core.services.Services.preference(ws)
     implicit val newFile: TmpDirectory = TmpDirectory(workspace)
@@ -75,19 +73,18 @@ object GUIServerServices {
     implicit val replicaCatalog: ReplicaCatalog = ReplicaCatalog(ws)
     implicit val loggerService: LoggerService = LoggerService(logLevel, file = Some(workspace.location / Workspace.logLocation), fileLevel = logFileLevel)
     implicit val timeService: TimeService = TimeService()
+    given Cypher = Cypher(password)
 
     new GUIServerServices()
-  }
 
   def dispose(services: GUIServerServices) =
     scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level])(f: GUIServerServices ⇒ T) = {
-    val services = GUIServerServices(workspace, httpProxy, logLevel, logFileLevel)
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level], password: Option[String])(f: GUIServerServices ⇒ T) =
+    val services = GUIServerServices(workspace, httpProxy, logLevel, logFileLevel, password)
     try f(services)
     finally dispose(services)
-  }
 
 }
 
@@ -97,7 +94,7 @@ class GUIServerServices(implicit
   val threadProvider:      ThreadProvider,
   val seeder:              Seeder,
   val replicaCatalog:      ReplicaCatalog,
-  val tmpDirectory:             TmpDirectory,
+  val tmpDirectory:        TmpDirectory,
   val authenticationStore: AuthenticationStore,
   val serializerService:   SerializerService,
   val fileService:         FileService,
@@ -107,7 +104,8 @@ class GUIServerServices(implicit
   val outputRedirection:   OutputRedirection,
   val networkService:      NetworkService,
   val loggerService:       LoggerService,
-  val timeService:         TimeService
+  val timeService:         TimeService,
+  val cypher:              Cypher
 )
 
 object GUIServlet:

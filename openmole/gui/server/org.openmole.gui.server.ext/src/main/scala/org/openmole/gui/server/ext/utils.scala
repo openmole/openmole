@@ -230,7 +230,7 @@ object utils:
         case t: Throwable ⇒ Failure(t)
     res
 
-  def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.persistentDir / "keys"
+  def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.userDir / "keys"
 
   def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] =
     val file = safePathToFile(safePath)

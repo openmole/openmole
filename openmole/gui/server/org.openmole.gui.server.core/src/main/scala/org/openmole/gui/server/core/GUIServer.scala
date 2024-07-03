@@ -81,9 +81,8 @@ object GUIServer:
 
   lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
-  def initialisePreference(preference: Preference) = {
+  def initialisePreference(preference: Preference) =
     if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
-  }
 
   def lockFile(implicit workspace: Workspace) = 
     val file = workspace.persistentDir / "GUI.lock"
@@ -93,15 +92,6 @@ object GUIServer:
   def urlFile(implicit workspace: Workspace) = workspace.persistentDir / "GUI.url"
 
   val servletArguments = "servletArguments"
-
-  case class ServletArguments(
-    services:           GUIServerServices,
-    password:           Option[String],
-    applicationControl: ApplicationControl,
-    webapp:             File,
-    extraHeader:        String,
-    subDir:             Option[String]
-  )
 
   def waitingOpenMOLEContent = """
     |<html>
@@ -209,7 +199,7 @@ class GUIServer(
         () ⇒ control.stop()
       )
 
-    val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher(password)))
+    val serviceProvider = GUIServerServices.ServicesProvider(services)
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     apiImpl.activatePlugins
 

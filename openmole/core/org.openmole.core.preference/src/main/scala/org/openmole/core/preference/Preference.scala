@@ -13,7 +13,6 @@ object Preference:
   def passwordTestString = "test"
   def location = "preferences"
 
-
   def memory() =
     val pref = new MemoryPreference
     pref setPreference (uniqueID, UUID.randomUUID.toString)
@@ -59,39 +58,32 @@ trait Preference:
     preferenceOption(location) getOrElse (throw new UserBadDataError(s"No value found for $location and no default is defined for this property."))
 
   def preferenceOption[T: ConfigurationString](location: PreferenceLocation[T])(implicit cypher: Cypher): Option[T] =
-    location match {
+    location match
       case c: ClearPreferenceLocation[T]    ⇒ preferenceOption(c)
       case c: CypheredPreferenceLocation[T] ⇒ preferenceOption(c)
-    }
 
-  def preferenceOption[T](location: ClearPreferenceLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized {
+  def preferenceOption[T](location: ClearPreferenceLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized:
     val confVal = getRawPreference(location)
     confVal.map(fromString.fromString) orElse location.default
-  }
 
-  def preferenceOption[T](location: CypheredPreferenceLocation[T])(implicit fromString: ConfigurationString[T], cypher: Cypher): Option[T] = synchronized {
+  def preferenceOption[T](location: CypheredPreferenceLocation[T])(implicit fromString: ConfigurationString[T], cypher: Cypher): Option[T] = synchronized:
     val confVal = getRawPreference(location)
     def v = confVal.map(cypher.decrypt(_))
     v.map(fromString.fromString) orElse location.default
-  }
 
   def setPreference[T: ConfigurationString](location: PreferenceLocation[T], value: T)(implicit cypher: Cypher): Unit =
-    location match {
+    location match
       case c: ClearPreferenceLocation[T]    ⇒ setPreference(c, value)
       case c: CypheredPreferenceLocation[T] ⇒ setPreference(c, value)
 
-    }
-
-  def setPreference[T](location: ClearPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized {
+  def setPreference[T](location: ClearPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized:
     val v = configurationString.toString(value)
     setRawPreference(location, v)
-  }
 
-  def setPreference[T](location: CypheredPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T], cypher: Cypher) = synchronized {
+  def setPreference[T](location: CypheredPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T], cypher: Cypher) = synchronized:
     val v = configurationString.toString(value)
     val prop = cypher.encrypt(v)
     setRawPreference(location, prop)
-  }
 
   def updatePreference[T: ConfigurationString](location: PreferenceLocation[T])(value: Option[T] => Option[T])(implicit cypher: Cypher) = synchronized {
     val v = preferenceOption(location)
@@ -123,14 +115,13 @@ case class FilePreference(configurationFile: ConfigurationFile) extends Preferen
 
   def clearPreference[T](location: PreferenceLocation[T]) = synchronized { configurationFile.clearValue(location.group, location.name) }
 
-  def clear() = {
+  def clear() =
     val uniqueId = getRawPreference(Preference.uniqueID)
     try configurationFile.clear()
     finally uniqueId.foreach(prop ⇒ setPreference(Preference.uniqueID, prop))
     //      _password = None
     //      setPreference(Workspace.uniqueIDLocation, uniqueId)
     //    }
-  }
 
 
 class MemoryPreference() extends Preference:

@@ -215,45 +215,21 @@ object Application extends JavaLogger {
         implicit val preference = Services.preference(workspace)
         displayErrors(loadPlugins)
 
-        val passwordString =
-          password match
-            case Some(p) ⇒ p
-            case None    ⇒ Console.initPassword
+        Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel): services ⇒
+          Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
+          val server = new RESTServer(config.port, !config.remote, services)
+          server.run()
 
-        Console.chosePassword(passwordString)
-
-        if !Console.testPassword(passwordString)
-        then
-          println("Password is incorrect")
-          Console.ExitCodes.incorrectPassword
-        else
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel): services ⇒
-            Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
-            val server = new RESTServer(config.port, !config.remote, services)
-            server.run()
-
-          Console.ExitCodes.ok
+        Console.ExitCodes.ok
       case ConsoleMode ⇒
         implicit val preference = Services.preference(workspace)
+        Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
+        Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
+          Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
+          val console = new Console(config.scriptFile)
+          console.run(config.args, config.consoleWorkDirectory)
+        }
 
-        val passwordString =
-          password match
-            case Some(p) ⇒ p
-            case None    ⇒ Console.initPassword
-
-        Console.chosePassword(passwordString)
-
-        if (!Console.testPassword(passwordString))
-        then
-          println("Password is incorrect")
-          Console.ExitCodes.incorrectPassword
-        else
-          Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, passwordString, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
-            Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
-            val console = new Console(config.scriptFile)
-            console.run(config.args, config.consoleWorkDirectory)
-          }
       case GUIMode ⇒
         implicit val preference = Services.preference(workspace)
 
@@ -277,7 +253,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
             
-            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel): services ⇒
+            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel, config.password): services ⇒
               Runtime.getRuntime.addShutdownHook(thread(GUIServerServices.dispose(services)))
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 

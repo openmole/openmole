@@ -94,15 +94,6 @@ object SettingsView:
           case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
     )
 
-
-  def resetPasswordButton(using panels: Panels) =
-    serverActions(
-      "Reset password",
-      glyph_lock,
-      "Careful! Resetting your password will wipe out all your preferences! Reset anyway?",
-      s"/${resetPasswordRoute}"
-    )
-
   def shutdownButton(using panels: Panels) = serverActions(
     "Shutdown",
     glyph_off,
@@ -145,7 +136,6 @@ object SettingsView:
           case true => jvmInfosDiv
           case false => emptyNode,
       removeContainerCacheButton,
-      resetPasswordButton,
       shutdownButton,
       restartButton,
     )

@@ -45,12 +45,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     val basePath = dom.document.location.pathname.split("/").dropRight(1).mkString("/")
     BasePath(if basePath.isEmpty then None else Some(basePath))
 
-  def connection() =
-    render(
-      dom.document.body,
-      panels.connection.render
-    )
-
   def stopped(): Unit =
     given BasePath = basePath
 

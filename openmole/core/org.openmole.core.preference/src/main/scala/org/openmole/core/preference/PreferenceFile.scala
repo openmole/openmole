@@ -31,90 +31,71 @@ import squants.information.*
 import java.io.StringWriter
 
 
-object ConfigurationFile {
-  def apply(file: File) = {
+object ConfigurationFile:
+
+  def apply(file: File) =
     if (file.createNewFile) file.setPosixMode("rw-------")
     new ConfigurationFile(file)
-  }
 
-}
 
-class ConfigurationFile private (val file: File) {
+class ConfigurationFile private (val file: File):
 
   @transient private lazy val lock = new ReentrantReadWriteLock()
 
-  @transient private lazy val builder = {
+  @transient private lazy val builder =
     val params = new Parameters
     new PropertiesConfiguration()
     new ReloadingFileBasedConfigurationBuilder(classOf[PropertiesConfiguration]).configure(params.fileBased().setFile(file))
-  }
 
   private def config = withThreadClassLoader(classOf[PropertiesConfiguration].getClassLoader) { builder.getConfiguration }
 
-  def value(group: String, name: String): Option[String] = lock.read {
+  def value(group: String, name: String): Option[String] = lock.read:
     Option(config.getString(s"$group.$name"))
-  }
 
-  def setValue(group: String, name: String, value: String) = lock.write {
+  def setValue(group: String, name: String, value: String) = lock.write:
     config.setProperty(s"$group.$name", value)
     builder.save()
-  }
 
-  def clearValue(group: String, name: String) = lock.write {
+  def clearValue(group: String, name: String) = lock.write:
     config.clearProperty(s"$group.$name")
     builder.save()
-  }
 
-  def clear(): Unit = lock.write {
+  def clear(): Unit = lock.write:
     file.content = ""
     builder.resetResult()
-  }
 
-}
 
-object ConfigurationString {
+object ConfigurationString:
 
-  given ConfigurationString[String] =
-    new ConfigurationString[String] {
-      def toString(t: String): String = t
-      def fromString(s: String) = implicitly[FromString[String]].apply(s)
-    }
+  given ConfigurationString[String] with
+    def toString(t: String): String = t
+    def fromString(s: String) = implicitly[FromString[String]].apply(s)
 
-  given ConfigurationString[Boolean] =
-    new ConfigurationString[Boolean] {
-      def toString(t: Boolean): String = t.toString
-      def fromString(s: String) = implicitly[FromString[Boolean]].apply(s)
-    }
 
-  given ConfigurationString[Int] =
-    new ConfigurationString[Int] {
-      override def toString(t: Int): String = t.toString
-      override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
-    }
+  given ConfigurationString[Boolean] with
+    def toString(t: Boolean): String = t.toString
+     def fromString(s: String) = implicitly[FromString[Boolean]].apply(s)
 
-  given ConfigurationString[Long] =
-    new ConfigurationString[Long] {
-      override def toString(t: Long): String = t.toString
-      override def fromString(s: String) = implicitly[FromString[Long]].apply(s)
-    }
+  given ConfigurationString[Int] with
+    override def toString(t: Int): String = t.toString
+    override def fromString(s: String) = implicitly[FromString[Int]].apply(s)
 
-  given ConfigurationString[Time] =
-    new ConfigurationString[Time] {
-      override def toString(t: Time): String = t.toString
-      override def fromString(s: String) = implicitly[FromString[Time]].apply(s)
-    }
+  given ConfigurationString[Long] with
+    override def toString(t: Long): String = t.toString
+    override def fromString(s: String) = implicitly[FromString[Long]].apply(s)
 
-  given ConfigurationString[Information] =
-    new ConfigurationString[Information] {
-      override def toString(i: Information): String = i.toString
-      override def fromString(s: String) = implicitly[FromString[Information]].apply(s)
-    }
+  given ConfigurationString[Time] with
+    override def toString(t: Time): String = t.toString
+    override def fromString(s: String) = implicitly[FromString[Time]].apply(s)
 
-  given ConfigurationString[Double] =
-    new ConfigurationString[Double] {
-      def toString(t: Double): String = t.toString
-      def fromString(s: String) = implicitly[FromString[Double]].apply(s)
-    }
+  given ConfigurationString[Information] with
+    override def toString(i: Information): String = i.toString
+    override def fromString(s: String) = implicitly[FromString[Information]].apply(s)
+
+  given ConfigurationString[Double] with
+    def toString(t: Double): String = t.toString
+    def fromString(s: String) = implicitly[FromString[Double]].apply(s)
+
 
   given [T](using cs: ConfigurationString[T]): ConfigurationString[Seq[T]] = new ConfigurationString[Seq[T]]:
     import au.com.bytecode.opencsv.{CSVParser, CSVWriter}
@@ -133,10 +114,8 @@ object ConfigurationString {
         val parser = new CSVParser()
         parser.parseLine(s).toSeq.map(cs.fromString)
 
-}
 
-trait ConfigurationString[T] {
+trait ConfigurationString[T]:
   def toString(t: T): String
   def fromString(s: String): T
-}
 

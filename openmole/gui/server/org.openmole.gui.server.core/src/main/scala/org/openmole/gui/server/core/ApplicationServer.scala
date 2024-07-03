@@ -53,13 +53,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
   val routes: HttpRoutes[IO] = HttpRoutes.of:
     case GET -> Root / shared.api.appRoute =>
       def application = GUIServlet.html(s"${GUIServlet.webpackLibrary}.run();", GUIServlet.cssFiles(webapp), extraHeader)
-
-      if(!passwordIsChosen && passwordProvided) Preference.setPasswordTest(services.preference, services.cypher)
-
-      if (!passwordIsChosen && !passwordProvided) ApplicationServer.redirect(shared.api.connectionRoute)
-      else
-        if (passwordIsCorrect) Ok.apply(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
-        else ApplicationServer.redirect(shared.api.connectionRoute)
+       Ok.apply(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case GET -> Root / shared.api.connectionRoute =>
       if (passwordIsChosen && passwordIsCorrect) ApplicationServer.redirect(shared.api.appRoute)
       else if (passwordIsChosen) {
@@ -84,29 +78,7 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
     case GET -> Root / shared.api.shutdownRoute =>
       val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.stopped();", GUIServlet.cssFiles(webapp), extraHeader)
       Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
-    case req @ POST -> Root / shared.api.connectionRoute =>
-
-      //      response.setHeader("Access-Control-Allow-Origin", "*")
-//      response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
-//      response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
-
-      req.decode[UrlForm]: m =>
-        val password = m.getFirstOrElse("password", "")
-        services.cypherProvider.set(Cypher(password))
-        passwordIsCorrect match
-          case true ⇒ ApplicationServer.redirect(shared.api.appRoute)
-          case _ ⇒ ApplicationServer.redirect(shared.api.connectionRoute)
-    case req@POST -> Root / org.openmole.gui.shared.api.`resetPasswordRoute` =>
-      req.decode[UrlForm]: m =>
-        val password = m.getFirstOrElse("password", "")
-        val passwordAgain = m.getFirstOrElse("passwordagain", "")
-
-        if password == passwordAgain
-        then
-          org.openmole.core.preference.Preference.setPasswordTest(services.preference, Cypher(password))
-          services.cypherProvider.set(Cypher(password))
-
-        ApplicationServer.redirect(shared.api.connectionRoute)
+    case req @ POST -> Root / shared.api.connectionRoute => ApplicationServer.redirect(shared.api.appRoute)
     case request@GET -> Root / "js" / "snippets" / path =>
       StaticFile.fromFile(new File(webapp, s"js/$path"), Some(request)).getOrElseF(NotFound())
     case request @ GET -> "js" /: path =>

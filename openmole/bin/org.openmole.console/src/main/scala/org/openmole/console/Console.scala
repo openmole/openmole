@@ -86,14 +86,12 @@ object Console extends JavaLogger {
       password
     }
 
-  object ExitCodes {
+  object ExitCodes:
     def ok = 0
-    def incorrectPassword = 1
     def scriptDoesNotExist = 2
     def compilationError = 3
     def executionError = 6
     def restart = 254
-  }
 
   def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)], interactive: Boolean) = {
     val res = load
