@@ -30,7 +30,7 @@ class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val script = workDirectory / "script.oms"
 
 
-    Services.withServices(workDirectory, "") { implicit services =>
+    Services.withServices(workDirectory) { implicit services =>
       val begin =
         """
           |def theFunction(i: Int) = i * 2

@@ -39,7 +39,7 @@ package services {
      * @tparam T
      * @return
      */
-    def withServices[T](workspace: File, password: Option[String], httpProxy: Option[String] = None, logLevel: Option[Level] = None, logFileLevel: Option[Level] = None)(f: Services ⇒ T) = {
+    def withServices[T](workspace: File, password: Option[String] = None, httpProxy: Option[String] = None, logLevel: Option[Level] = None, logFileLevel: Option[Level] = None)(f: Services ⇒ T) = {
       val services = Services(workspace, password, httpProxy, logLevel, logFileLevel)
       try f(services)
       finally dispose(services)
