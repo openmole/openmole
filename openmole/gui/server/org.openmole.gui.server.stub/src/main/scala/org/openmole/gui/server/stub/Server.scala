@@ -44,8 +44,8 @@ import scala.concurrent.duration.Duration
 
   OutputManager.uninstall
   val location = org.openmole.core.workspace.defaultOpenMOLEDirectory / "stub"
-  val services =  GUIServerServices(Workspace(location), None, None, None)
-  val serviceProvider = GUIServerServices.ServicesProvider(services, new AtomicReference(Cypher("password")))
+  val services =  GUIServerServices(Workspace(location), None, None, None, None)
+  val serviceProvider = GUIServerServices.ServicesProvider(services)
   val apiImpl = new ApiImpl(serviceProvider, None)
   //apiImpl.activatePlugins
 
