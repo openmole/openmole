@@ -1381,10 +1381,8 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """chmod +x /openmole/openmole && \
         |ln -s /openmole/openmole /usr/bin/openmole""".stripMargin)
-    runRaw(
-      """echo '#!/bin/bash' > /usr/bin/openmole-docker && \
-        |echo 'export HOME=/var/openmole && mkdir -p $HOME && chown openmole:openmole $HOME && sudo -u openmole openmole --mem 2G --port 8080 --remote $@' >>/usr/bin/openmole-docker && \
-        |chmod +x-w /usr/bin/openmole-docker""".stripMargin)
+    copy((Compile / resourceDirectory).value / "openmole-docker", "/usr/bin/openmole-docker")
+    runRaw("""chmod +x-w /usr/bin/openmole-docker""".stripMargin)
     volume("/var/openmole")
     expose(8443)
     cmdShell("openmole-docker")

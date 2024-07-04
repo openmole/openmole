@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export HOME=/var/openmole && \
+mkdir -p $HOME && \
+chown openmole:openmole $HOME
+
+sudo -u openmole openmole --mem 2G --port 8080 --remote $@ &
+
+OM_PID=$!
+trap 'kill -TERM $OM_PID' TERM INT
+wait $OM_PID
