@@ -7,7 +7,7 @@ import org.openmole.gui.client.ext.ClientUtil.*
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 import org.openmole.gui.client.ext.*
-import org.openmole.gui.client.core.files.FileDisplayer
+import org.openmole.gui.client.core.files.{FileDisplayer, FileToolBox}
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.shared.api.*
@@ -122,6 +122,9 @@ object SettingsView:
       }
     )
 
+  def dowloadAllFiles =
+    import ServerFileSystemContext.Project
+    a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "Download All"), href := org.openmole.gui.shared.api.downloadFile(SafePath.root(Project)))
 
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     val jvmInfos: Var[Boolean] = Var(false)
@@ -138,5 +141,9 @@ object SettingsView:
       removeContainerCacheButton,
       shutdownButton,
       restartButton,
+      dowloadAllFiles
     )
+
+
+
 
