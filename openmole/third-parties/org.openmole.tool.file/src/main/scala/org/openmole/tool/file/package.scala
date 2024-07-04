@@ -159,14 +159,12 @@ package file {
             case Success(_) ⇒
             case Failure(_) ⇒ DirUtils.move(file, to)
 
-      def forceFileDelete = wrapError {
+      def forceFileDelete = wrapError:
         try Files.deleteIfExists(file)
-        catch {
+        catch
           case t: Throwable ⇒
             FileTools.setAllPermissions(file)
             Files.deleteIfExists(file)
-        }
-      }
 
       def recursiveDelete: Unit = wrapError { DirUtils.deleteIfExists(file) }
 

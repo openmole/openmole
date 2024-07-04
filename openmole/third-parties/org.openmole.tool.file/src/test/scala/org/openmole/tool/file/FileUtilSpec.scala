@@ -25,15 +25,13 @@ import org.scalatest._
 
 class FileUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  "A string" should "be appended to the stream" in {
+  "A string" should "be appended to the stream" in:
     val t = "TestString"
     val sis = new StringOutputStream
-    try {
+    try
       sis.append(t)
       sis.toString should equal(t)
-    }
     finally sis.close()
-  }
 
   "A string" should "be appended to the file" in {
     val file = Files.createTempFile("test", ".tmp").toFile

@@ -1,8 +1,9 @@
 package org.openmole.tool.file
 
 import java.io.IOException
-import java.nio.file.{ CopyOption, FileVisitOption, Files, Path }
-import java.util.{ EnumSet, Objects, Set }
+import java.nio.file.{CopyOption, FileVisitOption, Files, Path}
+import java.util.{EnumSet, Objects, Set}
+import scala.annotation.tailrec
 
 /*
  * Copyright (C) 2021 Romain Reuillon
@@ -76,7 +77,7 @@ object DirUtils:
    * @throws IOException
    */
   @throws[IOException]
-  def delete(p: Path) =
+  def delete(p: Path): Unit =
     val file = p.toFile
     if !file.toFile.isSymbolicLink && file.isDirectory
     then
@@ -90,11 +91,9 @@ object DirUtils:
       for
         s ← list
       do
-        s.isDirectory match
-          case true ⇒
-            s.recursiveDelete
-            s.forceFileDelete
-          case false ⇒ s.forceFileDelete
+        if s.isDirectory
+        then delete(s.toPath)
+        else s.forceFileDelete
 
     file.forceFileDelete
 
