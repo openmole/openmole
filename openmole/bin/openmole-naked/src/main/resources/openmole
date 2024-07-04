@@ -101,8 +101,7 @@ fi
 if [[ $(ulimit -S -n) -lt 4096 ]]; then ulimit -S -n 4096 2>/dev/null; fi
 
 function run {
-  mkdir -p "${WORKSPACE}/.tmp/"
-  CONFIGDIR=${WORKSPACE}/.tmp/`date +%s`_$RANDOM
+  CONFIGDIR=$(mktemp -d)
 
   $JAVA -Xss8M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area="${CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true "-Xmx${MEM}" "${FLAGS[@]}" \
      -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
