@@ -110,15 +110,18 @@ function run {
      -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
      "${ARGS[@]}" "${SCRIPT_ARGS[@]}" &
 
-  OM_PID=$!
-
-  trap 'kill -TERM $OM_PID' TERM INT
-
-  wait $OM_PID
+  wait $(jobs -p)
   RET=$?
 
   rm -rf "${CONFIGDIR}"
 }
+
+function _term(){
+  kill -TERM $(jobs -p)
+  wait $(jobs -p)
+}
+
+trap _term SIGTERM SIGINT
 
 run
 while [[ $RET -eq 254 ]]; do
