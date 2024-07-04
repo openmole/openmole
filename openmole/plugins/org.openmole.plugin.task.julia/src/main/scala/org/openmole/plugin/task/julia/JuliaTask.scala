@@ -40,7 +40,7 @@ object JuliaTask:
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
-    version:                String                             = "1.6.1",
+    version:                String                             = "1.6.7",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
