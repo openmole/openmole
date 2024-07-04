@@ -124,7 +124,7 @@ object SettingsView:
 
   def dowloadAllFiles =
     import ServerFileSystemContext.Project
-    a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "Download All"), href := org.openmole.gui.shared.api.downloadFile(SafePath.root(Project)))
+    a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "Download All"), href := org.openmole.gui.shared.api.downloadFile(SafePath.root(Project), includeTopDirectoryInArchive = Some(false)))
 
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     val jvmInfos: Var[Boolean] = Var(false)
