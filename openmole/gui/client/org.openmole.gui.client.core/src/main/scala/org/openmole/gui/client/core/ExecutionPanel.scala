@@ -1,5 +1,7 @@
 package org.openmole.gui.client.core
 
+import com.raquo.laminar.DomApi
+
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.{Failure, Success}
 import org.openmole.gui.client.ext.*
@@ -386,8 +388,10 @@ class ExecutionPanel:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
             val size = Var(1000)
+            val raw: Var[Boolean] = Var(false)
+
             div(
-              children <--
+              child <--
                 size.signal.flatMap: sizeValue =>
                   Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
                     case Some(output) =>
@@ -395,36 +399,67 @@ class ExecutionPanel:
                       val convert = scalajs.js.Dynamic.newInstance(Convert)()
                       convert.options.newline = true
 
-                      val outputDiv = com.raquo.laminar.api.L.div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll")
+                      def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
 
-                      def replaceSpace(s: String) = s.replace(" ", "&nbsp;")
+                      lazy val ansiOutputDiv =
+                        val d = baseOutputDiv
+                        d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
+                        d
 
-                      outputDiv.ref.innerHTML = convert.toHtml(replaceSpace(output.output)).asInstanceOf[String]
+                      lazy val rawOutput =
+                        val d = baseOutputDiv
+                        d.ref.innerHTML =  output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
+                        d
 
-                      //val textArea = execTextArea(output.output).amend(cls := "console")
+                      def outputDiv =
+                        div(
+                          child <-- raw.signal.map:
+                            case false => ansiOutputDiv
+                            case true => rawOutput
+                        )
+
+                      def rawDiv =
+                        div(display.flex, flexDirection.column, width := "800", height := "30",
+                          div(cursor.pointer, alignSelf.flexEnd, marginTop := "10",
+                            child <-- raw.signal.map:
+                              case true => "ansi"
+                              case false => "raw",
+                            onClick --> raw.update(!_)
+                          )
+                        )
 
                       def more =
-                        if output.listed < output.total
+                        if true //output.listed < output.total
                         then
-                          Seq(
-                            div(position := "absolute", top := "270", left := "950", cursor.pointer, textAlign := "center",
-                              i(cls := "bi bi-plus"),
-                              br(),
-                              i(fontSize := "12", s"${output.listed}/${output.total}"),
-                              onClick --> { _ => size.update(_ * 2) }
-                            )
+                          div(cursor.pointer, textAlign := "center",
+                            i(cls := "bi bi-plus"),
+                            br(),
+                            i(fontSize := "12", s"${output.listed}/${output.total}"),
+                            onClick --> { _ => size.update(_ * 2) }
                           )
-                        else Seq()
+                        else div()
 
 
                       def bottom =
-                        div(position := "absolute", top := "760", left := "973", cursor.pointer, textAlign := "center",
+                        div(/*position := "absolute", top := "760", left := "973",*/ cursor.pointer, textAlign := "center",
                           i(cls := "bi bi-caret-down"),
-                          onClick --> { _ => outputDiv.ref.scrollTop = outputDiv.ref.scrollHeight }
+                          onClick --> { _ =>
+                            if raw.now()
+                            then rawOutput.ref.scrollTop = rawOutput.ref.scrollHeight
+                            else ansiOutputDiv.ref.scrollTop = ansiOutputDiv.ref.scrollHeight
+                          }
                         )
 
-                      Seq(outputDiv) ++ more ++ Seq(bottom)
-                    case None => Seq(i(cls := "bi bi-hourglass-split", textAlign := "center"))
+                      div(
+                        display.flex, flexDirection.column, alignItems.center,
+                        height := "500",
+                        rawDiv,
+                        outputDiv,
+                        bottom,
+                        more
+                      )
+                      //outputDiv ++ more ++ Seq(bottom)
+                    case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(id, details.envStates)
