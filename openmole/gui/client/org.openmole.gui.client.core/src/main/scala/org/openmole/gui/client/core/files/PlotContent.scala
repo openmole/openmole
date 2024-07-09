@@ -188,7 +188,7 @@ object PlotContent:
 
     val content =
       div(display.flex, flexDirection.row,
-        div(display.flex, flexDirection.column,
+        div(display.flex, flexDirection.column, width := "100%",
           div(display.flex, flexDirection.row,
             (sectionStates.size match
               case 1 => div()
