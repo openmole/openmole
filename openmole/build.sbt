@@ -814,6 +814,8 @@ lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "or
   Compile / run / connectInput := true,
   Compile / run / outputStrategy := Some(StdoutOutput),
 
+  test := false,
+
   Compile / compile := {
     val targetModules = target.value / "node_modules"
 
