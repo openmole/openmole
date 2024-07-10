@@ -31,16 +31,46 @@ object JuliaTask:
   given InfoBuilder[JuliaTask] = InfoBuilder(Focus[JuliaTask](_.info))
   given MappedInputOutputBuilder[JuliaTask] = MappedInputOutputBuilder(Focus[JuliaTask](_.mapped))
 
-  def installCommands(install: Seq[String], libraries: Seq[String]): Vector[String] =
-     (install ++ Seq("""julia -e 'using Pkg; Pkg.add.([ """ + libraries.map { l ⇒ "\""+l+"\"" }.mkString(",")+"""])'""" )).toVector
+
+  object Library:
+    given Conversion[String, Library] = s => LibraryName(s)
+    given Conversion[File, Library] = f => FileLibrary(f)
+
+    case class LibraryName(v: String) extends Library
+    case class FileLibrary(f: File) extends Library
+    case class PackageSpec(url: String, rev: OptionalArgument[String] = None) extends Library
+
+    def volumes(libraries: Seq[Library]) =
+      def volume(l: Library) =
+        l match
+          case FileLibrary(f) => Some(f -> s"/root/${f.getName}")
+          case _: LibraryName | _: PackageSpec => None
+
+      libraries.flatMap(volume)
+
+
+    def installCommands(libraries: Seq[Library]): Vector[String] =
+      def command(l: Library) =
+        l match
+          case Library.FileLibrary(f) => s"""TERM=dumb julia -e 'using Pkg; Pkg.add(path = "/root/${f.getName}")'"""
+          case Library.LibraryName(name) => s"""TERM=dumb julia -e 'using Pkg; Pkg.add("$name")'"""
+          case Library.PackageSpec(url, rev) =>
+            val revString = rev.option.map(r => s""", rev = "$r"""").getOrElse("")
+            s"""TERM=dumb julia -e 'using Pkg; Pkg.add(url = "$url"$revString)'"""
+
+      libraries.map(command).toVector
+
+  sealed trait Library
+
 
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    libraries:              Seq[String]                        = Seq.empty,
+    libraries:              Seq[Library]                       = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
+    installFiles:           Seq[File]                          = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
-    version:                String                             = "1.6.7",
+    version:                String                             = "1.10.4",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -48,12 +78,13 @@ object JuliaTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                    = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                    = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    installContainerSystem: ContainerSystem                    = ContainerSystem.default,
+    clearCache:             Boolean                            = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
   new JuliaTask(
     script = script,
     arguments = arguments.option,
-    image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), installCommands(install, Seq("JSON")++libraries)),
+    image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache),
     prepare = prepare,
     errorOnReturnValue = errorOnReturnValue,
     returnValue = returnValue,

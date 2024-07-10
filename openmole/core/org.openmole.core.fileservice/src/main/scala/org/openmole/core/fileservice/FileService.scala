@@ -65,7 +65,7 @@ object FileService:
 object FileServiceCache:
   def apply()(implicit preference: Preference) = new FileServiceCache()
 
-class FileServiceCache(implicit preference: Preference) {
+class FileServiceCache(implicit preference: Preference):
   private[fileservice] val hashCache =
     CacheBuilder.newBuilder.maximumSize(preference(FileService.hashCacheSize)).
       expireAfterAccess(preference(FileService.hashCacheTime).millis, TimeUnit.MILLISECONDS).
@@ -75,34 +75,30 @@ class FileServiceCache(implicit preference: Preference) {
     CacheBuilder.newBuilder.maximumSize(preference(FileService.archiveCacheSize)).
       expireAfterAccess(preference(FileService.archiveCacheTime).millis, TimeUnit.MILLISECONDS).
       build[String, File]()
-}
 
 class FileService(implicit preference: Preference):
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
-  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: TmpDirectory) = {
-    if (file.isDirectory) newFile.withTmpFile { archive ⇒
-      file.archive(archive, time = false)
-      hashFile(archive, hashType)
-    }
+  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: TmpDirectory) =
+    if file.isDirectory
+    then
+      newFile.withTmpFile: archive ⇒
+        file.archive(archive, time = false)
+        hashFile(archive, hashType)
     else hashFile(file, hashType)
-  }
 
-  def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash = {
+  def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash =
     def hash = hashFile(if (file.isDirectory) archiveForDir(file) else file)
     fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
-  }
 
-  def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File = {
-    def archive = {
+  def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File =
+    def archive =
       val ret = newFile.newFile("archive", ".tar")
       directory.archive(ret, time = false)
       wrapRemoveOnGC(ret)
-    }
 
     fileServiceCache.archiveCache.get(directory.getAbsolutePath, archive)
-  }
 
   private val emptyDeleter = new AsynchronousDeleter(WeakReference(this))
   private val gc = new FileServiceGC(WeakReference(this))

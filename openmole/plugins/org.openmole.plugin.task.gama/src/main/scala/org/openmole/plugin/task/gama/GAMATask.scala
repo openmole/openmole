@@ -64,7 +64,7 @@ object GAMATask:
       installContainerSystem,
       image,
       installCommands,
-      volumesValue.map { (lv, cv) ⇒ lv.getAbsolutePath -> cv },
+      volumesValue.map { (lv, cv) ⇒ lv -> cv },
       error,
       clearCache = clearCache)
 

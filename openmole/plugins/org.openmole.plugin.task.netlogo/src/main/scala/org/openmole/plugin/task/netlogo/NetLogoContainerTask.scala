@@ -63,7 +63,7 @@ object NetLogoContainerTask:
     val image:  ContainerImage                   = s"openmole/netlogo:${version}"
 
     val volumesValue = volumes(script, embedWorkspace)
-    val preparedImage = ContainerTask.install(installContainerSystem, image, install, volumesValue.map { case (lv, cv) ⇒ lv.getAbsolutePath -> cv }, clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.install(installContainerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
 
     NetLogoContainerTask(
       script = script,
