@@ -104,6 +104,7 @@ class ExecutionPanel:
   val showDurationOnCores = Var(false)
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
+  val showGlobalControls = Var(false)
   val showEvironmentControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
@@ -278,7 +279,7 @@ class ExecutionPanel:
           case _ => None
     )
 
-  lazy val autoRemoveFailed = Component.Switch("remove failed", true, "autoCleanExecSwitch")
+  lazy val autoRemoveFailed = Component.Switch("remove failed", true)
 
   def render(using panels: Panels, api: ServerAPI, path: BasePath) =
     def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
@@ -470,7 +471,7 @@ class ExecutionPanel:
     def triggerStateUpdate = forceUpdate.update(_ + 1)
 
     val initialUpdate = EventStream.delay(500)
-    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined)
+    val periodicUpdate = EventStream.periodic(1000000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
@@ -490,27 +491,11 @@ class ExecutionPanel:
             div(rowFlex, justifyContent.center,
               details.toSeq.sortBy(_._2.startDate).map { (id, detailValue) => simulationBlock(id, detailValue) }
             ),
-            div(display.flex, flexDirection.column, alignItems.flexEnd,
-              div(display.flex, flexDirection.column,
-                autoRemoveFailed.element,
-                button(btn_danger, "Clean inactive", cls := "removeInactive",
-                  width := "160",
-                  onClick --> { _ =>
-                    Future.sequence:
-                      details.filter((_, d) => ExecutionDetails.State.isFinished(d.state)).map :(e, _) =>
-                        api.removeExecution(e)
-                    .andThen: _ =>
-                      triggerStateUpdate
-                  })
-
-              )
-            ),
             div(
               id.map: idValue =>
                 details.get(idValue) match
                   case Some(st) =>
                     def cancel(id: ExecutionId) = api.cancelExecution(id).andThen { case Success(_) => triggerStateUpdate }
-
                     def remove(id: ExecutionId) = api.removeExecution(id).andThen { case Success(_) => triggerStateUpdate }
 
                     div(buildExecution(idValue, st, cancel, remove))
@@ -518,6 +503,26 @@ class ExecutionPanel:
             )
           )
       ,
+      div(display.flex, flexDirection.row, alignItems.center, cls := "execGlobalControls", height := "100",
+        child <--
+          showGlobalControls.signal.map:
+            case true =>
+              div(display.flex, flexDirection.column, marginRight := "10",
+                button(btn_danger, "Clean inactive", //cls := "removeInactive",
+                  width := "180",
+                  marginBottom := "5",
+                  onClick --> { _ =>
+                    Future.sequence:
+                      details.now().filter((_, d) => ExecutionDetails.State.isFinished(d.state)).map((e, _) => api.removeExecution(e))
+                    .andThen: _ =>
+                      triggerStateUpdate
+                  }
+                ),
+                autoRemoveFailed.element.amend(width := "180", marginTop := "5")
+              )
+            case false => emptyNode,
+        div(cls := "bi-three-dots-vertical execControls", onClick --> showGlobalControls.update(!_))
+      ),
       showExpander.toObservable.distinct --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable -->
         Observer: _ =>

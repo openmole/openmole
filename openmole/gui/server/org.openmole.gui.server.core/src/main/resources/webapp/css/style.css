@@ -1257,18 +1257,11 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-.autoCleanExecSwitch {
+.execGlobalControls {
     position: absolute;
-    top: 20;
+    top: 30;
     right: 20;
     color: #222;
-}
-
-.removeInactive{
- position: absolute;
-  top: 70;
-  right: 30;
-  color: #222;
 }
 
 .btnOm {
