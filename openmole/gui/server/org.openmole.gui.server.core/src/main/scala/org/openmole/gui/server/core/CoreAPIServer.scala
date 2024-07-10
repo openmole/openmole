@@ -56,7 +56,7 @@ object CoreAPIServer:
     import org.openmole.tool.stream.*
     import org.openmole.tool.archive.*
 
-    HTTP.sendFileStream(s"${name.getOrElse(f.getName)}.tgz"): out =>
+    HTTP.sendFileStream(s"${name.getOrElse(f.getName)}.tar.gz"): out =>
       val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
       try tos.archive(f, includeTopDirectoryName = topDirectory)
       finally tos.close()
@@ -69,7 +69,7 @@ object CoreAPIServer:
     import org.openmole.tool.archive.*
     import org.openmole.core.format.*
     val dataFiles = OMRFormat.dataFiles(f)
-    HTTP.sendFileStream(s"${name.getOrElse(f.baseName)}.tgz"): out =>
+    HTTP.sendFileStream(s"${name.getOrElse(f.baseName)}.tar.gz"): out =>
       val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
       try
         tos.addFile(f, f.getName)

@@ -311,7 +311,7 @@ object utils:
 
       val history = org.openmole.core.format.OMRFormat.dataFiles(omrFile)
 
-      HTTP.sendFileStream(s"${omrFile.baseName}.tgz"): out =>
+      HTTP.sendFileStream(s"${omrFile.baseName}.tar.gz"): out =>
         val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
         try
           history.zipWithIndex.foreach: (h, i) =>
