@@ -422,8 +422,8 @@ class ExecutionPanel:
                         div(display.flex, flexDirection.column, width := "800", height := "30",
                           div(cursor.pointer, alignSelf.flexEnd, marginTop := "10",
                             child <-- raw.signal.map:
-                              case true => "ansi"
-                              case false => "raw",
+                              case false => "ansi"
+                              case true => del("ansi"),
                             onClick --> raw.update(!_)
                           )
                         )
