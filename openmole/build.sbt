@@ -813,17 +813,41 @@ lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "or
   Compile / run / fork := true,
   Compile / run / connectInput := true,
   Compile / run / outputStrategy := Some(StdoutOutput),
-  Compile / compile := {
-    val bundlerTarget = (clientStub / target).value / ("scala-" + scalaVersion.value) / "scalajs-bundler"
 
-    val jsBuild = (clientStub / Compile / fastOptJS / webpack).value.head.data
-    IO.copyFile(jsBuild, target.value / "webapp/js/openmole-webpacked.js")
-    //IO.copyFile(new File(jsBuild.toString + ".map"), target.value / ("webapp/js/" + jsBuild.getName + ".map"))
+  Compile / compile := {
+    val targetModules = target.value / "node_modules"
+
+    IO.withTemporaryDirectory { modules =>
+      import sys.process._
+
+      val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
+      val cacheFile = target.value / "node_modules-hash"
+      val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
+
+      if (!cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
+        IO.copyFile(packageJson, modules / "package.json")
+        Process("npm install", Some(modules)).!!
+        modules.renameTo(targetModules)
+        IO.write(cacheFile, packageJsonHash)
+      }
+    }
+
+    //val jsBuild = (clientGUI / Compile / fastOptJS / webpack).value.head.data
+
+//    val bundlerTarget = (clientStub / target).value / ("scala-" + scalaVersion.value) / "scalajs-bundler"
+//
 
     IO.copyDirectory((clientStub / Compile / resourceDirectory).value / "webapp", target.value / "webapp")
-    IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", target.value / "webapp" / "js" / "ace.js")
-    IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "snippets/text.js", target.value / "webapp" / "js" / "text.js")
-    IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", target.value / "webapp" / "js" / "plotly.min.js")
+    val jsBuild = (clientStub / Compile / fastOptJS / webpack).value.head.data
+    IO.copyFile(jsBuild, target.value / "webapp/js/openmole-webpacked.js")
+//    //IO.copyFile(new File(jsBuild.toString + ".map"), target.value / ("webapp/js/" + jsBuild.getName + ".map"))
+//
+    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", target.value / "webapp" / "js" / "ace.js")
+    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "snippets/text.js", target.value / "webapp" / "js" / "text.js")
+    IO.copyFile(targetModules / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", target.value / "webapp" / "js" / "plotly.min.js")
+    IO.copyFile(targetModules  / "node_modules" / "nouislider" / "dist" / "nouislider.min.js", target.value / "webapp" / "js" / "nouislider.min.js")
+    IO.copyDirectory(targetModules  /  "node_modules" / "bootstrap-icons" / "font",  target.value / "webapp" / "css" / "bootstrap-icons")
+
     IO.copyFile((clientStub / Compile / resourceDirectory).value / "webapp/js/openmole_grammar_stub.js", target.value / "webapp" / "js" / "mode-openmole.js")
 
     (Compile / compile).value

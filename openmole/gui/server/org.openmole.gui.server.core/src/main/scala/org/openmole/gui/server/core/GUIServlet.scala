@@ -120,7 +120,7 @@ object GUIServlet:
       tags.script(tags.`type` := "text/javascript", tags.src := "js/nouislider.min.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
       //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
-      tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/font/bootstrap-icons.min.css"),
+      tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/bootstrap-icons.min.css"),
       RawFrag(extraHeader)
     ),
     tags.body(
