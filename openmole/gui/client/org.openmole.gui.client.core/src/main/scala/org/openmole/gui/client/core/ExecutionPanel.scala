@@ -471,7 +471,7 @@ class ExecutionPanel:
     def triggerStateUpdate = forceUpdate.update(_ + 1)
 
     val initialUpdate = EventStream.delay(500)
-    val periodicUpdate = EventStream.periodic(1000000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined)
+    val periodicUpdate = EventStream.periodic(10000).drop(1, resetOnStop = true).filter(_ => !queryingState && !showExpander.now().isDefined)
 
     div(
       columnFlex, width := "100%", marginTop := "20",
