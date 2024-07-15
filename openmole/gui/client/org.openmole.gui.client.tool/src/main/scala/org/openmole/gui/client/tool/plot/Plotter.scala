@@ -45,7 +45,7 @@ object Plotter {
     closureFilter.filteredAxis.map {
       _.fullSequenceIndex
     }.map { colToBeFiltered ⇒
-      Table.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1, colToBeFiltered)).map {
+      Table.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1.value, colToBeFiltered)).map {
         _._2
       }
     }.getOrElse(0 to nbLines - 1)
@@ -57,9 +57,7 @@ object Plotter {
     val nbDims = plotter.toBePlotted.indexes.length
 
     if (dataNbLines > 0) {
-      val dataRows = sequenceData.content.map {
-        Table.DataRow(_)
-      }
+      val dataRows = sequenceData.content.map(d => Table.DataRow(d.map(s => Table.DataContent(s))))
 
       val dataNbColumns = sequenceData.header.length
       val indexes = plotter.toBePlotted.indexes.filterNot {
@@ -72,7 +70,7 @@ object Plotter {
           if (dataNbColumns >= nbDims) {
             indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
               acc :+ Dim(Table.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map {
-                _._1
+                _._1.value
               }, sequenceData.header.lift(col).getOrElse(""))
             }
           }

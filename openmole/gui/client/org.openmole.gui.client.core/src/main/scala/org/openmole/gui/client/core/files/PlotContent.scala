@@ -51,7 +51,7 @@ object PlotContent:
         )
 
         val table = div(idAttr := "editor",
-          dataTable(s.rowData.content)
+          dataTable(s.rowData.content.map(_.map(RowData.toDataContent)))
             .addHeaders(s.rowData.headers: _*)
             .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
             .sortable
@@ -63,8 +63,8 @@ object PlotContent:
           //We only keep data of dimension 0 or 1
           val plotData = ColumnData(
             s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap:
-              case ((h, c), d) if d == 0 => Some(Column(h, ScalarColumn(c)))
-              case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(ResultData.fromStringToArray))))
+              case ((h, c), d) if d == 0 => Some(Column(h, ScalarColumn(c.map(_.value))))
+              case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(_.value).map(ResultData.fromStringToArray))))
               case _ => None
           )
           ResultPlot.fromColumnData(plotData)

@@ -1,13 +1,20 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.tool.plot.Tools
 import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.*
-import org.openmole.gui.shared.data.{GUIOMRSectionContent, GUIVariable}
+import org.openmole.gui.shared.data.{GUIOMRSectionContent, GUIVariable, SafePath}
+import com.raquo.laminar.api.L.*
 
 import scala.annotation.tailrec
 
-case class RowData(headers: Seq[String] = Seq(), content: Seq[Seq[String]] = Seq(), dimensions: Seq[Int])
+object RowData:
+  object Content:
+    given Conversion[String, Content] = s => Content(s)
+
+  case class Content(value: String, html: Option[HtmlElement] = None)
+  def toDataContent(c: Content) = scaladget.bootstrapnative.Table.DataContent(c.value, c.html)
+
+case class RowData(headers: Seq[String] = Seq(), content: Seq[Seq[RowData.Content]] = Seq(), dimensions: Seq[Int])
 
 case class ScalarColumn(column: Seq[String])
 
@@ -103,7 +110,7 @@ object ResultData {
       _.map { s => dimension(s) }
     }.toSeq.flatten
 
-    RowData(header, body, dims)
+    RowData(header, body.map(_.map(v => RowData.Content(v))), dims)
   }
 
 
@@ -116,8 +123,10 @@ object ResultData {
       //      implicit class WrapStringArrayArray(content: Array[Array[String]]):
       //        def beautify: String = s"[${content.map(_.beautify).mkString(",")}]"
 
-      def beautify: Array[String] =
-        (valueType match
+      def safepathToLink(f: SafePath) = a(href := org.openmole.gui.shared.api.downloadFile(f), cls := "downloadLink", f.name)
+
+      def beautify: Array[RowData.Content] =
+        valueType match
           case ValueLong(l) => Array(l.toString)
           case ValueInt(i) => Array(i.toString)
           case ValueDouble(d) => Array(d.toString)
@@ -127,16 +136,20 @@ object ResultData {
           case ValueArrayLong(aL) => aL.map(_.toString)
           case ValueArrayInt(aI) => aI.map(_.toString)
           case ValueArrayDouble(aD) => aD.map(_.toString)
-          case ValueArrayString(aS) => aS
+          case ValueArrayString(aS) => aS.map(x => x)
           case ValueArrayBoolean(aB) => aB.map(_.toString)
-          case ValueArrayFile(aF) => aF.map(_.name)
+          case ValueArrayFile(aF) => aF.map(f => RowData.Content(f.name, Some(safepathToLink(f))))
           case ValueArrayArrayLong(aaL) => aaL.map(_.map(_.toString).beautify)
           case ValueArrayArrayInt(aaI) => aaI.map(_.map(_.toString).beautify)
           case ValueArrayArrayDouble(aaD) => aaD.map(_.map(_.toString).beautify)
           case ValueArrayArrayString(aaS) => aaS.map(_.beautify)
           case ValueArrayArrayBoolean(aaB) => aaB.map(_.map(_.toString).beautify)
-          case ValueArrayArrayFile(aaF) => aaF.map(_.map(_.name).beautify)
-          )
+          case ValueArrayArrayFile(aaF) =>
+            aaF.map: af =>
+              val html: HtmlElement = div("[", af.map(safepathToLink).flatMap(c => Seq[HtmlElement](c, span(","))).dropRight(1), "]")
+              val content = af.map(_.name).beautify
+              RowData.Content(content, Some(html))
+
 
       def dimension =
         valueType match
