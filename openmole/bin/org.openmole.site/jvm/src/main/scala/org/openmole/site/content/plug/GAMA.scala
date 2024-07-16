@@ -64,7 +64,7 @@ DirectSampling(
       sample = 10,
       aggregation = Seq(numberOfPreys evaluate average)) hook(workDirectory / "result"),
   sampling = nbPreysInit in (0 to 200 by 50)
-)
+) hook display
 """)}
 
 

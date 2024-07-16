@@ -83,14 +83,11 @@ ${hl.openmole("""
         outputs += output mapped "output.txt",
     )
 
-    // Define a hook
-    val copy = CopyFileHook(output, workDirectory / "result/hello${arg}.txt")
-
     // Workflow
     DirectSampling(
         evaluation = pythonTask,
         sampling = arg in (0 to 10)
-    ) hook copy
+    ) hook (workDirectory / "result")
 """)}
 
 $br
