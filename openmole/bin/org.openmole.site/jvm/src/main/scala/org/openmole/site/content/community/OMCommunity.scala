@@ -26,10 +26,9 @@ $br$br
 
 Several tools are available to interact with the OpenMOLE community:
 ${ul(
-  li(html"et help on the ${aa("chat", href := shared.link.chat)}"),
+  li(html"Get help on the ${aa("chat", href := shared.link.chat)}"),
   li(html"Ask more structured questions and get help on the ${aa("forum", href := shared.link.forum)} (it is quite empty yet, but don't be afraid of the void)"),
-  li(html"Stay informed about the latest OpenMOLE news via ${aa("Twitter", href := shared.link.twitter)}"),
-  li(html"Get commercial support for OpenMOLE and model exploration by the ${aa("Trempoline", href := shared.link.partner.trempoline)} company")
+  li(html"Stay informed about the latest OpenMOLE news via ${aa("Twitter", href := shared.link.twitter)}")
 )}
 
 $br
