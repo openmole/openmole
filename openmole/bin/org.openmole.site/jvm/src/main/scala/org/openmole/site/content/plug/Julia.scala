@@ -74,13 +74,12 @@ ${hl.openmole("""
        outputs += fileoutput mapped "output.txt"
      )
 
-   val copy = CopyFileHook(fileoutput, workDirectory / "result/hello${arg}.txt")
    val env = LocalEnvironment(2)
 
    DirectSampling(
      evaluation = juliaTask,
      sampling = (arg in (0 to 10)) x (arg2 is 2.0)
-   ) hook copy on env
+   ) hook (workDirectory / "result") on env
 """)}
 
 Notions from OpenMOLE are reused in this example.
