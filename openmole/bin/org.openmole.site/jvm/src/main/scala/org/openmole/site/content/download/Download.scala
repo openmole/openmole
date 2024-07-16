@@ -30,9 +30,14 @@ ${h2("Install OpenMOLE")}
 
 ${h3("Prerequisites")}
 
-${ul(li(html"${i("Java >= 11")}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information."),
- li(html"${i("Node.js")}: to run on your own computer, OpenMOLE GUI requires ${aa("Node.js", href := shared.link.nodejs)}."),
-  li(html"${i("Singularity")}: some OpenMOLE tasks require ${org.openmole.site.content.Native.singularity}. You must install it on your system if you want to use some tasks such as Python, R, Scilab, Container."))}
+${
+  ul(
+    li(html"${i("A Linux System")}: OpenMOLE runs on Linux, in order to run it on other systems please consider using the ${a("docker package", href := "#RuninDocker")}"),
+    li(html"${i("Java >= 11")}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information"),
+    li(html"${i("Node.js")}: to run on your own computer, OpenMOLE GUI requires ${aa("Node.js", href := shared.link.nodejs)}"),
+    li(html"${i("Singularity")}: most of OpenMOLE tasks require ${org.openmole.site.content.Native.singularity}")
+  )
+}
 
 $br
 
@@ -111,8 +116,7 @@ version: "3"
         - ./data/openmole:/var/openmole/
       ports:
         - "55555:8080"
-      privileged: true
-      restart: on-failure:100000""".stripMargin, "plain")}
+      privileged: true""".stripMargin, "plain")}
 
 To set some OpenMOLE parameters (for instance an http proxy) you can do:
 
