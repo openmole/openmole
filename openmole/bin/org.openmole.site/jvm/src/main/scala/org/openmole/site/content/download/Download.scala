@@ -41,7 +41,7 @@ ${
 
 $br
 
-${i("NB")}: If you have docker installed on your computer, the most convient way to run OpenMOLE might be ${a("to run OpenMOLE in docker", href := "#RuninDocker")}.
+${i("NB")}: If you have docker installed on your computer, the most convenient way to run OpenMOLE might be ${a("to run OpenMOLE in docker", href := "#RuninDocker")}.
 
 ${h3("Download")}
 
@@ -63,6 +63,10 @@ ${img(src := Resource.img.mole.uiScreenshot.file, `class` := "uiScreenshot", wid
 OpenMOLE supports Chrome and Firefox.
 If you are using another web browser, you will need to copy paste the OpenMOLE URL (something like ${code("http://localhost:[port]")} in either Chrome or Firefox.
 
+$br
+
+To get help an installing OpenMOLE, get in touch with us through the OpenMOLE ${aa("chat", href := shared.link.chat)}".
+
 ${h2("Experiment with OpenMOLE")}
 
 To get started with OpenMOLE and see a few simple use cases, you can follow our ${a("Step by Step Introduction to OpenMOLE", href := DocumentationPages.stepByStepIntro.file)}.
@@ -74,10 +78,6 @@ If you have questions or problems, don't hesitate to contact our great community
 
 ${h2{"Alternative Install"}}
 
-${h3{"Build From Sources"}}
-
-If you prefer building the OpenMOLE application from sources you can do so as explained ${aa("here", href := DocumentationPages.buildSources.file)}.
-
 ${h3{"Run in Docker"}}
 
 You can run OpenMOLE using a Docker container published ${aa("on the Docker Hub", href := org.openmole.site.shared.link.dockerHub)}.
@@ -87,6 +87,14 @@ It also facilitates the automatic restart of OpenMOLE or its update for a newer 
 $br
 
 You can run it using ${code{"docker"}} or ${code{"docker-compose"}}.
+
+In one line you can run:
+${hl(
+  s"""# Set or replace $$USER_DIR with a directory value to store your OpenMOLE data
+     |docker run --privileged -p 8080:8080 -v $$USER_DIR:/var/openmole/ openmole/openmole:${org.openmole.core.buildinfo.version.value}""".stripMargin
+, "plain")}
+
+$br
 
 In order to use the latter, follow these steps:
 ${ul(
@@ -133,6 +141,15 @@ version: "3"
         - "55555:8080"
       privileged: true
       restart: on-failure:100000""".stripMargin, "plain")}
+
+
+${h3{"Multi-user OpenMOLE server"}}
+
+A multi-user OpenMOLE server host base on k3S has been developed. The instruction to deploy it are not available yet, but if you require such a sever for your lab or your company, please get in touch with us.
+
+${h3{"Build From Sources"}}
+
+If you prefer building the OpenMOLE application from sources you can do so as explained ${aa("here", href := DocumentationPages.buildSources.file)}.
 
 ${h3{"Get a previous version"}}
 
