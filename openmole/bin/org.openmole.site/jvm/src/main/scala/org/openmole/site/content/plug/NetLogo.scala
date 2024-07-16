@@ -19,7 +19,7 @@ package org.openmole.site.content.plug
 
 import org.openmole.site.content.header.*
 
-object NetLogoTools {
+object NetLogoTools:
   def variables = """
     |val density = Val[Double]
     |val seed = Val[Int]
@@ -44,10 +44,6 @@ object NetLogoTools {
     |    outputs += burned mapped "burned-trees"
     |  )""".stripMargin
 
-
-  def csvHook = """
-    |val csvHook = AppendToCSVFileHook(workDirectory / "result.csv", density, burned, seed)""".stripMargin
-}
 
 import NetLogoTools._
 

@@ -131,9 +131,8 @@ ${hl.openmole(s"""
     sampling =
       (dataFile in (workDirectory / "data") withName dataFileName) x
         (i in (0 to 3)),
-    evaluation =
-      container hook CopyFileHook(resultFile, workDirectory / "results/$${dataFileName.dropRight(4)}_$${i}.csv")
-  )
+    evaluation = container
+  ) hook (workDirectory / "result")
 """)}
 
 $br

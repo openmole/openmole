@@ -68,7 +68,7 @@ ${hl.openmole("""
     )
 
     // Workflow
-    m hook DisplayHook()
+    m hook display
 """)}
 
 ${h3{"A ScilabTask running a script"}}
