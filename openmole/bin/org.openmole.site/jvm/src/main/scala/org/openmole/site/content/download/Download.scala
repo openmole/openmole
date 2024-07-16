@@ -90,7 +90,7 @@ You can run it using ${code{"docker"}} or ${code{"docker-compose"}}.
 
 In one line you can run:
 ${hl(
-  s"""# Set or replace $$USER_DIR with a directory value to store your OpenMOLE data
+  s"""#replace $$USER_DIR with a directory value in which your data will be stored
      |docker run --privileged -p 8080:8080 -v $$USER_DIR:/var/openmole/ openmole/openmole:${org.openmole.core.buildinfo.version.value}""".stripMargin
 , "plain")}
 
