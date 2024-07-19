@@ -4,12 +4,5 @@ export HOME=/var/openmole && \
 mkdir -p $HOME && \
 chown openmole:openmole $HOME
 
-sudo -u openmole openmole --mem 2G --port 8080 --remote $@ &
+exec sudo -u openmole openmole --mem 2G --port 8080 --remote $@ 
 
-function _term(){
-  kill -TERM $(jobs -p)
-  wait $(jobs -p)
-}
-
-trap _term SIGTERM SIGINT
-wait $(jobs -p)
