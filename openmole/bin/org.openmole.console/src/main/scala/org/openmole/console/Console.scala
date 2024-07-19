@@ -42,7 +42,7 @@ object Console extends JavaLogger {
   lazy val consoleUsage = "(Type :q to quit)"
 
   private def withReader[T](f: LineReader => T) =
-    val terminal = TerminalBuilder.builder.build()
+    val terminal = TerminalBuilder.builder.jni(true).build()
     val reader = LineReaderBuilder.builder().terminal(terminal).build()
     try f(reader)
     finally terminal.close()
