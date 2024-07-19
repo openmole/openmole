@@ -24,7 +24,7 @@ assemble:
     - chmod 400 ~/.ssh/identity
     - ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - docker prune -a -f
+    - docker system prune -a -f
   #artifacts:
   #  paths:
   #    - ./openmole/site/
