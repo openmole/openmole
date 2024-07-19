@@ -133,7 +133,7 @@ lazy val scalaLang = OsgiProject(
 ) dependsOn(jline)
 
 
-lazy val jline = OsgiProject(dir, "org.jline.jline", exports = Seq("org.jline.*")) settings (
+lazy val jline = OsgiProject(dir, "org.jline.jline", exports = Seq("org.jline.*"), privatePackages = Seq("!scala.*", "META-INF.**", "**")) settings (
   settings,
   libraryDependencies += "org.jline" % "jline" % jlineVersion, 
   libraryDependencies += "org.jline" % "jline-reader" % jlineVersion, 
@@ -141,6 +141,7 @@ lazy val jline = OsgiProject(dir, "org.jline.jline", exports = Seq("org.jline.*"
   libraryDependencies += "org.jline" % "jline-terminal" % jlineVersion, 
   libraryDependencies += "org.jline" % "jline-terminal-jna" % jlineVersion,
   libraryDependencies += "org.jline" % "jline-style" % jlineVersion,
+
   version := jlineVersion)
 
 

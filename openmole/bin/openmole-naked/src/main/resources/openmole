@@ -83,7 +83,7 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    debug ) DEBUG_MODE=true ;;
+    -d|--debug ) DEBUG_MODE=true ;;
     h|--help ) usage ; ARGS+=("--help") ;;
     m|--mem ) MEM="$2" ; shift ;;
     --debug-port ) DEBUG_PORT="$2"; shift ;;
@@ -100,32 +100,10 @@ fi
 # Try to increase the max number of opened files
 if [[ $(ulimit -S -n) -lt 4096 ]]; then ulimit -S -n 4096 2>/dev/null; fi
 
-function run {
-  CONFIGDIR=$(mktemp -d)
+CONFIGDIR=$(mktemp -d)
 
-  $JAVA -Xss8M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area="${CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true "-Xmx${MEM}" "${FLAGS[@]}" \
-     -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
-     --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
-     -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
-     "${ARGS[@]}" "${SCRIPT_ARGS[@]}" &
-
-  wait $(jobs -p)
-  RET=$?
-
-  rm -rf "${CONFIGDIR}"
-}
-
-function _term(){
-  kill -TERM $(jobs -p)
-  wait $(jobs -p)
-}
-
-trap _term SIGTERM SIGINT
-
-run
-while [[ $RET -eq 254 ]]; do
- SCRIPT_ARGS=("--no-browser")
- run
-done
-
-exit $RET
+exec $JAVA -Xss8M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area="${CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true "-Xmx${MEM}" "${FLAGS[@]}" \
+   -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
+   --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
+   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
+   "${ARGS[@]}" "${SCRIPT_ARGS[@]}"

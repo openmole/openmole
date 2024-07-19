@@ -105,7 +105,7 @@ public class Launcher {
         Framework framework = frameworkFactory.newFramework(osgiConfig);
 
 
-        int ret = 0;
+        int ret = 127;
         try {
             if(directory == null) throw new RuntimeException("Missing plugin directory argument");
             if(run == null) throw new RuntimeException("Missing run class argument");
@@ -154,13 +154,28 @@ public class Launcher {
             ret = (int) runMethod.invoke(null, (Object) forwardAgs);
 
             framework.stop();
+            framework.waitForStop(0);
         } catch(Throwable e) {
             e.printStackTrace();
-            System.exit(127);
+        } finally {
+            if(osgiDirectory != null) {
+                deleteDir(new File(osgiDirectory));
+            }
         }
 
         System.exit(ret);
     }
 
+    static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                if (!java.nio.file.Files.isSymbolicLink(f.toPath())) {
+                    deleteDir(f);
+                }
+            }
+        }
+        file.delete();
+    }
 
 }
