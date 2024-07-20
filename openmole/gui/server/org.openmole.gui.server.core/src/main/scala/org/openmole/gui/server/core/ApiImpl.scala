@@ -83,7 +83,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     )
 
   def shutdown() = applicationControl.foreach(_.stop())
-  def restart() = applicationControl.foreach(_.restart())
 
   def isAlive() = true
 

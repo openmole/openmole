@@ -277,7 +277,6 @@ object Application extends JavaLogger {
 
               s.join() match
                 case GUIServer.Ok      ⇒ Console.ExitCodes.ok
-                case GUIServer.Restart ⇒ Console.ExitCodes.restart
 
               //newServer.stop()
           else

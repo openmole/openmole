@@ -188,9 +188,6 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   val shutdownRoute =
     shutdown.errorImplementedBy { _ => apiImpl.shutdown() }
 
-  val restartRoute =
-    restart.errorImplementedBy { _ => apiImpl.restart() }
-
   val isAliveRoute =
     isAlive.implementedBy { _ => apiImpl.isAlive() }
 
@@ -271,7 +268,6 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       listNotificationRoute,
       clearNotificationRoute,
       removeContainerCacheRoute,
-      restartRoute,
       shutdownRoute,
       jvmInfosRoute,
       isAliveRoute
