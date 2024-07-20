@@ -95,182 +95,48 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
-  val settingsRoute =
-    omSettings.errorImplementedBy(_ => apiImpl.settings)
-
-//  val isPasswordCorrectRoute =
-//    isPasswordCorrect.safeImplementedBy(apiImpl.isPasswordCorrect _)
-
-//  val resetPasswordRoute =
-//    resetPassword.safeImplementedBy(_ => apiImpl.resetPassword())
-
-  val listPluginsRoute =
-    listPlugins.errorImplementedBy{ _ => apiImpl.listPlugins() }
-
-  val guiPluginsRoute =
-    guiPlugins.errorImplementedBy (_ => apiImpl.getGUIPlugins() )
-
-  val listFilesRoute =
-    listFiles.errorImplementedBy { (path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden) }
-
-  val sizeRoute =
-    size.errorImplementedBy { path => apiImpl.size(path) }
-
-  val saveFileRoute =
-    saveFile.errorImplementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
-
-  val copyFilesRoute =
-    copyFiles.errorImplementedBy { case(sp, overwrite) => apiImpl.copyFiles(sp, overwrite) }
-
-  val createFileRoute =
-    createFile.errorImplementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
-
-  val extractArchiveRoute =
-    extractArchive.errorImplementedBy { (sp, to) => apiImpl.extractArchive(sp, to) }
-
-  val deleteFilesRoute =
-    deleteFiles.errorImplementedBy { sp => apiImpl.deleteFiles(sp) }
-
-  val existsRoute=
-    exists.errorImplementedBy { sp => apiImpl.exists(sp) }
-
-  val isTextRoute =
-    isText.errorImplementedBy { sp => apiImpl.isTextFile(sp) }
-
-  val listRecursiveRoute =
-    listRecursive.errorImplementedBy { case(path, f, hidden) => apiImpl.recursiveListFiles(path, f, hidden) }
-
-  val moveRoute =
-    move.errorImplementedBy { p => apiImpl.move(p) }
-
-  val mdToHtmlRoute =
-    mdToHtml.errorImplementedBy { p => apiImpl.mdToHtml(p) }
-
-  val sequenceRoute =
-    sequence.errorImplementedBy { p => apiImpl.sequence(p) }
-
-  val executionStateRoute =
-    executionState.errorImplementedBy { i => apiImpl.executionData(i) }
-
-  val executionOutputRoute =
-    executionOutput.errorImplementedBy { (i, l) => apiImpl.executionOutput(i, l) }
-
-  val cancelExecutionRoute =
-    cancelExecution.errorImplementedBy { i => apiImpl.cancelExecution(i) }
-
-  val removeExecutionRoute =
-    removeExecution.errorImplementedBy { i => apiImpl.removeExecution(i) }
-
-  val validateScriptRoute =
-    validateScript.errorImplementedBy { s => apiImpl.validateScript(s) }
-
-  val launchScriptRoute =
-    launchScript.errorImplementedBy { (s, b) => apiImpl.launchScript(s, b) }
-
-  val clearEnvironmentErrorsRoute =
-    clearEnvironmentErrors.errorImplementedBy { case (eid, i) => apiImpl.clearEnvironmentErrors(eid, i) }
-
-  val listEnvironmentErrorsRoute =
-    listEnvironmentErrors.errorImplementedBy { case(eid, e, i) => apiImpl.listEnvironmentErrors(eid, e, i) }
-
-//  val modelsRoute =
-//    models.errorImplementedBy { p => apiImpl.models(p) }
-
-//  val expandResourcesRoute =
-//    expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
-
-  val downloadHTTPRoute =
-    downloadHTTP.errorImplementedBy { case(s, p, b, o) => apiImpl.downloadHTTP(s, p, b, o) }
-
-  val temporaryDirectoryRoute =
-    temporaryDirectory.errorImplementedBy { _ => apiImpl.temporaryDirectory() }
-
-  val shutdownRoute =
-    shutdown.errorImplementedBy { _ => apiImpl.shutdown() }
-
-  val isAliveRoute =
-    isAlive.implementedBy { _ => apiImpl.isAlive() }
-
-  val jvmInfosRoute =
-    jvmInfos.errorImplementedBy { _ => apiImpl.jvmInfos() }
-
-  val marketIndexRoute =
-    marketIndex.errorImplementedBy { _ => apiImpl.marketIndex() }
-
-  val getMarketEntryRoute =
-    getMarketEntry.errorImplementedBy { case (e, p) => apiImpl.getMarketEntry(e, p) }
-
-  val omrMethodRoute =
-    omrMethod.errorImplementedBy { p => apiImpl.omrMethodName(p) }
-
-  val omrContentRoute =
-    omrContent.errorImplementedBy { (p, d) => apiImpl.omrContent(p, d) }
-
-  val omrFilesRoute =
-    omrFiles.errorImplementedBy { p => apiImpl.omrFiles(p) }
-
-  val omrDataIndexRoute =
-    omrDataIndex.errorImplementedBy { p => apiImpl.omrDataIndex(p) }
-
-  val addPluginRoute =
-    addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }
-
-  val removePluginRoute =
-    removePlugin.errorImplementedBy { p => apiImpl.removePlugin(p) }
-
-  val listNotificationRoute =
-    listNotification.errorImplementedBy { p => apiImpl.listNotification }
-
-  val clearNotificationRoute =
-    clearNotification.errorImplementedBy { s => apiImpl.clearNotification(s) }
-
-  val removeContainerCacheRoute =
-    removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache())
-
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
-      settingsRoute,
-//      isPasswordCorrectRoute,
-//      resetPasswordRoute,
-      listPluginsRoute,
-      guiPluginsRoute,
-      listFilesRoute,
-      sizeRoute,
-      saveFileRoute,
-      createFileRoute,
-      extractArchiveRoute,
-      deleteFilesRoute,
-      existsRoute,
-      isTextRoute,
-      listRecursiveRoute,
-      copyFilesRoute,
-      moveRoute,
-      mdToHtmlRoute,
-      sequenceRoute,
-      executionStateRoute,
-      executionOutputRoute,
-      cancelExecutionRoute,
-      removeExecutionRoute,
-      validateScriptRoute,
-      launchScriptRoute,
-      clearEnvironmentErrorsRoute,
-      listEnvironmentErrorsRoute,
-      downloadHTTPRoute,
-      temporaryDirectoryRoute,
-      marketIndexRoute,
-      getMarketEntryRoute,
-      omrMethodRoute,
-      omrContentRoute,
-      omrFilesRoute,
-      omrDataIndexRoute,
-      addPluginRoute,
-      removePluginRoute,
-      listNotificationRoute,
-      clearNotificationRoute,
-      removeContainerCacheRoute,
-      shutdownRoute,
-      jvmInfosRoute,
-      isAliveRoute
+      omSettings.errorImplementedBy(_ => apiImpl.settings),
+      listPlugins.errorImplementedBy(_ => apiImpl.listPlugins()),
+      guiPlugins.errorImplementedBy(_ => apiImpl.getGUIPlugins()),
+      listFiles.errorImplementedBy((path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden)),
+      size.errorImplementedBy(apiImpl.size),
+      saveFile.errorImplementedBy(apiImpl.saveFile),
+      createFile.errorImplementedBy(apiImpl.createFile),
+      extractArchive.errorImplementedBy(apiImpl.extractArchive),
+      deleteFiles.errorImplementedBy(apiImpl.deleteFiles),
+      exists.errorImplementedBy(apiImpl.exists),
+      isText.errorImplementedBy(apiImpl.isTextFile),
+      listRecursive.errorImplementedBy(apiImpl.recursiveListFiles),
+      copyFiles.errorImplementedBy(apiImpl.copyFiles),
+      move.errorImplementedBy(apiImpl.move),
+      mdToHtml.errorImplementedBy(apiImpl.mdToHtml),
+      sequence.errorImplementedBy(sp => apiImpl.sequence(sp)),
+      executionState.errorImplementedBy(apiImpl.executionData),
+      executionOutput.errorImplementedBy(apiImpl.executionOutput),
+      cancelExecution.errorImplementedBy(apiImpl.cancelExecution),
+      removeExecution.errorImplementedBy(apiImpl.removeExecution),
+      validateScript.errorImplementedBy(apiImpl.validateScript),
+      launchScript.errorImplementedBy(apiImpl.launchScript),
+      clearEnvironmentErrors.errorImplementedBy(apiImpl.clearEnvironmentErrors),
+      listEnvironmentErrors.errorImplementedBy(apiImpl.listEnvironmentErrors),
+      downloadHTTP.errorImplementedBy(apiImpl.downloadHTTP),
+      temporaryDirectory.errorImplementedBy(_ => apiImpl.temporaryDirectory()),
+      marketIndex.errorImplementedBy(_ => apiImpl.marketIndex()),
+      getMarketEntry.errorImplementedBy(apiImpl.getMarketEntry),
+      omrMethod.errorImplementedBy(apiImpl.omrMethodName),
+      omrContent.errorImplementedBy(apiImpl.omrContent),
+      omrFiles.errorImplementedBy(apiImpl.omrFiles),
+      omrDataIndex.errorImplementedBy(apiImpl.omrDataIndex),
+      addPlugin.errorImplementedBy(apiImpl.addPlugin),
+      removePlugin.errorImplementedBy(apiImpl.removePlugin),
+      listNotification.errorImplementedBy(_ => apiImpl.listNotification),
+      clearNotification.errorImplementedBy(apiImpl.clearNotification),
+      removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache()),
+      shutdown.errorImplementedBy(_ => apiImpl.shutdown()),
+      jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
+      isAlive.implementedBy(_ => apiImpl.isAlive())
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 
