@@ -100,14 +100,7 @@ object SettingsView:
     "This will stop the server, the application will no longer be usable. Halt anyway?",
     s"/${shutdownRoute}"
   )
-
-  def restartButton(using panels: Panels) = serverActions(
-    "Restart",
-    glyph_repeat,
-    "This will restart the server, the application will not respond for a while. Restart anyway?",
-    s"/${restartRoute}"
-  )
-
+  
   def removeContainerCacheButton(using api: ServerAPI, basePath: BasePath) =
     val disableButton = Var(false)
     button(
@@ -140,7 +133,6 @@ object SettingsView:
           case false => emptyNode,
       removeContainerCacheButton,
       shutdownButton,
-      restartButton,
       dowloadAllFiles
     )
 
