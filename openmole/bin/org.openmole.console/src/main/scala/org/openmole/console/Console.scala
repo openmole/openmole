@@ -35,7 +35,7 @@ import org.openmole.core.dsl.*
 import scala.annotation.tailrec
 import scala.util.*
 
-object Console extends JavaLogger {
+object Console extends JavaLogger:
 
   def consoleSplash = org.openmole.core.buildinfo.consoleSplash
 
@@ -49,42 +49,43 @@ object Console extends JavaLogger {
 
   @tailrec def askPassword(msg: String = "password"): String = 
     val (password, confirmation) = 
-      withReader { reader =>
+      withReader: reader =>
         val password = reader.readLine(s"$msg             :", '*')
         val confirmation = reader.readLine(s"$msg confirmation:", '*')
         (password, confirmation)
-      }
-    if (password != confirmation) {
+
+    if password != confirmation
+    then
       println("Password and confirmation don't match.")
       askPassword(msg)
-    } else password
+    else password
 
-  def testPassword(password: String)(implicit preference: Preference): Boolean = {
+  def testPassword(password: String)(implicit preference: Preference): Boolean =
     val cypher = Cypher(password)
     Preference.passwordIsCorrect(cypher, preference)
-  }
 
   def chosePassword(password: String)(implicit preference: Preference) =
-    if (!Preference.passwordChosen(preference)) {
+    if !Preference.passwordChosen(preference)
+    then
       val cypher = Cypher(password)
       Preference.setPasswordTest(preference, cypher)
-    }
 
   @tailrec def initPassword(implicit preference: Preference): String =
-    if (Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)) ""
-    else if (Preference.passwordChosen(preference)) {
-      val password = withReader(_.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*'))
-      val cypher = Cypher(password)
-      if (!Preference.passwordIsCorrect(cypher, preference)) initPassword(preference)
-      else password
-    }
-    else {
-      println("OpenMOLE Password has not been set yet, choose a password.")
-      val password = askPassword("Preferences password")
-      val cypher = Cypher(password)
-      Preference.setPasswordTest(preference, cypher)
-      password
-    }
+    if Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)
+    then ""
+    else
+      if (Preference.passwordChosen(preference))
+      then
+        val password = withReader(_.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*'))
+        val cypher = Cypher(password)
+        if (!Preference.passwordIsCorrect(cypher, preference)) initPassword(preference)
+        else password
+      else
+        println("OpenMOLE Password has not been set yet, choose a password.")
+        val password = askPassword("Preferences password")
+        val cypher = Cypher(password)
+        Preference.setPasswordTest(preference, cypher)
+        password
 
   object ExitCodes:
     def ok = 0
@@ -93,10 +94,11 @@ object Console extends JavaLogger {
     def executionError = 6
     def restart = 254
 
-  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)], interactive: Boolean) = {
+  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)], interactive: Boolean) =
     val res = load
     res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
-    if (interactive && !res.isEmpty) {
+    if interactive && !res.isEmpty
+    then
       print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
       val terminal = TerminalBuilder.terminal()
       val reader = new BindingReader(terminal.reader())
@@ -111,23 +113,19 @@ object Console extends JavaLogger {
 
         println()
       finally terminal.close()
-        
-    }
+
     res
-  }
 
   class CompiledDSL(val dsl: DSL, val compilationContext: CompilationContext, val raw: Interpreter.RawCompiled)
 
-}
 
 import org.openmole.console.Console._
 
-class Console(script: Option[String] = None) {
-  console ⇒
+class Console(script: Option[String] = None) { console ⇒
 
   def commandsName = "_commands_"
 
-  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(implicit services: Services): Int =
+  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(using services: Services): Int =
     if splash
     then
       println(consoleSplash)
@@ -137,12 +135,12 @@ class Console(script: Option[String] = None) {
       case None ⇒
         import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
-        withREPL(variables) { loop ⇒
+        withREPL(variables): loop ⇒
           //loop.storeErrors = false
           //loop.loopWithExitCode
           loop.loop
           0
-        }
+
       case Some(script) ⇒
         val scriptFile = new File(script)
         load(scriptFile, args, workDirectory) match
@@ -156,12 +154,11 @@ class Console(script: Option[String] = None) {
           case Left(c) => c
 
   def load(script: File, args: Seq[String], workDirectory: Option[File])(implicit services: Services): Either[Int, Console.CompiledDSL] =
-    val runServices = {
+    val runServices =
       import services._
       Services.copy(services)(fileServiceCache = FileServiceCache())
-    }
 
-    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match {
+    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match
       case ScriptFileDoesNotExists() ⇒
         println("File " + script + " doesn't exist.")
         Left(ExitCodes.scriptDoesNotExist)
@@ -170,18 +167,16 @@ class Console(script: Option[String] = None) {
         println(e.error.stackString)
         Left(ExitCodes.compilationError)
       case compiled: Compiled ⇒
-        Try(compiled.eval(args)) match {
+        Try(compiled.eval(args)) match
           case Success(res) ⇒ Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
           case Failure(e) ⇒
             services.tmpDirectory.directory.recursiveDelete
             println(s"Error during script evaluation: ")
             print(e.stackString)
             Left(ExitCodes.compilationError)
-        }
 
-    }
 
-  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) =
     args.workDirectory.mkdirs()
 
     val loop = OpenMOLEREPL.newREPL(quiet = false)
@@ -192,6 +187,6 @@ class Console(script: Option[String] = None) {
 
     try f(loop)
     finally loop.close
-  }
-
 }
+
+
