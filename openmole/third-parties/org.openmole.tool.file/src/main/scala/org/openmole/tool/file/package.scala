@@ -120,12 +120,12 @@ package file {
         toF.mode = file
       }
 
-      def copy(toF: File, followSymlinks: Boolean = false) = {
+      def copy(toF: File, followSymlinks: Boolean = false) = 
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
         toF.getParentFileSafe.mkdirs()
-        if (Files.isDirectory(file)) DirUtils.copy(file, toF, followSymlinks)
+        if (Files.isDirectory(file)) 
+        then DirUtils.copy(file, toF, followSymlinks)
         else copyFile(toF, followSymlinks)
-      }
 
       def copy(to: OutputStream) = withClosable(bufferedInputStream()) {
         _.copy(to)

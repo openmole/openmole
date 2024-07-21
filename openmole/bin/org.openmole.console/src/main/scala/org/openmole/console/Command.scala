@@ -40,6 +40,7 @@ import org.openmole.core.services.*
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
+import org.openmole.tool.file.*
 
 object Command:
   def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
@@ -77,6 +78,8 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
   def start(dsl: Console.CompiledDSL)(using Services): MoleExecution = mole.start(dsl)
   def validate(mole: Mole)(using TmpDirectory, FileService): Unit = verify(mole)
   def verify(m: Mole)(using TmpDirectory, FileService): Unit = mole.verify(m)
+
+  def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 
   export openmole.{version}
 
@@ -170,7 +173,12 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
       given KeyValueCache = KeyValueCache()
       Validation(mole).foreach(println)
 
-  def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
+  object omr:
+    def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeCSV(file, destination)
+    def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeJSON(file, destination)
+    def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.resultFileDirectory(file).foreach(_.copy(destination))
+    def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
+
 
   object openmole:
     def version =
