@@ -17,7 +17,7 @@
 
 package org.openmole.core
 
-package dsl {
+package dsl:
 
   import org.openmole.core.context._
   import org.openmole.core.logconfig.LoggerConfig
@@ -33,7 +33,7 @@ package dsl {
     with Serializer
     with Classes
     with workflow.ExportedPackage
-    with cats.instances.AllInstances {
+    with cats.instances.AllInstances:
 
     implicit lazy val implicitContext: Context = Context.empty
 
@@ -46,7 +46,7 @@ package dsl {
 
     export squants.time.TimeConversions.TimeConversions
     //implicit def timeConversion[N: Numeric](n: N): squants.Time.TimeConversions = squants.time.TimeConversions.TimeConversions(n)
-    extension [N: Numeric](n: N) {
+    extension [N: Numeric](n: N)
       def nanosecond = n nanoseconds
       def microsecond = n microseconds
       def millisecond = n milliseconds
@@ -54,12 +54,11 @@ package dsl {
       def minute = n minutes
       def hour = n hours
       def day = n days
-    }
 
     export squants.information.InformationConversions.InformationConversions
 
     //implicit def informationUnitConversion[N: Numeric](n: N): squants.information.InformationConversions.InformationConversions = squants.information.InformationConversions.InformationConversions(n)
-    extension [N: Numeric](n: N) {
+    extension [N: Numeric](n: N)
       def byte = n bytes
       def kilobyte = n kilobytes
       def megabyte = n megabytes
@@ -69,32 +68,26 @@ package dsl {
       def exabyte = n exabytes
       def zettabyte = n zettabytes
       def yottabyte = n yottabytes
-    }
 
     //implicit def intToMemory(i: Int): Information = (i megabytes)
     //implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
 
     def encrypt(s: String)(implicit cypher: Cypher) = cypher.encrypt(s)
 
-    implicit def seqIsFunctor: Functor[Seq] = new Functor[Seq] {
+    implicit def seqIsFunctor: Functor[Seq] = new Functor[Seq]:
       override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
-    }
 
     type Data = File
 
     //export org.openmole.tool.collection.DoubleRangeDecorator
-    @inline implicit class DoubleWrapper(d: Double) {
+    @inline implicit class DoubleWrapper(d: Double):
       def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
       def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
-    }
 
     //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
     export Predef.longWrapper
     export Predef.intWrapper
     export Predef.doubleWrapper
 
-  }
-
-}
 
 package object dsl extends DSLPackage
