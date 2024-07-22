@@ -34,6 +34,7 @@ import org.http4s.blaze.server.*
 import org.http4s.dsl.io.*
 import org.http4s.implicits.*
 import org.http4s.server.Router
+import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
 import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
@@ -46,6 +47,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.{Level, Logger}
 
 object GUIServer:
 
@@ -133,6 +135,11 @@ object GUIServer:
     password: Option[String],
     optimizedJS: Boolean,
     extraHeaders: String) =
+
+    Logger.getLogger(classOf[BlazeServerBuilder[?]].getName).setLevel(Level.WARNING)
+    Logger.getLogger("org.http4s.blaze.channel.nio1.NIO1SocketServerGroup").setLevel(Level.WARNING)
+    Logger.getLogger("org.http4s.blaze.channel.nio1.SelectorLoop").setLevel(Level.WARNING)
+
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 

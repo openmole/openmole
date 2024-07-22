@@ -65,9 +65,10 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 /*lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)*/
 
-lazy val slf4j = OsgiProject(dir,"org.slf4j") settings(
+lazy val slf4j = OsgiProject(dir,"org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion,
+  libraryDependencies += "org.slf4j" % "slf4j-jdk14" % slf4jVersion,
   version := slf4jVersion)
 
 lazy val xstream = OsgiProject(

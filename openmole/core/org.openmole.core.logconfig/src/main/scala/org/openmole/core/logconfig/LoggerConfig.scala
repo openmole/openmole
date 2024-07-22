@@ -23,6 +23,8 @@ import java.util.logging._
 
 object LoggerConfig:
 
+  def setLevel(l: String, level: Level) = Logger.getLogger(l).setLevel(level)
+
   def level(level: Level) =
     LogManager.getLogManager.reset
 
@@ -36,5 +38,6 @@ object LoggerConfig:
   def init =
     BasicConfigurator.configure
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
+    val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME)
     level(Level.INFO)
 
