@@ -56,10 +56,10 @@ object common {
 
   def http4sVersion = "0.23.12"
 
-  def endpoint4SHttp4SVersion = "10.2.0"
-  def endpoints4SVersion = "1.10.0"
-  def endpoint4SCirceSchemaVersion = "2.4.0"
-  def endpoint4SXHRClientVersion = "5.3.0"
+  def endpoint4SHttp4SVersion = "10.3.1"
+  def endpoints4SVersion = "1.11.1"
+  def endpoint4SCirceSchemaVersion = "2.5.1"
+  def endpoint4SFetchClientCirceVersion = "3.2.0"
 
   def xzVersion = "1.9"
 

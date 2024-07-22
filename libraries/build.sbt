@@ -521,7 +521,7 @@ lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.se
   libraryDependencies += "org.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
   libraryDependencies += "org.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
   
-  libraryDependencies += "org.endpoints4s" %% sjs("xhr-client") % endpoint4SXHRClientVersion,
+  libraryDependencies += "org.endpoints4s" %% sjs("fetch-client-circe") % endpoint4SFetchClientCirceVersion,
 
   version := endpoints4SVersion
 ) dependsOn(cats, circe, http4s)

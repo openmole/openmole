@@ -17,7 +17,7 @@ package org.openmole.gui.client.ext
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import endpoints4s.xhr.EndpointsSettings
+import endpoints4s.fetch.EndpointsSettings
 
 import com.raquo.laminar.api.L.*
 import scala.concurrent.duration.*
