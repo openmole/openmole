@@ -8,9 +8,9 @@ import dotc.*, core.*
 import Contexts.*, Denotations.*, Flags.*, NameOps.*, StdNames.*, Symbols.*
 import printing.ReplPrinter
 import reporting.Diagnostic
-import transform.ValueClasses
 import util.StackTraceOps.*
 
+import scala.compiletime.uninitialized
 import scala.util.control.NonFatal
 
 /** This rendering object uses `ClassLoader`s to accomplish crossing the 4th
@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
  */
 class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
-  import Rendering._
+  import Rendering.*
 
   /** OM A `MessageRenderer` for the REPL without file positions */
   private[repl] val messageRenderer = new MessageRendering {
@@ -31,10 +31,10 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 //      hl(s"-- $diagnosticLevel:")
   }
 
-  var myClassLoader: AbstractFileClassLoader = _
+  var myClassLoader: AbstractFileClassLoader = uninitialized
 
   /** (value, maxElements, maxCharacters) => String */
-  var myReplStringOf: (Object, Int, Int) => String = _
+  var myReplStringOf: (Object, Int, Int) => String = uninitialized
 
   /** Class loader used to load compiled code */
   def classLoader()(using Context) = // OM
@@ -57,36 +57,40 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
         // We need to use the ScalaRunTime class coming from the scala-library
         // on the user classpath, and not the one available in the current
         // classloader, so we use reflection instead of simply calling
-        // `ScalaRunTime.replStringOf`. Probe for new API without extraneous newlines.
-        // For old API, try to clean up extraneous newlines by stripping suffix and maybe prefix newline.
+        // `ScalaRunTime.stringOf`. Also probe for new stringOf that does string quoting, etc.
         val scalaRuntime = Class.forName("scala.runtime.ScalaRunTime", true, myClassLoader)
         val renderer = "stringOf"
-        def stringOfMaybeTruncated(value: Object, maxElements: Int): String = {
-          try {
-            val meth = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int], classOf[Boolean])
-            val truly = java.lang.Boolean.TRUE
-            meth.invoke(null, value, maxElements, truly).asInstanceOf[String]
-          } catch {
-            case _: NoSuchMethodException =>
-              val meth = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int])
-              meth.invoke(null, value, maxElements).asInstanceOf[String]
-          }
-        }
+        val stringOfInvoker: (Object, Int) => String =
+          def richStringOf: (Object, Int) => String =
+            val method = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int], classOf[Boolean])
+            val richly = java.lang.Boolean.TRUE // add a repl option for enriched output
+            (value, maxElements) => method.invoke(null, value, maxElements, richly).asInstanceOf[String]
+          def poorStringOf: (Object, Int) => String =
+            try
+              val method = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int])
+              (value, maxElements) => method.invoke(null, value, maxElements).asInstanceOf[String]
+            catch case _: NoSuchMethodException => (value, maxElements) => String.valueOf(value).take(maxElements)
+          try richStringOf
+          catch case _: NoSuchMethodException => poorStringOf
+        def stringOfMaybeTruncated(value: Object, maxElements: Int): String = stringOfInvoker(value, maxElements)
 
-        (value: Object, maxElements: Int, maxCharacters: Int) => {
-          // `ScalaRuntime.stringOf` may truncate the output, in which case we want to indicate that fact to the user
-          // In order to figure out if it did get truncated, we invoke it twice - once with the `maxElements` that we
-          // want to print, and once without a limit. If the first is shorter, truncation did occur.
-          val notTruncated = stringOfMaybeTruncated(value, Int.MaxValue)
-          val maybeTruncatedByElementCount = stringOfMaybeTruncated(value, maxElements)
-          val maybeTruncated = truncate(maybeTruncatedByElementCount, maxCharacters)
-
-          // our string representation may have been truncated by element and/or character count
-          // if so, append an info string - but only once
-          if (notTruncated.length == maybeTruncated.length) maybeTruncated
-          else s"$maybeTruncated ... large output truncated, print value to show all"
-        }
-
+        // require value != null
+        // `ScalaRuntime.stringOf` returns null iff value.toString == null, let caller handle that.
+        // `ScalaRuntime.stringOf` may truncate the output, in which case we want to indicate that fact to the user
+        // In order to figure out if it did get truncated, we invoke it twice - once with the `maxElements` that we
+        // want to print, and once without a limit. If the first is shorter, truncation did occur.
+        // Note that `stringOf` has new API in flight to handle truncation, see stringOfMaybeTruncated.
+        (value: Object, maxElements: Int, maxCharacters: Int) =>
+          stringOfMaybeTruncated(value, Int.MaxValue) match
+            case null => null
+            case notTruncated =>
+              val maybeTruncated =
+                val maybeTruncatedByElementCount = stringOfMaybeTruncated(value, maxElements)
+                truncate(maybeTruncatedByElementCount, maxCharacters)
+              // our string representation may have been truncated by element and/or character count
+              // if so, append an info string - but only once
+              if notTruncated.length == maybeTruncated.length then maybeTruncated
+              else s"$maybeTruncated ... large output truncated, print value to show all"
       }
       myClassLoader
     }
@@ -97,13 +101,18 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     else str.substring(0, str.offsetByCodePoints(0, maxPrintCharacters - 1))
 
   /** Return a String representation of a value we got from `classLoader()`. */
-  private def replStringOf(value: Object)(using Context): String = // OM
+  private def replStringOf(sym: Symbol, value: Object)(using Context): String = // OM
     assert(myReplStringOf != null,
       "replStringOf should only be called on values creating using `classLoader()`, but `classLoader()` has not been called so far")
     val maxPrintElements = ctx.settings.VreplMaxPrintElements.valueIn(ctx.settingsState)
     val maxPrintCharacters = ctx.settings.VreplMaxPrintCharacters.valueIn(ctx.settingsState)
-    val res = myReplStringOf(value, maxPrintElements, maxPrintCharacters)
-    if res == null then "null // non-null reference has null-valued toString" else res
+    // stringOf returns null if value.toString returns null. Show some text as a fallback.
+    def fallback = s"""null // result of "${sym.name}.toString" is null"""
+    if value == null then "null" else
+      myReplStringOf(value, maxPrintElements, maxPrintCharacters) match
+        case null => fallback
+        case res  => res
+    end if
 
   /** Load the value of the symbol using reflection.
    *
@@ -115,27 +124,15 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     val symValue = resObj
       .getDeclaredMethods.find(_.getName == sym.name.encode.toString)
       .flatMap(result => rewrapValueClass(sym.info.classSymbol, result.invoke(null)))
-    val valueString = symValue.map(replStringOf)
+    symValue
+      .filter(_ => sym.is(Flags.Method) || sym.info != defn.UnitType)
+      .map(value => stripReplPrefix(replStringOf(sym, value)))
 
-    if (!sym.is(Flags.Method) && sym.info == defn.UnitType)
-      None
+  private def stripReplPrefix(s: String): String =
+    if (s.startsWith(REPL_WRAPPER_NAME_PREFIX))
+      s.drop(REPL_WRAPPER_NAME_PREFIX.length).dropWhile(c => c.isDigit || c == '$')
     else
-      valueString.map { s =>
-        if (s.startsWith(REPL_WRAPPER_NAME_PREFIX))
-          s.drop(REPL_WRAPPER_NAME_PREFIX.length).dropWhile(c => c.isDigit || c == '$')
-        else
-          s
-      }
-
-  /** OM Formats errors using the `messageRenderer` */
-  def formatError(dia: Diagnostic)(using state: State): Diagnostic =
-    import dotty.tools.dotc.reporting.NoExplanation
-    given Context = state.context
-    new Diagnostic(
-      NoExplanation(messageRenderer.messageAndPos(dia)),
-      dia.pos,
-      dia.level
-    )
+      s
 
   /** Rewrap value class to their Wrapper class
    *
@@ -143,7 +140,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
    * @param value underlying value
    */
   private def rewrapValueClass(sym: Symbol, value: Object)(using Context): Option[Object] =
-    if ValueClasses.isDerivedValueClass(sym) then
+    if sym.isDerivedValueClass then
       val valueClass = Class.forName(sym.binaryClassName, true, classLoader())
       valueClass.getConstructors.headOption.map(_.newInstance(value))
     else
@@ -197,6 +194,13 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
   private def infoDiagnostic(msg: String, d: Denotation)(using Context): Diagnostic =
     new Diagnostic.Info(msg, d.symbol.sourcePos)
+
+  /** OM */
+  def formatError(dia: Diagnostic)(using state: State): Diagnostic =
+    import dotty.tools.dotc.reporting.NoExplanation
+    given Context = state.context
+    new Diagnostic(NoExplanation(messageRenderer.messageAndPos(dia)), dia.pos, dia.level)
+
 
 object Rendering:
   final val REPL_WRAPPER_NAME_PREFIX = str.REPL_SESSION_LINE

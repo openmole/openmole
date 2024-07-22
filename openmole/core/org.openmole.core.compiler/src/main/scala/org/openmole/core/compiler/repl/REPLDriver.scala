@@ -5,21 +5,21 @@ import dotty.tools.repl.* // OM
 import java.io.{File => JFile, PrintStream}
 import java.nio.charset.StandardCharsets
 
-import dotty.tools.dotc.ast.Trees._
+import dotty.tools.dotc.ast.Trees.*
 import dotty.tools.dotc.ast.{tpd, untpd}
 import dotty.tools.dotc.config.CommandLineParser.tokenize
 import dotty.tools.dotc.config.Properties.{javaVersion, javaVmName, simpleVersionString}
-import dotty.tools.dotc.core.Contexts._
-import dotty.tools.dotc.core.Decorators._
+import dotty.tools.dotc.core.Contexts.*
+import dotty.tools.dotc.core.Decorators.*
 import dotty.tools.dotc.core.Phases.{unfusedPhases, typerPhase}
 import dotty.tools.dotc.core.Denotations.Denotation
-import dotty.tools.dotc.core.Flags._
+import dotty.tools.dotc.core.Flags.*
 import dotty.tools.dotc.core.Mode
 import dotty.tools.dotc.core.NameKinds.SimpleNameKind
 import dotty.tools.dotc.core.NameKinds.DefaultGetterName
-import dotty.tools.dotc.core.NameOps._
+import dotty.tools.dotc.core.NameOps.*
 import dotty.tools.dotc.core.Names.Name
-import dotty.tools.dotc.core.StdNames._
+import dotty.tools.dotc.core.StdNames.*
 import dotty.tools.dotc.core.Symbols.{Symbol, defn}
 import dotty.tools.dotc.interfaces
 import dotty.tools.dotc.interactive.Completion
@@ -30,13 +30,15 @@ import dotty.tools.dotc.util.Spans.Span
 import dotty.tools.dotc.util.{SourceFile, SourcePosition}
 import dotty.tools.dotc.{CompilationUnit, Driver}
 import dotty.tools.dotc.config.CompilerCommand
-import dotty.tools.io._
+import dotty.tools.io.*
+import dotty.tools.repl.Rendering.showUser
 import dotty.tools.runner.ScalaClassLoader.*
-import org.jline.reader._
+import org.jline.reader.*
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
+import scala.compiletime.uninitialized
+import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 import scala.util.Using
 
@@ -94,8 +96,8 @@ class REPLDriver(settings: Array[String],
   /** Create a fresh and initialized context with IDE mode enabled */
   private def initialCtx(settings: List[String]) = {
     val rootCtx = initCtx.fresh.addMode(Mode.ReadPositions | Mode.Interactive)
-    rootCtx.setSetting(rootCtx.settings.YcookComments, true)
-    rootCtx.setSetting(rootCtx.settings.YreadComments, true)
+    rootCtx.setSetting(rootCtx.settings.XcookComments, true)
+    rootCtx.setSetting(rootCtx.settings.XreadComments, true)
     setupRootCtx(this.settings ++ settings, rootCtx)
   }
 
@@ -130,10 +132,10 @@ class REPLDriver(settings: Array[String],
     rendering = new Rendering(classLoader)
   }
 
-  private var rootCtx: Context = _
-  private var shouldStart: Boolean = _
-  private var compiler: ReplCompiler = _
-  protected var rendering: Rendering = _
+  private var rootCtx: Context = uninitialized
+  private var shouldStart: Boolean = uninitialized
+  private var compiler: ReplCompiler = uninitialized
+  protected var rendering: Rendering = uninitialized
 
   def rederingValue = rendering  // OM
 
@@ -158,19 +160,42 @@ class REPLDriver(settings: Array[String],
   def runUntilQuit(using initialState: State = initialState)(): State = {
     val terminal = new JLineTerminal
 
-  //val terminal = LineReaderBuilder.builder().terminal(org.jline.terminal.TerminalBuilder.terminal()).build() // new JLineTerminal
-
 // OM    out.println(
 // OM     s"""Welcome to OpenMOLE $simpleVersionString ($javaVersion, Java $javaVmName).
 // OM        |Type in expressions for evaluation. Or try :help.""".stripMargin)
 
     /** Blockingly read a line, getting back a parse result */
     def readLine()(using state: State): ParseResult = {
-      val completer: Completer = { (_, line, candidates) =>
-        val comps = completions(line.cursor, line.line, state)
-        candidates.addAll(comps.asJava)
-      }
       given Context = state.context
+      val completer: Completer = { (lineReader, line, candidates) =>
+        def makeCandidate(label: String) = {
+          new Candidate(
+            /* value    = */ label,
+            /* displ    = */ stripBackTicks(label), // displayed value
+            /* group    = */ null,  // can be used to group completions together
+            /* descr    = */ null,  // TODO use for documentation?
+            /* suffix   = */ null,
+            /* key      = */ null,
+            /* complete = */ false  // if true adds space when completing
+          )
+        }
+        val comps = completions(line.cursor, line.line, state)
+        candidates.addAll(comps.map(_.label).distinct.map(makeCandidate).asJava)
+        val lineWord = line.word()
+        comps.filter(c => c.label == lineWord && c.symbols.nonEmpty) match
+          case Nil =>
+          case exachMatches =>
+            val terminal = lineReader.nn.getTerminal
+            lineReader.callWidget(LineReader.CLEAR)
+            terminal.writer.println()
+            exachMatches.foreach: exact =>
+              exact.symbols.foreach: sym =>
+                terminal.writer.println(SyntaxHighlighting.highlight(sym.showUser))
+            lineReader.callWidget(LineReader.REDRAW_LINE)
+            lineReader.callWidget(LineReader.REDISPLAY)
+            terminal.flush()
+      }
+
       try {
         val line = terminal.readLine(completer)
         ParseResult(line)
@@ -247,37 +272,24 @@ class REPLDriver(settings: Array[String],
       label
 
   /** Extract possible completions at the index of `cursor` in `expr` */
-  final def completions(cursor: Int, expr: String, state0: State): List[Candidate] =  // OM
-    def makeCandidate(label: String) = {
-
-      new Candidate(
-        /* value    = */ label,
-        /* displ    = */ stripBackTicks(label), // displayed value
-        /* group    = */ null,  // can be used to group completions together
-        /* descr    = */ null,  // TODO use for documentation?
-        /* suffix   = */ null,
-        /* key      = */ null,
-        /* complete = */ false  // if true adds space when completing
-      )
-    }
-
-    // OM: Disable command parsing since commands is private
-//    if expr.startsWith(":") then
-//      ParseResult.commands.collect {
-//        case command if command._1.startsWith(expr) => makeCandidate(command._1)
-//      }
-//    else
+  final def completions(cursor: Int, expr: String, state0: State): List[Completion] = // OM
+  // OM: Disable command parsing since commands is private
+  //  if expr.startsWith(":") then
+  //    ParseResult.commands.collect {
+  //      case command if command._1.startsWith(expr) => Completion(command._1, "", List())
+  //    }
+  //  else
       given state: State = newRun(state0)
       compiler
         .typeCheck(expr, errorsAllowed = true)
-        .map { tree =>
+        .map { (untpdTree, tpdTree) =>
           val file = SourceFile.virtual("<completions>", expr, maybeIncomplete = true)
           val unit = CompilationUnit(file)(using state.context)
-          unit.tpdTree = tree
+          unit.untpdTree = untpdTree
+          unit.tpdTree = tpdTree
           given Context = state.context.fresh.setCompilationUnit(unit)
           val srcPos = SourcePosition(file, Span(cursor))
-          val completions = try Completion.completions(srcPos)._2 catch case NonFatal(_) => Nil
-          completions.map(_.label).distinct.map(makeCandidate)
+          try Completion.completions(srcPos)._2 catch case NonFatal(_) => Nil
         }
         .getOrElse(Nil)
   end completions
@@ -624,6 +636,7 @@ class REPLDriver(settings: Array[String],
   private object ReplConsoleReporter extends ConsoleReporter.AbstractConsoleReporter {
     override def posFileStr(pos: SourcePosition) = "" // omit file paths
     override def printMessage(msg: String): Unit = out.println(msg)
+    override def echoMessage(msg: String): Unit  = printMessage(msg)
     override def flush()(using Context): Unit    = out.flush()
   }
 

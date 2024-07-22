@@ -79,7 +79,7 @@ object Interpreter {
   case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition], error: Boolean)
   case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  case class CompletionCandidate(value: String)
+  case class CompletionCandidate(label: String, symbols: List[dotty.tools.dotc.core.Symbols.Symbol], description: String)
 
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
@@ -173,7 +173,7 @@ object Interpreter {
 
 class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File, val classLoaderValue: ClassLoader) {
 
-  def initialState = driver.initialState 
+  def initialState = driver.initialState
 
   def eval(code: String) = compile(code)()
   def compile(code: String): Interpreter.Compiled =
@@ -209,7 +209,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
     (getResult(runResult), runResult)
 
   def completion(code: String, position: Int, state: repl.REPLDriver.CompilerState) = synchronized {
-    driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(value = c.value())).toVector
+    driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(c.label, c.symbols, c.description)).toVector
   }
 
   def resultClass(state: dotty.tools.repl.State, index: Option[Int] = None) =
