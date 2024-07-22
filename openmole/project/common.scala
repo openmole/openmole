@@ -53,6 +53,7 @@ object common {
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
+  def slf4jVersion = "2.0.9"
 
   def http4sVersion = "0.23.12"
 
@@ -68,6 +69,6 @@ object common {
   def codecVersion = "1.15"
 
   def scalajsLoggingVersion = "1.1.1"
-  def scalaJSDomVersion = "2.0.0"
+  def scalaJSDomVersion = "2.8.0"
 }
 

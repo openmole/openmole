@@ -37,7 +37,7 @@ object Libraries {
   lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
-  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
+  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % slf4jVersion
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"

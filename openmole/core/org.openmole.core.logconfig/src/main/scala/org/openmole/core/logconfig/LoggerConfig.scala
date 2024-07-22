@@ -21,9 +21,9 @@ import org.apache.log4j.{ Appender ⇒ L4JAppender, Level ⇒ L4JLevel, Logger �
 import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 
-object LoggerConfig {
+object LoggerConfig:
 
-  def level(level: Level) = {
+  def level(level: Level) =
     LogManager.getLogManager.reset
 
     val rootLogger = Logger.getLogger("")
@@ -32,14 +32,9 @@ object LoggerConfig {
     val ch = new ConsoleHandler
     ch.setLevel(level)
     rootLogger.addHandler(ch)
-  }
 
-  def init = {
+  def init =
     BasicConfigurator.configure
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
-    val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
-    root.setLevel(ch.qos.logback.classic.Level.ERROR)
     level(Level.INFO)
-  }
 
-}

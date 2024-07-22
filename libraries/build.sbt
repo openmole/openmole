@@ -67,8 +67,8 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 
 lazy val slf4j = OsgiProject(dir,"org.slf4j") settings(
   settings,
-  libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30",
-  version := "1.7.30")
+  libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion,
+  version := slf4jVersion)
 
 lazy val xstream = OsgiProject(
   dir,
@@ -431,7 +431,7 @@ lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("!sun.secu
   settings,
   libraryDependencies += "com.hierynomus" % "sshj" % sshjVersion,
   version := sshjVersion
-)
+) dependsOn(slf4j)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
   settings,
@@ -533,7 +533,7 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
   version := http4sVersion
-) dependsOn(cats)
+) dependsOn(cats, slf4j)
 
 
 
