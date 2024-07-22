@@ -24,7 +24,7 @@ import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.mole.MoleServices
 import org.openmole.tool.file._
 
-object ConsoleVariables {
+object ConsoleVariables:
 
   def variablesName = "__variables"
   def workDirectory = "workDirectory"
@@ -36,28 +36,24 @@ object ConsoleVariables {
       |import $variablesName.services._""".stripMargin)
     
 
-  def experimentName(f: File) = {
+  def experimentName(f: File) =
     val name = f.getName
     if (name.endsWith(".oms")) name.dropRight(".oms".length) else name
-  }
 
-  object Experiment {
+  object Experiment:
     def apply(name: String)(implicit timeService: TimeService): Experiment = Experiment(name, timeService.currentTime)
-  }
 
-  case class Experiment(name: String, launchTime: Long) {
+  case class Experiment(name: String, launchTime: Long):
     def launchDate = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date(launchTime))
-  }
 
 
   def apply(
     args:                     Seq[String],
     workDirectory: File,
-    experiment:    ConsoleVariables.Experiment)(implicit services: Services) = {
+    experiment:    ConsoleVariables.Experiment)(implicit services: Services) =
     import services._
     new ConsoleVariables(args, workDirectory, experiment)(services, moleServices = MoleServices.create(services.tmpDirectory.directory))
-  }
-}
+
 
 
 

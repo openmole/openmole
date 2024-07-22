@@ -176,7 +176,7 @@ class Console(script: Option[String] = None) { console ⇒
             Left(ExitCodes.compilationError)
 
 
-  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(implicit newFile: TmpDirectory, fileService: FileService) =
+  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(using TmpDirectory, FileService) =
     args.workDirectory.mkdirs()
 
     val loop = OpenMOLEREPL.newREPL(quiet = false)
