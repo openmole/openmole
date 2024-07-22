@@ -22,10 +22,10 @@ import org.openmole.core.services.Services
 import org.openmole.tool.file.*
 import org.scalatest.{flatspec, matchers}
 
-class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.*
 
-  "Project compiler" should "complete code" in {
+  "Project compiler" should "complete code" in:
     val workDirectory = tmpDirectory.newDir("project")
     val script = workDirectory / "script.oms"
 
@@ -46,12 +46,11 @@ class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
           |$f2
           |val l = 2 * 2""".stripMargin
 
-
-      Project.completion(workDirectory, script, begin.size).exists(_.value == "theFunction") should equal(true)
-      Project.completion(workDirectory, script, begin.size + f1.size + 1).exists(_.value == "cos") should equal(true)
-      Project.completion(workDirectory, script, begin.size + f1.size + f2.size + 2).exists(_.value == "EmptyTask") should equal(true)
+      Project.completion(workDirectory, script, begin.size).exists(_.label == "theFunction") should equal(true)
+      Project.completion(workDirectory, script, begin.size + f1.size + 1).exists(_.label == "cos") should equal(true)
+      Project.completion(workDirectory, script, begin.size + f1.size + f2.size + 2).exists(_.label == "EmptyTask") should equal(true)
     }
-  }
 
 
-}
+
+
