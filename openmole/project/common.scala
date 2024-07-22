@@ -14,7 +14,7 @@ object common {
   def scalaXMLVersion = "2.1.0"
   def gridscaleVersion = "2.52"
   def mgoVersion = "3.57"
-  def sshjVersion = "0.35.0"
+  def sshjVersion = "0.38.0"
   def containerVersion = "1.28"
   def bouncyCastleVersion = "1.77"
   def scalaTagsVersion = "0.11.1"
