@@ -65,7 +65,7 @@ If you are using another web browser, you will need to copy paste the OpenMOLE U
 
 $br
 
-To get help an installing OpenMOLE, get in touch with us through the OpenMOLE ${aa("chat", href := shared.link.chat)}".
+To get help an installing OpenMOLE, get in touch with us through the OpenMOLE ${aa("chat", href := shared.link.chat)}.
 
 ${h2("Experiment with OpenMOLE")}
 
@@ -93,6 +93,8 @@ ${hl(
   s"""#replace $$USER_DIR with a directory value in which your data will be stored
      |docker run --privileged -p 8080:8080 -v $$USER_DIR:/var/openmole/ openmole/openmole:${org.openmole.core.buildinfo.version.value}""".stripMargin
 , "plain")}
+
+You should be able to access OpenMOLE by opening ${a(href := "http://localhost:8080", "http://localhost:8080")} in your browser.
 
 $br
 
