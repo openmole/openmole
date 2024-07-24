@@ -28,10 +28,10 @@ import org.openmole.core.keyword.:=
 
 object Setter:
   def apply[O, T](f: O ⇒ T ⇒ T) = new Setter[O, T]:
-    def set(o: O) = t => f(o)(t)
+    infix def set(o: O) = t => f(o)(t)
 
 trait Setter[O, T]:
-  def set(o: O): T => T
+  infix def set(o: O): T => T
 
 
 object Mapped:
@@ -170,7 +170,7 @@ trait BuilderPackage:
   final lazy val name = new Name
 
   implicit class SetBuilder[T](t: T):
-    def set(ops: (T ⇒ T)*): T =
+    infix def set(ops: (T ⇒ T)*): T =
       ops.foldLeft(t) { (curT, op) ⇒ op(curT) }
 
   /**
