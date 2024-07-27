@@ -138,7 +138,7 @@ object Interpreter {
             Array(
               "-classpath", classPath(priorityBundles, jars).mkString(":"),
               //"-usejavacp",
-              "-color:never",
+              //"-color:never",
               "-d", classDirectory.getAbsolutePath
             ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
             Console.out,
@@ -149,7 +149,7 @@ object Interpreter {
             Array(
               "-classpath", System.getProperty("java.class.path"),
               //"-usejavacp",
-              "-color:never",
+              // "-color:never",
               "-d", classDirectory.getAbsolutePath,
             ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
             Console.out,
