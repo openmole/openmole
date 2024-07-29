@@ -117,9 +117,9 @@ object GUIServer:
 
   def waitRouter =
     import org.http4s.headers.{`Content-Type`}
-    val routes: HttpRoutes[IO] = HttpRoutes.of {
+    val routes: HttpRoutes[IO] = HttpRoutes.of:
       case _ =>  org.http4s.dsl.io.Ok.apply(waitingOpenMOLEContent).map(_.withContentType(`Content-Type`(MediaType.text.html)))
-    }
+
     Router("/" -> routes)
 
   case class ApplicationControl(stop: () ⇒ Unit)
@@ -178,7 +178,7 @@ object GUIServer:
       if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
       else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
-    s.enableHttp2(true)
+    s
   end server
 
 
