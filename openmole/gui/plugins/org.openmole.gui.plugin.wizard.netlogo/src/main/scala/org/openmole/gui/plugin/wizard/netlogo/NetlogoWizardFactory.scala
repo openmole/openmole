@@ -50,38 +50,40 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
     def parseSwitch(start: Int): PrototypeData =
       val name = lines(start + 5)
-      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, lines(start + 7), Some(name))
+      val default = if lines(start + 7).trim == "1" then "true" else "false"
+      println(lines(start + 7) + " " + default)
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, default, Some(name))
 
     def parseInputBox(start: Int): PrototypeData =
       val name = lines(start + 5)
       PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
 
     def parseMonitor(start: Int): Seq[PrototypeData] =
-      val name = lines(start + 6).split(' ')
-      if (name.size == 1) Seq(PrototypeData(WizardUtils.toVariableName(name.head), PrototypeData.Double, mapping = Some(name.head)))
-      else Seq()
+      lines(start + 6).replace("\\n", "").split(' ').headOption match
+        case Some(name) => Seq(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, mapping = Some(name)))
+        case None => Seq()
 
     def parseChooser(start: Int): PrototypeData =
       val name = lines(start + 5)
       PrototypeData(WizardUtils.toVariableName(name), PrototypeData.String, lines(start + 7).split(' ').head, Some(name))
 
-    def parse0(lines: Seq[(String, Int)], args: Seq[PrototypeData], outputs: Seq[PrototypeData]): (Seq[PrototypeData], Seq[PrototypeData]) =
+    def parse0(lines: Seq[(String, Int)], inputs: Seq[PrototypeData], outputs: Seq[PrototypeData]): (Seq[PrototypeData], Seq[PrototypeData]) =
       if lines.isEmpty
-      then (PrototypeData("mySeed", PrototypeData.Long, "0", None) +: args, outputs)
+      then (PrototypeData("mySeed", PrototypeData.Long, "0", None) +: inputs, outputs)
       else
         val (line, index) = lines.head
         val tail = lines.tail
-        if (line.startsWith("SLIDER")) parse0(tail, args :+ parseSlider(index), outputs)
-        else if (line.startsWith("SWITCH")) parse0(tail, args :+ parseSwitch(index), outputs)
-        else if (line.startsWith("INPUTBOX")) parse0(tail, args :+ parseInputBox(index), outputs)
-        else if (line.startsWith("CHOOSER")) parse0(tail, args :+ parseChooser(index), outputs)
-        else if (line.startsWith("MONITOR")) parse0(tail, args, outputs ++ parseMonitor(index))
+        if (line.startsWith("SLIDER")) parse0(tail, inputs :+ parseSlider(index), outputs)
+        else if (line.startsWith("SWITCH")) parse0(tail, inputs :+ parseSwitch(index), outputs)
+        else if (line.startsWith("INPUTBOX")) parse0(tail, inputs :+ parseInputBox(index), outputs)
+        else if (line.startsWith("CHOOSER")) parse0(tail, inputs :+ parseChooser(index), outputs)
+        else if (line.startsWith("MONITOR")) parse0(tail, inputs, outputs ++ parseMonitor(index))
         // else if (line.startsWith("PLOT")) parse0(tail, args, outputs ++ parsePlot(index))
-        else parse0(tail, args, outputs)
+        else parse0(tail, inputs, outputs)
 
 
     val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())
-    
+
     ModelMetadata(
       inputs,
       outputs,

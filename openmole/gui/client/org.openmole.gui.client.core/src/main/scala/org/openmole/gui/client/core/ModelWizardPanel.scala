@@ -79,11 +79,9 @@ object ModelWizardPanel:
     given NotificationService = NotificationManager.toService(panels.notifications)
     val exclusiveMenu = new ExclusiveMenu
 
-    //val filePath: Var[Option[SafePath]] = Var(None)
     val transferring: Var[ProcessState] = Var(Processed())
     val modelMetadata: Var[Option[ParsedModelMetadata]] = Var(None)
     val currentDirectory: Var[SafePath] = Var(panels.directory.now())
-    //val resources: Var[Resources] = Var(Resources.empty)
 
     def factory(uploaded: Seq[(RelativePath, SafePath)]): Future[Option[(AcceptedModel, WizardPluginFactory)]] =
       val future =
@@ -103,7 +101,8 @@ object ModelWizardPanel:
           _ <-
             f match
               case Some((accepted, factory)) =>
-                factory.parse(uploaded, accepted).map { md => modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory))) }
+                factory.parse(uploaded, accepted).map: md =>
+                  modelMetadata.set(Some(ParsedModelMetadata(accepted, md, uploaded, factory)))
               case None =>
                 panels.notifications.addAndShowNotificaton(NotificationLevel.Info, "No wizard available for your model", div(s"No wizard found for: ${uploaded.map(_._1.mkString).mkString(", ")}"))
                 Future.successful(())
@@ -113,7 +112,7 @@ object ModelWizardPanel:
         case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while parsing", exception)
         case util.Success(_) =>
 
-    val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "autoCleanExecSwitch")
+    val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "wizardControls")
     val uploadDirectory = Var(false)
 
     def upButton(tmpDirectory: SafePath) =
@@ -153,12 +152,10 @@ object ModelWizardPanel:
       div(cls := "verticalFormItem", div("Outputs", width := "100px", margin := "15px"), outputTags.render(initialO))
     )
 
-    def inferProtoTyePair(param: String) =
-      val defaultPrototype = PrototypeData(WizardUtils.toVariableName(param), PrototypeData.Double, "0.0", Some(param))
-
-      modelMetadata.now() match
-        case Some(mmd) => (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == param).getOrElse(defaultPrototype)
-        case _ => defaultPrototype
+    def inferProtoTyePair(param: String, mmd: ParsedModelMetadata) =
+      val variableName = WizardUtils.toVariableName(param)
+      val defaultPrototype = PrototypeData(variableName, PrototypeData.Double, "0.0", Some(param))
+      (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == variableName).getOrElse(defaultPrototype)
 
     def browseToPath(safePath: SafePath)(using panels: Panels) =
       a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
@@ -168,8 +165,8 @@ object ModelWizardPanel:
         case Some(md) =>
           val modifiedMMD =
             md.data.copy(
-              inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
-              outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText) },
+              inputs = inputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText, md) },
+              outputs = outputTags.tags.now().map { t => inferProtoTyePair(t.ref.innerText, md) },
               command = commandInput.ref.value
             )
 
