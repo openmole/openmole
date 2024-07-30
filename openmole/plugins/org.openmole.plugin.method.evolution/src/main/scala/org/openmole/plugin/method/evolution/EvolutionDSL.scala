@@ -86,9 +86,9 @@ object EvolutionWorkflow:
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow = {
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow = 
     val _validate = validate
-    new EvolutionWorkflow {
+    new EvolutionWorkflow:
       type MGOAG = AG
 
       def mgoAG = ag
@@ -100,8 +100,8 @@ object EvolutionWorkflow:
 
       def validate = _validate
 
-      def buildIndividual(g: G, context: Context): I =
-        operations.buildIndividual(g, variablesToPhenotype(context), context)
+      def buildIndividual(g: G, context: Context, state: S): I =
+        operations.buildIndividual(g, variablesToPhenotype(context), context, state)
 
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -110,17 +110,16 @@ object EvolutionWorkflow:
         operations.genomeToVariables(genome)
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
-    }
-  }
+    
 
   def stochasticGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = {
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = 
     val _validate = validate
-    new EvolutionWorkflow {
+    new EvolutionWorkflow:
       type MGOAG = AG
       def mgoAG = ag
 
@@ -131,8 +130,8 @@ object EvolutionWorkflow:
 
       def validate = _validate
 
-      def buildIndividual(genome: G, context: Context): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), context)
+      def buildIndividual(genome: G, context: Context, state: S): I =
+        operations.buildIndividual(genome, variablesToPhenotype(context), context, state)
 
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -145,8 +144,7 @@ object EvolutionWorkflow:
       }
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
-    }
-  }
+  
 
   object OMTermination {
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
@@ -351,7 +349,7 @@ trait EvolutionWorkflow:
 
   def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
 
-  def buildIndividual(genome: G, context: Context): I
+  def buildIndividual(genome: G, context: Context, state: S): I
 
   def inputVals: Seq[Val[?]]
   def outputVals: Seq[Val[?]]
@@ -482,7 +480,7 @@ object MGOAPI:
       def genomeToVariables(genome: G): FromContext[Vector[Variable[?]]]
 
       def buildGenome(context: Vector[Variable[?]]): G
-      def buildIndividual(genome: G, phenotype: P, context: Context): I
+      def buildIndividual(genome: G, phenotype: P, context: Context, state: S): I
 
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]

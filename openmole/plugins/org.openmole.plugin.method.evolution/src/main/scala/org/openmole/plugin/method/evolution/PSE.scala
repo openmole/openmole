@@ -248,12 +248,11 @@ object PSE {
         def buildGenome(vs: Vector[Variable[?]]): G = buildGenome(Genome.fromVariables(vs, om.genome))
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = 
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
-        }
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = PSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context, state: S) = PSEAlgorithm.buildIndividual(genome, phenotype)
 
         def initialState = EvolutionState[HitMapState](s = Map())
 
@@ -367,7 +366,7 @@ object PSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, context: Context, state: S) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
