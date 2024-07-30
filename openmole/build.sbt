@@ -829,7 +829,8 @@ lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "or
       if (!cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
         IO.copyFile(packageJson, modules / "package.json")
         Process("npm install", Some(modules)).!!
-        modules.renameTo(targetModules)
+        IO.copyDirectory(modules, targetModules)
+        IO.delete(modules)
         IO.write(cacheFile, packageJsonHash)
       }
     }
