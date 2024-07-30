@@ -106,7 +106,7 @@ object EvolutionWorkflow:
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]] =
+      def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]] =
         operations.genomeToVariables(genome)
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
@@ -137,7 +137,7 @@ object EvolutionWorkflow:
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(g: G): FromContext[Seq[Variable[_]]] = FromContext { p ⇒
+      def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] = FromContext { p ⇒
         import p._
         val (continuous, discrete) = operations.genomeValues(g)
         val seeder = replication.seed
@@ -173,7 +173,7 @@ object EvolutionWorkflow:
 //      keepHistory:    Boolean                = false,
 //      keepAll:        Boolean                = false,
 //      includeOutputs: Boolean                = true,
-//      filter:         Seq[Val[_]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): DSLContainer[EvolutionWorkflow] =
+//      filter:         Seq[Val[?]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): DSLContainer[EvolutionWorkflow] =
 //      implicit val defScope = dsl.scope
 //      dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, keepHistory = keepHistory, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter))
 
@@ -353,10 +353,10 @@ trait EvolutionWorkflow:
 
   def buildIndividual(genome: G, context: Context): I
 
-  def inputVals: Seq[Val[_]]
-  def outputVals: Seq[Val[_]]
+  def inputVals: Seq[Val[?]]
+  def outputVals: Seq[Val[?]]
 
-  def genomeToVariables(genome: G): FromContext[Seq[Variable[_]]]
+  def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]]
 
   // Variables
   import GAIntegration.namespace
@@ -378,7 +378,7 @@ case class Stochastic(
   reevaluate: Double       = 0.2
 )
 
-object GAIntegration {
+object GAIntegration:
 
   def namespace = Namespace("evolution")
 
@@ -389,19 +389,17 @@ object GAIntegration {
   def genomeToVariable(
     genome: Genome,
     values: (Vector[Double], Vector[Int]),
-    scale:  Boolean) = {
+    scale:  Boolean) =
     val (continuous, discrete) = values
     Genome.toVariables(genome, continuous, discrete, scale)
-  }
 
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
-    scale:  Boolean): Vector[Variable[_]] = {
+    scale:  Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { case (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
-    genome.zipWithIndex.map { case (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
-  }
+    val variables = values.map { (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
+    genome.zipWithIndex.map { (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
 
   def genomeDoubleToVariable(
     genome: GenomeDouble,
@@ -411,61 +409,62 @@ object GAIntegration {
   def genomesDoubleOfPopulationToVariables[I](
     genome: GenomeDouble,
     values: Vector[Vector[Double]],
-    scale:  Boolean): Vector[Variable[_]] = {
+    scale:  Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { case continuous ⇒ GenomeDouble.toVariables(genome, continuous, scale) }
-    genome.zipWithIndex.map { case (g, i) ⇒ GenomeDouble.toArrayVariable(g, variables.map(_(i).value)) }.toVector
-  }
+    val variables = values.map { continuous ⇒ GenomeDouble.toVariables(genome, continuous, scale) }
+    genome.zipWithIndex.map { (g, i) ⇒ GenomeDouble.toArrayVariable(g, variables.map(_(i).value)) }.toVector
 
-  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[_]] =
-    Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map {
-      case (objective, i) ⇒
-        Variable(
-          objective.withType[Array[Double]],
-          phenotypeValues.map(_(i)).toArray
-        )
-    }
+  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
+    Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) ⇒
+      Variable(
+        objective.withType[Array[Double]],
+        phenotypeValues.map(_(i)).toArray
+      )
 
   def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒
     import p._
-    (g: G) ⇒ {
+    (g: G) ⇒
       val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
       reject.from(genomeVariables)
-    }
   }
 
-}
 
-object DeterministicGAIntegration {
+object DeterministicGAIntegration:
 
   def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
   def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
 
-  def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) = {
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) =
     val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
     (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray, va) }
-  }
 
-}
+  def updateState[S](
+    s: S,
+    generationLens: monocle.Lens[S, Long],
+    evaluatedLens: monocle.Lens[S, Long],
+    evaluated: Long) = 
+    generationLens.modify(_ + 1)
+    .andThen(evaluatedLens.modify(_ + evaluated))
+    .apply(s)
 
-object StochasticGAIntegration {
+
+object StochasticGAIntegration:
 
   def migrateToIsland[I](population: Vector[I], historyAge: monocle.Lens[I, Long]) = population.map(historyAge.set(0))
-  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) = {
+
+  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) =
     def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
     population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
-  }
 
-  def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) = {
+  def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) =
     val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
     (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
-  }
 
-}
+  export DeterministicGAIntegration.updateState
 
-object MGOAPI {
+object MGOAPI:
 
-  trait Integration[A, V, P] {
+  trait Integration[A, V, P]:
     type I
     type G
     type S
@@ -476,13 +475,13 @@ object MGOAPI {
 
     def operations(a: A): Ops
 
-    trait Ops {
+    trait Ops:
       def metadata(state: S, data: SaveOption): EvolutionMetadata = EvolutionMetadata.none
 
       def genomeValues(genome: G): V
-      def genomeToVariables(genome: G): FromContext[Vector[Variable[_]]]
+      def genomeToVariables(genome: G): FromContext[Vector[Variable[?]]]
 
-      def buildGenome(context: Vector[Variable[_]]): G
+      def buildGenome(context: Vector[Variable[?]]): G
       def buildIndividual(genome: G, phenotype: P, context: Context): I
 
       def startTimeLens: monocle.Lens[S, Long]
@@ -501,14 +500,10 @@ object MGOAPI {
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
       def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
-      def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[_]]]
-    }
-
-  }
+      def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[?]]]
 
   import mgo.evolution.algorithm._
 
   def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
 
-}
 

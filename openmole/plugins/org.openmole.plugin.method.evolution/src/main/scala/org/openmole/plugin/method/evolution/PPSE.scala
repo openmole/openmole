@@ -62,10 +62,10 @@
 //
 //        def genomeValues(genome: G) = genome._1.toVector
 //
-//        def buildGenome(vs: Vector[Variable[_]]) =
+//        def buildGenome(vs: Vector[Variable[?]]) =
 //          (GenomeDouble.fromVariables(vs, om.genome).toArray, 0.0)
 //
-//        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+//        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
 //          val cs = genomeValues(g)
 //          GenomeDouble.toVariables(om.genome, cs, scale = true)
 //        }
@@ -159,7 +159,7 @@
 //    dilation:  Double,
 //    rarest:    Int,
 //    reject:    Option[Condition],
-//    outputs:   Seq[Val[_]]     = Seq()) = {
+//    outputs:   Seq[Val[?]]     = Seq()) = {
 //    val exactObjectives = Objectives.toExact(objective.map(_.p))
 //    val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 //

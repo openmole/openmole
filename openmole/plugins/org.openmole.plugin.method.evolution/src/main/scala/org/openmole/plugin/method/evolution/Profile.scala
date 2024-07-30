@@ -64,8 +64,8 @@ object Profile {
 
 
   def indexesOfProfiledTry(profiled: Seq[ProfileElement], genome: Genome) =
-    def notFoundInGenome(v: Val[_]) = new UserBadDataError(s"Variable \"$v\" has not been found in the genome, you should add it to the genome to be able to profile it.")
-    def toTry[T](o: Option[T], v: Val[_]): util.Try[T] = o.map(util.Success.apply).getOrElse(util.Failure(notFoundInGenome(v)))
+    def notFoundInGenome(v: Val[?]) = new UserBadDataError(s"Variable \"$v\" has not been found in the genome, you should add it to the genome to be able to profile it.")
+    def toTry[T](o: Option[T], v: Val[?]): util.Try[T] = o.map(util.Success.apply).getOrElse(util.Failure(notFoundInGenome(v)))
 
     profiled.toVector.map:
       case c: IntervalDoubleProfileElement ⇒ toTry(Genome.continuousIndex(genome, c.v), c.v)
@@ -120,11 +120,11 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
         }
@@ -165,9 +165,8 @@ object Profile {
 
           val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
           val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](niche, om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
+          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+          (s3, elited)
         }
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
@@ -196,10 +195,10 @@ object Profile {
       import CDGenome.NoisyIndividual.Individual
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.continuousProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.continuousValues).get _, x, nX)
+        mgo.evolution.niche.continuousProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.continuousValues).get, x, nX)
 
       def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteValues).get _, x)
+        mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteValues).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
         mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
@@ -226,11 +225,11 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
         }
@@ -281,9 +280,8 @@ object Profile {
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-            val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-            (s4, elited)
+            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+            (s3, elited)
           }
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
@@ -313,7 +311,7 @@ object Profile {
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
-    outputs:    Seq[Val[_]]                  = Seq(),
+    outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =

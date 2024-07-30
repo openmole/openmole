@@ -25,7 +25,7 @@ import org.openmole.core.setter.DefinitionScope
 
 object GenerateIslandTask {
 
-  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[?])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
 
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒

@@ -198,15 +198,15 @@ object NichedNSGA2 {
     }
 
     case class Discrete(v: Val[Int]) extends NichedElement
-    case class Aggregated(v: Val[_], a: FromContext[Int]) extends NichedElement
+    case class Aggregated(v: Val[?], a: FromContext[Int]) extends NichedElement
 
-    def valContent(n: NichedElement): Val[_] =
+    def valContent(n: NichedElement): Val[?] =
       n match {
         case d: Discrete   ⇒ d.v
         case a: Aggregated ⇒ a.v
       }
 
-    def validate(n: NichedElement, values: Seq[Val[_]]): Validate =
+    def validate(n: NichedElement, values: Seq[Val[?]]): Validate =
       n match {
         case d: Discrete ⇒ Validate.success
         case a: Aggregated ⇒ Validate { p ⇒
@@ -242,10 +242,9 @@ object NichedNSGA2 {
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Exact]) = FromContext { p ⇒
       import p._
 
-      (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ {
+      (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ 
         val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
         niche.map(n ⇒ context(n)).toVector
-      }
     }
 
     import CDGenome.DeterministicIndividual
@@ -264,11 +263,11 @@ object NichedNSGA2 {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] =
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
@@ -304,9 +303,8 @@ object NichedNSGA2 {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
+          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+          (s3, elited)
         }
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
@@ -334,7 +332,7 @@ object NichedNSGA2 {
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Noisy]) = FromContext { p ⇒
       import p._
 
-      (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ {
+      (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ 
         import org.openmole.tool.types.TypeTool._
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
         val context =
@@ -345,7 +343,7 @@ object NichedNSGA2 {
           }
 
         niche.map(_.from(context)).toVector
-      }
+      
     }
 
     implicit def integration: MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
@@ -362,11 +360,11 @@ object NichedNSGA2 {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
         }
@@ -412,9 +410,8 @@ object NichedNSGA2 {
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-            val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-            (s4, elited)
+            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+            (s3, elited)
           }
 
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
@@ -444,7 +441,7 @@ object NichedNSGA2 {
     genome:     Genome,
     objective:  Objectives,
     nicheSize:  Int,
-    outputs:    Seq[Val[_]]                  = Seq(),
+    outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match

@@ -152,7 +152,7 @@ object NoisyPSEAlgorithm {
       discreteValues.get,
       discreteOperator.get,
       discrete,
-      vectorPhenotype.get _ andThen aggregation andThen pattern,
+      vectorPhenotype.get andThen aggregation andThen pattern,
       buildGenome,
       lambda,
       reject,
@@ -185,7 +185,7 @@ object NoisyPSEAlgorithm {
       scaleContinuousValues(continuousValues.get(i.genome), continuous),
       i.focus(_.genome) andThen discreteValues get,
       aggregation(vectorPhenotype.get(i)),
-      (vectorPhenotype.get _ andThen aggregation andThen pattern)(i),
+      (vectorPhenotype.get andThen aggregation andThen pattern)(i),
       i.phenotypeHistory.size)
 
   case class Result[P](continuous: Vector[Double], discrete: Vector[Int], phenotype: Vector[Double], pattern: Vector[Int], replications: Int, individual: Individual[P])
@@ -243,12 +243,12 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
-        def buildGenome(vs: Vector[Variable[_]]): G = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]): G = buildGenome(Genome.fromVariables(vs, om.genome))
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
         }
@@ -301,9 +301,8 @@ object PSE {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
           import p._
           val (s2, elited) = PSEAlgorithm.elitism[S, Phenotype](pattern(_).from(context), Genome.continuous(om.genome), Focus[S](_.s)) apply (s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
+          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+          (s3, elited)
         }
 
         def migrateToIsland(population: Vector[I]) = population.map(Focus[I](_.foundedIsland).set(true))
@@ -360,14 +359,13 @@ object PSE {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
-        }
 
         def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = NoisyPSEAlgorithm.buildIndividual(genome, phenotype)
         def initialState = EvolutionState[HitMapState](s = Map())
@@ -408,20 +406,20 @@ object PSE {
             Focus[S](_.s)) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
 
-          val (s2, elited) =
-            NoisyPSEAlgorithm.elitism[S, Phenotype](
-              om.pattern,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
-              om.historySize,
-              Genome.continuous(om.genome),
-              Focus[S](_.s)) apply (s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
-        }
+            val (s2, elited) =
+              NoisyPSEAlgorithm.elitism[S, Phenotype](
+                om.pattern,
+                Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+                om.historySize,
+                Genome.continuous(om.genome),
+                Focus[S](_.s)) apply (s, population, candidates, rng)
+
+            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
+            (s3, elited)
 
         def migrateToIsland(population: Vector[I]) =
           StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
@@ -454,7 +452,7 @@ object PSE {
   def apply(
     genome:     Genome,
     objective:  Seq[PatternAxe],
-    outputs:    Seq[Val[_]]                  = Seq(),
+    outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
     reject:     OptionalArgument[Condition]  = None
   ) =
