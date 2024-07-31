@@ -90,7 +90,7 @@ object PSE {
         def buildGenome(vs: Vector[Variable[?]]): G =
           def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
-        
+
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
@@ -146,10 +146,19 @@ object PSE {
             import p._
             MGOPSE.elitism[Phenotype](pattern(_).from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-        def mergeIslandState(state: S, islandState: S): S = state
-        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state: S)
-        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
+        def mergeIslandState(state: S, islandState: S): S =
+          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
+          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
+          state.copy(s = newMap.toMap)
 
+        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          def diffIslandState(initialState: S, islandState: S): S =
+            def allKeys = islandState.s.keys
+            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
+            islandState.copy(s = newMap.toMap)
+
+          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
 
     }
   }
@@ -257,9 +266,19 @@ object PSE {
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
 
-        def mergeIslandState(state: S, islandState: S): S = state
+        def mergeIslandState(state: S, islandState: S): S =
+          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
+          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
+          state.copy(s = newMap.toMap)
+
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          def diffIslandState(initialState: S, islandState: S): S =
+            def allKeys = islandState.s.keys
+            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
+            islandState.copy(s = newMap.toMap)
+
+          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
 
     }
   }

@@ -240,6 +240,7 @@ object EvolutionWorkflow:
 
     val t = island.method
 
+    val initialIslandStateVal = t.stateVal.withName("initialIslandState")
     val islandStateVal = t.stateVal.withName("islandState")
     val islandPopulationPrototype = t.populationVal.withName("islandPopulation")
 
@@ -257,8 +258,8 @@ object EvolutionWorkflow:
     val generateIsland = GenerateIslandTask(t, sample, 1, islandPopulationPrototype)
     val terminationTask = TerminationTask(t, termination)
 
-    val toIsland = ToIslandTask(t, islandPopulationPrototype)
-    val fromIsland = FromIslandTask(t, islandStateVal)
+    val toIsland = ToIslandTask(t, islandPopulationPrototype, initialIslandStateVal)
+    val fromIsland = FromIslandTask(t, islandStateVal, initialIslandStateVal)
 
     val master =
       ((masterFirst -- elitism keep (t.stateVal, t.populationVal, t.offspringPopulationVal, islandStateVal)) -- terminationTask -- masterLast keep (t.terminatedVal, t.stateVal)) &
@@ -280,7 +281,7 @@ object EvolutionWorkflow:
 
     val slave =
       (slaveFist -- toIsland -- islandTask -- fromIsland -- slaveLast) &
-        (toIsland -- fromIsland keep t.generationVal)
+        (toIsland -- fromIsland keep initialIslandStateVal)
 
     val masterSlave = MasterSlave(
       generateInitialIslands,
@@ -403,12 +404,12 @@ object GAIntegration:
         phenotypeValues.map(_(i)).toArray
       )
 
-  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) = FromContext { p ⇒
-    import p._
-    (g: G) ⇒
-      val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
-      reject.from(genomeVariables)
-  }
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) =
+    FromContext: p ⇒
+      import p._
+      (g: G) ⇒
+        val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
+        reject.from(genomeVariables)
 
 
 object DeterministicGAIntegration:
@@ -468,7 +469,7 @@ object MGOAPI:
 
       def mergeIslandState(state: S, islandState: S): S
       def migrateToIsland(i: Vector[I], state: S): (Vector[I], S)
-      def migrateFromIsland(population: Vector[I], state: S, generation: Long): Vector[I]
+      def migrateFromIsland(population: Vector[I], initialState: S, state: S): (Vector[I], S)
 
       def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[?]]]
 
