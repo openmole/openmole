@@ -415,8 +415,7 @@ object DeterministicGAIntegration:
   import mgo.evolution.algorithm._
 
   def migrateToIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]]) = population.map(_.copy(initial = true))
-  def migrateFromIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]], generation: Long) =
-    population.filter(!_.initial).map(_.copy(generation = generation))
+  def migrateFromIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]], generation: Long) = population.filter(!_.initial).map(_.copy(generation = generation))
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) =
     val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
@@ -463,7 +462,7 @@ object MGOAPI:
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
-      
+
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
       def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
