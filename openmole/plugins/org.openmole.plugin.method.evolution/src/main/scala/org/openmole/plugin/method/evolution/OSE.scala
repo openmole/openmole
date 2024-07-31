@@ -35,6 +35,7 @@ object OSE {
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE ⇒ MGOOSE, _ }
 
+
     implicit def integration: MGOAPI.Integration[DeterministicOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicOSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
@@ -102,7 +103,8 @@ object OSE {
             MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
-          val archive = state.s._1 ++ islandState.s._1.filter(!_.initial)
+          def origin(i: I): Vector[Int] = om.origin(i.genome.continuousValues.toVector, i.genome.discreteValues.toVector)
+          val archive = (state.s._1 ++ islandState.s._1.filter(!_.initial)).sortBy(_.generation).distinctBy(origin)
           val map = (state.s._2 ++ islandState.s._2).distinct
           state.copy(s = (archive, map))
 
@@ -212,7 +214,8 @@ object OSE {
               om.limit) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
-          val archive = state.s._1 ++ islandState.s._1.filter(!_.initial)
+          def origin(i: I): Vector[Int] = om.origin(i.genome.continuousValues.toVector, i.genome.discreteValues.toVector)
+          val archive = (state.s._1 ++ islandState.s._1.filter(!_.initial)).sortBy(_.generation).distinctBy(origin)
           val map = (state.s._2 ++ islandState.s._2).distinct
           state.copy(s = (archive, map))
 
