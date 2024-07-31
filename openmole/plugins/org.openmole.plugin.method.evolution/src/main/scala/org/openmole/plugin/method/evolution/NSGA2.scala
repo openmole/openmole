@@ -32,7 +32,7 @@ object NSGA2 {
   object DeterministicNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
     
-    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -47,8 +47,10 @@ object NSGA2 {
         def evaluatedLens = Focus[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = 
           val (cs, is) = genomeValues(g)
@@ -104,11 +106,7 @@ object NSGA2 {
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated(g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration(g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration(d, Focus[S](_.startTime))(s, population)
 
-    }
 
   }
 
@@ -132,7 +130,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticNSGA2) = new Ops {
+      def operations(om: StochasticNSGA2) = new Ops:
 
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
@@ -149,8 +147,9 @@ object NSGA2 {
         def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
@@ -202,10 +201,7 @@ object NSGA2 {
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated(g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration(g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration(d, Focus[S](_.startTime))(s, population)
-      }
+
 
     }
   }

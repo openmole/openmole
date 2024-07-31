@@ -71,7 +71,7 @@ object PSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicPSE) = new Ops {
+      def operations(om: DeterministicPSE) = new Ops:
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
@@ -87,9 +87,10 @@ object PSE {
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
-        def buildGenome(vs: Vector[Variable[?]]): G = buildGenome(Genome.fromVariables(vs, om.genome))
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-
+        def buildGenome(vs: Vector[Variable[?]]): G =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
+        
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
@@ -98,51 +99,47 @@ object PSE {
 
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
+          FromContext: p ⇒
+            import p._
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
-          import p._
+            val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
+            val res = MGOPSE.result[Phenotype](population, Genome.continuous(om.genome), toFitness andThen om.pattern)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
+            val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-          val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
-          val res = MGOPSE.result[Phenotype](population, Genome.continuous(om.genome), toFitness andThen om.pattern)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
-          val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
+            val outputValues =
+              if includeOutputs
+              then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype))
+              else Seq()
 
-          val outputValues =
-            if includeOutputs
-            then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype))
-            else Seq()
+            genomes ++ fitness ++ Seq(generated) ++ outputValues
 
-          genomes ++ fitness ++ Seq(generated) ++ outputValues
-        }
+        def initialGenomes(n: Int, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGOPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val continuous = Genome.continuous(om.genome)
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGOPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
-        }
+        private def pattern(phenotype: Phenotype) =
+          FromContext: p ⇒
+            import p._
+            om.pattern(Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply(phenotype))
 
-        private def pattern(phenotype: Phenotype) = FromContext { p ⇒
-          import p._
-          om.pattern(Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply(phenotype))
-        }
-
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGOPSE.adaptiveBreeding[Phenotype](
-            n,
-            om.operatorExploration,
-            discrete,
-            pattern(_).from(context),
-            rejectValue)(s, individuals, rng)
-        }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGOPSE.adaptiveBreeding[Phenotype](
+              n,
+              om.operatorExploration,
+              discrete,
+              pattern(_).from(context),
+              rejectValue)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p ⇒
@@ -152,7 +149,7 @@ object PSE {
         def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state: S)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
-      }
+
 
     }
   }
@@ -197,13 +194,10 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)

@@ -149,9 +149,9 @@ object EvolutionWorkflow:
   object OMTermination:
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match
-        case AfterEvaluated(e) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterEvaluated(e, s, population)
-        case AfterGeneration(g) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterGeneration(g, s, population)
-        case AfterDuration(d) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterDuration(d, s, population)
+        case AfterEvaluated(e) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterEvaluated(e, integration.operations.evaluatedLens)(s, population)
+        case AfterGeneration(g) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterGeneration(g, integration.operations.generationLens)(s, population)
+        case AfterDuration(d) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterDuration(d, integration.operations.startTimeLens)(s, population)
 
   sealed trait OMTermination
   case class AfterEvaluated(steps: Long) extends OMTermination
@@ -463,16 +463,13 @@ object MGOAPI:
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
+      
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
       def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
       def mergeIslandState(state: S, islandState: S): S
       def migrateToIsland(i: Vector[I], state: S): (Vector[I], S)
       def migrateFromIsland(population: Vector[I], state: S, generation: Long): Vector[I]
-
-      def afterEvaluated(e: Long, s: S, population: Vector[I]): Boolean
-      def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean
-      def afterDuration(d: squants.Time, s: S, population: Vector[I]): Boolean
 
       def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean): FromContext[Seq[Variable[?]]]
 

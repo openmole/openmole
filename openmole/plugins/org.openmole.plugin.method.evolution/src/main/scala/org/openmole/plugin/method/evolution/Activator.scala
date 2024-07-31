@@ -39,11 +39,11 @@ class Activator extends BundleActivator {
         TaskHighLight(objectName(ScalingGenomeTask)),
         TaskHighLight(objectName(TerminationTask)),
         TaskHighLight(objectName(InitialStateTask)),
-//        PatternHighLight(objectName(ProfileEvolution)),
+        PatternHighLight(objectName(ProfileEvolution)),
         PatternHighLight(objectName(NSGA2Evolution)),
-//        PatternHighLight(objectName(NSGA3Evolution)),
-//        PatternHighLight(objectName(OSEEvolution)),
-//        PatternHighLight(objectName(PSEEvolution)),
+        PatternHighLight(objectName(NSGA3Evolution)),
+        PatternHighLight(objectName(OSEEvolution)),
+        PatternHighLight(objectName(PSEEvolution)),
         WordHighLight(Stochastic.getClass),
         HookHighLight(objectName(SavePopulationHook))
       )

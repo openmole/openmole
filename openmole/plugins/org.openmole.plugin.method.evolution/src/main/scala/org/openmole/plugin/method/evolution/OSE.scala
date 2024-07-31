@@ -51,8 +51,9 @@ object OSE {
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
@@ -61,10 +62,6 @@ object OSE {
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState(s = (Array.empty, Array.empty))
-
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p ⇒
@@ -151,8 +148,9 @@ object OSE {
         def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[?]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
@@ -212,8 +210,6 @@ object OSE {
               Genome.continuous(om.genome),
               om.origin,
               om.limit) apply (s, population, candidates, rng)
-
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
 
         def mergeIslandState(state: S, islandState: S): S =
           val archive = state.s._1 ++ islandState.s._1.filter(!_.initial)
@@ -362,7 +358,7 @@ object OSE {
 
 import EvolutionWorkflow._
 
-object OSEEvolution {
+object OSEEvolution:
 
   import org.openmole.core.dsl._
 
@@ -392,7 +388,7 @@ object OSEEvolution {
 
   given ExplorationMethodSetter[OSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
-}
+
 
 import monocle.macros._
 
