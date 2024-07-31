@@ -258,9 +258,7 @@ object EvolutionWorkflow:
     val terminationTask = TerminationTask(t, termination)
 
     val toIsland = ToIslandTask(t, islandPopulationPrototype)
-    val fromIsland = FromIslandTask(t)
-
-    val populationToOffspring = AssignTask(t.populationVal → t.offspringPopulationVal, t.evaluatedVal -> islandEvaluatedVal)
+    val fromIsland = FromIslandTask(t, islandEvaluatedVal)
 
     val master =
       ((masterFirst -- elitism keep (t.stateVal, t.populationVal, t.offspringPopulationVal, islandEvaluatedVal)) -- terminationTask -- masterLast keep (t.terminatedVal, t.stateVal)) &
@@ -281,7 +279,7 @@ object EvolutionWorkflow:
     val slaveLast = EmptyTask() set ((inputs, outputs) += (t.offspringPopulationVal, islandEvaluatedVal))
 
     val slave =
-      (slaveFist -- toIsland -- islandTask -- fromIsland -- populationToOffspring -- slaveLast) &
+      (slaveFist -- toIsland -- islandTask -- fromIsland -- slaveLast) &
         (toIsland -- fromIsland keep t.generationVal)
 
     val masterSlave = MasterSlave(
