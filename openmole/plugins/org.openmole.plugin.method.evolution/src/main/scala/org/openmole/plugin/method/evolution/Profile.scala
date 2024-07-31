@@ -159,19 +159,19 @@ object Profile {
           mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-
-          val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
-          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](niche, om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
-          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-          (s3, elited)
-        }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = 
+          FromContext: p ⇒
+            import p._
+  
+            val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
+            NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](niche, om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
+          
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
       }
@@ -265,27 +265,26 @@ object Profile {
           NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext { p ⇒
             import p._
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
 
-            val (s2, elited) = NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
+            NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
               niche,
               om.nicheSize,
               om.historySize,
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-            (s3, elited)
           }
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
       }

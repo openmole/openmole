@@ -189,10 +189,9 @@ object NichedNSGA2 {
 
     implicit def fromAggregate[A, V[_]: FromArray](a: Evaluate[Val[A], V[A] ⇒ Int]): Aggregated = {
       val f =
-        FromContext { p ⇒
+        FromContext: p ⇒
           import p._
           a.evaluate(implicitly[FromArray[V]].apply(context(a.value.array)))
-        }
 
       Aggregated(a.value, f)
     }
@@ -201,36 +200,32 @@ object NichedNSGA2 {
     case class Aggregated(v: Val[?], a: FromContext[Int]) extends NichedElement
 
     def valContent(n: NichedElement): Val[?] =
-      n match {
+      n match
         case d: Discrete   ⇒ d.v
         case a: Aggregated ⇒ a.v
-      }
 
     def validate(n: NichedElement, values: Seq[Val[?]]): Validate =
-      n match {
+      n match
         case d: Discrete ⇒ Validate.success
         case a: Aggregated ⇒ Validate { p ⇒
           import p._
           a.a.validate(inputs ++ values)
         }
-      }
 
     type Exact = Val[Int]
     type Noisy = FromContext[Int]
 
     def toExact(n: NichedElement) =
-      n match {
+      n match
         case d: Discrete ⇒ d.v
         case _           ⇒ throw new UserBadDataError(s"Niche element $n cannot be aggregated it should be exact.")
-      }
 
     def toNoisy(n: NichedElement) = FromContext { p ⇒
       import p._
 
-      n match {
+      n match
         case d: Discrete   ⇒ context(d.v.array).head
         case a: Aggregated ⇒ a.a.from(context)
-      }
     }
 
   }
@@ -300,17 +295,16 @@ object NichedNSGA2 {
           mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val (s2, elited) = NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
-          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-          (s3, elited)
-        }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            NichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](om.niche.from(context), om.nicheSize, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
       }
@@ -398,24 +392,21 @@ object NichedNSGA2 {
           NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
-          FromContext { p ⇒
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
             import p._
-            val (s2, elited) = NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
+            NoisyNichedNSGA2Algorithm.elitism[S, Vector[Int], Phenotype](
               om.niche.from(context),
               om.nicheSize,
               om.historySize,
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-            (s3, elited)
-          }
-
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
+
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
       }

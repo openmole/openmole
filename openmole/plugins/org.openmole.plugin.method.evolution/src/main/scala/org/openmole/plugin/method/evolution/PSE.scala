@@ -144,13 +144,12 @@ object PSE {
             rejectValue)(s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val (s2, elited) = MGOPSE.elitism[Phenotype](pattern(_).from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
-          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-          (s3, elited)
-        }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            MGOPSE.elitism[Phenotype](pattern(_).from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state: S)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
       }
@@ -253,25 +252,20 @@ object PSE {
               om.pattern,
               rejectValue) apply (s, individuals, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
 
-            val (s2, elited) =
-              MGONoisyPSE.elitism[Phenotype](
-                om.pattern,
-                Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
-                om.historySize,
-                Genome.continuous(om.genome)) apply (s, population, candidates, rng)
+            MGONoisyPSE.elitism[Phenotype](
+              om.pattern,
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              om.historySize,
+              Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-            (s3, elited)
 
-        def migrateToIsland(population: Vector[I], state: S) =
-          (StochasticGAIntegration.migrateToIsland(population), state)
-
-        def migrateFromIsland(population: Vector[I], state: S, generation: Long) =
-          StochasticGAIntegration.migrateFromIsland(population, generation)
+        def mergeIslandState(state: S, islandState: S): S = state
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
 
     }
   }

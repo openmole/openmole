@@ -99,15 +99,18 @@ object OSE {
               Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
               rejectValue) apply (s, individuals, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
-            val (s2, elited) = MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
-            val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-            (s3, elited)
+            MGOOSE.elitism[Phenotype](om.mu, om.limit, om.origin, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
+
+        def mergeIslandState(state: S, islandState: S): S =
+          val archive = state.s._1 ++ islandState.s._1.filter(!_.initial)
+          val map = (state.s._2 ++ islandState.s._2).distinct
+          state.copy(s = (archive, map))
 
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state.focus(_.s._1).modify(_.map(_.copy(initial = true))))
-        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population ++ state.s._1, generation)
+        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
 
 
     }
@@ -198,29 +201,27 @@ object OSE {
               om.limit,
               rejectValue) apply (s, individuals, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) =
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
 
-            val (s2, elited) =
-              MGONoisyOSE.elitism[Phenotype](
-                om.mu,
-                om.historySize,
-                Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
-                Genome.continuous(om.genome),
-                om.origin,
-                om.limit) apply (s, population, candidates, rng)
-            val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-            (s3, elited)
+            MGONoisyOSE.elitism(
+              om.mu,
+              om.historySize,
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Genome.continuous(om.genome),
+              om.origin,
+              om.limit) apply (s, population, candidates, rng)
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def migrateToIsland(population: Vector[I], state: S) =
-          (
-            StochasticGAIntegration.migrateToIsland(population),
-            state.focus(_.s._1).modify(_.map(i => i.copy(initial = true)))
-          )
 
-        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population ++ state.s._1, generation)
+        def mergeIslandState(state: S, islandState: S): S =
+          val archive = state.s._1 ++ islandState.s._1.filter(!_.initial)
+          val map = (state.s._2 ++ islandState.s._2).distinct
+          state.copy(s = (archive, map))
+
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state.focus(_.s._1).modify(_.map(i => i.copy(initial = true))))
+        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
 
 
     }

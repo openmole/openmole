@@ -88,13 +88,12 @@ object NSGA3 {
           MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue, lambda = n)(s, individuals, rng)
         }
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val (s2, elited) = MGONSGA3.elitism[S, Phenotype](om.mu, om.references, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
-          val s3 = DeterministicGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-          (s3, elited)
-        }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            MGONSGA3.elitism[S, Phenotype](om.mu, om.references, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
 
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
 
@@ -162,31 +161,29 @@ object NSGA3 {
           genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
         }
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
+        def initialGenomes(n: Int, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
 
-          val continuous = Genome.continuous(om.genome)
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONoisyNSGA3.initialGenomes(n, continuous, discrete, rejectValue, rng)
-        }
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONoisyNSGA3.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) = FromContext { p ⇒
-          import p._
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) =
+          FromContext: p ⇒
+            import p._
 
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONoisyNSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.cloneProbability, discrete, aggregate.from(context), rejectValue, lambda = n) apply (s, individuals, rng)
-        }
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONoisyNSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.cloneProbability, discrete, aggregate.from(context), rejectValue, lambda = n) apply (s, individuals, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: util.Random) = FromContext { p ⇒
-          import p._
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
+          FromContext: p ⇒
+            import p._
+            MGONoisyNSGA3.elitism(om.mu, om.references, om.historySize, aggregate.from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-          val (s2, elited) = MGONoisyNSGA3.elitism[S, Phenotype](om.mu, om.references, om.historySize, aggregate.from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
-          val s3 = StochasticGAIntegration.updateState(s2, generationLens, evaluatedLens, evaluated)
-          (s3, elited)
-        }
-
+        def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
 

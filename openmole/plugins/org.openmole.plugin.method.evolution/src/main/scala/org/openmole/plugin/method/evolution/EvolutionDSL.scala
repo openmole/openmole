@@ -178,7 +178,7 @@ object EvolutionWorkflow:
 
     val scaleGenome = ScalingGenomeTask(evolution)
     val toOffspring = ToOffspringTask(evolution)
-    val elitism = ElitismTask(evolution, evolution.evaluatedVal) set (evolution.evaluatedVal := 1)
+    val elitism = ElitismTask(evolution)
     val terminationTask = TerminationTask(evolution, termination)
     val breed = BreedTask(evolution, 1, Genome.SuggestedValues.empty)
 
@@ -240,12 +240,12 @@ object EvolutionWorkflow:
 
     val t = island.method
 
-    val islandEvaluatedVal = t.generationVal.withName("islandEvaluated")
+    val islandStateVal = t.stateVal.withName("islandState")
     val islandPopulationPrototype = t.populationVal.withName("islandPopulation")
 
     val masterFirst =
       EmptyTask() set (
-        (inputs, outputs) += (t.populationVal, t.offspringPopulationVal, t.stateVal, islandEvaluatedVal)
+        (inputs, outputs) += (t.populationVal, t.offspringPopulationVal, t.stateVal, islandStateVal)
       )
 
     val masterLast =
@@ -253,19 +253,19 @@ object EvolutionWorkflow:
         (inputs, outputs) += (t.populationVal, t.stateVal, islandPopulationPrototype.toArray, t.terminatedVal)
       )
 
-    val elitism = ElitismTask(t, islandEvaluatedVal)
+    val elitism = IslandElitismTask(t, islandStateVal)
     val generateIsland = GenerateIslandTask(t, sample, 1, islandPopulationPrototype)
     val terminationTask = TerminationTask(t, termination)
 
     val toIsland = ToIslandTask(t, islandPopulationPrototype)
-    val fromIsland = FromIslandTask(t, islandEvaluatedVal)
+    val fromIsland = FromIslandTask(t, islandStateVal)
 
     val master =
-      ((masterFirst -- elitism keep (t.stateVal, t.populationVal, t.offspringPopulationVal, islandEvaluatedVal)) -- terminationTask -- masterLast keep (t.terminatedVal, t.stateVal)) &
+      ((masterFirst -- elitism keep (t.stateVal, t.populationVal, t.offspringPopulationVal, islandStateVal)) -- terminationTask -- masterLast keep (t.terminatedVal, t.stateVal)) &
         (elitism -- generateIsland -- masterLast) &
         (elitism -- masterLast keep t.populationVal)
 
-    val masterTask = MoleTask(master) set (exploredOutputs += (islandPopulationPrototype.toArray))
+    val masterTask = MoleTask(master) set (exploredOutputs += islandPopulationPrototype.toArray)
 
     val generateInitialIslands =
       GenerateIslandTask(t, sample, parallelism, islandPopulationPrototype) set (
@@ -276,7 +276,7 @@ object EvolutionWorkflow:
     val islandTask = MoleTask(island)
 
     val slaveFist = EmptyTask() set ((inputs, outputs) += (t.stateVal, islandPopulationPrototype))
-    val slaveLast = EmptyTask() set ((inputs, outputs) += (t.offspringPopulationVal, islandEvaluatedVal))
+    val slaveLast = EmptyTask() set ((inputs, outputs) += (t.offspringPopulationVal, islandStateVal))
 
     val slave =
       (slaveFist -- toIsland -- islandTask -- fromIsland -- slaveLast) &
@@ -422,15 +422,6 @@ object DeterministicGAIntegration:
     val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
     (phenotypeContent.outputs zip outputs.transpose).map { (v, va) ⇒ Variable.unsecure(v.toArray, va) }
 
-  def updateState[S](
-    s: S,
-    generationLens: monocle.Lens[S, Long],
-    evaluatedLens: monocle.Lens[S, Long],
-    evaluated: Long) = 
-    generationLens.modify(_ + 1)
-    .andThen(evaluatedLens.modify(_ + evaluated))
-    .apply(s)
-
 object StochasticGAIntegration:
   import mgo.evolution.algorithm._
 
@@ -443,8 +434,6 @@ object StochasticGAIntegration:
   def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) =
     val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
     (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
-
-  export DeterministicGAIntegration.updateState
 
 object MGOAPI:
 
@@ -475,8 +464,9 @@ object MGOAPI:
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
-      def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random): FromContext[(S, Vector[I])]
+      def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
+      def mergeIslandState(state: S, islandState: S): S
       def migrateToIsland(i: Vector[I], state: S): (Vector[I], S)
       def migrateFromIsland(population: Vector[I], state: S, generation: Long): Vector[I]
 
