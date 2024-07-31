@@ -86,7 +86,7 @@ object EvolutionWorkflow:
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow = 
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type MGOAG = AG
@@ -101,7 +101,7 @@ object EvolutionWorkflow:
       def validate = _validate
 
       def buildIndividual(g: G, context: Context, state: S): I =
-        operations.buildIndividual(g, variablesToPhenotype(context), context, state)
+        operations.buildIndividual(g, variablesToPhenotype(context), state)
 
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -110,14 +110,14 @@ object EvolutionWorkflow:
         operations.genomeToVariables(genome)
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
-    
+
 
   def stochasticGAIntegration[AG](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow = 
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type MGOAG = AG
@@ -131,7 +131,7 @@ object EvolutionWorkflow:
       def validate = _validate
 
       def buildIndividual(genome: G, context: Context, state: S): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), context, state)
+        operations.buildIndividual(genome, variablesToPhenotype(context), state)
 
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -144,16 +144,14 @@ object EvolutionWorkflow:
       }
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
-  
 
-  object OMTermination {
+
+  object OMTermination:
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
-      oMTermination match {
+      oMTermination match
         case AfterEvaluated(e) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterEvaluated(e, s, population)
         case AfterGeneration(g) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterGeneration(g, s, population)
         case AfterDuration(d) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ integration.operations.afterDuration(d, s, population)
-      }
-  }
 
   sealed trait OMTermination
   case class AfterEvaluated(steps: Long) extends OMTermination
@@ -164,17 +162,6 @@ object EvolutionWorkflow:
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
-//  implicit class EvolutionMethodContainer(dsl: DSLContainer[EvolutionWorkflow]) extends MethodHookDecorator(dsl):
-//    def hook(
-//      output:         WritableOutput,
-//      frequency:      OptionalArgument[Long] = None,
-//      keepHistory:    Boolean                = false,
-//      keepAll:        Boolean                = false,
-//      includeOutputs: Boolean                = true,
-//      filter:         Seq[Val[?]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): DSLContainer[EvolutionWorkflow] =
-//      implicit val defScope = dsl.scope
-//      dsl.hook(SavePopulationHook(dsl.method, output, frequency = frequency, keepHistory = keepHistory, keepAll = keepAll, includeOutputs = includeOutputs, filter = filter))
-
   def SteadyStateEvolution[M](
     method:      M,
     evaluation:  DSL,
@@ -182,7 +169,7 @@ object EvolutionWorkflow:
     parallelism: Int                          = 1,
     suggestion:  Genome.SuggestedValues       = Genome.SuggestedValues.empty,
     wrap:        Boolean                      = false,
-    scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) = {
+    scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) =
     implicit def defScope: DefinitionScope = scope
     val evolution = evolutionMethod(method)
 
@@ -241,15 +228,13 @@ object EvolutionWorkflow:
       delegate = wrapped.delegate,
       method = evolution,
       validate = evolution.validate)
-  }
 
   def IslandEvolution(
     island:      DSLContainer[EvolutionWorkflow],
     parallelism: Int,
     termination: OMTermination,
     sample:      OptionalArgument[Int]           = None,
-    scope:       DefinitionScope                 = "island evolution"
-  ) = {
+    scope:       DefinitionScope                 = "island evolution") =
 
     implicit def defScope: DefinitionScope = scope
 
@@ -271,8 +256,8 @@ object EvolutionWorkflow:
     val elitism = ElitismTask(t, islandEvaluatedVal)
     val generateIsland = GenerateIslandTask(t, sample, 1, islandPopulationPrototype)
     val terminationTask = TerminationTask(t, termination)
-    val islandPopulationToPopulation = AssignTask(islandPopulationPrototype → t.populationVal) set ((inputs, outputs) += t.stateVal)
 
+    val toIsland = ToIslandTask(t, islandPopulationPrototype)
     val fromIsland = FromIslandTask(t)
 
     val populationToOffspring = AssignTask(t.populationVal → t.offspringPopulationVal, t.evaluatedVal -> islandEvaluatedVal)
@@ -296,7 +281,8 @@ object EvolutionWorkflow:
     val slaveLast = EmptyTask() set ((inputs, outputs) += (t.offspringPopulationVal, islandEvaluatedVal))
 
     val slave =
-      (slaveFist -- islandPopulationToPopulation -- islandTask -- fromIsland -- populationToOffspring -- slaveLast)
+      (slaveFist -- toIsland -- islandTask -- fromIsland -- populationToOffspring -- slaveLast) &
+        (toIsland -- fromIsland keep t.generationVal)
 
     val masterSlave = MasterSlave(
       generateInitialIslands,
@@ -318,7 +304,6 @@ object EvolutionWorkflow:
       output = Some(masterTask),
       delegate = Vector(islandTask),
       method = t)
-  }
 
 end EvolutionWorkflow
 
@@ -381,6 +366,7 @@ object GAIntegration:
   def namespace = Namespace("evolution")
 
   def samplesVal = Val[Int]("samples", namespace)
+  def generatedVal = Val[Long]("generated", namespace)
   def generationVal = Val[Long]("generation", namespace)
   def evaluatedVal = Val[Long]("evaluated", namespace)
 
@@ -428,13 +414,15 @@ object GAIntegration:
 
 
 object DeterministicGAIntegration:
+  import mgo.evolution.algorithm._
 
-  def migrateToIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
-  def migrateFromIsland[P](population: Vector[mgo.evolution.algorithm.CDGenome.DeterministicIndividual.Individual[P]]) = population
+  def migrateToIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]]) = population.map(_.copy(initial = true))
+  def migrateFromIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]], generation: Long) =
+    population.filter(!_.initial).map(_.copy(generation = generation))
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) =
     val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
-    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray, va) }
+    (phenotypeContent.outputs zip outputs.transpose).map { (v, va) ⇒ Variable.unsecure(v.toArray, va) }
 
   def updateState[S](
     s: S,
@@ -445,14 +433,14 @@ object DeterministicGAIntegration:
     .andThen(evaluatedLens.modify(_ + evaluated))
     .apply(s)
 
-
 object StochasticGAIntegration:
+  import mgo.evolution.algorithm._
 
-  def migrateToIsland[I](population: Vector[I], historyAge: monocle.Lens[I, Long]) = population.map(historyAge.set(0))
+  def migrateToIsland[P](population: Vector[CDGenome.NoisyIndividual.Individual[P]]) = population.map(_.copy(historyAge = 0, initial = true))
 
-  def migrateFromIsland[I, P](population: Vector[I], historyAge: monocle.Lens[I, Long], history: monocle.Lens[I, Array[P]]) =
-    def keepIslandHistoryPart(i: I) = history.modify(h ⇒ h.takeRight(historyAge.get(i).toInt))(i)
-    population.filter(i ⇒ historyAge.get(i) > 0).map(keepIslandHistoryPart)
+  def migrateFromIsland[P](population: Vector[CDGenome.NoisyIndividual.Individual[P]], generation: Long) =
+    def keepIslandHistoryPart(i: CDGenome.NoisyIndividual.Individual[P]) = i.copy(phenotypeHistory = i.phenotypeHistory.takeRight(i.historyAge.toInt))
+    population.filter(!_.initial).map(_.copy(generation = generation)).map(keepIslandHistoryPart)
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) =
     val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
@@ -480,7 +468,7 @@ object MGOAPI:
       def genomeToVariables(genome: G): FromContext[Vector[Variable[?]]]
 
       def buildGenome(context: Vector[Variable[?]]): G
-      def buildIndividual(genome: G, phenotype: P, context: Context, state: S): I
+      def buildIndividual(genome: G, phenotype: P, state: S): I
 
       def startTimeLens: monocle.Lens[S, Long]
       def generationLens: monocle.Lens[S, Long]
@@ -491,8 +479,8 @@ object MGOAPI:
       def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random): FromContext[Vector[G]]
       def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random): FromContext[(S, Vector[I])]
 
-      def migrateToIsland(i: Vector[I]): Vector[I]
-      def migrateFromIsland(population: Vector[I], state: S): Vector[I]
+      def migrateToIsland(i: Vector[I], state: S): (Vector[I], S)
+      def migrateFromIsland(population: Vector[I], state: S, generation: Long): Vector[I]
 
       def afterEvaluated(e: Long, s: S, population: Vector[I]): Boolean
       def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean

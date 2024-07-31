@@ -35,12 +35,11 @@ object GenerateIslandTask {
 
       def samples =
         if (p.isEmpty) Vector.empty
-        else sample match {
+        else sample match 
           case Some(s) ⇒ rng().shuffle(p.toVector).take(s)
           case None    ⇒ p.toVector
-        }
 
-      def populations = Array.fill(size)(evolution.operations.migrateToIsland(samples).toArray)
+      def populations = Array.fill(size)(samples.toArray)
       Variable(outputPopulation.toArray, populations)
     } set (
       inputs += evolution.populationVal,

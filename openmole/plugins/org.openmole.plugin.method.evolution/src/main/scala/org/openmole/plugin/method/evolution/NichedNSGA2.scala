@@ -80,7 +80,7 @@ object NichedNSGA2Algorithm {
       reject,
       operatorExploration)
 
-  def expression[P](fitness: (Vector[Double], Vector[Int]) ⇒ P, components: Vector[C]): Genome ⇒ Individual[P] =
+  def expression[P](fitness: (Vector[Double], Vector[Int]) ⇒ P, components: Vector[C]) =
     DeterministicIndividual.expression[P](fitness, components)
 
   def elitism[S, N, P](niche: Niche[Individual[P], N], mu: Int, components: Vector[C], fitness: P ⇒ Vector[Double]) =
@@ -172,7 +172,7 @@ object NoisyNichedNSGA2Algorithm {
       muByNiche)
   }
 
-  def expression[P: Manifest](fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]): (util.Random, Genome) ⇒ Individual[P] =
+  def expression[P: Manifest](fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]) =
     NoisyIndividual.expression(fitness, continuous)
 
   def initialGenomes(lambda: Int, continuous: Vector[C], discrete: Vector[D], reject: Option[Genome ⇒ Boolean], rng: scala.util.Random) =
@@ -242,7 +242,7 @@ object NichedNSGA2 {
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Exact]) = FromContext { p ⇒
       import p._
 
-      (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒ 
+      (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒
         val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
         niche.map(n ⇒ context(n)).toVector
     }
@@ -271,7 +271,7 @@ object NichedNSGA2 {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
@@ -311,8 +311,8 @@ object NichedNSGA2 {
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
-        def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
+        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = DeterministicGAIntegration.migrateFromIsland(population, generation)
       }
 
     }
@@ -332,18 +332,16 @@ object NichedNSGA2 {
     def niche(phenotypeContent: PhenotypeContent, niche: Seq[NichedElement.Noisy]) = FromContext { p ⇒
       import p._
 
-      (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒ 
+      (i: CDGenome.NoisyIndividual.Individual[Phenotype]) ⇒
         import org.openmole.tool.types.TypeTool._
         val values = i.phenotypeHistory.map(Phenotype.outputs(phenotypeContent, _)).transpose
         val context =
-          (phenotypeContent.outputs zip values).map {
-            case (v, va) ⇒
-              val array = fillArray(v.`type`.manifest, va)
-              Variable.unsecure(v.toArray, array)
-          }
+          (phenotypeContent.outputs zip values).map: (v, va) ⇒
+            val array = fillArray(v.`type`.manifest, va)
+            Variable.unsecure(v.toArray, array)
 
         niche.map(_.from(context)).toVector
-      
+
     }
 
     implicit def integration: MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticNichedNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
@@ -369,7 +367,7 @@ object NichedNSGA2 {
           Genome.toVariables(om.genome, cs, is, scale = true)
         }
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
@@ -418,8 +416,8 @@ object NichedNSGA2 {
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, Focus[I](_.historyAge), Focus[I](_.phenotypeHistory))
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], state: S, generation: Long) = StochasticGAIntegration.migrateFromIsland(population, generation)
       }
 
     }

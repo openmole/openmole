@@ -20,9 +20,9 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object ElitismTask {
+object ElitismTask:
 
-  def apply[T](evolution: EvolutionWorkflow, evaluated: Val[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](evolution: EvolutionWorkflow, evaluated: Val[Long])(using sourcecode.Name, DefinitionScope) =
     Task("ElitismTask") { p ⇒
       import p._
 
@@ -32,7 +32,8 @@ object ElitismTask {
           context(evolution.offspringPopulationVal).toVector,
           context(evolution.stateVal),
           context(evaluated),
-          random()).from(context)
+          random()
+        ).from(context)
 
       Context(
         Variable(evolution.populationVal, newPopulation.toArray(evolution.individualVal.`type`.manifest)),
@@ -42,6 +43,4 @@ object ElitismTask {
       inputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal, evaluated),
       outputs += (evolution.populationVal, evolution.stateVal)
     )
-  }
 
-}

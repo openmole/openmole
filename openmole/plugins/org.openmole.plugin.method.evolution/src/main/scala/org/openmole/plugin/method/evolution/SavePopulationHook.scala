@@ -36,7 +36,8 @@ object SavePopulationHook:
             context(t.populationVal).toVector,
             state,
             keepAll = keepAll,
-            includeOutputs = includeOutputs).from(context)
+            includeOutputs = includeOutputs
+          ).from(context)
 
       val filterSet = filter.toSet
       all.filter(v ⇒ !filterSet.contains(v.name))
