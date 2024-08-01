@@ -1,6 +1,6 @@
 package org.openmole.core.compiler.repl
 
-import dotty.tools.repl.* // OM
+import dotty.tools.repl.{JLineTerminal => _, *} // OM
 
 import java.io.{File => JFile, PrintStream}
 import java.nio.charset.StandardCharsets
@@ -157,8 +157,8 @@ class REPLDriver(settings: Array[String],
    *  observable outside of the CLI, for this reason, most helper methods are
    *  `protected final` to facilitate testing.
    */
-  def runUntilQuit(using initialState: State = initialState)(): State = {
-    val terminal = new JLineTerminal
+  def runUntilQuit(using initialState: State = initialState)(term: Option[org.jline.terminal.Terminal] = None): State = { // OM
+    val terminal = new JLineTerminal(term)                                                        // OM
 
 // OM    out.println(
 // OM     s"""Welcome to OpenMOLE $simpleVersionString ($javaVersion, Java $javaVmName).

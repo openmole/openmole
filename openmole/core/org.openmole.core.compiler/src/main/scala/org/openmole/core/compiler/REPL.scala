@@ -54,8 +54,8 @@ class REPL(interpreter: Interpreter):
     eqMethod.invoke(null, value)
     eval(s"val $name = $mutableName: ${manifest[T].toString}")
 
-  def loop = synchronized:
-    state = interpreter.driver.runUntilQuit(using state)()
+  def loop(terminal: Option[org.jline.terminal.Terminal]) = synchronized:
+    state = interpreter.driver.runUntilQuit(using state)(terminal)
 
   def classLoader = synchronized:
     interpreter.classLoader(state.context)

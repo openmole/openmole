@@ -41,6 +41,7 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
 import org.openmole.tool.file.*
+import org.jline.terminal.Terminal
 
 object Command:
   def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
@@ -69,7 +70,9 @@ object Command:
   end load
 
 
-class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
+class Command(val console: REPL, val variables: ConsoleVariables, val terminal: Terminal) { commands ⇒
+
+  given Terminal = terminal
 
   def print(m: Mole): Unit = mole.print(m)
   def print(moleExecution: MoleExecution, debug: Boolean = false) = mole.print(moleExecution, debug)
@@ -91,12 +94,10 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
       mole.dataChannels.foreach(println)
 
     def print(moleExecution: MoleExecution, debug: Boolean = false): Unit =
-
       def environmentErrors(environment: Environment, level: Level) =
         def filtered =
           Environment.clearErrors(environment).filter: e ⇒
             e.level.intValue() >= level.intValue()
-
 
         for
           error ← filtered
