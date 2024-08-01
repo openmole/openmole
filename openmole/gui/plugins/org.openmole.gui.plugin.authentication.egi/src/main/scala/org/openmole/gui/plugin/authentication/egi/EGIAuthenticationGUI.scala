@@ -27,6 +27,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext}
 import scaladget.bootstrapnative.bsn
+import scala.concurrent.duration.*
 
 import scala.scalajs.js
 
@@ -89,6 +90,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       _ <- PluginFetch.futureError(_.setVOTests(vos).future)
     yield ()
 
-  def test(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60 seconds))
+  def test(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60.second))
 
 
