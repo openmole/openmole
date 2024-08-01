@@ -89,6 +89,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       _ <- PluginFetch.futureError(_.setVOTests(vos).future)
     yield ()
 
-  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
+  def test(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60 seconds))
 
 
