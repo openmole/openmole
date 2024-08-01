@@ -108,12 +108,9 @@ object OSE {
           val map = (state.s._2 ++ islandState.s._2).distinct
           state.copy(s = (archive, map))
 
-        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state.focus(_.s._1).modify(_.map(_.copy(initial = true))))
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState = state.focus(_.s._1).modify(_.filter(!_.initial))
-          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState)
-
-
+        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
+      
     }
   }
 
@@ -222,10 +219,8 @@ object OSE {
           val map = (state.s._2 ++ islandState.s._2).distinct
           state.copy(s = (archive, map))
 
-        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state.focus(_.s._1).modify(_.map(i => i.copy(initial = true))))
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState = state.focus(_.s._1).modify(_.filter(!_.initial))
-          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState)
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
 
     }
