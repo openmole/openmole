@@ -429,7 +429,7 @@ object StochasticGAIntegration:
 
   def migrateFromIsland[P](population: Vector[CDGenome.NoisyIndividual.Individual[P]], generation: Long) =
     def keepIslandHistoryPart(i: CDGenome.NoisyIndividual.Individual[P]) = i.copy(phenotypeHistory = i.phenotypeHistory.takeRight(i.historyAge.toInt))
-    population.map(_.copy(generation = generation)).map(keepIslandHistoryPart)
+    population.filter(_.historyAge > 0).map(_.copy(generation = generation, initial = false)).map(keepIslandHistoryPart)
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[Array[Phenotype]]) =
     val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
