@@ -18,7 +18,7 @@ import org.jline.utils.AttributedString
 
 import dotty.tools.repl.* // OM
 
-class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends java.io.Closeable {
+class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends java.io.Closeable { // OM
   // import java.util.logging.{Logger, Level}
   // Logger.getLogger("org.jline").setLevel(Level.FINEST)
 
@@ -32,7 +32,7 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
   private def blue(str: String)(using Context) =
     if (ctx.settings.color.value != "never") Console.BLUE + str + Console.RESET
     else str
-  protected def promptStr = "scala"
+  protected def promptStr = "OpenMOLE" // OM
   private def prompt(using Context)        = blue(s"\n$promptStr> ")
   private def newLinePrompt(using Context) = blue("     | ")
 
@@ -62,7 +62,7 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
       .completer(completer)
       .highlighter(new Highlighter)
       .parser(new Parser)
-      .variable(HISTORY_FILE, s"$userHome/.dotty_history") // Save history to file
+      .variable(HISTORY_FILE, s"$userHome/.openmole_history") // Save history to file  // OM
       .variable(SECONDARY_PROMPT_PATTERN, "%M") // A short word explaining what is "missing",
       // this is supplied from the EOFError.getMissing() method
       .variable(LIST_MAX, 400)                  // Ask user when number of completions exceed this limit (default is 100).
