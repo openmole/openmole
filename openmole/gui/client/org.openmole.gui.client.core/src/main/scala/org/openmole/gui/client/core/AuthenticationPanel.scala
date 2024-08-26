@@ -30,8 +30,6 @@ import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
 import scaladget.bootstrapnative.bsn
 
-import scala.meta.internal.fastparse.Parsed.Failure
-
 object AuthenticationPanel:
 
   case class TestingAuthentication(auth: AuthenticationPlugin, tests: Signal[Seq[Test]])

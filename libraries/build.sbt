@@ -331,7 +331,7 @@ lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.a
 
 lazy val exec = OsgiProject(dir, "org.apache.commons.exec") settings(
   settings,
-  libraryDependencies += "org.apache.commons" % "commons-exec" % "1.3", version := "1.3")
+  libraryDependencies += "org.apache.commons" % "commons-exec" % execVersion, version := execVersion)
 
 lazy val log4j = OsgiProject(dir, "org.apache.log4j") settings(
   settings,
@@ -514,7 +514,7 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("!com.google
 lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*", "org.objectweb.asm.*")) settings (
   settings,
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
-  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
 
   libraryDependencies += "org.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
@@ -533,7 +533,7 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   settings,
   libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
-  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   version := http4sVersion
 ) dependsOn(cats, slf4j)
 
