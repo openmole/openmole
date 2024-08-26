@@ -444,6 +444,7 @@ object GUIOMRContent:
   enum ExportFormat:
     case CSV, JSON
 
+
 case class GUIOMRContent(
   section: Seq[GUIOMRSectionContent],
   openMoleVersion: String,
@@ -451,7 +452,8 @@ case class GUIOMRContent(
   script: Option[GUIOMRScript],
   timeStart: Long,
   timeSave: Long,
-  index: Option[GUIOMRContent.Index])
+  index: Option[GUIOMRContent.Index],
+  raw: String)
 
 case class GUIOMRDataIndex(sectionIndex: Int, variableName: String, values: Seq[data.GUIVariable.ValueType], fileIndex: Seq[String])
 

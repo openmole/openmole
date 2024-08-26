@@ -13,9 +13,9 @@ import org.openmole.gui.shared.api.*
 object OMRContent:
 
   def buildTab(safePath: SafePath, guiOMRContent: GUIOMRContent, currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
-    val (rowData: RowData, rawContent: String) = ResultData.fromOMR(guiOMRContent.section)
+    val rowData = ResultData.fromOMR(guiOMRContent.section)
     val pcSections = guiOMRContent.section.map: s =>
-      PlotContentSection(s.name.getOrElse("section"), rawContent, rowData, "initialHash")
+      PlotContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
     val scriptText =
       guiOMRContent.script match
         case Some(gos: GUIOMRScript)=>
