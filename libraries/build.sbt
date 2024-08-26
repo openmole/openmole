@@ -211,6 +211,7 @@ lazy val netlogo6 = OsgiProject(
   privatePackages = Seq("**"),
   imports = Seq("empty;resolution:=optional")) settings(settings) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
+  resolvers += "Netlogo" at "https://mvnrepository.com/artifact/org.nlogo/netlogo",
   scalaVersion := "2.12.8",
   resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
   libraryDependencies += "org.nlogo" % "netlogo" % netLogo6Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),

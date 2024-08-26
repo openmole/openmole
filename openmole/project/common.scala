@@ -20,7 +20,7 @@ object common {
   def scalaTagsVersion = "0.11.1"
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
-  def netLogo6Version = "6.4.0"
+  def netLogo6Version = "6.4.0-d2e6005"
   def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.3.0"
