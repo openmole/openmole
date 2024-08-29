@@ -59,7 +59,6 @@ object OMROutputFormat:
     FromContext: p =>
       import p.*
       import org.json4s.*
-      import executionContext.serializerService
       import executionContext.tmpDirectory
       import executionContext.timeService
 

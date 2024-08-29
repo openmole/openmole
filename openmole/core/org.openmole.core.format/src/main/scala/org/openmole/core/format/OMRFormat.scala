@@ -29,7 +29,6 @@ import org.openmole.core.context.{Val, ValType, Variable}
 import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.format.OutputFormat.SectionContent
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
@@ -123,7 +122,7 @@ object OMRFormat:
     script: Option[OMRContent.Script],
     timeStart: Long,
     openMOLEVersion: String,
-    option: OMROption)(using TimeService, FileService, TmpDirectory, SerializerService) =
+    option: OMROption)(using TimeService, FileService, TmpDirectory) =
     def newUUID = UUID.randomUUID().toString.filter(_ != '-')
 
     def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
@@ -271,7 +270,7 @@ object OMRFormat:
     omrFile: File,
     relativePath: Boolean = false,
     dataFile: Option[String] = None,
-    indexOnly: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(omrFile)
     val dataFileValue = dataFile getOrElse index.`data-file`.last
     OMRFormat.readDataStream(omrFile, dataFileValue): is =>
@@ -281,7 +280,7 @@ object OMRFormat:
     omrFile: File,
     is: java.io.InputStream,
     relativePath: Boolean = false,
-    indexOnly: Boolean = false)(using serializerService: SerializerService): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
     val index = omrContent(omrFile)
     val omrDirectory = omrFile.getParentFile
 
@@ -346,7 +345,7 @@ object OMRFormat:
 
   case class IndexedData(variableName: String, sectionIndex: Int, values: Array[Any], fileIndex: Array[IndexedData.FileIndex])
 
-  def indexes(file: File)(using SerializerService): Seq[IndexedData] =
+  def indexes(file: File): Seq[IndexedData] =
     val content = omrContent(file)
     val indexes = content.`data-content`.section.zipWithIndex.flatMap((s, i) => s.indexes.toSeq.flatten.map(id => i -> id))
 
@@ -364,7 +363,7 @@ object OMRFormat:
       val values = indexedValues(i).toArray
       IndexedData(i._2, i._1, values.map(_._2), values.map(_._1))
 
-  def variablesAtIndex(file: File, index: IndexedData.FileIndex)(using SerializerService) =
+  def variablesAtIndex(file: File, index: IndexedData.FileIndex) =
     variables(file, dataFile = Some(index))
 
   def methodName(file: File): Option[String] =
@@ -378,7 +377,7 @@ object OMRFormat:
     dataFile: Option[String] = None,
     unrollArray: Boolean = true,
     arrayOnRow: Boolean = false,
-    gzip: Boolean = false)(using SerializerService) =
+    gzip: Boolean = false) =
     val variable = variables(file, relativePath = true, dataFile = dataFile)
 
     if variable.size == 1
@@ -407,7 +406,7 @@ object OMRFormat:
   def writeJSON(
     file: File,
     destination: File,
-    dataFile: Option[String] = None)(using SerializerService) =
+    dataFile: Option[String] = None) =
 
     val index = omrContent(file)
     def variablesValues = variables(file, relativePath = true, dataFile = dataFile)

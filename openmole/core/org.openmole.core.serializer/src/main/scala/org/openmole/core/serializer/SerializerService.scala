@@ -100,9 +100,6 @@ class SerializerService:
   def deserialize[T](is: InputStream): T = 
     buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeFromString[T](s: String, json: Boolean = false): T = 
-    buildXStream(json = json).fromXML(s).asInstanceOf[T]
-
   def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
     val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
@@ -143,13 +140,11 @@ class SerializerService:
     try serializer.fromXML[T](is)
     finally serializer.injectedFiles = null
 
-  def serializeToString(obj: Any, json: Boolean = false) = buildXStream(json = json).toXML(obj)
-
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit =
+  def serialize(obj: Any, file: File, gz: Boolean = false): Unit =
     val os = file.bufferedOutputStream(gz = gz)
-    try buildXStream(json = json).toXML(obj, os)
+    try buildXStream().toXML(obj, os)
     finally os.close()
 
 

@@ -2,7 +2,6 @@ package org.openmole.core.format
 
 import org.openmole.core.context.*
 import org.openmole.core.argument.*
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
 
@@ -12,7 +11,6 @@ object OutputFormat:
     jobId: Long,
     moleExecutionId: String)(
    implicit val tmpDirectory: TmpDirectory,
-   val serializerService: SerializerService,
    val timeService:       TimeService
   )
 
