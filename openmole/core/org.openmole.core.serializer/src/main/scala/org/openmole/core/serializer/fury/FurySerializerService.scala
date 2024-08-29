@@ -1,8 +1,12 @@
 package org.openmole.core.serializer.fury
 
+import com.fasterxml.jackson.databind
 import org.openmole.core.serializer.SerializerService
+import org.openmole.tool.stream.StringInputStream
 
-import java.io.{OutputStream, InputStream}
+import java.io.{FileInputStream, InputStream, OutputStream}
+import scala.reflect.ClassTag
+import scala.util.NotGiven
 
 /*
  * Copyright (C) 2024 Romain Reuillon
@@ -21,6 +25,7 @@ import java.io.{OutputStream, InputStream}
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.tool.file.*
 import org.apache.fury.*
 import org.apache.fury.config.*
 import org.apache.fury.io.*
@@ -38,7 +43,8 @@ class FurySerializerService:
     .withRefTracking(true)
     .build()
 
-  private def fileListing() = new FilesListing(buildFury())
-  def listFiles(obj: Any) = fileListing().list(obj)
+  def deserialize[T](file: File): T = file.withFileInputStream(deserialize[T])
+  def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = buildFury().deserialize(new FuryInputStream(is)).asInstanceOf[T]
+
+  def listFiles(obj: Any) = FilesListing.list(buildFury(), obj)
   def serialize(obj: Any, os: OutputStream) = buildFury().serialize(os, obj)
-  def deserialize[T](is: InputStream): T = buildFury().deserialize(new FuryInputStream(is)).asInstanceOf[T]

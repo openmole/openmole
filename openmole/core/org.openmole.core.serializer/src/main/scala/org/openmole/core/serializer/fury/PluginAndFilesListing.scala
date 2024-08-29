@@ -46,25 +46,21 @@ object FilesListing:
   class FileNotifier(fury: Fury, notify: File => Unit) extends Serializer(fury, classOf[File]):
     override def write(buffer: MemoryBuffer, value: File): Unit =
       notify(value)
-      fury.writeString(buffer, value.getPath)
+      fury.writeJavaString(buffer, value.getPath)
 
     override def read(buffer: MemoryBuffer): File =
-      new File(fury.readString(buffer))
+      new File(fury.readJavaString(buffer))
+  
+  
+  def list(fury: Fury, obj: Any) = synchronized:
+    var listedFiles: TreeSet[File] = null
+    def fileUsed(file: File) = listedFiles += file
+    fury.registerSerializer(classOf[File], new FilesListing.FileNotifier(fury, fileUsed))
 
-
-
-class FilesListing(fury: Fury):
-  private var listedFiles: TreeSet[File] = null
-  fury.registerSerializer(classOf[File], new FilesListing.FileNotifier(fury, fileUsed))
-
-  def fileUsed(file: File) = listedFiles += file
-
-  def list(obj: Any) = synchronized:
     listedFiles = TreeSet[File]()(fileOrdering)
     fury.serialize(new NullOutputStream(), obj)
-    val retFile = listedFiles
-    listedFiles = null
-    retFile.toVector
+    listedFiles.toVector
+
 
 //class PluginAndFilesListing(xStream: XStream)(using val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache):
 //

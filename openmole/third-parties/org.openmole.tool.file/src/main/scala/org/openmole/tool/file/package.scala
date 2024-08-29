@@ -404,6 +404,7 @@ package file {
         if (append) Seq(CREATE, APPEND, WRITE) else Seq(CREATE, TRUNCATE_EXISTING, WRITE)
 
       def fileOutputStream = new FileOutputStream(file)
+      def fileInputStream = new FileInputStream(file)
 
       def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) =
         file.createParentDirectory
@@ -434,6 +435,7 @@ package file {
 
 
       def withFileOutputStream[T] = withClosable[FileOutputStream, T](fileOutputStream)(_)
+      def withFileInputStream[T] = withClosable[FileInputStream, T](fileInputStream)(_)
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream())(_)
 
