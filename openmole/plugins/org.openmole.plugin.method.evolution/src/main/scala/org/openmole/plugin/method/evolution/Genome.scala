@@ -286,7 +286,7 @@ object Genome:
   object ToSuggestion:
 
     import scala.util.boundary
-    def loadFromFile(f: File, genome: Genome)(using SerializerService): SuggestedValues = boundary:
+    def loadFromFile(f: File, genome: Genome): SuggestedValues = boundary:
       import org.openmole.core.format.CSVFormat
       import org.openmole.core.format.OMRFormat
       import org.openmole.core.dsl._
@@ -321,13 +321,13 @@ object Genome:
 
       SuggestedValues.Error(new UserBadDataError(s"Unsupported file type for suggestion $f"))
 
-    private def fileSuggestion(t: File)(using SerializerService) =
+    private def fileSuggestion(t: File) =
       Suggestion(genome => loadFromFile(t, genome))
 
-    given suggestionFromFile(using SerializerService): ToSuggestion[File] with
+    given suggestionFromFile: ToSuggestion[File] with
       def apply(t: File): Suggestion = fileSuggestion(t)
 
-    given suggestionFromString(using SerializerService): ToSuggestion[String] with
+    given suggestionFromString: ToSuggestion[String] with
       def apply(t: String): Suggestion = fileSuggestion(File(t))
 
     given fromAssignment: ToSuggestion[Seq[ValueAssignment[Any]]] with
