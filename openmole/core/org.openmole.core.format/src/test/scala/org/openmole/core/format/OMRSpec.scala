@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.context.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.{timeservice, workspace}
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
@@ -39,7 +38,6 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   given Preference = Preference.stub()
   given FileService = FileService.stub()
   given tmpDirectory: TmpDirectory = TmpDirectory.stub()
-  given SerializerService = SerializerService.stub()
 
   "OMR" should "support enum" in:
     val p = Val[String]

@@ -55,7 +55,8 @@ object Libraries {
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % configuration2Version
-  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion cross CrossVersion.for2_13Use3
+  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
+  lazy val jackson = "org.openmole.library" %% "com-fasterxml-jackson" % jacksonVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsLinker = "org.openmole.library" %% "scalajs-linker" % scalajsVersion
   lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsLoggingVersion
@@ -64,7 +65,7 @@ object Libraries {
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
-  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion cross CrossVersion.for2_13Use3 // cross CrossVersion.for3Use2_13
+  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
 

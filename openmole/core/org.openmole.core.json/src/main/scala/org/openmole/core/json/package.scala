@@ -1,6 +1,8 @@
 package org.openmole.core
 
 import com.fasterxml.jackson.core.json.JsonReadFeature
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.json4s.JsonAST.{JObject, JValue}
 import org.openmole.core.context.*
 import org.openmole.core.exception.UserBadDataError
@@ -46,7 +48,7 @@ package object json:
   def jValueToVariable(
     jValue: JValue, v: Val[_],
     unwrapArrays: Boolean = false,
-    default: Option[JValue => Any] = None,
+    default: Option[(JValue, Class[_]) => Any] = None,
     file: Option[JValue => java.io.File] = None): Variable[_] =
     import org.json4s.*
 
@@ -115,7 +117,7 @@ package object json:
             case (value: JValue, c) if c == classOf[java.io.File] ⇒ jValueToFile(value)
             case (jValue, c) ⇒
               (jValue, default) match
-                case (value: JValue, Some(serializer)) => serializer(value)
+                case (value: JValue, Some(serializer)) => serializer(value, arrayType)
                 case _ => throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
 
         given Variable.ConstructArray[JArray] =
@@ -133,15 +135,19 @@ package object json:
       case (value: JValue, Val.caseFile(v))    ⇒ Variable(v, jValueToFile(value))
       case (value, v) =>
         (value, v, default) match
-          case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value))
+          case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value, v.`type`.runtimeClass))
           case _                                    ⇒ throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
 
-  def anyToJValue(using s: org.openmole.core.serializer.SerializerService): Any => org.json4s.JValue =
-    a =>
-      import org.json4s.jackson.JsonMethods.*
-      parse(s.serializeToString(a, json = true))
 
-  def jValueToAny(using s: org.openmole.core.serializer.SerializerService): JValue => Any =
-    value =>
-      import org.json4s.jackson.JsonMethods.*
-      s.deserializeFromString[Any](compact(render(value)), json = true)
+  private def objectMapper =
+    JsonMapper.builder()
+      .addModule(DefaultScalaModule)
+      .build()
+
+  def anyToJValue(a: Any): org.json4s.JValue =
+    import org.json4s.jackson.JsonMethods.*
+    parse(objectMapper.writeValueAsString(a))
+
+  def jValueToAny(value: JValue, clazz: Class[_]): Any =
+    import org.json4s.jackson.JsonMethods.*
+    objectMapper.readValue(compact(render(value)), clazz)

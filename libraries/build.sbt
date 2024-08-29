@@ -18,12 +18,19 @@ def settings = Seq(
 )
 
 lazy val json4s = OsgiProject(dir, "org.json4s",
-  exports = Seq("org.json4s.*", "com.fasterxml.jackson.*"),
+  exports = Seq("org.json4s.*"),
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.fasterxml.jackson.*", "*"),
+  imports = Seq("scala.*", "org.slf4j.*", "com.fasterxml.jackson.*")) settings (
+  settings,
+  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
+  version := json4sVersion) dependsOn(slf4j, jackson)
+
+lazy val jackson = OsgiProject(dir, "com.fasterxml.jackson",
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
   imports = Seq("scala.*", "org.slf4j.*")) settings (
   settings,
-  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
-  version := json4sVersion) dependsOn(slf4j)
+  libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+  version := jacksonVersion)
 
 lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq("shapeless3.*")) settings (
   settings,
@@ -35,6 +42,8 @@ lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq(
 
   version := shapelessVersion
 )
+
+
 
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "org.latestbit.*", "!cats.*", "!scala.*", "!shapeless3.*"),

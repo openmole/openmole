@@ -28,6 +28,7 @@ object common {
   def plotlyVersion = "1.8.1"
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.6"
+  def jacksonVersion = "2.17.2"
   def circeVersion = "0.14.9"
   def circeYamlVersion = "0.14.2"
   def catsVersion = "2.9.0"
