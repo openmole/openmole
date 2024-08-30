@@ -25,6 +25,7 @@ lazy val json4s = OsgiProject(dir, "org.json4s",
   libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
   version := json4sVersion) dependsOn(slf4j, jackson)
 
+
 lazy val jackson = OsgiProject(dir, "com.fasterxml.jackson",
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
   imports = Seq("scala.*", "org.slf4j.*")) settings (
@@ -108,13 +109,12 @@ lazy val xstream = OsgiProject(
 lazy val fury = OsgiProject(
   dir,
   "org.apache.fury",
-  imports = Seq(
-    "!javax.*",
-    "*"),
-  privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
+  imports = Seq("!javax.*", "*"),
+  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies ++= Seq("org.apache.fury" % "fury-core" % furyVersion),
-  version := furyVersion)
+  libraryDependencies += "de.unkrig.jdisasm" % "jdisasm" % "1.0.6",
+  version := furyVersion) dependsOn(guava)
 
 lazy val scalaLang = OsgiProject(
   dir,

@@ -237,7 +237,7 @@ lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", globa
   libraryDependencies += Libraries.xstream,
   libraryDependencies += Libraries.fury,
   libraryDependencies += Libraries.equinoxOSGi
-) dependsOn(workspace, pluginManager, fileService, tools, openmoleArchive, openmoleCompiler) settings (coreSettings: _*)
+) dependsOn(workspace, pluginManager, fileService, tools, openmoleArchive, openmoleCompiler, logconfig) settings (coreSettings: _*)
 
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings: _*)
 

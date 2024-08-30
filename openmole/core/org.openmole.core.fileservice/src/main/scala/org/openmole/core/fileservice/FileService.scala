@@ -44,20 +44,17 @@ object FileService:
   val archiveCacheSize = PreferenceLocation("FileService", "ArchiveCacheSize", Some(1000L))
   val archiveCacheTime = PreferenceLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
 
-  def apply()(implicit preference: Preference, threadProvider: ThreadProvider) = {
+  def apply()(implicit preference: Preference, threadProvider: ThreadProvider) =
     val fs = new FileService
     start(fs)
     fs
-  }
 
-  def start(fileService: FileService)(implicit preference: Preference, threadProvider: ThreadProvider): Unit = {
+  def start(fileService: FileService)(implicit preference: Preference, threadProvider: ThreadProvider): Unit =
     fileService.emptyDeleter.start(threadProvider)
     Updater.delay(fileService.gc, preference(FileService.GCInterval))
-  }
 
-  class FileWithGC(path: String, fileService: FileService) extends java.io.File(path) {
+  class FileWithGC(path: String, fileService: FileService) extends java.io.File(path):
     override protected def finalize() = fileService.asynchronousRemove(new java.io.File(getPath))
-  }
 
   def stub() = apply()(Preference.stub(), ThreadProvider.stub())
 

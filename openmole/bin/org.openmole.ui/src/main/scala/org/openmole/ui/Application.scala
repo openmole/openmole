@@ -240,10 +240,13 @@ object Application extends JavaLogger {
         displayErrors(loadPlugins)
 
         def browse(url: String) =
-          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+          if (Desktop.isDesktopSupported)
+            try Desktop.getDesktop.browse(new URI(url))
+            catch
+              case t: Throwable => logger.warning("Error while opening the OpenMOLE app page in the browser")
 
         GUIServer.lockFile.withFileOutputStream: fos ⇒
-          val launch = (config.remote || fos.getChannel.tryLock != null)
+          val launch = config.remote || fos.getChannel.tryLock != null
           if launch
           then
             GUIServer.initialisePreference(preference)

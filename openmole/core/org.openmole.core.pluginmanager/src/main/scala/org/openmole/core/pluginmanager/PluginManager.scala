@@ -109,11 +109,10 @@ object PluginManager extends JavaLogger {
   def dependencies(file: File): Option[Iterable[File]] =
     infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { _.file } }
 
-  def isClassProvidedByAPlugin(c: Class[_]) = {
+  def isClassProvidedByAPlugin(c: Class[_]) = 
     val b = FrameworkUtil.getBundle(c)
     if (b != null) !infos.providedDependencies.contains(b.getBundleId())
     else false
-  }
 
   def fileProviding(c: Class[_]) =
     bundleForClass(c).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)

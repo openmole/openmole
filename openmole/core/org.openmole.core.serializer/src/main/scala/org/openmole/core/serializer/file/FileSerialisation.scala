@@ -17,16 +17,18 @@
 
 package org.openmole.core.serializer.file
 
-import org.openmole.tool.file._
-import org.openmole.tool.archive._
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.tool.file.*
+import org.openmole.tool.archive.*
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.archive.*
 
 import scala.collection.immutable.HashMap
 import java.util.UUID
-import java.io.{ File, FileOutputStream }
+import java.io.{File, FileOutputStream}
 import com.thoughtworks.xstream.XStream
 import org.openmole.core.fileservice.FileService
+import org.apache.fury.*
+import org.apache.fury.io.FuryInputStream
 
 object FileSerialisation:
   case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
@@ -35,34 +37,32 @@ object FileSerialisation:
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, xStream: XStream)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDir ⇒
-    val fileInfo = HashMap() ++ files.map {
-      file ⇒
-        val name = UUID.randomUUID
+  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, fury: Fury)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir ⇒
+    val fileInfo = HashMap() ++ files.map: file ⇒
+      val name = UUID.randomUUID
 
-        val toArchive =
-          if file.isDirectory
-          then
-            val toArchive = tmpDir.newFile("archive", ".tar")
-            file.archive(toArchive)
-            toArchive
-          else file
+      val toArchive =
+        if file.isDirectory
+        then
+          val toArchive = tmpDir.newFile("archive", ".tar")
+          file.archive(toArchive)
+          toArchive
+        else file
 
-        if toArchive.exists
-        then tos.addFile(toArchive, fileDir + "/" + name.toString)
+      if toArchive.exists
+      then tos.addFile(toArchive, fileDir + "/" + name.toString)
 
-        (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
-    }
+      (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
 
-    newFile.withTmpFile { tmpFile ⇒
-      tmpFile.withOutputStream(xStream.toXML(fileInfo, _))
+
+    newFile.withTmpFile: tmpFile ⇒
+      tmpFile.withOutputStream(os => fury.serialize(os, fileInfo))
       tos.addFile(tmpFile, fileDir + "/" + filesInfo)
-    }
-  }
 
-  def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
+
+  def deserialiseFileReplacements(archiveExtractDir: File, fury: Fury, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
-    val fi = fileInfoFile.withInputStream(xStream.fromXML).asInstanceOf[FilesInfo]
+    val fi = fileInfoFile.withInputStream(is => fury.deserialize(new FuryInputStream(is))).asInstanceOf[FilesInfo]
 
     HashMap() ++ fi.map:
       case (name, FileInfo(originalPath, isDirectory, exists)) ⇒
@@ -86,6 +86,8 @@ object FileSerialisation:
             dest
 
         originalPath → (if !deleteOnGC then fileContent else fileService.wrapRemoveOnGC(fileContent))
+
+
 
 
 
