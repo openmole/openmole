@@ -109,7 +109,7 @@ lazy val xstream = OsgiProject(
 lazy val fury = OsgiProject(
   dir,
   "org.apache.fury",
-  imports = Seq("!javax.*", "*"),
+  imports = Seq("!javax.*", "scala.*", "*"),
   privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies ++= Seq("org.apache.fury" % "fury-core" % furyVersion),
