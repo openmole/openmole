@@ -226,7 +226,8 @@ class AnimatedStubRESTServerAPI extends ServerAPI:
       script = None,
       timeStart = System.currentTimeMillis(),
       timeSave = System.currentTimeMillis(),
-      index = None
+      index = None,
+      raw = "test"
     )
   )
 

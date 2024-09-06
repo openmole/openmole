@@ -33,6 +33,7 @@ object utils:
     val old = workspace.location / "webui" / "projects"
     val newProjects = workspace.userDir / "projects"
     if old.exists() then old.move(newProjects)
+    newProjects.mkdirs()
     newProjects
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
@@ -276,7 +277,7 @@ object utils:
       destination.setWritable(true)
       val stream = fs2.io.toInputStreamResource(part.body)
       stream.use { st =>
-        IO:
+        IO.blocking:
           st.copy(destination)
           destination.setExecutable(true)
       }.unsafeRunSync()

@@ -209,6 +209,7 @@ class GUIServer(
 
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
+    val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace))
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -227,7 +228,8 @@ class GUIServer(
         s"/" -> GZip(applicationServer.routes),
         s"/" -> GZip(apiServer.routes),
         s"/" -> GZip(apiServer.endpointRoutes),
-        s"/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
+        s"/rest/v1" -> restServer.routes,
+        s"/webdav" -> webdavServer.routes) ++ pluginsRoutes: _*).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
