@@ -59,8 +59,7 @@ import scala.concurrent.duration.Duration
     InternalServerError { Left(ErrorData(t)).asJson.noSpaces }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
   val apiServer = new org.openmole.gui.server.core.CoreAPIServer(apiImpl, stackError)
-  val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace))
-
+  val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
 
   def hello =
     import org.http4s.headers.{`Content-Type`}

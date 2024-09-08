@@ -209,7 +209,7 @@ class GUIServer(
 
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
-    val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace))
+    val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 

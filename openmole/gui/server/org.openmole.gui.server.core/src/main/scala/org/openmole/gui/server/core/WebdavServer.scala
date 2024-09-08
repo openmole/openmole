@@ -53,7 +53,10 @@ object WebdavServer:
         case <resourcetype/> => if file.isDirectory then node(<D:collection/>) else Some(prop)
         case _ => None
 
-    def url(resource: FileResource) = s"/${resource.path.mkString("/")}" + (if resource.file.isDirectory then "/" else "")
+    def url(resource: FileResource) =
+      val path = s"${resource.path.mkString("/")}"
+      (if !path.startsWith("/") then "/" else "") + path + (if resource.file.isDirectory && !path.endsWith("/") then "/" else "")
+
     def children(resource: FileResource): Seq[FileResource] =
       if resource.file.exists() && resource.file.isDirectory
       then
@@ -98,12 +101,17 @@ object WebdavServer:
       }
     </D:multistatus>
 
-  def handle(req: Request[IO], directory: java.io.File) =
+  def handle(req: Request[IO], directory: java.io.File, mountRoot: String) =
+    def toRelativeFilePath(path: Seq[String]) = path.dropWhile(_ != mountRoot).drop(1).mkString("/")
+
     val file =
-      val path = req.uri.path.segments.drop(1).mkString("/") //req.pathInfo.segments.map(_.decoded()).mkString("/")
+      val path = toRelativeFilePath(req.uri.path.segments.map(_.decoded())) //.drop(1).mkString("/") //req.pathInfo.segments.map(_.decoded()).mkString("/")
       new java.io.File(directory, path)
 
-    val requestPath = req.uri.path.segments.mkString("/")
+    val requestPath =
+      req.headers.get(CIString("X-Forwarded-URI")) match
+        case Some(forward) => java.net.URI(forward.head.value).getPath
+        case None => req.uri.path.segments.mkString("/")
 
     req.method match
       case Method.OPTIONS =>
@@ -128,7 +136,8 @@ object WebdavServer:
 
       case Method.MOVE =>
         val destination = java.net.URI.create(req.headers.get(ci"Destination").map(_.head.value).get)
-        val destinationFile = directory / destination.getPath.split("/").drop(2).mkString("/")
+        val destinationFile = directory / toRelativeFilePath(destination.getPath.split("/"))
+
         file move destinationFile
         Ok()
 
@@ -173,7 +182,7 @@ object WebdavServer:
       case m => NotImplemented(s"$m not implement")
 
 
-class WebdavServer(directory: java.io.File):
+class WebdavServer(directory: java.io.File, mountRoot: String):
   def routes: HttpRoutes[IO] =
     HttpRoutes.of:
-      case req => WebdavServer.handle(req, directory)
+      case req => WebdavServer.handle(req, directory, mountRoot)
