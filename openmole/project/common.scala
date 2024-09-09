@@ -29,7 +29,7 @@ object common {
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.6"
   def jacksonVersion = "2.17.2"
-  def circeVersion = "0.14.9"
+  def circeVersion = "0.14.10"
   def circeYamlVersion = "0.14.2"
   def catsVersion = "2.9.0"
   def catsEffectVersion = "3.3.14"
