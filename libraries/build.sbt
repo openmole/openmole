@@ -364,9 +364,12 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   settings,
   libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4")
 
-//lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-//  scala2Settings,
-//  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r", version := "4.6.0" )
+lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+  settings,
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % jgitVersion,
+  version := jgitVersion
+
+)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   settings,
@@ -545,6 +548,11 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   version := http4sVersion
 ) dependsOn(cats, slf4j)
+
+
+
+
+
 
 
 

@@ -56,6 +56,7 @@ object common {
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
   def slf4jVersion = "2.0.9"
+  def jgitVersion = "6.10.0.202406032230-r"
 
   def http4sVersion = "0.23.12"
 
