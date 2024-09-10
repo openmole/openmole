@@ -80,12 +80,16 @@ case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
 object TreeNodeData:
   case class Directory(isEmpty: Boolean)
 
+enum GitStatus:
+  case Modified, Untracked, Conflicting
+
 case class TreeNodeData(
   name: String,
   size: Long,
   time: Long,
   directory: Option[TreeNodeData.Directory] = None,
-  pluginState: PluginState = PluginState.empty)
+  pluginState: PluginState = PluginState.empty,
+  gitStatus: Option[GitStatus])
 
 object ErrorData:
   def empty = MessageErrorData("", None)

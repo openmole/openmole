@@ -16,6 +16,8 @@ import org.openmole.gui.shared.data
 import org.openmole.gui.shared.data.*
 import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.gui.server.git.*
+import org.eclipse.jgit.api.Git
 
 import java.text.SimpleDateFormat
 import scala.annotation.tailrec
@@ -80,7 +82,7 @@ object utils:
     }.contains(safePath)
 
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true, gitStatus: Option[GitStatus] = None)(using workspace: Workspace): Option[TreeNodeData] =
     import org.openmole.core.format.OMRFormat
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
@@ -93,7 +95,7 @@ object utils:
         then Try { OMRFormat.diskUsage(f) }.getOrElse(f.length())
         else f.length()
 
-      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
+      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList)), gitStatus))
     else None
 
   //implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
@@ -133,7 +135,26 @@ object utils:
     given ServerFileSystemContext = path.context
 
     def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
-    def treeNodesData = safePathToFile(path).listFilesSafe.toSeq.filter(filterHidden).flatMap { f ⇒ fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin) }
+
+    val git = GitService.git(path.toFile, projectsDirectory)
+    val modified = git.map(GitService.getModified(_))
+    val conflicting = git.map(GitService.getConflicting(_))
+    val untracked = git.map(GitService.getUntracked(_))
+    val all = modified ++ conflicting ++ untracked
+
+    def treeNodesData =
+      safePathToFile(path).listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
+        val gitStatus = git match
+          case Some(g: Git)=>
+            val name = f.getName
+            if all.isEmpty then None
+            else if modified.contains(name) then Some(GitStatus.Modified)
+            else if untracked.contains(name) then Some(GitStatus.Untracked)
+            else if conflicting.contains(name) then Some(GitStatus.Conflicting)
+            else None
+          case None=> None
+        fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
+
     val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
 
     val sortedSize = sorted.size

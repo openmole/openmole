@@ -38,6 +38,7 @@ sealed trait TreeNode:
   def name: String
   val size: Long
   val time: Long
+  val gitStatus: Option[GitStatus]
 
 def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.treeNodeDataToTreeNode)
 
@@ -45,16 +46,16 @@ object TreeNode:
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
     case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty)
-    case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState)
+    case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState, tnd.gitStatus)
   }
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
     val (dOf, pluginState) = tn match {
-      case TreeNode.Directory(_, _, _, isEmpty) ⇒ (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
+      case TreeNode.Directory(_, _, _, isEmpty,_) ⇒ (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
       case f: TreeNode.File ⇒ (None, f.pluginState)
     }
 
-    TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf)
+    TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf, tn.gitStatus)
 
   implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map { treeNodeToTreeNodeData }
   implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
@@ -72,13 +73,15 @@ object TreeNode:
     name: String,
     size: Long,
     time: Long,
-    isEmpty: Boolean) extends TreeNode
+    isEmpty: Boolean,
+    gitStatus: Option[GitStatus] = None) extends TreeNode
 
   case class File(
     name: String,
     size: Long,
     time: Long,
-    pluginState: PluginState) extends TreeNode
+    pluginState: PluginState,
+    gitStatus: Option[GitStatus]) extends TreeNode
 
 
 
