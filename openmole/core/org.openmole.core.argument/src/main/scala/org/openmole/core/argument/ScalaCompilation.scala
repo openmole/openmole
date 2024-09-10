@@ -189,12 +189,12 @@ object ScalaCompilation {
     }
 
     def compiled(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
-      cache().synchronized {
+      cache().synchronized:
         val allInputMap = inputs.groupBy(_.name)
 
         val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
 
-        duplicatedInputs match {
+        duplicatedInputs match
           case Nil ⇒
             def sortedInputNames = inputs.map(_.name).distinct.sorted
             val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
@@ -206,17 +206,13 @@ object ScalaCompilation {
               update
             )
           case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
-        }
-      }
 
-    def validate = Validate { p ⇒
+    def validate = Validate: p ⇒
       import p._
 
-      compiled(inputs) match {
+      compiled(inputs) match
         case Success(_) ⇒ Seq()
         case Failure(e) ⇒ Seq(e)
-      }
-    }
 
     def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒
       val closure: ContextClosure[R] = compiled(p.context).get
@@ -240,9 +236,8 @@ object ScalaCompilation {
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
     new ScalaWrappedCompilation[R](code, wrapping)
 
-  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter) {
+  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter):
     def apply(context: Context, randomProvider: RandomProvider, tmpDirectory: TmpDirectory): R = f(context, randomProvider, tmpDirectory)
-  }
 
   trait OutputWrapping[+R]:
     def wrapOutput: String

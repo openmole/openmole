@@ -109,11 +109,12 @@ object ValType:
   def toNativeType(t: ValType[_]): ValType[_] =
     def native =
       val (contentType, level) = ValType.unArrayify(t)
-      for {
+      for 
         m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
-      } yield (0 until level).foldLeft(ValType.unsecure(m)) {
-        (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
-      }
+      yield 
+        (0 until level).foldLeft(ValType.unsecure(m)) {
+          (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
+        }
     native getOrElse t
 
   def toTypeString(t: ValType[_], rootPrefix: Boolean = true, replaceObject$: Boolean = true): String =
