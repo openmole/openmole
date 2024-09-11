@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
 
 object GUIServer:
+  org.http4s.reduceLogging()
 
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
@@ -135,8 +136,6 @@ object GUIServer:
     password: Option[String],
     optimizedJS: Boolean,
     extraHeaders: String) =
-
-    org.http4s.reduceLogging()
 
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
