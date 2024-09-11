@@ -42,11 +42,13 @@ import IslandValue.*
 
 object Island extends PageContent(html"""
 
-${h2{"Distribution scheme"}}
+${h2{"Island distribution scheme"}}
 
-For distributed environments, the island distribution scheme of evolutionary algorithms is especially well adapted.
-Islands of population evolve for a while on a remote node before being merged back into the global population.
-A new island is then generated until the termination criterion, ${i{"i.e."}} the max total number of individual evaluation, has been reached.
+The evolutionary algorithms implemented in OpenMOLE supports the island distribution scheme. This scheme make it possible to run multiple model execution on the remote environment and therefore reducing the queuing and initialisation overhead implied by the workload delegation.
+$br
+In the islands distribution scheme, islands of population evolve for a while on a remote node before being merged back into the global population of your OpenMOLE instance. It means that each node run a small evolution algorithm and the results of each of these evolution is used to evolve the central population.
+$br
+Each of the island are executed on the remote node unit until a termination criterion. This termination criterion can be either expressed as a total number of model evaluation or an execution time.
 
 $br
 
@@ -61,13 +63,33 @@ ${hl.openmole("""
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
       objective = Seq(o1, o2),
       evaluation = model,
-      termination = 10000,
+      termination = 100000,
       parallelism = 100
     ) by Island(5 minutes) hook (workDirectory / "evolution")
 
-  // Construction of the complete mole with the execution environment, and the hook.
-  // Here the generated workflow will run using 4 threads of the local machine.
-  (evolution on LocalEnvironment(4))
+  // For the sake of simplicity the generated workflow will run using 4 threads of the local machine.
+  // Island are generally more useful for remote execution environments
+  evolution on LocalEnvironment(4)
 """, header = model)}
+
+In the example above a 100 islands are submitted to the environment. Each of these island runs for 5 minutes. Once an island has ended the result is merge in the global population and a new island is submitted. The evolution stops when 100000 model evaluations have been executed within the islands.
+
+$br
+
+Here is the syntax to stop the islands based on a given number of model executions (here 10 execution).
+
+${hl.openmole("""
+  val evolution =
+    NSGA2Evolution(
+      genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)),
+      objective = Seq(o1, o2),
+      evaluation = model,
+      termination = 10000,
+      parallelism = 100
+    ) by Island(10) hook (workDirectory / "evolution")
+
+  evolution on LocalEnvironment(4)
+""", header = model)}
+
 
 """)
