@@ -86,3 +86,5 @@ trait ServerAPI:
 
   def upload(fileList: Seq[(org.scalajs.dom.File, SafePath)], fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[(RelativePath, SafePath)]]
   def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
+
+  def cloneRepository(repository: String, destination: SafePath)(using BasePath): Future[Unit]

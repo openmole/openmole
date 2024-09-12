@@ -10,14 +10,22 @@ import scala.jdk.CollectionConverters.*
 object GitService:
 
   def git(file: File, ceilingDirectory: File): Option[Git] =
+    println("F " + file.getAbsolutePath + " / " + file.exists + " / " + ceilingDirectory.getAbsolutePath)
     val builder = (new FileRepositoryBuilder)
       .addCeilingDirectory(ceilingDirectory)
-      .findGitDir(file)
-
+    
     builder.getGitDir match
       case null => None
       case _ => Some(new Git(builder.build()))
 
+  def clone(remoteURL: String, destination: File) =
+    val dest = new File(destination, remoteURL.split("/").last)
+    println("DEST " + dest.getAbsolutePath)
+    Git.cloneRepository()
+      .setURI(remoteURL)
+      .setDirectory(dest)
+      .call()
+      ()
 
   def getModified(git: Git): Seq[String] = git.status().call().getModified.asScala.toSeq
 

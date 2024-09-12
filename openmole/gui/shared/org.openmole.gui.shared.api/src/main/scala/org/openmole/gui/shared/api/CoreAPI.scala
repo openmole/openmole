@@ -80,7 +80,6 @@ trait CoreAPI extends RESTAPI:
   val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
     errorEndpoint(get(path / prefix / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
-
   val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
 
@@ -93,6 +92,8 @@ trait CoreAPI extends RESTAPI:
   val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
 
+  val cloneRepository: ErrorEndpoint[(String, SafePath), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath)]), ok(jsonResponse[Unit]))
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
@@ -213,6 +214,6 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
 
 
-  //TODO ------------ refactor -------------------
+//TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =
 

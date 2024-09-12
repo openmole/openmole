@@ -82,6 +82,8 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit] = fetch.futureError(_.clearNotification(ids).future)
   override def removeContainerCache()(using BasePath): Future[Unit] = fetch.futureError(_.removeContainerCache(()).future)
 
+  override def cloneRepository(repositoryURL: String, destination: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.cloneRepository(repositoryURL, destination).future)
+
   override def upload(
     files: Seq[(File, SafePath)],
     fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[(RelativePath, SafePath)]] = {

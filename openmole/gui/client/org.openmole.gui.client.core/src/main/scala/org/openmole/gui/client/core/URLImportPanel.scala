@@ -20,12 +20,6 @@ object URLImportPanel:
 
     val manager = panels.treeNodePanel.treeNodeManager
 
-    case class URLFile(name: String, extension: String) {
-      def file = s"$name.$extension"
-    }
-
-    //private val downloadedFile: Var[Option[SafePath]] = Var(None)
-
     lazy val downloading: Var[ProcessState] = Var(Processed())
 
     def download(url: String) =
