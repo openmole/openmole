@@ -892,7 +892,44 @@ padding-bottom: 90px;
     background: #d35f5f;
 }
 
- .findFile{
+
+.specific-file.git::before {
+    transform: rotate(-45deg);
+    color: white;
+    content: "G";
+}
+
+.specific-file.git {
+    transform: rotate(45deg);
+    background-color: #f34c28;
+    width: 18px;
+    height: 18px;
+}
+
+.git-status {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    font-size: 14px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.conflicting {
+  background: #d25757;
+}
+
+.modified {
+  background: #3086b5;
+}
+
+.untracked {
+    background: #a8b562;
+    color: black;
+}
+
+.findFile{
   fontStyle:italic;
   cursor: pointer;
   margin-left: 20px;

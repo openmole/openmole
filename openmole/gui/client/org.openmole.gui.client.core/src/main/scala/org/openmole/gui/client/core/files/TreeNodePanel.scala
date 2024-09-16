@@ -373,6 +373,7 @@ class TreeNodePanel { panel =>
                   FileContentType(tnSafePath) match
                     case FileContentType.OpenMOLEScript=> div("S", cls := "specific-file oms")
                     case FileContentType.OpenMOLEResult=> div("R", cls := "specific-file omr")
+                    case FileContentType.OpenMOLEResult=> div(cls := "specific-file git")
                     case _=> emptyNode
           }
         }
@@ -390,6 +391,13 @@ class TreeNodePanel { panel =>
         ,
         isDirectory = tn.directory.isDefined
       )
+
+    def gitDivStatus(tn: TreeNodeData) =
+      tn.gitStatus match
+        case None=> emptyNode
+        case Some(GitStatus.Modified)=> div("M", cls := ".git-status modified")
+        case Some(GitStatus.Untracked)=> div("U", cls := ".git-status untracked")
+        case Some(GitStatus.Conflicting)=> div("C", cls := ".git-status conflicting")
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
       div(display.flex, flexDirection.column,
@@ -410,7 +418,9 @@ class TreeNodePanel { panel =>
             cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
               mt == Off || mt == Paste
             },
-            cls := "file1", fileClick(todo), draggable := true),
+            cls := "file1", fileClick(todo), draggable := true,
+            gitDivStatus(tn)
+          ),
           i(timeOrSize(tn), cls := "file2"),
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))
