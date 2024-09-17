@@ -82,6 +82,11 @@ def safePathToURLParams(sp: SafePath) =
       s"$pathParam=$uri",
       s"$fileTypeParam=${fileType.typeName}")
 
+def downloadFiles(sp: Seq[SafePath], name: Option[String] = None) =
+  import Download.*
+  val params = sp.flatMap(safePathToURLParams) ++ name.map(n => s"$fileNameParam=$n")
+  s"$downloadFileRoute?${params.mkString("&")}"
+
 def downloadFile(sp: SafePath, hash: Boolean = false, name: Option[String] = None, includeTopDirectoryInArchive: Option[Boolean] = None) =
   import Download.*
   val params = safePathToURLParams(sp) ++ includeTopDirectoryInArchive.map(d => s"$topDirectoryParam=$d") ++ name.map(n => s"$fileNameParam=$n") ++ Seq(s"$hashParam=$hash")
