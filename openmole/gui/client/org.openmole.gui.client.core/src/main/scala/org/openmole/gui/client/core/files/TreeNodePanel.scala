@@ -136,6 +136,14 @@ class TreeNodePanel {
       div(fileItemWarning, okText, onClick --> { _ ⇒ todo() })
     )
 
+  def archiveFiles(sp: Seq[SafePath]) =
+      multiTool.set(Off)
+      if (!sp.isEmpty)
+        org.scalajs.dom.window.open(
+          url = downloadFiles(sp, name = Some(s"${sp.head.nameWithoutExtension}")),
+          target = "_blank"
+        )
+
   def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
@@ -174,7 +182,7 @@ class TreeNodePanel {
                 .amend(verticalLine, disableIfEmptyCls),
               iconAction(glyphItemize(OMTags.glyph_move), "move", () ⇒ copy(true))
                 .amend(verticalLine, disableIfEmptyCls),
-              iconAction(glyphItemize(glyph_download), "download", () ⇒ println("download"))
+              iconAction(glyphItemize(glyph_download), "download", () ⇒ archiveFiles(selected.now()))
                 .amend(verticalLine, disableIfEmptyCls),
               iconAction(glyphItemize(glyph_trash), "delete", () ⇒
                 confirmationDiv.set(
