@@ -12,6 +12,7 @@ import org.openmole.gui.client.ext.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import TreeNode.*
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.files.FileToolBox.{glyphItemize, iconAction}
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.api.*
@@ -36,10 +37,17 @@ import scala.collection.immutable.ArraySeq
  */
 
 object TreeNodePanel:
+  enum MultiTool:
+    case CopyOrTrash, Paste, Off
+
   extension (p: TreeNodePanel)
     def refresh = p.refresh
 
-class TreeNodePanel { panel =>
+class TreeNodePanel {
+  panel =>
+
+  import TreeNodePanel.MultiTool
+  import TreeNodePanel.MultiTool.*
 
   val treeNodeManager: TreeNodeManager = new TreeNodeManager
   val treeWarning = Var(true)
@@ -128,67 +136,64 @@ class TreeNodePanel { panel =>
       div(fileItemWarning, okText, onClick --> { _ ⇒ todo() })
     )
 
-  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) = div(
-    height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
-    children <-- confirmationDiv.signal.map { ac ⇒
-      val selected = treeNodeManager.selected
-      val isSelectionEmpty = selected.signal.map {
-        _.isEmpty
-      }
-      ac match {
-        case Some(c) ⇒ Seq(c)
-        case None ⇒ Seq(
-          button(cls := "btn btn-primary", marginLeft := "80px", "Copy", onClick --> { _ ⇒
-            multiTool.set(Paste)
-            confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              val target = treeNodeManager.directory.now()
-              api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
-                if (existing.isEmpty) {
-                  refresh
-                  closeMultiTool
-                }
-                else {
-                  confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    val target = treeNodeManager.directory.now()
-                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
-                      refresh
-                      closeMultiTool
-                    })))
-                }
-              })))
-          },
-            disabled <-- isSelectionEmpty
-          ),
-          button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
-            confirmationDiv.set(
-              Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-                CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
-              )
-              )
+  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
+    div(
+      height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
+      children <-- confirmationDiv.signal.map: ac ⇒
+        val selected = treeNodeManager.selected
+        val isSelectionEmpty = selected.signal.map {
+          _.isEmpty
+        }
+        ac match
+          case Some(c) ⇒ Seq(c)
+          case None ⇒
+            def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
+              if se then "disable" else ""
+            def copy(move: Boolean) =
+             multiTool.set(MultiTool.Paste)
+              confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
+                val target = treeNodeManager.directory.now()
+                api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
+                  if (existing.isEmpty) {
+                    if move then api.deleteFiles(selected.now())
+                    refresh
+                    closeMultiTool
+                  }
+                  else {
+                    confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
+                      val target = treeNodeManager.directory.now()
+                      api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
+                        if move then api.deleteFiles(selected.now())
+                        refresh
+                        closeMultiTool
+                      })))
+                  }
+                })))
+            Seq(
+              iconAction(glyphItemize(OMTags.glyph_copy), "copy", () ⇒ copy(false))
+                .amend(verticalLine, disableIfEmptyCls),
+              iconAction(glyphItemize(OMTags.glyph_move), "move", () ⇒ copy(true))
+                .amend(verticalLine, disableIfEmptyCls),
+              iconAction(glyphItemize(glyph_download), "download", () ⇒ println("download"))
+                .amend(verticalLine, disableIfEmptyCls),
+              iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+                confirmationDiv.set(
+                  Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                    CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                  ))
+                )
+              ).amend(disableIfEmptyCls)
             )
-          },
-            disabled <-- isSelectionEmpty)
-        )
-      }
-    }
-  )
+    )
 
   def closeMultiTool =
-    multiTool.set(Off)
+    multiTool.set(MultiTool.Off)
     confirmationDiv.set(None)
     treeNodeManager.clearSelection
 
   val plusFile = Var(false)
 
-  trait MultiTool
-
-  object CopyOrTrash extends MultiTool
-
-  object Paste extends MultiTool
-
-  object Off extends MultiTool
-
-  val multiTool: Var[MultiTool] = Var(Off)
+  val multiTool: Var[MultiTool] = Var(MultiTool.Off)
 
   def fileControler(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     div(
@@ -204,7 +209,9 @@ class TreeNodePanel { panel =>
             goToDirButton(sp, s"${sp.name} / ")
           },
           div(glyph_plus, cls <-- plusFile.signal.map { pf ⇒
-            "plus-button" + { if (pf) " selected" else "" }
+            "plus-button" + {
+              if (pf) " selected" else ""
+            }
           }, onClick --> { _ ⇒ plusFile.update(!_) }),
         )
       },
@@ -217,21 +224,21 @@ class TreeNodePanel { panel =>
         div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
           multiTool.update { mcot ⇒
             mcot match {
-              case Off ⇒ CopyOrTrash
+              case MultiTool.Off ⇒ MultiTool.CopyOrTrash
               case _ ⇒
                 confirmationDiv.set(None)
                 treeNodeManager.clearSelection
-                Off
+                MultiTool.Off
             }
           }
           multiTool.now() match {
-            case Off ⇒ refresh
+            case MultiTool.Off ⇒ refresh
             case _ ⇒
           }
         })
       ),
       plusFile.signal.expand(createFileTool),
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
+      multiTool.signal.map { m ⇒ m != MultiTool.Off }.expand(copyOrTrashTool),
       plusFile.toObservable --> Observer[Boolean]: v =>
         if !v then directoryToggle.toggled.set(false)
     )
@@ -239,7 +246,9 @@ class TreeNodePanel { panel =>
   def downloadFile(safePath: SafePath, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
     api.download(
       safePath,
-      (p: ProcessState) ⇒ { transferring.set(p) },
+      (p: ProcessState) ⇒ {
+        transferring.set(p)
+      },
       hash = hash
     )
 
@@ -289,7 +298,7 @@ class TreeNodePanel { panel =>
                 then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
                 else
                   val checked =
-                    if multiTool == CopyOrTrash
+                    if multiTool == MultiTool.CopyOrTrash
                     then
                       val allCheck: Input = checkbox(false)
                       allCheck.amend(
@@ -343,7 +352,7 @@ class TreeNodePanel { panel =>
     onClick --> { _ ⇒
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
-      if (currentMultiTool == Off || currentMultiTool == Paste) todo()
+      if (currentMultiTool == MultiTool.Off || currentMultiTool == MultiTool.Paste) todo()
       fileToolBar.filterToolOpen.set(false)
       //treeNodeManager.computeCurrentSons
     }
@@ -356,7 +365,7 @@ class TreeNodePanel { panel =>
     def dirBox(tn: TreeNode)(using plugins: GUIPlugins) =
       div(
         child <-- multiTool.signal.combineWith(treeNodeManager.selected.signal).map { case (mcot, selected) ⇒
-          if (mcot == CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
+          if (mcot == MultiTool.CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
             treeNodeManager.switchSelection(tnSafePath)
           })
           else {
@@ -369,12 +378,12 @@ class TreeNodePanel { panel =>
                     if (f.pluginState.isPlugged) " plugged"
                     else " unplugged"
                   })
+                else if tn.gitStatus.isDefined then div(cls := "specific-file git")
                 else
                   FileContentType(tnSafePath) match
-                    case FileContentType.OpenMOLEScript=> div("S", cls := "specific-file oms")
-                    case FileContentType.OpenMOLEResult=> div("R", cls := "specific-file omr")
-                    case FileContentType.OpenMOLEResult=> div(cls := "specific-file git")
-                    case _=> emptyNode
+                    case FileContentType.OpenMOLEScript => div("S", cls := "specific-file oms")
+                    case FileContentType.OpenMOLEResult => div("R", cls := "specific-file omr")
+                    case _ => emptyNode
           }
         }
       )
@@ -394,10 +403,10 @@ class TreeNodePanel { panel =>
 
     def gitDivStatus(tn: TreeNodeData) =
       tn.gitStatus match
-        case None=> emptyNode
-        case Some(GitStatus.Modified)=> div("M", cls := ".git-status modified")
-        case Some(GitStatus.Untracked)=> div("U", cls := ".git-status untracked")
-        case Some(GitStatus.Conflicting)=> div("C", cls := ".git-status conflicting")
+        case None => emptyNode
+        case Some(GitStatus.Modified) => div("M", cls := ".git-status modified")
+        case Some(GitStatus.Untracked) => div("U", cls := ".git-status untracked")
+        case Some(GitStatus.Conflicting) => div("C", cls := ".git-status conflicting")
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
       div(display.flex, flexDirection.column,
@@ -416,7 +425,7 @@ class TreeNodePanel { panel =>
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,
             cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
-              mt == Off || mt == Paste
+              mt == MultiTool.Off || mt == MultiTool.Paste
             },
             cls := "file1", fileClick(todo), draggable := true,
             gitDivStatus(tn)
@@ -424,7 +433,7 @@ class TreeNodePanel { panel =>
           i(timeOrSize(tn), cls := "file2"),
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
             currentSafePath.set(Some(tnSafePath))
-            currentLine.update( cl => if cl == id then  -1 else id)
+            currentLine.update(cl => if cl == id then -1 else id)
           })
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),

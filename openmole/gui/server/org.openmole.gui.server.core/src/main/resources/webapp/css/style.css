@@ -1585,3 +1585,8 @@ input:checked + .slider:before {
 div.noUi-connect {
   background: #3086b5;
 }
+
+.disable {
+    pointer-events: none;
+    opacity: 0.4;
+}
