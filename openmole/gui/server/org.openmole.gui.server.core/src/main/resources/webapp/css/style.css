@@ -708,6 +708,10 @@ padding-bottom: 90px;
     flex: 1;
 }
 
+.file-action-border {
+    border-right: 2px solid #fff4;
+}
+
 .file-item-text {
 
 }
