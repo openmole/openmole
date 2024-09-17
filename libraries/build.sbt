@@ -74,7 +74,7 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 /*lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)*/
 
-lazy val slf4j = OsgiProject(dir,"org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
+lazy val slf4j = OsgiProject(dir, "org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion,
   libraryDependencies += "org.slf4j" % "slf4j-jdk14" % slf4jVersion,
@@ -368,8 +368,7 @@ lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!sca
   settings,
   libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % jgitVersion,
   version := jgitVersion
-
-)
+) dependsOn(slf4j)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   settings,
