@@ -15,6 +15,7 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.toService
+import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
@@ -109,7 +110,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
-      }
+        else if k.keyCode == 27
+        then
+          panels.treeNodePanel.multiTool.set(MultiTool.Off)
+          panels.treeNodePanel.currentLine.set(-1)
+          panels.closeExpandable
+        }
 
       //START BUTTON
       lazy val theNavBar = div(
