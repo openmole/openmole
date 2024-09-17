@@ -222,10 +222,10 @@ case class Compiled(result: Interpreter.RawCompiled, repl: REPL, compilationCont
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
         workDirectory.mkdirs()
 
-        p.run(consoleVariables) match {
+        p.run(consoleVariables) match 
           case p: DSL ⇒ p
           case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
-        }
+        
       case e ⇒ throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     
 

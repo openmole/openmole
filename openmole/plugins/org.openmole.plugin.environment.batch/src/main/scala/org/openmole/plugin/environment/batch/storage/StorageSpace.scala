@@ -17,18 +17,17 @@ import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
 import squants._
 
-object StorageSpace {
+object StorageSpace:
 
-  def lastBegining(interval: Time) = {
+  def lastBegining(interval: Time) =
     val modulo = interval.toMillis
     val time = System.currentTimeMillis()
     val sinceBeginingOfTheDay = time % modulo
     (time - sinceBeginingOfTheDay).toString
-  }
 
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
 
-}
+
 
 object HierarchicalStorageSpace extends JavaLogger {
   val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))

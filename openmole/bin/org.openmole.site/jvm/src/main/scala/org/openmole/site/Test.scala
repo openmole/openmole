@@ -6,40 +6,41 @@ import org.openmole.tool.file._
 
 import scala.collection.mutable.ListBuffer
 
-object Test {
+object Test:
+
+
+  opaque type TestList = Option[ListBuffer[Test]]
 
   var testing = false
   var allTests = ListBuffer[Test]()
 
-  def generate(target: File) = synchronized {
+  def list(test: Test) =
+    if Test.testing then Test.allTests += test
+
+  def generate(target: File) = synchronized:
     allTests.clear()
     testing = true
 
     val tests =
-      try {
-        Pages.all.foreach {
-          _.content
-        }
+      try
+        Pages.all.foreach { _.content }
         allTests.toVector.distinct
-      }
-      finally {
+      finally
         allTests.clear()
         testing = false
-      }
 
     target.mkdirs()
 
-    for {
+    for
       (t, i) ← tests.zipWithIndex
-    } {
+    do
       def name: String = t.name.getOrElse(s"test${i}")
 
       (target / s"${i}_$name.omt").content =
         s"""${t.code}
            |EmptyTask()
          """.stripMargin
-    }
-  }
+
 
 //  def urls = {
 //    val tests = shared.links.map { l ⇒
@@ -58,6 +59,5 @@ object Test {
 //    }
 //  }
 
-}
 
 case class Test(code: String, name: Option[String])

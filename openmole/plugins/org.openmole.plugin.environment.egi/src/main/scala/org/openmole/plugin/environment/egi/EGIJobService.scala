@@ -1,7 +1,9 @@
 package org.openmole.plugin.environment.egi
 
 import gridscale.dirac.JobDescription
-import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
 import org.openmole.plugin.environment.batch.storage.EnvironmentStorage
 import org.openmole.tool.cache.TimeCache
@@ -20,10 +22,10 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
 
   lazy val diracJobGroup = java.util.UUID.randomUUID().toString.filter(_ != '-')
 
-  def submit(serializedJob: SerializedJob, outputPath: String, storageLocation: String) = {
-    import org.openmole.tool.file._
+  def submit(serializedJob: SerializedJob, outputPath: String, storageLocation: String) =
+    import org.openmole.tool.file.*
 
-    newFile.withTmpFile("script", ".sh") { script ⇒
+    newFile.withTmpFile("script", ".sh"): script ⇒
       script.content = JobScript.create(
         serializedJob,
         outputPath,
@@ -37,7 +39,7 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
       val jobDescription =
         JobDescription(
           executable = "/bin/bash",
-          arguments = s"-x ${script.getName}",
+          arguments = s"-x ${script.getName} -- --unique-id ${preference(Preference.uniqueID)}",
           inputSandbox = Seq(script),
           stdOut = Some(EGIEnvironment.stdOutFileName),
           stdErr = Some(EGIEnvironment.stdErrFileName),
@@ -46,8 +48,6 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
         )
 
       accessControl { gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup)) }
-    }
-  }
 
   lazy val jobStateCache = TimeCache { () ⇒
     // FIXME enable again with semaphore with priority

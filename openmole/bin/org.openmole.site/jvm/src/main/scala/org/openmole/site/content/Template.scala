@@ -19,7 +19,7 @@ package org.openmole.site.content
 
 import org.openmole.site.content.header.*
 
-object Template extends PageContent(html"""
+def Template = PageContent(html"""
 
 See CheatsheetScalatex.txt for a reminder of the main Scalatex features needed in the OpenMOLE doc.
 

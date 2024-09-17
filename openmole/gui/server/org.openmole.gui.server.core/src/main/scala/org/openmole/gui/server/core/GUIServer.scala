@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
 
 object GUIServer:
+  org.http4s.reduceLogging()
 
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
@@ -84,7 +85,7 @@ object GUIServer:
   lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) =
-    if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
+    if !preference.isSet(port) then preference.setPreference(port, Network.freePort)
 
   def lockFile(implicit workspace: Workspace) = 
     val file = workspace.persistentDir / "GUI.lock"
@@ -136,14 +137,10 @@ object GUIServer:
     optimizedJS: Boolean,
     extraHeaders: String) =
 
-    Logger.getLogger(classOf[BlazeServerBuilder[?]].getName).setLevel(Level.WARNING)
-    Logger.getLogger("org.http4s.blaze.channel.nio1.NIO1SocketServerGroup").setLevel(Level.WARNING)
-    Logger.getLogger("org.http4s.blaze.channel.nio1.SelectorLoop").setLevel(Level.WARNING)
-
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-    val waitingServerShutdown = server(port, localhost).withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+    val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
     val webappCache =
       try GUIServer.webapp(optimizedJS)
       finally waitingServerShutdown.unsafeRunSync()
@@ -175,7 +172,8 @@ object GUIServer:
 
   def server(port: Int, localhost: Boolean) =
     val s =
-      if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      if localhost
+      then BlazeServerBuilder[IO].bindHttp(port, "localhost")
       else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
     s
@@ -236,6 +234,7 @@ class GUIServer(
     val shutdown =
       GUIServer.
         server(port, localhost).
+        withoutBanner.
         withHttpApp(httpApp).
         withIdleTimeout(Duration.Inf).
         withResponseHeaderTimeout(Duration.Inf).

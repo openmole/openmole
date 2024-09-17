@@ -214,7 +214,7 @@ object Application extends JavaLogger {
           if initialisePassword then Console.initPassword
           Console.ExitCodes.ok
       case RESTMode ⇒
-        implicit val preference = Services.preference(workspace)
+        given Preference = Services.preference(workspace)
         displayErrors(loadPlugins)
 
         Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel): services ⇒
@@ -226,6 +226,7 @@ object Application extends JavaLogger {
       case ConsoleMode ⇒
         Console.withTerminal:
           given Preference = Services.preference(workspace)
+          
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
           Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
@@ -234,7 +235,7 @@ object Application extends JavaLogger {
           }
 
       case GUIMode ⇒
-        implicit val preference = Services.preference(workspace)
+        given preference: Preference = Services.preference(workspace)
 
         // FIXME switch to a GUI display in the plugin panel
         displayErrors(loadPlugins)
