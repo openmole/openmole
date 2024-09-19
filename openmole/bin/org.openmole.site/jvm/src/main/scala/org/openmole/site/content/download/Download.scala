@@ -147,7 +147,7 @@ version: "3"
 
 ${h3{"Multi-user OpenMOLE server"}}
 
-A multi-user OpenMOLE server host base on k3S has been developed. The instruction to deploy it are not available yet, but if you require such a sever for your lab or your company, please get in touch with us.
+OpenMOLE connect, a multi-user OpenMOLE service based on K3S has been developed. The instructions to deploy it are ${a("available here", href := "https://github.com/openmole/connect")}.
 
 ${h3{"Build From Sources"}}
 
