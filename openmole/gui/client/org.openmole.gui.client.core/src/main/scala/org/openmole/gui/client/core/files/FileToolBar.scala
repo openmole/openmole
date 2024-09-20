@@ -38,14 +38,13 @@ import org.openmole.gui.shared.api.*
 class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager):
   def manager = treeNodePanel.treeNodeManager
 
-  // Filter tool
-  val nameTag = "names"
-
   val findInput = inputTag("").amend(
     width := "180px",
     marginTop := "12px",
     onMountFocus
   )
+
+  val gitFolder: Var[Boolean] = Var(false)
 
   val filterToolOpen = Var(false)
 
@@ -92,6 +91,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
 
     div(
       centerInDiv, backgroundColor := "#3f3d56",
+      div(cls <-- gitFolder.signal.map(gf=> if gf then "specific-file git gitInfo" else "")),
       div(flexRow, justifyContent.right,
         div(
           cls <-- filterToolOpen.signal.map { o =>

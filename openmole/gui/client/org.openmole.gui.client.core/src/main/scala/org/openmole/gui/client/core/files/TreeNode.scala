@@ -45,7 +45,7 @@ def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.tre
 object TreeNode:
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
-    case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty)
+    case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty, tnd.gitStatus)
     case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState, tnd.gitStatus)
   }
 
@@ -74,7 +74,7 @@ object TreeNode:
     size: Long,
     time: Long,
     isEmpty: Boolean,
-    gitStatus: Option[GitStatus] = None) extends TreeNode
+    gitStatus: Option[GitStatus]) extends TreeNode
 
   case class File(
     name: String,

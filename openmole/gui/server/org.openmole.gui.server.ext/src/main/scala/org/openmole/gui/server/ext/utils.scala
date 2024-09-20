@@ -136,27 +136,34 @@ object utils:
 
     def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
 
-    val git = GitService.git(path.toFile, projectsDirectory)
-    val modified = git.map(GitService.getModified(_))
-    val conflicting = git.map(GitService.getConflicting(_))
-    val untracked = git.map(GitService.getUntracked(_))
-    val all = modified ++ conflicting ++ untracked
+    val currentDirGit = GitService.git(path.toFile, projectsDirectory)
+    val modified = currentDirGit.map(GitService.getModified(_)).getOrElse(Seq())
+    val conflicting = currentDirGit.map(GitService.getConflicting(_)).getOrElse(Seq())
+    val untracked = currentDirGit.map(GitService.getUntracked(_)).getOrElse(Seq())
+
+    val currentFile = safePathToFile(path)
+    def relativePath(file: File, rootDir: File) = (file.getAbsolutePath diff rootDir.getAbsolutePath).tail
 
     def treeNodesData =
-      safePathToFile(path).listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
-        val gitStatus = git match
+      currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
+        val gitStatus = currentDirGit match
           case Some(g: Git)=>
-            val name = f.getName
-            if all.isEmpty then None
-            else if modified.contains(name) then Some(GitStatus.Modified)
-            else if untracked.contains(name) then Some(GitStatus.Untracked)
-            else if conflicting.contains(name) then Some(GitStatus.Conflicting)
+            val root = g.getRepository.getDirectory.getParentFile.getAbsolutePath
+            val relativeName = (f.getAbsolutePath.split("/") diff root.split("/")).mkString("/")
+            if modified.contains(relativeName) then Some(GitStatus.Modified)
+            else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
+            else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)
+            else Some(GitStatus.Versioned)
+          case None=>
+            if f.isDirectory
+            then
+              GitService.git(f, currentFile) match
+                case Some(g: Git)=>  Some(GitStatus.Root)
+                case _=> None
             else None
-          case None=> None
         fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
 
     val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
-
     val sortedSize = sorted.size
 
     fileFilter.size match

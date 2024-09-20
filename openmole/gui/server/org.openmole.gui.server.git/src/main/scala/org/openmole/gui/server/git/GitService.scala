@@ -10,9 +10,7 @@ import scala.jdk.CollectionConverters.*
 object GitService:
 
   def git(file: File, ceilingDirectory: File): Option[Git] =
-    println("F " + file.getAbsolutePath + " / " + file.exists + " / " + ceilingDirectory.getAbsolutePath)
-    val builder = (new FileRepositoryBuilder)
-      .addCeilingDirectory(ceilingDirectory)
+    val builder = (new FileRepositoryBuilder).readEnvironment().addCeilingDirectory(ceilingDirectory).findGitDir(file)
     
     builder.getGitDir match
       case null => None
@@ -20,17 +18,22 @@ object GitService:
 
   def clone(remoteURL: String, destination: File) =
     val dest = new File(destination, remoteURL.split("/").last)
-    println("DEST " + dest.getAbsolutePath)
     Git.cloneRepository()
       .setURI(remoteURL)
       .setDirectory(dest)
       .call()
       ()
 
-  def getModified(git: Git): Seq[String] = git.status().call().getModified.asScala.toSeq
+  def getAllSubPaths(path: String) =
+     val allDirs = path.split("/").dropRight(1)
+     val size = allDirs.size
+     (for i <- 1 to size
+     yield allDirs.dropRight(size - i).mkString("/")) :+ path
 
-  def getUntracked(git: Git): Seq[String] = git.status().call().getUntracked.asScala.toSeq
+  def getModified(git: Git): Seq[String] = git.status().call().getModified.asScala.toSeq.flatMap(getAllSubPaths(_))
 
-  def getConflicting(git: Git): Seq[String] = git.status().call().getConflicting.asScala.toSeq
+  def getUntracked(git: Git): Seq[String] = git.status().call().getUntracked.asScala.toSeq.flatMap(getAllSubPaths(_))
+
+  def getConflicting(git: Git): Seq[String] = git.status().call().getConflicting.asScala.toSeq.flatMap(getAllSubPaths(_))
 
 

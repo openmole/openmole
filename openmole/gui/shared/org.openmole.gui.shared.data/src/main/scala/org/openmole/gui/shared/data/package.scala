@@ -81,7 +81,7 @@ object TreeNodeData:
   case class Directory(isEmpty: Boolean)
 
 enum GitStatus:
-  case Modified, Untracked, Conflicting
+  case Modified, Untracked, Conflicting, Root, Versioned
 
 case class TreeNodeData(
   name: String,

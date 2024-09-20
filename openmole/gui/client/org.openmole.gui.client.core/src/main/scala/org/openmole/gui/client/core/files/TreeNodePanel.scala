@@ -315,7 +315,7 @@ class TreeNodePanel {
                         }
                       )
                     else emptyNode
-
+                  fileToolBar.gitFolder.set(nodes.data.headOption.map(tn=> tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 
               def more =
@@ -378,7 +378,10 @@ class TreeNodePanel {
           })
           else {
             tn match
-              case _: TreeNode.Directory ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
+              case _: TreeNode.Directory ⇒
+                tn.gitStatus match
+                  case Some(GitStatus.Root)=> div(cls := "specific-file git", cursor.pointer)
+                  case _=> div(cls := "dir plus bi-plus", cursor.pointer)
               case f: TreeNode.File ⇒
                 if (f.pluginState.isPlugin)
                 then
@@ -386,7 +389,6 @@ class TreeNodePanel {
                     if (f.pluginState.isPlugged) " plugged"
                     else " unplugged"
                   })
-                else if tn.gitStatus.isDefined then div(cls := "specific-file git")
                 else
                   FileContentType(tnSafePath) match
                     case FileContentType.OpenMOLEScript => div("S", cls := "specific-file oms")
@@ -411,10 +413,10 @@ class TreeNodePanel {
 
     def gitDivStatus(tn: TreeNodeData) =
       tn.gitStatus match
-        case None => emptyNode
-        case Some(GitStatus.Modified) => div("M", cls := ".git-status modified")
-        case Some(GitStatus.Untracked) => div("U", cls := ".git-status untracked")
-        case Some(GitStatus.Conflicting) => div("C", cls := ".git-status conflicting")
+        case Some(GitStatus.Modified) => "git-status-modified"
+        case Some(GitStatus.Untracked) => "git-status- untracked"
+        case Some(GitStatus.Conflicting) => "git-status-conflicting"
+        case _ => ""
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
       div(display.flex, flexDirection.column,
@@ -435,8 +437,7 @@ class TreeNodePanel {
             cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
               mt == MultiTool.Off || mt == MultiTool.Paste
             },
-            cls := "file1", fileClick(todo), draggable := true,
-            gitDivStatus(tn)
+            cls := s"file1 ${gitDivStatus(tn)}", fileClick(todo), draggable := true
           ),
           i(timeOrSize(tn), cls := "file2"),
           button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
