@@ -18,6 +18,7 @@ import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
+import javax.swing.plaf.multi.MultiToolBarUI
 import scala.concurrent.Await
 import scala.concurrent.duration.*
 import scala.scalajs.js.timers.*
@@ -109,7 +110,14 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
-      }
+        else if k.keyCode == 27
+        then
+          //TODO: uncomment after git-system merge
+         // panels.treeNodePanel.multiTool.set(MultiTool.Off)
+          panels.treeNodePanel.currentLine.set(-1)
+          panels.closeExpandable
+          panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
+        }
 
       //START BUTTON
       lazy val theNavBar = div(
