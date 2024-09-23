@@ -225,7 +225,7 @@ object ModelWizardPanel:
                   if mmd.data.inputs.nonEmpty || mmd.data.outputs.nonEmpty
                   then
                     exclusiveMenu.entry("Inputs / Ouputs", 1,
-                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping)))
+                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.name), mmd.data.outputs.flatMap(_.name)))
                     )
                   else div()
                 case None => div()
