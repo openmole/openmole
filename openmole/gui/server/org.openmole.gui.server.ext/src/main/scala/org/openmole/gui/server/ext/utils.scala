@@ -268,18 +268,18 @@ object utils:
       val path = new java.net.URI(part.name.get).getPath
       new java.io.File(directory, path)
 
-    def recieveFile(part: Part[IO], directory: File)(using cats.effect.unsafe.IORuntime) =
-      import org.openmole.tool.stream.*
+    def recieveFile(part: Part[IO], directory: File): IO[Unit] =
       val destination = recieveDestination(part, directory)
 
+      def copyToFile(stream: fs2.Stream[IO, Byte], path: fs2.io.file.Path) =
+        stream
+          .through(fs2.io.file.Files[IO].writeAll(path))
+          .compile
+          .drain
+
       destination.getParentFile.mkdirs()
-      destination.setWritable(true)
-      val stream = fs2.io.toInputStreamResource(part.body)
-      stream.use { st =>
-        IO:
-          st.copy(destination)
-          destination.setExecutable(true)
-      }.unsafeRunSync()
+      copyToFile(part.body, fs2.io.file.Path.fromNioPath(destination.toPath)).map: _ =>
+        destination.setWritable(true)
 
     def sendFileStream(fileName: String)(stream: java.io.OutputStream => Unit) =
       import org.typelevel.ci.*
