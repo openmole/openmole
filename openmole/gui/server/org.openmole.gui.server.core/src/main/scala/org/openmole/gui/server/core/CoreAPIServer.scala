@@ -167,8 +167,12 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
         import org.http4s.multipart.*
         import org.openmole.gui.server.ext.utils
         import org.openmole.tool.stream.*
+        import cats.effect.IO
+        import cats.syntax.traverse.*
+        import cats.instances.list.*
 
-        def move(fileParts: Vector[Part[IO]], fileTypes: Seq[String]) =
+
+        def move(fileParts: Vector[Part[IO]], fileTypes: Seq[String]): IO[Unit] =
           import org.openmole.gui.shared.data.ServerFileSystemContext
           def rootFile(fileType: String) =
             fileType match
@@ -176,17 +180,16 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
               case ServerFileSystemContext.Authentication.typeName ⇒ utils.authenticationKeysDirectory
               case ServerFileSystemContext.Absolute.typeName ⇒ new java.io.File("/")
 
-          for
-            (file, fileType) ← fileParts zip fileTypes
-          do
+          (fileParts zip fileTypes).map: (file, fileType) =>
             val destination = rootFile(fileType)
             apiImpl.unplug(HTTP.recieveDestination(file, destination))
             HTTP.recieveFile(file, destination)
+          .traverse(identity).map(_ => ())
 
-        req.decode[Multipart[IO]]: parts =>
-          def getFileParts = parts.parts.filter(_.filename.isDefined)
-          move(getFileParts, HTTP.multipartStringContent(parts, "fileType").get.split(',').toSeq)
-          Ok()
+        EntityDecoder.mixedMultipartResource[IO]().use: decoder =>
+          req.decodeWith(decoder, strict = true): multipart =>
+            def getFileParts = multipart.parts.filter(_.filename.isDefined)
+            Ok(move(getFileParts, HTTP.multipartStringContent(multipart, "fileType").get.split(',').toSeq))
 
       case req @ GET -> Root / org.openmole.gui.shared.api.`downloadFileRoute` =>
         import apiImpl.services.*
