@@ -78,7 +78,6 @@ object MoleTask:
   def tasks(moleTask: MoleTask) =
     moleTask.mole.capsules.map(_.task(moleTask.mole, Sources.empty, Hooks.empty))
 
-}
 
 /**
  * Task executing a Mole
@@ -97,7 +96,7 @@ case class MoleTask(
   info:      InfoConfig
 ) extends Task:
 
-  protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
+  protected def process(executionContext: TaskExecutionContext) = FromContext[Context]: p ⇒
     import p._
 
     @volatile var lastContext: Option[Context] = None
