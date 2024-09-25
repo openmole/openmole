@@ -267,8 +267,9 @@ package file {
 
       def content: String = content()
       def content(gz: Boolean = false): String =
-        if (gz) withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
-        else withSource(_.mkString)
+        if gz
+        then withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
+        else Files.readString(file.toPath)
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
@@ -276,7 +277,7 @@ package file {
       def clear =
         content = ""
 
-      def lines = withSource(_.getLines.toVector)
+      def lines: IArray[String] = IArray.unsafeFromArray(Files.readAllLines(file.toPath).asScala.toArray)
 
       def contentOption =
         try Some(file.content)
@@ -457,9 +458,8 @@ package file {
 
       def wrapError[T](f: ⇒ T): T =
         try f
-        catch {
+        catch
           case t: Throwable ⇒ throw new IOException(s"For file $file", t)
-        }
 
       ////// synchronized operations //////
       def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
