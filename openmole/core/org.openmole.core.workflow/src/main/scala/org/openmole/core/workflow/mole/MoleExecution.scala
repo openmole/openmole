@@ -57,7 +57,7 @@ object MoleExecution {
 
   type Id = String
 
-  object MoleExecutionFailed {
+  object MoleExecutionFailed:
     def exception(moleExecutionError: MoleExecutionFailed) = moleExecutionError.exception
     def capsule(moleExecutionError: MoleExecutionFailed) = moleExecutionError match {
       case e: JobFailed             ⇒ Some(e.capsule)
@@ -66,7 +66,7 @@ object MoleExecution {
       case e: HookExceptionRaised   ⇒ Some(e.capsule)
       case e: MoleExecutionError    ⇒ None
     }
-  }
+  
 
   sealed trait MoleExecutionFailed {
     def exception: Throwable

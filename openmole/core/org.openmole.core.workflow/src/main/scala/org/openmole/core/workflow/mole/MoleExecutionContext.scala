@@ -62,7 +62,7 @@ object MoleServices {
     moleExecutionDirectory:        Option[File]               = None,
     outputRedirection:             Option[OutputRedirection]  = None,
     seed:                          Option[Long]               = None,
-    compilationContext:            Option[CompilationContext] = None)(implicit preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService, networkService: NetworkService, fileServiceCache: FileServiceCache, timeService: TimeService) = {
+    compilationContext:            Option[CompilationContext] = None)(using preference: Preference, seeder: Seeder, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, _newFile: TmpDirectory, fileService: FileService, workspace: Workspace, _outputRedirection: OutputRedirection, loggerService: LoggerService, serializerService: SerializerService, networkService: NetworkService, fileServiceCache: FileServiceCache, timeService: TimeService) = 
     val executionDirectory = moleExecutionDirectory.getOrElse(applicationExecutionDirectory.newDirectory("execution"))
 
     new MoleServices(applicationExecutionDirectory, executionDirectory, compilationContext = compilationContext)(
@@ -80,11 +80,9 @@ object MoleServices {
       networkService = networkService,
       timeService = timeService
     )
-  }
 
-  def clean(moleServices: MoleServices) = {
+  def clean(moleServices: MoleServices) = 
     TmpDirectory.dispose(moleServices.tmpDirectory)
-  }
 
 }
 

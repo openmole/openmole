@@ -186,7 +186,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
             HTTP.recieveFile(file, destination)
           .traverse(identity).map(_ => ())
 
-        EntityDecoder.mixedMultipartResource[IO]().use: decoder =>
+        EntityDecoder.mixedMultipartResource[IO](maxParts = 1000).use: decoder =>
           req.decodeWith(decoder, strict = true): multipart =>
             def getFileParts = multipart.parts.filter(_.filename.isDefined)
             Ok(move(getFileParts, HTTP.multipartStringContent(multipart, "fileType").get.split(',').toSeq))
