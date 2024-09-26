@@ -122,25 +122,25 @@ object ContainerTask:
     retCode
 
   def apply(
-             image:                  ContainerImage,
-             command:                Commands,
-             containerSystem:        ContainerSystem                                    = ContainerSystem.default,
-             installContainerSystem: ContainerSystem                                    = ContainerSystem.default,
-             install:                Seq[String]                                        = Vector.empty,
-             installFiles:           Seq[File]                                          = Vector.empty,
-             workDirectory:          OptionalArgument[String]                           = None,
-             relativePathRoot:       OptionalArgument[String]                           = None,
-             hostFiles:              Seq[HostFile]                                      = Vector.empty,
-             duplicatedDirectories:  Seq[String]                                        = Vector.empty,
-             environmentVariables:   Seq[EnvironmentVariable]                           = Vector.empty,
-             errorOnReturnValue:     Boolean                                            = true,
-             returnValue:            OptionalArgument[Val[Int]]                         = None,
-             stdOut:                 OptionalArgument[Val[String]]                      = None,
-             stdErr:                 OptionalArgument[Val[String]]                      = None,
-             duplicateImage:         Boolean                                            = true,
-             reuseContainer:         Boolean                                            = true,
-             clearCache:             Boolean                                            = false,
-             containerPoolKey:       CacheKey[WithInstance[Pooled]] = CacheKey())(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
+    image:                  ContainerImage,
+    command:                Commands,
+    containerSystem:        ContainerSystem                                    = ContainerSystem.default,
+    installContainerSystem: ContainerSystem                                    = ContainerSystem.default,
+    install:                Seq[String]                                        = Vector.empty,
+    installFiles:           Seq[File]                                          = Vector.empty,
+    workDirectory:          OptionalArgument[String]                           = None,
+    relativePathRoot:       OptionalArgument[String]                           = None,
+    hostFiles:              Seq[HostFile]                                      = Vector.empty,
+    duplicateDirectories:  Seq[String]                                        = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable]                           = Vector.empty,
+    errorOnReturnValue:     Boolean                                            = true,
+    returnValue:            OptionalArgument[Val[Int]]                         = None,
+    stdOut:                 OptionalArgument[Val[String]]                      = None,
+    stdErr:                 OptionalArgument[Val[String]]                      = None,
+    duplicateImage:         Boolean                                            = true,
+    reuseContainer:         Boolean                                            = true,
+    clearCache:             Boolean                                            = false,
+    containerPoolKey:       CacheKey[WithInstance[Pooled]] = CacheKey())(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
     new ContainerTask(
       containerSystem,
       ContainerTask.install(installContainerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache),
@@ -150,7 +150,7 @@ object ContainerTask:
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue.option,
       hostFiles = hostFiles,
-      duplicatedDirectories = duplicatedDirectories,
+      duplicateDirectories = duplicateDirectories,
       environmentVariables = environmentVariables,
       stdOut = stdOut.option,
       stdErr = stdErr.option,
@@ -272,7 +272,7 @@ object ContainerTask:
     info: InfoConfig,
     containerPoolKey: CacheKey[WithInstance[Pooled]],
     hostFiles: Seq[HostFile] = Seq(),
-    duplicatedDirectories:  Seq[String] = Seq(),
+    duplicateDirectories:  Seq[String] = Seq(),
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
     duplicateImage: Boolean = true,
@@ -287,7 +287,7 @@ object ContainerTask:
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       hostFiles = hostFiles,
-      duplicatedDirectories = duplicatedDirectories,
+      duplicateDirectories = duplicateDirectories,
       environmentVariables = environmentVariables,
       duplicateImage = duplicateImage,
       reuseContainer = reuseContainer,
@@ -310,7 +310,7 @@ case class ContainerTask(
     workDirectory:          Option[String],
     relativePathRoot:       Option[String],
     hostFiles:              Seq[HostFile],
-    duplicatedDirectories:  Seq[String],
+    duplicateDirectories:  Seq[String],
     environmentVariables:   Seq[EnvironmentVariable],
     errorOnReturnValue:     Boolean,
     returnValue:            Option[Val[Int]],
@@ -346,14 +346,14 @@ case class ContainerTask(
         case _ ⇒
             WithInstance[ContainerTask.Pooled](pooled = reuseContainer): () ⇒
               val pooledImage =
-                if duplicateImage && duplicatedDirectories.isEmpty
+                if duplicateImage && duplicateDirectories.isEmpty
                 then
                   val containerDirectory = executionContext.moleExecutionDirectory.newDirectory("container")
                   _root_.container.ImageBuilder.duplicateFlatImage(image, containerDirectory)
                 else image
 
               val isolatedDirectoryMapping =
-                duplicatedDirectories.map: d =>
+                duplicateDirectories.map: d =>
                   val isolatedDirectory = executionContext.moleExecutionDirectory.newDirectory("isolated")
                   val containerPathValue = containerPathResolver(image, d).getPath
                   val containerPath = rootDirectory(image) / containerPathValue
