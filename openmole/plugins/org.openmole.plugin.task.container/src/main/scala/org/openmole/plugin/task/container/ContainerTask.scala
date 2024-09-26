@@ -462,7 +462,7 @@ case class ContainerTask(
           self.outputs,
           preparedContext,
           outputPathResolverValue,
-          Seq(rootDirectory(container.image), executionContext.taskExecutionDirectory)
+          Seq(rootDirectory(container.image), executionContext.taskExecutionDirectory) ++ container.isolatedDirectories.map(_._1)
         )
 
       retContext ++
