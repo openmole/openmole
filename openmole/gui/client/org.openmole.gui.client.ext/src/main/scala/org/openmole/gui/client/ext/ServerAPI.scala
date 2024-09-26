@@ -88,3 +88,4 @@ trait ServerAPI:
   def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
 
   def cloneRepository(repository: String, destination: SafePath)(using BasePath): Future[Unit]
+  def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit]

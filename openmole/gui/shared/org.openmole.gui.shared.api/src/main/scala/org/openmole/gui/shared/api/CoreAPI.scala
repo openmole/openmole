@@ -95,6 +95,9 @@ trait CoreAPI extends RESTAPI:
   val cloneRepository: ErrorEndpoint[(String, SafePath), Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath)]), ok(jsonResponse[Unit]))
 
+  val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
+
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema

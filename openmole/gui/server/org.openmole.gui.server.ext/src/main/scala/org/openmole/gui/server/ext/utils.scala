@@ -142,14 +142,12 @@ object utils:
     val untracked = currentDirGit.map(GitService.getUntracked(_)).getOrElse(Seq())
 
     val currentFile = safePathToFile(path)
-    def relativePath(file: File, rootDir: File) = (file.getAbsolutePath diff rootDir.getAbsolutePath).tail
 
     def treeNodesData =
       currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
         val gitStatus = currentDirGit match
           case Some(g: Git)=>
-            val root = g.getRepository.getDirectory.getParentFile.getAbsolutePath
-            val relativeName = (f.getAbsolutePath.split("/") diff root.split("/")).mkString("/")
+            val relativeName = GitService.relativeName(f,g)
             if modified.contains(relativeName) then Some(GitStatus.Modified)
             else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
             else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)

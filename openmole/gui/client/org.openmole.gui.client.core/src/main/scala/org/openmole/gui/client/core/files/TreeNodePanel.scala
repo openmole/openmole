@@ -12,10 +12,12 @@ import org.openmole.gui.client.ext.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import TreeNode.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.nodes.ReactiveElement
 import org.openmole.gui.client.core.files.FileToolBox.{glyphItemize, iconAction}
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.GitStatus.{Conflicting, Modified, Untracked}
 
 import scala.collection.immutable.ArraySeq
 
@@ -53,11 +55,11 @@ class TreeNodePanel {
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
   val update: Var[Long] = Var(0)
+  val commitable: Var[Boolean] = Var(false)
 
   def refresh = update.update(_ + 1)
 
   val fileToolBar = new FileToolBar(this, treeNodeManager)
-
 
   val editNodeInput = inputTag("").amend(
     placeholder := "Name",
@@ -125,10 +127,13 @@ class TreeNodePanel {
 
   val confirmationDiv: Var[Option[Div]] = Var(None)
 
-  def confirmation(text: String, okText: String, todo: () ⇒ Unit) =
+  def confirmation(text: String, okText: String, todo: () ⇒ Unit): Div =
+    confirmationWithMessage(div(text, width := "50%", margin := "10px"), okText, todo)
+
+  def confirmationWithMessage(message: ReactiveElement[_], okText: String, todo: () => Unit): Div =
     div(
       fileActions,
-      div(text, width := "50%", margin := "10px"),
+      message,
       div(fileItemCancel, "Cancel", onClick --> {
         _ ⇒
           closeMultiTool
@@ -137,17 +142,17 @@ class TreeNodePanel {
     )
 
   def archiveFiles(sp: Seq[SafePath]) =
-      multiTool.set(Off)
-      if (!sp.isEmpty)
-        org.scalajs.dom.window.open(
-          url = downloadFiles(sp, name = Some(s"${sp.head.nameWithoutExtension}")),
-          target = "_blank"
-        )
+    multiTool.set(Off)
+    if (!sp.isEmpty)
+      org.scalajs.dom.window.open(
+        url = downloadFiles(sp, name = Some(s"${sp.head.nameWithoutExtension}")),
+        target = "_blank"
+      )
 
   def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
-      children <-- confirmationDiv.signal.map: ac ⇒
+      children <-- confirmationDiv.signal.combineWith(commitable.signal).map: (ac, co) ⇒
         val selected = treeNodeManager.selected
         val isSelectionEmpty = selected.signal.map {
           _.isEmpty
@@ -157,8 +162,9 @@ class TreeNodePanel {
           case None ⇒
             def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
               if se then "disable" else ""
+
             def copy(move: Boolean) =
-             multiTool.set(MultiTool.Paste)
+              multiTool.set(MultiTool.Paste)
               confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
                 val target = treeNodeManager.directory.now()
                 api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
@@ -177,6 +183,24 @@ class TreeNodePanel {
                       })))
                   }
                 })))
+
+            def commit =
+              val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
+              confirmationDiv.set(
+                Some(
+                  confirmationWithMessage(messageInput, "Commit",
+                    () =>
+                      val target = treeNodeManager.directory.now()
+                      val commitMsg = messageInput.ref.value
+                      if !commitMsg.isEmpty
+                      then
+                        api.commitFiles(selected.now(), commitMsg).foreach: _ =>
+                          refresh
+                          closeMultiTool
+                  )
+                )
+              )
+
             Seq(
               iconAction(glyphItemize(OMTags.glyph_copy), "copy", () ⇒ copy(false))
                 .amend(verticalLine, disableIfEmptyCls),
@@ -184,7 +208,10 @@ class TreeNodePanel {
                 .amend(verticalLine, disableIfEmptyCls),
               iconAction(glyphItemize(glyph_download), "download", () ⇒ archiveFiles(selected.now()))
                 .amend(verticalLine, disableIfEmptyCls),
-              iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+              if co
+              then div(fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit }, OMTags.glyph_commit, "commit")
+              else emptyNode
+              , iconAction(glyphItemize(glyph_trash), "delete", () ⇒
                 confirmationDiv.set(
                   Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
                     CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
@@ -315,7 +342,8 @@ class TreeNodePanel {
                         }
                       )
                     else emptyNode
-                  fileToolBar.gitFolder.set(nodes.data.headOption.map(tn=> tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
+                  commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs=> gs == Modified || gs == Conflicting))
+                  fileToolBar.gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 
               def more =
@@ -380,8 +408,8 @@ class TreeNodePanel {
             tn match
               case _: TreeNode.Directory ⇒
                 tn.gitStatus match
-                  case Some(GitStatus.Root)=> div(cls := "specific-file git", cursor.pointer)
-                  case _=> div(cls := "dir plus bi-plus", cursor.pointer)
+                  case Some(GitStatus.Root) => div(cls := "specific-file git", cursor.pointer)
+                  case _ => div(cls := "dir plus bi-plus", cursor.pointer)
               case f: TreeNode.File ⇒
                 if (f.pluginState.isPlugin)
                 then

@@ -24,9 +24,9 @@ object GitClonePanel:
       height := "38", width := "150", marginTop := "20",
       onClick --> { _ ⇒
         val sp = manager.directory.now()
-        api.cloneRepository(urlInput.ref.value, sp)
-        panels.treeNodePanel.refresh
-        panels.closeExpandable
+        api.cloneRepository(urlInput.ref.value, sp).foreach: c=>
+          panels.treeNodePanel.refresh
+          panels.closeExpandable
       }
     )
 

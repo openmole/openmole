@@ -1,5 +1,7 @@
 package org.openmole.gui.server.core
 
+import org.eclipse.jgit.api.Git
+
 import java.io.File
 import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
@@ -694,4 +696,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.workspace
     GitService.clone(remoteURL, destination.toFile)
 
+  def commit(paths: Seq[SafePath], message: String): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.git(safePathToFile(hf), projectsDirectory) match
+        case Some(git: Git)=>
+          GitService.commit(paths.map(_.toFile), message)(git)
+        case _=>
 }
