@@ -131,6 +131,7 @@ object ContainerTask:
     workDirectory:          OptionalArgument[String]                           = None,
     relativePathRoot:       OptionalArgument[String]                           = None,
     hostFiles:              Seq[HostFile]                                      = Vector.empty,
+    isolatedDirectories:    Seq[String]                                        = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]                           = Vector.empty,
     errorOnReturnValue:     Boolean                                            = true,
     returnValue:            OptionalArgument[Val[Int]]                         = None,
@@ -139,7 +140,7 @@ object ContainerTask:
     duplicateImage:         Boolean                                            = true,
     reuseContainer:         Boolean                                            = true,
     clearCache:             Boolean                                            = false,
-    containerPoolKey:       CacheKey[WithInstance[InstalledImage]] = CacheKey())(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
+    containerPoolKey:       CacheKey[WithInstance[Pooled]] = CacheKey())(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
     new ContainerTask(
       containerSystem,
       ContainerTask.install(installContainerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache),
@@ -149,6 +150,7 @@ object ContainerTask:
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue.option,
       hostFiles = hostFiles,
+      isolatedDirectories = isolatedDirectories,
       environmentVariables = environmentVariables,
       stdOut = stdOut.option,
       stdErr = stdErr.option,
@@ -210,7 +212,7 @@ object ContainerTask:
           _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
 
 
-  def newCacheKey = CacheKey[WithInstance[InstalledImage]]()
+  def newCacheKey = CacheKey[WithInstance[Pooled]]()
 
   type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
@@ -231,7 +233,7 @@ object ContainerTask:
     external: External,
     info: InfoConfig,
     config: InputOutputConfig,
-    containerPoolKey: CacheKey[WithInstance[InstalledImage]],
+    containerPoolKey: CacheKey[WithInstance[Pooled]],
     hostFiles: Seq[HostFile] = Seq(),
     relativePathRoot: Option[String] = None) =
     val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
@@ -268,8 +270,9 @@ object ContainerTask:
     stdErr: Option[Val[String]],
     external: External,
     info: InfoConfig,
-    containerPoolKey: CacheKey[WithInstance[InstalledImage]],
+    containerPoolKey: CacheKey[WithInstance[Pooled]],
     hostFiles: Seq[HostFile] = Seq(),
+    isolatedDirectories:  Seq[String] = Seq(),
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
     duplicateImage: Boolean = true,
@@ -284,6 +287,7 @@ object ContainerTask:
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
       hostFiles = hostFiles,
+      isolatedDirectories = isolatedDirectories,
       environmentVariables = environmentVariables,
       duplicateImage = duplicateImage,
       reuseContainer = reuseContainer,
@@ -295,6 +299,7 @@ object ContainerTask:
       containerPoolKey = containerPoolKey
     )
 
+  case class Pooled(image: InstalledImage, isolatedDirectories: Seq[VolumeInfo])
 
 import ContainerTask._
 
@@ -305,6 +310,7 @@ case class ContainerTask(
   workDirectory:        Option[String],
   relativePathRoot:     Option[String],
   hostFiles:            Seq[HostFile],
+  isolatedDirectories:  Seq[String],
   environmentVariables: Seq[EnvironmentVariable],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -315,26 +321,50 @@ case class ContainerTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  containerPoolKey:     CacheKey[WithInstance[InstalledImage]]) extends Task with ValidateTask { self ⇒
+  containerPoolKey:     CacheKey[WithInstance[Pooled]]) extends Task with ValidateTask { self ⇒
 
   def validate = validateContainer(command.value, environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext[Context] { parameters ⇒
+  override def process(executionContext: TaskExecutionContext) = FromContext[Context]: parameters ⇒
     import parameters._
     import executionContext.networkService
 
-    def noImageDuplication = WithInstance[_root_.container.FlatImage](pooled = false) { () ⇒ image }
+    def workDirectoryValue(image: InstalledImage) = workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
+    def relativeWorkDirectoryValue(image: InstalledImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
+    def rootDirectory(image: InstalledImage) = image.file / _root_.container.FlatImage.rootfsName
+
+
+    def containerPathResolver(image: InstalledImage, path: String): File =
+      val rootDirectory = File("/")
+      if File(path).isAbsolute
+      then rootDirectory / path
+      else rootDirectory / relativeWorkDirectoryValue(image) / path
 
     def createPool =
       executionContext.remote match
-        case Some(r) if r.threads == 1 ⇒ noImageDuplication
+        case Some(r) if r.threads == 1 ⇒  WithInstance[ContainerTask.Pooled](pooled = false) { () ⇒ ContainerTask.Pooled(image, Seq()) }
         case _ ⇒
-          if duplicateImage
-          then
-            WithInstance[_root_.container.FlatImage](close = _.file.recursiveDelete, pooled = reuseContainer): () ⇒
-              val containersDirectory = executionContext.moleExecutionDirectory.newDirectory("container")
-              _root_.container.ImageBuilder.duplicateFlatImage(image, containersDirectory)
-          else noImageDuplication
+            WithInstance[ContainerTask.Pooled](pooled = reuseContainer): () ⇒
+              val pooledImage =
+                if duplicateImage && isolatedDirectories.isEmpty
+                then
+                  val containerDirectory = executionContext.moleExecutionDirectory.newDirectory("container")
+                  _root_.container.ImageBuilder.duplicateFlatImage(image, containerDirectory)
+                else image
+
+              val isolatedDirectoryMapping =
+                isolatedDirectories.map: d =>
+                  val isolatedDirectory = executionContext.moleExecutionDirectory.newDirectory("isolated")
+                  val containerPathValue = containerPathResolver(image, d).getPath
+                  val containerPath = rootDirectory(image) / containerPathValue
+
+                  if containerPath.exists()
+                  then containerPath.copy(isolatedDirectory)
+                  else isolatedDirectory.mkdirs()
+
+                  isolatedDirectory -> containerPathValue
+
+              ContainerTask.Pooled(image = pooledImage, isolatedDirectories = isolatedDirectoryMapping)
 
     val pool = executionContext.cache.getOrElseUpdate(containerPoolKey)(createPool)
 
@@ -345,52 +375,53 @@ case class ContainerTask(
     val tailBuilder = new StringOutputStream(maxCharacters = Some(tailSize))
 
     val out: PrintStream =
-      if (stdOut.isDefined) new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output, tailBuilder))
+      if stdOut.isDefined
+      then new PrintStream(MultiplexedOutputStream(outBuilder, executionContext.outputRedirection.output, tailBuilder))
       else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.output, tailBuilder))
 
     val err: PrintStream =
-      if (stdErr.isDefined) new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error, tailBuilder))
+      if stdErr.isDefined
+      then new PrintStream(MultiplexedOutputStream(errBuilder, executionContext.outputRedirection.error, tailBuilder))
       else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.error, tailBuilder))
 
     def prepareVolumes(
-      preparedFilesInfo:     Iterable[FileInfo],
-      containerPathResolver: String ⇒ File,
-      hostFiles:             Seq[HostFile],
-      volumesInfo:           List[VolumeInfo]   = List.empty[VolumeInfo]): Iterable[MountPoint] =
-      hostFiles.map { h ⇒ h.path → h.destination } ++
-      preparedFilesInfo.map { (f, d) ⇒ d.getAbsolutePath → containerPathResolver(f.expandedUserPath).toString } ++
-        volumesInfo.map { (f, d) ⇒ f.toString → d }
+      preparedFilesInfo:        Iterable[FileInfo],
+      containerPathResolver:    String ⇒ File,
+      hostFiles:                Seq[HostFile],
+      volumesInfo:              Seq[VolumeInfo]): Iterable[MountPoint] =
+      val volumes =
+        volumesInfo.map((f, d) ⇒ f.toString -> d) ++
+          hostFiles.map(h ⇒ h.path -> h.destination) ++
+          preparedFilesInfo.map((f, d) ⇒ d.getAbsolutePath -> containerPathResolver(f.expandedUserPath).toString)
 
-    pool { container ⇒
-      val workDirectoryValue = workDirectory.orElse(container.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
-      val relativeWorkDirectoryValue = relativePathRoot.getOrElse(workDirectoryValue)
-      val inputDirectory = executionContext.taskExecutionDirectory /> "inputs"
+      volumes.sortBy((_, bind) => bind.split("/").length)
 
-      def containerPathResolver(path: String): File =
-        val rootDirectory = File("/")
-        if File(path).isAbsolute
-        then rootDirectory / path
-        else rootDirectory / relativeWorkDirectoryValue / path
-
+    pool: container ⇒
       def uniquePathResolver(path: String): File =
         import org.openmole.tool.hash.*
         executionContext.taskExecutionDirectory /> path.hash().toString / path
 
       val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, uniquePathResolver)
 
-      val volumes = prepareVolumes(preparedFilesInfo, containerPathResolver, hostFiles).toVector
+      val volumes =
+        prepareVolumes(
+          preparedFilesInfo,
+          containerPathResolver(container.image, _),
+          hostFiles,
+          container.isolatedDirectories
+        ).toVector
 
       val containerEnvironmentVariables =
-        environmentVariables.map { v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext) }
+        environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
 
       val commandValue = command.value.map(_.from(context))
 
       val retCode =
         runCommandInContainer(
           containerSystem,
-          image = container,
+          image = container.image,
           commands = commandValue,
-          workDirectory = Some(workDirectoryValue),
+          workDirectory = Some(workDirectoryValue(container.image)),
           output = out,
           error = err,
           volumes = volumes,
@@ -402,7 +433,8 @@ case class ContainerTask(
         def log =
           // last line might have been truncated
           val lst = tailBuilder.toString
-          if (lst.size >= tailSize) lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
+          if lst.size >= tailSize
+          then lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
           else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
 
         def command = commandValue.mkString(" ; ")
@@ -415,24 +447,27 @@ case class ContainerTask(
 
         throw new InternalProcessingError(error)
 
-      val rootDirectory = container.file / _root_.container.FlatImage.rootfsName
 
       def outputPathResolverValue =
-        outputPathResolver(
-          hostFiles.map { h ⇒ h.path → h.destination } ++ preparedFilesInfo.map { (f, d) ⇒ d.toString -> f.expandedUserPath },
-          rootDirectory,
-          containerPathResolver
-        ) _
+        val mappings =
+          container.isolatedDirectories.map((f, d) => f.toString -> d) ++
+          hostFiles.map(h ⇒ h.path → h.destination) ++
+            preparedFilesInfo.map((f, d) ⇒ d.toString -> f.expandedUserPath)
+
+        outputPathResolver(mappings, rootDirectory(container.image), containerPathResolver(container.image, _))
 
       val retContext =
-        External.fetchOutputFiles(external, self.outputs, preparedContext, outputPathResolverValue, Seq(rootDirectory, executionContext.taskExecutionDirectory))
+        External.fetchOutputFiles(
+          external,
+          self.outputs,
+          preparedContext,
+          outputPathResolverValue,
+          Seq(rootDirectory(container.image), executionContext.taskExecutionDirectory)
+        )
 
       retContext ++
         returnValue.map(v ⇒ Variable(v, retCode)) ++
         stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
         stdErr.map(v ⇒ Variable(v, errBuilder.toString))
-
-    }
-  }
 
 }

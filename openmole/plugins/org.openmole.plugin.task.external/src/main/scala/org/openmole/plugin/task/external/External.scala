@@ -145,7 +145,7 @@ object External:
     do
       def parentMessage =
         if f.value.getParentFileSafe.exists()
-        then s"""its parent directory ${f.value.getParentFileSafe} contains [${f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ")}"]"""
+        then s"""its parent directory ${f.value.getParentFileSafe} contains [${f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ")}]"""
         else s"""its parent directory ${f.value.getParentFileSafe} doesn't exist either"""
       throw new UserBadDataError(s"""Output file ${f.value.getAbsolutePath} (stored in variable ${f.prototype}) doesn't exist, $parentMessage""")
 
