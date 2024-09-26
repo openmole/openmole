@@ -211,7 +211,18 @@ class TreeNodePanel {
               if co
               then div(fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit }, OMTags.glyph_commit, "commit")
               else emptyNode
-              , iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+              ,
+              if co
+              then iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
+                confirmationDiv.set(
+                  Some(confirmation(s"Revert changes ? ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                    api.revertFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                  ))
+                )
+              ).amend(verticalLine, disableIfEmptyCls)
+              else emptyNode
+              ,
+              iconAction(glyphItemize(glyph_trash), "delete", () ⇒
                 confirmationDiv.set(
                   Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
                     CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }

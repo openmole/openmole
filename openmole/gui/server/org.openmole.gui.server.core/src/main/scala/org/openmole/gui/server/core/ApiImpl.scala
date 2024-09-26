@@ -703,4 +703,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case Some(git: Git)=>
           GitService.commit(paths.map(_.toFile), message)(git)
         case _=>
+
+  def revert(paths: Seq[SafePath]): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.git(safePathToFile(hf), projectsDirectory) match
+        case Some(git: Git) =>
+          GitService.revert(paths.map(_.toFile))(git)
+        case _ =>
 }

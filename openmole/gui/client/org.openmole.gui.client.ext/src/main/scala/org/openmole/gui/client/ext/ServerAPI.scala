@@ -89,3 +89,4 @@ trait ServerAPI:
 
   def cloneRepository(repository: String, destination: SafePath)(using BasePath): Future[Unit]
   def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit]
+  def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit]

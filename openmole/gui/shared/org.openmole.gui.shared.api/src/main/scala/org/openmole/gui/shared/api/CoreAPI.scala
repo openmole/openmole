@@ -97,6 +97,9 @@ trait CoreAPI extends RESTAPI:
 
   val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
+    
+  val revert: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "revert", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
 
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])

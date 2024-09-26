@@ -157,7 +157,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
       isAlive.implementedBy(_ => apiImpl.isAlive()),
       cloneRepository.errorImplementedBy((r,d) => apiImpl.cloneRepository(r,d)),
-      commit.errorImplementedBy((r,d) => apiImpl.commit(r,d))
+      commit.errorImplementedBy((r,d) => apiImpl.commit(r,d)),
+      revert.errorImplementedBy(r=> apiImpl.revert(r))
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

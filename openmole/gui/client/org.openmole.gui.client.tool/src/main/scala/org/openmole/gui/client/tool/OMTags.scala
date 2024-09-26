@@ -69,6 +69,7 @@ object OMTags:
   val glyph_copy = cls("bi-copy")
   val glyph_move = cls("bi-box-arrow-right")
   val glyph_commit = img(src := "img/commit.svg", width := "35px")
+  val glyph_rollback = cls("bi-arrow-counterclockwise")
 
   case class AlertAction(action: () ⇒ Unit)
 
