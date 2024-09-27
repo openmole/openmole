@@ -116,8 +116,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       api.revertFiles(Seq(sp)).foreach: _ ⇒
         panels.treeNodePanel.refresh
-        panels.tabContent.removeTab(sp)
-        FileDisplayer.display(sp)
+        if (panels.tabContent.alreadyDisplayed(sp).isDefined)
+        then
+          panels.tabContent.removeTab(sp)
+          FileDisplayer.display(sp)
         closeToolBox
 
   def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =

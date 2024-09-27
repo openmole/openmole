@@ -68,7 +68,6 @@ object FileDisplayer:
 
 
   def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
-    println("dis " + safePath.name)
     panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
