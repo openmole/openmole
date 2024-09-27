@@ -454,7 +454,7 @@ class TreeNodePanel {
     def gitDivStatus(tn: TreeNodeData) =
       tn.gitStatus match
         case Some(GitStatus.Modified) => "git-status-modified"
-        case Some(GitStatus.Untracked) => "git-status- untracked"
+        case Some(GitStatus.Untracked) => "git-status-untracked"
         case Some(GitStatus.Conflicting) => "git-status-conflicting"
         case _ => ""
 
