@@ -480,10 +480,15 @@ class TreeNodePanel {
             cls := s"file1 ${gitDivStatus(tn)}", fileClick(todo), draggable := true
           ),
           i(timeOrSize(tn), cls := "file2"),
-          button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
-            currentSafePath.set(Some(tnSafePath))
-            currentLine.update(cl => if cl == id then -1 else id)
-          })
+          child <--
+            multiTool.signal.map:
+              _ match
+                case CopyOrTrash => emptyNode
+                case _ =>
+                  button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
+                    currentSafePath.set(Some(tnSafePath))
+                    currentLine.update(cl => if cl == id then -1 else id)
+                  })
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),
         treeNodeManager.directory.toObservable --> Observer { _ => currentLine.set(-1) }
