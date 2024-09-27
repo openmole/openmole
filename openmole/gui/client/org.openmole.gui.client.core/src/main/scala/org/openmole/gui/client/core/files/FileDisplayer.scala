@@ -68,11 +68,14 @@ object FileDisplayer:
 
 
   def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
+    println("dis " + safePath.name)
     panels.tabContent.alreadyDisplayed(safePath) match
       case Some(tabID: bsn.TabID) ⇒ panels.tabContent.tabsUI.setActive(tabID)
       case _ ⇒
         val tab = buildTab(safePath)
         tab.foreach:
-          case Some((tabData, content)) => panels.tabContent.addTab(tabData, content)
-          case _ =>
+          case Some((tabData, content)) => 
+            println("Add content " + content)
+            panels.tabContent.addTab(tabData, content)
+          case _ => 
 

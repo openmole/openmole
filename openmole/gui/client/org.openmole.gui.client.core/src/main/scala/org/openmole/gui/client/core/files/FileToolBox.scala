@@ -107,6 +107,14 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     closeToolBox
   }
 
+  def revert(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+    withSafePath: sp ⇒
+      api.revertFiles(Seq(sp)).foreach: _ ⇒
+        panels.treeNodePanel.refresh
+        panels.tabContent.removeTab(sp)
+        FileDisplayer.display(sp) 
+        closeToolBox
+
   def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newSafePath = safePath.parent ++ to
 
@@ -236,22 +244,23 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                 iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
-            child <-- {
+            children <-- {
               panels.treeNodePanel.commitable.signal.map: co =>
                 if co
                 then
-                  div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item",  "commit", verticalLine, onClick --> { _ ⇒
-                    actionEdit.set(Some(editForm(initSafePath, "", "Commit message",
-                      (inputValue: String) =>
-                        commit(inputValue)
-                      //  api.commitFiles(Seq(initSafePath), inputValue)
-                    )))
-                  })
-                else emptyNode
+                  Seq(
+                    div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, onClick --> { _ ⇒
+                      actionEdit.set(Some(editForm(initSafePath, "", "Commit message",
+                        (inputValue: String) => commit(inputValue)
+                      )))
+                    }),
+                    iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
+                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert)))).amend(verticalLine)
+                  )
+                else Seq()
             },
-            iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
-              initSafePath.name
-            } ?", () ⇒ trash)))),
+            iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+              actionConfirmation.set(Some(confirmation(s"Delete ${initSafePath.name} ?", () ⇒ trash)))),
 
             //                FileContentType(initSafePath) match {
             //                  //FIXME discover extensions from wizard plugins
