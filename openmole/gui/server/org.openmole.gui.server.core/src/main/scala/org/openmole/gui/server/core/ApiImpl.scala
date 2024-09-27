@@ -699,16 +699,18 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def commit(paths: Seq[SafePath], message: String): Unit =
     import services.workspace
     paths.headOption.foreach: hf =>
-      GitService.git(safePathToFile(hf), projectsDirectory) match
-        case Some(git: Git)=>
-          GitService.commit(paths.map(_.toFile), message)(git)
-        case _=>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git=>
+        GitService.commit(paths.map(_.toFile), message)(git)
 
   def revert(paths: Seq[SafePath]): Unit =
     import services.workspace
     paths.headOption.foreach: hf =>
-      GitService.git(safePathToFile(hf), projectsDirectory) match
-        case Some(git: Git) =>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git=>
           GitService.revert(paths.map(_.toFile))(git)
-        case _ =>
+          
+  def add(paths: Seq[SafePath]): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git=>
+          GitService.add(paths.map(_.toFile))(git)
 }

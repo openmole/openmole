@@ -56,6 +56,7 @@ class TreeNodePanel {
   val draggedNode: Var[Option[SafePath]] = Var(None)
   val update: Var[Long] = Var(0)
   val commitable: Var[Boolean] = Var(false)
+  val addable: Var[Boolean] = Var(false)
 
   def refresh = update.update(_ + 1)
 
@@ -152,7 +153,7 @@ class TreeNodePanel {
   def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
-      children <-- confirmationDiv.signal.combineWith(commitable.signal).map: (ac, co) ⇒
+      children <-- confirmationDiv.signal.combineWith(commitable.signal).combineWith(addable.signal).map: (ac, co, ad) ⇒
         val selected = treeNodeManager.selected
         val isSelectionEmpty = selected.signal.map {
           _.isEmpty
@@ -208,6 +209,16 @@ class TreeNodePanel {
                 .amend(verticalLine, disableIfEmptyCls),
               iconAction(glyphItemize(glyph_download), "download", () ⇒ archiveFiles(selected.now()))
                 .amend(verticalLine, disableIfEmptyCls),
+              if ad
+              then iconAction(glyphItemize(OMTags.glyph_addFile), "add", () ⇒
+                confirmationDiv.set(
+                  Some(confirmation(s"Add ? ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                    api.addFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                  ))
+                )
+              ).amend(verticalLine, disableIfEmptyCls)
+              else emptyNode
+              ,
               if co
               then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
               else emptyNode
@@ -355,6 +366,7 @@ class TreeNodePanel {
                       )
                     else emptyNode
                   commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs => gs == Modified || gs == Conflicting))
+                  addable.set(nodes.data.flatMap(_.gitStatus).exists(gs => gs == Untracked))
                   fileToolBar.gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 

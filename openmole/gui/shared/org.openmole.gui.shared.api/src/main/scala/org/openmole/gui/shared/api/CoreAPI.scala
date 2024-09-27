@@ -101,6 +101,9 @@ trait CoreAPI extends RESTAPI:
   val revert: ErrorEndpoint[Seq[SafePath], Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "revert", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
 
+  val add: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "add", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema

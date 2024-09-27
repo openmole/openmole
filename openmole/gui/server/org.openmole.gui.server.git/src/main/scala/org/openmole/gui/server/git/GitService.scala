@@ -1,9 +1,8 @@
 package org.openmole.gui.server.git
 
-import org.eclipse.jgit.api.{CheckoutCommand, CommitCommand, Git, GitCommand}
-import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.api.*
 import org.eclipse.jgit.storage.file.*
-import org.openmole.gui.shared.data.{GitStatus, SafePath}
+import org.openmole.gui.shared.data.*
 
 import java.io.File
 import scala.annotation.tailrec
@@ -18,6 +17,12 @@ object GitService:
       case null => None
       case _ => Some(new Git(builder.build()))
 
+
+  def withGit(fromFile: File, ceilingDir: File)(g: Git=> Unit) =
+      GitService.git(fromFile, ceilingDir) match
+        case Some(git: Git)=> g(git)
+        case _=>
+
   def rootPath(git: Git) = git.getRepository.getDirectory.getParentFile.getAbsolutePath
   
   def relativeName(f: File, git: Git) = (f.getAbsolutePath.split("/") diff rootPath(git).split("/")).mkString("/")
@@ -30,7 +35,7 @@ object GitService:
       .call
 
   def commit(files: Seq[File], message: String)(implicit git: Git) =
-    
+
     @tailrec
     def addCommitedFiles(fs: Seq[File], commitCommand: CommitCommand): CommitCommand =
     if fs.isEmpty
@@ -40,15 +45,26 @@ object GitService:
     addCommitedFiles(files, git.commit).setMessage(message).call
 
   def revert(files: Seq[File])(implicit git: Git) =
-    
+
     @tailrec
     def addPath0(fs: Seq[File], checkoutCommand: CheckoutCommand): CheckoutCommand =
       if fs.isEmpty
       then checkoutCommand
       else addPath0(fs.tail, checkoutCommand.addPath(relativeName(fs.head, git)))
-            
+
     addPath0(files, git.checkout).call
-  
+
+
+  def add(files: Seq[File])(implicit git: Git) =
+
+    @tailrec
+    def addPath0(fs: Seq[File], addCommand: AddCommand): AddCommand =
+      if fs.isEmpty
+      then addCommand
+      else addPath0(fs.tail, addCommand.addFilepattern(relativeName(fs.head, git)))
+
+    addPath0(files, git.add).call
+
   private def getAllSubPaths(path: String) =
      val allDirs = path.split("/").dropRight(1)
      val size = allDirs.size

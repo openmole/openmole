@@ -85,6 +85,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def cloneRepository(repositoryURL: String, destination: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.cloneRepository(repositoryURL, destination).future)
   override def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit] = fetch.futureError(_.commit(files, message).future)
   override def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.revert(files).future)
+  override def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.add(files).future)
 
   override def upload(
     files: Seq[(File, SafePath)],

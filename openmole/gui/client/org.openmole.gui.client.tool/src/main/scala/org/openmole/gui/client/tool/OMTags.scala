@@ -70,6 +70,7 @@ object OMTags:
   val glyph_move = cls("bi-box-arrow-right")
   def glyph_commit = img(src := "img/commit.svg")
   val glyph_rollback = cls("bi-arrow-counterclockwise")
+  val glyph_addFile = cls("bi-node-plus")
 
   case class AlertAction(action: () ⇒ Unit)
 
