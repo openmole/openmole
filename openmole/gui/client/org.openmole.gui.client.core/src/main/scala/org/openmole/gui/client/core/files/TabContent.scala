@@ -34,6 +34,7 @@ class TabContent:
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
         save(tabData)
         removeTab(tabData.safePath)
+        panels.treeNodePanel.refresh
         e.stopPropagation()
       })
     )

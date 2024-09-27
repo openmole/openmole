@@ -209,7 +209,7 @@ class TreeNodePanel {
               iconAction(glyphItemize(glyph_download), "download", () ⇒ archiveFiles(selected.now()))
                 .amend(verticalLine, disableIfEmptyCls),
               if co
-              then div(fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit }, OMTags.glyph_commit, "commit")
+              then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
               else emptyNode
               ,
               if co
@@ -270,7 +270,8 @@ class TreeNodePanel {
         div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
           multiTool.update { mcot ⇒
             mcot match {
-              case MultiTool.Off ⇒ MultiTool.CopyOrTrash
+              case MultiTool.Off ⇒
+                MultiTool.CopyOrTrash
               case _ ⇒
                 confirmationDiv.set(None)
                 treeNodeManager.clearSelection
@@ -353,7 +354,7 @@ class TreeNodePanel {
                         }
                       )
                     else emptyNode
-                  commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs=> gs == Modified || gs == Conflicting))
+                  commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs => gs == Modified || gs == Conflicting))
                   fileToolBar.gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 

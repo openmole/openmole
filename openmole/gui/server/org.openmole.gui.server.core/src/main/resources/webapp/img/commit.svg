@@ -24,11 +24,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="2.061125"
-     inkscape:cx="45.606162"
-     inkscape:cy="73.746134"
-     inkscape:window-width="1824"
-     inkscape:window-height="957"
+     inkscape:zoom="32.978"
+     inkscape:cx="10.006671"
+     inkscape:cy="9.5821457"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -40,23 +40,19 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-66.973321,-88.445211)">
-    <g
-       id="g12150"
-       transform="matrix(0.07567404,0,0,0.07567404,63.596919,82.209451)">
-      <circle
-         style="fill:none;stroke:#ffffff;stroke-width:2.5;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-         id="path234"
-         cx="97.124977"
-         cy="106.21555"
-         r="22.562658" />
-      <path
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-         d="m 44.617703,106.21555 h 30"
-         id="path1060" />
-      <path
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-         d="m 119.51977,106.21555 h 30"
-         id="path1788" />
-    </g>
+    <circle
+       style="fill:none;stroke:#ffffff;stroke-width:0.189185;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="path234"
+       cx="70.946762"
+       cy="90.247208"
+       r="1.7074075" />
+    <path
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:0.189185;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 66.973321,90.247211 h 2.270221"
+       id="path1060" />
+    <path
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:0.189185;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 72.641463,90.247211 h 2.270221"
+       id="path1788" />
   </g>
 </svg>
