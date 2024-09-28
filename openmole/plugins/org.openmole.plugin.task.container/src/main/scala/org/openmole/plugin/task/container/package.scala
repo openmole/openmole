@@ -64,7 +64,7 @@ package container:
 package object container:
 
   type FileBinding = (String, String)
-  
+
   def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, containerPathResolver: String => File )(filePath: String): File =
     /**
      * Search for a parent, not only in level 1 subdirs
@@ -114,17 +114,12 @@ package object container:
 
   object ContainerSystem:
     def default = Singularity()
+    def sudo(containerSystem: ContainerSystem, cmd: String) = s"fakeroot $cmd"
 
-    def sudo(containerSystem: ContainerSystem, cmd: String) =
-      containerSystem match
-        case _: Proot       ⇒ s"sudo $cmd"
-        case _: Singularity ⇒ s"fakeroot $cmd"
+  type ContainerSystem = Singularity
+  case class Singularity(command: String = "singularity", size: Information = 50.gigabyte)
 
-  sealed trait ContainerSystem
-  case class Proot(proot: File, noSeccomp: Boolean = false, kernel: String = "3.2.1") extends ContainerSystem
-  case class Singularity(command: String = "singularity") extends ContainerSystem
-
-  type InstalledImage = _root_.container.FlatImage
+  type InstalledImage = _root_.container.Singularity.SingularityImageFile
 
   /**
    * Trait for either string scripts or script file runnable in tasks based on the container task

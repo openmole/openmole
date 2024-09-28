@@ -51,8 +51,7 @@ object GAMATask:
     val (modelName, volumesValue) = volumes(workspace, model)
 
     def gamaCommand = s"gama-headless -xml '$experiment' '$gamaWorkspaceDirectory/$modelName' '$inputXML'"
-    def installCommands =
-      install ++ Seq(gamaCommand, s"ls '${inputXML}'")
+    def installCommands = install ++ Seq(gamaCommand, s"ls '${inputXML}'")
 
     def error(retCode: Int) =
       retCode match
@@ -90,8 +89,8 @@ object GAMATask:
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
     installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
 
-    if (!project.exists()) throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
-    if (!(project / gaml).exists()) throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
+    if !project.exists() then throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
+    if !(project / gaml).exists() then throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
 
     val gamaContainerImage: ContainerImage =
       (version.option, containerImage) match
@@ -166,6 +165,11 @@ object GAMATask:
     then scalar
     else scalar.map(_.arrayManifest)
 
+  def readInputXML(image: InstalledImage, tmpDirectory: TmpDirectory) =
+    tmpDirectory.withTmpDir: dir =>
+      _root_.container.Singularity.extractFile(image, GAMATask.inputXML, dir, dir)
+      val inputXML = dir / GAMATask.inputXML
+      XML.loadFile(inputXML)
 
 case class GAMATask(
   project:              File,
@@ -188,54 +192,55 @@ case class GAMATask(
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate =
-    container.validateContainer(Vector(), environmentVariables, external) ++ finalStep.validate ++ {
-      import xml._
+    container.validateContainer(Vector(), environmentVariables, external) ++ finalStep.validate ++
+      Validate: p =>
+        import p.*
+        import xml.*
 
-      val inputXML = XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML)
-      val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
-      val outputs = (inputXML \ "Simulation" \ "Outputs" \ "Output").collect { case x: Elem => x }
+        val inputXML = GAMATask.readInputXML(image, tmpDirectory)
 
-      def gamaParameters = parameters.flatMap(e => e.attribute("var").flatMap(_.headOption).map(_.text)) ++ parameters.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
-      def gamaParameterByName(name: String) =
-        parameters.find(e => e.attribute("var").flatMap(_.headOption).map(_.text) == Some(name) || e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name))
+        val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
+        val outputs = (inputXML \ "Simulation" \ "Outputs" \ "Output").collect { case x: Elem => x }
 
-      def gamaOutputs = outputs.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
-      def gamaOutputByName(name: String) =
-        outputs.find(e => e.attribute("name").flatMap(_.headOption).map(_.text) == Some(name))
+        def gamaParameters = parameters.flatMap(e => e.attribute("var").flatMap(_.headOption).map(_.text)) ++ parameters.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
+        def gamaParameterByName(name: String) =
+          parameters.find(e => e.attribute("var").flatMap(_.headOption).map(_.text).contains(name) || e.attribute("name").flatMap(_.headOption).map(_.text).contains(name))
+
+        def gamaOutputs = outputs.flatMap(e => e.attribute("name").flatMap(_.headOption).map(_.text))
+        def gamaOutputByName(name: String) =
+          outputs.find(e => e.attribute("name").flatMap(_.headOption).map(_.text).contains(name))
 
 
-      def validateInputs =
-        def typeMatch(v: Val[_], t: String) =
-          v match
-            case Val.caseInt(v) => t == "INT" | t == "FLOAT"
-            case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
-            case Val.caseString(v) => t == "STRING"
-            case Val.caseBoolean(v) => t == "BOOLEAN"
-            case _ => false
+        def validateInputs =
+          def typeMatch(v: Val[_], t: String) =
+            v match
+              case Val.caseInt(v) => t == "INT" | t == "FLOAT"
+              case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
+              case Val.caseString(v) => t == "STRING"
+              case Val.caseBoolean(v) => t == "BOOLEAN"
+              case _ => false
 
-        Mapped.noFile(mapped.inputs).flatMap: m =>
-          gamaParameterByName(m.name) match
-            case Some(p) =>
-              val gamaType = p.attribute("type").get.head.text
-              if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"""Type mismatch between mapped input ${m.v} and input "${m.name}" of type ${gamaType}.""")) else None
-            case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation among: ${gamaParameters.mkString(", ")}. Make sure it is defined in your gaml file"""))
+          Mapped.noFile(mapped.inputs).flatMap: m =>
+            gamaParameterByName(m.name) match
+              case Some(p) =>
+                val gamaType = p.attribute("type").get.head.text
+                if(!typeMatch(m.v, gamaType)) Some(new UserBadDataError(s"""Type mismatch between mapped input ${m.v} and input "${m.name}" of type ${gamaType}.""")) else None
+              case None => Some(new UserBadDataError(s"""Mapped input "${m.name}" has not been found in the simulation among: ${gamaParameters.mkString(", ")}. Make sure it is defined in your gaml file"""))
 
-      def validateOutputs =
-        val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
-        def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
+        def validateOutputs =
+          val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
+          def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
 
-        Mapped.noFile(mapped.outputs).flatMap: m =>
-          gamaOutputByName(m.name) match
-            case Some(_) => if(!accepted(m.v.`type`.manifest)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are: ${acceptedOutputsTypes.mkString(", ")})""")) else None
-            case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
+          Mapped.noFile(mapped.outputs).flatMap: m =>
+            gamaOutputByName(m.name) match
+              case Some(_) => if(!accepted(m.v.`type`.manifest)) Some(new UserBadDataError(s"""Mapped output ${m} type is not supported (frameRate is ${frameRate.option.isDefined}, it implies that supported types are: ${acceptedOutputsTypes.mkString(", ")})""")) else None
+              case None => Some(new UserBadDataError(s"""Mapped output "${m.name}" has not been found in the simulation among: ${gamaOutputs.mkString(", ")}. Make sure it is defined in your gaml file."""))
 
-      if (inputXML \ "Simulation").isEmpty
-      then Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
-      else validateInputs ++ validateOutputs
-    }
+        if (inputXML \ "Simulation").isEmpty
+        then Seq(new UserBadDataError(s"Experiment ${experiment} has not been found, make sure it is defined in your gaml file"))
+        else validateInputs ++ validateOutputs
+
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
     import p._
@@ -249,7 +254,10 @@ case class GAMATask(
     val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
     def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
-    val inputXML = GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(XML.loadFile(image.file / _root_.container.FlatImage.rootfsName / GAMATask.inputXML))
+
+    val inputXML =
+      val inputXML = GAMATask.readInputXML(image, tmpDirectory)
+      GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(inputXML)
 
     inputFile.content =
       s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${inputXML.mkString("")}"""
@@ -262,11 +270,11 @@ case class GAMATask(
         case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFilePath $outputDirectoryPath"
 
     def containerTask =
-      ContainerTask.isolatedWorkdirectory(executionContext)(
+      ContainerTask.internal(
         image = image,
         command = launchCommand,
         containerSystem = containerSystem,
-        workDirectory = GAMATask.workspaceDirectory,
+        workDirectory = Some(GAMATask.workspaceDirectory),
         relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
@@ -276,8 +284,7 @@ case class GAMATask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        containerPoolKey = containerPoolKey) set(
+        info = info) set(
         resources += (inputFile, inputFilePath, true),
         resources += (outputDirectory, outputDirectoryPath, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },

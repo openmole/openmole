@@ -124,8 +124,6 @@ case class RTask(
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
@@ -172,11 +170,11 @@ case class RTask(
     val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
     def containerTask =
-      ContainerTask.isolatedWorkdirectory(executionContext)(
+      ContainerTask.internal(
         containerSystem = containerSystem,
         image = image,
         command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
-        workDirectory = workDirectory,
+        workDirectory = Some(workDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
@@ -185,8 +183,7 @@ case class RTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        containerPoolKey = containerPoolKey) set (
+        info = info) set (
         resources += (scriptFile, rScriptPath),
         resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),

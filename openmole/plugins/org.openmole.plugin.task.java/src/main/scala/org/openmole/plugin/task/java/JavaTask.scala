@@ -110,8 +110,6 @@ case class JavaTask(
   info: InfoConfig,
   mapped: MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = validateContainer(Vector(), environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
@@ -185,11 +183,11 @@ case class JavaTask(
         else ""
 
       def containerTask =
-        ContainerTask.isolatedWorkdirectory(executionContext)(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
-          workDirectory = workspace,
+          workDirectory = Some(workspace),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,
@@ -198,8 +196,7 @@ case class JavaTask(
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set(
+          info = info) set(
           resources += (scriptFile, scriptName, true),
           resources += (inputData, inputDataName, true),
           jarResources.map((j, n) => resources += (j, n, true)),

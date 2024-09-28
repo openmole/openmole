@@ -92,8 +92,6 @@ case class PythonTask(
   mapped:                 MappedInputOutputConfig,
   major:                  Int) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
@@ -157,11 +155,11 @@ case class PythonTask(
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
       def containerTask =
-        ContainerTask.isolatedWorkdirectory(executionContext)(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
-          workDirectory = workDirectory,
+          workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           environmentVariables = environmentVariables,
@@ -170,8 +168,7 @@ case class PythonTask(
           stdErr = stdErr,
           external = external,
           config = config,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
+          info = info) set (
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),

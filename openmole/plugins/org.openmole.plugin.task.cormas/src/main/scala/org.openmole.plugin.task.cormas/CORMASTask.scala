@@ -83,8 +83,6 @@ case class CORMASTask(
   info:                 InfoConfig,
   mapped: MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p ⇒
@@ -121,11 +119,11 @@ case class CORMASTask(
     scriptFile.content = RunnableScript.content(script)
 
     def containerTask =
-      ContainerTask.isolatedWorkdirectory(executionContext)(
+      ContainerTask.internal(
         containerSystem = containerSystem,
         image = image,
         command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
-        workDirectory = workDirectory,
+        workDirectory = Some(workDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
@@ -134,8 +132,7 @@ case class CORMASTask(
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info,
-        containerPoolKey = containerPoolKey) set (
+        info = info) set (
         resources += (jsonInputs, inputJSONName, true),
         resources += (scriptFile, scriptName, true),
         outputFiles += (outputJSONName, outputFile),

@@ -113,8 +113,6 @@ case class NetLogoContainerTask(
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = Validate: p ⇒
     import p._
     val allInputs = External.PWD :: p.inputs.toList
@@ -163,11 +161,11 @@ case class NetLogoContainerTask(
     val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
 
     def containerTask =
-      ContainerTask.isolatedWorkdirectory(executionContext)(
+      ContainerTask.internal(
         image = image,
         command = launchCommand,
         containerSystem = containerSystem,
-        workDirectory = workspace,
+        workDirectory = Some(workspace),
         relativePathRoot = Some(netLogoWorkspace),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
@@ -177,8 +175,7 @@ case class NetLogoContainerTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        containerPoolKey = containerPoolKey) set(
+        info = info) set(
         resources += (inputFile, inputFileName, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
         outputFiles += (outputFileName, outputFileVal),

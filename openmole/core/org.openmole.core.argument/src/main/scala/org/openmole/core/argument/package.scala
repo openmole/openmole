@@ -25,7 +25,7 @@ package argument:
   import org.openmole.tool.cache.KeyValueCache
 
   sealed trait Validate:
-    def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable]
+    def apply(inputs: Seq[Val[_]])(using TmpDirectory, FileService, KeyValueCache): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
 
   object Validate:

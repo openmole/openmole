@@ -118,8 +118,6 @@ case class JuliaTask(
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig) extends Task with ValidateTask:
 
-  lazy val containerPoolKey = ContainerTask.newCacheKey
-
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
@@ -175,11 +173,11 @@ case class JuliaTask(
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
       def containerTask =
-        ContainerTask.isolatedWorkdirectory(executionContext)(
+        ContainerTask.internal(
           containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
-          workDirectory = workDirectory,
+          workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,
@@ -188,8 +186,7 @@ case class JuliaTask(
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
+          info = info) set (
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
