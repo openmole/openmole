@@ -373,7 +373,7 @@ case class ContainerTask(
     val overlay =
       ContainerTask.synchronized:
         val file = executionContext.taskExecutionDirectory / "overlay.img"
-        _root_.container.Singularity.createOverlay(file, containerSystem.size)
+        _root_.container.Singularity.createOverlay(file, containerSystem.space)
 
     val retCode =
       runCommandInContainer(

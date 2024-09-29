@@ -113,11 +113,11 @@ package object container:
   lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
   object ContainerSystem:
-    def default = Singularity()
+    def default: ContainerSystem = Singularity()
     def sudo(containerSystem: ContainerSystem, cmd: String) = s"fakeroot $cmd"
 
   type ContainerSystem = Singularity
-  case class Singularity(command: String = "singularity", size: Information = 50.gigabyte)
+  case class Singularity(command: String = "singularity", space: Information = 10.gigabyte)
 
   type InstalledImage = _root_.container.Singularity.SingularityImageFile
 
