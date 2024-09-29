@@ -143,7 +143,7 @@ object ContainerTask:
     stdErr:                 OptionalArgument[Val[String]]                      = None,
     clearCache:             Boolean                                            = false,
     cacheKey:               OverlayKey                                         = newCacheKey,
-    cleanCachedOverlay:     Boolean                                            = false)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
+    poolOverlay:            Boolean                                            = true)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
     new ContainerTask(
       containerSystem,
       ContainerTask.install(installContainerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache),
@@ -160,7 +160,7 @@ object ContainerTask:
       info = InfoConfig(),
       external = External(),
       cacheKey = cacheKey,
-      cleanCachedOverlay = cleanCachedOverlay) set (
+      poolOverlay = poolOverlay) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
 
@@ -257,29 +257,29 @@ object ContainerTask:
       external = external,
       info = info,
       cacheKey = cacheKey,
-      cleanCachedOverlay = false
+      poolOverlay = true
     )
 
 
 import org.openmole.plugin.task.container.ContainerTask.*
 
 case class ContainerTask(
-    containerSystem:        Singularity,
-    image:                  InstalledImage,
-    command:                Commands,
-    workDirectory:          Option[String],
-    relativePathRoot:       Option[String],
-    hostFiles:              Seq[HostFile],
-    environmentVariables:   Seq[EnvironmentVariable],
-    errorOnReturnValue:     Boolean,
-    returnValue:            Option[Val[Int]],
-    stdOut:                 Option[Val[String]],
-    stdErr:                 Option[Val[String]],
-    config:                 InputOutputConfig,
-    external:               External,
-    info:                   InfoConfig,
-    cacheKey:               OverlayKey,
-    cleanCachedOverlay:     Boolean) extends Task with ValidateTask:
+  containerSystem:        Singularity,
+  image:                  InstalledImage,
+  command:                Commands,
+  workDirectory:          Option[String],
+  relativePathRoot:       Option[String],
+  hostFiles:              Seq[HostFile],
+  environmentVariables:   Seq[EnvironmentVariable],
+  errorOnReturnValue:     Boolean,
+  returnValue:            Option[Val[Int]],
+  stdOut:                 Option[Val[String]],
+  stdErr:                 Option[Val[String]],
+  config:                 InputOutputConfig,
+  external:               External,
+  info:                   InfoConfig,
+  cacheKey:               OverlayKey,
+  poolOverlay:            Boolean) extends Task with ValidateTask:
 
   def validate = validateContainer(command.value, environmentVariables, external)
 
@@ -343,14 +343,11 @@ case class ContainerTask(
     val commandValue = command.value.map(_.from(context))
 
     def createPool =
-      def clear(o: _root_.container.Singularity.OverlayImg) =
-        if cleanCachedOverlay
-        then
-          val nullOutput = new PrintStream(NullOutputStream())
-          _root_.container.Singularity.clearOverlay(o, executionContext.taskExecutionDirectory.newDirectory("overlay", create = true), output = nullOutput, error = nullOutput)
-
-      WithInstance[_root_.container.Singularity.OverlayImg](pooled = true, release = clear): () ⇒
-        val overlay = executionContext.moleExecutionDirectory.newFile("overlay", ".img")
+      WithInstance[_root_.container.Singularity.OverlayImg](pooled = poolOverlay): () ⇒
+        val overlay =
+          if poolOverlay
+          then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
+          else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
         _root_.container.Singularity.createOverlay(overlay, containerSystem.space, output = out, error = err)
 
     val overlayCache = executionContext.cache.getOrElseUpdate(cacheKey)(createPool)
