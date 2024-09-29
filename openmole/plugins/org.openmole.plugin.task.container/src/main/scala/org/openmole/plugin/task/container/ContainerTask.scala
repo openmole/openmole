@@ -32,7 +32,7 @@ import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.container.ContainerTask.{Commands, downloadImage, extractImage, repositoryDirectory}
 import org.openmole.plugin.task.external.*
-import org.openmole.tool.cache.{CacheKey, WithInstance}
+import org.openmole.tool.cache.*
 import org.openmole.tool.hash.hashString
 import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.*
@@ -141,7 +141,9 @@ object ContainerTask:
     returnValue:            OptionalArgument[Val[Int]]                         = None,
     stdOut:                 OptionalArgument[Val[String]]                      = None,
     stdErr:                 OptionalArgument[Val[String]]                      = None,
-    clearCache:             Boolean                                            = false)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
+    clearCache:             Boolean                                            = false,
+    cacheKey:               OverlayKey                                         = newCacheKey,
+    cleanCachedOverlay:     Boolean                                            = false)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
     new ContainerTask(
       containerSystem,
       ContainerTask.install(installContainerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache),
@@ -156,7 +158,9 @@ object ContainerTask:
       stdErr = stdErr.option,
       config = InputOutputConfig(),
       info = InfoConfig(),
-      external = External()) set (
+      external = External(),
+      cacheKey = cacheKey,
+      cleanCachedOverlay = cleanCachedOverlay) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
 
@@ -218,45 +222,8 @@ object ContainerTask:
   type MountPoint = (String, String)
   type ContainerId = String
 
-
-//  def isolatedWorkdirectory(executionContext: TaskExecutionContext)(
-//    containerSystem: ContainerSystem,
-//    image: InstalledImage,
-//    command: Commands,
-//    workDirectory: String,
-//    environmentVariables: Seq[EnvironmentVariable],
-//    errorOnReturnValue: Boolean,
-//    returnValue: Option[Val[Int]],
-//    stdOut: Option[Val[String]],
-//    stdErr: Option[Val[String]],
-//    external: External,
-//    info: InfoConfig,
-//    config: InputOutputConfig,
-//    containerPoolKey: CacheKey[WithInstance[Pooled]],
-//    hostFiles: Seq[HostFile] = Seq(),
-//    relativePathRoot: Option[String] = None) =
-//    val workDirectoryFile = executionContext.taskExecutionDirectory.newDirectory("workdirectory", create = true)
-//
-//    ContainerTask.internal(
-//      containerSystem = containerSystem,
-//      image = image,
-//      command = command,
-//      workDirectory = Some(workDirectory),
-//      relativePathRoot = relativePathRoot,
-//      errorOnReturnValue = errorOnReturnValue,
-//      returnValue = returnValue,
-//      hostFiles = hostFiles,
-//      environmentVariables = environmentVariables,
-//      duplicateImage = false,
-//      stdOut = stdOut,
-//      stdErr = stdErr,
-//      config = config,
-//      external = external,
-//      info = info,
-//      containerPoolKey = containerPoolKey
-//    ) set (
-//      resources += (workDirectoryFile, workDirectory, head = true)
-//    )
+  type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImg]]
+  def newCacheKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImg]]()
 
   def internal(
     containerSystem: Singularity,
@@ -269,6 +236,7 @@ object ContainerTask:
     stdErr: Option[Val[String]],
     external: External,
     info: InfoConfig,
+    cacheKey: OverlayKey,
     hostFiles: Seq[HostFile] = Seq(),
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
@@ -287,7 +255,9 @@ object ContainerTask:
       stdErr = stdErr,
       config = config,
       external = external,
-      info = info
+      info = info,
+      cacheKey = cacheKey,
+      cleanCachedOverlay = false
     )
 
 
@@ -307,7 +277,9 @@ case class ContainerTask(
     stdErr:                 Option[Val[String]],
     config:                 InputOutputConfig,
     external:               External,
-    info:                   InfoConfig) extends Task with ValidateTask:
+    info:                   InfoConfig,
+    cacheKey:               OverlayKey,
+    cleanCachedOverlay:     Boolean) extends Task with ValidateTask:
 
   def validate = validateContainer(command.value, environmentVariables, external)
 
@@ -370,99 +342,108 @@ case class ContainerTask(
 
     val commandValue = command.value.map(_.from(context))
 
-    val overlay =
-      ContainerTask.synchronized:
-        val file = executionContext.taskExecutionDirectory / "overlay.img"
-        _root_.container.Singularity.createOverlay(file, containerSystem.space)
+    def createPool =
+      def clear(o: _root_.container.Singularity.OverlayImg) =
+        if cleanCachedOverlay
+        then
+          val nullOutput = new PrintStream(NullOutputStream())
+          _root_.container.Singularity.clearOverlay(o, executionContext.taskExecutionDirectory.newDirectory("overlay", create = true), output = nullOutput, error = nullOutput)
 
-    val retCode =
-      runCommandInContainer(
-        containerSystem,
-        image = image,
-        overlay = Some(overlay),
-        commands = commandValue,
-        workDirectory = Some(workDirectoryValue(image)),
-        output = out,
-        error = err,
-        volumes = volumes,
-        environmentVariables = containerEnvironmentVariables
-      )
+      WithInstance[_root_.container.Singularity.OverlayImg](pooled = true, release = clear): () ⇒
+        val overlay = executionContext.moleExecutionDirectory.newFile("overlay", ".img")
+        _root_.container.Singularity.createOverlay(overlay, containerSystem.space, output = out, error = err)
 
-    if errorOnReturnValue && !returnValue.isDefined && retCode != 0
-    then
-      def log =
-        // last line might have been truncated
-        val lst = tailBuilder.toString
-        if lst.size >= tailSize
-        then lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
-        else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
+    val overlayCache = executionContext.cache.getOrElseUpdate(cacheKey)(createPool)
 
-      def command = commandValue.mkString(" ; ")
+    overlayCache: overlay =>
+      val retCode =
+        runCommandInContainer(
+          containerSystem,
+          image = image,
+          overlay = Some(overlay),
+          commands = commandValue,
+          workDirectory = Some(workDirectoryValue(image)),
+          output = out,
+          error = err,
+          volumes = volumes,
+          environmentVariables = containerEnvironmentVariables
+        )
 
-      val error =
-        s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
-           |The last lines of the standard output were:
-           $log
-           |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
+      if errorOnReturnValue && !returnValue.isDefined && retCode != 0
+      then
+        def log =
+          // last line might have been truncated
+          val lst = tailBuilder.toString
+          if lst.size >= tailSize
+          then lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
+          else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
 
-      throw new InternalProcessingError(error)
+        def command = commandValue.mkString(" ; ")
+
+        val error =
+          s"""Process \"$command\" exited with an error code $retCode (it should equal 0).
+             |The last lines of the standard output were:
+             $log
+             |You may want to check the log of the standard outputs for more information on this error.""".stripMargin
+
+        throw new InternalProcessingError(error)
 
 
-    case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
+      case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-    val outputFileMapping: Vector[OutputMapping] =
-      val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
-      val resultDirectoryBind = "/_result_"
+      val outputFileMapping: Vector[OutputMapping] =
+        val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
+        val resultDirectoryBind = "/_result_"
 
-      val outputFileMapping =
-        external.outputFiles.map: f =>
-          val origin = f.origin.from(context)
-          val directory = UUID.randomUUID.toString
-          val resolved = containerPathResolver(image, origin)
-          OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
+        val outputFileMapping =
+          external.outputFiles.map: f =>
+            val origin = f.origin.from(context)
+            val directory = UUID.randomUUID.toString
+            val resolved = containerPathResolver(image, origin)
+            OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
 
-      val copyCommand: Seq[String] =
-        outputFileMapping.flatMap: m =>
-          val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
-          Seq(s"""mkdir -p \"$destinationDirectory\"""",  s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
+        val copyCommand: Seq[String] =
+          outputFileMapping.flatMap: m =>
+            val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
+            Seq(s"""mkdir -p \"$destinationDirectory\"""",  s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
 
-      runCommandInContainer(
-        containerSystem,
-        image = image,
-        overlay = Some(overlay),
-        commands = copyCommand,
-        workDirectory = Some(workDirectoryValue(image)),
-        output = out,
-        error = err,
-        volumes = volumes ++ Seq(resultDirectory.getAbsolutePath -> resultDirectoryBind),
-        environmentVariables = containerEnvironmentVariables
-      )
+        runCommandInContainer(
+          containerSystem,
+          image = image,
+          overlay = Some(overlay),
+          commands = copyCommand,
+          workDirectory = Some(workDirectoryValue(image)),
+          output = out,
+          error = err,
+          volumes = volumes ++ Seq(resultDirectory.getAbsolutePath -> resultDirectoryBind),
+          environmentVariables = containerEnvironmentVariables
+        )
 
-      // Set garbage collection of directories
-      for
-        m <- outputFileMapping
-      do fileService.deleteWhenEmpty(resultDirectory / m.directory)
-      fileService.deleteWhenEmpty(resultDirectory)
+        // Set garbage collection of directories
+        for
+          m <- outputFileMapping
+        do fileService.deleteWhenEmpty(resultDirectory / m.directory)
+        fileService.deleteWhenEmpty(resultDirectory)
 
-      outputFileMapping
+        outputFileMapping
 
-    val outputPathResolverValue =
-      outputFileMapping.map: r =>
-        r.origin -> r.file
-      .toMap
+      val outputPathResolverValue =
+        outputFileMapping.map: r =>
+          r.origin -> r.file
+        .toMap
 
-    val retContext = //context
-      External.fetchOutputFiles(
-        external,
-        this.outputs,
-        preparedContext,
-        outputPathResolverValue.apply,
-        Seq()
-      )
+      val retContext = //context
+        External.fetchOutputFiles(
+          external,
+          this.outputs,
+          preparedContext,
+          outputPathResolverValue.apply,
+          Seq()
+        )
 
-    retContext ++
-      returnValue.map(v ⇒ Variable(v, retCode)) ++
-      stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
-      stdErr.map(v ⇒ Variable(v, errBuilder.toString))
+      retContext ++
+        returnValue.map(v ⇒ Variable(v, retCode)) ++
+        stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
+        stdErr.map(v ⇒ Variable(v, errBuilder.toString))
 
 

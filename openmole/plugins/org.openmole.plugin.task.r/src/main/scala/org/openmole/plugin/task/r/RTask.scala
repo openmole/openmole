@@ -123,6 +123,8 @@ case class RTask(
   external:             External,
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
+  
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -183,7 +185,8 @@ case class RTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info) set (
+        info = info,
+        cacheKey = cacheKey) set (
         resources += (scriptFile, rScriptPath),
         resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),

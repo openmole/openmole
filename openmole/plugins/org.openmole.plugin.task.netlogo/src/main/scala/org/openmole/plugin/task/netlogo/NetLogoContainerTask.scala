@@ -113,6 +113,8 @@ case class NetLogoContainerTask(
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+
   override def validate = Validate: p ⇒
     import p._
     val allInputs = External.PWD :: p.inputs.toList
@@ -175,7 +177,8 @@ case class NetLogoContainerTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info) set(
+        info = info,
+        cacheKey = cacheKey) set(
         resources += (inputFile, inputFileName, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
         outputFiles += (outputFileName, outputFileVal),

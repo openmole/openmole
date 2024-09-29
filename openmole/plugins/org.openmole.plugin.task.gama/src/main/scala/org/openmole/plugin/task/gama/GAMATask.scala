@@ -192,6 +192,8 @@ case class GAMATask(
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  
   override def validate =
     container.validateContainer(Vector(), environmentVariables, external) ++ finalStep.validate ++
       Validate: p =>
@@ -284,7 +286,8 @@ case class GAMATask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info) set(
+        info = info,
+        cacheKey = cacheKey) set(
         resources += (inputFile, inputFilePath, true),
         resources += (outputDirectory, outputDirectoryPath, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },

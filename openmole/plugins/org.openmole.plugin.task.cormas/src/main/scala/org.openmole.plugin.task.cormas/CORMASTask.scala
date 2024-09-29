@@ -83,6 +83,8 @@ case class CORMASTask(
   info:                 InfoConfig,
   mapped: MappedInputOutputConfig) extends Task with ValidateTask:
 
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p ⇒
@@ -132,7 +134,8 @@ case class CORMASTask(
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info) set (
+        info = info,
+        cacheKey = cacheKey) set (
         resources += (jsonInputs, inputJSONName, true),
         resources += (scriptFile, scriptName, true),
         outputFiles += (outputJSONName, outputFile),

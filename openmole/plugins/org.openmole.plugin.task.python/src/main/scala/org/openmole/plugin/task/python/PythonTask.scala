@@ -91,6 +91,8 @@ case class PythonTask(
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig,
   major:                  Int) extends Task with ValidateTask:
+  
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -168,7 +170,8 @@ case class PythonTask(
           stdErr = stdErr,
           external = external,
           config = config,
-          info = info) set (
+          info = info,
+          cacheKey = cacheKey) set (
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),

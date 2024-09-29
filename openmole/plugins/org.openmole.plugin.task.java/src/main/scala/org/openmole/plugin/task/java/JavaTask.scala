@@ -109,6 +109,8 @@ case class JavaTask(
   external: External,
   info: InfoConfig,
   mapped: MappedInputOutputConfig) extends Task with ValidateTask:
+  
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
 
   override def validate = validateContainer(Vector(), environmentVariables, external)
 
@@ -196,7 +198,8 @@ case class JavaTask(
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info) set(
+          info = info,
+          cacheKey = cacheKey) set(
           resources += (scriptFile, scriptName, true),
           resources += (inputData, inputDataName, true),
           jarResources.map((j, n) => resources += (j, n, true)),

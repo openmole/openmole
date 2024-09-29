@@ -178,6 +178,8 @@ case class ScilabTask(
   mapped:               MappedInputOutputConfig,
   version:              String) extends Task with ValidateTask:
 
+  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
@@ -225,7 +227,8 @@ case class ScilabTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info) set (
+        info = info,
+        cacheKey = cacheKey) set (
         resources += (scriptFile, scriptName, true),
         mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
       )
