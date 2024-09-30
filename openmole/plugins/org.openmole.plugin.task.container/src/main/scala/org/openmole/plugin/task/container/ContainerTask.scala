@@ -78,7 +78,7 @@ object ContainerTask:
 
   def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "container" /> "repos"
 
-  def runCommandInFlatImaageContainer(
+  def runCommandInFlatImageContainer(
     containerSystem:      ContainerSystem,
     image:                _root_.container.FlatImage,
     commands:             Seq[String],
@@ -201,7 +201,7 @@ object ContainerTask:
     if install.isEmpty
     then image
     else
-      val retCode = runCommandInFlatImaageContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n))
+      val retCode = runCommandInFlatImageContainer(containerSystem, image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n))
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m ⇒ s": $m").getOrElse(""))
       image
 
