@@ -143,7 +143,7 @@ object ContainerTask:
     stdErr:                 OptionalArgument[Val[String]]                      = None,
     clearCache:             Boolean                                            = false,
     cacheKey:               OverlayKey                                         = newCacheKey,
-    poolOverlay:            Boolean                                            = true)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
+    reuseOverlay:            Boolean                                            = true)(using sourcecode.Name, DefinitionScope, TmpDirectory, NetworkService, Workspace, ThreadProvider, Preference, OutputRedirection, SerializerService, FileService) =
     new ContainerTask(
       containerSystem,
       ContainerTask.install(installContainerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache),
@@ -160,7 +160,7 @@ object ContainerTask:
       info = InfoConfig(),
       external = External(),
       cacheKey = cacheKey,
-      poolOverlay = poolOverlay) set (
+      reuseOverlay = reuseOverlay) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
 
@@ -257,7 +257,7 @@ object ContainerTask:
       external = external,
       info = info,
       cacheKey = cacheKey,
-      poolOverlay = true
+      reuseOverlay = true
     )
 
 
@@ -279,13 +279,15 @@ case class ContainerTask(
   external:               External,
   info:                   InfoConfig,
   cacheKey:               OverlayKey,
-  poolOverlay:            Boolean) extends Task with ValidateTask:
+  reuseOverlay:            Boolean) extends Task with ValidateTask:
 
   def validate = validateContainer(command.value, environmentVariables, external)
 
   override def process(executionContext: TaskExecutionContext) = FromContext[Context]: parameters ⇒
     import executionContext.networkService
     import parameters.*
+
+    case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
     def workDirectoryValue(image: InstalledImage) = workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
     def relativeWorkDirectoryValue(image: InstalledImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
@@ -343,26 +345,45 @@ case class ContainerTask(
     val commandValue = command.value.map(_.from(context))
 
     def createPool =
-      WithInstance[_root_.container.Singularity.OverlayImg](pooled = poolOverlay): () ⇒
+      WithInstance[_root_.container.Singularity.OverlayImg](pooled = reuseOverlay): () ⇒
         val overlay =
-          if poolOverlay
+          if reuseOverlay
           then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
           else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
         _root_.container.Singularity.createOverlay(overlay, containerSystem.space, output = out, error = err)
 
     val overlayCache = executionContext.cache.getOrElseUpdate(cacheKey)(createPool)
 
+    // Prepare the copy of output files
+    val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
+    val resultDirectoryBind = "/_result_"
+
+    val outputFileMapping =
+      external.outputFiles.map: f =>
+        val origin = f.origin.from(context)
+        val directory = UUID.randomUUID.toString
+        val resolved = containerPathResolver(image, origin)
+        OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
+
+    val copyCommand: Seq[String] =
+      outputFileMapping.flatMap: m =>
+        val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
+        Seq(s"""mkdir -p \"$destinationDirectory\"""", s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
+
+    val copyVolume = resultDirectory.getAbsolutePath -> resultDirectoryBind
+
     overlayCache: overlay =>
+
       val retCode =
         runCommandInContainer(
           containerSystem,
           image = image,
           overlay = Some(overlay),
-          commands = commandValue,
+          commands = commandValue ++ copyCommand,
           workDirectory = Some(workDirectoryValue(image)),
           output = out,
           error = err,
-          volumes = volumes,
+          volumes = volumes ++ Seq(copyVolume),
           environmentVariables = containerEnvironmentVariables
         )
 
@@ -385,44 +406,11 @@ case class ContainerTask(
 
         throw new InternalProcessingError(error)
 
-
-      case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
-
-      val outputFileMapping: Vector[OutputMapping] =
-        val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
-        val resultDirectoryBind = "/_result_"
-
-        val outputFileMapping =
-          external.outputFiles.map: f =>
-            val origin = f.origin.from(context)
-            val directory = UUID.randomUUID.toString
-            val resolved = containerPathResolver(image, origin)
-            OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
-
-        val copyCommand: Seq[String] =
-          outputFileMapping.flatMap: m =>
-            val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
-            Seq(s"""mkdir -p \"$destinationDirectory\"""",  s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
-
-        runCommandInContainer(
-          containerSystem,
-          image = image,
-          overlay = Some(overlay),
-          commands = copyCommand,
-          workDirectory = Some(workDirectoryValue(image)),
-          output = out,
-          error = err,
-          volumes = volumes ++ Seq(resultDirectory.getAbsolutePath -> resultDirectoryBind),
-          environmentVariables = containerEnvironmentVariables
-        )
-
-        // Set garbage collection of directories
-        for
-          m <- outputFileMapping
-        do fileService.deleteWhenEmpty(resultDirectory / m.directory)
-        fileService.deleteWhenEmpty(resultDirectory)
-
-        outputFileMapping
+      // Set garbage collection of directories
+      for
+        m <- outputFileMapping
+      do fileService.deleteWhenEmpty(resultDirectory / m.directory)
+      fileService.deleteWhenEmpty(resultDirectory)
 
       val outputPathResolverValue =
         outputFileMapping.map: r =>
