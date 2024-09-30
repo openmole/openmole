@@ -53,6 +53,7 @@ object PSE {
     phenotypeContent:    PhenotypeContent,
     objectives:          Seq[Objective],
     operatorExploration: Double,
+    maxRareSample:       Int,
     reject:              Option[Condition],
     grid:                Seq[PatternAxe]
   )
@@ -132,13 +133,16 @@ object PSE {
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
+            val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
             val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
             MGOPSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
+              continuous,
               discrete,
               pattern(_).from(context),
+              om.maxRareSample,
               rejectValue)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
@@ -171,6 +175,7 @@ object PSE {
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
+    maxRareSample:       Int,
     reject:              Option[Condition],
     grid:                Seq[PatternAxe])
 
@@ -243,7 +248,8 @@ object PSE {
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
           FromContext: p ⇒
-            import p._
+            import p.*
+            val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
             val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
             MGONoisyPSE.adaptiveBreeding[Phenotype](
@@ -251,8 +257,10 @@ object PSE {
               om.operatorExploration,
               om.cloneProbability,
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              continuous,
               discrete,
               om.pattern,
+              om.maxRareSample,
               rejectValue) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
@@ -303,11 +311,12 @@ object PSE {
   def apply(
     genome:     Genome,
     objective:  Seq[PatternAxe],
-    outputs:    Seq[Val[?]]                  = Seq(),
-    stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
+    outputs:    Seq[Val[?]],
+    stochastic: OptionalArgument[Stochastic],
+    reject:     OptionalArgument[Condition] ,
+    maxRareSample: Int
   ) =
-    EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match {
+    EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
       case None ⇒
         val exactObjectives = Objectives.toExact(objective.map(_.p))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
@@ -320,7 +329,8 @@ object PSE {
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
             reject = reject.option,
-            grid = objective),
+            grid = objective,
+            maxRareSample = maxRareSample),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -329,10 +339,9 @@ object PSE {
         val noisyObjectives = Objectives.toNoisy(objective.map(_.p))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
-        def validation: Validate = {
+        def validation: Validate =
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
-        }
 
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticPSE(
@@ -344,20 +353,21 @@ object PSE {
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = EvolutionWorkflow.operatorExploration,
             reject = reject.option,
-            grid = objective),
+            grid = objective,
+            maxRareSample = maxRareSample),
           genome,
           phenotypeContent,
           stochasticValue,
           validate = validation
         )
-    }
+
 
 }
 
 import monocle.macros._
 import EvolutionWorkflow._
 
-object PSEEvolution {
+object PSEEvolution:
 
   import org.openmole.core.dsl.DSL
 
@@ -368,7 +378,8 @@ object PSEEvolution {
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject
+        reject = p.reject,
+        maxRareSample = p.maxRareSample
       )
 
   given ExplorationMethod[PSEEvolution, EvolutionWorkflow] =
@@ -385,16 +396,16 @@ object PSEEvolution {
 
   given ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
-}
 
 case class PSEEvolution(
-  genome:       Genome,
-  objective:    Seq[PSE.PatternAxe],
-  evaluation:   DSL,
-  termination:  OMTermination,
-  stochastic:   OptionalArgument[Stochastic] = None,
-  reject:       OptionalArgument[Condition]  = None,
-  parallelism:  Int                          = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern             = SteadyState(),
-  suggestion:   Suggestion                   = Suggestion.empty,
-  scope:        DefinitionScope              = "pse")
+  genome:        Genome,
+  objective:     Seq[PSE.PatternAxe],
+  evaluation:    DSL,
+  termination:   OMTermination,
+  maxRareSample: Int                          = 10,
+  stochastic:    OptionalArgument[Stochastic] = None,
+  reject:        OptionalArgument[Condition]  = None,
+  parallelism:   Int                          = EvolutionWorkflow.parallelism,
+  distribution:  EvolutionPattern             = SteadyState(),
+  suggestion:    Suggestion                   = Suggestion.empty,
+  scope:         DefinitionScope              = "pse")
