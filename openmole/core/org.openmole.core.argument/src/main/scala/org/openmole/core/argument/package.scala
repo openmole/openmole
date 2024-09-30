@@ -23,37 +23,37 @@ package argument:
   import org.openmole.core.fileservice.FileService
   import org.openmole.core.workspace.TmpDirectory
   import org.openmole.tool.cache.KeyValueCache
+  import org.openmole.tool.outputredirection.OutputRedirection
 
   sealed trait Validate:
-    def apply(inputs: Seq[Val[_]])(using TmpDirectory, FileService, KeyValueCache): Seq[Throwable]
+    def apply(inputs: Seq[Val[_]])(using TmpDirectory, FileService, KeyValueCache, OutputRedirection): Seq[Throwable]
     def ++(v: Validate) = Validate.++(this, v)
 
   object Validate:
 
-    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache)
+    class Parameters(val inputs: Seq[Val[_]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache, val outputRedirection: OutputRedirection)
 
     case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate:
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = validate(new Parameters(inputs))
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = validate(new Parameters(inputs))
 
     case class SeqValidate(validate: Seq[Validate]) extends Validate:
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = validate.flatMap(_.apply(inputs))
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = validate.flatMap(_.apply(inputs))
 
     def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
 
     def withExtraInputs(v: Validate, extraInputs: Seq[Val[_]] => Seq[Val[_]]): Validate = new Validate:
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = v(inputs ++ extraInputs(inputs))
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = v(inputs ++ extraInputs(inputs))
 
     case object success extends Validate:
-      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache): Seq[Throwable] = Seq()
+      def apply(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = Seq()
 
     def ++(v1: Validate, v2: Validate) =
-      (v1, v2) match {
+      (v1, v2) match
         case (Validate.success, Validate.success) ⇒ Validate.success
         case (v, Validate.success)                ⇒ v
         case (Validate.success, v)                ⇒ v
         case (v1, v2)                             ⇒ SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
-      }
 
     implicit def fromSeqValidate(v: Seq[Validate]): Validate = apply(v: _*)
     implicit def fromThrowables(t: Seq[Throwable]): Validate = Validate { _ ⇒ t }

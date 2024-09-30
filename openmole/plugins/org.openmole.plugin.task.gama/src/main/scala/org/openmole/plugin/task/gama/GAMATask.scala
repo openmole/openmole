@@ -3,8 +3,8 @@ package org.openmole.plugin.task.gama
 import java.io.FileNotFoundException
 
 import monocle.Focus
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.networkservice.NetworkService
@@ -165,11 +165,6 @@ object GAMATask:
     then scalar
     else scalar.map(_.arrayManifest)
 
-  def readInputXML(image: InstalledImage, tmpDirectory: TmpDirectory) =
-    tmpDirectory.withTmpDir: dir =>
-      _root_.container.Singularity.extractFile(image, GAMATask.inputXML, dir, dir)
-      val inputXML = dir / GAMATask.inputXML
-      XML.loadFile(inputXML)
 
 case class GAMATask(
   project:              File,
@@ -193,14 +188,32 @@ case class GAMATask(
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
-  
+
+  def readInputXML(image: InstalledImage)(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
+    tmpDirectory.withTmpDir: dir =>
+      val bindDirectory = s"/__copy__"
+      val copyDirectory = dir /> "copy"
+
+      _root_.container.Singularity.executeImage(
+        image,
+        dir / "tmp",
+        commands = Seq(s"cp -rf ${GAMATask.inputXML} $bindDirectory"),
+        bind = Seq(copyDirectory.getAbsolutePath -> bindDirectory),
+        output = outputRedirection.output,
+        error = outputRedirection.error,
+        singularityCommand = containerSystem.command,
+        singularityWorkdir = Some(dir /> "singularitytmp")
+      )
+
+      XML.loadFile(copyDirectory / GAMATask.inputXML)
+
   override def validate =
     container.validateContainer(Vector(), environmentVariables, external) ++ finalStep.validate ++
       Validate: p =>
         import p.*
         import xml.*
 
-        val inputXML = GAMATask.readInputXML(image, tmpDirectory)
+        val inputXML = readInputXML(image)
 
         val parameters = (inputXML \ "Simulation" \ "Parameters" \ "Parameter").collect { case x: Elem => x }
         val outputs = (inputXML \ "Simulation" \ "Outputs" \ "Output").collect { case x: Elem => x }
@@ -245,7 +258,8 @@ case class GAMATask(
 
 
   override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
-    import p._
+    import p.*
+    import executionContext.outputRedirection
 
     val inputFilePath = s"${GAMATask.workspaceDirectory}/_inputs_openmole_.xml"
     val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".xml")
@@ -258,7 +272,7 @@ case class GAMATask(
     def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
 
     val inputXML =
-      val inputXML = GAMATask.readInputXML(image, tmpDirectory)
+      val inputXML = readInputXML(image)
       GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(inputXML)
 
     inputFile.content =

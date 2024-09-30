@@ -79,8 +79,8 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
   def load(file: File, args: Seq[String] = Seq.empty)(using Services): Console.CompiledDSL = mole.load(file, args)
   def start(dsl: DSL)(using Services): MoleExecution = mole.start(dsl)
   def start(dsl: Console.CompiledDSL)(using Services): MoleExecution = mole.start(dsl)
-  def validate(mole: Mole)(using TmpDirectory, FileService): Unit = verify(mole)
-  def verify(m: Mole)(using TmpDirectory, FileService): Unit = mole.verify(m)
+  def validate(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = verify(mole)
+  def verify(m: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = mole.verify(m)
 
   def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
 
@@ -169,8 +169,8 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
 
     implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
-    def validate(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = verify(mole)
-    def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit =
+    def validate(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = verify(mole)
+    def verify(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit =
       given KeyValueCache = KeyValueCache()
       Validation(mole).foreach(println)
 
