@@ -113,8 +113,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
         else if k.keyCode == 27
         then
-          //TODO: uncomment after git-system merge
-         // panels.treeNodePanel.multiTool.set(MultiTool.Off)
+          panels.treeNodePanel.multiTool.set(MultiTool.Off)
           panels.treeNodePanel.currentLine.set(-1)
           panels.closeExpandable
           panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
