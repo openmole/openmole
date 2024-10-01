@@ -262,7 +262,7 @@ class TreeNodePanel {
                       api.revertFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
                     ))
                   )
-                ).amend(verticalLine, disableIfEmptyCls)
+                ).amend(disableIfEmptyCls)
                 else emptyNode
               )
             else Seq(emptyNode)

@@ -268,7 +268,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                       )))
                     }),
                     iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
-                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert))))
+                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert)))).amend(verticalLine)
                   )
                 else Seq()
             },
