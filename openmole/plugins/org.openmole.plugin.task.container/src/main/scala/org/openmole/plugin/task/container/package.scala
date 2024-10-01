@@ -122,7 +122,7 @@ object ContainerSystem:
 
 sealed trait ContainerSystem
 
-case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, initialize: Boolean = false, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends ContainerSystem:
+case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, copy: Boolean = false, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends ContainerSystem:
   lazy val cacheKey: ContainerSystem.OverlayKey = CacheKey()
 
 case class SingularityMemory() extends ContainerSystem

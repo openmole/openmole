@@ -235,7 +235,7 @@ object ContainerTask:
 
   def initializeOverlay(containerSystem: ContainerSystem.SingularitySIF)(using TmpDirectory, OutputRedirection) =
     containerSystem match
-      case overlay: SingularityOverlay if overlay.initialize =>
+      case overlay: SingularityOverlay if overlay.copy =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
         overlay.copy(overlay = Some(initializedOverlay))
