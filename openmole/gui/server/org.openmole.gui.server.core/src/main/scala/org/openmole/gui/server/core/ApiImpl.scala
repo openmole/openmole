@@ -701,7 +701,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     paths.headOption.foreach: hf =>
       GitService.withGit(safePathToFile(hf), projectsDirectory): git=>
         GitService.commit(paths.map(_.toFile), message)(git)
-
+      
   def revert(paths: Seq[SafePath]): Unit =
     import services.workspace
     paths.headOption.foreach: hf =>
@@ -713,4 +713,29 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     paths.headOption.foreach: hf =>
       GitService.withGit(safePathToFile(hf), projectsDirectory): git=>
           GitService.add(paths.map(_.toFile))(git)
+          
+  def pull(from: SafePath): Unit =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git=>
+          GitService.pull(git)
+          
+  def branchList(from: SafePath): Option[BranchData] =
+    import services.workspace
+    GitService.git(safePathToFile(from), projectsDirectory) map: git=>
+        BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+        
+  def checkout(from: SafePath, branchName: String): Unit =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git=>
+      GitService.checkout(branchName)(git)
+        
+  def stash(from: SafePath): Unit = 
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git=>
+      GitService.stash(git)
+      
+  def stashPop(from: SafePath): Unit = 
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git=>
+      GitService.stashPop(git)
 }

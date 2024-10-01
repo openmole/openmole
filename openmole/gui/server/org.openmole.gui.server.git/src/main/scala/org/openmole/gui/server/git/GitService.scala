@@ -53,7 +53,7 @@ object GitService:
       else addPath0(fs.tail, checkoutCommand.addPath(relativeName(fs.head, git)))
 
     addPath0(files, git.checkout).call
-
+    ()
 
   def add(files: Seq[File])(implicit git: Git) =
 
@@ -65,6 +65,24 @@ object GitService:
 
     addPath0(files, git.add).call
 
+  def pull(implicit git: Git) =
+    val stashed = git.stashCreate.call
+    if git.pull.call.isSuccessful
+    then git.stashApply
+    else stashed.reset
+
+  def branchList(implicit git: Git): Seq[String] =
+    git.branchList.call().asScala.toSeq.map(_.getName)
+
+  def checkout(branchName: String)(implicit git: Git) =
+    git.checkout.setName(branchName).call
+    
+  def stash(implicit git: Git): Unit =
+    git.stashCreate.call
+    
+  def stashPop(implicit git: Git): Unit =
+    git.stashApply.call
+    
   private def getAllSubPaths(path: String) =
      val allDirs = path.split("/").dropRight(1)
      val size = allDirs.size

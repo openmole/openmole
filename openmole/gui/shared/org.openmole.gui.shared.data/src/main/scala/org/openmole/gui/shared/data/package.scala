@@ -83,6 +83,8 @@ object TreeNodeData:
 enum GitStatus:
   case Modified, Untracked, Conflicting, Root, Versioned
 
+case class BranchData(list: Seq[String], current: String)
+
 case class TreeNodeData(
   name: String,
   size: Long,
@@ -297,7 +299,7 @@ case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: List
 object FileListData:
   def empty = Seq()
 
-case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0)
+case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0, branchData: Option[BranchData] = None)
 
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: Long, isDevelopment: Boolean)
 

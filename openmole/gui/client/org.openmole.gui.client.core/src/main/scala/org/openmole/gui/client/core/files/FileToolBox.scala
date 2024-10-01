@@ -251,13 +251,12 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                 iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
-            child <-- {
-              panels.treeNodePanel.addable.signal.map:ad =>
-                if ad
-                then iconAction(glyphItemize(OMTags.glyph_addFile), "add", () ⇒
-                      actionConfirmation.set(Some(confirmation(s"Add ${initSafePath.name} ?", () ⇒ add)))).amend(verticalLine)
-                else emptyNode
-            },
+            child <-- panels.treeNodePanel.addable.signal.map: ad =>
+              if ad.contains(initSafePath.name)
+              then iconAction(glyphItemize(OMTags.glyph_addFile), "add", () ⇒
+                actionConfirmation.set(Some(confirmation(s"Add ${initSafePath.name} ?", () ⇒ add)))).amend(verticalLine)
+              else emptyNode
+            ,
             children <-- {
               panels.treeNodePanel.commitable.signal.map: co =>
                 if co
@@ -269,7 +268,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                       )))
                     }),
                     iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
-                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert)))).amend(verticalLine)
+                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert))))
                   )
                 else Seq()
             },

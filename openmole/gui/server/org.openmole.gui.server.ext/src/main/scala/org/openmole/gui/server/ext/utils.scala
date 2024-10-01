@@ -90,9 +90,12 @@ object utils:
     then
       val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+
       def size =
         if OMRFormat.isOMR(f)
-        then Try { OMRFormat.diskUsage(f) }.getOrElse(f.length())
+        then Try {
+          OMRFormat.diskUsage(f)
+        }.getOrElse(f.length())
         else f.length()
 
       Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList)), gitStatus))
@@ -146,27 +149,31 @@ object utils:
     def treeNodesData =
       currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
         val gitStatus = currentDirGit match
-          case Some(g: Git)=>
-            val relativeName = GitService.relativeName(f,g)
+          case Some(g: Git) =>
+            val relativeName = GitService.relativeName(f, g)
             if modified.contains(relativeName) then Some(GitStatus.Modified)
             else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
             else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)
             else Some(GitStatus.Versioned)
-          case None=>
+          case None =>
             if f.isDirectory
             then
               GitService.git(f, currentFile) match
-                case Some(g: Git)=>  Some(GitStatus.Root)
-                case _=> None
+                case Some(g: Git) => Some(GitStatus.Root)
+                case _ => None
             else None
         fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
 
     val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
     val sortedSize = sorted.size
 
+    val branchData =
+      GitService.git(safePathToFile(path), projectsDirectory) map : git =>
+        BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+
     fileFilter.size match
-      case Some(s) => FileListData(sorted.take(s), s, sortedSize)
-      case None => FileListData(sorted, sortedSize, sortedSize)
+      case Some(s) => FileListData(sorted.take(s), s, sortedSize, branchData)
+      case None => FileListData(sorted, sortedSize, sortedSize, branchData)
 
   def recursiveListFiles(path: SafePath, findString: Option[String], withHidden: Boolean = true)(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context
@@ -190,6 +197,7 @@ object utils:
     val existing = ListBuffer[SafePath]()
     safePaths.foreach: (p, d) ⇒
       val destination = d.toFile
+
       def copy(): Unit =
         val fromFile = p.toFile
         if OMRFormat.isOMR(fromFile)
@@ -231,6 +239,7 @@ object utils:
     import org.openmole.core.fileservice._
 
     def hash(f: File) = hashFile.getOrElse(new File(f.toString + "-hash"))
+
     lockFile(file).withLock: _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
@@ -249,7 +258,6 @@ object utils:
         hashFile.content = currentHash
 
 
-
   def catchAll[T](f: ⇒ T): Try[T] =
     val res =
       try Success(f)
@@ -264,8 +272,7 @@ object utils:
     val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
     errors.map(e ⇒ ErrorData(e._2)).toSeq
 
-  
-  
+
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
     import org.openmole.core.module
     val file: File = safePathToFile(safePath)
@@ -274,6 +281,7 @@ object utils:
   }
 
   object HTTP:
+
     import cats.effect.*
     import org.http4s
     import org.http4s.*

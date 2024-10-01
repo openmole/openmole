@@ -682,7 +682,6 @@ padding-bottom: 90px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     padding: 7px;
-    min-width: 60px;
 }
 
 .file-item-cancel {
@@ -735,7 +734,7 @@ padding-bottom: 90px;
   justify-content: right;
   padding: 10 50 14 10;
   background-color: #3f3d56;
-  margin-right: -100px;
+  margin-right: -390px;
 }
 
 .sorting-files-item,
@@ -778,8 +777,17 @@ padding-bottom: 90px;
      align-items: center;
      color: white;
      font-size: 14px;
-     width: 300px;
+     width: 250px;
      justify-content: flex-start;
+}
+
+.toolBlock {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  background-color: #3f3d56;
+  margin-right: -20px;
 }
 
 .open-transition {
@@ -907,16 +915,17 @@ padding-bottom: 90px;
 .specific-file.git::before {
     transform: rotate(-45deg);
       color: white;
-      content: "G";
+      content: "g";
       font-weight: bold;
-      font-size: 15px;
+      color: #795c85;
+      padding-bottom: 6px;
 }
 
 .specific-file.git {
     transform: rotate(45deg);
-      background-color: #f34c28;
-      width: 18px;
-      height: 18px;
+    background-color: white;
+    width: 16px;
+    height: 16px;
 }
 
 .git-status-conflicting {
@@ -932,9 +941,9 @@ padding-bottom: 90px;
 }
 
 .gitInfo {
-    left : -40px;
+    margin-left : 40px;
     position: relative;
-    scale : 1.5;
+    scale : 1.4;
 }
 
 .findFile{
