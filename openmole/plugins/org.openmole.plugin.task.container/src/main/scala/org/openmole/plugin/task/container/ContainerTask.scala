@@ -235,10 +235,10 @@ object ContainerTask:
 
   def initializeOverlay(containerSystem: ContainerSystem.SingularitySIF)(using TmpDirectory, OutputRedirection) =
     containerSystem match
-      case overlay: SingularityOverlay =>
+      case overlay: SingularityOverlay if overlay.initialize =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
-        overlay.copy(image = Some(initializedOverlay))
+        overlay.copy(overlay = Some(initializedOverlay))
       case SingularityMemory() => containerSystem
 
   type FileInfo = (External.DeployedFile, File)
@@ -383,7 +383,7 @@ object ContainerTask:
                   then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
                   else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
 
-                img.image match
+                img.overlay match
                   case None => _root_.container.Singularity.createOverlay(overlay, img.size, output = out, error = err)
                   case Some(image) =>
                     if img.reuse && executionContext.localEnvironment.threads == 1
