@@ -40,7 +40,8 @@ object ScilabTask:
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
     containerSystem:        ContainerSystem               = ContainerSystem.default,
-    installContainerSystem: ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
+    installContainerSystem: ContainerSystem               = ContainerSystem.default,
+    overlay:                OverlayConfiguration          = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
 
     ScilabTask(
       script = script,
@@ -57,7 +58,8 @@ object ScilabTask:
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
-      version = version
+      version = version,
+      overlay = overlay
     ) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
@@ -176,9 +178,8 @@ case class ScilabTask(
   external:             External,
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig,
-  version:              String) extends Task with ValidateTask:
-
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  version:              String,
+  overlay:              OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -228,7 +229,7 @@ case class ScilabTask(
         config = config,
         external = external,
         info = info,
-        cacheKey = cacheKey) set (
+        overlay = overlay) set (
         resources += (scriptFile, scriptName, true),
         mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
       )

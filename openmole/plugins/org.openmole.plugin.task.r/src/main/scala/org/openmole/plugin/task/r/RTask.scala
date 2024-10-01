@@ -87,6 +87,7 @@ object RTask:
     clearContainerCache:        Boolean                            = false,
     containerSystem:            ContainerSystem                    = ContainerSystem.default,
     installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
+    overlay:                    OverlayConfiguration               = OverlayConfiguration.default
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
     val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
 
@@ -104,7 +105,8 @@ object RTask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
+      mapped = MappedInputOutputConfig(),
+      overlay = overlay
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
@@ -122,9 +124,8 @@ case class RTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
-  
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped:               MappedInputOutputConfig,
+  overlay:              OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -186,7 +187,7 @@ case class RTask(
         config = config,
         external = external,
         info = info,
-        cacheKey = cacheKey) set (
+        overlay = overlay) set (
         resources += (scriptFile, rScriptPath),
         resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),

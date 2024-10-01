@@ -58,7 +58,8 @@ object NetLogoContainerTask:
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
+    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
 
     val image:  ContainerImage                   = s"openmole/netlogo:${version}"
 
@@ -85,7 +86,8 @@ object NetLogoContainerTask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
+      mapped = MappedInputOutputConfig(),
+      overlay = overlay
     ) set (
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
@@ -111,9 +113,8 @@ case class NetLogoContainerTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
-
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped:               MappedInputOutputConfig,
+  overlay:              OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = Validate: p ⇒
     import p._
@@ -178,7 +179,7 @@ case class NetLogoContainerTask(
         config = config,
         external = external,
         info = info,
-        cacheKey = cacheKey) set(
+        overlay = overlay) set(
         resources += (inputFile, inputFileName, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
         outputFiles += (outputFileName, outputFileVal),

@@ -49,7 +49,8 @@ object PythonTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
+    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     val major = if(version.startsWith("2")) 2 else 3
 
@@ -69,7 +70,8 @@ object PythonTask:
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
-      major = major
+      major = major,
+      overlay = overlay
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
@@ -90,9 +92,8 @@ case class PythonTask(
   external:               External,
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig,
-  major:                  Int) extends Task with ValidateTask:
-  
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  major:                  Int,
+  overlay:                OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -171,7 +172,7 @@ case class PythonTask(
           external = external,
           config = config,
           info = info,
-          cacheKey = cacheKey) set (
+          overlay = overlay) set (
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),

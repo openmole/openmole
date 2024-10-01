@@ -87,7 +87,8 @@ object GAMATask:
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
     containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
+    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
+    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
 
     if !project.exists() then throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
     if !(project / gaml).exists() then throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
@@ -119,7 +120,8 @@ object GAMATask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
+      mapped = MappedInputOutputConfig(),
+      overlay = overlay
     ) set (
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
@@ -185,9 +187,8 @@ case class GAMATask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
-
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped:               MappedInputOutputConfig,
+  overlay:              OverlayConfiguration) extends Task with ValidateTask:
 
   def readInputXML(image: InstalledImage)(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     tmpDirectory.withTmpDir: dir =>
@@ -301,7 +302,7 @@ case class GAMATask(
         config = config,
         external = external,
         info = info,
-        cacheKey = cacheKey) set(
+        overlay = overlay) set(
         resources += (inputFile, inputFilePath, true),
         resources += (outputDirectory, outputDirectoryPath, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },

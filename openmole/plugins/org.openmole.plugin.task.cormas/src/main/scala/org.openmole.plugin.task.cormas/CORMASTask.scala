@@ -44,11 +44,12 @@ object CORMASTask:
     stdErr:               OptionalArgument[Val[String]] = None,
     environmentVariables: Vector[EnvironmentVariable]   = Vector.empty,
     hostFiles:            Vector[HostFile]              = Vector.empty,
-    install:              Seq[String]                    = Seq.empty,
-    clearContainerCache:    Boolean         = false,
-    version:                String          = "latest",
-    containerSystem:        ContainerSystem = ContainerSystem.default,
-    installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask =
+    install:              Seq[String]                   = Seq.empty,
+    clearContainerCache:    Boolean                     = false,
+    version:                String                      = "latest",
+    containerSystem:        ContainerSystem             = ContainerSystem.default,
+    installContainerSystem: ContainerSystem             = ContainerSystem.default,
+    overlay:                OverlayConfiguration        = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask =
 
     val preparedImage = ContainerTask.install(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
@@ -65,7 +66,8 @@ object CORMASTask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig())
+      mapped = MappedInputOutputConfig(),
+      overlay = overlay)
 
 
 case class CORMASTask(
@@ -81,9 +83,8 @@ case class CORMASTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped: MappedInputOutputConfig) extends Task with ValidateTask:
-
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped:               MappedInputOutputConfig,
+  overlay:              OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -135,7 +136,7 @@ case class CORMASTask(
         config = InputOutputConfig(),
         external = external,
         info = info,
-        cacheKey = cacheKey) set (
+        overlay = overlay) set (
         resources += (jsonInputs, inputJSONName, true),
         resources += (scriptFile, scriptName, true),
         outputFiles += (outputJSONName, outputFile),

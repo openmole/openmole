@@ -58,7 +58,8 @@ object JavaTask:
     version: String = "21.0",
     jvmVersion: String = "21",
     containerSystem: ContainerSystem = ContainerSystem.default,
-    installContainerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    installContainerSystem: ContainerSystem = ContainerSystem.default,
+    overlay: OverlayConfiguration = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     def cacheLibraries =
       val deps = libraries.map(l => s"--dep $l").mkString(" ")
@@ -84,7 +85,8 @@ object JavaTask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
+      mapped = MappedInputOutputConfig(),
+      overlay = overlay
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
@@ -108,9 +110,8 @@ case class JavaTask(
   config: InputOutputConfig,
   external: External,
   info: InfoConfig,
-  mapped: MappedInputOutputConfig) extends Task with ValidateTask:
-  
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped: MappedInputOutputConfig,
+  overlay: OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = validateContainer(Vector(), environmentVariables, external)
 
@@ -199,7 +200,7 @@ case class JavaTask(
           config = InputOutputConfig(),
           external = external,
           info = info,
-          cacheKey = cacheKey) set(
+          overlay = overlay) set(
           resources += (scriptFile, scriptName, true),
           resources += (inputData, inputDataName, true),
           jarResources.map((j, n) => resources += (j, n, true)),

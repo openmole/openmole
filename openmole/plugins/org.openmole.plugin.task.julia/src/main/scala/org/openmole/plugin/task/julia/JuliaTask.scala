@@ -79,7 +79,8 @@ object JuliaTask:
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                    = ContainerSystem.default,
     installContainerSystem: ContainerSystem                    = ContainerSystem.default,
-    clearCache:             Boolean                            = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    clearCache:             Boolean                            = false,
+    overlay:                OverlayConfiguration               = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
   new JuliaTask(
     script = script,
@@ -96,7 +97,8 @@ object JuliaTask:
     config = InputOutputConfig(),
     external = External(),
     info = InfoConfig(),
-    mapped = MappedInputOutputConfig()
+    mapped = MappedInputOutputConfig(),
+    overlay = overlay
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
@@ -116,10 +118,8 @@ case class JuliaTask(
   config:                 InputOutputConfig,
   external:               External,
   info:                   InfoConfig,
-  mapped:                 MappedInputOutputConfig) extends Task with ValidateTask:
-
-
-  lazy val cacheKey: ContainerTask.OverlayKey = ContainerTask.newCacheKey
+  mapped:                 MappedInputOutputConfig,
+  overlay:                OverlayConfiguration) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -190,7 +190,7 @@ case class JuliaTask(
           config = InputOutputConfig(),
           external = external,
           info = info,
-          cacheKey = cacheKey) set (
+          overlay = overlay) set (
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
