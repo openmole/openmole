@@ -239,7 +239,7 @@ object ContainerTask:
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
         overlay.copy(overlay = Some(initializedOverlay))
-      case SingularityMemory() => containerSystem
+      case _ => containerSystem
 
   type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
