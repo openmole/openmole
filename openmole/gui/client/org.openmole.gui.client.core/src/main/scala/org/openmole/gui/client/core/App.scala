@@ -15,6 +15,7 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.toService
+import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 

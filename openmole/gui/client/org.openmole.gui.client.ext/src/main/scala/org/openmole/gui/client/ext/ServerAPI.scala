@@ -86,3 +86,13 @@ trait ServerAPI:
 
   def upload(fileList: Seq[(org.scalajs.dom.File, SafePath)], fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[(RelativePath, SafePath)]]
   def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
+
+  def cloneRepository(repository: String, destination: SafePath)(using BasePath): Future[Unit]
+  def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit]
+  def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
+  def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
+  def pull(from: SafePath)(using BasePath): Future[Unit]
+  def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]]
+  def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit]
+  def stash(from: SafePath)(using BasePath): Future[Unit]
+  def stashPop(from: SafePath)(using BasePath): Future[Unit]

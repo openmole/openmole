@@ -15,6 +15,7 @@ import com.raquo.laminar.nodes.ReactiveHtmlElement
 import org.openmole.gui.client.core.Waiter.*
 import org.openmole.gui.client.tool.*
 import org.openmole.gui.client.core.*
+import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool.{Git, On}
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.shared.api.*
 
@@ -38,14 +39,13 @@ import org.openmole.gui.shared.api.*
 class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager):
   def manager = treeNodePanel.treeNodeManager
 
-  // Filter tool
-  val nameTag = "names"
-
   val findInput = inputTag("").amend(
     width := "180px",
     marginTop := "12px",
     onMountFocus
   )
+
+  val gitBranchList: Var[Option[BranchData]] = Var(None)
 
   val filterToolOpen = Var(false)
 
@@ -53,13 +53,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
     cls := "file-filter",
     //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
     // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
-    label("Find ", width := "30px", margin := "0 15 0 10"),
-    form(findInput, onMountFocus, onSubmit.preventDefault --> { _ ⇒ treeNodeManager.find(findInput.ref.value) }),
-    div(cls := "close-button bi-x", onClick --> { _ =>
-      filterToolOpen.set(false)
-      findInput.ref.value = ""
-      treeNodeManager.resetFileFinder
-    })
+    label("Find ", width := "30px", margin := "0 10 0 10"),
+    form(findInput, onMountFocus, onSubmit.preventDefault --> { _ ⇒ treeNodeManager.find(findInput.ref.value) })
   )
 
   def sortingGroup(using api: ServerAPI, basePath: BasePath) =
@@ -91,31 +86,59 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
       )
 
     div(
-      centerInDiv, backgroundColor := "#3f3d56",
-      div(flexRow, justifyContent.right,
-        div(
-          cls <-- filterToolOpen.signal.map { o =>
-            if (o) "open-transition" else "close-transition"
-          },
-          filterTool
-        )),
-        div(
-          cls := "sorting-files",
-          children <-- treeNodeManager.fileSorting.signal.map: fs ⇒
-            Seq(
-              item(ListSorting.AlphaSorting),
-              item(ListSorting.TimeSorting),
-              item(ListSorting.SizeSorting),
-              div(
-                cls := "sorting-file-item-caret",
-                marginTop := "4",
-                fs.firstLast match
-                  case FirstLast.Last ⇒ glyph_triangle_up
-                  case FirstLast.First ⇒ glyph_triangle_down
-              )
-            )
+      display.flex, justifyContent.spaceBetween, width := "150", backgroundColor := "#3f3d56",
+      div(
+        child <-- gitBranchList.signal.map: bdo =>
+          bdo match
+            case Some(bd: BranchData) =>
+              val curInd = bd.list.indexOf(bd.current)
 
-        )
+              def checkout(branch: String) =
+                api.checkout(treeNodeManager.directory.now(), branch).andThen(_ =>
+                  treeNodePanel.refresh
+                )
+              val previous: Var[Option[String]] = Var(Some(bd.current))
+              lazy val opts: Options[String] = bd.list.options(
+                curInd,
+                Seq(cls := "btn btn-purple", minWidth := "90", marginLeft := "10"),
+                (m: String) => m,
+                onclickExtra = ()=> previous.set(opts.content.now()),
+                onclose = () =>
+                  opts.get.foreach: b =>
+                    if treeNodePanel.commitable.now()
+                    then
+                      previous.now().foreach(p=> opts.set(p))
+                      treeNodePanel.multiTool.set(Git)
+                      treeNodePanel.confirmationDiv.set(
+                        Some(treeNodePanel.confirmation(s"Modifications pending, stash or commit your changes.", "Stash", () ⇒
+                          api.stash(treeNodeManager.directory.now()).andThen { _ ⇒
+                            checkout(b)
+                            treeNodePanel.closeMultiTool
+                          }
+                        ))
+                      )
+                    else checkout(b)
+              )
+              opts.selector
+            case _ => emptyNode
+      ),
+      div(
+        cls := "sorting-files",
+        children <-- treeNodeManager.fileSorting.signal.map: fs ⇒
+          Seq(
+            item(ListSorting.AlphaSorting),
+            item(ListSorting.TimeSorting),
+            item(ListSorting.SizeSorting),
+            div(
+              cls := "sorting-file-item-caret",
+              marginTop := "4",
+              fs.firstLast match
+                case FirstLast.Last ⇒ glyph_triangle_up
+                case FirstLast.First ⇒ glyph_triangle_down
+            )
+          )
+
       )
+    )
 
 
