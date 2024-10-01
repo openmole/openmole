@@ -163,7 +163,7 @@ object Interpreter {
   case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
+    val classDirectory = fileService.wrapRemoveOnGC(TmpDirectory.newDirectory("classDirectory"))
     val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet)
     //    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     //    new Interpreter(priorityBundles, jars, quiet, classDirectory, settings)

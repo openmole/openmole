@@ -26,7 +26,7 @@ class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.*
 
   "Project compiler" should "complete code" in:
-    val workDirectory = tmpDirectory.newDir("project")
+    val workDirectory = tmpDirectory.newDirectory("project")
     val script = workDirectory / "script.oms"
 
 

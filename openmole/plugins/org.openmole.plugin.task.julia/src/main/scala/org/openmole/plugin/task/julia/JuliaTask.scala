@@ -98,7 +98,7 @@ object JuliaTask:
     external = External(),
     info = InfoConfig(),
     mapped = MappedInputOutputConfig(),
-    overlay = overlay
+    overlay = ContainerTask.initializeOverlay(overlay)
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 

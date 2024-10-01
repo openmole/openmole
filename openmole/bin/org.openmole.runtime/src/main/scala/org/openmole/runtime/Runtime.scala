@@ -173,8 +173,7 @@ class Runtime {
             lockRepository = LockRepository[LockKey](),
             serializerService = serializerService,
             networkService = networkService,
-            timeService = timeService,
-            remote = Some(TaskExecutionContext.Remote(threads))
+            timeService = timeService
           )
 
           for

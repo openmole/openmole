@@ -57,7 +57,7 @@ object GUIServer:
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
-    val to = newFile.newDir("webapp")
+    val to = newFile.newDirectory("webapp")
 
     val cssTarget = to / "css"
     from / "css" copy to / "css"

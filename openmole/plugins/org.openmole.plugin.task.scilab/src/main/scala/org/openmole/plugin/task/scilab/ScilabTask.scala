@@ -59,7 +59,7 @@ object ScilabTask:
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
       version = version,
-      overlay = overlay
+      overlay = ContainerTask.initializeOverlay(overlay)
     ) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )

@@ -106,7 +106,7 @@ class SerializerService:
     finally tis.close
 
   def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T =
-    newFile.withTmpDir: archiveExtractDir ⇒
+    TmpDirectory.withTmpDir: archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
@@ -119,7 +119,7 @@ class SerializerService:
     finally os.close()
 
   def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(implicit newFile: TmpDirectory): Unit =
-    newFile.withTmpFile: objSerial ⇒
+    TmpDirectory.withTmpFile: objSerial ⇒
       serialize(obj, objSerial)
       tos.addFile(objSerial, content)
 

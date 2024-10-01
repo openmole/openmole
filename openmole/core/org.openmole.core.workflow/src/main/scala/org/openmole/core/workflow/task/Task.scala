@@ -54,7 +54,6 @@ import org.openmole.tool.random
  * @param moleExecution
  */
 object TaskExecutionContext {
-  case class Remote(threads: Int)
 
   def apply(
     moleExecutionDirectory: File,
@@ -73,8 +72,7 @@ object TaskExecutionContext {
     timeService: TimeService,
     cache: KeyValueCache,
     lockRepository: LockRepository[LockKey],
-    moleExecution: Option[MoleExecution] = None,
-    remote: Option[TaskExecutionContext.Remote] = None): TaskExecutionContext =
+    moleExecution: Option[MoleExecution] = None): TaskExecutionContext =
     TaskExecutionContext(
       moleExecutionDirectory = moleExecutionDirectory,
       taskExecutionDirectory = taskExecutionDirectory,
@@ -82,8 +80,7 @@ object TaskExecutionContext {
       cache = cache,
       lockRepository = lockRepository,
       moleExecution = moleExecution,
-      localEnvironment = localEnvironment,
-      remote = remote)(
+      localEnvironment = localEnvironment)(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -111,8 +108,7 @@ object TaskExecutionContext {
     timeService:                   TimeService,
     cache:                         KeyValueCache,
     lockRepository:                LockRepository[LockKey],
-    moleExecution:                 Option[MoleExecution]               = None,
-    remote:                        Option[TaskExecutionContext.Remote] = None) =
+    moleExecution:                 Option[MoleExecution]               = None) =
     Partial(
       moleExecutionDirectory = moleExecutionDirectory,
       applicationExecutionDirectory = applicationExecutionDirectory)(
@@ -128,8 +124,7 @@ object TaskExecutionContext {
       timeService = timeService,
       cache = cache,
       lockRepository = lockRepository,
-      moleExecution = moleExecution,
-      remote = remote
+      moleExecution = moleExecution
     )
 
   def complete(partialTaskExecutionContext: Partial, taskExecutionDirectory: File, localEnvironment: LocalEnvironment) =
@@ -141,8 +136,7 @@ object TaskExecutionContext {
       localEnvironment = localEnvironment,
       cache = cache,
       lockRepository = lockRepository,
-      moleExecution = moleExecution,
-      remote = remote)(using
+      moleExecution = moleExecution)(using
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -170,8 +164,7 @@ object TaskExecutionContext {
     val timeService:       TimeService,
     val cache:             KeyValueCache,
     val lockRepository:    LockRepository[LockKey],
-    val moleExecution:     Option[MoleExecution]               = None,
-    val remote:            Option[TaskExecutionContext.Remote] = None)
+    val moleExecution:     Option[MoleExecution]               = None)
 
 }
 
@@ -182,8 +175,7 @@ case class TaskExecutionContext(
   localEnvironment: LocalEnvironment,
   cache: KeyValueCache,
   lockRepository: LockRepository[LockKey],
-  moleExecution: Option[MoleExecution],
-  remote: Option[TaskExecutionContext.Remote])(
+  moleExecution: Option[MoleExecution])(
   implicit
   val preference: Preference,
   val threadProvider: ThreadProvider,

@@ -18,7 +18,7 @@ object JobStore {
     new StoredJob(JobGroup.moleExecution(job), moleJobs.toArray.map(mj ⇒ store(jobStore, mj)))
 
   def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob =
-    val f = TmpDirectory(jobStore.store).newFile("storedjob", ".bin")
+    val f = jobStore.store.newFile("storedjob", ".bin")
     f.withOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
       f,

@@ -195,7 +195,7 @@ object MoleExecution {
           //            eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobStatusChanged(job, c, newState, oldState))
 
           subMoleExecutionState.masterCapsuleExecutor.submit {
-            try {
+            try
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
               val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
               val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) ⇒ (), () ⇒ subMoleExecutionState.canceled)
@@ -204,29 +204,28 @@ object MoleExecution {
 
               val taskExecutionDirectory = moleExecutionDirectory.newDirectory("taskExecution")
               val result =
-                try {
+                try
                   val taskContext =
                     TaskExecutionContext.complete(
                       subMoleExecutionState.moleExecution.partialTaskExecutionContext,
                       taskExecutionDirectory = taskExecutionDirectory,
-                      localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment)
+                      localEnvironment = subMoleExecutionState.moleExecution.defaultEnvironment
+                    )
 
                   moleJob.perform(taskContext)
-                }
                 finally taskExecutionDirectory.recursiveDelete
 
               Job.finish(moleJob, result) // Does nothing
 
-              result match {
+              result match
                 case Left(newContext) ⇒ subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))
                 case _                ⇒
-              }
 
               MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(jobId, result.swap.map(CompactedContext.compact).swap, capsule, ticket))
-            }
-            catch {
+
+            catch
               case t: Throwable ⇒ MoleExecutionMessage.send(subMoleExecutionState.moleExecution)(MoleExecutionMessage.MoleExecutionError(t))
-            }
+
           }
         case _ ⇒
           case class JobCallBackClosure(subMoleExecutionState: SubMoleExecutionState, capsule: MoleCapsule, ticket: Ticket) extends Job.CallBack {
@@ -715,7 +714,7 @@ class MoleExecution(
   private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
   
   
-  lazy val partialTaskExecutionContext = {
+  lazy val partialTaskExecutionContext =
     import executionContext.services._
 
     TaskExecutionContext.partial(
@@ -735,7 +734,6 @@ class MoleExecution(
       networkService = networkService,
       timeService = timeService
     )
-  }
 
   lazy val environments = EnvironmentProvider.build(environmentProviders.values.toVector, executionContext.services, keyValueCache)
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) ⇒ k → environments(v) }.toMap

@@ -38,13 +38,12 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage:
   def newRandom(seed: Long): java.util.Random = Random(seed)
   def newRandom()(implicit randomProvider: RandomProvider): java.util.Random = Random()
 
-  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(implicit newFile: TmpDirectory) = newFile.newFile(prefix, suffix)
-  def newDir(prefix: String = Workspace.fixedDir)(implicit newFile: TmpDirectory) = newFile.newDir(prefix)
-  def mkDir(prefix: String = Workspace.fixedDir)(implicit newFile: TmpDirectory) = {
-    val dir = newFile.newDir(prefix)
+  def newFile(prefix: String = Workspace.fixedPrefix, suffix: String = Workspace.fixedPostfix)(using TmpDirectory) = TmpDirectory.newFile(prefix, suffix)
+  def newDir(prefix: String = Workspace.fixedDir)(using TmpDirectory) = TmpDirectory.newDirectory(prefix)
+  def mkDir(prefix: String = Workspace.fixedDir)(using TmpDirectory) = 
+    val dir = TmpDirectory.newDirectory(prefix)
     dir.mkdirs
     dir
-  }
 
   def classLoader[C: Manifest] = manifest[C].erasure.getClassLoader
   def classLoader(a: Any) = a.getClass.getClassLoader

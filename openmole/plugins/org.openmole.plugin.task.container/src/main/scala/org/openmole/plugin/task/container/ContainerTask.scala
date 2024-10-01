@@ -76,7 +76,7 @@ object ContainerTask:
       proxy = networkService.httpProxy.map(p ⇒ ImageDownloader.HttpProxy(p.hostURI))
     )
 
-  def repositoryDirectory(workspace: Workspace) = workspace.persistentDir /> "container" /> "repos"
+  def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
 
   def runCommandInFlatImageContainer(
     containerSystem:      ContainerSystem,
@@ -104,7 +104,7 @@ object ContainerTask:
   def runCommandInContainer(
     containerSystem:      ContainerSystem,
     image:                _root_.container.Singularity.SingularityImageFile,
-    overlay:              Option[_root_.container.Singularity.OverlayImg] = None,
+    overlay:              Option[_root_.container.Singularity.OverlayImage] = None,
     tmpFS:                Boolean = false,
     commands:             Seq[String],
     volumes:              Seq[(String, String)]      = Seq.empty,
@@ -160,7 +160,7 @@ object ContainerTask:
       config = InputOutputConfig(),
       info = InfoConfig(),
       external = External(),
-      overlay = overlay) set (
+      overlay = initializeOverlay(overlay)) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
 
@@ -205,7 +205,7 @@ object ContainerTask:
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m ⇒ s": $m").getOrElse(""))
       image
 
-  def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean)(implicit networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
+  def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean)(using networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
     image match
       case image: DockerImage ⇒
         if clearCache then _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(workspace), DockerImage.toRegistryImage(image)).recursiveDelete
@@ -217,21 +217,30 @@ object ContainerTask:
           _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
 
 
+  def initializeOverlay(overlay: OverlayConfiguration)(using TmpDirectory, OutputRedirection) =
+    overlay match
+      case overlay: FileOverlay =>
+        val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
+        val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
+        overlay.copy(image = Some(initializedOverlay))
+      case MemoryOverlay() => overlay
+
   type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
   type MountPoint = (String, String)
   type ContainerId = String
 
-  type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImg]]
-  def newCacheKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImg]]()
+  type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImage]]
+  def newCacheKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImage]]()
 
 
   object OverlayConfiguration:
     def default = FileOverlay()
 
   sealed trait OverlayConfiguration
-  case class FileOverlay(reuse: Boolean = true, size: Information = 20.gigabyte) extends OverlayConfiguration:
+  case class FileOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, image: Option[_root_.container.Singularity.OverlayImage] = None) extends OverlayConfiguration:
     lazy val cacheKey: OverlayKey = newCacheKey
+
   case class MemoryOverlay() extends OverlayConfiguration
 
   def internal(
@@ -351,7 +360,6 @@ case class ContainerTask(
 
     val commandValue = command.value.map(_.from(context))
 
-
     // Prepare the copy of output files
     val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
     val resultDirectoryBind = "/_result_"
@@ -374,12 +382,18 @@ case class ContainerTask(
       overlay match
         case img: FileOverlay =>
           def createPool =
-            WithInstance[_root_.container.Singularity.OverlayImg](pooled = img.reuse): () ⇒
+            WithInstance[_root_.container.Singularity.OverlayImage](pooled = img.reuse): () ⇒
               val overlay =
                 if img.reuse
                 then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
                 else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
-              _root_.container.Singularity.createOverlay(overlay, img.size, output = out, error = err)
+
+              img.image match
+                case None => _root_.container.Singularity.createOverlay(overlay, img.size, output = out, error = err)
+                case Some(image) =>
+                  if img.reuse && executionContext.localEnvironment.threads == 1
+                  then image
+                  else _root_.container.Singularity.copyOverlay(image, overlay)
 
           val overlayCache = executionContext.cache.getOrElseUpdate(img.cacheKey)(createPool)
 

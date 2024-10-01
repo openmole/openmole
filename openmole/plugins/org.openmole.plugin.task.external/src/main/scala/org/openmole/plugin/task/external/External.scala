@@ -130,7 +130,7 @@ object External:
   def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     val resultContext = listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectories)
     // TODO use moleExecution directory here
-    val resultDirectory = newFile.newDir("externalresult")
+    val resultDirectory = TmpDirectory.newDirectory("externalresult")
     val outputContext = context ++ resultContext
     val result = outputContext ++ moveFilesOutOfWorkDirectory(outputs, outputContext, workDirectories, resultDirectory)
     fileService.deleteWhenEmpty(resultDirectory)
@@ -157,13 +157,13 @@ object External:
     fetchedOutputFiles
 
   def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) =
-    val newFile = TmpDirectory(resultDirectory)
+    import org.openmole.tool.file.*
 
     contextFiles(outputs, context).map: v ⇒
       val movedFile =
         if workDirectories.exists(_.isAParentOf(v.value))
         then
-          val newDir = newFile.newDir("outputFile")
+          val newDir = resultDirectory.newDirectory("outputFile")
           newDir.mkdirs()
           val moved = fileService.wrapRemoveOnGC(newDir / v.value.getName)
           v.value.move(moved)

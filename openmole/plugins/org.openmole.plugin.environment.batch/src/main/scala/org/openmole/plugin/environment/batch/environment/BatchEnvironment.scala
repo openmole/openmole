@@ -205,50 +205,50 @@ object BatchEnvironment {
     remoteStorage: RemoteStorage,
     replicate: (File, TransferOptions) => ReplicatedFile,
     upload: (File, TransferOptions) => String,
-    storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob = services.newFile.withTmpFile("job", ".tar") { jobFile ⇒
+    storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob =
+    import services.*
+    TmpDirectory.withTmpFile("job", ".tar") { jobFile ⇒
 
-    import services._
+      serializerService.serialize(job.runnableTasks, jobFile, gz = true)
 
-    serializerService.serialize(job.runnableTasks, jobFile, gz = true)
+      val plugins =
+        new TreeSet[File]()(fileOrdering) ++
+          job.plugins ++
+          environment.scriptPlugins --
+          environment.environmentPlugins ++
+          (job.files.toSet & environment.environmentPlugins.toSet)
 
-    val plugins =
-      new TreeSet[File]()(fileOrdering) ++
-        job.plugins ++
-        environment.scriptPlugins --
-        environment.environmentPlugins ++
-        (job.files.toSet & environment.environmentPlugins.toSet)
+      val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
 
-    val files = (new TreeSet[File]()(fileOrdering) ++ job.files) -- plugins
+      val runtime = replicateTheRuntime(environment, replicate)
 
-    val runtime = replicateTheRuntime(environment, replicate)
+      val executionMessage = createExecutionMessage(
+        jobFile,
+        files,
+        plugins,
+        replicate,
+        environment
+      )
 
-    val executionMessage = createExecutionMessage(
-      jobFile,
-      files,
-      plugins,
-      replicate,
-      environment
-    )
+      /* ---- upload the execution message ----*/
+      val inputPath =
+        newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+          serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
+          signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
+        }
 
-    /* ---- upload the execution message ----*/
-    val inputPath =
-      newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
-        serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
-        signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
-      }
+      val serializedStorage =
+        services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+          import org.openmole.tool.hash._
+          import services._
+          services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
+          val hash = storageFile.hash().toString()
+          val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
+          FileMessage(path, hash)
+        }
 
-    val serializedStorage =
-      services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
-        import org.openmole.tool.hash._
-        import services._
-        services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
-        val hash = storageFile.hash().toString()
-        val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
-        FileMessage(path, hash)
-      }
-
-    SerializedJob(inputPath, runtime, serializedStorage)
-  }
+      SerializedJob(inputPath, runtime, serializedStorage)
+    }
 
   
   def replicateTheRuntime(
@@ -400,9 +400,10 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 
 object BatchEnvironmentState:
   def apply()(implicit services: BatchEnvironment.Services) =
+    import services.newFile
     val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
     val jobStore =
-      val storeDirectory = services.newFile.makeNewDir("jobstore")
+      val storeDirectory = TmpDirectory.makeNewDir("jobstore")
       JobStore(storeDirectory)
 
     new BatchEnvironmentState(_errors, jobStore)

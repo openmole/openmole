@@ -130,7 +130,7 @@ object AbstractNetLogoTask {
 
   def createPool(netLogoFactory: NetLogoFactory, workspace: AbstractNetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: TmpDirectory) = {
     def createInstance = {
-      val workspaceDirectory = newFile.newDir("netlogoworkpsace")
+      val workspaceDirectory = newFile.newDirectory("netlogoworkpsace")
       AbstractNetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
     }
 

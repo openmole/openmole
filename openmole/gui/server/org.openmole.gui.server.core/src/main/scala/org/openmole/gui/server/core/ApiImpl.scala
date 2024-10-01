@@ -182,7 +182,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def temporaryDirectory(): SafePath =
     import services.*
-    val dir = services.tmpDirectory.newDir("openmoleGUI", create = true)
+    val dir = services.tmpDirectory.newDirectory("openmoleGUI", create = true)
     dir.toSafePath(using org.openmole.gui.shared.data.ServerFileSystemContext.Absolute)
 
   def exists(safePath: SafePath): Boolean =
@@ -312,7 +312,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       safePathToFile(scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
-    val executionTmpDirectory = services.tmpDirectory.newDir("execution")
+
+    val executionTmpDirectory =
+      import services.tmpDirectory
+      TmpDirectory.newDirectory("execution")
 
     val runServices =
       import services._

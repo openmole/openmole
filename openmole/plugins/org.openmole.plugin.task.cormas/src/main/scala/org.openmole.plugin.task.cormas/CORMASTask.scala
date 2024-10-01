@@ -67,7 +67,7 @@ object CORMASTask:
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
-      overlay = overlay)
+      overlay = ContainerTask.initializeOverlay(overlay))
 
 
 case class CORMASTask(

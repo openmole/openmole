@@ -52,7 +52,7 @@ package object module:
   case class SelectableModule(baseURL: String, module: Module)
 
   def install(modules: Seq[SelectableModule])(implicit newFile: TmpDirectory, workspace: Workspace) =
-    newFile.withTmpDir: dir ⇒
+    TmpDirectory.withTmpDir: dir ⇒
       case class DownloadableComponent(baseURL: String, component: Component)
       val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
       val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)

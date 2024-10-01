@@ -36,14 +36,12 @@ import org.openmole.tool.archive._
 
 package object message {
 
-  object FileMessage {
+  object FileMessage:
     implicit def replicatedFile2FileMessage(r: ReplicatedFile): FileMessage = FileMessage(r)
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
-  }
 
-  object RunnableTask {
+  object RunnableTask:
     def apply(moleJob: Job) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
-  }
 
   class RunnableTask(val task: RuntimeTask, val context: Context, val id: JobId)
 
@@ -51,7 +49,7 @@ package object message {
 
   object ReplicatedFile {
     def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) = {
-      val localDirectory = newFile.makeNewDir("replica")
+      val localDirectory = TmpDirectory.makeNewDir("replica")
       try {
         def verify(cache: File) =
           if (verifyHash) {
@@ -90,22 +88,21 @@ package object message {
       finally fileService.deleteWhenEmpty(localDirectory)
     }
 
-    def upload(file: File, upload: File ⇒ String)(implicit newFile: TmpDirectory) = {
+    def upload(file: File, upload: File ⇒ String)(using TmpDirectory) =
       val isDir = file.isDirectory
 
       val toReplicate =
-        if (isDir) {
-          val ret = newFile.newFile("archive", ".tar")
+        if isDir
+        then
+          val ret = TmpDirectory.newFile("archive", ".tar")
           file.archive(ret)
           ret
-        }
         else file
 
       val mode = file.mode
       val hash = toReplicate.hash().toString
       val uploaded = upload(toReplicate)
       ReplicatedFile(file.getPath, file.getName, isDir, hash, uploaded, mode)
-    }
 
   }
 
