@@ -57,14 +57,12 @@ object NetLogoContainerTask:
     hostFiles:              Seq[HostFile]                    = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
-    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
+    containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
 
     val image:  ContainerImage                   = s"openmole/netlogo:${version}"
 
     val volumesValue = volumes(script, embedWorkspace)
-    val preparedImage = ContainerTask.install(installContainerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
 
     NetLogoContainerTask(
       script = script,
@@ -82,12 +80,10 @@ object NetLogoContainerTask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      overlay = ContainerTask.initializeOverlay(overlay)
+      mapped = MappedInputOutputConfig()
     ) set (
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
@@ -101,7 +97,7 @@ case class NetLogoContainerTask(
   embedWorkspace: Boolean,
   seed: OptionalArgument[Val[Int]],
   switch3d: Boolean,
-  image:                InstalledImage,
+  image:                InstalledContainerImage,
   memory:               Information,
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -109,12 +105,10 @@ case class NetLogoContainerTask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  overlay:              OverlayConfiguration) extends Task with ValidateTask:
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   override def validate = Validate: p ⇒
     import p._
@@ -167,7 +161,6 @@ case class NetLogoContainerTask(
       ContainerTask.internal(
         image = image,
         command = launchCommand,
-        containerSystem = containerSystem,
         workDirectory = Some(workspace),
         relativePathRoot = Some(netLogoWorkspace),
         errorOnReturnValue = errorOnReturnValue,
@@ -178,8 +171,7 @@ case class NetLogoContainerTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        overlay = overlay) set(
+        info = info) set (
         resources += (inputFile, inputFileName, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
         outputFiles += (outputFileName, outputFileVal),

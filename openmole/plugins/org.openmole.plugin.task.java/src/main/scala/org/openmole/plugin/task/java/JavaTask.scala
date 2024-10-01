@@ -57,9 +57,7 @@ object JavaTask:
     fewerThreads: Boolean = true,
     version: String = "21.0",
     jvmVersion: String = "21",
-    containerSystem: ContainerSystem = ContainerSystem.default,
-    installContainerSystem: ContainerSystem = ContainerSystem.default,
-    overlay: OverlayConfiguration = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    containerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     def cacheLibraries =
       val deps = libraries.map(l => s"--dep $l").mkString(" ")
@@ -67,7 +65,7 @@ object JavaTask:
 
     new JavaTask(
       script = script,
-      image = ContainerTask.install(installContainerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache),
+      image = ContainerTask.install(containerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache),
       jars = jars,
       libraries = libraries,
       jvmOptions = jvmOptions,
@@ -81,18 +79,16 @@ object JavaTask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      overlay = ContainerTask.initializeOverlay(overlay)
+      mapped = MappedInputOutputConfig()
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
 case class JavaTask(
   script: RunnableScript,
-  image: InstalledImage,
+  image: InstalledContainerImage,
   jars: Seq[File],
   libraries: Seq[String],
   jvmOptions: Seq[String],
@@ -106,12 +102,10 @@ case class JavaTask(
   stdErr: Option[Val[String]],
   hostFiles: Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem: ContainerSystem,
   config: InputOutputConfig,
   external: External,
   info: InfoConfig,
-  mapped: MappedInputOutputConfig,
-  overlay: OverlayConfiguration) extends Task with ValidateTask:
+  mapped: MappedInputOutputConfig) extends Task with ValidateTask:
 
   override def validate = validateContainer(Vector(), environmentVariables, external)
 
@@ -187,7 +181,6 @@ case class JavaTask(
 
       def containerTask =
         ContainerTask.internal(
-          containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
           workDirectory = Some(workspace),
@@ -199,8 +192,7 @@ case class JavaTask(
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info,
-          overlay = overlay) set(
+          info = info) set(
           resources += (scriptFile, scriptName, true),
           resources += (inputData, inputDataName, true),
           jarResources.map((j, n) => resources += (j, n, true)),

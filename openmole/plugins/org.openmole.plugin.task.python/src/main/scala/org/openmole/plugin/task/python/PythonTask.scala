@@ -48,16 +48,14 @@ object PythonTask:
     returnValue:            OptionalArgument[Val[Int]]         = None,
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
-    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     val major = if(version.startsWith("2")) 2 else 3
 
     new PythonTask(
       script = script,
       arguments = arguments.option,
-      image = ContainerTask.install(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      image = ContainerTask.install(containerSystem, dockerImage(version), installCommands(install, libraries, major)),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -70,15 +68,14 @@ object PythonTask:
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
-      major = major,
-      overlay = ContainerTask.initializeOverlay(overlay)
+      major = major
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
 
 case class PythonTask(
   script:                 RunnableScript,
-  image:                  InstalledImage,
+  image:                  InstalledContainerImage,
   arguments:              Option[String],
   prepare:                Seq[String],
   errorOnReturnValue:     Boolean,
@@ -92,8 +89,7 @@ case class PythonTask(
   external:               External,
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig,
-  major:                  Int,
-  overlay:                OverlayConfiguration) extends Task with ValidateTask:
+  major:                  Int) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -159,7 +155,6 @@ case class PythonTask(
 
       def containerTask =
         ContainerTask.internal(
-          containerSystem = containerSystem,
           image = image,
           command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
           workDirectory = Some(workDirectory),
@@ -171,8 +166,7 @@ case class PythonTask(
           stdErr = stdErr,
           external = external,
           config = config,
-          info = info,
-          overlay = overlay) set (
+          info = info) set (
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),

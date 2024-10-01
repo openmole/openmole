@@ -85,15 +85,13 @@ object RTask:
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     clearContainerCache:        Boolean                            = false,
-    containerSystem:            ContainerSystem                    = ContainerSystem.default,
-    installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
-    overlay:                    OverlayConfiguration               = OverlayConfiguration.default
+    containerSystem:            ContainerSystem                    = ContainerSystem.default
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
     val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -101,18 +99,16 @@ object RTask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      overlay = ContainerTask.initializeOverlay(overlay)
+      mapped = MappedInputOutputConfig()
     ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
 
 
 case class RTask(
   script:               RunnableScript,
-  image:                InstalledImage,
+  image:                InstalledContainerImage,
   errorOnReturnValue:   Boolean,
   prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
@@ -120,12 +116,10 @@ case class RTask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  overlay:              OverlayConfiguration) extends Task with ValidateTask:
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -174,7 +168,6 @@ case class RTask(
 
     def containerTask =
       ContainerTask.internal(
-        containerSystem = containerSystem,
         image = image,
         command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
         workDirectory = Some(workDirectory),
@@ -186,8 +179,7 @@ case class RTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        overlay = overlay) set (
+        info = info) set (
         resources += (scriptFile, rScriptPath),
         resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),
