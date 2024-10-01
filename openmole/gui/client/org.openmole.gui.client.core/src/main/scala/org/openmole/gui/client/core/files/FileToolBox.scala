@@ -20,6 +20,7 @@ object FileToolBox:
 
 
 class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginState: PluginState, isDirectory: Boolean):
+
   import FileToolBox.{iconAction, glyphItemize}
 
   def closeToolBox(using panels: Panels) = panels.treeNodePanel.currentLine.set(-1)
@@ -94,12 +95,32 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath { sp ⇒
       closeToolBox
       api.fetchGUIPlugins { p ⇒
-//FIXME
+        //FIXME
         //        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-//        wizardPanel.dialog.show
-//        wizardPanel.fromSafePath(sp)
+        //        wizardPanel.dialog.show
+        //        wizardPanel.fromSafePath(sp)
       }
     }
+
+  def commit(message: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
+    api.commitFiles(Seq(sp), message).foreach { _ ⇒ panels.treeNodePanel.refresh }
+    closeToolBox
+  }
+
+  def add(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
+    api.addFiles(Seq(sp)).foreach { _ ⇒ panels.treeNodePanel.refresh }
+    closeToolBox
+  }
+
+  def revert(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+    withSafePath: sp ⇒
+      api.revertFiles(Seq(sp)).foreach: _ ⇒
+        panels.treeNodePanel.refresh
+        if (panels.tabContent.alreadyDisplayed(sp).isDefined)
+        then
+          panels.tabContent.removeTab(sp)
+          FileDisplayer.display(sp)
+        closeToolBox
 
   def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newSafePath = safePath.parent ++ to
@@ -126,21 +147,21 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       replacing()
     }
 
-  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) = 
+  def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     pluginState.isPlugged match
       case true ⇒
         CoreUtils.removePlugin(safePath).foreach { _ ⇒
           panels.pluginPanel.getPlugins
           panels.treeNodePanel.refresh
         }
-          //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
-//          panels.pluginPanel.getPlugins
-//          treeNodeManager.invalidCurrentCache
-//        }
+      //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
+      //          panels.pluginPanel.getPlugins
+      //          treeNodeManager.invalidCurrentCache
+      //        }
       case false ⇒
         CoreUtils.addPlugin(safePath).foreach: errors ⇒
           for e <- errors
-          do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", ClientUtil.errorTextArea(ErrorData.stackTrace(e)))
+            do panels.notifications.showGetItNotification(NotificationLevel.Error, "An error occurred while adding plugin", ClientUtil.errorTextArea(ErrorData.stackTrace(e)))
           panels.pluginPanel.getPlugins
           panels.treeNodePanel.refresh
 
@@ -153,23 +174,20 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)
 
-  def editForm(sp: SafePath)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
-    val renameInput = inputTag(sp.name).amend(
-      placeholder := "File name",
+  def editForm(sp: SafePath, initText: String, ph: String, todo: String => Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
+    val renameInput = inputTag(initText).amend(
+      margin := "auto 10 auto 25",
+      placeholder := ph,
       onMountFocus
     )
 
     div(
-      child <-- actionConfirmation.signal.map :
+      child <-- actionConfirmation.signal.map:
         case Some(c) ⇒ c
         case None ⇒
           form(
             renameInput,
-            onSubmit.preventDefault --> { _ ⇒
-              withSafePath { sp ⇒
-                testRename(sp, renameInput.ref.value)
-              }
-            }
+            onSubmit.preventDefault --> { _ ⇒ todo(renameInput.ref.value) }
           )
     )
 
@@ -196,47 +214,73 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
         case (None, None) ⇒
           div(
             fileActions,
-            iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate),
-            iconAction(glyphItemize(glyph_edit), "rename", () ⇒ actionEdit.set(Some(editForm(initSafePath)))),
-            iconAction(glyphItemize(glyph_download), "download", () ⇒ download),
+            iconAction(glyphItemize(OMTags.glyph_arrow_left_right), "duplicate", () ⇒ duplicate).amend(verticalLine),
+            iconAction(glyphItemize(glyph_edit), "rename",
+              () ⇒ actionEdit.set(Some(editForm(initSafePath, initSafePath.name, "File name",
+                (inputValue: String) =>
+                  withSafePath { sp ⇒
+                    testRename(sp, inputValue)
+                  }
+              )))).amend(verticalLine),
+            iconAction(glyphItemize(glyph_download), "download", () ⇒ download).amend(verticalLine),
             FileContentType(initSafePath) match
               case FileContentType.OpenMOLEResult ⇒
-                iconAction(glyphItemize(glyph_download), "csv", () ⇒ omrToCSV)
+                iconAction(glyphItemize(glyph_download), "csv", () ⇒ omrToCSV).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
             FileContentType(initSafePath) match
               case FileContentType.OpenMOLEResult ⇒
-                iconAction(glyphItemize(glyph_download), "json", () ⇒ omrToJSON)
+                iconAction(glyphItemize(glyph_download), "json", () ⇒ omrToJSON).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
             child <-- {
               FileContentType(initSafePath) match
                 case FileContentType.OpenMOLEResult =>
                   Signal.fromFuture(api.omrFiles(initSafePath), None).map:
-                    case Some(p) => iconAction(glyphItemize(glyph_download), "files", () ⇒ omrFiles(p))
+                    case Some(p) => iconAction(glyphItemize(glyph_download), "files", () ⇒ omrFiles(p)).amend(verticalLine)
                     case None => emptyNode
                 case _ => Signal.fromValue(emptyNode)
             },
-            iconAction(glyphItemize(glyph_trash), "delete", () ⇒ actionConfirmation.set(Some(confirmation(s"Delete ${
-              initSafePath.name
-            } ?", () ⇒ trash)))),
             FileContentType(initSafePath) match
               case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-                iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract)
+                iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
             FileContentType(initSafePath) match
               case FileContentType.OpenMOLEScript ⇒
-                iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute)
+                iconAction(glyphItemize(OMTags.glyph_flash), "run", () ⇒ execute).amend(verticalLine)
               case _ ⇒ emptyMod
             ,
+            child <-- panels.treeNodePanel.addable.signal.map: ad =>
+              if ad.contains(initSafePath.name)
+              then iconAction(glyphItemize(OMTags.glyph_addFile), "add", () ⇒
+                actionConfirmation.set(Some(confirmation(s"Add ${initSafePath.name} ?", () ⇒ add)))).amend(verticalLine)
+              else emptyNode
+            ,
+            children <-- {
+              panels.treeNodePanel.commitable.signal.map: co =>
+                if co
+                then
+                  Seq(
+                    div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, onClick --> { _ ⇒
+                      actionEdit.set(Some(editForm(initSafePath, "", "Commit message",
+                        (inputValue: String) => commit(inputValue)
+                      )))
+                    }),
+                    iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
+                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert))))
+                  )
+                else Seq()
+            },
+            iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+              actionConfirmation.set(Some(confirmation(s"Delete ${initSafePath.name} ?", () ⇒ trash)))),
 
-//                FileContentType(initSafePath) match {
-//                  //FIXME discover extensions from wizard plugins
-//                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
-//                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
-//                  case _ ⇒ emptyMod
-//                },
+            //                FileContentType(initSafePath) match {
+            //                  //FIXME discover extensions from wizard plugins
+            //                  case FileContentType.Jar | FileContentType.NetLogo | FileContentType.R | FileContentType.TarGz ⇒
+            //                    iconAction(glyphItemize(OMTags.glyph_share), "to OMS", () ⇒ toScript)
+            //                  case _ ⇒ emptyMod
+            //                },
             if pluginState.isPlugin
             then
               val (icon, text) =

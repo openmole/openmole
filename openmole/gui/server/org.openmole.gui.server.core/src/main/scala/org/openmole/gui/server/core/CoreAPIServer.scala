@@ -155,7 +155,16 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache()),
       shutdown.errorImplementedBy(_ => apiImpl.shutdown()),
       jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
-      isAlive.implementedBy(_ => apiImpl.isAlive())
+      isAlive.implementedBy(_ => apiImpl.isAlive()),
+      cloneRepository.errorImplementedBy((r,d) => apiImpl.cloneRepository(r,d)),
+      commit.errorImplementedBy((r,d) => apiImpl.commit(r,d)),
+      revert.errorImplementedBy(r=> apiImpl.revert(r)),
+      add.errorImplementedBy(r=> apiImpl.add(r)),
+      pull.errorImplementedBy(r=> apiImpl.pull(r)),
+      branchList.errorImplementedBy(r=> apiImpl.branchList(r)),
+      checkout.errorImplementedBy((r,b)=> apiImpl.checkout(r,b)),
+      stash.errorImplementedBy(r=> apiImpl.stash(r)),
+      stashPop.errorImplementedBy(r=> apiImpl.stashPop(r))
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

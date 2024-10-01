@@ -40,18 +40,22 @@ object ProjectPanel:
 
     val emptyProjectButton = button(btn_purple, marginTop:= "40", "Build", onClick --> {_=> emptyProject})
 
-    // 2- Model wizard
+    // 2- Git repo
+    val gitClonePanel = GitClonePanel.render
+    
+    // 3- Model wizard
     val wizardPanel = ModelWizardPanel.render
     
-    // 3- Market place
+    // 4- Market place
     val marketPanel = MarketPanel.render
 
-    // 4- From URL
+    // 5- From URL
     val urlPanel = URLImportPanel.render
 
     lazy val theTabs = Tabs.tabs(tabStyle = navbar_pills, isClosable = false)
       .add(Tab("empty", span("Empty project"), emptyProjectButton))
       .add(Tab("wizard", span("From your model"), wizardPanel))
+      .add(Tab("git", span("From git repository"), gitClonePanel))
       .add(Tab("market", span("From examples"), marketPanel))
       .add(Tab("url", span("From URL"), urlPanel ))
 

@@ -80,7 +80,6 @@ trait CoreAPI extends RESTAPI:
   val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
     errorEndpoint(get(path / prefix / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
-
   val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
 
@@ -93,7 +92,34 @@ trait CoreAPI extends RESTAPI:
   val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
 
+  val cloneRepository: ErrorEndpoint[(String, SafePath), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath)]), ok(jsonResponse[Unit]))
 
+  val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
+    
+  val revert: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "revert", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
+  val add: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "add", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
+  val pull: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "pull", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+    
+  val branchList: ErrorEndpoint[SafePath, Option[BranchData]] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "branch-list", jsonRequest[SafePath]), ok(jsonResponse[Option[BranchData]]))
+    
+  val checkout: ErrorEndpoint[(SafePath, String), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "checkout", jsonRequest[(SafePath, String)]), ok(jsonResponse[Unit]))
+    
+  val stash: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "stash", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+    
+  val stashPop: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "stash-pop", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+    
+    
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
@@ -213,6 +239,6 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
 
 
-  //TODO ------------ refactor -------------------
+//TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =
 

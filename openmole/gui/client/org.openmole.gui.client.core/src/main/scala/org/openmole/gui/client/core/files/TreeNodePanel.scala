@@ -12,9 +12,12 @@ import org.openmole.gui.client.ext.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import TreeNode.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.nodes.ReactiveElement
+import org.openmole.gui.client.core.files.FileToolBox.{glyphItemize, iconAction}
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.GitStatus.{Conflicting, Modified, Untracked}
 
 import scala.collection.immutable.ArraySeq
 
@@ -36,20 +39,29 @@ import scala.collection.immutable.ArraySeq
  */
 
 object TreeNodePanel:
+  enum MultiTool:
+    case On, PendingOperation, Off, Git
+
   extension (p: TreeNodePanel)
     def refresh = p.refresh
 
-class TreeNodePanel { panel =>
+class TreeNodePanel {
+  panel =>
+
+  import TreeNodePanel.MultiTool
+  import TreeNodePanel.MultiTool.*
 
   val treeNodeManager: TreeNodeManager = new TreeNodeManager
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
   val update: Var[Long] = Var(0)
+  val commitable: Var[Boolean] = Var(false)
+  val addable: Var[Seq[String]] = Var(Seq())
+  val gitFolder: Var[Boolean] = Var(false)
 
   def refresh = update.update(_ + 1)
 
   val fileToolBar = new FileToolBar(this, treeNodeManager)
-
 
   val editNodeInput = inputTag("").amend(
     placeholder := "Name",
@@ -117,10 +129,13 @@ class TreeNodePanel { panel =>
 
   val confirmationDiv: Var[Option[Div]] = Var(None)
 
-  def confirmation(text: String, okText: String, todo: () ⇒ Unit) =
+  def confirmation(text: String, okText: String, todo: () ⇒ Unit): Div =
+    confirmationWithMessage(div(text, width := "50%", margin := "10px"), okText, todo)
+
+  def confirmationWithMessage(message: ReactiveElement[_], okText: String, todo: () => Unit): Div =
     div(
       fileActions,
-      div(text, width := "50%", margin := "10px"),
+      message,
       div(fileItemCancel, "Cancel", onClick --> {
         _ ⇒
           closeMultiTool
@@ -128,67 +143,154 @@ class TreeNodePanel { panel =>
       div(fileItemWarning, okText, onClick --> { _ ⇒ todo() })
     )
 
-  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) = div(
-    height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
-    children <-- confirmationDiv.signal.map { ac ⇒
-      val selected = treeNodeManager.selected
-      val isSelectionEmpty = selected.signal.map {
-        _.isEmpty
-      }
-      ac match {
-        case Some(c) ⇒ Seq(c)
-        case None ⇒ Seq(
-          button(cls := "btn btn-primary", marginLeft := "80px", "Copy", onClick --> { _ ⇒
-            multiTool.set(Paste)
-            confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-              val target = treeNodeManager.directory.now()
-              api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
-                if (existing.isEmpty) {
-                  refresh
-                  closeMultiTool
-                }
-                else {
-                  confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                    val target = treeNodeManager.directory.now()
-                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
-                      refresh
-                      closeMultiTool
-                    })))
-                }
-              })))
-          },
-            disabled <-- isSelectionEmpty
-          ),
-          button(btn_danger, "Delete", marginRight := "80px", onClick --> { _ ⇒
-            confirmationDiv.set(
-              Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
-                CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+  def archiveFiles(sp: Seq[SafePath]) =
+    multiTool.set(Off)
+    if (!sp.isEmpty)
+      org.scalajs.dom.window.open(
+        url = downloadFiles(sp, name = Some(s"${sp.head.nameWithoutExtension}")),
+        target = "_blank"
+      )
+
+  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
+    div(
+      height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
+      children <-- confirmationDiv.signal.combineWith(commitable.signal).combineWith(addable.signal).combineWith(gitFolder.signal).combineWith(multiTool.signal).map: (ac, co, ad, gf, mt) ⇒
+        val selected = treeNodeManager.selected
+        val isSelectionEmpty = selected.signal.map {
+          _.isEmpty
+        }
+        ac match
+          case Some(c) ⇒ Seq(c)
+          case None ⇒
+            def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
+              if se then "disable" else ""
+
+            def copy(move: Boolean) =
+              multiTool.set(MultiTool.PendingOperation)
+              confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
+                val target = treeNodeManager.directory.now()
+                api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
+                  if (existing.isEmpty) {
+                    if move then api.deleteFiles(selected.now())
+                    refresh
+                    closeMultiTool
+                  }
+                  else {
+                    confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
+                      val target = treeNodeManager.directory.now()
+                      api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
+                        if move then api.deleteFiles(selected.now())
+                        refresh
+                        closeMultiTool
+                      })))
+                  }
+                })))
+
+            def commit =
+              val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
+              confirmationDiv.set(
+                Some(
+                  confirmationWithMessage(messageInput, "Commit",
+                    () =>
+                      val target = treeNodeManager.directory.now()
+                      val commitMsg = messageInput.ref.value
+                      if !commitMsg.isEmpty
+                      then
+                        api.commitFiles(selected.now(), commitMsg).foreach: _ =>
+                          refresh
+                          closeMultiTool
+                  )
+                )
               )
+
+            if (mt == MultiTool.On)
+              Seq(
+                iconAction(glyphItemize(OMTags.glyph_copy), "copy", () ⇒ copy(false))
+                  .amend(verticalLine, disableIfEmptyCls),
+                iconAction(glyphItemize(OMTags.glyph_move), "move", () ⇒ copy(true))
+                  .amend(verticalLine, disableIfEmptyCls),
+                iconAction(glyphItemize(glyph_download), "download", () ⇒ archiveFiles(selected.now()))
+                  .amend(verticalLine, disableIfEmptyCls),
+                iconAction(glyphItemize(glyph_trash), "delete", () ⇒
+                  confirmationDiv.set(
+                    Some(confirmation(s"Delete ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                      CoreUtils.trashNodes(this, treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                    ))
+                  )
+                ).amend(disableIfEmptyCls)
               )
-            )
-          },
-            disabled <-- isSelectionEmpty)
-        )
-      }
-    }
-  )
+            else if (mt == MultiTool.Git)
+              Seq(
+                if !ad.isEmpty
+                then iconAction(glyphItemize(OMTags.glyph_addFile), "add", () ⇒
+                  confirmationDiv.set(
+                    Some(confirmation(s"Add ? ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                      api.addFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                    ))
+                  )
+                ).amend(verticalLine, disableIfEmptyCls)
+                else emptyNode
+                ,
+                if co
+                then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
+                else emptyNode
+                ,
+                if co
+                then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
+                  confirmationDiv.set(
+                    Some(confirmation("Stash changes ?", "OK", () ⇒
+                      api.stash(treeNodeManager.directory.now()).andThen { _ ⇒ closeMultiTool }
+                    ))
+                  )
+                ).amend(verticalLine)
+                else emptyNode
+                ,
+                if gf
+                then iconAction(glyphItemize(OMTags.glyph_stash_pop), "pop", () ⇒
+                  confirmationDiv.set(
+                    Some(confirmation("Pop stashed changes (if any) ?", "OK", () ⇒
+                      api.stashPop(treeNodeManager.directory.now()).andThen { _ ⇒ closeMultiTool }
+                    ))
+                  )
+                ).amend(verticalLine)
+                else emptyNode
+                ,
+                if co
+                then iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
+                  confirmationDiv.set(
+                    Some(confirmation(s"Revert changes ? ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
+                      api.revertFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
+                    ))
+                  )
+                ).amend(verticalLine, disableIfEmptyCls)
+                else emptyNode
+              )
+            else Seq(emptyNode)
+    )
 
   def closeMultiTool =
-    multiTool.set(Off)
+    multiTool.set(MultiTool.Off)
     confirmationDiv.set(None)
     treeNodeManager.clearSelection
 
   val plusFile = Var(false)
 
-  trait MultiTool
+  val multiTool: Var[MultiTool] = Var(MultiTool.Off)
 
-  object CopyOrTrash extends MultiTool
-
-  object Paste extends MultiTool
-
-  object Off extends MultiTool
-
-  val multiTool: Var[MultiTool] = Var(Off)
+  def initMultiTool(multiToolMode: MultiTool) =
+    multiTool.update { mcot ⇒
+      mcot match {
+        case MultiTool.Off ⇒ multiToolMode
+        case _ ⇒
+          confirmationDiv.set(None)
+          treeNodeManager.clearSelection
+          MultiTool.Off
+      }
+    }
+    multiTool.now() match {
+      case MultiTool.Off ⇒ refresh
+      case _ ⇒
+    }
 
   def fileControler(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     div(
@@ -204,34 +306,43 @@ class TreeNodePanel { panel =>
             goToDirButton(sp, s"${sp.name} / ")
           },
           div(glyph_plus, cls <-- plusFile.signal.map { pf ⇒
-            "plus-button" + { if (pf) " selected" else "" }
+            "plus-button" + {
+              if (pf) " selected" else ""
+            }
           }, onClick --> { _ ⇒ plusFile.update(!_) }),
         )
       },
       div(
-        display.flex, justifyContent.flexEnd, marginTop := "20",
-        div(OMTags.glyph_search,
-          cls := "filtering-files-item-selected",
-          onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
-        div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ refresh }),
-        div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", onClick --> { _ ⇒
-          multiTool.update { mcot ⇒
-            mcot match {
-              case Off ⇒ CopyOrTrash
-              case _ ⇒
-                confirmationDiv.set(None)
-                treeNodeManager.clearSelection
-                Off
-            }
-          }
-          multiTool.now() match {
-            case Off ⇒ refresh
-            case _ ⇒
-          }
-        })
+        display.flex, justifyContent.flexEnd, marginTop := "10",
+        div(flexRow, justifyContent.right,
+          div(
+            cls <-- fileToolBar.filterToolOpen.signal.map { o =>
+              if (o) "open-transition" else "close-transition"
+            },
+            fileToolBar.filterTool
+          )),
+        div(cls := "toolBlock",
+          child <--
+            gitFolder.signal.map: gf =>
+              if gf
+              then
+                div(cls := "specific-file git gitInfo", color := "white", cursor.pointer, marginRight := "18px",
+                onClick --> { _ ⇒
+                  initMultiTool(MultiTool.Git)
+                })
+              else emptyNode
+          ,
+          div(OMTags.glyph_search,
+            cls := "filtering-files-item-selected",
+            onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
+          div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ refresh }),
+          div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", paddingRight := "15px",onClick --> { _ ⇒
+            initMultiTool(MultiTool.On)
+          })
+        )
       ),
       plusFile.signal.expand(createFileTool),
-      multiTool.signal.map { m ⇒ m != Off }.expand(copyOrTrashTool),
+      multiTool.signal.map { m ⇒ m != MultiTool.Off }.expand(copyOrTrashTool),
       plusFile.toObservable --> Observer[Boolean]: v =>
         if !v then directoryToggle.toggled.set(false)
     )
@@ -239,7 +350,9 @@ class TreeNodePanel { panel =>
   def downloadFile(safePath: SafePath, hash: Boolean)(using api: ServerAPI, basePath: BasePath) =
     api.download(
       safePath,
-      (p: ProcessState) ⇒ { transferring.set(p) },
+      (p: ProcessState) ⇒ {
+        transferring.set(p)
+      },
       hash = hash
     )
 
@@ -289,7 +402,7 @@ class TreeNodePanel { panel =>
                 then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
                 else
                   val checked =
-                    if multiTool == CopyOrTrash
+                    if multiTool == MultiTool.On || multiTool == MultiTool.Git
                     then
                       val allCheck: Input = checkbox(false)
                       allCheck.amend(
@@ -298,7 +411,10 @@ class TreeNodePanel { panel =>
                         }
                       )
                     else emptyNode
-
+                  fileToolBar.gitBranchList.set(nodes.branchData)
+                  commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs => gs == Modified || gs == Conflicting))
+                  addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked)).map(_._1))
+                  gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
 
               def more =
@@ -343,7 +459,7 @@ class TreeNodePanel { panel =>
     onClick --> { _ ⇒
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
-      if (currentMultiTool == Off || currentMultiTool == Paste) todo()
+      if (currentMultiTool == MultiTool.Off || currentMultiTool == MultiTool.PendingOperation) todo()
       fileToolBar.filterToolOpen.set(false)
       //treeNodeManager.computeCurrentSons
     }
@@ -356,12 +472,15 @@ class TreeNodePanel { panel =>
     def dirBox(tn: TreeNode)(using plugins: GUIPlugins) =
       div(
         child <-- multiTool.signal.combineWith(treeNodeManager.selected.signal).map { case (mcot, selected) ⇒
-          if (mcot == CopyOrTrash) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
+          if (mcot == MultiTool.On || mcot == MultiTool.Git) checkbox(isSelected(selected)).amend(onClick --> { _ ⇒
             treeNodeManager.switchSelection(tnSafePath)
           })
           else {
             tn match
-              case _: TreeNode.Directory ⇒ div(cls := "dir plus bi-plus", cursor.pointer)
+              case _: TreeNode.Directory ⇒
+                tn.gitStatus match
+                  case Some(GitStatus.Root) => div(cls := "specific-file git", cursor.pointer)
+                  case _ => div(cls := "dir plus bi-plus", cursor.pointer)
               case f: TreeNode.File ⇒
                 if (f.pluginState.isPlugin)
                 then
@@ -371,9 +490,9 @@ class TreeNodePanel { panel =>
                   })
                 else
                   FileContentType(tnSafePath) match
-                    case FileContentType.OpenMOLEScript=> div("S", cls := "specific-file oms")
-                    case FileContentType.OpenMOLEResult=> div("R", cls := "specific-file omr")
-                    case _=> emptyNode
+                    case FileContentType.OpenMOLEScript => div("S", cls := "specific-file oms")
+                    case FileContentType.OpenMOLEResult => div("R", cls := "specific-file omr")
+                    case _ => emptyNode
           }
         }
       )
@@ -390,6 +509,13 @@ class TreeNodePanel { panel =>
         ,
         isDirectory = tn.directory.isDefined
       )
+
+    def gitDivStatus(tn: TreeNodeData) =
+      tn.gitStatus match
+        case Some(GitStatus.Modified) => "git-status-modified"
+        case Some(GitStatus.Untracked) => "git-status-untracked"
+        case Some(GitStatus.Conflicting) => "git-status-conflicting"
+        case _ => ""
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement = {
       div(display.flex, flexDirection.column,
@@ -408,14 +534,20 @@ class TreeNodePanel { panel =>
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,
             cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt ⇒
-              mt == Off || mt == Paste
+              mt == MultiTool.Off || mt == MultiTool.PendingOperation
             },
-            cls := "file1", fileClick(todo), draggable := true),
+            cls := s"file1 ${gitDivStatus(tn)}", fileClick(todo), draggable := true
+          ),
           i(timeOrSize(tn), cls := "file2"),
-          button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
-            currentSafePath.set(Some(tnSafePath))
-            currentLine.update( cl => if cl == id then  -1 else id)
-          })
+          child <--
+            multiTool.signal.map:
+              _ match
+                case On | Git => emptyNode
+                case _ =>
+                  button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
+                    currentSafePath.set(Some(tnSafePath))
+                    currentLine.update(cl => if cl == id then -1 else id)
+                  })
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),
         treeNodeManager.directory.toObservable --> Observer { _ => currentLine.set(-1) }
