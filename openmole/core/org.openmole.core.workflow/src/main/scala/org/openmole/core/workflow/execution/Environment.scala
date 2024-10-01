@@ -96,18 +96,18 @@ object LocalEnvironment:
   def apply(
     threads:      OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
-    name:         OptionalArgument[String] = None
+    name:         OptionalArgument[String] = None,
+    remote:       Boolean                  = false
   )(implicit varName: sourcecode.Name) =
-    EnvironmentProvider { ms ⇒
+    EnvironmentProvider: ms ⇒
       import ms._
-      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
-    }
+      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)), remote)
 
-  def apply(threads: Int, deinterleave: Boolean) =
-    EnvironmentProvider { ms ⇒
+  def apply(threads: Int, deinterleave: Boolean, remote: Boolean) =
+    EnvironmentProvider: ms ⇒
       import ms._
-      new LocalEnvironment(threads, deinterleave, None)
-    }
+      new LocalEnvironment(threads, deinterleave, None, remote)
+
 
 /**
  * Local environment
@@ -117,7 +117,8 @@ object LocalEnvironment:
 class LocalEnvironment(
   val threads:       Int,
   val deinterleave:  Boolean,
-  override val name: Option[String]
+  override val name: Option[String],
+  val remote:      Boolean
 )(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(threads, WeakReference(this), threadProvider))

@@ -39,13 +39,11 @@ object ScilabTask:
     stdErr:                 OptionalArgument[Val[String]] = None,
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
-    containerSystem:        ContainerSystem               = ContainerSystem.default,
-    installContainerSystem: ContainerSystem               = ContainerSystem.default,
-    overlay:                OverlayConfiguration          = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
+    containerSystem:        ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
 
     ScilabTask(
       script = script,
-      image = ContainerTask.install(installContainerSystem, scilabImage(version), install),
+      image = ContainerTask.install(containerSystem, scilabImage(version), install),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -53,13 +51,11 @@ object ScilabTask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
       mapped = MappedInputOutputConfig(),
-      version = version,
-      overlay = ContainerTask.initializeOverlay(overlay)
+      version = version
     ) set (
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
     )
@@ -165,7 +161,7 @@ object ScilabTask:
 
 case class ScilabTask(
   script:               RunnableScript,
-  image:                InstalledImage,
+  image:                InstalledContainerImage,
   errorOnReturnValue:   Boolean,
   prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
@@ -173,13 +169,11 @@ case class ScilabTask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig,
-  version:              String,
-  overlay:              OverlayConfiguration) extends Task with ValidateTask:
+  version:              String) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -216,7 +210,6 @@ case class ScilabTask(
 
     def containerTask =
       ContainerTask.internal(
-        containerSystem = containerSystem,
         image = image,
         command = prepare ++ Seq(launchCommand),
         workDirectory = Some(workDirectory),
@@ -228,8 +221,7 @@ case class ScilabTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        overlay = overlay) set (
+        info = info) set (
         resources += (scriptFile, scriptName, true),
         mapped.outputs.map { m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)) }
       )

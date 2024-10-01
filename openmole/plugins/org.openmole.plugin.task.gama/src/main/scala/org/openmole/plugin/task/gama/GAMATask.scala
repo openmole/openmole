@@ -86,9 +86,7 @@ object GAMATask:
     hostFiles:              Seq[HostFile]                    = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default,
-    overlay:                OverlayConfiguration             = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
+    containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): GAMATask =
 
     if !project.exists() then throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
     if !(project / gaml).exists() then throw new UserBadDataError(s"The model file you specify does not exist: ${project / gaml}")
@@ -99,7 +97,7 @@ object GAMATask:
         case (Some(v), c: DockerImage) => c.copy(tag = v)
         case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
 
-    val preparedImage = prepare(project, gaml, experiment, install, installContainerSystem, gamaContainerImage, clearCache = clearContainerCache)
+    val preparedImage = prepare(project, gaml, experiment, install, containerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
     GAMATask(
       project = project,
@@ -116,12 +114,10 @@ object GAMATask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      overlay = ContainerTask.initializeOverlay(overlay)
+      mapped = MappedInputOutputConfig()
     ) set (
         inputs ++= seed.option.toSeq,
         outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
@@ -175,7 +171,7 @@ case class GAMATask(
   finalStep:            FromContext[Int],
   seed:                 OptionalArgument[Val[Long]],
   frameRate:            OptionalArgument[Int],
-  image:                InstalledImage,
+  image:                InstalledContainerImage,
   memory:               OptionalArgument[Information],
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -183,27 +179,26 @@ case class GAMATask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  overlay:              OverlayConfiguration) extends Task with ValidateTask:
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
-  def readInputXML(image: InstalledImage)(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
+  def readInputXML(image: InstalledContainerImage)(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection) =
     tmpDirectory.withTmpDir: dir =>
       val bindDirectory = s"/__copy__"
       val copyDirectory = dir /> "copy"
+      
+      val containerImage =
+        image match
+          case i: ContainerSystem.InstalledSIFImage => i.image
+          case i: ContainerSystem.InstalledFlatImage => i.image
 
-      _root_.container.Singularity.executeImage(
-        image,
-        dir / "tmp",
-        commands = Seq(s"cp -rf ${GAMATask.inputXML} $bindDirectory"),
-        bind = Seq(copyDirectory.getAbsolutePath -> bindDirectory),
-        output = outputRedirection.output,
-        error = outputRedirection.error,
-        singularityCommand = containerSystem.command,
-        singularityWorkdir = Some(dir /> "singularitytmp")
+      _root_.container.Singularity.extractFiles(
+        containerImage,
+        Seq(GAMATask.inputXML),
+        copyDirectory,
+        dir / "tmp"
       )
 
       XML.loadFile(copyDirectory / GAMATask.inputXML)
@@ -290,7 +285,6 @@ case class GAMATask(
       ContainerTask.internal(
         image = image,
         command = launchCommand,
-        containerSystem = containerSystem,
         workDirectory = Some(GAMATask.workspaceDirectory),
         relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
         errorOnReturnValue = errorOnReturnValue,
@@ -301,8 +295,7 @@ case class GAMATask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        overlay = overlay) set(
+        info = info) set(
         resources += (inputFile, inputFilePath, true),
         resources += (outputDirectory, outputDirectoryPath, true),
         volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },

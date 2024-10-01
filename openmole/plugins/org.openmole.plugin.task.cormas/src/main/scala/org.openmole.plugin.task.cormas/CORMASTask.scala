@@ -11,7 +11,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.setter._
 import org.openmole.core.workflow.task.{ Task, TaskExecutionContext }
 import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile, InstalledImage }
+import org.openmole.plugin.task.container.{ ContainerSystem, ContainerTask, DockerImage, HostFile }
 import org.openmole.plugin.task.external._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -47,15 +47,12 @@ object CORMASTask:
     install:              Seq[String]                   = Seq.empty,
     clearContainerCache:    Boolean                     = false,
     version:                String                      = "latest",
-    containerSystem:        ContainerSystem             = ContainerSystem.default,
-    installContainerSystem: ContainerSystem             = ContainerSystem.default,
-    overlay:                OverlayConfiguration        = OverlayConfiguration.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask =
+    containerSystem:        ContainerSystem             = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): CORMASTask =
 
-    val preparedImage = ContainerTask.install(installContainerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
+    val preparedImage = ContainerTask.install(containerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
 
     new CORMASTask(
       preparedImage,
-      containerSystem,
       script,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -66,13 +63,11 @@ object CORMASTask:
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      overlay = ContainerTask.initializeOverlay(overlay))
+      mapped = MappedInputOutputConfig())
 
 
 case class CORMASTask(
-  image:                InstalledImage,
-  containerSystem:      ContainerSystem,
+  image:                InstalledContainerImage,
   script:               RunnableScript,
   errorOnReturnValue:   Boolean,
   returnValue:          Option[Val[Int]],
@@ -83,8 +78,7 @@ case class CORMASTask(
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  overlay:              OverlayConfiguration) extends Task with ValidateTask:
+  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -123,7 +117,6 @@ case class CORMASTask(
 
     def containerTask =
       ContainerTask.internal(
-        containerSystem = containerSystem,
         image = image,
         command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
         workDirectory = Some(workDirectory),
@@ -135,8 +128,7 @@ case class CORMASTask(
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info,
-        overlay = overlay) set (
+        info = info) set (
         resources += (jsonInputs, inputJSONName, true),
         resources += (scriptFile, scriptName, true),
         outputFiles += (outputJSONName, outputFile),
