@@ -259,7 +259,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             ,
             children <-- {
               panels.treeNodePanel.commitable.signal.map: co =>
-                if co
+                if co.contains(initSafePath.name)
                 then
                   Seq(
                     div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, onClick --> { _ ⇒
@@ -268,7 +268,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                       )))
                     }),
                     iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
-                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert))))
+                      actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert)))).amend(verticalLine)
                   )
                 else Seq()
             },

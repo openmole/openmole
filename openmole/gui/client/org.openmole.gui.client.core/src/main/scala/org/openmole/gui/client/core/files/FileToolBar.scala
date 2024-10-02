@@ -105,7 +105,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
                 onclickExtra = ()=> previous.set(opts.content.now()),
                 onclose = () =>
                   opts.get.foreach: b =>
-                    if treeNodePanel.commitable.now()
+                    if !treeNodePanel.commitable.now().isEmpty
                     then
                       previous.now().foreach(p=> opts.set(p))
                       treeNodePanel.multiTool.set(Git)
