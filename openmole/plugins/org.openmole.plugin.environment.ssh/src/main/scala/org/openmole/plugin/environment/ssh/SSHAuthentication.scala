@@ -20,7 +20,6 @@ package org.openmole.plugin.environment.ssh
 import java.io.File
 
 import org.openmole.core.exception._
-import org.openmole.plugin.environment.batch.authentication._
 import org.openmole.core.authentication._
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
@@ -29,42 +28,42 @@ import io.circe.generic.auto.*
 import org.openmole.core.json.given
 import scala.util.Try
 
-object SSHAuthentication {
-  implicit def isGridScaleAuthentication(implicit cypher: Cypher): _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] = new _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] {
-    override def login(a: org.openmole.plugin.environment.ssh.SSHAuthentication) = a match {
-      case a: LoginPassword ⇒ a.login
-      case a: PrivateKey    ⇒ a.login
-    }
-    override def authenticate(a: org.openmole.plugin.environment.ssh.SSHAuthentication, sshClient: _root_.gridscale.ssh.sshj.SSHClient) = a match {
-      case a: LoginPassword ⇒
-        val gsAuth = gridscale.authentication.UserPassword(a.login, a.password)
-        implicitly[gridscale.ssh.SSHAuthentication[gridscale.authentication.UserPassword]].authenticate(gsAuth, sshClient)
-      case a: PrivateKey ⇒
-        val gsAuth = gridscale.authentication.PrivateKey(a.privateKey, a.password, a.login)
-        implicitly[gridscale.ssh.SSHAuthentication[gridscale.authentication.PrivateKey]].authenticate(gsAuth, sshClient)
-    }
-  }
+object SSHAuthentication:
+  given isGridScaleAuthentication(using cypher: Cypher): _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] with
+    override def login(a: org.openmole.plugin.environment.ssh.SSHAuthentication) =
+      a match
+        case a: LoginPassword ⇒ a.login
+        case a: PrivateKey    ⇒ a.login
 
-  def apply()(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService): Seq[SSHAuthentication] =
+    override def authenticate(a: org.openmole.plugin.environment.ssh.SSHAuthentication, sshClient: _root_.gridscale.ssh.sshj.SSHClient) =
+      a match
+        case a: LoginPassword =>
+          val gsAuth = gridscale.authentication.UserPassword(a.login, cypher.decrypt(a.cypheredPassword))
+          implicitly[gridscale.ssh.SSHAuthentication[gridscale.authentication.UserPassword]].authenticate(gsAuth, sshClient)
+        case a: PrivateKey =>
+          val gsAuth = gridscale.authentication.PrivateKey(a.privateKey, cypher.decrypt(a.cypheredPassword), a.login)
+          implicitly[gridscale.ssh.SSHAuthentication[gridscale.authentication.PrivateKey]].authenticate(gsAuth, sshClient)
+
+
+  def apply()(using AuthenticationStore): Seq[SSHAuthentication] =
     Authentication.load[SSHAuthentication]
 
-  def find(login: String, host: String, port: Int = 22)(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService): SSHAuthentication = {
+  def find(login: String, host: String, port: Int = 22)(using AuthenticationStore): SSHAuthentication =
     val list = apply()
-    val auth = list.reverse.find { a ⇒ (a.login, a.host, a.port) == (login, host, port) }
+    val auth = list.findLast(a => (a.login, a.host, a.port) == (login, host, port))
     auth.getOrElse(throw new UserBadDataError(s"No authentication method found for $login@$host:$port"))
-  }
 
-  def +=(a: SSHAuthentication)(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService) =
+  def +=(a: SSHAuthentication)(using AuthenticationStore) =
     Authentication.save[SSHAuthentication](a, eq)
 
-  def -=(a: SSHAuthentication)(implicit authenticationStore: AuthenticationStore, serializerService: SerializerService) =
+  def -=(a: SSHAuthentication)(implicit authenticationStore: AuthenticationStore) =
     Authentication.remove[SSHAuthentication](a, eq)
 
   def clear()(implicit authenticationStore: AuthenticationStore) = Authentication.clear[SSHAuthentication]
 
   private def eq(a1: SSHAuthentication, a2: SSHAuthentication) = (a1.getClass, a1.login, a1.host, a1.port) == (a2.getClass, a2.login, a2.host, a2.port)
 
-  def test(a: SSHAuthentication)(implicit cypher: Cypher, authenticationStore: AuthenticationStore, serializerService: SerializerService, preference: Preference) = {
+  def test(a: SSHAuthentication)(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference) =
     implicit val intp = gridscale.ssh.SSH()
     try
       Try {
@@ -72,24 +71,20 @@ object SSHAuthentication {
         gridscale.ssh.home(server)
       }.map(_ ⇒ true)
     finally intp().close()
-  }
 
-}
 
-sealed trait SSHAuthentication {
+sealed trait SSHAuthentication:
   def host: String
   def port: Int
   def login: String
-}
 
 case class LoginPassword(
   login:            String,
   cypheredPassword: String,
   host:             String,
   port:             Int    = 22
-) extends SSHAuthentication with CypheredPassword {
+) extends SSHAuthentication:
   override def toString = s"$login@$host:$port using password"
-}
 
 case class PrivateKey(
   privateKey:       File,
@@ -97,7 +92,7 @@ case class PrivateKey(
   cypheredPassword: String,
   host:             String,
   port:             Int    = 22
-) extends SSHAuthentication with CypheredPassword {
+) extends SSHAuthentication:
   override def toString = s"$login@$host:$port using private key $privateKey"
-}
+
 

@@ -322,7 +322,6 @@ type GUIPluginAsJS = String
 trait AuthenticationData:
   def name: String
 
-
 trait WizardData
 
 sealed trait Test:

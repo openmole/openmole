@@ -44,13 +44,8 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]]
 
 
-//trait WizardGUIPlugin extends GUIPlugin:
-//  def factory: WizardPluginFactory
-//  def save(): Unit
-
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
-
 
 case class PluginServices(errorManager: ErrorManager)
 

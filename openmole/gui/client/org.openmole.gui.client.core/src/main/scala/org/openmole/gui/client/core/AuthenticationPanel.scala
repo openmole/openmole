@@ -25,6 +25,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.shared.api.*
 import scaladget.bootstrapnative.Selector.Options
@@ -46,20 +47,18 @@ object AuthenticationPanel:
         for
           factory <- plugins.authenticationFactories
         yield
-          factory.getData.map { data =>
-            data.map { d =>
+          factory.getData.map: data =>
+            data.map: d =>
               val as = factory.build(d)
               TestingAuthentication(as, EventStream.fromFuture(as.test, true).toSignal(Seq()))
-            }
-          }.recover { e =>
+          .recover: e =>
             toService(panels.notifications).notify(NotificationLevel.Error,  s"Error while getting authentication", org.openmole.gui.client.ext.ClientUtil.errorTextArea(ErrorData.toStackTrace(e)))
             Seq()
-          }
 
       Future.sequence(tested).map(_.flatten).foreach(testingAuthentications.set)
 
-    def getAuthSelector(currentFactory: AuthenticationPluginFactory) = {
-      lazy val authenticationSelector: Options[AuthenticationPluginFactory] = {
+    def getAuthSelector(currentFactory: AuthenticationPluginFactory) =
+      lazy val authenticationSelector: Options[AuthenticationPluginFactory] =
 
         val currentInd =
           val ind = plugins.authenticationFactories.map { _.name }.indexOf(currentFactory.name)
@@ -67,9 +66,8 @@ object AuthenticationPanel:
 
         plugins.authenticationFactories.options(currentInd, bsn.btn_warning, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
           currentAuthentication.set(authenticationSelector.content.now().map { _.buildEmpty }))
-      }
+
       authenticationSelector
-    }
 
     def removeAuthentication(ad: AuthenticationPlugin) = ad.remove.andThen(_ ⇒ refreshAuthentications)
 
@@ -81,28 +79,19 @@ object AuthenticationPanel:
       "New authentication",
       btn_primary,
       marginLeft := "40",
-      onClick --> {
-        _ ⇒
-          currentAuthentication.set(plugins.authenticationFactories.headOption.map {
-            _.buildEmpty
-          })
-      })
+      onClick --> currentAuthentication.set(plugins.authenticationFactories.headOption.map(_.buildEmpty))
+    )
 
-    val saveButton = button("Save", btn_primary, onClick --> {
-      _ ⇒ save
-    })
+    val saveButton = button("Save", btn_primary, onClick --> save)
 
-    val cancelButton = button("Cancel", btn_secondary_outline, onClick --> {
-      _ ⇒ {
-        currentAuthentication.update {
-          as ⇒
-            as match
-              case None ⇒ panels.closeExpandable
-              case _ ⇒
-            None
-        }
-      }
-    })
+    val cancelButton =
+      button("Cancel", btn_secondary_outline, onClick -->
+        currentAuthentication.update: as ⇒
+          as match
+            case None ⇒ panels.closeExpandable
+            case _ ⇒
+          None
+      )
 
     case class Reactive(testingAuthentication: TestingAuthentication, i: Int):
 
@@ -130,7 +119,7 @@ object AuthenticationPanel:
       def render =
         div(flexRow,
           cls := "docEntry",
-          backgroundColor := { if i % 2 == 0 then "#d1dbe4" else "#f4f4f4" },
+          backgroundColor := (if i % 2 == 0 then "#d1dbe4" else "#f4f4f4"),
           a(testingAuthentication.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒ currentAuthentication.set(Some(testingAuthentication.auth)) }),
           columnizer(
             span(
@@ -150,36 +139,37 @@ object AuthenticationPanel:
 
     val authPanel =
       div(marginTop := "50",
-        child <-- currentAuthentication.signal.map {
-          case Some(p: AuthenticationPlugin) ⇒ div(padding := "20",
-            getAuthSelector(p.factory).selector,
-            p.panel.amend(
-              div(
-                marginTop := "20",
-                display.flex,
-                justifyContent.flexEnd,
-                div(btnGroup, saveButton, cancelButton)
+        child <-- currentAuthentication.signal.map:
+          case Some(p: AuthenticationPlugin) ⇒
+            div(
+              padding := "20",
+              getAuthSelector(p.factory).selector,
+              p.panel.amend(
+                div(
+                  marginTop := "20",
+                  display.flex,
+                  justifyContent.flexEnd,
+                  div(btnGroup, saveButton, cancelButton)
+                )
               )
-            ))
+            )
           case _ ⇒
             div(
-              children <-- testingAuthentications.signal.map { as ⇒
-                as.zipWithIndex.map { case (a, i) ⇒
-                  //for (a ← auths()) yield {
-                  val r = Reactive(a, i)
-                  div(flexColumn,
-                    r.render,
-                    r.errorOn.signal.expand(
-                      textArea(fontSize := "15px",
-                        dropdownError,
-                        child.text <-- r.currentStack.signal
+              children <--
+                testingAuthentications.signal.map: as ⇒
+                  as.zipWithIndex.map: (a, i) ⇒
+                    //for (a ← auths()) yield {
+                    val r = Reactive(a, i)
+                    div(flexColumn,
+                      r.render,
+                      r.errorOn.signal.expand(
+                        textArea(fontSize := "15px",
+                          dropdownError,
+                          child.text <-- r.currentStack.signal
+                        )
                       )
                     )
-                  )
-                }
-              }
             )
-        }
       )
 
     div(

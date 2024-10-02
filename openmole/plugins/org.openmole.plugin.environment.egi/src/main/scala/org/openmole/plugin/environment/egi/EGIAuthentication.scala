@@ -22,8 +22,6 @@ import java.io.{ File, _ }
 import gridscale.authentication.P12Authentication
 import gridscale.egi._
 import org.openmole.core.authentication._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.plugin.environment.batch.authentication._
 import org.openmole.tool.crypto.Cypher
 import java.util.zip.GZIPInputStream
 
@@ -91,7 +89,7 @@ object EGIAuthentication extends JavaLogger {
     Authentication.save[EGIAuthentication](a, (_, _) => true)
   }
 
-  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService) =
+  def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore) =
     Authentication.load[EGIAuthentication].headOption
 
   def clear(implicit workspace: Workspace, authenticationStore: AuthenticationStore) =
@@ -145,9 +143,8 @@ object EGIAuthentication extends JavaLogger {
   }
 
   def testPassword[A: EGIAuthenticationInterface](a: A)(implicit cypher: Cypher) =
-    a match {
-      case a: P12Certificate ⇒ P12Authentication.testPassword(P12Authentication(a.certificate, a.password))
-    }
+    a match
+      case a: P12Certificate ⇒ P12Authentication.testPassword(P12Authentication(a.certificate, cypher.decrypt(a.cypheredPassword)))
 
   def testProxy[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
     proxy(a, voName, None, None).map(_ ⇒ true)
@@ -169,30 +166,22 @@ object EGIAuthentication extends JavaLogger {
     gridscale.dirac.supportedVOs(CACertificatesDir, preference(EGIEnvironment.DiracConnectionTimeout))
   }
 
-  implicit def defaultAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore, serializerService: SerializerService): EGIAuthentication =
+  implicit def defaultAuthentication(implicit workspace: Workspace, authenticationStore: AuthenticationStore): EGIAuthentication =
     EGIAuthentication().getOrElse(throw new UserBadDataError("No authentication was found"))
 
 }
 
 sealed trait EGIAuthentication
 
-object P12Certificate {
+object P12Certificate:
   def apply(cypheredPassword: String, certificate: File = new File(new File(System.getProperty("user.home")), ".globus/certificate.p12")) =
     new P12Certificate(cypheredPassword, certificate)
-}
 
-case class P12Certificate(cypheredPassword: String, certificate: File) extends CypheredPassword with EGIAuthentication
+case class P12Certificate(cypheredPassword: String, certificate: File) extends EGIAuthentication
 
-object EGIAuthenticationInterface {
+object EGIAuthenticationInterface:
   implicit def p12CertificateIsEGIAuthentication(implicit cypher: Cypher): EGIAuthenticationInterface[EGIAuthentication] =
-    new EGIAuthenticationInterface[EGIAuthentication] {
-      override def apply(a: EGIAuthentication) =
-        a match {
-          case p12: P12Certificate ⇒ P12Authentication(p12.certificate, p12.password)
-        }
-    }
-}
+    case p12: P12Certificate ⇒ P12Authentication(p12.certificate, cypher.decrypt(p12.cypheredPassword))
 
-trait EGIAuthenticationInterface[A] {
+trait EGIAuthenticationInterface[A]:
   def apply(a: A): gridscale.authentication.P12Authentication
-}

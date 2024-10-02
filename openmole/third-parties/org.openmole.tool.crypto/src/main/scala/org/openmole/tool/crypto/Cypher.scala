@@ -31,6 +31,6 @@ case class Cypher(private val password: Option[String]):
       case None    ⇒ Cypher.Obfuscator
 
   def encrypt(s: String) = encryptor.encrypt(s)
-  def decrypt(s: String) = if (s.isEmpty) s else encryptor.decrypt(s)
+  def decrypt(s: String) = if s == null || s.isEmpty then s else encryptor.decrypt(s)
 
 
