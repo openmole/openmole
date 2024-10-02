@@ -55,7 +55,7 @@ class TreeNodePanel {
   val treeWarning = Var(true)
   val draggedNode: Var[Option[SafePath]] = Var(None)
   val update: Var[Long] = Var(0)
-  val commitable: Var[Boolean] = Var(false)
+  val commitable: Var[Seq[String]] = Var(Seq())
   val addable: Var[Seq[String]] = Var(Seq())
   val gitFolder: Var[Boolean] = Var(false)
 
@@ -231,11 +231,11 @@ class TreeNodePanel {
                 ).amend(verticalLine, disableIfEmptyCls)
                 else emptyNode
                 ,
-                if co
+                if !co.isEmpty
                 then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
                 else emptyNode
                 ,
-                if co
+                if !co.isEmpty
                 then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
                   confirmationDiv.set(
                     Some(confirmation("Stash changes ?", "OK", () ⇒
@@ -255,7 +255,7 @@ class TreeNodePanel {
                 ).amend(verticalLine)
                 else emptyNode
                 ,
-                if co
+                if !co.isEmpty
                 then iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
                   confirmationDiv.set(
                     Some(confirmation(s"Revert changes ? ${treeNodeManager.selected.now().size} files ?", "OK", () ⇒
@@ -412,7 +412,7 @@ class TreeNodePanel {
                       )
                     else emptyNode
                   fileToolBar.gitBranchList.set(nodes.branchData)
-                  commitable.set(nodes.data.flatMap(_.gitStatus).exists(gs => gs == Modified || gs == Conflicting))
+                  commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked) || x._2 == Some(Conflicting) || x._2 == Some(Modified)).map(_._1))
                   addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked)).map(_._1))
                   gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
                   checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }

@@ -259,7 +259,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             ,
             children <-- {
               panels.treeNodePanel.commitable.signal.map: co =>
-                if co
+                if co.contains(initSafePath.name)
                 then
                   Seq(
                     div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, onClick --> { _ ⇒
