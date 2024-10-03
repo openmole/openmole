@@ -25,24 +25,21 @@ import scala.concurrent.Future
 
 sealed trait GUIPlugin
 
-trait AuthenticationPlugin extends GUIPlugin:
-  type AuthType <: AuthenticationData
-  def data: AuthType
-  def factory: AuthenticationPluginFactory
+trait AuthenticationPlugin[T] extends GUIPlugin:
+  def name: String
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement
   def save(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
-  def remove(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
-  def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
 trait GUIPluginFactory
 
 trait AuthenticationPluginFactory extends GUIPluginFactory:
-  type AuthType <: AuthenticationData
+  type AuthType
   def name: String
-  def build(data: AuthType): AuthenticationPlugin
-  def buildEmpty: AuthenticationPlugin
+  def build(data: AuthType): AuthenticationPlugin[AuthType]
+  def buildEmpty: AuthenticationPlugin[AuthType]
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]]
-
+  def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
 
 trait MethodAnalysisPlugin extends GUIPlugin:
   def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement

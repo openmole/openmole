@@ -754,7 +754,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.scalaXML),
+  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.scalaXML, Libraries.sshj),
   guiSettings) dependsOn(
   apiGUI,
   dataGUI,

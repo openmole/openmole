@@ -26,21 +26,28 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
 
-case class FileUploaderUI(existingKey: Option[SafePath], renaming: Option[SafePath] = None):
-  val file: Var[Option[SafePath]] = Var(existingKey)
+object AuthenticationUploaderUI:
+  def apply(existingKey: Option[SafePath], directory: SafePath) =
+    val up = new AuthenticationUploaderUI(directory)
+    up.file.set(existingKey)
+    up
+
+class AuthenticationUploaderUI(directory: SafePath):
+  val file: Var[Option[SafePath]] = Var(None)
 
   def view(using api: ServerAPI, path: BasePath) =
     label(
-      fileInput((fInput: Input) ⇒ {
-        val to = renaming.orElse(existingKey).getOrElse(SafePath(Seq(randomId), ServerFileSystemContext.Authentication))
-        api.upload(fInput.ref.files.toSeq.map(f => f -> to)).map { _ ⇒
-          file.set(Some(to))
-          fInput.ref.value = ""
-        }
-      }),
-      child <-- file.signal.map {
+      fileInput: fInput ⇒
+        println(fInput.ref.files)
+        fInput.ref.files.headOption.foreach: f =>
+          val to = directory / f.name
+          api.upload:
+            fInput.ref.files.toSeq.map(f => f -> to)
+          .map: _ ⇒
+            file.set(Some(to))
+            fInput.ref.value = "",
+      child <-- file.signal.map:
         case Some(f) => span(f.name, badge_success, cls := "badgeOM")
-        case _ => span("No certificate", badge_secondary, cls := "badgeOM")
-      },
+        case _ => span("No certificate", badge_secondary, cls := "badgeOM"),
       cls := "inputFileStyle"
     )

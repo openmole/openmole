@@ -319,9 +319,6 @@ case class PluginExtensionData(
 
 type GUIPluginAsJS = String
 
-trait AuthenticationData:
-  def name: String
-
 trait WizardData
 
 sealed trait Test:
@@ -467,3 +464,8 @@ case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
 
 case class GUIOMRSectionContent(name: Option[String], variables: Seq[GUIVariable])
 case class GUIVariable(name: String, value: Option[GUIVariable.ValueType], `type`: String)
+
+case class GitPrivateKeyAuthenticationData(
+  privateKey:       Option[SafePath] = None,
+  password:         String           = "",
+  directory:        SafePath         = SafePath(Seq(randomId), ServerFileSystemContext.Authentication))

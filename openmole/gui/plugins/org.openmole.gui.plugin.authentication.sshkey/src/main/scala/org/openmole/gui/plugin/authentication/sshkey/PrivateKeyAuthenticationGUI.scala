@@ -29,29 +29,30 @@ import org.openmole.gui.shared.api.*
 
 import scala.scalajs.js
 
-object TopLevelExports {
+object TopLevelExports:
   @JSExportTopLevel("authentication_sshkey")
-  val sshkey = js.Object {
+  val sshkey = js.Object:
     new org.openmole.gui.plugin.authentication.sshkey.PrivateKeyAuthenticationFactory
-  }
-}
 
-class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory {
+
+class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory:
   type AuthType = PrivateKeyAuthenticationData
-  def buildEmpty: AuthenticationPlugin = new PrivateKeyAuthenticationGUI
-  def build(data: AuthType): AuthenticationPlugin = new PrivateKeyAuthenticationGUI(data)
-  def name = "SSH Private key"
+  def buildEmpty = new PrivateKeyAuthenticationGUI()
+  def build(data: AuthType): AuthenticationPlugin[AuthType] = new PrivateKeyAuthenticationGUI(data)
+  def name = "Cluster SSH Private key"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.privateKeyAuthentications(()).future)
-}
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future)
+  def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
-class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin {
+class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin[PrivateKeyAuthenticationData] {
   type AuthType = PrivateKeyAuthenticationData
 
   val passwordStyle: HESetters = Seq(
     width := "130",
     `type` := "password"
   )
-  val privateKeyUploader = FileUploaderUI(data.privateKey)
+
+  val privateKeyUploader = AuthenticationUploaderUI(data.privateKey, data.directory)
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
 
@@ -61,9 +62,7 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
 
   val portInput = inputTag(data.port).amend(placeholder := "Port")
 
-  def factory = new PrivateKeyAuthenticationFactory
-
-  def remove(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future)
+  def name = s"${data.login}@${data.target}"
 
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = div(
     flexColumn, width := "400px", height := "220",
@@ -74,19 +73,14 @@ class PrivateKeyAuthenticationGUI(val data: PrivateKeyAuthenticationData = Priva
     div(cls := "verticalFormItem", div("Private key", width := "150px"), display.flex, div(privateKeyUploader.view.amend(flexRow, justifyContent.flexEnd), width := "100%"))
   )
 
-
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
-    for
-      - <- remove
-      _ <-
-        PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
-          privateKey = privateKeyUploader.file.now(),
-          loginInput.ref.value,
-          passwordInput.ref.value,
-          targetInput.ref.value,
-          portInput.ref.value)).future)
-    yield ()
+    PluginFetch.futureError(_.removeAuthentication(data).future).andThen: _=>
+      PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
+        privateKey = privateKeyUploader.file.now(),
+        loginInput.ref.value,
+        passwordInput.ref.value,
+        targetInput.ref.value,
+        portInput.ref.value)).future)
 
-  def test(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
 }

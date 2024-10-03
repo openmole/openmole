@@ -33,7 +33,7 @@ import org.openmole.core.threadprovider.{ThreadProvider, toExecutionContext}
 import org.openmole.core.dsl.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.core.fileservice.FileServiceCache
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.format.*
 import org.openmole.core.format.OMROutputFormat
@@ -46,7 +46,6 @@ import org.openmole.gui.server.git.GitService
 import org.openmole.gui.shared.data
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
-
 import scala.jdk.FutureConverters.*
 
 /*
@@ -741,4 +740,55 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.workspace
     GitService.withGit(safePathToFile(from), projectsDirectory): git=>
       GitService.stashPop(git)
+
+
+  def gitAuthenticationEquality =
+    (d1: GitPrivateKeyAuthenticationData, d2: GitPrivateKeyAuthenticationData) =>
+      d1.directory == d2.directory
+
+  def gitAuthentications: Seq[GitPrivateKeyAuthenticationData] =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, cypher}
+    Authentication.load[GitPrivateKeyAuthenticationData].map: d =>
+      d.copy(password = cypher.decrypt(d.password))
+
+  def addGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, cypher}
+    Authentication.save(d.copy(password = cypher.encrypt(d.password)), gitAuthenticationEquality)
+
+  def removeGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, workspace}
+    Authentication.remove(d, gitAuthenticationEquality)
+    safePathToFile(d.directory).recursiveDelete
+
+  def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+    import services.{cypher, workspace}
+
+    def isPasswordCorrect(path: String, password: String): Boolean =
+      import net.schmizz.sshj.*
+
+      val sshClient = new SSHClient()
+      try
+        val verifier = new transport.verification.HostKeyVerifier:
+          def verify(hostname: String, port: Int, key: java.security.PublicKey): Boolean = true
+          def findExistingAlgorithms(hostname: String, port: Int): java.util.List[String] = new java.util.ArrayList()
+
+        sshClient.addHostKeyVerifier(verifier)
+        val keyProvider = sshClient.loadKeys(path, password)
+        true
+      catch
+        case e: IOException => false
+      finally sshClient.close()
+
+    d.privateKey.map: file =>
+      val privateKey = safePathToFile(file)
+      if isPasswordCorrect(privateKey.getAbsolutePath, d.password)
+      then Seq(PassedTest("Password is correct"))
+      else Seq(PassedTest("Password is incorrect"))
+    .getOrElse(Seq(PassedTest("Private key not set")))
 }

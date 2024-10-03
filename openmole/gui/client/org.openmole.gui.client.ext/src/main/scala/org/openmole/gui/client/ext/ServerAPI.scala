@@ -96,3 +96,8 @@ trait ServerAPI:
   def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit]
   def stash(from: SafePath)(using BasePath): Future[Unit]
   def stashPop(from: SafePath)(using BasePath): Future[Unit]
+
+  def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]]
+  def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit]
+  def removeGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit]
+  def testGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Seq[Test]]

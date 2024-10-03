@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.sshkey
 
-import org.openmole.gui.shared.data.{AuthenticationData, SafePath}
+import org.openmole.gui.shared.data.*
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -24,8 +24,5 @@ case class PrivateKeyAuthenticationData(
   login:            String         = "",
   password: String                 = "",
   target:           String         = "",
-  port:             String         = "22"
-) extends AuthenticationData {
-  def name = s"$login@$target"
-
-}
+  port:             String         = "22",
+  directory:        SafePath       = SafePath(Seq(randomId), ServerFileSystemContext.Authentication))

@@ -224,6 +224,10 @@ object utils:
     safePaths.foreach: sp ⇒
       deleteFile(sp)
 
+  def deleteEmptyDirectories(s: SafePath)(using workspace: Workspace) =
+    safePathToFile(s).listFilesSafe.foreach: f =>
+      if f.isDirectory && f.listFileSafeIterator.isEmpty then f.delete()
+
   val openmoleFileName = "main.js"
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val depsFileName = "deps.js"
@@ -396,3 +400,4 @@ object utils:
       InternalServerError {
         Left(ErrorData(t)).asJson.noSpaces
       }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
+

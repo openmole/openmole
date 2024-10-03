@@ -91,8 +91,8 @@ package file {
         else file.size == 0L
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
-
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
+      def listFileSafeIterator = Files.list(file.toPath).iterator().asScala
       
       def recursiveListFilesSafe(filter: File ⇒ Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 

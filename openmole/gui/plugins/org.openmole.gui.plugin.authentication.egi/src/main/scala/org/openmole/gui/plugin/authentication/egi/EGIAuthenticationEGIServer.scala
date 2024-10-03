@@ -30,10 +30,10 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
+import org.openmole.tool.file.*
 
-object EGIAuthenticationAPIServer {
+object EGIAuthenticationAPIServer:
   val voTest = PreferenceLocation[Seq[String]]("AuthenticationPanel", "voTest", Some(Seq[String]()))
-}
 
 class EGIAuthenticationEGIServer(s: Services)
   extends APIServer
@@ -49,7 +49,7 @@ class EGIAuthenticationEGIServer(s: Services)
     addAuthentication.errorImplementedBy(a => impl.addAuthentication(a))
 
   val removeAuthenticationsRoute =
-    removeAuthentications.errorImplementedBy(_ => impl.removeAuthentications())
+    removeAuthentications.errorImplementedBy(impl.removeAuthentications)
 
   val setVOTestsRoute =
     setVOTests.errorImplementedBy(vo => impl.setVOTest(vo))
@@ -80,25 +80,26 @@ class EGIAuthenticationEGIServer(s: Services)
         case _ ⇒ Seq()
 
     def addAuthentication(data: EGIAuthenticationData): Unit =
-      coreObject(data).foreach { a ⇒ EGIAuthentication.update(a, test = false) }
+      coreObject(data).foreach: a ⇒
+        EGIAuthentication.update(a, test = false)
 
-    def removeAuthentications() = EGIAuthentication.clear
+    def removeAuthentications(data: EGIAuthenticationData) =
+      EGIAuthentication.clear
+      safePathToFile(EGIAuthenticationData.directory).recursiveDelete
 
-    def testAuthentication(data: EGIAuthenticationData): Seq[Test] = {
+    def testAuthentication(data: EGIAuthenticationData): Seq[Test] =
 
       def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
-        test(d) match {
+        test(d) match
           case Success(_) ⇒ Test.passed()
           case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
-        }
-      }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name, None)))
+      }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown error", None)))
 
       def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
-        test(d, voName) match {
+        test(d, voName) match
           case Success(_) ⇒ Test.passed(voName)
           case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
-        }
-      }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown " + data.name, None)))
+      }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown error", None)))
 
       val vos = services.preference(EGIAuthenticationAPIServer.voTest)
 
@@ -123,7 +124,6 @@ class EGIAuthenticationEGIServer(s: Services)
           case Failure(f) ⇒ Test.error("Error", ErrorData(f))
         }
       }
-    }
 
     def setVOTest(vos: Seq[String]): Unit =
       services.preference.setPreference(EGIAuthenticationAPIServer.voTest, vos)

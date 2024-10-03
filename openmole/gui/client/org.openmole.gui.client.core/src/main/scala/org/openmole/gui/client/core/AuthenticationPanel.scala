@@ -33,11 +33,11 @@ import scaladget.bootstrapnative.bsn
 
 object AuthenticationPanel:
 
-  case class TestingAuthentication(auth: AuthenticationPlugin, tests: Signal[Seq[Test]])
+  case class TestingAuthentication(auth: AuthenticationPlugin[?], tests: Signal[Seq[Test]], factoryName: String, remove: () => Future[Unit])
+  case class DisplayedAuthentication(plugin: AuthenticationPlugin[?], factoryName: String)
 
-  val currentAuthentication: Var[Option[AuthenticationPlugin]] = Var(None)
+  val currentAuthentication: Var[Option[DisplayedAuthentication]] = Var(None)
   val testingAuthentications: Var[Seq[TestingAuthentication]] = Var(Seq())
-
 
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     given NotificationService = NotificationManager.toService(panels.notifications)
@@ -49,37 +49,45 @@ object AuthenticationPanel:
         yield
           factory.getData.map: data =>
             data.map: d =>
-              val as = factory.build(d)
-              TestingAuthentication(as, EventStream.fromFuture(as.test, true).toSignal(Seq()))
+              TestingAuthentication(factory.build(d), EventStream.fromFuture(factory.test(d), true).toSignal(Seq()), factory.name, () => factory.remove(d))
           .recover: e =>
             toService(panels.notifications).notify(NotificationLevel.Error,  s"Error while getting authentication", org.openmole.gui.client.ext.ClientUtil.errorTextArea(ErrorData.toStackTrace(e)))
             Seq()
 
       Future.sequence(tested).map(_.flatten).foreach(testingAuthentications.set)
 
-    def getAuthSelector(currentFactory: AuthenticationPluginFactory) =
+    def getAuthSelector(factoryName: String) =
       lazy val authenticationSelector: Options[AuthenticationPluginFactory] =
 
         val currentInd =
-          val ind = plugins.authenticationFactories.map { _.name }.indexOf(currentFactory.name)
+          val ind = plugins.authenticationFactories.map { _.name }.indexOf(factoryName)
           if ind == -1 then 0 else ind
 
-        plugins.authenticationFactories.options(currentInd, bsn.btn_warning, (a: AuthenticationPluginFactory) ⇒ a.name, onclose = () ⇒
-          currentAuthentication.set(authenticationSelector.content.now().map { _.buildEmpty }))
+        plugins.
+          authenticationFactories.options(
+            currentInd,
+            bsn.btn_warning,
+            _.name,
+            onclose = () ⇒ currentAuthentication.set:
+              authenticationSelector.content.now().map: s =>
+                DisplayedAuthentication(s.buildEmpty, s.name)
+          )
 
       authenticationSelector
 
-    def removeAuthentication(ad: AuthenticationPlugin) = ad.remove.andThen(_ ⇒ refreshAuthentications)
-
     def save =
-      currentAuthentication.now().map { _.save.andThen(_ => refreshAuthentications) }
+      currentAuthentication.now().foreach: auth =>
+        auth.plugin.save.andThen(_ => refreshAuthentications)
       currentAuthentication.set(None)
 
     val newButton = button(
       "New authentication",
       btn_primary,
       marginLeft := "40",
-      onClick --> currentAuthentication.set(plugins.authenticationFactories.headOption.map(_.buildEmpty))
+      onClick -->
+        currentAuthentication.set:
+          plugins.authenticationFactories.headOption.map: factory =>
+            DisplayedAuthentication(factory.buildEmpty, factory.name)
     )
 
     val saveButton = button("Save", btn_primary, onClick --> save)
@@ -120,18 +128,31 @@ object AuthenticationPanel:
         div(flexRow,
           cls := "docEntry",
           backgroundColor := (if i % 2 == 0 then "#d1dbe4" else "#f4f4f4"),
-          a(testingAuthentication.auth.data.name, float.left, color := "#222", width := "350px", cursor.pointer, onClick --> { _ ⇒ currentAuthentication.set(Some(testingAuthentication.auth)) }),
+          a(
+            testingAuthentication.auth.name, float.left, color := "#222", width := "350px", cursor.pointer,
+            onClick -->
+              currentAuthentication.set:
+                Some(DisplayedAuthentication(testingAuthentication.auth, testingAuthentication.factoryName))
+          ),
           columnizer(
             span(
               cls := "badgeOM",
-              testingAuthentication.auth.factory.name)
+              testingAuthentication.factoryName)
           ),
           div(
-            glyphSpan(glyph_trash).amend(cls := "glyphitem", marginLeft := "50px", color := "#222", fontSize := "18", onClick --> { _ ⇒ removeAuthentication(testingAuthentication.auth) })
+            glyphSpan(glyph_trash).amend(
+              cls := "glyphitem", marginLeft := "50px", color := "#222", fontSize := "18",
+              onClick --> {
+                _ =>
+                  testingAuthentication.remove().andThen: _ =>
+                    refreshAuthentications
+              }
+            )
           ),
           div(
             children <--
-              testingAuthentication.tests.map { tests => tests.map { t => columnizer(toLabel(t)) } }
+              testingAuthentication.tests.map: tests =>
+                tests.map(t => columnizer(toLabel(t)))
           )
         )
 
@@ -140,11 +161,11 @@ object AuthenticationPanel:
     val authPanel =
       div(marginTop := "50",
         child <-- currentAuthentication.signal.map:
-          case Some(p: AuthenticationPlugin) ⇒
+          case Some(p) ⇒
             div(
               padding := "20",
-              getAuthSelector(p.factory).selector,
-              p.panel.amend(
+              getAuthSelector(p.factoryName).selector,
+              p.plugin.panel.amend(
                 div(
                   marginTop := "20",
                   display.flex,
@@ -153,7 +174,7 @@ object AuthenticationPanel:
                 )
               )
             )
-          case _ ⇒
+          case None ⇒
             div(
               children <--
                 testingAuthentications.signal.map: as ⇒

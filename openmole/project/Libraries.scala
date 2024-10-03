@@ -78,6 +78,7 @@ object Libraries {
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
   lazy val jline = "org.openmole.library" %% "org-jline-jline" % jlineVersion
 
+  lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
 
   def httpClientVersion = "4.5.3"
@@ -94,7 +95,7 @@ object Libraries {
   lazy val gridscaleSSH =
     Seq(
       "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
-      "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+      sshj
     )
 
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion

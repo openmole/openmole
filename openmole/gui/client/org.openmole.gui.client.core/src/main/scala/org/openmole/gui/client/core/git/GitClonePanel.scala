@@ -1,14 +1,16 @@
-package org.openmole.gui.client.core
+package org.openmole.gui.client.core.git
 
-import org.openmole.gui.client.ext.*
-import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
-import org.openmole.gui.client.core.CoreUtils.*
-import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveElement.isActive
+import org.openmole.gui.client.core.CoreUtils.*
+import org.openmole.gui.client.core.Panels
+import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
+import scaladget.bootstrapnative.bsn.*
+import scaladget.tools.*
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object GitClonePanel:
@@ -34,3 +36,5 @@ object GitClonePanel:
       urlInput,
       cloneButton
     )
+    
+    

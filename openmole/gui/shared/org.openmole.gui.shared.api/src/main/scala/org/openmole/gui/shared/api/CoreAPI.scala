@@ -118,8 +118,20 @@ trait CoreAPI extends RESTAPI:
     
   val stashPop: ErrorEndpoint[SafePath, Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "stash-pop", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
-    
-    
+
+  val gitAuthentications: ErrorEndpoint[Unit, Seq[GitPrivateKeyAuthenticationData]] =
+    errorEndpoint(get(path /  "git" / "authentications"), ok(jsonResponse[Seq[GitPrivateKeyAuthenticationData]]))
+
+  val addGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
+    errorEndpoint(post(path / "git" / "add-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+
+  val removeGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
+    errorEndpoint(post(path / "git" / "remove-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+
+  val testGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Seq[Test]] =
+    errorEndpoint(post(path / "git" / "test-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+
+
   // ---------- Executions --------------------
   //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
 //  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema

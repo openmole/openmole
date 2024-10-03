@@ -156,15 +156,19 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       shutdown.errorImplementedBy(_ => apiImpl.shutdown()),
       jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
       isAlive.implementedBy(_ => apiImpl.isAlive()),
-      cloneRepository.errorImplementedBy((r,d) => apiImpl.cloneRepository(r,d)),
-      commit.errorImplementedBy((r,d) => apiImpl.commit(r,d)),
-      revert.errorImplementedBy(r=> apiImpl.revert(r)),
-      add.errorImplementedBy(r=> apiImpl.add(r)),
-      pull.errorImplementedBy(r=> apiImpl.pull(r)),
-      branchList.errorImplementedBy(r=> apiImpl.branchList(r)),
-      checkout.errorImplementedBy((r,b)=> apiImpl.checkout(r,b)),
-      stash.errorImplementedBy(r=> apiImpl.stash(r)),
-      stashPop.errorImplementedBy(r=> apiImpl.stashPop(r))
+      cloneRepository.errorImplementedBy(apiImpl.cloneRepository),
+      commit.errorImplementedBy(apiImpl.commit),
+      revert.errorImplementedBy(apiImpl.revert),
+      add.errorImplementedBy(apiImpl.add),
+      pull.errorImplementedBy(apiImpl.pull),
+      branchList.errorImplementedBy(apiImpl.branchList),
+      checkout.errorImplementedBy(apiImpl.checkout),
+      stash.errorImplementedBy(apiImpl.stash),
+      stashPop.errorImplementedBy(apiImpl.stashPop),
+      gitAuthentications.errorImplementedBy(_ => apiImpl.gitAuthentications),
+      addGitAuthentication.errorImplementedBy(apiImpl.addGitAuthentication),
+      removeGitAuthentication.errorImplementedBy(apiImpl.removeGitAuthentication),
+      testGitAuthentication.errorImplementedBy(apiImpl.testGitAuthentication)
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

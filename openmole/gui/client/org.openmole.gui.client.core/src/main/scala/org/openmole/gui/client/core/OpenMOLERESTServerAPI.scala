@@ -31,8 +31,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.io.IOException
 import scala.util.Failure
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.core.git.GitPrivateKeyAuthenticationFactory
 
 class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationService) extends ServerAPI:
+  api =>
+
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = fetch.futureError(_.copyFiles(paths, overwrite).future)
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = fetch.futureError(_.saveFile(safePath, content, hash, overwrite).future)
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = fetch.futureError(_.createFile(path, name, directory).future)
@@ -70,10 +73,9 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
   override def isAlive()(using BasePath): Future[Boolean] =
     import scala.util.*
-    fetch.future(_.isAlive(()).future, timeout = Some(3 seconds), warningTimeout = None, notifyError = false).transform {
+    fetch.future(_.isAlive(()).future, timeout = Some(3 seconds), warningTimeout = None, notifyError = false).transform:
       case Success(value) => Success(value)
       case Failure(_) => Success(false)
-    }
 
   override def jvmInfos()(using BasePath): Future[JVMInfos] = fetch.futureError(_.jvmInfos(()).future)
   override def mdToHtml(safePath: SafePath)(using BasePath): Future[String] = fetch.futureError(_.mdToHtml(safePath).future)
@@ -91,6 +93,11 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit] = fetch.futureError(_.checkout(from,branchName).future)
   override def stash(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.stash(from).future)
   override def stashPop(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.stashPop(from).future)
+
+  override def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]] = fetch.futureError(_.gitAuthentications(()).future)
+  override def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit] = fetch.futureError(_.addGitAuthentication(data).future)
+  override def removeGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit] = fetch.futureError(_.removeGitAuthentication(data).future)
+  override def testGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Seq[Test]] = fetch.futureError(_.testGitAuthentication(data).future)
 
   override def upload(
     files: Seq[(File, SafePath)],
@@ -191,9 +198,11 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
           notificationService.notify(NotificationLevel.Error, s"Error while instantiating plugin", div(ErrorData.stackTrace(ErrorData(t))))
           None
 
-    fetch.futureError(_.guiPlugins(()).future).map { p ⇒
-      val authFact = p.authentications.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) }
+    fetch.futureError(_.guiPlugins(()).future).map: p ⇒
+      val authFact =
+        p.authentications.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) } ++
+          Seq(new GitPrivateKeyAuthenticationFactory(api))
+
       val wizardFactories = p.wizards.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
       val analysisFactories = p.analysis.flatMap { (method, gp) ⇒ successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
       f(GUIPlugins(authFact, wizardFactories, analysisFactories))
-    }
