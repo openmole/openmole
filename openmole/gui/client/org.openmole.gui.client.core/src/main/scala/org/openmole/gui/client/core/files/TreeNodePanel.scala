@@ -245,6 +245,15 @@ class TreeNodePanel {
                 then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
                 else emptyNode
                 ,
+                div(OMTags.glyph_pull, "pull", paddingBottom := "20,  fileActionItems, verticalLine, cls := "glyphitem popover-item",
+                  onClick --> { _ ⇒
+                    api.pull(treeNodeManager.directory.now()).foreach { st =>
+                        st match
+                          case MergeStatus.ChangeToBeResolved =>
+                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                          case _ => closeMultiTool
+                      }
+                  }),
                 if !co.isEmpty
                 then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
                   confirmationDiv.set(
@@ -259,11 +268,11 @@ class TreeNodePanel {
                 then iconAction(glyphItemize(OMTags.glyph_stash_pop), "pop", () ⇒
                   confirmationDiv.set(
                     Some(confirmation("Pop stashed changes ?", "OK", () ⇒
-                      api.stashPop(treeNodeManager.directory.now()).foreach { st=>
+                      api.stashPop(treeNodeManager.directory.now()).foreach { st =>
                         st match
                           case MergeStatus.ChangeToBeResolved =>
                             confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
-                          case _=> closeMultiTool
+                          case _ => closeMultiTool
                       }
                     ))
                   )

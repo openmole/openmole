@@ -1,7 +1,7 @@
 package org.openmole.gui.server.git
 
 import org.eclipse.jgit.api.*
-import org.eclipse.jgit.api.errors.StashApplyFailureException
+import org.eclipse.jgit.api.errors.{CheckoutConflictException, StashApplyFailureException}
 import org.eclipse.jgit.storage.file.*
 import org.openmole.gui.shared.data.*
 
@@ -66,7 +66,14 @@ object GitService:
 
     addPath0(files, git.add).call
 
-  def pull(implicit git: Git) = git.pull.call
+  def pull(implicit git: Git) =
+    if !git.stashList.call.isEmpty
+    then 
+      try 
+        git.pull.call
+        MergeStatus.Ok
+      catch case e: CheckoutConflictException=> MergeStatus.ChangeToBeResolved
+    else MergeStatus.Empty
 
   def branchList(implicit git: Git): Seq[String] =
     git.branchList.call().asScala.toSeq.map(_.getName)

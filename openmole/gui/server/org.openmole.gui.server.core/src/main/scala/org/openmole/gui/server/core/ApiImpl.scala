@@ -717,10 +717,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GitService.withGit(safePathToFile(hf), projectsDirectory): git =>
         GitService.add(paths.map(_.toFile))(git)
 
-  def pull(from: SafePath): Unit =
+  def pull(from: SafePath): MergeStatus =
     import services.workspace
-    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
-      GitService.pull(git)
+    {
+      GitService.git(safePathToFile(from), projectsDirectory) map: git =>
+       GitService.pull(git)
+    }.getOrElse(MergeStatus.Empty)
 
   def branchList(from: SafePath): Option[BranchData] =
     import services.workspace
