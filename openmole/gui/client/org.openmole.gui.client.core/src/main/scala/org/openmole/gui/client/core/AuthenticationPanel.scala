@@ -201,7 +201,8 @@ object AuthenticationPanel:
         newButton
       ),
       authPanel,
-      onMountCallback(_ => refreshAuthentications)
+      onMountCallback(_ => refreshAuthentications),
+      onUnmountCallback(_ => currentAuthentication.set(None))
     )
 
 
