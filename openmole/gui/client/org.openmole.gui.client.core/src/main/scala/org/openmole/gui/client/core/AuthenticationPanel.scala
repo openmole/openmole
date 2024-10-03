@@ -45,7 +45,7 @@ object AuthenticationPanel:
     def refreshAuthentications =
       val tested =
         for
-          factory <- plugins.authenticationFactories.sortBy(_.name)
+          factory <- plugins.authenticationFactories
         yield
           factory.getData.map: data =>
             data.map: d =>
@@ -58,17 +58,18 @@ object AuthenticationPanel:
 
     def getAuthSelector(factoryName: String) =
       lazy val authenticationSelector: Options[AuthenticationPluginFactory] =
+        val factories = plugins.authenticationFactories.sortBy(_.name)
 
         val currentInd =
-          val ind = plugins.authenticationFactories.map { _.name }.indexOf(factoryName)
+          val ind = factories.indexWhere(_.name == factoryName)
           if ind == -1 then 0 else ind
 
-        plugins.
-          authenticationFactories.options(
-            currentInd,
-            bsn.btn_warning,
-            _.name,
-            onclose = () ⇒ currentAuthentication.set:
+        factories.options(
+          currentInd,
+          bsn.btn_warning,
+          _.name,
+          onclose =
+            () ⇒ currentAuthentication.set:
               authenticationSelector.content.now().map: s =>
                 DisplayedAuthentication(s.buildEmpty, s.name)
           )
@@ -87,7 +88,7 @@ object AuthenticationPanel:
       marginLeft := "40",
       onClick -->
         currentAuthentication.set:
-          plugins.authenticationFactories.headOption.map: factory =>
+          plugins.authenticationFactories.sortBy(_.name).headOption.map: factory =>
             DisplayedAuthentication(factory.buildEmpty, factory.name)
     )
 
