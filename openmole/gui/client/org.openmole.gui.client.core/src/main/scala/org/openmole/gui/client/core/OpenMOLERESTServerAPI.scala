@@ -88,11 +88,11 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit] = fetch.futureError(_.commit(files, message).future)
   override def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.revert(files).future)
   override def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.add(files).future)
-  override def pull(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.pull(from).future)
+  override def pull(from: SafePath)(using BasePath): Future[MergeStatus] = fetch.futureError(_.pull(from).future)
   override def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]] = fetch.futureError(_.branchList(from).future)
   override def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit] = fetch.futureError(_.checkout(from,branchName).future)
   override def stash(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.stash(from).future)
-  override def stashPop(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.stashPop(from).future)
+  override def stashPop(from: SafePath)(using BasePath): Future[MergeStatus] = fetch.futureError(_.stashPop(from).future)
 
   override def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]] = fetch.futureError(_.gitAuthentications(()).future)
   override def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit] = fetch.futureError(_.addGitAuthentication(data).future)
