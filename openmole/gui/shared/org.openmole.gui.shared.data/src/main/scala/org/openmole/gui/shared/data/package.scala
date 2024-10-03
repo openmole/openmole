@@ -468,7 +468,16 @@ case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
 case class GUIOMRSectionContent(name: Option[String], variables: Seq[GUIVariable])
 case class GUIVariable(name: String, value: Option[GUIVariable.ValueType], `type`: String)
 
+object GitPrivateKeyAuthenticationData:
+  def empty =
+    GitPrivateKeyAuthenticationData(
+      privateKey = None,
+      password = "",
+      directory = SafePath(Seq(randomId), ServerFileSystemContext.Authentication)
+    )
+
 case class GitPrivateKeyAuthenticationData(
-  privateKey:       Option[SafePath] = None,
-  password:         String           = "",
-  directory:        SafePath         = SafePath(Seq(randomId), ServerFileSystemContext.Authentication))
+  privateKey:   Option[String],
+  password:         String,
+  directory:        SafePath):
+  def privateKeyPath = privateKey.map(n => directory / n)

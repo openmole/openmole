@@ -51,15 +51,15 @@ import scala.scalajs.js.annotation.*
 
 class GitPrivateKeyAuthenticationFactory(api: ServerAPI) extends AuthenticationPluginFactory:
   type AuthType = GitPrivateKeyAuthenticationData
-  def buildEmpty = new GitPrivateKeyAuthenticationGUI(api)
+  def buildEmpty = new GitPrivateKeyAuthenticationGUI(api, GitPrivateKeyAuthenticationData.empty)
   def build(data: AuthType) = new GitPrivateKeyAuthenticationGUI(api, data)
   def name = "Git SSH Private key"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = api.gitAuthentications()
   def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.testGitAuthentication(data)
-  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeGitAuthentication(data)
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeGitAuthentication(data, true)
 
 
-class GitPrivateKeyAuthenticationGUI(api: ServerAPI, data: GitPrivateKeyAuthenticationData = GitPrivateKeyAuthenticationData()) extends AuthenticationPlugin[GitPrivateKeyAuthenticationData]:
+class GitPrivateKeyAuthenticationGUI(api: ServerAPI, data: GitPrivateKeyAuthenticationData) extends AuthenticationPlugin[GitPrivateKeyAuthenticationData]:
 
   val passwordStyle: HESetters = Seq(
     width := "130",
@@ -69,7 +69,7 @@ class GitPrivateKeyAuthenticationGUI(api: ServerAPI, data: GitPrivateKeyAuthenti
   val privateKeyUploader = AuthenticationUploaderUI(data.privateKey, data.directory)
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
 
-  def name = data.privateKey.map(_.name).getOrElse("No Name")
+  def name = data.privateKeyPath.map(_.name).getOrElse("No Name")
 
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = div(
     flexColumn, width := "400px", height := "220",
@@ -78,11 +78,12 @@ class GitPrivateKeyAuthenticationGUI(api: ServerAPI, data: GitPrivateKeyAuthenti
   )
 
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
-    api.removeGitAuthentication(data).andThen: _ =>
+    api.removeGitAuthentication(data, false).andThen: _ =>
       val data =
         GitPrivateKeyAuthenticationData(
           privateKey = privateKeyUploader.file.now(),
-          passwordInput.ref.value
+          password = passwordInput.ref.value,
+          directory = privateKeyUploader.directory
         )
 
       api.addGitAuthentication(data)

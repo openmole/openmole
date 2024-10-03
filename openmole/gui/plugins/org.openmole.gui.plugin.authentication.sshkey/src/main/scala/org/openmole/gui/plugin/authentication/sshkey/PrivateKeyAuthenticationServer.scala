@@ -43,7 +43,7 @@ class PrivateKeyAuthenticationServer(s: Services)
     addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
 
   val removeAuthenticationRoute =
-    removeAuthentication.errorImplementedBy { a => impl.removeAuthentication(a) }
+    removeAuthentication.errorImplementedBy { impl.removeAuthentication }
 
   val testAuthenticationRoute =
     testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
@@ -56,7 +56,7 @@ class PrivateKeyAuthenticationServer(s: Services)
     import s._
 
     private def coreObject(data: PrivateKeyAuthenticationData) =
-      data.privateKey.map: pk =>
+      data.privateKeyPath.map: pk =>
         PrivateKey(
           safePathToFile(pk),
           data.login,
@@ -66,27 +66,29 @@ class PrivateKeyAuthenticationServer(s: Services)
         )
 
     def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData] =
-      SSHAuthentication().flatMap {
-        case key: PrivateKey ⇒ Seq(
-          PrivateKeyAuthenticationData(
-            Some(key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)),
-            key.login,
-            cypher.decrypt(key.cypheredPassword),
-            key.host,
-            key.port.toString
-          )
-        )
+      SSHAuthentication().flatMap:
+        case key: PrivateKey ⇒
+          val safePath = key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)
+          Seq:
+            PrivateKeyAuthenticationData(
+              privateKey = Some(safePath.name),
+              login = key.login,
+              password = cypher.decrypt(key.cypheredPassword),
+              target = key.host,
+              port = key.port.toString,
+              directory = safePath.parent
+            )
         case _ ⇒ None
-      }
+
 
     def addAuthentication(data: PrivateKeyAuthenticationData): Unit =
       coreObject(data).foreach: co ⇒
         SSHAuthentication += co
 
-    def removeAuthentication(data: PrivateKeyAuthenticationData): Unit =
+    def removeAuthentication(data: PrivateKeyAuthenticationData, deleteKey: Boolean): Unit =
       coreObject(data).foreach: co ⇒
         SSHAuthentication -= co
-        safePathToFile(data.directory).recursiveDelete
+      if deleteKey then safePathToFile(data.directory).recursiveDelete
 
     def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] =
       Seq(

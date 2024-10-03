@@ -126,8 +126,8 @@ trait CoreAPI extends RESTAPI:
   val addGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
     errorEndpoint(post(path / "git" / "add-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
 
-  val removeGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
-    errorEndpoint(post(path / "git" / "remove-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+  val removeGitAuthentication: ErrorEndpoint[(GitPrivateKeyAuthenticationData, Boolean), Unit] =
+    errorEndpoint(post(path / "git" / "remove-authentication", jsonRequest[(GitPrivateKeyAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
 
   val testGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Seq[Test]] =
     errorEndpoint(post(path / "git" / "test-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))

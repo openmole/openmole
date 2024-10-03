@@ -763,17 +763,17 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.{authenticationStore, cypher}
     Authentication.save(d.copy(password = cypher.encrypt(d.password)), gitAuthenticationEquality)
 
-  def removeGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+  def removeGitAuthentication(d: GitPrivateKeyAuthenticationData, removeFile: Boolean) =
     import io.circe.generic.auto.*
     import org.openmole.core.authentication.*
     import services.{authenticationStore, workspace}
     Authentication.remove(d, gitAuthenticationEquality)
-    safePathToFile(d.directory).recursiveDelete
+    if removeFile then safePathToFile(d.directory).recursiveDelete
 
   def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
     import services.{cypher, workspace}
 
-    def isPasswordCorrect(path: String, password: String): Boolean =
+    def isPasswordCorrect(path: String, password: String): Option[Throwable] =
       import net.schmizz.sshj.*
 
       val sshClient = new SSHClient()
@@ -784,16 +784,16 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
         sshClient.addHostKeyVerifier(verifier)
         val keyProvider = sshClient.loadKeys(path, password)
-        true
+        None
       catch
-        case e: IOException => false
+        case e: IOException => Some(e)
       finally sshClient.close()
 
-    d.privateKey.map: file =>
+    d.privateKeyPath.map: file =>
       val privateKey = safePathToFile(file)
-      if isPasswordCorrect(privateKey.getAbsolutePath, d.password)
-      then Seq(PassedTest("Password is correct"))
-      else Seq(PassedTest("Password is incorrect"))
-    .getOrElse(Seq(PassedTest("Private key not set")))
+      isPasswordCorrect(privateKey.getAbsolutePath, d.password) match
+        case None => Seq(PassedTest("Password is correct"))
+        case Some(e) => Seq(FailedTest("Password is incorrect", ErrorData(e)))
+    .getOrElse(Seq(FailedTest("Private key not set", ErrorData.empty)))
     
 }

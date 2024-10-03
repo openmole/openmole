@@ -96,7 +96,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
   override def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]] = fetch.futureError(_.gitAuthentications(()).future)
   override def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit] = fetch.futureError(_.addGitAuthentication(data).future)
-  override def removeGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit] = fetch.futureError(_.removeGitAuthentication(data).future)
+  override def removeGitAuthentication(data: GitPrivateKeyAuthenticationData, delete: Boolean)(using BasePath): Future[Unit] = fetch.futureError(_.removeGitAuthentication(data, delete).future)
   override def testGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Seq[Test]] = fetch.futureError(_.testGitAuthentication(data).future)
 
   override def upload(

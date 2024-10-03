@@ -45,7 +45,7 @@ object AuthenticationPanel:
     def refreshAuthentications =
       val tested =
         for
-          factory <- plugins.authenticationFactories
+          factory <- plugins.authenticationFactories.sortBy(_.name)
         yield
           factory.getData.map: data =>
             data.map: d =>
@@ -77,8 +77,9 @@ object AuthenticationPanel:
 
     def save =
       currentAuthentication.now().foreach: auth =>
-        auth.plugin.save.andThen(_ => refreshAuthentications)
-      currentAuthentication.set(None)
+        auth.plugin.save.andThen: _ =>
+          currentAuthentication.set(None)
+          refreshAuthentications
 
     val newButton = button(
       "New authentication",

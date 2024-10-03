@@ -37,14 +37,14 @@ object TopLevelExports:
 
 class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory:
   type AuthType = PrivateKeyAuthenticationData
-  def buildEmpty = new PrivateKeyAuthenticationGUI()
+  def buildEmpty = new PrivateKeyAuthenticationGUI(PrivateKeyAuthenticationData.empty)
   def build(data: AuthType): AuthenticationPlugin[AuthType] = new PrivateKeyAuthenticationGUI(data)
   def name = "Cluster SSH Private key"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.privateKeyAuthentications(()).future)
-  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data).future)
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data, true).future)
   def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
 
-class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData = PrivateKeyAuthenticationData()) extends AuthenticationPlugin[PrivateKeyAuthenticationData] {
+class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData) extends AuthenticationPlugin[PrivateKeyAuthenticationData] {
   type AuthType = PrivateKeyAuthenticationData
 
   val passwordStyle: HESetters = Seq(
@@ -74,13 +74,14 @@ class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData = PrivateKe
   )
 
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
-    PluginFetch.futureError(_.removeAuthentication(data).future).andThen: _=>
+    PluginFetch.futureError(_.removeAuthentication(data, false).future).andThen: _=>
       PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
         privateKey = privateKeyUploader.file.now(),
-        loginInput.ref.value,
-        passwordInput.ref.value,
-        targetInput.ref.value,
-        portInput.ref.value)).future)
+        login = loginInput.ref.value,
+        password = passwordInput.ref.value,
+        target = targetInput.ref.value,
+        port = portInput.ref.value,
+        directory = privateKeyUploader.directory)).future)
 
 
 }

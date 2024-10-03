@@ -55,7 +55,6 @@ trait ServerAPI:
   def clearEnvironmentError(id: ExecutionId, environment: EnvironmentId)(using BasePath): Future[Unit]
   def listEnvironmentError(id: ExecutionId, environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
 
-
   def listPlugins()(using BasePath): Future[Seq[Plugin]]
   def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]]
   def removePlugin(path: SafePath)(using BasePath): Future[Unit]
@@ -99,5 +98,5 @@ trait ServerAPI:
 
   def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]]
   def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit]
-  def removeGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit]
+  def removeGitAuthentication(data: GitPrivateKeyAuthenticationData, delete: Boolean)(using BasePath): Future[Unit]
   def testGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Seq[Test]]

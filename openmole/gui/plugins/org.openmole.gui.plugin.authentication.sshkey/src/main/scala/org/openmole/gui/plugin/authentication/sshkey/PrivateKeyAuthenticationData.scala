@@ -19,10 +19,22 @@ import org.openmole.gui.shared.data.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object PrivateKeyAuthenticationData:
+  def empty =
+    PrivateKeyAuthenticationData(
+      privateKey = None,
+      login = "",
+      password = "",
+      target = "",
+      port = "22",
+      directory = SafePath(Seq(randomId), ServerFileSystemContext.Authentication)
+    )
+
 case class PrivateKeyAuthenticationData(
-  privateKey:       Option[SafePath] = None,
-  login:            String         = "",
-  password: String                 = "",
-  target:           String         = "",
-  port:             String         = "22",
-  directory:        SafePath       = SafePath(Seq(randomId), ServerFileSystemContext.Authentication))
+  privateKey:       Option[String],
+  login:            String,
+  password:         String,
+  target:           String,
+  port:             String,
+  directory:        SafePath):
+  def privateKeyPath = privateKey.map(n => directory / n)

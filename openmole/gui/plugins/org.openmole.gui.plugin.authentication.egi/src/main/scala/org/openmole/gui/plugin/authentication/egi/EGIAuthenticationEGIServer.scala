@@ -83,9 +83,9 @@ class EGIAuthenticationEGIServer(s: Services)
       coreObject(data).foreach: a ⇒
         EGIAuthentication.update(a, test = false)
 
-    def removeAuthentications(data: EGIAuthenticationData) =
+    def removeAuthentications(data: EGIAuthenticationData, removeFile: Boolean) =
       EGIAuthentication.clear
-      safePathToFile(EGIAuthenticationData.directory).recursiveDelete
+      if removeFile then safePathToFile(EGIAuthenticationData.directory).recursiveDelete
 
     def testAuthentication(data: EGIAuthenticationData): Seq[Test] =
 

@@ -11,8 +11,8 @@ trait PrivateKeyAuthenticationAPI extends RESTAPI:
   val addAuthentication: ErrorEndpoint[PrivateKeyAuthenticationData, Unit] =
     errorEndpoint(post(path / "ssh" / "add-privatekey-authentication", jsonRequest[PrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
 
-  val removeAuthentication: ErrorEndpoint[PrivateKeyAuthenticationData, Unit] =
-    errorEndpoint(post(path / "ssh" / "remove-privatekey-authentication", jsonRequest[PrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+  val removeAuthentication: ErrorEndpoint[(PrivateKeyAuthenticationData, Boolean), Unit] =
+    errorEndpoint(post(path / "ssh" / "remove-privatekey-authentication", jsonRequest[(PrivateKeyAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
 
   val testAuthentication: ErrorEndpoint[PrivateKeyAuthenticationData, Seq[Test]] =
     errorEndpoint(post(path / "ssh" / "test-privatekey-authentication", jsonRequest[PrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))

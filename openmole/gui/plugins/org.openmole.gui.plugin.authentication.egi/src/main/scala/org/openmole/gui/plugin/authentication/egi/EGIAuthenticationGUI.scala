@@ -44,11 +44,11 @@ class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory:
   def name = "EGI"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.egiAuthentications(()).future)
   def test(data: AuthType)(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60.second))
-  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentications(data).future)
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentications(data, true).future)
 
 class EGIAuthenticationGUI(data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin[EGIAuthenticationData]:
   val password = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
-  val certificateUpload = AuthenticationUploaderUI(data.privateKey, EGIAuthenticationData.directory)
+  val certificateUpload = AuthenticationUploaderUI(data.privateKey.map(_.name), EGIAuthenticationData.directory)
   val voInputContent = Var[String]("")
   val voInput = inputTag("").amend(placeholder := "vo1,vo2", onInput.mapToValue --> voInputContent)
 
@@ -72,8 +72,8 @@ class EGIAuthenticationGUI(data: EGIAuthenticationData = EGIAuthenticationData()
         case s => s.trim.split(',').map(_.trim).toSeq
 
     for
-      _ <- PluginFetch.futureError(_.removeAuthentications(data).future)
-      _ <- PluginFetch.futureError(_.addAuthentication(EGIAuthenticationData(password = password.ref.value, privateKey = certificateUpload.file.now())).future)
+      _ <- PluginFetch.futureError(_.removeAuthentications(data, false).future)
+      _ <- PluginFetch.futureError(_.addAuthentication(EGIAuthenticationData(password = password.ref.value, privateKey = certificateUpload.file.now().map(n => EGIAuthenticationData.directory / n))).future)
       _ <- PluginFetch.futureError(_.setVOTests(vos).future)
     yield ()
 

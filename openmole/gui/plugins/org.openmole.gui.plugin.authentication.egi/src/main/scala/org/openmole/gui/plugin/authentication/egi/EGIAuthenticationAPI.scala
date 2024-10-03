@@ -12,7 +12,7 @@ trait EGIAuthenticationAPI extends RESTAPI:
     errorEndpoint(post(path / "egi" / "add-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Unit]))
 
   val removeAuthentications =
-    errorEndpoint(post(path / "egi" / "remove-authentications", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Unit]))
+    errorEndpoint(post(path / "egi" / "remove-authentications", jsonRequest[(EGIAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
 
   val setVOTests =
     errorEndpoint(post(path / "egi" / "set-vo-tests", jsonRequest[Seq[String]]), ok(jsonResponse[Unit]))

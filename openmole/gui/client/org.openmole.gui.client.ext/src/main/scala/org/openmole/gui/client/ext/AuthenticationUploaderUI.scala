@@ -27,27 +27,26 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
 
 object AuthenticationUploaderUI:
-  def apply(existingKey: Option[SafePath], directory: SafePath) =
+  def apply(existingKey: Option[String], directory: SafePath) =
     val up = new AuthenticationUploaderUI(directory)
     up.file.set(existingKey)
     up
 
-class AuthenticationUploaderUI(directory: SafePath):
-  val file: Var[Option[SafePath]] = Var(None)
+class AuthenticationUploaderUI(val directory: SafePath):
+  val file: Var[Option[String]] = Var(None)
 
   def view(using api: ServerAPI, path: BasePath) =
     label(
       fileInput: fInput ⇒
-        println(fInput.ref.files)
         fInput.ref.files.headOption.foreach: f =>
           val to = directory / f.name
           api.upload:
             fInput.ref.files.toSeq.map(f => f -> to)
           .map: _ ⇒
-            file.set(Some(to))
+            file.set(Some(f.name))
             fInput.ref.value = "",
       child <-- file.signal.map:
-        case Some(f) => span(f.name, badge_success, cls := "badgeOM")
+        case Some(f) => span(f, badge_success, cls := "badgeOM")
         case _ => span("No certificate", badge_secondary, cls := "badgeOM"),
       cls := "inputFileStyle"
     )
