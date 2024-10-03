@@ -95,4 +95,4 @@ trait ServerAPI:
   def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]]
   def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit]
   def stash(from: SafePath)(using BasePath): Future[Unit]
-  def stashPop(from: SafePath)(using BasePath): Future[Unit]
+  def stashPop(from: SafePath)(using BasePath): Future[MergeStatus]

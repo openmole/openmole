@@ -1,6 +1,7 @@
 package org.openmole.gui.server.git
 
 import org.eclipse.jgit.api.*
+import org.eclipse.jgit.api.errors.StashApplyFailureException
 import org.eclipse.jgit.storage.file.*
 import org.openmole.gui.shared.data.*
 
@@ -65,11 +66,7 @@ object GitService:
 
     addPath0(files, git.add).call
 
-  def pull(implicit git: Git) =
-    val stashed = git.stashCreate.call
-    if git.pull.call.isSuccessful
-    then git.stashApply
-    else stashed.reset
+  def pull(implicit git: Git) = git.pull.call
 
   def branchList(implicit git: Git): Seq[String] =
     git.branchList.call().asScala.toSeq.map(_.getName)
@@ -80,8 +77,14 @@ object GitService:
   def stash(implicit git: Git): Unit =
     git.stashCreate.call
     
-  def stashPop(implicit git: Git): Unit =
-    git.stashApply.call
+  def stashPop(implicit git: Git): MergeStatus =
+    if !git.stashList.call.isEmpty
+    then 
+      try 
+        git.stashApply.call
+        MergeStatus.Ok
+      catch case e: StashApplyFailureException=> MergeStatus.ChangeToBeResolved
+    else MergeStatus.Empty
     
   private def getAllSubPaths(path: String) =
      val allDirs = path.split("/").dropRight(1)

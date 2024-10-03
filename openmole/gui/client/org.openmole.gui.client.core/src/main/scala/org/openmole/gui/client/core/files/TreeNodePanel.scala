@@ -129,6 +129,16 @@ class TreeNodePanel {
 
   val confirmationDiv: Var[Option[Div]] = Var(None)
 
+  def info(text: String): Div =
+    div(
+      fileActions,
+      text,
+      button(cls := "btn white-button", "OK", onClick --> {
+        _ ⇒
+          closeMultiTool
+      })
+    )
+
   def confirmation(text: String, okText: String, todo: () ⇒ Unit): Div =
     confirmationWithMessage(div(text, width := "50%", margin := "10px"), okText, todo)
 
@@ -248,8 +258,13 @@ class TreeNodePanel {
                 if gf
                 then iconAction(glyphItemize(OMTags.glyph_stash_pop), "pop", () ⇒
                   confirmationDiv.set(
-                    Some(confirmation("Pop stashed changes (if any) ?", "OK", () ⇒
-                      api.stashPop(treeNodeManager.directory.now()).andThen { _ ⇒ closeMultiTool }
+                    Some(confirmation("Pop stashed changes ?", "OK", () ⇒
+                      api.stashPop(treeNodeManager.directory.now()).foreach { st=>
+                        st match
+                          case MergeStatus.ChangeToBeResolved =>
+                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                          case _=> closeMultiTool
+                      }
                     ))
                   )
                 ).amend(verticalLine)
@@ -327,16 +342,16 @@ class TreeNodePanel {
               if gf
               then
                 div(cls := "specific-file git gitInfo", color := "white", cursor.pointer, marginRight := "18px",
-                onClick --> { _ ⇒
-                  initMultiTool(MultiTool.Git)
-                })
+                  onClick --> { _ ⇒
+                    initMultiTool(MultiTool.Git)
+                  })
               else emptyNode
           ,
           div(OMTags.glyph_search,
             cls := "filtering-files-item-selected",
             onClick --> { _ ⇒ fileToolBar.filterToolOpen.update(!_) }),
           div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ ⇒ refresh }),
-          div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", paddingRight := "15px",onClick --> { _ ⇒
+          div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", paddingRight := "15px", onClick --> { _ ⇒
             initMultiTool(MultiTool.On)
           })
         )

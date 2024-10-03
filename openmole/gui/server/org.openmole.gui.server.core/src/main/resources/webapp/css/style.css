@@ -833,6 +833,15 @@ padding-bottom: 90px;
     height: 38px;
 }
 
+.white-button {
+    width: 80px;
+    padding: 5px;
+    color: #6c757d;;
+    background-color: white;
+    border-color: white;
+    height: 38px;
+}
+
 .close-button {
   font-size: 18px;
   color: white;

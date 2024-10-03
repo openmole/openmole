@@ -83,6 +83,9 @@ object TreeNodeData:
 enum GitStatus:
   case Modified, Untracked, Conflicting, Root, Versioned
 
+enum MergeStatus:
+  case Ok, ChangeToBeResolved, Empty
+
 case class BranchData(list: Seq[String], current: String)
 
 case class TreeNodeData(
