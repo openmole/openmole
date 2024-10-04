@@ -768,7 +768,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.core.authentication.*
     import services.{authenticationStore, workspace}
     Authentication.remove(d, gitAuthenticationEquality)
-    if removeFile then safePathToFile(d.directory).recursiveDelete
+    if removeFile && d.directory.parent == SafePath.root(ServerFileSystemContext.Authentication) 
+    then safePathToFile(d.directory).recursiveDelete
 
   def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
     import services.{cypher, workspace}

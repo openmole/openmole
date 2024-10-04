@@ -88,7 +88,8 @@ class PrivateKeyAuthenticationServer(s: Services)
     def removeAuthentication(data: PrivateKeyAuthenticationData, deleteKey: Boolean): Unit =
       coreObject(data).foreach: co ⇒
         SSHAuthentication -= co
-      if deleteKey then safePathToFile(data.directory).recursiveDelete
+      if deleteKey && data.directory.parent == SafePath.root(ServerFileSystemContext.Authentication) 
+      then safePathToFile(data.directory).recursiveDelete
 
     def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] =
       Seq(
