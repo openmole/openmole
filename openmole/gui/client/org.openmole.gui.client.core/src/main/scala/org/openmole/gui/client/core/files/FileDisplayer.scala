@@ -74,7 +74,6 @@ object FileDisplayer:
         val tab = buildTab(safePath)
         tab.foreach:
           case Some((tabData, content)) => 
-            println("Add content " + content)
             panels.tabContent.addTab(tabData, content)
           case _ => 
 

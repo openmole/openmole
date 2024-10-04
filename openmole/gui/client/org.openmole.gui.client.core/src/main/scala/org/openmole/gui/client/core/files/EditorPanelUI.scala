@@ -82,6 +82,7 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
     js.Dynamic.global.ace.config.set("themePath", "js")
 
     scalamode
+    pythonmode
 
     //EditorPanelUI.openmolemode
 
