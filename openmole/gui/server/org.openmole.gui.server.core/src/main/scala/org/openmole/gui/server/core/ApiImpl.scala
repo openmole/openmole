@@ -718,14 +718,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def pull(from: SafePath): MergeStatus =
     import services.workspace
-    {
-      GitService.git(safePathToFile(from), projectsDirectory) map: git =>
-       GitService.pull(git)
-    }.getOrElse(MergeStatus.Empty)
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.pull(git)
+    .getOrElse(MergeStatus.Empty)
 
   def branchList(from: SafePath): Option[BranchData] =
     import services.workspace
-    GitService.git(safePathToFile(from), projectsDirectory) map : git =>
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
       BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
 
   def checkout(from: SafePath, branchName: String): Unit =
@@ -740,15 +739,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def stashPop(from: SafePath): MergeStatus =
     import services.workspace
-    {
-      GitService.git(safePathToFile(from), projectsDirectory) map : git =>
-        GitService.stashPop(git)
-    }.getOrElse(MergeStatus.Empty)
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.stashPop(git)
+    .getOrElse(MergeStatus.Empty)
 
-
-  def gitAuthenticationEquality =
-    (d1: GitPrivateKeyAuthenticationData, d2: GitPrivateKeyAuthenticationData) =>
-      d1.directory == d2.directory
+  def gitAuthenticationEquality(d1: GitPrivateKeyAuthenticationData, d2: GitPrivateKeyAuthenticationData) = d1.directory == d2.directory
 
   def gitAuthentications: Seq[GitPrivateKeyAuthenticationData] =
     import io.circe.generic.auto.*
@@ -768,7 +763,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.core.authentication.*
     import services.{authenticationStore, workspace}
     Authentication.remove(d, gitAuthenticationEquality)
-    if removeFile && d.directory.parent == SafePath.root(ServerFileSystemContext.Authentication) 
+    if removeFile && d.directory.parent == SafePath.root(ServerFileSystemContext.Authentication)
     then safePathToFile(d.directory).recursiveDelete
 
   def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =

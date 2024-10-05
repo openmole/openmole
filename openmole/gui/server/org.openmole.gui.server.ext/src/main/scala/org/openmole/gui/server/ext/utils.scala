@@ -140,40 +140,42 @@ object utils:
     def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
 
     val currentDirGit = GitService.git(path.toFile, projectsDirectory)
-    val modified = currentDirGit.map(GitService.getModified(_)).getOrElse(Seq())
-    val conflicting = currentDirGit.map(GitService.getConflicting(_)).getOrElse(Seq())
-    val untracked = currentDirGit.map(GitService.getUntracked(_)).getOrElse(Seq())
 
-    val currentFile = safePathToFile(path)
+    try
+      val modified = currentDirGit.map(GitService.getModified(_)).getOrElse(Seq())
+      val conflicting = currentDirGit.map(GitService.getConflicting(_)).getOrElse(Seq())
+      val untracked = currentDirGit.map(GitService.getUntracked(_)).getOrElse(Seq())
 
-    def treeNodesData =
-      currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
-        val gitStatus = currentDirGit match
-          case Some(g: Git) =>
-            val relativeName = GitService.relativeName(f, g)
-            if modified.contains(relativeName) then Some(GitStatus.Modified)
-            else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
-            else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)
-            else Some(GitStatus.Versioned)
-          case None =>
-            if f.isDirectory
-            then
-              GitService.git(f, currentFile) match
-                case Some(g: Git) => Some(GitStatus.Root)
-                case _ => None
-            else None
-        fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
+      val currentFile = safePathToFile(path)
 
-    val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
-    val sortedSize = sorted.size
+      def treeNodesData =
+        currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
+          val gitStatus = currentDirGit match
+            case Some(g: Git) =>
+              val relativeName = GitService.relativeName(f, g)
+              if modified.contains(relativeName) then Some(GitStatus.Modified)
+              else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
+              else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)
+              else Some(GitStatus.Versioned)
+            case None =>
+              if f.isDirectory
+              then
+                GitService.withGit(f, currentFile): git =>
+                  GitStatus.Root
+              else None
+          fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
 
-    val branchData =
-      GitService.git(safePathToFile(path), projectsDirectory) map : git =>
-        BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+      val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
+      val sortedSize = sorted.size
 
-    fileFilter.size match
-      case Some(s) => FileListData(sorted.take(s), s, sortedSize, branchData)
-      case None => FileListData(sorted, sortedSize, sortedSize, branchData)
+      val branchData =
+        currentDirGit.map: git =>
+          BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+
+      fileFilter.size match
+        case Some(s) => FileListData(sorted.take(s), s, sortedSize, branchData)
+        case None => FileListData(sorted, sortedSize, sortedSize, branchData)
+    finally currentDirGit.foreach(_.close())
 
   def recursiveListFiles(path: SafePath, findString: Option[String], withHidden: Boolean = true)(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context

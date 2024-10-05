@@ -18,11 +18,10 @@ object GitService:
       case null => None
       case _ => Some(new Git(builder.build()))
 
-
-  def withGit(fromFile: File, ceilingDir: File)(g: Git=> Unit) =
-      GitService.git(fromFile, ceilingDir) match
-        case Some(git: Git)=> g(git)
-        case _=>
+  def withGit[T](fromFile: File, ceilingDir: File)(g: Git => T) =
+      GitService.git(fromFile, ceilingDir).map: git =>
+        try g(git)
+        finally git.close()
 
   def rootPath(git: Git) = git.getRepository.getDirectory.getParentFile.getAbsolutePath
   
