@@ -357,12 +357,15 @@ object ContainerTask:
       val containerEnvironmentVariables =
         environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
 
+      def ignoreRetCode = !errorOnReturnValue || returnValue.isDefined
+      def retCodeVariable = "_PROCESS_RET_CODE_"
+
       val commandValue =
         val value = command.value.map(_.from(context))
-        if !errorOnReturnValue || returnValue.isDefined
-        then Seq(s"(${value.mkString(" && ")} ; true)")
+        if ignoreRetCode
+        then Seq(s"${value.mkString(" && ")} ; $retCodeVariable=$$? ; true")
         else value
-
+        
       // Prepare the copy of output files
       val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
       val resultDirectoryBind = "/_result_"
@@ -378,6 +381,8 @@ object ContainerTask:
         outputFileMapping.flatMap: m =>
           val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
           Seq(s"""mkdir -p \"$destinationDirectory\"""", s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
+
+      val exitCommand = if ignoreRetCode then Seq(s"exit $$$retCodeVariable") else Seq()
 
       val copyVolume = resultDirectory.getAbsolutePath -> resultDirectoryBind
 
@@ -404,7 +409,7 @@ object ContainerTask:
               runCommandInContainer(
                 image = image.image,
                 overlay = Some(overlay),
-                commands = commandValue ++ copyCommand,
+                commands = commandValue ++ copyCommand ++ exitCommand,
                 workDirectory = Some(workDirectoryValue(image)),
                 output = out,
                 error = err,
@@ -417,7 +422,7 @@ object ContainerTask:
             runCommandInContainer(
               image = image.image,
               tmpFS = true,
-              commands = commandValue ++ copyCommand,
+              commands = commandValue ++ copyCommand ++ exitCommand,
               workDirectory = Some(workDirectoryValue(image)),
               output = out,
               error = err,
