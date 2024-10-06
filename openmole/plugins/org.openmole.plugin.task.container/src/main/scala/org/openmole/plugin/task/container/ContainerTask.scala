@@ -193,6 +193,7 @@ object ContainerTask:
     volumes: Seq[(String, String)] = Seq.empty,
     environmentVariables: Seq[(String, String)] = Seq.empty,
     workDirectory: Option[String] = None,
+    verbose: Boolean = false,
     output: PrintStream,
     error: PrintStream)(using tmpDirectory: TmpDirectory, networkService: NetworkService): Int =
     tmpDirectory.withTmpDir: directory ⇒
@@ -205,7 +206,8 @@ object ContainerTask:
         bind = volumes,
         environmentVariables = NetworkService.proxyVariables ++ environmentVariables,
         workDirectory = workDirectory,
-        singularityWorkdir = Some(directory /> "singularitytmp")
+        singularityWorkdir = Some(directory /> "singularitytmp"),
+        verbose = verbose
       )
 
   def runCommandInContainer(
@@ -216,6 +218,7 @@ object ContainerTask:
     volumes: Seq[(String, String)] = Seq.empty,
     environmentVariables: Seq[(String, String)] = Seq.empty,
     workDirectory: Option[String] = None,
+    verbose: Boolean = false,
     output: PrintStream,
     error: PrintStream)(using tmpDirectory: TmpDirectory, networkService: NetworkService) =
     tmpDirectory.withTmpDir: directory ⇒
@@ -230,7 +233,8 @@ object ContainerTask:
         bind = volumes,
         environmentVariables = NetworkService.proxyVariables ++ environmentVariables,
         workDirectory = workDirectory,
-        singularityWorkdir = Some(directory /> "singularitytmp")
+        singularityWorkdir = Some(directory /> "singularitytmp"),
+        verbose = verbose
       )
 
   def initializeOverlay(containerSystem: ContainerSystem.SingularitySIF)(using TmpDirectory, OutputRedirection) =
@@ -353,7 +357,11 @@ object ContainerTask:
       val containerEnvironmentVariables =
         environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
 
-      val commandValue = command.value.map(_.from(context))
+      val commandValue =
+        val value = command.value.map(_.from(context))
+        if !errorOnReturnValue || returnValue.isDefined
+        then Seq(s"(${value.mkString(" && ")} ; true)")
+        else value
 
       // Prepare the copy of output files
       val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
@@ -375,22 +383,22 @@ object ContainerTask:
 
       val retCode =
         image.containerSystem match
-          case img: SingularityOverlay =>
+          case containerSystem: SingularityOverlay =>
             def createPool =
-              WithInstance[_root_.container.Singularity.OverlayImage](pooled = img.reuse): () ⇒
+              WithInstance[_root_.container.Singularity.OverlayImage](pooled = containerSystem.reuse): () ⇒
                 val overlay =
-                  if img.reuse
+                  if containerSystem.reuse
                   then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
                   else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
 
-                img.overlay match
-                  case None => _root_.container.Singularity.createOverlay(overlay, img.size, output = out, error = err)
+                containerSystem.overlay match
+                  case None => _root_.container.Singularity.createOverlay(overlay, containerSystem.size, output = out, error = err)
                   case Some(image) =>
-                    if img.reuse && executionContext.localEnvironment.threads == 1
+                    if containerSystem.reuse && executionContext.localEnvironment.threads == 1
                     then image
                     else _root_.container.Singularity.copyOverlay(image, overlay)
 
-            val overlayCache = executionContext.cache.getOrElseUpdate(img.cacheKey)(createPool)
+            val overlayCache = executionContext.cache.getOrElseUpdate(containerSystem.cacheKey)(createPool)
 
             overlayCache: overlay =>
               runCommandInContainer(
@@ -401,10 +409,11 @@ object ContainerTask:
                 output = out,
                 error = err,
                 volumes = volumes ++ Seq(copyVolume),
-                environmentVariables = containerEnvironmentVariables
+                environmentVariables = containerEnvironmentVariables,
+                verbose = containerSystem.verbose
               )
 
-          case img: SingularityMemory =>
+          case containerSystem: SingularityMemory =>
             runCommandInContainer(
               image = image.image,
               tmpFS = true,
@@ -413,7 +422,8 @@ object ContainerTask:
               output = out,
               error = err,
               volumes = volumes ++ Seq(copyVolume),
-              environmentVariables = containerEnvironmentVariables
+              environmentVariables = containerEnvironmentVariables,
+              verbose = containerSystem.verbose
             )
 
       if errorOnReturnValue && !returnValue.isDefined && retCode != 0

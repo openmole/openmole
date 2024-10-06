@@ -122,12 +122,12 @@ object ContainerSystem:
 
 sealed trait ContainerSystem
 
-case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, copy: Boolean = false, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends ContainerSystem:
+case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, verbose: Boolean = false, copy: Boolean = false, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends ContainerSystem:
   lazy val cacheKey: ContainerSystem.OverlayKey = CacheKey()
 
-case class SingularityMemory() extends ContainerSystem
+case class SingularityMemory(verbose: Boolean = false) extends ContainerSystem
 
-case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem:
+case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem:
   lazy val cacheKey: ContainerSystem.FlatImageKey = CacheKey()
 
 export ContainerSystem.{InstalledImage as InstalledContainerImage}

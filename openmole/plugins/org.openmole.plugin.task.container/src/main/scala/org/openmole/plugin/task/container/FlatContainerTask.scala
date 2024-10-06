@@ -188,7 +188,11 @@ object FlatContainerTask:
         val containerEnvironmentVariables =
           environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
 
-        val commandValue = command.value.map(_.from(context))
+        val commandValue =
+          val value = command.value.map(_.from(context))
+          if !errorOnReturnValue || returnValue.isDefined
+          then Seq(s"(${value.mkString(" && ")} ; true)")
+          else value
 
         // Prepare the copy of output files
         val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
