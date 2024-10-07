@@ -69,15 +69,24 @@ object CoreAPIServer:
     then Status.NotFound.apply(s"The file(s) ${notExists.map(_.path.mkString).mkString(" and ")} do(es) not exist.")
     else
       val files = safePath.map(safePathToFile)
+
+      def archiveDirectoryName(f: File) = s"${name.getOrElse(f.getName)}.tar.gz"
+
       if files.size == 1 && !OMRFormat.isOMR(files.head)
-      then CoreAPIServer.fileDownload(files.head, req, name)
+      then
+        val file = files.head
+        if file.isDirectory
+        then
+          downloadInArchive(archiveDirectoryName(file)): os =>
+            addFile(os, file)
+        else CoreAPIServer.fileDownload(file, req, name)
       else
         val fileName =
           if files.size == 1
           then
             val f = files.head
             if f.isDirectory
-            then s"${name.getOrElse(f.getName)}.tar.gz"
+            then archiveDirectoryName(f)
             else s"${name.getOrElse(f.baseName)}.tar.gz"
           else "files.tar.gz"
 
