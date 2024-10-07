@@ -365,7 +365,7 @@ object ContainerTask:
         if ignoreRetCode
         then Seq(s"${value.mkString(" && ")} ; $retCodeVariable=$$? ; true")
         else value
-        
+
       // Prepare the copy of output files
       val resultDirectory = executionContext.moleExecutionDirectory.newDirectory("result", create = true)
       val resultDirectoryBind = "/_result_"
