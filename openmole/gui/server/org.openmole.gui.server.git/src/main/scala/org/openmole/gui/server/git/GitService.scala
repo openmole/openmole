@@ -1,7 +1,7 @@
 package org.openmole.gui.server.git
 
 import org.eclipse.jgit.api.*
-import org.eclipse.jgit.api.errors.{CheckoutConflictException, StashApplyFailureException}
+import org.eclipse.jgit.api.errors.{CheckoutConflictException, StashApplyFailureException, TransportException}
 import org.eclipse.jgit.storage.file.*
 import org.openmole.gui.shared.data.*
 
@@ -73,6 +73,14 @@ object GitService:
         MergeStatus.Ok
       catch case e: CheckoutConflictException=> MergeStatus.ChangeToBeResolved
     else MergeStatus.Empty
+
+  def push(implicit git: Git): PushStatus =
+    try
+      git.push.call
+      PushStatus.Ok
+    catch
+      case e:TransportException => PushStatus.AuthenticationRequired
+
 
   def branchList(implicit git: Git): Seq[String] =
     git.branchList.call().asScala.toSeq.map(_.getName)

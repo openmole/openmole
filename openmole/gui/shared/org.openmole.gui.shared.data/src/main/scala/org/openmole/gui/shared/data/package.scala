@@ -86,6 +86,9 @@ enum GitStatus:
 enum MergeStatus:
   case Ok, ChangeToBeResolved, Empty
 
+enum PushStatus:
+  case Ok, AuthenticationRequired, Failed
+
 case class BranchData(list: Seq[String], current: String)
 
 case class TreeNodeData(

@@ -91,6 +91,7 @@ trait ServerAPI:
   def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
   def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
   def pull(from: SafePath)(using BasePath): Future[MergeStatus]
+  def push(from: SafePath)(using BasePath): Future[PushStatus]
   def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]]
   def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit]
   def stash(from: SafePath)(using BasePath): Future[Unit]
