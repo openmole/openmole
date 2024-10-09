@@ -89,6 +89,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
   override def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.revert(files).future)
   override def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit] = fetch.futureError(_.add(files).future)
   override def pull(from: SafePath)(using BasePath): Future[MergeStatus] = fetch.futureError(_.pull(from).future)
+  override def push(from: SafePath)(using BasePath): Future[PushStatus] = fetch.futureError(_.push(from).future)
   override def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]] = fetch.futureError(_.branchList(from).future)
   override def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit] = fetch.futureError(_.checkout(from,branchName).future)
   override def stash(from: SafePath)(using BasePath): Future[Unit] = fetch.futureError(_.stash(from).future)

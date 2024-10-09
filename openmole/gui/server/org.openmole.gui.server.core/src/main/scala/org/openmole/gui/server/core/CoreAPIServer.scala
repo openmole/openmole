@@ -177,7 +177,8 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
       gitAuthentications.errorImplementedBy(_ => apiImpl.gitAuthentications),
       addGitAuthentication.errorImplementedBy(apiImpl.addGitAuthentication),
       removeGitAuthentication.errorImplementedBy(apiImpl.removeGitAuthentication),
-      testGitAuthentication.errorImplementedBy(apiImpl.testGitAuthentication)
+      testGitAuthentication.errorImplementedBy(apiImpl.testGitAuthentication),
+      push.errorImplementedBy(apiImpl.push)
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 

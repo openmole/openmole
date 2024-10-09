@@ -161,7 +161,7 @@ class TreeNodePanel {
         target = "_blank"
       )
 
-  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath) =
+  def copyOrTrashTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- confirmationDiv.signal.combineWith(commitable.signal).combineWith(addable.signal).combineWith(gitFolder.signal).combineWith(multiTool.signal).map: (ac, co, ad, gf, mt) ⇒
@@ -254,7 +254,14 @@ class TreeNodePanel {
                           case _ => closeMultiTool
                       }
                   }),
-                if !co.isEmpty
+                div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
+                  api.push(treeNodeManager.directory.now()).foreach{p=>
+                    p match
+                      case PushStatus.Ok=> confirmationDiv.set(Some(info("Push successful")))
+                      case PushStatus.AuthenticationRequired => confirmationDiv.set(Some(info("Push failed, an authentication is required")))
+                  }
+                }),
+              if !co.isEmpty
                 then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
                   confirmationDiv.set(
                     Some(confirmation("Stash changes ?", "OK", () ⇒
@@ -276,7 +283,7 @@ class TreeNodePanel {
                       }
                     ))
                   )
-                ).amend(verticalLine)
+                ).amend(if co.isEmpty then emptyMod else verticalLine)
                 else emptyNode
                 ,
                 if !co.isEmpty

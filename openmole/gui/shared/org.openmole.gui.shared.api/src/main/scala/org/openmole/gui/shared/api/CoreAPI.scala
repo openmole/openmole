@@ -106,7 +106,10 @@ trait CoreAPI extends RESTAPI:
 
   val pull: ErrorEndpoint[SafePath, MergeStatus] =
     errorEndpoint(post(path / prefix / "file" / "git" / "pull", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))
-    
+  
+  val push: ErrorEndpoint[SafePath, PushStatus] =
+    errorEndpoint(post(path / "git" / "push", jsonRequest[SafePath]), ok(jsonResponse[PushStatus]))
+
   val branchList: ErrorEndpoint[SafePath, Option[BranchData]] =
     errorEndpoint(post(path / prefix / "file" / "git" / "branch-list", jsonRequest[SafePath]), ok(jsonResponse[Option[BranchData]]))
     
@@ -115,7 +118,6 @@ trait CoreAPI extends RESTAPI:
     
   val stash: ErrorEndpoint[SafePath, Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "stash", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
-
 
   val stashPop: ErrorEndpoint[SafePath, MergeStatus] =
     errorEndpoint(post(path / prefix / "file" / "git" / "stash-pop", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))

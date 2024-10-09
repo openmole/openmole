@@ -722,6 +722,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       GitService.pull(git)
     .getOrElse(MergeStatus.Empty)
 
+  def push(fromPath: SafePath): PushStatus =
+    import services.workspace
+    GitService.withGit(safePathToFile(fromPath), projectsDirectory): git =>
+      GitService.push(git)
+    .getOrElse(PushStatus.Failed)
+
   def branchList(from: SafePath): Option[BranchData] =
     import services.workspace
     GitService.withGit(safePathToFile(from), projectsDirectory): git =>
