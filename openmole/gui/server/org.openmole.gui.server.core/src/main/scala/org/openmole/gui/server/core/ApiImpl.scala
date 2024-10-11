@@ -213,17 +213,27 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
 
-  def move(moves: Seq[(SafePath, SafePath)]): Unit =
+  def move(moves: Seq[(SafePath, SafePath)], overwrite: Boolean): Seq[SafePath] =
+    val existing = collection.mutable.ListBuffer[SafePath]()
     moves.foreach: (from, to) =>
       import services.*
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
-      toFile.getParentFile.mkdirs()
-      if OMRFormat.isOMR(fromFile)
-      then OMRFormat.move(fromFile, toFile)
-      else
-        unplug(fromFile)
-        fromFile.move(toFile)
+      val exists = toFile.exists()
+
+      if exists
+      then existing += to
+
+      if !exists || overwrite
+      then
+        toFile.getParentFile.mkdirs()
+        if OMRFormat.isOMR(fromFile)
+        then OMRFormat.move(fromFile, toFile)
+        else
+          unplug(fromFile)
+          fromFile.move(toFile)
+
+    existing.toSeq
 
   def mdToHtml(safePath: SafePath): String =
     import services._

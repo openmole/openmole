@@ -91,17 +91,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       closeToolBox
     }
 
-  def toScript(using panels: Panels, api: ServerAPI, basePath: BasePath) =
-    withSafePath { sp ⇒
-      closeToolBox
-      api.fetchGUIPlugins { p ⇒
-        //FIXME
-        //        val wizardPanel = panels.modelWizardPanel(p.wizardFactories)
-        //        wizardPanel.dialog.show
-        //        wizardPanel.fromSafePath(sp)
-      }
-    }
-
   def commit(message: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
     api.commitFiles(Seq(sp), message).foreach { _ ⇒ panels.treeNodePanel.refresh }
     closeToolBox
@@ -116,36 +105,38 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     withSafePath: sp ⇒
       api.revertFiles(Seq(sp)).foreach: _ ⇒
         panels.treeNodePanel.refresh
-        if (panels.tabContent.alreadyDisplayed(sp).isDefined)
+        if panels.tabContent.alreadyDisplayed(sp).isDefined
         then
           panels.tabContent.removeTab(sp)
           FileDisplayer.display(sp)
         closeToolBox
 
-  def testRename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
-    val newSafePath = safePath.parent ++ to
-
-    api.exists(newSafePath).foreach: exists ⇒
-      if exists
-      then
-        actionEdit.set(None)
-        actionConfirmation.set(Some(confirmation(s"Overwrite ${safePath.name} ?", () ⇒ rename(safePath, to, () ⇒ closeToolBox))))
-      else
-        rename(safePath, to, () ⇒ closeToolBox)
-        actionEdit.set(None)
-        actionConfirmation.set(None)
-
-
-  def rename(safePath: SafePath, to: String, replacing: () ⇒ Unit)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+  def rename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
     val newNode = safePath.parent ++ to
-    api.move(Seq(safePath -> newNode)).foreach { _ ⇒
+
+    def afterRename =
+      actionEdit.set(None)
+      actionConfirmation.set(None)
       if !isDirectory
       then panels.tabContent.rename(safePath, newNode)
       else panels.tabContent.closeNonExstingFiles
+
       panels.treeNodePanel.refresh
       panels.treeNodePanel.currentSafePath.set(Some(newNode))
-      replacing()
-    }
+
+      closeToolBox
+
+    api.move(Seq(safePath -> newNode), overwrite = false).foreach: existing =>
+      if existing.nonEmpty
+      then
+        actionConfirmation.set:
+          Some:
+            confirmation(s"Overwrite ${safePath.name}?", () ⇒
+              api.move(Seq(safePath -> newNode), overwrite = true).foreach:  _ =>
+                afterRename
+            )
+      else afterRename
+
 
   def plugOrUnplug(safePath: SafePath, pluginState: PluginState)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     pluginState.isPlugged match
@@ -154,10 +145,6 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
           panels.pluginPanel.getPlugins
           panels.treeNodePanel.refresh
         }
-      //        OMPost()[Api].unplug(safePath).call().foreach { _ ⇒
-      //          panels.pluginPanel.getPlugins
-      //          treeNodeManager.invalidCurrentCache
-      //        }
       case false ⇒
         CoreUtils.addPlugin(safePath).foreach: errors ⇒
           for e <- errors
@@ -218,9 +205,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             iconAction(glyphItemize(glyph_edit), "rename",
               () ⇒ actionEdit.set(Some(editForm(initSafePath, initSafePath.name, "File name",
                 (inputValue: String) =>
-                  withSafePath { sp ⇒
-                    testRename(sp, inputValue)
-                  }
+                  withSafePath { sp ⇒ rename(sp, inputValue) }
               )))).amend(verticalLine),
             iconAction(glyphItemize(glyph_download), "download", () ⇒ download).amend(verticalLine),
             FileContentType(initSafePath) match

@@ -176,7 +176,7 @@ object ModelWizardPanel:
             destination = content.directory match
               case None => directory
               case Some(d) => directory / d
-            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)))
+            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)), overwrite = true)
             modelName = content.name.getOrElse("Model.oms")
             _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
           yield

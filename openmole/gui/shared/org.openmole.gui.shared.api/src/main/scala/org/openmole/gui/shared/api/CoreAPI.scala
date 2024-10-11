@@ -62,8 +62,8 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "file" / "list-recursive", jsonRequest[(SafePath, Option[String], Boolean)]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
-  val move: ErrorEndpoint[Seq[(SafePath, SafePath)], Unit] =
-    errorEndpoint(post(path / prefix / "file" / "move", jsonRequest[Seq[(SafePath, SafePath)]]), ok(jsonResponse[Unit]))
+  val move: ErrorEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    errorEndpoint(post(path / prefix / "file" / "move", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   val duplicate: ErrorEndpoint[(SafePath, String), SafePath] =
    errorEndpoint(post(path / prefix / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))

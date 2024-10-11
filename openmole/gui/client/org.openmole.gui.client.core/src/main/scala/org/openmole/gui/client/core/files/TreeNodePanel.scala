@@ -146,10 +146,7 @@ class TreeNodePanel {
     div(
       fileActions,
       message,
-      div(fileItemCancel, "Cancel", onClick --> {
-        _ ⇒
-          closeMultiTool
-      }),
+      div(fileItemCancel, "Cancel", onClick --> { _ ⇒ closeMultiTool }),
       div(fileItemWarning, okText, onClick --> { _ ⇒ todo() })
     )
 
@@ -160,6 +157,61 @@ class TreeNodePanel {
         url = downloadFiles(sp, name = Some(s"${sp.head.nameWithoutExtension}")),
         target = "_blank"
       )
+
+
+  def copyFiles(selectedFiles: Seq[SafePath], target: SafePath)(using api: ServerAPI, basePath: BasePath) =
+    def toTarget(target: SafePath)(p: SafePath) = p -> (target ++ p.name)
+
+    api.copyFiles(selectedFiles.map(toTarget(target)), overwrite = false).foreach: existing ⇒
+      if existing.isEmpty
+      then
+        refresh
+        closeMultiTool
+      else
+        confirmationDiv.set:
+          Some:
+            confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
+              api.copyFiles(selectedFiles.map(toTarget(target)), overwrite = true).foreach: b ⇒
+                refresh
+                closeMultiTool
+            )
+
+
+  def moveFiles(selectedFiles: Seq[SafePath], target: SafePath)(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    def toTarget(target: SafePath)(p: SafePath) = p -> (target ++ p.name)
+
+    def afterMove =
+      refresh
+      closeMultiTool
+      panels.tabContent.closeNonExstingFiles
+
+    api.move(selectedFiles.map(toTarget(target)), overwrite = false).foreach: existing ⇒
+      if existing.isEmpty
+      then afterMove
+      else
+        confirmationDiv.set:
+          Some:
+            confirmation(s"${existing.size} files have already the same name. Overwrite them?", "Overwrite", () ⇒
+              api.move(selectedFiles.map(toTarget(target)), overwrite = true).foreach: _ =>
+                afterMove
+            )
+
+
+  def copy(move: Boolean)(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    multiTool.set(MultiTool.PendingOperation)
+
+    confirmationDiv.set:
+      Some:
+        val selectedFiles = treeNodeManager.selected.now()
+        def toTarget(target: SafePath)(p: SafePath) = p -> (target ++ p.name)
+
+        confirmation(s"${selectedFiles.size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
+          val target = treeNodeManager.directory.now()
+          if move
+          then moveFiles(selectedFiles, target)
+          else copyFiles(selectedFiles, target)
+        )
+
 
   def copyOrTrashTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(
@@ -173,31 +225,6 @@ class TreeNodePanel {
             def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
               if se then "disable" else ""
 
-            def copy(move: Boolean) =
-              multiTool.set(MultiTool.PendingOperation)
-              confirmationDiv.set(
-                Some(
-                  confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-                    val target = treeNodeManager.directory.now()
-                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach: existing ⇒
-                      if existing.isEmpty
-                      then
-                        if move then api.deleteFiles(selected.now())
-                        refresh
-                        closeMultiTool
-                      else
-                        confirmationDiv.set:
-                          Some:
-                            confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                              val target = treeNodeManager.directory.now()
-                              api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach: b ⇒
-                                if move then api.deleteFiles(selected.now())
-                                refresh
-                                closeMultiTool
-                              )
-                    )
-                )
-              )
 
             def commit =
               val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
@@ -605,11 +632,7 @@ class TreeNodePanel {
   def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     draggedNode.now().foreach: dragged ⇒
       if isDir && dragged != to
-      then
-        api.move(Seq(dragged -> (to ++ dragged.name))).foreach: b ⇒
-          refresh
-          panels.tabContent.closeNonExstingFiles
-
+      then moveFiles(Seq(dragged), to)
     draggedNode.set(None)
 
   def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
