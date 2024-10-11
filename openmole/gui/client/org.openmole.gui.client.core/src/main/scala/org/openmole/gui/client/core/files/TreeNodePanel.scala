@@ -166,9 +166,7 @@ class TreeNodePanel {
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- confirmationDiv.signal.combineWith(commitable.signal).combineWith(addable.signal).combineWith(gitFolder.signal).combineWith(multiTool.signal).map: (ac, co, ad, gf, mt) ⇒
         val selected = treeNodeManager.selected
-        val isSelectionEmpty = selected.signal.map {
-          _.isEmpty
-        }
+        val isSelectionEmpty = selected.signal.map { _.isEmpty }
         ac match
           case Some(c) ⇒ Seq(c)
           case None ⇒
@@ -177,24 +175,29 @@ class TreeNodePanel {
 
             def copy(move: Boolean) =
               multiTool.set(MultiTool.PendingOperation)
-              confirmationDiv.set(Some(confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
-                val target = treeNodeManager.directory.now()
-                api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach { existing ⇒
-                  if (existing.isEmpty) {
-                    if move then api.deleteFiles(selected.now())
-                    refresh
-                    closeMultiTool
-                  }
-                  else {
-                    confirmationDiv.set(Some(confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
-                      val target = treeNodeManager.directory.now()
-                      api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach { b ⇒
+              confirmationDiv.set(
+                Some(
+                  confirmation(s"${selected.now().size} files copied. Browse to the target folder and press Paste", "Paste", () ⇒
+                    val target = treeNodeManager.directory.now()
+                    api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = false).foreach: existing ⇒
+                      if existing.isEmpty
+                      then
                         if move then api.deleteFiles(selected.now())
                         refresh
                         closeMultiTool
-                      })))
-                  }
-                })))
+                      else
+                        confirmationDiv.set:
+                          Some:
+                            confirmation(s"${existing.size} files have already the same name. Overwrite them ?", "Overwrite", () ⇒
+                              val target = treeNodeManager.directory.now()
+                              api.copyFiles(selected.now().map(p => p -> (target ++ p.name)), overwrite = true).foreach: b ⇒
+                                if move then api.deleteFiles(selected.now())
+                                refresh
+                                closeMultiTool
+                              )
+                    )
+                )
+              )
 
             def commit =
               val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
@@ -247,21 +250,18 @@ class TreeNodePanel {
                 ,
                 div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
                   onClick --> { _ ⇒
-                    api.pull(treeNodeManager.directory.now()).foreach { st =>
-                        st match
-                          case MergeStatus.ChangeToBeResolved =>
-                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
-                          case _ => closeMultiTool
-                      }
+                    api.pull(treeNodeManager.directory.now()).foreach:
+                      case MergeStatus.ChangeToBeResolved =>
+                        confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                      case _ => closeMultiTool
                   }),
                 div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
-                  api.push(treeNodeManager.directory.now()).foreach{p=>
-                    p match
-                      case PushStatus.Ok=> confirmationDiv.set(Some(info("Push successful")))
-                      case PushStatus.AuthenticationRequired => confirmationDiv.set(Some(info("Push failed, an authentication is required")))
-                  }
+                  api.push(treeNodeManager.directory.now()).foreach:
+                    case PushStatus.Ok => confirmationDiv.set(Some(info("Push successful")))
+                    case PushStatus.AuthenticationRequired => confirmationDiv.set(Some(info("Push failed, an authentication is required")))
+                    case PushStatus.Failed => confirmationDiv.set(Some(info("Push failed")))
                 }),
-              if !co.isEmpty
+                if !co.isEmpty
                 then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
                   confirmationDiv.set(
                     Some(confirmation("Stash changes ?", "OK", () ⇒
@@ -269,18 +269,15 @@ class TreeNodePanel {
                     ))
                   )
                 ).amend(verticalLine)
-                else emptyNode
-                ,
+                else emptyNode,
                 if gf
                 then iconAction(glyphItemize(OMTags.glyph_stash_pop), "pop", () ⇒
                   confirmationDiv.set(
                     Some(confirmation("Pop stashed changes ?", "OK", () ⇒
-                      api.stashPop(treeNodeManager.directory.now()).foreach { st =>
-                        st match
-                          case MergeStatus.ChangeToBeResolved =>
-                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
-                          case _ => closeMultiTool
-                      }
+                      api.stashPop(treeNodeManager.directory.now()).foreach:
+                        case MergeStatus.ChangeToBeResolved =>
+                          confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                        case _ => closeMultiTool
                     ))
                   )
                 ).amend(if co.isEmpty then emptyMod else verticalLine)
@@ -606,22 +603,13 @@ class TreeNodePanel {
   )
 
   def dropAction(to: SafePath, isDir: Boolean)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
-    draggedNode.now().map {
-      dragged ⇒
-        if (isDir) {
-          if (dragged != to) {
-            //treeNodeTabs.saveAllTabs(() ⇒ {
-            api.move(Seq(dragged -> (to ++ dragged.name))).foreach {
-              b ⇒
-                //treeNodeManager.invalidCache(to)
-                //treeNodeManager.invalidCache(dragged)
-                refresh
-                panels.tabContent.closeNonExstingFiles
-            }
-            //})
-          }
-        }
-    }
+    draggedNode.now().foreach: dragged ⇒
+      if isDir && dragged != to
+      then
+        api.move(Seq(dragged -> (to ++ dragged.name))).foreach: b ⇒
+          refresh
+          panels.tabContent.closeNonExstingFiles
+
     draggedNode.set(None)
 
   def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =

@@ -53,9 +53,7 @@ object MarketPanel:
 
     def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
       downloading.signal.map {
-        _.find {
-          _._1 == entry
-        }.map {
+        _.find { _._1 == entry }.map {
           case (e, state: Var[ProcessState]) ⇒
             state.withTransferWaiter { _ ⇒
               glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ ⇒ todo() }).amend("Download")
