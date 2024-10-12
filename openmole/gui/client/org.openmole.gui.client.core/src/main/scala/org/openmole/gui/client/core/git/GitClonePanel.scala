@@ -6,7 +6,7 @@ import org.openmole.gui.client.core.CoreUtils.*
 import org.openmole.gui.client.core.Panels
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
-import org.openmole.gui.shared.data.*
+import org.openmole.gui.shared.data.{ProcessState, *}
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
 
@@ -26,9 +26,23 @@ object GitClonePanel:
       height := "38", width := "150", marginTop := "20",
       onClick --> { _ ⇒
         val sp = manager.directory.now()
-        api.cloneRepository(urlInput.ref.value, sp).foreach: c=>
-          panels.treeNodePanel.refresh
-          panels.closeExpandable
+        //panels.treeNodePanel.transferring.set(Processing())
+        panels.closeExpandable
+        api.cloneRepository(urlInput.ref.value, sp, false).andThen:
+          case util.Success(None) =>
+            //panels.treeNodePanel.transferring.set(Processed())
+            panels.treeNodePanel.refresh
+          case util.Success(Some(exist)) =>
+            panels.treeNodePanel.confirmationDiv.set:
+              Some:
+                panels.treeNodePanel.confirmation(s"A file named \"${exist.name}\" exists, overwrite it?", "Overwrite", () ⇒
+                  panels.treeNodePanel.confirmationDiv.set(None)
+                  api.cloneRepository(urlInput.ref.value, sp, true).andThen: _ =>
+                    //panels.treeNodePanel.transferring.set(Processed())
+                    panels.treeNodePanel.refresh
+                )
+          case _ =>
+            //panels.treeNodePanel.transferring.set(Processed())
       }
     )
 

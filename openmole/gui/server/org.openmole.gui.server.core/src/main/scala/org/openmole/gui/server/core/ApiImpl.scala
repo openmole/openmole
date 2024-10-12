@@ -704,9 +704,26 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
     }
 
-  def cloneRepository(remoteURL: String, destination: SafePath): Unit =
-    import services.workspace
-    GitService.clone(remoteURL, destination.toFile)
+  def cloneRepository(remoteURL: String, destination: SafePath, overwrite: Boolean): Option[SafePath] =
+    import services.{workspace}
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+    val destPath =
+      val name = remoteURL.split("/").last
+      def nameValue = if name.endsWith(".git") then name.dropRight(".git".length) else name
+      destination / nameValue
+
+    val destinationFile = destPath.toFile
+    if destinationFile.exists()
+    then
+      if overwrite
+      then
+        destinationFile.recursiveDelete
+        GitService.clone(remoteURL, destPath.toFile, authentications)
+        None
+      else Some(destPath)
+    else
+      GitService.clone(remoteURL, destPath.toFile, authentications)
+      None
 
   def commit(paths: Seq[SafePath], message: String): Unit =
     import services.workspace
@@ -728,14 +745,20 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def pull(from: SafePath): MergeStatus =
     import services.workspace
+
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+
     GitService.withGit(safePathToFile(from), projectsDirectory): git =>
-      GitService.pull(git)
+      GitService.pull(git, authentications)
     .getOrElse(MergeStatus.Empty)
 
   def push(fromPath: SafePath): PushStatus =
     import services.workspace
+
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+
     GitService.withGit(safePathToFile(fromPath), projectsDirectory): git =>
-      GitService.push(git)
+      GitService.push(git, authentications)
     .getOrElse(PushStatus.Failed)
 
   def branchList(from: SafePath): Option[BranchData] =
@@ -782,6 +805,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     if removeFile && d.directory.parent == SafePath.root(ServerFileSystemContext.Authentication)
     then safePathToFile(d.directory).recursiveDelete
 
+  // Password is not cyphered since it commes from the GUI
   def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
     import services.{cypher, workspace}
 

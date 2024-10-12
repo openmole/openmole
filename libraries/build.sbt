@@ -364,9 +364,11 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   settings,
   libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4")
 
-lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
+lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", exports = Seq("org.eclipse.jgit.*", "org.apache.sshd.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.bouncycastle.*","*"))  settings (
   settings,
   libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % jgitVersion,
+  libraryDependencies += "org.apache.sshd" % "sshd-git" % "2.14.0",
+  libraryDependencies += "net.i2p.crypto" % "eddsa" % "0.3.0",
   version := jgitVersion
 ) dependsOn(slf4j)
 

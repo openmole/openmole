@@ -403,3 +403,8 @@ object utils:
         Left(ErrorData(t)).asJson.noSpaces
       }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
+
+  def gitAuthenticationFromData(a: Seq[GitPrivateKeyAuthenticationData])(using Workspace) =
+    a.flatMap: a =>
+      a.privateKeyPath.map: k =>
+        GitAuthentication.PrivateKey(utils.safePathToFile(k), a.password)

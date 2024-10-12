@@ -16,7 +16,7 @@ object common {
   def mgoVersion = "3.59-SNAPSHOT"
   def sshjVersion = "0.38.0"
   def containerVersion = "1.32-SNAPSHOT"
-  def bouncyCastleVersion = "1.77"
+  def bouncyCastleVersion = "1.78.1"
   def scalaTagsVersion = "0.11.1"
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
@@ -56,7 +56,7 @@ object common {
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
   def slf4jVersion = "2.0.9"
-  def jgitVersion = "6.10.0.202406032230-r"
+  def jgitVersion = "7.0.0.202409031743-r"
 
   def http4sVersion = "0.23.12"
 

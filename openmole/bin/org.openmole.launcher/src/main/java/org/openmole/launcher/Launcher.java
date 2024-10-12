@@ -89,6 +89,7 @@ public class Launcher {
         int maxVersion = 50;
         for(int version = 0; version <= maxVersion; version++) {
             versions.append("1." + version);
+            versions.append("," + version);
             executionEnvironments.append("J2SE-1." + version + ",");
             executionEnvironments.append("JavaSE-1." + version);
 

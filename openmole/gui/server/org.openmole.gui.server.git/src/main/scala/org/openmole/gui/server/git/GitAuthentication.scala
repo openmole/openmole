@@ -17,17 +17,17 @@ package org.openmole.gui.server.git
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.openmole.gui.shared.data.GitPrivateKeyAuthenticationData
 import org.openmole.tool.file.*
 
 object GitAuthentication:
-  case class LoginPassword(
-    login: String,
-    password: String) extends GitAuthentication
+//  case class LoginPassword(
+//    login: String,
+//    password: String) extends GitAuthentication
 
   case class PrivateKey(
     privateKey: File,
-    login: String,
-    cypheredPassword: String) extends GitAuthentication
+    password: String) extends GitAuthentication
 
 sealed trait GitAuthentication
 

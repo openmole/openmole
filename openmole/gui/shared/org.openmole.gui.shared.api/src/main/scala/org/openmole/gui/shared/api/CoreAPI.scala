@@ -92,8 +92,8 @@ trait CoreAPI extends RESTAPI:
   val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
 
-  val cloneRepository: ErrorEndpoint[(String, SafePath), Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath)]), ok(jsonResponse[Unit]))
+  val cloneRepository: ErrorEndpoint[(String, SafePath, Boolean), Option[SafePath]] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath, Boolean)]), ok(jsonResponse[Option[SafePath]]))
 
   val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
     errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
