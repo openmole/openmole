@@ -123,9 +123,7 @@ object GitService:
   def withConfiguredTransport[T <: TransportCommand[?, ?], R](authentication: Seq[GitAuthentication.PrivateKey], transportCommand: T)(f: T => R) =
     val prov = new CredentialsProvider:
       override def isInteractive: Boolean = false
-
       override def supports(items: CredentialItem*): Boolean = true
-
       override def get(uri: URIish, items: CredentialItem*): Boolean = true
 
     val factory = sshdSessionFactory(authentication)
