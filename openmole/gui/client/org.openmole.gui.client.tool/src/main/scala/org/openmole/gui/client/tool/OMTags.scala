@@ -73,8 +73,8 @@ object OMTags:
   def glyph_push = img(src := "img/push.svg")
   val glyph_rollback = cls("bi-arrow-counterclockwise")
   val glyph_addFile = cls("bi-node-plus")
-  val glyph_stash = cls("bi-layer-backward")
-  val glyph_stash_pop = cls("bi-layer-forward")
+  def glyph_stash = img(src := "img/stash.svg")
+  def glyph_stash_pop = img(src := "img/stashPop.svg")
   val glyph_git = cls("bi-git")
 
   case class AlertAction(action: () ⇒ Unit)

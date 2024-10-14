@@ -15,13 +15,13 @@ import org.apache.sshd.common.file.FileSystemFactory
 import org.apache.sshd.common.session.SessionContext
 import org.apache.sshd.common.signature.BuiltinSignatures
 import org.apache.sshd.git.transport.GitSshdSessionFactory
+import org.eclipse.jgit.api.ListBranchCommand.ListMode
 import org.eclipse.jgit.transport.{CredentialItem, CredentialsProvider, SshSessionFactory, SshTransport, URIish}
 import org.openmole.gui.shared.data
 
 import java.net.SocketAddress
 import java.nio.file.{FileSystem, Path}
 import java.security.Provider
-
 import org.openmole.tool.file.*
 
 object GitService:
@@ -37,12 +37,12 @@ object GitService:
       case _ => Some(new Git(builder.build()))
 
   def withGit[T](fromFile: File, ceilingDir: File)(g: Git => T) =
-      GitService.git(fromFile, ceilingDir).map: git =>
-        try g(git)
-        finally git.close()
+    GitService.git(fromFile, ceilingDir).map: git =>
+      try g(git)
+      finally git.close()
 
   def rootPath(git: Git) = git.getRepository.getDirectory.getParentFile.getAbsolutePath
-  
+
   def relativeName(f: File, git: Git) = (f.getAbsolutePath.split("/") diff rootPath(git).split("/")).mkString("/")
 
   def clone(remoteURL: String, destination: File, authentication: Seq[GitAuthentication.PrivateKey]) =
@@ -55,7 +55,7 @@ object GitService:
       if fs.isEmpty
       then commitCommand
       else addCommitedFiles(fs.tail, commitCommand.setOnly(relativeName(fs.head, git)))
-        
+
     addCommitedFiles(files, git.commit).setMessage(message).call
 
   def revert(files: Seq[File])(implicit git: Git) =
@@ -79,11 +79,11 @@ object GitService:
 
   def pull(git: Git, authentication: Seq[GitAuthentication.PrivateKey]) =
     if !git.stashList.call.isEmpty
-    then 
-      try 
+    then
+      try
         withConfiguredTransport(authentication, git.pull)(_.call)
         MergeStatus.Ok
-      catch case e: CheckoutConflictException=> MergeStatus.ChangeToBeResolved
+      catch case e: CheckoutConflictException => MergeStatus.ChangeToBeResolved
     else MergeStatus.Empty
 
   def push(git: Git, authentication: Seq[GitAuthentication.PrivateKey]): PushStatus =
@@ -91,39 +91,57 @@ object GitService:
       withConfiguredTransport(authentication, git.push)(_.call)
       PushStatus.Ok
     catch
-      case e:TransportException => PushStatus.AuthenticationRequired
+      case e: TransportException => PushStatus.AuthenticationRequired
 
   def branchList(implicit git: Git): Seq[String] =
-    git.branchList.call().asScala.toSeq.map(_.getName)
+    git.branchList.setListMode(ListMode.ALL).call().asScala.toSeq.map(_.getName).sorted
 
   def checkout(branchName: String)(implicit git: Git) =
-    git.checkout.setName(branchName).call
-    
+    if git.branchList.call().asScala.toSeq.map(_.getName).exists(_.contains(branchName))
+    then git.checkout.setName(branchName).call
+    else
+      git
+        .branchList.setListMode(ListMode.REMOTE).call.asScala.toSeq
+        .filter(b => b.getName.contains(branchName)).headOption
+        .foreach: ref =>
+          val remote = ref.getName.split("/")(2)
+          git
+            .checkout
+            .setCreateBranch(true)
+            .setName(branchName)
+            .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+            .setStartPoint(s"$remote/$branchName")
+            .call
+
   def stash(implicit git: Git): Unit =
     git.stashCreate.call
-    
+
   def stashPop(implicit git: Git): MergeStatus =
     if !git.stashList.call.isEmpty
-    then 
-      try 
+    then
+      try
         git.stashApply.call
         MergeStatus.Ok
-      catch case e: StashApplyFailureException=> MergeStatus.ChangeToBeResolved
+      catch case e: StashApplyFailureException => MergeStatus.ChangeToBeResolved
     else MergeStatus.Empty
     
   private def getAllSubPaths(path: String) =
-     val allDirs = path.split("/").dropRight(1)
-     val size = allDirs.size
-     (for i <- 1 to size yield allDirs.dropRight(size - i).mkString("/")) :+ path
+    val allDirs = path.split("/").dropRight(1)
+    val size = allDirs.size
+    (for i <- 1 to size yield allDirs.dropRight(size - i).mkString("/")) :+ path
 
   def getModified(git: Git): Seq[String] = git.status().call().getModified.asScala.toSeq.flatMap(getAllSubPaths)
+
   def getUntracked(git: Git): Seq[String] = git.status().call().getUntracked.asScala.toSeq.flatMap(getAllSubPaths)
+
   def getConflicting(git: Git): Seq[String] = git.status().call().getConflicting.asScala.toSeq.flatMap(getAllSubPaths)
 
   def withConfiguredTransport[T <: TransportCommand[?, ?], R](authentication: Seq[GitAuthentication.PrivateKey], transportCommand: T)(f: T => R) =
     val prov = new CredentialsProvider:
       override def isInteractive: Boolean = false
+
       override def supports(items: CredentialItem*): Boolean = true
+
       override def get(uri: URIish, items: CredentialItem*): Boolean = true
 
     val factory = sshdSessionFactory(authentication)
@@ -166,7 +184,7 @@ object GitService:
         val portValue = if port < 0 then 22 else port
         HostConfigEntry(host, host, portValue, username, jump)
 
-    val sshSessionFactory =  new GitSshdSessionFactory(sshClient)
+    val sshSessionFactory = new GitSshdSessionFactory(sshClient)
 
     Factory(sshSessionFactory, sshClient)
 

@@ -285,16 +285,16 @@ class TreeNodePanel {
                 case PushStatus.Failed => confirmationDiv.set(Some(info("Push failed")))
             }),
             if !co.isEmpty
-            then iconAction(glyphItemize(OMTags.glyph_stash), "stash", () ⇒
+            then div(OMTags.glyph_stash, fileActionItems, "stash", cls := "glyphitem popover-item", onClick --> { _ ⇒
               confirmationDiv.set(
                 Some(confirmation("Stash changes ?", "OK", () ⇒
                   api.stash(treeNodeManager.directory.now()).andThen { _ ⇒ closeMultiTool }
                 ))
               )
-            ).amend(verticalLine)
+            }).amend(verticalLine)
             else emptyNode,
             if gf
-            then iconAction(glyphItemize(OMTags.glyph_stash_pop), "pop", () ⇒
+            then div(OMTags.glyph_stash_pop, fileActionItems, "pop", cls := "glyphitem popover-item", onClick --> { _ ⇒
               confirmationDiv.set(
                 Some(confirmation("Pop stashed changes ?", "OK", () ⇒
                   api.stashPop(treeNodeManager.directory.now()).foreach:
@@ -303,7 +303,7 @@ class TreeNodePanel {
                     case _ => closeMultiTool
                 ))
               )
-            ).amend(if co.isEmpty then emptyMod else verticalLine)
+            }).amend(if co.isEmpty then emptyMod else verticalLine)
             else emptyNode
             ,
             if !co.isEmpty
