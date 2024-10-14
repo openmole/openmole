@@ -157,17 +157,19 @@ class ServerState:
     executionInfo(key) = info
   }
 
-
-  def modifyState(key: ExecutionId, state: ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
-    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = state)) }.isDefined
+  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
+    executionInfo.updateWith(key) {
+      _.map(e => e.copy(moleExecution = state(e.moleExecution)))
+    }.isDefined
   }
+
 
   def cancel(key: ExecutionId) =
     val moleExecution =
       atomic { implicit ctx ⇒
         val moleExecution = executionInfo.get(key).map(_.moleExecution)
         moleExecution match
-          case None | Some(_: ServerState.Preparing) => modifyState(key, ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
+          case None | Some(_: ServerState.Preparing) => modifyState(key)(_ => ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
           case _ =>
         moleExecution
       }
