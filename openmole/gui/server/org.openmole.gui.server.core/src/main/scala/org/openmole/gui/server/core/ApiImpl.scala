@@ -304,8 +304,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           MoleExecution.clean(e)
 
   def synchronousCompilation(
-                              scriptPath: SafePath,
-                              outputStream: StringPrintStream): ErrorData | MoleExecution =
+    scriptPath: SafePath,
+    outputStream: StringPrintStream): ErrorData | MoleExecution =
 
     def scriptError(t: Throwable): ErrorData =
       t match
@@ -380,7 +380,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         try ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
         catch
           case e: Throwable =>
-            serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+            serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
             Breaks.break()
 
       serverState.setEnvironments(execId, envIds)
@@ -389,9 +389,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
       catchAll(ex.start(validateScript)) match
         case Failure(e) ⇒
-          serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+          serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) ⇒
-          val inserted = serverState.modifyState(execId, ex)
+          val inserted = serverState.modifyState(execId)(_ => ex)
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
     def compileAndRun =
@@ -399,7 +399,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case e: MoleExecution =>
           if Thread.interrupted() then throw new InterruptedIOException()
           processRun(execId, e, validateScript)
-        case ed: ErrorData => serverState.modifyState(execId, Failed(Vector.empty, ed, Seq.empty))
+        case ed: ErrorData => serverState.modifyState(execId)(_ => Failed(Vector.empty, ed, Seq.empty))
 
 
     val future =
