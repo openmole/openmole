@@ -133,7 +133,7 @@ class TreeNodePanel {
     div(
       fileActions,
       text,
-      button(cls := "btn white-button", "OK", onClick --> {
+      button(cls := "btn white-button", "OK", marginLeft := "10", onClick --> {
         _ ⇒
           closeMultiTool
       })
