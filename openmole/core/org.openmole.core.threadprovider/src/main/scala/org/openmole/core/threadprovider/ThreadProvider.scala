@@ -20,16 +20,12 @@ object ThreadProvider:
 
   type Closure = () ⇒ Unit
 
-  class RunClosure(queue: PriorityQueue[Closure]) extends Runnable {
-    override def run = {
+  class RunClosure(queue: PriorityQueue[Closure]) extends Runnable:
+    override def run =
       val job = queue.dequeue()
       job.apply()
-    }
-  }
 
-
-  def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = new ThreadFactory:
-    override def newThread(r: Runnable): Thread =
+  def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = r =>
       val t = parentGroup match
         case Some(p) ⇒ new Thread(p, r)
         case None    ⇒ new Thread(r)
@@ -58,29 +54,19 @@ class ThreadProvider(poolSize: Int):
   def stop() = synchronized:
     stopped = true
     scheduler.shutdown()
-    //pool.shutdown()
     parentGroup.interrupt()
 
   def virtual(task: ThreadProvider.Closure) = virtualThreadPool.execute(() => task())
 
-//  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit =
-//    taskQueue.enqueue(task, priority)
-//    pool.submit(new ThreadProvider.RunClosure(taskQueue))
+  def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
 
-  def submit[T](t: ⇒ T) =
-    scala.concurrent.Future[T] { t }
-
-//  def javaSubmit[T](t: => T): java.util.Future[T] =
-//    val callable: Callable[T] = t
-//    pool.submit(callable)
-
-  def newThread(runnable: Runnable, groupName: Option[String] = None) = synchronized {
-    if (stopped) throw new RuntimeException("Thread provider has been stopped")
-    val group = groupName.map(n ⇒ new ThreadGroup(parentGroup, n)).getOrElse(parentGroup)
-    val t = new Thread(group, runnable)
-    t.setDaemon(true)
-    t
-  }
+  def newThread(runnable: Runnable, groupName: Option[String] = None) =
+    synchronized:
+      if (stopped) throw new RuntimeException("Thread provider has been stopped")
+      val group = groupName.map(n ⇒ new ThreadGroup(parentGroup, n)).getOrElse(parentGroup)
+      val t = new Thread(group, runnable)
+      t.setDaemon(true)
+      t
 
   def threadFactory: ThreadFactory = ThreadProvider.threadFactory(Some(parentGroup))
 

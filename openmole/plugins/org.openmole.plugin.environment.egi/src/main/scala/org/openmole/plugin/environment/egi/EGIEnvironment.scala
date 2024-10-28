@@ -358,7 +358,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       def download(src: String, dest: File, options: TransferOptions, priority: AccessControl.Priority) =
         given AccessControl.Priority = priority
         StorageService.download(storage, src, dest, options)
-      
+
       def clean(priority: AccessControl.Priority) =
         given AccessControl.Priority = priority
         StorageService.rmDirectory(storage, jobDirectory)
@@ -379,18 +379,18 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   lazy val jobService =
     def userDiracService =
-      for {
+      for
         s ← service
         g ← group
-      } yield gridscale.dirac.Service(s, g)
+      yield gridscale.dirac.Service(s, g)
 
     val diracService = userDiracService getOrElse getService(voName, EGIAuthentication.CACertificatesDir)
     val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     EGIJobService(s, env)
 
-  override def finishedJob(job: ExecutionJob): Unit = {
-    if (!stopped) EGIEnvironment.eagerSubmit(env)
-  }
+  override def finishedJob(job: ExecutionJob): Unit =
+    if !stopped
+    then EGIEnvironment.eagerSubmit(env)
 
 }
