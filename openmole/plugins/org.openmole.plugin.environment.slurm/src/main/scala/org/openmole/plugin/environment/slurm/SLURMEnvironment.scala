@@ -32,8 +32,8 @@ import org.openmole.core.dsl.extension.*
 object SLURMEnvironment {
 
   def apply(
-    user:                 OptionalArgument[String]      = None,
-    host:                 OptionalArgument[String]      = None,
+    user:                 OptionalArgument[String],
+    host:                 OptionalArgument[String],
     port:                 OptionalArgument[Int]         = 22,
     partition:            OptionalArgument[String]      = None,
     openMOLEMemory:       OptionalArgument[Information] = None,
@@ -58,7 +58,7 @@ object SLURMEnvironment {
     refresh:              OptionalArgument[Time]        = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
-  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+  )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       partition = partition,
@@ -85,7 +85,7 @@ object SLURMEnvironment {
     EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission)
+      if !localSubmission
       then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")

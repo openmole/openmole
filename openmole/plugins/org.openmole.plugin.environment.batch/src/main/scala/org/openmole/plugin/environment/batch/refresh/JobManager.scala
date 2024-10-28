@@ -107,7 +107,8 @@ object JobManager { self ⇒
     else op()
 
   def killOr(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) =
-    if (environment.stopped || canceled(storedJob)) self ! kill
+    if environment.stopped || canceled(storedJob)
+    then self ! kill
     else
       sendToMoleExecution(storedJob): state ⇒
         if !jobIsFinished(state, storedJob) then op() else self ! kill

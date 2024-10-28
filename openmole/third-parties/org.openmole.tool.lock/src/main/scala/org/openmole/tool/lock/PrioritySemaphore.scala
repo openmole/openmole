@@ -17,7 +17,6 @@ package org.openmole.tool.lock
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scala.collection.mutable
 import gears.async.*
 import gears.async.default.given
 import org.openmole.tool.collection.PriorityQueue
@@ -39,7 +38,8 @@ class PrioritySemaphore(initialPermits: Int):
           Some(promise)
 
     Async.blocking:
-      promise.foreach(_.await)
+      promise.foreach:p =>
+        p.await
 
   def release(): Unit =
     synchronized:
