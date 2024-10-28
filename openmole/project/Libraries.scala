@@ -80,6 +80,7 @@ object Libraries {
 
   lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
+  lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
 
   def httpClientVersion = "4.5.3"
   lazy val httpClient =

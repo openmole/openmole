@@ -21,18 +21,16 @@ import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.osgi.framework._
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
   override def stop(context: BundleContext): Unit =
     PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
+  override def start(context: BundleContext): Unit =
     import org.openmole.core.highlight.HighLight._
 
     val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentHighLight(classOf[OAREnvironment[_]])
+        EnvironmentHighLight(classOf[OAREnvironment[?]])
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
-  }
-}

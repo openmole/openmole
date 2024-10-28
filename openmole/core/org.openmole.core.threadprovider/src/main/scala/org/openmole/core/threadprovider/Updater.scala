@@ -24,67 +24,52 @@ import squants._
 
 import scala.ref.WeakReference
 
-object Updater {
+object Updater:
 
-  class UpdaterTask(val updatable: IUpdatableWithVariableDelay, threadProvider: WeakReference[ThreadProvider]) extends Runnable {
+  class UpdaterTask(val updatable: IUpdatableWithVariableDelay, threadProvider: WeakReference[ThreadProvider]) extends Runnable:
 
-    override def run = {
-      try {
+    override def run() =
+      try
         val resubmit = updatable.update()
         System.runFinalization
-        if (resubmit) threadProvider.get.foreach(tp ⇒ delay(this)(tp))
-      }
-      catch {
+        if resubmit then threadProvider.get.foreach(tp ⇒ delay(this)(tp))
+      catch
         case e: Throwable ⇒ Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
-      }
-    }
 
-  }
-
-  def registerForUpdate(updatable: IUpdatableWithVariableDelay)(implicit threadProvider: ThreadProvider) = {
+  def registerForUpdate(updatable: IUpdatableWithVariableDelay)(implicit threadProvider: ThreadProvider) =
     val task = new UpdaterTask(updatable, WeakReference(threadProvider))
-    threadProvider.pool.submit(task)
-  }
+    threadProvider.virtual(() => task.run())
 
-  def delay(updatable: IUpdatableWithVariableDelay)(implicit threadProvider: ThreadProvider): Unit = {
+  def delay(updatable: IUpdatableWithVariableDelay)(implicit threadProvider: ThreadProvider): Unit =
     val task = new UpdaterTask(updatable, WeakReference(threadProvider))
     delay(task)
-  }
 
-  def registerForUpdate(updatable: IUpdatable, updateInterval: Time)(implicit threadProvider: ThreadProvider): Unit = {
+  def registerForUpdate(updatable: IUpdatable, updateInterval: Time)(implicit threadProvider: ThreadProvider): Unit =
     registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval))
-  }
 
-  def delay(updatable: IUpdatable, updateInterval: Time)(implicit threadProvider: ThreadProvider): Unit = {
+  def delay(updatable: IUpdatable, updateInterval: Time)(implicit threadProvider: ThreadProvider): Unit =
     delay(new UpdatableWithFixedDelay(updatable, updateInterval))
-  }
 
-  def delay(updaterTask: UpdaterTask)(implicit threadProvider: ThreadProvider) = {
+  def delay(updaterTask: UpdaterTask)(implicit threadProvider: ThreadProvider) =
     threadProvider.scheduler.schedule(
-      new Runnable {
-        override def run() = threadProvider.pool.submit(updaterTask)
-      },
+      new Runnable:
+        override def run(): Unit = threadProvider.virtual(() => updaterTask.run())
+      ,
       updaterTask.updatable.delay.millis, TimeUnit.MILLISECONDS
     )
-  }
 
-}
 
-object IUpdatable {
-  def apply(f: () ⇒ Boolean) = new IUpdatable {
+object IUpdatable:
+  def apply(f: () ⇒ Boolean) = new IUpdatable:
     override def update(): Boolean = f()
-  }
-}
 
-trait IUpdatable {
+
+trait IUpdatable:
   def update(): Boolean
-}
 
-trait IUpdatableWithVariableDelay extends IUpdatable {
+trait IUpdatableWithVariableDelay extends IUpdatable:
   def delay: Time
-}
 
-class UpdatableWithFixedDelay(val updatable: IUpdatable, val delay: Time) extends IUpdatableWithVariableDelay {
+class UpdatableWithFixedDelay(val updatable: IUpdatable, val delay: Time) extends IUpdatableWithVariableDelay:
   override def update() = updatable.update()
-}
 

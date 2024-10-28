@@ -131,31 +131,29 @@ object EGIEnvironment extends JavaLogger {
         }
       }
 
-      if (!nbRuns.isEmpty) {
-        while (nbRessub > 0 && nbRuns.head < numberOfSimultaneousExecutionForAJob) {
+      if !nbRuns.isEmpty
+      then
+        while (nbRessub > 0 && nbRuns.head < numberOfSimultaneousExecutionForAJob)
+        do
           val size = nbRuns.head
           val jobKey = jobKeyMap(nbRuns.head)
 
           val job =
-            jobKey.find(j ⇒ executionJobsMap(j).isEmpty) match {
+            jobKey.find(j ⇒ executionJobsMap(j).isEmpty) match
               case Some(j) ⇒ j
               case None ⇒
-                jobKey.find(j ⇒ !executionJobsMap(j).exists(j ⇒ j.state != ExecutionState.SUBMITTED)) match {
+                jobKey.find(j ⇒ !executionJobsMap(j).exists(j ⇒ j.state != ExecutionState.SUBMITTED)) match
                   case Some(j) ⇒ j
                   case None    ⇒ jobKey.head
-                }
-            }
 
           environment.submit(JobStore.load(executionJobsMap(job).head.storedJob))
 
           jobKeyMap.removeBinding(size, job)
-          if (jobKey.isEmpty) nbRuns -= size
+          if jobKey.isEmpty then nbRuns -= size
 
           jobKeyMap.addBinding(size + 1, job)
           nbRuns += (size + 1)
           nbRessub -= 1
-        }
-      }
     }
   }
 
@@ -207,12 +205,11 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val name:              Option[String],
   val authentication:    A,
   implicit val services: BatchEnvironment.Services,
-)(implicit workspace: Workspace) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+)(implicit workspace: Workspace) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒
 
   import services._
 
-  implicit val interpreters: EGI.Interpreters = EGI()
-  import interpreters._
+  given gridscale.http.HTTP = gridscale.http.HTTP()
 
   lazy val proxyCache = TimeCache { () ⇒
     val proxy = EGIAuthentication.proxy(authentication, voName, voms, fqan).get
@@ -224,48 +221,50 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     (token, preference(EGIEnvironment.TokenRenewalTime))
   }
 
-  override def start() = {
+  override def start() =
     proxyCache()
-    if (storages().map(_.toOption).flatten.isEmpty) throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages().collect { case util.Failure(e) ⇒ e }))
+    if storages().flatMap(_.toOption).isEmpty then throw new InternalProcessingError(s"No webdav storage is working for the VO $voName", MultipleException(storages().collect { case util.Failure(e) ⇒ e }))
+    storages().flatMap(_.toOption).foreach: (space, storage) =>
+      AccessControl.defaultPrirority:
+        HierarchicalStorageSpace.clean(storage, space, background = true)
     jobService
-  }
 
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    storages().map(_.toOption).flatten.foreach { case (space, storage) ⇒ HierarchicalStorageSpace.clean(storage, space, background = false) }
+    storages().map(_.toOption).flatten.foreach: (space, storage) =>
+      AccessControl.defaultPrirority:
+        HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
-  }
 
   def bdiis: Seq[gridscale.egi.BDIIServer] =
     bdiiURL.map(b ⇒ Seq(EGIEnvironment.toBDII(new java.net.URI(b)))).getOrElse(EGIEnvironment.defaultBDIIs)
 
-  val storages = Lazy {
-    val webdavStorages =
-      (storage getOrElse findFirstWorking(bdiis) { b ⇒ webDAVs(b, voName) }).toVector
+  val storages =
+    Lazy:
+      val webdavStorages =
+        (storage getOrElse findFirstWorking(bdiis) { b => webDAVs(b, voName) }).toVector
 
-    if webdavStorages.nonEmpty
-    then
-      webdavStorages.map { location ⇒
-        threadProvider.submit {
-          def isConnectionError(t: Throwable) = {
-            (t, t.getCause) match {
-              case (_: _root_.gridscale.authentication.AuthenticationException, _) ⇒ true
-              case (_, _: java.net.SocketException) ⇒ true
-              case _ ⇒ false
-            }
-          }
+      if webdavStorages.nonEmpty
+      then
+        webdavStorages.map: location ⇒
+          threadProvider.submit:
+            def isConnectionError(t: Throwable) =
+              (t, t.getCause) match
+                case (_: _root_.gridscale.authentication.AuthenticationException, _) ⇒ true
+                case (_, _: java.net.SocketException) ⇒ true
+                case _ ⇒ false
 
-          val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
-          val storageSpace = util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
-          storageSpace.map { s ⇒ (s, storage) }
-        }
-      }.map(Await.result(_, scala.concurrent.duration.Duration.Inf))
+            val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
+            val storageSpace =
+              AccessControl.defaultPrirority:
+                util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
+            storageSpace.map { s ⇒ (s, storage) }
+        .map(Await.result(_, scala.concurrent.duration.Duration.Inf))
 
-    else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
+      else throw new InternalProcessingError(s"No WebDAV storage available for the VO $voName")
 
-  }
 
-  def execute(batchExecutionJob: BatchExecutionJob) = {
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     import EGIEnvironment._
     import org.openmole.core.tools.math._
     import org.openmole.tool.file._
@@ -356,22 +355,29 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
       val job = jobService.submit(sj, outputPath, storage.url)
 
+      def download(src: String, dest: File, options: TransferOptions, priority: AccessControl.Priority) =
+        given AccessControl.Priority = priority
+        StorageService.download(storage, src, dest, options)
+      
+      def clean(priority: AccessControl.Priority) =
+        given AccessControl.Priority = priority
+        StorageService.rmDirectory(storage, jobDirectory)
+
       BatchJobControl(
         () ⇒ UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
         () ⇒ StorageService.id(storage),
-        () ⇒ jobService.state(job),
-        () ⇒ jobService.delete(job),
-        () ⇒ jobService.stdOutErr(job),
+        jobService.state(job, _),
+        jobService.delete(job, _),
+        jobService.stdOutErr(job, _),
+        download,
         () ⇒ outputPath,
-        StorageService.download(storage, _, _, _),
-        () ⇒ StorageService.rmDirectory(storage, jobDirectory)
+        clean
       )
     }
-  }
 
   import gridscale.dirac._
 
-  lazy val jobService = {
+  lazy val jobService =
     def userDiracService =
       for {
         s ← service
@@ -382,7 +388,6 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
     val s = server(diracService, implicitly[EGIAuthenticationInterface[A]].apply(authentication), EGIAuthentication.CACertificatesDir)
     delegate(s, implicitly[EGIAuthenticationInterface[A]].apply(authentication), tokenCache())
     EGIJobService(s, env)
-  }
 
   override def finishedJob(job: ExecutionJob): Unit = {
     if (!stopped) EGIEnvironment.eagerSubmit(env)

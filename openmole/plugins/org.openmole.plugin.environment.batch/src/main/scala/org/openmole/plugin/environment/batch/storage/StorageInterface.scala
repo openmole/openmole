@@ -26,54 +26,52 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Acc
 import org.openmole.tool.file._
 import org.openmole.tool.stream._
 
-object StorageInterface {
+object StorageInterface:
 
-  def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
-    new RemoteStorage {
-      override def upload(src: File, dest: Option[String], options: TransferOptions)(implicit newFile: TmpDirectory): String = StorageService.uploadInDirectory(s, src, communicationDirectory, options)
-      override def download(src: String, dest: File, options: TransferOptions)(implicit newFile: TmpDirectory): Unit = StorageService.download(s, src, dest, options)
-    }
+//  def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
+//    new RemoteStorage:
+//      override def upload(src: File, dest: Option[String], options: TransferOptions)(using TmpDirectory): String =
+//        AccessControl.defaultPrirority:
+//          StorageService.uploadInDirectory(s, src, communicationDirectory, options)
+//
+//      override def download(src: String, dest: File, options: TransferOptions)(using TmpDirectory): Unit =
+//        AccessControl.defaultPrirority:
+//          StorageService.download(s, src, dest, options)
 
-  def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit = {
+  def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit =
     def fileStream() = src.bufferedInputStream()
 
-    if (compressed) {
+    if compressed
+    then
       def compressedFileStream() = src.bufferedInputStream().toGZiped
       if (!options.raw) uploadStream(compressedFileStream, dest) else uploadStream(fileStream, dest)
-    }
     else uploadStream(fileStream, dest)
-  }
 
-  def download(compressed: Boolean, downloadStream: (String, InputStream ⇒ Unit) ⇒ Unit)(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit = {
+  def download(compressed: Boolean, downloadStream: (String, InputStream ⇒ Unit) ⇒ Unit)(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit =
     def downloadFile(is: InputStream) = Files.copy(is, dest.toPath)
-    if (compressed) {
+    if compressed
+    then
       def uncompressed(is: InputStream) = downloadFile(is.toGZ)
       if (!options.raw) downloadStream(src, uncompressed) else downloadStream(src, downloadFile)
-    }
     else downloadStream(src, downloadFile)
-  }
 
   def isDirectory(name: String) = name.endsWith("/")
 
-}
 
-trait StorageInterface[T] {
-  def exists(t: T, path: String): Boolean
-  def rmFile(t: T, path: String): Unit
-  def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit
-  def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit
-}
+trait StorageInterface[T]:
+  def exists(t: T, path: String)(using AccessControl.Priority): Boolean
+  def rmFile(t: T, path: String)(using AccessControl.Priority): Unit
+  def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default)(using AccessControl.Priority): Unit
+  def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default)(using AccessControl.Priority): Unit
 
-trait HierarchicalStorageInterface[T] {
-  def rmDir(t: T, path: String): Unit
-  def makeDir(t: T, path: String): Unit
-  def child(t: T, parent: String, child: String): String
-  def list(t: T, path: String): Seq[ListEntry]
-  def parent(t: T, path: String): Option[String]
+trait HierarchicalStorageInterface[T]:
+  def rmDir(t: T, path: String)(using AccessControl.Priority): Unit
+  def makeDir(t: T, path: String)(using AccessControl.Priority): Unit
+  def child(t: T, parent: String, child: String)(using AccessControl.Priority): String
+  def list(t: T, path: String)(using AccessControl.Priority): Seq[ListEntry]
+  def parent(t: T, path: String)(using AccessControl.Priority): Option[String]
   def name(t: T, path: String): String
-}
 
-trait EnvironmentStorage[S] {
+trait EnvironmentStorage[S]:
   def id(s: S): String
   def environment(s: S): BatchEnvironment
-}

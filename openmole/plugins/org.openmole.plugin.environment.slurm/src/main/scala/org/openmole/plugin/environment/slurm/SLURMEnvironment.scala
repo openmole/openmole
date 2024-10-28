@@ -18,7 +18,6 @@
 
 package org.openmole.plugin.environment.slurm
 
-import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -132,16 +131,16 @@ object SLURMEnvironment {
     modules:              Seq[String],
     debug:                Boolean)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _], refresh: Option[Time])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
     submitToCluster(
       environment,
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _, _),
-      jobService.state(_),
-      jobService.delete(_),
-      jobService.stdOutErr(_),
+      jobService.submit,
+      jobService.state,
+      jobService.delete,
+      jobService.stdOutErr,
       refresh)
 
 }
@@ -154,37 +153,36 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) {
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
   env ⇒
 
-  import services._
+  import services.*
 
-  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit val ssh: gridscale.ssh.SSH = gridscale.ssh.SSH()
 
-  override def start() = { storageService }
+  override def start() =
+    storageService
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = true)
 
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    cleanSSHStorage(storageService, background = false)
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
-    sshInterpreter().close
-  }
-
-  import env.services.{ threadProvider, preference }
-  import org.openmole.plugin.environment.ssh._
+    ssh.close
 
   lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
   lazy val storageService =
-    if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
-      (localStorageSpace(local), local)
-    }
+    if parameters.storageSharedLocally
+    then
+      Left:
+        val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
+        (localStorageSpace(local), local)
     else
-      Right {
+      Right:
         val ssh =
           sshStorage(
             user = user,
@@ -197,58 +195,54 @@ class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
           )
 
         (sshStorageSpace(ssh), ssh)
-      }
 
-  def execute(batchExecutionJob: BatchExecutionJob) =
-    storageService match {
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    storageService match
       case Left((space, local)) ⇒ SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
       case Right((space, ssh))  ⇒ SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
-    }
 
   lazy val installRuntime =
-    storageService match {
-      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
-    }
+    storageService match
+      case Left((space, local)) ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
-    storageService match {
-      case Left((space, local)) ⇒ new SLURMJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ new SLURMJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-    }
+    storageService match
+      case Left((space, local)) ⇒ SLURMJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Right((space, ssh))  ⇒ SLURMJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
 
-}
 
 class SLURMLocalEnvironment(
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env =>
 
-  import services._
+  import services.*
 
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
+  override def start() =
+    storage
+    space
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = true)
 
-  override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space, background = true) }
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    HierarchicalStorageSpace.clean(storage, space, background = false)
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
-  }
-
-  import env.services.preference
-  import org.openmole.plugin.environment.ssh._
 
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
 
-  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
+  lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 
-  import _root_.gridscale.local.LocalHost
 
-  lazy val jobService = new SLURMJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
+  lazy val jobService =
+    import _root_.gridscale.cluster.LocalHeadNode
+    new SLURMJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHeadNode(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
-}
 

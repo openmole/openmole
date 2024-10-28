@@ -550,10 +550,9 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   version := http4sVersion
 ) dependsOn(cats, slf4j)
 
-
-
-
-
-
-
+lazy val gears = OsgiProject(dir, "gears") settings (
+  settings,
+  libraryDependencies += "ch.epfl.lamp" %% "gears" % gearsVersion,
+  version := gearsVersion
+)
 

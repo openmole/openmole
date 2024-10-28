@@ -24,37 +24,33 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Acc
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.tool.file._
 
-object LocalStorage {
+object LocalStorage:
 
-  import gridscale.effectaside._
-  import gridscale.local
+  import gridscale.local.Local
 
-  def home(implicit interpreter: Effect[local.Local]) = interpreter().home()
+  def home = Local.home()
   def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
-  implicit def isStorage(implicit interpreter: Effect[local.Local]): StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage] {
-    override def child(t: LocalStorage, parent: String, child: String): String = LocalStorage.child(parent, child)
-    override def parent(t: LocalStorage, path: String): Option[String] = Option(File(path).getParent)
+  implicit def isStorage: StorageInterface[LocalStorage] & HierarchicalStorageInterface[LocalStorage] & EnvironmentStorage[LocalStorage] = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage]:
+    override def child(t: LocalStorage, parent: String, child: String)(using AccessControl.Priority): String = LocalStorage.child(parent, child)
+    override def parent(t: LocalStorage, path: String)(using AccessControl.Priority): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName
-    override def exists(t: LocalStorage, path: String): Boolean = t.accessControl { local.exists(path) }
-    override def list(t: LocalStorage, path: String): Seq[gridscale.ListEntry] = t.accessControl { local.list(path) }
-    override def makeDir(t: LocalStorage, path: String): Unit = t.accessControl { local.makeDir(path) }
-    override def rmDir(t: LocalStorage, path: String): Unit = t.accessControl { local.rmDir(path) }
-    override def rmFile(t: LocalStorage, path: String): Unit = t.accessControl { local.rmFile(path) }
+    override def exists(t: LocalStorage, path: String)(using AccessControl.Priority): Boolean = t.accessControl { Local.exists(path) }
+    override def list(t: LocalStorage, path: String)(using AccessControl.Priority): Seq[gridscale.ListEntry] = t.accessControl { Local.list(path) }
+    override def makeDir(t: LocalStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { Local.makeDir(path) }
+    override def rmDir(t: LocalStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { Local.rmDir(path) }
+    override def rmFile(t: LocalStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { Local.rmFile(path) }
 
-    override def upload(t: LocalStorage, src: File, dest: String, options: TransferOptions): Unit = t.accessControl {
-      StorageInterface.upload(false, local.writeFile(_, _))(src, dest, options)
-    }
+    override def upload(t: LocalStorage, src: File, dest: String, options: TransferOptions)(using AccessControl.Priority): Unit = t.accessControl:
+      StorageInterface.upload(false, Local.writeFile)(src, dest, options)
+    
 
-    override def download(t: LocalStorage, src: String, dest: File, options: TransferOptions): Unit = t.accessControl {
-      StorageInterface.download(false, local.readFile[Unit](_, _))(src, dest, options)
-    }
+    override def download(t: LocalStorage, src: String, dest: File, options: TransferOptions)(using AccessControl.Priority): Unit = t.accessControl:
+      StorageInterface.download(false, Local.readFile)(src, dest, options)
 
     override def id(s: LocalStorage): String = s.id
     override def environment(s: LocalStorage): BatchEnvironment = s.environment
-  }
-
-}
+  
 
 case class LocalStorage(accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
 

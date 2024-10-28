@@ -21,45 +21,46 @@ import java.util
 import java.util.concurrent.Semaphore
 import scala.jdk.CollectionConverters._
 
-object PriorityQueue {
+object PriorityQueue:
   def apply[T](fifo: Boolean = false) = new PriorityQueue[T](fifo)
 
   sealed trait InnerQueue[T]
   case class FIFO[T](linkedList: util.LinkedList[T] = new util.LinkedList[T]) extends InnerQueue[T]
   case class FILO[T](stack: util.Stack[T] = new util.Stack[T]) extends InnerQueue[T]
 
-  def add[T](innerQueue: InnerQueue[T], t: T) = innerQueue match {
-    case FILO(s) ⇒ s.push(t)
-    case FIFO(l) ⇒ l.add(t)
-  }
+  def add[T](innerQueue: InnerQueue[T], t: T) =
+    innerQueue match
+      case FILO(s) ⇒ s.push(t)
+      case FIFO(l) ⇒ l.add(t)
 
-  def pool[T](innerQueue: InnerQueue[T]) = innerQueue match {
-    case FILO(s) ⇒ s.pop()
-    case FIFO(l) ⇒ l.poll()
-  }
+  def pool[T](innerQueue: InnerQueue[T]) =
+    innerQueue match
+      case FILO(s) ⇒ s.pop()
+      case FIFO(l) ⇒ l.poll()
 
-  def clear[T](innerQueue: InnerQueue[T]) = innerQueue match {
-    case FILO(s) ⇒ s.clear()
-    case FIFO(l) ⇒ l.clear()
-  }
+  def clear[T](innerQueue: InnerQueue[T]) =
+    innerQueue match
+      case FILO(s) ⇒ s.clear()
+      case FIFO(l) ⇒ l.clear()
 
-  def size[T](innerQueue: InnerQueue[T]) = innerQueue match {
-    case FILO(s) ⇒ s.size()
-    case FIFO(l) ⇒ l.size()
-  }
+  def size[T](innerQueue: InnerQueue[T]) =
+    innerQueue match
+      case FILO(s) ⇒ s.size()
+      case FIFO(l) ⇒ l.size()
 
-  def isEmpty[T](innerQueue: InnerQueue[T]) = innerQueue match {
-    case FILO(s) ⇒ s.isEmpty()
-    case FIFO(l) ⇒ l.isEmpty()
-  }
+  def isEmpty[T](innerQueue: InnerQueue[T]) =
+    innerQueue match
+      case FILO(s) ⇒ s.isEmpty()
+      case FIFO(l) ⇒ l.isEmpty()
 
-  def toVector[T](innerQueue: InnerQueue[T]) = innerQueue match {
-    case FILO(s) ⇒ s.iterator().asScala.toVector
-    case FIFO(l) ⇒ l.iterator().asScala.toVector
-  }
-}
+  def toVector[T](innerQueue: InnerQueue[T]) =
+    innerQueue match
+      case FILO(s) ⇒ s.iterator().asScala.toVector
+      case FIFO(l) ⇒ l.iterator().asScala.toVector
 
-class PriorityQueue[T](fifo: Boolean) {
+
+
+class PriorityQueue[T](fifo: Boolean):
 
   private val inQueue = new Semaphore(0)
 
@@ -67,34 +68,32 @@ class PriorityQueue[T](fifo: Boolean) {
 
   def size: Int = inQueue.availablePermits
 
-  def enqueue(e: T, priority: Int) = {
-    synchronized {
-      queues.get(priority) match {
+  def enqueue(e: T, priority: Int) =
+    synchronized:
+      queues.get(priority) match
         case Some(queue) ⇒ PriorityQueue.add(queue, e)
         case None ⇒
-          val q: PriorityQueue.InnerQueue[T] = if (!fifo) PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
+          val q: PriorityQueue.InnerQueue[T] = if !fifo then PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
           PriorityQueue.add(q, e)
           queues.put(priority, q)
-      }
-    }
-    inQueue.release
-  }
+    inQueue.release()
 
   def dequeue() =
-    inQueue.acquire
-    synchronized {
+    inQueue.acquire()
+    synchronized:
       val (p, q) = queues.last
       val job = PriorityQueue.pool(q)
-      if (PriorityQueue.isEmpty(q)) queues.remove(p)
+      if PriorityQueue.isEmpty(q) then queues.remove(p)
       job
-    }
 
-  def all = synchronized { queues.values.toVector.flatMap(PriorityQueue.toVector) }
+  def all =
+    synchronized:
+      queues.values.toVector.flatMap(PriorityQueue.toVector)
 
   def clear() =
-    synchronized { queues.clear() }
+    synchronized:
+      queues.clear()
     inQueue.drainPermits()
 
   def isEmpty = synchronized(size == 0)
 
-}

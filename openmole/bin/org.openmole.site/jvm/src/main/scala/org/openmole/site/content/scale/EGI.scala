@@ -43,8 +43,8 @@ In the console, execute the following:
 $br$br
 
 ${hl.openmole("""
-EGIAuthentication() = P12Certificate(encrypted, "/path/to/your/certificate.p12")
-""", header = """def encrypted = "" """)}
+EGIAuthentication() = P12Certificate(password, "/path/to/your/certificate.p12")
+""", header = """def password = "" """)}
 
 $br
 
@@ -71,7 +71,7 @@ ${h3{"Optional parameters"}}
 
 Other optional parameters are available when defining an ${code{"EGIEnvironment"}}:
 ${ul(
-  li{html"${apiEntryTitle{"cpuTime"}} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,"},
+  li{html"${apiEntryTitle{"cpuTime"}} the maximum duration for the job in terms of CPU consumption, for instance 1 hour,"},
   li{html"$openMOLEMemory,"},
   li{html"${apiEntryTitle{"debug"}} generate debugging information about the execution node (hostname, date, memory, max number of file descriptors, user proxy, ...). Defaults to ${hl.openmoleNoTest{"debug = false"}}."}
 )}

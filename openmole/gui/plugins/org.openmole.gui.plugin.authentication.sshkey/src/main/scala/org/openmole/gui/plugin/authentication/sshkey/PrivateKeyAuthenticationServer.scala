@@ -60,7 +60,7 @@ class PrivateKeyAuthenticationServer(s: Services)
         PrivateKey(
           safePathToFile(pk),
           data.login,
-          cypher.encrypt(data.password),
+          data.password,
           data.target,
           data.port.toInt
         )
@@ -73,7 +73,7 @@ class PrivateKeyAuthenticationServer(s: Services)
             PrivateKeyAuthenticationData(
               privateKey = Some(safePath.name),
               login = key.login,
-              password = cypher.decrypt(key.cypheredPassword),
+              password = key.password,
               target = key.host,
               port = key.port.toString,
               directory = safePath.parent

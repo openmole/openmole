@@ -66,14 +66,14 @@ class EGIAuthenticationEGIServer(s: Services)
 
   object impl {
     private def coreObject(data: EGIAuthenticationData) =
-      data.privateKey.map { pk ⇒ P12Certificate(cypher.encrypt(data.password), safePathToFile(pk)) }
+      data.privateKey.map { pk ⇒ P12Certificate(data.password, safePathToFile(pk)) }
 
     def egiAuthentications(): Seq[EGIAuthenticationData] =
       EGIAuthentication() match
         case Some(p12: P12Certificate) ⇒
           Seq(
             EGIAuthenticationData(
-              cypher.decrypt(p12.cypheredPassword),
+              p12.password,
               Some(p12.certificate.toSafePath(using ServerFileSystemContext.Authentication))
             )
           )

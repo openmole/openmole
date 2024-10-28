@@ -44,32 +44,31 @@ object ThreadProvider:
     def newSingleThreadExecutor = Executors.newSingleThreadExecutor(t.threadFactory)
 
 
-class ThreadProvider(poolSize: Int) {
+class ThreadProvider(poolSize: Int):
 
   lazy val parentGroup = new ThreadGroup("provider-" + UUID.randomUUID().toString)
 
-  implicit lazy val pool: ThreadPoolExecutor =
-    new ThreadPoolExecutor(poolSize, poolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](), threadFactory)
+  lazy val virtualThreadPool = Executors.newVirtualThreadPerTaskExecutor()
+  given executionContext: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.fromExecutor(virtualThreadPool)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
-  lazy val taskQueue = PriorityQueue[ThreadProvider.Closure](true)
-
-  implicit lazy val executionContext: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.fromExecutor(pool)
 
   var stopped = false
 
-  def stop() = synchronized {
+  def stop() = synchronized:
     stopped = true
     scheduler.shutdown()
-    pool.shutdown()
+    //pool.shutdown()
     parentGroup.interrupt()
-  }
 
-  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit =
-    taskQueue.enqueue(task, priority)
-    pool.submit(new ThreadProvider.RunClosure(taskQueue))
+  def virtual(task: ThreadProvider.Closure) = virtualThreadPool.execute(() => task())
 
-  def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
+//  def enqueue(priority: Int)(task: ThreadProvider.Closure): Unit =
+//    taskQueue.enqueue(task, priority)
+//    pool.submit(new ThreadProvider.RunClosure(taskQueue))
+
+  def submit[T](t: ⇒ T) =
+    scala.concurrent.Future[T] { t }
 
 //  def javaSubmit[T](t: => T): java.util.Future[T] =
 //    val callable: Callable[T] = t
@@ -85,4 +84,3 @@ class ThreadProvider(poolSize: Int) {
 
   def threadFactory: ThreadFactory = ThreadProvider.threadFactory(Some(parentGroup))
 
-}

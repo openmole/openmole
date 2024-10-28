@@ -377,14 +377,13 @@ object MoleExecution {
       moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.Finished(canceled = canceled))
       moleExecution.finishedSemaphore.release()
 
-      moleExecution.executionContext.services.threadProvider.enqueue(ThreadProvider.maxPriority) { () ⇒
+      moleExecution.executionContext.services.threadProvider.virtual: ()  =>
         def stopEnvironments() =
-          if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.stop()
+          if moleExecution.startStopDefaultEnvironment then moleExecution.defaultEnvironment.stop()
           moleExecution.environments.values.foreach(_.stop())
 
         try stopEnvironments()
         finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExecution())
-      }
 
   def clean(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._
@@ -782,9 +781,8 @@ class MoleExecution(
 
   def start(doValidation: Boolean) =
     import executionContext.services._
-    if (doValidation) validate
-    val t = threadProvider.newThread { () ⇒ run(None, validate = doValidation) }
-    t.start()
+    if doValidation then validate
+    threadProvider.virtual { () ⇒ run(None, validate = doValidation) }
     this
 
   def hangOn(cleaned: Boolean = true) =

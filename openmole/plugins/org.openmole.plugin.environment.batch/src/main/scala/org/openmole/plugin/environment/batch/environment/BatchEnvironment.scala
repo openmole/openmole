@@ -20,36 +20,35 @@ package org.openmole.plugin.environment.batch.environment
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{CountDownLatch, Semaphore}
-
-import org.openmole.core.communication.message._
+import org.openmole.core.communication.message.*
 import org.openmole.core.communication.storage.{RemoteStorage, TransferOptions}
 import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
-import org.openmole.core.location._
+import org.openmole.core.location.*
 import org.openmole.core.pluginmanager.PluginManager
-import org.openmole.core.preference.{PreferenceLocation, Preference}
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.execution.*
-import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole.MoleServices
-import org.openmole.core.workspace._
+import org.openmole.core.workspace.*
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.ExecutionJobRegistry
-import org.openmole.plugin.environment.batch.refresh._
-import org.openmole.tool.cache._
+import org.openmole.plugin.environment.batch.refresh.*
+import org.openmole.tool.cache.*
 import org.openmole.tool.collection.RingBuffer
-import org.openmole.tool.file._
+import org.openmole.tool.file.*
 import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.tool.random.{RandomProvider, Seeder, shuffled}
 import squants.information.Information
-import squants.information.InformationConversions._
-import squants.time.TimeConversions._
-import org.openmole.tool.lock._
+import squants.information.InformationConversions.*
+import squants.time.TimeConversions.*
+import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.core.compiler.CompilationContext
-
+import org.openmole.tool.crypto.Cypher
 
 import scala.collection.immutable.TreeSet
 
@@ -162,8 +161,8 @@ object BatchEnvironment {
     val eventDispatcher:   EventDispatcher,
     val fileServiceCache:  FileServiceCache,
     val outputRedirection: OutputRedirection,
-    val loggerService: LoggerService,
-    val cache: KeyValueCache
+    val loggerService:     LoggerService,
+    val cache:             KeyValueCache
   )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =
@@ -181,7 +180,7 @@ object BatchEnvironment {
     storageId: String)(file: File, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
     import services._
 
-    if (!file.exists) throw new UserBadDataError(s"File $file is required but doesn't exist.")
+    if !file.exists then throw new UserBadDataError(s"File $file is required but doesn't exist.")
 
     val isDir = file.isDirectory
     val toReplicatePath = file.getCanonicalFile
@@ -375,7 +374,7 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
   def submit(job: JobGroup) = BatchEnvironment.submit(this, job)(services)
 
   def finishedJob(job: ExecutionJob) = {}
-  def execute(batchExecutionJob: BatchExecutionJob): BatchJobControl
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority): BatchJobControl
   def clean = BatchEnvironment.registryIsEmpty(env)
 
   def runtime = BatchEnvironment.runtimeLocation
@@ -399,7 +398,7 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 
 
 object BatchEnvironmentState:
-  def apply()(implicit services: BatchEnvironment.Services) =
+  def apply(services: BatchEnvironment.Services) =
     import services.newFile
     val _errors = new RingBuffer[ExceptionEvent](services.preference(Environment.maxExceptionsLog))
     val jobStore =

@@ -181,7 +181,7 @@ object ContainerTask:
       repository,
       timeout = preference(RegistryTimeout),
       retry = Some(preference(RegistryRetryOnError)),
-      executor = ImageDownloader.Executor.parallel(threadProvider.pool),
+      executor = ImageDownloader.Executor.parallel(threadProvider.virtualThreadPool),
       proxy = networkService.httpProxy.map(p ⇒ ImageDownloader.HttpProxy(p.hostURI))
     )
 
