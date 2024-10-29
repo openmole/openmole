@@ -101,7 +101,7 @@ object BatchEnvironment {
   val GetTokenInterval = PreferenceLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
 
   val MinUpdateInterval = PreferenceLocation("BatchEnvironment", "MinUpdateInterval", Some(20 seconds))
-  val IncrementUpdateInterval = PreferenceLocation("BatchEnvironment", "IncrementUpdateInterval", Some(20 seconds))
+  val IncrementUpdateInterval = PreferenceLocation("BatchEnvironment", "IncrementUpdateInterval", Some(10 seconds))
   val MaxUpdateInterval = PreferenceLocation("BatchEnvironment", "MaxUpdateInterval", Some(5 minutes))
   val MaxUpdateErrorsInARow = PreferenceLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
