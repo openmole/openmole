@@ -11,7 +11,7 @@ import org.openmole.core.workflow.task.Task
 import org.openmole.core.workspace._
 import org.openmole.tool.file._
 
-object JobStore {
+object JobStore:
 
   def store(jobStore: JobStore, job: JobGroup)(implicit serializer: SerializerService): StoredJob =
     val moleJobs = JobGroup.moleJobs(job)
@@ -51,7 +51,6 @@ object JobStore {
 
   def subMoleCanceled(storedMoleJob: StoredMoleJob) = storedMoleJob.callBack.subMoleCanceled()
   def finish(storedMoleJob: StoredMoleJob, result: Either[Context, Throwable]) = storedMoleJob.callBack.jobFinished(storedMoleJob.id, result)
-
-}
+  
 
 case class JobStore(store: File)

@@ -23,7 +23,7 @@ import org.openmole.core.context._
 
 case class RuntimeTask(task: Task, strain: Boolean)
 
-object Job {
+object Job:
 
   implicit val moleJobOrdering: Ordering[Job] = Ordering.by((_: Job).id)
 
@@ -57,24 +57,19 @@ object Job {
 
   class SubMoleCanceled extends Exception
 
-  object CallBack {
+  object CallBack:
     def apply(jobFinished: JobFinished, canceled: Canceled) = Instance(jobFinished, canceled)
 
-    case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack {
+    case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack:
       def subMoleCanceled() = _canceled()
       def jobFinished(job: JobId, result: Either[Context, Throwable]) = _jobFinished(job, result)
-    }
-  }
 
-  trait CallBack {
+  trait CallBack:
     def jobFinished(id: JobId, result: Either[Context, Throwable]): Unit
     def subMoleCanceled(): Boolean
-  }
 
   type JobFinished = (JobId, Either[Context, Throwable]) ⇒ Unit
   type Canceled = () ⇒ Boolean
-
-}
 
 import Job._
 
@@ -90,21 +85,18 @@ class Job(
   val task:          RuntimeTask,
   compressedContext: CompactedContext,
   val id:            JobId,
-  val callBack:      CallBack) {
+  val callBack:      CallBack):
 
   def context: Context = CompactedContext.expand(compressedContext)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
-    if (!callBack.subMoleCanceled()) {
+    if !callBack.subMoleCanceled()
+    then
       val ctx = context
-      try {
+      try
         val performResult = Task.perform(task.task, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
-      }
-      catch {
+      catch
         case t: Throwable ⇒ Right(t)
-      }
-    }
     else Right(new SubMoleCanceled)
 
-}

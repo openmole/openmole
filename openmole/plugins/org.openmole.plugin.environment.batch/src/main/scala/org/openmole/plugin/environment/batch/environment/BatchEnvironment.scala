@@ -54,9 +54,8 @@ import scala.collection.immutable.TreeSet
 
 object BatchEnvironment {
 
-  trait Transfer {
+  trait Transfer:
     def id: Long
-  }
 
   case class BeginUpload(id: Long, file: File, storageId: String) extends Event[BatchEnvironment] with Transfer
   case class EndUpload(id: Long, file: File, storageId: String, path: util.Try[String], size: Long) extends Event[BatchEnvironment] with Transfer {
@@ -96,8 +95,7 @@ object BatchEnvironment {
     res
 
   val MemorySizeForRuntime = PreferenceLocation("BatchEnvironment", "MemorySizeForRuntime", Some(1024 megabytes))
-  
-  val CheckInterval = PreferenceLocation("BatchEnvironment", "CheckInterval", Some(1 minutes))
+
   val SubmitRetryInterval = PreferenceLocation("BatchEnvironment", "SubmitRetryInterval", Some(30 seconds))
 
   val GetTokenInterval = PreferenceLocation("BatchEnvironment", "GetTokenInterval", Some(1 minutes))
@@ -105,12 +103,13 @@ object BatchEnvironment {
   val MinUpdateInterval = PreferenceLocation("BatchEnvironment", "MinUpdateInterval", Some(20 seconds))
   val IncrementUpdateInterval = PreferenceLocation("BatchEnvironment", "IncrementUpdateInterval", Some(20 seconds))
   val MaxUpdateInterval = PreferenceLocation("BatchEnvironment", "MaxUpdateInterval", Some(5 minutes))
-
   val MaxUpdateErrorsInARow = PreferenceLocation("BatchEnvironment", "MaxUpdateErrorsInARow", Some(3))
 
   val downloadResultRetry = PreferenceLocation("BatchEnvironment", "DownloadResultRetry", Some(3))
   val killJobRetry = PreferenceLocation("BatchEnvironment", "KillJobRetry", Some(3))
   val cleanJobRetry = PreferenceLocation("BatchEnvironment", "KillJobRetry", Some(3))
+
+  val checkJobCanceledInterval = PreferenceLocation("BatchEnvironment", "CheckJobCanceledInterval", Some(5 seconds))
 
   val QualityHysteresis = PreferenceLocation("BatchEnvironment", "QualityHysteresis", Some(100))
 
