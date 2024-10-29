@@ -30,7 +30,8 @@ import org.openmole.core.dsl.extension.Logger
 
 import java.util.logging.Level
 
-object JobManager { self ⇒
+object JobManager:
+  self =>
 
   def killPriority = 10
 
@@ -43,33 +44,25 @@ object JobManager { self ⇒
       case _: Error     ⇒ 100 // This is very quick to process
       case _            ⇒ 1
 
-
-  object DispatcherActor:
-    def receive(dispatched: DispatchedMessage)(using BatchEnvironment.Services) =
-      System.runFinalization // Help with finalization just in case
-
-      given AccessControl.Priority = AccessControl.Priority(messagePriority(dispatched))
-
-      dispatched match
-        case msg: Submit      => SubmitActor.receive(msg)
-        case msg: Refresh     => RefreshActor.receive(msg)
-        case msg: GetResult   => GetResultActor.receive(msg)
-        case msg: RetryAction => RetryActionActor.receive(msg)
-        case msg: Error       => ErrorActor.receive(msg)
-        case msg: Kill        => KillActor.receive(msg)
-
-
   def dispatch(msg: DispatchedMessage)(using services: BatchEnvironment.Services) =
-    services.threadProvider.virtual: () =>
-      DispatcherActor.receive(msg)
+    given AccessControl.Priority = AccessControl.Priority(messagePriority(msg))
 
-  def !(msg: JobMessage)(implicit services: BatchEnvironment.Services): Unit =
+    msg match
+      case msg: Submit => SubmitActor.receive(msg)
+      case msg: Refresh => RefreshActor.receive(msg)
+      case msg: GetResult => GetResultActor.receive(msg)
+      case msg: RetryAction => RetryActionActor.receive(msg)
+      case msg: Error => ErrorActor.receive(msg)
+      case msg: Kill => KillActor.receive(msg)
+
+  def !(msg: JobMessage)(using services: BatchEnvironment.Services): Unit = services.threadProvider.virtual: () =>
+    System.runFinalization // Help with finalization just in case
     import services.*
 
     msg match
-      case msg: Submit      => killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, None)) { () ⇒ dispatch(msg) }
-      case msg: Refresh     => killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
-      case msg: GetResult   => killOr(msg.environment, msg.job.storedJob, Kill(msg.job, msg.environment, Some(msg.batchJob))) { () ⇒ dispatch(msg) }
+      case msg: Submit      => dispatch(msg)
+      case msg: Refresh     => dispatch(msg)
+      case msg: GetResult   => dispatch(msg)
       case msg: RetryAction => dispatch(msg)
       case msg: Error       => dispatch(msg)
       case msg: Kill        => dispatch(msg)
@@ -116,4 +109,3 @@ object JobManager { self ⇒
   def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) =
     job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
 
-}
