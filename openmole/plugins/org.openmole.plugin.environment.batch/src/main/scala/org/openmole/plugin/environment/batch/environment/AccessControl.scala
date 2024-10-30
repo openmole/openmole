@@ -7,17 +7,24 @@ object AccessControl:
   object Priority:
     def apply(i: Int): Priority = i
 
-  opaque type Priority = Int
+  object Bypass
+  opaque type Priority = Int | Bypass.type
   
   def defaultPrirority[T](f: Priority ?=> T) =
     f(using 0)
 
-  def withPermit[B](accessControl: AccessControl)(using AccessControl.Priority)(f: ⇒ B) =
-    aquirePermit(accessControl)
-    try f
-    finally releasePermit(accessControl)
+  def bypassAccessControl[T](f: Priority ?=> T) =
+    f(using Bypass)
 
-  private def aquirePermit(accessControl: AccessControl)(using priority: AccessControl.Priority) =
+  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: ⇒ B) =
+    priority match
+      case Bypass => f
+      case p: Int =>
+        acquirePermit(accessControl, p)
+        try f
+        finally releasePermit(accessControl)
+
+  private def acquirePermit(accessControl: AccessControl, priority: Int) =
     if !isPermitted(accessControl, Thread.currentThread())
     then
       accessControl.semaphore.acquire(priority)

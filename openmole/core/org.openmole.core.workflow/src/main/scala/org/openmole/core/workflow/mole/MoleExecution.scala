@@ -37,7 +37,7 @@ import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.transition.{AggregationTransition, DataChannel, Transition, TransitionSlot}
 import org.openmole.core.workflow.validation.*
 import org.openmole.tool.cache.KeyValueCache
-import org.openmole.tool.collection.{PriorityQueue, StaticArrayBuffer}
+import org.openmole.tool.collection.{BlockingPriorityQueue, StaticArrayBuffer}
 import org.openmole.tool.lock.*
 import org.openmole.tool.thread.*
 import org.openmole.tool.logger.{JavaLogger, LoggerService}
@@ -668,7 +668,7 @@ class MoleExecution(
   val lockRepository:              LockRepository[LockKey]
 ) { moleExecution ⇒
 
-  val messageQueue = PriorityQueue[MoleExecutionMessage](fifo = false)
+  val messageQueue = BlockingPriorityQueue[MoleExecutionMessage](fifo = false)
 
   private[mole] var _started = false
   private[mole] var _canceled = false

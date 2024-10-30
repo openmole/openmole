@@ -17,37 +17,35 @@ package org.openmole.tool.lock
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import gears.async.*
-import gears.async.default.given
 import org.openmole.tool.collection.PriorityQueue
+
+import scala.jdk.CollectionConverters.*
+import java.util.concurrent.Semaphore
+
+
 
 class PrioritySemaphore(initialPermits: Int):
   private var permits = initialPermits
-  private val waitQueue = PriorityQueue[Future.Promise[Unit]]()
+  val locks = PriorityQueue[Semaphore]()
 
   def acquire(priority: Int): Unit =
-    val promise: Option[Future.Promise[Unit]] =
+    val semaphore =
       synchronized:
         if permits > 0
         then
           permits -= 1
           None
         else
-          val promise = Future.Promise[Unit]()
-          waitQueue.enqueue(promise, priority)
-          Some(promise)
+          val lock = new Semaphore(0)
+          locks.enqueue(lock, priority)
+          Some(lock)
 
-    Async.blocking:
-      promise.foreach:p =>
-        p.await
+    semaphore.foreach(_.acquire())
 
   def release(): Unit =
     synchronized:
-      if !waitQueue.isEmpty
-      then
-        val nextPromise = waitQueue.dequeue()
-        nextPromise.complete(util.Success(()))
-      else permits += 1
-
+      locks.dequeue() match
+        case None => permits += 1
+        case Some(l) => l.release()
 
 

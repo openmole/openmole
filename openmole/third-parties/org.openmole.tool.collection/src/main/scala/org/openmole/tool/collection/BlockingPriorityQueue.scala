@@ -25,7 +25,9 @@ object PriorityQueue:
   def apply[T](fifo: Boolean = false) = new PriorityQueue[T](fifo)
 
   sealed trait InnerQueue[T]
+
   case class FIFO[T](linkedList: util.LinkedList[T] = new util.LinkedList[T]) extends InnerQueue[T]
+
   case class FILO[T](stack: util.Stack[T] = new util.Stack[T]) extends InnerQueue[T]
 
   def add[T](innerQueue: InnerQueue[T], t: T) =
@@ -58,9 +60,51 @@ object PriorityQueue:
       case FILO(s) ⇒ s.iterator().asScala.toVector
       case FIFO(l) ⇒ l.iterator().asScala.toVector
 
-
-
 class PriorityQueue[T](fifo: Boolean):
+
+  private var inQueue = 0
+  val queues = (new java.util.TreeMap[Int, PriorityQueue.InnerQueue[T]]).asScala
+
+  def size: Int = synchronized(inQueue)
+
+  def enqueue(e: T, priority: Int) =
+    synchronized:
+      queues.get(priority) match
+        case Some(queue) ⇒ PriorityQueue.add(queue, e)
+        case None ⇒
+          val q: PriorityQueue.InnerQueue[T] = if !fifo then PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
+          PriorityQueue.add(q, e)
+          queues.put(priority, q)
+      inQueue += 1
+
+  def dequeue(): Option[T] =
+    synchronized:
+      var res: Option[T] = None
+
+      queues.lastOption.foreach: (p, q) =>
+        val job = PriorityQueue.pool(q)
+        res = Some(job)
+        inQueue -= 1
+        if PriorityQueue.isEmpty(q) then queues.remove(p)
+        job
+      
+      res
+
+  def all =
+    synchronized:
+      queues.values.toVector.flatMap(PriorityQueue.toVector)
+
+  def clear() =
+    synchronized:
+      queues.clear()
+
+  def isEmpty = synchronized(size == 0)
+
+
+object BlockingPriorityQueue:
+  def apply[T](fifo: Boolean = false) = new BlockingPriorityQueue[T](fifo)
+
+class BlockingPriorityQueue[T](fifo: Boolean):
 
   private val inQueue = new Semaphore(0)
 

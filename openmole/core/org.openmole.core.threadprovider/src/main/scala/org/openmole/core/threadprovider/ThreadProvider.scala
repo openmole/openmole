@@ -20,7 +20,7 @@ object ThreadProvider:
 
   type Closure = () ⇒ Unit
 
-  class RunClosure(queue: PriorityQueue[Closure]) extends Runnable:
+  class RunClosure(queue: BlockingPriorityQueue[Closure]) extends Runnable:
     override def run =
       val job = queue.dequeue()
       job.apply()

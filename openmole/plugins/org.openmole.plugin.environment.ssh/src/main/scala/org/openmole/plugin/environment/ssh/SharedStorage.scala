@@ -91,7 +91,7 @@ object SharedStorage extends JavaLogger:
     override def toString = content
 
   def buildScript[S](
-    runtimePath:    (Runtime, AccessControl.Priority) ⇒ String,
+    runtimePath:    Runtime ⇒ String,
     jobDirectory:   String,
     workDirectory:  String,
     openMOLEMemory: Option[Information],
@@ -101,7 +101,7 @@ object SharedStorage extends JavaLogger:
     storage:        S,
     modules:        Seq[String],
     debug:          Boolean             = false)(using newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority) =
-    val runtime = runtimePath(serializedJob.runtime, priority) //preparedRuntime(serializedJob.runtime)
+    val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
     val workspace = StorageService.child(storage, workDirectory, s"openmole_${UUID.randomUUID.toString}")
 

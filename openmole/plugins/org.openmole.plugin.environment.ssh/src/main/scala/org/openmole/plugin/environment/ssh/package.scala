@@ -24,11 +24,13 @@ import org.openmole.core.workflow.dsl.{File, uniqName}
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob, UpdateInterval}
-import org.openmole.plugin.environment.batch.storage._
+import org.openmole.plugin.environment.batch.storage.*
 import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
 import org.openmole.tool.exception.tryOnError
 import squants.Time
+import org.openmole.tool.lock.*
 
+import java.util.concurrent.locks.ReentrantLock
 
 case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
 case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
@@ -130,10 +132,10 @@ case class RuntimeInstallation[S](
   baseDirectory: String)(using Preference, TmpDirectory, StorageInterface[S], HierarchicalStorageInterface[S]):
 
   val installMap = collection.mutable.Map[Runtime, String]()
+  val lock = new ReentrantLock()
 
-  def apply[S](runtime: Runtime, priority: AccessControl.Priority) =
-    installMap.synchronized:
-      given AccessControl.Priority = priority
+  def apply[S](runtime: Runtime) = lock:
+    AccessControl.bypassAccessControl:
       def install =  SharedStorage.installRuntime(runtime, storage, frontend, baseDirectory)
       installMap.getOrElseUpdate(runtime, install)
 
