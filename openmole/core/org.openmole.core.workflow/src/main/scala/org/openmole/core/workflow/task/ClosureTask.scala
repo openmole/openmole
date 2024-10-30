@@ -34,7 +34,7 @@ object ClosureTask:
    * @param closure
    * @return
    */
-  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
+  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(using name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
     closure,
     className = className,
     config = InputOutputConfig(),

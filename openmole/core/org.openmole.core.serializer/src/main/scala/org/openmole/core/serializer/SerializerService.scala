@@ -53,8 +53,9 @@ object SerializerService:
  * Serializer
  */
 class SerializerService:
+  service =>
 
-  private[serializer] def buildXStream(json: Boolean = false) = {
+  private[serializer] def buildXStream(json: Boolean = false) =
     val lookup = new DefaultConverterLookup()
 
     val driver =
@@ -66,12 +67,12 @@ class SerializerService:
       new XStream(
         null,
         driver,
-        new ClassLoaderReference(this.getClass.getClassLoader),
+        new ClassLoaderReference(service.getClass.getClassLoader),
         null: Mapper,
         lookup,
-        new ConverterRegistry {
+        new ConverterRegistry:
           override def registerConverter(c: Converter, p: Int): Unit = lookup.registerConverter(c, p)
-        }
+
       )
 
     xs.addPermission(NoTypePermission.NONE)
@@ -83,7 +84,6 @@ class SerializerService:
     xs.registerConverter(new FileWithGCConverter)
 
     xs
-  }
 
   private val content = "content.xml"
 
