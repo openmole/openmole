@@ -50,8 +50,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
 
 object GUIServer:
-  org.http4s.reduceLogging()
-
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
 
