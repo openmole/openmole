@@ -124,13 +124,15 @@ object GitService:
         MergeStatus.Ok
       catch case e: StashApplyFailureException => MergeStatus.ChangeToBeResolved
     else MergeStatus.Empty
-    
+
   private def getAllSubPaths(path: String) =
     val allDirs = path.split("/").dropRight(1)
     val size = allDirs.size
     (for i <- 1 to size yield allDirs.dropRight(size - i).mkString("/")) :+ path
 
-  def getModified(git: Git): Seq[String] = git.status().call().getModified.asScala.toSeq.flatMap(getAllSubPaths)
+  def getModified(git: Git): Seq[String] =
+    val status = git.status().call()
+    (status.getModified.asScala.toSeq ++ status.getAdded.asScala.toSeq).flatMap(getAllSubPaths)
 
   def getUntracked(git: Git): Seq[String] = git.status().call().getUntracked.asScala.toSeq.flatMap(getAllSubPaths)
 
