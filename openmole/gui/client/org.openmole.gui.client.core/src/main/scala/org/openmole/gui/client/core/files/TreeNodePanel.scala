@@ -216,6 +216,7 @@ class TreeNodePanel {
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- (commitable.signal combineWith addable.signal combineWith gitFolder.signal combineWith multiTool.signal).map: (co, ad, gf, mt) ⇒
+        println("COO " + co)
         val selected = treeNodeManager.selected
         val isSelectionEmpty = selected.signal.map { _.isEmpty }
 
@@ -264,11 +265,11 @@ class TreeNodePanel {
                   api.addFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
                 ))
               )
-            ).amend(verticalLine, disableIfEmptyCls)
+            ).amend(verticalLine)
             else emptyNode
             ,
             if !co.isEmpty
-            then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, disableIfEmptyCls, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
+            then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
             else emptyNode
             ,
             div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
@@ -313,7 +314,7 @@ class TreeNodePanel {
                   api.revertFiles(treeNodeManager.selected.now()).andThen { _ ⇒ closeMultiTool }
                 ))
               )
-            ).amend(disableIfEmptyCls)
+            )
             else emptyNode
           )
         else Seq(emptyNode)
