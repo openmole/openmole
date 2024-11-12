@@ -28,10 +28,10 @@ object SSHJobService extends JavaLogger:
             AccessControl.defaultPrirority:
               env.accessControl:
                 import env.ssh
-                sshJobIds.toList.map { case (_, id) ⇒ util.Try(gridscale.ssh.SSHJobDescription.jobIsRunning(env.sshServer, id)) }
+                sshJobIds.toList.map { case (_, id) ⇒ util.Try(gridscale.ssh.SSHJobDescription.jobIsRunning(id)) }
 
           val errors = runningJobResults.collect { case util.Failure(x) ⇒ x }
-          for e ← errors
+          for e <- errors
           do env.error(ExceptionRaised(e, Log.WARNING))
 
           val boundNumberOfRunningJobs: Int = runningJobResults.map(_.getOrElse(true)).count(_ == true)
@@ -86,7 +86,7 @@ class SSHJobService[S](s: S, space: StorageSpace, services: BatchEnvironment.Ser
 
   def submit(job: SSHEnvironment.SSHJob, description: gridscale.ssh.SSHJobDescription, batchExecutionJob: BatchExecutionJob) =
     try
-      val id = gridscale.ssh.submit(env.sshServer, description)
+      val id = gridscale.ssh.submit(description)
       env.stateRegistry.update(job, SSHEnvironment.Submitted(id))
     catch
       case t: Throwable ⇒
@@ -102,20 +102,20 @@ class SSHJobService[S](s: S, space: StorageSpace, services: BatchEnvironment.Ser
       case Some(SSHEnvironment.Failed)        ⇒ ExecutionState.FAILED
       case Some(SSHEnvironment.Submitted(id)) ⇒
         accessControl:
-          GridScaleJobService.translateStatus(gridscale.ssh.state(env.sshServer, id))
+          GridScaleJobService.translateStatus(gridscale.ssh.state(id))
 
   def delete(job: SSHEnvironment.SSHJob, priority: AccessControl.Priority): Unit =
     given AccessControl.Priority = priority
     val jobState = env.stateRegistry.remove(job)
     jobState match
       case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl:
-        gridscale.ssh.clean(env.sshServer, id)
-        gridscale.ssh.run(env.sshServer, s"rm -rf ${job.workDirectory}")
+        gridscale.ssh.clean(id)
+        gridscale.ssh.run(s"rm -rf ${job.workDirectory}")
       case _ ⇒
 
   def stdOutErr(j: SSHEnvironment.SSHJob, priority: AccessControl.Priority) =
     given AccessControl.Priority = priority
     val jobState = env.stateRegistry.get(j)
     jobState match
-      case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { (gridscale.ssh.stdOut(env.sshServer, id), gridscale.ssh.stdErr(env.sshServer, id)) }
+      case Some(SSHEnvironment.Submitted(id)) ⇒ accessControl { (gridscale.ssh.stdOut(id), gridscale.ssh.stdErr(id)) }
       case _                                  ⇒ ("", "")

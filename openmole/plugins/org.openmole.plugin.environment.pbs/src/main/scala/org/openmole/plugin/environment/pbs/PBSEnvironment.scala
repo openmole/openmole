@@ -133,7 +133,9 @@ class PBSEnvironment(
 
   import services.*
 
-  implicit val ssh: gridscale.ssh.SSH = gridscale.ssh.SSH()
+  implicit lazy val ssh: gridscale.ssh.SSH =
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+    gridscale.ssh.SSH(sshServer)
 
   override def start() = 
     storageService
@@ -151,7 +153,6 @@ class PBSEnvironment(
   import org.openmole.plugin.environment.ssh._
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
     if parameters.storageSharedLocally
@@ -166,7 +167,6 @@ class PBSEnvironment(
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
             accessControl = accessControl,
             environment = env,
             sharedDirectory = parameters.sharedDirectory
@@ -187,9 +187,10 @@ class PBSEnvironment(
       case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
+    import _root_.gridscale.cluster.HeadNode
     storageService match 
-      case Left((space, local)) ⇒ PBSJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Left((space, local)) ⇒ PBSJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  ⇒ PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 
 

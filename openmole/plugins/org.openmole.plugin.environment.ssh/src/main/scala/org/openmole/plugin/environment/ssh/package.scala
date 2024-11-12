@@ -26,49 +26,59 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, Runtime, SerializedJob, UpdateInterval}
 import org.openmole.plugin.environment.batch.storage.*
 import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
-import org.openmole.tool.exception.tryOnError
 import squants.Time
 import org.openmole.tool.lock.*
 
 import java.util.concurrent.locks.ReentrantLock
 
-case class SSHStorage(sshServer: _root_.gridscale.ssh.SSHServer, accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)
+case class SSHStorage(accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)(using val ssh: _root_.gridscale.ssh.SSH)
 case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
 import _root_.gridscale.{ssh => gssh}
 
 object SSHStorage:
 
-  def home(sshServer: gssh.SSHServer)(using gssh.SSH) = gssh.home(sshServer)
+  def home(using gssh.SSH) = gssh.home()
   def child(parent: String, child: String) = _root_.gridscale.RemotePath.child(parent, child)
 
-  implicit def isStorage(using gssh.SSH): StorageInterface[SSHStorage] & HierarchicalStorageInterface[SSHStorage] & EnvironmentStorage[SSHStorage] = new StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage]:
-    implicit def toSSHServer(s: SSHStorage): _root_.gridscale.ssh.SSHServer = s.sshServer
-
+  given StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] with
     override def child(t: SSHStorage, parent: String, child: String)(using AccessControl.Priority): String = SSHStorage.child(parent, child)
     override def parent(t: SSHStorage, path: String)(using AccessControl.Priority): Option[String] = _root_.gridscale.RemotePath.parent(path)
     override def name(t: SSHStorage, path: String): String = _root_.gridscale.RemotePath.name(path)
 
-    override def exists(t: SSHStorage, path: String)(using AccessControl.Priority): Boolean = t.accessControl { gssh.exists(t, path) }
-    override def list(t: SSHStorage, path: String)(using AccessControl.Priority) = t.accessControl { gssh.list(t, path) }
+    override def exists(t: SSHStorage, path: String)(using AccessControl.Priority): Boolean =
+      import t.given
+      t.accessControl { gssh.exists(path) }
 
-    override def makeDir(t: SSHStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { gssh.makeDir(t, path) }
-    override def rmDir(t: SSHStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { gssh.rmDir(t, path) }
+    override def list(t: SSHStorage, path: String)(using AccessControl.Priority) =
+      import t.given
+      t.accessControl { gssh.list(path) }
 
-    override def rmFile(t: SSHStorage, path: String)(using AccessControl.Priority): Unit = t.accessControl { gssh.rmFile(t, path) }
+    override def makeDir(t: SSHStorage, path: String)(using AccessControl.Priority): Unit =
+      import t.given
+      t.accessControl { gssh.makeDir(path) }
+
+    override def rmDir(t: SSHStorage, path: String)(using AccessControl.Priority): Unit =
+      import t.given
+      t.accessControl { gssh.rmDir(path) }
+
+    override def rmFile(t: SSHStorage, path: String)(using AccessControl.Priority): Unit =
+      import t.given
+      t.accessControl { gssh.rmFile(path) }
 
     override def upload(t: SSHStorage, src: File, dest: String, options: TransferOptions)(using AccessControl.Priority): Unit =
+      import t.given
       try
         t.accessControl:
-          StorageInterface.upload(false, gssh.writeFile(t, _, _))(src, dest, options)
+          StorageInterface.upload(false, gssh.writeFile)(src, dest, options)
       catch
         case e: Throwable => throw InternalProcessingError(s"Error uploading $src to $dest with options $options", e)
 
-
     override def download(t: SSHStorage, src: String, dest: File, options: TransferOptions)(using AccessControl.Priority): Unit =
+      import t.given
       try
         t.accessControl:
-          StorageInterface.download(false, gssh.readFile[Unit](t, _, _))(src, dest, options)
+          StorageInterface.download(false, gssh.readFile)(src, dest, options)
       catch
         case e: Throwable => throw InternalProcessingError(s"Error downloading $src to $dest with options $options", e)
 
@@ -106,25 +116,17 @@ def sshStorage(
   user:                 String,
   host:                 String,
   port:                 Int,
-  sshServer:            _root_.gridscale.ssh.SSHServer,
   accessControl:         AccessControl,
   environment:          BatchEnvironment,
   sharedDirectory:      Option[String]
 )(using _root_.gridscale.ssh.SSH) =
-  val root = sshRoot(SSHStorage.home(sshServer), SSHStorage.child, sharedDirectory)
+  val root = sshRoot(SSHStorage.home, SSHStorage.child, sharedDirectory)
   def id = new URI("ssh", user, host, port, root, null, null).toString
-  SSHStorage(sshServer, accessControl, id, environment, root)
+  SSHStorage(accessControl, id, environment, root)
 
-def sshStorageSpace(ssh: SSHStorage)(using preference: Preference, sshEffect: _root_.gridscale.ssh.SSH) =
+def sshStorageSpace(ssh: SSHStorage)(using preference: Preference) =
   AccessControl.defaultPrirority:
     HierarchicalStorageSpace.create(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
-
-type LocalOrSSH = Either[(Any, LocalStorage), (Any, SSHStorage)]
-
-def getaccessControl(storage: LocalOrSSH) =
-  storage match
-    case Left((_, s)) => s.accessControl
-    case Right((_, s)) => s.accessControl
 
 case class RuntimeInstallation[S](
   frontend:       Frontend,
@@ -142,7 +144,8 @@ case class RuntimeInstallation[S](
 
 object Frontend:
   def ssh(frontend: _root_.gridscale.ssh.SSHServer)(using _root_.gridscale.ssh.SSH): Frontend =
-    command => util.Try(_root_.gridscale.ssh.run(frontend, command, verbose = true))
+    command =>
+      util.Try(_root_.gridscale.ssh.run(command, verbose = true))
 
   def ssh[A: _root_.gridscale.ssh.SSHAuthentication](host: String, port: Int, timeout: Time, authentication: A)(using _root_.gridscale.ssh.SSH): Frontend =
     val sshServer = _root_.gridscale.ssh.SSHServer(host, port, timeout)(authentication)
@@ -173,7 +176,7 @@ def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: Environme
     given AccessControl.Priority = priority
     StorageService.rmDirectory(storage, jobDirectory)
 
-  tryOnError { clean } {
+  try
     def replicate(f: File, options: TransferOptions) =
       BatchEnvironment.toReplicatedFile(
         StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
@@ -204,7 +207,10 @@ def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: Environme
       () ⇒ outputPath,
       priority ⇒ clean(priority)
     )
-  }
+  catch
+    case t: Throwable =>
+      util.Try(clean)
+      throw t
 
 
 def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace, SSHStorage)], background: Boolean)(using services: BatchEnvironment.Services, s: _root_.gridscale.ssh.SSH, priority: AccessControl.Priority) =

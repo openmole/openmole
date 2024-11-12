@@ -123,7 +123,9 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   import services._
 
-  implicit val ssh: gridscale.ssh.SSH = gridscale.ssh.SSH()
+  implicit val ssh: gridscale.ssh.SSH =
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+    gridscale.ssh.SSH(sshServer)
 
   override def start() =
     storageService
@@ -138,8 +140,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
     ssh.close
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-
+  
   lazy val storageService =
     if parameters.storageSharedLocally
     then
@@ -153,7 +154,6 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
             accessControl = accessControl,
             environment = env,
             sharedDirectory = parameters.sharedDirectory
@@ -174,9 +174,10 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
 
   lazy val pbsJobService =
+    import _root_.gridscale.cluster.HeadNode
     storageService match
-      case Left((space, local)) ⇒ SGEJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ SGEJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
+      case Left((space, local)) ⇒ SGEJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  ⇒ SGEJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 }
 

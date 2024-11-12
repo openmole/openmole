@@ -145,7 +145,9 @@ class SSHEnvironment(
 
   lazy val stateRegistry = new SSHEnvironment.SSHJobStateRegistry
 
-  implicit val ssh: gridscale.ssh.SSH = gridscale.ssh.SSH()
+  implicit val ssh: gridscale.ssh.SSH =
+    lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
+    gridscale.ssh.SSH(sshServer)
 
   def timeout = services.preference(SSHEnvironment.timeOut)
 
@@ -166,8 +168,7 @@ class SSHEnvironment(
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
-  lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
-
+ 
   lazy val storageService =
     if storageSharedLocally
     then
@@ -182,7 +183,6 @@ class SSHEnvironment(
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
             accessControl = accessControl,
             environment = env,
             sharedDirectory = sharedDirectory

@@ -41,7 +41,7 @@ object SharedStorage extends JavaLogger:
       util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
       val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
-      if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
+      if !storageInterface.exists(storage, workdir) then hierarchicalStorageInterface.makeDir(storage, workdir)
 
       newFile.withTmpFile("install", ".sh"): script ⇒
 

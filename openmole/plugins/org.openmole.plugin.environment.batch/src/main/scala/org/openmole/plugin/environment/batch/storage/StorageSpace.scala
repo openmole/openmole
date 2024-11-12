@@ -80,7 +80,7 @@ object HierarchicalStorageSpace extends JavaLogger:
     def remove(name: String) = extractTimeFromName(name).map(_ < removalDate).getOrElse(true)
 
     for
-      entry ← entries
+      entry <- entries
       if remove(entry.name)
     do
       val path = StorageService.child(s, tmpDirectory, entry.name)
@@ -113,7 +113,7 @@ object HierarchicalStorageSpace extends JavaLogger:
     def mkRootDir: String = synchronized:
       val paths = Iterator.iterate[Option[String]](Some(root))(p ⇒ p.flatMap(hierarchicalStorageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
 
-      paths.tail.foldLeft(paths.head.toString):
+      paths.tail.foldLeft(paths.head):
         (path, file) ⇒
           val childPath = StorageService.child(s, path, hierarchicalStorageInterface.name(s, file))
           try

@@ -337,7 +337,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, space)
 
-    tryOnError { StorageService.rmDirectory(storage, jobDirectory) } {
+    try
       val remoteStorage = CurlRemoteStorage(storage.url, jobDirectory, voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
 
       def replicate(f: File, options: TransferOptions) =
@@ -373,7 +373,11 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         () ⇒ outputPath,
         clean
       )
-    }
+    catch
+      case t: Throwable =>
+        util.Try(StorageService.rmDirectory(storage, jobDirectory))
+        throw t
+
 
   import gridscale.dirac._
 

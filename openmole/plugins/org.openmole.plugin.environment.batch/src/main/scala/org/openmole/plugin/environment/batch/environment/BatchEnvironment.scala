@@ -252,7 +252,7 @@ object BatchEnvironment {
   def replicateTheRuntime(
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
-  )(implicit services: BatchEnvironment.Services) = {
+  )(implicit services: BatchEnvironment.Services) =
     val environmentPluginPath = shuffled(environment.environmentPlugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }.sortBy(_.path)
     val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
@@ -262,7 +262,6 @@ object BatchEnvironment {
       environmentPluginPath,
       jvmLinuxX64FileMessage
     )
-  }
 
   def createExecutionMessage(
     jobFile:             File,
@@ -282,10 +281,9 @@ object BatchEnvironment {
       environment.runtimeSettings
     )
 
-  def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = {
+  def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = 
     val environmentJobs = environment.jobs
     environmentJobs.forall(_.state == ExecutionState.KILLED)
-  }
 
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) =
     ExecutionJobRegistry.finished(environment.registry, job, environment)
@@ -318,11 +316,11 @@ object BatchEnvironment {
   def environmentPlugins(env: BatchEnvironment) = PluginManager.pluginsForClass(env.getClass).toSeq.distinctBy(_.getCanonicalPath)
 
   def scriptPlugins(services: Services) =
-    def closureBundleAndPlugins = services.compilationContext.toSeq.flatMap { c =>
-      import services._
-      val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
-      cb.plugins ++ file.toSeq
-    }
+    def closureBundleAndPlugins = 
+      services.compilationContext.toSeq.flatMap: c =>
+        import services._
+        val (cb, file) = BatchExecutionJob.replClassesToPlugins(c.classDirectory, c.classLoader)
+        cb.plugins ++ file.toSeq
 
     closureBundleAndPlugins.distinctBy(_.getCanonicalPath)
 
@@ -335,7 +333,7 @@ object BatchEnvironment {
     def finished(registry: ExecutionJobRegistry, job: BatchExecutionJob, environment: BatchEnvironment) = registry.synchronized:
       def pruneJobs(registry: ExecutionJobRegistry, job: BatchExecutionJob) = registry.executionJobs.filter(j => j.id != job.id)
       registry.executionJobs = pruneJobs(registry, job)
-      if(registry.executionJobs.isEmpty) registry.empty.release(1)
+      if registry.executionJobs.isEmpty then registry.empty.release(1)
 
     def executionJobs(registry: ExecutionJobRegistry) = registry.synchronized { registry.executionJobs }
 
@@ -360,10 +358,13 @@ object BatchEnvironment {
   type REPLClassCache = AssociativeCache[Set[String], Seq[File]]
 }
 
-trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvironment { env =>
+trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvironment:
+  env =>
+
   def services: BatchEnvironment.Services
 
   def jobStore = state.jobStore
+  
   def environmentPlugins: Iterable[File] = BatchEnvironment.environmentPlugins(this)
   def scriptPlugins: Iterable[File] = BatchEnvironment.scriptPlugins(services)
 
@@ -393,7 +394,6 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
   def failed: Long = state._failed.get()
 
   def stopped = state.stopped
-}
 
 
 object BatchEnvironmentState:
