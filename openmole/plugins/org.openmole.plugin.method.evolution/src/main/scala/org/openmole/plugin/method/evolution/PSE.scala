@@ -220,7 +220,7 @@ object PSE {
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
         def initialState = EvolutionState[HitMapState](s = Map())
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext: p ⇒
           import p._
 
           val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
@@ -236,7 +236,6 @@ object PSE {
             else Seq()
 
           genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
-        }
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
           FromContext: p ⇒
