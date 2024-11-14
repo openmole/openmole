@@ -216,7 +216,6 @@ class TreeNodePanel {
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- (commitable.signal combineWith addable.signal combineWith gitFolder.signal combineWith multiTool.signal).map: (co, ad, gf, mt) ⇒
-        println("COO " + co)
         val selected = treeNodeManager.selected
         val isSelectionEmpty = selected.signal.map { _.isEmpty }
 
@@ -366,7 +365,8 @@ class TreeNodePanel {
         div(flexRow, justifyContent.right,
           div(
             cls <-- fileToolBar.filterToolOpen.signal.map { o =>
-              if (o) "open-transition" else "close-transition"
+              if (o) "open-transition"
+              else "close-transition"
             },
             fileToolBar.filterTool
           )),

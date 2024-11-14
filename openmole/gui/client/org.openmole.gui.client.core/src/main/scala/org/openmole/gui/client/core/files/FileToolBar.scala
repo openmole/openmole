@@ -39,15 +39,21 @@ import org.openmole.gui.shared.api.*
 class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager):
   def manager = treeNodePanel.treeNodeManager
 
-  val findInput = inputTag("").amend(
+  val filterToolOpen = Var(false)
+
+  lazy val findInput = inputTag("").amend(
     width := "180px",
     marginTop := "12px",
-    onMountFocus
+    inContext{ctx =>
+      filterToolOpen.signal.toObservable --> Observer[Boolean] { e => if e then ctx.ref.focus()}
+    },
   )
+
+
+
 
   val gitBranchList: Var[Option[BranchData]] = Var(None)
 
-  val filterToolOpen = Var(false)
 
   def filterTool(using api: ServerAPI, basePath: BasePath) = div(
     cls := "file-filter",
