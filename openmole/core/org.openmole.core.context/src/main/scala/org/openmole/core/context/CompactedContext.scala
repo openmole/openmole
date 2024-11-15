@@ -3,7 +3,7 @@ package org.openmole.core.context
 import scala.collection.Iterable
 
 object CompactedContext:
-  def empty: CompactedContext = Array()
+  def empty: CompactedContext = IArray.empty[Any]
 
   def compact(variables: Iterable[Variable[_]]): CompactedContext =
     val middle = variables.size
@@ -15,7 +15,7 @@ object CompactedContext:
       result(i) = v.asInstanceOf[Variable[Any]].prototype
       result(middle + i) = v.value
 
-    result
+    IArray.unsafeFromArray(result)
 
   def compact(context: Context): CompactedContext =
     compact(context.variables.toSeq.map(_._2))
