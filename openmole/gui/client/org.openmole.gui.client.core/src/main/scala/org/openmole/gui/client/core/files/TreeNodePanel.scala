@@ -70,13 +70,18 @@ class TreeNodePanel {
     onMountFocus
   )
 
+
+  val plusFile = Var(false)
+  
   // New file tool
   val newNodeInput =
     inputTag().amend(
       placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New directory" else "New file" },
       width := "270px",
       marginLeft := "12px",
-      onMountFocus
+      inContext { thisNode ⇒ 
+          plusFile.signal.toObservable --> Observer[Boolean] { e => if e then thisNode.ref.focus()}
+     }
     )
 
   lazy val directoryToggle =
@@ -216,7 +221,6 @@ class TreeNodePanel {
     div(
       height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- (commitable.signal combineWith addable.signal combineWith gitFolder.signal combineWith multiTool.signal).map: (co, ad, gf, mt) ⇒
-        println("COO " + co)
         val selected = treeNodeManager.selected
         val isSelectionEmpty = selected.signal.map { _.isEmpty }
 
@@ -224,7 +228,13 @@ class TreeNodePanel {
           if se then "disable" else ""
 
         def commit =
-          val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
+          val messageInput = inputTag().amend(
+            placeholder := "Commit message", marginRight := "10",
+             inContext{ctx =>
+              if mt == MultiTool.Git then ctx.ref.focus()
+              emptyMod
+              }   
+            )
           confirmationDiv.set(
             Some(
               confirmationWithMessage(messageInput, "Commit",
@@ -324,8 +334,6 @@ class TreeNodePanel {
     multiTool.set(MultiTool.Off)
     confirmationDiv.set(None)
     treeNodeManager.clearSelection
-
-  val plusFile = Var(false)
 
   val multiTool: Var[MultiTool] = Var(MultiTool.Off)
 

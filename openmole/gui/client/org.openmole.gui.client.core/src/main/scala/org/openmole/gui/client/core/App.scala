@@ -117,6 +117,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           panels.treeNodePanel.currentLine.set(-1)
           panels.closeExpandable
           panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
+          panels.treeNodePanel.plusFile.set(false)
         }
 
       //START BUTTON
