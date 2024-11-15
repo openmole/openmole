@@ -77,7 +77,7 @@ object GetResultActor {
           services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
 
           //Try to download the results for all the jobs of the group
-          for moleJob ← batchJob.storedJob.storedMoleJobs
+          for moleJob <- batchJob.storedJob.storedMoleJobs
           do
             if contextResults.results.isDefinedAt(moleJob.id)
             then

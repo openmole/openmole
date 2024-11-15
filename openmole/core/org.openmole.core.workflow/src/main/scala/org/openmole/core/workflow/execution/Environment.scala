@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.execution
 
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.*
 import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
@@ -128,12 +128,12 @@ class LocalEnvironment(
 
   def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
-    submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
+    submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobsValue(job), Some(JobGroup.moleExecution(job))))
     id
 
   def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
-    submit(LocalExecutionJob(id, executionContext, List(moleJob), None))
+    submit(LocalExecutionJob(id, executionContext, moleJob, None))
     id
 
   private def submit(ejob: LocalExecutionJob): Unit =

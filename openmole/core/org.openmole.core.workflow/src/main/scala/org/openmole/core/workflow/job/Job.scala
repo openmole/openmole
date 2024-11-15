@@ -17,7 +17,6 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
 
@@ -25,7 +24,7 @@ case class RuntimeTask(task: Task, strain: Boolean)
 
 object Job:
 
-  implicit val moleJobOrdering: Ordering[Job] = Ordering.by((_: Job).id)
+  given Ordering[Job] = Ordering.by((_: Job).id)
 
   /**
    * Construct from context and UUID
@@ -70,6 +69,8 @@ object Job:
 
   type JobFinished = (JobId, Either[Context, Throwable]) ⇒ Unit
   type Canceled = () ⇒ Boolean
+  
+  //def compact(job: Job) = Array(job.task, job.compressedContext, job.id, job.callBack)
 
 import Job._
 
@@ -83,7 +84,7 @@ import Job._
  */
 class Job(
   val task:          RuntimeTask,
-  compressedContext: CompactedContext,
+  private val compressedContext: CompactedContext,
   val id:            JobId,
   val callBack:      CallBack):
 

@@ -1,5 +1,9 @@
+package org.openmole.tool.collection
+
+import scala.reflect.ClassTag
+
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2024 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,9 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.workflow.execution
 
-import org.openmole.core.workflow.job._
+object OneOrIArray:
+  given [T]: Conversion[T | IArray[T], OneOrIArray[T]] = identity
+  extension [T](a: OneOrIArray[T])
+    def toIArray(using ClassTag[T], ClassTag[IArray[T]]): IArray[T] =
+      a match
+        case a: T => IArray(a)
+        case a: IArray[T] => a
 
-trait ExecutionJob:
-  def moleJobIds: Iterable[JobId]
+    def value: T | IArray[T] = a
+
+opaque type OneOrIArray[T] = T | IArray[T]

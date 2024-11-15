@@ -58,7 +58,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
 
                   for
-                    moleJob ← executionJob.jobs
+                    moleJob <- executionJob.jobs
                   do
                     runningJob = Some(moleJob)
 
