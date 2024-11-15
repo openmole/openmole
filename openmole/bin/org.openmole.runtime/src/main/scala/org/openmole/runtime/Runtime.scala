@@ -138,7 +138,7 @@ class Runtime {
         logger.fine("Downloading files")
 
         for
-          repliURI ← executionMessage.files
+          repliURI <- executionMessage.files
         do
           // To avoid getting twice the same plugin
           if !usedFiles.contains(repliURI.originalPath)
@@ -146,7 +146,7 @@ class Runtime {
             val local = getReplicatedFile(repliURI, TransferOptions())
             usedFiles.put(repliURI.originalPath, local)
 
-        val runnableTasks = serializerService.deserializeReplaceFiles[Iterable[RunnableTask]](executionMessage.jobs, Map() ++ usedFiles, gz = true)
+        val runnableTasks = serializerService.deserializeReplaceFiles[RunnableTaskSequence](executionMessage.jobs, Map() ++ usedFiles, gz = true)
 
         val saver = new ContextSaver(runnableTasks.size)
         val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }

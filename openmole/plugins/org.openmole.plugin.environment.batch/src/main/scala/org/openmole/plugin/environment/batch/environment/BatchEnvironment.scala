@@ -206,8 +206,8 @@ object BatchEnvironment {
     storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob =
     import services.*
     TmpDirectory.withTmpFile("job", ".tar") { jobFile ⇒
-
-      serializerService.serialize(job.runnableTasks, jobFile, gz = true)
+      def tasks: RunnableTaskSequence = job.runnableTasks
+      serializerService.serialize(tasks, jobFile, gz = true)
 
       val plugins =
         new TreeSet[File]()(fileOrdering) ++

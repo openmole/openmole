@@ -40,6 +40,8 @@ package object message {
     implicit def replicatedFile2FileMessage(r: ReplicatedFile): FileMessage = FileMessage(r)
     def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
 
+  type RunnableTaskSequence = IArray[RunnableTask]
+  
   object RunnableTask:
     def apply(moleJob: Job) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
 

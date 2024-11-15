@@ -21,11 +21,11 @@ object LocalExecutionJob:
     new LocalExecutionJob(
       id = id,
       executionContext = executionContext,
-      jobsValue = jobs,
-      _moleExecution = moleExecution.getOrElse(null))
+      _jobs = jobs,
+      _moleExecution = moleExecution.orNull)
 
 
-case class LocalExecutionJob(id: Long, executionContext: TaskExecutionContext.Partial, jobsValue: OneOrIArray[Job], _moleExecution: MoleExecution) extends ExecutionJob:
-  def jobs: IArray[Job] = jobsValue.toIArray
+case class LocalExecutionJob(id: Long, executionContext: TaskExecutionContext.Partial, _jobs: OneOrIArray[Job], _moleExecution: MoleExecution) extends ExecutionJob:
+  def jobs: IArray[Job] = _jobs.toIArray
   def moleJobIds = jobs.map(_.id)
   def moleExecution: Option[MoleExecution] = Option(_moleExecution)
