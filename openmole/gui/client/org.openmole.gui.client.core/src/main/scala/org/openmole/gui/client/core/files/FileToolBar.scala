@@ -49,9 +49,6 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
     },
   )
 
-
-
-
   val gitBranchList: Var[Option[BranchData]] = Var(None)
 
 

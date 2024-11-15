@@ -165,7 +165,9 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     val renameInput = inputTag(initText).amend(
       margin := "auto 10 auto 25",
       placeholder := ph,
-      onMountFocus
+      inContext{ctx =>
+        actionEdit.signal.toObservable --> Observer[Option[Div]] { e => if e.isDefined then ctx.ref.focus()}
+    }
     )
 
     div(

@@ -70,13 +70,18 @@ class TreeNodePanel {
     onMountFocus
   )
 
+
+  val plusFile = Var(false)
+  
   // New file tool
   val newNodeInput =
     inputTag().amend(
       placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New directory" else "New file" },
       width := "270px",
       marginLeft := "12px",
-      onMountFocus
+      inContext { thisNode ⇒ 
+          plusFile.signal.toObservable --> Observer[Boolean] { e => if e then thisNode.ref.focus()}
+     }
     )
 
   lazy val directoryToggle =
@@ -223,7 +228,13 @@ class TreeNodePanel {
           if se then "disable" else ""
 
         def commit =
-          val messageInput = inputTag().amend(placeholder := "Commit message", marginRight := "10")
+          val messageInput = inputTag().amend(
+            placeholder := "Commit message", marginRight := "10",
+             inContext{ctx =>
+              if mt == MultiTool.Git then ctx.ref.focus()
+              emptyMod
+              }   
+            )
           confirmationDiv.set(
             Some(
               confirmationWithMessage(messageInput, "Commit",
@@ -324,8 +335,6 @@ class TreeNodePanel {
     confirmationDiv.set(None)
     treeNodeManager.clearSelection
 
-  val plusFile = Var(false)
-
   val multiTool: Var[MultiTool] = Var(MultiTool.Off)
 
   def initMultiTool(multiToolMode: MultiTool) =
@@ -365,8 +374,7 @@ class TreeNodePanel {
         div(flexRow, justifyContent.right,
           div(
             cls <-- fileToolBar.filterToolOpen.signal.map { o =>
-              if (o) "open-transition"
-              else "close-transition"
+              if (o) "open-transition" else "close-transition"
             },
             fileToolBar.filterTool
           )),
