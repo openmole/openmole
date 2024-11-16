@@ -35,10 +35,10 @@ class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matc
   "The strainer capsule" should "let the data pass through" in {
     val p = Val[String]
 
-    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
     val strainer = EmptyTask()
 
-    val t2 = TestTask { context ⇒
+    val t2 = TestTask { context =>
       context(p) should equal("Test")
       context
     } set (inputs += p)
@@ -53,14 +53,14 @@ class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matc
 
     val root = EmptyTask()
 
-    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
 
     val tNone = EmptyTask()
     val tNone2 = EmptyTask()
 
     val strainer = EmptyTask()
 
-    val t2 = TestTask { context ⇒
+    val t2 = TestTask { context =>
       context(p) should equal("Test")
       executed = true
       context

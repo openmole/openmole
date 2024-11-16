@@ -35,7 +35,7 @@ object FromContextTask {
    * @param fromContext
    * @return
    */
-  def apply(className: String)(fromContext: Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+  def apply(className: String)(fromContext: Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     new FromContextTask(
       fromContext,
       className = className,
@@ -56,7 +56,7 @@ object FromContextTask {
  * @param info
  */
 case class FromContextTask(
-  f:                      FromContextTask.Parameters ⇒ Context,
+  f:                      FromContextTask.Parameters => Context,
   v:                      Validate                             = Validate.success,
   override val className: String,
   config:                 InputOutputConfig,
@@ -66,7 +66,7 @@ case class FromContextTask(
 
   override def validate = v
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p ⇒
+  override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p =>
     val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped)(executionContext.preference, p.random, p.tmpDirectory, p.fileService)
     f(tp)
   }

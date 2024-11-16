@@ -47,13 +47,13 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   private val executorMap =
     val map = mutable.HashMap[LocalExecutor, Thread]()
-    (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
+    (0 until nbThreads).foreach { _ => map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
 
   def runningJobs = executorMap.keys.flatMap(_.runningJob)
 
   override def finalize() = executorMap.foreach {
-    case (exe, thread) ⇒ exe.stop = true; thread.interrupt
+    case (exe, thread) => exe.stop = true; thread.interrupt
   }
 
   private[execution] def takeNextJob: LocalExecutionJob =
@@ -68,12 +68,12 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   def running: Int =
     executorMap.synchronized:
-      executorMap.toList.count { case (e, _) ⇒ e.runningJob.isDefined }
+      executorMap.toList.count { case (e, _) => e.runningJob.isDefined }
 
   def stop() =
     executorMap.synchronized:
       executorMap.foreach {
-        case (exe, thread) ⇒
+        case (exe, thread) =>
           exe.stop = true
           thread.interrupt()
       }

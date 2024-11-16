@@ -43,13 +43,13 @@ object JobGroup:
    */
   def moleJobs(job: JobGroup): IArray[Job] =
     job match
-      case sj: SingleJobGroup ⇒ IArray(sj.moleJob)
-      case mj: MultiJobGroup  ⇒ mj.moleJobs
+      case sj: SingleJobGroup => IArray(sj.moleJob)
+      case mj: MultiJobGroup  => mj.moleJobs
 
   def moleJobsValue(job: JobGroup): Job | IArray[Job] =
     job match
-      case sj: SingleJobGroup ⇒ sj.moleJob
-      case mj: MultiJobGroup ⇒ mj.moleJobs
+      case sj: SingleJobGroup => sj.moleJob
+      case mj: MultiJobGroup => mj.moleJobs
 
 
   /**
@@ -61,4 +61,4 @@ object JobGroup:
       case sj: SingleJobGroup => sj.moleExecution
       case mj: MultiJobGroup  => mj.moleExecution
 
-  given Ordering[JobGroup] = Ordering.by[JobGroup, Iterable[Job]](moleJobs) 
+  given Ordering[JobGroup] = Ordering.by[JobGroup, Iterable[Job]](moleJobs)

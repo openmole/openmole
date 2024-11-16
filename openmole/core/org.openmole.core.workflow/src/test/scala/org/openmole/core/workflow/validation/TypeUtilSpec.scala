@@ -40,9 +40,9 @@ class TypeUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_._task == t2).get).head)
 
-    types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
+    types.collect { case x: InvalidType => x }.isEmpty should equal(true)
 
-    val validTypes = types.collect { case x: ValidType ⇒ x }
+    val validTypes = types.collect { case x: ValidType => x }
     validTypes.filter(_.toArray).isEmpty should equal(true)
     val tc = validTypes.filter(_.name == p.name).head
     tc.toArray should equal(false)
@@ -59,8 +59,8 @@ class TypeUtilSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val types = TypeUtil.computeTypes(mole, Sources.empty, Hooks.empty)(mole.slots(mole.capsules.find(_._task == t3).get).head)
 
-    types.collect { case x: InvalidType ⇒ x }.isEmpty should equal(true)
-    val validTypes = types.collect { case x: ValidType ⇒ x }
+    types.collect { case x: InvalidType => x }.isEmpty should equal(true)
+    val validTypes = types.collect { case x: ValidType => x }
     val m = validTypes.filter(_.name == p.name).head
     m.toArray should equal(true)
     m.`type`.runtimeClass should equal(classOf[Int])

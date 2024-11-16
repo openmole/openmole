@@ -57,9 +57,9 @@ object MoleCapsule {
           val capsules = previousCapsules(s)
 
           for {
-            c ← capsules
+            c <- capsules
             if !seen.contains(c)
-            s ← mole.slots(c)
+            s <- mole.slots(c)
           } toProceed.push(s)
 
           seen ++= capsules
@@ -74,23 +74,23 @@ object MoleCapsule {
     if (capsule == mole.root) mole.inputs
     else {
       val slots = mole.slots(capsule)
-      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachRootWithNoLoop(mole)(s))
+      val noStrainer = slots.toSeq.filter(s => MoleCapsule.reachRootWithNoLoop(mole)(s))
 
       val bySlot =
         for {
-          slot ← noStrainer
+          slot <- noStrainer
           received = TypeUtil.validTypes(mole, sources, hooks)(slot)
         } yield received.map(_.toVal)
 
       val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
       val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
 
-      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
-      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
+      def haveAllTheSameType(ps: Seq[Val[?]]) = ps.map(_.`type`).distinct.size == 1
+      def inAllSlots(ps: Seq[Val[?]]) = ps.size == noStrainer.size
 
       val prototypes =
         for {
-          name ← allNames
+          name <- allNames
           inSlots = byName.map(_(name).toSeq).toSeq
           if inSlots.forall(haveAllTheSameType)
           oneBySlot = inSlots.map(_.head)
@@ -115,8 +115,8 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
   def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = 
     val withInputs =
       _task match {
-        case task: MoleTask ⇒ Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
-        case task           ⇒ task
+        case task: MoleTask => Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
+        case task           => task
       }
     RuntimeTask(withInputs, strain)
 
@@ -151,12 +151,12 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
 
   private def receivedInputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsInputs = capsuleInputs(mole, sources, hooks)
-    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d => capsInputs.contains(d.name))
   }
 
   private def strainedOutputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
-    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d => capsOutputs.contains(d.name))
   }
 
   override def toString =
@@ -169,7 +169,7 @@ object StrainerCapsule {
 }
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
-  def apply(t: Task, persist: Val[_]*): MoleCapsule = apply(t, persist, false)
-  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
+  def apply(task: Task, persist: Seq[Val[?]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
+  def apply(t: Task, persist: Val[?]*): MoleCapsule = apply(t, persist, false)
+  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n => context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

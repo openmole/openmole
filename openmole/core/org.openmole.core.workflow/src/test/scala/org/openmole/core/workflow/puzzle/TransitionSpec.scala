@@ -56,15 +56,15 @@ class TransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     val t1Executed = new AtomicBoolean(false)
     val t2Executed = new AtomicBoolean(false)
 
-    val t1 = TestTask { ctx ⇒
+    val t1 = TestTask { ctx =>
       t1Executed.set(true)
-      ctx + (p → "Test")
+      ctx + (p -> "Test")
     } set (
       name := "Test write",
       outputs += p
     )
 
-    val t2 = TestTask { context ⇒
+    val t2 = TestTask { context =>
       t2Executed.set(true)
       context(p) should equal("Test")
       context
@@ -85,10 +85,10 @@ class TransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
     val init = EmptyTask()
 
-    val t1 = TestTask { _ + (p1 → "Test1") } set (outputs += p1)
-    val t2 = TestTask { _ + (p2 → "Test2") } set (outputs += p2)
+    val t1 = TestTask { _ + (p1 -> "Test1") } set (outputs += p1)
+    val t2 = TestTask { _ + (p2 -> "Test2") } set (outputs += p2)
 
-    val t3 = TestTask { context ⇒
+    val t3 = TestTask { context =>
       context(p1) should equal("Test1")
       context(p2) should equal("Test2")
       context
@@ -115,11 +115,11 @@ class TransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
     val init = EmptyTask()
 
-    val t1 = TestTask { _ + (p1 → "Test1") } set (outputs += p1)
+    val t1 = TestTask { _ + (p1 -> "Test1") } set (outputs += p1)
 
-    val t2 = TestTask { _ + (p2 → "Test2") } set (outputs += p2)
+    val t2 = TestTask { _ + (p2 -> "Test2") } set (outputs += p2)
 
-    val t3 = TestTask { context ⇒
+    val t3 = TestTask { context =>
       context(p1) should equal("Test1")
       context(p2.toArray).head should equal("Test2")
       context(p2.toArray).size should equal(100)
@@ -132,7 +132,7 @@ class TransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     val mole =
       init -- (t1 on env) -- t3 &
         (0 until 100).map {
-          i ⇒ init -- Capsule(t2 on env) -- t3
+          i => init -- Capsule(t2 on env) -- t3
         }.reduce[DSL](_ & _)
 
     mole.run()

@@ -34,7 +34,7 @@ trait BoundedDomain[-D, +T] {
 object BoundedFromContextDomain {
 
   implicit def boundsIsContextBounds[D, T](implicit bounds: BoundedDomain[D, T]): BoundedFromContextDomain[D, T] =
-    d ⇒ {
+    d => {
       val domain = bounds(d)
       val (min, max) = domain.domain
       domain.copy(domain = (FromContext.value(min), FromContext.value(max)))

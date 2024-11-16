@@ -20,7 +20,7 @@ class Activator extends BundleActivator:
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
-        WordHighLight(classOf[Val[_]]),
+        WordHighLight(classOf[Val[?]]),
         WordHighLight(objectName(Capsule)),
         WordHighLight(objectName(Slot)),
         WordHighLight("Strain"),

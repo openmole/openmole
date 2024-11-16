@@ -34,7 +34,7 @@ object TopologyProblem {
     capsule: MoleCapsule,
     paths:   List[(List[MoleCapsule], Int)]
   ) extends TopologyProblem {
-    override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Following the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
+    override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) => "Following the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
 
   case class NegativeLevelProblem(

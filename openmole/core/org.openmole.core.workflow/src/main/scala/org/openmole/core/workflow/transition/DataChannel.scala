@@ -36,7 +36,7 @@ object DataChannel {
    * @param moleExecution the current mole execution
    * @return the variables which have been transmitted through this data channel
    */
-  def consums(dataChannel: DataChannel, ticket: Ticket, moleExecution: MoleExecution): Iterable[Variable[_]] = {
+  def consums(dataChannel: DataChannel, ticket: Ticket, moleExecution: MoleExecution): Iterable[Variable[?]] = {
     val delta = dataChannel.levelDelta(moleExecution.mole)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
@@ -44,7 +44,7 @@ object DataChannel {
       if (delta <= 0) dataChannelRegistry.remove(dataChannel, ticket).getOrElse(CompactedContext.empty)
       else {
         val workingOnTicket = (0 until delta).foldLeft(ticket) {
-          (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+          (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
         }
         dataChannelRegistry.consult(dataChannel, workingOnTicket) getOrElse (CompactedContext.empty)
       }
@@ -65,15 +65,15 @@ object DataChannel {
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     if (delta >= 0) {
-      val toContext = CompactedContext.compact(fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype)))
+      val toContext = CompactedContext.compact(fromContext.values.filterNot(v => dataChannel.filter(v.prototype)))
       dataChannelRegistry.register(dataChannel, ticket, toContext)
     }
     else {
       val workingOnTicket = (delta until 0).foldLeft(ticket) {
-        (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
+        (c, e) => c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
       val context = dataChannelRegistry.getOrElseUpdate(dataChannel, workingOnTicket, CompactedContext.empty)
-      val compactedVariables = CompactedContext.compact(fromContext.values.filterNot(v ⇒ dataChannel.filter(v.prototype)))
+      val compactedVariables = CompactedContext.compact(fromContext.values.filterNot(v => dataChannel.filter(v.prototype)))
       val toContext = CompactedContext.merge(context, compactedVariables)
       dataChannelRegistry.register(dataChannel, ticket, toContext)
     }
@@ -118,7 +118,7 @@ class DataChannel(
    * @return the transmitted data
    */
   def data(mole: Mole, sources: Sources, hooks: Hooks) =
-    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d))
+    start.outputs(mole, sources, hooks).filterNot(d => filter(d))
 
   def levelDelta(mole: Mole): Int = DataChannel.levelDelta(mole)(this)
 

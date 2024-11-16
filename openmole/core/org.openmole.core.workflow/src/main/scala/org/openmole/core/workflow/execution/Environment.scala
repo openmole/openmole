@@ -48,20 +48,20 @@ object Environment:
 
   def errors(environment: Environment) =
     environment match
-      case e: SubmissionEnvironment ⇒ e.errors
-      case _: LocalEnvironment      ⇒ Seq()
+      case e: SubmissionEnvironment => e.errors
+      case _: LocalEnvironment      => Seq()
 
   def clearErrors(environment: Environment) =
     environment match
-      case e: SubmissionEnvironment ⇒ e.clearErrors
-      case _                        ⇒ Seq()
+      case e: SubmissionEnvironment => e.clearErrors
+      case _                        => Seq()
 
   def submit(environment: Environment, job: JobGroup): Long =
     val moleExecution = JobGroup.moleExecution(job)
 
     environment match
-      case env: SubmissionEnvironment ⇒ env.submit(job)
-      case env: LocalEnvironment ⇒
+      case env: SubmissionEnvironment => env.submit(job)
+      case env: LocalEnvironment =>
         env.submit(
           job,
           moleExecution.partialTaskExecutionContext
@@ -99,12 +99,12 @@ object LocalEnvironment:
     name:         OptionalArgument[String] = None,
     remote:       Boolean                  = false
   )(implicit varName: sourcecode.Name) =
-    EnvironmentProvider: ms ⇒
+    EnvironmentProvider: ms =>
       import ms._
       new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)), remote)
 
   def apply(threads: Int, deinterleave: Boolean, remote: Boolean) =
-    EnvironmentProvider: ms ⇒
+    EnvironmentProvider: ms =>
       import ms._
       new LocalEnvironment(threads, deinterleave, None, remote)
 

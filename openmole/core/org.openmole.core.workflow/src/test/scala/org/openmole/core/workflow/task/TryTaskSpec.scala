@@ -39,7 +39,7 @@ class TryTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val o = Val[Int]
 
     val emptyT =
-      TestTask: context ⇒
+      TestTask: context =>
         context + (o -> 9)
       .set (inputs += i, i := "test", outputs += o)
 
@@ -58,7 +58,7 @@ class TryTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val o = Val[Int]
 
     val emptyT =
-      TestTask: context ⇒
+      TestTask: context =>
         throw new RuntimeException("error in task")
       .set(inputs += i, i := "test", outputs += o)
 

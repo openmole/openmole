@@ -21,27 +21,27 @@ import org.openmole.core.context.Val
 
 object BlockList {
   def empty = new BlockList {
-    override def apply(t: Val[_]) = false
+    override def apply(t: Val[?]) = false
   }
 
-  implicit def seqOfValToKeep(s: Seq[Val[_]]): Keep = Keep(s: _*)
+  implicit def seqOfValToKeep(s: Seq[Val[?]]): Keep = Keep(s *)
 }
 
-trait BlockList extends (Val[_] ⇒ Boolean)
+trait BlockList extends (Val[?] => Boolean)
 
 trait Block extends BlockList {
   def filtered: Set[String]
-  override def apply(t: Val[_]) = filtered.contains(t.name)
+  override def apply(t: Val[?]) = filtered.contains(t.name)
 }
 
 trait Keep extends BlockList {
   def kept: Set[String]
-  override def apply(t: Val[_]) = !kept.contains(t.name)
+  override def apply(t: Val[?]) = !kept.contains(t.name)
 }
 
 object Block {
 
-  def apply(ts: Val[_]*): Block = new Block {
+  def apply(ts: Val[?]*): Block = new Block {
     val filtered: Set[String] = ts.map(_.name).toSet
   }
 
@@ -49,7 +49,7 @@ object Block {
 
 object Keep {
 
-  def apply(ts: Val[_]*): Keep = new Keep {
+  def apply(ts: Val[?]*): Keep = new Keep {
     val kept = ts.map(_.name).toSet
   }
 }

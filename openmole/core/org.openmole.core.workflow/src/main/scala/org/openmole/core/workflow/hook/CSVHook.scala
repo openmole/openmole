@@ -10,13 +10,13 @@ import org.openmole.core.format.{ CSVFormat, WritableOutput }
 
 object CSVHook:
 
-  def apply(output: WritableOutput, values: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
+  def apply(output: WritableOutput, values: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
     apply(output, values.toVector)
 
   def apply(
     output:      WritableOutput,
-    values:      Seq[Val[_]]                           = Vector.empty,
-    exclude:     Seq[Val[_]]                           = Vector.empty,
+    values:      Seq[Val[?]]                           = Vector.empty,
+    exclude:     Seq[Val[?]]                           = Vector.empty,
     header:      OptionalArgument[FromContext[String]] = None,
     unrollArray: Boolean                               = false,
     arrayOnRow:  Boolean                               = false,
@@ -24,27 +24,27 @@ object CSVHook:
     postfix:     OptionalArgument[FromContext[String]] = None,
     directory:   Boolean                               = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
 
-    Hook("CSVHook"): parameters ⇒
+    Hook("CSVHook"): parameters =>
       import parameters._
 
-      def headerLine(variables: Seq[Variable[_]]) = header.map(_.from(context)) getOrElse CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = arrayOnRow)
+      def headerLine(variables: Seq[Variable[?]]) = header.map(_.from(context)) getOrElse CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = arrayOnRow)
 
       import WritableOutput.*
 
       output match
-        case Store(file) ⇒
-          def writeFile(f: File, variables: Seq[Variable[_]]) =
+        case Store(file) =>
+          def writeFile(f: File, variables: Seq[Variable[?]]) =
             val create = overwrite || f.isEmpty
             val h = if (create || f.isEmpty) Some(headerLine(variables)) else None
             if create
-            then f.atomicWithPrintStream { ps ⇒ CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = unrollArray, arrayOnRow = arrayOnRow) }
-            else f.withPrintStream(append = true, create = true) { ps ⇒ CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = unrollArray, arrayOnRow = arrayOnRow) }
+            then f.atomicWithPrintStream { ps => CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = unrollArray, arrayOnRow = arrayOnRow) }
+            else f.withPrintStream(append = true, create = true) { ps => CSVFormat.appendVariablesToCSV(ps, h, variables.map(_.value), unrollArray = unrollArray, arrayOnRow = arrayOnRow) }
 
 
           writeFile(file.from(context), context.values.toSeq)
           context
-        case Display(ps) ⇒
-          def writeStream(ps: PrintStream, variables: Seq[Variable[_]]) =
+        case Display(ps) =>
+          def writeStream(ps: PrintStream, variables: Seq[Variable[?]]) =
             val header = Some(headerLine(variables))
             CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = unrollArray, arrayOnRow = arrayOnRow)
 

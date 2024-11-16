@@ -25,8 +25,8 @@ object Sampling {
 }
 
 case class Sampling(
-  sampling: FromContext[Iterator[Iterable[Variable[_]]]],
-  outputs:  Iterable[Val[_]],
+  sampling: FromContext[Iterator[Iterable[Variable[?]]]],
+  outputs:  Iterable[Val[?]],
   inputs:   PrototypeSet                                 = PrototypeSet.empty,
   validate: Validate                                     = Validate.success)
 

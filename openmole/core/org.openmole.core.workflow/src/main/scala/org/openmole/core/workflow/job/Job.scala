@@ -67,9 +67,9 @@ object Job:
     def jobFinished(id: JobId, result: Either[Context, Throwable]): Unit
     def subMoleCanceled(): Boolean
 
-  type JobFinished = (JobId, Either[Context, Throwable]) ⇒ Unit
-  type Canceled = () ⇒ Boolean
-  
+  type JobFinished = (JobId, Either[Context, Throwable]) => Unit
+  type Canceled = () => Boolean
+
   //def compact(job: Job) = Array(job.task, job.compressedContext, job.id, job.callBack)
 
 import Job._
@@ -98,6 +98,6 @@ class Job(
         val performResult = Task.perform(task.task, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
       catch
-        case t: Throwable ⇒ Right(t)
+        case t: Throwable => Right(t)
     else Right(new SubMoleCanceled)
 

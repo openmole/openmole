@@ -22,7 +22,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 //    val task = EmptyTask()
 //    val test = (DSLContainer(task, ()), 9)
 //
-//    (test: DSLContainer[_]).run()
+//    (test: DSLContainer[?]).run()
 //    (test: MoleExecution).run()
 //    test.run()
 //    test on LocalEnvironment(1)
@@ -35,7 +35,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val first = EmptyTask() set (outputs += i, i := 1)
 
-    val last = FromContextTask("last") { p ⇒
+    val last = FromContextTask("last") { p =>
       import p._
       context(i) should equal(1)
       lastExecuted = true
@@ -55,7 +55,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val first = EmptyTask() set (outputs += i, i := 1)
 
-    val last = FromContextTask("last") { p ⇒
+    val last = FromContextTask("last") { p =>
       import p._
       context(i) should equal(1)
       lastExecuted = true
@@ -90,7 +90,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val container = DSLContainer(first, (), output = Some(first))
 
-    val h = TestHook { context ⇒ hookExecuted = true }
+    val h = TestHook { context => hookExecuted = true }
 
     (container hook h) run
 

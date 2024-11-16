@@ -199,7 +199,7 @@ object Task:
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
   def definitionScope(t: Task) = t.info.definitionScope
 
-  def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+  def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
   /**

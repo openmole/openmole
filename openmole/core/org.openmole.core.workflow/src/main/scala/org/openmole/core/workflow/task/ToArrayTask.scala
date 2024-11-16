@@ -34,12 +34,12 @@ object ToArrayTask {
    * @param prototypes
    * @return
    */
-  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(prototypes: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     // FIXME seems to be never used ?
     ClosureTask("ToArrayTask"):
-      (context, _, _) ⇒
+      (context, _, _) =>
         prototypes.map {
-          p ⇒ Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
+          p => Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
         }
     .set (
       inputs ++= prototypes,

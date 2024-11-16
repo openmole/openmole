@@ -31,7 +31,7 @@ trait DomainCenter[-D, +T] {
 }
 
 object DomainCenterFromContext {
-  implicit def centerIsContextCenter[D, T](implicit c: DomainCenter[D, T]): DomainCenterFromContext[D, T] = d ⇒ FromContext.value(c(d))
+  implicit def centerIsContextCenter[D, T](implicit c: DomainCenter[D, T]): DomainCenterFromContext[D, T] = d => FromContext.value(c(d))
 }
 
 @implicitNotFound("${D} is not a variation domain with a center of type T | FromContext[${T}]")

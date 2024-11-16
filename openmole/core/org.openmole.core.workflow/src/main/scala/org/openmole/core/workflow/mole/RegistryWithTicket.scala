@@ -74,7 +74,7 @@ class RegistryWithTicket[K, V] {
    * @param value the value to register
    */
   def register(key: K, ticket: Ticket, value: V) = synchronized {
-    registry(ticket) += (key → value)
+    registry(ticket) += (key -> value)
   }
 
   /**
@@ -90,7 +90,7 @@ class RegistryWithTicket[K, V] {
     ret
   }
 
-  def getOrElseUpdate(key: K, ticket: Ticket, f: ⇒ V): V = synchronized {
+  def getOrElseUpdate(key: K, ticket: Ticket, f: => V): V = synchronized {
     registries.getOrElseUpdate(ticket, new Registry).getOrElseUpdate(key, f)
   }
 

@@ -38,7 +38,7 @@ class EndExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.sh
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val testT = TestTask { context ⇒
+    val testT = TestTask { context =>
       context.contains(i) should equal(true)
       endCapsExecuted += 1
       context
