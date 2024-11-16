@@ -44,10 +44,9 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
   class JobGroupingBy2Test extends Grouping {
 
     def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
-      groups.find { case (_, g) => g.size < 2 } match {
+      groups.find { case (_, g) => g.size < 2 } match 
         case Some((mg, _)) => mg
         case None          => MoleJobGroup()
-      }
     }
 
   }

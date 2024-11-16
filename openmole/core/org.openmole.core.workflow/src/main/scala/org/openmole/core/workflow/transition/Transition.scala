@@ -155,7 +155,7 @@ class DirectTransition(
   val start:     MoleCapsule,
   val end:       TransitionSlot,
   val condition: Condition      = Condition.True,
-  val filter:    BlockList      = BlockList.empty) extends Transition with ValidateTransition {
+  val filter:    BlockList      = BlockList.empty) extends Transition with ValidateTransition:
 
   override def validate = condition.validate
 
@@ -167,7 +167,7 @@ class DirectTransition(
   }
 
   override def toString = s"$start -- $end"
-}
+
 
 object ExplorationTransition {
 

@@ -240,18 +240,19 @@ case class TransitionDSLDestination(t: DSL) extends TransitionDestination
 
 object DSL {
 
-  def tasks(t: DSL): Vector[TaskNode] = t match
-    case --(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case -<(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case >-(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case >|(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case -<-(o, d, _, _, _) => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case oo(o, d, _)        => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
-    case &(a, b)            => tasks(a) ++ tasks(b)
-    case Slot(d)            => tasks(d)
-    case Capsule(d, _)      => tasks(d)
-    case c: DSLContainer[?] => DSLContainer.taskNodes(c) ++ tasks(c.dsl)
-    case TaskNodeDSL(n)     => Vector(n)
+  def tasks(t: DSL): Vector[TaskNode] =
+    t match
+      case --(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case -<(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case >-(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case >|(o, d, _, _)     => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case -<-(o, d, _, _, _) => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case oo(o, d, _)        => TransitionOrigin.tasks(o) ++ d.flatMap(TransitionDestination.tasks)
+      case &(a, b)            => tasks(a) ++ tasks(b)
+      case Slot(d)            => tasks(d)
+      case Capsule(d, _)      => tasks(d)
+      case c: DSLContainer[?] => DSLContainer.taskNodes(c) ++ tasks(c.dsl)
+      case TaskNodeDSL(n)     => Vector(n)
 
   def delegate(t: DSL) =
     t match
@@ -269,66 +270,64 @@ object DSL {
 
   /* ----------- implicit conversions ----------------- */
 
-  object ToOrigin {
+  object ToOrigin:
     import org.openmole.core.workflow.sampling.IsSampling
     given ToOrigin[Task] = t => TaskOrigin(TaskNode(t))
     given ToOrigin[DSL] = TransitionDSLOrigin(_)
     given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, ?]): ToOrigin[T] = t => TransitionDSLOrigin(tc(t))
-    given [T: ToNode]: ToOrigin[T] = t => TaskOrigin(summon[ToNode[T]].apply(t))
+    given [T: ToTaskNode]: ToOrigin[T] = t => TaskOrigin(summon[ToTaskNode[T]].apply(t))
     given [T: IsSampling](using scope: DefinitionScope): ToOrigin[T] = s => summon[ToOrigin[Task]](ExplorationTask(s))
-  }
 
-  @FunctionalInterface trait ToOrigin[-T]:
+  trait ToOrigin[-T]:
     def apply(t: T): TransitionOrigin
 
   object ToDestination:
     import org.openmole.core.workflow.sampling.IsSampling
     given ToDestination[Task] = t => TaskDestination(TaskNode(t))
-    given [T: ToNode]: ToDestination[T] = t => TaskDestination(implicitly[ToNode[T]].apply(t))
+    given [T: ToTaskNode]: ToDestination[T] = t => TaskDestination(implicitly[ToTaskNode[T]].apply(t))
     given [T: IsSampling](using scope: DefinitionScope): ToDestination[T] = s => summon[ToDestination[Task]](ExplorationTask(s))
     given ToDestination[DSL] = TransitionDSLDestination(_)
     given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, ?]): ToDestination[T] = t => TransitionDSLDestination(tc(t))
 
-  @FunctionalInterface trait ToDestination[-T]:
+  trait ToDestination[-T]:
     def apply(t: T): TransitionDestination
 
-  object ToNode:
-    given [T <: Task]: ToNode[T] = t => TaskNode(t)
-    given ToNode[TaskNode] = t => t
-    given byToNode[T: ToNode]: ToNode[By[T, Grouping]] = t => summon[ToNode[T]](t.value).copy(grouping = Some(t.by))
-    given byIntToNode[T: ToNode]: ToNode[By[T, Int]] = t => summon[ToNode[T]](t.value).copy(grouping = Some(ByGrouping(t.by)))
-    given [T: ToNode]: ToNode[On[T, EnvironmentProvider]] = t => summon[ToNode[T]](t.value).copy(environment = Some(t.on))
+  object ToTaskNode:
+    given [T <: Task]: ToTaskNode[T] = t => TaskNode(t)
+    given ToTaskNode[TaskNode] = t => t
+    given byToNode[T: ToTaskNode]: ToTaskNode[By[T, Grouping]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(t.by))
+    given byIntToNode[T: ToTaskNode]: ToTaskNode[By[T, Int]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(ByGrouping(t.by)))
+    given [T: ToTaskNode]: ToTaskNode[On[T, EnvironmentProvider]] = t => summon[ToTaskNode[T]](t.value).copy(environment = Some(t.on))
 
-  @FunctionalInterface trait ToNode[-T] {
+  trait ToTaskNode[-T]:
     def apply(t: T): TaskNode
-  }
 
   object ToDSL:
     given ToDSL[DSL] = t => t
     given [T](using tc: org.openmole.core.workflow.composition.DSLContainer.ExplorationMethod[T, ?]): ToDSL[T] = t => tc(t)
-    given [T: ToNode]: ToDSL[T] = t => TaskNodeDSL(summon[ToNode[T]](t))
+    given [T: ToTaskNode]: ToDSL[T] = t => TaskNodeDSL(summon[ToTaskNode[T]](t))
     given [T](using dslSelector: DSLSelector[T]): ToDSL[T] = t => dslSelector.select(t)
 
-  @FunctionalInterface trait ToDSL[-T]:
+  trait ToDSL[-T]:
     def apply(t: T): DSL
 
   object ToMole:
     given ToMole[DSL] = t => Puzzle.toMole(DSL.toPuzzle(t))
     given [T: ToDSL]: ToMole[T] = t => summon[ToMole[DSL]](summon[ToDSL[T]](t))
 
-  @FunctionalInterface trait ToMole[-T]:
+  trait ToMole[-T]:
     def apply(t: T): Mole
 
   object ToMoleExecution:
     given [T: ToDSL](using moleServices: MoleServices): ToMoleExecution[T] = t => MoleExecution(implicitly[ToDSL[T]].apply(t))
 
-  @FunctionalInterface trait ToMoleExecution[-T]:
+  trait ToMoleExecution[-T]:
     def apply(t: T): MoleExecution
 
   def toPuzzle(t: DSL): Puzzle =
     val taskNodeList = DSL.tasks(t)
-    val taskEnvironment = taskNodeList.groupBy(n => n.task).mapValues(_.flatMap(_.environment).headOption)
-    val taskGrouping = taskNodeList.groupBy(n => n.task).mapValues(_.flatMap(_.grouping).headOption)
+    val taskEnvironment = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.environment).headOption).toMap
+    val taskGrouping = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.grouping).headOption).toMap
 
     def taskToSlot(dsl: DSL) =
       def buildCapsule(task: Task, ns: Vector[TaskNode]) =
@@ -342,7 +341,9 @@ object DSL {
           val persist = ns.find(_.master).get.persist
           MasterCapsule(task, persist = persist, strain = strain)
 
-      DSL.tasks(dsl).groupBy(_.task).map { case (t, ns) => t -> TransitionSlot(buildCapsule(t, ns)) }
+      DSL.tasks(dsl).
+        groupBy(_.task).map: (t, ns) =>
+          t -> TransitionSlot(buildCapsule(t, ns))
 
     def taskNodeToPuzzle(n: TaskNode, slots: Map[Task, TransitionSlot]) =
       val task = n.task
@@ -359,10 +360,9 @@ object DSL {
 
     def transitionDSLToPuzzle0(t: DSL, slots: Map[Task, TransitionSlot], converted: collection.mutable.Map[DSL, Puzzle]): Puzzle =
       def transitionOriginToPuzzle(d: TransitionOrigin): Puzzle =
-        d match {
+        d match
           case TaskOrigin(n)          => taskNodeToPuzzle(n, slots)
           case TransitionDSLOrigin(o) => transitionDSLToPuzzle0(o, slots, converted)
-        }
 
       def transitionDestinationToPuzzle(d: TransitionDestination): (Puzzle, Boolean) =
         d match
@@ -380,9 +380,9 @@ object DSL {
             (f, newSlot) <- destinationPuzzle
           yield transition(l, if (!newSlot) f.firstSlot else TransitionSlot(f.first))
 
-        val merged = destinationPuzzle.map(_._1).foldLeft(originPuzzle) {
-          case (a, b) => Puzzle.merge(a, b)
-        }
+        val merged =
+          destinationPuzzle.map(_._1).foldLeft(originPuzzle): (a, b) =>
+            Puzzle.merge(a, b)
 
         val plugged = Puzzle.copy(merged)(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.map(_._1).flatMap(_.lasts))
         add(plugged, transitions)
@@ -441,85 +441,77 @@ object DSL {
 /* -------------------- Transition DSL ---------------------- */
 sealed trait DSL
 
-case class --(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL {
-  def when(condition: Condition) = copy(condition = condition)
-  def filter(filter: BlockList) = copy(filterValue = filter)
+case class --(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL:
+  infix def when(condition: Condition) = copy(condition = condition)
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
 
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-}
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
 
-case class -<(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL {
-  def when(condition: Condition) = copy(condition = condition)
-  def filter(filter: BlockList) = copy(filterValue = filter)
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-}
+case class -<(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL:
+  infix def when(condition: Condition) = copy(condition = condition)
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
 
-case class >-(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL {
-  def when(condition: Condition) = copy(condition = condition)
-  def filter(filter: BlockList) = copy(filterValue = filter)
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-}
+case class >-(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL:
+  infix def when(condition: Condition) = copy(condition = condition)
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
 
-case class >|(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL {
-  def when(condition: Condition) = copy(condition = condition)
-  def filter(filter: BlockList) = copy(filterValue = filter)
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-}
+case class >|(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty) extends DSL:
+  infix def when(condition: Condition) = copy(condition = condition)
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
 
-case class -<-(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty, slaves: Option[Int] = None) extends DSL {
-  def when(condition: Condition) = copy(condition = condition)
-  def filter(filter: BlockList) = copy(filterValue = filter)
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-  def slaves(n: Int) = copy(slaves = Some(n))
-  def slaves(n: Option[Int]) = copy(slaves = n)
-}
+case class -<-(a: TransitionOrigin, b: Vector[TransitionDestination], condition: Condition = Condition.True, filterValue: BlockList = BlockList.empty, slaves: Option[Int] = None) extends DSL:
+  infix def when(condition: Condition) = copy(condition = condition)
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
+  infix def slaves(n: Int) = copy(slaves = Some(n))
+  infix def slaves(n: Option[Int]) = copy(slaves = n)
 
-case class oo(a: TransitionOrigin, b: Vector[TransitionDestination], filterValue: BlockList = BlockList.empty) extends DSL {
-  def filter(filter: BlockList) = copy(filterValue = filter)
-  def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
-  def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
-  def block(prototypes: Val[?]*) = filter(Block(prototypes *))
-  def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
-}
+case class oo(a: TransitionOrigin, b: Vector[TransitionDestination], filterValue: BlockList = BlockList.empty) extends DSL:
+  infix def filter(filter: BlockList) = copy(filterValue = filter)
+  infix def keep(prototypes: Val[?]*) = filter(Keep(prototypes *))
+  infix def keepAll(prototypes: Seq[Val[?]]) = filter(Keep(prototypes *))
+  infix def block(prototypes: Val[?]*) = filter(Block(prototypes *))
+  infix def blockAll(prototypes: Seq[Val[?]]) = filter(Block(prototypes *))
+
 
 case class &(a: DSL, b: DSL) extends DSL
 
 object DSLContainer {
-  def taskNodes(container: DSLContainer[?]) = {
+  def taskNodes(container: DSLContainer[?]) =
     val output = container.output.map { o => TaskNode(o, hooks = container.hooks) }
     val delegate = container.delegate.map { t => TaskNode(t, environment = container.environment, grouping = container.grouping) }
     delegate ++ output
-  }
 
-  object ExplorationMethod {
+  object ExplorationMethod:
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
     given byGrouping[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t => toDSLContainer(t.value).copy(grouping = Some(t.by))
     given byInt[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t => toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
     given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t => toDSLContainer(t.value).copy(environment = Some(t.on))
-    given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t => {
+    given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t =>
       val container = toDSLContainer(t.value)
       container.copy(hooks = container.hooks ++ Seq(t.h))
-    }
-  }
 
-  @FunctionalInterface trait ExplorationMethod[-T, +D] {
+
+  trait ExplorationMethod[-T, +D]:
     def apply(t: T): DSLContainer[D]
-  }
 
   implicit def convert[T, C](t: T)(implicit toDSLContainer: ExplorationMethod[T, C]): DSLContainer[C] = toDSLContainer(t)
 }
@@ -553,9 +545,8 @@ trait CompositionPackage {
 
   export org.openmole.core.workflow.composition.DSL
 
-  class MethodHookDecorator[T, C](dsl: T)(implicit method: ExplorationMethod[T, C]) {
+  class MethodHookDecorator[T, C](dsl: T)(implicit method: ExplorationMethod[T, C]):
     def hook(hook: Hook): Hooked[T] = Hooked(dsl, hook)
-  }
 
   implicit def hookDecorator[T](container: T)(implicit method: ExplorationMethod[T, Unit]): MethodHookDecorator[T, Unit] = new MethodHookDecorator[T, Unit](container)
 
@@ -605,7 +596,7 @@ trait CompositionPackage {
   implicit def toDestination[T](t: T)(using toDestination: org.openmole.core.workflow.composition.DSL.ToDestination[T]): TransitionDestination = toDestination.apply(t)
   implicit def toDestinationSeq[T](s: Seq[T])(using toDestination: org.openmole.core.workflow.composition.DSL.ToDestination[T]): Seq[TransitionDestination] = s.map(t => toDestination.apply(t))
 
-  implicit def toNode[T](t: T)(using toNode: org.openmole.core.workflow.composition.DSL.ToNode[T]): TaskNode = toNode.apply(t)
+  implicit def toNode[T](t: T)(using toNode: org.openmole.core.workflow.composition.DSL.ToTaskNode[T]): TaskNode = toNode.apply(t)
   implicit def toDSL[T](t: T)(using td: org.openmole.core.workflow.composition.DSL.ToDSL[T]): DSL = td.apply(t)
   implicit def toOptionalDSL[T](t: T)(using td: org.openmole.core.workflow.composition.DSL.ToDSL[T]): OptionalArgument[DSL] = OptionalArgument(toDSL(t))
   implicit def toMole[T](t: T)(using toMole: org.openmole.core.workflow.composition.DSL.ToMole[T]): Mole = toMole.apply(t)
