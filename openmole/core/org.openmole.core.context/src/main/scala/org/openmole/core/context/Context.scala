@@ -27,15 +27,15 @@ object Context:
 
   def ErrorArraySnipSize = PreferenceLocation[Int]("Display", "ErrorArraySnipSize", Some(10))
 
-  given Conversion[Variable[_], Context] = variable => Context(variable)
-  given Conversion[Iterable[Variable[_]], Context] = variables => Context(variables.toSeq: _*)
+  given Conversion[Variable[?], Context] = variable => Context(variable)
+  given Conversion[Iterable[Variable[?]], Context] = variables => Context.fromMap(variables.map(v => v.prototype.name -> v))
 
-  def fromMap(v: Iterable[(String, Variable[_])]) =
-    new Context:
-      val variables = TreeMap.empty[String, Variable[_]] ++ v
+  def fromMap(v: Iterable[(String, Variable[?])]) =
+    new Context(TreeMap.from(v))
 
-
-  def apply(v: Variable[_]*): Context = Context.fromMap(v.map { v ⇒ v.prototype.name → v })
+  def apply(v: Variable[?]*): Context =
+    val values = v.map(v => v.prototype.name -> v)
+    Context.fromMap(values)
 
   val empty = apply()
 
@@ -44,9 +44,7 @@ object Context:
  * A task execution can remove variables from context, change the values of
  * the variables and add values to it.
  */
-trait Context {
-
-  def variables: TreeMap[String, Variable[_]]
+class Context(val variables: TreeMap[String, Variable[?]]):
 
   def values = variables.values
 
@@ -138,7 +136,7 @@ trait Context {
    * @param v additional variable
    * @return
    */
-  def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name → v))
+  def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name -> v))
 
   /**
    * Concatenate the current context with the provided context
@@ -147,7 +145,7 @@ trait Context {
    */
   def +(ctx: Context) = Context.fromMap(variables ++ ctx.variables.toSeq)
 
-  def +[B1 >: Variable[_]](kv: (String, B1)) = variables + kv
+  def +[B1 >: Variable[?]](kv: (String, B1)) = variables + kv
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -156,7 +154,7 @@ trait Context {
    * @param vs the variables to add
    * @return the new context
    */
-  def ++(vs: Iterable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
+  def ++(vs: Iterable[Variable[?]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
 
   /**
    * Build a new context containing the variables of the current context minus the
@@ -172,11 +170,10 @@ trait Context {
    * @param p
    * @return
    */
-  def contains(p: Val[_]): Boolean =
-    variable(p.name) match {
+  def contains(p: Val[?]): Boolean =
+    variable(p.name) match
       case None    ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
-    }
 
   def contains(name: String) =
     variables.contains(name)
@@ -193,7 +190,7 @@ trait Context {
    * @param v
    * @return
    */
-  def -(v: Val[_]): Context = this - v.name
+  def -(v: Val[?]): Context = this - v.name
 
   def empty = Context.empty
 
@@ -209,12 +206,11 @@ trait Context {
    * Get the prototypes in this context
    * @return
    */
-  def prototypes = variables.values.map { _.prototype }
+  def prototypes = variables.values.map(_.prototype)
 
   def prettified(stripSize: Int): String =
     "{" + (if (variables.values.isEmpty) ""
     else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
 
-  def prettified(implicit preference: Preference): String = prettified(preference(Context.ErrorArraySnipSize))
+  def prettified(using preference: Preference): String = prettified(preference(Context.ErrorArraySnipSize))
 
-}
