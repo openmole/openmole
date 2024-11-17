@@ -171,10 +171,12 @@ class DirectTransition(
 
 object ExplorationTransition {
 
-  def registerAggregationTransitions(transition: ExplorationTransition, ticket: Ticket, subMoleExecution: SubMoleExecutionState, executionContext: MoleExecutionContext, size: Int) =
+  def listAggregationTransitions(transition: ExplorationTransition, moleExecution: MoleExecution): Seq[AggregationTransition] =
     val alreadySeen = new HashSet[MoleCapsule]
     val toProcess = new ListBuffer[(MoleCapsule, Int)]
     toProcess += ((transition.end.capsule, 0))
+
+    val result = ListBuffer[AggregationTransition]()
     while toProcess.nonEmpty
     do
       val cur = toProcess.remove(0)
@@ -185,17 +187,19 @@ object ExplorationTransition {
       then
         alreadySeen += capsule
 
-        subMoleExecution.moleExecution.mole.outputTransitions(capsule).foreach:
+        moleExecution.mole.outputTransitions(capsule).foreach:
           case t: AggregationTransition =>
             if level > 0
             then toProcess += t.end.capsule -> (level - 1)
             else
               if level == 0
-              then
-                subMoleExecution.aggregationTransitionRegistry.register(t, ticket, AggregationTransitionRegistryRecord(size))
-                subMoleExecution.onFinish += { se => AggregationTransition.aggregate(t, se, ticket, executionContext) }
+              then result += t
+//                subMoleExecution.aggregationTransitionRegistry.register(t, ticket, AggregationTransitionRegistryRecord(size))
+//                subMoleExecution.onFinish += { se => AggregationTransition.aggregate(t, se, ticket, executionContext) }
           case t if Transition.isExploration(t) => toProcess += t.end.capsule -> (level + 1)
           case t                                => toProcess += t.end.capsule -> level
+
+    result.toSeq
 
   def factors(capsule: MoleCapsule, moleExecution: MoleExecution) =
     val explored = ExplorationTask.explored(capsule, moleExecution.mole, moleExecution.sources, moleExecution.hooks)
@@ -256,14 +260,24 @@ class ExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, val
 
   override def validate = condition.validate
 
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    MoleExecutionMessage.PerformTransition(subMole) { subMoleState =>
-      val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState)
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution):
+    MoleExecutionMessage.PerformTransition(subMole): subMoleState =>
       val samples = ExplorationTransition.exploredSamples(start, context, moleExecution)
-      ExplorationTransition.registerAggregationTransitions(this, ticket, subSubMole, executionContext, samples.size)
+
+      val aggregationTransitions = ExplorationTransition.listAggregationTransitions(this, moleExecution)
+
+      def onFinish =
+        IArray.unsafeFromArray:
+          aggregationTransitions.toArray.map: t =>
+            AggregationTransition.aggregate(t, _, ticket, executionContext)
+
+      val subSubMole = MoleExecution.newChildSubMoleExecution(subMoleState, onFinish)
+
+      for
+        t <- aggregationTransitions
+      do subSubMole.aggregationTransitionRegistry.register(t, ticket, AggregationTransitionRegistryRecord(samples.size))
+
       ExplorationTransition.submitIn(this, condition, filtered(context), ticket, samples, subSubMole, executionContext)
-    }
-  }
 
   override def toString = s"$start -< $end"
 

@@ -197,7 +197,8 @@ object MoleExecution {
             try
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
               val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
-              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, subMoleExecutionState.jobCallBack)
+              def jobCallBack = Job.CallBack((_, _) => (), () => subMoleExecutionState.canceled)
+              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, jobCallBack)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -296,9 +297,9 @@ object MoleExecution {
       val newContext = context ++ hooksVariables
       mole.outputDataChannels(capsule).toSeq.foreach { d => DataChannel.provides(d, subMoleExecutionState.moleExecution.implicits + newContext, ticket, subMoleExecutionState.moleExecution) }
 
-      for {
+      for
         transition <- mole.outputTransitions(capsule).toList.sortBy(t => mole.slots(t.end.capsule).size).reverse
-      } transition.perform(subMoleExecutionState.moleExecution.implicits + context, ticket, subMoleExecutionState.moleExecution, subMoleExecutionState.id, subMoleExecutionState.moleExecution.executionContext)
+      do transition.perform(subMoleExecutionState.moleExecution.implicits + context, ticket, subMoleExecutionState.moleExecution, subMoleExecutionState.id, subMoleExecutionState.moleExecution.executionContext)
 
     }
     catch {
@@ -315,17 +316,17 @@ object MoleExecution {
 
   def newSubMoleExecution(
     parent:        Option[SubMoleExecutionState],
-    moleExecution: MoleExecution) = {
+    moleExecution: MoleExecution,
+    onFinish: IArray[SubMoleExecutionState => Any]) =
     val id: SubMoleExecution = moleExecution.currentSubMoleExecutionId
     moleExecution.currentSubMoleExecutionId += 1
-    val sm = new SubMoleExecutionState(id, parent, moleExecution)
+    val sm = new SubMoleExecutionState(id, parent, moleExecution, onFinish)
     parent.foreach(_.children.put(id, sm))
     moleExecution.subMoleExecutions.put(id, sm)
     sm
-  }
 
-  def newChildSubMoleExecution(subMoleExecution: SubMoleExecutionState): SubMoleExecutionState =
-    newSubMoleExecution(Some(subMoleExecution), subMoleExecution.moleExecution)
+  def newChildSubMoleExecution(subMoleExecution: SubMoleExecutionState, onFinish: IArray[SubMoleExecutionState => Any]): SubMoleExecutionState =
+    newSubMoleExecution(Some(subMoleExecution), subMoleExecution.moleExecution, onFinish)
 
   def processFinalState(subMoleExecutionState: SubMoleExecutionState, job: JobId, result: Either[Context, Throwable], capsule: MoleCapsule, ticket: Ticket) = {
     result match {
@@ -532,9 +533,10 @@ object MoleExecution {
   class SubMoleExecutionState(
     val id:            SubMoleExecution,
     val parent:        Option[SubMoleExecutionState],
-    val moleExecution: MoleExecution):
+    val moleExecution: MoleExecution,
+    val onFinish: IArray[SubMoleExecutionState => Any]):
 
-    import moleExecution.executionContext.services._
+    import moleExecution.executionContext.services.*
 
     var nbJobs = 0L
     var children = collection.mutable.LongMap[SubMoleExecutionState]()
@@ -542,13 +544,11 @@ object MoleExecution {
 
     @volatile var canceled = false
 
-    val onFinish = collection.mutable.ListBuffer[(SubMoleExecutionState => Any)]()
-    val masterCapsuleRegistry = new MasterCapsuleRegistry
     val aggregationTransitionRegistry = new AggregationTransitionRegistry
     val transitionRegistry = new TransitionRegistry
 
+    lazy val masterCapsuleRegistry = new MasterCapsuleRegistry
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
-    lazy val jobCallBack = Job.CallBack((_, _) => (), () => canceled)
 
   def cachedValidTypes(moleExecution: MoleExecution, transitionSlot: TransitionSlot) =
     def f = TypeUtil.validTypes(moleExecution.mole, moleExecution.sources, moleExecution.hooks)(transitionSlot)
@@ -726,7 +726,7 @@ class MoleExecution(
               
   def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
 
-  lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this)
+  lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this, IArray.empty)
   lazy val subMoleExecutions = collection.mutable.LongMap[SubMoleExecutionState]()
 
   private[mole] var currentSubMoleExecutionId = 0L
