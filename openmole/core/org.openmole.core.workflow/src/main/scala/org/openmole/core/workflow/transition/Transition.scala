@@ -58,8 +58,8 @@ object Transition {
 
   def submitNextJobsIfReady(transition: Transition)(context: Iterable[Variable[?]], ticket: Ticket, subMoleState: SubMoleExecutionState) =
     val mole = subMoleState.moleExecution.mole
-    subMoleState.transitionRegistry.register(transition, ticket, context)
-    if (nextTaskReady(transition.end)(ticket, subMoleState.transitionRegistry, mole))
+    subMoleState.transitionRegistry.register(transition, ticket, IArray.unsafeFromArray(context.toArray))
+    if nextTaskReady(transition.end)(ticket, subMoleState.transitionRegistry, mole)
     then
 
       def removeVariables(t: Transition) = subMoleState.transitionRegistry.remove(t, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registered")).toIterable
@@ -231,26 +231,31 @@ object ExplorationTransition {
     val (typedFactors, outputs) = factors(transition.start, moleExecution)
     val factorVals = typedFactors.map { f => Val.copyWithType(f, ValType.fromArrayUnsecure(f.`type`)) }
 
-    for (i <- 0 until samples.size) {
+    for
+      i <- 0 until samples.size
+    do
       val value = samples(i)
       val newTicket = MoleExecution.nextTicket(moleExecution, ticket)
       val variables = new ListBuffer[Variable[?]]
 
-      for (in <- outputs)
-        context.variable(in) match {
+      for
+        in <- outputs
+      do
+        context.variable(in) match
           case Some(v) => variables += v
           case None    =>
-        }
 
-      for ((fv, v) <- factorVals zip value) {
+      for
+        (fv, v) <- factorVals zip value
+      do
         if (fv.accepts(v)) variables += Variable(fv, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fv)
-      }
 
       import executionContext.services._
 
-      if (condition.from(variables)) { Transition.submitNextJobsIfReady(transition)(ListBuffer() ++ variables, newTicket, subMole) }
-    }
+      if condition.from(variables)
+      then Transition.submitNextJobsIfReady(transition)(variables.toArray, newTicket, subMole)
+
 
   }
 
@@ -307,7 +312,7 @@ object AggregationTransition {
       Variable.unsecure(v, result)
 
 
-    new collection.mutable.WrappedArray.ofRef(variables)
+    new collection.mutable.ArraySeq.ofRef(variables)
 
   def aggregate(aggregationTransition: AggregationTransition, subMole: SubMoleExecutionState, ticket: Ticket, executionContext: MoleExecutionContext) = {
     import executionContext.services._
