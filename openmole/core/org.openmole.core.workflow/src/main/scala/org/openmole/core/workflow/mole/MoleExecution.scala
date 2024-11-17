@@ -129,9 +129,6 @@ object MoleExecution {
   }
 
   case class AggregationTransitionRegistryRecord(ids: StaticArrayBuffer[Long], values: StaticArrayBuffer[Array[Any]])
-  type AggregationTransitionRegistry = RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord]
-  type MasterCapsuleRegistry = RegistryWithTicket[MoleCapsule, Context]
-  type TransitionRegistry = RegistryWithTicket[Transition, Iterable[Variable[?]]]
 
   def cancel(subMoleExecution: SubMoleExecutionState): Unit = {
     subMoleExecution.canceled = true
@@ -530,6 +527,8 @@ object MoleExecution {
         )
     .toMap
 
+  type TransitionRegistry = RegistryWithTicket[Transition, Iterable[Variable[?]]]
+  
   class SubMoleExecutionState(
     val id:            SubMoleExecution,
     val parent:        Option[SubMoleExecutionState],
@@ -544,10 +543,10 @@ object MoleExecution {
 
     @volatile var canceled = false
 
-    val aggregationTransitionRegistry = new AggregationTransitionRegistry
-    val transitionRegistry = new TransitionRegistry
+    val aggregationTransitionRegistry: RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord] = RegistryWithTicket()
+    val transitionRegistry: TransitionRegistry = RegistryWithTicket()
 
-    lazy val masterCapsuleRegistry = new MasterCapsuleRegistry
+    lazy val masterCapsuleRegistry: RegistryWithTicket[MoleCapsule, Context] = RegistryWithTicket()
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
 
   def cachedValidTypes(moleExecution: MoleExecution, transitionSlot: TransitionSlot) =
@@ -733,17 +732,16 @@ class MoleExecution(
 
   private[mole] val jobs = collection.mutable.LongMap[MoleCapsule]()
 
-  private[workflow] val dataChannelRegistry = new RegistryWithTicket[DataChannel, CompactedContext]
+  private[workflow] val dataChannelRegistry = RegistryWithTicket[DataChannel, CompactedContext]()
   private[mole] var _exception = Option.empty[MoleExecutionFailed]
 
   def exception(implicit s: MoleExecution.SynchronisationContext) = sync(_exception)
 
   def duration(implicit s: MoleExecution.SynchronisationContext): Option[Long] = sync {
-    (startTime, endTime) match {
+    (startTime, endTime) match 
       case (None, _)          => None
       case (Some(t), None)    => Some(System.currentTimeMillis - t)
       case (Some(s), Some(e)) => Some(e - s)
-    }
   }
 
   def run: Unit = run(None)
