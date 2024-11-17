@@ -42,7 +42,7 @@ object ExecutorPool:
  * @param threadProvider
  */
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider):
-  private val jobs = new java.util.ArrayDeque[LocalExecutionJob]()
+  private val jobs = ArrayStack[LocalExecutionJob](1024)
   private val semaphore = new Semaphore(0)
 
   private val executorMap =
@@ -58,13 +58,13 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   private[execution] def takeNextJob: LocalExecutionJob =
     semaphore.acquire()
-    jobs.synchronized(jobs.pop())
+    jobs.pop()
 
   def enqueue(job: LocalExecutionJob) =
-    jobs.synchronized(jobs.add(job))
+    jobs.add(job)
     semaphore.release()
 
-  def waiting: Int = jobs.synchronized(jobs.size)
+  def waiting: Int = jobs.size
 
   def running: Int =
     executorMap.synchronized:
@@ -72,14 +72,14 @@ class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment],
 
   def stop() =
     executorMap.synchronized:
-      executorMap.foreach {
+      executorMap.foreach:
         case (exe, thread) =>
           exe.stop = true
           thread.interrupt()
-      }
+
       executorMap.clear()
 
-    jobs.synchronized(jobs.clear())
+    jobs.clear()
     semaphore.drainPermits()
 
 
