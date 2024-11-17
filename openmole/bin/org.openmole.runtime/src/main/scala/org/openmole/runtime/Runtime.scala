@@ -149,7 +149,8 @@ class Runtime {
         val runnableTasks = serializerService.deserializeReplaceFiles[RunnableTaskSequence](executionMessage.jobs, Map() ++ usedFiles, gz = true)
 
         val saver = new ContextSaver(runnableTasks.size)
-        val allMoleJobs = runnableTasks.map { t ⇒ Job(t.task, t.context, t.id, saver.save, () ⇒ false) }
+        val callBack = Job.CallBack(saver.save, () => false)
+        val allMoleJobs = runnableTasks.map(t => Job(t.task, t.context, t.id, callBack))
 
         val beginExecutionTime = System.currentTimeMillis
 
