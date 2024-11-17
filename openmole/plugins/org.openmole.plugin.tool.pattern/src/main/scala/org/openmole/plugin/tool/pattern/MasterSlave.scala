@@ -25,11 +25,11 @@ object MasterSlave {
     bootstrap: DSL,
     master:    Task,
     slave:     DSL,
-    state:     Seq[Val[_]],
+    state:     Seq[Val[?]],
     slaves:    OptionalArgument[Int]       = None,
     stop:      OptionalArgument[Condition] = None
   )(implicit scope: DefinitionScope = "master slave"): DSL = {
-    val masterCapsule = Master(master, persist = state: _*)
+    val masterCapsule = Master(master, persist = state *)
     val masterSlaveLast = Strain(EmptyTask())
 
     val skel = stop.option match {

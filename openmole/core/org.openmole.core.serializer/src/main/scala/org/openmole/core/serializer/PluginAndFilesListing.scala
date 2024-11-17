@@ -56,14 +56,14 @@ class PluginAndFilesListing(xStream: XStream)(using val tmpDirectory: TmpDirecto
 
   private var plugins: TreeSet[File] = null
   private var listedFiles: TreeSet[File] = null
-  private var seenClasses: HashSet[Class[_]] = null
-  private var replClasses: HashSet[Class[_]] = null
+  private var seenClasses: HashSet[Class[?]] = null
+  private var replClasses: HashSet[Class[?]] = null
 
   xStream.registerConverter(new FileConverterNotifier(fileUsed))
   xStream.registerConverter(new PluginConverter(this, reflectionConverter))
   xStream.registerConverter(new PluginClassConverter(this))
 
-  def classUsed(c: Class[_]) =
+  def classUsed(c: Class[?]) =
     if !seenClasses.contains(c)
     then
       PluginManager.pluginsForClass(c).foreach(pluginUsed)

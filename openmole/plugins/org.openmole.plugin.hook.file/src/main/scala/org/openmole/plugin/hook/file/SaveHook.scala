@@ -36,7 +36,7 @@ object SaveHook {
   implicit def isIO: InputOutputBuilder[SaveHook] = InputOutputBuilder(Focus[SaveHook](_.config))
   implicit def isInfo: InfoBuilder[SaveHook] = InfoBuilder(Focus[SaveHook](_.info))
 
-  def apply(file: FromContext[File], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(file: FromContext[File], prototypes: Val[?]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new SaveHook(
       file,
       prototypes.toVector,
@@ -48,7 +48,7 @@ object SaveHook {
 
 case class SaveHook(
   file:              FromContext[File],
-  prototypes:        Vector[Val[_]],
+  prototypes:        Vector[Val[?]],
   config:            InputOutputConfig,
   serializerService: SerializerService,
   info:              InfoConfig

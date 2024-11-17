@@ -26,15 +26,15 @@ import org.openmole.core.workspace.TmpDirectory
 import scala.collection.immutable.TreeMap
 
 object DefaultSet {
-  implicit def seqToDefaultSet(s: Seq[Default[_]]): DefaultSet = DefaultSet(s: _*)
-  implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[_]] = d.defaultMap.values.toSeq
+  implicit def seqToDefaultSet(s: Seq[Default[?]]): DefaultSet = DefaultSet(s *)
+  implicit def defaultSetToSeq(d: DefaultSet): Seq[Default[?]] = d.defaultMap.values.toSeq
 
   lazy val empty = DefaultSet(Iterable.empty)
 
   type DefaultAssignment = DefaultSet ⇒ DefaultSet
   def fromAssignments(assignments: Seq[DefaultAssignment]): DefaultSet = assignments.foldLeft(empty)((ds, a) ⇒ a(ds))
 
-  def apply(p: Default[_]*): DefaultSet = DefaultSet(p)
+  def apply(p: Default[?]*): DefaultSet = DefaultSet(p)
 
   /**
    * Extend a context with default values (taken into account if overriding is activated or variable is missing in previous context)
@@ -48,12 +48,12 @@ object DefaultSet {
       defaults.flatMap {
         parameter ⇒
           if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
-          else Option.empty[Variable[_]]
+          else Option.empty[Variable[?]]
       }
 
-  def vals(defaults: DefaultSet): Seq[Val[_]] = defaults.defaults.map(_.prototype).toSeq
+  def vals(defaults: DefaultSet): Seq[Val[?]] = defaults.defaults.map(_.prototype).toSeq
 
-  def defaultVals(inputs: PrototypeSet, defaults: DefaultSet): Seq[Val[_]] =
+  def defaultVals(inputs: PrototypeSet, defaults: DefaultSet): Seq[Val[?]] =
     defaults.flatMap {
       parameter ⇒
         if (parameter.`override` || !inputs.contains(parameter.prototype.name)) Some(parameter.prototype)
@@ -66,25 +66,25 @@ object DefaultSet {
  * A set of default values for prototypes
  * @param defaults
  */
-case class DefaultSet(defaults: Iterable[Default[_]]) {
+case class DefaultSet(defaults: Iterable[Default[?]]) {
 
   @transient lazy val defaultMap =
-    TreeMap.empty[String, Default[_]] ++ defaults.map { p ⇒ (p.prototype.name, p) }
+    TreeMap.empty[String, Default[?]] ++ defaults.map { p ⇒ (p.prototype.name, p) }
 
   /**
    * add a Default to the DefaultSet
    * @param p
    * @return
    */
-  def +(p: Default[_]) = DefaultSet(p :: defaults.toList.filter(_.prototype != p.prototype))
+  def +(p: Default[?]) = DefaultSet(p :: defaults.toList.filter(_.prototype != p.prototype))
 
   /**
    * Remove a default
    * @param p
    * @return
    */
-  def -(p: Default[_]) = DefaultSet((defaultMap - p.prototype.name).values.toList)
-  def contains(p: Default[_]) = defaultMap.contains(p.prototype.name)
-  def get(name: String): Option[Default[_]] = defaultMap.get(name)
-  def get(v: Val[_]): Option[Default[_]] = get(v.name)
+  def -(p: Default[?]) = DefaultSet((defaultMap - p.prototype.name).values.toList)
+  def contains(p: Default[?]) = defaultMap.contains(p.prototype.name)
+  def get(name: String): Option[Default[?]] = defaultMap.get(name)
+  def get(v: Val[?]): Option[Default[?]] = get(v.name)
 }

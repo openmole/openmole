@@ -43,7 +43,7 @@
 //
 //  def allBundles = Activator.bundleContext.get.getBundles.filterNot(_.getBundleId == 0).flatMap(create)
 //
-//  def bundles(c: Class[_]) = PluginManager.bundlesForClass(c).filterNot(_.getBundleId == 0).flatMap(create)
+//  def bundles(c: Class[?]) = PluginManager.bundlesForClass(c).filterNot(_.getBundleId == 0).flatMap(create)
 //
 //  /**
 //   *  Create a new  { @link AbstractFile } instance representing an

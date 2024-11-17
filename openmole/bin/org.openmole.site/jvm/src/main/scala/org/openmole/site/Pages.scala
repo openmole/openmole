@@ -322,7 +322,7 @@ object DocumentationPages:
   //        ul(
   //          entries.sortBy(_.entry.name.toLowerCase).map {
   //            de ⇒ li(entryContent(de))
-  //          }: _*
+  //          } *
   //        )
   //
   //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
@@ -340,7 +340,7 @@ object DocumentationPages:
   //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
   //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
   //
-  //        div(scalatags.Text.all.id := "market-entry")(content: _*)
+  //        div(scalatags.Text.all.id := "market-entry")(content *)
   //      }
   //
   //      def themes: Seq[Market.Tag] = {

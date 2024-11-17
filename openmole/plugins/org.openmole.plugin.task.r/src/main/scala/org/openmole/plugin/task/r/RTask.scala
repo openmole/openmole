@@ -128,11 +128,11 @@ case class RTask(
     import org.json4s.jackson.JsonMethods._
     import p._
 
-    def writeInputsJSON(inputs: Vector[Mapped[_]], file: File) =
+    def writeInputsJSON(inputs: Vector[ Mapped[?]], file: File) =
       def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray[Any])))
 
-    def rInputMapping(inputs: Vector[Mapped[_]], arrayName: String) =
+    def rInputMapping(inputs: Vector[ Mapped[?]], arrayName: String) =
       inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =

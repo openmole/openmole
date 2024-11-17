@@ -13,13 +13,13 @@ case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: Di
 }
 
 object OneFactorSampling {
-  def apply(factors: NominalFactor[_, _]*) = new OneFactorSampling(factors: _*)
+  def apply(factors: NominalFactor[_, _]*) = new OneFactorSampling(factors *)
 
   implicit def isSampling: IsSampling[OneFactorSampling] = s ⇒ {
     def validate: Validate = Validate.success
     def inputs: PrototypeSet = Seq()
-    def outputs: Iterable[Val[_]] = s.factors.map { _.prototype }
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext {
+    def outputs: Iterable[Val[?]] = s.factors.map { _.prototype }
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext {
       p ⇒
         import p._
         if (s.factors.isEmpty) Iterator.empty
@@ -39,12 +39,12 @@ object OneFactorSampling {
    * @param n
    * @return
    */
-  def oneFactorSampling[D, T](n: NominalFactor[D, T], factors: Seq[NominalFactor[_, _]]): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+  def oneFactorSampling[D, T](n: NominalFactor[D, T], factors: Seq[NominalFactor[_, _]]): FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
     import p._
     val exploreSampling: Sampling = n.prototype in n.values(n.factor.domain).domain.from(context).toSeq
     val nominalSampling: Seq[Sampling] = factors.filter(!_.equals(n)).map { n ⇒ n.nominalSampling }
 
-    CompleteSampling(Seq(exploreSampling) ++ nominalSampling: _*)().from(context)
+    CompleteSampling(Seq(exploreSampling) ++ nominalSampling *)().from(context)
   }
 
 }

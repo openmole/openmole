@@ -24,9 +24,9 @@ import org.openmole.core.argument.DefaultSet
 object InputOutputConfig {
 
   implicit class ConfigDecoration(config: InputOutputConfig) {
-    def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) = InputOutputConfig.add(inputs, outputs)(config)
-    def addInput(input: Val[_]*) = add(inputs = input)
-    def addOutput(output: Val[_]*) = add(outputs = output)
+    def add(inputs: Seq[Val[?]] = Seq.empty, outputs: Seq[Val[?]] = Seq.empty) = InputOutputConfig.add(inputs, outputs)(config)
+    def addInput(input: Val[?]*) = add(inputs = input)
+    def addOutput(output: Val[?]*) = add(outputs = output)
   }
 
   /**
@@ -35,7 +35,7 @@ object InputOutputConfig {
    * @param outputs
    * @return
    */
-  def add(inputs: Seq[Val[_]] = Seq.empty, outputs: Seq[Val[_]] = Seq.empty) =
+  def add(inputs: Seq[Val[?]] = Seq.empty, outputs: Seq[Val[?]] = Seq.empty) =
     Focus[InputOutputConfig](_.inputs).modify(_ ++ outputs) andThen
       Focus[InputOutputConfig](_.outputs).modify(_ ++ outputs)
 

@@ -31,7 +31,7 @@ object SeqDomain {
       domain.values.map(_.validate)
     )
 
-  def apply[T](values: FromContext[T]*) = new SeqDomain[T](values: _*)
+  def apply[T](values: FromContext[T]*) = new SeqDomain[T](values *)
 }
 
 sealed class SeqDomain[T](val values: FromContext[T]*)

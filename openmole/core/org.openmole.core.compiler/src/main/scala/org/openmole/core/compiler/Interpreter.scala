@@ -53,7 +53,7 @@ object Interpreter {
   import java.io.File
   import java.net.URL
 
-  def isInterpretedClass(c: Class[_]) = 
+  def isInterpretedClass(c: Class[?]) =
     c.getClassLoader != null && classOf[dotty.tools.repl.AbstractFileClassLoader].isAssignableFrom(c.getClassLoader.getClass)
 
   def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0, fullCode: Option[String] = None) =
@@ -112,7 +112,7 @@ object Interpreter {
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-        List(classOf[Interpreter].getClassLoader): _*
+        List(classOf[Interpreter].getClassLoader) *
     )
 
   def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {

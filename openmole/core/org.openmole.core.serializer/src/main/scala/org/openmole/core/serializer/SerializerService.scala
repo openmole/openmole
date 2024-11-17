@@ -77,7 +77,7 @@ class SerializerService:
 
     xs.addPermission(NoTypePermission.NONE)
     xs.addPermission(new TypePermission {
-      override def allows(`type`: Class[_]): Boolean = true
+      override def allows(`type`: Class[?]): Boolean = true
     })
     //xs.registerConverter(new converter.fix.HashMapConverter(xs.getMapper))
 

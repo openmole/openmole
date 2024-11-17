@@ -277,7 +277,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
         then linkData += LinkData(dest, e.getLinkName, e.isLink)
         // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
         else
-          Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
+          Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite } *)
           setMode(dest, e.getMode)
 
       dest.toFile.setLastModified(e.getModTime.getTime)
@@ -302,7 +302,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
               l.dest.toFile.delete()
               Files.createLink(l.dest, link)
             case e: java.nio.file.FileSystemException =>
-              Files.copy(link, l.dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite }: _*)
+              Files.copy(link, l.dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite } *)
               setMode(l.dest, link.toFile.mode)
 
 

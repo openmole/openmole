@@ -82,7 +82,7 @@ object Imports {
                   multipleImports.collect {
                     case x: WildCardBut ⇒ x
                     case x: Alias       ⇒ WildCardBut(x.from)
-                  }.reduceLeft { (w1, w2) ⇒ WildCardBut(w1.names ++ w2.names: _*) }
+                  }.reduceLeft { (w1, w2) ⇒ WildCardBut(w1.names ++ w2.names *) }
                 aliases.dropRight(1) ++ Seq(wildCardBut)
               case _ ⇒ aliases
             }

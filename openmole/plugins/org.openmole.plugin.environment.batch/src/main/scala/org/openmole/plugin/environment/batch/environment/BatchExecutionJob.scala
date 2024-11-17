@@ -42,7 +42,7 @@ object BatchExecutionJob:
       val allClassFiles = ClassSource.allClasses(directory)
       val mentionedClasses = allMentionedClasses(allClassFiles, classLoader)
 
-      def toVersionedPackage(c: Class[_]) =
+      def toVersionedPackage(c: Class[?]) =
         val p = c.getName.reverse.dropWhile(_ != '.').drop(1).reverse
         PluginManager.bundleForClass(c).map { b ⇒ VersionedPackage(p, Some(b.getVersion.toString)) }
 

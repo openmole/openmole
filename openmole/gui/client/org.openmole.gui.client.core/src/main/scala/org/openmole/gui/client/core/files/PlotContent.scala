@@ -52,7 +52,7 @@ object PlotContent:
 
         val table = div(idAttr := "editor",
           dataTable(s.rowData.content.map(_.map(RowData.toDataContent)))
-            .addHeaders(s.rowData.headers: _*)
+            .addHeaders(s.rowData.headers *)
             .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
             .sortable
             .render.render.amend(borderCollapse.collapse)

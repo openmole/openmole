@@ -25,8 +25,8 @@ object ZipWithIndexSampling {
   implicit def isSampling[S]: IsSampling[ZipWithIndexSampling[S]] = s ⇒ {
     def validate: Validate = s.sampling(s.s).validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
-    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs ++ Seq(s.index)
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def outputs: Iterable[Val[?]] = s.sampling(s.s).outputs ++ Seq(s.index)
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
       import p._
       s.sampling(s.s).sampling.from(context).zipWithIndex.map {
         case (line, i) ⇒ line ++ List(Variable(s.index, i))

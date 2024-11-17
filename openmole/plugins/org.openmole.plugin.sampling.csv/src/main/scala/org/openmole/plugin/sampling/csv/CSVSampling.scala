@@ -32,7 +32,7 @@ object CSVSampling {
   implicit def isIO: InputOutputBuilder[CSVSampling] = InputOutputBuilder(Focus[CSVSampling](_.config))
 
   implicit def isBuilder: MappedOutputBuilder[CSVSampling] = new MappedOutputBuilder[CSVSampling] {
-    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[_]]] = Focus[CSVSampling](_.columns)
+    override def mappedOutputs: Lens[CSVSampling, Vector[ Mapped[?]]] = Focus[CSVSampling](_.columns)
   }
 
   implicit def isSampling: IsSampling[CSVSampling] = s ⇒
@@ -59,7 +59,7 @@ object CSVSampling {
 case class CSVSampling(
   file:      FromContext[File],
   config:    InputOutputConfig,
-  columns:   Vector[Mapped[_]],
+  columns:   Vector[ Mapped[?]],
   separator: Option[Char]
 ) {
 

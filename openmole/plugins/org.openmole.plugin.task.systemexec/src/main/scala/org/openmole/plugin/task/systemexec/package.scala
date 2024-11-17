@@ -65,7 +65,7 @@ package systemexec {
     implicit def stringToCommands(s: String): OSCommands = OSCommands(OS(), s)
 
     /** A sequence of command lines is considered local (non-remote) by default */
-    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)): _*)
+    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)) *)
   }
 
 }

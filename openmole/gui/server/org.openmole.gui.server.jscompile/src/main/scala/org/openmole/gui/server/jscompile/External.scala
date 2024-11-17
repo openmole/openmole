@@ -34,7 +34,7 @@ object External {
       override def buffer[T](f: => T): T = f
     }
 
-    Process(command = cmd, cwd = Some(cwd), extraEnv = env: _*).!(log) match
+    Process(command = cmd, cwd = Some(cwd), extraEnv = env *).!(log) match
       case 0 =>
       case x =>
         throw new InternalProcessingError(

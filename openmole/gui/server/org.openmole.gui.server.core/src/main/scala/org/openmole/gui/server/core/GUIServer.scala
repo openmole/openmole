@@ -225,7 +225,7 @@ class GUIServer(
         s"/" -> GZip(apiServer.routes),
         s"/" -> GZip(apiServer.endpointRoutes),
         s"/rest/v1" -> restServer.routes,
-        s"/webdav" -> webdavServer.routes) ++ pluginsRoutes: _*).orNotFound
+        s"/webdav" -> webdavServer.routes) ++ pluginsRoutes *).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 

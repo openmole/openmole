@@ -635,7 +635,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case util.Failure(e: Throwable) => throw e
 
 
-  def toGUIVariable(v: Variable[_]) =
+  def toGUIVariable(v: Variable[?]) =
     GUIVariable(v.name, toValueTypeFromAny(v.value), v.prototype.`type`.toString)
 
   def expandResources(resources: Resources): Resources =

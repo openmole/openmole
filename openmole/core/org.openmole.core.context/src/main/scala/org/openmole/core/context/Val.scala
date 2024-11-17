@@ -35,13 +35,13 @@ object ValType:
    * @param t
    * @return
    */
-  def unArrayify(t: ValType[_]): (ValType[_], Int) =
-    @tailrec def rec(c: ValType[_], level: Int = 0): (ValType[_], Int) =
+  def unArrayify(t: ValType[?]): (ValType[?], Int) =
+    @tailrec def rec(c: ValType[?], level: Int = 0): (ValType[?], Int) =
       if (!c.isArray) (c, level)
       else rec(c.asArray.fromArray, level + 1)
     rec(t)
 
-  def unsecureFromArray(t: ValType[_]): ValType[_] =
+  def unsecureFromArray(t: ValType[?]): ValType[?] =
     val (res, level) = unArrayify(t)
     if (level == 0) throw new UserBadDataError(s"ValType $t is no an array type")
     res
@@ -77,7 +77,7 @@ object ValType:
     def asArray = p.asInstanceOf[ValType[Array[T]]]
 
 
-  def fromArrayUnsecure(t: ValType[Array[_]]) = ValType[Any](manifestFromArrayUnsecure(t.manifest))
+  def fromArrayUnsecure(t: ValType[Array[?]]) = ValType[Any](manifestFromArrayUnsecure(t.manifest))
 
   /**
    * Decorate for conversion from array type
@@ -104,9 +104,9 @@ object ValType:
    * @param c
    * @return
    */
-  def unsecure(c: Manifest[_]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
+  def unsecure(c: Manifest[?]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
-  def toNativeType(t: ValType[_]): ValType[_] =
+  def toNativeType(t: ValType[?]): ValType[?] =
     def native =
       val (contentType, level) = ValType.unArrayify(t)
       for 
@@ -117,7 +117,7 @@ object ValType:
         }
     native getOrElse t
 
-  def toTypeString(t: ValType[_], rootPrefix: Boolean = true, replaceObject$: Boolean = true): String =
+  def toTypeString(t: ValType[?], rootPrefix: Boolean = true, replaceObject$: Boolean = true): String =
     TypeTool.toString(rootPrefix = rootPrefix, replaceObject$ = replaceObject$)(toNativeType(t).manifest)
 
 /**
@@ -140,8 +140,8 @@ object Val:
    * @tparam T
    */
   implicit class ValToArrayDecorator[T](prototype: Val[T]) {
-    def toArray(level: Int): Val[_] =
-      def toArrayRecursive[A](prototype: Val[A], level: Int): Val[_] =
+    def toArray(level: Int): Val[?] =
+      def toArrayRecursive[A](prototype: Val[A], level: Int): Val[?] =
         if (level <= 0)
         then prototype
         else
@@ -179,8 +179,8 @@ object Val:
 
   def apply[T](implicit t: ValType[T], name: sourcecode.Name): Val[T] = apply[T](name.value)
 
-  implicit lazy val valOrderingOnName: Ordering[Val[_]] = new Ordering[Val[_]] {
-    override def compare(left: Val[_], right: Val[_]) =
+  implicit lazy val valOrderingOnName: Ordering[Val[?]] = new Ordering[Val[?]] {
+    override def compare(left: Val[?], right: Val[?]) =
       left.name compare right.name
   }
 
@@ -188,7 +188,7 @@ object Val:
     new Typeable[Val[T]] {
       override def cast(t: Any): Option[Val[T]] =
         t match {
-          case v: Val[_] if v.`type`.manifest == manifest[T] ⇒ Some(v.asInstanceOf[Val[T]])
+          case v: Val[?] if v.`type`.manifest == manifest[T] ⇒ Some(v.asInstanceOf[Val[T]])
           case _ ⇒ None
         }
       override def castable(t: Any): Boolean = cast(t).isDefined
@@ -227,16 +227,16 @@ object Val:
     namespace: Namespace = v.namespace
   ) = new Val(name, v.`type`, namespace)
 
-  def copyWithType[T](v: Val[_], `type`: ValType[T]) = new Val(v.simpleName, `type`, v.namespace)
+  def copyWithType[T](v: Val[?], `type`: ValType[T]) = new Val(v.simpleName, `type`, v.namespace)
 
-  extension (v: Val[_])
+  extension (v: Val[?])
     def quotedString = s"\"${v}\""
 
 
 object Namespace {
   def empty = Namespace()
 
-  implicit def fromSeqString(s: Seq[String]): Namespace = Namespace(s: _*)
+  implicit def fromSeqString(s: Seq[String]): Namespace = Namespace(s *)
 }
 
 case class Namespace(names: String*) {
@@ -244,8 +244,8 @@ case class Namespace(names: String*) {
     if (names.isEmpty) ""
     else names.mkString("$")
   def isEmpty = names.isEmpty
-  def prefix(s: String*) = Namespace(s ++ names: _*)
-  def postfix(s: String*) = Namespace(names ++ s: _*)
+  def prefix(s: String*) = Namespace(s ++ names *)
+  def postfix(s: String*) = Namespace(names ++ s *)
 }
 
 /**
@@ -276,7 +276,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    * @param p the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
-  def isAssignableFrom(p: Val[_]): Boolean = TypeTool.assignable(p.`type`.manifest, `type`.manifest)
+  def isAssignableFrom(p: Val[?]): Boolean = TypeTool.assignable(p.`type`.manifest, `type`.manifest)
 
   /**
    * Test if a given object can be accepted by the prototype

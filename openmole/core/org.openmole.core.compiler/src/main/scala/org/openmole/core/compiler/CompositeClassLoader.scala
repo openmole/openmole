@@ -41,7 +41,7 @@ object CompositeClassLoader {
 
 class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
 
-  override def loadClass(s: String, b: Boolean): Class[_] =
+  override def loadClass(s: String, b: Boolean): Class[?] =
     CompositeClassLoader.loop(classLoaders)(_.loadClass(s)).getOrElse(throw new ClassNotFoundException)
 
   override def getResource(s: String): URL =

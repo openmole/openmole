@@ -150,7 +150,7 @@ object GAMATask:
     new RuleTransformer(rewrite)
 
 
-  def acceptedOutputType(frame: Boolean): Seq[Manifest[_]] =
+  def acceptedOutputType(frame: Boolean): Seq[Manifest[?]] =
     def scalar =
       Seq(
         manifest[Double],
@@ -224,7 +224,7 @@ case class GAMATask(
 
 
         def validateInputs =
-          def typeMatch(v: Val[_], t: String) =
+          def typeMatch(v: Val[?], t: String) =
             v match
               case Val.caseInt(v) => t == "INT" | t == "FLOAT"
               case Val.caseDouble(v) => t == "INT" | t == "FLOAT"
@@ -241,7 +241,7 @@ case class GAMATask(
 
         def validateOutputs =
           val acceptedOutputsTypes = GAMATask.acceptedOutputType(frameRate.option.isDefined)
-          def accepted(c: Manifest[_]) = acceptedOutputsTypes.exists(t => t == c)
+          def accepted(c: Manifest[?]) = acceptedOutputsTypes.exists(t => t == c)
 
           Mapped.noFile(mapped.outputs).flatMap: m =>
             gamaOutputByName(m.name) match
@@ -317,7 +317,7 @@ case class GAMATask(
         case (false, None) =>
           import xml._
 
-          def toVariable(v: Val[_], value: String) =
+          def toVariable(v: Val[?], value: String) =
             v match
               case Val.caseInt(v) => Variable(v, value.toInt)
               case Val.caseDouble(v) => Variable(v, value.toDouble)
@@ -325,7 +325,7 @@ case class GAMATask(
               case Val.caseBoolean(v) => Variable(v, value.toBoolean)
               case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
 
-          val outputs = Map[String, Val[_]]() ++ Mapped.noFile(mapped.outputs).map { m => (m.name, m.v) }
+          val outputs = Map[String, Val[?]]() ++ Mapped.noFile(mapped.outputs).map { m => (m.name, m.v) }
           def outputValue(e: Elem) =
             for
               a <- e.attribute("name").flatMap(_.headOption)
@@ -343,7 +343,7 @@ case class GAMATask(
         case (false, Some(f)) =>
           import xml._
 
-          def toVariable(v: Val[_], value: Array[String]) =
+          def toVariable(v: Val[?], value: Array[String]) =
             v match
               case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
               case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))

@@ -58,7 +58,7 @@ package file {
 
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
-    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
+    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[?], resourceName: String, executable: Boolean = false) =
     //      if (!file.exists()) {
     //        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
     //        if (executable) file.setExecutable(true)
@@ -116,7 +116,7 @@ package file {
 
       private def copyFile(toF: File, followSymlinks: Boolean = false) = {
         val copyOptions = getCopyOptions(followSymlinks)
-        Files.copy(file, toF, copyOptions: _*)
+        Files.copy(file, toF, copyOptions *)
         toF.mode = file
       }
 
@@ -408,8 +408,8 @@ package file {
 
       def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) =
         file.createParentDirectory
-        if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
-        else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
+        if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append) *))
+        else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append) *).toGZ)
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream())
       def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
@@ -440,7 +440,7 @@ package file {
 
       def withReader[T] = withClosable[Reader, T](Files.newBufferedReader(file.toPath))(_)
 
-      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append): _*))(_)
+      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append) *))(_)
 
       def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] ⇒ T): T = {
         def open =

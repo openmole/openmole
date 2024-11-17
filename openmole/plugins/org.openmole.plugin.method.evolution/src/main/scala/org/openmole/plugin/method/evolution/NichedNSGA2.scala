@@ -238,7 +238,7 @@ object NichedNSGA2 {
       import p._
 
       (i: CDGenome.DeterministicIndividual.Individual[Phenotype]) ⇒
-        val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) }: _*)
+        val context = Context((phenotypeContent.outputs zip Phenotype.outputs(phenotypeContent, i.phenotype)).map { case (v, va) ⇒ Variable.unsecure(v, va) } *)
         niche.map(n ⇒ context(n)).toVector
     }
 

@@ -104,7 +104,7 @@ package object stream:
       Files.copy(
         is,
         file.toPath,
-        (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()): _*
+        (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()) *
       )
 
     def mkString =
