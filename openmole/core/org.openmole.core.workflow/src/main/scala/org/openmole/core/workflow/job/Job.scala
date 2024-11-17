@@ -57,7 +57,7 @@ object Job:
   class SubMoleCanceled extends Exception
 
   object CallBack:
-    def apply(jobFinished: JobFinished, canceled: Canceled) = Instance(jobFinished, canceled)
+    def apply(jobFinished: JobFinished, canceled: Canceled): CallBack = Instance(jobFinished, canceled)
 
     case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack:
       def subMoleCanceled() = _canceled()

@@ -197,7 +197,7 @@ object MoleExecution {
             try
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
               val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
-              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, (_, _) => (), () => subMoleExecutionState.canceled)
+              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, subMoleExecutionState.jobCallBack)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
 
@@ -546,7 +546,9 @@ object MoleExecution {
     val masterCapsuleRegistry = new MasterCapsuleRegistry
     val aggregationTransitionRegistry = new AggregationTransitionRegistry
     val transitionRegistry = new TransitionRegistry
+
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
+    lazy val jobCallBack = Job.CallBack((_, _) => (), () => canceled)
 
   def cachedValidTypes(moleExecution: MoleExecution, transitionSlot: TransitionSlot) =
     def f = TypeUtil.validTypes(moleExecution.mole, moleExecution.sources, moleExecution.hooks)(transitionSlot)

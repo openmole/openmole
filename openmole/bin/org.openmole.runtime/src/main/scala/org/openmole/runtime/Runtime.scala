@@ -177,7 +177,7 @@ class Runtime {
           )
 
           for
-            toProcess ← allMoleJobs
+            toProcess <- allMoleJobs
           do
             environment.submit(toProcess, taskExecutionContext)
 
