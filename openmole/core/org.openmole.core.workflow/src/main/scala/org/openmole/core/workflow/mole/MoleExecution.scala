@@ -469,12 +469,13 @@ object MoleExecution {
     jobs:          Array[JobId],
     capsules:      Array[MoleCapsule],
     completed:     Map[MoleCapsule, Long]): CapsuleStatuses =
+    val length = jobs.length
 
     val runningSet: java.util.HashSet[Long] =
       def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment => e }
       def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment => e } ++ Seq(moleExecution.defaultEnvironment)
 
-      val set = new java.util.HashSet[Long](jobs.size + 1, 1.0f)
+      val set = new java.util.HashSet[Long](length + 1, 1.0f)
 
       for
         env <- submissionEnvironments
@@ -498,13 +499,17 @@ object MoleExecution {
       val value = map.getOrElse(key, 0L)
       map.update(key, value + 1)
 
-    for
-      i <- 0 until jobs.size
+    var i = 0
+
+    while
+      i < length
     do
       val moleJob = jobs(i)
       val capsule = capsules(i)
-      if (isRunning(moleJob)) increment(running, capsule)
+      if isRunning(moleJob)
+      then increment(running, capsule)
       else increment(ready, capsule)
+      i += 1
 
     moleExecution.mole.capsules.map: c =>
       c ->
@@ -674,11 +679,10 @@ class MoleExecution(
   private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, collection.mutable.Map[MoleJobGroup, ListBuffer[Job]]]()
   private[mole] var nbWaiting = 0
 
-  private[mole] val completed = {
+  private[mole] val completed =
     val map = collection.mutable.Map[MoleCapsule, Long]()
     map ++= mole.capsules.map(_ -> 0L)
     map
-  }
 
   /* Caches to speedup workflow execution */
   private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
@@ -766,19 +770,19 @@ class MoleExecution(
   def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses =
     val (jobs, capsules, cmp) =
       sync:
-        val size = moleExecution.jobs.size
-        val jobs = Array.ofDim[Long](size)
-        val capsules = Array.ofDim[MoleCapsule](size)
+        val moleExecutionJobs = moleExecution.jobs.toArray
+        val jobs = Array.ofDim[Long](moleExecutionJobs.length)
+        val capsules = Array.ofDim[MoleCapsule](moleExecutionJobs.length)
         var i = 0
 
-        for
-          (j, c) <- moleExecution.jobs
+        while 
+          i < moleExecutionJobs.length
         do
-          if i < size
-          then
-            jobs(i) = j
-            capsules(i) = c
-            i += 1
+          val (j, c) = moleExecutionJobs(i)
+
+          jobs(i) = j
+          capsules(i) = c
+          i += 1
 
         (jobs, capsules, completed.toMap)
 
