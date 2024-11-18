@@ -1584,16 +1584,19 @@ input:checked + .slider:before {
 }
 
 .scriptError {
-  width: 100%;
-  overflow: scroll;
-  background-color: rgb(211, 95, 95);
-  color: white;
-  padding: 10px;
-  font-family: monospace;
-  font-size: medium;
-  border: 1px solid rgb(211,95,95);
-  border-radius: 4px;
-  margin-bottom: 10px;
+    width: 100%;
+    overflow: scroll;
+    background-color: rgba(255, 95, 95, 0.5);
+    color: white;
+    padding: 10px;
+    font-family: monospace;
+    font-size: medium;
+    border: 2px solid rgb(255,95,95);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    margin-left: 15;
+    height: 69vh;
+    margin-right: 5px;
 }
 
 .metadata {

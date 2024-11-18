@@ -21,6 +21,7 @@ object OMSContent:
   def setError(safePath: SafePath, errorDataOption: Option[ErrorData])(using panels: Panels) =
     val editorPanelUI = panels.tabContent.editorPanelUI(safePath)
     editorPanelUI.foreach(_.errors.set(errorDataOption))
+    panels.treeNodePanel.scriptError.set(editorPanelUI)
 
   def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) =
 
@@ -66,7 +67,9 @@ object OMSContent:
               child <--
                 (editor.errors.signal combineWith editor.errorMessage).map: (e, em) =>
                   if e.isDefined || em.isDefined
-                  then button("CLEAR", btn_secondary, marginLeft := "10", onClick --> editor.unsetErrors)
+                  then button("CLEAR", btn_secondary, marginLeft := "10", onClick -->  
+                    panels.treeNodePanel.clearErrorView
+                  )
                   else div()
             )
         },
