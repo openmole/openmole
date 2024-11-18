@@ -770,12 +770,12 @@ class MoleExecution(
   def capsuleStatuses(implicit s: MoleExecution.SynchronisationContext): MoleExecution.CapsuleStatuses =
     val (jobs, capsules, cmp) =
       sync:
-        val moleExecutionJobs = moleExecution.jobs.toArray
+        val moleExecutionJobs = moleExecution.jobs.toArray.filter(_ != null)
         val jobs = Array.ofDim[Long](moleExecutionJobs.length)
         val capsules = Array.ofDim[MoleCapsule](moleExecutionJobs.length)
         var i = 0
 
-        while 
+        while
           i < moleExecutionJobs.length
         do
           val (j, c) = moleExecutionJobs(i)
