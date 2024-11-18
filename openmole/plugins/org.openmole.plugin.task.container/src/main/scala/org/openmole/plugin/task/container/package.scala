@@ -40,7 +40,7 @@ object ContainerImage:
     SavedDockerImage(f, compressed)
 
   implicit def stringToContainerImage(s: String): ContainerImage =
-    if (s.contains(":"))
+    if s.contains(":")
     then
       val Vector(image, tag) = s.split(":").toVector
       DockerImage(image, tag)
@@ -113,6 +113,13 @@ object ContainerSystem:
 
   type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImage]]
   type FlatImageKey = CacheKey[WithInstance[FlatContainerTask.Cached]]
+
+  object InstalledImage:
+    extension (img: InstalledImage)
+      def image =
+        img match
+          case i: InstalledSIFImage => i.image
+          case i: InstalledFlatImage => i.image
 
   sealed trait InstalledImage
   case class InstalledSIFImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularitySIF) extends InstalledImage

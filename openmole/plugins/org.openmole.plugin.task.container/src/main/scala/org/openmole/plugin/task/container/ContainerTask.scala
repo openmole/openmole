@@ -187,6 +187,51 @@ object ContainerTask:
 
   def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
 
+  def runCommandInContainer(
+    image: ContainerSystem.InstalledImage,
+    commands: Seq[String],
+    volumes: Seq[(String, String)] = Seq.empty,
+    environmentVariables: Seq[(String, String)] = Seq.empty,
+    workDirectory: Option[String] = None,
+    verbose: Boolean = false,
+    output: PrintStream,
+    error: PrintStream)(using TmpDirectory, NetworkService) =
+    image match
+      case image: ContainerSystem.InstalledSIFImage =>
+        def execute(overlay: Option[_root_.container.Singularity.OverlayImage]) =
+          runCommandInSIFContainer(
+            image.image,
+            commands = commands,
+            volumes = volumes,
+            environmentVariables = environmentVariables,
+            workDirectory = workDirectory,
+            verbose = verbose,
+            output = output,
+            error = error,
+            overlay = overlay,
+            tmpFS = overlay.isEmpty
+          )
+
+        image.containerSystem match
+          case cs: SingularityOverlay =>
+            TmpDirectory.withTmpFile: overlayFile =>
+              val overlay = _root_.container.Singularity.createOverlay(overlayFile, cs.size, output = output, error = error)
+              execute(Some(overlay))
+          case cs: SingularityMemory => execute(None)
+
+      case image: ContainerSystem.InstalledFlatImage =>
+        runCommandInFlatImageContainer(
+          image.image,
+          commands = commands,
+          volumes = volumes,
+          environmentVariables = environmentVariables,
+          workDirectory = workDirectory,
+          verbose = verbose,
+          output = output,
+          error = error
+        )
+
+
   def runCommandInFlatImageContainer(
     image: _root_.container.FlatImage,
     commands: Seq[String],
@@ -210,7 +255,7 @@ object ContainerTask:
         verbose = verbose
       )
 
-  def runCommandInContainer(
+  def runCommandInSIFContainer(
     image: _root_.container.Singularity.SingularityImageFile,
     overlay: Option[_root_.container.Singularity.OverlayImage] = None,
     tmpFS: Boolean = false,
@@ -406,7 +451,7 @@ object ContainerTask:
             val overlayCache = executionContext.cache.getOrElseUpdate(containerSystem.cacheKey)(createPool)
 
             overlayCache: overlay =>
-              runCommandInContainer(
+              runCommandInSIFContainer(
                 image = image.image,
                 overlay = Some(overlay),
                 commands = commandValue ++ copyCommand ++ exitCommand,
@@ -419,7 +464,7 @@ object ContainerTask:
               )
 
           case containerSystem: SingularityMemory =>
-            runCommandInContainer(
+            runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
               commands = commandValue ++ copyCommand ++ exitCommand,
