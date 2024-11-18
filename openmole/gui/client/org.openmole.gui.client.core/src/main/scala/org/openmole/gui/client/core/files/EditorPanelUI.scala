@@ -153,59 +153,43 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
-  def switchAreaSize =
-    errorAreaSize.update(eas=>
-    eas match {
-      case "100px"=> "500px"
-      case "500px"=> "100px"
-    })
-
-  val errorViewSizeButton = button(
-    cls := "btn",
-    background := "white",
-    OMTags.down,
-    onClick --> { _ => switchAreaSize},
-    position.absolute,
-    margin := "20px",
-    right := "20px"
-  )
-
-  val view =
+  val errorView =
     div(
       children <--
         errorMessage.signal.map: em =>
-          em.toSeq.map: message =>
-            div( display.flex,
-              errorViewSizeButton,
-              textArea(
-                flexRow,
-                message,
-                cls := "scriptError",
-                height <-- errorAreaSize,
-              )
-          ),
-      edDiv.amend(
-        lineHeight --> lineHeightObserver,
-        fileContentType match
-          case FileContentType.OpenMOLEScript ⇒
-            errors -->
-              Observer[Option[ErrorData]]:
-                case Some(errors: CompilationErrorData) =>
-                  editor.getSession().clearBreakpoints()
-                  errors.errors.foreach: e ⇒
-                    e.position.foreach: p =>
-                      editor.getSession().setBreakpoint(p.line - 1)
-                  errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>
-                    errorMessage.set(Some(errorMessage(e)))
-                case Some(e: MessageErrorData) =>
-                  errorMessage.set(Some(e.message))
-                case None =>
-                  editor.getSession().clearBreakpoints()
-                case _ =>
+            em.toSeq.map: message =>
+              div( display.flex,
+                textArea(
+                  flexRow,
+                  message,
+                  cls := "scriptError",
+                )
+            )
+    )  
 
-          case _ => emptyMod,
-        onClick --> { _ => updateErrorMessage }
-      )
+  val view =
+    div(
+      edDiv.amend(
+          lineHeight --> lineHeightObserver,
+          fileContentType match
+            case FileContentType.OpenMOLEScript ⇒
+              errors -->
+                Observer[Option[ErrorData]]:
+                  case Some(errors: CompilationErrorData) =>
+                    editor.getSession().clearBreakpoints()
+                    errors.errors.foreach: e ⇒
+                      e.position.foreach: p =>
+                        editor.getSession().setBreakpoint(p.line - 1)
+                    errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>
+                      errorMessage.set(Some(errorMessage(e)))
+                  case Some(e: MessageErrorData) =>
+                    errorMessage.set(Some(e.message))
+                  case None =>
+                    editor.getSession().clearBreakpoints()
+                  case _ =>
+            case _ => emptyMod,
+          onClick --> { _ => updateErrorMessage }
+        )
     )
 
   def aceDoc = editor.getSession().getDocument()

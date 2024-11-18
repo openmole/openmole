@@ -70,7 +70,7 @@ class TreeNodePanel {
     onMountFocus
   )
 
-
+  val scriptError: Var[Option[EditorPanelUI]] = Var(None)
   val plusFile = Var(false)
   
   // New file tool
@@ -420,6 +420,7 @@ class TreeNodePanel {
   def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
     div(cls := "treePathItems", paddingLeft := "4px", name,
       onClick --> { _ ⇒
+        clearErrorView
         treeNodeManager.switch(safePath)
       },
       dropPairs,
@@ -430,7 +431,7 @@ class TreeNodePanel {
       }
     )
 
-  def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
+  private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     val size = Var(100)
     div(
       cls := "file-scrollable-content",
@@ -495,6 +496,20 @@ class TreeNodePanel {
         },
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
+
+  def clearErrorView =
+    scriptError.update: opt=>
+      opt.foreach: pui=>
+        pui.unsetErrors
+      None      
+
+  def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
+      div(
+        child <-- scriptError.signal.map: se=> 
+          se match
+            case Some(ep) => ep.errorView
+            case _ =>  treeView
+      )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     if refresh then panels.tabContent.removeTab(safePath)

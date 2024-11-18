@@ -118,6 +118,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           panels.closeExpandable
           panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
           panels.treeNodePanel.plusFile.set(false)
+          panels.treeNodePanel.clearErrorView
         }
 
       //START BUTTON
@@ -205,7 +206,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
               div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
               panels.treeNodePanel.fileControler,
               panels.treeNodePanel.fileToolBar.sortingGroup,
-              panels.treeNodePanel.treeView
+              panels.treeNodePanel.treeViewOrErrors
             ),
             div(
               cls := "tab-section",
