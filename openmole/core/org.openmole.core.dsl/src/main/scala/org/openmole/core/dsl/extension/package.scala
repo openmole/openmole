@@ -113,6 +113,7 @@ package object extension:
   def Logger = org.openmole.tool.logger.LoggerService
 
   export org.openmole.tool.types.TypeTool.ManifestDecoration
+  export org.openmole.tool.crypto.Cypher
 
   export org.openmole.core.replication.ReplicaCatalog
   export org.openmole.core.workflow.execution.EnvironmentProvider
@@ -140,5 +141,8 @@ package object extension:
 
   export org.openmole.core.setter.DefaultBuilder
   export org.openmole.core.script.ScriptSourceData
+  export org.openmole.core.authentication.AuthenticationStore
+
+
 
 

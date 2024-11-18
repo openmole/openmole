@@ -54,6 +54,7 @@ object SLURMEnvironment:
     timeout:              OptionalArgument[Time]        = None,
     reconnect:            OptionalArgument[Time]        = None,
     storageSharedLocally: Boolean                       = false,
+    proxy:                OptionalArgument[SSHProxy]    = None,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
     forceCopyOnNode:      Boolean                       = false,
@@ -102,6 +103,7 @@ object SLURMEnvironment:
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          proxy = proxy.map(SSHProxy.authenticated),
           services = BatchEnvironment.Services(ms, cache)
         )
       else
@@ -148,21 +150,23 @@ object SLURMEnvironment:
       refresh)
 
 
-class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
+class SLURMEnvironment(
   val user:              String,
   val host:              String,
   val port:              Int,
   val timeout:           Time,
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
-  val authentication:    A,
+  val authentication:    SSHAuthentication,
+  val proxy:             Option[SSHProxy.Authenticated],
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
   env =>
 
   import services.*
 
   implicit lazy val ssh: gridscale.ssh.SSH =
-    val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+    def proxyValue = proxy.map(p => SSHProxy.toSSHServer(p, timeout))
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout, sshProxy = proxyValue)(authentication)
     gridscale.ssh.SSH(sshServer, reconnect = parameters.reconnect)
 
   override def start() =

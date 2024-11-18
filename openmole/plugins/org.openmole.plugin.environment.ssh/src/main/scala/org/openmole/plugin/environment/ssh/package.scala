@@ -28,6 +28,8 @@ import org.openmole.plugin.environment.batch.storage.*
 import org.openmole.plugin.environment.gridscale.{LocalStorage, LogicalLinkStorage}
 import squants.Time
 import org.openmole.tool.lock.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 import java.util.concurrent.locks.ReentrantLock
 
@@ -219,4 +221,20 @@ def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace,
     case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space, background)
 
 
+object SSHProxy:
+  def toSSHServer(a: Authenticated, timeout: Time) =
+    _root_.gridscale.ssh.SSHServer(a.proxy.host, a.proxy.port, timeout = timeout)(a.authentication)
 
+  case class Authenticated(proxy: SSHProxy, authentication: SSHAuthentication)
+
+  def authenticated(proxy: SSHProxy)(using AuthenticationStore, Cypher) =
+    val authentication = SSHAuthentication.find(proxy.user, proxy.host, proxy.port)
+    Authenticated(proxy, authentication)
+
+  def apply(
+    user: String,
+    host: String,
+    port: Int = 22) =
+    new SSHProxy(user, host, port)
+
+case class SSHProxy(user: String, host: String, port: Int)
