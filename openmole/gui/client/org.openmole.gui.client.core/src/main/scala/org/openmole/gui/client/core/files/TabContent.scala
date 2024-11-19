@@ -43,7 +43,6 @@ class TabContent:
 
   def buildTab(tabData: TabData, content: HtmlElement, copyAttributes: Option[Tab[TabData]] = None)(using Panels, ServerAPI, BasePath) =
     val header = buildHeader(tabData).amend(onClick --> {_ => 
-      println("Click " + tabData.safePath.name)
       current.set(Some(tabData))
     })
     copyAttributes match
