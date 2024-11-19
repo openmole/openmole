@@ -37,7 +37,7 @@ object OMSContent:
       div(display.flex, flexDirection.row, height := "6vh", alignItems.center,
         child <-- compileDisabled.signal.map { compDisabled ⇒
           if compDisabled
-          then Waiter.waiter
+          then Waiter.waiter()
           else
             div(display.flex, flexDirection.row,
               button("RUN", btn_primary, marginLeft := "10", onClick --> { _ ⇒

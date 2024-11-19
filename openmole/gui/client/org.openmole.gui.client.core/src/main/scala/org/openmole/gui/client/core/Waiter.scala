@@ -32,24 +32,24 @@ object Waiter {
 
   implicit def fTStateToClientTState[S](f: Future[S]): FutureWaiter[S] = new FutureWaiter(f)
 
-  val waiter =
-    div(cls := "spinner-wave", div(), div(), div())
+  def waiter(foregroundColor: String = "black") = 
+    div(cls := "spinner-wave", div(backgroundColor := foregroundColor), div(backgroundColor := foregroundColor), div(backgroundColor := foregroundColor))
 }
 
 import Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
-  def withTransferWaiter[T <: HTMLElement](f: ProcessState ⇒ HtmlElement): HtmlElement = {
+  def withTransferWaiter[T <: HTMLElement](foregroundColor: String = "black")(f: ProcessState ⇒ HtmlElement): HtmlElement = {
 
     div(
       child <-- processingState.signal.map { pState ⇒
         val ratio = pState.ratio
         val waiterSpan = div(
           ext.flexColumn, alignItems.center,
-          waiter,
+          waiter(foregroundColor),
           if (ratio == 0 || ratio == 100) span()
-          else span(cls := "spinner-wave-ratio", ratio + " %")
+          else span(color := foregroundColor, ratio + " %")
         )
 
         pState match {
@@ -66,10 +66,11 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
 
   def withFutureWaiter[T <: HTMLElement](
     waitingString:    String,
-    onsuccessElement: S ⇒ HtmlElement
+    onsuccessElement: S ⇒ HtmlElement,
+    foregroundColor: String = "black"
   ): HtmlElement = {
 
-    val processing: Var[HtmlElement] = Var(waiter)
+    val processing: Var[HtmlElement] = Var(waiter(foregroundColor))
     waitingForFuture.andThen {
       case Success(s) ⇒ processing.set(onsuccessElement(s))
       case Failure(_) ⇒ processing.set(div("Failed to load data"))
@@ -82,10 +83,11 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
 
   def withFutureWaiterAndSideEffect[T <: HTMLElement](
     waitingString:    String,
-    onsuccessElement: S ⇒ Any
+    onsuccessElement: S ⇒ Any,
+    foregroundColor: String = "black"
   ): HtmlElement = {
 
-    val processing: Var[HtmlElement] = Var(waiter)
+    val processing: Var[HtmlElement] = Var(waiter(foregroundColor))
     waitingForFuture.andThen {
       case Success(s) ⇒
         onsuccessElement(s)

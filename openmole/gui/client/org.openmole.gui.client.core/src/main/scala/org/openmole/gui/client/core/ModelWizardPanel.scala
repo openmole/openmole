@@ -119,7 +119,7 @@ object ModelWizardPanel:
       label(
         cls := "inputFileStyle",
         margin := "15px",
-        transferring.withTransferWaiter:
+        transferring.withTransferWaiter():
           _ ⇒
             div(
               child <--

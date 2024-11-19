@@ -123,7 +123,7 @@ class TreeNodePanel {
       directoryToggle.element,
       newNodeInput.amend(marginLeft := "10px"),
       upButton.amend(justifyContent.flexEnd),
-      transferring.withTransferWaiter {
+      transferring.withTransferWaiter("white") {
         _ ⇒
           div()
       }.amend(marginLeft := "10px"),

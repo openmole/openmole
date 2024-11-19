@@ -57,7 +57,7 @@ object URLImportPanel:
 
     val downloadButton = button(
       cls := "btn btn-purple",
-      downloading.withTransferWaiter { _ ⇒ span("Download") },
+      downloading.withTransferWaiter() { _ ⇒ span("Download") },
       height := "38", width := "150", marginTop := "20",
       onClick --> { _ ⇒ download(urlInput.ref.value) }
     )
