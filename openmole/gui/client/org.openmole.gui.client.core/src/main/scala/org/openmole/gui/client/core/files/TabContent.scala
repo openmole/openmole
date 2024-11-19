@@ -24,6 +24,7 @@ class TabContent:
   import TabContent.*
 
   val tabsUI = Tabs.tabs[TabData](Seq()).build
+  val current: Var[Option[TabData]] = Var(None)
 
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.render.amend(margin := "10px")
@@ -34,21 +35,27 @@ class TabContent:
       span(cls := "close-button close-button-tab bi-x", marginLeft := "5px", onClick --> { e =>
         save(tabData)
         removeTab(tabData.safePath)
-        panels.treeNodePanel.clearErrorView
+        panels.treeNodePanel.clearErrorView(Some(tabData.safePath))
         panels.treeNodePanel.refresh
         e.stopPropagation()
       })
     )
 
   def buildTab(tabData: TabData, content: HtmlElement, copyAttributes: Option[Tab[TabData]] = None)(using Panels, ServerAPI, BasePath) =
+    val header = buildHeader(tabData).amend(onClick --> {_ => 
+      println("Click " + tabData.safePath.name)
+      current.set(Some(tabData))
+    })
     copyAttributes match
-      case None => Tab(tabData, buildHeader(tabData), content)
-      case Some(tab) => Tab(tabData, buildHeader(tabData), content, tabID = tab.tabID, refID = tab.refID, active = tab.active)
+      case None => Tab(tabData, header, content)
+      case Some(tab) => Tab(tabData, header, content, tabID = tab.tabID, refID = tab.refID, active = tab.active)
 
   def addTab(
     tabData: TabData,
     content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     tabsUI.add(buildTab(tabData, content))
+    current.set(Some(tabData))
+    
 
   def tab(safePath: SafePath) =
     tabsUI.tabs.now().find { tab => tab.t.safePath == safePath }

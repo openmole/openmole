@@ -44,10 +44,10 @@ import scala.scalajs.js.annotation.JSImport
 object EditorPanelUI:
 
   def apply(
-    fileType: FileContentType,
+    safePath: SafePath,
     initCode: String,
     initHash: String)(using plugins: GUIPlugins) =
-    val editor = new EditorPanelUI(fileType)
+    val editor = new EditorPanelUI(safePath)
     editor.setCode(initCode, initHash)
     editor
 
@@ -68,8 +68,9 @@ object EditorPanelUI:
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
 
-class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins):
+class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins):
 
+  val fileContentType = FileContentType(safePath)
   val modified = Var(false)
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
@@ -130,10 +131,6 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
   def unsetErrors =
     errors.set(None)
     errorMessage.set(None)
-
-//  def setErrorMessage(message: String) =
-//    errorMessage.set(Some(message))
-//    errorMessageOpen.set(true)
 
   def errorMessage(e: ScriptError) =
     s"${e.position.map(p => s"${p.line}: ").getOrElse("")}${e.message}"

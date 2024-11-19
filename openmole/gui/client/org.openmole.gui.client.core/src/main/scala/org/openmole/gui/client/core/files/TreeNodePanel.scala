@@ -20,6 +20,7 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.GitStatus.{Conflicting, Modified, Untracked}
 
 import scala.collection.immutable.ArraySeq
+import org.openmole.gui.client.core.files.TabContent.TabData
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -70,7 +71,7 @@ class TreeNodePanel {
     onMountFocus
   )
 
-  val scriptError: Var[Option[EditorPanelUI]] = Var(None)
+  val scriptErrors: Var[Seq[EditorPanelUI]] = Var(Seq())
   val plusFile = Var(false)
   
   // New file tool
@@ -420,7 +421,7 @@ class TreeNodePanel {
   def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
     div(cls := "treePathItems", paddingLeft := "4px", name,
       onClick --> { _ ⇒
-        clearErrorView
+        clearErrorView(Some(safePath))
         treeNodeManager.switch(safePath)
       },
       dropPairs,
@@ -497,18 +498,26 @@ class TreeNodePanel {
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
 
-  def clearErrorView =
-    scriptError.update: opt=>
-      opt.foreach: pui=>
+  def clearCurrentErrorView(using panels: Panels) =
+    clearErrorView(panels.tabContent.current.now().map(_.safePath))
+    
+  def clearErrorView(safePath: Option[SafePath]) =
+    scriptErrors.update: s=>
+      val ePUI = s.find(pui=> Some(pui.safePath) == safePath)
+      ePUI.map: pui=>
         pui.unsetErrors
-      None      
+        s.filterNot(_== pui)
+      .getOrElse(s)
 
   def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
       div(
-        child <-- scriptError.signal.map: se=> 
-          se match
-            case Some(ep) => ep.errorView
-            case _ =>  treeView
+        child <-- scriptErrors.signal.combineWith(panels.tabContent.current.signal).map: (se,curTab)=> 
+          curTab match
+            case Some(td: TabData)=> 
+              se.filter(_.safePath == td.safePath).headOption match
+                case Some(e: EditorPanelUI)=> e.errorView
+                case _=> treeView
+            case _ => treeView
       )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
