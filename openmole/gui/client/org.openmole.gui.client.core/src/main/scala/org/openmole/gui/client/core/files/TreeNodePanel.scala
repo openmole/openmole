@@ -434,7 +434,7 @@ class TreeNodePanel {
 
   private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     val size = Var(100)
-    div(
+    lazy val tree: Div = div(
       cls := "file-scrollable-content",
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
@@ -455,7 +455,6 @@ class TreeNodePanel {
                         fileToolBar.findInput.ref.value = ""
                         val switchTarget = if isDir then sp else sp.parent
                         treeNodeManager.switch(switchTarget)
-                        //treeNodeManager.computeCurrentSons
                         displayNode(sp)
                       }
                     )
@@ -477,7 +476,7 @@ class TreeNodePanel {
                   commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked) || x._2 == Some(Conflicting) || x._2 == Some(Modified)).map(_._1))
                   addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked)).map(_._1))
                   gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
-                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id, tree).render) }
 
               def more =
                 if nodes.listed < nodes.total
@@ -497,6 +496,7 @@ class TreeNodePanel {
         },
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
+    tree
 
   def clearCurrentErrorView(using panels: Panels) =
     clearErrorView(panels.tabContent.current.now().map(_.safePath))
@@ -548,7 +548,7 @@ class TreeNodePanel {
       //treeNodeManager.computeCurrentSons
     }
 
-  case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
+  case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, tree: Div) {
     val tnSafePath = treeNodeManager.directory.now() ++ tn.name
 
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
@@ -631,6 +631,7 @@ class TreeNodePanel {
                   button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
                     currentSafePath.set(Some(tnSafePath))
                     currentLine.update(cl => if cl == id then -1 else id)
+                    if(id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
                   })
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),
@@ -663,10 +664,10 @@ class TreeNodePanel {
       then moveFiles(Seq(dragged), to)
     draggedNode.set(None)
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
+  def drawNode(node: TreeNode, i: Int, tree: Div)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
     node match
       case fn: TreeNode.File ⇒
-        ReactiveLine(i, fn, TreeNodeType.File, () ⇒ displayNode(fn))
+        ReactiveLine(i, fn, TreeNodeType.File, () ⇒ displayNode(fn), tree)
       case dn: TreeNode.Directory ⇒
         ReactiveLine(
           i,
@@ -674,6 +675,7 @@ class TreeNodePanel {
           TreeNodeType.Folder,
           () ⇒
             treeNodeManager switch (dn.name)
-            treeWarning.set(true)
+            treeWarning.set(true),
+          tree
         )
 }
