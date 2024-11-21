@@ -11,9 +11,12 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.client.core.Waiter.*
+import com.raquo.laminar.nodes.ReactiveHtmlElement
+import scala.concurrent.Future
 
 object FileToolBox:
-  def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit) =
+  def iconAction(icon: HESetters, text: String, todo: () ⇒ Unit = () => {}) =
     div(fileActionItems, icon, text, onClick --> { _ ⇒ todo() })
 
   def glyphItemize(icon: HESetter) = icon.appended(cls := "glyphitem popover-item")
@@ -79,10 +82,19 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     }
   }
 
-  def extract(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    api.extractArchive(sp, sp.parent).foreach { _ ⇒ panels.treeNodePanel.refresh }
-    closeToolBox
-  }
+  def extract(extractIcon: Div)(using panels: Panels, api: ServerAPI, basePath: BasePath) = 
+    Waiter.doOrWait(
+      extractIcon,
+      ()=>
+        withTSafePath: sp ⇒
+          api.extractArchive(sp, sp.parent)  
+      ,
+      ()=> 
+        panels.treeNodePanel.refresh 
+        closeToolBox
+      ,
+      Waiter.waiter("white").amend(verticalLine)
+    )
 
   def execute(using panels: Panels, api: ServerAPI, path: BasePath) =
     import scala.concurrent.duration._
@@ -157,7 +169,10 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
     panels.treeNodePanel.currentSafePath.now().foreach: sp ⇒
       action(sp)
 
-
+  def withTSafePath[T](action: SafePath ⇒ T)(using panels: Panels): Option[T] =
+    panels.treeNodePanel.currentSafePath.now().map: sp ⇒
+      action(sp)   
+        
   val actionConfirmation: Var[Option[Div]] = Var(None)
   val actionEdit: Var[Option[Div]] = Var(None)
 
@@ -230,7 +245,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
             },
             FileContentType(initSafePath) match
               case FileContentType.TarGz | FileContentType.Tar | FileContentType.Zip | FileContentType.TarXz ⇒
-                iconAction(glyphItemize(OMTags.glyph_extract), "extract", () ⇒ extract).amend(verticalLine)
+                  extract(iconAction(glyphItemize(OMTags.glyph_extract), "extract").amend(verticalLine))
               case _ ⇒ emptyMod
             ,
             FileContentType(initSafePath) match

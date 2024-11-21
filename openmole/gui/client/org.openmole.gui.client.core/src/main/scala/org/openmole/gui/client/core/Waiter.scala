@@ -34,6 +34,24 @@ object Waiter {
 
   def waiter(foregroundColor: String = "black") = 
     div(cls := "spinner-wave", div(backgroundColor := foregroundColor), div(backgroundColor := foregroundColor), div(backgroundColor := foregroundColor))
+
+
+  def doOrWait(actionDiv: Div, action: () => Option[Future[_]], onSuccess: ()=> Unit, waiter: Div = Waiter.waiter()) = 
+    val processing: Var[Boolean] = Var(false)
+    div(
+      child <-- processing.signal.map: p=> 
+        p match
+          case true=> waiter
+          case false=> actionDiv.amend(
+            onClick --> { _=>
+              processing.set(true)
+              action().foreach: a=> 
+                a.foreach: _ =>
+                  processing.set(false)
+                  onSuccess()
+            }
+          )
+    )
 }
 
 import Waiter._
@@ -66,13 +84,13 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
 
   def withFutureWaiter[T <: HTMLElement](
     waitingString:    String,
-    onsuccessElement: S ⇒ HtmlElement,
+    onsuccessElement: HtmlElement,
     foregroundColor: String = "black"
   ): HtmlElement = {
 
     val processing: Var[HtmlElement] = Var(waiter(foregroundColor))
     waitingForFuture.andThen {
-      case Success(s) ⇒ processing.set(onsuccessElement(s))
+      case Success(s) ⇒ processing.set(onsuccessElement)
       case Failure(_) ⇒ processing.set(div("Failed to load data"))
     }
 
