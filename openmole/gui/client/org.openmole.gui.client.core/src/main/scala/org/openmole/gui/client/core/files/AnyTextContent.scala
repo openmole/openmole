@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object AnyTextContent:
 
   def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
-    val editor = EditorPanelUI(FileContentType(safePath), initialContent, initialHash)
+    val editor = EditorPanelUI(safePath, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
     val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, panels.tabContent.fontSizeControl, marginLeft.auto)
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)

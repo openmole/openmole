@@ -40,7 +40,7 @@ object PlotContent:
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
-        val editor = EditorPanelUI(extension, s.rawContent, "initialHash")
+        val editor = EditorPanelUI(safePath, s.rawContent, "initialHash")
         editor.setReadOnly(true)
 
         // FIXME: this should be in css but for some reason it does not work this way

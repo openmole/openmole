@@ -20,6 +20,7 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.GitStatus.{Conflicting, Modified, Untracked}
 
 import scala.collection.immutable.ArraySeq
+import org.openmole.gui.client.core.files.TabContent.TabData
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -70,7 +71,7 @@ class TreeNodePanel {
     onMountFocus
   )
 
-  val scriptError: Var[Option[EditorPanelUI]] = Var(None)
+  val scriptErrors: Var[Seq[EditorPanelUI]] = Var(Seq())
   val plusFile = Var(false)
   
   // New file tool
@@ -122,7 +123,7 @@ class TreeNodePanel {
       directoryToggle.element,
       newNodeInput.amend(marginLeft := "10px"),
       upButton.amend(justifyContent.flexEnd),
-      transferring.withTransferWaiter {
+      transferring.withTransferWaiter("white") {
         _ ⇒
           div()
       }.amend(marginLeft := "10px"),
@@ -420,7 +421,7 @@ class TreeNodePanel {
   def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
     div(cls := "treePathItems", paddingLeft := "4px", name,
       onClick --> { _ ⇒
-        clearErrorView
+        clearErrorView(Some(safePath))
         treeNodeManager.switch(safePath)
       },
       dropPairs,
@@ -433,7 +434,7 @@ class TreeNodePanel {
 
   private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     val size = Var(100)
-    div(
+    lazy val tree: Div = div(
       cls := "file-scrollable-content",
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) ⇒
@@ -454,7 +455,6 @@ class TreeNodePanel {
                         fileToolBar.findInput.ref.value = ""
                         val switchTarget = if isDir then sp else sp.parent
                         treeNodeManager.switch(switchTarget)
-                        //treeNodeManager.computeCurrentSons
                         displayNode(sp)
                       }
                     )
@@ -476,7 +476,7 @@ class TreeNodePanel {
                   commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked) || x._2 == Some(Conflicting) || x._2 == Some(Modified)).map(_._1))
                   addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked)).map(_._1))
                   gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
-                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id).render) }
+                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id, tree).render) }
 
               def more =
                 if nodes.listed < nodes.total
@@ -496,19 +496,28 @@ class TreeNodePanel {
         },
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
+    tree
 
-  def clearErrorView =
-    scriptError.update: opt=>
-      opt.foreach: pui=>
+  def clearCurrentErrorView(using panels: Panels) =
+    clearErrorView(panels.tabContent.current.now().map(_.safePath))
+    
+  def clearErrorView(safePath: Option[SafePath]) =
+    scriptErrors.update: s=>
+      val ePUI = s.find(pui=> Some(pui.safePath) == safePath)
+      ePUI.map: pui=>
         pui.unsetErrors
-      None      
+        s.filterNot(_== pui)
+      .getOrElse(s)
 
   def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
       div(
-        child <-- scriptError.signal.map: se=> 
-          se match
-            case Some(ep) => ep.errorView
-            case _ =>  treeView
+        child <-- scriptErrors.signal.combineWith(panels.tabContent.current.signal).map: (se,curTab)=> 
+          curTab match
+            case Some(td: TabData)=> 
+              se.filter(_.safePath == td.safePath).headOption match
+                case Some(e: EditorPanelUI)=> e.errorView
+                case _=> treeView
+            case _ => treeView
       )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
@@ -539,7 +548,7 @@ class TreeNodePanel {
       //treeNodeManager.computeCurrentSons
     }
 
-  case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit) {
+  case class ReactiveLine(id: Int, tn: TreeNode, treeNodeType: TreeNodeType, todo: () ⇒ Unit, tree: Div) {
     val tnSafePath = treeNodeManager.directory.now() ++ tn.name
 
     def isSelected(selection: Seq[SafePath]) = selection.contains(tnSafePath)
@@ -622,6 +631,7 @@ class TreeNodePanel {
                   button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ ⇒
                     currentSafePath.set(Some(tnSafePath))
                     currentLine.update(cl => if cl == id then -1 else id)
+                    if(id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
                   })
         ),
         currentLine.signal.map { i ⇒ i == id }.expand(toolBox.contentRoot),
@@ -654,10 +664,10 @@ class TreeNodePanel {
       then moveFiles(Seq(dragged), to)
     draggedNode.set(None)
 
-  def drawNode(node: TreeNode, i: Int)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
+  def drawNode(node: TreeNode, i: Int, tree: Div)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
     node match
       case fn: TreeNode.File ⇒
-        ReactiveLine(i, fn, TreeNodeType.File, () ⇒ displayNode(fn))
+        ReactiveLine(i, fn, TreeNodeType.File, () ⇒ displayNode(fn), tree)
       case dn: TreeNode.Directory ⇒
         ReactiveLine(
           i,
@@ -665,6 +675,7 @@ class TreeNodePanel {
           TreeNodeType.Folder,
           () ⇒
             treeNodeManager switch (dn.name)
-            treeWarning.set(true)
+            treeWarning.set(true),
+          tree
         )
 }

@@ -20,12 +20,13 @@ object OMSContent:
 
   def setError(safePath: SafePath, errorDataOption: Option[ErrorData])(using panels: Panels) =
     val editorPanelUI = panels.tabContent.editorPanelUI(safePath)
-    editorPanelUI.foreach(_.errors.set(errorDataOption))
-    panels.treeNodePanel.scriptError.set(editorPanelUI)
+    editorPanelUI.foreach: pui=>
+      pui.errors.set(errorDataOption)
+      panels.treeNodePanel.scriptErrors.update(se=> (se :+ pui).distinct)
 
   def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) =
 
-    val editor = EditorPanelUI(FileContentType(safePath), initialContent, initialHash)
+    val editor = EditorPanelUI(safePath, initialContent, initialHash)
     val tabData = TabData(safePath, Some(editor))
 
     lazy val controlElement =
@@ -36,7 +37,7 @@ object OMSContent:
       div(display.flex, flexDirection.row, height := "6vh", alignItems.center,
         child <-- compileDisabled.signal.map { compDisabled ⇒
           if compDisabled
-          then Waiter.waiter
+          then Waiter.waiter()
           else
             div(display.flex, flexDirection.row,
               button("RUN", btn_primary, marginLeft := "10", onClick --> { _ ⇒
@@ -68,7 +69,7 @@ object OMSContent:
                 (editor.errors.signal combineWith editor.errorMessage).map: (e, em) =>
                   if e.isDefined || em.isDefined
                   then button("CLEAR", btn_secondary, marginLeft := "10", onClick -->  
-                    panels.treeNodePanel.clearErrorView
+                    panels.treeNodePanel.clearErrorView(Some(safePath))
                   )
                   else div()
             )

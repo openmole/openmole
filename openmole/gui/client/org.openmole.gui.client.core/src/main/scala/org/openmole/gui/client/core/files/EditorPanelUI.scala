@@ -23,6 +23,7 @@ import scaladget.bootstrapnative.Tools.MyPopoverBuilder
 
 import scala.scalajs.js.timers.*
 import scala.scalajs.js.annotation.JSImport
+import org.openmole.gui.client.core.Panels
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -44,10 +45,10 @@ import scala.scalajs.js.annotation.JSImport
 object EditorPanelUI:
 
   def apply(
-    fileType: FileContentType,
+    safePath: SafePath,
     initCode: String,
-    initHash: String)(using plugins: GUIPlugins) =
-    val editor = new EditorPanelUI(fileType)
+    initHash: String)(using plugins: GUIPlugins, panels: Panels) =
+    val editor = new EditorPanelUI(safePath)
     editor.setCode(initCode, initHash)
     editor
 
@@ -68,8 +69,9 @@ object EditorPanelUI:
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
 
-class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins):
+class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: Panels):
 
+  val fileContentType = FileContentType(safePath)
   val modified = Var(false)
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
@@ -131,10 +133,6 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
     errors.set(None)
     errorMessage.set(None)
 
-//  def setErrorMessage(message: String) =
-//    errorMessage.set(Some(message))
-//    errorMessageOpen.set(true)
-
   def errorMessage(e: ScriptError) =
     s"${e.position.map(p => s"${p.line}: ").getOrElse("")}${e.message}"
 
@@ -158,13 +156,18 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
       children <--
         errorMessage.signal.map: em =>
             em.toSeq.map: message =>
-              div( display.flex,
+              div(display.flex, cls := "scriptError",
                 textArea(
                   flexRow,
                   message,
-                  cls := "scriptError",
+                  cls := "errorTextArea",
+                  ),
+                  span(
+                  flexDirection.row, alignItems.center, 
+                  cls := "close-button close-button-tab bi-x", color := "white", marginLeft := "5px", 
+                  onClick --> { e => panels.treeNodePanel.clearCurrentErrorView}
                 )
-            )
+              )
     )  
 
   val view =

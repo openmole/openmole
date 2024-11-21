@@ -320,7 +320,6 @@ li.selectElement{
     height: 100%;
     margin-left: 5px;
     width: 6px;
-    background-color: #3f3d56;
 }
 
 .spinner-wave div:nth-child(2) {
@@ -578,6 +577,7 @@ padding-bottom: 90px;
     min-height: 0;
     background-color: #3f3d56;
     color: white;
+    height: 72vh;
 }
 
 /* EDITOR */
@@ -1584,10 +1584,8 @@ input:checked + .slider:before {
 }
 
 .scriptError {
-    width: 100%;
     overflow: scroll;
     background-color: rgba(255, 95, 95, 0.5);
-    color: white;
     padding: 10px;
     font-family: monospace;
     font-size: medium;
@@ -1597,6 +1595,13 @@ input:checked + .slider:before {
     margin-left: 15;
     height: 69vh;
     margin-right: 5px;
+}
+
+.errorTextArea {
+    background-color: rgba(0,0,0,0);
+    border: none;
+    color: white;
+    width: 100%;
 }
 
 .metadata {
