@@ -271,12 +271,12 @@ class TreeNodePanel {
 
           val processing: Var[Boolean] = Var(false)
                       
-          div(
+          div(fileActionItems, verticalLine, cls := "glyphitem popover-item",
             child <-- processing.signal.map: p=>
               p match
-                case true=> Waiter.waiter("white").amend(verticalLine)
+                case true=> Waiter.waiter("white")
                 case false=> 
-                  div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
+                  div(OMTags.glyph_push, "push", flexColumn, alignItems.center, onClick --> { _ ⇒
                     processing.set(true)
                     api.push(treeNodeManager.directory.now()).foreach:
                       case PushStatus.Ok => 
@@ -295,25 +295,22 @@ class TreeNodePanel {
 
           val processing: Var[Boolean] = Var(false)
 
-          div(
+          div( paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
             child <-- processing.signal.map: p=>
               p match
-                case true=> Waiter.waiter("white").amend(verticalLine)
+                case true=> Waiter.waiter("white")
                 case false=> 
-                  div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
+                  div(OMTags.glyph_pull, "pull",flexColumn, alignItems.center,
                       onClick --> { _ ⇒
                         processing.set(true)
                         api.pull(treeNodeManager.directory.now()).foreach:
                           case MergeStatus.ChangeToBeResolved =>
-                            println("XX00")
                             processing.set(false)
                             confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
                           case MergeStatus.ConnectionFailed => 
-                            println("XX11")
                             processing.set(false)
                             confirmationDiv.set(Some(info("Connection to server impossible.")))
                           case _ => 
-                            println("XX")
                             processing.set(false)
                             closeMultiTool
                       }
