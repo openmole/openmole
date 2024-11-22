@@ -228,27 +228,67 @@ class TreeNodePanel {
         def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
           if se then "disable" else ""
 
+
         def commit =
-          val messageInput = inputTag().amend(
-            placeholder := "Commit message", marginRight := "10",
-             inContext{ctx =>
-              if mt == MultiTool.Git then ctx.ref.focus()
-              emptyMod
-              }   
-            )
-          confirmationDiv.set(
-            Some(
-              confirmationWithMessage(messageInput, "Commit",
-                () =>
-                  val target = treeNodeManager.directory.now()
-                  val commitMsg = messageInput.ref.value
-                  if !commitMsg.isEmpty
-                  then
-                    api.commitFiles(selected.now(), commitMsg).foreach: _ =>
-                      refresh
-                      closeMultiTool
+          
+          val processing: Var[Boolean] = Var(false)
+                   
+          def doCommit = 
+
+            val messageInput = inputTag().amend(
+              placeholder := "Commit message", marginRight := "10",
+              inContext{ctx =>
+                if mt == MultiTool.Git then ctx.ref.focus()
+                emptyMod
+                }   
+              )
+            confirmationDiv.set(
+              Some(
+                confirmationWithMessage(messageInput, "Commit",
+                  () =>
+                    val target = treeNodeManager.directory.now()
+                    val commitMsg = messageInput.ref.value
+                    if !commitMsg.isEmpty
+                    then
+                      processing.set(true)
+                      api.commitFiles(selected.now(), commitMsg).foreach: _ =>
+                        processing.set(false)
+                        refresh
+                        closeMultiTool
+                )
               )
             )
+
+          div(
+            child <-- processing.signal.map: p=>
+              p match
+                case true=> Waiter.waiter("white")
+                case false=>
+                  div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒ doCommit })
+          )
+
+        def push = 
+
+          val processing: Var[Boolean] = Var(false)
+                      
+          div(
+            child <-- processing.signal.map: p=>
+              p match
+                case true=> Waiter.waiter("white")
+                case false=> 
+                  div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
+                    processing.set(true)
+                    api.push(treeNodeManager.directory.now()).foreach:
+                      case PushStatus.Ok => 
+                        processing.set(false)
+                        confirmationDiv.set(Some(info("Push successful")))
+                      case PushStatus.AuthenticationRequired => 
+                        processing.set(false)
+                        confirmationDiv.set(Some(info("Push failed, an authentication is required")))
+                      case PushStatus.Failed => 
+                        processing.set(false)
+                        confirmationDiv.set(Some(info("Push failed")))
+              })
           )
 
         if (mt == MultiTool.On)
@@ -280,7 +320,7 @@ class TreeNodePanel {
             else emptyNode
             ,
             if !co.isEmpty
-            then div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒ commit })
+            then commit
             else emptyNode
             ,
             div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
@@ -290,12 +330,7 @@ class TreeNodePanel {
                     confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
                   case _ => closeMultiTool
               }),
-            div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
-              api.push(treeNodeManager.directory.now()).foreach:
-                case PushStatus.Ok => confirmationDiv.set(Some(info("Push successful")))
-                case PushStatus.AuthenticationRequired => confirmationDiv.set(Some(info("Push failed, an authentication is required")))
-                case PushStatus.Failed => confirmationDiv.set(Some(info("Push failed")))
-            }),
+            push,
             if !co.isEmpty
             then div(OMTags.glyph_stash, fileActionItems, "stash", cls := "glyphitem popover-item", onClick --> { _ ⇒
               confirmationDiv.set(
