@@ -274,7 +274,7 @@ class TreeNodePanel {
           div(
             child <-- processing.signal.map: p=>
               p match
-                case true=> Waiter.waiter("white")
+                case true=> Waiter.waiter("white").amend(verticalLine)
                 case false=> 
                   div(OMTags.glyph_push, "push", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ ⇒
                     processing.set(true)
@@ -290,6 +290,35 @@ class TreeNodePanel {
                         confirmationDiv.set(Some(info("Push failed")))
               })
           )
+
+        def pull =
+
+          val processing: Var[Boolean] = Var(false)
+
+          div(
+            child <-- processing.signal.map: p=>
+              p match
+                case true=> Waiter.waiter("white").amend(verticalLine)
+                case false=> 
+                  div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
+                      onClick --> { _ ⇒
+                        processing.set(true)
+                        api.pull(treeNodeManager.directory.now()).foreach:
+                          case MergeStatus.ChangeToBeResolved =>
+                            println("XX00")
+                            processing.set(false)
+                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                          case MergeStatus.ConnectionFailed => 
+                            println("XX11")
+                            processing.set(false)
+                            confirmationDiv.set(Some(info("Connection to server impossible.")))
+                          case _ => 
+                            println("XX")
+                            processing.set(false)
+                            closeMultiTool
+                      }
+                  )        
+          )  
 
         if (mt == MultiTool.On)
           Seq(
@@ -323,13 +352,7 @@ class TreeNodePanel {
             then commit
             else emptyNode
             ,
-            div(OMTags.glyph_pull, "pull", paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
-              onClick --> { _ ⇒
-                api.pull(treeNodeManager.directory.now()).foreach:
-                  case MergeStatus.ChangeToBeResolved =>
-                    confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
-                  case _ => closeMultiTool
-              }),
+            pull,
             push,
             if !co.isEmpty
             then div(OMTags.glyph_stash, fileActionItems, "stash", cls := "glyphitem popover-item", onClick --> { _ ⇒
