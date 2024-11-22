@@ -83,7 +83,8 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
   def verify(m: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = mole.verify(m)
 
   def password = Console.askPassword()
-  def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
+  def encrypted(using Cypher): String = encrypt(Console.askPassword())
+  def encrypted(s: String)(using Cypher): String = encrypt(s)
 
   export openmole.{version}
 
