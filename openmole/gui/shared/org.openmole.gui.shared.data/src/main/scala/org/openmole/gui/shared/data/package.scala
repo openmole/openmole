@@ -84,7 +84,7 @@ enum GitStatus:
   case Modified, Untracked, Conflicting, Root, Versioned
 
 enum MergeStatus:
-  case Ok, ChangeToBeResolved, Empty
+  case Ok, ConnectionFailed, ChangeToBeResolved, Empty
 
 enum PushStatus:
   case Ok, AuthenticationRequired, Failed

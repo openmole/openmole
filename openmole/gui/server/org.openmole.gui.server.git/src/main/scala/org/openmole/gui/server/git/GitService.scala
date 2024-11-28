@@ -83,7 +83,9 @@ object GitService:
       try
         withConfiguredTransport(authentication, git.pull)(_.call)
         MergeStatus.Ok
-      catch case e: CheckoutConflictException => MergeStatus.ChangeToBeResolved
+      catch 
+        case e: CheckoutConflictException => MergeStatus.ChangeToBeResolved
+        case e: TransportException => MergeStatus.ConnectionFailed
     else MergeStatus.Empty
 
   def push(git: Git, authentication: Seq[GitAuthentication.PrivateKey]): PushStatus =

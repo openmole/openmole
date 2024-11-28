@@ -103,10 +103,33 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
       closeToolBox
     }
 
-  def commit(message: String)(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
-    api.commitFiles(Seq(sp), message).foreach { _ ⇒ panels.treeNodePanel.refresh }
-    closeToolBox
-  }
+
+  def commit(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) = 
+    val processing: Var[Boolean] = Var(false)
+    
+    div(
+      child <-- processing.signal.map: p=>
+        p match
+          case false => 
+            div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, 
+            onClick --> { _ ⇒
+                actionEdit.set(
+                  Some(editForm(initSafePath, "", "Commit message", (inputValue: String) => 
+                    processing.set(true)
+                    withSafePath { sp ⇒
+                      api.commitFiles(Seq(sp), inputValue).foreach { _ ⇒ 
+                        processing.set(false)
+                        panels.treeNodePanel.refresh 
+                        closeToolBox
+                      }
+                    }
+                  ))
+                )
+              }
+           )
+          case true=> Waiter.waiter("white")
+    )
+  
 
   def add(using panels: Panels, api: ServerAPI, basePath: BasePath) = withSafePath { sp ⇒
     api.addFiles(Seq(sp)).foreach { _ ⇒ panels.treeNodePanel.refresh }
@@ -264,11 +287,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () ⇒ Unit, pluginStat
                 if co.contains(initSafePath.name)
                 then
                   Seq(
-                    div(OMTags.glyph_commit, fileActionItems, verticalLine, cls := "glyphitem popover-item", "commit", verticalLine, onClick --> { _ ⇒
-                      actionEdit.set(Some(editForm(initSafePath, "", "Commit message",
-                        (inputValue: String) => commit(inputValue)
-                      )))
-                    }),
+                    commit,
                     iconAction(glyphItemize(OMTags.glyph_rollback), "revert", () ⇒
                       actionConfirmation.set(Some(confirmation(s"Revert ${initSafePath.name} ?", () ⇒ revert)))).amend(verticalLine)
                   )
