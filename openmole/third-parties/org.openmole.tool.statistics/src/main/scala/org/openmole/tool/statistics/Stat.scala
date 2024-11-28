@@ -25,35 +25,32 @@ trait Stat {
   def head = (sequence: Seq[Double]) ⇒ sequence.head
   def sum = (sequence: Seq[Double]) ⇒ sequence.sum
 
-  def median = (sequence: Seq[Double]) ⇒ {
+  def median(sequence: Seq[Double]) =
     val sortedSerie = sequence.toArray.filterNot(_.isNaN).sorted
     val size = sortedSerie.size
     if (size == sequence.size)
       if (size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2
       else sortedSerie((size / 2))
     else Double.NaN
-  }
 
-  def medianAbsoluteDeviation = (sequence: Seq[Double]) ⇒ {
+  def medianAbsoluteDeviation = (sequence: Seq[Double]) =>
     val m = median(sequence)
     median(sequence.map { v ⇒ math.abs(v - m) })
-  }
 
   def average = (sequence: Seq[Double]) ⇒ sequence.sum / sequence.size
 
   def meanSquaredError = (sequence: Seq[Double]) ⇒ variance(sequence)
-  def variance = (sequence: Seq[Double]) ⇒ {
+
+  def variance(sequence: Seq[Double])=
     val avg = average(sequence)
     average(sequence.map { v ⇒ math.pow(v - avg, 2) })
-  }
 
-  def rootMeanSquaredError = (sequence: Seq[Double]) ⇒ standardDeviation(sequence)
-  def standardDeviation = (sequence: Seq[Double]) ⇒ sqrt(variance(sequence))
+  def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
+  def standardDeviation(sequence: Seq[Double]) = sqrt(variance(sequence))
 
-  def normalize(sequence: Seq[Double]) = {
+  def normalize(sequence: Seq[Double]) =
     val sum = sequence.sum
     sequence.map(_ / sum)
-  }
 
   /* ------ Difference on series ----- */
 
