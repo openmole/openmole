@@ -120,32 +120,30 @@ object Genome:
   end GenomeBound
 
   import _root_.mgo.evolution.{ C, D }
-  import cats.implicits._
+  import cats.implicits.*
 
   def continuous(genome: Genome): Vector[C] =
-    genome.toVector.collect {
+    genome.toVector.collect:
       case s: GenomeBound.ScalarDouble     ⇒ Vector(C(s.low, s.high))
-      case s: GenomeBound.SequenceOfDouble ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ C(l, h) }
+      case s: GenomeBound.SequenceOfDouble ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
       case s: GenomeBound.ContinuousInt    ⇒ Vector(C(s.low, s.high))
-    }.flatten
+    .flatten
 
   def discrete(genome: Genome): Vector[D] =
-    genome.toVector.collect {
+    genome.toVector.collect:
       case s: GenomeBound.ScalarInt                ⇒ Vector(D(s.low, s.high))
-      case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ D(l, h) }
+      case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ D(l, h))
       case s: GenomeBound.Enumeration[?]           ⇒ Vector(D(0, s.values.size - 1))
-      case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map { v ⇒ D(0, v.size - 1) }
-    }.flatten
+      case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map(v => D(0, v.size - 1))
+    .flatten
 
-  def continuousValue(genome: Genome, v: Val[?], continuous: Vector[Double]) = {
+  def continuousValue(genome: Genome, v: Val[?], continuous: Vector[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous(index)
-  }
 
-  def continuousSequenceValue(genome: Genome, v: Val[?], size: Int, continuous: Vector[Double]) = {
+  def continuousSequenceValue(genome: Genome, v: Val[?], size: Int, continuous: Vector[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous.slice(index, index + size)
-  }
 
   def discreteValue(genome: Genome, v: Val[?], discrete: Vector[Int]) =
     val index = Genome.discreteIndex(genome, v).get
@@ -161,9 +159,9 @@ object Genome:
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
       l match
         case Nil                                    ⇒ None
-        case (h: GenomeBound.ScalarDouble) :: t     ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.ContinuousInt) :: t    ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
+        case (h: GenomeBound.ScalarDouble) :: t     ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.ContinuousInt) :: t    ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.size)
         case h :: t                                 ⇒ indexOf0(t, index)
 
     indexOf0(genome.toList, 0)
@@ -172,10 +170,10 @@ object Genome:
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
       l match
         case Nil ⇒ None
-        case (h: GenomeBound.ScalarInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.Enumeration[?]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.SequenceOfInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
-        case (h: GenomeBound.SequenceOfEnumeration[?]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.values.size)
+        case (h: GenomeBound.ScalarInt) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.Enumeration[?]) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.SequenceOfInt) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.size)
+        case (h: GenomeBound.SequenceOfEnumeration[?]) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.values.size)
         case h :: t ⇒ indexOf0(t, index)
 
     indexOf0(genome.toList, 0)
