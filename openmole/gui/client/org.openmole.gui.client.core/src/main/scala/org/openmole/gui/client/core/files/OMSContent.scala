@@ -22,7 +22,9 @@ object OMSContent:
     val editorPanelUI = panels.tabContent.editorPanelUI(safePath)
     editorPanelUI.foreach: pui=>
       pui.errors.set(errorDataOption)
-      panels.treeNodePanel.scriptErrors.update(se=> (se :+ pui).distinct)
+      errorDataOption match 
+        case Some(ed)=> panels.treeNodePanel.scriptErrors.update(se=> (se :+ pui).distinct)
+        case _=> panels.treeNodePanel.scriptErrors.update(se=> se.filterNot(_ == pui))
 
   def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, path: BasePath, guiPlugins: GUIPlugins) =
 
@@ -50,6 +52,7 @@ object OMSContent:
                     ExecutionPanel.open
               }),
               button("CHECK", btn_secondary, marginLeft := "10", onClick --> { _ ⇒
+                println("Check")
                 editor.unsetErrors
                 editor.editor.getSession().clearBreakpoints()
                 compileDisabled.set(true)
