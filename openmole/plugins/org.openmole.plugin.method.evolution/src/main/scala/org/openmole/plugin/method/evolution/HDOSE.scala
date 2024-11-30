@@ -50,7 +50,7 @@ object HDOSE:
     import mgo.evolution.algorithm.HDOSE.*
     import mgo.evolution.algorithm.{ HDOSE => MGOHDOSE, * }
 
-    implicit def integration: MGOAPI.Integration[DeterministicHDOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicHDOSE, (Vector[Double], Vector[Int]), Phenotype]:
+    given MGOAPI.Integration[DeterministicHDOSE, (Vector[Double], Vector[Int]), Phenotype] with
       api =>
 
       type G = CDGenome.Genome
@@ -167,7 +167,7 @@ object HDOSE:
     import mgo.evolution.algorithm.NoisyHDOSE._
     import mgo.evolution.algorithm.{NoisyHDOSE ⇒ MGONoisyHDOSE, _}
 
-    implicit def integration: MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype]:
+    given MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype] with
       api =>
 
       type G = CDGenome.Genome
@@ -276,11 +276,7 @@ object HDOSE:
           state.copy(s = archive)
 
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
-
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
-
-
-
 
 
   type Significance = Seq[By[Val[?], Double]]
@@ -365,23 +361,36 @@ object HDOSE:
           validate = validation
         )
 
+import EvolutionWorkflow.*
 
 object HDOSEEvolution:
+  import org.openmole.core.dsl.*
 
+  given EvolutionMethod[HDOSEEvolution] =
+    p =>
+      HDOSE(
+        genome = p.genome,
+        objective = p.objective,
+        significance = p.significance,
+        outputs = p.evaluation.outputs,
+        stochastic = p.stochastic,
+        populationSize = p.populationSize,
+        reject = p.reject
+      )
 
-  import org.openmole.core.dsl._
+  given ExplorationMethod[HDOSEEvolution, EvolutionWorkflow] =
+    p ⇒
+      EvolutionWorkflow(
+        method = p,
+        evaluation = p.evaluation,
+        termination = p.termination,
+        parallelism = p.parallelism,
+        distribution = p.distribution,
+        suggestion = p.suggestion(p.genome),
+        scope = p.scope
+      )
 
-//  given EvolutionMethod[HDOSEEvolution] =
-//    p =>
-//      HDOSE(
-//        origin = p.origin,
-//        genome = p.genome,
-//        objective = p.objective,
-//        outputs = p.evaluation.outputs,
-//        //stochastic = p.stochastic,
-//        populationSize = p.populationSize,
-//        reject = p.reject
-//      )
+  given ExplorationMethodSetter[HDOSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
 
 
 import EvolutionWorkflow.*
