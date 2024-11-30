@@ -49,6 +49,6 @@ object plugins:
 
 def pluginsOf(o: Any): Seq[File] = pluginsOf(o.getClass)
 def pluginsOf[T](implicit m: Manifest[T]): Seq[File] = pluginsOf(manifest[T].runtimeClass)
-def pluginsOf(clazz: Class[_]): Seq[File] = PluginManager.pluginsForClass(clazz).toSeq
+def pluginsOf(clazz: Class[?]): Seq[File] = PluginManager.pluginsForClass(clazz).toSeq
 
 

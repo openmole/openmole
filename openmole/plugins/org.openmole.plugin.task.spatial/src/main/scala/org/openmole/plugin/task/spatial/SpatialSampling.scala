@@ -22,9 +22,9 @@ object SpatialSampling {
   def buildVariables(
     prototype:           Val[Array[Array[Double]]],
     values:              Array[Array[Array[Double]]],
-    morphologyPrototype: Option[Val[_]],
-    parameters:          (Val[_], Iterable[Double])*
-  )(implicit rng: scala.util.Random): Iterator[List[Variable[_]]] = {
+    morphologyPrototype: Option[Val[?]],
+    parameters:          (Val[?], Iterable[Double])*
+  )(implicit rng: scala.util.Random): Iterator[List[Variable[?]]] = {
 
     val morphologies: Array[Array[Double]] = if (morphologyPrototype.isDefined) {
       values.map { v ⇒
@@ -34,7 +34,7 @@ object SpatialSampling {
     }
     else Array.fill(values.length)(Array.empty)
 
-    val arrayParams: List[(Val[_], Array[Double])] = parameters.map { case (p, v) ⇒ (p, v.toArray) }.toList
+    val arrayParams: List[(Val[?], Array[Double])] = parameters.map { case (p, v) ⇒ (p, v.toArray) }.toList
 
     values.zip(morphologies).zipWithIndex.map {
       case ((v, morph), i) ⇒
@@ -197,8 +197,8 @@ object OSMBuildingsGridSampling {
     windowSize: FromContext[Double],
     worldSize:  FromContext[Int],
     // + api parameters / simplif options ?
-    prototype:           Val[_],
-    morphologyPrototype: Option[Val[_]] = None
+    prototype:           Val[?],
+    morphologyPrototype: Option[Val[?]] = None
   ) = Sampling {
     p ⇒
       import p._
@@ -237,7 +237,7 @@ object ExponentialMixtureSpatialSampling {
      maxValues:      FromContext[Either[Double, Seq[Double]]],
      kernelRadiuses: FromContext[Either[Double, Seq[Double]]],
      samples:        FromContext[Int],
-     protos:         Val[_]*
+     protos:         Val[?]*
   ) = Sampling { p =>
     import p._
 

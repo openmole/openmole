@@ -22,46 +22,35 @@ import java.util.concurrent.locks._
 
 package object lock {
 
-  implicit class LockDecorator(lock: Lock) {
-    def apply[T](block: ⇒ T): T = {
+  implicit class LockDecorator(lock: Lock):
+    def apply[T](block: ⇒ T): T =
       lock.lock()
-      try {
+      try
         block
-      }
       finally lock.unlock()
-    }
-  }
 
-  implicit class SemaphoreDecorator(s: Semaphore) {
-    def apply[T](block: ⇒ T): T = {
+  implicit class SemaphoreDecorator(s: Semaphore):
+    def apply[T](block: ⇒ T): T =
       s.acquire()
-      try {
-        block
-      }
+      try block
       finally s.release()
-    }
 
-    def acquireAndRelease() = {
+    def acquireAndRelease() =
       s.acquire()
       s.release()
-    }
-  }
 
-  implicit class ReadWriteLockDecorator(l: ReadWriteLock) {
+  implicit class ReadWriteLockDecorator(l: ReadWriteLock):
 
-    def read[T](t: ⇒ T) = {
+    def read[T](t: ⇒ T) =
       l.readLock.lock
       try t
       finally l.readLock.unlock
-    }
 
-    def write[T](t: ⇒ T) = {
+    def write[T](t: ⇒ T) =
       l.writeLock.lock
       try t
       finally l.writeLock.unlock
-    }
 
-  }
 
   case class LockKey(id: UUID = java.util.UUID.randomUUID())
 }

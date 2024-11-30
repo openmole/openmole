@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.oar
 
-import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.workflow.dsl._
@@ -109,16 +108,16 @@ object OAREnvironment {
 
   def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _, _),
-      jobService.state(_),
-      jobService.delete(_),
-      jobService.stdOutErr(_)
+      jobService.submit,
+      jobService.state,
+      jobService.delete,
+      jobService.stdOutErr
     )
 
 }
@@ -132,66 +131,62 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   val name:              Option[String],
   val authentication:    A,
   implicit val services: BatchEnvironment.Services
-) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒
 
   import services._
 
-  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit lazy val ssh: gridscale.ssh.SSH =
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+    gridscale.ssh.SSH(sshServer)
 
-  override def start() = {
+  override def start() =
     storageService
-  }
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = true)
 
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    cleanSSHStorage(storageService, background = false)
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
-    sshInterpreter().close
-  }
+    ssh.close
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-
+  
   lazy val storageService =
-    if (parameters.storageSharedLocally) Left {
+    if parameters.storageSharedLocally
+    then Left:
       val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
       (localStorageSpace(local), local)
-    }
     else
-      Right {
+      Right:
         val ssh =
           sshStorage(
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
             accessControl = accessControl,
             environment = env,
             sharedDirectory = parameters.sharedDirectory
           )
 
         (sshStorageSpace(ssh), ssh)
-      }
 
-  def execute(batchExecutionJob: BatchExecutionJob) =
-    storageService match {
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    storageService match
       case Left((space, local)) ⇒ OAREnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
       case Right((space, ssh))  ⇒ OAREnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
-    }
 
   lazy val installRuntime =
-    storageService match {
-      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
-    }
+    storageService match
+      case Left((space, local)) ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
-    storageService match {
-      case Left((space, local)) ⇒ new OARJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ new OARJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-    }
+    import _root_.gridscale.cluster.HeadNode
+    storageService match
+      case Left((space, local)) ⇒ OARJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  ⇒ OARJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 }
 
@@ -199,18 +194,22 @@ class OARLocalEnvironment(
   val parameters:        OAREnvironment.Parameters,
   val name:              Option[String],
   implicit val services: BatchEnvironment.Services
-) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env =>
 
   import services._
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
 
-  override def start() = { storage; space }
-  override def stop() = {
+  override def start() =
+    storage
+    space
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = true)
+
+  override def stop() =
     state.stopped = true
-    HierarchicalStorageSpace.clean(storage, space, background = false)
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
-  }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
@@ -218,12 +217,9 @@ class OARLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = OAREnvironment.submit(env, batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) = OAREnvironment.submit(env, batchExecutionJob, storage, space, jobService)
 
-  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
+  lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 
-  import _root_.gridscale.local.LocalHost
+  lazy val jobService = OARJobService(storage, space.tmpDirectory, installRuntime, parameters, _root_.gridscale.cluster.LocalHeadNode(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
-  lazy val jobService = new OARJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
-
-}

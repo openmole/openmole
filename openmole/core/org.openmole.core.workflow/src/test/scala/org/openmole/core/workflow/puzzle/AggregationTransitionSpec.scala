@@ -47,7 +47,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
 
       val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-      val testT = TestTask { context ⇒
+      val testT = TestTask { context =>
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.toVector should equal(data.toVector)
         endCapsExecuted += 1
@@ -76,7 +76,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val testT =
-      TestTask { context ⇒
+      TestTask { context =>
         context.contains(i.toArray) should equal(true)
         context(i.toArray).getClass should equal(classOf[Array[Int]])
         context(i.toArray).sorted.toVector should equal(data.sorted.toVector)
@@ -99,7 +99,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
     val testT =
-      TestTask { context ⇒
+      TestTask { context =>
         context.contains(i.toArray) should equal(true)
         context(i.toArray).sorted.toVector should equal(data.toVector)
         endCapsExecuted.incrementAndGet()
@@ -121,12 +121,12 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     val endCapsExecuted = new AtomicInteger()
 
     val run =
-      TestTask { context ⇒
+      TestTask { context =>
         if (context(i) == 42) throw new InternalProcessingError("Some error for test")
         context
       } set ((inputs, outputs) += i)
 
-    val test = TestTask { context ⇒
+    val test = TestTask { context =>
       endCapsExecuted.incrementAndGet()
       context
     } set (inputs += i.array)
@@ -152,7 +152,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
       )
 
     def test =
-      TestTask { ctx ⇒ executed.incrementAndGet(); ctx } set (
+      TestTask { ctx => executed.incrementAndGet(); ctx } set (
         name := "mean",
         inputs += v.array
       )
@@ -178,7 +178,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
 
       def test =
         TestTask {
-          ctx ⇒
+          ctx =>
             executed.incrementAndGet()
             ctx(v.toArray).toSeq should equal(sampling)
             ctx
@@ -191,7 +191,7 @@ class AggregationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
       executed.get should equal(1)
     }
 
-    for (i ← 0 until 10) test
+    for (i <- 0 until 10) test
   }
 
 }

@@ -78,13 +78,12 @@ object JuliaTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                    = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                    = ContainerSystem.default,
     clearCache:             Boolean                            = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
   new JuliaTask(
     script = script,
     arguments = arguments.option,
-    image = ContainerTask.install(installContainerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache),
+    image = ContainerTask.install(containerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache),
     prepare = prepare,
     errorOnReturnValue = errorOnReturnValue,
     returnValue = returnValue,
@@ -92,7 +91,6 @@ object JuliaTask:
     stdErr = stdErr,
     hostFiles = hostFiles,
     environmentVariables = environmentVariables,
-    containerSystem = containerSystem,
     config = InputOutputConfig(),
     external = External(),
     info = InfoConfig(),
@@ -103,7 +101,7 @@ object JuliaTask:
 
 case class JuliaTask(
   script:                 RunnableScript,
-  image:                  InstalledImage,
+  image:                  InstalledContainerImage,
   arguments:              Option[String],
   prepare:                Seq[String],
   errorOnReturnValue:     Boolean,
@@ -112,13 +110,10 @@ case class JuliaTask(
   stdErr:                 Option[Val[String]],
   hostFiles:              Seq[HostFile],
   environmentVariables:   Seq[EnvironmentVariable],
-  containerSystem:        ContainerSystem,
   config:                 InputOutputConfig,
   external:               External,
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig) extends Task with ValidateTask:
-
-  lazy val containerPoolKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -175,11 +170,10 @@ case class JuliaTask(
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
       def containerTask =
-        ContainerTask.isolatedWorkdirectory(executionContext)(
-          containerSystem = containerSystem,
+        ContainerTask.internal(
           image = image,
           command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
-          workDirectory = workDirectory,
+          workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,
@@ -188,8 +182,7 @@ case class JuliaTask(
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
+          info = info) set (
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),

@@ -49,7 +49,7 @@ class MoleTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   "MoleTask" should "propagate errors" in {
     val error =
-      TestTask { _ ⇒ throw new InternalProcessingError("Some error for test") } set (
+      TestTask { _ => throw new InternalProcessingError("Some error for test") } set (
         name := "error"
       )
 
@@ -65,7 +65,7 @@ class MoleTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val i = Val[String]
 
-    val emptyT = TestTask { context ⇒
+    val emptyT = TestTask { context =>
       executed = true
       context
     } set (inputs += i)

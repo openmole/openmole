@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.job
 
-object State {
+object State:
 
   /**
    *
@@ -48,4 +48,3 @@ object State {
    */
   final val FAILED: State = 3.toByte
 
-}

@@ -24,36 +24,36 @@ object ContextAggregator {
 
   def aggregateSimilar(contexts: Seq[Context]) =
     contexts.headOption match {
-      case None    ⇒ Context.empty
-      case Some(c) ⇒ aggregate(c.prototypes, c.prototypes.toSeq, contexts.flatMap(_.values))
+      case None    => Context.empty
+      case Some(c) => aggregate(c.prototypes, c.prototypes.toSeq, contexts.flatMap(_.values))
     }
 
-  def aggregate(prototypes: PrototypeSet, toArray: Seq[Val[_]], toAggregateList: Seq[Variable[_]]): Context = {
+  def aggregate(prototypes: PrototypeSet, toArray: Seq[Val[?]], toAggregateList: Seq[Variable[?]]): Context = {
     val toAggregate = toAggregateList.groupBy { _.prototype.name }
-    val toArrayMap = toArray.map(v ⇒ v.name -> v.`type`).toMap
+    val toArrayMap = toArray.map(v => v.name -> v.`type`).toMap
 
-    prototypes.foldLeft(List.empty[Variable[_]]) {
-      case (acc, d) ⇒
+    prototypes.foldLeft(List.empty[Variable[?]]) {
+      case (acc, d) =>
         val merging = toAggregate.getOrElse(d.name, Iterable.empty)
 
         toArrayMap.get(d.name) match {
-          case Some(arrayType) ⇒
+          case Some(arrayType) =>
             val array = arrayType.manifest.newArray(merging.size)
             merging.zipWithIndex.foreach {
-              e ⇒
+              e =>
                 try java.lang.reflect.Array.set(array, e._2, e._1.value)
                 catch {
-                  case t: Throwable ⇒
+                  case t: Throwable =>
                     def valType = if (e._1.value != null) s" of type ${e._1.value.getClass}" else ""
                     throw new InternalProcessingError(s"Error setting value ${e._1.value}${valType} in an array ${array} of type ${array.getClass} at position ${e._2}", t)
                 }
             }
 
             Variable(Val(d.name)(arrayType.toArray).asInstanceOf[Val[Any]], array) :: acc
-          case None if !merging.isEmpty ⇒
+          case None if !merging.isEmpty =>
             if (merging.size > 1) throw new InternalProcessingError("Variable " + d + " has been found multiple times, it doesn't match data flow specification, " + toAggregateList)
             Variable.unsecure(d, merging.head.value) :: acc
-          case _ ⇒ acc
+          case _ => acc
         }
     }
   }

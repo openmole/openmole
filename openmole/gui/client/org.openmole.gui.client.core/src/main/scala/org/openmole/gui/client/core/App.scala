@@ -15,9 +15,11 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.client.ext.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.toService
+import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
+import javax.swing.plaf.multi.MultiToolBarUI
 import scala.concurrent.Await
 import scala.concurrent.duration.*
 import scala.scalajs.js.timers.*
@@ -106,10 +108,21 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       val settingsView = SettingsView.render
 
       val openFileTree = Var(true)
+      
+      def undo =
+        println("undo")
+        panels.treeNodePanel.multiTool.set(MultiTool.Off)
+        panels.treeNodePanel.currentLine.set(-1)
+        panels.closeExpandable
+        panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
+        panels.treeNodePanel.plusFile.set(false)
+        panels.treeNodePanel.clearCurrentErrorView
 
       dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
-      }
+        else if k.keyCode == 27
+        then undo
+        }
 
       //START BUTTON
       lazy val theNavBar = div(
@@ -193,10 +206,14 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
                   if (oft) "" else " closed"
                 }
               },
-              div(img(src := "img/openmole_dark.png", height := "70px"), cls := "nav-container"),
+              div(img(src := "img/openmole_dark.png", height := "70px", onClick --> {_=>
+                 undo
+                 panels.treeNodePanel.treeNodeManager.goToHome
+                },
+                 cursor.pointer), cls := "nav-container"),
               panels.treeNodePanel.fileControler,
               panels.treeNodePanel.fileToolBar.sortingGroup,
-              panels.treeNodePanel.treeView
+              panels.treeNodePanel.treeViewOrErrors
             ),
             div(
               cls := "tab-section",

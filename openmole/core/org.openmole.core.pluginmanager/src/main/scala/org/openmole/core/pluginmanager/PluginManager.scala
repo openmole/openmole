@@ -109,24 +109,24 @@ object PluginManager extends JavaLogger {
   def dependencies(file: File): Option[Iterable[File]] =
     infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { _.file } }
 
-  def isClassProvidedByAPlugin(c: Class[_]) = {
+  def isClassProvidedByAPlugin(c: Class[?]) = {
     val b = FrameworkUtil.getBundle(c)
     if (b != null) !infos.providedDependencies.contains(b.getBundleId())
     else false
   }
 
-  def fileProviding(c: Class[_]) =
+  def fileProviding(c: Class[?]) =
     bundleForClass(c).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
-  def bundleForClass(c: Class[_]): Option[Bundle] =
+  def bundleForClass(c: Class[?]): Option[Bundle] =
     Option(FrameworkUtil.getBundle(c))
 
-  def bundlesForClass(c: Class[_]): Iterable[Bundle] = {
+  def bundlesForClass(c: Class[?]): Iterable[Bundle] = {
     val bundle = bundleForClass(c).toSeq
     bundle.flatMap(allDependencies)
   }
 
-  def pluginsForClass(c: Class[_]): Iterable[File] = {
+  def pluginsForClass(c: Class[?]): Iterable[File] = {
     val bundle = bundleForClass(c)
     bundle.toSeq.flatMap(allPluginDependencies).map(_.file)
   }
@@ -305,6 +305,6 @@ object PluginManager extends JavaLogger {
   def printDirectDepending(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
   def printDirectDependencies(b: Long) = println(directDependencies(Activator.contextOrException.getBundle(b)).mkString("\n"))
   def printIsPlugin(b: Long) = println(isPlugin(b))
-  def printPluginsForClass(c: Class[_]) = println(pluginsForClass(c).mkString("\n"))
+  def printPluginsForClass(c: Class[?]) = println(pluginsForClass(c).mkString("\n"))
 
 }

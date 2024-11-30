@@ -34,6 +34,7 @@ import org.http4s.blaze.server.*
 import org.http4s.dsl.io.*
 import org.http4s.implicits.*
 import org.http4s.server.Router
+import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
 import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
@@ -46,15 +47,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.{Level, Logger}
 
 object GUIServer:
-
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
-    val to = newFile.newDir("webapp")
+    val to = newFile.newDirectory("webapp")
 
     val cssTarget = to / "css"
     from / "css" copy to / "css"
@@ -82,7 +83,7 @@ object GUIServer:
   lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) =
-    if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
+    if !preference.isSet(port) then preference.setPreference(port, Network.freePort)
 
   def lockFile(implicit workspace: Workspace) = 
     val file = workspace.persistentDir / "GUI.lock"
@@ -115,9 +116,9 @@ object GUIServer:
 
   def waitRouter =
     import org.http4s.headers.{`Content-Type`}
-    val routes: HttpRoutes[IO] = HttpRoutes.of {
+    val routes: HttpRoutes[IO] = HttpRoutes.of:
       case _ =>  org.http4s.dsl.io.Ok.apply(waitingOpenMOLEContent).map(_.withContentType(`Content-Type`(MediaType.text.html)))
-    }
+
     Router("/" -> routes)
 
   case class ApplicationControl(stop: () ⇒ Unit)
@@ -133,10 +134,11 @@ object GUIServer:
     password: Option[String],
     optimizedJS: Boolean,
     extraHeaders: String) =
+
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-    val waitingServerShutdown = server(port, localhost).withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+    val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
     val webappCache =
       try GUIServer.webapp(optimizedJS)
       finally waitingServerShutdown.unsafeRunSync()
@@ -168,10 +170,11 @@ object GUIServer:
 
   def server(port: Int, localhost: Boolean) =
     val s =
-      if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      if localhost
+      then BlazeServerBuilder[IO].bindHttp(port, "localhost")
       else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
-    s.enableHttp2(true)
+    s
   end server
 
 
@@ -202,6 +205,7 @@ class GUIServer(
 
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
+    val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -220,13 +224,15 @@ class GUIServer(
         s"/" -> GZip(applicationServer.routes),
         s"/" -> GZip(apiServer.routes),
         s"/" -> GZip(apiServer.endpointRoutes),
-        s"/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
+        s"/rest/v1" -> restServer.routes,
+        s"/webdav" -> webdavServer.routes) ++ pluginsRoutes *).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
     val shutdown =
       GUIServer.
         server(port, localhost).
+        withoutBanner.
         withHttpApp(httpApp).
         withIdleTimeout(Duration.Inf).
         withResponseHeaderTimeout(Duration.Inf).

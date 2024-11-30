@@ -33,9 +33,9 @@ sealed class Ticket(val content: Long, _parent: Ticket) {
 
   override def toString = Ticket.toString(this)
   override def equals(obj: Any): Boolean = obj match {
-    case t: Ticket ⇒ t.content == content
-    case t: Long   ⇒ t == content
-    case _         ⇒ false
+    case t: Ticket => t.content == content
+    case t: Long   => t == content
+    case _         => false
   }
 
   override def hashCode = content.hashCode

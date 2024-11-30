@@ -31,8 +31,8 @@ object OMROutputFormat:
       import p.*
       output match
         case WritableOutput.Display(ps) ⇒
-          def writeStream(ps: java.io.PrintStream, section: Option[String], variables: Seq[Variable[_]]) =
-            def headerLine(variables: Seq[Variable[_]]) = CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = false)
+          def writeStream(ps: java.io.PrintStream, section: Option[String], variables: Seq[Variable[?]]) =
+            def headerLine(variables: Seq[Variable[?]]) = CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = false)
 
             section match
               case None ⇒
@@ -59,7 +59,6 @@ object OMROutputFormat:
     FromContext: p =>
       import p.*
       import org.json4s.*
-      import executionContext.serializerService
       import executionContext.tmpDirectory
       import executionContext.timeService
 

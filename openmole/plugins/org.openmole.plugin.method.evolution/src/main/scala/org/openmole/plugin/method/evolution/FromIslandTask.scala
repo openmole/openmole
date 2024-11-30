@@ -19,21 +19,21 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
-object FromIslandTask {
+object FromIslandTask:
 
-  def apply[T](evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply[T](evolution: EvolutionWorkflow, islandStateVal: Val[evolution.S], initialIslandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
     Task("FromIslandTask") { p ⇒
       import p._
       val state = context(evolution.stateVal)
-      val population = evolution.operations.migrateFromIsland(context(evolution.populationVal).toVector, state)
-      val evaluated = evolution.operations.evaluatedLens.get(state)
+      val initialState = context(initialIslandStateVal)
+      val (population, islandState) = evolution.operations.migrateFromIsland(context(evolution.populationVal).toVector, initialState, state)
+
       Context(
-        evolution.populationVal -> population.toArray(evolution.individualVal.`type`.manifest),
-        evolution.evaluatedVal -> evaluated
+        evolution.offspringPopulationVal -> population.toArray(evolution.individualVal.`type`.manifest),
+        islandStateVal -> islandState
       )
     } set (
-      inputs += (evolution.populationVal, evolution.stateVal),
-      outputs += (evolution.populationVal, evolution.evaluatedVal)
+      inputs += (evolution.populationVal, evolution.stateVal, initialIslandStateVal),
+      outputs += (evolution.offspringPopulationVal, islandStateVal)
     )
 
-}

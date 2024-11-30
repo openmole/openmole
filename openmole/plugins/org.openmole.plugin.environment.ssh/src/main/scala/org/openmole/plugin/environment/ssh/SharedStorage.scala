@@ -30,20 +30,20 @@ import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
 import org.openmole.tool.logger.JavaLogger
 import squants.information.Information
 
-object SharedStorage extends JavaLogger {
+object SharedStorage extends JavaLogger:
 
-  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(implicit preference: Preference, newFile: TmpDirectory, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+  def installRuntime[S](runtime: Runtime, storage: S, frontend: Frontend, baseDirectory: String)(using preference: Preference, newFile: TmpDirectory, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority) =
     val runtimePrefix = "runtime"
     val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
-    val (workdir, scriptName) = {
+    val (workdir, scriptName) =
       val installDir = StorageService.child(storage, baseDirectory, "install")
       util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
 
       val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
-      if (!storageInterface.exists(storage, workdir)) hierarchicalStorageInterface.makeDir(storage, workdir)
+      if !storageInterface.exists(storage, workdir) then hierarchicalStorageInterface.makeDir(storage, workdir)
 
-      newFile.withTmpFile("install", ".sh") { script ⇒
+      newFile.withTmpFile("install", ".sh"): script ⇒
 
         val tmpDirName = runtimePrefix + UUID.randomUUID.toString
         val scriptName = uniqName("install", ".sh")
@@ -67,22 +67,18 @@ object SharedStorage extends JavaLogger {
         val remoteScript = StorageService.child(storage, workdir, scriptName)
         storageInterface.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         (workdir, scriptName)
-      }
-    }
 
     val command = s"""cd "$workdir" ; /bin/bash -x $scriptName"""
 
     Log.logger.fine("Begin install")
 
-    frontend.run(command) match {
+    frontend.run(command) match
       case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
       case util.Success(r) ⇒
-        r.returnCode match {
+        r.returnCode match
           case 0 ⇒
           case _ ⇒
             throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
-        }
-    }
 
     val path = StorageService.child(storage, workdir, runtimeInstall)
 
@@ -90,11 +86,9 @@ object SharedStorage extends JavaLogger {
     Log.logger.fine("End install")
 
     path
-  }
 
-  case class JobScript(content: String, jobWorkDirectory: String) {
+  case class JobScript(content: String, jobWorkDirectory: String):
     override def toString = content
-  }
 
   def buildScript[S](
     runtimePath:    Runtime ⇒ String,
@@ -106,13 +100,13 @@ object SharedStorage extends JavaLogger {
     outputPath:     String,
     storage:        S,
     modules:        Seq[String],
-    debug:          Boolean             = false)(implicit newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S]) = {
+    debug:          Boolean             = false)(using newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority) =
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
     val workspace = StorageService.child(storage, workDirectory, s"openmole_${UUID.randomUUID.toString}")
 
     val remoteScript =
-      newFile.withTmpFile("run", ".sh") { script ⇒
+      newFile.withTmpFile("run", ".sh"): script ⇒
 
         val loadModules = modules.map(m ⇒ s"module load $m")
 
@@ -137,9 +131,7 @@ object SharedStorage extends JavaLogger {
         val remoteScript = StorageService.child(storage, jobDirectory, uniqName("run", ".sh"))
         StorageService.upload(storage, script, remoteScript, options = TransferOptions(raw = true, noLink = true, canMove = true))
         remoteScript
-      }
 
     JobScript(remoteScript, workspace)
-  }
 
-}
+

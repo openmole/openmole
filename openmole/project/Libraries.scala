@@ -37,7 +37,7 @@ object Libraries {
   lazy val scalaXML = "org.openmole.library" %% "org-scala-lang-modules-xml" % scalaXMLVersion
   lazy val logback = "org.openmole.library" %% "ch-qos-logback" % logbackVersion
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
-  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % "1.7.30"
+  lazy val slf4j = "org.openmole.library" %% "org-slf4j" % slf4jVersion
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
@@ -45,7 +45,7 @@ object Libraries {
   lazy val scalabc = "org.openmole.library" %% "fr-iscpif-scalabc" % "0.4"
   lazy val math = "org.openmole.library" %% "org-apache-commons-math" % mathVersion
   lazy val collections = "org.openmole.library" %% "org-apache-commons-collections" % "4.4"
-  lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % "1.3"
+  lazy val exec = "org.openmole.library" %% "org-apache-commons-exec" % execVersion
   lazy val log4j = "org.openmole.library" %% "org-apache-log4j" % "1.2.17"
   lazy val logging = "org.openmole.library" %% "org-apache-commons-logging" % "1.2"
   lazy val lang3 = "org.openmole.library" %% "org-apache-commons-lang3" % lang3Version
@@ -55,7 +55,8 @@ object Libraries {
   lazy val squants = "org.openmole.library" %% "squants" % squantsVersion
   lazy val asm = "org.openmole.library" %% "org-objectweb-asm" % asmVersion
   lazy val configuration = "org.openmole.library" %% "org-apache-commons-configuration2" % configuration2Version
-  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion cross CrossVersion.for2_13Use3
+  lazy val json4s = "org.openmole.library" %% "org-json4s" % json4sVersion
+  lazy val jackson = "org.openmole.library" %% "com-fasterxml-jackson" % jacksonVersion
   lazy val circe = "org.openmole.library" %% "io-circe" % circeVersion
   lazy val scalajsLinker = "org.openmole.library" %% "scalajs-linker" % scalajsVersion
   lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsLoggingVersion
@@ -64,9 +65,8 @@ object Libraries {
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
-  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion cross CrossVersion.for2_13Use3 // cross CrossVersion.for3Use2_13
+  lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
-
 
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
 
@@ -77,6 +77,10 @@ object Libraries {
   lazy val xzJava = "org.openmole.library" %% "xzjava" % xzVersion
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
   lazy val jline = "org.openmole.library" %% "org-jline-jline" % jlineVersion
+
+  lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
+  lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
 
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -92,7 +96,7 @@ object Libraries {
   lazy val gridscaleSSH =
     Seq(
       "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
-      "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+      sshj
     )
 
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion

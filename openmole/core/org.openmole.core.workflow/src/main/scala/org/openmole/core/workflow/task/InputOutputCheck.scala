@@ -36,7 +36,7 @@ object InputOutputCheck:
    * Missing input
    * @param input
    */
-  case class InputNotFound(input: Val[_]) extends InputError:
+  case class InputNotFound(input: Val[?]) extends InputError:
     override def toString = s"Input data '$input' has not been found"
 
   /**
@@ -44,7 +44,7 @@ object InputOutputCheck:
    * @param input
    * @param found
    */
-  case class InputTypeMismatch(input: Val[_], found: Val[_]) extends InputError:
+  case class InputTypeMismatch(input: Val[?], found: Val[?]) extends InputError:
     override def toString = s"Input data named '$found' is of an incompatible with the required '$input'"
 
   trait OutputError
@@ -53,7 +53,7 @@ object InputOutputCheck:
    * Missing output
    * @param output
    */
-  case class OutputNotFound(output: Val[_]) extends OutputError:
+  case class OutputNotFound(output: Val[?]) extends OutputError:
     override def toString = s"Output data '$output' has not been found"
 
   /**
@@ -61,23 +61,23 @@ object InputOutputCheck:
    * @param output
    * @param variable
    */
-  case class OutputTypeMismatch(output: Val[_], variable: Variable[_]) extends OutputError:
+  case class OutputTypeMismatch(output: Val[?], variable: Variable[?]) extends OutputError:
     override def toString = s"""Type mismatch the content of the output value '${output.name}' of type '${variable.value.getClass}' is incompatible with the output variable '${output}'."""
 
   protected def verifyInput(inputs: PrototypeSet, context: Context): Iterable[InputError] =
     (for {
-      p ← inputs.toList
+      p <- inputs.toList
     } yield context.variable(p.name) match {
-      case None    ⇒ Some(InputNotFound(p))
-      case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
+      case None    => Some(InputNotFound(p))
+      case Some(v) => if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
     }).flatten
 
   protected def verifyOutput(outputs: PrototypeSet, context: Context): Iterable[OutputError] =
     outputs.flatMap:
-      d ⇒
+      d =>
         context.variable(d) match
-          case None ⇒ Some(OutputNotFound(d))
-          case Some(v) ⇒
+          case None => Some(OutputNotFound(d))
+          case Some(v) =>
             if (!d.accepts(v.value))
               Some(OutputTypeMismatch(d, v))
             else None
@@ -90,9 +90,9 @@ object InputOutputCheck:
    * @return
    */
   def filterOutput(outputs: PrototypeSet, context: Context): Context =
-    Context(outputs.toList.flatMap(o ⇒ context.variable(o): Option[Variable[_]]): _*)
+    Context(outputs.toList.flatMap(o => context.variable(o): Option[Variable[?]]) *)
 
-  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p ⇒
+  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p =>
     import p.*
     val initializedContext = DefaultSet.completeContext(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)
@@ -101,7 +101,7 @@ object InputOutputCheck:
     val result =
       try initializedContext + process.from(initializedContext)
       catch
-        case e: Throwable ⇒
+        case e: Throwable =>
           throw new InternalProcessingError(e, s"Error in ${obj} for context values ${initializedContext.prettified}")
 
     val outputErrors = verifyOutput(outputs, result)

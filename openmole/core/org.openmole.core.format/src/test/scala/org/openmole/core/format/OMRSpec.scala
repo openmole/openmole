@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.context.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.preference.Preference
-import org.openmole.core.serializer.SerializerService
 import org.openmole.core.{timeservice, workspace}
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
@@ -39,14 +38,13 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   given Preference = Preference.stub()
   given FileService = FileService.stub()
   given tmpDirectory: TmpDirectory = TmpDirectory.stub()
-  given SerializerService = SerializerService.stub()
 
   "OMR" should "support enum" in:
     val p = Val[String]
     val t = Val[OMRSpec.Test]
     val file = tmpDirectory.newFile("test", ".omr")
 
-    val vs = Seq[Variable[_]](p -> "test", t -> OMRSpec.Test.T1)
+    val vs = Seq[Variable[?]](p -> "test", t -> OMRSpec.Test.T1)
     val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
 
     OMRFormat.write(
@@ -68,7 +66,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val file = tmpDirectory.newFile("test", ".omr")
 
     def writeData(v: Int) =
-      val vs = Seq[Variable[_]](p -> v)
+      val vs = Seq[Variable[?]](p -> v)
       val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs, indexes = Seq(p.name)))
 
       OMRFormat.write(
@@ -96,7 +94,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     storedFile.content = "indeed\n"
 
-    val vs = Seq[Variable[_]](p -> storedFile)
+    val vs = Seq[Variable[?]](p -> storedFile)
     val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
 
     OMRFormat.write(

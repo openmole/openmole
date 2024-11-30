@@ -41,6 +41,7 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
 import org.openmole.tool.file.*
+import org.jline.terminal.Terminal
 
 object Command:
   def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
@@ -69,17 +70,21 @@ object Command:
   end load
 
 
-class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
+class Command(val console: REPL, val variables: ConsoleVariables, val terminal: Terminal) { commands ⇒
+
+  given Terminal = terminal
 
   def print(m: Mole): Unit = mole.print(m)
   def print(moleExecution: MoleExecution, debug: Boolean = false) = mole.print(moleExecution, debug)
   def load(file: File, args: Seq[String] = Seq.empty)(using Services): Console.CompiledDSL = mole.load(file, args)
   def start(dsl: DSL)(using Services): MoleExecution = mole.start(dsl)
   def start(dsl: Console.CompiledDSL)(using Services): MoleExecution = mole.start(dsl)
-  def validate(mole: Mole)(using TmpDirectory, FileService): Unit = verify(mole)
-  def verify(m: Mole)(using TmpDirectory, FileService): Unit = mole.verify(m)
+  def validate(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = verify(mole)
+  def verify(m: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = mole.verify(m)
 
-  def encrypted(implicit cypher: Cypher): String = encrypt(Console.askPassword())
+  def password = Console.askPassword()
+  def encrypted(using Cypher): String = encrypt(Console.askPassword())
+  def encrypted(s: String)(using Cypher): String = encrypt(s)
 
   export openmole.{version}
 
@@ -91,12 +96,10 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
       mole.dataChannels.foreach(println)
 
     def print(moleExecution: MoleExecution, debug: Boolean = false): Unit =
-
       def environmentErrors(environment: Environment, level: Level) =
         def filtered =
           Environment.clearErrors(environment).filter: e ⇒
             e.level.intValue() >= level.intValue()
-
 
         for
           error ← filtered
@@ -168,8 +171,8 @@ class Command(val console: REPL, val variables: ConsoleVariables) { commands ⇒
 
     implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
-    def validate(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit = verify(mole)
-    def verify(mole: Mole)(implicit newFile: TmpDirectory, fileService: FileService): Unit =
+    def validate(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit = verify(mole)
+    def verify(mole: Mole)(using TmpDirectory, FileService, OutputRedirection): Unit =
       given KeyValueCache = KeyValueCache()
       Validation(mole).foreach(println)
 

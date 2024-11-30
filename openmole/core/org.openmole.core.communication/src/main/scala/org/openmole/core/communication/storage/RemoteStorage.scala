@@ -18,11 +18,9 @@
 package org.openmole.core.communication.storage
 
 import java.io.File
-
 import org.openmole.core.workspace.TmpDirectory
 
-trait RemoteStorage {
-  def upload(src: File, dest: Option[String], options: TransferOptions = TransferOptions.default)(implicit newFile: TmpDirectory): String
-  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit newFile: TmpDirectory): Unit
-}
+trait RemoteStorage:
+  def upload(src: File, dest: Option[String], options: TransferOptions = TransferOptions.default)(using TmpDirectory): String
+  def download(src: String, dest: File, options: TransferOptions = TransferOptions.default)(using TmpDirectory): Unit
 

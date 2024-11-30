@@ -25,9 +25,9 @@ import org.openmole.plugin.tool.pattern.MapReduce
 object SensitivityMorris {
   def methodName = MethodMetaData.name(SensitivityMorris)
   
-  def mu(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("mu", output.name))
-  def muStar(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("muStar", output.name))
-  def sigma(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("sigma", output.name))
+  def mu(input: Val[?], output: Val[?]) = input.withNamespace(Namespace("mu", output.name))
+  def muStar(input: Val[?], output: Val[?]) = input.withNamespace(Namespace("muStar", output.name))
+  def sigma(input: Val[?], output: Val[?]) = input.withNamespace(Namespace("sigma", output.name))
 
   import io.circe.*
 
@@ -43,7 +43,7 @@ object SensitivityMorris {
   case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData]) derives derivation.ConfiguredCodec
 
 
-  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
+  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[?]])
 
   object MorrisHook:
 
@@ -115,8 +115,8 @@ object SensitivityMorris {
      * which factor was changed and of how much delta
      */
     def elementaryEffect(
-      input:         Val[_],
-      output:        Val[_],
+      input:         Val[?],
+      output:        Val[?],
       outputValues:  Array[Double],
       factorChanged: Array[String],
       deltas:        Array[Double]): (Double, Double, Double) =
@@ -342,11 +342,11 @@ object SensitivityMorris {
      * to execute in a given context. Replaces the index of factor by the variable name,
      * and scales each of the points in a n-dimensional [0:1] space into their actual range.
      */
-    def trajectoryToVariables(t: Trajectory, idTraj: Int): FromContext[List[List[Variable[_]]]] = FromContext { p ⇒
+    def trajectoryToVariables(t: Trajectory, idTraj: Int): FromContext[List[List[Variable[?]]]] = FromContext { p ⇒
 
       import p._
       // forge the list of variables for the first run (reference run)
-      val variablesForRefRun: List[Variable[_]] = List(
+      val variablesForRefRun: List[Variable[?]] = List(
         Variable(MorrisSampling.varFactorName, ""),
         Variable(MorrisSampling.varDelta, 0.0)
       ) ++ ScalableValue.toVariables(factors, t.seed).from(context)
@@ -367,7 +367,7 @@ object SensitivityMorris {
 
     }
 
-    def apply(): FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { ctxt ⇒
+    def apply(): FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { ctxt ⇒
       import ctxt._
       val r: Int = repetitions.from(context)
       val p: Int = levels.from(context)

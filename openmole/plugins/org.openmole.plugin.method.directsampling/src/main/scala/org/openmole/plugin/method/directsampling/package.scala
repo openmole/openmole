@@ -48,7 +48,7 @@ object Replication:
   case class MetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
 
-  case class Method(seed: Val[_], sample: Int, aggregation: Seq[Aggregation])
+  case class Method(seed: Val[?], sample: Int, aggregation: Seq[Aggregation])
 
   implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
     implicit def defScope: DefinitionScope = r.scope
@@ -97,7 +97,7 @@ case class Replication[T: Distribution](
 implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):
   def hook(
     output:      WritableOutput,
-    values:      Seq[Val[_]]    = Vector.empty,
+    values:      Seq[Val[?]]    = Vector.empty,
     includeSeed: Boolean        = false)(using scriptSourceData: ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
@@ -118,7 +118,7 @@ object DirectSampling:
 
   case class MetaData(sampled: Seq[ValData], aggregation: Option[Seq[AggregationMetaData]], output: Seq[ValData]) derives derivation.ConfiguredCodec
 
-  case class Method(sampled: Seq[Val[_]], aggregation: Seq[Aggregation], output: Seq[Val[_]])
+  case class Method(sampled: Seq[Val[?]], aggregation: Seq[Aggregation], output: Seq[Val[?]])
 
   implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒
     implicit def defScope: DefinitionScope = m.scope
@@ -167,7 +167,7 @@ case class DirectSampling[S: IsSampling](
 implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
   def hook(
     output: WritableOutput,
-    values: Seq[Val[_]]    = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[M] =
+    values: Seq[Val[?]]    = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), option = OMROption(append = true)))

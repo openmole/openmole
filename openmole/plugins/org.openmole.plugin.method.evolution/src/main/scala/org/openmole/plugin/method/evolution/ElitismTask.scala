@@ -20,9 +20,9 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object ElitismTask {
+object ElitismTask:
 
-  def apply[T](evolution: EvolutionWorkflow, evaluated: Val[Long])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply[T](evolution: EvolutionWorkflow)(using sourcecode.Name, DefinitionScope) =
     Task("ElitismTask") { p ⇒
       import p._
 
@@ -31,17 +31,53 @@ object ElitismTask {
           context(evolution.populationVal).toVector,
           context(evolution.offspringPopulationVal).toVector,
           context(evolution.stateVal),
-          context(evaluated),
-          random()).from(context)
+          random()
+        ).from(context)
+
+      val incrementedState =
+        evolution.operations.generationLens.modify(_ + 1)
+        .andThen(evolution.operations.evaluatedLens.modify(_ + 1))
+        .apply(newState)
 
       Context(
         Variable(evolution.populationVal, newPopulation.toArray(evolution.individualVal.`type`.manifest)),
-        Variable(evolution.stateVal, newState)
+        Variable(evolution.stateVal, incrementedState)
       )
     } set (
-      inputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal, evaluated),
+      inputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal),
       outputs += (evolution.populationVal, evolution.stateVal)
     )
-  }
 
-}
+object IslandElitismTask:
+
+  def apply[T](evolution: EvolutionWorkflow, islandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
+    Task("IslandElitismTask") { p ⇒
+      import p._
+
+      def state = context(evolution.stateVal)
+      def islandState = context(islandStateVal)
+      val mergedState = evolution.operations.mergeIslandState(state, islandState)
+
+      val (newState, newPopulation) =
+        evolution.operations.elitism(
+          context(evolution.populationVal).toVector,
+          context(evolution.offspringPopulationVal).toVector,
+          mergedState,
+          random()
+        ).from(context)
+
+      val incrementedState =
+        evolution.operations.generationLens.modify(_ + 1)
+          .andThen(evolution.operations.evaluatedLens.modify(_ + evolution.operations.evaluatedLens.get(islandState)))
+          .apply(newState)
+
+      Context(
+        Variable(evolution.populationVal, newPopulation.toArray(evolution.individualVal.`type`.manifest)),
+        Variable(evolution.stateVal, incrementedState)
+      )
+    } set (
+      inputs += (evolution.stateVal, islandStateVal, evolution.populationVal, evolution.offspringPopulationVal),
+      outputs += (evolution.populationVal, evolution.stateVal)
+    )
+
+

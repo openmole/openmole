@@ -24,8 +24,7 @@ import org.openmole.site.stylesheet._
 import DocumentationPages._
 import org.openmole.site.content.Native._
 
-object FAQ extends PageContent(html"""
-
+def FAQ =  PageContent(html"""
 
 ${h2{"Which Java version should I use?"}}
 

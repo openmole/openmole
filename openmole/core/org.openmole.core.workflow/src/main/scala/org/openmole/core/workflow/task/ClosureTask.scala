@@ -34,7 +34,7 @@ object ClosureTask:
    * @param closure
    * @return
    */
-  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
+  def apply(className: String)(closure: (Context, RandomProvider, TaskExecutionContext) => Context)(using name: sourcecode.Name, definitionScope: DefinitionScope): ClosureTask = new ClosureTask(
     closure,
     className = className,
     config = InputOutputConfig(),
@@ -50,12 +50,12 @@ object ClosureTask:
  * @param info
  */
 case class ClosureTask(
-  closure:                (Context, RandomProvider, TaskExecutionContext) ⇒ Context,
+  closure:                (Context, RandomProvider, TaskExecutionContext) => Context,
   override val className: String,
   config:                 InputOutputConfig,
   info:                   InfoConfig
 ) extends Task:
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p ⇒
+  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext { p =>
     closure(p.context, p.random, executionContext)
   }
 

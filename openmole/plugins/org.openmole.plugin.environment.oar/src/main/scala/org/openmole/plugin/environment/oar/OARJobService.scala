@@ -5,22 +5,22 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
-import _root_.gridscale.effectaside
 
-class OARJobService[S, H](
+class OARJobService[S](
   s:             S,
   tmpDirectory:  String,
   installation:  RuntimeInstallation[_],
   parameters:    OAREnvironment.Parameters,
-  h:             H,
-  accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
+  headNode:      HeadNode,
+  accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) {
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
     val workDirectory = parameters.workDirectory getOrElse "/tmp"
 
-    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
+    def buildScript(serializedJob: SerializedJob, outputPath: String) =
       SharedStorage.buildScript(
         installation.apply,
         jobDirectory,
@@ -32,7 +32,6 @@ class OARJobService[S, H](
         s,
         modules = parameters.modules
       )
-    }
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
@@ -46,16 +45,18 @@ class OARJobService[S, H](
       bestEffort = parameters.bestEffort
     )
 
-    accessControl { gridscale.oar.submit(h, description) }
-  }
+    accessControl { gridscale.oar.submit(headNode, description) }
 
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.oar.state(h, id)) }
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl { GridScaleJobService.translateStatus(gridscale.oar.state(headNode, id)) }
 
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.oar.clean(h, id) }
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl { gridscale.oar.clean(headNode, id) }
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.oar.stdOut(h, id), gridscale.oar.stdErr(h, id)) }
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl { (gridscale.oar.stdOut(headNode, id), gridscale.oar.stdErr(headNode, id)) }
 
 }

@@ -29,12 +29,11 @@ package object stream:
 
   val DefaultBufferSize = 16 * 1024
 
-  def copy(inputStream: InputStream, outputStream: OutputStream) = {
+  def copy(inputStream: InputStream, outputStream: OutputStream) =
     val buffer = new Array[Byte](DefaultBufferSize)
     Iterator.continually(inputStream.read(buffer)).takeWhile(_ != -1).foreach {
       outputStream.write(buffer, 0, _)
     }
-  }
 
   def copy(inputStream: InputStream, outputStream: OutputStream, bufferSize: Int, timeout: Time)(implicit pool: ThreadPoolExecutor) = {
     val buffer = new Array[Byte](bufferSize)
@@ -62,7 +61,9 @@ package object stream:
     }
   }
 
-  implicit class OutputStreamDecorator(os: OutputStream) {
+  def NullPrintStream() = PrintStream(NullOutputStream())
+
+  implicit class OutputStreamDecorator(os: OutputStream):
     def flushClose = {
       try os.flush
       finally os.close
@@ -73,18 +74,17 @@ package object stream:
     def append(content: String) = new PrintWriter(os).append(content).flush
 
     def appendLine(line: String) = append(line + "\n")
-  }
 
-  implicit class InputStreamDecorator(is: InputStream) {
 
-    def toByteArray = {
+  implicit class InputStreamDecorator(is: InputStream):
+
+    def toByteArray =
       val os = new ByteArrayOutputStream()
       try {
         copy(os)
         os.toByteArray
       }
       finally is.close()
-    }
 
     def copy(to: OutputStream): Unit = stream.copy(is, to)
 
@@ -104,31 +104,28 @@ package object stream:
       Files.copy(
         is,
         file.toPath,
-        (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()): _*
+        (if (replace) Seq(StandardCopyOption.REPLACE_EXISTING) else Seq()) *
       )
 
     def mkString =
       try scala.io.Source.fromInputStream(is).mkString
       finally is.close()
 
-  }
 
-  def withClosable[C <: { def close(): Unit }, T](open: ⇒ C)(f: C ⇒ T): T = {
+
+  def withClosable[C <: { def close(): Unit }, T](open: ⇒ C)(f: C ⇒ T): T =
     val c = open
     try f(c)
     finally c.close()
-  }
 
-  class ReaderRunnable(buffer: Array[Byte], from: InputStream, maxRead: Int) extends Callable[Int] {
+  class ReaderRunnable(buffer: Array[Byte], from: InputStream, maxRead: Int) extends Callable[Int]:
     override def call: Int = from.read(buffer, 0, maxRead)
-  }
 
-  class WriterRunnable(buffer: Array[Byte], to: OutputStream, amount: Int) extends Callable[Unit] {
-    override def call: Unit = {
+  class WriterRunnable(buffer: Array[Byte], to: OutputStream, amount: Int) extends Callable[Unit] :
+    override def call: Unit =
       to.write(buffer, 0, amount)
       to.flush()
-    }
-  }
+
 
   def inputStreamSequence(h: InputStream, t: InputStream*): InputStream =
     t.foldLeft(h) { (c, n) => new SequenceInputStream(c, n) }

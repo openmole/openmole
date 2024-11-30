@@ -27,7 +27,7 @@ import io.circe.*
 
 import scala.util.{ Failure, Success, Try }
 
-object Authentication extends JavaLogger {
+object Authentication extends JavaLogger:
   def category[T](using m: Manifest[T]): String = s"${m.runtimeClass.getCanonicalName}.json"
 
   def save[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) ⇒ Boolean)(using authenticationStore: AuthenticationStore) =
@@ -39,6 +39,6 @@ object Authentication extends JavaLogger {
   def remove[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) ⇒ Boolean)(using authenticationStore: AuthenticationStore) =
     authenticationStore.modify[T](category, s => s.filterNot(eq(_, t)))
 
-   def clear[T](using m: Manifest[T], authenticationStore: AuthenticationStore): Unit =
+  def clear[T](using m: Manifest[T], authenticationStore: AuthenticationStore): Unit =
      authenticationStore.clear(category[T])
-}
+

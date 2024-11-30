@@ -18,12 +18,19 @@ def settings = Seq(
 )
 
 lazy val json4s = OsgiProject(dir, "org.json4s",
-  exports = Seq("org.json4s.*", "com.fasterxml.jackson.*"),
+  exports = Seq("org.json4s.*"),
+  privatePackages = Seq("!scala.*", "!org.slf4j.*", "!com.fasterxml.jackson.*", "*"),
+  imports = Seq("scala.*", "org.slf4j.*", "com.fasterxml.jackson.*")) settings (
+  settings,
+  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
+  version := json4sVersion) dependsOn(slf4j, jackson)
+
+lazy val jackson = OsgiProject(dir, "com.fasterxml.jackson",
   privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"),
   imports = Seq("scala.*", "org.slf4j.*")) settings (
   settings,
-  libraryDependencies +=  "org.json4s" %% "json4s-jackson" % json4sVersion,
-  version := json4sVersion) dependsOn(slf4j)
+  libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+  version := jacksonVersion)
 
 lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq("shapeless3.*")) settings (
   settings,
@@ -35,6 +42,8 @@ lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq(
 
   version := shapelessVersion
 )
+
+
 
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "org.latestbit.*", "!cats.*", "!scala.*", "!shapeless3.*"),
@@ -65,10 +74,11 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 /*lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)*/
 
-lazy val slf4j = OsgiProject(dir,"org.slf4j") settings(
+lazy val slf4j = OsgiProject(dir, "org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   settings,
-  libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30",
-  version := "1.7.30")
+  libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion,
+  libraryDependencies += "org.slf4j" % "slf4j-jdk14" % slf4jVersion,
+  version := slf4jVersion)
 
 lazy val xstream = OsgiProject(
   dir,
@@ -330,7 +340,7 @@ lazy val math = OsgiProject(dir, "org.apache.commons.math", exports = Seq("org.a
 
 lazy val exec = OsgiProject(dir, "org.apache.commons.exec") settings(
   settings,
-  libraryDependencies += "org.apache.commons" % "commons-exec" % "1.3", version := "1.3")
+  libraryDependencies += "org.apache.commons" % "commons-exec" % execVersion, version := execVersion)
 
 lazy val log4j = OsgiProject(dir, "org.apache.log4j") settings(
   settings,
@@ -354,9 +364,13 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   settings,
   libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4")
 
-//lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-//  scala2Settings,
-//  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r", version := "4.6.0" )
+lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", exports = Seq("org.eclipse.jgit.*", "org.apache.sshd.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.bouncycastle.*","*"))  settings (
+  settings,
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % jgitVersion,
+  libraryDependencies += "org.apache.sshd" % "sshd-git" % "2.14.0",
+  libraryDependencies += "net.i2p.crypto" % "eddsa" % "0.3.0",
+  version := jgitVersion
+) dependsOn(slf4j)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   settings,
@@ -432,7 +446,7 @@ lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("!sun.secu
   settings,
   libraryDependencies += "com.hierynomus" % "sshj" % sshjVersion,
   version := sshjVersion
-)
+) dependsOn(slf4j)
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
   settings,
@@ -513,7 +527,7 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("!com.google
 lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*", "org.objectweb.asm.*")) settings (
   settings,
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
-  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
 
   libraryDependencies += "org.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
@@ -522,7 +536,7 @@ lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.se
   libraryDependencies += "org.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
   libraryDependencies += "org.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
   
-  libraryDependencies += "org.endpoints4s" %% sjs("xhr-client") % endpoint4SXHRClientVersion,
+  libraryDependencies += "org.endpoints4s" %% sjs("fetch-client-circe") % endpoint4SFetchClientCirceVersion,
 
   version := endpoints4SVersion
 ) dependsOn(cats, circe, http4s)
@@ -532,9 +546,13 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   settings,
   libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
-  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.17",
+  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   version := http4sVersion
-) dependsOn(cats)
+) dependsOn(cats, slf4j)
 
-
+lazy val gears = OsgiProject(dir, "gears") settings (
+  settings,
+  libraryDependencies += "ch.epfl.lamp" %% "gears" % gearsVersion,
+  version := gearsVersion
+)
 

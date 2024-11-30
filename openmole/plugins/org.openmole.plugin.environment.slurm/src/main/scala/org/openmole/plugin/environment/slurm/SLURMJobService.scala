@@ -5,22 +5,23 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
-import _root_.gridscale.effectaside
 
-class SLURMJobService[S, H](
+class SLURMJobService[S](
   s:                 S,
   tmpDirectory:      String,
-  installation:      RuntimeInstallation[_],
+  installation:      RuntimeInstallation[?],
   parameters:        SLURMEnvironment.Parameters,
-  h:                 H,
-  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
+  h:                 HeadNode,
+  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services):
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+
     val workDirectory = parameters.workDirectory getOrElse "/tmp"
 
-    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
+    def buildScript(serializedJob: SerializedJob, outputPath: String) =
       SharedStorage.buildScript(
         installation.apply,
         jobDirectory,
@@ -33,7 +34,6 @@ class SLURMJobService[S, H](
         debug = parameters.debug,
         modules = parameters.modules
       )
-    }
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
@@ -54,15 +54,20 @@ class SLURMJobService[S, H](
     )
 
     accessControl { gridscale.slurm.submit(h, description) }
-  }
 
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.slurm.state(h, id)) }
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      GridScaleJobService.translateStatus(gridscale.slurm.state(h, id))
 
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.slurm.clean(h, id) }
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      gridscale.slurm.clean(h, id)
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.slurm.stdOut(h, id), gridscale.slurm.stdErr(h, id)) }
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      (gridscale.slurm.stdOut(h, id), gridscale.slurm.stdErr(h, id))
 
-}
+

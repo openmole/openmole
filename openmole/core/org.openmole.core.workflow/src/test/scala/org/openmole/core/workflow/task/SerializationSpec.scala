@@ -58,7 +58,7 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val data = List("A", "B", "C")
     val i = Val[String]("i")
 
-    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain ⇒ Domain(domain.iterator)
+    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain => Domain(domain.iterator)
 
     val exp = ExplorationTask(i in data)
     val t = EmptyTask() set (inputs += i)

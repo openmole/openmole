@@ -33,11 +33,11 @@ class DataChannelSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = Val[String]
 
-    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
     val t2 = EmptyTask()
 
     val t3 =
-      TestTask { context ⇒
+      TestTask { context =>
         context(p) should equal("Test")
         context
       } set (inputs += p)
@@ -50,11 +50,11 @@ class DataChannelSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
   "A datachannel" should "not conflict with variable values to be transmitted by a transition" in {
     val p = Val[String]
 
-    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
     val t2 = TestTask { _ + (p -> "Correct") } set { (inputs, outputs) += p }
 
     val t3 =
-      TestTask { context ⇒
+      TestTask { context =>
         context(p) should equal("Correct")
         context
       } set (inputs += p)
@@ -66,14 +66,14 @@ class DataChannelSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
 
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
     val j = Val[String]
-    val tw = TestTask { _ + (j → "J") } set (outputs += j)
+    val tw = TestTask { _ + (j -> "J") } set (outputs += j)
 
     val data = List("A", "B", "C")
     val i = Val[String]
 
     val res = new ListBuffer[String]
 
-    val t = TestTask { context ⇒
+    val t = TestTask { context =>
       res.synchronized {
         context.contains(i) should equal(true)
         context.contains(j) should equal(true)

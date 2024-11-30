@@ -21,25 +21,34 @@ import org.apache.log4j.{ Appender ⇒ L4JAppender, Level ⇒ L4JLevel, Logger �
 import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 
-object LoggerConfig {
+object LoggerConfig:
 
-  def level(level: Level) = {
+  lazy val infoBlackList =
+    Seq(
+      "org.http4s.blaze",
+      "net.schmizz.sshj"
+    )
+
+  //def setLevel(l: String, level: Level) = Logger.getLogger(l).setLevel(level)
+
+  def level(level: Level) =
     LogManager.getLogManager.reset
 
     val rootLogger = Logger.getLogger("")
     rootLogger.setLevel(level)
 
-    val ch = new ConsoleHandler
+    val ch = new ConsoleHandler:
+      override def publish(record: LogRecord): Unit =
+        if infoBlackList.exists(record.getSourceClassName.startsWith) && record.getLevel.intValue() < Level.WARNING.intValue()
+        then ()
+        else super.publish(record)
+
     ch.setLevel(level)
     rootLogger.addHandler(ch)
-  }
 
-  def init = {
+  def init =
     BasicConfigurator.configure
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
-    val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
-    root.setLevel(ch.qos.logback.classic.Level.ERROR)
+    val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME)
     level(Level.INFO)
-  }
 
-}

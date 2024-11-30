@@ -23,6 +23,7 @@ import scaladget.bootstrapnative.Tools.MyPopoverBuilder
 
 import scala.scalajs.js.timers.*
 import scala.scalajs.js.annotation.JSImport
+import org.openmole.gui.client.core.Panels
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -44,10 +45,10 @@ import scala.scalajs.js.annotation.JSImport
 object EditorPanelUI:
 
   def apply(
-    fileType: FileContentType,
+    safePath: SafePath,
     initCode: String,
-    initHash: String)(using plugins: GUIPlugins) =
-    val editor = new EditorPanelUI(fileType)
+    initHash: String)(using plugins: GUIPlugins, panels: Panels) =
+    val editor = new EditorPanelUI(safePath)
     editor.setCode(initCode, initHash)
     editor
 
@@ -68,8 +69,9 @@ object EditorPanelUI:
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
 
-class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins):
+class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: Panels):
 
+  val fileContentType = FileContentType(safePath)
   val modified = Var(false)
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
@@ -82,6 +84,7 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
     js.Dynamic.global.ace.config.set("themePath", "js")
 
     scalamode
+    pythonmode
 
     //EditorPanelUI.openmolemode
 
@@ -130,10 +133,6 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
     errors.set(None)
     errorMessage.set(None)
 
-//  def setErrorMessage(message: String) =
-//    errorMessage.set(Some(message))
-//    errorMessageOpen.set(true)
-
   def errorMessage(e: ScriptError) =
     s"${e.position.map(p => s"${p.line}: ").getOrElse("")}${e.message}"
 
@@ -152,59 +151,48 @@ class EditorPanelUI(fileContentType: FileContentType)(using plugins: GUIPlugins)
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
-  def switchAreaSize =
-    errorAreaSize.update(eas=>
-    eas match {
-      case "100px"=> "500px"
-      case "500px"=> "100px"
-    })
-
-  val errorViewSizeButton = button(
-    cls := "btn",
-    background := "white",
-    OMTags.down,
-    onClick --> { _ => switchAreaSize},
-    position.absolute,
-    margin := "20px",
-    right := "20px"
-  )
-
-  val view =
+  val errorView =
     div(
       children <--
         errorMessage.signal.map: em =>
-          em.toSeq.map: message =>
-            div( display.flex,
-              errorViewSizeButton,
-              textArea(
-                flexRow,
-                message,
-                cls := "scriptError",
-                height <-- errorAreaSize,
+            em.toSeq.map: message =>
+              div(display.flex, cls := "scriptError",
+                textArea(
+                  flexRow,
+                  message,
+                  cls := "errorTextArea",
+                  ),
+                  span(
+                  flexDirection.row, alignItems.center, 
+                  cls := "close-button close-button-tab bi-x", color := "white", marginLeft := "5px", 
+                  onClick --> { e => panels.treeNodePanel.clearCurrentErrorView}
+                )
               )
-          ),
-      edDiv.amend(
-        lineHeight --> lineHeightObserver,
-        fileContentType match
-          case FileContentType.OpenMOLEScript ⇒
-            errors -->
-              Observer[Option[ErrorData]]:
-                case Some(errors: CompilationErrorData) =>
-                  editor.getSession().clearBreakpoints()
-                  errors.errors.foreach: e ⇒
-                    e.position.foreach: p =>
-                      editor.getSession().setBreakpoint(p.line - 1)
-                  errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>
-                    errorMessage.set(Some(errorMessage(e)))
-                case Some(e: MessageErrorData) =>
-                  errorMessage.set(Some(e.message))
-                case None =>
-                  editor.getSession().clearBreakpoints()
-                case _ =>
+    )  
 
-          case _ => emptyMod,
-        onClick --> { _ => updateErrorMessage }
-      )
+  val view =
+    div(
+      edDiv.amend(
+          lineHeight --> lineHeightObserver,
+          fileContentType match
+            case FileContentType.OpenMOLEScript ⇒
+              errors -->
+                Observer[Option[ErrorData]]:
+                  case Some(errors: CompilationErrorData) =>
+                    editor.getSession().clearBreakpoints()
+                    errors.errors.foreach: e ⇒
+                      e.position.foreach: p =>
+                        editor.getSession().setBreakpoint(p.line - 1)
+                    errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>
+                      errorMessage.set(Some(errorMessage(e)))
+                  case Some(e: MessageErrorData) =>
+                    errorMessage.set(Some(e.message))
+                  case None =>
+                    editor.getSession().clearBreakpoints()
+                  case _ =>
+            case _ => emptyMod,
+          onClick --> { _ => updateErrorMessage }
+        )
     )
 
   def aceDoc = editor.getSession().getDocument()

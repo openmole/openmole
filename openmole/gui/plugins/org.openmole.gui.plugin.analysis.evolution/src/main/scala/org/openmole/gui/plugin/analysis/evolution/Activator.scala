@@ -23,7 +23,7 @@ import org.osgi.framework.{BundleActivator, BundleContext}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   def info = GUIPluginInfo(
     analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
@@ -32,4 +32,4 @@ class Activator extends BundleActivator {
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
   override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
-}
+

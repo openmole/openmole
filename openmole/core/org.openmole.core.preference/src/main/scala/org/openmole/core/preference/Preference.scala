@@ -22,7 +22,7 @@ object Preference:
     val pref = FilePreference(ConfigurationFile(file))
     //if (!passwordIsCorrect(cypher, pref)) throw new UserBadDataError("Password is incorrect.")
     //setPasswordTest(pref, cypher)
-    if (!pref.isSet(uniqueID)) pref setPreference (uniqueID, UUID.randomUUID.toString)
+    if !pref.isSet(uniqueID) then pref.setPreference(uniqueID, UUID.randomUUID.toString)
     pref
 
   def passwordIsCorrect(cypher: Cypher, preference: Preference) =

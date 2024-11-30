@@ -1,6 +1,5 @@
 package org.openmole.gui.plugin.authentication.sshlogin
 
-import org.openmole.gui.shared.data.AuthenticationData
 
 /*
  * Copyright (C) 12/01/17 // mathieu.leclaire@openmole.org
@@ -23,7 +22,5 @@ case class LoginAuthenticationData(
   login:    String = "",
   password: String = "",
   target:   String = "",
-  port:     String = "22"
-) extends AuthenticationData {
-  def name = s"$login@$target"
-}
+  port:     String = "22")
+

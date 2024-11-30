@@ -54,12 +54,12 @@ object WizardUtils:
 
       def imapString(protos: Seq[PrototypeData], keyString: String) =
         protos.flatMap: i ⇒
-          i.mapping.map { mapping => s"""$keyString += ${i.name} mapped "${mapping}"""" }
+          i.mapping.map { mapping => s"""$keyString += ${i.name} mapped \"\"\"${mapping}\"\"\"""" }
 
       def omapString(protos: Seq[PrototypeData], keyString: String) =
         protos.flatMap: o ⇒
           o.mapping.map: mapping =>
-            s"""$keyString += ${o.name} mapped "${mapping}""""
+            s"""$keyString += ${o.name} mapped \"\"\"${mapping}\"\"\""""
 
       def default(key: String, value: String) = s"$key := $value"
 
@@ -134,8 +134,8 @@ object WizardUtils:
     r.nameWithoutExtension.capitalize.filter(c => c.isLetterOrDigit | c == '_') + ".oms"
 
   def toVariableName(s: String) =
-    val capital: String = s.split('-').reduce(_ + _.capitalize)
-    capital.replace("?", "").replace(" ", "").replace("%", "percent")
+    val capital: String = s.split('-').flatMap(_.split(' ')).reduce(_ + _.capitalize)
+    capital.replace("?", "").replace("%", "percent")
 
   def unknownError(acceptedModel: AcceptedModel, name: String) = Future.failed(new UnknownError(s"Unable to handle ${acceptedModel} in wizard $name"))
 

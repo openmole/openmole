@@ -53,8 +53,9 @@ object SerializerService:
  * Serializer
  */
 class SerializerService:
+  service =>
 
-  private[serializer] def buildXStream(json: Boolean = false) = {
+  private[serializer] def buildXStream(json: Boolean = false) =
     val lookup = new DefaultConverterLookup()
 
     val driver =
@@ -66,24 +67,23 @@ class SerializerService:
       new XStream(
         null,
         driver,
-        new ClassLoaderReference(this.getClass.getClassLoader),
+        new ClassLoaderReference(service.getClass.getClassLoader),
         null: Mapper,
         lookup,
-        new ConverterRegistry {
+        new ConverterRegistry:
           override def registerConverter(c: Converter, p: Int): Unit = lookup.registerConverter(c, p)
-        }
+
       )
 
     xs.addPermission(NoTypePermission.NONE)
     xs.addPermission(new TypePermission {
-      override def allows(`type`: Class[_]): Boolean = true
+      override def allows(`type`: Class[?]): Boolean = true
     })
     //xs.registerConverter(new converter.fix.HashMapConverter(xs.getMapper))
 
     xs.registerConverter(new FileWithGCConverter)
 
     xs
-  }
 
   private val content = "content.xml"
 
@@ -100,16 +100,13 @@ class SerializerService:
   def deserialize[T](is: InputStream): T = 
     buildXStream().fromXML(is).asInstanceOf[T]
 
-  def deserializeFromString[T](s: String, json: Boolean = false): T = 
-    buildXStream(json = json).fromXML(s).asInstanceOf[T]
-
   def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
     val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
 
   def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T =
-    newFile.withTmpDir: archiveExtractDir ⇒
+    TmpDirectory.withTmpDir: archiveExtractDir ⇒
       tis.extract(archiveExtractDir)
       val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, fileSerialisation(), deleteOnGC = deleteFilesOnGC)
       val contentFile = new File(archiveExtractDir, content)
@@ -122,7 +119,7 @@ class SerializerService:
     finally os.close()
 
   def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(implicit newFile: TmpDirectory): Unit =
-    newFile.withTmpFile: objSerial ⇒
+    TmpDirectory.withTmpFile: objSerial ⇒
       serialize(obj, objSerial)
       tos.addFile(objSerial, content)
 
@@ -143,13 +140,11 @@ class SerializerService:
     try serializer.fromXML[T](is)
     finally serializer.injectedFiles = null
 
-  def serializeToString(obj: Any, json: Boolean = false) = buildXStream(json = json).toXML(obj)
-
   def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
 
-  def serialize(obj: Any, file: File, json: Boolean = false, gz: Boolean = false): Unit =
+  def serialize(obj: Any, file: File, gz: Boolean = false): Unit =
     val os = file.bufferedOutputStream(gz = gz)
-    try buildXStream(json = json).toXML(obj, os)
+    try buildXStream().toXML(obj, os)
     finally os.close()
 
 

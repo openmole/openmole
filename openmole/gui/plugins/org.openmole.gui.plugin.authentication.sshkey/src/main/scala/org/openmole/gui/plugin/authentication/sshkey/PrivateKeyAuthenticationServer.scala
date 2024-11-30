@@ -24,11 +24,14 @@ import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.gui.server.ext.utils
 import org.openmole.plugin.environment.ssh.*
-import util.{Success, Failure, Try}
+import org.openmole.tool.file.*
+
+import util.{Failure, Success, Try}
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
+import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
 
 class PrivateKeyAuthenticationServer(s: Services)
   extends APIServer with PrivateKeyAuthenticationAPI {
@@ -40,7 +43,7 @@ class PrivateKeyAuthenticationServer(s: Services)
     addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
 
   val removeAuthenticationRoute =
-    removeAuthentication.errorImplementedBy { a => impl.removeAuthentication(a) }
+    removeAuthentication.errorImplementedBy { impl.removeAuthentication }
 
   val testAuthenticationRoute =
     testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
@@ -53,44 +56,48 @@ class PrivateKeyAuthenticationServer(s: Services)
     import s._
 
     private def coreObject(data: PrivateKeyAuthenticationData) =
-      data.privateKey match
-        case Some(pk) ⇒ Some(PrivateKey(
+      data.privateKeyPath.map: pk =>
+        PrivateKey(
           safePathToFile(pk),
           data.login,
-          cypher.encrypt(data.password),
+          data.password,
           data.target,
           data.port.toInt
-        ))
+        )
+
+    def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData] =
+      SSHAuthentication().flatMap:
+        case key: PrivateKey ⇒
+          val safePath = key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)
+          Seq:
+            PrivateKeyAuthenticationData(
+              privateKey = Some(safePath.name),
+              login = key.login,
+              password = key.password,
+              target = key.host,
+              port = key.port.toString,
+              directory = safePath.parent
+            )
         case _ ⇒ None
 
 
-    def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData] = SSHAuthentication().flatMap {
-      case key: PrivateKey ⇒ Seq(
-        PrivateKeyAuthenticationData(
-          Some(key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)),
-          key.login,
-          cypher.decrypt(key.cypheredPassword),
-          key.host,
-          key.port.toString
-        )
-      )
-      case _ ⇒ None
-    }
-
     def addAuthentication(data: PrivateKeyAuthenticationData): Unit =
-      coreObject(data).foreach { co ⇒ SSHAuthentication += co }
+      coreObject(data).foreach: co ⇒
+        SSHAuthentication += co
 
-    def removeAuthentication(data: PrivateKeyAuthenticationData): Unit =
-      coreObject(data).foreach { co ⇒ SSHAuthentication -= co }
+    def removeAuthentication(data: PrivateKeyAuthenticationData, deleteKey: Boolean): Unit =
+      coreObject(data).foreach: co ⇒
+        SSHAuthentication -= co
+      if deleteKey && data.directory.parent == SafePath.root(ServerFileSystemContext.Authentication) 
+      then safePathToFile(data.directory).recursiveDelete
 
-    def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] = Seq(
-      coreObject(data).map { co ⇒
-        SSHAuthentication.test(co) match {
-          case Success(_) ⇒ Test.passed()
-          case Failure(f) ⇒ Test.error("failed", ErrorData(f))
-        }
-      }
-    ).flatten
+    def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] =
+      Seq(
+        coreObject(data).map: co ⇒
+          SSHAuthentication.test(co) match
+            case Success(_) ⇒ Test.passed()
+            case Failure(f) ⇒ Test.error("failed", ErrorData(f))
+      ).flatten
 
   }
 }

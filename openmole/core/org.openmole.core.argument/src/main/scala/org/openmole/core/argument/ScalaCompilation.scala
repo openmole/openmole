@@ -111,12 +111,12 @@ object ScalaCompilation {
         util.Failure(userBadDataError)
       case util.Failure(e) ⇒ util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
 
-  def function[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def function[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
     compile[CompilationClosure[RETURN]](s, plugins, libraries)
   }
 
-  def closure[RETURN](inputs: Seq[Val[_]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) =
+  def closure[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) =
     function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
   /**
@@ -141,7 +141,7 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  def script[RETURN](inputs: Seq[Val[_]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) = {
+  def script[RETURN](inputs: Seq[Val[?]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) = {
     val header =
       s"""new ${classOf[CompilationClosure[_]].getName}[${ValType.toTypeString(returnType)}] {
          |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}): ${ValType.toTypeString(returnType)} = {
@@ -181,20 +181,20 @@ object ScalaCompilation {
   class ScalaWrappedCompilation[R: Manifest](code: String, wrapping: OutputWrapping[R]) {
     def returnType = ValType.apply[R]
 
-    val cache = Cache(collection.mutable.HashMap[Seq[Val[_]], Try[ContextClosure[R]]]())
+    val cache = Cache(collection.mutable.HashMap[Seq[Val[?]], Try[ContextClosure[R]]]())
 
     def compiled(context: Context)(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] = {
       val contextPrototypes = context.values.map { _.prototype }.toSeq
       compiled(contextPrototypes)
     }
 
-    def compiled(inputs: Seq[Val[_]])(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
-      cache().synchronized {
+    def compiled(inputs: Seq[Val[?]])(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
+      cache().synchronized:
         val allInputMap = inputs.groupBy(_.name)
 
         val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
 
-        duplicatedInputs match {
+        duplicatedInputs match
           case Nil ⇒
             def sortedInputNames = inputs.map(_.name).distinct.sorted
             val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
@@ -206,17 +206,13 @@ object ScalaCompilation {
               update
             )
           case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
-        }
-      }
 
-    def validate = Validate { p ⇒
+    def validate = Validate: p ⇒
       import p._
 
-      compiled(inputs) match {
+      compiled(inputs) match
         case Success(_) ⇒ Seq()
         case Failure(e) ⇒ Seq(e)
-      }
-    }
 
     def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒
       val closure: ContextClosure[R] = compiled(p.context).get
@@ -229,7 +225,7 @@ object ScalaCompilation {
 
   def static[R](
     code:      String,
-    inputs:    Seq[Val[_]],
+    inputs:    Seq[Val[?]],
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
@@ -240,9 +236,8 @@ object ScalaCompilation {
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
     new ScalaWrappedCompilation[R](code, wrapping)
 
-  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter) {
+  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter):
     def apply(context: Context, randomProvider: RandomProvider, tmpDirectory: TmpDirectory): R = f(context, randomProvider, tmpDirectory)
-  }
 
   trait OutputWrapping[+R]:
     def wrapOutput: String

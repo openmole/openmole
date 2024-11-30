@@ -24,7 +24,7 @@ import org.openmole.plugin.environment.batch.environment.SerializedJob
 
 import scala.collection.mutable.ListBuffer
 
-object JobScript {
+object JobScript:
 
   def create(
     serializedJob:   SerializedJob,
@@ -35,7 +35,7 @@ object JobScript {
     threads:         Int,
     debug:           Boolean,
     proxy:           Option[String] = None
-  )(implicit preference: Preference) = {
+  )(using preference: Preference) =
     import serializedJob._
 
     def cpCommand = CurlRemoteStorage.Curl(voName, debug, preference(EGIEnvironment.RemoteCopyTimeout))
@@ -67,11 +67,21 @@ object JobScript {
 
     val debugInfo = s"echo $storageLocation ; hostname ; date -R ; cat /proc/meminfo ; ulimit -n 10240 ; ulimit -a ; " + "env ; echo $X509_USER_PROXY ; "
 
-    val init = {
+    val init =
       val script = ListBuffer[String]()
 
       proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
 
+      script += "ARGS=()"
+      script += """while [[ $# -gt 0 ]]; do
+                  |  case "$1" in
+                  |    --unique-id ) UNIQUE_ID=$2 ;;
+                  |    * ) ARGS+=("$1");;
+                  |  esac
+                  |  shift
+                  |done""".stripMargin
+
+      script += """echo Job running for unique id: $UNIQUE_ID"""
       script += "unset http_proxy"
       script += "unset https_proxy"
       script += "BASEPATH=$PWD"
@@ -82,9 +92,8 @@ object JobScript {
       script += "cd $CUR"
 
       script.mkString(" && ")
-    }
 
-    val install = {
+    val install =
       val script = ListBuffer[String]()
 
       script +=
@@ -97,36 +106,32 @@ object JobScript {
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
       script.mkString(" && ")
-    }
 
-    val dl = {
+    val dl =
       val script = ListBuffer[String]()
 
-      for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
+      for (plugin, index) ← runtime.environmentPlugins.zipWithIndex
+      do
         assert(plugin.path != null)
         script += s"retry $retry " + cpCommand.download(resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
-      }
 
       script += s"retry $retry " + cpCommand.download(resolve(serializedJob.remoteStorage.path), "$CUR/storage.bin")
 
       "mkdir -p envplugins && " + script.mkString(" && ")
-    }
 
-    val run = {
+    val run =
       val script = ListBuffer[String]()
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath -t $threads --transfer-retry $retry""" + (if (debug) " -d 2>&1" else "")
+      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath -t $threads --transfer-retry $retry""" + (if debug then " -d 2>&1" else "")
       script.mkString(" && ")
-    }
 
     val postDebugInfo = if (debug) "cat *.log ; " else ""
 
     val finish = "cd .. &&  rm -rf $CUR"
 
-    functions + debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if (debug) "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
-  }
+    functions + debugInfo + init + " && " + install + " && " + dl + " && " + run + s"; RETURNCODE=${if debug then "0" else "$?"};" + postDebugInfo + finish + "; exit $RETURNCODE;"
 
   private def background(s: String) = "( " + s + " & )"
-}
+

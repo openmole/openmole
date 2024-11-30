@@ -35,7 +35,7 @@ object FileSerialisation:
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, xStream: XStream)(implicit newFile: TmpDirectory) = newFile.withTmpDir { tmpDir ⇒
+  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, xStream: XStream)(implicit newFile: TmpDirectory) = TmpDirectory.withTmpDir { tmpDir ⇒
     val fileInfo = HashMap() ++ files.map {
       file ⇒
         val name = UUID.randomUUID
@@ -54,10 +54,9 @@ object FileSerialisation:
         (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
     }
 
-    newFile.withTmpFile { tmpFile ⇒
+    TmpDirectory.withTmpFile: tmpFile ⇒
       tmpFile.withOutputStream(xStream.toXML(fileInfo, _))
       tos.addFile(tmpFile, fileDir + "/" + filesInfo)
-    }
   }
 
   def deserialiseFileReplacements(archiveExtractDir: File, xStream: XStream, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
@@ -71,14 +70,14 @@ object FileSerialisation:
         def fileContent =
           if isDirectory
           then
-            val dest = newFile.newDir("directoryFromArchive")
+            val dest = TmpDirectory.newDirectory("directoryFromArchive")
             dest.mkdirs()
             if exists
             then fromArchive.extract(dest, archive = ArchiveType.Tar)
             else dest.delete
             dest
           else
-            val dest = newFile.newFile("fileFromArchive", ".bin")
+            val dest = TmpDirectory.newFile("fileFromArchive", ".bin")
             dest.createParentDirectory
             if exists
             then fromArchive.move(dest)

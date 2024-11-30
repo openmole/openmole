@@ -24,8 +24,8 @@ object MetadataGeneration:
       case b: GenomeBound.ContinuousInt            ⇒ GenomeBoundData.IntBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
       case b: GenomeBound.SequenceOfDouble         ⇒ GenomeBoundData.DoubleSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
       case b: GenomeBound.SequenceOfInt            ⇒ GenomeBoundData.IntSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
-      case b: GenomeBound.Enumeration[_]           ⇒ GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
-      case b: GenomeBound.SequenceOfEnumeration[_] ⇒ GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
+      case b: GenomeBound.Enumeration[?]           ⇒ GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
+      case b: GenomeBound.SequenceOfEnumeration[?] ⇒ GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
 
   def objectiveData(o: Objective) =
     EvolutionMetadata.Objective(Objective.resultPrototype(o).name, o.delta, o.negative, o.noisy)

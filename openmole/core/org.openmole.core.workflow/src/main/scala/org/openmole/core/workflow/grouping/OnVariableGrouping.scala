@@ -25,14 +25,14 @@ import org.openmole.tool.random.RandomProvider
 
 object OnVariableGrouping {
 
-  def apply(prototypes: Val[_]*) = new OnVariableGrouping(None, prototypes: _*)
-  def apply(numberOfMoleJobs: Int, prototypes: Val[_]*) = new OnVariableGrouping(Some(numberOfMoleJobs), prototypes: _*)
+  def apply(prototypes: Val[?]*) = new OnVariableGrouping(None, prototypes *)
+  def apply(numberOfMoleJobs: Int, prototypes: Val[?]*) = new OnVariableGrouping(Some(numberOfMoleJobs), prototypes *)
 }
 
-class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Val[_]*) extends Grouping {
+class OnVariableGrouping(numberOfMoleJobs: Option[Int], prototypes: Val[?]*) extends Grouping {
 
   def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
-    new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq: _*)
+    new MoleJobGroup(prototypes.flatMap { context.option(_) }.toSeq *)
 
   override def complete(jobs: Iterable[Job]) =
     numberOfMoleJobs map { jobs.size >= _ } getOrElse (false)

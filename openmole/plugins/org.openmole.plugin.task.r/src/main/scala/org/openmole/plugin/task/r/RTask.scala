@@ -85,14 +85,13 @@ object RTask:
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     clearContainerCache:        Boolean                            = false,
-    containerSystem:            ContainerSystem                    = ContainerSystem.default,
-    installContainerSystem:     ContainerSystem                    = ContainerSystem.default,
+    containerSystem:            ContainerSystem                    = ContainerSystem.default
   )(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): RTask =
     val installCommands = install ++ RLibrary.installCommands(libraries.toVector)
 
     RTask(
       script = script,
-      image = ContainerTask.install(installContainerSystem, image, installCommands, clearCache = clearContainerCache),
+      image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -100,7 +99,6 @@ object RTask:
       stdErr = stdErr,
       hostFiles = hostFiles,
       environmentVariables = environmentVariables,
-      containerSystem = containerSystem,
       config = InputOutputConfig(),
       external = External(),
       info = InfoConfig(),
@@ -110,7 +108,7 @@ object RTask:
 
 case class RTask(
   script:               RunnableScript,
-  image:                InstalledImage,
+  image:                InstalledContainerImage,
   errorOnReturnValue:   Boolean,
   prepare:              Seq[String],
   returnValue:          Option[Val[Int]],
@@ -118,13 +116,10 @@ case class RTask(
   stdErr:               Option[Val[String]],
   hostFiles:            Seq[HostFile],
   environmentVariables: Seq[EnvironmentVariable],
-  containerSystem:      ContainerSystem,
   config:               InputOutputConfig,
   external:             External,
   info:                 InfoConfig,
   mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
-
-  lazy val containerPoolKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -133,11 +128,11 @@ case class RTask(
     import org.json4s.jackson.JsonMethods._
     import p._
 
-    def writeInputsJSON(inputs: Vector[Mapped[_]], file: File) =
+    def writeInputsJSON(inputs: Vector[ Mapped[?]], file: File) =
       def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
       file.content = compact(render(toJSONValue(values.toArray[Any])))
 
-    def rInputMapping(inputs: Vector[Mapped[_]], arrayName: String) =
+    def rInputMapping(inputs: Vector[ Mapped[?]], arrayName: String) =
       inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
     def rOutputMapping =
@@ -172,11 +167,10 @@ case class RTask(
     val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
     def containerTask =
-      ContainerTask.isolatedWorkdirectory(executionContext)(
-        containerSystem = containerSystem,
+      ContainerTask.internal(
         image = image,
         command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
-        workDirectory = workDirectory,
+        workDirectory = Some(workDirectory),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
         hostFiles = hostFiles,
@@ -185,8 +179,7 @@ case class RTask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info,
-        containerPoolKey = containerPoolKey) set (
+        info = info) set (
         resources += (scriptFile, rScriptPath),
         resources += (jsonInputs, inputJSONPath),
         outputFiles += (outputJSONPath, outputFile),

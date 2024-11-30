@@ -31,7 +31,7 @@ class FileConverterNotifier(fileUsed: File => Unit) extends FileConverter:
     fileUsed(file)
     file.getPath
 
-  override def canConvert(`type`: Class[_]): Boolean = classOf[File].isAssignableFrom(`type`)
+  override def canConvert(`type`: Class[?]): Boolean = classOf[File].isAssignableFrom(`type`)
 
 
 

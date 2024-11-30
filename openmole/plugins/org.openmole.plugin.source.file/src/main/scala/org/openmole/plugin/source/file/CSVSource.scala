@@ -52,7 +52,7 @@ case class CSVSource(
   path:      FromContext[String],
   config:    InputOutputConfig,
   info:      InfoConfig,
-  columns:   Vector[Mapped[_]],
+  columns:   Vector[ Mapped[?]],
   separator: Option[Char]
 ) extends Source {
 

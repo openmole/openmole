@@ -44,10 +44,9 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
   class JobGroupingBy2Test extends Grouping {
 
     def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
-      groups.find { case (_, g) ⇒ g.size < 2 } match {
-        case Some((mg, _)) ⇒ mg
-        case None          ⇒ MoleJobGroup()
-      }
+      groups.find { case (_, g) => g.size < 2 } match 
+        case Some((mg, _)) => mg
+        case None          => MoleJobGroup()
     }
 
   }
@@ -59,7 +58,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val sampling = ExplicitSampling(i, data)
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val testT = TestTask { context ⇒
+    val testT = TestTask { context =>
       context.contains(i.toArray) should equal(true)
       context(i.toArray).sorted.toVector should equal(data.toVector)
       context
@@ -77,7 +76,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val sampling = ExplicitSampling(i, data)
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val testT = TestTask { context ⇒
+    val testT = TestTask { context =>
       context.contains(i.toArray) should equal(true)
       context(i.toArray).sorted.toVector should equal(data.toVector)
       context
@@ -112,7 +111,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val mole = toMoleExecution(emptyT on env)
 
     mole.environments.head._2 listen {
-      case (_, _: Environment.JobSubmitted) ⇒ sub += 1
+      case (_, _: Environment.JobSubmitted) => sub += 1
     }
 
     mole.run

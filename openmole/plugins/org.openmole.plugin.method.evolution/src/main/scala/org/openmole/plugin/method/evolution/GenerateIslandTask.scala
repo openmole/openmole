@@ -25,7 +25,7 @@ import org.openmole.core.setter.DefinitionScope
 
 object GenerateIslandTask {
 
-  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[_])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[?])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
 
     ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
@@ -35,12 +35,11 @@ object GenerateIslandTask {
 
       def samples =
         if (p.isEmpty) Vector.empty
-        else sample match {
+        else sample match 
           case Some(s) ⇒ rng().shuffle(p.toVector).take(s)
           case None    ⇒ p.toVector
-        }
 
-      def populations = Array.fill(size)(evolution.operations.migrateToIsland(samples).toArray)
+      def populations = Array.fill(size)(samples.toArray)
       Variable(outputPopulation.toArray, populations)
     } set (
       inputs += evolution.populationVal,

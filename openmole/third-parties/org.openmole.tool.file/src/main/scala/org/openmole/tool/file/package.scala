@@ -58,7 +58,7 @@ package file {
 
     def copyChannel(source: FileChannel, destination: FileChannel): Unit = source.transferTo(0, source.size, destination)
 
-    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[_], resourceName: String, executable: Boolean = false) =
+    //    def retrieveResourceFromClassLoader(file: File, clazz: Class[?], resourceName: String, executable: Boolean = false) =
     //      if (!file.exists()) {
     //        withClosable(clazz.getClassLoader.getResourceAsStream(resourceName))(_.copy(file))
     //        if (executable) file.setExecutable(true)
@@ -91,8 +91,8 @@ package file {
         else file.size == 0L
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
-
       def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
+      def listFileSafeIterator = Files.list(file.toPath).iterator().asScala
       
       def recursiveListFilesSafe(filter: File ⇒ Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 
@@ -116,20 +116,20 @@ package file {
 
       private def copyFile(toF: File, followSymlinks: Boolean = false) = {
         val copyOptions = getCopyOptions(followSymlinks)
-        Files.copy(file, toF, copyOptions: _*)
+        Files.copy(file, toF, copyOptions *)
         toF.mode = file
       }
 
       def copy(toF: File, followSymlinks: Boolean = false) = 
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
         toF.getParentFileSafe.mkdirs()
-        if (Files.isDirectory(file)) 
+        if Files.isDirectory(file)
         then DirUtils.copy(file, toF, followSymlinks)
         else copyFile(toF, followSymlinks)
 
-      def copy(to: OutputStream) = withClosable(bufferedInputStream()) {
-        _.copy(to)
-      }
+      def copy(to: OutputStream) =
+        withClosable(bufferedInputStream()):
+          _.copy(to)
 
       // TODO replace with NIO
       def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor): Unit =
@@ -267,8 +267,9 @@ package file {
 
       def content: String = content()
       def content(gz: Boolean = false): String =
-        if (gz) withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
-        else withSource(_.mkString)
+        if gz
+        then withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
+        else Files.readString(file.toPath)
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
       def <<(s: String) = append(s)
@@ -276,7 +277,7 @@ package file {
       def clear =
         content = ""
 
-      def lines = withSource(_.getLines.toVector)
+      def lines: IArray[String] = IArray.unsafeFromArray(Files.readAllLines(file.toPath).asScala.toArray)
 
       def contentOption =
         try Some(file.content)
@@ -407,8 +408,8 @@ package file {
 
       def bufferedOutputStream(append: Boolean = false, gz: Boolean = false) =
         file.createParentDirectory
-        if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*))
-        else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append): _*).toGZ)
+        if (!gz) new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append) *))
+        else new BufferedOutputStream(Files.newOutputStream(file.toPath, writeOptions(append) *).toGZ)
 
       def gzippedBufferedInputStream = new GZIPInputStream(bufferedInputStream())
       def gzippedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream())
@@ -439,7 +440,7 @@ package file {
 
       def withReader[T] = withClosable[Reader, T](Files.newBufferedReader(file.toPath))(_)
 
-      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append): _*))(_)
+      def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append) *))(_)
 
       def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] ⇒ T): T = {
         def open =
@@ -457,9 +458,8 @@ package file {
 
       def wrapError[T](f: ⇒ T): T =
         try f
-        catch {
+        catch
           case t: Throwable ⇒ throw new IOException(s"For file $file", t)
-        }
 
       ////// synchronized operations //////
       def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))

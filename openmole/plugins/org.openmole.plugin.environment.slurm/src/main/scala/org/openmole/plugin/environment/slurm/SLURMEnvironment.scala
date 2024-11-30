@@ -18,7 +18,6 @@
 
 package org.openmole.plugin.environment.slurm
 
-import _root_.gridscale.effectaside
 import org.openmole.core.authentication._
 import org.openmole.core.workflow.execution._
 import org.openmole.plugin.environment.batch.environment._
@@ -29,12 +28,13 @@ import squants.information._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import _root_.gridscale.cluster.*
 
-object SLURMEnvironment {
+object SLURMEnvironment:
 
   def apply(
-    user:                 OptionalArgument[String]      = None,
-    host:                 OptionalArgument[String]      = None,
+    user:                 OptionalArgument[String],
+    host:                 OptionalArgument[String],
     port:                 OptionalArgument[Int]         = 22,
     partition:            OptionalArgument[String]      = None,
     openMOLEMemory:       OptionalArgument[Information] = None,
@@ -52,14 +52,16 @@ object SLURMEnvironment {
     workDirectory:        OptionalArgument[String]      = None,
     threads:              OptionalArgument[Int]         = None,
     timeout:              OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = None,
     storageSharedLocally: Boolean                       = false,
+    proxy:                OptionalArgument[SSHProxy]    = None,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
     forceCopyOnNode:      Boolean                       = false,
     refresh:              OptionalArgument[Time]        = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
-  )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+  )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       partition = partition,
@@ -80,13 +82,14 @@ object SLURMEnvironment {
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
+      reconnect = reconnect,
       modules = modules,
       debug = debug)
 
     EnvironmentProvider: (ms, cache) ⇒
       import ms._
 
-      if (!localSubmission)
+      if !localSubmission
       then
         val userValue = user.mustBeDefined("user")
         val hostValue = host.mustBeDefined("host")
@@ -100,6 +103,7 @@ object SLURMEnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+          proxy = proxy.map(SSHProxy.authenticated),
           services = BatchEnvironment.Services(ms, cache)
         )
       else
@@ -129,126 +133,119 @@ object SLURMEnvironment {
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
+    reconnect:            Option[Time],
     modules:              Seq[String],
     debug:                Boolean)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[_, _], refresh: Option[Time])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
     submitToCluster(
       environment,
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _, _),
-      jobService.state(_),
-      jobService.delete(_),
-      jobService.stdOutErr(_),
+      jobService.submit,
+      jobService.state,
+      jobService.delete,
+      jobService.stdOutErr,
       refresh)
 
-}
 
-class SLURMEnvironment[A: gridscale.ssh.SSHAuthentication](
+class SLURMEnvironment(
   val user:              String,
   val host:              String,
   val port:              Int,
   val timeout:           Time,
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
-  val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) {
-  env ⇒
+  val authentication:    SSHAuthentication,
+  val proxy:             Option[SSHProxy.Authenticated],
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env =>
 
-  import services._
+  import services.*
 
-  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit lazy val ssh: gridscale.ssh.SSH =
+    def proxyValue = proxy.map(p => SSHProxy.toSSHServer(p, timeout))
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout, sshProxy = proxyValue)(authentication)
+    gridscale.ssh.SSH(sshServer, reconnect = parameters.reconnect)
 
-  override def start() = { storageService }
+  override def start() =
+    storageService
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = true)
 
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    cleanSSHStorage(storageService, background = false)
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
-    sshInterpreter().close
-  }
+    ssh.close
 
-  import env.services.{ threadProvider, preference }
-  import org.openmole.plugin.environment.ssh._
-
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-  lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
+  lazy val sshAccessControl = AccessControl(preference(SSHEnvironment.maxConnections))
 
   lazy val storageService =
-    if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
-      (localStorageSpace(local), local)
-    }
+    if parameters.storageSharedLocally
+    then
+      Left:
+        val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
+        (localStorageSpace(local), local)
     else
-      Right {
+      Right:
         val ssh =
           sshStorage(
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
-            accessControl = accessControl,
+            accessControl = sshAccessControl,
             environment = env,
             sharedDirectory = parameters.sharedDirectory
           )
 
         (sshStorageSpace(ssh), ssh)
-      }
-
-  def execute(batchExecutionJob: BatchExecutionJob) =
-    storageService match {
-      case Left((space, local)) ⇒ SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
-      case Right((space, ssh))  ⇒ SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
-    }
-
-  lazy val installRuntime =
-    storageService match {
-      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
-    }
 
   lazy val pbsJobService =
-    storageService match {
-      case Left((space, local)) ⇒ new SLURMJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ new SLURMJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-    }
+    storageService match
+      case Left((space, local)) ⇒
+        val installRuntime = RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+        SLURMJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, sshAccessControl)
+      case Right((space, ssh)) ⇒
+        val installRuntime = RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+        SLURMJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, sshAccessControl)
 
-}
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    storageService match
+      case Left((space, local)) ⇒ SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
+      case Right((space, ssh))  ⇒ SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
+
 
 class SLURMLocalEnvironment(
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env =>
 
-  import services._
+  import services.*
 
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
+  override def start() =
+    storage
+    space
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = true)
 
-  override def start() = { storage; space; HierarchicalStorageSpace.clean(storage, space, background = true) }
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    HierarchicalStorageSpace.clean(storage, space, background = false)
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
-  }
-
-  import env.services.preference
-  import org.openmole.plugin.environment.ssh._
 
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
 
-  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
+  lazy val jobService =
+    val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
+    new SLURMJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHeadNode(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
-  import _root_.gridscale.local.LocalHost
-
-  lazy val jobService = new SLURMJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
-
-}
 

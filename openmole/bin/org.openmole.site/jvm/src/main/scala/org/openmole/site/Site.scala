@@ -80,9 +80,8 @@ object Site {
       case None ⇒ throw new RuntimeException("Missing argument --target")
     }
 
-    if (parameters.test) {
-      Test.generate(dest)
-    }
+    if parameters.test then Test.generate(dest)
+    
 //    else if (parameters.testUrls) {
 //      Test.urls
 //    }
@@ -120,12 +119,11 @@ object Site {
          * The body of this site's HTML page
          */
 
-        def bodyFrag(pageTree: PageTree) = {
+        def bodyFrag(pageTree: PageTree) =
 
           val (sitePage, elementClass) =
-            pageTree.page match {
+            pageTree.page match
               case _ ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
-            }
 
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
@@ -148,26 +146,24 @@ object Site {
             //onload := "SiteJS.SiteJS.toto();",
             onload := onLoadString(pageTree)
           )
-        }
 
-        private def onLoadString(sitepage: org.openmole.site.PageTree) = {
+        private def onLoadString(sitepage: org.openmole.site.PageTree) =
           def siteJS = "openmole_site"
 
           def commonJS = s"$siteJS.loadIndex(index);"
 
-          sitepage.page match {
+          sitepage.page match
             case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + commonJS
             case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + commonJS
             case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
             case _                               ⇒ commonJS
-          }
-        }
 
-        def generateHtml(outputRoot: File) = {
+
+        def generateHtml(outputRoot: File) =
           import scalatags.Text.all._
           outputRoot.mkdirs()
 
-          val res = Pages.all.map { page ⇒
+          val res = Pages.all.map: page ⇒
             val txt = html(
               head(headFrags(page)),
               bodyFrag(page)
@@ -178,12 +174,10 @@ object Site {
             val target = outputRoot / page.file
             target.withFileOutputStream { _.write(bytes.array()) }
             LunrIndex.Index(page.file, page.name, txt)
-          }
 
           val jsDir = outputRoot / "js"
           jsDir.mkdirs()
           (jsDir / "index.js").content = "var index = " + JsArray(res).compactPrint
-        }
 
         lazy val pagesFrag = Pages.all.map {
           _.content

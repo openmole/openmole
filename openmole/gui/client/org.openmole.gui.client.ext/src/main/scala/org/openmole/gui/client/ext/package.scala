@@ -22,14 +22,14 @@ import scaladget.tools.*
 import org.openmole.gui.shared.data.{ExecutionState, RelativePath}
 import org.scalajs.dom
 import com.raquo.laminar.api.L.*
-import endpoints4s.xhr
-import endpoints4s.xhr.EndpointsSettings
+import endpoints4s.fetch
+import endpoints4s.fetch.EndpointsSettings
 import org.openmole.gui.shared.api.CoreAPI
 
 package object ext {
 
   type ClientSettings = EndpointsSettings
-  trait APIClient extends xhr.future.Endpoints with xhr.JsonEntitiesFromCodecs
+  trait APIClient extends fetch.future.Endpoints with fetch.JsonEntitiesFromCodecs
 
   class CoreAPIClientImpl(val settings: ClientSettings)
     extends CoreAPI with APIClient
@@ -101,6 +101,8 @@ package object ext {
   lazy val fileActions = cls := "file-actions"
 
   lazy val fileActionItems = cls := "file-action-items"
+
+  lazy val verticalLine = cls := "file-action-border"
 
   lazy val navBarItem = cls := "navbar-item"
 

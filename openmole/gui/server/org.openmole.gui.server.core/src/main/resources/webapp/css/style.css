@@ -269,6 +269,10 @@ li.selectElement{
     transform: scale(1.2);
 }
 
+.bi-arrow-counterclockwise::before{
+    scale: 1.4;
+}
+
 /* MODAL WIZARD PANEL*/
 .modelWizardDivs{
     display: inline-block;
@@ -316,7 +320,6 @@ li.selectElement{
     height: 100%;
     margin-left: 5px;
     width: 6px;
-    background-color: #3f3d56;
 }
 
 .spinner-wave div:nth-child(2) {
@@ -574,6 +577,7 @@ padding-bottom: 90px;
     min-height: 0;
     background-color: #3f3d56;
     color: white;
+    height: 72vh;
 }
 
 /* EDITOR */
@@ -673,21 +677,22 @@ padding-bottom: 90px;
 .file-item-warning {
     background-color: #dc3545;
     cursor: pointer;
-    width: 17%;
     height: 38px;
     color: white;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
+    padding: 7px;
+    min-width: 60px;
 }
 
 .file-item-cancel {
     background-color: white;
     cursor: pointer;
-    width: 17%;
     height: 38px;
     color: #6c757d;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+    padding: 7px;
 }
 
 .file-actions {
@@ -706,6 +711,12 @@ padding-bottom: 90px;
     padding: 10px;
     line-height: 20px;
     flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-action-border {
+    border-right: 2px solid #fff4;
 }
 
 .file-item-text {
@@ -724,7 +735,7 @@ padding-bottom: 90px;
   justify-content: right;
   padding: 10 50 14 10;
   background-color: #3f3d56;
-  margin-right: -100px;
+  margin-right: -390px;
 }
 
 .sorting-files-item,
@@ -767,8 +778,17 @@ padding-bottom: 90px;
      align-items: center;
      color: white;
      font-size: 14px;
-     width: 300px;
+     width: 250px;
      justify-content: flex-start;
+}
+
+.toolBlock {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  background-color: #3f3d56;
+  margin-right: -20px;
 }
 
 .open-transition {
@@ -810,6 +830,15 @@ padding-bottom: 90px;
     color: white;
     background-color: #795c85;
     border-color: #795c85;
+    height: 38px;
+}
+
+.white-button {
+    width: 80px;
+    padding: 5px;
+    color: #6c757d;;
+    background-color: white;
+    border-color: white;
     height: 38px;
 }
 
@@ -892,7 +921,42 @@ padding-bottom: 90px;
     background: #d35f5f;
 }
 
- .findFile{
+
+.specific-file.git::before {
+    transform: rotate(-45deg);
+      color: white;
+      content: "g";
+      font-weight: bold;
+      color: #795c85;
+      padding-bottom: 6px;
+}
+
+.specific-file.git {
+    transform: rotate(45deg);
+    background-color: white;
+    width: 16px;
+    height: 16px;
+}
+
+.git-status-conflicting {
+  color: #d25757;
+}
+
+.git-status-modified {
+  color: #3086b5;
+}
+
+.git-status-untracked {
+    color: #5aa64b;
+}
+
+.gitInfo {
+    margin-left : 40px;
+    position: relative;
+    scale : 1.4;
+}
+
+.findFile{
   fontStyle:italic;
   cursor: pointer;
   margin-left: 20px;
@@ -1520,16 +1584,24 @@ input:checked + .slider:before {
 }
 
 .scriptError {
-  width: 100%;
-  overflow: scroll;
-  background-color: rgb(211, 95, 95);
-  color: white;
-  padding: 10px;
-  font-family: monospace;
-  font-size: medium;
-  border: 1px solid rgb(211,95,95);
-  border-radius: 4px;
-  margin-bottom: 10px;
+    overflow: scroll;
+    background-color: rgba(255, 95, 95, 0.5);
+    padding: 10px;
+    font-family: monospace;
+    font-size: medium;
+    border: 2px solid rgb(255,95,95);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    margin-left: 15;
+    height: 69vh;
+    margin-right: 5px;
+}
+
+.errorTextArea {
+    background-color: rgba(0,0,0,0);
+    border: none;
+    color: white;
+    width: 100%;
 }
 
 .metadata {
@@ -1543,4 +1615,9 @@ input:checked + .slider:before {
 
 div.noUi-connect {
   background: #3086b5;
+}
+
+.disable {
+    pointer-events: none;
+    opacity: 0.4;
 }

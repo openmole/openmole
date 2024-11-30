@@ -5,22 +5,22 @@ import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchE
 import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterface, StorageInterface }
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
-import _root_.gridscale.effectaside
 
-class SGEJobService[S, H](
+class SGEJobService[S](
   s:             S,
   tmpDirectory:  String,
-  installation:  RuntimeInstallation[_],
+  installation:  RuntimeInstallation[?],
   parameters:    SGEEnvironment.Parameters,
-  h:             H,
-  accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
+  headNode:      HeadNode,
+  accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services):
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
     val workDirectory = parameters.workDirectory getOrElse "/tmp"
 
-    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
+    def buildScript(serializedJob: SerializedJob, outputPath: String) =
       SharedStorage.buildScript(
         installation.apply,
         jobDirectory,
@@ -32,7 +32,6 @@ class SGEJobService[S, H](
         s,
         modules = parameters.modules
       )
-    }
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
@@ -44,16 +43,22 @@ class SGEJobService[S, H](
       memory = parameters.memory
     )
 
-    accessControl { gridscale.sge.submit(h, description) }
-  }
+    accessControl:
+      gridscale.sge.submit(headNode, description)
 
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.sge.state(h, id)) }
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      GridScaleJobService.translateStatus(gridscale.sge.state(headNode, id))
 
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.sge.clean(h, id) }
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      gridscale.sge.clean(headNode, id)
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.sge.stdOut(h, id), gridscale.sge.stdErr(h, id)) }
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      (gridscale.sge.stdOut(headNode, id), gridscale.sge.stdErr(headNode, id))
 
-}
+

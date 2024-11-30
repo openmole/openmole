@@ -66,7 +66,7 @@ class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthent
 
     private def coreObject(data: LoginAuthenticationData) = LoginPassword(
       data.login,
-      cypher.encrypt(data.password),
+      data.password,
       data.target,
       data.port.toInt
     )
@@ -75,18 +75,15 @@ class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthent
 
     def removeAuthentication(data: LoginAuthenticationData): Unit = SSHAuthentication -= coreObject(data)
 
-    def loginAuthentications(): Seq[LoginAuthenticationData] = SSHAuthentication().flatMap {
-      _ match {
-        case lp: LoginPassword ⇒
-          Some(LoginAuthenticationData(
-            lp.login,
-            cypher.decrypt(lp.cypheredPassword),
-            lp.host,
-            lp.port.toString
-          ))
-        case _ ⇒ None
-      }
-    }
+    def loginAuthentications(): Seq[LoginAuthenticationData] = SSHAuthentication().flatMap:
+      case lp: LoginPassword ⇒
+        Some(LoginAuthenticationData(
+          lp.login,
+          lp.password,
+          lp.host,
+          lp.port.toString
+        ))
+      case _ ⇒ None
 
     def testAuthentication(data: LoginAuthenticationData): Seq[Test] =
       Seq(

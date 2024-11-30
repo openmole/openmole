@@ -19,7 +19,7 @@ object GenomeDouble {
 
   def toVariables(genome: GenomeDouble, continuousValues: Vector[Double], scale: Boolean = true) =
 
-    @tailrec def toVariables0(genome: List[Genome.GenomeBound.ScalarDouble], continuousValues: List[Double], acc: List[Variable[_]]): Vector[Variable[_]] = {
+    @tailrec def toVariables0(genome: List[Genome.GenomeBound.ScalarDouble], continuousValues: List[Double], acc: List[Variable[?]]): Vector[Variable[?]] = {
       genome match {
         case Nil ⇒ acc.reverse.toVector
         case (h: Genome.GenomeBound.ScalarDouble) :: t ⇒
@@ -38,7 +38,7 @@ object GenomeDouble {
       Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
   }
 
-  def fromVariables(variables: Seq[Variable[_]], genome: GenomeDouble) = {
+  def fromVariables(variables: Seq[Variable[?]], genome: GenomeDouble) = {
     val vContext = Context() ++ variables
 
     @tailrec def fromVariables0(genome: List[Genome.GenomeBound.ScalarDouble], accDouble: List[Double]): Vector[Double] =
@@ -114,73 +114,71 @@ object Genome:
         case b: GenomeBound.ContinuousInt            ⇒ b.v
         case b: GenomeBound.SequenceOfDouble         ⇒ b.v
         case b: GenomeBound.SequenceOfInt            ⇒ b.v
-        case b: GenomeBound.Enumeration[_]           ⇒ b.v
-        case b: GenomeBound.SequenceOfEnumeration[_] ⇒ b.v
+        case b: GenomeBound.Enumeration[?]           ⇒ b.v
+        case b: GenomeBound.SequenceOfEnumeration[?] ⇒ b.v
 
   end GenomeBound
 
   import _root_.mgo.evolution.{ C, D }
-  import cats.implicits._
+  import cats.implicits.*
 
   def continuous(genome: Genome): Vector[C] =
-    genome.toVector.collect {
+    genome.toVector.collect:
       case s: GenomeBound.ScalarDouble     ⇒ Vector(C(s.low, s.high))
-      case s: GenomeBound.SequenceOfDouble ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ C(l, h) }
+      case s: GenomeBound.SequenceOfDouble ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
       case s: GenomeBound.ContinuousInt    ⇒ Vector(C(s.low, s.high))
-    }.flatten
+    .flatten
 
   def discrete(genome: Genome): Vector[D] =
-    genome.toVector.collect {
+    genome.toVector.collect:
       case s: GenomeBound.ScalarInt                ⇒ Vector(D(s.low, s.high))
-      case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map { case (l, h) ⇒ D(l, h) }
-      case s: GenomeBound.Enumeration[_]           ⇒ Vector(D(0, s.values.size - 1))
-      case s: GenomeBound.SequenceOfEnumeration[_] ⇒ s.values.map { v ⇒ D(0, v.size - 1) }
-    }.flatten
+      case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ D(l, h))
+      case s: GenomeBound.Enumeration[?]           ⇒ Vector(D(0, s.values.size - 1))
+      case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map(v => D(0, v.size - 1))
+    .flatten
 
-  def continuousValue(genome: Genome, v: Val[_], continuous: Vector[Double]) = {
+  def continuousValue(genome: Genome, v: Val[?], continuous: Vector[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous(index)
-  }
 
-  def continuousSequenceValue(genome: Genome, v: Val[_], size: Int, continuous: Vector[Double]) = {
+  def continuousSequenceValue(genome: Genome, v: Val[?], size: Int, continuous: Vector[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous.slice(index, index + size)
-  }
 
-  def discreteValue(genome: Genome, v: Val[_], discrete: Vector[Int]) =
+  def discreteValue(genome: Genome, v: Val[?], discrete: Vector[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete(index)
 
-  def discreteSequenceValue(genome: Genome, v: Val[_], size: Int, discrete: Vector[Int]) =
+  def discreteSequenceValue(genome: Genome, v: Val[?], size: Int, discrete: Vector[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete.slice(index, index + size)
 
   def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
 
-  def continuousIndex(genome: Genome, v: Val[_]): Option[Int] =
+  def continuousIndex(genome: Genome, v: Val[?]): Option[Int] =
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
       l match
         case Nil                                    ⇒ None
-        case (h: GenomeBound.ScalarDouble) :: t     ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.ContinuousInt) :: t    ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
+        case (h: GenomeBound.ScalarDouble) :: t     ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.ContinuousInt) :: t    ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.SequenceOfDouble) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.size)
         case h :: t                                 ⇒ indexOf0(t, index)
 
     indexOf0(genome.toList, 0)
 
-  def discreteIndex(genome: Genome, v: Val[_]): Option[Int] =
+  def discreteIndex(genome: Genome, v: Val[?]): Option[Int] =
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
       l match
         case Nil ⇒ None
-        case (h: GenomeBound.ScalarInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.Enumeration[_]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + 1)
-        case (h: GenomeBound.SequenceOfInt) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.size)
-        case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒ if (h.v == v) Some(index) else indexOf0(t, index + h.values.size)
+        case (h: GenomeBound.ScalarInt) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.Enumeration[?]) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + 1)
+        case (h: GenomeBound.SequenceOfInt) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.size)
+        case (h: GenomeBound.SequenceOfEnumeration[?]) :: t ⇒ if h.v == v then Some(index) else indexOf0(t, index + h.values.size)
         case h :: t ⇒ indexOf0(t, index)
 
     indexOf0(genome.toList, 0)
 
-  def valueOf(context: Context, v: Val[_]) =
+  def valueOf(context: Context, v: Val[?]) =
     context.get(v.name) match {
       case None ⇒ throw new UserBadDataError(s"Values $v has not been provided among $context")
       case Some(f) ⇒
@@ -188,7 +186,7 @@ object Genome:
         else f.value
     }
 
-  def fromVariables(variables: Seq[Variable[_]], genome: Genome) = {
+  def fromVariables(variables: Seq[Variable[?]], genome: Genome) = {
     val vContext = Context() ++ variables
 
     @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (Vector[Double], Vector[Int]) =
@@ -201,12 +199,12 @@ object Genome:
           fromVariables0(t, accInt, values ::: accDouble)
         case (h: GenomeBound.ScalarInt) :: t     ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Int] :: accInt, accDouble)
         case (h: GenomeBound.SequenceOfInt) :: t ⇒ fromVariables0(t, valueOf(vContext, h.v).asInstanceOf[Array[Int]].toList ::: accInt, accDouble)
-        case (h: GenomeBound.Enumeration[_]) :: t ⇒
+        case (h: GenomeBound.Enumeration[?]) :: t ⇒
           val i = h.values.indexOf(valueOf(vContext, h.v))
           if (i == -1) throw new UserBadDataError(s"Value ${valueOf(vContext, h.v)} doesn't match a element of enumeration ${h.values} for input ${h.v}")
           fromVariables0(t, i :: accInt, accDouble)
-        case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
-          val vs = valueOf(vContext, h.v).asInstanceOf[Array[_]]
+        case (h: GenomeBound.SequenceOfEnumeration[?]) :: t ⇒
+          val vs = valueOf(vContext, h.v).asInstanceOf[Array[?]]
           val is =
             (vs zip h.values).zipWithIndex.map {
               case ((v, hv), index) ⇒
@@ -222,7 +220,7 @@ object Genome:
 
   def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean = true) = {
 
-    @tailrec def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[_]]): Vector[Variable[_]] = {
+    @tailrec def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[?]]): Vector[Variable[?]] = {
       genome match {
         case Nil ⇒ acc.reverse.toVector
         case (h: GenomeBound.ScalarDouble) :: t ⇒
@@ -248,11 +246,11 @@ object Genome:
           val value = (h.low zip h.high zip discreteValues).take(h.size) map { case (_, v) ⇒ v }
           val v = Variable(h.v, value)
           toVariables0(t, continuousValues, discreteValues.drop(h.size), v :: acc)
-        case (h: GenomeBound.Enumeration[_]) :: t ⇒
+        case (h: GenomeBound.Enumeration[?]) :: t ⇒
           val value = h.values(discreteValues.head)
           val v = Variable(h.v, value)
           toVariables0(t, continuousValues, discreteValues.tail, v :: acc)
-        case (h: GenomeBound.SequenceOfEnumeration[_]) :: t ⇒
+        case (h: GenomeBound.SequenceOfEnumeration[?]) :: t ⇒
           val value = (h.values zip discreteValues).take(h.values.size) map { case (vs, i) ⇒ vs(i) }
           val v = Variable(h.v, value.toArray(h.v.fromArray.`type`.manifest))
           toVariables0(t, continuousValues, discreteValues.drop(h.values.size), v :: acc)
@@ -273,11 +271,11 @@ object Genome:
       Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
     case b: GenomeBound.SequenceOfInt ⇒
       Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
-    case b: GenomeBound.Enumeration[_] ⇒
+    case b: GenomeBound.Enumeration[?] ⇒
       val array = b.v.`type`.manifest.newArray(value.size)
       value.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(array, i, v) }
       Variable.unsecure(b.v.toArray, array)
-    case b: GenomeBound.SequenceOfEnumeration[_] ⇒
+    case b: GenomeBound.SequenceOfEnumeration[?] ⇒
       val array = b.v.`type`.manifest.newArray(value.size)
       value.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(array, i, v) }
       Variable.unsecure(b.v.toArray, array)
@@ -286,7 +284,7 @@ object Genome:
   object ToSuggestion:
 
     import scala.util.boundary
-    def loadFromFile(f: File, genome: Genome)(using SerializerService): SuggestedValues = boundary:
+    def loadFromFile(f: File, genome: Genome): SuggestedValues = boundary:
       import org.openmole.core.format.CSVFormat
       import org.openmole.core.format.OMRFormat
       import org.openmole.core.dsl._
@@ -304,7 +302,7 @@ object Genome:
 
       if OMRFormat.isOMR(f)
       then
-        val ctx = Context(OMRFormat.variables(f).head._2: _*)
+        val ctx = Context(OMRFormat.variables(f).head._2 *)
         val vals = genome.map(g => GenomeBound.toVal(g))
         val values =
           vals.map(v => ctx.variable(v.array).getOrElse:
@@ -321,13 +319,13 @@ object Genome:
 
       SuggestedValues.Error(new UserBadDataError(s"Unsupported file type for suggestion $f"))
 
-    private def fileSuggestion(t: File)(using SerializerService) =
+    private def fileSuggestion(t: File) =
       Suggestion(genome => loadFromFile(t, genome))
 
-    given suggestionFromFile(using SerializerService): ToSuggestion[File] with
+    given suggestionFromFile: ToSuggestion[File] with
       def apply(t: File): Suggestion = fileSuggestion(t)
 
-    given suggestionFromString(using SerializerService): ToSuggestion[String] with
+    given suggestionFromString: ToSuggestion[String] with
       def apply(t: String): Suggestion = fileSuggestion(File(t))
 
     given fromAssignment: ToSuggestion[Seq[ValueAssignment[Any]]] with
@@ -347,7 +345,7 @@ object Genome:
     def empty: Suggestion =
       Suggestion(g => SuggestedValues.empty)
 
-    def apply(vs: :=[Val[_], Any]*): Seq[ValueAssignment[Any]] =
+    def apply(vs: :=[Val[?], Any]*): Seq[ValueAssignment[Any]] =
       vs.map(v => ValueAssignment.untyped(v.asInstanceOf[ValueAssignment[Any]]).assignment)
 
   case class Suggestion(f: Genome => SuggestedValues):

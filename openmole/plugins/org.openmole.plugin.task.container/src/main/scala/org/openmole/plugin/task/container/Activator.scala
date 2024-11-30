@@ -19,7 +19,7 @@ package org.openmole.plugin.task.container
 
 import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.PluginRegistry
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.osgi.framework.{BundleActivator, BundleContext}
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit =
@@ -30,7 +30,10 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        TaskHighLight("ContainerTask")
+        TaskHighLight("ContainerTask"),
+        WordHighLight(classOf[SingularityFlatImage]),
+        WordHighLight(classOf[SingularityMemory]),
+        WordHighLight(classOf[SingularityOverlay]),
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

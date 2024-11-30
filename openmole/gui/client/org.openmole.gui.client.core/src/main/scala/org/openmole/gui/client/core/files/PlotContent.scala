@@ -40,7 +40,7 @@ object PlotContent:
     import ResultView.*
     val sectionMap =
       (sections.map: s =>
-        val editor = EditorPanelUI(extension, s.rawContent, "initialHash")
+        val editor = EditorPanelUI(safePath, s.rawContent, "initialHash")
         editor.setReadOnly(true)
 
         // FIXME: this should be in css but for some reason it does not work this way
@@ -52,7 +52,7 @@ object PlotContent:
 
         val table = div(idAttr := "editor",
           dataTable(s.rowData.content.map(_.map(RowData.toDataContent)))
-            .addHeaders(s.rowData.headers: _*)
+            .addHeaders(s.rowData.headers *)
             .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
             .sortable
             .render.render.amend(borderCollapse.collapse)

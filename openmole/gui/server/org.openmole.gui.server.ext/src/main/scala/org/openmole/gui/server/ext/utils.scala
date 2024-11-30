@@ -16,6 +16,8 @@ import org.openmole.gui.shared.data
 import org.openmole.gui.shared.data.*
 import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
+import org.openmole.gui.server.git.*
+import org.eclipse.jgit.api.Git
 
 import java.text.SimpleDateFormat
 import scala.annotation.tailrec
@@ -33,6 +35,7 @@ object utils:
     val old = workspace.location / "webui" / "projects"
     val newProjects = workspace.userDir / "projects"
     if old.exists() then old.move(newProjects)
+    newProjects.mkdirs()
     newProjects
 
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
@@ -79,7 +82,7 @@ object utils:
     }.contains(safePath)
 
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true)(using workspace: Workspace): Option[TreeNodeData] =
+  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true, gitStatus: Option[GitStatus] = None)(using workspace: Workspace): Option[TreeNodeData] =
     import org.openmole.core.format.OMRFormat
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
@@ -87,12 +90,15 @@ object utils:
     then
       val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
+
       def size =
         if OMRFormat.isOMR(f)
-        then Try { OMRFormat.diskUsage(f) }.getOrElse(f.length())
+        then Try {
+          OMRFormat.diskUsage(f)
+        }.getOrElse(f.length())
         else f.length()
 
-      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList))))
+      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList)), gitStatus))
     else None
 
   //implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
@@ -132,14 +138,44 @@ object utils:
     given ServerFileSystemContext = path.context
 
     def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
-    def treeNodesData = safePathToFile(path).listFilesSafe.toSeq.filter(filterHidden).flatMap { f ⇒ fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin) }
-    val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
 
-    val sortedSize = sorted.size
+    val currentDirGit = GitService.git(path.toFile, projectsDirectory)
 
-    fileFilter.size match
-      case Some(s) => FileListData(sorted.take(s), s, sortedSize)
-      case None => FileListData(sorted, sortedSize, sortedSize)
+    try
+      val modified = currentDirGit.map(GitService.getModified(_)).getOrElse(Seq())
+      val conflicting = currentDirGit.map(GitService.getConflicting(_)).getOrElse(Seq())
+      val untracked = currentDirGit.map(GitService.getUntracked(_)).getOrElse(Seq())
+
+      val currentFile = safePathToFile(path)
+
+      def treeNodesData =
+        currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
+          val gitStatus = currentDirGit match
+            case Some(g: Git) =>
+              val relativeName = GitService.relativeName(f, g)
+              if modified.contains(relativeName) then Some(GitStatus.Modified)
+              else if untracked.contains(relativeName) then Some(GitStatus.Untracked)
+              else if conflicting.contains(relativeName) then Some(GitStatus.Conflicting)
+              else Some(GitStatus.Versioned)
+            case None =>
+              if f.isDirectory
+              then
+                GitService.withGit(f, currentFile): git =>
+                  GitStatus.Root
+              else None
+          fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
+
+      val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
+      val sortedSize = sorted.size
+
+      val branchData =
+        currentDirGit.map: git =>
+          BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+
+      fileFilter.size match
+        case Some(s) => FileListData(sorted.take(s), s, sortedSize, branchData)
+        case None => FileListData(sorted, sortedSize, sortedSize, branchData)
+    finally currentDirGit.foreach(_.close())
 
   def recursiveListFiles(path: SafePath, findString: Option[String], withHidden: Boolean = true)(implicit workspace: Workspace): Seq[(SafePath, Boolean)] =
     given ServerFileSystemContext = path.context
@@ -163,6 +199,7 @@ object utils:
     val existing = ListBuffer[SafePath]()
     safePaths.foreach: (p, d) ⇒
       val destination = d.toFile
+
       def copy(): Unit =
         val fromFile = p.toFile
         if OMRFormat.isOMR(fromFile)
@@ -189,6 +226,10 @@ object utils:
     safePaths.foreach: sp ⇒
       deleteFile(sp)
 
+  def deleteEmptyDirectories(s: SafePath)(using workspace: Workspace) =
+    safePathToFile(s).listFilesSafe.foreach: f =>
+      if f.isDirectory && f.listFileSafeIterator.isEmpty then f.delete()
+
   val openmoleFileName = "main.js"
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val depsFileName = "deps.js"
@@ -204,6 +245,7 @@ object utils:
     import org.openmole.core.fileservice._
 
     def hash(f: File) = hashFile.getOrElse(new File(f.toString + "-hash"))
+
     lockFile(file).withLock: _ ⇒
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
@@ -222,7 +264,6 @@ object utils:
         hashFile.content = currentHash
 
 
-
   def catchAll[T](f: ⇒ T): Try[T] =
     val res =
       try Success(f)
@@ -237,8 +278,7 @@ object utils:
     val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
     errors.map(e ⇒ ErrorData(e._2)).toSeq
 
-  
-  
+
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {
     import org.openmole.core.module
     val file: File = safePathToFile(safePath)
@@ -247,6 +287,7 @@ object utils:
   }
 
   object HTTP:
+
     import cats.effect.*
     import org.http4s
     import org.http4s.*
@@ -361,3 +402,9 @@ object utils:
       InternalServerError {
         Left(ErrorData(t)).asJson.noSpaces
       }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
+
+
+  def gitAuthenticationFromData(a: Seq[GitPrivateKeyAuthenticationData])(using Workspace) =
+    a.flatMap: a =>
+      a.privateKeyPath.map: k =>
+        GitAuthentication.PrivateKey(utils.safePathToFile(k), a.password)

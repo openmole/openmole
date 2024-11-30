@@ -32,6 +32,7 @@ import org.openmole.tool.logger.JavaLogger
 import annotation.tailrec
 import org.openmole.gui.server.core.*
 import org.openmole.console.*
+import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.tool.file.*
 import org.openmole.tool.hash.*
 import org.openmole.core.{location, module}
@@ -206,13 +207,14 @@ object Application extends JavaLogger {
         println(usage)
         Console.ExitCodes.ok
       case Reset(initialisePassword) ⇒
-        implicit val preference = Services.preference(workspace)
-        implicit val authenticationStore = Services.authenticationStore(workspace)
-        Services.resetPassword
-        if (initialisePassword) Console.initPassword
-        Console.ExitCodes.ok
+        Console.withTerminal:
+          given Preference = Services.preference(workspace)
+          given AuthenticationStore = Services.authenticationStore(workspace)
+          Services.resetPassword
+          if initialisePassword then Console.initPassword
+          Console.ExitCodes.ok
       case RESTMode ⇒
-        implicit val preference = Services.preference(workspace)
+        given Preference = Services.preference(workspace)
         displayErrors(loadPlugins)
 
         Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel): services ⇒
@@ -222,22 +224,29 @@ object Application extends JavaLogger {
 
         Console.ExitCodes.ok
       case ConsoleMode ⇒
-        implicit val preference = Services.preference(workspace)
-        Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-        Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
-          Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
-          val console = new Console(config.scriptFile)
-          console.run(config.args, config.consoleWorkDirectory)
-        }
+        Console.withTerminal:
+          given Preference = Services.preference(workspace)
+          
+          Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
+          Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
+            Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
+            val console = new Console(config.scriptFile)
+            console.run(config.args, config.consoleWorkDirectory)
+          }
 
       case GUIMode ⇒
-        implicit val preference = Services.preference(workspace)
+        given preference: Preference = Services.preference(workspace)
 
         // FIXME switch to a GUI display in the plugin panel
         displayErrors(loadPlugins)
 
         def browse(url: String) =
-          if (Desktop.isDesktopSupported) Desktop.getDesktop.browse(new URI(url))
+          if Desktop.isDesktopSupported
+          then
+            try Desktop.getDesktop.browse(new URI(url))
+            catch
+              case t: Throwable => logger.warning("Unable to open OpenMOLE app page in the browser")
+
 
         GUIServer.lockFile.withFileOutputStream: fos ⇒
           val launch = (config.remote || fos.getChannel.tryLock != null)
@@ -295,35 +304,30 @@ object Application extends JavaLogger {
         val results = Test.withTmpServices { implicit services ⇒
 
           import services._
-          files.flatMap(toFile).filter { case (_, file) ⇒ isTestable(file) }.map {
-            case (root, file) ⇒
+          files.flatMap(toFile).filter { (_, file) ⇒ isTestable(file) }.map: (root, file) ⇒
 
-              def processResult(c: CompileResult) =
-                c match {
-                  case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
-                  case s: CompilationError        ⇒ util.Failure(s.error)
-                  case s: Compiled                ⇒ util.Success("Compilation succeeded")
-                }
+            def processResult(c: CompileResult) =
+              c match
+                case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
+                case s: CompilationError        ⇒ util.Failure(s.error)
+                case s: Compiled                ⇒ util.Success("Compilation succeeded")
 
-              def displayName(file: File) = s"${root.relativize(file).getPath}"
+            def displayName(file: File) = s"${root.relativize(file).getPath}"
 
-              println(s"Testing: ${displayName(file)}")
+            println(s"Testing: ${displayName(file)}")
 
-              val res =
-                if (!success(file).exists) {
-                  file → processResult(Project.compile(file.getParentFileSafe, file, returnUnit = true))
-                }
-                else {
-                  file -> util.Success("Compilation succeeded (from previous test)")
-                }
+            val res =
+              if !success(file).exists
+              then file → processResult(Project.compile(file.getParentFileSafe, file, returnUnit = true))
+              else file -> util.Success("Compilation succeeded (from previous test)")
 
-              if (res._2.isSuccess) success(file) < "success"
+            if res._2.isSuccess then success(file) < "success"
 
-              print("\u001b[1A\u001b[2K")
-              println(s"${displayName(res._1)}: ${res._2}")
+            print("\u001b[1A\u001b[2K")
+            println(s"${displayName(res._1)}: ${res._2}")
 
-              res
-          }
+            res
+          
         }
 
         val errors =

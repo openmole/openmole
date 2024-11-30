@@ -26,44 +26,50 @@ import org.openmole.plugin.environment.batch.refresh._
 import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
-object StorageService extends JavaLogger {
+object StorageService extends JavaLogger:
   val DirRegenerate = PreferenceLocation("StorageService", "DirRegenerate", Some(1 hours))
 
-  def rmFile[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S]): Unit = {
-    def action = { rmFile(s, path); false }
-    if (background) JobManager ! RetryAction(() ⇒ action)
+  def rmFile[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], priority: AccessControl.Priority): Unit =
+    def action =
+      rmFile(s, path)
+      false
+
+    if background
+    then JobManager ! RetryAction(() ⇒ action)
     else rmFile(s, path)
-  }
 
-  def rmDirectory[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: HierarchicalStorageInterface[S]): Unit = {
-    def action = { rmDirectory(s, path); false }
-    if (background) JobManager ! RetryAction(() ⇒ action)
+  def rmDirectory[S](s: S, path: String, background: Boolean)(using services: BatchEnvironment.Services, storageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority): Unit =
+    def action =
+      rmDirectory(s, path)
+      false
+
+    if background
+    then JobManager ! RetryAction(() ⇒ action)
     else rmDirectory(s, path)
-  }
 
-  def rmFile[S](s: S, directory: String)(implicit storageInterface: StorageInterface[S]): Unit =
+  def rmFile[S](s: S, directory: String)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority): Unit =
     storageInterface.rmFile(s, directory)
 
-  def rmDirectory[S](s: S, directory: String)(implicit hierarchicalStorageInterface: HierarchicalStorageInterface[S]): Unit =
+  def rmDirectory[S](s: S, directory: String)(using hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority): Unit =
     hierarchicalStorageInterface.rmDir(s, directory)
 
   def id[S](s: S)(implicit environmentStorage: EnvironmentStorage[S]) = environmentStorage.id(s)
-  def download[S](s: S, src: String, dest: File, options: TransferOptions = TransferOptions.default)(implicit storageService: StorageInterface[S]) =
+
+  def download[S](s: S, src: String, dest: File, options: TransferOptions = TransferOptions.default)(using storageService: StorageInterface[S], priority: AccessControl.Priority) =
     storageService.download(s, src, dest, options)
 
-  def upload[S](s: S, src: File, dest: String, options: TransferOptions = TransferOptions.default)(implicit storageInterface: StorageInterface[S]) =
+  def upload[S](s: S, src: File, dest: String, options: TransferOptions = TransferOptions.default)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority) =
     storageInterface.upload(s, src, dest, options)
 
-  def child[S](s: S, path: String, name: String)(implicit storageService: HierarchicalStorageInterface[S]) = storageService.child(s, path, name)
+  def child[S](s: S, path: String, name: String)(using storageService: HierarchicalStorageInterface[S], priority: AccessControl.Priority) = storageService.child(s, path, name)
 
-  def exists[S](s: S, path: String)(implicit storageInterface: StorageInterface[S]) =
+  def exists[S](s: S, path: String)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority) =
     storageInterface.exists(s, path)
 
-  def uploadInDirectory[S: StorageInterface: HierarchicalStorageInterface](s: S, file: File, directory: String, transferOptions: TransferOptions) = {
+  def uploadInDirectory[S: StorageInterface: HierarchicalStorageInterface](s: S, file: File, directory: String, transferOptions: TransferOptions)(using AccessControl.Priority) =
     val path = child(s, directory, StorageSpace.timedUniqName)
     upload(s, file, path, transferOptions)
     path
-  }
 
-}
+
 

@@ -25,8 +25,8 @@ object ZipSampling:
   implicit def isSampling[S1, S2]: IsSampling[ZipSampling[S1, S2]] = s ⇒
     def validate: Validate = s.sampling1(s.s1).validate ++ s.sampling2(s.s2).validate
     def inputs: PrototypeSet = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
-    def outputs: Iterable[Val[_]] = s.sampling1(s.s1).outputs ++ s.sampling2(s.s2).outputs
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext: p ⇒
+    def outputs: Iterable[Val[?]] = s.sampling1(s.s1).outputs ++ s.sampling2(s.s2).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext: p ⇒
       import p._
       (s.sampling1(s.s1).sampling.from(context) zip s.sampling2(s.s2).sampling.from(context)).map { case (v1, v2) ⇒ v1 ++ v2 }
 

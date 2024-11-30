@@ -39,7 +39,7 @@ trait ServerAPI:
   def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit]
   def listFiles(path: SafePath, filter: FileSorting = FileSorting(), withHidden: Boolean = false)(using BasePath): Future[FileListData]
   def listRecursive(path: SafePath, findString: Option[String], withHidden: Boolean = false)(using BasePath): Future[Seq[(SafePath, Boolean)]]
-  def move(paths: Seq[(SafePath, SafePath)])(using BasePath): Future[Unit]
+  def move(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]]
   def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit]
   def exists(path: SafePath)(using BasePath): Future[Boolean]
   def isTextFile(path: SafePath)(using BasePath): Future[Boolean]
@@ -54,7 +54,6 @@ trait ServerAPI:
   def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId]
   def clearEnvironmentError(id: ExecutionId, environment: EnvironmentId)(using BasePath): Future[Unit]
   def listEnvironmentError(id: ExecutionId, environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
-
 
   def listPlugins()(using BasePath): Future[Seq[Plugin]]
   def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]]
@@ -86,3 +85,19 @@ trait ServerAPI:
 
   def upload(fileList: Seq[(org.scalajs.dom.File, SafePath)], fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[(RelativePath, SafePath)]]
   def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
+
+  def cloneRepository(repository: String, destination: SafePath, overwrite: Boolean)(using BasePath): Future[Option[SafePath]]
+  def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit]
+  def revertFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
+  def addFiles(files: Seq[SafePath])(using BasePath): Future[Unit]
+  def pull(from: SafePath)(using BasePath): Future[MergeStatus]
+  def push(from: SafePath)(using BasePath): Future[PushStatus]
+  def branchList(from: SafePath)(using BasePath): Future[Option[BranchData]]
+  def checkout(from: SafePath, branchName: String)(using BasePath): Future[Unit]
+  def stash(from: SafePath)(using BasePath): Future[Unit]
+  def stashPop(from: SafePath)(using BasePath): Future[MergeStatus]
+
+  def gitAuthentications()(using BasePath): Future[Seq[GitPrivateKeyAuthenticationData]]
+  def addGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Unit]
+  def removeGitAuthentication(data: GitPrivateKeyAuthenticationData, delete: Boolean)(using BasePath): Future[Unit]
+  def testGitAuthentication(data: GitPrivateKeyAuthenticationData)(using BasePath): Future[Seq[Test]]

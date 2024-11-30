@@ -33,7 +33,7 @@ import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.logger.JavaLogger
 
 object PluginConverter extends JavaLogger:
-  def canConvert(c: Class[_]): Boolean =
+  def canConvert(c: Class[?]): Boolean =
     classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c) || Interpreter.isInterpretedClass(c)
 
 
@@ -52,5 +52,5 @@ class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: Re
   override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object =
     throw new UnsupportedOperationException("Bug: Should never be called.")
 
-  override def canConvert(c: Class[_]): Boolean = PluginConverter.canConvert(c)
+  override def canConvert(c: Class[?]): Boolean = PluginConverter.canConvert(c)
 

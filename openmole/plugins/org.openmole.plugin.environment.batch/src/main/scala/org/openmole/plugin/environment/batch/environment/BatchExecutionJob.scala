@@ -42,7 +42,7 @@ object BatchExecutionJob:
       val allClassFiles = ClassSource.allClasses(directory)
       val mentionedClasses = allMentionedClasses(allClassFiles, classLoader)
 
-      def toVersionedPackage(c: Class[_]) =
+      def toVersionedPackage(c: Class[?]) =
         val p = c.getName.reverse.dropWhile(_ != '.').drop(1).reverse
         PluginManager.bundleForClass(c).map { b ⇒ VersionedPackage(p, Some(b.getVersion.toString)) }
 
@@ -86,8 +86,8 @@ class BatchExecutionJob(
   val plugins: IArray[File]) extends ExecutionJob:
 
   def moleJobIds = storedJob.storedMoleJobs.map(_.id)
-  private def job(implicit serializerService: SerializerService) = JobStore.load(storedJob)
-  def runnableTasks(implicit serializerService: SerializerService) = JobGroup.moleJobs(job).map(RunnableTask(_))
+  private def job(using SerializerService) = JobStore.load(storedJob)
+  def runnableTasks(using SerializerService) = JobGroup.moleJobs(job).map(RunnableTask(_))
 
   private[environment] var _state: ExecutionState = ExecutionState.READY
 

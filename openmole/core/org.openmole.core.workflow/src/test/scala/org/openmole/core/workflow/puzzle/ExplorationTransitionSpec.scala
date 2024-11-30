@@ -37,7 +37,7 @@ class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     val sampling = ExplicitSampling(i, data)
     val res = ListBuffer[String]()
 
-    val t = TestTask { context ⇒
+    val t = TestTask { context =>
       res.synchronized {
         context.contains(i) should equal(true)
         res += context(i)
@@ -56,7 +56,7 @@ class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
 
     val res = new ListBuffer[String]
 
-    val t = TestTask { context ⇒
+    val t = TestTask { context =>
       res.synchronized {
         context.contains(i) should equal(true)
         res += context(i)
@@ -76,7 +76,7 @@ class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
 
     val res = new ListBuffer[Int]
 
-    val t = TestTask { context ⇒
+    val t = TestTask { context =>
       res.synchronized {
         context.contains(i) should equal(true)
         res += context(i)

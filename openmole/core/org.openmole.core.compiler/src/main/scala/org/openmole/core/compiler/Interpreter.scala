@@ -53,7 +53,7 @@ object Interpreter {
   import java.io.File
   import java.net.URL
 
-  def isInterpretedClass(c: Class[_]) = 
+  def isInterpretedClass(c: Class[?]) =
     c.getClassLoader != null && classOf[dotty.tools.repl.AbstractFileClassLoader].isAssignableFrom(c.getClassLoader.getClass)
 
   def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0, fullCode: Option[String] = None) =
@@ -79,7 +79,7 @@ object Interpreter {
   case class ErrorMessage(decoratedMessage: String, rawMessage: String, position: Option[ErrorPosition], error: Boolean)
   case class ErrorPosition(line: Int, start: Int, end: Int, point: Int)
 
-  case class CompletionCandidate(value: String)
+  case class CompletionCandidate(label: String, symbols: List[dotty.tools.dotc.core.Symbols.Symbol], description: String)
 
   case class HeaderInfo(file: String)
   def firstLine(file: String) = HeaderInfo(file)
@@ -112,7 +112,7 @@ object Interpreter {
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-        List(classOf[Interpreter].getClassLoader): _*
+        List(classOf[Interpreter].getClassLoader) *
     )
 
   def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {
@@ -138,9 +138,9 @@ object Interpreter {
             Array(
               "-classpath", classPath(priorityBundles, jars).mkString(":"),
               //"-usejavacp",
-              "-color:never",
+              //"-color:never",
               "-d", classDirectory.getAbsolutePath
-            ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
+            ) ++ (if quiet then Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
             Console.out,
             Some(classLoaderValue)
           )
@@ -149,9 +149,9 @@ object Interpreter {
             Array(
               "-classpath", System.getProperty("java.class.path"),
               //"-usejavacp",
-              "-color:never",
+              // "-color:never",
               "-d", classDirectory.getAbsolutePath,
-            ) ++ (if (quiet) Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
+            ) ++ (if quiet then Seq("-Xrepl-disable-display") else Seq()) ++ commonOptions,
             Console.out,
             Some(classLoaderValue)
             //Some (classOf[Test].getClassLoader)
@@ -163,7 +163,7 @@ object Interpreter {
   case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
   def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
-    val classDirectory = fileService.wrapRemoveOnGC(newFile.newDir("classDirectory"))
+    val classDirectory = fileService.wrapRemoveOnGC(TmpDirectory.newDirectory("classDirectory"))
     val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet)
     //    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     //    new Interpreter(priorityBundles, jars, quiet, classDirectory, settings)
@@ -173,7 +173,7 @@ object Interpreter {
 
 class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File, val classLoaderValue: ClassLoader) {
 
-  def initialState = driver.initialState 
+  def initialState = driver.initialState
 
   def eval(code: String) = compile(code)()
   def compile(code: String): Interpreter.Compiled =
@@ -209,7 +209,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
     (getResult(runResult), runResult)
 
   def completion(code: String, position: Int, state: repl.REPLDriver.CompilerState) = synchronized {
-    driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(value = c.value())).toVector
+    driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(c.label, c.symbols, c.description)).toVector
   }
 
   def resultClass(state: dotty.tools.repl.State, index: Option[Int] = None) =

@@ -19,37 +19,21 @@ package org.openmole.core.workflow.transition
 
 import org.openmole.core.context.Val
 
-object BlockList {
-  def empty = new BlockList {
-    override def apply(t: Val[_]) = false
-  }
+object BlockList:
+  def empty: BlockList = _ => false
+  given Conversion[Seq[Val[?]], Keep] = s => Keep(s *)
 
-  implicit def seqOfValToKeep(s: Seq[Val[_]]): Keep = Keep(s: _*)
-}
+trait BlockList extends (Val[?] => Boolean)
 
-trait BlockList extends (Val[_] ⇒ Boolean)
+class Block(filtered: Set[String]) extends BlockList:
+  override def apply(t: Val[?]) = filtered.contains(t.name)
 
-trait Block extends BlockList {
-  def filtered: Set[String]
-  override def apply(t: Val[_]) = filtered.contains(t.name)
-}
+class Keep(kept: Set[String]) extends BlockList:
+  override def apply(t: Val[?]) = !kept.contains(t.name)
 
-trait Keep extends BlockList {
-  def kept: Set[String]
-  override def apply(t: Val[_]) = !kept.contains(t.name)
-}
+object Block:
+  def apply(ts: Val[?]*): Block = new Block(ts.map(_.name).toSet)
 
-object Block {
+object Keep:
+  def apply(ts: Val[?]*): Keep = new Keep(ts.map(_.name).toSet)
 
-  def apply(ts: Val[_]*): Block = new Block {
-    val filtered: Set[String] = ts.map(_.name).toSet
-  }
-
-}
-
-object Keep {
-
-  def apply(ts: Val[_]*): Keep = new Keep {
-    val kept = ts.map(_.name).toSet
-  }
-}

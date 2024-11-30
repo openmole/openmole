@@ -102,7 +102,7 @@ object ResultPlot {
     val plotObserver = Observer[(HtmlElement, Seq[String], NumberOfColumToBePlotted)] { case (p, hs, n) =>
       n match
         case NumberOfColumToBePlotted.One => Plotly.relayout(p.ref, baseLayout("", hs.headOption.getOrElse("")))
-        case NumberOfColumToBePlotted.Two => Plotly.relayout(p.ref, baseLayout(hs.headOption.getOrElse(""), hs.lastOption.getOrElse("")))
+        case NumberOfColumToBePlotted.Two => Plotly.relayout(p.ref, baseLayout(hs.lastOption.getOrElse(""), hs.headOption.getOrElse("")))
         case NumberOfColumToBePlotted.N | NumberOfColumToBePlotted.Parallel => Plotly.relayout(p.ref, splomLayout)
     }
 
@@ -118,7 +118,7 @@ object ResultPlot {
             oneTwoNRadio.element.amend(margin := "10", height := "38"),
             aRadio.element.amend(display.block, margin := "10")
           ),
-          plot.signal.combineWith(aRadio.selected.signal.map(_.map(_.t))).combineWith(oneTwoNRadio.selected.signal.map(_.map(_.t).head)) --> plotObserver,
+          plot.signal.combineWith(aRadio.selected.signal.map(_.map(_.t).reverse)).combineWith(oneTwoNRadio.selected.signal.map(_.map(_.t).head)) --> plotObserver,
           child <-- plot.signal
         )
       }

@@ -17,9 +17,9 @@ class ReplicaCatalogSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     given Preference = Preference.memory()
     val catalog = ReplicaCatalog(workspace)
-    val tmp = TmpDirectory(workspace)
+    given TmpDirectory = TmpDirectory(workspace)
 
-    val file = tmp.newFile("replica", ".txt")
+    val file = TmpDirectory.newFile("replica", ".txt")
     file.content = "This is a test"
 
     val hash: String = file.hash().toString()

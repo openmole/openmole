@@ -130,7 +130,7 @@ object AbstractNetLogoTask {
 
   def createPool(netLogoFactory: NetLogoFactory, workspace: AbstractNetLogoTask.Workspace, cached: Boolean, ignoreErrorOnDispose: Boolean, switch3d: Boolean)(implicit newFile: TmpDirectory) = {
     def createInstance = {
-      val workspaceDirectory = newFile.newDir("netlogoworkpsace")
+      val workspaceDirectory = newFile.newDirectory("netlogoworkpsace")
       AbstractNetLogoTask.openNetLogoWorkspace(netLogoFactory, workspace, workspaceDirectory, switch3d)
     }
 
@@ -149,7 +149,7 @@ object AbstractNetLogoTask {
    */
   def netLogoCompatibleType(x: Any) = {
     def convertArray(x: Any): AnyRef = x match {
-      case a: Array[_] ⇒ a.asInstanceOf[Array[_]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
+      case a: Array[?] ⇒ a.asInstanceOf[Array[?]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
       case x           ⇒ safeType(x)
     }
 
@@ -165,7 +165,7 @@ object AbstractNetLogoTask {
     }
 
     x match {
-      case x: Array[_] ⇒ convertArray(x)
+      case x: Array[?] ⇒ convertArray(x)
       case x           ⇒ safeType(x)
     }
   }
@@ -173,7 +173,7 @@ object AbstractNetLogoTask {
   // Manually do conversions to java native types ; necessary to add an output cast feature,
   // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
   // the target type being the one of the prototype
-  def cast(value: Any, clazz: Class[_]) = {
+  def cast(value: Any, clazz: Class[?]) = {
     try {
       clazz match {
         // all netlogo numeric are java.lang.Double
@@ -201,7 +201,7 @@ object AbstractNetLogoTask {
    * @param prototype
    * @return
    */
-  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[_]) =
+  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[?]) =
     Variable.constructArray[java.util.AbstractCollection[Any]](prototype, netlogoCollection, cast(_, _))
 
   /**
@@ -212,20 +212,20 @@ object AbstractNetLogoTask {
    */
   def validateNetLogoInputTypes = Validate { p ⇒
     import p._
-    def acceptedType(c: Class[_]): Boolean =
+    def acceptedType(c: Class[?]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
       else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
 
     inputs.flatMap {
       case v ⇒
-        v.`type`.runtimeClass.asInstanceOf[Class[_]] match {
+        v.`type`.runtimeClass.asInstanceOf[Class[?]] match {
           case c if acceptedType(c) ⇒ None
           case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
         }
     }
   }
 
-  def netLogoValueToVal(outputValue: => AnyRef, mapped: Mapped[_]) =
+  def netLogoValueToVal(outputValue: => AnyRef, mapped:  Mapped[?]) =
     try {
       if (outputValue == null) throw new InternalProcessingError(s"Value of netlogo output ${mapped.name} has been reported as null by netlogo")
       val runtimeClass = mapped.v.`type`.runtimeClass

@@ -27,7 +27,7 @@ import org.http4s.server.*
 import org.http4s.dsl.io.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
+import org.openmole.gui.server.core.{ApiImpl, GUIServerServices, WebdavServer}
 import org.openmole.tool.crypto.Cypher
 
 import java.util.concurrent.atomic.AtomicReference
@@ -59,6 +59,7 @@ import scala.concurrent.duration.Duration
     InternalServerError { Left(ErrorData(t)).asJson.noSpaces }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
   val apiServer = new org.openmole.gui.server.core.CoreAPIServer(apiImpl, stackError)
+  val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
 
   def hello =
     import org.http4s.headers.{`Content-Type`}
@@ -75,7 +76,7 @@ import scala.concurrent.duration.Duration
         StaticFile.fromFile(new File(webapp, s"fonts/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
       case request@GET -> Root => Ok(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
 
-    Router(Seq("/" -> routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes)*).orNotFound
+    Router(Seq("/" -> routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes, "/webdav" -> webdavServer.routes)*).orNotFound
 
   val shutdown =
     BlazeServerBuilder[IO].bindHttp(8080, "localhost").

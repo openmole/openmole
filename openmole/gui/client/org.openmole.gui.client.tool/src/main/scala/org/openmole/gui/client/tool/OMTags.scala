@@ -66,6 +66,16 @@ object OMTags:
   val buttonOM = cls("btn btnOm")
   val btn_purple = cls("btn btn-purple")
   val down = cls("bi bi-arrow-down-square")
+  val glyph_copy = cls("bi-copy")
+  val glyph_move = cls("bi-box-arrow-right")
+  def glyph_commit = img(src := "img/commit.svg")
+  def glyph_pull = img(src := "img/pull.svg")
+  def glyph_push = img(src := "img/push.svg")
+  val glyph_rollback = cls("bi-arrow-counterclockwise")
+  val glyph_addFile = cls("bi-node-plus")
+  def glyph_stash = img(src := "img/stash.svg")
+  def glyph_stash_pop = img(src := "img/stashPop.svg")
+  val glyph_git = cls("bi-git")
 
   case class AlertAction(action: () ⇒ Unit)
 

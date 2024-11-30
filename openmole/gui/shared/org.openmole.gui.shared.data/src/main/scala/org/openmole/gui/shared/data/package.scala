@@ -80,12 +80,24 @@ case class PluginState(isPlugin: Boolean, isPlugged: Boolean)
 object TreeNodeData:
   case class Directory(isEmpty: Boolean)
 
+enum GitStatus:
+  case Modified, Untracked, Conflicting, Root, Versioned
+
+enum MergeStatus:
+  case Ok, ConnectionFailed, ChangeToBeResolved, Empty
+
+enum PushStatus:
+  case Ok, AuthenticationRequired, Failed
+
+case class BranchData(list: Seq[String], current: String)
+
 case class TreeNodeData(
   name: String,
   size: Long,
   time: Long,
   directory: Option[TreeNodeData.Directory] = None,
-  pluginState: PluginState = PluginState.empty)
+  pluginState: PluginState = PluginState.empty,
+  gitStatus: Option[GitStatus])
 
 object ErrorData:
   def empty = MessageErrorData("", None)
@@ -293,7 +305,7 @@ case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: List
 object FileListData:
   def empty = Seq()
 
-case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0)
+case class FileListData(data: Seq[TreeNodeData] = Seq(), listed: Int = 0, total: Int = 0, branchData: Option[BranchData] = None)
 
 case class OMSettings(workspace: SafePath, version: String, versionName: String, buildTime: Long, isDevelopment: Boolean)
 
@@ -312,10 +324,6 @@ case class PluginExtensionData(
   analysis: Seq[(String, GUIPluginAsJS)])
 
 type GUIPluginAsJS = String
-
-trait AuthenticationData:
-  def name: String
-
 
 trait WizardData
 
@@ -462,3 +470,17 @@ case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])
 
 case class GUIOMRSectionContent(name: Option[String], variables: Seq[GUIVariable])
 case class GUIVariable(name: String, value: Option[GUIVariable.ValueType], `type`: String)
+
+object GitPrivateKeyAuthenticationData:
+  def empty =
+    GitPrivateKeyAuthenticationData(
+      privateKey = None,
+      password = "",
+      directory = SafePath(Seq(randomId), ServerFileSystemContext.Authentication)
+    )
+
+case class GitPrivateKeyAuthenticationData(
+  privateKey:   Option[String],
+  password:         String,
+  directory:        SafePath):
+  def privateKeyPath = privateKey.map(n => directory / n)

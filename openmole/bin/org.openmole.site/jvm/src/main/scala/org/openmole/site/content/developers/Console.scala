@@ -41,16 +41,16 @@ ${h2{"Authentications"}}
 In console mode, you can define an authentication using a pair of login/password with the following command:
 
 ${hl.openmole("""
-  SSHAuthentication += LoginPassword("login", encrypted, "machine-name")
-""".stripMargin, header = """def encrypted = "" """)}
+  SSHAuthentication += LoginPassword("login", password, "machine-name")
+""".stripMargin, header = """def password = "" """)}
 
 Or, to authenticate with a private key:
 
 ${hl.openmole("""
-  SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", encrypted, "machine-name")
-""", header = """def encrypted = "" """)}
+  SSHAuthentication += PrivateKey("/path/to/the/private/key", "login", password, "machine-name")
+""", header = """def password = "" """)}
 
-It mentions the ${i{"encrypted"}} function.
+It mentions the ${i{"password"}} function.
 This function will prompt for the password/passphrase of the private key, right after the call to the ${code{"Environment"}} builder, using ${code{"SSHAuthentication"}}.
 
 $br

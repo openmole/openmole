@@ -51,17 +51,16 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     def parseSwitch(start: Int): PrototypeData =
       val name = lines(start + 5)
       val default = if lines(start + 7).trim == "1" then "true" else "false"
-      println(lines(start + 7) + " " + default)
       PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, default, Some(name))
 
     def parseInputBox(start: Int): PrototypeData =
       val name = lines(start + 5)
       PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, lines(start + 6), Some(name))
 
-    def parseMonitor(start: Int): Seq[PrototypeData] =
-      lines(start + 6).replace("\\n", "").split(' ').headOption match
-        case Some(name) => Seq(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, mapping = Some(name)))
-        case None => Seq()
+    def parseMonitor(start: Int): PrototypeData =
+      val name = lines(start + 5)
+      val mapping = lines(start + 6)
+      PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, mapping = Some(mapping))
 
     def parseChooser(start: Int): PrototypeData =
       val name = lines(start + 5)
@@ -69,15 +68,15 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
     def parse0(lines: Seq[(String, Int)], inputs: Seq[PrototypeData], outputs: Seq[PrototypeData]): (Seq[PrototypeData], Seq[PrototypeData]) =
       if lines.isEmpty
-      then (PrototypeData("mySeed", PrototypeData.Long, "0", None) +: inputs, outputs)
+      then (PrototypeData("mySeed", PrototypeData.Int, "42", None) +: inputs, outputs)
       else
         val (line, index) = lines.head
         val tail = lines.tail
-        if (line.startsWith("SLIDER")) parse0(tail, inputs :+ parseSlider(index), outputs)
-        else if (line.startsWith("SWITCH")) parse0(tail, inputs :+ parseSwitch(index), outputs)
-        else if (line.startsWith("INPUTBOX")) parse0(tail, inputs :+ parseInputBox(index), outputs)
-        else if (line.startsWith("CHOOSER")) parse0(tail, inputs :+ parseChooser(index), outputs)
-        else if (line.startsWith("MONITOR")) parse0(tail, inputs, outputs ++ parseMonitor(index))
+        if line.startsWith("SLIDER") then parse0(tail, inputs :+ parseSlider(index), outputs)
+        else if line.startsWith("SWITCH") then parse0(tail, inputs :+ parseSwitch(index), outputs)
+        else if line.startsWith("INPUTBOX") then parse0(tail, inputs :+ parseInputBox(index), outputs)
+        else if line.startsWith("CHOOSER") then parse0(tail, inputs :+ parseChooser(index), outputs)
+        else if line.startsWith("MONITOR") then parse0(tail, inputs, outputs :+ parseMonitor(index))
         // else if (line.startsWith("PLOT")) parse0(tail, args, outputs ++ parsePlot(index))
         else parse0(tail, inputs, outputs)
 
@@ -96,14 +95,14 @@ class NetlogoWizardFactory extends WizardPluginFactory:
     val NetLogo = ReadableFileType(Seq("nlogo", "nlogo3d", "nls"), text = true, highlight = Some("netlogo"))
     Seq(NetLogo)
 
-  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = Future.successful {
-    WizardUtils.findFileWithExtensions(
-      uploaded,
-      "nlogo" -> FindLevel.SingleFile,
-      "nlogo" -> FindLevel.Directory,
-      "nlogo" -> FindLevel.MultipleFile
-    )
-  }
+  def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    Future.successful:
+      WizardUtils.findFileWithExtensions(
+        uploaded,
+        "nlogo" -> FindLevel.SingleFile,
+        "nlogo" -> FindLevel.Directory,
+        "nlogo" -> FindLevel.MultipleFile
+      )
 
   def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
@@ -137,10 +136,9 @@ class NetlogoWizardFactory extends WizardPluginFactory:
             |${WizardUtils.preamble}
             |
             |${WizardUtils.mkVals(modelMetadata)}
-            |val mySeed = Val[Int]
             |
             |val $task = NetLogo6Task(
-            |  $params) ${WizardUtils.mkSet(modelMetadata, "mySeed := 42")}
+            |  $params) ${WizardUtils.mkSet(modelMetadata)}
             |
             |$task
             |""".stripMargin

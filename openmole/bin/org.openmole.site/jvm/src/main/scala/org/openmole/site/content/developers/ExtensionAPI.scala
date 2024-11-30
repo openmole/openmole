@@ -62,12 +62,12 @@ ${hl.code("""
 
 ${h2{"Sampling extensions"}}
 
-To implement a sampling, the constructor ${code{"Sampling"}} takes a function transforming a ${code{"FromContext"}} into a sampling result, which is an ${code{"Iterator[Iterable[Variable[_]]]"}}.
+To implement a sampling, the constructor ${code{"Sampling"}} takes a function transforming a ${code{"FromContext"}} into a sampling result, which is an ${code{"Iterator[Iterable[Variable[?]]]"}}.
 For example, the following sampling assigns uniformally a sequence of doubles to some prototypes :
 
 ${hl.code("""
   object MySampling {
-    def apply(values: FromContext[Array[[Double]]],prototypes: Val[_]*) = Sampling {
+    def apply(values: FromContext[Array[[Double]]],prototypes: Val[?]*) = Sampling {
      p =>
       values.from(p.context).map{ value => prototypes.toList.map{ proto => Variable(proto,value)}}.toIterator
     } validate { _ => Seq.empty} inputs {prototypes} prototypes {prototypes}

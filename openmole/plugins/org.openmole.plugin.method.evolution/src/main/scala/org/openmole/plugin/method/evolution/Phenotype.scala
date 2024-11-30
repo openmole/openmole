@@ -40,4 +40,4 @@ object PhenotypeContent:
 
 
 
-case class PhenotypeContent(objectives: Seq[Val[_]], outputs: Seq[Val[_]] = Seq())
+case class PhenotypeContent(objectives: Seq[Val[?]], outputs: Seq[Val[?]] = Seq())

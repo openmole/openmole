@@ -22,7 +22,7 @@ import cats.implicits._
 
 object UnrolledDomain {
 
-  implicit def isDiscrete[D, T: Manifest]: DiscreteDomain[UnrolledDomain[D, T], Array[T]] = domain ⇒
+  implicit def isDiscrete[D, T: Manifest]: DiscreteDomain[UnrolledDomain[D, T], Array[T]] = domain =>
     Domain(
       domain = Seq(domain.discrete(domain.d).domain.toArray).iterator,
       inputs = domain.discrete(domain.d).inputs,

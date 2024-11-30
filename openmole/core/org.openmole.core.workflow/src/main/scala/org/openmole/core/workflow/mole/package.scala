@@ -32,13 +32,13 @@ def Source = FromContextSource
 case class Hooks(map: Map[MoleCapsule, Iterable[Hook]])
 case class Sources(map: Map[MoleCapsule, Iterable[Source]])
 
-implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Iterable[Hook]] = h.map.withDefault(_ ⇒ List.empty)
-implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Iterable[Source]] = s.map.withDefault(_ ⇒ List.empty)
+implicit def hooksToMap(h: Hooks): Map[MoleCapsule, Iterable[Hook]] = h.map.withDefault(_ => List.empty)
+implicit def sourcesToMap(s: Sources): Map[MoleCapsule, Iterable[Source]] = s.map.withDefault(_ => List.empty)
 
 object Hooks {
   def empty = Map.empty[MoleCapsule, Iterable[Hook]]
 
-  implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
+  implicit def iterableTupleToHooks(h: Iterable[(MoleCapsule, Hook)]): Hooks = new Hooks(h.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) })
   implicit def mapToHooks(m: Map[MoleCapsule, Iterable[Hook]]): Hooks = new Hooks(m)
 }
 
@@ -46,6 +46,6 @@ object Sources {
   def empty = Map.empty[MoleCapsule, Iterable[Source]]
 
   implicit def mapToSources(m: Map[MoleCapsule, Iterable[Source]]): Sources = new Sources(m)
-  implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).map { case (k, v) ⇒ k -> v.map(_._2) })
+  implicit def iterableTupleToSources(s: Iterable[(MoleCapsule, Source)]): Sources = new Sources(s.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) })
 }
 

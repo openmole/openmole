@@ -31,8 +31,8 @@ object NSGA2 {
 
   object DeterministicNSGA2 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 ⇒ MGONSGA2, _ }
-
-    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] {
+    
+    given MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (Vector[Double], Vector[Int]), Phenotype]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -41,21 +41,22 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicNSGA2) = new Ops {
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
+      def operations(om: DeterministicNSGA2) = new Ops:
+        def startTimeLens = Focus[S](_.startTime)
+        def generationLens = Focus[S](_.generation)
+        def evaluatedLens = Focus[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] = 
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
-        }
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState[Unit](s = ())
 
@@ -68,49 +69,43 @@ object NSGA2 {
             saveOption = saveOption
           )
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
-          import p._
-          val res = MGONSGA2.result[Phenotype](population, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
+          FromContext: p ⇒
+            import p._
+            val res = MGONSGA2.result[Phenotype](population, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-          val outputsValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
+            val outputsValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
-          genomes ++ fitness ++ outputsValues
-        }
+            genomes ++ fitness ++ Seq(generated) ++ outputsValues
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val continuous = Genome.continuous(om.genome)
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA2.initialGenomes(n, continuous, discrete, rejectValue, rng)
-        }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue)(s, individuals, rng)
-        }
+        def initialGenomes(n: Int, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONSGA2.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val (s2, elited) = MGONSGA2.elitism[S, Phenotype](om.mu, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
-        }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue)(s, individuals, rng)
 
-        def migrateToIsland(population: Vector[I]) = DeterministicGAIntegration.migrateToIsland(population)
-        def migrateFromIsland(population: Vector[I], state: S) = DeterministicGAIntegration.migrateFromIsland(population)
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            MGONSGA2.elitism[S, Phenotype](om.mu, Genome.continuous(om.genome), Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
 
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-      }
+        def mergeIslandState(state: S, islandState: S): S = state
+        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
-    }
 
   }
 
@@ -134,7 +129,7 @@ object NSGA2 {
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: StochasticNSGA2) = new Ops {
+      def operations(om: StochasticNSGA2) = new Ops:
 
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
@@ -150,63 +145,60 @@ object NSGA2 {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get _, CDGenome.discreteValues.get _)(genome)
-        def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
-        def buildGenome(vs: Vector[Variable[_]]) = buildGenome(Genome.fromVariables(vs, om.genome))
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          buildGenome(Genome.fromVariables(vs, om.genome))
 
-        def genomeToVariables(g: G): FromContext[Vector[Variable[_]]] = {
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
-        }
 
-        def buildIndividual(genome: G, phenotype: Phenotype, context: Context) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype)
+        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
         def initialState = EvolutionState[Unit](s = ())
 
         def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
 
-        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
-          import p._
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
+          FromContext: p ⇒
+            import p._
 
-          val res = MGONoisyNSGA2.result(population, aggregate.from(context), Genome.continuous(om.genome), keepAll = keepAll)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-          val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
-          val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
+            val res = MGONoisyNSGA2.result(population, aggregate.from(context), Genome.continuous(om.genome), keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
+            val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-          val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
+            val outputValues =
+              if includeOutputs
+              then StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory))
+              else Seq()
 
-          genomes ++ fitness ++ Seq(samples) ++ outputValues
-        }
+            genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
-          import p._
-          val continuous = Genome.continuous(om.genome)
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONoisyNSGA2.initialGenomes(n, continuous, discrete, rejectValue, rng)
-        }
+        def initialGenomes(n: Int, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONoisyNSGA2.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) = FromContext { p ⇒
-          import p._
-          val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
-          MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.cloneProbability, aggregate.from(context), discrete, rejectValue) apply (s, individuals, rng)
-        }
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) =
+          FromContext: p ⇒
+            import p._
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.cloneProbability, aggregate.from(context), discrete, rejectValue) apply (s, individuals, rng)
 
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: util.Random) = FromContext { p ⇒
-          import p._
-          val (s2, elited) = MGONoisyNSGA2.elitism[S, Phenotype](om.mu, om.historySize, aggregate.from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          val s4 = Focus[S](_.evaluated).modify(_ + evaluated)(s3)
-          (s4, elited)
-        }
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
+          FromContext: p ⇒
+            import p._
+            MGONoisyNSGA2.elitism[S, Phenotype](om.mu, om.historySize, aggregate.from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
 
-        def migrateToIsland(population: Vector[I]) = StochasticGAIntegration.migrateToIsland[I](population, Focus[I](_.historyAge))
-        def migrateFromIsland(population: Vector[I], state: S) = StochasticGAIntegration.migrateFromIsland[I, Phenotype](population, Focus[I](_.historyAge), Focus[I](_.phenotypeHistory))
-
-        def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
-        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
-        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-      }
+        def mergeIslandState(state: S, islandState: S): S = state
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
   }
@@ -225,7 +217,7 @@ object NSGA2 {
   def apply(
     genome:         Genome,
     objective:      Objectives,
-    outputs:        Seq[Val[_]]                  = Seq(),
+    outputs:        Seq[Val[?]]                  = Seq(),
     populationSize: Int                          = 200,
     stochastic:     OptionalArgument[Stochastic] = None,
     reject:         OptionalArgument[Condition]  = None

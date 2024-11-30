@@ -25,8 +25,10 @@ import org.http4s.dsl.io.*
 import org.http4s.headers.*
 import org.http4s.implicits.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.core.format.OMRFormat
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.workspace.Workspace
+import org.openmole.gui.server.core.CoreAPIServer.download
 import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
@@ -34,55 +36,81 @@ import org.openmole.gui.server.core.{ApiImpl, GUIServerServices}
 import org.openmole.gui.shared.api
 import org.openmole.gui.shared.data.*
 import org.openmole.tool.file.*
+import org.openmole.tool.archive.*
 
 object CoreAPIServer:
-  def download(req: Request[IO], safePath: SafePath, name: Option[String] = None, topDirectory: Boolean = true)(using Workspace) =
-    val f = safePathToFile(safePath)
+  def download(req: Request[IO], safePath: Seq[SafePath], name: Option[String] = None, topDirectory: Boolean = true)(using Workspace) =
+    def downloadInArchive[T](name: String)(f: TarArchiveOutputStream => T): IO[Response[IO]] =
+      import org.openmole.tool.stream.*
 
-    val response =
-      if !f.exists()
-      then Status.NotFound.apply(s"The file ${safePath.path.mkString} does not exist.")
-      else if f.isDirectory
-      then CoreAPIServer.directoryDownload(f, name, topDirectory = topDirectory)
+      HTTP.sendFileStream(name): out =>
+        val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
+        try f(tos)
+        finally tos.close()
+
+    def addOMR(tos: TarArchiveOutputStream, f: File) =
+      import org.openmole.core.format.*
+      val dataFiles = OMRFormat.dataFiles(f)
+      tos.addFile(f, f.getName)
+      dataFiles.foreach(n => tos.addFile(OMRFormat.dataFile(f, n), n))
+
+    def addFile(tos: TarArchiveOutputStream, f: File) =
+      if f.isDirectory
+      then tos.archive(f, includeTopDirectoryName = topDirectory)
       else
         import org.openmole.core.format.*
         if !OMRFormat.isOMR(f)
-        then CoreAPIServer.fileDownload(f, req, name)
-        else CoreAPIServer.omrDownload(f, name)
+        then tos.addFile(f, f.getName)
+        else addOMR(tos, f)
 
-    response
+    val notExists = safePath.filter(sp => !safePathToFile(sp).exists())
 
-  def directoryDownload(f: File, name: Option[String] = None, topDirectory: Boolean = true): IO[Response[IO]] =
-    import org.openmole.tool.stream.*
-    import org.openmole.tool.archive.*
+    if notExists.nonEmpty
+    then Status.NotFound.apply(s"The file(s) ${notExists.map(_.path.mkString).mkString(" and ")} do(es) not exist.")
+    else
+      val files = safePath.map(safePathToFile)
 
-    HTTP.sendFileStream(s"${name.getOrElse(f.getName)}.tar.gz"): out =>
-      val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
-      try tos.archive(f, includeTopDirectoryName = topDirectory)
-      finally tos.close()
+      def archiveDirectoryName(f: File) = s"${name.getOrElse(f.getName)}.tar.gz"
+
+      if files.size == 1 && !OMRFormat.isOMR(files.head)
+      then
+        val file = files.head
+        if file.isDirectory
+        then
+          downloadInArchive(archiveDirectoryName(file)): os =>
+            addFile(os, file)
+        else CoreAPIServer.fileDownload(file, req, name)
+      else
+        val fileName =
+          if files.size == 1
+          then
+            val f = files.head
+            if f.isDirectory
+            then archiveDirectoryName(f)
+            else s"${name.getOrElse(f.baseName)}.tar.gz"
+          else "files.tar.gz"
+
+        downloadInArchive(fileName): os =>
+          for f <- files
+          do addFile(os, f)
+
+
 
   def fileDownload(f: File, req: Request[IO], name: Option[String]): IO[Response[IO]] =
     HTTP.sendFile(req, f, name)
 
-  def omrDownload(f: File, name: Option[String]): IO[Response[IO]] =
-    import org.openmole.tool.stream.*
-    import org.openmole.tool.archive.*
-    import org.openmole.core.format.*
-    val dataFiles = OMRFormat.dataFiles(f)
-    HTTP.sendFileStream(s"${name.getOrElse(f.baseName)}.tar.gz"): out =>
-      val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))
-      try
-        tos.addFile(f, f.getName)
-        dataFiles.foreach(n => tos.addFile(OMRFormat.dataFile(f, n), n))
-      finally tos.close()
 
-  def getSafePath(req: Request[IO]) =
-    val fileType = req.params.get(org.openmole.gui.shared.api.fileTypeParam)
-    val path = req.params.getOrElse(org.openmole.gui.shared.api.pathParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.pathParam} is required"))
+  def getSafePath(req: Request[IO]): Seq[SafePath] =
+    val fileType = req.multiParams.get(org.openmole.gui.shared.api.fileTypeParam)
+    val path = req.multiParams.getOrElse(org.openmole.gui.shared.api.pathParam, throw UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.pathParam} is required"))
+
+    if path.isEmpty then throw UserBadDataError("Path param should be set to a value")
 
     fileType match
-      case Some(fileType) => SafePath(path.split('/').toSeq, ServerFileSystemContext.fromTypeName(fileType).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
-      case None => SafePath(path.split('/').toSeq, ServerFileSystemContext.Project)
+      case Some(fileType) =>
+        (path lazyZip fileType).map: (p, ft) =>
+          SafePath(p.split('/').toSeq, ServerFileSystemContext.fromTypeName(ft).getOrElse(throw new InternalProcessingError(s"Unknown file type ${fileType}")))
+      case None => path.map(p => SafePath(p.split('/').toSeq, ServerFileSystemContext.Project))
 
 
 
@@ -95,182 +123,62 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
-  val settingsRoute =
-    omSettings.errorImplementedBy(_ => apiImpl.settings)
-
-//  val isPasswordCorrectRoute =
-//    isPasswordCorrect.safeImplementedBy(apiImpl.isPasswordCorrect _)
-
-//  val resetPasswordRoute =
-//    resetPassword.safeImplementedBy(_ => apiImpl.resetPassword())
-
-  val listPluginsRoute =
-    listPlugins.errorImplementedBy{ _ => apiImpl.listPlugins() }
-
-  val guiPluginsRoute =
-    guiPlugins.errorImplementedBy (_ => apiImpl.getGUIPlugins() )
-
-  val listFilesRoute =
-    listFiles.errorImplementedBy { (path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden) }
-
-  val sizeRoute =
-    size.errorImplementedBy { path => apiImpl.size(path) }
-
-  val saveFileRoute =
-    saveFile.errorImplementedBy { case(path, fileContent, hash, overwrite) => apiImpl.saveFile(path, fileContent, hash, overwrite) }
-
-  val copyFilesRoute =
-    copyFiles.errorImplementedBy { case(sp, overwrite) => apiImpl.copyFiles(sp, overwrite) }
-
-  val createFileRoute =
-    createFile.errorImplementedBy { case(path, name, directory) => apiImpl.createFile(path, name, directory) }
-
-  val extractArchiveRoute =
-    extractArchive.errorImplementedBy { (sp, to) => apiImpl.extractArchive(sp, to) }
-
-  val deleteFilesRoute =
-    deleteFiles.errorImplementedBy { sp => apiImpl.deleteFiles(sp) }
-
-  val existsRoute=
-    exists.errorImplementedBy { sp => apiImpl.exists(sp) }
-
-  val isTextRoute =
-    isText.errorImplementedBy { sp => apiImpl.isTextFile(sp) }
-
-  val listRecursiveRoute =
-    listRecursive.errorImplementedBy { case(path, f, hidden) => apiImpl.recursiveListFiles(path, f, hidden) }
-
-  val moveRoute =
-    move.errorImplementedBy { p => apiImpl.move(p) }
-
-  val mdToHtmlRoute =
-    mdToHtml.errorImplementedBy { p => apiImpl.mdToHtml(p) }
-
-  val sequenceRoute =
-    sequence.errorImplementedBy { p => apiImpl.sequence(p) }
-
-  val executionStateRoute =
-    executionState.errorImplementedBy { i => apiImpl.executionData(i) }
-
-  val executionOutputRoute =
-    executionOutput.errorImplementedBy { (i, l) => apiImpl.executionOutput(i, l) }
-
-  val cancelExecutionRoute =
-    cancelExecution.errorImplementedBy { i => apiImpl.cancelExecution(i) }
-
-  val removeExecutionRoute =
-    removeExecution.errorImplementedBy { i => apiImpl.removeExecution(i) }
-
-  val validateScriptRoute =
-    validateScript.errorImplementedBy { s => apiImpl.validateScript(s) }
-
-  val launchScriptRoute =
-    launchScript.errorImplementedBy { (s, b) => apiImpl.launchScript(s, b) }
-
-  val clearEnvironmentErrorsRoute =
-    clearEnvironmentErrors.errorImplementedBy { case (eid, i) => apiImpl.clearEnvironmentErrors(eid, i) }
-
-  val listEnvironmentErrorsRoute =
-    listEnvironmentErrors.errorImplementedBy { case(eid, e, i) => apiImpl.listEnvironmentErrors(eid, e, i) }
-
-//  val modelsRoute =
-//    models.errorImplementedBy { p => apiImpl.models(p) }
-
-//  val expandResourcesRoute =
-//    expandResources.errorImplementedBy { r => apiImpl.expandResources(r) }
-
-  val downloadHTTPRoute =
-    downloadHTTP.errorImplementedBy { case(s, p, b, o) => apiImpl.downloadHTTP(s, p, b, o) }
-
-  val temporaryDirectoryRoute =
-    temporaryDirectory.errorImplementedBy { _ => apiImpl.temporaryDirectory() }
-
-  val shutdownRoute =
-    shutdown.errorImplementedBy { _ => apiImpl.shutdown() }
-
-  val isAliveRoute =
-    isAlive.implementedBy { _ => apiImpl.isAlive() }
-
-  val jvmInfosRoute =
-    jvmInfos.errorImplementedBy { _ => apiImpl.jvmInfos() }
-
-  val marketIndexRoute =
-    marketIndex.errorImplementedBy { _ => apiImpl.marketIndex() }
-
-  val getMarketEntryRoute =
-    getMarketEntry.errorImplementedBy { case (e, p) => apiImpl.getMarketEntry(e, p) }
-
-  val omrMethodRoute =
-    omrMethod.errorImplementedBy { p => apiImpl.omrMethodName(p) }
-
-  val omrContentRoute =
-    omrContent.errorImplementedBy { (p, d) => apiImpl.omrContent(p, d) }
-
-  val omrFilesRoute =
-    omrFiles.errorImplementedBy { p => apiImpl.omrFiles(p) }
-
-  val omrDataIndexRoute =
-    omrDataIndex.errorImplementedBy { p => apiImpl.omrDataIndex(p) }
-
-  val addPluginRoute =
-    addPlugin.errorImplementedBy { p => apiImpl.addPlugin(p) }
-
-  val removePluginRoute =
-    removePlugin.errorImplementedBy { p => apiImpl.removePlugin(p) }
-
-  val listNotificationRoute =
-    listNotification.errorImplementedBy { p => apiImpl.listNotification }
-
-  val clearNotificationRoute =
-    clearNotification.errorImplementedBy { s => apiImpl.clearNotification(s) }
-
-  val removeContainerCacheRoute =
-    removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache())
-
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
-      settingsRoute,
-//      isPasswordCorrectRoute,
-//      resetPasswordRoute,
-      listPluginsRoute,
-      guiPluginsRoute,
-      listFilesRoute,
-      sizeRoute,
-      saveFileRoute,
-      createFileRoute,
-      extractArchiveRoute,
-      deleteFilesRoute,
-      existsRoute,
-      isTextRoute,
-      listRecursiveRoute,
-      copyFilesRoute,
-      moveRoute,
-      mdToHtmlRoute,
-      sequenceRoute,
-      executionStateRoute,
-      executionOutputRoute,
-      cancelExecutionRoute,
-      removeExecutionRoute,
-      validateScriptRoute,
-      launchScriptRoute,
-      clearEnvironmentErrorsRoute,
-      listEnvironmentErrorsRoute,
-      downloadHTTPRoute,
-      temporaryDirectoryRoute,
-      marketIndexRoute,
-      getMarketEntryRoute,
-      omrMethodRoute,
-      omrContentRoute,
-      omrFilesRoute,
-      omrDataIndexRoute,
-      addPluginRoute,
-      removePluginRoute,
-      listNotificationRoute,
-      clearNotificationRoute,
-      removeContainerCacheRoute,
-      shutdownRoute,
-      jvmInfosRoute,
-      isAliveRoute
+      omSettings.errorImplementedBy(_ => apiImpl.settings),
+      listPlugins.errorImplementedBy(_ => apiImpl.listPlugins()),
+      guiPlugins.errorImplementedBy(_ => apiImpl.getGUIPlugins()),
+      listFiles.errorImplementedBy((path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden)),
+      size.errorImplementedBy(apiImpl.size),
+      saveFile.errorImplementedBy(apiImpl.saveFile),
+      createFile.errorImplementedBy(apiImpl.createFile),
+      extractArchive.errorImplementedBy(apiImpl.extractArchive),
+      deleteFiles.errorImplementedBy(apiImpl.deleteFiles),
+      exists.errorImplementedBy(apiImpl.exists),
+      isText.errorImplementedBy(apiImpl.isTextFile),
+      listRecursive.errorImplementedBy(apiImpl.recursiveListFiles),
+      copyFiles.errorImplementedBy(apiImpl.copyFiles),
+      move.errorImplementedBy(apiImpl.move),
+      mdToHtml.errorImplementedBy(apiImpl.mdToHtml),
+      sequence.errorImplementedBy(sp => apiImpl.sequence(sp)),
+      executionState.errorImplementedBy(apiImpl.executionData),
+      executionOutput.errorImplementedBy(apiImpl.executionOutput),
+      cancelExecution.errorImplementedBy(apiImpl.cancelExecution),
+      removeExecution.errorImplementedBy(apiImpl.removeExecution),
+      validateScript.errorImplementedBy(apiImpl.validateScript),
+      launchScript.errorImplementedBy(apiImpl.launchScript),
+      clearEnvironmentErrors.errorImplementedBy(apiImpl.clearEnvironmentErrors),
+      listEnvironmentErrors.errorImplementedBy(apiImpl.listEnvironmentErrors),
+      downloadHTTP.errorImplementedBy(apiImpl.downloadHTTP),
+      temporaryDirectory.errorImplementedBy(_ => apiImpl.temporaryDirectory()),
+      marketIndex.errorImplementedBy(_ => apiImpl.marketIndex()),
+      getMarketEntry.errorImplementedBy(apiImpl.getMarketEntry),
+      omrMethod.errorImplementedBy(apiImpl.omrMethodName),
+      omrContent.errorImplementedBy(apiImpl.omrContent),
+      omrFiles.errorImplementedBy(apiImpl.omrFiles),
+      omrDataIndex.errorImplementedBy(apiImpl.omrDataIndex),
+      addPlugin.errorImplementedBy(apiImpl.addPlugin),
+      removePlugin.errorImplementedBy(apiImpl.removePlugin),
+      listNotification.errorImplementedBy(_ => apiImpl.listNotification),
+      clearNotification.errorImplementedBy(apiImpl.clearNotification),
+      removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache()),
+      shutdown.errorImplementedBy(_ => apiImpl.shutdown()),
+      jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
+      isAlive.implementedBy(_ => apiImpl.isAlive()),
+      cloneRepository.errorImplementedBy(apiImpl.cloneRepository),
+      commit.errorImplementedBy(apiImpl.commit),
+      revert.errorImplementedBy(apiImpl.revert),
+      add.errorImplementedBy(apiImpl.add),
+      pull.errorImplementedBy(apiImpl.pull),
+      branchList.errorImplementedBy(apiImpl.branchList),
+      checkout.errorImplementedBy(apiImpl.checkout),
+      stash.errorImplementedBy(apiImpl.stash),
+      stashPop.errorImplementedBy(apiImpl.stashPop),
+      gitAuthentications.errorImplementedBy(_ => apiImpl.gitAuthentications),
+      addGitAuthentication.errorImplementedBy(apiImpl.addGitAuthentication),
+      removeGitAuthentication.errorImplementedBy(apiImpl.removeGitAuthentication),
+      testGitAuthentication.errorImplementedBy(apiImpl.testGitAuthentication),
+      push.errorImplementedBy(apiImpl.push)
     )
   ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 
@@ -301,7 +209,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
             HTTP.recieveFile(file, destination)
           .traverse(identity).map(_ => ())
 
-        EntityDecoder.mixedMultipartResource[IO]().use: decoder =>
+        EntityDecoder.mixedMultipartResource[IO](maxParts = 1000).use: decoder =>
           req.decodeWith(decoder, strict = true): multipart =>
             def getFileParts = multipart.parts.filter(_.filename.isDefined)
             Ok(move(getFileParts, HTTP.multipartStringContent(multipart, "fileType").get.split(',').toSeq))
@@ -312,24 +220,29 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
         import org.typelevel.ci.*
 
+        val safePaths = CoreAPIServer.getSafePath(req)
         val nameParam = req.params.get(org.openmole.gui.shared.api.Download.fileNameParam)
 
-        val safePath = CoreAPIServer.getSafePath(req)
+        if safePaths.size == 1
+        then
+          val safePath = safePaths.head
 
-        val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
-        val r = CoreAPIServer.download(req, safePath, nameParam, topDirectory = topDirectory)
+          val topDirectory = req.params.get(org.openmole.gui.shared.api.Download.topDirectoryParam).flatMap(_.toBooleanOption).getOrElse(true)
+          val r = CoreAPIServer.download(req, Seq(safePath), nameParam, topDirectory = topDirectory)
 
-        def addHashHeader(r: org.http4s.Response[IO], f: File) =
-          val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
-          if hash
-          then r.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
-          else r
+          def addHashHeader(r: org.http4s.Response[IO], f: File) =
+            val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
+            if hash
+            then r.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+            else r
 
-        r.map { r => addHashHeader(r, safePathToFile(safePath)) }
+          r.map { r => addHashHeader(r, safePathToFile(safePath)) }
+        else CoreAPIServer.download(req, safePaths, nameParam)
+
 
       case req @ GET -> p if p.renderString == s"/${org.openmole.gui.shared.api.convertOMRRoute}" =>
         import apiImpl.services.*
-        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req))
+        val omrFile = safePathToFile(CoreAPIServer.getSafePath(req).head)
         val format = req.params.getOrElse(org.openmole.gui.shared.api.formatParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.formatParam} is required"))
         val history = req.params.get(org.openmole.gui.shared.api.historyParam).map(_.toBoolean).getOrElse(false)
 

@@ -7,7 +7,7 @@ sealed trait HighLight {
 object HighLight {
 
   implicit def fromString(s: String): WordHighLight = WordHighLight(s)
-  implicit def classToString(c: Class[_]): String = c.getSimpleName
+  implicit def classToString(c: Class[?]): String = c.getSimpleName
 
   def objectName(o: Any) = o.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse
 

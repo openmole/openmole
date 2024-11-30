@@ -44,7 +44,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
     keepHistory:    Boolean         = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[_]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[T] =
+    filter:         Seq[Val[?]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[T] =
     val m = method(t)
     implicit def scope: DefinitionScope = m.scope
 

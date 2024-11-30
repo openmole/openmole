@@ -23,6 +23,5 @@ package context {
   }
 }
 
-package object context extends ContextPackage {
-  type CompactedContext = Array[Any]
-}
+package object context extends ContextPackage:
+  type CompactedContext = IArray[Any]

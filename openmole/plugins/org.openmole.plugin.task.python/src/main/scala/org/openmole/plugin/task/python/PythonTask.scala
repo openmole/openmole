@@ -48,15 +48,14 @@ object PythonTask:
     returnValue:            OptionalArgument[Val[Int]]         = None,
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default,
-    installContainerSystem: ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
     val major = if(version.startsWith("2")) 2 else 3
 
     new PythonTask(
       script = script,
       arguments = arguments.option,
-      image = ContainerTask.install(installContainerSystem, dockerImage(version), installCommands(install, libraries, major)),
+      image = ContainerTask.install(containerSystem, dockerImage(version), installCommands(install, libraries, major)),
       prepare = prepare,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -76,7 +75,7 @@ object PythonTask:
 
 case class PythonTask(
   script:                 RunnableScript,
-  image:                  InstalledImage,
+  image:                  InstalledContainerImage,
   arguments:              Option[String],
   prepare:                Seq[String],
   errorOnReturnValue:     Boolean,
@@ -91,8 +90,6 @@ case class PythonTask(
   info:                   InfoConfig,
   mapped:                 MappedInputOutputConfig,
   major:                  Int) extends Task with ValidateTask:
-
-  lazy val containerPoolKey = ContainerTask.newCacheKey
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
@@ -157,11 +154,10 @@ case class PythonTask(
       val argumentsValue = arguments.map(" " + _).getOrElse("")
 
       def containerTask =
-        ContainerTask.isolatedWorkdirectory(executionContext)(
-          containerSystem = containerSystem,
+        ContainerTask.internal(
           image = image,
           command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
-          workDirectory = workDirectory,
+          workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           environmentVariables = environmentVariables,
@@ -170,8 +166,7 @@ case class PythonTask(
           stdErr = stdErr,
           external = external,
           config = config,
-          info = info,
-          containerPoolKey = containerPoolKey) set (
+          info = info) set (
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),

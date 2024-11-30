@@ -13,11 +13,11 @@ import scala.reflect.ClassTag
 object Objective:
 
   object ToObjective:
-    implicit def valIsToExact[T](implicit td: ToDouble[T]): ToObjective[Val[T]] = v ⇒ Objective(_ ⇒ ComputeValue(v, td.apply _), negative = false, delta = None, as = None)
-    implicit def negativeToExact[T](implicit exact: ToObjective[T]): ToObjective[Negative[T]] = t ⇒ exact.apply(t.value).copy(negative = true)
-    implicit def deltaIsToExact[T, V](implicit exact: ToObjective[T], td: ToDouble[V]): ToObjective[Delta[T, V]] = t ⇒ exact.apply(t.value).copy(delta = Some(td.apply(t.delta)))
-    implicit def asIsToExact[T](implicit exact: ToObjective[T]): ToObjective[As[T, String]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as))
-    implicit def asValIsToExact[T, P](implicit exact: ToObjective[T]): ToObjective[As[T, Val[P]]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as.name))
+    given valIsToExact[T](using td: ToDouble[T]): ToObjective[Val[T]] = v ⇒ Objective(_ ⇒ ComputeValue(v, td.apply), negative = false, delta = None, as = None)
+    given negativeToExact[T](using exact: ToObjective[T]): ToObjective[Negative[T]] = t ⇒ exact.apply(t.value).copy(negative = true)
+    given deltaIsToExact[T, V](using exact: ToObjective[T], td: ToDouble[V]): ToObjective[Delta[T, V]] = t ⇒ exact.apply(t.value).copy(delta = Some(td.apply(t.delta)))
+    given asIsToExact[T](using exact: ToObjective[T]): ToObjective[As[T, String]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as))
+    given asValIsToExact[T, P](using exact: ToObjective[T]): ToObjective[As[T, Val[P]]] = t ⇒ exact.apply(t.value).copy(as = Some(t.as.name))
 
     def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double]) =
       def value(noisy: Boolean) =
@@ -106,7 +106,7 @@ object Objective:
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray
 
   def resultPrototype(o: Objective) =
-    def objectiveNamespace(p: Val[_]) = p.withNamespace(p.namespace.prefix("objective"))
+    def objectiveNamespace(p: Val[?]) = p.withNamespace(p.namespace.prefix("objective"))
 
     def p = (o.delta, o.as) match
       case (_, Some(s))    ⇒ Objective.prototype(o).withName(s)
@@ -134,7 +134,7 @@ object Objective:
 
 
 case class Objective(
-  v:        Boolean ⇒ Objective.ComputeValue[_],
+  v:        Boolean ⇒ Objective.ComputeValue[?],
   negative: Boolean,
   delta:    Option[Double],
   as:       Option[String],
@@ -160,7 +160,7 @@ object Objectives:
 
   def resultPrototypes(o: Objectives) = toSeq(o).map(Objective.resultPrototype)
 
-  def validate(o: Objectives, outputs: Seq[Val[_]]) = Validate { p ⇒
+  def validate(o: Objectives, outputs: Seq[Val[?]]) = Validate { p ⇒
     import p._
     toSeq(o) flatMap { o ⇒ o.validate(inputs ++ outputs) }
   }

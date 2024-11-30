@@ -26,12 +26,12 @@ import scala.collection.mutable.{ HashMap, HashSet, ListBuffer }
 
 object TypeUtil {
 
-  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: TransitionSlot): Iterable[Val[_]] =
+  def receivedTypes(mole: Mole, sources: Sources, hooks: Hooks)(slot: TransitionSlot): Iterable[Val[?]] =
     validTypes(mole, sources, hooks)(slot).map { _.toVal }
 
   sealed trait ComputedType
-  case class InvalidType(name: String, direct: Seq[ValType[_]], toArray: Seq[ValType[_]], fromArray: Seq[ValType[_]]) extends ComputedType
-  case class ValidType(name: String, `type`: ValType[_], toArray: Boolean) extends ComputedType {
+  case class InvalidType(name: String, direct: Seq[ValType[?]], toArray: Seq[ValType[?]], fromArray: Seq[ValType[?]]) extends ComputedType
+  case class ValidType(name: String, `type`: ValType[?], toArray: Boolean) extends ComputedType {
     def toVal =
       if (toArray) Val(name)(`type`.toArray)
       else Val(name)(`type`)
@@ -39,15 +39,15 @@ object TypeUtil {
 
   def validTypes(mole: Mole, sources: Sources, hooks: Hooks)(
     slot:        TransitionSlot,
-    transition:  Transition ⇒ Boolean = _ ⇒ true,
-    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+    transition:  Transition => Boolean = _ => true,
+    dataChannel: DataChannel => Boolean = _ => true
   ): Iterable[ValidType] =
-    computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType ⇒ x }
+    computeTypes(mole, sources, hooks)(slot, transition).collect { case x: ValidType => x }
 
   def computeTypes(mole: Mole, sources: Sources, hooks: Hooks)(
     slot:        TransitionSlot,
-    transition:  Transition ⇒ Boolean = _ ⇒ true,
-    dataChannel: DataChannel ⇒ Boolean = _ ⇒ true
+    transition:  Transition => Boolean = _ => true,
+    dataChannel: DataChannel => Boolean = _ => true
   ): Iterable[ComputedType] = {
     val (varNames, direct, toArray, fromArray) =
       computeTransmissions(mole, sources, hooks)(
@@ -58,31 +58,31 @@ object TypeUtil {
     varNames.toSeq.map {
       import scala.collection.mutable.ListBuffer.empty
 
-      name ⇒
+      name =>
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ ValidType(name, d, false)
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ ValidType(name, t.toArray, false)
-          case (d, t, ListBuffer()) ⇒
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) => ValidType(name, d, false)
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) => ValidType(name, t.toArray, false)
+          case (d, t, ListBuffer()) =>
             val allTypes = d.toList ++ t.map(_.toArray)
             val types = allTypes.distinct
             if (types.size == 1) ValidType(name, types.head, true)
             else InvalidType(name, d.toSeq, t.toSeq, Seq.empty)
-          case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒ ValidType(name, f.asArray.fromArray, false)
-          case (d, t, f)                                   ⇒ InvalidType(name, d.toSeq, t.toSeq, f.toSeq)
+          case (ListBuffer(), ListBuffer(), ListBuffer(f)) => ValidType(name, f.asArray.fromArray, false)
+          case (d, t, f)                                   => InvalidType(name, d.toSeq, t.toSeq, f.toSeq)
         }
     }
   }
 
   private def computeTransmissions(mole: Mole, sources: Sources, hooks: Hooks)(transitions: Iterable[Transition], dataChannels: Iterable[DataChannel]) = {
-    val direct = new HashMap[String, ListBuffer[ValType[_]]] // Direct transmission through transition or data channel
-    val toArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through exploration transition
-    val fromArray = new HashMap[String, ListBuffer[ValType[_]]] // Transmission through aggregation transition
+    val direct = new HashMap[String, ListBuffer[ValType[?]]] // Direct transmission through transition or data channel
+    val toArray = new HashMap[String, ListBuffer[ValType[?]]] // Transmission through exploration transition
+    val fromArray = new HashMap[String, ListBuffer[ValType[?]]] // Transmission through aggregation transition
 
     val transitionVarNames = new HashSet[String]
 
     for {
-      t ← transitions
-      d ← t.data(mole, sources, hooks)
+      t <- transitions
+      d <- t.data(mole, sources, hooks)
     } {
       def explored = ExplorationTask.explored(t.start, mole, sources, hooks)
       def setFromArray =
@@ -92,18 +92,18 @@ object TypeUtil {
       transitionVarNames += d.name
 
       t match {
-        case t if Transition.isAggregation(t) ⇒ toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
-        case t if Transition.isSlave(t)       ⇒ setFromArray
-        case t if Transition.isExploration(t) ⇒ setFromArray
-        case _                                ⇒ direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+        case t if Transition.isAggregation(t) => toArray.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
+        case t if Transition.isSlave(t)       => setFromArray
+        case t if Transition.isExploration(t) => setFromArray
+        case _                                => direct.getOrElseUpdate(d.name, new ListBuffer) += d.`type`
       }
     }
 
     val dataChannelVarNames = ListBuffer[String]()
 
     for {
-      dc ← dataChannels
-      d ← dc.data(mole, sources, hooks)
+      dc <- dataChannels
+      d <- dc.data(mole, sources, hooks)
       if !transitionVarNames.contains(d.name)
     } {
       dataChannelVarNames += d.name

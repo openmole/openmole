@@ -48,7 +48,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
       while !stop
       do
         environment.get match
-          case Some(environment) ⇒
+          case Some(environment) =>
             val executionJob = environment.pool().takeNextJob
             val beginTime = System.currentTimeMillis
 
@@ -58,7 +58,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.RUNNING, ExecutionState.SUBMITTED))
 
                   for
-                    moleJob ← executionJob.jobs
+                    moleJob <- executionJob.jobs
                   do
                     runningJob = Some(moleJob)
 
@@ -79,13 +79,13 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                     Job.finish(moleJob, result)
 
                     result match
-                      case Right(_: Job.SubMoleCanceled) ⇒
+                      case Right(_: Job.SubMoleCanceled) =>
                         environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.KILLED, ExecutionState.RUNNING))
-                      case Right(e) ⇒
+                      case Right(e) =>
                         environment._failed.incrementAndGet()
                         environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.FAILED, ExecutionState.RUNNING))
                         environment.eventDispatcherService.trigger(environment: Environment, MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob.id, None))
-                      case _ ⇒
+                      case _ =>
                         environment.eventDispatcherService.trigger(environment, Environment.JobStateChanged(executionJob.id, executionJob, ExecutionState.DONE, ExecutionState.RUNNING))
                         environment._done.incrementAndGet()
 
@@ -94,36 +94,36 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
 
 
               output.foreach:
-                case Output(stream, output, error) ⇒
+                case Output(stream, output, error) =>
                   display(stream, s"Output of local execution", output)
                   display(stream, s"Error of local execution", error)
 
               environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
             catch
-              case e: InterruptedException ⇒ throw e
-              case e: ThreadDeath          ⇒ throw e
-              case e: Throwable ⇒
+              case e: InterruptedException => throw e
+              case e: ThreadDeath          => throw e
+              case e: Throwable =>
                 logger.log(SEVERE, "Error in execution", e)
-                executionJob.moleExecution.foreach { me ⇒ MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
+                executionJob.moleExecution.foreach { me => MoleExecutionMessage.send(me)(MoleExecutionMessage.MoleExecutionError(e)) }
                 val er = ExecutionJobExceptionRaised(executionJob, e, SEVERE, None)
                 environment.eventDispatcherService.trigger(environment: Environment, er)
-          case None ⇒ stop = true
+          case None => stop = true
     catch
-      case e: InterruptedException ⇒
-      case e: ThreadDeath          ⇒
+      case e: InterruptedException =>
+      case e: ThreadDeath          =>
 
 
   case class Output(stream: PrintStream, output: String, error: String)
 
-  private def withRedirectedOutput[T](executionJob: LocalExecutionJob, deinterleave: Boolean)(f: ⇒ T) =
+  private def withRedirectedOutput[T](executionJob: LocalExecutionJob, deinterleave: Boolean)(f: => T) =
     executionJob.moleExecution match
-      case Some(execution) if deinterleave ⇒
+      case Some(execution) if deinterleave =>
         val (res, out) = OutputManager.withStringOutput(f)
-        res → Some(Output(execution.executionContext.services.outputRedirection.output, out.output, out.error))
-      case Some(execution) ⇒
+        res -> Some(Output(execution.executionContext.services.outputRedirection.output, out.output, out.error))
+      case Some(execution) =>
         val res = OutputManager.withStreamOutputs(execution.executionContext.services.outputRedirection.output, execution.executionContext.services.outputRedirection.output)(f)
-        res → None
-      case _ ⇒
-        f → None
+        res -> None
+      case _ =>
+        f -> None
 
 

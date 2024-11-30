@@ -41,13 +41,17 @@ object Console extends JavaLogger:
 
   lazy val consoleUsage = "(Type :q to quit)"
 
-  private def withReader[T](f: LineReader => T) =
-    val terminal = TerminalBuilder.builder.jni(true).build()
+  def withTerminal[T](f: Terminal ?=> T): T =
+    val term = TerminalBuilder.builder().build()
+    try f(using term)
+    finally term.close()
+
+  private def withReader[T](f: LineReader => T)(using terminal: Terminal) =
     val reader = LineReaderBuilder.builder().terminal(terminal).build()
     try f(reader)
     finally terminal.close()
 
-  @tailrec def askPassword(msg: String = "password"): String = 
+  @tailrec def askPassword(msg: String = "password")(using terminal: Terminal): String =
     val (password, confirmation) = 
       withReader: reader =>
         val password = reader.readLine(s"$msg             :", '*')
@@ -70,15 +74,16 @@ object Console extends JavaLogger:
       val cypher = Cypher(password)
       Preference.setPasswordTest(preference, cypher)
 
-  @tailrec def initPassword(implicit preference: Preference): String =
+  @tailrec def initPassword(implicit preference: Preference, terminal: Terminal): String =
     if Preference.passwordChosen(preference) && Preference.passwordIsCorrect(Cypher(""), preference)
     then ""
     else
-      if (Preference.passwordChosen(preference))
+      if Preference.passwordChosen(preference)
       then
         val password = withReader(_.readLine("Enter your OpenMOLE password (for preferences encryption): ", '*'))
         val cypher = Cypher(password)
-        if (!Preference.passwordIsCorrect(cypher, preference)) initPassword(preference)
+        if !Preference.passwordIsCorrect(cypher, preference)
+        then initPassword(preference, terminal)
         else password
       else
         println("OpenMOLE Password has not been set yet, choose a password.")
@@ -125,7 +130,7 @@ class Console(script: Option[String] = None) { console ⇒
 
   def commandsName = "_commands_"
 
-  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(using services: Services): Int =
+  def run(args: Seq[String], workDirectory: Option[File], splash: Boolean = true)(using services: Services, terminal: Terminal): Int =
     if splash
     then
       println(consoleSplash)
@@ -138,7 +143,7 @@ class Console(script: Option[String] = None) { console ⇒
         withREPL(variables): loop ⇒
           //loop.storeErrors = false
           //loop.loopWithExitCode
-          loop.loop
+          loop.loop(Some(terminal))
           0
 
       case Some(script) ⇒
@@ -176,13 +181,13 @@ class Console(script: Option[String] = None) { console ⇒
             Left(ExitCodes.compilationError)
 
 
-  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(using TmpDirectory, FileService) =
+  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(using TmpDirectory, FileService, Terminal) =
     args.workDirectory.mkdirs()
 
     val loop = OpenMOLEREPL.newREPL(quiet = false)
 
     ConsoleVariables.bindVariables(loop, args)
-    loop.bind(commandsName, new Command(loop, args))
+    loop.bind(commandsName, new Command(loop, args, summon[Terminal]))
     loop.eval(s"import $commandsName._")
 
     try f(loop)

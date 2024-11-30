@@ -28,7 +28,7 @@ object AggregateTask {
     //implicit def fromAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](a: Aggregate[Val[A], V[Double] ⇒ B]): AggregateVal[A, B] = AggregateVal.applyToDouble(a, a.value.withType[B])
     implicit def fromEvaluate[A, B: Manifest, V[_]: FromArray](a: Evaluate[Val[A], V[A] ⇒ B]): AggregateVal[A, B] = AggregateVal(a, a.value.withType[B])
 
-    //implicit def fromAsAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], Val[B]]): AggregateVal[A, B] = AggregateVal.applyToDouble(as.value, as.as)
+    //implicit def fromAsEvaluateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], Val[B]]): AggregateVal[A, B] = AggregateVal.applyToDouble(as.value, as.as)
     implicit def fromAsEvaluate[A, B: Manifest, V[_]: FromArray](as: As[Evaluate[Val[A], V[A] ⇒ B], Val[B]]): AggregateVal[A, B] = AggregateVal(as.value, as.as)
 
     //implicit def fromAsStringAggregateToDouble[A: ToDouble, B: Manifest, V[_]: FromArray](as: As[Aggregate[Val[A], V[Double] ⇒ B], String]):  AggregateVal[A, B] = AggregateVal.applyToDouble(as.value, Val[B](as.as))
