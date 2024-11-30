@@ -85,8 +85,8 @@ object NichedNSGA2Algorithm {
 
   def elitism[S, N, P](niche: Niche[Individual[P], N], mu: Int, components: Vector[C], fitness: P ⇒ Vector[Double]) =
     ProfileOperations.elitism[S, Individual[P], N](
-      i ⇒ fitness(i.phenotype),
-      i ⇒ values(i.genome, components),
+      i => fitness(i.phenotype),
+      i => scaledValues(components)(i.genome),
       niche,
       mu)
 
@@ -108,24 +108,24 @@ object NoisyNichedNSGA2Algorithm {
     niche:       Individual[P] ⇒ N,
     continuous:  Vector[C],
     onlyOldest:  Boolean,
-    keepAll:     Boolean) = {
+    keepAll:     Boolean) =
     def nicheResult(population: Vector[Individual[P]]) =
-      if (population.isEmpty) population
-      else if (onlyOldest) {
-        val firstFront = keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
-        val sorted = firstFront.sortBy(-_.phenotypeHistory.size)
-        val maxHistory = sorted.head.phenotypeHistory.size
-        firstFront.filter(_.phenotypeHistory.size == maxHistory)
-      }
-      else keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
+      if population.isEmpty
+      then population
+      else
+        if onlyOldest
+        then
+          val firstFront = keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
+          val sorted = firstFront.sortBy(-_.phenotypeHistory.size)
+          val maxHistory = sorted.head.phenotypeHistory.size
+          firstFront.filter(_.phenotypeHistory.size == maxHistory)
+        else keepFirstFront(population, NoisyNSGA2.fitness[P](aggregation))
 
-    val individuals = if (keepAll) population else nicheElitism[Individual[P], N](population, nicheResult, niche)
+    val individuals = if keepAll then population else nicheElitism[Individual[P], N](population, nicheResult, niche)
 
-    individuals.map { i ⇒
+    individuals.map: i ⇒
       val (c, d, f, r) = NoisyIndividual.aggregate[P](i, aggregation, continuous)
       Result(c, d, f, niche(i), r, i)
-    }
-  }
 
   def continuousProfile[P](x: Int, nX: Int): Niche[Individual[P], Int] =
     mgo.evolution.niche.continuousProfile[Individual[P]](_.focus(_.genome) andThen continuousValues get, x, nX)
@@ -161,8 +161,8 @@ object NoisyNichedNSGA2Algorithm {
       operatorExploration,
       cloneProbability)
 
-  def elitism[S, N, P: Manifest](niche: Niche[Individual[P], N], muByNiche: Int, historySize: Int, aggregation: Vector[P] ⇒ Vector[Double], components: Vector[C]): Elitism[S, Individual[P]] = {
-    def individualValues(i: Individual[P]) = values(i.genome, components)
+  def elitism[S, N, P: Manifest](niche: Niche[Individual[P], N], muByNiche: Int, historySize: Int, aggregation: Vector[P] ⇒ Vector[Double], components: Vector[C]): Elitism[S, Individual[P]] =
+    def individualValues(i: Individual[P]) = scaledValues(components)(i.genome)
 
     NoisyProfileOperations.elitism[S, Individual[P], N, P](
       aggregatedFitness(aggregation),
@@ -170,7 +170,6 @@ object NoisyNichedNSGA2Algorithm {
       individualValues,
       niche,
       muByNiche)
-  }
 
   def expression[P: Manifest](fitness: (util.Random, Vector[Double], Vector[Int]) ⇒ P, continuous: Vector[C]) =
     NoisyIndividual.expression(fitness, continuous)

@@ -80,12 +80,7 @@ object HDOSE:
 
         def initialState: S = EvolutionState(s = Archive.empty)
 
-        def distance: mgo.evolution.algorithm.HDOSEOperation.Distance =
-          MGOHDOSE.distanceByComponent(
-            Genome.continuous(om.genome),
-            om.significanceC,
-            om.significanceD
-          )
+        def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = MGOHDOSE.distanceByComponent(om.significanceC, om.significanceD)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p ⇒
@@ -141,8 +136,7 @@ object HDOSE:
             HDOSEOperation.isTooCloseFromArchive[G, I](
               distance,
               state.s,
-              _.continuousValues.toVector,
-              _.discreteValues.toVector,
+              CDGenome.scaledValues(Genome.continuous(om.genome)),
               _.genome,
               om.diversityDistance
             )
@@ -153,6 +147,139 @@ object HDOSE:
 
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
+
+  case class StochasticHDOSE(
+    mu: Int,
+    limit: Vector[Double],
+    genome: Genome,
+    significanceC:       Vector[Double],
+    significanceD:       Vector[Int],
+    diversityDistance:   Double,
+    phenotypeContent: PhenotypeContent,
+    objectives: Seq[Objective],
+    historySize: Int,
+    cloneProbability: Double,
+    operatorExploration: Double,
+    reject: Option[Condition])
+
+  object StochasticHDOSE:
+
+    import mgo.evolution.algorithm.NoisyHDOSE._
+    import mgo.evolution.algorithm.{NoisyHDOSE ⇒ MGONoisyHDOSE, _}
+
+    implicit def integration: MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype]:
+      api =>
+
+      type G = CDGenome.Genome
+      type I = CDGenome.NoisyIndividual.Individual[Phenotype]
+      type S = HDOSEState[Phenotype]
+
+      def iManifest = implicitly
+      def gManifest = implicitly
+      def sManifest = implicitly
+
+      def operations(om: StochasticHDOSE) = new Ops:
+        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
+        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
+        def startTimeLens = GenLens[S](_.startTime)
+        def generationLens = GenLens[S](_.generation)
+        def evaluatedLens = GenLens[S](_.evaluated)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+
+        def buildGenome(vs: Vector[Variable[?]]) =
+          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+
+          buildGenome(Genome.fromVariables(vs, om.genome))
+
+        def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
+          val (cs, is) = genomeValues(g)
+          Genome.toVariables(om.genome, cs, is, scale = true)
+
+        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
+        def initialState = EvolutionState(s = Archive.empty)
+
+        def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = mgo.evolution.algorithm.HDOSE.distanceByComponent(om.significanceC, om.significanceD)
+
+        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
+          FromContext: p =>
+            import p.*
+
+            val res = MGONoisyHDOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
+            val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
+
+            val outputValues =
+              if includeOutputs
+              then StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory))
+              else Seq()
+
+            genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
+
+        def initialGenomes(n: Int, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            MGONoisyHDOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
+
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+            val continuous = Genome.continuous(om.genome)
+            val discrete = Genome.discrete(om.genome)
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+
+            MGONoisyHDOSE.adaptiveBreeding[Phenotype](
+              n,
+              om.operatorExploration,
+              om.cloneProbability,
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              continuous,
+              discrete,
+              om.significanceC,
+              om.significanceD,
+              om.diversityDistance,
+              om.limit,
+              rejectValue) apply(s, individuals, rng)
+
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
+          FromContext: p ⇒
+            import p._
+
+            MGONoisyHDOSE.elitism(
+              om.mu,
+              om.historySize,
+              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Genome.continuous(om.genome),
+              om.significanceC,
+              om.significanceD,
+              om.diversityDistance,
+              om.limit) apply(s, population, candidates, rng)
+
+
+        def mergeIslandState(state: S, islandState: S): S =
+          def isTooCloseFromArchive =
+            HDOSEOperation.isTooCloseFromArchive[G, I](
+              distance,
+              state.s,
+              CDGenome.scaledValues(Genome.continuous(om.genome)),
+              _.genome,
+              om.diversityDistance
+            )
+
+          val archive = state.s ++ islandState.s.sortBy(_.generation).filterNot(i => isTooCloseFromArchive(i.genome))
+          state.copy(s = archive)
+
+        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
+
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
+
+
 
 
 
@@ -210,32 +337,33 @@ object HDOSE:
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
         )
-//      case Some(stochasticValue) ⇒
-//        val fg = OriginAxe.fullGenome(origin, genome)
-//        val noisyObjectives = Objectives.toNoisy(FitnessPattern.toObjectives(objective))
-//        val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
-//
-//        def validation: Validate =
-//          val aOutputs = outputs.map(_.toArray)
-//          Objectives.validate(noisyObjectives, aOutputs)
-//
-//        EvolutionWorkflow.stochasticGAIntegration(
-//          StochasticOSE(
-//            mu = populationSize,
-//            origin = OriginAxe.toOrigin(origin, genome),
-//            genome = fg,
-//            phenotypeContent = phenotypeContent,
-//            objectives = noisyObjectives,
-//            limit = FitnessPattern.toLimit(objective),
-//            operatorExploration = EvolutionWorkflow.operatorExploration,
-//            historySize = stochasticValue.sample,
-//            cloneProbability = stochasticValue.reevaluate,
-//            reject = reject.option),
-//          fg,
-//          phenotypeContent,
-//          stochasticValue,
-//          validate = validation
-//        )
+      case Some(stochasticValue) ⇒
+        val noisyObjectives = Objectives.toNoisy(OSE.FitnessPattern.toObjectives(objective))
+        val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
+
+        def validation: Validate =
+          val aOutputs = outputs.map(_.toArray)
+          Objectives.validate(noisyObjectives, aOutputs)
+
+        EvolutionWorkflow.stochasticGAIntegration(
+          StochasticHDOSE(
+            mu = populationSize,
+            genome = genome,
+            significanceC = significanceC,
+            significanceD = significanceD,
+            diversityDistance = diversityDistance,
+            phenotypeContent = phenotypeContent,
+            objectives = noisyObjectives,
+            limit = OSE.FitnessPattern.toLimit(objective),
+            operatorExploration = EvolutionWorkflow.operatorExploration,
+            historySize = stochasticValue.sample,
+            cloneProbability = stochasticValue.reevaluate,
+            reject = reject.option),
+          genome,
+          phenotypeContent,
+          stochasticValue,
+          validate = validation
+        )
 
 
 object HDOSEEvolution:
