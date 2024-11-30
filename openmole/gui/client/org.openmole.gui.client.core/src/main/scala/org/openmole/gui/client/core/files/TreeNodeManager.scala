@@ -72,6 +72,8 @@ class TreeNodeManager:
     updateFilter(FileSorting())
     directory.set(sp)
 
+  def goToHome = switch(root)
+    
   def updateFilter(newFilter: FileSorting) = fileSorting.set(newFilter)
 
 

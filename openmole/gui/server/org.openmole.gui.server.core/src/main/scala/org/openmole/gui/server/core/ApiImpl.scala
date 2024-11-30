@@ -574,7 +574,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       tmpDirectory.withTmpFile("result", ".csv"): csvFile =>
         OMRFormat.writeCSV(omrFile, csvFile, dataFile)
         csvFile.content
-
+    
     GUIOMRContent(
       section = content,
       openMoleVersion = omrContent.`openmole-version`,
@@ -585,6 +585,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       index = index,
       raw = raw
     )
+  
 
 
   def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =
