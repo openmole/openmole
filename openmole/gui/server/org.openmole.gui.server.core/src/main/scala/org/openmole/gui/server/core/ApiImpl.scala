@@ -668,42 +668,42 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.tool.stream.*
 
     val checkedURL =
-      java.net.URI.create(url).getScheme match {
+      java.net.URI.create(url).getScheme match
         case null ⇒ "http://" + url
         case _ ⇒ url
-      }
 
-    NetworkService.withResponse(checkedURL) {
-      response ⇒
+    NetworkService.withResponse(checkedURL): response =>
+      val nameHeader =
+        response.getAllHeaders.map(h => h.getName -> h.getValue).flatMap:
+          case ("Content-Disposition", value) =>
+            value.split(";").map(_.split("=")).find(_.head.trim == "filename").map: filename =>
+              val name = filename.last.trim
+              if name.startsWith("\"") && name.endsWith("\"")
+              then name.drop(1).dropRight(1)
+              else name
+          case _ => None
+        .headOption
+
+      def isArchive =
+        val fileName =
+          nameHeader match
+            case Some(name) => safePathToFile(path / name)
+            case None => safePathToFile(path)
+        archiveType(fileName) contains org.openmole.tool.archive.ArchiveType.TarGZ
+
+      if extract && isArchive
+      then
+        import org.openmole.tool.archive.*
+        val dest = safePathToFile(path)
+        val tis = TarArchiveInputStream(new GZIPInputStream(response.getEntity.getContent))
+        try tis.extract(dest, overwrite = overwrite)
+        finally tis.close()
+      else
         def extractName = checkedURL.split("/").last
-
-        val name =
-          response.getAllHeaders.map(h => h.getName -> h.getValue).flatMap {
-            case ("Content-Disposition", value) ⇒
-              value.split(";").map(_.split("=")).find(_.head.trim == "filename").map {
-                filename ⇒
-                  val name = filename.last.trim
-                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
-              }
-            case _ ⇒ None
-          }.headOption.getOrElse(extractName)
-
-        val is = response.getEntity.getContent
-
-        if
-          extract && (archiveType(safePathToFile(path)) contains org.openmole.tool.archive.ArchiveType.TarGZ)
-        then
-          import org.openmole.tool.archive.*
-          val dest = safePathToFile(path)
-          val tis = TarArchiveInputStream(new GZIPInputStream(is))
-          try tis.extract(dest, overwrite = overwrite)
-          finally tis.close()
-        else
-          val dest = safePathToFile(path / name)
-          if !dest.exists() || overwrite
-          then dest.withOutputStream(os ⇒ copy(is, os))
-          else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
-    }
+        val dest = safePathToFile(path / nameHeader.getOrElse(extractName))
+        if !dest.exists() || overwrite
+        then dest.withOutputStream(os ⇒ copy(response.getEntity.getContent, os))
+        else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
 
   def cloneRepository(remoteURL: String, destination: SafePath, overwrite: Boolean): Option[SafePath] =
     import services.{workspace}
