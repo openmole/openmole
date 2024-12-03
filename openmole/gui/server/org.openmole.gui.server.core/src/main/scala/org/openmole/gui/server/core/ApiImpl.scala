@@ -691,7 +691,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         val is = response.getEntity.getContent
 
         if
-          extract && (archiveType(safePathToFile(path)) contains org.openmole.tool.archive.ArchiveType.TarGZ)
+          extract && (archiveType(safePathToFile(path / name)) contains org.openmole.tool.archive.ArchiveType.TarGZ)
         then
           import org.openmole.tool.archive.*
           val dest = safePathToFile(path)
