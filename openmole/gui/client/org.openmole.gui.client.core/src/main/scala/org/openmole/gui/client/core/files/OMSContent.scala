@@ -77,7 +77,7 @@ object OMSContent:
                   else div()
             )
         },
-        div(row, panels.tabContent.fontSizeControl, marginLeft.auto)
+        div(row, marginLeft.auto)
       )
 
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
