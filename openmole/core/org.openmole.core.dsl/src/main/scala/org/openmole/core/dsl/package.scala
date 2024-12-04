@@ -46,32 +46,21 @@ package dsl:
     export org.openmole.core.format.{OMROutputFormat, OMROption}
 
     def bundles = PluginManager.bundleFiles
-
     def dependencies(file: File) = PluginManager.dependencies(file)
 
     object omr:
       def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeCSV(file, destination)
-
       def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeJSON(file, destination)
-
       def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.resultFileDirectory(file).foreach(_.copy(destination))
-
       def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
 
     def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
-
     def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true, gz = true)
-
     def load(file: String)(implicit serialiserService: SerializerService): Object = load(new File(file))
-
     def loadArchive(file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService): Object = loadArchive(new File(file))
-
     def save(obj: Object, file: File)(implicit serialiserService: SerializerService) = serialiserService.serialize(obj, file)
-
     def saveArchive(obj: Object, file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService) = serialiserService.serializeAndArchiveFiles(obj, file, gz = true)
-
     def save(obj: Object, file: String)(implicit serialiserService: SerializerService): Unit = save(obj, new File(file))
-
     def saveArchive(obj: Object, file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService): Unit = saveArchive(obj, new File(file))
 
 
@@ -122,7 +111,6 @@ package dsl:
     //export org.openmole.tool.collection.DoubleRangeDecorator
     @inline implicit class DoubleWrapper(d: Double):
       infix def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
-
       infix def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
 
     //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
