@@ -17,23 +17,63 @@
 
 package org.openmole.core
 
+import cats.*
+
+import org.openmole.core.workspace.TmpDirectory
+import org.openmole.core.logconfig.LoggerConfig
+import org.openmole.core.workflow.mole
+import org.openmole.core.serializer.SerializerService
+import org.openmole.core.pluginmanager.PluginManager
+import org.openmole.core.fileservice.FileService
+import org.openmole.tool.crypto.Cypher
+import org.openmole.core.context.Context
+import squants.information.*
+
+import scala.collection.immutable.NumericRange
+
 package dsl:
+  trait DSLPackage:
+    export org.openmole.core.context.Val
+    export org.openmole.core.workflow.execution.LocalEnvironment
 
-  import org.openmole.core.context._
-  import org.openmole.core.logconfig.LoggerConfig
-  import cats._
-  import org.openmole.core.workflow.mole
+    export org.openmole.core.workflow.task.EmptyTask
+    export org.openmole.core.workflow.task.ExplorationTask
+    export org.openmole.core.workflow.task.MoleTask
+    export org.openmole.core.workflow.task.TryTask
+    export org.openmole.core.workflow.task.RetryTask
 
-  import org.openmole.tool.crypto.Cypher
-  import squants.information._
+    export org.openmole.core.workflow.hook.display
+    export org.openmole.core.format.{OMROutputFormat, OMROption}
 
-  import scala.collection.immutable.NumericRange
+    def bundles = PluginManager.bundleFiles
 
-  trait DSLPackage extends Commands
-    with Serializer
-    with Classes
-    with workflow.ExportedPackage
-    with cats.instances.AllInstances:
+    def dependencies(file: File) = PluginManager.dependencies(file)
+
+    object omr:
+      def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeCSV(file, destination)
+
+      def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeJSON(file, destination)
+
+      def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.resultFileDirectory(file).foreach(_.copy(destination))
+
+      def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
+
+    def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
+
+    def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true, gz = true)
+
+    def load(file: String)(implicit serialiserService: SerializerService): Object = load(new File(file))
+
+    def loadArchive(file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService): Object = loadArchive(new File(file))
+
+    def save(obj: Object, file: File)(implicit serialiserService: SerializerService) = serialiserService.serialize(obj, file)
+
+    def saveArchive(obj: Object, file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService) = serialiserService.serializeAndArchiveFiles(obj, file, gz = true)
+
+    def save(obj: Object, file: String)(implicit serialiserService: SerializerService): Unit = save(obj, new File(file))
+
+    def saveArchive(obj: Object, file: String)(implicit newFile: TmpDirectory, serialiserService: SerializerService): Unit = saveArchive(obj, new File(file))
+
 
     implicit lazy val implicitContext: Context = Context.empty
 
@@ -82,6 +122,7 @@ package dsl:
     //export org.openmole.tool.collection.DoubleRangeDecorator
     @inline implicit class DoubleWrapper(d: Double):
       infix def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
+
       infix def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
 
     //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
@@ -90,4 +131,6 @@ package dsl:
     export Predef.doubleWrapper
 
 
-package object dsl extends DSLPackage
+package object dsl extends dsl.DSLPackage
+  with workflow.ExportedPackage
+  with cats.instances.AllInstances

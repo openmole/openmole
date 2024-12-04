@@ -24,29 +24,25 @@ import org.openmole.plugin.domain.range._
 import org.openmole.plugin.domain.file._
 import org.scalatest._
 
-class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  "inputs of modified domain" should "be as expected" in {
+  "inputs of modified domain" should "be as expected" in:
     val size = Val[Int]
-    val range = RangeDomain[Int](0, 10).step(1)
+    val range = RangeDomain[Int](0, 10, 1)
     val take = range.take(size)
     TakeDomain.isDiscrete(take).inputs should contain(size)
-  }
 
-  "range" should "work with modifiers" in {
+  "range" should "work with modifiers" in:
     RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
     RangeDomain[Int](0, 10).map(x ⇒ x * x)
 
-    val range = RangeDomain[Int](0, 10).step(1)
+    val range = RangeDomain[Int](0, 10, 1)
     val take = range.take(10)
     val t = Val[Int]
     val sampling: Sampling = t in take
-  }
 
-  "files" should "work with modifiers" in {
+  "files" should "work with modifiers" in:
     val f = Val[File]
 
     f in (File("/tmp").files().filter(f ⇒ f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
-  }
 
-}
