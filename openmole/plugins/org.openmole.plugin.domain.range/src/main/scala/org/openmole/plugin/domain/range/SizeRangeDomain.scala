@@ -48,14 +48,16 @@ object SizeRangeDomain {
 
 }
 
-class SizeRangeDomain[T](val range: RangeDomain[T], val size: FromContext[Int]) extends SizeStep[T] {
-  import range._
+class SizeRangeDomain[T](val range: RangeDomain[T], val size: FromContext[Int]):
+  import range.*
+
+  def iterator = SizeStep.iterator(range, stepAndSize)
 
   def stepAndSize(minValue: T, maxValue: T) = size.map { size ⇒
-    import ops._
+    import ops.*
     val s = size - 1
     val step = (maxValue - minValue) / fromInt(s)
-    (step, s.toInt)
+    (step, s)
   }
 
   def min = range.min
@@ -64,4 +66,3 @@ class SizeRangeDomain[T](val range: RangeDomain[T], val size: FromContext[Int]) 
   def inputs = range.inputs ++ size.inputs
   def validate = range.validate ++ size.validate
 
-}

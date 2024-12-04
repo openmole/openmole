@@ -28,22 +28,19 @@ package object range {
   val scale = 128
   private val mc = new MathContext(scale, RoundingMode.HALF_UP)
 
-  trait Log[T] {
+  trait Log[T]:
     def log(t: T): T
     def exp(t: T): T
-  }
 
   implicit lazy val doubleLog: Log[Double] =
-    new Log[Double] {
-      def log(t: Double) = math.log(t)
-      def exp(t: Double) = math.exp(t)
-    }
+    new Log[Double] :
+      def log(t: Double) = Math.log(t)
+      def exp(t: Double) = Math.exp(t)
 
   implicit lazy val bigDecimalLog: Log[BigDecimal] =
-    new Log[BigDecimal] {
+    new Log[BigDecimal]:
       def log(t: BigDecimal) = BigDecimalOperations.ln(t, scale)
       def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
-    }
 
   implicit class RangeDomainDecorator[T](r: RangeDomain[T]):
     def step(s: FromContext[T]) = StepRangeDomain[T](r, s)
@@ -56,6 +53,23 @@ package object range {
 
   implicit def defaultStepInt: DefaultStep[Int] = new DefaultStep[Int] { def step = 1 }
   implicit def defaultStepLong: DefaultStep[Long] = new DefaultStep[Long] { def step = 1 }
+
+  object SizeStep:
+    def iterator[T](
+      range: RangeDomain[T],
+      stepAndSize: (T, T) => FromContext[(T, Int)]): FromContext[Iterator[T]] =
+
+      import range.ops.*
+
+      FromContext: p =>
+        import p.*
+        val mi: T = range.min.from(context)
+        val ma: T = range.max.from(context)
+        val (step, size) = stepAndSize(mi, ma).from(context)
+        (0 to size).iterator.map(i => mi + (fromInt(i) * step))
+      .withValidate:
+        range.min.validate ++ range.max.validate
+
 
   object RangeValue {
     implicit def fractionalIsRangeValue[T](implicit fractional: Fractional[T]): RangeValue[T] = new RangeValue[T] {
@@ -97,13 +111,13 @@ package object range {
 
   object IsRangeDomain:
     import org.openmole.tool.collection.DoubleRange
-    implicit def doubleRangeIsRange: IsRangeDomain[DoubleRange, Double] = (range: DoubleRange) ⇒ RangeDomain(range.low, range.high)
-    implicit def intRangeIsRange: IsRangeDomain[scala.Range, Int] = (range: scala.Range) =>
+    given doubleRangeIsRange: IsRangeDomain[DoubleRange, Double] = (range: DoubleRange) ⇒ RangeDomain(range.low, range.high)
+    given intRangeIsRange: IsRangeDomain[scala.Range, Int] = (range: scala.Range) =>
       val start = range.start
       val end = range.end
       RangeDomain(Math.min(start, end), Math.min(start, end))
-      
-    implicit def intRangeIsRangeDouble: IsRangeDomain[scala.Range, Double] = (range: scala.Range) =>
+
+    given intRangeIsRangeDouble: IsRangeDomain[scala.Range, Double] = (range: scala.Range) =>
       val start = range.start
       val end = range.end
       RangeDomain(Math.min(start, end).toDouble, Math.min(start, end).toDouble)

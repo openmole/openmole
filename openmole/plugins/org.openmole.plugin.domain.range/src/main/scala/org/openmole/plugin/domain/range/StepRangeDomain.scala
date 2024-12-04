@@ -24,14 +24,14 @@ import org.openmole.core.workflow.domain
 
 object StepRangeDomain:
 
-  implicit def isDiscrete[T]: DiscreteFromContextDomain[StepRangeDomain[T], T] = domain ⇒
+  given isDiscrete[T]: DiscreteFromContextDomain[StepRangeDomain[T], T] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
       domain.validate
     )
 
-  implicit def isBounded[T]: BoundedFromContextDomain[StepRangeDomain[T], T] = domain ⇒
+  given isBounded[T]: BoundedFromContextDomain[StepRangeDomain[T], T] = domain =>
     Domain(
       (domain.min, domain.max),
       domain.inputs,
@@ -42,8 +42,10 @@ object StepRangeDomain:
 
   def apply[T](range: RangeDomain[T], step: FromContext[T]) = new StepRangeDomain[T](range, step)
 
-class StepRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[T]) extends SizeStep[T] {
-  import range._
+class StepRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[T]):
+  import range.*
+
+  def iterator = SizeStep.iterator(range, stepAndSize)
 
   def stepAndSize(minValue: T, maxValue: T) = steps.map { step ⇒
     import ops._
@@ -57,4 +59,4 @@ class StepRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[T]) e
   def inputs = range.inputs ++ steps.inputs
   def validate = range.validate ++ steps.validate
 
-}
+
