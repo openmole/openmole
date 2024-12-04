@@ -87,16 +87,19 @@ object Genome:
     implicit def factorOfIntRangeIsContinuousInt(f: Factor[DoubleRange, Int]): ContinuousInt =
       ContinuousInt(f.value, f.domain.low.toInt, f.domain.high.toInt)
 
-    implicit def factorSeqOfDoubleRangeIsSequenceOfDouble[D](f: Factor[Seq[DoubleRange], Array[Double]]): SequenceOfDouble =
+    implicit def factorSeqOfDoubleRangeIsSequenceOfDouble(f: Factor[Seq[DoubleRange], Array[Double]]): SequenceOfDouble =
       SequenceOfDouble(f.value, f.domain.map(_.low).toArray, f.domain.map(_.high).toArray, f.domain.size)
 
-    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], sized: DomainSize[D]): SequenceOfDouble =
+    implicit def factorIsSequenceOfDouble[D](f: Factor[D, Array[Double]])(implicit bounded: BoundedDomain[D, Array[Double]], size: DomainSize[D]): SequenceOfDouble =
       val (min, max) = bounded(f.domain).domain
-      SequenceOfDouble(f.value, min, max, sized(f.domain))
+      SequenceOfDouble(f.value, min, max, size(f.domain))
 
     implicit def factorIsSequenceOfInt[D](f: Factor[D, Array[Int]])(implicit bounded: BoundedDomain[D, Array[Int]], sized: DomainSize[D]): SequenceOfInt =
       val (min, max) = bounded(f.domain).domain
       SequenceOfInt(f.value, min, max, sized(f.domain))
+
+    implicit def factorSeqOfRangeIsSequenceOfInt(f: Factor[Seq[scala.Range], Array[Int]]): SequenceOfInt =
+      SequenceOfInt(f.value, f.domain.map(_.start).toArray, f.domain.map(_.end).toArray, f.domain.size)
 
     implicit def factorIsIsEnumeration[D, T](f: Factor[D, T])(implicit fix: FixDomain[D, T]): Enumeration[T] =
       Enumeration(f.value, fix(f.domain).domain.toVector)

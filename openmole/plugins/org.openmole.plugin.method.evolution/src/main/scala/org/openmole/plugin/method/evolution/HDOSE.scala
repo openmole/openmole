@@ -282,38 +282,74 @@ object HDOSE:
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
 
-  type Significance = Seq[By[Val[?], Double]]
+  object OriginAxe:
+    given factorDouble[D](using bounds: BoundedDomain[D, Double], step: DomainStep[D, Double]): Conversion[Factor[D, Double], OriginAxe] = f =>
+      val (min, max) = bounds(f.domain).domain
+      ContinuousOriginAxe(Genome.GenomeBound.ScalarDouble(f.value, min, max), step(f.domain))
 
-  object Significance:
-    def significanceC(genome: Genome, s: Significance): Vector[Double] =
-      val sMap = s.map(s => s.value -> s.by).toMap[Val[?], Double]
-      val genomeC = Genome.continuousGenome(genome)
-      (Genome.toVals(genomeC) zip Genome.sizes(genomeC)).flatMap: (v, s) =>
-        val sValue = sMap.getOrElse(v, 1.0)
-        Vector.fill(s)(sValue)
-      .toVector
+    given doubleRange[D]: Conversion[Factor[Seq[DoubleRange], Array[Double]], OriginAxe] = f =>
+      ContinuousSequenceOriginAxe(
+        Genome.GenomeBound.SequenceOfDouble(f.value, f.domain.map(_.low).toArray, f.domain.map(_.high).toArray, f.domain.size),
+        f.domain.map(_.step).toVector
+      )
 
-    def significanceD(genome: Genome, s: Significance): Vector[Int] =
-      val sMap = s.map(s => s.value -> s.by).toMap[Val[?], Double]
-      val genomeD = Genome.discreteGenome(genome)
-      (Genome.toVals(genomeD) zip Genome.sizes(genomeD)).flatMap: (v, s) =>
-        val sValue = sMap.getOrElse(v, 1.0).toInt
-        Vector.fill(s)(sValue)
-      .toVector
+    given factorInt[D](using bounds: BoundedDomain[D, Int], step: DomainStep[D, Int]): Conversion[Factor[D, Int], OriginAxe] = f =>
+      val (min, max) = bounds(f.domain).domain
+      DiscreteOriginAxe(Genome.GenomeBound.ScalarInt(f.value, min, max), step(f.domain))
+
+    given intRange[D]: Conversion[Factor[Seq[Range], Array[Int]], OriginAxe] = f =>
+      DiscreteSequenceOriginAxe(
+        Genome.GenomeBound.SequenceOfInt(f.value, f.domain.map(_.start).toArray, f.domain.map(_.end).toArray, f.domain.size),
+        f.domain.map(_.step).toVector
+      )
+
+    given enumeration[D, T](using fix: FixDomain[D, T]): Conversion[Factor[D, T], OriginAxe] = f =>
+      val domain = fix(f.domain).domain.toVector
+      EnumerationOriginAxe(Genome.GenomeBound.Enumeration(f.value, domain))
+
+    def genomeBound(originAxe: OriginAxe) = originAxe match
+      case c: ContinuousOriginAxe ⇒ c.p
+      case d: DiscreteOriginAxe ⇒ d.p
+      case cs: ContinuousSequenceOriginAxe ⇒ cs.p
+      case ds: DiscreteSequenceOriginAxe ⇒ ds.p
+      case en: EnumerationOriginAxe => en.p
+
+    def toGenome(axes: Seq[OriginAxe]): Genome = axes.map(genomeBound)
+
+    def significanceC(axes: Seq[OriginAxe]): Vector[Double] =
+      axes.toVector.flatMap:
+        case c: ContinuousOriginAxe ⇒ Seq(c.step)
+        case cs: ContinuousSequenceOriginAxe ⇒ cs.step
+        case _ => Seq()
+
+    def significanceD(axes: Seq[OriginAxe]): Vector[Int] =
+      axes.toVector.flatMap:
+        case d: DiscreteOriginAxe ⇒ Seq(d.step)
+        case ds: DiscreteSequenceOriginAxe ⇒ ds.step
+        case en: EnumerationOriginAxe => Seq(1)
+        case _ => Seq()
+
+
+  sealed trait OriginAxe
+  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, step: Double) extends OriginAxe
+  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, step: Vector[Double]) extends OriginAxe
+  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, step: Int) extends OriginAxe
+  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, step: Vector[Int]) extends OriginAxe
+  case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[?]) extends OriginAxe
 
 
   def apply(
-    genome: Genome,
+    origin: Seq[OriginAxe],
     objective: Seq[OSE.FitnessPattern],
     archiveSize: Int = 1000,
-    significance: Significance = Seq(),
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
     stochastic: OptionalArgument[Stochastic] = None,
     reject: OptionalArgument[Condition] = None): EvolutionWorkflow =
 
-    val significanceC = Significance.significanceC(genome, significance)
-    val significanceD = Significance.significanceD(genome, significance)
+    val genomeValue = OriginAxe.toGenome(origin)
+    val significanceC = OriginAxe.significanceC(origin)
+    val significanceD = OriginAxe.significanceD(origin)
 
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match
       case None ⇒
@@ -323,7 +359,7 @@ object HDOSE:
         EvolutionWorkflow.deterministicGAIntegration(
           DeterministicHDOSE(
             mu = populationSize,
-            genome = genome,
+            genome = genomeValue,
             significanceC = significanceC,
             significanceD = significanceD,
             archiveSize = archiveSize,
@@ -332,7 +368,7 @@ object HDOSE:
             limit = OSE.FitnessPattern.toLimit(objective),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             reject = reject.option),
-          genome,
+          genomeValue,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
         )
@@ -347,7 +383,7 @@ object HDOSE:
         EvolutionWorkflow.stochasticGAIntegration(
           StochasticHDOSE(
             mu = populationSize,
-            genome = genome,
+            genome = genomeValue,
             significanceC = significanceC,
             significanceD = significanceD,
             archiveSize = archiveSize,
@@ -358,7 +394,7 @@ object HDOSE:
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             reject = reject.option),
-          genome,
+          genomeValue,
           phenotypeContent,
           stochasticValue,
           validate = validation
@@ -372,9 +408,8 @@ object HDOSEEvolution:
   given EvolutionMethod[HDOSEEvolution] =
     p =>
       HDOSE(
-        genome = p.genome,
+        origin = p.origin,
         objective = p.objective,
-        significance = p.significance,
         archiveSize = p.archiveSize,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
@@ -390,7 +425,7 @@ object HDOSEEvolution:
         termination = p.termination,
         parallelism = p.parallelism,
         distribution = p.distribution,
-        suggestion = p.suggestion(p.genome),
+        suggestion = p.suggestion(HDOSE.OriginAxe.toGenome(p.origin)),
         scope = p.scope
       )
 
@@ -400,11 +435,10 @@ object HDOSEEvolution:
 import EvolutionWorkflow.*
 
 case class HDOSEEvolution(
-  genome:         Genome,
+  origin:         Seq[HDOSE.OriginAxe],
   objective:      Seq[OSE.FitnessPattern],
   evaluation:     DSL,
   termination:    OMTermination,
-  significance:   HDOSE.Significance           = Seq(),
   archiveSize:    Int                          = 1000,
   populationSize: Int                          = 200,
   stochastic:     OptionalArgument[Stochastic] = None,

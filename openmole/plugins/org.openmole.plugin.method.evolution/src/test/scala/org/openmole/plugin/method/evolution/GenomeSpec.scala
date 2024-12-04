@@ -24,9 +24,9 @@ import org.openmole.core.dsl.extension._
 import org.openmole.plugin.domain.collection._
 import org.openmole.plugin.domain.bounds._
 
-class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  "syntax x to y" should "be converted to bounds" in {
+  "syntax x to y" should "be converted to bounds" in:
     val x = Val[Double]
     val g1: Genome = Seq(x in (1.0 to 2.0))
     g1.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble] should equal(true)
@@ -43,6 +43,12 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val vx = Val[Array[Double]]
     val g4: Genome = Seq(vx in Seq.fill(10)(0.0 to 1.0))
     g4.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble] should equal(true)
-  }
+    g4.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble].size should equal(10)
 
-}
+    val ai = Val[Array[Int]]
+    val g5: Genome = Seq(ai in Seq.fill(10)(0 to 100))
+    g5.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt] should equal(true)
+    g5.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt].size should equal(10)
+
+
+
