@@ -81,8 +81,8 @@ package dsl:
 
     //export org.openmole.tool.collection.DoubleRangeDecorator
     @inline implicit class DoubleWrapper(d: Double):
-      def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
-      def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
+      infix def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
+      infix def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
 
     //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
     export Predef.longWrapper

@@ -21,9 +21,6 @@ import org.openmole.core.context
 import org.openmole.core.workflow._
 
 trait Classes:
-  export org.openmole.core.context.Val
-  export org.openmole.core.context.Val as Prototype
-
   export org.openmole.core.workflow.execution.LocalEnvironment
 
   export task.EmptyTask
@@ -34,4 +31,8 @@ trait Classes:
 
   export org.openmole.core.workflow.hook.display
   export org.openmole.core.format.{OMROutputFormat, OMROption}
+
+  export org.openmole.core.context.Val
+  export org.openmole.core.context.Val as Prototype
+
 

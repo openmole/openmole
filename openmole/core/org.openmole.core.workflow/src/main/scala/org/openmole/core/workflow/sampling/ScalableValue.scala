@@ -102,7 +102,7 @@ object ScalableValue:
 
   def prototypes(scales: Seq[ScalableValue]) = scales.map(_.prototype)
 
-  def toVariables(scales: Seq[ScalableValue], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[?]]] = {
+  def toVariables(scales: Seq[ScalableValue], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[?]]] = 
     @tailrec def scaled0(scales: List[ScalableValue], values: List[Double], acc: List[Variable[?]] = Nil)(context: => Context, rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): List[Variable[?]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
@@ -114,7 +114,6 @@ object ScalableValue:
       }
 
     FromContext { p => scaled0(scales.toList, values.toList)(p.context, p.random, p.tmpDirectory, p.fileService) }
-  }
 
 
   def unflatten(s: ScalableValue) = 
