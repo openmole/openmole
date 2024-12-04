@@ -45,16 +45,14 @@ package object range {
       def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
     }
 
-  implicit class RangeDomainDecorator[T](r: RangeDomain[T]) {
+  implicit class RangeDomainDecorator[T](r: RangeDomain[T]):
     def step(s: FromContext[T]) = StepRangeDomain[T](r, s)
     def by(s: FromContext[T]) = step(s)
     def size(s: FromContext[Int]) = SizeRangeDomain[T](r, s)
     def logSteps(s: FromContext[Int])(implicit l: Log[T]) = LogRangeDomain[T](r, s)
-  }
 
-  trait DefaultStep[T] {
+  trait DefaultStep[T]:
     def step: T
-  }
 
   implicit def defaultStepInt: DefaultStep[Int] = new DefaultStep[Int] { def step = 1 }
   implicit def defaultStepLong: DefaultStep[Long] = new DefaultStep[Long] { def step = 1 }
@@ -97,18 +95,23 @@ package object range {
     }
   }
 
-  object IsRangeDomain {
+  object IsRangeDomain:
     import org.openmole.tool.collection.DoubleRange
     implicit def doubleRangeIsRange: IsRangeDomain[DoubleRange, Double] = (range: DoubleRange) ⇒ RangeDomain(range.low, range.high)
-    implicit def intRangeIsRange: IsRangeDomain[scala.Range, Int] = (range: scala.Range) ⇒ RangeDomain(range.min, range.max)
-    implicit def intRangeIsRangeDouble: IsRangeDomain[scala.Range, Double] = (range: scala.Range) ⇒ RangeDomain(range.min.toDouble, range.max.toDouble)
-  }
+    implicit def intRangeIsRange: IsRangeDomain[scala.Range, Int] = (range: scala.Range) =>
+      val start = range.start
+      val end = range.end
+      RangeDomain(Math.min(start, end), Math.min(start, end))
+      
+    implicit def intRangeIsRangeDouble: IsRangeDomain[scala.Range, Double] = (range: scala.Range) =>
+      val start = range.start
+      val end = range.end
+      RangeDomain(Math.min(start, end).toDouble, Math.min(start, end).toDouble)
 
-  trait IsRangeDomain[-D, T] {
+  trait IsRangeDomain[-D, T]:
     def apply(t: D): RangeDomain[T]
-  }
 
-  implicit def isRangeDomainIsBounded[D, T](implicit isRangeDomain: IsRangeDomain[D, T]): BoundedFromContextDomain[D, T] = domain ⇒
+  implicit def isRangeDomainIsBounded[D, T](implicit isRangeDomain: IsRangeDomain[D, T]): BoundedFromContextDomain[D, T] = domain =>
     Domain(
       (isRangeDomain(domain).min, isRangeDomain(domain).max),
       isRangeDomain(domain).inputs,

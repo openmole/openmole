@@ -233,7 +233,6 @@ object OSE {
   import org.openmole.core.dsl.*
 
   object OriginAxe:
-
     implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe =
       val domain = fix(f.domain).domain.toVector
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.value, domain.min, domain.max), domain)

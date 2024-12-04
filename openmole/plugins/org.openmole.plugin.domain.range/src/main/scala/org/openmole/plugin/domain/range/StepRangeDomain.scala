@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import org.openmole.core.workflow.domain
 
-object StepRangeDomain {
+object StepRangeDomain:
 
   implicit def isDiscrete[T]: DiscreteFromContextDomain[StepRangeDomain[T], T] = domain ⇒
     Domain(
@@ -41,7 +41,6 @@ object StepRangeDomain {
   implicit def hasCenter[T]: DomainCenterFromContext[StepRangeDomain[T], T] = domain ⇒ RangeDomain.rangeCenter(domain.range)
 
   def apply[T](range: RangeDomain[T], step: FromContext[T]) = new StepRangeDomain[T](range, step)
-}
 
 class StepRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[T]) extends SizeStep[T] {
   import range._
