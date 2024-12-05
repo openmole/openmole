@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
 object TupledSampling:
-  implicit def tuple2InIsSampling[T1, T2, D](using d: DiscreteFromContextDomain[D, (T1, T2)]): IsSampling[In[(Val[T1], Val[T2]), D]] = s =>
+  implicit def tuple2InIsSampling[T1, T2, D](implicit d: DiscreteFromContextDomain[D, (T1, T2)]): IsSampling[In[(Val[T1], Val[T2]), D]] = s =>
     import org.openmole.plugin.domain.collection._
     import org.openmole.plugin.domain.modifier._
     import cats.implicits.*
@@ -33,7 +33,7 @@ object TupledSampling:
     ZipSampling(v1 in d1v, v2 in d2v)
 
 
-  implicit def tuple3InIsSampling[T1, T2, T3, D](using d: DiscreteFromContextDomain[D, (T1, T2, T3)]): IsSampling[In[(Val[T1], Val[T2], Val[T3]), D]] = s =>
+  implicit def tuple3InIsSampling[T1, T2, T3, D](implicit d: DiscreteFromContextDomain[D, (T1, T2, T3)]): IsSampling[In[(Val[T1], Val[T2], Val[T3]), D]] = s =>
     import org.openmole.plugin.domain.collection._
     import org.openmole.plugin.domain.modifier._
     import cats.implicits.*
@@ -46,7 +46,7 @@ object TupledSampling:
   
     (v1 in d1v) zip (v2 in d2v) zip (v3 in d3v)
 
-  implicit def tuple4InIsSampling[T1, T2, T3, T4, D](using d: DiscreteFromContextDomain[D, (T1, T2, T3, T4)]): IsSampling[In[(Val[T1], Val[T2], Val[T3], Val[T4]), D]] = s =>
+  implicit def tuple4InIsSampling[T1, T2, T3, T4, D](implicit d: DiscreteFromContextDomain[D, (T1, T2, T3, T4)]): IsSampling[In[(Val[T1], Val[T2], Val[T3], Val[T4]), D]] = s =>
     import org.openmole.plugin.domain.collection._
     import org.openmole.plugin.domain.modifier._
     import cats.implicits.*

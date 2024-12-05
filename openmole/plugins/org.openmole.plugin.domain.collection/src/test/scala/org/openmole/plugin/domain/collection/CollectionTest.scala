@@ -15,29 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.plugin.domain.range
+package org.openmole.plugin.domain.collection
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.sampling.ScalableValue
 import org.scalatest.*
 
-class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers:
+class CollectionTest extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  import org.openmole.core.workflow.test.Stubs._
+  import org.openmole.core.workflow.test.Stubs.*
 
-  "sizes of computed values" should "be correct" in:
-    RangeDomain(0.0, 10.0, 0.1).iterator(Context()).size shouldBe 101
-    RangeDomain(0, 10, 1).iterator(Context()).size shouldBe 11
-    LogRangeDomain(0.0, 10.0, 10).iterator(Context()).size shouldBe 10
+  "collection" should "be  domains" in:
+    val d = Val[Double]
+    val scd: ScalableValue = d in (0.0 to 1.0)
+    val samplingD1: Sampling = d in (0.0 to 1.0)
+    samplingD1.sampling.from(Context()).size shouldEqual 2
+    val samplingD2: Sampling = d in (0.0 to 10.0 by 5.0)
+    samplingD2.sampling.from(Context()).size shouldEqual 3
 
-  "ranges using val" should "compile" in:
     val i = Val[Int]
-    val rd = RangeDomain(0, i, 1)
-    rd.iterator.from(Context(i -> 2)).size shouldEqual 3
-
-    val rd2 = RangeDomain[Double](0, "i * 2", 1)
-    rd2.iterator.from(Context(i -> 2)).size shouldEqual 5
-
-
+    val samplingI: Sampling = i in (0 to 1)
+    samplingI.sampling.from(Context()).size shouldEqual 2
 
