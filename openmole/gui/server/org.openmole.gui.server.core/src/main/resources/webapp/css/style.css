@@ -1275,6 +1275,11 @@ li.selectElement {
 .execControls {
     font-size: 20px;
     cursor: pointer;
+    color: white;
+    background: #373f46;
+    height: 81;
+    display: flex;
+    align-items: center;
 }
 
 .execTextArea {
