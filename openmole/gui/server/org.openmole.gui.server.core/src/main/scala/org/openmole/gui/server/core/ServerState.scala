@@ -328,7 +328,7 @@ class ServerState:
       info.map: info =>
         val lines = info.output.toString.lines.toArray
         val output = lines.takeRight(l)
-        ExecutionOutput(lines.takeRight(l).reverse.mkString("\n"), output.length, lines.length)
+        ExecutionOutput(lines.takeRight(l).mkString("\n"), output.length, lines.length)
     res.getOrElse(ExecutionOutput("", 0, 0))
   }
 
