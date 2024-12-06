@@ -1288,7 +1288,7 @@ li.selectElement {
     border-radius: 3px;
     margin: 50px;
     height: 450px;
-    width: 800px;
+    width: 700px;
     color: "#222";
     font-size: 16px;
     user-select: text;
@@ -1659,4 +1659,14 @@ div.noUi-connect {
     background: #795c85;
     color: white;
     border-radius: 5px;
+}
+
+.plusButton {
+    background: #795c85;
+    border-radius: 20px;
+    color: white;
+    padding: 1;
+    display: flex;
+    font-size: 25px;
+    margin-left: 10px;
 }

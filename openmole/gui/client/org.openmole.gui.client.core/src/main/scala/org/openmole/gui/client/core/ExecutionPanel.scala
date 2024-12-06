@@ -218,15 +218,16 @@ class ExecutionPanel:
       )
     )
 
-  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
-    child <-- showControls.signal.map: c =>
-      if c
-      then
-        div(display.flex, flexDirection.column, alignItems.center,
-          button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
-          button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
-        )
-      else div()
+  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
+     div(
+      child <-- showControls.signal.map: c =>
+        if c
+        then
+          div(display.flex, flexDirection.column, alignItems.center,
+            button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
+            button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
+          )
+        else div()
   )
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${
@@ -384,12 +385,13 @@ class ExecutionPanel:
       )
 
     def expander(id: ExecutionId, details: ExecutionDetails) =
-      div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
+      div(height := "500", rowFlex, justifyContent.center,
         child <-- showExpander.signal.map:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
             val size = Var(1000)
             val raw: Var[Boolean] = Var(false)
+            val scrollBottom: Var[Boolean] = Var(false)
 
             div(
               child <--
@@ -400,66 +402,77 @@ class ExecutionPanel:
                       val convert = scalajs.js.Dynamic.newInstance(Convert)()
                       convert.options.newline = true
 
-                      def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
+                        def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
 
-                      lazy val ansiOutputDiv =
-                        val d = baseOutputDiv
-                        d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
-                        d
+                        lazy val ansiOutputDiv =
+                          val d = baseOutputDiv
+                          d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
+                          d
 
-                      lazy val rawOutput =
-                        val d = baseOutputDiv
-                        d.ref.innerHTML =  output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
-                        d
+                        lazy val rawOutput =
+                          val d = baseOutputDiv
+                          d.ref.innerHTML =  output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
+                          d
 
-                      def outputDiv =
-                        div(
-                          child <-- raw.signal.map:
-                            case false => ansiOutputDiv
-                            case true => rawOutput
-                        )
-
-                      def rawDiv =
-                        div(display.flex, flexDirection.column, width := "800", height := "30",
-                          div(cursor.pointer, alignSelf.flexEnd, marginTop := "10",
+                        def outputDiv =
+                          div(
                             child <-- raw.signal.map:
-                              case false => "ansi"
-                              case true => del("ansi"),
-                            onClick --> raw.update(!_)
+                              case false => ansiOutputDiv
+                              case true => rawOutput
+                          )
+
+                        def rawDiv =
+                          Component.Switch("ansi",
+                          raw.now(),
+                          onClickAction = ()=> 
+                            raw.update(!_)
+                            if scrollBottom.now()
+                            then setScrollToBottom
+                          )
+
+                        def more =
+                          if true //output.listed < output.total
+                          then
+                            div(cursor.pointer, display.flex, justifyContent.flexEnd, alignItems.center,
+                              i(s"${output.listed}/${output.total}"),
+                              i(cls := "bi bi-plus plusButton"),
+                              onClick --> { _ => size.update(_ * 2) }
+                            )
+                          else div()
+                  
+                        def bottom =  Component.Switch(
+                            "Stay at the end", 
+                            scrollBottom.now(),
+                            onClickAction = () => scrollBottom.update(!_)
+                          ) 
+
+                        def setScrollToBottom =
+                          rawOutput.ref.scrollTop = rawOutput.ref.scrollHeight
+
+                        val bottomElement = 
+                          bottom.element.amend(
+                            scrollBottom.signal.toObservable --> Observer[Boolean] { e => 
+                              if e 
+                              then setScrollToBottom
+                            }
+                          )  
+
+                        if scrollBottom.now()
+                        then setScrollToBottom
+
+                        div(
+                          display.flex, flexDirection.row, marginTop := "50px",
+                          height := "500",
+                          outputDiv,
+                          div(
+                            columnFlex,
+                            marginTop := "20px",
+                            bottomElement,
+                            rawDiv.element.amend(justifyContent.flexEnd),
+                            more
                           )
                         )
-
-                      def more =
-                        if true //output.listed < output.total
-                        then
-                          div(cursor.pointer, textAlign := "center",
-                            i(cls := "bi bi-plus"),
-                            br(),
-                            i(fontSize := "12", s"${output.listed}/${output.total}"),
-                            onClick --> { _ => size.update(_ * 2) }
-                          )
-                        else div()
-
-
-                      def bottom =
-                        div(/*position := "absolute", top := "760", left := "973",*/ cursor.pointer, textAlign := "center",
-                          i(cls := "bi bi-caret-down"),
-                          onClick --> { _ =>
-                            if raw.now()
-                            then rawOutput.ref.scrollTop = rawOutput.ref.scrollHeight
-                            else ansiOutputDiv.ref.scrollTop = ansiOutputDiv.ref.scrollHeight
-                          }
-                        )
-
-                      div(
-                        display.flex, flexDirection.column, alignItems.center,
-                        height := "500",
-                        rawDiv,
-                        outputDiv,
-                        bottom,
-                        more
-                      )
-                      //outputDiv ++ more ++ Seq(bottom)
+                        //outputDiv ++ more ++ Seq(bottom)
                     case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
