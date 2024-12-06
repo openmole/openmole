@@ -131,9 +131,9 @@ class ExecutionPanel:
   //def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
 
-  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false) =
+  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false, blockWidth: Int = 150) =
     div(columnFlex,
-      div(cls := "contextBlock",
+      div(cls := "contextBlock", width := blockWidth.toString,
         if (!alwaysOpaque) backgroundOpacityCls else emptyMod,
         div(info, cls := "info"), div(content, cls := (if !link then "infoContent" else "infoContentLink")))
     )
@@ -238,7 +238,7 @@ class ExecutionPanel:
   def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
-      contextBlock("Start time", ClientUtil.longToDate(details.startDate)),
+      contextBlock("Start time", ClientUtil.longToDate(details.startDate), blockWidth = 220),
       //contextBlock("Method", "???"),
       durationBlock(details.duration, details.executionTime),
       statusBlock("Running", details.running.toString),
@@ -309,7 +309,7 @@ class ExecutionPanel:
       finally queryingState = false
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
-      div(columnFlex, marginTop := "20px",
+      div(columnFlex, marginTop := "5px", maxWidth := "1520px",
         for
           e <- envStates
         yield jobRow(executionId, e)
@@ -347,9 +347,9 @@ class ExecutionPanel:
 
       div(columnFlex,
         div(rowFlex, justifyContent.center,
-          contextBlock("Resource", e.taskName, true).amend(width := "180"),
-          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
-          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Resource", e.taskName, true, blockWidth = 180),
+          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true, blockWidth = 220),
+          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true, blockWidth = 200),
           contextBlock("Downloads", displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
           contextBlock("Submitted", e.submitted.toString, true),
           contextBlock("Running", e.running.toString, true),
@@ -370,7 +370,7 @@ class ExecutionPanel:
                   val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
-                      cls := "docEntry", width := "1140", margin := "0 4 0 3",
+                      cls := "docEntry", width := "100%",
                       backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
@@ -521,7 +521,8 @@ class ExecutionPanel:
                 autoRemoveFailed.element.amend(width := "180", marginTop := "5")
               )
             case false => emptyNode,
-        div(cls := "bi-three-dots-vertical execControls", onClick --> showGlobalControls.update(!_))
+        div(cls := "bi-three-dots-vertical execControls", color := "#373f46", backgroundColor := "white",
+          onClick --> showGlobalControls.update(!_))
       ),
       showExpander.toObservable.distinct --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable -->

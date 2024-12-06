@@ -88,19 +88,28 @@ object Variable:
 
     def isRectangular: Option[Seq[Int]] =
       val dimensions = Array.fill[Option[Int]](depth)(None)
-      def isRectangular0(c: CA, currentDepth: Int): Boolean =
+
+      def testDimension(currentDepth: Int, size: => Int): Boolean =
         dimensions(currentDepth) match
-          case None => dimensions(currentDepth) = Some(construct.size(c))
-          case Some(d) =>
-            if d != construct.size(c)
-            then return false
+          case None =>
+            dimensions(currentDepth) = Some(size)
+            true
+          case Some(d) if d != size => false
+          case _ => true
+
+      def isRectangular0(c: CA, currentDepth: Int): Boolean =
+        if !testDimension(currentDepth, construct.size(c)) then return false
 
         if currentDepth >= depth - 1
         then true
         else
-          construct.iterable(c).asScala.forall:
-            case e: CA => isRectangular0(e, currentDepth + 1)
-            case e => false
+          val iterable = construct.iterable(c).asScala
+          if iterable.isEmpty
+          then testDimension(currentDepth + 1, size = 0)
+          else
+            construct.iterable(c).asScala.forall:
+              case e: CA => isRectangular0(e, currentDepth + 1)
+              case e => false
 
       if isRectangular0(collection, 0)
       then Some(dimensions.map(_.get).toSeq)
