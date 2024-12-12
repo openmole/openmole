@@ -110,11 +110,10 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       val openFileTree = Var(true)
       
       def undo =
-        println("undo")
         panels.treeNodePanel.multiTool.set(MultiTool.Off)
         panels.treeNodePanel.currentLine.set(-1)
         panels.closeExpandable
-        panels.treeNodePanel.fileToolBar.filterToolOpen.set(false)
+        panels.treeNodePanel.clearFileFinder
         panels.treeNodePanel.plusFile.set(false)
         panels.treeNodePanel.clearCurrentErrorView
 

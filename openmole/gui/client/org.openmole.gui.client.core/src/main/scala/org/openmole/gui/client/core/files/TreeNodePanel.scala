@@ -487,6 +487,11 @@ class TreeNodePanel {
       }
     )
 
+  def clearFileFinder = 
+    fileToolBar.filterToolOpen.set(false)
+    treeNodeManager.resetFileFinder
+    fileToolBar.findInput.ref.value = ""
+
   private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
     val size = Var(100)
     lazy val tree: Div = div(
@@ -505,9 +510,7 @@ class TreeNodePanel {
                   foundFiles.map { (sp, isDir) =>
                     div(s"${sp.normalizedPathString}", cls := "findFile",
                       onClick --> { _ =>
-                        fileToolBar.filterToolOpen.set(false)
-                        treeNodeManager.resetFileFinder
-                        fileToolBar.findInput.ref.value = ""
+                        clearFileFinder
                         val switchTarget = if isDir then sp else sp.parent
                         treeNodeManager.switch(switchTarget)
                         displayNode(sp)
