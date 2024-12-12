@@ -1288,11 +1288,7 @@ li.selectElement {
     border-radius: 3px;
     margin: 50px;
     height: 450px;
-<<<<<<< HEAD
     width: 700px;
-=======
-    width: 800px;
->>>>>>> master
     color: "#222";
     font-size: 16px;
     user-select: text;
@@ -1639,6 +1635,7 @@ input:checked+.slider:before {
     border: none;
     color: white;
     width: 100%;
+    outline: none;
 }
 
 .metadata {
@@ -1663,7 +1660,6 @@ div.noUi-connect {
     background: #795c85;
     color: white;
     border-radius: 5px;
-<<<<<<< HEAD
 }
 
 .plusButton {
@@ -1674,6 +1670,4 @@ div.noUi-connect {
     display: flex;
     font-size: 25px;
     margin-left: 10px;
-=======
->>>>>>> master
 }
