@@ -170,7 +170,7 @@ object utils:
 
       val branchData =
         currentDirGit.map: git =>
-          BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+          BranchData(GitService.branchList(git).map(_.split("/").last).distinct, git.getRepository.getBranch)
 
       fileFilter.size match
         case Some(s) => FileListData(sorted.take(s), s, sortedSize, branchData)
