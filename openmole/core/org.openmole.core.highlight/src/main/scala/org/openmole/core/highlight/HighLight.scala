@@ -4,8 +4,8 @@ sealed trait HighLight {
   def name: String
 }
 
-object HighLight {
-
+object HighLight:
+  
   implicit def fromString(s: String): WordHighLight = WordHighLight(s)
   implicit def classToString(c: Class[?]): String = c.getSimpleName
 
@@ -23,4 +23,4 @@ object HighLight {
   case class WordHighLight(name: String) extends HighLight
   case class DomainHighLight(name: String) extends HighLight
   case class OtherHighLight(name: String) extends HighLight
-}
+
