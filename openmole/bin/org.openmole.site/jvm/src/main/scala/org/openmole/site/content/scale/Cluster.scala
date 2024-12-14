@@ -55,7 +55,7 @@ ${code(
   """singularity overlay create -S -s 20000 test.img
     |singularity exec --overlay test.img lolcow.sif cowsay OpenMOLE""".stripMargin)}
 
-If you see a cow saying OpenMOLE, congrats the OpenMOLE tasks should work fine on the cluster. In case there is an error, you can report it to you cluster admin team and ask for help.
+If you see a cow saying OpenMOLE, congrats the OpenMOLE tasks should work fine on the cluster. In case there is an error, you can report it to the cluster admin team and ask for help.
 
 $br$br
 
