@@ -48,7 +48,8 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
   li{html"$workDirectory,"},
-  li{html"${code{"killAfter"}}: use the timeout command to kill the process after a given time, for exemple killAfter = 24 hours"}
+  li{html"${code{"killAfter"}}: use the timeout command to kill the process after a given time, for exemple killAfter = 24 hours,"},
+  li{html"$reconnect"}
 )}
 
 """)

@@ -48,6 +48,7 @@ object OAREnvironment {
     name:                 OptionalArgument[String]      = None,
     bestEffort:           Boolean                       = true,
     timeout:              OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     localSubmission:      Boolean                       = false,
     modules: Seq[String] = Vector(),
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
@@ -80,6 +81,7 @@ object OAREnvironment {
           host = hostValue,
           port = portValue,
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+          reconnect = reconnect,
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
@@ -128,6 +130,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
   val host:              String,
   val port:              Int,
   val timeout:           Time,
+  val reconnect:         Option[Time],
   val name:              Option[String],
   val authentication:    A,
   implicit val services: BatchEnvironment.Services
@@ -137,7 +140,7 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 
   implicit lazy val ssh: gridscale.ssh.SSH =
     val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-    gridscale.ssh.SSH(sshServer)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
   override def start() =
     storageService

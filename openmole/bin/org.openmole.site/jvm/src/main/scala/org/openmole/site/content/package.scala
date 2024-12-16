@@ -1,5 +1,7 @@
 package org.openmole.site.content
 
+import org.openmole.site.content.scale.Environment
+
 /*
  * Copyright (C) 2023 Romain Reuillon
  *
@@ -22,4 +24,4 @@ object header:
   export org.openmole.site.{DocumentationPages, PageContent, Resource, shared, Papers}
   export org.openmole.site.tools._
   export org.openmole.site.stylesheet._
-  export org.openmole.site.content.{Native, Environment}
+  export org.openmole.site.content.Native
