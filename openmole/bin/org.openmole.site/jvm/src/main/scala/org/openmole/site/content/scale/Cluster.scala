@@ -136,10 +136,11 @@ ${ul(
  li{html"$openMOLEMemory,"},
  li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
  li{html"$threads,"},
- li{html"${apiEntryTitle{"coreByNodes"}} An alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified."},
- li{html"${apiEntryTitle{"flavour"}} Specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}}. Defaults to ${hl.openmoleNoTest{"flavour = Torque"}}"},
+ li{html"${apiEntryTitle{"coreByNodes"}} an alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified,"},
+ li{html"${apiEntryTitle{"flavour"}} specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}} (defaults to ${hl.openmoleNoTest{"flavour = Torque"}}),"},
  li{html"$modules,"},
- li{html"$localSubmission."},
+ li{html"$reconnect,"},
+ li{html"$localSubmission."}
 )}
 
 
@@ -169,7 +170,8 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
   li{html"$modules,"},
-  li{html"$localSubmission."},
+  li{html"$reconnect,"},
+  li{html"$localSubmission."}
 )}
 
 
@@ -202,14 +204,15 @@ ${ul(
   li{html"${wallTime{"time"}},"},
   li{html"$memory,"},
   li{html"$openMOLEMemory,"},
-  li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
+  li{html"${apiEntryTitle{"nodes"}} number of nodes requested,"},
   li{html"$threads, it automatically sets the ${i{"cpuPerTask"}} entry,"},
-  li{html"${apiEntryTitle{"cpuPerTask"}} An alternative to specifying the number of threads. ${i{"cpuPerTask"}} takes the value of the ${i{"threads"}} when not specified, or 1 if none of them is specified."},
+  li{html"${apiEntryTitle{"cpuPerTask"}} specify the number of thread requested on the execution nodes, you should use it if your executable is multi-threaded, if not specified ${i{"cpuPerTask"}} takes the value of the ${i{"threads"}} when it is specified,"},
   li{html"${apiEntryTitle{"reservation"}} name of a SLURM reservation,"},
   li{html"${apiEntryTitle{"qos"}} Quality of Service (QOS) as defined in the Slurm database"},
   li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance ${hl.openmoleNoTest{"gres = List( Gres(\"resource\", 1) )"}}"},
   li{html"${apiEntryTitle{"constraints"}} a list of SLURM defined constraints which selected nodes must match,"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 
@@ -237,6 +240,7 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 
@@ -268,6 +272,7 @@ ${ul(
   li{html"${apiEntryTitle{"cpu"}} number of CPUs allocated for each job,"},
   li{html"${apiEntryTitle{"bestEffort"}} a boolean for setting the best effort mode (true by default),"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 

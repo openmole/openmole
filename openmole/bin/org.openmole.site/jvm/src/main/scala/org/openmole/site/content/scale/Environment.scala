@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.site.content
+package org.openmole.site.content.scale
 
-import org.openmole.site.tools._
-
-import scalatags.Text.all._
+import org.openmole.site.tools.*
+import scalatags.Text.all.*
 
 object Environment:
 
@@ -27,7 +26,7 @@ object Environment:
   def wallTime(name: String = "wallTime") = newEntry(name = name, " the maximum time a job is permitted to run before being killed, for instance ", hl.openmoleNoTest(s"$name = 1 hour"))
   def memory = newEntry("memory", " the memory for the job, for instance ", hl.openmoleNoTest("memory = 2 gigabytes"))
   def openMOLEMemory = newEntry("openMOLEMemory", " the memory of attributed to the OpenMOLE runtime on the execution node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256MB in order to have more memory for you program on the execution node, for instance ", hl.openmoleNoTest("openMOLEMemory = 256 megabytes"))
-  def threads = newEntry("threads", " the number of threads for concurrent execution of tasks on the worker node, for instance ", hl.openmoleNoTest("threads = 4"))
+  def threads = newEntry("threads", " the number of threads for concurrent execution of OpenMOLE tasks on the worker node, for instance ", hl.openmoleNoTest("threads = 4"))
   def queue(name: String = "queue") = newEntry(name, " the name of the queue on which jobs will be submitted, for instance ", hl.openmoleNoTest(s"""$name = \"longjobs\""""))
   def port = newEntry("port", " the port number used by the ssh server, by ", b("default it is set to 22"))
   def sharedDirectory = newEntry("sharedDirectory", " OpenMOLE uses this directory to communicate from the head node of the cluster to the worker nodes (defaults to ", hl.openmoleNoTest("\"/home/user/.openmole/.tmp/ssh\")"))
@@ -35,6 +34,7 @@ object Environment:
   def workDirectory = newEntry("workDirectory", " the directory in which OpenMOLE will execute on the remote server, for instance ", hl.openmoleNoTest("workDirectory = \"/tmp\""), "(defaults to ", hl.openmoleNoTest("\"/tmp\")"))
   def localSubmission = newEntry("localSubmission", " set to true if you are running OpenMOLE from a node of the cluster (useful for example if you have a cluster that you can only ssh behind a VPN but you can not set up the VPN where your OpenMOLE is running); user and host are not mandatory in this case")
   def modules = newEntry("modules", "a sequence of String to load modules on the execution environment using \"module load name\", for instance ", hl.openmoleNoTest(s"""modules = Seq("singularity")"""))
+  def reconnect = newEntry("reconect", "when set, the interval at which the SSH connection is reconnected, for instance ", hl.openmoleNoTest(s"modules = 1 minute"), " (bx default the ssh connection is connected once and for all)")
 
   def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
   def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)
