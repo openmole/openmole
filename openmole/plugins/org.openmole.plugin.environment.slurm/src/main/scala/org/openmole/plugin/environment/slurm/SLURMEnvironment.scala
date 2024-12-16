@@ -52,7 +52,7 @@ object SLURMEnvironment:
     workDirectory:        OptionalArgument[String]      = None,
     threads:              OptionalArgument[Int]         = None,
     timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     storageSharedLocally: Boolean                       = false,
     proxy:                OptionalArgument[SSHProxy]    = None,
     name:                 OptionalArgument[String]      = None,
@@ -82,7 +82,6 @@ object SLURMEnvironment:
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
-      reconnect = reconnect,
       modules = modules,
       debug = debug)
 
@@ -100,6 +99,7 @@ object SLURMEnvironment:
           host = hostValue,
           port = portValue,
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+          reconnect = reconnect,
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
@@ -133,7 +133,6 @@ object SLURMEnvironment:
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
-    reconnect:            Option[Time],
     modules:              Seq[String],
     debug:                Boolean)
 
@@ -155,6 +154,7 @@ class SLURMEnvironment(
   val host:              String,
   val port:              Int,
   val timeout:           Time,
+  val reconnect:         Option[Time],
   val parameters:        SLURMEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    SSHAuthentication,
@@ -167,7 +167,7 @@ class SLURMEnvironment(
   implicit lazy val ssh: gridscale.ssh.SSH =
     def proxyValue = proxy.map(p => SSHProxy.toSSHServer(p, timeout))
     val sshServer = gridscale.ssh.SSHServer(host, port, timeout, sshProxy = proxyValue)(authentication)
-    gridscale.ssh.SSH(sshServer, reconnect = parameters.reconnect)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
   override def start() =
     storageService

@@ -33,6 +33,9 @@ import org.openmole.core.dsl.extension.*
 
 import java.util.concurrent.locks.ReentrantLock
 
+object SSHConnection:
+  def defaultReconnect: OptionalArgument[Time] = None
+
 case class SSHStorage(accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)(using val ssh: _root_.gridscale.ssh.SSH)
 case class LocalStorageServer(localStorage: LocalStorage, accessControl: AccessControl, qualityControl: QualityControl)
 
