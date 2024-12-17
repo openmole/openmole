@@ -77,6 +77,20 @@ class TabContent:
     tabsUI.add(buildTab(tabData, content))
     current.set(Some(tabData))
 
+  def updateTab(safePath: SafePath, content: HtmlElement)(using
+      panels: Panels,
+      api: ServerAPI,
+      basePath: BasePath
+  ) =
+    tabIndex(safePath).foreach: t=>
+      val ind = tabsUI.tabs.now().indexOf(t._1)
+      if (ind > -1)
+      then
+        val newTab = t._1.copy(content = content)
+        tabsUI.tabs.update(tabs=>
+          tabs.updated(ind, newTab)
+        )
+
   def tab(safePath: SafePath) =
     tabsUI.tabs.now().find { tab => tab.t.safePath == safePath }
 

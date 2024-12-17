@@ -14,6 +14,9 @@ import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.unwrap
+import org.openmole.gui.client.tool.OMTags.btn_purple
+import org.openmole.gui.client.core.Waiter
+import org.openmole.gui.client.tool.plot.Plot.NumberOfColumToBePlotted
 
 
 object PlotContent:
@@ -25,19 +28,35 @@ object PlotContent:
 
   case class Section(name: String)
 
-  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, metadata: HtmlElement)
+  case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, resultPlot: ResultPlot, metadata: HtmlElement)
 
   case class ResultViewAndSection(resultView: ResultView, historyView: Option[ResultView], section: Option[Section])
 
   case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
+
+  trait PlotContentState:
+    def resultView: ResultView
+
+  case class TableState(scrollDown: Boolean, resultView: ResultView = ResultView.Table) extends PlotContentState
+  case class RawState(scrollDown: Boolean, resultView: ResultView = ResultView.Raw) extends PlotContentState
+  case class PlotState(
+    numberOfColumToBePlotted: NumberOfColumToBePlotted = NumberOfColumToBePlotted.One, 
+    initialHeaders: Seq[String] = Seq(),
+    resultView: ResultView = ResultView.Plot
+     ) extends PlotContentState
+  case class MetadataState(resultView: ResultView = ResultView.Metadata) extends PlotContentState
+  case class MetadataHistoryState(resultView: ResultView = ResultView.HistoryMetadata) extends PlotContentState
 
   def buildTab(
                 safePath: SafePath,
                 extension: FileContentType,
                 sections: Seq[PlotContentSection],
                 omrMetadata: Option[OMRMetadata] = None,
+                plotContentState: PlotContentState = TableState(false),
                 currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
     import ResultView.*
+
+    
     val sectionMap =
       (sections.map: s =>
         val editor = EditorPanelUI(safePath, s.rawContent, "initialHash")
@@ -58,16 +77,22 @@ object PlotContent:
             .render.render.amend(borderCollapse.collapse)
         )
 
-        val plot =
-          val columns = s.rowData.content.transpose
-          //We only keep data of dimension 0 or 1
-          val plotData = ColumnData(
+        val columns = s.rowData.content.transpose
+        val plotData = ColumnData(
             s.rowData.headers.zip(columns).zip(s.rowData.dimensions).flatMap:
               case ((h, c), d) if d == 0 => Some(Column(h, ScalarColumn(c.map(_.value))))
               case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(_.value).map(ResultData.fromStringToArray))))
               case _ => None
           )
-          ResultPlot.fromColumnData(plotData)
+
+        val plotState = plotContentState match
+          case ps: PlotState => ps
+          case _=> PlotState(NumberOfColumToBePlotted.One, Seq())
+
+        val resultPlot = new ResultPlot(plotData, plotState)
+
+        //We only keep data of dimension 0 or 1  
+        val plot = resultPlot.fromColumnData
 
         val metadataHistory =
           val sliderValueText = Var("")
@@ -120,7 +145,7 @@ object PlotContent:
 
                       api.omrContent(safePath, dataFile).map: guiContent =>
                         panels.tabContent.removeTab(safePath)
-                        val (tabData, content) = OMRContent.buildTab(safePath, guiContent, Some(newCurrentIndex.toInt))
+                        val (tabData, content) = OMRContent.buildTab(safePath, guiContent, Some(newCurrentIndex.toInt), plotContentState)
                         panels.tabContent.addTab(tabData, content)
                     })
                 div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
@@ -147,14 +172,15 @@ object PlotContent:
               )
             case _ => div("Unavailable metadata")
 
-        s.section -> RawTablePlot(editor, table, plot, metadata)
+        s.section -> RawTablePlot(editor, table, plot, resultPlot, metadata)
         ).toMap
 
-    val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(ResultView.Table, None, sectionMap.keys.headOption.map(s => Section(s))))
+    val currentResultViewAndSection: Var[ResultViewAndSection] = Var(ResultViewAndSection(plotContentState.resultView, None, sectionMap.keys.headOption.map(s => Section(s))))
 
     val tabData = TabData(safePath, None)
 
-    def switchView(resultView: ResultView): Unit = currentResultViewAndSection.update(rvs => rvs.copy(resultView = resultView))
+    def switchView(resultView: ResultView): Unit = 
+      currentResultViewAndSection.update(rvs => rvs.copy(resultView = resultView))
 
     def switchSection(section: Section): Unit = currentResultViewAndSection.update(rvs => rvs.copy(section = Some(section)))
 
@@ -165,7 +191,7 @@ object PlotContent:
 
     def toView(resultViewAndSection: ResultViewAndSection) =
       val rTP = rawTablePlot(resultViewAndSection)
-
+      
       resultViewAndSection.resultView match
         case Raw => rTP.editor.view
         case Table => rTP.table
@@ -173,11 +199,47 @@ object PlotContent:
         case Metadata => rTP.metadata
         case _ => div()
 
-    val rawState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
-    val tableState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
-    val plotState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
-    val metadataState = ToggleState(ResultView, "More", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
-    val switchButton = exclusiveRadio(Seq(tableState, plotState, rawState, metadataState), btn_secondary_string, 0)
+    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchView(ResultView.Raw))
+    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchView(ResultView.Table))
+    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchView(ResultView.Plot))
+    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ ⇒ switchView(ResultView.Metadata))
+
+    def viewIndex(initialView: ResultView) =
+      initialView match
+        case Table => 0
+        case Plot => 1
+        case Raw => 2
+        case _=> 3 
+
+    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(plotContentState.resultView))
+
+    val refreshing: Var[Boolean] = Var(false)
+
+    val refreshButton = 
+      button(btn_purple, cls := "refreshOMR", glyph_refresh, onClick --> {_ => 
+        refreshing.set(true)
+        val resView =  currentResultViewAndSection.now().resultView
+        val plotContentState = resView match
+          case Table => TableState(false)
+          case Raw=> RawState(false)
+          case Plot=> 
+            currentResultViewAndSection.now().section match
+              case Some(s)=>
+                val resultPlot = sectionMap(s.name).resultPlot
+                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.t)
+                val numberOfColumToBePlotted = resultPlot.oneTwoNRadio.selected.now().map(x=> x.t).head
+                
+                PlotState(numberOfColumToBePlotted, selectedAxis)
+              case _=> PlotState(NumberOfColumToBePlotted.One, Seq())
+          case Metadata=> MetadataState()
+          case HistoryMetadata=> MetadataHistoryState()
+
+        api.omrContent(safePath).map: guiContent =>
+          val (_, content) = OMRContent.buildTab(safePath, guiContent, plotContentState = plotContentState)
+          panels.tabContent.updateTab(safePath, content)
+          refreshing.set(false)
+      })
+                   
 
     val sectionStates: Seq[ToggleState[Section]] =
       sectionMap.keys.map(name =>
@@ -189,11 +251,17 @@ object PlotContent:
     val content =
       div(display.flex, flexDirection.row,
         div(display.flex, flexDirection.column, width := "100%",
-          div(display.flex, flexDirection.row,
+          div(display.flex, flexDirection.row, alignItems.center,
+            div(
+              child <-- refreshing.signal.map: p=>
+                p match
+                  case false => refreshButton
+                  case true => Waiter.waiter("#794985")
+            ),
             (sectionStates.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")),
-            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "50")
+            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "20")
           ),
           child <-- currentResultViewAndSection.signal.map(rvs => toView(rvs))
         )

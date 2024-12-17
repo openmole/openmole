@@ -1660,3 +1660,22 @@ div.noUi-connect {
     color: white;
     border-radius: 5px;
 }
+
+.plusButton {
+    background: #795c85;
+    border-radius: 20px;
+    color: white;
+    padding: 1;
+    display: flex;
+    font-size: 25px;
+    margin-left: 10px;
+}
+
+.refreshOMR {
+  color: white;
+  width: 40px;
+  border-radius: 200px;
+  height: 40px;
+  font-size: 20;
+  padding: 5px;
+}

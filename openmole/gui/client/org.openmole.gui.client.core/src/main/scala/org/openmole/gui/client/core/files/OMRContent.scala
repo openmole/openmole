@@ -12,7 +12,13 @@ import org.openmole.gui.shared.api.*
 
 object OMRContent:
 
-  def buildTab(safePath: SafePath, guiOMRContent: GUIOMRContent, currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+  def buildTab(
+    safePath: SafePath,
+    guiOMRContent: GUIOMRContent,
+    currentIndex: Option[Int] = None,
+    plotContentState: PlotContent.PlotContentState = PlotContent.TableState(false)
+    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+
     val rowData = ResultData.fromOMR(guiOMRContent.section)
     val pcSections = guiOMRContent.section.map: s =>
       PlotContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
@@ -49,5 +55,6 @@ object OMRContent:
       FileContentType.OpenMOLEResult,
       pcSections,
       Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
+      plotContentState,
       currentIndex
     )
