@@ -44,6 +44,7 @@ object SGEEnvironment {
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     timeout:              OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
     modules:              Seq[String]                   = Vector())(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
@@ -73,6 +74,7 @@ object SGEEnvironment {
           host = hostValue,
           port = portValue,
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+          reconnect = reconnect,
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
@@ -116,6 +118,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   val host:              String,
   val port:              Int,
   val timeout:           Time,
+  val reconnect:         Option[Time],
   val parameters:        SGEEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
@@ -125,7 +128,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   implicit val ssh: gridscale.ssh.SSH =
     val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-    gridscale.ssh.SSH(sshServer)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
   override def start() =
     storageService

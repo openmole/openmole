@@ -49,6 +49,7 @@ object CondorEnvironment:
     workDirectory:        OptionalArgument[String]      = None,
     requirements:         OptionalArgument[String]      = None,
     timeout:              OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     localSubmission:      Boolean                       = false,
@@ -82,6 +83,7 @@ object CondorEnvironment:
           host = hostValue,
           port = portValue,
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+          reconnect = reconnect,
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
@@ -125,6 +127,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
   val host:              String,
   val port:              Int,
   val timeout:           Time,
+  val reconnect:         Option[Time],
   val parameters:        CondorEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
@@ -135,7 +138,7 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   implicit lazy val ssh: gridscale.ssh.SSH =
     val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
-    gridscale.ssh.SSH(sshServer)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
   override def start() =
     storageService
