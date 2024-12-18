@@ -43,7 +43,7 @@ object SSHEnvironment extends JavaLogger:
   val maxConnections = PreferenceLocation("SSHEnvironment", "MaxConnections", Some(5))
   val updateInterval = PreferenceLocation("SSHEnvironment", "UpdateInterval", Some(10 seconds))
   val timeOut = PreferenceLocation("SSHEnvironment", "Timeout", Some(1 minutes))
-
+    
   def apply(
     user:                 String,
     host:                 String,
@@ -55,6 +55,7 @@ object SSHEnvironment extends JavaLogger:
     threads:              OptionalArgument[Int]         = None,
     killAfter:            OptionalArgument[Time]        = None,
     storageSharedLocally: Boolean                       = false,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     name:                 OptionalArgument[String]      = None,
     modules:              Seq[String]                   = Vector(),
     debug:                Boolean                       = false
@@ -72,6 +73,7 @@ object SSHEnvironment extends JavaLogger:
         threads = threads,
         killAfter = killAfter,
         storageSharedLocally = storageSharedLocally,
+        reconnect = reconnect,
         name = Some(name.getOrElse(varName.value)),
         authentication = SSHAuthentication.find(user, host, port),
         modules = modules,
@@ -128,6 +130,7 @@ class SSHEnvironment(
   val threads:              Option[Int],
   val killAfter:            Option[Time],
   val storageSharedLocally: Boolean,
+  val reconnect:            Option[Time],
   val name:                 Option[String],
   val authentication:       SSHAuthentication,
   val modules:              Seq[String],
@@ -147,7 +150,7 @@ class SSHEnvironment(
 
   implicit val ssh: gridscale.ssh.SSH =
     lazy val sshServer = gridscale.ssh.SSHServer(env.host, env.port, env.timeout)(env.authentication)
-    gridscale.ssh.SSH(sshServer)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
   def timeout = services.preference(SSHEnvironment.timeOut)
 
