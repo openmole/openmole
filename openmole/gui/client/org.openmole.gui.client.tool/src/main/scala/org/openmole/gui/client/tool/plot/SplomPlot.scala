@@ -25,6 +25,7 @@ object SplomPlot {
       lazy val layout = Layout
         .showlegend(false)
         .autosize(true)
+        .width(1200)
         .font(Font.family("gi").size(14))
         .dragmode("select")
         .xaxis2(Plot.axis)
