@@ -7,7 +7,15 @@ object Component:
 
   class Switch(name: String, activated: Boolean, cl: String = "", onClickAction: () => Unit = ()=> {}):
 
-    private val in = input(`type` := "checkbox", checked := activated, onClick --> {_=> onClickAction()})
+    private val in: Input = 
+      input(
+        `type` := "checkbox", 
+        checked := activated, 
+        onClick --> {_=> 
+          if isChecked 
+          then onClickAction()
+        }
+      )
     val element = 
       div(display.flex, flexDirection.row, cls := cl,
         div(name, height := "34px", marginRight := "10px", display.flex, flexDirection.row, alignItems.center),
