@@ -16,9 +16,6 @@ import scaladget.bootstrapnative.bsn
 import com.raquo.laminar.api.features.unitArrows
 import java.text.SimpleDateFormat
 
-
-//case class Notification(level: NotificationLevel, title: String, body: Div, id: String = DataUtils.uuID)
-//import NotificationContent._
 object NotificationManager:
 
   case class Alternative(name: String, action: String => Unit = _ => {})
@@ -32,7 +29,7 @@ object NotificationManager:
 
   def toService(manager: NotificationManager) =
     new NotificationService:
-      override def notify(level: NotificationLevel, title: String, body: HtmlElement, time: Option[Long]): Unit = manager.addAndShowNotificaton(level, title, body, time)
+      override def notify(level: NotificationLevel, title: String, body: HtmlElement, time: Option[Long]): Unit = manager.addNotification(level, title, _=> body, time)
 
 class NotificationManager:
 
@@ -138,16 +135,13 @@ class NotificationManager:
 
       newEvents ++ s
 
-  //  def addNotification(level: NotificationLevel, title: String, body: Div, serverId: Option[Long] = None) = notifications.update { s =>
-  //    s :+ NotificationLine(level, title, div(body, cls := "notification"), DataUtils.uuID)
-  //  }
-
   def clearNotifications(level: NotificationLevel)(using api: ServerAPI, basePath: BasePath) =
     notifications.update: s =>
       val (cleared, kept) = s.partition(_.level == level)
       val serverClear = cleared.flatMap(_.serverId)
       if !serverClear.isEmpty then api.clearNotification(serverClear)
       kept
+    hideNotificationManager 
 
 
   case class ListColor(background: String, border: String)
