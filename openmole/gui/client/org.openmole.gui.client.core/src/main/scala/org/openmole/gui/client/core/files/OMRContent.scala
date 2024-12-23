@@ -4,7 +4,7 @@ import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.DomApi
-import org.openmole.gui.client.core.files.PlotContent.{OMRMetadata, PlotContentSection}
+import org.openmole.gui.client.core.files.PlotContent.*
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
@@ -15,13 +15,14 @@ object OMRContent:
   def buildTab(
     safePath: SafePath,
     guiOMRContent: GUIOMRContent,
-    currentIndex: Option[Int] = None,
-    plotContentState: PlotContent.PlotContentState = PlotContent.TableState(false)
+    contentStates: ContentStates = ContentStates(),
+    currentState: ContentState = TableState(false),
+    currentIndex: Option[Int] = None
     )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
 
     val rowData = ResultData.fromOMR(guiOMRContent.section)
     val pcSections = guiOMRContent.section.map: s =>
-      PlotContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
+      ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
     val scriptText =
       guiOMRContent.script match
         case Some(gos: GUIOMRScript)=>
@@ -54,7 +55,9 @@ object OMRContent:
       safePath,
       FileContentType.OpenMOLEResult,
       pcSections,
-      Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
-      plotContentState,
-      currentIndex
+      pcSections.map(_.section).head,
+      contentStates,
+      currentState,
+      omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
+      currentIndex = currentIndex
     )

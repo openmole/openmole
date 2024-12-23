@@ -125,6 +125,8 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
     editor.renderer.updateFontSize()
   }
 
+  def scrollToBottom = editor.renderer.scrollToLine(99999.0, false, true, ()=> {})
+
   val errors: Var[Option[ErrorData]] = Var(None)
   val errorMessage: Var[Option[String]] = Var(None)
   val errorAreaSize: Var[String] = Var("100px")
