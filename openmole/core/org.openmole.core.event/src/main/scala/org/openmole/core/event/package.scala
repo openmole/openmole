@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.core
+package org.openmole.core.event
 
-package object event {
-  export EventDispatcher.Listner
-  implicit class EventDispatcherDecorator[T](o: T) {
-    def listen(listener: EventDispatcher.Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
-  }
-}
+export EventDispatcher.Listner
+
+implicit class EventDispatcherDecorator[T](o: T):
+  def listen(listener: EventDispatcher.Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
+  
+
 
