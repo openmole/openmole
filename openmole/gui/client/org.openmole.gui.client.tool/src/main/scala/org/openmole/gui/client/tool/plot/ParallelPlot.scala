@@ -18,7 +18,7 @@ object ParallelPlot:
    ) =
     lazy val plotDiv = Plot.baseDiv
 
-    lazy val layout = Layout.width(1500).height(600)
+    lazy val layout = Layout.width(1200)
 
     val dimensions = content.zipWithIndex.map { case (c,id) =>
 
