@@ -37,12 +37,11 @@ import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
-class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
 
   class JobGroupingBy2Test extends Grouping:
-
     def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
       groups.find { case (_, g) => g.size < 2 } match 
         case Some((mg, _)) => mg
@@ -103,8 +102,9 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
         context
       .set(inputs += i.array)
 
-    val ex: MoleExecution =
-      ExplorationTask(sampling) -< (emptyT by 10 on env) >- testT
+    val ex =
+      toMoleExecution:
+        ExplorationTask(sampling) -< (emptyT by 10 on env) >- testT
 
     var nbJobs = 0
 
@@ -121,13 +121,12 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val emptyC = MoleCapsule(emptyT)
     MoleExecution(mole = Mole(emptyC), implicits = Context(Variable(i, "test"))).run
 
-  "Wait" should "wait for the mole executon to be completed" in {
+  "Wait" should "wait for the mole executon to be completed" in:
     val emptyT = EmptyTask()
     val me = emptyT.start(false)
     me.hangOn()
-  }
 
-  "Delegation on environment" should "work" in {
+  "Delegation on environment" should "work" in:
     import org.openmole.core.event._
 
     @volatile var sub = 0
@@ -137,12 +136,10 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
     val mole = toMoleExecution(emptyT on env)
 
-    mole.environments.head._2 listen {
+    mole.environments.head._2 listen:
       case (_, _: Environment.JobSubmitted) => sub += 1
-    }
 
     mole.run
 
     assert(sub == 1)
-  }
-}
+

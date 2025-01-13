@@ -28,11 +28,11 @@ import org.scalatest._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.test.TestTask
 
-class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
 
-  "The strainer capsule" should "let the data pass through" in {
+  "The strainer capsule" should "let the data pass through" in:
     val p = Val[String]
 
     val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
@@ -45,9 +45,8 @@ class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matc
 
     val ex = t1 -- Strain(strainer) -- t2
     ex.run
-  }
 
-  "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
+  it should "let the data pass through even if linked with a data channel to the root" in:
     @volatile var executed = false
     val p = Val[String]
 
@@ -69,6 +68,4 @@ class StrainerCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matc
     val ex = (Strain(root) -- Strain(tNone) -- (t1, Strain(tNone2)) -- Strain(strainer) -- t2) & (root oo strainer)
     ex.run
     executed should equal(true)
-  }
 
-}

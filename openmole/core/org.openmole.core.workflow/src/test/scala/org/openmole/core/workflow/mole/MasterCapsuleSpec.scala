@@ -28,7 +28,7 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
   import org.openmole.core.workflow.test.Stubs._
 
-  "A master capsule" should "execute tasks" in {
+  "A master capsule" should "execute tasks" in:
     @volatile var testExecuted = false
 
     val p = Val[String]("p")
@@ -46,9 +46,8 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     ex.run
 
     testExecuted should equal(true)
-  }
 
-  "A master capsule" should "keep value of a variable from on execution to another" in {
+  it should "keep value of a variable from on execution to another" in {
     val data = List("A", "A", "B", "C")
     val i = Val[String]("i")
     val n = Val[Int]("n")
