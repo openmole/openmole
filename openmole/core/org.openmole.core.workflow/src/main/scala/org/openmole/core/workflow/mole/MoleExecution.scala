@@ -391,37 +391,31 @@ object MoleExecution {
       moleExecution._canceled = true
       finish(moleExecution, canceled = true)
 
-  def nextTicket(moleExecution: MoleExecution, parent: Ticket): Ticket = {
+  def nextTicket(moleExecution: MoleExecution, parent: Ticket): Ticket =
     val ticket = Ticket(parent, moleExecution.ticketNumber)
     moleExecution.ticketNumber = moleExecution.ticketNumber + 1
     ticket
-  }
 
-  def nextJobId(moleExecution: MoleExecution) = {
+  def nextJobId(moleExecution: MoleExecution) =
     val id = moleExecution.moleId
     moleExecution.moleId += 1
     id
-  }
 
-  def group(moleExecution: MoleExecution, moleJob: Job, context: Context, capsule: MoleCapsule) = {
-    moleExecution.grouping.get(capsule) match
-      case Some(strategy) =>
-        val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
-        val category = strategy.apply(context, groups.toVector)(moleExecution.newGroup, moleExecution.executionContext.services.defaultRandom)
-        val jobs = groups.getOrElseUpdate(category, ListBuffer())
-        jobs.append(moleJob)
-        moleExecution.nbWaiting += 1
+  def group(moleExecution: MoleExecution, moleJob: Job, context: Context, capsule: MoleCapsule) =
+    val submitJob =
+      moleExecution.grouping.get(capsule) match
+        case Some(strategy) =>
+          val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
+          val category = strategy.apply(context, groups.toVector)(using moleExecution.newGroup, moleExecution.executionContext.services.defaultRandom)
+          val jobs = groups.getOrElseUpdate(category, ListBuffer())
+          jobs.append(moleJob)
+          moleExecution.nbWaiting += 1
+          None
+        case None =>
+          val job = JobGroup(moleExecution, moleJob)
+          Some(job -> capsule)
 
-        if strategy.complete(jobs)
-        then
-          groups -= category
-          moleExecution.nbWaiting -= jobs.size
-          Some(JobGroup(moleExecution, IArray.unsafeFromArray(jobs.toArray)) -> capsule)
-        else None
-      case None =>
-        val job = JobGroup(moleExecution, moleJob)
-        Some(job -> capsule)
-  }.foreach { case (j, c) => submit(moleExecution, j, c) }
+    submitJob.foreach((j, c) => submit(moleExecution, j, c))
 
   def submit(moleExecution: MoleExecution, job: JobGroup, capsule: MoleCapsule) =
     val env = moleExecution.environmentForCapsule.getOrElse(capsule, moleExecution.defaultEnvironment)
@@ -451,7 +445,8 @@ object MoleExecution {
   def moleJobIsFinished(moleExecution: MoleExecution, id: JobId) = !moleExecution.jobs.contains(id)
 
   def checkAllWaiting(moleExecution: MoleExecution) =
-    if (moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting) MoleExecution.submitAll(moleExecution)
+    if moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting
+    then MoleExecution.submitAll(moleExecution)
 
   def checkMoleExecutionIsFinished(moleExecution: MoleExecution) =
     import moleExecution.executionContext.services._

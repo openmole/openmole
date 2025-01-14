@@ -22,20 +22,19 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.tool.random.RandomProvider
 
-object InGrouping {
+object InGrouping:
   def apply(numberOfBatch: Int) = new InGrouping(numberOfBatch)
-}
 
 /**
  * Group mole jobs given a fixed number of batch.
  *
  * @param numberOfBatch total number of batch
  */
-class InGrouping(numberOfBatch: Int) extends Grouping {
+class InGrouping(numberOfBatch: Int) extends Grouping:
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup = {
-    if (groups.size < numberOfBatch) newGroup()
-    else groups.minBy { case (_, g) => g.size }._1
-  }
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(using newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
+    if groups.size < numberOfBatch
+    then newGroup()
+    else groups.minBy((_, g) => g.size)._1
 
-}
+

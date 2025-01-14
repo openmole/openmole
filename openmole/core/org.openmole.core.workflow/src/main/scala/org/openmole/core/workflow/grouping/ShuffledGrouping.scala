@@ -22,11 +22,8 @@ import org.openmole.core.workflow.job._
 import org.openmole.core.workflow.mole._
 import org.openmole.tool.random.RandomProvider
 
-object ShuffledGrouping {
-
+object ShuffledGrouping:
   def apply(numberOfBatch: Int) = new ShuffledGrouping(numberOfBatch)
-
-}
 
 /**
  * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
@@ -34,9 +31,8 @@ object ShuffledGrouping {
  *
  * @param numberOfBatch total number of groups
  */
-class ShuffledGrouping(numberOfBatch: Int) extends Grouping {
+class ShuffledGrouping(numberOfBatch: Int) extends Grouping:
 
-  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(implicit newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
-    new MoleJobGroup(randomProvider().nextInt(numberOfBatch))
+  override def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(using newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
+    MoleJobGroup(randomProvider().nextLong(numberOfBatch))
 
-}

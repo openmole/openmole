@@ -19,8 +19,10 @@ package org.openmole.core.workflow.mole
 
 import java.util.concurrent.atomic.AtomicLong
 
-case class MoleJobGroup(val values: Any*)
+object MoleJobGroup:
+  def apply(l: Long): MoleJobGroup = l
 
-case class NewGroup(val cpt: AtomicLong = new AtomicLong()) {
+opaque type MoleJobGroup = Long
+
+case class NewGroup(val cpt: AtomicLong = new AtomicLong()):
   def apply() = MoleJobGroup(cpt.getAndIncrement())
-}
