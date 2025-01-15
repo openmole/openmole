@@ -16,10 +16,12 @@ import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.api.features.unitArrows
 import com.raquo.laminar.api.Laminar
+import com.raquo.laminar.nodes.ReactiveElement
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
+import org.scalajs.dom.HTMLDivElement
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*
@@ -286,7 +288,7 @@ class ExecutionPanel:
     def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
       import ExecutionPanel.ExecutionDetails.State
       val (ids, cleanIds) =
-        if autoRemoveFailed.isChecked
+        if autoRemoveFailed.checked.now()
         then
           val idsForPath =
             execs.groupBy(_._2.path).toSeq
@@ -390,8 +392,7 @@ class ExecutionPanel:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
             val size = Var(1000)
-            val raw: Var[Boolean] = Var(false)
-            val scrollBottom: Var[Boolean] = Var(false)
+            //val ansi: Var[Boolean] = Var(true)
 
             div(
               child <--
@@ -402,77 +403,48 @@ class ExecutionPanel:
                       val convert = scalajs.js.Dynamic.newInstance(Convert)()
                       convert.options.newline = true
 
-                        def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
+                      def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
 
-                        lazy val ansiOutputDiv =
-                          val d = baseOutputDiv
-                          d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
-                          d
+                      val ansiOutputDiv =
+                        val d = baseOutputDiv
+                        d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
+                        d
 
-                        lazy val rawOutput =
-                          val d = baseOutputDiv
-                          d.ref.innerHTML =  output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
-                          d
+                      val rawOutputDiv =
+                        val d = baseOutputDiv
+                        d.ref.innerHTML = output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
+                        d
 
-                        def outputDiv =
-                          div(
-                            child <-- raw.signal.map:
-                              case false => ansiOutputDiv
-                              case true => rawOutput
+                      val ansiSwitch = Component.Switch("ansi", true)
+
+                      val outputDiv =
+                        ansiSwitch.checked.signal.map:
+                          case true => ansiOutputDiv
+                          case false => rawOutputDiv
+
+                      def more =
+                        if output.listed < output.total
+                        then
+                          div(cursor.pointer, display.flex, justifyContent.flexEnd, alignItems.center,
+                            i(s"${output.listed}/${output.total}"),
+                            i(cls := "bi bi-plus plusButton"),
+                            onClick --> { _ => size.update(_ * 2) }
                           )
+                        else div()
 
-                        def rawDiv =
-                          Component.Switch("ansi",
-                          raw.now(),
-                          onClickAction = ()=> 
-                            raw.update(!_)
-                            if scrollBottom.now()
-                            then setScrollToBottom
-                          )
-
-                        def more =
-                          if true //output.listed < output.total
-                          then
-                            div(cursor.pointer, display.flex, justifyContent.flexEnd, alignItems.center,
-                              i(s"${output.listed}/${output.total}"),
-                              i(cls := "bi bi-plus plusButton"),
-                              onClick --> { _ => size.update(_ * 2) }
-                            )
-                          else div()
-                  
-                        def bottom =  Component.Switch(
-                            "Stay at the end", 
-                            scrollBottom.now(),
-                            onClickAction = () => scrollBottom.update(!_)
-                          ) 
-
-                        def setScrollToBottom =
-                          rawOutput.ref.scrollTop = rawOutput.ref.scrollHeight
-
-                        val bottomElement = 
-                          bottom.element.amend(
-                            scrollBottom.signal.toObservable --> Observer[Boolean] { e => 
-                              if e 
-                              then setScrollToBottom
-                            }
-                          )  
-
-                        if scrollBottom.now()
-                        then setScrollToBottom
-
+                      div(
+                        display.flex, flexDirection.row, marginTop := "50px",
+                        height := "500",
+                        child <-- outputDiv,
+                        outputDiv.toObservable --> Observer[ReactiveElement[HTMLDivElement]](e => e.ref.scrollTop = e.ref.scrollHeight),
                         div(
-                          display.flex, flexDirection.row, marginTop := "50px",
-                          height := "500",
-                          outputDiv,
-                          div(
-                            columnFlex,
-                            marginTop := "20px",
-                            bottomElement,
-                            rawDiv.element.amend(justifyContent.flexEnd),
-                            more
-                          )
+                          columnFlex,
+                          marginTop := "20px",
+                          ansiSwitch.element.amend(justifyContent.flexEnd),
+                          more
                         )
-                        //outputDiv ++ more ++ Seq(bottom)
+                      )
+                      //outputDiv ++ more ++ Seq(bottom)
                     case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))

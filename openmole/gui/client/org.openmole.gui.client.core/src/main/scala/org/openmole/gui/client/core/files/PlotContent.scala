@@ -213,24 +213,26 @@ object PlotContent:
     def stayAtTheEnd = 
       currentState match
         case rs: RawState => rs.scrollDown
-        case ts: TableState=> ts.scrollDown 
-        case _=> false  
+        case ts: TableState => ts.scrollDown
+        case _ => false  
 
     def setScrollToBottom(element: HtmlElement) =
       element.ref.scrollTop = element.ref.scrollHeight
   
     def buildBottomSwitch = 
       def switchComponent(action: () => Unit) =  
-      Component.Switch(
-        "SStay at the end",
-        stayAtTheEnd,
-        onClickAction = () => action()
-      )
+        Component.Switch(
+          "End",
+          stayAtTheEnd,
+          onChange =
+            case true => action()
+            case false => ()
+        )
       
       currentState match
           case r: RawState =>
             sectionView match 
-              case EditorView(_, editor) => Some(switchComponent(()=> editor.scrollToBottom))
+              case EditorView(_, editor) => Some(switchComponent(() => editor.scrollToBottom))
               case _=> None
           case ts: TableState=> 
             sectionView match
@@ -242,8 +244,8 @@ object PlotContent:
 
     def updatedContentState = 
       currentState match
-        case TableState(_,_) => TableState(bottomSwitch.map(_.isChecked).getOrElse(false))
-        case RawState(_,_)=> RawState(bottomSwitch.map(_.isChecked).getOrElse(false))
+        case TableState(_,_) => TableState(bottomSwitch.map(_.checked.now()).getOrElse(false))
+        case RawState(_,_)=> RawState(bottomSwitch.map(_.checked.now()).getOrElse(false))
         case PlotState(_,_)=> 
             sectionView match
               case PlotView(view, resultPlot) => 
