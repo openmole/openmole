@@ -359,6 +359,7 @@ case class GAMATask(
             for
               a <- e.attribute("name").flatMap(_.headOption)
               if a.text == name
+              if e.child.text != "NA"
             yield e.child.text
 
           val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
