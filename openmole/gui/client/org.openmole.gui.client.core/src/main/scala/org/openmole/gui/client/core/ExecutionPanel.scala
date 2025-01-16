@@ -405,12 +405,12 @@ class ExecutionPanel:
 
                       def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
 
-                      val ansiOutputDiv =
+                      def ansiOutputDiv =
                         val d = baseOutputDiv
                         d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
                         d
 
-                      val rawOutputDiv =
+                      def rawOutputDiv =
                         val d = baseOutputDiv
                         d.ref.innerHTML = output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
                         d
