@@ -67,7 +67,7 @@ object OAREnvironment {
       modules = modules
     )
 
-    EnvironmentProvider: (ms, cache) ⇒
+    EnvironmentBuilder: (ms, cache) ⇒
       import ms._
 
       if !localSubmission

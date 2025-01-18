@@ -30,7 +30,7 @@ import org.openmole.core.keyword.{By, On}
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
-import org.openmole.core.workflow.execution.{EnvironmentProvider, LocalEnvironmentProvider}
+import org.openmole.core.workflow.execution.{EnvironmentBuilder, LocalEnvironmentBuilder}
 import org.openmole.core.workflow.hook.{Hook, OMRFileHook}
 import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
 import org.openmole.core.workflow.sampling.Sampling
@@ -42,7 +42,7 @@ import org.openmole.core.format.*
 import org.openmole.core.format.WritableOutput.Display
 import org.openmole.core.script.ScriptSourceData
 
-object Puzzle {
+object Puzzle:
 
   def apply(
     firstSlot:    TransitionSlot,
@@ -51,7 +51,7 @@ object Puzzle {
     dataChannels: Iterable[DataChannel]                 = Iterable.empty,
     sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
     hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
-    environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
+    environments: Map[MoleCapsule, EnvironmentBuilder] = Map.empty,
     grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
     validate:     Validate                              = Validate.success): Puzzle =
     new Puzzle(
@@ -75,7 +75,7 @@ object Puzzle {
     dataChannels: Iterable[DataChannel]                 = puzzle.dataChannels,
     sources:      Iterable[(MoleCapsule, Source)]       = puzzle.sources,
     hooks:        Iterable[(MoleCapsule, Hook)]         = puzzle.hooks,
-    environments: Map[MoleCapsule, EnvironmentProvider] = puzzle.environments,
+    environments: Map[MoleCapsule, EnvironmentBuilder] = puzzle.environments,
     grouping:     Map[MoleCapsule, Grouping]            = puzzle.grouping,
     validate:     Validate                              = puzzle.validate
   ) = apply(
@@ -119,7 +119,7 @@ object Puzzle {
     dataChannels: Iterable[DataChannel]                 = Iterable.empty,
     sources:      Iterable[(MoleCapsule, Source)]       = Iterable.empty,
     hooks:        Iterable[(MoleCapsule, Hook)]         = Iterable.empty,
-    environments: Map[MoleCapsule, EnvironmentProvider] = Map.empty,
+    environments: Map[MoleCapsule, EnvironmentBuilder] = Map.empty,
     grouping:     Map[MoleCapsule, Grouping]            = Map.empty,
     validate:     Validate                              = Validate.success) =
     copy(p)(
@@ -134,7 +134,6 @@ object Puzzle {
 
   def toMole(p: Puzzle) = new Mole(p.firstSlot.capsule, p.transitions, p.dataChannels, validate = p.validate)
 
-}
 
 /**
  * A Puzzle is the overall wrapper of the different components of an experiment: it articulates the different <code>MoleCapsule</code> in the script
@@ -156,27 +155,9 @@ class Puzzle(
   val dataChannels: Iterable[DataChannel],
   val sources:      Iterable[(MoleCapsule, Source)],
   val hooks:        Iterable[(MoleCapsule, Hook)],
-  val environments: Map[MoleCapsule, EnvironmentProvider],
+  val environments: Map[MoleCapsule, EnvironmentBuilder],
   val grouping:     Map[MoleCapsule, Grouping],
   val validate:     Validate):
-
-//  def toMole = new Mole(firstSlot.capsule, transitions, dataChannels, validate = validate)
-//
-//  def toExecution(implicit moleServices: MoleServices): MoleExecution =
-//    MoleExecution(toMole, sources, hooks, environments, grouping)
-//
-//  def toExecution(
-//    implicits:          Context                                    = Context.empty,
-//    defaultEnvironment: OptionalArgument[LocalEnvironmentProvider] = None)(implicit moleServices: MoleServices): MoleExecution =
-//    MoleExecution(
-//      mole = toMole,
-//      sources = sources,
-//      hooks = hooks,
-//      environments = environments,
-//      grouping = grouping,
-//      implicits = implicits,
-//      defaultEnvironment = defaultEnvironment
-//    )
 
   def slots: Set[TransitionSlot] = (firstSlot :: transitions.map(_.end).toList).toSet
   def first = firstSlot.capsule
@@ -186,7 +167,7 @@ class Puzzle(
 
 case class SingleTaskMethod()
 
-case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[?]] = Seq.empty, environment: Option[EnvironmentProvider] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty):
+case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false, master: Boolean = false, persist: Seq[Val[?]] = Seq.empty, environment: Option[EnvironmentBuilder] = None, grouping: Option[Grouping] = None, hooks: Vector[Hook] = Vector.empty, sources: Vector[Source] = Vector.empty):
   infix def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   infix def hook(
     output: WritableOutput,
@@ -297,7 +278,7 @@ object DSL {
     given ToTaskNode[TaskNode] = t => t
     given byToNode[T: ToTaskNode]: ToTaskNode[By[T, Grouping]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(t.by))
     given byIntToNode[T: ToTaskNode]: ToTaskNode[By[T, Int]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(ByGrouping(t.by)))
-    given [T: ToTaskNode]: ToTaskNode[On[T, EnvironmentProvider]] = t => summon[ToTaskNode[T]](t.value).copy(environment = Some(t.on))
+    given [T: ToTaskNode]: ToTaskNode[On[T, EnvironmentBuilder]] = t => summon[ToTaskNode[T]](t.value).copy(environment = Some(t.on))
 
   trait ToTaskNode[-T]:
     def apply(t: T): TaskNode
@@ -504,7 +485,7 @@ object DSLContainer {
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
     given byGrouping[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t => toDSLContainer(t.value).copy(grouping = Some(t.by))
     given byInt[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t => toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
-    given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentProvider], C] = t => toDSLContainer(t.value).copy(environment = Some(t.on))
+    given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentBuilder], C] = t => toDSLContainer(t.value).copy(environment = Some(t.on))
     given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t =>
       val container = toDSLContainer(t.value)
       container.copy(hooks = container.hooks ++ Seq(t.h))
@@ -517,15 +498,15 @@ object DSLContainer {
 }
 
 case class DSLContainer[+T](
-  dsl:         DSL,
-  output:      Option[Task]                = None,
-  delegate:    Vector[Task]                = Vector.empty,
-  environment: Option[EnvironmentProvider] = None,
-  grouping:    Option[Grouping]            = None,
-  hooks:       Vector[Hook]                = Vector.empty,
-  validate:    Validate                    = Validate.success,
-  method:      T,
-  scope:       DefinitionScope) extends DSL
+                             dsl:         DSL,
+                             output:      Option[Task]                = None,
+                             delegate:    Vector[Task]                = Vector.empty,
+                             environment: Option[EnvironmentBuilder] = None,
+                             grouping:    Option[Grouping]            = None,
+                             hooks:       Vector[Hook]                = Vector.empty,
+                             validate:    Validate                    = Validate.success,
+                             method:      T,
+                             scope:       DefinitionScope) extends DSL
 
 case class TaskNodeDSL(node: TaskNode) extends DSL
 case class Slot(dsl: DSL) extends DSL
@@ -553,14 +534,14 @@ trait CompositionPackage {
   export org.openmole.core.workflow.composition.ExplorationMethodSetter
 
   def DSLContainer[T](
-    dsl:         DSL,
-    method:      T,
-    output:      Option[Task]                = None,
-    delegate:    Vector[Task]                = Vector.empty,
-    environment: Option[EnvironmentProvider] = None,
-    grouping:    Option[Grouping]            = None,
-    hooks:       Vector[Hook]                = Vector.empty,
-    validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
+                       dsl:         DSL,
+                       method:      T,
+                       output:      Option[Task]                = None,
+                       delegate:    Vector[Task]                = Vector.empty,
+                       environment: Option[EnvironmentBuilder] = None,
+                       grouping:    Option[Grouping]            = None,
+                       hooks:       Vector[Hook]                = Vector.empty,
+                       validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
     dsl match
       case dsl: DSLContainer[?] =>
         org.openmole.core.workflow.composition.DSLContainer[T](

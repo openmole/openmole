@@ -61,7 +61,7 @@ object SSHEnvironment extends JavaLogger:
     debug:                Boolean                       = false
   )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentProvider: (ms, cache) ⇒
+    EnvironmentBuilder: (ms, cache) ⇒
       new SSHEnvironment(
         user = user,
         host = host,

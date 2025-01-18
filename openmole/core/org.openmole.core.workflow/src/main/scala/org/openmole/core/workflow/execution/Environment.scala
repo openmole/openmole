@@ -99,12 +99,12 @@ object LocalEnvironment:
     name:         OptionalArgument[String] = None,
     remote:       Boolean                  = false
   )(implicit varName: sourcecode.Name) =
-    EnvironmentProvider: ms =>
+    EnvironmentBuilder: ms =>
       import ms._
       new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)), remote)
 
   def apply(threads: Int, deinterleave: Boolean, remote: Boolean) =
-    EnvironmentProvider: ms =>
+    EnvironmentBuilder: ms =>
       import ms._
       new LocalEnvironment(threads, deinterleave, None, remote)
 

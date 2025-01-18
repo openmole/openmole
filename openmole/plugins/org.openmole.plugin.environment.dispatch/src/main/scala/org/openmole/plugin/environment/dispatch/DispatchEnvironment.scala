@@ -4,7 +4,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workflow.execution.{ExceptionEvent, ExecutionState}
-import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
+import org.openmole.core.workflow.execution.{ Environment, EnvironmentBuilder, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, JobId }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
@@ -18,10 +18,10 @@ object DispatchEnvironment {
   val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
 
   object DestinationProvider {
-    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]): DestinationProvider = DestinationProvider(on.on, on.value)
+    implicit def toDestinationProvider(on: On[Int, EnvironmentBuilder]): DestinationProvider = DestinationProvider(on.on, on.value)
   }
 
-  case class DestinationProvider(environment: EnvironmentProvider, slot: Int)
+  case class DestinationProvider(environment: EnvironmentBuilder, slot: Int)
 
   case class Destination(environment: Environment, slot: Int)
 
@@ -98,10 +98,10 @@ object DispatchEnvironment {
     slot: Seq[DestinationProvider],
     name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentProvider.multiple: (ms, cache, c1) ⇒
+    EnvironmentBuilder.multiple: (ms, cache, c1) ⇒
       import ms._
 
-      val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, cache, c1)
+      val c2 = EnvironmentBuilder.build(slot.map(_.environment), ms, cache, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(

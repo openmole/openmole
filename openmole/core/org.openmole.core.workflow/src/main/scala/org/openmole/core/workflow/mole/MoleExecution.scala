@@ -91,10 +91,10 @@ object MoleExecution {
     mole:                        Mole,
     sources:                     Iterable[(MoleCapsule, Source)]            = Iterable.empty,
     hooks:                       Iterable[(MoleCapsule, Hook)]              = Iterable.empty,
-    environments:                Map[MoleCapsule, EnvironmentProvider]      = Map.empty,
+    environments:                Map[MoleCapsule, EnvironmentBuilder]      = Map.empty,
     grouping:                    Map[MoleCapsule, Grouping]                 = Map.empty,
     implicits:                   Context                                    = Context.empty,
-    defaultEnvironment:          OptionalArgument[LocalEnvironmentProvider] = None,
+    defaultEnvironment:          OptionalArgument[LocalEnvironmentBuilder] = None,
     cleanOnFinish:               Boolean                                    = true,
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
@@ -628,9 +628,9 @@ class MoleExecution(
   val mole:                        Mole,
   val sources:                     Sources,
   val hooks:                       Hooks,
-  val environmentProviders:        Map[MoleCapsule, EnvironmentProvider],
+  val environmentProviders:        Map[MoleCapsule, EnvironmentBuilder],
   val grouping:                    Map[MoleCapsule, Grouping],
-  val defaultEnvironmentProvider:  LocalEnvironmentProvider,
+  val defaultEnvironmentProvider:  LocalEnvironmentBuilder,
   val cleanOnFinish:               Boolean,
   val implicits:                   Context,
   val executionContext:            MoleExecutionContext,
@@ -705,9 +705,9 @@ class MoleExecution(
       timeService = timeService
     )
 
-  lazy val environments = EnvironmentProvider.build(environmentProviders.values.toVector, executionContext.services, keyValueCache)
+  lazy val environments = EnvironmentBuilder.build(environmentProviders.values.toVector, executionContext.services, keyValueCache)
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) => k -> environments(v) }.toMap
-  lazy val defaultEnvironment = EnvironmentProvider.buildLocal(defaultEnvironmentProvider, executionContext.services)
+  lazy val defaultEnvironment = EnvironmentBuilder.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
   lazy val runtimeTask = mole.capsules.map(c => c -> c.runtimeTask(mole, sources, hooks)).toMap
               

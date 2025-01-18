@@ -117,7 +117,7 @@ package object extension:
   export org.openmole.tool.crypto.Cypher
 
   export org.openmole.core.replication.ReplicaCatalog
-  export org.openmole.core.workflow.execution.EnvironmentProvider
+  export org.openmole.core.workflow.execution.EnvironmentBuilder
   export org.openmole.core.timeservice.TimeService
   export org.openmole.core.pluginmanager.PluginManager
   export org.openmole.core.workflow.validation.ValidateTask
