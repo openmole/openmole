@@ -76,8 +76,8 @@ case class ScalaTask(
 
   lazy val noFileInputs = Mapped.noFile(mapped.inputs)
   lazy val noFileOutputs = Mapped.noFile(mapped.outputs)
-  lazy val mappedInputs = toMappedInputVals(this.inputs, noFileInputs)
-  lazy val mappedOutputs = toMappedOutputVals(this.outputs, noFileOutputs)
+  lazy val mappedInputs = toMappedInputVals(Task.inputs(this), noFileInputs)
+  lazy val mappedOutputs = toMappedOutputVals(Task.outputs(this), noFileOutputs)
 
   lazy val externalWithFiles =
     external.copy(

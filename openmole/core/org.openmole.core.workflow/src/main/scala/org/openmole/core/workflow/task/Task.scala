@@ -221,9 +221,14 @@ object Task:
 
   def process(task: Task, executionContext: TaskExecutionContext): FromContext[Context] = task.process(executionContext)
 
-  def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
-  def outputs(task: Task): PrototypeSet = task.config.outputs
-  def defaults(task: Task): DefaultSet = task.config.defaults
+  extension (task: Task)
+    def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
+    def outputs: PrototypeSet = task.config.outputs
+    def defaults: DefaultSet = task.config.defaults
+
+
+
+
 
 /**
  * A Task is a fundamental unit for the execution of a workflow.
@@ -257,9 +262,5 @@ trait Task extends Name with Id:
    * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
    */
   lazy val id = new Object {}
-
-  def inputs: PrototypeSet = Task.inputs(this)
-  def outputs: PrototypeSet = Task.outputs(this)
-  def defaults: DefaultSet = Task.defaults(this)
 
 
