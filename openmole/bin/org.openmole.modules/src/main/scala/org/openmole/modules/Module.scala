@@ -48,7 +48,7 @@ object module {
       ModuleEntry("R", "Execute R code", components[org.openmole.plugin.task.r.RTask], task),
       ModuleEntry("Scilab", "Execute Scilab code", components[org.openmole.plugin.task.scilab.ScilabTask], task),
       ModuleEntry("SystemExec", "Execute system command", components[org.openmole.plugin.task.systemexec.SystemExecTask], task),
-      ModuleEntry("Template", "Generate files", components[org.openmole.plugin.task.template.TemplateTask], task),
+      ModuleEntry("Template", "Generate files", components(org.openmole.plugin.task.template.TemplateTask), task),
       ModuleEntry("CSVSampling", "Generate sampling using CSV files", components(org.openmole.plugin.sampling.csv.CSVSampling), sampling),
       ModuleEntry("LHS", "Generate Latin Hypercube Sampling", components(org.openmole.plugin.sampling.lhs.LHS), sampling),
       ModuleEntry("QuasiRandom", "Generate sampling using low-discrepency sequences", components(org.openmole.plugin.sampling.quasirandom.SobolSampling), sampling),

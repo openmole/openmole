@@ -43,7 +43,6 @@ import org.openmole.tool.lock.*
 
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{FileInjection, FileSerialisation, FileWithGCConverter}
-import org.openmole.tool.cache.KeyValueCache
 
 object SerializerService:
   def apply() = new SerializerService
@@ -89,7 +88,7 @@ class SerializerService:
 
   private def fileSerialisation() = buildXStream()
   private def fileListing() = new FilesListing(buildXStream())
-  private def pluginAndFileListing()(using TmpDirectory, FileService, KeyValueCache) = new PluginAndFilesListing(buildXStream())
+  private def pluginAndFileListing() = new PluginAndFilesListing(buildXStream())
   private def deserializerWithFileInjection() = new FileInjection(buildXStream())
 
   def deserialize[T](file: File): T =
@@ -127,7 +126,7 @@ class SerializerService:
     FileSerialisation.serialiseFiles(files, tos, fileSerialisation())
 
   def listFiles(obj: Any) = fileListing().list(obj)
-  def listPluginsAndFiles(obj: Any)(using TmpDirectory, FileService, KeyValueCache) = pluginAndFileListing().list(obj)
+  def listPluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
 
   def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)

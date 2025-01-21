@@ -27,10 +27,11 @@ object ToOffspringTask:
   def apply(evolution: EvolutionWorkflow)(using sourcecode.Name, DefinitionScope) =
     import evolution.integration.iManifest
 
-    ClosureTask("ToOffspringTask") { (context, _, _) ⇒
+    Task("ToOffspringTask"): p =>
+      import p.*
       val i = evolution.buildIndividual(context(evolution.genomeVal), context, context(evolution.stateVal))
       Context(Variable(evolution.offspringPopulationVal, Array(i)))
-    } set (
+    .set (
       inputs ++= evolution.outputVals,
       inputs += (evolution.genomeVal, evolution.stateVal),
       outputs += (evolution.stateVal, evolution.offspringPopulationVal)

@@ -257,36 +257,17 @@ case class GAMATask(
         else validateInputs ++ validateOutputs
 
 
-  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
-    import p.*
-    import executionContext.outputRedirection
-
+  def apply(taskBuildContext: TaskExecutionBuildContext): TaskExecution =
     val inputFilePath = s"${GAMATask.workspaceDirectory}/_inputs_openmole_.xml"
-    val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".xml")
-
     def outputDirectoryPath = s"${GAMATask.workspaceDirectory}/_output_"
-    val outputDirectory = executionContext.taskExecutionDirectory.newDirectory("output", create = true)
-
-    val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
-
-    def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
-
-    val parsedInputXML =
-      val parsedInputXML = XML.loadString(inputXML)
-      GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(parsedInputXML)
-
-    inputFile.content =
-      s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${parsedInputXML.mkString("")}"""
-
-    val (_, volumes) = GAMATask.volumes(project, gaml)
 
     def launchCommand =
       memory.option match
         case None => s"gama-headless -hpc 1 $inputFilePath $outputDirectoryPath"
         case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFilePath $outputDirectoryPath"
 
-    def containerTask =
-      ContainerTask.internal(
+    val containerTaskExecution =
+      ContainerTask.execution(
         image = image,
         command = launchCommand,
         workDirectory = Some(GAMATask.workspaceDirectory),
@@ -299,93 +280,117 @@ case class GAMATask(
         stdErr = stdErr,
         config = config,
         external = external,
-        info = info) set(
-        resources += (inputFile, inputFilePath, true),
-        resources += (outputDirectory, outputDirectoryPath, true),
-        volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
-        Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-        Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-      )
+        info = info)(taskBuildContext)
 
-    val resultContext = containerTask.process(executionContext).from(context)
+    TaskExecution: p =>
+      import p.*
+      //override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
+      import executionContext.outputRedirection
 
-    def gamaOutputFile =
-      outputDirectory.
-        listFilesSafe.
-        filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
-        sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${outputDirectory.list.mkString(", ")}]"""))
+      val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".xml")
+      val outputDirectory = executionContext.taskExecutionDirectory.newDirectory("output", create = true)
 
-    try
-      (Mapped.noFile(mapped.outputs).isEmpty, frameRate.option) match
-        case (true, _) => resultContext
-        case (false, None) =>
-          import xml._
+      val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
-          def toVariable(v: Val[?], value: String) =
-            v match
-              case Val.caseInt(v) => Variable(v, value.toInt)
-              case Val.caseDouble(v) => Variable(v, value.toDouble)
-              case Val.caseString(v) => Variable(v, value)
-              case Val.caseBoolean(v) => Variable(v, value.toBoolean)
-              case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
+      def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
 
-          val outputs = Map[String, Val[?]]() ++ Mapped.noFile(mapped.outputs).map { m => (m.name, m.v) }
-          def outputValue(e: Elem) =
-            for
-              a <- e.attribute("name").flatMap(_.headOption)
-              value <- outputs.get(a.text)
-            yield toVariable(value, e.child.text)
+      val parsedInputXML =
+        val parsedInputXML = XML.loadString(inputXML)
+        GAMATask.modifyInputXML(inputMap, finalStep.from(context), seedValue, frameRate.option).transform(parsedInputXML)
 
-          def extractOutputs(n: Node) =
-            (n \ "Variable").flatMap:
-              case e: Elem => outputValue(e)
-              case _ => None
+      inputFile.content =
+        s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${parsedInputXML.mkString("")}"""
 
-          val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+      val (_, volumes) = GAMATask.volumes(project, gaml)
 
-          resultContext ++ extractOutputs(simulationOutput.last)
-        case (false, Some(f)) =>
-          import xml._
+      def containerTask =
+        containerTaskExecution.set(
+          resources += (inputFile, inputFilePath, true),
+          resources += (outputDirectory, outputDirectoryPath, true),
+          volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
+          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+        )
 
-          def toVariable(v: Val[?], value: Array[String]) =
-            v match
-              case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
-              case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
-              case Val.caseArrayString(v) => Variable(v, value)
-              case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
-              case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
+      val resultContext = containerTask(executionContext).from(context)
 
-          def outputValue(e: Elem, name: String) =
-            for
-              a <- e.attribute("name").flatMap(_.headOption)
-              if a.text == name
-              if e.child.text != "NA"
-            yield e.child.text
+      def gamaOutputFile =
+        outputDirectory.
+          listFilesSafe.
+          filter(f => f.isFile && f.getName.startsWith("simulation-outputs") && f.getName.endsWith(".xml")).
+          sortBy(_.getName).headOption.getOrElse(throw new InternalProcessingError(s"""GAMA result file (simulation-outputsXX.xml) has not been found, the content of the output folder is: [${outputDirectory.list.mkString(", ")}]"""))
 
-          val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+      try
+        (Mapped.noFile(mapped.outputs).isEmpty, frameRate.option) match
+          case (true, _) => resultContext
+          case (false, None) =>
+            import xml._
 
-          resultContext ++
-            Mapped.noFile(mapped.outputs).map: m =>
-              val values =
-                for
-                  o <- simulationOutput
-                  v <- o \ "Variable"
-                yield
-                  v match
-                    case o: Elem => outputValue(o, m.name)
-                    case _ => None
-              toVariable(m.v, values.flatten.toArray)
+            def toVariable(v: Val[?], value: String) =
+              v match
+                case Val.caseInt(v) => Variable(v, value.toInt)
+                case Val.caseDouble(v) => Variable(v, value.toDouble)
+                case Val.caseString(v) => Variable(v, value)
+                case Val.caseBoolean(v) => Variable(v, value.toBoolean)
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Int, Double, String, Boolean)")
 
-    catch
-      case t: Throwable =>
-        def parseOutputError(t: Throwable) =
-          InternalProcessingError(
-            s"""Error parsing the result file, it might be caused by an error during the execution of GAMA, you should look at the standard output.
-               |Result file content was: ${gamaOutputFile.content}
-               |Experiment file content was: ${inputFile.content}
-               |GAMA was launched using the command: $launchCommand
-               |""".stripMargin, t)
-        throw parseOutputError(t)
+            val outputs = Map[String, Val[?]]() ++ Mapped.noFile(mapped.outputs).map { m => (m.name, m.v) }
+            def outputValue(e: Elem) =
+              for
+                a <- e.attribute("name").flatMap(_.headOption)
+                value <- outputs.get(a.text)
+              yield toVariable(value, e.child.text)
+
+            def extractOutputs(n: Node) =
+              (n \ "Variable").flatMap:
+                case e: Elem => outputValue(e)
+                case _ => None
+
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+
+            resultContext ++ extractOutputs(simulationOutput.last)
+          case (false, Some(f)) =>
+            import xml._
+
+            def toVariable(v: Val[?], value: Array[String]) =
+              v match
+                case Val.caseArrayInt(v) => Variable(v, value.map(_.toInt))
+                case Val.caseArrayDouble(v) => Variable(v, value.map(_.toDouble))
+                case Val.caseArrayString(v) => Variable(v, value)
+                case Val.caseArrayBoolean(v) => Variable(v, value.map(_.toBoolean))
+                case _ => throw new UserBadDataError(s"Unsupported type of output variable $v (supported types are Array[Int], Array[Double], Array[String], Array[Boolean])")
+
+            def outputValue(e: Elem, name: String) =
+              for
+                a <- e.attribute("name").flatMap(_.headOption)
+                if a.text == name
+                if e.child.text != "NA"
+              yield e.child.text
+
+            val simulationOutput = XML.loadFile(gamaOutputFile) \ "Step"
+
+            resultContext ++
+              Mapped.noFile(mapped.outputs).map: m =>
+                val values =
+                  for
+                    o <- simulationOutput
+                    v <- o \ "Variable"
+                  yield
+                    v match
+                      case o: Elem => outputValue(o, m.name)
+                      case _ => None
+                toVariable(m.v, values.flatten.toArray)
+
+      catch
+        case t: Throwable =>
+          def parseOutputError(t: Throwable) =
+            InternalProcessingError(
+              s"""Error parsing the result file, it might be caused by an error during the execution of GAMA, you should look at the standard output.
+                 |Result file content was: ${gamaOutputFile.content}
+                 |Experiment file content was: ${inputFile.content}
+                 |GAMA was launched using the command: $launchCommand
+                 |""".stripMargin, t)
+          throw parseOutputError(t)
 
 
 

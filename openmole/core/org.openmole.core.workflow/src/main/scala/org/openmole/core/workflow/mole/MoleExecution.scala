@@ -33,7 +33,7 @@ import org.openmole.core.workflow.job.State.*
 import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{Cleaned, MoleExecutionFailed, SubMoleExecutionState}
-import org.openmole.core.workflow.task.TaskExecutionContext
+import org.openmole.core.workflow.task.{TaskExecutionBuildContext, TaskExecutionContext}
 import org.openmole.core.workflow.transition.{AggregationTransition, DataChannel, Transition, TransitionSlot}
 import org.openmole.core.workflow.validation.*
 import org.openmole.tool.cache.KeyValueCache
@@ -46,7 +46,7 @@ import org.openmole.core.argument.*
 import scala.collection.mutable
 import scala.collection.mutable.{Buffer, ListBuffer}
 
-object MoleExecution {
+object MoleExecution:
 
   class Started extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]
@@ -67,9 +67,8 @@ object MoleExecution {
       case e: MoleExecutionError    => None
   
 
-  sealed trait MoleExecutionFailed {
+  sealed trait MoleExecutionFailed:
     def exception: Throwable
-  }
 
   case class JobFailed(moleJob: JobId, capsule: MoleCapsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
     def level = Level.SEVERE
@@ -98,10 +97,14 @@ object MoleExecution {
     cleanOnFinish:               Boolean                                    = true,
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
-    lockRepository:              LockRepository[LockKey]                    = LockRepository()
-  )(implicit moleServices: MoleServices): MoleExecution =
+    lockRepository:              LockRepository[LockKey]                    = LockRepository(),
+    runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None
+  )(using moleServices: MoleServices): MoleExecution =
 
     def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
+    val executionBuildContext =
+      import moleServices.*
+      TaskExecutionBuildContext(taskCache)
 
     new MoleExecution(
       mole,
@@ -116,7 +119,8 @@ object MoleExecution {
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
-      lockRepository = lockRepository
+      lockRepository = lockRepository,
+      runtimeTask = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext))
     )
 
   type CapsuleStatuses = Map[MoleCapsule, JobStatuses]
@@ -548,7 +552,7 @@ object MoleExecution {
 
   object SynchronisationContext:
     implicit def default: Synchronized.type = Synchronized
-    def apply[T](th: Any, op: => T)(implicit s: SynchronisationContext) =
+    def apply[T](th: Any, op: => T)(using s: SynchronisationContext) =
       s match
         case MoleExecution.Synchronized => synchronized(op)
         case MoleExecution.UnsafeAccess => op
@@ -562,7 +566,13 @@ object MoleExecution {
     import moleExecution.executionContext.services._
     given KeyValueCache = moleExecution.keyValueCache
     Validation(moleExecution.mole, moleExecution.implicits, moleExecution.sources, moleExecution.hooks)
-}
+
+  def runtimeTasks(mole: Mole, sources: Sources, hooks: Hooks, taskBuildContext: TaskExecutionBuildContext): Map[MoleCapsule, RuntimeTask] =
+    mole.capsules.map: capsule =>
+      val task = capsule.task(mole, sources, hooks)
+      capsule -> RuntimeTask(task, task(taskBuildContext), capsule.strain)
+    .toMap
+
 
 sealed trait MoleExecutionMessage
 
@@ -637,8 +647,10 @@ class MoleExecution(
   val startStopDefaultEnvironment: Boolean,
   val id:                          MoleExecution.Id,
   val keyValueCache:               KeyValueCache,
-  val lockRepository:              LockRepository[LockKey]
-) { moleExecution =>
+  val lockRepository:              LockRepository[LockKey],
+  val runtimeTask:                 Map[MoleCapsule, RuntimeTask]
+):
+  moleExecution =>
 
   val messageQueue = BlockingPriorityQueue[MoleExecutionMessage](fifo = false)
 
@@ -650,19 +662,20 @@ class MoleExecution(
   private val finishedSemaphore = new Semaphore(0)
   private val cleanedSemaphore = new Semaphore(0)
 
-  def sync[T](op: => T)(implicit s: MoleExecution.SynchronisationContext) = MoleExecution.SynchronisationContext(this, op)
+  def sync[T](op: => T)(using MoleExecution.SynchronisationContext) =
+    MoleExecution.SynchronisationContext(this, op)
 
-  def started(implicit s: MoleExecution.SynchronisationContext) = sync(_started)
-  def canceled(implicit s: MoleExecution.SynchronisationContext) = sync(_canceled)
-  def finished(implicit s: MoleExecution.SynchronisationContext) = sync(_finished)
+  def started(using MoleExecution.SynchronisationContext) = sync(_started)
+  def canceled(using MoleExecution.SynchronisationContext) = sync(_canceled)
+  def finished(using MoleExecution.SynchronisationContext) = sync(_finished)
 
-  def cleaned(implicit s: MoleExecution.SynchronisationContext) = sync(_cleaned)
+  def cleaned(using MoleExecution.SynchronisationContext) = sync(_cleaned)
 
   private[mole] var _startTime: Option[Long] = None
   private[mole] var _endTime: Option[Long] = None
 
-  def startTime(implicit s: MoleExecution.SynchronisationContext) = sync(_startTime)
-  def endTime(implicit s: MoleExecution.SynchronisationContext) = sync(_endTime)
+  def startTime(using MoleExecution.SynchronisationContext) = sync(_startTime)
+  def endTime(using MoleExecution.SynchronisationContext) = sync(_endTime)
 
   private[mole] var ticketNumber = 1L
   private[mole] val rootTicket = Ticket.root(0L)
@@ -705,12 +718,10 @@ class MoleExecution(
       timeService = timeService
     )
 
-  lazy val environments = EnvironmentBuilder.build(environmentProviders.values.toVector, executionContext.services, keyValueCache)
+  lazy val environments = EnvironmentBuilder.build(environmentProviders.values.toVector, executionContext.services)
   lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) => k -> environments(v) }.toMap
   lazy val defaultEnvironment = EnvironmentBuilder.buildLocal(defaultEnvironmentProvider, executionContext.services)
 
-  lazy val runtimeTask = mole.capsules.map(c => c -> c.runtimeTask(mole, sources, hooks)).toMap
-              
   def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
 
   lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this, IArray.empty)
@@ -723,14 +734,13 @@ class MoleExecution(
   private[workflow] val dataChannelRegistry = RegistryWithTicket[DataChannel, CompactedContext]()
   private[mole] var _exception = Option.empty[MoleExecutionFailed]
 
-  def exception(implicit s: MoleExecution.SynchronisationContext) = sync(_exception)
+  def exception(using MoleExecution.SynchronisationContext) = sync(_exception)
 
-  def duration(implicit s: MoleExecution.SynchronisationContext): Option[Long] = sync {
+  def duration(using MoleExecution.SynchronisationContext): Option[Long] = sync:
     (startTime, endTime) match
       case (None, _)          => None
       case (Some(t), None)    => Some(System.currentTimeMillis - t)
       case (Some(s), Some(e)) => Some(e - s)
-  }
 
   def run: Unit = run(None)
 
@@ -782,5 +792,3 @@ class MoleExecution(
         (jobs, capsules, completed.toMap)
 
     MoleExecution.capsuleStatuses(this, jobs, capsules, cmp)
-
-}

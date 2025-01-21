@@ -498,15 +498,15 @@ object DSLContainer {
 }
 
 case class DSLContainer[+T](
-                             dsl:         DSL,
-                             output:      Option[Task]                = None,
-                             delegate:    Vector[Task]                = Vector.empty,
-                             environment: Option[EnvironmentBuilder] = None,
-                             grouping:    Option[Grouping]            = None,
-                             hooks:       Vector[Hook]                = Vector.empty,
-                             validate:    Validate                    = Validate.success,
-                             method:      T,
-                             scope:       DefinitionScope) extends DSL
+  dsl:         DSL,
+  output:      Option[Task]                = None,
+  delegate:    Vector[Task]                = Vector.empty,
+  environment: Option[EnvironmentBuilder] = None,
+  grouping:    Option[Grouping]            = None,
+  hooks:       Vector[Hook]                = Vector.empty,
+  validate:    Validate                    = Validate.success,
+  method:      T,
+  scope:       DefinitionScope) extends DSL
 
 case class TaskNodeDSL(node: TaskNode) extends DSL
 case class Slot(dsl: DSL) extends DSL

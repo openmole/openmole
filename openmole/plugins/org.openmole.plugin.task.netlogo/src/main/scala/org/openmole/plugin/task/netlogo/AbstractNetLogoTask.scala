@@ -173,7 +173,7 @@ object AbstractNetLogoTask {
   // Manually do conversions to java native types ; necessary to add an output cast feature,
   // e.g. NetLogo numeric ~ java.lang.Double -> Int or String and not necessarily Double,
   // the target type being the one of the prototype
-  def cast(value: Any, clazz: Class[?]) = {
+  def cast(value: Any, clazz: Class[?]) =
     try {
       clazz match {
         // all netlogo numeric are java.lang.Double
@@ -192,7 +192,6 @@ object AbstractNetLogoTask {
     catch {
       case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${clazz}")
     }
-  }
 
   /**
    * Convert a netlogo collection to a Variable for which the prototype is expected to have the corresponding depth.
@@ -252,7 +251,8 @@ object AbstractNetLogoTask {
 /**
  * Generic NetLogoTask
  */
-trait AbstractNetLogoTask extends Task with ValidateTask { netlogoTask =>
+trait AbstractNetLogoTask extends Task with ValidateTask:
+  netlogoTask =>
 
   lazy val netLogoInstanceKey = CacheKey[WithInstance[AbstractNetLogoTask.NetoLogoInstance]]()
 
@@ -284,15 +284,14 @@ trait AbstractNetLogoTask extends Task with ValidateTask { netlogoTask =>
 
   def switch3d: Boolean
 
-  override def validate = Validate { p ⇒
-    import p._
+  override def validate = Validate: p =>
+    import p.*
     val allInputs = External.PWD :: p.inputs.toList
     go.flatMap(_.validate(allInputs)) ++
       External.validate(external)(allInputs) ++
       AbstractNetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
-  }
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext: parameters ⇒
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) = TaskExecution: parameters ⇒
     import parameters._
 
     val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey):
@@ -309,13 +308,12 @@ trait AbstractNetLogoTask extends Task with ValidateTask { netlogoTask =>
 
       for (cmd ← setup.map(_.from(context))) AbstractNetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
-      for (inBinding ← mapped.inputs) {
+      for (inBinding <- mapped.inputs)
+      do
         val v = AbstractNetLogoTask.netLogoCompatibleType(preparedContext(inBinding.v))
         AbstractNetLogoTask.setGlobal(instance.netLogo, inBinding.name, v)
-      }
 
       for (cmd ← go.map(_.from(context))) AbstractNetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
-
 
 
       val contextResult =
@@ -326,4 +324,3 @@ trait AbstractNetLogoTask extends Task with ValidateTask { netlogoTask =>
 
       contextResult
 
-}

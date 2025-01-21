@@ -79,7 +79,7 @@ case class Mole(
   dataChannels: Iterable[DataChannel] = Iterable.empty,
   inputs:       PrototypeSet          = PrototypeSet.empty,
   validate:     Validate              = Validate.success
-) {
+):
 
   lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
   lazy val capsules = slots.keys
@@ -90,8 +90,6 @@ case class Mole(
 
   lazy val levels = Mole.levels(this)
   def level(c: MoleCapsule) =
-    levels.get(c) match {
+    levels.get(c) match
       case Some(l) => l
       case None    => throw new InternalProcessingError(s"Capsule $c not found in $this")
-    }
-}

@@ -22,14 +22,13 @@ import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
-object AssignTask {
+object AssignTask:
 
   def apply(assignments: (Val[?], Val[?])*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("AssignTask") { (context, _, _) ⇒
-      assignments.map { case (from, to) ⇒ Variable.unsecure(to, context(from)) }
-    } set (
+    Task("AssignTask"): p =>
+      assignments.map { case (from, to) ⇒ Variable.unsecure(to, p.context(from)) }
+    .set (
       inputs ++= assignments.map(_._1),
       outputs ++= assignments.map(_._2)
     )
 
-}

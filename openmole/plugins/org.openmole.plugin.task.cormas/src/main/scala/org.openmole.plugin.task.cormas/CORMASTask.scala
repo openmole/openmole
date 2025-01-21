@@ -82,41 +82,12 @@ case class CORMASTask(
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p ⇒
-    import p._
-    import Mapped.noFile
-
-    def inputJSONName = "input.json"
-    def outputJSONName = "output.json"
-
-    import org.openmole.core.json.*
-
-    def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
-    def inputDictionary = JObject(inputsFields *)
-
-    def readOutputJSON(file: File) =
-      import org.json4s._
-      import org.json4s.jackson.JsonMethods._
-      val outputValues = parse(file.content)
-      val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
-      noFile(mapped.outputs).map: o ⇒
-        jValueToVariable(
-          outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue], 
-          o.v,
-          unwrapArrays = true)
-
-    val outputFile = Val[File]("outputFile", Namespace("CormasTask"))
-    val jsonInputs = executionContext.taskExecutionDirectory.newFile("inputs", ".json")
-    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".st")
-
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     def scriptName = "_script_.st"
     def workDirectory = "/_workdirectory_"
 
-    jsonInputs.content = compact(render(inputDictionary))
-    scriptFile.content = RunnableScript.content(script)
-
-    def containerTask =
-      ContainerTask.internal(
+    val taskExecution =
+      ContainerTask.execution(
         image = image,
         command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
         workDirectory = Some(workDirectory),
@@ -128,16 +99,50 @@ case class CORMASTask(
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info) set (
-        resources += (jsonInputs, inputJSONName, true),
-        resources += (scriptFile, scriptName, true),
-        outputFiles += (outputJSONName, outputFile),
-        Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-        Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-      )
+        info = info)(taskExecutionBuildContext)
 
-    val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
-    resultContext ++ readOutputJSON(resultContext(outputFile))
+    TaskExecution: p =>
+      import p.*
+      import Mapped.noFile
+
+      def inputJSONName = "input.json"
+      def outputJSONName = "output.json"
+
+      import org.openmole.core.json.*
+
+      def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
+      def inputDictionary = JObject(inputsFields *)
+
+      def readOutputJSON(file: File) =
+        import org.json4s._
+        import org.json4s.jackson.JsonMethods._
+        val outputValues = parse(file.content)
+        val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
+        noFile(mapped.outputs).map: o ⇒
+          jValueToVariable(
+            outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue],
+            o.v,
+            unwrapArrays = true)
+
+      val outputFile = Val[File]("outputFile", Namespace("CormasTask"))
+      val jsonInputs = executionContext.taskExecutionDirectory.newFile("inputs", ".json")
+      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".st")
+
+
+      jsonInputs.content = compact(render(inputDictionary))
+      scriptFile.content = RunnableScript.content(script)
+
+      def containerTask =
+        taskExecution.set (
+          resources += (jsonInputs, inputJSONName, true),
+          resources += (scriptFile, scriptName, true),
+          outputFiles += (outputJSONName, outputFile),
+          Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
+          Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
+        )
+
+      val resultContext = containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+      resultContext ++ readOutputJSON(resultContext(outputFile))
 
 
 

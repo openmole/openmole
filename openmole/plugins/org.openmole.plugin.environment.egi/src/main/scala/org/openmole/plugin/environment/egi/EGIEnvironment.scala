@@ -171,7 +171,7 @@ object EGIEnvironment extends JavaLogger {
     name:           OptionalArgument[String]      = None
   )(implicit authentication: EGIAuthentication, cypher: Cypher, workspace: Workspace, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentBuilder: (ms, cache) ⇒
+    EnvironmentBuilder: ms =>
       new EGIEnvironment(
         voName = voName,
         service = service,
@@ -185,7 +185,7 @@ object EGIEnvironment extends JavaLogger {
         debug = debug,
         name = name,
         authentication = authentication,
-        services = BatchEnvironment.Services(ms, cache)
+        services = BatchEnvironment.Services(ms)
       )
 
 

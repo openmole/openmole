@@ -50,7 +50,8 @@ object PythonTask:
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
-    val major = if(version.startsWith("2")) 2 else 3
+    val major =
+      if version.startsWith("2") then 2 else 3
 
     new PythonTask(
       script = script,
@@ -93,91 +94,95 @@ case class PythonTask(
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
-    import org.json4s.jackson.JsonMethods._
-    import p._
-    import Mapped.noFile
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    def workDirectory = "/_workdirectory_"
+    def scriptPath = s"$workDirectory/_generatescript_.py"
+    val argumentsValue = arguments.map(" " + _).getOrElse("")
 
-    def writeInputsJSON(file: File): Unit =
-      def values = noFile(mapped.inputs).map { m => p.context(m.v) }
-      file.content = compact(render(toJSONValue(values.toArray)))
+    val taskExecution =
+      ContainerTask.execution(
+        image = image,
+        command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        environmentVariables = environmentVariables,
+        hostFiles = hostFiles,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        external = external,
+        config = config,
+        info = info)(taskExecutionBuildContext)
 
-    def readOutputJSON(file: File) =
-      import org.json4s._
+    TaskExecution: p =>
       import org.json4s.jackson.JsonMethods._
-      val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+      import p._
+      import Mapped.noFile
 
-    def inputMapping(dicoName: String): String =
-      noFile(mapped.inputs)
-        .zipWithIndex
-        .map { (m, i) ⇒ s"${m.name} = $dicoName[${i}]" }
-        .mkString("\n")
+      def writeInputsJSON(file: File): Unit =
+        def values = noFile(mapped.inputs).map { m => p.context(m.v) }
+        file.content = compact(render(toJSONValue(values.toArray)))
 
-    def outputMapping: String =
-      s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
+      def readOutputJSON(file: File) =
+        import org.json4s._
+        import org.json4s.jackson.JsonMethods._
+        val outputValues = parse(file.content)
+        (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
-    val resultContext: Context =
-      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".py")
-      val jsonInputFile =  executionContext.taskExecutionDirectory.newFile("input", ".json")
+      def inputMapping(dicoName: String): String =
+        noFile(mapped.inputs)
+          .zipWithIndex
+          .map { (m, i) ⇒ s"${m.name} = $dicoName[${i}]" }
+          .mkString("\n")
 
-      def workDirectory = "/_workdirectory_"
-      def inputArrayName = "_generateddata_"
+      def outputMapping: String =
+        s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
 
-      def scriptPath = s"$workDirectory/_generatescript_.py"
-      def inputJSONPath = s"$workDirectory/_inputs_.json"
-      def outputJSONPath = s"$workDirectory/_outputs_.json"
+      val resultContext: Context =
+        val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".py")
+        val jsonInputFile =  executionContext.taskExecutionDirectory.newFile("input", ".json")
 
-      def alignedUserCode =
-        val source = RunnableScript.content(script)
-        val lines = source.split('\n')
-        if lines.nonEmpty
-        then
-          val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
-          if minSpace > 0
-          then lines.map(_.drop(minSpace)).mkString("\n")
+        def inputArrayName = "_generateddata_"
+
+        def inputJSONPath = s"$workDirectory/_inputs_.json"
+        def outputJSONPath = s"$workDirectory/_outputs_.json"
+
+        def alignedUserCode =
+          val source = RunnableScript.content(script)
+          val lines = source.split('\n')
+          if lines.nonEmpty
+          then
+            val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
+            if minSpace > 0
+            then lines.map(_.drop(minSpace)).mkString("\n")
+            else source
           else source
-        else source
 
-      writeInputsJSON(jsonInputFile)
-      scriptFile.content =
-        s"""
-           |import json
-           |$inputArrayName = json.load(open('$inputJSONPath'))
-           |${inputMapping(inputArrayName)}
-           |${alignedUserCode}
-           |json.dump($outputMapping, open('$outputJSONPath','w'))
-        """.stripMargin
+        writeInputsJSON(jsonInputFile)
+        scriptFile.content =
+          s"""
+             |import json
+             |$inputArrayName = json.load(open('$inputJSONPath'))
+             |${inputMapping(inputArrayName)}
+             |${alignedUserCode}
+             |json.dump($outputMapping, open('$outputJSONPath','w'))
+          """.stripMargin
 
-      val outputFile = Val[File]("outputFile", Namespace("PythonTask"))
+        val outputFile = Val[File]("outputFile", Namespace("PythonTask"))
 
-      val argumentsValue = arguments.map(" " + _).getOrElse("")
-
-      def containerTask =
-        ContainerTask.internal(
-          image = image,
-          command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          environmentVariables = environmentVariables,
-          hostFiles = hostFiles,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          external = external,
-          config = config,
-          info = info) set (
+        def containerTask =
+          taskExecution.set(
             resources += (scriptFile, scriptPath, true),
             resources += (jsonInputFile, inputJSONPath, true),
             outputFiles += (outputJSONPath, outputFile),
-            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+            Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
+            Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
           )
 
-      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
-      resultContext ++ readOutputJSON(resultContext(outputFile))
+        val resultContext = containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+        resultContext ++ readOutputJSON(resultContext(outputFile))
 
-    resultContext
+      resultContext
 
 
 

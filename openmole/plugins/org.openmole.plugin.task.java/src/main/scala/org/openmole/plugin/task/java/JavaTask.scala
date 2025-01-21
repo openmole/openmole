@@ -109,102 +109,106 @@ case class JavaTask(
 
   override def validate = validateContainer(Vector(), environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
-    import org.json4s.jackson.JsonMethods._
-    import p._
-    import Mapped.noFile
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    def workspace = "/_workspace_"
+    def scriptName = "_generatedscript_.sc"
 
-    def writeInputData(file: File): Unit =
-      def values = noFile(mapped.inputs).map { m => p.context(m.v) }
-      executionContext.serializerService.serialize(values.toArray, file)
+    val jarResources = jars.map(j => (j, s"/jars/${j.getName}"))
 
-    def readOutputData(file: File) =
-      val outputValues = executionContext.serializerService.deserialize[Array[Any]](file)
-      (outputValues zip noFile(mapped.outputs).map(_.v)).map { case (value, v) ⇒ Variable.unsecureUntyped(v, value) }
+    def jarParameter =
+      if jarResources.nonEmpty
+      then jarResources.map(j => s"""--jar \"${j._2}\"""").mkString(" ")
+      else ""
 
-    def inputMapping(dicoName: String): String =
-      noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.toTypeString(m.v.`type`)}]" }.mkString("\n")
+    val taskExecution = ContainerTask.execution(
+      image = image,
+      command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
+      workDirectory = Some(workspace),
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = InputOutputConfig(),
+      external = external,
+      info = info)(taskExecutionBuildContext)
 
-    def outputMapping: String =
-      s"""Array[Any](${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")})"""
+    TaskExecution: p =>
+      import org.json4s.jackson.JsonMethods._
+      import p._
+      import Mapped.noFile
 
-    def librariesContent =
-      libraries.map(l => s"//>using dep \"$l\"").mkString("\n")
+      def writeInputData(file: File): Unit =
+        def values = noFile(mapped.inputs).map { m => p.context(m.v) }
+        executionContext.serializerService.serialize(values.toArray, file)
 
-    val resultContext: Context =
-      def workspace = "/_workspace_"
-      def inputArrayName = "_generateddata_"
+      def readOutputData(file: File) =
+        val outputValues = executionContext.serializerService.deserialize[Array[Any]](file)
+        (outputValues zip noFile(mapped.outputs).map(_.v)).map { case (value, v) ⇒ Variable.unsecureUntyped(v, value) }
 
-      def scriptName = "_generatedscript_.sc"
-      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sc")
+      def inputMapping(dicoName: String): String =
+        noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.toTypeString(m.v.`type`)}]" }.mkString("\n")
 
+      def outputMapping: String =
+        s"""Array[Any](${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")})"""
 
-      def inputDataName = s"${workspace}/_inputs_.bin"
-      val inputData = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
-      def outputDataName = s"${workspace}/_outputs_.bin"
+      def librariesContent =
+        libraries.map(l => s"//>using dep \"$l\"").mkString("\n")
 
-      writeInputData(inputData)
-      scriptFile.content =
-        s"""
-           |//>using dep "com.thoughtworks.xstream:xstream:1.4.20"
-           |$librariesContent
-           |val __serializer__ =
-           |  import com.thoughtworks.xstream.*
-           |  import com.thoughtworks.xstream.io.binary.*
-           |  new XStream(null, new BinaryStreamDriver())
-           |
-           |val ${inputArrayName} =
-           |  import java.io.File
-           |  __serializer__.fromXML(new File("$inputDataName")).asInstanceOf[Array[Any]]
-           |
-           |${inputMapping(inputArrayName)}
-           |
-           |${RunnableScript.content(script)}
-           |
-           |{
-           |  import java.io.*
-           |  import java.nio.file.*
-           |  val mapping = ${outputMapping}
-           |  val stream = Files.newOutputStream(new File("$outputDataName").toPath)
-           |  try __serializer__.toXML(mapping, stream)
-           |  finally stream.close()
-           |}
-      """.stripMargin
+      val resultContext: Context =
+        def inputArrayName = "_generateddata_"
 
-      val outputFile = Val[File]("outputFile", Namespace("JavaTask"))
-      val jarResources = jars.map(j => (j, s"/jars/${j.getName}"))
+        val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sc")
+        
+        def inputDataName = s"${workspace}/_inputs_.bin"
+        val inputData = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
+        def outputDataName = s"${workspace}/_outputs_.bin"
 
-      def jarParameter =
-        if jarResources.nonEmpty
-        then jarResources.map(j => s"""--jar \"${j._2}\"""").mkString(" ")
-        else ""
+        writeInputData(inputData)
+        scriptFile.content =
+          s"""
+             |//>using dep "com.thoughtworks.xstream:xstream:1.4.20"
+             |$librariesContent
+             |val __serializer__ =
+             |  import com.thoughtworks.xstream.*
+             |  import com.thoughtworks.xstream.io.binary.*
+             |  new XStream(null, new BinaryStreamDriver())
+             |
+             |val ${inputArrayName} =
+             |  import java.io.File
+             |  __serializer__.fromXML(new File("$inputDataName")).asInstanceOf[Array[Any]]
+             |
+             |${inputMapping(inputArrayName)}
+             |
+             |${RunnableScript.content(script)}
+             |
+             |{
+             |  import java.io.*
+             |  import java.nio.file.*
+             |  val mapping = ${outputMapping}
+             |  val stream = Files.newOutputStream(new File("$outputDataName").toPath)
+             |  try __serializer__.toXML(mapping, stream)
+             |  finally stream.close()
+             |}
+        """.stripMargin
 
-      def containerTask =
-        ContainerTask.internal(
-          image = image,
-          command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
-          workDirectory = Some(workspace),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = InputOutputConfig(),
-          external = external,
-          info = info) set(
-          resources += (scriptFile, scriptName, true),
-          resources += (inputData, inputDataName, true),
-          jarResources.map((j, n) => resources += (j, n, true)),
-          outputFiles += (outputDataName, outputFile),
-          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-        )
+        val outputFile = Val[File]("outputFile", Namespace("JavaTask"))
 
-      val resultContext = containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
-      resultContext ++ readOutputData(resultContext(outputFile))
+        def containerTask =
+          taskExecution.set(
+            resources += (scriptFile, scriptName, true),
+            resources += (inputData, inputDataName, true),
+            jarResources.map((j, n) => resources += (j, n, true)),
+            outputFiles += (outputDataName, outputFile),
+            Mapped.files(mapped.inputs).map(m  => inputFiles += (m.v, m.name, true)),
+            Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
+          )
 
-    resultContext
+        val resultContext = containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+        resultContext ++ readOutputData(resultContext(outputFile))
+
+      resultContext
 
 
 

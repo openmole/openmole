@@ -20,9 +20,10 @@ package org.openmole.core.workflow.sampling
 import org.openmole.core.context._
 import org.openmole.core.argument._
 
-object Sampling {
-  implicit def fromIsSampling[T](t: T)(implicit isSampling: IsSampling[T]): Sampling = isSampling(t)
-}
+object Sampling:
+  inline given [T: IsSampling as isSampling]: Conversion[T, Sampling] =
+    new Conversion[T, Sampling]:
+      override def apply(t: T): Sampling = isSampling(t)
 
 case class Sampling(
   sampling: FromContext[Iterator[Iterable[Variable[?]]]],
@@ -30,7 +31,6 @@ case class Sampling(
   inputs:   PrototypeSet                                 = PrototypeSet.empty,
   validate: Validate                                     = Validate.success)
 
-trait IsSampling[-S] {
+trait IsSampling[-S]:
   def apply(s: S): Sampling
-}
 

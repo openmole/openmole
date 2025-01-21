@@ -20,10 +20,12 @@ package object extension:
   def Source = org.openmole.core.workflow.mole.Source
 
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
-  export org.openmole.core.workflow.task.ClosureTask
   export org.openmole.core.workflow.task.Task
 
+  export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
+  export org.openmole.core.workflow.task.TaskExecutionBuildContext
+
 
   type Grouping = org.openmole.core.workflow.grouping.Grouping
 

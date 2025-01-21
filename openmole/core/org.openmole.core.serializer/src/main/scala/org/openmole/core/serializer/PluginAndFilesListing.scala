@@ -20,13 +20,11 @@ package org.openmole.core.serializer
 import java.io.File
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import org.openmole.core.fileservice.FileService
 import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.serializer.file.{FileConverterNotifier, FileWithGCConverter}
 import org.openmole.core.serializer.plugin.{PluginClassConverter, PluginConverter}
 import org.openmole.core.serializer.structure.PluginClassAndFiles
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.file.*
 import org.openmole.tool.stream.NullOutputStream
 
@@ -49,7 +47,7 @@ class FilesListing(xStream: XStream):
     retFile.toVector
 
 
-class PluginAndFilesListing(xStream: XStream)(using val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache):
+class PluginAndFilesListing(xStream: XStream):
 
   lazy val reflectionConverter: ReflectionConverter =
     new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)

@@ -85,7 +85,7 @@ object SLURMEnvironment:
       modules = modules,
       debug = debug)
 
-    EnvironmentBuilder: (ms, cache) ⇒
+    EnvironmentBuilder: ms =>
       import ms._
 
       if !localSubmission
@@ -104,13 +104,13 @@ object SLURMEnvironment:
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
           proxy = proxy.map(SSHProxy.authenticated),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
       else
         new SLURMLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
 

@@ -83,31 +83,31 @@ object DispatchEnvironment {
       submitToEnvironment(dispatchEnvironment, environment)
     }
 
-  def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = {
+  def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = 
     case (env: Environment, e: Environment.JobStateChanged) ⇒
-      def isActive(s: ExecutionState) = s match {
-        case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING ⇒ true
-        case _ ⇒ false
-      }
+      def isActive(s: ExecutionState) = 
+        s match 
+          case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING ⇒ true
+          case _ ⇒ false
+        
 
-      if (!isActive(e.newState))
-        dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job, e.newState))
-  }
+      if !isActive(e.newState)
+      then dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job, e.newState))
 
   def apply(
     slot: Seq[DestinationProvider],
     name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentBuilder.multiple: (ms, cache, c1) ⇒
+    EnvironmentBuilder.multiple: (ms, c1) ⇒
       import ms._
 
-      val c2 = EnvironmentBuilder.build(slot.map(_.environment), ms, cache, c1)
+      val c2 = EnvironmentBuilder.build(slot.map(_.environment), ms, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(
           destination = slot.map(e ⇒ Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
       for

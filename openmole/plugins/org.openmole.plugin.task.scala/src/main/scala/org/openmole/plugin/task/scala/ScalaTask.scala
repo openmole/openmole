@@ -49,10 +49,10 @@ object ScalaTask:
     )
 
   def apply(f: (Context, ⇒ _root_.scala.util.Random) ⇒ Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("ScalaTask")((ctx, rng, _) ⇒ Context(f(ctx, rng()) *))
+    Task("ScalaTask")(p => Context(f(p.context, p.random())*))
 
   def apply(f: Context ⇒ Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("ScalaTask")((ctx, _, _) ⇒ Context(f(ctx) *))
+    Task("ScalaTask")(p => Context(f(p.context)*))
 
 
 case class ScalaTask(
@@ -63,7 +63,7 @@ case class ScalaTask(
   external:    External,
   info:        InfoConfig,
   mapped:      MappedInputOutputConfig
-) extends Task with ValidateTask with Plugins:
+) extends Task with ValidateTask:
 
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
   lazy val pluginsCache = CacheKey[Seq[File]]()
@@ -126,26 +126,34 @@ case class ScalaTask(
 
       libraryErrors ++ pluginsErrors ++ compilationError
 
-  override def process(taskExecutionContext: TaskExecutionContext) = FromContext: p ⇒
-    def toMappedInputContext(context: Context, mapped: Seq[ Mapped[?]]) =
-      context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name)))
 
-    def toMappedOutputContext(context: Context, mapped: Seq[ Mapped[?]]) =
-      context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
+  override def apply(taskBuildContext:  TaskExecutionBuildContext) =
+    val pluginsValue =
+      import taskBuildContext.*
+      given KeyValueCache = taskBuildContext.cache
+      plugins
 
-    def processCode =
-      FromContext: p ⇒
-        import p._
+    TaskExecution.withPlugins(pluginsValue): p =>
+      import p.*
 
-        val scalaCompilation =
-          taskExecutionContext.cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))
+      def toMappedInputContext(context: Context, mapped: Seq[ Mapped[?]]) =
+        context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name)))
 
-        val map = scalaCompilation(context, p.random, p.tmpDirectory)
-        mappedOutputs.toSeq.map {
-          o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
-        }: Context
+      def toMappedOutputContext(context: Context, mapped: Seq[ Mapped[?]]) =
+        context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
 
-    import p.*
-    def mappedContext = toMappedInputContext(context, noFileInputs)
-    def resultContext = JVMLanguageTask.process(taskExecutionContext, libraries, externalWithFiles, processCode, mappedOutputs).from(mappedContext)
-    toMappedOutputContext(resultContext, noFileOutputs)
+      def processCode =
+        FromContext: p ⇒
+          import p._
+
+          val scalaCompilation =
+            executionContext.cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))
+
+          val map = scalaCompilation(context, p.random, p.tmpDirectory)
+          mappedOutputs.toSeq.map {
+            o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+          }: Context
+
+      def mappedContext = toMappedInputContext(context, noFileInputs)
+      def resultContext = JVMLanguageTask.process(executionContext, libraries, externalWithFiles, processCode, mappedOutputs).from(mappedContext)
+      toMappedOutputContext(resultContext, noFileOutputs)

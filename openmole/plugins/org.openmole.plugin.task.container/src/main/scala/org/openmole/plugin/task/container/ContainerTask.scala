@@ -46,6 +46,7 @@ object ContainerTask:
   given ExternalBuilder[ContainerTask] = ExternalBuilder(Focus[ContainerTask](_.external))
   given InfoBuilder[ContainerTask] = InfoBuilder(Focus[ContainerTask](_.info))
 
+
   val RegistryTimeout = PreferenceLocation("ContainerTask", "RegistryTimeout", Some(1 minutes))
   val RegistryRetryOnError = PreferenceLocation("ContainerTask", "RegistryRetryOnError", Some(5))
 
@@ -295,7 +296,7 @@ object ContainerTask:
   type MountPoint = (String, String)
   type ContainerId = String
 
-  def internal(
+  def execution(
     image: ContainerSystem.InstalledImage,
     command: Commands,
     environmentVariables: Seq[EnvironmentVariable],
@@ -308,7 +309,7 @@ object ContainerTask:
     hostFiles: Seq[HostFile] = Seq(),
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
-    config: InputOutputConfig = InputOutputConfig()) =
+    config: InputOutputConfig = InputOutputConfig())(taskExecutionBuildContext: TaskExecutionBuildContext): ContainerTaskExecution =
     new ContainerTask(
       image = image,
       command = command,
@@ -323,9 +324,9 @@ object ContainerTask:
       config = config,
       external = external,
       info = info
-    ) set (
+    ).set(
       outputs ++= Seq(returnValue, stdOut, stdErr).flatten
-    )
+    ).execution(taskExecutionBuildContext)
 
 
   def process(
@@ -538,37 +539,76 @@ case class ContainerTask(
   external:               External,
   info:                   InfoConfig) extends Task with ValidateTask:
 
-  def validate = validateContainer(command.value, environmentVariables, external)
+  override def validate = validateContainer(command.value, environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) =
-    image match
-      case image: ContainerSystem.InstalledSIFImage =>
-        ContainerTask.process(
-          image = image,
-          command = command,
-          workDirectory = workDirectory,
-          relativePathRoot = relativePathRoot,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info)(executionContext)
-      case image: ContainerSystem.InstalledFlatImage =>
-        FlatContainerTask.process(
-          image = image,
-          command = command,
-          workDirectory = workDirectory,
-          relativePathRoot = relativePathRoot,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info)(executionContext)
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) = execution(taskExecutionBuildContext)
+
+  def execution(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    ContainerTaskExecution(
+      image = image,
+      command = command,
+      workDirectory = workDirectory,
+      relativePathRoot = relativePathRoot,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = config,
+      external = external,
+      info = info
+    )
+
+object ContainerTaskExecution:
+  given InputOutputBuilder[ContainerTaskExecution] = InputOutputBuilder(Focus[ContainerTaskExecution](_.config))
+  given ExternalBuilder[ContainerTaskExecution] = ExternalBuilder(Focus[ContainerTaskExecution](_.external))
+
+case class ContainerTaskExecution(
+    image: InstalledContainerImage,
+    command: ContainerTask.Commands,
+    workDirectory: Option[String],
+    relativePathRoot: Option[String],
+    hostFiles: Seq[HostFile],
+    environmentVariables: Seq[EnvironmentVariable],
+    errorOnReturnValue: Boolean,
+    returnValue: Option[Val[Int]],
+    stdOut: Option[Val[String]],
+    stdErr: Option[Val[String]],
+    config: InputOutputConfig,
+    external: External,
+    info: InfoConfig) extends TaskExecution:
+
+    override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
+      import p.*
+      image match
+        case image: ContainerSystem.InstalledSIFImage =>
+          ContainerTask.process(
+            image = image,
+            command = command,
+            workDirectory = workDirectory,
+            relativePathRoot = relativePathRoot,
+            hostFiles = hostFiles,
+            environmentVariables = environmentVariables,
+            errorOnReturnValue = errorOnReturnValue,
+            returnValue = returnValue,
+            stdOut = stdOut,
+            stdErr = stdErr,
+            config = config,
+            external = external,
+            info = info)(executionContext).from(context)
+        case image: ContainerSystem.InstalledFlatImage =>
+          FlatContainerTask.process(
+            image = image,
+            command = command,
+            workDirectory = workDirectory,
+            relativePathRoot = relativePathRoot,
+            hostFiles = hostFiles,
+            environmentVariables = environmentVariables,
+            errorOnReturnValue = errorOnReturnValue,
+            returnValue = returnValue,
+            stdOut = stdOut,
+            stdErr = stdErr,
+            config = config,
+            external = external,
+            info = info)(executionContext).from(context)

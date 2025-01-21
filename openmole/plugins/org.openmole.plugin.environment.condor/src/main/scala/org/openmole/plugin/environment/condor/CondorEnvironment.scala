@@ -69,8 +69,8 @@ object CondorEnvironment:
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentBuilder: (ms, cache) ⇒
-      import ms._
+    EnvironmentBuilder: ms  =>
+      import ms.*
 
       if !localSubmission
       then
@@ -87,13 +87,13 @@ object CondorEnvironment:
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
       else
         new CondorLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
 

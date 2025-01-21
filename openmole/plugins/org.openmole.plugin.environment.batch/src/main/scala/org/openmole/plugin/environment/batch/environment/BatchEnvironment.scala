@@ -68,7 +68,7 @@ object BatchEnvironment {
     def size = file.size
   }
 
-  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String = 
+  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String =
     val size = file.size
     eventDispatcher.trigger(environment, BeginUpload(id, file, storageId))
     val path =
@@ -129,7 +129,7 @@ object BatchEnvironment {
 
   object Services:
 
-    def apply(ms: MoleServices, cache: KeyValueCache)(implicit replicaCatalog: ReplicaCatalog) =
+    def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
       new Services(ms.compilationContext) (
         threadProvider = ms.threadProvider,
         preference = ms.preference,
@@ -142,8 +142,7 @@ object BatchEnvironment {
         eventDispatcher = ms.eventDispatcher,
         fileServiceCache = ms.fileServiceCache,
         outputRedirection = ms.outputRedirection,
-        loggerService = ms.loggerService,
-        cache = cache
+        loggerService = ms.loggerService
       )
 
   
@@ -160,8 +159,7 @@ object BatchEnvironment {
     val eventDispatcher:   EventDispatcher,
     val fileServiceCache:  FileServiceCache,
     val outputRedirection: OutputRedirection,
-    val loggerService:     LoggerService,
-    val cache:             KeyValueCache
+    val loggerService:     LoggerService
   )
 
   def jobFiles(job: BatchExecutionJob, environment: BatchEnvironment) =

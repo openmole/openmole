@@ -43,8 +43,8 @@ object EmptyTask:
 case class EmptyTask(
   config:                 InputOutputConfig,
   info:                   InfoConfig) extends Task:
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] =
-    FromContext: p =>
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    TaskExecution: p =>
       p.context
 
 

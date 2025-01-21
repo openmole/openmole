@@ -17,7 +17,9 @@
 
 package org.openmole.plugin.task.template
 
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+
 import org.openmole.core.workflow.test.TestHook
 import org.openmole.tool.hash._
 import org.scalatest._

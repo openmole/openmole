@@ -60,7 +60,7 @@ object SGEEnvironment {
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentBuilder: (ms, cache) ⇒
+    EnvironmentBuilder: ms =>
       import ms._
 
       if !localSubmission
@@ -78,13 +78,13 @@ object SGEEnvironment {
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
       else
         new SGELocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
 

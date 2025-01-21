@@ -20,7 +20,7 @@ package org.openmole.core.workflow.job
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
 
-case class RuntimeTask(task: Task, strain: Boolean)
+case class RuntimeTask(task: Task, taskProcessing: TaskExecution, strain: Boolean)
 
 object Job:
 
@@ -95,7 +95,7 @@ class Job(
     then
       val ctx = context
       try
-        val performResult = Task.perform(task.task, ctx, executionContext)
+        val performResult = Task.perform(task.task, task.taskProcessing, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
       catch
         case t: Throwable => Right(t)

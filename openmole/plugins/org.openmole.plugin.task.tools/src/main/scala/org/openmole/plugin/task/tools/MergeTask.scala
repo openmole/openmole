@@ -25,16 +25,16 @@ import org.openmole.core.workflow.task._
 
 import scala.reflect.ClassTag
 
-object MergeTask {
+object MergeTask:
 
   def apply[S](result: Val[Array[S]], prototypes: Val[Array[S]]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("MergeTask") { (context, _, _) ⇒
+    Task("MergeTask"): p =>
+      import p.*
       val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
       Variable(result, flattened)
-    } set (
+    .set (
       dsl.inputs ++= prototypes,
       dsl.outputs += result
     )
 
-}
 

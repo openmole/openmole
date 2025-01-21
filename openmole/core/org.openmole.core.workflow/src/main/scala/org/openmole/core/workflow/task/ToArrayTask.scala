@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 /**
  * Task to force the conversion of prototype to prototypes of arrays
  */
-object ToArrayTask {
+object ToArrayTask:
 
   /**
    * ToArrayTask from a set of prototypes (whatever the type T of each)
@@ -35,16 +35,13 @@ object ToArrayTask {
    * @return
    */
   def apply(prototypes: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    // FIXME seems to be never used ?
-    ClosureTask("ToArrayTask"):
-      (context, _, _) =>
-        prototypes.map {
-          p => Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
-        }
+    Task("ToArrayTask"): p =>
+      import p.*
+      prototypes.map: p =>
+        Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
     .set (
       inputs ++= prototypes,
       outputs ++= prototypes.map(_.array)
     )
 
-}
 

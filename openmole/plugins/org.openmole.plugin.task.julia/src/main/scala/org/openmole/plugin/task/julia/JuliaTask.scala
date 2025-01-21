@@ -31,7 +31,6 @@ object JuliaTask:
   given InfoBuilder[JuliaTask] = InfoBuilder(Focus[JuliaTask](_.info))
   given MappedInputOutputBuilder[JuliaTask] = MappedInputOutputBuilder(Focus[JuliaTask](_.mapped))
 
-
   object Library:
     given Conversion[String, Library] = s => LibraryName(s)
     given Conversion[File, Library] = f => FileLibrary(f)
@@ -117,87 +116,90 @@ case class JuliaTask(
 
   override def validate = container.validateContainer(Vector(), environmentVariables, external)
 
-  override def process(executionContext: TaskExecutionContext) = FromContext: p ⇒
-    import org.json4s.jackson.JsonMethods._
-    import p._
-    import Mapped.noFile
-
-    def writeInputsJSON(file: File): Unit =
-      def values = noFile(mapped.inputs).map { m => (m.name,p.context(m.v)) }
-      file.content = "{" + values.map{ (name,value) => "\""+name+"\": "+compact(render(toJSONValue(value)))}.mkString(",") + "}"
-
-    def readOutputJSON(file: File) =
-      import org.json4s._
-      import org.json4s.jackson.JsonMethods._
-      val outputValues = parse(file.content)
-      (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
-
-    def inputMapping(dicoName: String): String =
-      noFile(mapped.inputs).zipWithIndex.map {
-        (m, i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
-      }.mkString("\n")
-
-    def outputMapping: String =
-      s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
-
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     def workDirectory = "/_workdirectory_"
+    def scriptName = s"$workDirectory/_generatescript_.jl"
+    val argumentsValue = arguments.map(" " + _).getOrElse("")
 
-    val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".jl")
-    val jsonInputs = executionContext.taskExecutionDirectory.newFile("inputs", ".json")
+    val taskExecution =
+      ContainerTask.execution(
+        image = image,
+        command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = InputOutputConfig(),
+        external = external,
+        info = info)(taskExecutionBuildContext)
 
-    val resultContext: Context =
-      def inputArrayName = "_generateddata_"
-      def scriptName = s"$workDirectory/_generatescript_.jl"
-      def inputJSONName = s"$workDirectory/_inputs_.json"
-      def outputJSONName = s"$workDirectory/_outputs_.json"
+    TaskExecution: p =>
+      import org.json4s.jackson.JsonMethods._
+      import p._
+      import Mapped.noFile
 
-      writeInputsJSON(jsonInputs)
+      def writeInputsJSON(file: File): Unit =
+        def values = noFile(mapped.inputs).map { m => (m.name,p.context(m.v)) }
+        file.content = "{" + values.map{ (name,value) => "\""+name+"\": "+compact(render(toJSONValue(value)))}.mkString(",") + "}"
 
-      def scriptContent =
-        s"""
-           |import JSON
-           |$inputArrayName = "$inputJSONName" |> open |> JSON.parse
-           |${inputMapping(inputArrayName)}
-           |${RunnableScript.content(script)}
-           |write(open("$outputJSONName","w"), JSON.json($outputMapping))
-          """.stripMargin
+      def readOutputJSON(file: File) =
+        import org.json4s._
+        import org.json4s.jackson.JsonMethods._
+        val outputValues = parse(file.content)
+        (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
-      scriptFile.content = scriptContent
+      def inputMapping(dicoName: String): String =
+        noFile(mapped.inputs).zipWithIndex.map {
+          (m, i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
+        }.mkString("\n")
+
+      def outputMapping: String =
+        s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
 
 
-      val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
+      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".jl")
+      val jsonInputs = executionContext.taskExecutionDirectory.newFile("inputs", ".json")
 
-      val argumentsValue = arguments.map(" " + _).getOrElse("")
+      val resultContext: Context =
+        def inputArrayName = "_generateddata_"
+        def inputJSONName = s"$workDirectory/_inputs_.json"
+        def outputJSONName = s"$workDirectory/_outputs_.json"
 
-      def containerTask =
-        ContainerTask.internal(
-          image = image,
-          command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = InputOutputConfig(),
-          external = external,
-          info = info) set (
+        writeInputsJSON(jsonInputs)
+
+        def scriptContent =
+          s"""
+             |import JSON
+             |$inputArrayName = "$inputJSONName" |> open |> JSON.parse
+             |${inputMapping(inputArrayName)}
+             |${RunnableScript.content(script)}
+             |write(open("$outputJSONName","w"), JSON.json($outputMapping))
+            """.stripMargin
+
+        scriptFile.content = scriptContent
+
+        val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
+
+        def containerTask =
+          taskExecution.set (
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
-            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+            Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
+            Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
           )
 
-      val resultContext =
-        try containerTask.process(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
-        catch
-          case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
+        val resultContext =
+          try containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+          catch
+            case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
 
-      resultContext ++ readOutputJSON(resultContext(outputFile))
+        resultContext ++ readOutputJSON(resultContext(outputFile))
 
-    resultContext
+      resultContext
 
 
 

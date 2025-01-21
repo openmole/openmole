@@ -36,16 +36,12 @@ object PluginConverter extends JavaLogger:
   def canConvert(c: Class[?]): Boolean =
     classOf[Plugins].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c) || Interpreter.isInterpretedClass(c)
 
-
 class PluginConverter(serializer: PluginAndFilesListing, reflectionConverter: ReflectionConverter) extends Converter:
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) =
     serializer.classUsed(o.getClass)
     if classOf[Plugins].isAssignableFrom(o.getClass)
     then
-      given TmpDirectory = serializer.tmpDirectory
-      given FileService = serializer.fileService
-      given KeyValueCache = serializer.cache
       o.asInstanceOf[Plugins].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
 

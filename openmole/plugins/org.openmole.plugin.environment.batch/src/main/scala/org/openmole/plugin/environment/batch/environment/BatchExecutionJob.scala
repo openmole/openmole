@@ -72,7 +72,7 @@ object BatchExecutionJob:
     val closuresBundle = bundle(classDirectory, classLoader)
     (closuresBundle, bundleFile(closuresBundle))
 
-  def apply(id: Long, job: JobGroup, jobStore: JobStore)(implicit serializerService: SerializerService, tmpDirectory: TmpDirectory, fileService: FileService, cache: KeyValueCache) =
+  def apply(id: Long, job: JobGroup, jobStore: JobStore)(implicit serializerService: SerializerService) =
     val pluginsAndFiles = serializerService.listPluginsAndFiles(JobGroup.moleJobs(job).map(RunnableTask(_)))
     val plugins = pluginsAndFiles.plugins.distinctBy(_.getCanonicalPath)
     val storedJob = JobStore.store(jobStore, job)

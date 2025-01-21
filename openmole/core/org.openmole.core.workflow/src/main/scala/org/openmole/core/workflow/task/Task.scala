@@ -53,7 +53,7 @@ import org.openmole.tool.random
  * @param lockRepository
  * @param moleExecution
  */
-object TaskExecutionContext {
+object TaskExecutionContext:
 
   def apply(
     moleExecutionDirectory: File,
@@ -166,8 +166,6 @@ object TaskExecutionContext {
     val lockRepository:    LockRepository[LockKey],
     val moleExecution:     Option[MoleExecution]               = None)
 
-}
-
 case class TaskExecutionContext(
   moleExecutionDirectory: File,
   taskExecutionDirectory: File,
@@ -187,6 +185,19 @@ case class TaskExecutionContext(
   val serializerService: SerializerService,
   val networkService: NetworkService,
   val timeService: TimeService)
+
+
+case class TaskExecutionBuildContext(
+  cache: KeyValueCache)(
+  implicit
+  val tmpDirectory: TmpDirectory,
+  val fileService: FileService,
+  val workspace: Workspace,
+  val preference: Preference,
+  val threadProvider: ThreadProvider,
+  val outputRedirection: OutputRedirection,
+  val networkService: NetworkService,
+  val serializerService: SerializerService)
 
 object Task:
 
@@ -209,17 +220,17 @@ object Task:
    * @param executionContext context of the environment in which the Task is executed
    * @return
    */
-  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context =
+  def perform(task: Task, process: TaskExecution, context: Context, executionContext: TaskExecutionContext): Context =
     lazy val rng = Lazy(Task.buildRNG(context))
     InputOutputCheck.perform(
       task,
       Task.inputs(task),
       Task.outputs(task),
       Task.defaults(task),
-      task.process(executionContext)
+      process(executionContext)
     )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
 
-  def process(task: Task, executionContext: TaskExecutionContext): FromContext[Context] = task.process(executionContext)
+  def process(process: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = process(executionContext)
 
   extension (task: Task)
     def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
@@ -227,7 +238,37 @@ object Task:
     def defaults: DefaultSet = task.config.defaults
 
 
+  object TaskExecution:
+    import org.openmole.tool.random.*
 
+    def context(context: Context, executionContext: TaskExecutionContext)(using RandomProvider, TmpDirectory, FileService) =
+      ProcessingContext(context, executionContext)
+
+    case class ProcessingContext(context: Context, executionContext: TaskExecutionContext)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
+
+    def withPlugins(p: Seq[File])(process: ProcessingContext => Context) =
+      new TaskExecution with org.openmole.core.serializer.plugin.Plugins:
+        override val plugins = p
+
+        override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
+          import p.*
+          process(TaskExecution.context(p.context, executionContext))
+
+    def apply(process: ProcessingContext => Context): TaskExecution =
+      //NOTE: Do not simplify here for xStream serialisation
+      new TaskExecution:
+        override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
+          import p.*
+          process(TaskExecution.context(p.context, executionContext))
+
+  trait TaskExecution:
+    /**
+     * The actual processing of the Task, wrapped by the [[perform]] method
+     *
+     * @param executionContext
+     * @return
+     */
+    def apply(executionContext: TaskExecutionContext): FromContext[Context]
 
 
 /**
@@ -235,13 +276,7 @@ object Task:
  */
 trait Task extends Name with Id:
 
-  /**
-   * The actual processing of the Task, wrapped by the [[perform]] method
-   * @param executionContext
-   * @return
-   */
-  protected def process(executionContext: TaskExecutionContext): FromContext[Context]
-
+  def apply(taskBuildContext: TaskExecutionBuildContext): TaskExecution
   /**
    * Configuration for inputs/outputs
    * @return
@@ -264,3 +299,5 @@ trait Task extends Name with Id:
   lazy val id = new Object {}
 
 
+
+export Task.TaskExecution

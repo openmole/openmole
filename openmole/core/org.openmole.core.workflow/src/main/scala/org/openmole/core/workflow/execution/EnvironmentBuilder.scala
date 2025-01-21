@@ -26,11 +26,11 @@ object EnvironmentBuilder:
 
   def apply(build: MoleServices => LocalEnvironment): LocalEnvironmentBuilder = LocalEnvironmentBuilder(build)
 
-  def apply[T <: Environment](build: (MoleServices, KeyValueCache) => T): EnvironmentBuilder = GenericEnvironmentBuilder(build)
+  def apply[T <: Environment](build: MoleServices => T): EnvironmentBuilder = GenericEnvironmentBuilder(build)
 
-  def multiple(build: (MoleServices, KeyValueCache, Cache) => (Environment, Cache)) = MultipleEnvironmentBuilder(build)
+  def multiple(build: (MoleServices, Cache) => (Environment, Cache)) = MultipleEnvironmentBuilder(build)
 
-  def build(p: Seq[EnvironmentBuilder], services: MoleServices, keyValueCache: KeyValueCache, cache: Cache = Map()): Cache =
+  def build(p: Seq[EnvironmentBuilder], services: MoleServices, cache: Cache = Map()): Cache =
 
     def build0(lp: List[EnvironmentBuilder], cache: Cache): Cache =
       lp match
@@ -40,10 +40,10 @@ object EnvironmentBuilder:
             case Some(e) => build0(t, cache)
             case None =>
               h match
-                case GenericEnvironmentBuilder(bp) => build0(t, cache + (h -> bp(services, keyValueCache)))
+                case GenericEnvironmentBuilder(bp) => build0(t, cache + (h -> bp(services)))
                 case LocalEnvironmentBuilder(bp)   => build0(t, cache + (h -> bp(services)))
                 case MultipleEnvironmentBuilder(bp) =>
-                  val (e1, cache2) = bp(services, keyValueCache, cache)
+                  val (e1, cache2) = bp(services, cache)
                   build0(t, cache ++ cache2 + (h -> e1))
 
 
@@ -54,7 +54,7 @@ object EnvironmentBuilder:
 
 
 sealed trait EnvironmentBuilder
-case class GenericEnvironmentBuilder(build: (MoleServices, KeyValueCache) => Environment) extends EnvironmentBuilder
+case class GenericEnvironmentBuilder(build: MoleServices => Environment) extends EnvironmentBuilder
 case class LocalEnvironmentBuilder(build: MoleServices => LocalEnvironment) extends EnvironmentBuilder
-case class MultipleEnvironmentBuilder(build: (MoleServices, KeyValueCache, EnvironmentBuilder.Cache) => (Environment, EnvironmentBuilder.Cache)) extends EnvironmentBuilder
+case class MultipleEnvironmentBuilder(build: (MoleServices, EnvironmentBuilder.Cache) => (Environment, EnvironmentBuilder.Cache)) extends EnvironmentBuilder
 

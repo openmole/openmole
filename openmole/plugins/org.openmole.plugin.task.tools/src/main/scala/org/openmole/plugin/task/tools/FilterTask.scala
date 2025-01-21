@@ -5,11 +5,12 @@ import org.openmole.core.dsl._
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task._
 
-object FilterTask {
+object FilterTask:
 
   def apply(variable: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("FilterTask") { (context, _, _) ⇒ context } set (
+    Task("FilterTask"): p =>
+      p.context
+    .set (
       (inputs, outputs) ++= variable
     )
 
-}

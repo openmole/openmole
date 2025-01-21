@@ -25,16 +25,16 @@ import org.openmole.core.workflow.task._
 
 import scala.reflect.ClassTag
 
-object FlattenTask {
+object FlattenTask:
 
   def apply[S](flatten: Val[Array[Array[S]]], in: Val[Array[S]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("FlattenTask") { (context, _, _) ⇒
+    Task("FlattenTask"): p =>
+      import p.*
       implicit val sClassTag = ClassTag[S](Val.fromArray(in).`type`.runtimeClass)
       Variable(in, context(flatten).flatten.toArray[S])
-    } set (
+    .set (
       dsl.inputs += flatten,
       dsl.outputs += in
     )
 
-}
 

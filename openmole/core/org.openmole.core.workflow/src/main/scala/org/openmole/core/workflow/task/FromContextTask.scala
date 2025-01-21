@@ -11,7 +11,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random.RandomProvider
 import monocle.Focus
 
-object FromContextTask {
+object FromContextTask:
 
   given InputOutputBuilder[FromContextTask] = InputOutputBuilder(Focus[FromContextTask](_.config))
   given InfoBuilder[FromContextTask] = InfoBuilder(Focus[FromContextTask](_.info))
@@ -35,7 +35,7 @@ object FromContextTask {
    * @param fromContext
    * @return
    */
-  def apply(className: String)(fromContext: Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+  def apply(className: String)(fromContext: Parameters => Context)(using sourcecode.Name, DefinitionScope): FromContextTask =
     new FromContextTask(
       fromContext,
       className = className,
@@ -44,7 +44,6 @@ object FromContextTask {
       info = InfoConfig()
     )
 
-}
 
 /**
  * A task wrapping a function from a [[TaskExecutionContext]] to a [[FromContext]]
@@ -66,9 +65,10 @@ case class FromContextTask(
 
   override def validate = v
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext[Context] { p =>
-    val tp = FromContextTask.Parameters(p.context, executionContext, config, mapped)(executionContext.preference, p.random, p.tmpDirectory, p.fileService)
-    f(tp)
-  }
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    TaskExecution: p =>
+      val tp = FromContextTask.Parameters(p.context, p.executionContext, config, mapped)(p.executionContext.preference, p.random, p.tmpDirectory, p.fileService)
+      f(tp)
+
 
   def withValidate(validate: Validate) = copy(v = v ++ validate)
