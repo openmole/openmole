@@ -303,6 +303,17 @@ object HDOSE:
         f.domain.map(_.step).toVector
       )
 
+    given boolean: Conversion[Val[Boolean], OriginAxe] = v =>
+      EnumerationOriginAxe(
+        Genome.GenomeBound.Enumeration(v, Vector(true, false))
+      )
+
+    given booleanArray: Conversion[Factor[Int, Array[Boolean]], OriginAxe] = f =>
+      EnumerationSequenceOriginAxe(
+        Genome.GenomeBound.SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
+      )
+
+
     given enumeration[D, T](using fix: FixDomain[D, T]): Conversion[Factor[D, T], OriginAxe] = f =>
       val domain = fix(f.domain).domain.toVector
       EnumerationOriginAxe(Genome.GenomeBound.Enumeration(f.value, domain))
@@ -313,6 +324,7 @@ object HDOSE:
       case cs: ContinuousSequenceOriginAxe ⇒ cs.p
       case ds: DiscreteSequenceOriginAxe ⇒ ds.p
       case en: EnumerationOriginAxe => en.p
+      case en: EnumerationSequenceOriginAxe => en.p
 
     def toGenome(axes: Seq[OriginAxe]): Genome = axes.map(genomeBound)
 
@@ -327,6 +339,7 @@ object HDOSE:
         case d: DiscreteOriginAxe ⇒ Seq(d.step)
         case ds: DiscreteSequenceOriginAxe ⇒ ds.step
         case en: EnumerationOriginAxe => Seq(1)
+        case en: EnumerationSequenceOriginAxe => en.p.values.map(_ => 1)
         case _ => Seq()
 
 
@@ -336,6 +349,7 @@ object HDOSE:
   case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, step: Int) extends OriginAxe
   case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, step: Vector[Int]) extends OriginAxe
   case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[?]) extends OriginAxe
+  case class EnumerationSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfEnumeration[?]) extends OriginAxe
 
 
   def apply(
