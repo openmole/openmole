@@ -43,7 +43,7 @@ object module {
       ModuleEntry("Container", "Execute a container", components[org.openmole.plugin.task.container.ContainerTask], task),
       ModuleEntry("NetLogo5", "Execute NetLogo 5 simulation models", components[org.openmole.plugin.task.netlogo5.NetLogo5Task], task),
       ModuleEntry("NetLogo6", "Execute NetLogo 6 simulation models", components[org.openmole.plugin.task.netlogo6.NetLogo6Task], task),
-      ModuleEntry("GAMA", "Execute GAMA simulation models", components[org.openmole.plugin.task.gama.GAMATask], task),
+      ModuleEntry("GAMA", "Execute GAMA simulation models", components(org.openmole.plugin.task.gama.GAMATask), task),
       ModuleEntry("Python", "Execute python code", components[org.openmole.plugin.task.python.PythonTask], task),
       ModuleEntry("R", "Execute R code", components[org.openmole.plugin.task.r.RTask], task),
       ModuleEntry("Scilab", "Execute Scilab code", components[org.openmole.plugin.task.scilab.ScilabTask], task),
