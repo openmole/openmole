@@ -78,7 +78,6 @@ object RTask:
 
       val containerTaskExecution =
         import taskExecutionBuildContext.*
-
         ContainerTask.execution(
           image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
           command = prepare ++ Seq(s"R --slave -f $rScriptPath"),

@@ -44,11 +44,10 @@ object ExternalTask:
    executionContext: TaskExecutionContext,
    taskInfo: TaskInfo)(
    implicit
-   val preference:  Preference,
    val random:      RandomProvider,
-   val newFile:     TmpDirectory,
-   val fileService: FileService):
+   val tmpDirectory: TmpDirectory):
    export taskInfo.*
+   export executionContext.*
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
@@ -101,7 +100,7 @@ case class ExternalTask(
     val taskInfo = ExternalTask.TaskInfo(config, mapped, info, external)
     val execution = fromContext(ExternalTask.BuildParameters(taskExecutionBuildContext, taskInfo))
     TaskExecution: p =>
-      val tp = ExternalTask.Parameters(p.context, p.executionContext, taskInfo)(p.executionContext.preference, p.random, p.tmpDirectory, p.fileService)
+      val tp = ExternalTask.Parameters(p.context, p.executionContext, taskInfo)(p.random, p.tmpDirectory)
       execution(tp)
 
   def withValidate(validate: Validate): ExternalTask = copy(v = info => v(info) ++ validate)

@@ -105,7 +105,7 @@ package object extension:
   type Validate = org.openmole.core.argument.Validate
   def Validate = org.openmole.core.argument.Validate
 
-  export org.openmole.core.exception.{UserBadDataError, InternalProcessingError}
+  export org.openmole.core.exception.{UserBadDataError, InternalProcessingError, MultipleException}
 
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet

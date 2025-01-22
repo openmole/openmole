@@ -31,11 +31,10 @@ object FromContextTask:
     executionContext: TaskExecutionContext,
     taskInfo: TaskInfo)(
     implicit
-    val preference:  Preference,
-    val random:      RandomProvider,
-    val newFile:     TmpDirectory,
-    val fileService: FileService):
+    val random:           RandomProvider,
+    val tmpDirectory:     TmpDirectory):
     export taskInfo.*
+    export executionContext.*
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
@@ -87,7 +86,7 @@ case class FromContextTask(
     val taskInfo = FromContextTask.TaskInfo(config, mapped, info)
     val execution = fromContext(FromContextTask.BuildParameters(taskExecutionBuildContext, taskInfo))
     TaskExecution: p =>
-      val tp = FromContextTask.Parameters(p.context, p.executionContext, taskInfo)(p.executionContext.preference, p.random, p.tmpDirectory, p.fileService)
+      val tp = FromContextTask.Parameters(p.context, p.executionContext, taskInfo)(p.random, p.tmpDirectory)
       execution(tp)
 
   def withValidate(validate: Validate): FromContextTask = copy(v = info => v(info) ++ validate)
