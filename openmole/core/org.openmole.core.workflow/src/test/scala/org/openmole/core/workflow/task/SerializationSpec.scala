@@ -45,8 +45,8 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     val rt = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, TaskExecutionBuildContext(cache)).head._2
 
     val rt2 = serializeDeserialize(rt)
-    rt2.task.config.inputs.contains(p.name) should equal(true)
-    rt2.task.config.outputs.contains(p.name) should equal(true)
+    rt2.taskExecutionInfo.inputs.contains(p.name) should equal(true)
+    rt2.taskExecutionInfo.outputs.contains(p.name) should equal(true)
 
   "MoleTask" should "be able to run after serialization and deserialization" in :
     val p = Val[Int]("p")

@@ -61,4 +61,4 @@ case class RetryTask(
     TaskExecution: p =>
       import p.*
       Retry.retry(time):
-        Task.process(taskProcess, executionContext).from(context)
+        TaskExecution.execute(taskProcess, executionContext).from(context)

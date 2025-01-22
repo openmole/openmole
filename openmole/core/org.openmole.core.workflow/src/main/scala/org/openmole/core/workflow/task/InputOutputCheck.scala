@@ -92,7 +92,7 @@ object InputOutputCheck:
   def filterOutput(outputs: PrototypeSet, context: Context): Context =
     Context(outputs.toList.flatMap(o => context.variable(o): Option[Variable[?]]) *)
 
-  def perform(obj: Any, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p =>
+  def perform(obj: String, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet, process: FromContext[Context])(implicit preference: Preference) = FromContext { p =>
     import p.*
     val initializedContext = DefaultSet.completeContext(defaults, context)
     val inputErrors = verifyInput(inputs, initializedContext)

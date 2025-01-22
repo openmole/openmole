@@ -37,4 +37,4 @@ trait Source extends Name:
     implicit val rng = executionContext.services.newRandom
     import executionContext.services.tmpDirectory
     import executionContext.services.fileService
-    InputOutputCheck.perform(this, inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)
+    InputOutputCheck.perform(this.toString, inputs, outputs, defaults, process(executionContext))(executionContext.services.preference).from(context)

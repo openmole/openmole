@@ -36,9 +36,11 @@ case class TimingTask(
 
   override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     val taskExecution = task(taskExecutionBuildContext)
+    val taskExecutionInfo = TaskExecutionInfo(task)
     TaskExecution:  p =>
+      import p.*
       val starttime = System.currentTimeMillis()
-      val taskcontext = p.context + Task.perform(task, taskExecution, p.context, p.executionContext)
+      val taskcontext = p.context + TaskExecution.execute(taskExecution, p.executionContext).from(context)
       val executiontime = (System.currentTimeMillis() - starttime)
       taskcontext + (tracker, executiontime)
 

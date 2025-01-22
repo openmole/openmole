@@ -213,24 +213,6 @@ object Task:
   def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-  /**
-   * Perform this task.
-   *
-   * @param context the context in which the task will be executed
-   * @param executionContext context of the environment in which the Task is executed
-   * @return
-   */
-  def perform(task: Task, process: TaskExecution, context: Context, executionContext: TaskExecutionContext): Context =
-    lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(
-      task,
-      Task.inputs(task),
-      Task.outputs(task),
-      Task.defaults(task),
-      process(executionContext)
-    )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
-
-  def process(process: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = process(executionContext)
 
   extension (task: Task)
     def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
@@ -244,9 +226,39 @@ object Task:
     def context(context: Context, executionContext: TaskExecutionContext)(using RandomProvider, TmpDirectory, FileService) =
       ProcessingContext(context, executionContext)
 
+
+    object TaskExecutionInfo:
+      def apply(task: Task) =
+        new TaskExecutionInfo(
+          task = task.toString,
+          inputs = Task.inputs(task),
+          outputs = Task.outputs(task),
+          defaults = Task.defaults(task)
+        )
+
+    case class TaskExecutionInfo(task: String, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet)
     case class ProcessingContext(context: Context, executionContext: TaskExecutionContext)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
 
-    def withPlugins(p: Seq[File])(process: ProcessingContext => Context) =
+    /**
+     * Perform this task.
+     *
+     * @param context          the context in which the task will be executed
+     * @param executionContext context of the environment in which the Task is executed
+     * @return
+     */
+    def perform(process: TaskExecution, executionInfo: TaskExecutionInfo, context: Context, executionContext: TaskExecutionContext): Context =
+      lazy val rng = Lazy(Task.buildRNG(context))
+      InputOutputCheck.perform(
+        executionInfo.task,
+        executionInfo.inputs,
+        executionInfo.outputs,
+        executionInfo.defaults,
+        process(executionContext)
+      )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+
+    def execute(taskExecution: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = taskExecution(executionContext)
+
+    def withPlugins(p: Seq[File])(process: ProcessingContext => Context): TaskExecution =
       new TaskExecution with org.openmole.core.serializer.plugin.Plugins:
         override val plugins = p
 
@@ -260,6 +272,7 @@ object Task:
         override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
           import p.*
           process(TaskExecution.context(p.context, executionContext))
+
 
   trait TaskExecution:
     /**
@@ -301,3 +314,4 @@ trait Task extends Name with Id:
 
 
 export Task.TaskExecution
+export Task.TaskExecution.TaskExecutionInfo

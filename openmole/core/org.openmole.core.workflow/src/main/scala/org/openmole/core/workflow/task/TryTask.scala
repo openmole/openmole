@@ -60,7 +60,7 @@ case class TryTask(
     val taskProcessing = task(taskExecutionBuildContext)
     TaskExecution: p =>
       import p.*
-      try Task.process(taskProcessing, executionContext).from(context)
+      try TaskExecution.execute(taskProcessing, executionContext).from(context)
       catch
         case t: Throwable =>
           p.context

@@ -33,7 +33,7 @@ import org.openmole.core.workflow.job.State.*
 import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole
 import org.openmole.core.workflow.mole.MoleExecution.{Cleaned, MoleExecutionFailed, SubMoleExecutionState}
-import org.openmole.core.workflow.task.{TaskExecutionBuildContext, TaskExecutionContext}
+import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.transition.{AggregationTransition, DataChannel, Transition, TransitionSlot}
 import org.openmole.core.workflow.validation.*
 import org.openmole.tool.cache.KeyValueCache
@@ -570,7 +570,7 @@ object MoleExecution:
   def runtimeTasks(mole: Mole, sources: Sources, hooks: Hooks, taskBuildContext: TaskExecutionBuildContext): Map[MoleCapsule, RuntimeTask] =
     mole.capsules.map: capsule =>
       val task = capsule.task(mole, sources, hooks)
-      capsule -> RuntimeTask(task, task(taskBuildContext), capsule.strain)
+      capsule -> RuntimeTask(task(taskBuildContext), TaskExecutionInfo(task), capsule.strain)
     .toMap
 
 

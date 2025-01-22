@@ -63,13 +63,11 @@ object MoleTask:
     )
 
   /**
-   * Check if a given [[Job]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
+   * Check if a given [[Task]] contains a [[MoleTask]] (a mole job wraps a task which is not necessarily a Mole Task).
    *
-   * @param moleJob
+   * @param task
    * @return
    */
-  def containsMoleTask(moleJob: Job) = isMoleTask(moleJob.task.task)
-
   def isMoleTask(task: Task) =
     task match
       case _: MoleTask => true

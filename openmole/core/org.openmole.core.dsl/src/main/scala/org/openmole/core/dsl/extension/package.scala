@@ -22,6 +22,7 @@ package object extension:
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
   export org.openmole.core.workflow.task.Task
 
+  export org.openmole.core.workflow.task.TaskExecutionInfo
   export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
   export org.openmole.core.workflow.task.TaskExecutionBuildContext

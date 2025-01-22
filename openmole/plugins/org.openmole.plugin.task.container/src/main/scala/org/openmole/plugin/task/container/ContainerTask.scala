@@ -310,23 +310,26 @@ object ContainerTask:
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
     config: InputOutputConfig = InputOutputConfig())(taskExecutionBuildContext: TaskExecutionBuildContext): ContainerTaskExecution =
-    new ContainerTask(
-      image = image,
-      command = command,
-      workDirectory = workDirectory,
-      relativePathRoot = relativePathRoot,
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      config = config,
-      external = external,
-      info = info
-    ).set(
-      outputs ++= Seq(returnValue, stdOut, stdErr).flatten
-    ).execution(taskExecutionBuildContext)
+    val task =
+      new ContainerTask(
+        image = image,
+        command = command,
+        workDirectory = workDirectory,
+        relativePathRoot = relativePathRoot,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info
+      ).set(
+        outputs ++= Seq(returnValue, stdOut, stdErr).flatten
+      )
+      
+    task.execution(taskExecutionBuildContext)
 
 
   def process(
@@ -541,7 +544,7 @@ case class ContainerTask(
 
   override def validate = validateContainer(command.value, environmentVariables, external)
 
-  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) = execution(taskExecutionBuildContext)
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext): TaskExecution = execution(taskExecutionBuildContext)
 
   def execution(taskExecutionBuildContext: TaskExecutionBuildContext) =
     ContainerTaskExecution(
@@ -565,19 +568,19 @@ object ContainerTaskExecution:
   given ExternalBuilder[ContainerTaskExecution] = ExternalBuilder(Focus[ContainerTaskExecution](_.external))
 
 case class ContainerTaskExecution(
-    image: InstalledContainerImage,
-    command: ContainerTask.Commands,
-    workDirectory: Option[String],
-    relativePathRoot: Option[String],
-    hostFiles: Seq[HostFile],
-    environmentVariables: Seq[EnvironmentVariable],
-    errorOnReturnValue: Boolean,
-    returnValue: Option[Val[Int]],
-    stdOut: Option[Val[String]],
-    stdErr: Option[Val[String]],
-    config: InputOutputConfig,
-    external: External,
-    info: InfoConfig) extends TaskExecution:
+  image: InstalledContainerImage,
+  command: ContainerTask.Commands,
+  workDirectory: Option[String],
+  relativePathRoot: Option[String],
+  hostFiles: Seq[HostFile],
+  environmentVariables: Seq[EnvironmentVariable],
+  errorOnReturnValue: Boolean,
+  returnValue: Option[Val[Int]],
+  stdOut: Option[Val[String]],
+  stdErr: Option[Val[String]],
+  config: InputOutputConfig,
+  external: External,
+  info: InfoConfig) extends TaskExecution:
 
     override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
       import p.*
