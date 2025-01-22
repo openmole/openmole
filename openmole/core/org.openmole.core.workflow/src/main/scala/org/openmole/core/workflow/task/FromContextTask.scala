@@ -12,22 +12,30 @@ import org.openmole.tool.random.RandomProvider
 import monocle.Focus
 
 object FromContextTask:
-
   given InputOutputBuilder[FromContextTask] = InputOutputBuilder(Focus[FromContextTask](_.config))
   given InfoBuilder[FromContextTask] = InfoBuilder(Focus[FromContextTask](_.info))
   given MappedInputOutputBuilder[FromContextTask] = MappedInputOutputBuilder(Focus[FromContextTask](_.mapped))
 
+  case class TaskInfo(
+    config:                    InputOutputConfig,
+    mapped:                    MappedInputOutputConfig,
+    info:                      InfoConfig)
+
+  case class BuildParameters(
+    taskExecutionBuildContext: TaskExecutionBuildContext,
+    taskInfo: TaskInfo):
+    export taskInfo.*
+
   case class Parameters(
     context:          Context,
     executionContext: TaskExecutionContext,
-    io:               InputOutputConfig,
-    mapped:           MappedInputOutputConfig)(
+    taskInfo: TaskInfo)(
     implicit
     val preference:  Preference,
     val random:      RandomProvider,
     val newFile:     TmpDirectory,
-    val fileService: FileService
-  )
+    val fileService: FileService):
+    export taskInfo.*
 
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
@@ -35,14 +43,22 @@ object FromContextTask:
    * @param fromContext
    * @return
    */
-  def apply(className: String)(fromContext: Parameters => Context)(using sourcecode.Name, DefinitionScope): FromContextTask =
+  inline def apply(className: String)(inline fromContext: Parameters => Context)(using sourcecode.Name, DefinitionScope): FromContextTask =
+    build(className): bp =>
+      fromContext
+
+  inline def build(className: String)(inline fromContext: BuildParameters => Parameters => Context)(using sourcecode.Name, DefinitionScope): FromContextTask =
     new FromContextTask(
       fromContext,
       className = className,
       config = InputOutputConfig(),
       mapped = MappedInputOutputConfig(),
-      info = InfoConfig()
+      info = InfoConfig(),
+      v = _ => Validate.success
     )
+
+  inline def execution(f: Parameters => Context) = f
+
 
 
 /**
@@ -55,20 +71,24 @@ object FromContextTask:
  * @param info
  */
 case class FromContextTask(
-  f:                      FromContextTask.Parameters => Context,
-  v:                      Validate                             = Validate.success,
+  fromContext:            FromContextTask.BuildParameters => FromContextTask.Parameters => Context,
+  v:                      FromContextTask.TaskInfo => Validate,
   override val className: String,
   config:                 InputOutputConfig,
   mapped:                 MappedInputOutputConfig,
   info:                   InfoConfig
 ) extends Task with ValidateTask:
 
-  override def validate = v
+  override def validate: Validate =
+    val taskInfo = FromContextTask.TaskInfo(config, mapped, info)
+    v(taskInfo)
 
   override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    val taskInfo = FromContextTask.TaskInfo(config, mapped, info)
+    val execution = fromContext(FromContextTask.BuildParameters(taskExecutionBuildContext, taskInfo))
     TaskExecution: p =>
-      val tp = FromContextTask.Parameters(p.context, p.executionContext, config, mapped)(p.executionContext.preference, p.random, p.tmpDirectory, p.fileService)
-      f(tp)
+      val tp = FromContextTask.Parameters(p.context, p.executionContext, taskInfo)(p.executionContext.preference, p.random, p.tmpDirectory, p.fileService)
+      execution(tp)
 
-
-  def withValidate(validate: Validate) = copy(v = v ++ validate)
+  def withValidate(validate: Validate): FromContextTask = copy(v = info => v(info) ++ validate)
+  def withValidate(validate: FromContextTask.TaskInfo => Validate): FromContextTask = copy(v = info => v(info) ++ validate(info))

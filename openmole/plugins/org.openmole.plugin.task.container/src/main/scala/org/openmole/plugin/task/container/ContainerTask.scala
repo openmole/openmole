@@ -41,11 +41,9 @@ import java.io.PrintStream
 import java.util.UUID
 
 object ContainerTask:
-
   given InputOutputBuilder[ContainerTask] = InputOutputBuilder(Focus[ContainerTask](_.config))
   given ExternalBuilder[ContainerTask] = ExternalBuilder(Focus[ContainerTask](_.external))
   given InfoBuilder[ContainerTask] = InfoBuilder(Focus[ContainerTask](_.info))
-
 
   val RegistryTimeout = PreferenceLocation("ContainerTask", "RegistryTimeout", Some(1 minutes))
   val RegistryRetryOnError = PreferenceLocation("ContainerTask", "RegistryRetryOnError", Some(5))
@@ -59,7 +57,6 @@ object ContainerTask:
     implicit def fromString(f: String): Commands = Commands(Vector(f))
     implicit def seqOfString(f: Seq[String]): Commands = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
     implicit def seqOfFromContext(f: Seq[FromContext[String]]): Commands = Commands(f.toVector)
-
 
 
   def apply(
@@ -328,7 +325,7 @@ object ContainerTask:
       ).set(
         outputs ++= Seq(returnValue, stdOut, stdErr).flatten
       )
-      
+
     task.execution(taskExecutionBuildContext)
 
 

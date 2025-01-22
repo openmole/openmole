@@ -188,61 +188,76 @@ package object systemexec {
     displayError:         Boolean                  = true,
     stdOut:               PrintStream              = System.out,
     stdErr:               PrintStream              = System.err
-  ) = {
-    try {
+  ) =
+  try
+    val outBuilder = new StringOutputStream
+    val errBuilder = new StringOutputStream
 
-      val outBuilder = new StringOutputStream
-      val errBuilder = new StringOutputStream
+    val out: PrintStream =
+      (displayOutput, captureOutput) match
+        case (true, false)  ⇒ stdOut
+        case (false, true)  ⇒ new PrintStream(outBuilder)
+        case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(outBuilder, stdOut))
+        case (false, false) ⇒ new PrintStream(new NullOutputStream)
 
-      val out: PrintStream =
-        (displayOutput, captureOutput) match {
-          case (true, false)  ⇒ stdOut
-          case (false, true)  ⇒ new PrintStream(outBuilder)
-          case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(outBuilder, stdOut))
-          case (false, false) ⇒ new PrintStream(new NullOutputStream)
-        }
+    val err =
+      (displayError, captureError) match
+        case (true, false)  ⇒ stdErr
+        case (false, true)  ⇒ new PrintStream(errBuilder)
+        case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(errBuilder, stdErr))
+        case (false, false) ⇒ new PrintStream(new NullOutputStream)
 
-      val err =
-        (displayError, captureError) match {
-          case (true, false)  ⇒ stdErr
-          case (false, true)  ⇒ new PrintStream(errBuilder)
-          case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(errBuilder, stdErr))
-          case (false, false) ⇒ new PrintStream(new NullOutputStream)
-        }
+    val runtime = Runtime.getRuntime
 
-      val runtime = Runtime.getRuntime
+    import scala.jdk.CollectionConverters._
+    val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
 
-      import scala.jdk.CollectionConverters._
-      val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
+    val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
 
-      val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
+    //FIXES java.io.IOException: error=26
+    val process = runtime.synchronized:
+      runtime.exec(
+        command,
+        inheritedEnvironment ++ openmoleEnvironment,
+        workDir
+      )
 
-      //FIXES java.io.IOException: error=26
-      val process = runtime.synchronized {
-        runtime.exec(
-          command,
-          inheritedEnvironment ++ openmoleEnvironment,
-          workDir
-        )
-      }
+    // debugging - please do not remove
+    //println("Running command:\n" + command.toList) //+ "\n" + inheritedEnvironment.mkString("\n") + "\n" + openmoleEnvironment.mkString("\n"))
 
-      // debugging - please do not remove
-      //println("Running command:\n" + command.toList) //+ "\n" + inheritedEnvironment.mkString("\n") + "\n" + openmoleEnvironment.mkString("\n"))
+    val returnCode = executeProcess(process, out, err)
 
-      val returnCode = executeProcess(process, out, err)
+    val result =
+      ExecutionResult(
+        returnCode,
+        if (captureOutput) Some(outBuilder.toString) else None,
+        if (captureError) Some(errBuilder.toString) else None
+      )
 
-      val result =
-        ExecutionResult(
-          returnCode,
-          if (captureOutput) Some(outBuilder.toString) else None,
-          if (captureError) Some(errBuilder.toString) else None
-        )
+    if (errorOnReturnValue && result.returnCode != 0) throw error(command.toVector, result)
+    result
+  catch
+    case e: IOException ⇒
+      import org.openmole.tool.file.*
+      def directoryContentInformation(directory: File, margin: String = "  ") =
+        def fileInformation(file: File) =
+          def permissions =
+            val w = if (file.canWrite) "w" else ""
+            val r = if (file.canRead) "r" else ""
+            val x = if (file.canExecute) "x" else ""
+            s"$r$w$x"
 
-      if (errorOnReturnValue && result.returnCode != 0) throw error(command.toVector, result)
-      result
-    }
-    catch {
-      case e: IOException ⇒ throw new InternalProcessingError(
+          def fileType =
+            if (file.isDirectory) "directory"
+            else if (file.isSymbolicLink) "link"
+            else if (file.isFile) "file"
+            else "unknown"
+
+          s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
+
+        directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
+
+      throw new InternalProcessingError(
         e,
         s"""Error executing: ${command.mkString(" ")}
 
@@ -250,8 +265,8 @@ package object systemexec {
             |${directoryContentInformation(workDir)}
           """.stripMargin
       )
-    }
-  }
+
+
 
   /**
    * Throw an error for a command and its result

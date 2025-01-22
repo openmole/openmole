@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task
+package org.openmole.plugin.task.external
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
@@ -25,89 +25,64 @@ import org.openmole.core.tools.service.OS
 import org.openmole.core.context.Val
 import org.openmole.core.setter.{InputOutputBuilder, Setter}
 
-package external:
+object InputFilesKeyword:
+  object InputFilesSetter:
+    given [T: {ExternalBuilder as eb, InputOutputBuilder}]: Setter[InputFilesSetter, T] = setter =>
+      eb.inputFiles add External.InputFile(setter.p, setter.name, setter.link) andThen (inputs += setter.p)
 
-  trait ExternalPackage:
+  case class InputFilesSetter(p: Val[File], name: FromContext[String], link: Boolean)
 
-    object InputFilesKeyword:
-      object InputFilesSetter:
-        given [T: ExternalBuilder: InputOutputBuilder]: Setter[InputFilesSetter, T] = setter =>
-          implicitly[ExternalBuilder[T]].inputFiles add External.InputFile(setter.p, setter.name, setter.link) andThen (inputs += setter.p)
+class InputFilesKeyword:
+  /**
+   * Copy a file or directory from the dataflow to the task workspace
+   */
+  def +=(p: Val[File], name: FromContext[String], link: Boolean = false) = InputFilesKeyword.InputFilesSetter(p, name, link = link)
 
-      case class InputFilesSetter(p: Val[File], name: FromContext[String], link: Boolean)
+lazy val inputFiles = new InputFilesKeyword
 
-    class InputFilesKeyword:
-      /**
-       * Copy a file or directory from the dataflow to the task workspace
-       */
-      def +=(p: Val[File], name: FromContext[String], link: Boolean = false) = InputFilesKeyword.InputFilesSetter(p, name, link = link)
+object OutputFilesKeyword:
+  object OutputFilesSetter:
+    given [T: {ExternalBuilder as eb, InputOutputBuilder}]: Setter[OutputFilesSetter, T] = setter =>
+      (eb.outputFiles add External.OutputFile(setter.name, setter.p)) andThen (outputs += setter.p)
 
-    lazy val inputFiles = new InputFilesKeyword
+  case class OutputFilesSetter(name: FromContext[String], p: Val[File])
 
-    object OutputFilesKeyword:
-      object OutputFilesSetter:
-        given [T: ExternalBuilder: InputOutputBuilder]: Setter[OutputFilesSetter, T] = setter =>
-          (implicitly[ExternalBuilder[T]].outputFiles add External.OutputFile(setter.name, setter.p)) andThen (outputs += setter.p)
+class OutputFilesKeyword:
+  /**
+   * Get a file generate by the task and inject it in the dataflow
+   *
+   */
+  def +=(name: FromContext[String], p: Val[File]) = OutputFilesKeyword.OutputFilesSetter(name, p)
 
-      case class OutputFilesSetter(name: FromContext[String], p: Val[File])
+lazy val outputFiles = new OutputFilesKeyword
 
-    class OutputFilesKeyword:
-      /**
-       * Get a file generate by the task and inject it in the dataflow
-       *
-       */
-      def +=(name: FromContext[String], p: Val[File]) = OutputFilesKeyword.OutputFilesSetter(name, p)
+object ResourcesKeyword:
+  object ResourceSetter:
+    given [T: ExternalBuilder as eb]: Setter[ResourceSetter, T] = setter =>
+      def resource = External.Resource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
+      if setter.head
+      then eb.resources add (resource, head = true)
+      else eb.resources add resource
 
-    lazy val outputFiles = new OutputFilesKeyword
-
-    object ResourcesKeyword:
-      object ResourceSetter:
-        given [T: ExternalBuilder]: Setter[ResourceSetter, T] = setter =>
-          def resource = External.Resource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
-          if setter.head
-          then implicitly[ExternalBuilder[T]].resources add (resource, head = true)
-          else implicitly[ExternalBuilder[T]].resources add resource
-
-      case class ResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean)
+  case class ResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean)
 
 
-    class ResourcesKeyword:
-      /**
-       * Copy a file from your computer in the workspace of the task
-       */
-      def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os, head = head)
+class ResourcesKeyword:
+  /**
+   * Copy a file from your computer in the workspace of the task
+   */
+  def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os, head = head)
 
-    lazy val resources = new ResourcesKeyword
+lazy val resources = new ResourcesKeyword
 
 
-package object external extends ExternalPackage:
+object EnvironmentVariable:
+  implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
+    EnvironmentVariable(toFromContextN.convert(tuple._1), toFromContextV.convert(tuple._2))
 
-  object EnvironmentVariable:
-    implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
-      EnvironmentVariable(toFromContextN.convert(tuple._1), toFromContextV.convert(tuple._2))
+case class EnvironmentVariable(name: FromContext[String], value: FromContext[String])
 
-  case class EnvironmentVariable(name: FromContext[String], value: FromContext[String])
+trait EnvironmentVariables[T]:
+  def environmentVariables: monocle.Lens[T, Vector[EnvironmentVariable]]
 
-  trait EnvironmentVariables[T]:
-    def environmentVariables: monocle.Lens[T, Vector[EnvironmentVariable]]
-
-  import org.openmole.tool.file._
-
-  def directoryContentInformation(directory: File, margin: String = "  ") =
-    def fileInformation(file: File) =
-      def permissions =
-        val w = if (file.canWrite) "w" else ""
-        val r = if (file.canRead) "r" else ""
-        val x = if (file.canExecute) "x" else ""
-        s"$r$w$x"
-
-      def fileType =
-        if (file.isDirectory) "directory"
-        else if (file.isSymbolicLink) "link"
-        else if (file.isFile) "file"
-        else "unknown"
-
-      s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
-
-    directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
 

@@ -47,9 +47,9 @@ object ExplorationTask:
     def sampling() = isSampling(s)
     build(sampling)
 
-  inline def build(inline sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  inline def build(inline sampling: () => Sampling)(using sourcecode.Name, DefinitionScope) =
     FromContextTask("ExplorationTask") { p =>
-      import p._
+      import p.*
 
       val variablesValues =
         val sValue = sampling()

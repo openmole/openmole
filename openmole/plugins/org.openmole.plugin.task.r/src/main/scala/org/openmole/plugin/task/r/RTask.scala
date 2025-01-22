@@ -1,37 +1,16 @@
 package org.openmole.plugin.task.r
 
-import monocle.Focus
-import org.openmole.core.context.{Namespace, Val}
-import org.openmole.core.dsl._
-import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.core.argument.{OptionalArgument, *}
-import org.openmole.core.fileservice._
-import org.openmole.core.networkservice._
-import org.openmole.core.preference._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.threadprovider._
-import org.openmole.core.setter._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation._
-import org.openmole.core.workspace._
 import org.openmole.plugin.task.container
-import org.openmole.plugin.task.container.ContainerTask.install
-import org.openmole.plugin.task.container._
-import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.container.*
+import org.openmole.plugin.task.external.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.json.*
-import org.openmole.tool.outputredirection.OutputRedirection
-import org.openmole.core.dsl.extension._
 
-import org.json4s.jackson.JsonMethods._
-import org.json4s._
+import org.json4s.jackson.JsonMethods.*
+import org.json4s.*
 
 object RTask:
-
-  given InputOutputBuilder[RTask] = InputOutputBuilder(Focus[RTask](_.config))
-  given ExternalBuilder[RTask] = ExternalBuilder(Focus[RTask](_.external))
-  given InfoBuilder[RTask] = InfoBuilder(Focus[RTask](_.info))
-  given MappedInputOutputBuilder[RTask] = MappedInputOutputBuilder(Focus[RTask](_.mapped))
-
   case class RLibrary(name: String, version: Option[String] = None, dependencies: Boolean = false)
 
   object RLibrary:
@@ -69,7 +48,6 @@ object RTask:
         (if noVersionWithDep.nonEmpty then Seq(toCommandNoVersion(noVersionWithDep.map(_.name), true)) else Seq()) ++
         withVersion.map(RLibrary.toCommand)
 
-
   def rImage(image: String, version: String) = DockerImage(image, version)
 
   def apply(
@@ -86,127 +64,94 @@ object RTask:
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     clearContainerCache:        Boolean                            = false,
     containerSystem:            ContainerSystem                    = ContainerSystem.default
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): RTask =
+  )(using sourcecode.Name, DefinitionScope) =
+    ExternalTask.build("RTask"): buildParameters =>
+      import buildParameters.*
 
-    RTask(
-      script = script,
-      image = image,
-      install = install,
-      libraries = libraries,
-      containerSystem = containerSystem,
-      clearContainerCache = clearContainerCache,
-      prepare = prepare,
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      config = InputOutputConfig(),
-      external = External(),
-      info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
-    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
+      def workDirectory = "/_workdirectory_"
+      def inputArrayName = "generatedomarray"
+      def rScriptPath = s"$workDirectory/_generatedomscript_.R"
+      def inputJSONPath = s"$workDirectory/_generatedominputs_.json"
+      def outputJSONPath = s"$workDirectory/_generatedomoutputs_.json"
 
+      def installCommands = install ++ RTask.RLibrary.installCommands(libraries.toVector)
 
-case class RTask(
-  script:               RunnableScript,
-  image:                String,
-  install:              Seq[String],
-  libraries:            Seq[RTask.RLibrary],
-  containerSystem:      ContainerSystem,
-  clearContainerCache:  Boolean,
-  errorOnReturnValue:   Boolean,
-  prepare:              Seq[String],
-  returnValue:          Option[Val[Int]],
-  stdOut:               Option[Val[String]],
-  stdErr:               Option[Val[String]],
-  hostFiles:            Seq[HostFile],
-  environmentVariables: Seq[EnvironmentVariable],
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
+      val containerTaskExecution =
+        import taskExecutionBuildContext.*
 
-  override def validate = container.validateContainer(Vector(), environmentVariables, external)
+        ContainerTask.execution(
+          image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
+          command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
+          workDirectory = Some(workDirectory),
+          errorOnReturnValue = errorOnReturnValue,
+          returnValue = returnValue,
+          hostFiles = hostFiles,
+          environmentVariables = environmentVariables,
+          stdOut = stdOut,
+          stdErr = stdErr,
+          config = config,
+          external = external,
+          info = info)(taskExecutionBuildContext)
 
-  def apply(taskBuildContext: TaskExecutionBuildContext): TaskExecution =
-    def workDirectory = "/_workdirectory_"
-    def inputArrayName = "generatedomarray"
-    def rScriptPath = s"$workDirectory/_generatedomscript_.R"
-    def inputJSONPath = s"$workDirectory/_generatedominputs_.json"
-    def outputJSONPath = s"$workDirectory/_generatedomoutputs_.json"
+      ExternalTask.execution: executionParameters =>
+        import executionParameters.*
+        import Mapped.noFile
+        import org.json4s.jackson.JsonMethods.*
 
-    def installCommands = install ++ RTask.RLibrary.installCommands(libraries.toVector)
+        def writeInputsJSON(inputs: Vector[Mapped[?]], file: File) =
+          def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
 
-    val containerTaskExecution =
-      import taskBuildContext.*
+          file.content = compact(render(toJSONValue(values.toArray[Any])))
 
-      ContainerTask.execution(
-        image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
-        command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
-        workDirectory = Some(workDirectory),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = config,
-        external = external,
-        info = info)(taskBuildContext)
+        def rInputMapping(inputs: Vector[Mapped[?]], arrayName: String) =
+          inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
-    TaskExecution: p =>
-      import p.*
-      import Mapped.noFile
-      import org.json4s.jackson.JsonMethods.*
+        def rOutputMapping =
+          s"""list(${
+            noFile(mapped.outputs).map {
+              _.name
+            }.mkString(",")
+          })"""
 
-      def writeInputsJSON(inputs: Vector[ Mapped[?]], file: File) =
-        def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
-        file.content = compact(render(toJSONValue(values.toArray[Any])))
+        def readOutputJSON(file: File) =
+          import org.json4s._
+          import org.json4s.jackson.JsonMethods._
+          val outputValues = parse(file.content)
+          (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
 
-      def rInputMapping(inputs: Vector[ Mapped[?]], arrayName: String) =
-        inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+        val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
+        val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
 
-      def rOutputMapping =
-        s"""list(${noFile(mapped.outputs).map { _.name }.mkString(",")})"""
+        val valueMappedInputs = noFile(mapped.inputs)
+        writeInputsJSON(valueMappedInputs, jsonInputs)
 
-      def readOutputJSON(file: File) =
-        import org.json4s._
-        import org.json4s.jackson.JsonMethods._
-        val outputValues = parse(file.content)
-        (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+        scriptFile.content =
+          s"""
+             |library("jsonlite")
+             |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
+             |${rInputMapping(valueMappedInputs, inputArrayName)}
+             |${RunnableScript.content(script)}
+             |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
+          """.stripMargin
 
-      val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
-      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
+        val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
-      val valueMappedInputs = noFile(mapped.inputs)
-      writeInputsJSON(valueMappedInputs, jsonInputs)
+        def containerTask =
+          containerTaskExecution.set(
+            resources += (scriptFile, rScriptPath),
+            resources += (jsonInputs, inputJSONPath),
+            outputFiles += (outputJSONPath, outputFile),
+            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+          )
 
-      scriptFile.content = s"""
-        |library("jsonlite")
-        |$inputArrayName = fromJSON("$inputJSONPath", simplifyMatrix = FALSE)
-        |${rInputMapping(valueMappedInputs, inputArrayName)}
-        |${RunnableScript.content(script)}
-        |write_json($rOutputMapping, "$outputJSONPath", always_decimal = TRUE)
-        """.stripMargin
+        val resultContext =
+          try containerTask(executionContext).from(context)
+          catch
+            case t: UserBadDataError => throw UserBadDataError(s"Error executing script:\n${scriptFile.content}", t)
+            case t: Throwable => throw InternalProcessingError(s"Error executing script:\n${scriptFile.content}", t)
 
-      val outputFile = Val[File]("outputFile", Namespace("RTask"))
-
-      def containerTask =
-        containerTaskExecution.set (
-          resources += (scriptFile, rScriptPath),
-          resources += (jsonInputs, inputJSONPath),
-          outputFiles += (outputJSONPath, outputFile),
-          Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-          Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
-        )
-
-      val resultContext =
-        try containerTask(executionContext).from(context)
-        catch
-          case t: UserBadDataError => throw UserBadDataError(s"Error executing script:\n${scriptFile.content}", t)
-          case t: Throwable => throw InternalProcessingError(s"Error executing script:\n${scriptFile.content}", t)
-
-      resultContext ++ readOutputJSON(resultContext(outputFile))
-
+        resultContext ++ readOutputJSON(resultContext(outputFile))
+  .set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
+  .withValidate: info =>
+    container.validateContainer(Vector(), environmentVariables, info.external)
