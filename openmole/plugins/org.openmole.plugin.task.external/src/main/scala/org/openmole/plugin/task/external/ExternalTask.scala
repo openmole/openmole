@@ -60,18 +60,32 @@ object ExternalTask:
       fromContext
 
   inline def build(className: String)(inline fromContext: BuildParameters => Parameters => Context)(using sourcecode.Name, DefinitionScope): ExternalTask =
+    val buildFunction =
+      new BuildFunction:
+        override def apply(p: BuildParameters): ExecuteFunction =
+          val executeFunction = fromContext(p)
+          new ExecuteFunction:
+            override def apply(p: Parameters): Context = executeFunction(p)
+
     new ExternalTask(
-      fromContext,
-      className = className,
-      config = InputOutputConfig(),
-      mapped = MappedInputOutputConfig(),
-      info = InfoConfig(),
-      external = External(),
-      v = _ => Validate.success
-    )
+        buildFunction,
+        className = className,
+        config = InputOutputConfig(),
+        mapped = MappedInputOutputConfig(),
+        info = InfoConfig(),
+        external = External(),
+        v = _ => Validate.success
+      )
 
-  inline def execution(f: Parameters => Context) = f
+  inline def execution(inline f: Parameters => Context): Parameters => Context = f
 
+  // --- For XStream along with inline
+  trait ExecuteFunction:
+    def apply(p: Parameters): Context
+
+  trait BuildFunction:
+    def apply(p: BuildParameters): ExecuteFunction
+  // ---
 
 
 /**
@@ -84,7 +98,7 @@ object ExternalTask:
  * @param info
  */
 case class ExternalTask(
-  fromContext: ExternalTask.BuildParameters => ExternalTask.Parameters => Context,
+  fromContext: ExternalTask.BuildFunction,
   v: ExternalTask.TaskInfo => Validate,
   override val className: String,
   config: InputOutputConfig,

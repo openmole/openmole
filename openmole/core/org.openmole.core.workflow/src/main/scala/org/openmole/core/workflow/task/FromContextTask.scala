@@ -47,8 +47,15 @@ object FromContextTask:
       fromContext
 
   inline def build(className: String)(inline fromContext: BuildParameters => Parameters => Context)(using sourcecode.Name, DefinitionScope): FromContextTask =
+    val buildFunction =
+      new BuildFunction:
+        override def apply(p: BuildParameters): ExecuteFunction =
+          val executeFunction = fromContext(p)
+          new ExecuteFunction:
+            override def apply(p: Parameters): Context = executeFunction(p)
+
     new FromContextTask(
-      fromContext,
+      buildFunction,
       className = className,
       config = InputOutputConfig(),
       mapped = MappedInputOutputConfig(),
@@ -56,8 +63,15 @@ object FromContextTask:
       v = _ => Validate.success
     )
 
-  inline def execution(f: Parameters => Context) = f
+  inline def execution(inline f: Parameters => Context): Parameters => Context = f
 
+  // --- For XStream along with inline
+  trait ExecuteFunction:
+    def apply(p: Parameters): Context
+
+  trait BuildFunction:
+    def apply(p: BuildParameters): ExecuteFunction
+  // ---
 
 
 /**
@@ -70,7 +84,7 @@ object FromContextTask:
  * @param info
  */
 case class FromContextTask(
-  fromContext:            FromContextTask.BuildParameters => FromContextTask.Parameters => Context,
+  fromContext:            FromContextTask.BuildFunction,
   v:                      FromContextTask.TaskInfo => Validate,
   override val className: String,
   config:                 InputOutputConfig,

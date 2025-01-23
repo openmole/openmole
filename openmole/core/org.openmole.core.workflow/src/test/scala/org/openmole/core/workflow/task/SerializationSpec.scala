@@ -88,6 +88,7 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
     val exp = ExplorationTask(i in data)
     val t = EmptyTask() set (inputs += i)
+    
     val t2 = serializeDeserialize(exp -< t)
     t2.run().hangOn()
 

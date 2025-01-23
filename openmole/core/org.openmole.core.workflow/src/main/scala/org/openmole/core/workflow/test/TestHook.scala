@@ -23,9 +23,8 @@ import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.test.Stubs._
 import monocle.Focus
 
-object TestHook {
+object TestHook:
   implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(Focus[TestHook](_.config))
-}
 
 case class TestHook(
   f:      Context => Unit    = identity[Context],
