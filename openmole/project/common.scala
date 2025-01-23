@@ -35,7 +35,7 @@ object common {
   def catsEffectVersion = "3.3.14"
   def catsParseVersion = "0.3.9"
   def squantsVersion = "1.8.3"
-  def xstreamVersion = "1.4.20"
+  def xstreamVersion = "1.4.21"
   def scalaURIVersion = "1.1.1"
   def scoptVersion = "4.1.0"
   def spatialsamplingVersion = "0.3"
