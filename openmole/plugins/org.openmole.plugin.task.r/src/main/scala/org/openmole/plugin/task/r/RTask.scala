@@ -77,7 +77,7 @@ object RTask:
       def installCommands = install ++ RTask.RLibrary.installCommands(libraries.toVector)
 
       val containerTaskExecution =
-        import taskExecutionBuildContext.*
+        import taskExecutionBuildContext.given
         ContainerTask.execution(
           image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
           command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
@@ -153,4 +153,4 @@ object RTask:
         resultContext ++ readOutputJSON(resultContext(outputFile))
   .set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   .withValidate: info =>
-    container.validateContainer(Vector(), environmentVariables, info.external)
+    ContainerTask.validateContainer(Vector(), environmentVariables, info.external)

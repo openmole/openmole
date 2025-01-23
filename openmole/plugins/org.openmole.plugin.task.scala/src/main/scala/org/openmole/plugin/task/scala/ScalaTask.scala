@@ -129,7 +129,7 @@ case class ScalaTask(
 
   override def apply(taskBuildContext:  TaskExecutionBuildContext) =
     val pluginsValue =
-      import taskBuildContext.*
+      import taskBuildContext.given
       given KeyValueCache = taskBuildContext.cache
       plugins
 

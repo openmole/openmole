@@ -31,7 +31,7 @@ class Activator extends BundleActivator:
 
     val keyWords: Vector[HighLight] =
       Vector(
-        TaskHighLight(classOf[NetLogoContainerTask]),
+        TaskHighLight(objectName(NetLogoContainerTask)),
         TaskHighLight("NetLogoTask")
       )
 

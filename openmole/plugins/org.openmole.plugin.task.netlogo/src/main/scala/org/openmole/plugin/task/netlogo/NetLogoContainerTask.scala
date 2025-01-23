@@ -23,11 +23,6 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import scala.xml.*
 
 object NetLogoContainerTask:
-  given InputOutputBuilder[NetLogoContainerTask] = InputOutputBuilder(Focus[NetLogoContainerTask](_.config))
-  given ExternalBuilder[NetLogoContainerTask] = ExternalBuilder(Focus[NetLogoContainerTask](_.external))
-  given InfoBuilder[NetLogoContainerTask] = InfoBuilder(Focus[NetLogoContainerTask](_.info))
-  given MappedInputOutputBuilder[NetLogoContainerTask] = MappedInputOutputBuilder(Focus[NetLogoContainerTask](_.mapped))
-
   def workspace = "/_workspace_"
   def netLogoWorkspace = s"$workspace/_netlogo_"
 
@@ -57,138 +52,99 @@ object NetLogoContainerTask:
     hostFiles:              Seq[HostFile]                    = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, _workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): NetLogoContainerTask =
+    containerSystem:        ContainerSystem                  = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
 
-    val image:  ContainerImage                   = s"openmole/netlogo:${version}"
+    ExternalTask.build("NetLogoContainerTask"): buildParameters =>
+      import buildParameters.*
+      val image: ContainerImage = s"openmole/netlogo:${version}"
 
-    val volumesValue = volumes(script, embedWorkspace)
-    val preparedImage = ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
+      val volumesValue = volumes(script, embedWorkspace)
+      val preparedImage =
+        import taskExecutionBuildContext.given
+        ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
 
-    NetLogoContainerTask(
-      script = script,
-      go = go,
-      setup = setup,
-      embedWorkspace = embedWorkspace,
-      seed = seed,
-      switch3d = switch3d,
-      //steps = steps,
-      image = preparedImage,
-      memory = memory,
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      config = InputOutputConfig(),
-      external = External(),
-      info = InfoConfig(),
-      mapped = MappedInputOutputConfig()
-    ) set (
-        inputs ++= seed.option.toSeq,
-        outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
-      )
+      import NetLogoContainerTask.{workspace, netLogoWorkspace}
 
+      def inputFileName = s"$workspace/_inputs_openmole_.bin"
+      def outputFileName = s"$workspace/_outputs_openmole_.bin"
+      val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
+      def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
+      def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
+      def paramJVM = s"-XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
 
-case class NetLogoContainerTask(
-  script: File,
-  go: Seq[FromContext[String]],
-  setup: Seq[FromContext[String]],
-  embedWorkspace: Boolean,
-  seed: OptionalArgument[Val[Int]],
-  switch3d: Boolean,
-  image:                InstalledContainerImage,
-  memory:               Information,
-  errorOnReturnValue:   Boolean,
-  returnValue:          Option[Val[Int]],
-  stdOut:               Option[Val[String]],
-  stdErr:               Option[Val[String]],
-  hostFiles:            Seq[HostFile],
-  environmentVariables: Seq[EnvironmentVariable],
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig) extends Task with ValidateTask:
+      val taskExecution =
+        ContainerTask.execution(
+          image = preparedImage,
+          command = launchCommand,
+          workDirectory = Some(workspace),
+          relativePathRoot = Some(netLogoWorkspace),
+          errorOnReturnValue = errorOnReturnValue,
+          returnValue = returnValue,
+          hostFiles = hostFiles,
+          environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
+          stdOut = stdOut,
+          stdErr = stdErr,
+          config = config,
+          external = external,
+          info = info)(taskExecutionBuildContext)
 
-  override def validate = Validate: p ⇒
-    import p._
-    val allInputs = External.PWD :: p.inputs.toList
-    go.flatMap(_.validate(allInputs)) ++
-      External.validate(external)(allInputs) ++
-      AbstractNetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
+      ExternalTask.execution: p =>
+        import p.*
 
-  def apply(taskBuildContext: TaskExecutionBuildContext): TaskExecution =
-    import NetLogoContainerTask.{workspace, netLogoWorkspace}
+        val inputFile = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
+        val outputFileVal = Val[File]("outputFile", Namespace("NetLogoTask"))
 
-    def inputFileName = s"$workspace/_inputs_openmole_.bin"
-    def outputFileName = s"$workspace/_outputs_openmole_.bin"
-    val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
+        def createInputFile(inputFile: File) =
+          val model = s"$netLogoWorkspace/${script.getName}"
+          val inputs =
+            val inputMap = new java.util.TreeMap[String, Any]()
+            for
+              m <- Mapped.noFile(mapped.inputs)
+            do inputMap.put(m.name, AbstractNetLogoTask.netLogoCompatibleType(context(m.v)))
+            inputMap
+          val outputs: Array[String] = mapped.outputs.map(_.name).toArray[String]
+          val goValue: Array[String] = go.map(_.from(context)).toArray[String]
+          val setupValue: Array[String] = setup.map(_.from(context)).toArray[String]
+          val seedValue: java.util.Optional[java.lang.Integer] = java.util.Optional.ofNullable[java.lang.Integer](seed.map(_.from(context)).map(new java.lang.Integer(_)).orNull)
 
-    def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
-    def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
-    def paramJVM = s"-XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
+          val content = Array[AnyRef](model, inputs, outputs, setupValue, goValue, seedValue)
 
-    val taskExecution =
-      ContainerTask.execution(
-        image = image,
-        command = launchCommand,
-        workDirectory = Some(workspace),
-        relativePathRoot = Some(netLogoWorkspace),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = config,
-        external = external,
-        info = info)(taskBuildContext)
+          executionContext.serializerService.serialize(content, inputFile)
 
-    TaskExecution: p =>
-      import p.*
+        def readOutputData(file: File) =
+          val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
+          (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) ⇒
+            AbstractNetLogoTask.netLogoValueToVal(value, v)
 
-      val inputFile = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
-      val outputFileVal = Val[File]("outputFile", Namespace("NetLogoTask"))
+        createInputFile(inputFile)
 
-      def createInputFile(inputFile: File) =
-        val model = s"$netLogoWorkspace/${script.getName}"
-        val inputs =
-          val inputMap = new java.util.TreeMap[String, Any]()
-          for
-            m <- Mapped.noFile(mapped.inputs)
-          do inputMap.put(m.name, AbstractNetLogoTask.netLogoCompatibleType(context(m.v)))
-          inputMap
-        val outputs: Array[String] = mapped.outputs.map(_.name).toArray[String]
-        val goValue: Array[String] = go.map(_.from(context)).toArray[String]
-        val setupValue: Array[String] = setup.map(_.from(context)).toArray[String]
-        val seedValue: java.util.Optional[java.lang.Integer] = java.util.Optional.ofNullable[java.lang.Integer](seed.map(_.from(context)).map(new java.lang.Integer(_)).orNull)
+        val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
 
-        val content = Array[AnyRef](model, inputs, outputs, setupValue, goValue, seedValue)
+        def containerTask =
+          taskExecution.set (
+            resources += (inputFile, inputFileName, true),
+            volumes.map((lv, cv) => resources += (lv, cv, true)),
+            outputFiles += (outputFileName, outputFileVal),
+            Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
+            Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
+          )
 
-        executionContext.serializerService.serialize(content, inputFile)
+        val resultContext = containerTask(executionContext).from(context)
 
-      def readOutputData(file: File) =
-        val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
-        (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) ⇒
-          AbstractNetLogoTask.netLogoValueToVal(value, v)
+        def resultFile = resultContext(outputFileVal)
+        resultContext ++ readOutputData(resultFile)
 
-      createInputFile(inputFile)
-
-      val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
-
-      def containerTask =
-        taskExecution.set (
-          resources += (inputFile, inputFileName, true),
-          volumes.map((lv, cv) => resources += (lv, cv, true)),
-          outputFiles += (outputFileName, outputFileVal),
-          Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
-          Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))
-        )
-
-      val resultContext = containerTask(executionContext).from(context)
-
-      def resultFile = resultContext(outputFileVal)
-      resultContext ++ readOutputData(resultFile)
-
-
+    .withValidate: info =>
+      Validate: p ⇒
+        import p._
+        val allInputs = External.PWD :: p.inputs.toList
+        go.flatMap(_.validate(allInputs)) ++
+          External.validate(info.external)(allInputs) ++
+          AbstractNetLogoTask.validateNetLogoInputTypes(info.mapped.inputs.map(_.v))
+    .withValidate: info =>
+          ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
+    .set (
+      inputs ++= seed.option.toSeq,
+      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
+    )
 

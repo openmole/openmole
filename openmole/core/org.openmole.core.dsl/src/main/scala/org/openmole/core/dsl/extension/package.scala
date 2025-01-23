@@ -148,5 +148,6 @@ package object extension:
   export org.openmole.core.authentication.AuthenticationStore
 
 
+  export org.openmole.core.preference.PreferenceLocation
 
 

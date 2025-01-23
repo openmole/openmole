@@ -189,7 +189,7 @@ case class TaskExecutionContext(
 
 case class TaskExecutionBuildContext(
   cache: KeyValueCache)(
-  implicit
+  using
   val tmpDirectory: TmpDirectory,
   val fileService: FileService,
   val workspace: Workspace,

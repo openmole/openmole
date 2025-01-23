@@ -87,22 +87,6 @@ def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, cont
 
   resolveFile(absolutePathInArchive) getOrElse (rootDirectory / absolutePathInArchive.getPath)
 
-
-def validateContainer(
-  commands:             Seq[FromContext[String]],
-  environmentVariables: Seq[EnvironmentVariable],
-  external:             External
-): Validate = Validate: p ⇒
-  import p._
-
-  val allInputs = External.PWD :: p.inputs.toList
-  val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
-
-  commands.flatMap(_.validate(allInputs)) ++
-    validateVariables ++
-    External.validate(external)(allInputs)
-
-
 def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find specified Archive $archive in your work directory. Did you prefix the path with `workDirectory / `?"))
 
 lazy val ArchiveOK = Seq.empty[UserBadDataError]

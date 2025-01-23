@@ -21,11 +21,6 @@ import scala.reflect.ClassTag
 
 object ScilabTask:
 
-  given InputOutputBuilder[ScilabTask] = InputOutputBuilder(Focus[ScilabTask](_.config))
-  given ExternalBuilder[ScilabTask] = ExternalBuilder(Focus[ScilabTask](_.external))
-  given InfoBuilder[ScilabTask] = InfoBuilder(Focus[ScilabTask](_.info))
-  given MappedInputOutputBuilder[ScilabTask] = MappedInputOutputBuilder(Focus[ScilabTask](_.mapped))
-
   def scilabImage(version: String) = DockerImage("openmole/scilab", version)
 
   def apply(
@@ -39,27 +34,79 @@ object ScilabTask:
     stdErr:                 OptionalArgument[Val[String]] = None,
     environmentVariables:   Seq[EnvironmentVariable]      = Vector.empty,
     hostFiles:              Seq[HostFile]                 = Vector.empty,
-    containerSystem:        ContainerSystem               = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService): ScilabTask = {
+    containerSystem:        ContainerSystem               = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
 
-    ScilabTask(
-      script = script,
-      image = ContainerTask.install(containerSystem, scilabImage(version), install),
-      prepare = prepare,
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      config = InputOutputConfig(),
-      external = External(),
-      info = InfoConfig(),
-      mapped = MappedInputOutputConfig(),
-      version = version
-    ) set (
-      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
-    )
-  }
+    ExternalTask.build("ScilabTask"): buildParameters =>
+      import buildParameters.*
+
+      val image =
+        import taskExecutionBuildContext.given
+        ContainerTask.install(containerSystem, scilabImage(version), install)
+
+      def workDirectory = "/_workdirectory_"
+
+      def scriptName = s"$workDirectory/openmolescript.sci"
+
+      def majorVersion = version.takeWhile(_ != '.').toInt
+
+      def launchCommand =
+        if majorVersion >= 6
+        then s"""scilab-cli -nwni -nb -quit -f $scriptName"""
+        else s"""scilab-cli -nb -f $scriptName"""
+
+      val taskExecution =
+        ContainerTask.execution(
+          image = image,
+          command = prepare ++ Seq(launchCommand),
+          workDirectory = Some(workDirectory),
+          errorOnReturnValue = errorOnReturnValue,
+          returnValue = returnValue,
+          hostFiles = hostFiles,
+          environmentVariables = environmentVariables,
+          stdOut = stdOut,
+          stdErr = stdErr,
+          config = config,
+          external = external,
+          info = info)(taskExecutionBuildContext)
+
+      ExternalTask.execution: p =>
+
+        import p.*
+
+        val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sci")
+
+        def scilabInputMapping =
+          mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
+
+        def outputFileName(v: Val[?]) = s"$workDirectory/${v.name}.openmole"
+
+        def outputValName(v: Val[?]) = v.withName(v.name + "File").withType[File]
+
+        def scilabOutputMapping =
+          (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
+
+        scriptFile.content =
+          s"""
+             |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
+             |$scilabInputMapping
+             |${RunnableScript.content(script)}
+             |${scilabOutputMapping}
+             |quit
+            """.stripMargin
+
+        def containerTask =
+          taskExecution.set(
+            resources += (scriptFile, scriptName, true),
+            mapped.outputs.map(m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)))
+          )
+
+        val resultContext = containerTask(executionContext).from(context)
+        resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
+
+  .set(outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
+  .withValidate: info =>
+    ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
+
 
   /**
    * transpose and stringify a multidimensional array
@@ -155,80 +202,5 @@ object ScilabTask:
     catch
       case t: Throwable ⇒
         throw new InternalProcessingError(s"Error parsing scilab value $s to OpenMOLE variable $v", t)
-
-
-
-case class ScilabTask(
-  script:               RunnableScript,
-  image:                InstalledContainerImage,
-  errorOnReturnValue:   Boolean,
-  prepare:              Seq[String],
-  returnValue:          Option[Val[Int]],
-  stdOut:               Option[Val[String]],
-  stdErr:               Option[Val[String]],
-  hostFiles:            Seq[HostFile],
-  environmentVariables: Seq[EnvironmentVariable],
-  config:               InputOutputConfig,
-  external:             External,
-  info:                 InfoConfig,
-  mapped:               MappedInputOutputConfig,
-  version:              String) extends Task with ValidateTask:
-
-  override def validate = container.validateContainer(Vector(), environmentVariables, external)
-
-  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
-    def workDirectory = "/_workdirectory_"
-    def scriptName = s"$workDirectory/openmolescript.sci"
-    def majorVersion = version.takeWhile(_ != '.').toInt
-    def launchCommand =
-      if majorVersion >= 6
-      then s"""scilab-cli -nwni -nb -quit -f $scriptName"""
-      else s"""scilab-cli -nb -f $scriptName"""
-
-    val taskExecution =
-      ContainerTask.execution(
-        image = image,
-        command = prepare ++ Seq(launchCommand),
-        workDirectory = Some(workDirectory),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = config,
-        external = external,
-        info = info)(taskExecutionBuildContext)
-
-    TaskExecution: p =>
-      import p.*
-
-      val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sci")
-
-      def scilabInputMapping =
-        mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
-
-      def outputFileName(v: Val[?]) = s"$workDirectory/${v.name}.openmole"
-      def outputValName(v: Val[?]) = v.withName(v.name + "File").withType[File]
-      def scilabOutputMapping =
-        (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
-
-      scriptFile.content =
-        s"""
-          |${if (majorVersion < 6) """errcatch(-1,"stop")""" else ""}
-          |$scilabInputMapping
-          |${RunnableScript.content(script)}
-          |${scilabOutputMapping}
-          |quit
-        """.stripMargin
-
-      def containerTask =
-        taskExecution.set (
-          resources += (scriptFile, scriptName, true),
-          mapped.outputs.map(m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)))
-        )
-
-      val resultContext = containerTask(executionContext).from(context)
-      resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
 
 

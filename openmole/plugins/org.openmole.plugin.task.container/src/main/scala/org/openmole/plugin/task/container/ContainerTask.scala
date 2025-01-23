@@ -20,16 +20,6 @@ package org.openmole.plugin.task.container
 import monocle.Focus
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
-import org.openmole.core.networkservice.NetworkService
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.preference.{Preference, PreferenceLocation}
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.setter.{DefinitionScope, InfoBuilder, InfoConfig, InputOutputBuilder, InputOutputConfig}
-import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.workflow.task.{Task, TaskExecutionContext}
-import org.openmole.core.workflow.validation.ValidateTask
-import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.plugin.task.external.*
 import org.openmole.tool.cache.*
 import org.openmole.tool.hash.hashString
@@ -520,6 +510,20 @@ object ContainerTask:
         returnValue.map(v ⇒ Variable(v, retCode)) ++
         stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
         stdErr.map(v ⇒ Variable(v, errBuilder.toString))
+
+  def validateContainer(
+    commands: Seq[FromContext[String]],
+    environmentVariables: Seq[EnvironmentVariable],
+    external: External): Validate = 
+    Validate: p =>
+      import p.*
+  
+      val allInputs = External.PWD :: p.inputs.toList
+      val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
+  
+      commands.flatMap(_.validate(allInputs)) ++
+        validateVariables ++
+        External.validate(external)(allInputs)
 
 
 import org.openmole.plugin.task.container.ContainerTask.*

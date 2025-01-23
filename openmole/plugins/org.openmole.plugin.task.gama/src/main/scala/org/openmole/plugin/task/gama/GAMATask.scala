@@ -194,7 +194,7 @@ object GAMATask:
           case (Some(_), _: SavedDockerImage) => throw new UserBadDataError(s"Can not set both, a saved docker image, and, set the version of the container.")
 
       val (preparedImage, inputXML) =
-        import taskExecutionBuildContext.*
+        import taskExecutionBuildContext.given
         prepare(project, gaml, experiment, install, containerSystem, gamaContainerImage, clearCache = clearContainerCache)
 
       checkXML(inputXML, experiment, frameRate.option, mapped) match
@@ -336,7 +336,7 @@ object GAMATask:
 
             throw parseOutputError(t)
     .withValidate: info =>
-      container.validateContainer(Vector(), environmentVariables, info.external) ++ finalStep.validate
+      ContainerTask.validateContainer(Vector(), environmentVariables, info.external) ++ finalStep.validate
     .set(
       inputs ++= seed.option.toSeq,
       outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten

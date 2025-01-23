@@ -26,11 +26,6 @@ import org.openmole.plugin.task.container
  */
 object JuliaTask:
 
-  given InputOutputBuilder[JuliaTask] = InputOutputBuilder(Focus[JuliaTask](_.config))
-  given ExternalBuilder[JuliaTask] = ExternalBuilder(Focus[JuliaTask](_.external))
-  given InfoBuilder[JuliaTask] = InfoBuilder(Focus[JuliaTask](_.info))
-  given MappedInputOutputBuilder[JuliaTask] = MappedInputOutputBuilder(Focus[JuliaTask](_.mapped))
-
   object Library:
     given Conversion[String, Library] = s => LibraryName(s)
     given Conversion[File, Library] = f => FileLibrary(f)
@@ -77,48 +72,18 @@ object JuliaTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        ContainerSystem                    = ContainerSystem.default,
-    clearCache:             Boolean                            = false)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
+    clearCache:             Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
-  new JuliaTask(
-    script = script,
-    arguments = arguments.option,
-    image = ContainerTask.install(containerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache),
-    prepare = prepare,
-    errorOnReturnValue = errorOnReturnValue,
-    returnValue = returnValue,
-    stdOut = stdOut,
-    stdErr = stdErr,
-    hostFiles = hostFiles,
-    environmentVariables = environmentVariables,
-    config = InputOutputConfig(),
-    external = External(),
-    info = InfoConfig(),
-    mapped = MappedInputOutputConfig()
-    ) set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
+  ExternalTask.build("JuliaTask"): buildParameters =>
+    import buildParameters.*
 
+    val image =
+      import taskExecutionBuildContext.given
+      ContainerTask.install(containerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache)
 
-
-case class JuliaTask(
-  script:                 RunnableScript,
-  image:                  InstalledContainerImage,
-  arguments:              Option[String],
-  prepare:                Seq[String],
-  errorOnReturnValue:     Boolean,
-  returnValue:            Option[Val[Int]],
-  stdOut:                 Option[Val[String]],
-  stdErr:                 Option[Val[String]],
-  hostFiles:              Seq[HostFile],
-  environmentVariables:   Seq[EnvironmentVariable],
-  config:                 InputOutputConfig,
-  external:               External,
-  info:                   InfoConfig,
-  mapped:                 MappedInputOutputConfig) extends Task with ValidateTask:
-
-  override def validate = container.validateContainer(Vector(), environmentVariables, external)
-
-  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     def workDirectory = "/_workdirectory_"
     def scriptName = s"$workDirectory/_generatescript_.jl"
+
     val argumentsValue = arguments.map(" " + _).getOrElse("")
 
     val taskExecution =
@@ -136,14 +101,15 @@ case class JuliaTask(
         external = external,
         info = info)(taskExecutionBuildContext)
 
-    TaskExecution: p =>
+    ExternalTask.execution: p =>
       import org.json4s.jackson.JsonMethods._
       import p._
       import Mapped.noFile
 
       def writeInputsJSON(file: File): Unit =
-        def values = noFile(mapped.inputs).map { m => (m.name,p.context(m.v)) }
-        file.content = "{" + values.map{ (name,value) => "\""+name+"\": "+compact(render(toJSONValue(value)))}.mkString(",") + "}"
+        def values = noFile(mapped.inputs).map { m => (m.name, p.context(m.v)) }
+
+        file.content = "{" + values.map { (name, value) => "\"" + name + "\": " + compact(render(toJSONValue(value))) }.mkString(",") + "}"
 
       def readOutputJSON(file: File) =
         import org.json4s._
@@ -165,7 +131,9 @@ case class JuliaTask(
 
       val resultContext: Context =
         def inputArrayName = "_generateddata_"
+
         def inputJSONName = s"$workDirectory/_inputs_.json"
+
         def outputJSONName = s"$workDirectory/_outputs_.json"
 
         writeInputsJSON(jsonInputs)
@@ -177,14 +145,14 @@ case class JuliaTask(
              |${inputMapping(inputArrayName)}
              |${RunnableScript.content(script)}
              |write(open("$outputJSONName","w"), JSON.json($outputMapping))
-            """.stripMargin
+               """.stripMargin
 
         scriptFile.content = scriptContent
 
         val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
 
         def containerTask =
-          taskExecution.set (
+          taskExecution.set(
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
@@ -200,8 +168,6 @@ case class JuliaTask(
         resultContext ++ readOutputJSON(resultContext(outputFile))
 
       resultContext
-
-
-
-
-
+  .set(outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
+  .withValidate: info =>
+    ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
