@@ -55,7 +55,7 @@ object JavaTask:
     clearContainerCache: Boolean = false,
     jvmOptions: Seq[String] = Seq.empty,
     fewerThreads: Boolean = true,
-    version: String = "21.1",
+    version: String = "21.2",
     jvmVersion: String = "21",
     containerSystem: ContainerSystem = ContainerSystem.default)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, newFile: TmpDirectory, workspace: Workspace, preference: Preference, fileService: FileService, threadProvider: ThreadProvider, outputRedirection: OutputRedirection, networkService: NetworkService, serializerService: SerializerService) =
 
