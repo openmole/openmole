@@ -114,6 +114,8 @@ lazy val fury = OsgiProject(
   global = true) settings(
   settings,
   libraryDependencies ++= Seq("org.apache.fury" % "fury-core" % furyVersion),
+  libraryDependencies ++= Seq("org.apache.fury" %% "fury-scala" % furyVersion),
+
   libraryDependencies += "de.unkrig.jdisasm" % "jdisasm" % "1.0.6",
   version := furyVersion) dependsOn(guava)
 

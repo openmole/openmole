@@ -47,10 +47,9 @@ object Replication:
 
   case class MetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
-
   case class Method(seed: Val[?], sample: Int, aggregation: Seq[Aggregation])
 
-  implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
+  given method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
     implicit def defScope: DefinitionScope = r.scope
 
     val aggregateTask: OptionalArgument[DSL] =

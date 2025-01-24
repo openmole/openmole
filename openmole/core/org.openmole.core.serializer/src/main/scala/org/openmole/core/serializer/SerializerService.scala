@@ -135,6 +135,8 @@ class SerializerService:
 
 
   def buildFury() =
+    import org.apache.fury.serializer.scala.ScalaSerializers
+
     class FileWithGCGerializer(fury: Fury) extends Serializer(fury, classOf[File]):
       lazy val fileSerializer = fury.getClassResolver.getSerializer(classOf[File])
       override def write(buffer: MemoryBuffer, value: File): Unit = fileSerializer.write(buffer, new File(value.asInstanceOf[FileWithGC].getPath))
@@ -142,12 +144,14 @@ class SerializerService:
 
     val fury =
       Fury.builder().withLanguage(Language.JAVA)
-        .withScalaOptimizationEnabled(true)
+        //.withScalaOptimizationEnabled(true)
         .requireClassRegistration(false)
         .withClassLoader(SerializerService.getClass.getClassLoader)
         .withRefTracking(true)
         .suppressClassRegistrationWarnings(true)
         .build()
+
+    //ScalaSerializers.registerSerializers(fury)
     fury.registerSerializer(classOf[FileWithGC], new FileWithGCGerializer(fury))
 
     fury
