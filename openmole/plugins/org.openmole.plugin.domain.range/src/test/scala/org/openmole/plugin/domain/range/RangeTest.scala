@@ -22,28 +22,22 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.sampling.ScalableValue
 import org.scalatest.*
 
-class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class RangeTest extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
 
-  "sizes of computed values" should "be correct" in {
+  "sizes of computed values" should "be correct" in:
     RangeDomain(0.0, 10.0, 0.1).iterator(Context()).size shouldBe 101
     RangeDomain(0, 10, 1).iterator(Context()).size shouldBe 11
     LogRangeDomain(0.0, 10.0, 10).iterator(Context()).size shouldBe 10
-  }
 
-  "ranges using val" should "compile" in {
+  "ranges using val" should "compile" in:
     val i = Val[Int]
-    RangeDomain(0, i, 1)
-  }
+    val rd = RangeDomain(0, i, 1)
+    rd.iterator.from(Context(i -> 2)).size shouldEqual 3
 
-  "ranges using to in scala" should "be range domains" in {
-    val r1: RangeDomain[Double] = 0.0 to 1.0
-    val r2: RangeDomain[Int] = 0 to 10
-    val r3: RangeDomain[Double] = 0 to 10
+    val rd2 = RangeDomain[Double](0, "i * 2", 1)
+    rd2.iterator.from(Context(i -> 2)).size shouldEqual 5
 
-    val i = Val[Double]
-    val scalar: ScalableValue = i in (0.0 to 1.0)
-  }
 
-}
+

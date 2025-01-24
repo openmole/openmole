@@ -75,7 +75,7 @@ lazy val h2 = OsgiProject(dir, "org.h2", dynamicImports = Seq("*"), privatePacka
 /*lazy val bonecp = OsgiProject(dir, "com.jolbox.bonecp", dynamicImports = Seq("*")) settings
   (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0.RELEASE", version := "0.8.0.RELEASE") settings(settings: _*)*/
 
-lazy val slf4j = OsgiProject(dir,"org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
+lazy val slf4j = OsgiProject(dir, "org.slf4j", privatePackages = Seq("!scala.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion,
   libraryDependencies += "org.slf4j" % "slf4j-jdk14" % slf4jVersion,
@@ -110,7 +110,8 @@ lazy val fury = OsgiProject(
   dir,
   "org.apache.fury",
   imports = Seq("!javax.*", "scala.*", "*"),
-  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*")) settings(
+  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*"),
+  global = true) settings(
   settings,
   libraryDependencies ++= Seq("org.apache.fury" % "fury-core" % furyVersion),
   libraryDependencies += "de.unkrig.jdisasm" % "jdisasm" % "1.0.6",
@@ -374,9 +375,13 @@ lazy val collections = OsgiProject(dir, "org.apache.commons.collections", export
   settings,
   libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.4", version := "4.4")
 
-//lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
-//  scala2Settings,
-//  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % "5.6.0.201912101111-r", version := "4.6.0" )
+lazy val jgit = OsgiProject(dir, "org.eclipse.jgit", exports = Seq("org.eclipse.jgit.*", "org.apache.sshd.*"), privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.bouncycastle.*","*"))  settings (
+  settings,
+  libraryDependencies += "org.eclipse.jgit" % "org.eclipse.jgit" % jgitVersion,
+  libraryDependencies += "org.apache.sshd" % "sshd-git" % "2.14.0",
+  libraryDependencies += "net.i2p.crypto" % "eddsa" % "0.3.0",
+  version := jgitVersion
+) dependsOn(slf4j)
 
 lazy val txtmark = OsgiProject(dir, "com.github.rjeschke.txtmark", privatePackages = Seq("!scala.*", "!org.slf4j.*", "*"))  settings (
   settings,
@@ -556,5 +561,9 @@ lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*"
   version := http4sVersion
 ) dependsOn(cats, slf4j)
 
-
+lazy val gears = OsgiProject(dir, "gears") settings (
+  settings,
+  libraryDependencies += "ch.epfl.lamp" %% "gears" % gearsVersion,
+  version := gearsVersion
+)
 

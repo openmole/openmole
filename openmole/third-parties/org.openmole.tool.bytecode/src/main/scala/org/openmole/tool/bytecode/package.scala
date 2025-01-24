@@ -99,13 +99,13 @@ package object bytecode:
     classes.toList
 
 
-  def allMentionedClasses(directory: File, classLoader: ClassLoader): Seq[Class[_]] =
+  def allMentionedClasses(directory: File, classLoader: ClassLoader): Seq[Class[?]] =
     val allClassFiles = ClassSource.allClasses(directory)
     allMentionedClasses(allClassFiles, classLoader)
 
-  def allMentionedClasses(allClassFiles: Seq[ClassFile], classLoader: ClassLoader): Seq[Class[_]] =
+  def allMentionedClasses(allClassFiles: Seq[ClassFile], classLoader: ClassLoader): Seq[Class[?]] =
     for
       f ← allClassFiles.toList
       t ← listAllClasses(Files.readAllBytes(f.file))
-      c ← util.Try[Class[_]](Class.forName(t.getClassName, false, classLoader)).toOption.toSeq
+      c ← util.Try[Class[?]](Class.forName(t.getClassName, false, classLoader)).toOption.toSeq
     yield c

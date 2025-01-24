@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 object FromIslandTask:
 
   def apply[T](evolution: EvolutionWorkflow, islandStateVal: Val[evolution.S], initialIslandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
-    Task("FromIslandTask") { p ⇒
+    Task("FromIslandTask"): p =>
       import p._
       val state = context(evolution.stateVal)
       val initialState = context(initialIslandStateVal)
@@ -32,7 +32,7 @@ object FromIslandTask:
         evolution.offspringPopulationVal -> population.toArray(evolution.individualVal.`type`.manifest),
         islandStateVal -> islandState
       )
-    } set (
+    .set (
       inputs += (evolution.populationVal, evolution.stateVal, initialIslandStateVal),
       outputs += (evolution.offspringPopulationVal, islandStateVal)
     )

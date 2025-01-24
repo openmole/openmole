@@ -42,6 +42,6 @@ object Delta {
   import org.openmole.core.setter.DefinitionScope
 
   def apply(dsl: DSL, objective: DeltaTask.Delta*)(implicit definitionScope: DefinitionScope) =
-    dsl -- DeltaTask(objective: _*)
+    dsl -- DeltaTask(objective *)
 
 }

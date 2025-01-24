@@ -72,14 +72,14 @@ package object random {
   class SynchronizedRandom(generator: RandomGenerator) extends java.util.Random {
     val initialized = true
 
-    override def nextBoolean = synchronized { generator.nextBoolean }
+    override def nextBoolean() = synchronized { generator.nextBoolean }
     override def nextBytes(bytes: Array[Byte]) = synchronized { generator.nextBytes(bytes) }
-    override def nextDouble = synchronized { generator.nextDouble }
-    override def nextFloat = synchronized { generator.nextFloat }
-    override def nextGaussian = synchronized { generator.nextGaussian }
-    override def nextInt = synchronized { generator.nextInt }
+    override def nextDouble() = synchronized { generator.nextDouble }
+    override def nextFloat() = synchronized { generator.nextFloat }
+    override def nextGaussian() = synchronized { generator.nextGaussian }
+    override def nextInt() = synchronized { generator.nextInt }
     override def nextInt(n: Int) = synchronized { generator.nextInt(n) }
-    override def nextLong = synchronized { generator.nextLong }
+    override def nextLong() = synchronized { generator.nextLong }
     override def setSeed(seed: Long) = synchronized {
       // Skip the call from Random.init
       if initialized then generator.setSeed(seed)

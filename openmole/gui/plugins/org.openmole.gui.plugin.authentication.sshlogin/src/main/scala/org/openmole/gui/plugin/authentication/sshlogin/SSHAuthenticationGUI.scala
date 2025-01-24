@@ -31,26 +31,24 @@ import org.openmole.gui.shared.api.*
 
 import scalajs.js
 
-object TopLevelExports {
+object TopLevelExports:
   @JSExportTopLevel("authentication_sshlogin")
-  val sshlogin = js.Object {
+  val sshlogin = js.Object:
     given LoginAuthenticationServerAPI()
     new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory
-  }
-}
 
 class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends AuthenticationPluginFactory:
   type AuthType = LoginAuthenticationData
-  def buildEmpty: AuthenticationPlugin = new LoginAuthenticationGUI
-  def build(data: AuthType): AuthenticationPlugin = new LoginAuthenticationGUI(data)
-  def name = "SSH Login/Password"
+  def buildEmpty = new LoginAuthenticationGUI
+  def build(data: AuthType) = new LoginAuthenticationGUI(data)
+  def name = "Cluster SSH Login/Password"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = api.loginAuthentications()
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
+  def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)
 
-class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin:
-  type AuthType = LoginAuthenticationData
-  def factory = new LoginAuthenticationFactory
+class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin[LoginAuthenticationData]:
+  def name = s"${data.login}@${data.target}"
 
-  def remove(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
 
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
@@ -67,8 +65,7 @@ class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthentica
 
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
     for
-      _ <- remove
+      _ <- api.removeAuthentication(data)
       _ <- api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value))
     yield ()
 
-  def test(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)

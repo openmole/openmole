@@ -23,14 +23,13 @@ import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
 import org.openmole.core.workflow.test.Stubs._
 import monocle.Focus
 
-object TestHook {
+object TestHook:
   implicit def isBuilder: InputOutputBuilder[TestHook] = InputOutputBuilder(Focus[TestHook](_.config))
-}
 
 case class TestHook(
-  f:      Context ⇒ Unit    = identity[Context],
+  f:      Context => Unit    = identity[Context],
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()
 ) extends Hook {
-  override protected def process(executionContext: HookExecutionContext) = FromContext { p ⇒ f(p.context); p.context }
+  override protected def process(executionContext: HookExecutionContext) = FromContext { p => f(p.context); p.context }
 }

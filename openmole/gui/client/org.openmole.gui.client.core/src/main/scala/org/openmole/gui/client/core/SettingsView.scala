@@ -56,7 +56,7 @@ object SettingsView:
         )
       }).map {
         case Some(e) => e
-        case _ => Waiter.waiter
+        case _ => Waiter.waiter()
       }
     )
 
@@ -91,7 +91,7 @@ object SettingsView:
                 ),
               )
             )
-          case _ => Waiter.waiter.amend(flexRow, justifyContent.center)
+          case _ => Waiter.waiter().amend(flexRow, justifyContent.center)
     )
 
   def shutdownButton(using panels: Panels) = serverActions(

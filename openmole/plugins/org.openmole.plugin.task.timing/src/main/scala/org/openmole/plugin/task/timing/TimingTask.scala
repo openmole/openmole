@@ -3,11 +3,12 @@ package org.openmole.plugin.task.timing
 import monocle.Focus
 import org.openmole.core.context.Val
 import org.openmole.core.argument.FromContext
-import org.openmole.core.setter._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.task.*
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.validation.ValidateTask
 
-object TimingTask {
+object TimingTask:
 
   implicit def isBuilder: InputOutputBuilder[TimingTask] = InputOutputBuilder(Focus[TimingTask](_.config))
   implicit def isInfo: InfoBuilder[TimingTask] = InfoBuilder(Focus[TimingTask](_.info))
@@ -26,20 +27,22 @@ object TimingTask {
       outputs ++= Task.outputs(task) ++ Seq(tracker)
     )
 
-}
-
 case class TimingTask(
   task:    Task,
   tracker: Val[Long],
   config:  InputOutputConfig,
   info:    InfoConfig
-) extends Task {
+) extends Task:
 
-  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
-    val starttime = System.currentTimeMillis()
-    val taskcontext = parameters.context + Task.perform(task, parameters.context, executionContext)
-    val executiontime = (System.currentTimeMillis() - starttime)
-    taskcontext + (tracker, executiontime)
-  }
-}
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    val taskExecution = task(taskExecutionBuildContext)
+    val taskExecutionInfo = TaskExecutionInfo(task)
+    TaskExecution:  p =>
+      import p.*
+      val starttime = System.currentTimeMillis()
+      val taskcontext = p.context + TaskExecution.execute(taskExecution, p.executionContext).from(context)
+      val executiontime = (System.currentTimeMillis() - starttime)
+      taskcontext + (tracker, executiontime)
+
+
 

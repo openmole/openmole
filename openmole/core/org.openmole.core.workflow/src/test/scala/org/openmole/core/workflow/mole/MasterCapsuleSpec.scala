@@ -28,14 +28,14 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
   import org.openmole.core.workflow.test.Stubs._
 
-  "A master capsule" should "execute tasks" in {
+  "A master capsule" should "execute tasks" in:
     @volatile var testExecuted = false
 
     val p = Val[String]("p")
 
-    val t1 = TestTask { _ + (p → "Test") } set (outputs += p)
+    val t1 = TestTask { _ + (p -> "Test") } set (outputs += p)
 
-    val t2 = TestTask { context ⇒
+    val t2 = TestTask { context =>
       context(p) should equal("Test")
       testExecuted = true
       context
@@ -46,16 +46,15 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     ex.run
 
     testExecuted should equal(true)
-  }
 
-  "A master capsule" should "keep value of a variable from on execution to another" in {
+  it should "keep value of a variable from on execution to another" in {
     val data = List("A", "A", "B", "C")
     val i = Val[String]("i")
     val n = Val[Int]("n")
 
     val emptyT = EmptyTask() set ((inputs, outputs) += i)
 
-    val select = TestTask { context ⇒
+    val select = TestTask { context =>
       val nVal = context(n)
       context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
     } set (
@@ -85,7 +84,7 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
         outputs += i
       )
 
-    val select = TestTask { context ⇒
+    val select = TestTask { context =>
       assert(context.contains(archive))
       selectTaskExecuted += 1
       context + Variable(archive, (context(i) :: context(archive).toList) toArray)
@@ -94,7 +93,7 @@ class MasterCapsuleSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
       archive := Array.empty[Int]
     )
 
-    val finalTask = TestTask { context ⇒
+    val finalTask = TestTask { context =>
       assert(context.contains(archive))
       assert(context(archive).size >= 10 && context(archive).size < 21)
       endCapsExecuted += 1

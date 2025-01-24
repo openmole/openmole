@@ -2,7 +2,7 @@
 
 export HOME=/var/openmole && \
 mkdir -p $HOME && \
-chown openmole:openmole $HOME
+find $HOME -mindepth 0 -maxdepth 3 -exec chown openmole:openmole {} +
 
 exec sudo -u openmole openmole --mem 2G --port 8080 --remote $@ 
 

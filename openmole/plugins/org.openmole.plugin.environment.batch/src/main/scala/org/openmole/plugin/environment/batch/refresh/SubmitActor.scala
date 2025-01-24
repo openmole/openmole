@@ -20,25 +20,20 @@ package org.openmole.plugin.environment.batch.refresh
 import org.openmole.core.workflow.execution.ExecutionState._
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
 
-object SubmitActor {
+object SubmitActor:
 
-  def receive(submit: Submit)(implicit services: BatchEnvironment.Services) = {
+  def receive(submit: Submit)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     import services._
 
     val Submit(job, environment) = submit
 
-    JobManager.killOr(job, Kill(job, environment, None)) { () ⇒
-      try {
+    JobManager.killOr(job, Kill(job, environment, None)): () ⇒
+      try
         val bj = environment.execute(job)
         BatchEnvironment.setExecutionJobSate(environment, job, SUBMITTED)
         JobManager ! Submitted(job, environment, bj)
-      }
-      catch {
+      catch
         case e: Throwable ⇒
           JobManager ! Error(job, environment, e, None, None)
           JobManager ! Delay(Submit(job, environment), preference(BatchEnvironment.SubmitRetryInterval))
-      }
-    }
-  }
 
-}

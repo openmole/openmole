@@ -549,7 +549,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       termination = 100
     ) by Island(10) hook ("/tmp/test")
   }
-  "by Island" should "be usable with by" in {
+
+  "by Island" should "be usable with by" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -560,10 +561,9 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         genome = Seq(a in (0.0, 1.0)),
         termination = 100
       ) on LocalEnvironment(1) by Island(10) by 10
-  }
 
 
-  "OSE" should "support enumerations" in {
+  "OSE" should "support enumerations" in:
     val e = Val[WorkflowSpec.En]
     val a = Val[Double]
     val b = Val[Double]
@@ -578,7 +578,32 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       termination = 100,
       stochastic = Stochastic()
     )
-  }
+
+  "HDOSE" should "support ranges" in :
+    val a = Val[Double]
+    val b = Val[Double]
+    val axea: HDOSE.OriginAxe = (a in (0.0 to 10.0 by 5.0))
+
+    val ar = Val[Array[Double]]
+    val axear: HDOSE.OriginAxe = (ar in Vector.fill(10)(0.0 to 10.0 by 2.0))
+
+    val ar2 = Val[Array[Int]]
+    val axear2: HDOSE.OriginAxe = (ar2 in Vector.fill(10)(0 to 100 by 20))
+
+    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).size should equal(11)
+    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).size should equal(10)
+
+    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).distinct should equal(Seq(5.0, 2.0))
+    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).distinct should equal(Seq(20))
+    
+    HDOSEEvolution(
+      origin = Seq(axea, axear, axear2),
+      evaluation = EmptyTask(),
+      objective = Seq(a under 9, b under 3.0),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
 
 
 }

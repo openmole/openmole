@@ -25,31 +25,17 @@ import org.openmole.core.setter._
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
 
-object TemplateTask {
-
-  implicit def isBuilder: InputOutputBuilder[TemplateTask] = InputOutputBuilder(Focus[TemplateTask](_.config))
-  implicit def isInfo: InfoBuilder[TemplateTask] = InfoBuilder(Focus[TemplateTask](_.info))
+object TemplateTask:
 
   def apply(
     template: String,
     output:   Val[File]
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = new TemplateTask(template, output, InputOutputConfig(), InfoConfig()) set (outputs += output)
+  )(using sourcecode.Name, DefinitionScope) =
+    val expanded = ExpandedString(template)
 
-}
-
-case class TemplateTask(
-  template: String,
-  output:   Val[File],
-  config:   InputOutputConfig,
-  info:     InfoConfig
-) extends Task {
-
-  val expanded = ExpandedString(template)
-
-  override protected def process(executionContext: TaskExecutionContext) = FromContext { parameters ⇒
-    import parameters._
-    val outputFile = executionContext.moleExecutionDirectory.newFile("output", "template")
-    outputFile.content = expanded.from(context)
-    Context.empty + (output, outputFile)
-  }
-}
+    Task("TemplateTask"): p =>
+      import p.*
+      val outputFile = executionContext.moleExecutionDirectory.newFile("output", "template")
+      outputFile.content = expanded.from(context)
+      Context.empty + (output, outputFile)
+    .set (outputs += output)

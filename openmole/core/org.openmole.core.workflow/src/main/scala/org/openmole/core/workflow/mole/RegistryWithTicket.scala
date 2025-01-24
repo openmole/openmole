@@ -32,66 +32,67 @@ import scala.collection.mutable
  * @tparam K the type of the keys
  * @tparam V the type of the values
  */
-class RegistryWithTicket[K, V] {
 
-  type Registry = mutable.HashMap[K, V]
-  val registries = new mutable.WeakHashMap[Ticket, Registry]
 
-  def registry(ticket: Ticket): Registry = synchronized {
-    registries.getOrElseUpdate(ticket, new Registry)
-  }
+object RegistryWithTicket:
 
-  /**
-   *
-   * Consult a value for a given key and ticket.
-   *
-   * @param key the index key
-   * @param ticket the index ticket
-   * @return the value or null if not found
-   */
-  def consult(key: K, ticket: Ticket): Option[V] = synchronized {
-    registry(ticket).get(key)
-  }
+  def apply[K, V](): RegistryWithTicket[K, V] = new mutable.WeakHashMap[Ticket, mutable.HashMap[K, V]]
 
-  /**
-   *
-   * Look if a value is registred for a given key and ticket.
-   *
-   * @param key the index key
-   * @param ticket the index ticket
-   * @return true if the value is present
-   */
-  def isRegistred(key: K, ticket: Ticket): Boolean = synchronized {
-    registry(ticket).contains(key)
-  }
+  extension [K, V](registries: RegistryWithTicket[K, V])
+    def registry(ticket: Ticket): mutable.HashMap[K, V] = registries.synchronized:
+      registries.getOrElseUpdate(ticket, new mutable.HashMap[K, V]())
 
-  /**
-   *
-   * Register a value for given key and ticket.
-   *
-   * @param key the index key
-   * @param ticket the index ticket
-   * @param value the value to register
-   */
-  def register(key: K, ticket: Ticket, value: V) = synchronized {
-    registry(ticket) += (key → value)
-  }
+    /**
+     *
+     * Consult a value for a given key and ticket.
+     *
+     * @param key the index key
+     * @param ticket the index ticket
+     * @return the value or null if not found
+     */
+    def consult(key: K, ticket: Ticket): Option[V] = registries.synchronized:
+      registry(ticket).get(key)
 
-  /**
-   *
-   * Remove a value from the registry.
-   *
-   * @param key the index key
-   * @param ticket the index ticket
-   */
-  def remove(key: K, ticket: Ticket): Option[V] = synchronized {
-    val ret = registry(ticket).remove(key)
-    if (registries(ticket).isEmpty) registries -= ticket
-    ret
-  }
+    /**
+     *
+     * Look if a value is registred for a given key and ticket.
+     *
+     * @param key the index key
+     * @param ticket the index ticket
+     * @return true if the value is present
+     */
+    def isRegistred(key: K, ticket: Ticket): Boolean = registries.synchronized:
+      registry(ticket).contains(key)
 
-  def getOrElseUpdate(key: K, ticket: Ticket, f: ⇒ V): V = synchronized {
-    registries.getOrElseUpdate(ticket, new Registry).getOrElseUpdate(key, f)
-  }
 
-}
+    /**
+    *
+    * Register a value for given key and ticket.
+    *
+    * @param key the index key
+    * @param ticket the index ticket
+    * @param value the value to register
+    */
+    def register(key: K, ticket: Ticket, value: V) = registries.synchronized:
+      registries.registry(ticket) += (key -> value)
+
+
+    /**
+     *
+     * Remove a value from the registry.
+     *
+     * @param key the index key
+     * @param ticket the index ticket
+     */
+    def remove(key: K, ticket: Ticket): Option[V] = registries.synchronized:
+      val ret = registry(ticket).remove(key)
+      if (registries(ticket).isEmpty) registries -= ticket
+      ret
+
+
+    def getOrElseUpdate(key: K, ticket: Ticket, f: => V): V = registries.synchronized:
+      registries.getOrElseUpdate(ticket, new mutable.HashMap[K, V]()).getOrElseUpdate(key, f)
+
+
+opaque type RegistryWithTicket[K, V] = mutable.WeakHashMap[Ticket, mutable.HashMap[K, V]]
+

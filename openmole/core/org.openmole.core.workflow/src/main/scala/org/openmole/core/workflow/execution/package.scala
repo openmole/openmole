@@ -36,44 +36,6 @@ def display(stream: PrintStream, label: String, content: String) =
       stream.println(footer)
 
 
-object EnvironmentProvider:
-
-  type Cache = Map[EnvironmentProvider, Environment]
-
-  def apply(build: MoleServices ⇒ LocalEnvironment): LocalEnvironmentProvider = LocalEnvironmentProvider(build)
-
-  def apply[T <: Environment](build: (MoleServices, KeyValueCache) ⇒ T): EnvironmentProvider = GenericEnvironmentProvider(build)
-
-  def multiple(build: (MoleServices, KeyValueCache, Cache) ⇒ (Environment, Cache)) = MultipleEnvironmentProvider(build)
-
-  def build(p: Seq[EnvironmentProvider], services: MoleServices, keyValueCache: KeyValueCache, cache: Cache = Map()): Cache =
-
-    def build0(lp: List[EnvironmentProvider], cache: Cache): Cache =
-      lp match
-        case Nil ⇒ cache
-        case h :: t ⇒
-          cache.get(h) match
-            case Some(e) ⇒ build0(t, cache)
-            case None ⇒
-              h match
-                case GenericEnvironmentProvider(bp) ⇒ build0(t, cache + (h -> bp(services, keyValueCache)))
-                case LocalEnvironmentProvider(bp)   ⇒ build0(t, cache + (h -> bp(services)))
-                case MultipleEnvironmentProvider(bp) ⇒
-                  val (e1, cache2) = bp(services, keyValueCache, cache)
-                  build0(t, cache ++ cache2 + (h -> e1))
-
-
-    build0(p.toList, cache)
-
-  def buildLocal(p: LocalEnvironmentProvider, services: MoleServices) = p.build(services)
-
-
-
-sealed trait EnvironmentProvider
-case class GenericEnvironmentProvider(build: (MoleServices, KeyValueCache) ⇒ Environment) extends EnvironmentProvider
-case class LocalEnvironmentProvider(build: MoleServices ⇒ LocalEnvironment) extends EnvironmentProvider
-case class MultipleEnvironmentProvider(build: (MoleServices, KeyValueCache, EnvironmentProvider.Cache) ⇒ (Environment, EnvironmentProvider.Cache)) extends EnvironmentProvider
-
 type ExecutionState = Byte
 
 

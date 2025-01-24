@@ -30,16 +30,15 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 
-class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI {
-
-  val analyseRoute = analyse.errorImplementedBy { p => ??? /*impl.analyse(p)*/ }
-  //val generationRoute = generation.implementedBy { case(p, g, a) => impl.generation(p, g, a)}
+class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI:
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(analyseRoute)
+    routesFromEndpoints:
+      analyse.errorImplementedBy(impl.analyse)
   )
 
-  object impl {
+  object impl:
+    def analyse(path: SafePath) = ???
 
 //    def analyse(path: SafePath) = {
 //      import ServerFileSystemContext.project
@@ -67,6 +66,5 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
       }
     }*/
 
-  }
 
-}
+

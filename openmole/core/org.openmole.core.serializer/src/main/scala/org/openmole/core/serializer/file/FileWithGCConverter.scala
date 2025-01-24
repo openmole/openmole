@@ -14,3 +14,4 @@ class FileWithGCConverter extends Converter:
     context.convertAnother(context.currentObject(), classOf[File])
 
   override def canConvert(`type`: Class[_]): Boolean = classOf[FileWithGC].isAssignableFrom(`type`)
+//

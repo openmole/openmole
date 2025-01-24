@@ -35,8 +35,8 @@ trait SamplingPackage {
     def is(d: FromContext[T]) = Factor(p, d)
   }
 
-  implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain ⇒ Domain(domain.map(v ⇒ Vector(v).iterator))
-  implicit def fromContextIterableIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterable[T]], T] = domain ⇒ Domain(domain.map(v ⇒ v.iterator))
+  implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain => Domain(domain.map(v => Vector(v).iterator))
+  implicit def fromContextIterableIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterable[T]], T] = domain => Domain(domain.map(v => v.iterator))
 
   implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T]): IsSampling[Factor[D, T]] = f => {
     def inputs = {
@@ -52,7 +52,7 @@ trait SamplingPackage {
     }
 
     Sampling(
-      domain(f.domain).domain.map { values ⇒ values.map { v ⇒ List(Variable(f.value, v)) } },
+      domain(f.domain).domain.map { values => values.map { v => List(Variable(f.value, v)) } },
       outputs,
       inputs,
       validate,

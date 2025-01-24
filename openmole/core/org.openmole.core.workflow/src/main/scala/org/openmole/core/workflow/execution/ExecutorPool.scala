@@ -42,44 +42,44 @@ object ExecutorPool:
  * @param threadProvider
  */
 class ExecutorPool(nbThreads: Int, environment: WeakReference[LocalEnvironment], threadProvider: ThreadProvider):
-  private val jobs = new java.util.ArrayDeque[LocalExecutionJob]()
+  private val jobs = ArrayStack[LocalExecutionJob](1024)
   private val semaphore = new Semaphore(0)
 
   private val executorMap =
     val map = mutable.HashMap[LocalExecutor, Thread]()
-    (0 until nbThreads).foreach { _ ⇒ map += ExecutorPool.createExecutor(environment, threadProvider) }
+    (0 until nbThreads).foreach { _ => map += ExecutorPool.createExecutor(environment, threadProvider) }
     map
 
   def runningJobs = executorMap.keys.flatMap(_.runningJob)
 
   override def finalize() = executorMap.foreach {
-    case (exe, thread) ⇒ exe.stop = true; thread.interrupt
+    case (exe, thread) => exe.stop = true; thread.interrupt
   }
 
   private[execution] def takeNextJob: LocalExecutionJob =
     semaphore.acquire()
-    jobs.synchronized(jobs.pop())
+    jobs.pop()
 
   def enqueue(job: LocalExecutionJob) =
-    jobs.synchronized(jobs.add(job))
+    jobs.add(job)
     semaphore.release()
 
-  def waiting: Int = jobs.synchronized(jobs.size)
+  def waiting: Int = jobs.size
 
   def running: Int =
     executorMap.synchronized:
-      executorMap.toList.count { case (e, _) ⇒ e.runningJob.isDefined }
+      executorMap.toList.count { case (e, _) => e.runningJob.isDefined }
 
   def stop() =
     executorMap.synchronized:
-      executorMap.foreach {
-        case (exe, thread) ⇒
+      executorMap.foreach:
+        case (exe, thread) =>
           exe.stop = true
           thread.interrupt()
-      }
+
       executorMap.clear()
 
-    jobs.synchronized(jobs.clear())
+    jobs.clear()
     semaphore.drainPermits()
 
 

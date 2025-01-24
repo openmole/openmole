@@ -50,13 +50,12 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Level, Logger}
 
 object GUIServer:
-
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
     val from = fromWebAppLocation
-    val to = newFile.newDir("webapp")
+    val to = newFile.newDirectory("webapp")
 
     val cssTarget = to / "css"
     from / "css" copy to / "css"
@@ -84,7 +83,7 @@ object GUIServer:
   lazy val plugins = PreferenceLocation[Seq[String]]("GUIServer", "Plugins", None)
 
   def initialisePreference(preference: Preference) =
-    if (!preference.isSet(port)) preference.setPreference(port, Network.freePort)
+    if !preference.isSet(port) then preference.setPreference(port, Network.freePort)
 
   def lockFile(implicit workspace: Workspace) = 
     val file = workspace.persistentDir / "GUI.lock"
@@ -136,14 +135,10 @@ object GUIServer:
     optimizedJS: Boolean,
     extraHeaders: String) =
 
-    Logger.getLogger(classOf[BlazeServerBuilder[?]].getName).setLevel(Level.WARNING)
-    Logger.getLogger("org.http4s.blaze.channel.nio1.NIO1SocketServerGroup").setLevel(Level.WARNING)
-    Logger.getLogger("org.http4s.blaze.channel.nio1.SelectorLoop").setLevel(Level.WARNING)
-
     import services.*
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
-    val waitingServerShutdown = server(port, localhost).withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+    val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
     val webappCache =
       try GUIServer.webapp(optimizedJS)
       finally waitingServerShutdown.unsafeRunSync()
@@ -175,7 +170,8 @@ object GUIServer:
 
   def server(port: Int, localhost: Boolean) =
     val s =
-      if (localhost) BlazeServerBuilder[IO].bindHttp(port, "localhost")
+      if localhost
+      then BlazeServerBuilder[IO].bindHttp(port, "localhost")
       else BlazeServerBuilder[IO].bindHttp(port, "0.0.0.0")
 
     s
@@ -209,6 +205,7 @@ class GUIServer(
 
     val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
+    val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
 
 
@@ -227,13 +224,15 @@ class GUIServer(
         s"/" -> GZip(applicationServer.routes),
         s"/" -> GZip(apiServer.routes),
         s"/" -> GZip(apiServer.endpointRoutes),
-        s"/rest/v1" -> restServer.routes) ++ pluginsRoutes: _*).orNotFound
+        s"/rest/v1" -> restServer.routes,
+        s"/webdav" -> webdavServer.routes) ++ pluginsRoutes *).orNotFound
 
     implicit val runtime = cats.effect.unsafe.IORuntime.global
 
     val shutdown =
       GUIServer.
         server(port, localhost).
+        withoutBanner.
         withHttpApp(httpApp).
         withIdleTimeout(Duration.Inf).
         withResponseHeaderTimeout(Duration.Inf).

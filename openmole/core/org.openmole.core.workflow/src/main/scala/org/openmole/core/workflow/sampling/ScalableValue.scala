@@ -35,8 +35,8 @@ object ScalableValue:
   object Scaled:
     def toVariable(s: Scaled, values: List[Double], inputSize: Int) =
       s match
-        case s: ScaledScalar[_]   ⇒ Variable(s.prototype, s.v) → values.tail
-        case s: ScaledSequence[_] ⇒ Variable(s.prototype, s.s) → values.drop(inputSize)
+        case s: ScaledScalar[_]   => Variable(s.prototype, s.v) -> values.tail
+        case s: ScaledSequence[_] => Variable(s.prototype, s.s) -> values.drop(inputSize)
   
   enum Scaled:
     case ScaledSequence[T](prototype: Val[Array[T]], s: Array[T])
@@ -64,7 +64,7 @@ object ScalableValue:
 
 
   implicit def fromFactor[D, T: ScalableType](s: Factor[D,T])(implicit bounded: BoundedFromContextDomain[D, T]): ScalableValue =
-    def unflatten(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p ⇒
+    def unflatten(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p =>
       import p.*
 
       val g = values.head
@@ -80,18 +80,18 @@ object ScalableValue:
 
   
   implicit def fromFactorOfSeq[D, T: ScalableType: ClassTag](t: Factor[D, Array[T]])(implicit bounded: BoundedFromContextDomain[D, Array[T]]): ScalableValue = 
-    def size: FromContext[Int] = FromContext { p ⇒
+    def size: FromContext[Int] = FromContext { p =>
       import p.*
       val (min, max) = bounded(t.domain).domain
       math.min(min.from(context).size, max.from(context).size)
     }
 
-    def unflatten(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p ⇒
+    def unflatten(values: Seq[Double], scale: Boolean): FromContext[Scaled] = FromContext { p =>
       import p.*
 
       val (min, max) = bounded(t.domain).domain
       def scaled =
-        if (scale) (values zip (min.from(context) zip max.from(context))).map { case (g, (min, max)) ⇒ implicitly[ScalableType[T]].scale(g, min, max) }
+        if (scale) (values zip (min.from(context) zip max.from(context))).map { case (g, (min, max)) => implicitly[ScalableType[T]].scale(g, min, max) }
         else values.map(implicitly[ScalableType[T]].convert)
 
       Scaled.ScaledSequence(t.value, scaled.toArray)
@@ -102,8 +102,8 @@ object ScalableValue:
 
   def prototypes(scales: Seq[ScalableValue]) = scales.map(_.prototype)
 
-  def toVariables(scales: Seq[ScalableValue], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[_]]] = {
-    @tailrec def scaled0(scales: List[ScalableValue], values: List[Double], acc: List[Variable[_]] = Nil)(context: ⇒ Context, rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): List[Variable[_]] =
+  def toVariables(scales: Seq[ScalableValue], values: Seq[Double], scale: Boolean = true): FromContext[List[Variable[?]]] = 
+    @tailrec def scaled0(scales: List[ScalableValue], values: List[Double], acc: List[Variable[?]] = Nil)(context: => Context, rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): List[Variable[?]] =
       if (scales.isEmpty || values.isEmpty) acc.reverse
       else {
         val input = scales.head
@@ -113,8 +113,7 @@ object ScalableValue:
         scaled0(scales.tail, tail, variable :: acc)({ context + variable }, rng, newFile, fileService)
       }
 
-    FromContext { p ⇒ scaled0(scales.toList, values.toList)(p.context, p.random, p.tmpDirectory, p.fileService) }
-  }
+    FromContext { p => scaled0(scales.toList, values.toList)(p.context, p.random, p.tmpDirectory, p.fileService) }
 
 
   def unflatten(s: ScalableValue) = 
@@ -144,7 +143,7 @@ object ScalableValue:
         case s: SeqValue => false
 
   def isContinuous(s: ScalableValue) =
-    def continuousType(t: Val[_]) =
+    def continuousType(t: Val[?]) =
       t match
         case Val.caseDouble(_) => true
         case _ => false
@@ -157,5 +156,5 @@ object ScalableValue:
 
 
 enum ScalableValue:
-  case ScalarValue(inputs: PrototypeSet, prototype: Val[_], unflatten: ScalableValue.Unflatten)
-  case SeqValue(inputs: PrototypeSet, prototype: Val[_], unflatten: ScalableValue.Unflatten, size: FromContext[Int])
+  case ScalarValue(inputs: PrototypeSet, prototype: Val[?], unflatten: ScalableValue.Unflatten)
+  case SeqValue(inputs: PrototypeSet, prototype: Val[?], unflatten: ScalableValue.Unflatten, size: FromContext[Int])

@@ -1,5 +1,7 @@
 package org.openmole.gui.server.core
 
+import org.eclipse.jgit.api.Git
+
 import java.io.File
 import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
@@ -31,7 +33,7 @@ import org.openmole.core.threadprovider.{ThreadProvider, toExecutionContext}
 import org.openmole.core.dsl.*
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.core.fileservice.FileServiceCache
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.format.*
 import org.openmole.core.format.OMROutputFormat
@@ -40,11 +42,12 @@ import org.openmole.gui.server.ext
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.server.core.GUIServer.{ApplicationControl, lockFile}
+import org.openmole.gui.server.git.GitService
 import org.openmole.gui.shared.data
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
-
 import scala.jdk.FutureConverters.*
+
 /*
  * Copyright (C) 21/07/14 // mathieu.leclaire@openmole.org
  *
@@ -122,7 +125,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     else target.createNewFile
 
 
-
   def deleteFiles(safePaths: Seq[SafePath]): Unit =
     import services.*
     import org.openmole.tool.file.*
@@ -134,12 +136,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     utils.deleteFiles(safePaths)
 
-//  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
-//    import services._
-//    extractArchiveFromFiles(from, to)
-//    to.listFilesSafe.map(utils.fileToSafePath).toSeq
-//  }
-//
+  //  private def getExtractedArchiveTo(from: File, to: File)(implicit context: ServerFileSystemContext): Seq[SafePath] = {
+  //    import services._
+  //    extractArchiveFromFiles(from, to)
+  //    to.listFilesSafe.map(utils.fileToSafePath).toSeq
+  //  }
+  //
 
   private def archiveType(f: File) =
     import org.openmole.tool.archive.*
@@ -165,7 +167,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case Some(ArchiveType.Zip) ⇒
           import org.openmole.tool.archive
           from.extract(to, true, archive = ArchiveType.Zip)
-        case Some(ArchiveType.TarXZ)  ⇒
+        case Some(ArchiveType.TarXZ) ⇒
           from.extract(to, true, archive = ArchiveType.TarXZ)
           to.applyRecursive((f: File) ⇒ f.setWritable(true))
         case None ⇒ throw new Throwable("Unknown compression format for file " + from)
@@ -176,13 +178,14 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def extractArchive(safePath: SafePath, to: SafePath) =
     import services.*
     def archiveFile = safePathToFile(safePath)
+
     def toFile = safePathToFile(to)
 
     extractArchiveFromFiles(archiveFile, toFile)
 
   def temporaryDirectory(): SafePath =
     import services.*
-    val dir = services.tmpDirectory.newDir("openmoleGUI", create = true)
+    val dir = services.tmpDirectory.newDirectory("openmoleGUI", create = true)
     dir.toSafePath(using org.openmole.gui.shared.data.ServerFileSystemContext.Absolute)
 
   def exists(safePath: SafePath): Boolean =
@@ -201,7 +204,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services.*
     utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin, withHidden = withHidden)
 
-   def recursiveListFiles(sp: SafePath, findString: Option[String], withHidden: Boolean): Seq[(SafePath, Boolean)] =
+  def recursiveListFiles(sp: SafePath, findString: Option[String], withHidden: Boolean): Seq[(SafePath, Boolean)] =
     import services._
     utils.recursiveListFiles(sp, findString, withHidden)
 
@@ -210,17 +213,27 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val f: File = safePathToFile(sp)
     f.isDirectoryEmpty
 
-  def move(moves: Seq[(SafePath, SafePath)]): Unit =
+  def move(moves: Seq[(SafePath, SafePath)], overwrite: Boolean): Seq[SafePath] =
+    val existing = collection.mutable.ListBuffer[SafePath]()
     moves.foreach: (from, to) =>
       import services.*
       val fromFile = safePathToFile(from)
       val toFile = safePathToFile(to)
-      toFile.getParentFile.mkdirs()
-      if OMRFormat.isOMR(fromFile)
-      then OMRFormat.move(fromFile, toFile)
-      else
-        unplug(fromFile)
-        fromFile.move(toFile)
+      val exists = toFile.exists()
+
+      if exists
+      then existing += to
+
+      if !exists || overwrite
+      then
+        toFile.getParentFile.mkdirs()
+        if OMRFormat.isOMR(fromFile)
+        then OMRFormat.move(fromFile, toFile)
+        else
+          unplug(fromFile)
+          fromFile.move(toFile)
+
+    existing.toSeq
 
   def mdToHtml(safePath: SafePath): String =
     import services._
@@ -242,6 +255,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         finally tmpFile.delete()
 
         def newHash = services.fileService.hashNoCache(file).toString
+
         (true, newHash)
 
       if (overwrite) save()
@@ -290,7 +304,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           MoleExecution.clean(e)
 
   def synchronousCompilation(
-    scriptPath:   SafePath,
+    scriptPath: SafePath,
     outputStream: StringPrintStream): ErrorData | MoleExecution =
 
     def scriptError(t: Throwable): ErrorData =
@@ -312,7 +326,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       safePathToFile(scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
-    val executionTmpDirectory = services.tmpDirectory.newDir("execution")
+
+    val executionTmpDirectory =
+      import services.tmpDirectory
+      TmpDirectory.newDirectory("execution")
 
     val runServices =
       import services._
@@ -321,8 +338,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     try
       Project.compile(script.getParentFileSafe, script)(runServices) match
         case ScriptFileDoesNotExists() ⇒ ErrorData("Script file does not exist")
-        case ErrorInCode(e)            ⇒ scriptError(e)
-        case ErrorInCompiler(e)        ⇒ scriptError(e)
+        case ErrorInCode(e) ⇒ scriptError(e)
+        case ErrorInCompiler(e) ⇒ scriptError(e)
         case compiled: Compiled ⇒
           if Thread.interrupted() then throw new InterruptedIOException()
           import runServices._
@@ -363,7 +380,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         try ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
         catch
           case e: Throwable =>
-            serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+            serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
             Breaks.break()
 
       serverState.setEnvironments(execId, envIds)
@@ -372,9 +389,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
       catchAll(ex.start(validateScript)) match
         case Failure(e) ⇒
-          serverState.modifyState(execId, Failed(Vector.empty, ErrorData(e), Seq.empty))
+          serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) ⇒
-          val inserted = serverState.modifyState(execId, ex)
+          val inserted = serverState.modifyState(execId)(_ => ex)
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
     def compileAndRun =
@@ -382,7 +399,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case e: MoleExecution =>
           if Thread.interrupted() then throw new InterruptedIOException()
           processRun(execId, e, validateScript)
-        case ed: ErrorData => serverState.modifyState(execId, Failed(Vector.empty, ed, Seq.empty))
+        case ed: ErrorData => serverState.modifyState(execId)(_ => Failed(Vector.empty, ed, Seq.empty))
 
 
     val future =
@@ -395,7 +412,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
 
   def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = serverState.executionData(ids)
+
   def executionOutput(id: ExecutionId, lines: Int) = serverState.executionOutput(id, lines)
+
   def executionIds = serverState.executionIds.toSeq
 
   //def staticInfos() = execution.staticInfos()
@@ -407,12 +426,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       implicit ctx ⇒
         val environmentErrors = serverState.environmentErrors(executionId, environmentId)
 
-  //      def groupedErrors =
-  //          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
-  //            case (_, err) ⇒
-  //              val dates = err.map { _.date }.sorted
-  //              EnvironmentErrorGroup(err.head, dates.max, dates.size)
-  //          }.takeRight(lines)
+        //      def groupedErrors =
+        //          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
+        //            case (_, err) ⇒
+        //              val dates = err.map { _.date }.sorted
+        //              EnvironmentErrorGroup(err.head, dates.max, dates.size)
+        //          }.takeRight(lines)
 
         val (errors, warning) = environmentErrors.partition(_.level == ErrorStateLevel.Error)
         val res = (errors.sortBy(_.date).reverse ++ warning.sortBy(_.date).reverse).take(lines)
@@ -458,9 +477,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/"), ServerFileSystemContext.Project))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
-//  private def isPlugged(safePath: SafePath) =
-//    import services._
-//    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
+  //  private def isPlugged(safePath: SafePath) =
+  //    import services._
+  //    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
   private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
     import services._
@@ -469,7 +488,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def addPlugin(safePath: SafePath): Seq[ErrorData] =
     import services._
     val errors = utils.addPlugin(safePath)
-    if (errors.isEmpty) { updatePluggedList { pList ⇒ (pList :+ safePath.path.value.mkString("/")).distinct } }
+    if (errors.isEmpty) {
+      updatePluggedList { pList ⇒ (pList :+ safePath.path.value.mkString("/")).distinct }
+    }
     errors
 
   def listPlugins(): Seq[Plugin] =
@@ -478,7 +499,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def removePlugin(safePath: SafePath) =
     import services.*
-    updatePluggedList { _.filterNot(_ == safePath.path.value.mkString("/")) }
+    updatePluggedList {
+      _.filterNot(_ == safePath.path.value.mkString("/"))
+    }
     utils.removePlugin(safePath)(workspace)
 
   def unplug(file: File) =
@@ -537,6 +560,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     def script =
       def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
+
       omrContent.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
 
     def index =
@@ -563,11 +587,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     )
   
 
+
   def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =
     import services.*
     import GUIVariable.ValueType
     import GUIVariable.ValueType.*
     val omrFile = safePathToFile(result)
+
     def indexes =
       OMRFormat.indexes(omrFile).map: id =>
         GUIOMRDataIndex(id.sectionIndex, id.variableName, id.values.flatMap(toValueTypeFromAny), id.fileIndex.toSeq)
@@ -610,7 +636,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case util.Failure(e: Throwable) => throw e
 
 
-  def toGUIVariable(v: Variable[_]) =
+  def toGUIVariable(v: Variable[?]) =
     GUIVariable(v.name, toValueTypeFromAny(v.value), v.prototype.`type`.toString)
 
   def expandResources(resources: Resources): Resources =
@@ -631,6 +657,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     )
 
   def listNotification = serverState.listNotification()
+
   def clearNotification(ids: Seq[Long]) = serverState.clearNotification(ids)
 
   def removeContainerCache(): Unit =
@@ -641,43 +668,169 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.tool.stream.*
 
     val checkedURL =
-      java.net.URI.create(url).getScheme match {
+      java.net.URI.create(url).getScheme match
         case null ⇒ "http://" + url
-        case _    ⇒ url
-      }
+        case _ ⇒ url
 
-    NetworkService.withResponse(checkedURL) {
-      response ⇒
+    NetworkService.withResponse(checkedURL): response =>
+      val nameHeader =
+        response.getAllHeaders.map(h => h.getName -> h.getValue).flatMap:
+          case ("Content-Disposition", value) =>
+            value.split(";").map(_.split("=")).find(_.head.trim == "filename").map: filename =>
+              val name = filename.last.trim
+              if name.startsWith("\"") && name.endsWith("\"")
+              then name.drop(1).dropRight(1)
+              else name
+          case _ => None
+        .headOption
+
+      def isArchive =
+        val fileName =
+          nameHeader match
+            case Some(name) => safePathToFile(path / name)
+            case None => safePathToFile(path)
+        archiveType(fileName) contains org.openmole.tool.archive.ArchiveType.TarGZ
+
+      if extract && isArchive
+      then
+        import org.openmole.tool.archive.*
+        val dest = safePathToFile(path)
+        val tis = TarArchiveInputStream(new GZIPInputStream(response.getEntity.getContent))
+        try tis.extract(dest, overwrite = overwrite)
+        finally tis.close()
+      else
         def extractName = checkedURL.split("/").last
+        val dest = safePathToFile(path / nameHeader.getOrElse(extractName))
+        if !dest.exists() || overwrite
+        then dest.withOutputStream(os ⇒ copy(response.getEntity.getContent, os))
+        else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
 
-        val name =
-          response.getAllHeaders.map(h => h.getName -> h.getValue).flatMap {
-            case ("Content-Disposition", value) ⇒
-              value.split(";").map(_.split("=")).find(_.head.trim == "filename").map {
-                filename ⇒
-                  val name = filename.last.trim
-                  if (name.startsWith("\"") && name.endsWith("\"")) name.drop(1).dropRight(1) else name
-              }
-            case _ ⇒ None
-          }.headOption.getOrElse(extractName)
+  def cloneRepository(remoteURL: String, destination: SafePath, overwrite: Boolean): Option[SafePath] =
+    import services.{workspace}
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+    val destPath =
+      val name = remoteURL.split("/").last
+      def nameValue = if name.endsWith(".git") then name.dropRight(".git".length) else name
+      destination / nameValue
 
-        val is = response.getEntity.getContent
+    val destinationFile = destPath.toFile
+    if destinationFile.exists()
+    then
+      if overwrite
+      then
+        destinationFile.recursiveDelete
+        GitService.clone(remoteURL, destPath.toFile, authentications)
+        None
+      else Some(destPath)
+    else
+      GitService.clone(remoteURL, destPath.toFile, authentications)
+      None
 
-        if
-          extract && (archiveType(safePathToFile(path)) contains org.openmole.tool.archive.ArchiveType.TarGZ)
-        then
-          import org.openmole.tool.archive.*
-          val dest = safePathToFile(path)
-          val tis = TarArchiveInputStream(new GZIPInputStream(is))
-          try tis.extract(dest, overwrite = overwrite)
-          finally tis.close()
-        else
-          val dest = safePathToFile(path / name)
-          if !dest.exists() || overwrite
-          then dest.withOutputStream(os ⇒ copy(is, os))
-          else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
-    }
+  def commit(paths: Seq[SafePath], message: String): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git =>
+        GitService.commit(paths.map(_.toFile), message)(git)
 
+  def revert(paths: Seq[SafePath]): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git =>
+        GitService.revert(paths.map(_.toFile))(git)
 
+  def add(paths: Seq[SafePath]): Unit =
+    import services.workspace
+    paths.headOption.foreach: hf =>
+      GitService.withGit(safePathToFile(hf), projectsDirectory): git =>
+        GitService.add(paths.map(_.toFile))(git)
 
+  def pull(from: SafePath): MergeStatus =
+    import services.workspace
+
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.pull(git, authentications)
+    .getOrElse(MergeStatus.Empty)
+
+  def push(fromPath: SafePath): PushStatus =
+    import services.workspace
+
+    val authentications = gitAuthenticationFromData(gitAuthentications)
+
+    GitService.withGit(safePathToFile(fromPath), projectsDirectory): git =>
+      GitService.push(git, authentications)
+    .getOrElse(PushStatus.Failed)
+
+  def branchList(from: SafePath): Option[BranchData] =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      BranchData(GitService.branchList(git).map(_.split("/").last), git.getRepository.getBranch)
+
+  def checkout(from: SafePath, branchName: String): Unit =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.checkout(branchName)(git)
+
+  def stash(from: SafePath): Unit =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.stash(git)
+
+  def stashPop(from: SafePath): MergeStatus =
+    import services.workspace
+    GitService.withGit(safePathToFile(from), projectsDirectory): git =>
+      GitService.stashPop(git)
+    .getOrElse(MergeStatus.Empty)
+
+  def gitAuthenticationEquality(d1: GitPrivateKeyAuthenticationData, d2: GitPrivateKeyAuthenticationData) = d1.directory == d2.directory
+
+  def gitAuthentications: Seq[GitPrivateKeyAuthenticationData] =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, cypher}
+    Authentication.load[GitPrivateKeyAuthenticationData].map: d =>
+      d.copy(password = cypher.decrypt(d.password))
+
+  def addGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, cypher}
+    Authentication.save(d.copy(password = cypher.encrypt(d.password)), gitAuthenticationEquality)
+
+  def removeGitAuthentication(d: GitPrivateKeyAuthenticationData, removeFile: Boolean) =
+    import io.circe.generic.auto.*
+    import org.openmole.core.authentication.*
+    import services.{authenticationStore, workspace}
+    Authentication.remove(d, gitAuthenticationEquality)
+    if removeFile && d.directory.parent == SafePath.root(ServerFileSystemContext.Authentication)
+    then safePathToFile(d.directory).recursiveDelete
+
+  // Password is not cyphered since it commes from the GUI
+  def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
+    import services.{cypher, workspace}
+
+    def isPasswordCorrect(path: String, password: String): Option[Throwable] =
+      import net.schmizz.sshj.*
+
+      val sshClient = new SSHClient()
+      try
+        val verifier = new transport.verification.HostKeyVerifier:
+          def verify(hostname: String, port: Int, key: java.security.PublicKey): Boolean = true
+          def findExistingAlgorithms(hostname: String, port: Int): java.util.List[String] = new java.util.ArrayList()
+
+        sshClient.addHostKeyVerifier(verifier)
+        val keyProvider = sshClient.loadKeys(path, password)
+        None
+      catch
+        case e: IOException => Some(e)
+      finally sshClient.close()
+
+    d.privateKeyPath.map: file =>
+      val privateKey = safePathToFile(file)
+      isPasswordCorrect(privateKey.getAbsolutePath, d.password) match
+        case None => Seq(PassedTest("Password is correct"))
+        case Some(e) => Seq(FailedTest("Password is incorrect", ErrorData(e)))
+    .getOrElse(Seq(FailedTest("Private key not set", ErrorData.empty)))
+    
 }

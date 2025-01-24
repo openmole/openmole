@@ -25,8 +25,8 @@ object TakeSampling {
   implicit def isSampling[S]: IsSampling[TakeSampling[S]] = s ⇒ {
     def validate: Validate = s.sampling(s.s).validate ++ s.n.validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
-    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def outputs: Iterable[Val[?]] = s.sampling(s.s).outputs
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
       import p._
       s.sampling(s.s).sampling.from(context).take(s.n.from(context))
     }

@@ -19,6 +19,5 @@ package org.openmole.core.workflow.execution
 
 import org.openmole.core.workflow.job._
 
-trait ExecutionJob {
+trait ExecutionJob:
   def moleJobIds: Iterable[JobId]
-}

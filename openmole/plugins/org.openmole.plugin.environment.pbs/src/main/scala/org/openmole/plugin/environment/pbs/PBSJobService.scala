@@ -7,22 +7,23 @@ import org.openmole.plugin.environment.batch.storage.{ HierarchicalStorageInterf
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.plugin.environment.pbs.PBSEnvironment.Parameters
 import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage }
-import _root_.gridscale.effectaside
 
-class PBSJobService[S, H](
+class PBSJobService[S](
   s:                 S,
   tmpDirectory:      String,
   installation:      RuntimeInstallation[_],
   parameters:        Parameters,
-  h:                 H,
-  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], headNode: HeadNode[H], services: BatchEnvironment.Services, systemInterpreter: effectaside.Effect[effectaside.System]) {
+  headnode:          HeadNode,
+  val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services):
 
   import services._
 
-  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String) = {
+  def submit(serializedJob: SerializedJob, outputPath: String, jobDirectory: String, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+
     val workDirectory = parameters.workDirectory getOrElse "/tmp"
 
-    def buildScript(serializedJob: SerializedJob, outputPath: String) = {
+    def buildScript(serializedJob: SerializedJob, outputPath: String) =
       SharedStorage.buildScript(
         installation.apply,
         jobDirectory,
@@ -34,7 +35,6 @@ class PBSJobService[S, H](
         s,
         modules = parameters.modules
       )
-    }
 
     val remoteScript = buildScript(serializedJob, outputPath)
 
@@ -56,22 +56,25 @@ class PBSJobService[S, H](
                  |bash script:
                  |$remoteScript""".stripMargin)
 
-    val id = accessControl { gridscale.pbs.submit(h, description) }
+    val id = accessControl { gridscale.pbs.submit(headnode, description) }
 
     log(FINE, s"""Submitted PBS job with PBS script:
                  |uniqId: ${id.uniqId}
                  |job id: ${id.jobId}""".stripMargin)
 
     id
-  }
 
-  def state(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { GridScaleJobService.translateStatus(gridscale.pbs.state(h, id)) }
+  def state(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      GridScaleJobService.translateStatus(gridscale.pbs.state(headnode, id))
 
-  def delete(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { gridscale.pbs.clean(h, id) }
+  def delete(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      gridscale.pbs.clean(headnode, id)
 
-  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob) =
-    accessControl { (gridscale.pbs.stdOut(h, id), gridscale.pbs.stdErr(h, id)) }
-
-}
+  def stdOutErr(id: gridscale.cluster.BatchScheduler.BatchJob, priority: AccessControl.Priority) =
+    given AccessControl.Priority = priority
+    accessControl:
+      (gridscale.pbs.stdOut(headnode, id), gridscale.pbs.stdErr(headnode, id))

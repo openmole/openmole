@@ -28,15 +28,15 @@ import monocle.Focus
 object Mole {
 
   def nextCapsules(mole: Mole)(from: MoleCapsule, lvl: Int) =
-    nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule → lvl }
+    nextTransitions(mole)(from, lvl).map { case (t, lvl) => t.end.capsule -> lvl }
 
   def nextTransitions(mole: Mole)(from: MoleCapsule, lvl: Int) =
     mole.outputTransitions(from).map {
-      case t if Transition.isAggregation(t)    ⇒ t → (lvl - 1)
-      case t if Transition.isEndExploration(t) ⇒ t → (lvl - 1)
-      case t if Transition.isSlave(t)          ⇒ t → lvl
-      case t if Transition.isExploration(t)    ⇒ t → (lvl + 1)
-      case t                                   ⇒ t → lvl
+      case t if Transition.isAggregation(t)    => t -> (lvl - 1)
+      case t if Transition.isEndExploration(t) => t -> (lvl - 1)
+      case t if Transition.isSlave(t)          => t -> lvl
+      case t if Transition.isExploration(t)    => t -> (lvl + 1)
+      case t                                   => t -> lvl
     }
 
   /**
@@ -47,17 +47,17 @@ object Mole {
    * @return
    */
   def levels(mole: Mole) = {
-    val cache = mutable.HashMap(mole.root → 0)
-    val toProceed = mutable.ListBuffer(mole.root → 0)
+    val cache = mutable.HashMap(mole.root -> 0)
+    val toProceed = mutable.ListBuffer(mole.root -> 0)
 
     while (!toProceed.isEmpty) {
       val (capsule, level) = toProceed.remove(0)
       nextCapsules(mole)(capsule, level).foreach {
-        case (c, l) ⇒
+        case (c, l) =>
           val continue = !cache.contains(c)
           val lvl = cache.getOrElseUpdate(c, l)
           if (lvl != l) throw new UserBadDataError("Inconsistent level found for capsule " + c)
-          if (continue) toProceed += (c → l)
+          if (continue) toProceed += (c -> l)
       }
     }
     cache
@@ -79,19 +79,17 @@ case class Mole(
   dataChannels: Iterable[DataChannel] = Iterable.empty,
   inputs:       PrototypeSet          = PrototypeSet.empty,
   validate:     Validate              = Validate.success
-) {
+):
 
-  lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
+  lazy val slots = (TransitionSlot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
   lazy val capsules = slots.keys
-  lazy val inputTransitions = transitions.groupBy(_.end).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
-  lazy val outputTransitions = transitions.groupBy(_.start).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
-  lazy val inputDataChannels = dataChannels.groupBy(_.end).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
-  lazy val outputDataChannels = dataChannels.groupBy(_.start).map { case (k, v) ⇒ k -> v.toSet }.withDefault(c ⇒ Iterable.empty)
+  lazy val inputTransitions = transitions.groupBy(_.end).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
+  lazy val outputTransitions = transitions.groupBy(_.start).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
+  lazy val inputDataChannels = dataChannels.groupBy(_.end).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
+  lazy val outputDataChannels = dataChannels.groupBy(_.start).map { case (k, v) => k -> v.toSet }.withDefault(c => Iterable.empty)
 
   lazy val levels = Mole.levels(this)
   def level(c: MoleCapsule) =
-    levels.get(c) match {
-      case Some(l) ⇒ l
-      case None    ⇒ throw new InternalProcessingError(s"Capsule $c not found in $this")
-    }
-}
+    levels.get(c) match
+      case Some(l) => l
+      case None    => throw new InternalProcessingError(s"Capsule $c not found in $this")

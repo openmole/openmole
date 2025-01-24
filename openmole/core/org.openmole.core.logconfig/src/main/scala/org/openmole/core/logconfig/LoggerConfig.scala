@@ -23,7 +23,13 @@ import java.util.logging._
 
 object LoggerConfig:
 
-  def setLevel(l: String, level: Level) = Logger.getLogger(l).setLevel(level)
+  lazy val infoBlackList =
+    Seq(
+      "org.http4s.blaze",
+      "net.schmizz.sshj"
+    )
+
+  //def setLevel(l: String, level: Level) = Logger.getLogger(l).setLevel(level)
 
   def level(level: Level) =
     LogManager.getLogManager.reset
@@ -31,7 +37,12 @@ object LoggerConfig:
     val rootLogger = Logger.getLogger("")
     rootLogger.setLevel(level)
 
-    val ch = new ConsoleHandler
+    val ch = new ConsoleHandler:
+      override def publish(record: LogRecord): Unit =
+        if infoBlackList.exists(record.getSourceClassName.startsWith) && record.getLevel.intValue() < Level.WARNING.intValue()
+        then ()
+        else super.publish(record)
+
     ch.setLevel(level)
     rootLogger.addHandler(ch)
 

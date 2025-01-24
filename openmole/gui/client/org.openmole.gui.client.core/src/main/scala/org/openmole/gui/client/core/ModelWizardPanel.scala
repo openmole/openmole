@@ -113,18 +113,18 @@ object ModelWizardPanel:
         case util.Success(_) =>
 
     val uploadDirectorySwitch = Component.Switch("Upload a directory", false, "wizardControls")
-    val uploadDirectory = Var(false)
+    //val uploadDirectory = Var(false)
 
     def upButton(tmpDirectory: SafePath) =
       label(
         cls := "inputFileStyle",
         margin := "15px",
-        transferring.withTransferWaiter:
+        transferring.withTransferWaiter():
           _ ⇒
             div(
               child <--
-                uploadDirectory.signal.map: directory =>
-                  OMTags.omFileInput(fInput ⇒
+                uploadDirectorySwitch.checked.signal.map: directory =>
+                  OMTags.omFileInput(fInput =>
                     if fInput.ref.files.length > 0
                     then uploadAndParse(tmpDirectory, fInput).andThen { _ => fInput.ref.value = "" },
                     directory = directory
@@ -176,7 +176,7 @@ object ModelWizardPanel:
             destination = content.directory match
               case None => directory
               case Some(d) => directory / d
-            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)))
+            _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)), overwrite = true)
             modelName = content.name.getOrElse("Model.oms")
             _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
           yield
@@ -225,7 +225,7 @@ object ModelWizardPanel:
                   if mmd.data.inputs.nonEmpty || mmd.data.outputs.nonEmpty
                   then
                     exclusiveMenu.entry("Inputs / Ouputs", 1,
-                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.mapping), mmd.data.outputs.flatMap(_.mapping)))
+                      div(height := "200px", ioTagBuilder(mmd.data.inputs.flatMap(_.name), mmd.data.outputs.flatMap(_.name)))
                     )
                   else div()
                 case None => div()
@@ -257,7 +257,6 @@ object ModelWizardPanel:
           Seq(upload, io, cmd, build)
         case _ => Seq()
       ,
-      uploadDirectorySwitch.element.amend(onClick --> { t => uploadDirectory.set(uploadDirectorySwitch.isChecked) }),
       div(onMountCallback(_ => currentDirectory.set(panels.directory.now()))),
       //            div(
       //              onUnmountCallback { _ => api.deleteFiles(Seq(tmpDirectory)) }

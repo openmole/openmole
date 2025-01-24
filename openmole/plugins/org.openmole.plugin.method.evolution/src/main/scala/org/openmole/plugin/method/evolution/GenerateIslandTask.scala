@@ -23,12 +23,14 @@ import org.openmole.core.workflow.task._
 import org.openmole.core.context._
 import org.openmole.core.setter.DefinitionScope
 
-object GenerateIslandTask {
+object GenerateIslandTask:
 
-  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[?])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+  def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[?])(using sourcecode.Name, DefinitionScope) =
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
 
-    ClosureTask("GenerateIslandTask") { (context, rng, _) ⇒
+    Task("GenerateIslandTask"): param =>
+      import param.*
+
       val p = context(evolution.populationVal)
 
       import evolution.integration.iManifest
@@ -36,15 +38,13 @@ object GenerateIslandTask {
       def samples =
         if (p.isEmpty) Vector.empty
         else sample match 
-          case Some(s) ⇒ rng().shuffle(p.toVector).take(s)
+          case Some(s) ⇒ random().shuffle(p.toVector).take(s)
           case None    ⇒ p.toVector
 
       def populations = Array.fill(size)(samples.toArray)
       Variable(outputPopulation.toArray, populations)
-    } set (
+    .set (
       inputs += evolution.populationVal,
       exploredOutputs += outputPopulation.toArray
     )
-  }
 
-}

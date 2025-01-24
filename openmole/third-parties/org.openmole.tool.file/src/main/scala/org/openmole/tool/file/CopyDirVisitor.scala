@@ -43,7 +43,7 @@ class CopyDirVisitor(fromPath: Path, toPath: Path, copyOptions: Array[CopyOption
     // if this fails, we're in the case of an access denied on a *file*
     try {
       // force type inference with _*
-      Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions: _*)
+      Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOptions *)
     }
     catch {
       case exc: java.nio.file.AccessDeniedException ⇒ Log.logger.warning(s"Could not read file ${exc.getFile} (Permission Denied), skip from copy")

@@ -33,7 +33,7 @@ object LoadSource {
   implicit def isIO: InputOutputBuilder[LoadSource] = InputOutputBuilder(Focus[LoadSource](_.config))
   implicit def isInfo: InfoBuilder[LoadSource] = InfoBuilder(Focus[LoadSource](_.info))
 
-  def apply(file: FromContext[String], prototypes: Val[_]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(file: FromContext[String], prototypes: Val[?]*)(implicit serializerService: SerializerService, name: sourcecode.Name, definitionScope: DefinitionScope) =
     new LoadSource(
       file,
       prototypes.toVector,
@@ -46,7 +46,7 @@ object LoadSource {
 
 case class LoadSource(
   file:              FromContext[String],
-  prototypes:        Vector[Val[_]],
+  prototypes:        Vector[Val[?]],
   config:            InputOutputConfig,
   info:              InfoConfig,
   serializerService: SerializerService

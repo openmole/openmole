@@ -84,7 +84,7 @@ object tools {
     case class OptionalName(name: Option[String])
 
     def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) =
-      if (Test.testing) Test.allTests += Test(header + "\n" + code, name.name)
+      Test.list(Test(header + "\n" + code, name.name))
       apply(code, "scala")
 
     def code(code: String) = openmoleNoTest(code)
@@ -135,12 +135,12 @@ object tools {
 
   }
 
-  def h2(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h2(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
-  def h3(elements: Any*): Frag = Seq(div(links.anchor(elements): _*), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements): _*))
+  def h2(elements: Any*): Frag = Seq(div(links.anchor(elements) *), scalatags.Text.all.h2(elements.map(links.toModifier) ++ links.linkIcon(elements) *))
+  def h3(elements: Any*): Frag = Seq(div(links.anchor(elements) *), scalatags.Text.all.h3(elements.map(links.toModifier) ++ links.linkIcon(elements) *))
 
   def anchor(title: String) = s"#${shared.anchor(title)}"
 
-  def img(xs: Modifier*) = scalatags.Text.all.img(Seq(cls := "doc-img") ++ xs: _*)
+  def img(xs: Modifier*) = scalatags.Text.all.img(Seq(cls := "doc-img") ++ xs *)
   def br = scalatags.Text.all.br(cls := "doc-br")
 
   case class Parameter(name: String, `type`: String, description: String)

@@ -98,7 +98,7 @@ class RESTAPIv1Server(impl: ApiImpl):
       case req @ GET -> root / "files" :? PathParam(path) =>
         // wget --content-disposition  localhost:46857/rest/v1/files@path=/trempoline
         val sp = fileToSafePath(path.getOrElse(""))
-        CoreAPIServer.download(req, sp)
+        CoreAPIServer.download(req, Seq(sp))
 
       case req @ POST -> root / "files" :? PathParam(path) =>
         // curl  -F "test.txt=@/tmp/test.txt" localhost:46857/rest/v1/files?path=/trempoline/

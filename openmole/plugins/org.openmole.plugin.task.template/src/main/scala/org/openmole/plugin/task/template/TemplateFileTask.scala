@@ -32,75 +32,55 @@ import org.openmole.core.setter.InfoBuilder
 
 object TemplateFileTask:
 
-  given InputOutputBuilder[TemplateFileTask] = InputOutputBuilder(Focus[TemplateFileTask](_.config))
-  given InfoBuilder[TemplateFileTask] = InfoBuilder(Focus[TemplateFileTask](_.info))
-
   def apply(
     template: File,
     output:   Val[File]
-  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): TemplateFileTask =
+  )(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     TemplateFileTask(
       template -> output
     )
 
   def apply(
     template: Val[File],
-    output: Val[File])(using sourcecode.Name, DefinitionScope): TemplateFileTask =
+    output: Val[File])(using sourcecode.Name, DefinitionScope): FromContextTask =
     TemplateFileTask(
       variable = Seq(template -> output)
     )
 
   def apply(
-    file: (File, Val[File])*)(using sourcecode.Name, DefinitionScope): TemplateFileTask =
+    file: (File, Val[File])*)(using sourcecode.Name, DefinitionScope): FromContextTask =
     TemplateFileTask(file)
 
   def apply(
    file: Seq[(File, Val[File])] = Seq(),
-   variable: Seq[(Val[File], Val[File])] = Seq())(using sourcecode.Name, DefinitionScope): TemplateFileTask =
-    new TemplateFileTask(
-      file,
-      variable,
-      InputOutputConfig(),
-      InfoConfig()) set(
+   variable: Seq[(Val[File], Val[File])] = Seq())(using sourcecode.Name, DefinitionScope): FromContextTask =
+    val expanded = file.map: (template, v) =>
+      template.withInputStream: is ⇒
+        (template.getName, ExpandedString(is), v)
+
+    Task("TemplateFileTask"): p =>
+      import p.*
+
+      val variablesFromFiles =
+        for
+          (name, template, output) <- expanded
+        yield
+          val file = executionContext.moleExecutionDirectory.newFile(name, ".tmp")
+          file.content = template.from(context)
+          Variable(output, file)
+
+      val variablesFromVariables =
+        for
+          (v, output) <- variable
+        yield
+          val expanded = context(v).withInputStream { is ⇒ ExpandedString(is).from(context) }
+          val file = executionContext.moleExecutionDirectory.newFile("template", ".tmp")
+          file.content = expanded
+          Variable(output, file)
+
+      context ++ variablesFromFiles ++ variablesFromVariables
+    .set(
       dsl.outputs ++= file.map(_._2),
       dsl.inputs ++= variable.map(_._1),
       dsl.outputs ++= variable.map(_._2)
     )
-
-
-case class TemplateFileTask(
-  files: Seq[(File, Val[File])],
-  variables: Seq[(Val[File], Val[File])],
-  config:   InputOutputConfig,
-  info:     InfoConfig
-) extends Task:
-
-  @transient lazy val expanded = files.map: (template, v) =>
-    template.withInputStream: is ⇒
-      (template.getName, ExpandedString(is), v)
-
-  override protected def process(executionContext: TaskExecutionContext) = FromContext: parameters ⇒
-    import parameters._
-
-    val variablesFromFiles =
-      for
-        (name, template, output) <- expanded
-      yield
-        val file = executionContext.moleExecutionDirectory.newFile(name, ".tmp")
-        file.content = template.from(context)
-        Variable(output, file)
-
-    val variablesFromVariables =
-      for
-        (v, output) <- variables
-      yield
-        val expanded = context(v).withInputStream { is ⇒ ExpandedString(is).from(context) }
-        val file = executionContext.moleExecutionDirectory.newFile("template", ".tmp")
-        file.content = expanded
-        Variable(output, file)
-
-    context ++ variablesFromFiles ++ variablesFromVariables
-
-
-
-

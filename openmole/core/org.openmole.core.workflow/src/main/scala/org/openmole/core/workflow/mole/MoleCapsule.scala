@@ -27,7 +27,7 @@ import org.openmole.core.workflow.validation._
 import org.openmole.tool.random._
 import monocle.Focus
 
-object MoleCapsule {
+object MoleCapsule:
 
   case class Master(persist: Seq[String])
 
@@ -37,7 +37,7 @@ object MoleCapsule {
   def isStrainer(c: MoleCapsule) = c.strain
 
   /* Test wether there is a path from this slot reaching the root of the mole without looping to the capsule it is bounded to */
-  def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean = {
+  def reachRootWithNoLoop(mole: Mole)(slot: TransitionSlot): Boolean =
     def previousCapsules(s: TransitionSlot) = mole.inputTransitions(s).map { _.start }
     def loopToCapsule(s: TransitionSlot) = previousCapsules(s).exists(_ == slot.capsule)
 
@@ -48,59 +48,68 @@ object MoleCapsule {
 
     toProceed.pushAll(previousCapsules(slot).flatMap(mole.slots))
 
-    while (!reachRoot && !toProceed.isEmpty) {
+    while !reachRoot && !toProceed.isEmpty
+    do
       val s = toProceed.pop()
 
-      if (!loopToCapsule(s)) {
-        if (s.capsule == mole.root) reachRoot = true
-        else {
+      if !loopToCapsule(s)
+      then
+        if s.capsule == mole.root
+        then reachRoot = true
+        else
           val capsules = previousCapsules(s)
 
-          for {
-            c ← capsules
+          for
+            c <- capsules
             if !seen.contains(c)
-            s ← mole.slots(c)
-          } toProceed.push(s)
+            s <- mole.slots(c)
+          do toProceed.push(s)
 
           seen ++= capsules
-        }
-      }
-    }
 
     reachRoot
-  }
 
   def received(capsule: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks): PrototypeSet =
-    if (capsule == mole.root) mole.inputs
-    else {
+    if capsule == mole.root
+    then mole.inputs
+    else
       val slots = mole.slots(capsule)
-      val noStrainer = slots.toSeq.filter(s ⇒ MoleCapsule.reachRootWithNoLoop(mole)(s))
+      val noStrainer = slots.toSeq.filter(s => MoleCapsule.reachRootWithNoLoop(mole)(s))
 
       val bySlot =
-        for {
-          slot ← noStrainer
+        for
+          slot <- noStrainer
           received = TypeUtil.validTypes(mole, sources, hooks)(slot)
-        } yield received.map(_.toVal)
+        yield received.map(_.toVal)
 
       val allNames = bySlot.toSeq.flatMap(_.map(_.name)).distinct
       val byName = bySlot.map(_.toSeq.groupBy(_.name).withDefaultValue(Seq.empty))
 
-      def haveAllTheSameType(ps: Seq[Val[_]]) = ps.map(_.`type`).distinct.size == 1
-      def inAllSlots(ps: Seq[Val[_]]) = ps.size == noStrainer.size
+      def haveAllTheSameType(ps: Seq[Val[?]]) = ps.map(_.`type`).distinct.size == 1
+      def inAllSlots(ps: Seq[Val[?]]) = ps.size == noStrainer.size
 
       val prototypes =
-        for {
-          name ← allNames
+        for
+          name <- allNames
           inSlots = byName.map(_(name).toSeq).toSeq
           if inSlots.forall(haveAllTheSameType)
           oneBySlot = inSlots.map(_.head)
           if inAllSlots(oneBySlot) && haveAllTheSameType(oneBySlot)
-        } yield oneBySlot.head
+        yield oneBySlot.head
 
       prototypes
-    }
 
-}
+
+  def completeMoleTask(capsule: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) =
+    capsule._task match
+      case task: MoleTask => Focus[MoleTask](_.mole.inputs) modify (_ ++ capsule.inputs(mole, sources, hooks)) apply task
+      case task => task
+
+
+//  def runtimeTask(capsule: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) =
+//    val withInputs = capsule.task(mole, sources, hooks)
+//    RuntimeTask(withInputs, capsule.strain)
+
 
 /**
  * A capsule containing a task.
@@ -110,15 +119,7 @@ object MoleCapsule {
  */
 class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val master: Option[MoleCapsule.Master]) {
 
-  def task(mole: Mole, sources: Sources, hooks: Hooks) = runtimeTask(mole, sources, hooks).task
-
-  def runtimeTask(mole: Mole, sources: Sources, hooks: Hooks) = 
-    val withInputs =
-      _task match {
-        case task: MoleTask ⇒ Focus[MoleTask](_.mole.inputs) modify (_ ++ inputs(mole, sources, hooks)) apply task
-        case task           ⇒ task
-      }
-    RuntimeTask(withInputs, strain)
+  def task(mole: Mole, sources: Sources, hooks: Hooks): Task = MoleCapsule.completeMoleTask(this, mole, sources, hooks)
 
   /**
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
@@ -151,12 +152,12 @@ class MoleCapsule(val _task: Task, val strain: Boolean, val funnel: Boolean, val
 
   private def receivedInputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsInputs = capsuleInputs(mole, sources, hooks)
-    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsInputs.contains(d.name))
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d => capsInputs.contains(d.name))
   }
 
   private def strainedOutputs(mole: Mole, sources: Sources, hooks: Hooks) = {
     lazy val capsOutputs = capsuleOutputs(mole, sources, hooks)
-    MoleCapsule.received(this, mole, sources, hooks).filterNot(d ⇒ capsOutputs.contains(d.name))
+    MoleCapsule.received(this, mole, sources, hooks).filterNot(d => capsOutputs.contains(d.name))
   }
 
   override def toString =
@@ -169,7 +170,7 @@ object StrainerCapsule {
 }
 
 object MasterCapsule {
-  def apply(task: Task, persist: Seq[Val[_]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
-  def apply(t: Task, persist: Val[_]*): MoleCapsule = apply(t, persist, false)
-  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n ⇒ context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
+  def apply(task: Task, persist: Seq[Val[?]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
+  def apply(t: Task, persist: Val[?]*): MoleCapsule = apply(t, persist, false)
+  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n => context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
 }

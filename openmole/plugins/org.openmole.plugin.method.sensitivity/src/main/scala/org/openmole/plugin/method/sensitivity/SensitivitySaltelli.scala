@@ -29,8 +29,8 @@ object SensitivitySaltelli {
 
   def methodName = MethodMetaData.name(SensitivitySaltelli)
 
-  def firstOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("firstOrder", output.name))
-  def totalOrder(input: Val[_], output: Val[_]) = input.withNamespace(Namespace("totalOrder", output.name))
+  def firstOrder(input: Val[?], output: Val[?]) = input.withNamespace(Namespace("firstOrder", output.name))
+  def totalOrder(input: Val[?], output: Val[?]) = input.withNamespace(Namespace("totalOrder", output.name))
 
 
   object MetaData:
@@ -48,12 +48,12 @@ object SensitivitySaltelli {
 
   case class MetaData(inputs: Seq[ValData], outputs: Seq[ValData])
 
-  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[_]])
+  case class Method(inputs: Seq[ScalableValue], outputs: Seq[Val[?]])
 
   given ExplorationMethod[SensitivitySaltelli, Method] = p =>
     implicit def defScope: DefinitionScope = p.scope
 
-    val sampling = SaltelliSampling(p.sample, p.inputs: _*)
+    val sampling = SaltelliSampling(p.sample, p.inputs *)
 
     val aggregation =
       SaltelliAggregation(
@@ -261,7 +261,7 @@ object SensitivitySaltelli {
 
         def toVariables(
           matrix: Array[Array[Double]],
-          m:      Namespace): List[Iterable[Variable[_]]] =
+          m:      Namespace): List[Iterable[Variable[?]]] =
           matrix.zipWithIndex.map {
             case (l, index) ⇒
               def line = ScalableValue.toVariables(saltelli.factors, l).from(context)
@@ -297,7 +297,7 @@ object SensitivitySaltelli {
 
 
     def apply(samples: FromContext[Int], factors: ScalableValue*): SaltelliSampling =
-      new SaltelliSampling(samples, true, factors: _*)
+      new SaltelliSampling(samples, true, factors *)
 
     def buildC(
       i: Int,

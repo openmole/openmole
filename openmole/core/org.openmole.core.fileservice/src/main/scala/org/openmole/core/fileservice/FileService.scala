@@ -44,7 +44,7 @@ object FileService:
   val archiveCacheSize = PreferenceLocation("FileService", "ArchiveCacheSize", Some(1000L))
   val archiveCacheTime = PreferenceLocation("FileService", "ArchiveCacheTime", Some(10 minutes))
 
-  def apply()(implicit preference: Preference, threadProvider: ThreadProvider) =
+  def apply()(using Preference, ThreadProvider) =
     val fs = new FileService
     start(fs)
     fs
@@ -56,7 +56,7 @@ object FileService:
   class FileWithGC(path: String, fileService: FileService) extends java.io.File(path):
     override protected def finalize() = fileService.asynchronousRemove(new java.io.File(getPath))
 
-  def stub() = apply()(Preference.stub(), ThreadProvider.stub())
+  def stub() = apply()(using Preference.stub(), ThreadProvider.stub())
 
 
 object FileServiceCache:
@@ -77,21 +77,21 @@ class FileService(implicit preference: Preference):
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
-  def hashNoCache(file: File, hashType: HashType = SHA1)(implicit newFile: TmpDirectory) =
+  def hashNoCache(file: File, hashType: HashType = SHA1)(using TmpDirectory) =
     if file.isDirectory
     then
-      newFile.withTmpFile: archive ⇒
+      TmpDirectory.withTmpFile: archive ⇒
         file.archive(archive, time = false)
         hashFile(archive, hashType)
     else hashFile(file, hashType)
 
   def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash =
-    def hash = hashFile(if (file.isDirectory) archiveForDir(file) else file)
+    def hash = hashFile(if file.isDirectory then archiveForDir(file) else file)
     fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
 
   def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File =
     def archive =
-      val ret = newFile.newFile("archive", ".tar")
+      val ret = TmpDirectory.newFile("archive", ".tar")
       directory.archive(ret, time = false)
       wrapRemoveOnGC(ret)
 

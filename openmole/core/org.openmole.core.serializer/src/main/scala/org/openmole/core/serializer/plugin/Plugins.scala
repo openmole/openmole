@@ -24,5 +24,5 @@ import org.openmole.tool.cache.*
 import java.io.File
 
 trait Plugins:
-  def plugins(using TmpDirectory, FileService, KeyValueCache): Seq[File]
+  def plugins: Seq[File]
 

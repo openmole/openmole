@@ -1,6 +1,6 @@
 package org.openmole.gui.plugin.authentication.egi
 
-import org.openmole.gui.shared.data.{AuthenticationData, ErrorData, MessageErrorData, SafePath, Test}
+import org.openmole.gui.shared.data.{ErrorData, MessageErrorData, SafePath, ServerFileSystemContext, Test}
 import org.openmole.gui.shared.data
 
 /*
@@ -20,9 +20,10 @@ import org.openmole.gui.shared.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+object EGIAuthenticationData:
+  def directory = SafePath(Seq("egi"), ServerFileSystemContext.Authentication)
+
 case class EGIAuthenticationData(
   password:         String         = "",
-  privateKey:       Option[SafePath] = None
-) extends AuthenticationData {
-  def name = "egi.p12"
-}
+  privateKey:       Option[SafePath] = None)
+

@@ -28,9 +28,9 @@ object TestSource {
 }
 
 case class TestSource(
-  f:      Context ⇒ Context = identity[Context],
+  f:      Context => Context = identity[Context],
   config: InputOutputConfig = InputOutputConfig(),
   info:   InfoConfig        = InfoConfig()
 ) extends Source {
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { p ⇒ f(p.context) }
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { p => f(p.context) }
 }

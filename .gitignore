@@ -32,3 +32,5 @@ metals.sbt
 **/openmole/bin/org.openmole.marketindex/src/main/resources/openmole-market
 .vscode/
 package-lock.json
+node_modules
+.scalafmt.conf

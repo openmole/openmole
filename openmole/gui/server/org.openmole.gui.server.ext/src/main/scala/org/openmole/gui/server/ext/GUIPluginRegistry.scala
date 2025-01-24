@@ -26,7 +26,7 @@ import scala.collection.JavaConverters.*
 object GUIPluginRegistry:
   private lazy val plugins = new java.util.concurrent.ConcurrentHashMap[AnyRef, GUIPluginInfo]().asScala
 
-  def toGUIPlugins(c: Class[_]): GUIPluginAsJS = c.getName
+  def toGUIPlugins(c: Class[?]): GUIPluginAsJS = c.getName
 
   def routers: Seq[Services => OMRouter] = plugins.flatMap(_._2.router).toSeq
 
@@ -42,6 +42,6 @@ object GUIPluginRegistry:
 
 case class GUIPluginInfo(
   router:         Option[Services ⇒ OMRouter]    = None,
-  authentication: Option[Class[_]]               = None,
-  wizard:         Option[Class[_]]               = None,
-  analysis:       Option[(String, Class[_])]     = None)
+  authentication: Option[Class[?]]               = None,
+  wizard:         Option[Class[?]]               = None,
+  analysis:       Option[(String, Class[?])]     = None)

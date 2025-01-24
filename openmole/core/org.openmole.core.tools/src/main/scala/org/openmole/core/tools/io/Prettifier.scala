@@ -40,7 +40,7 @@ object Prettifier extends JavaLogger {
   def prettify(o: Any, snipArray: Int = Int.MaxValue): String =
     try o match {
       case null                       ⇒ "null"
-      case o: Array[_]                ⇒ snip(o, snipArray)
+      case o: Array[?]                ⇒ snip(o, snipArray)
       case o: Seq[_]                  ⇒ snip(o, snipArray)
       case o: java.util.Collection[_] ⇒ snip(o.asScala, snipArray)
       case o                          ⇒ o.toString

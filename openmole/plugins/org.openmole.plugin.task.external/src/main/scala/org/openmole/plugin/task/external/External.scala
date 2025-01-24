@@ -64,10 +64,10 @@ object External:
       external.resources.flatMap(resourceExists)
 
   protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
-    inputFiles.map {
+    inputFiles.map:
       case InputFile(prototype, name, link) ⇒
         prototype → DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
-    }
+
   protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Iterable[DeployedFile] =
     val byLocation =
       resources.zipWithIndex.groupBy: (resource, _) ⇒
@@ -117,7 +117,7 @@ object External:
     val (newContext, inputFilesInfo) = deployInputFiles(external, context, resolver)
     (newContext, resourcesFiles ++ inputFilesInfo)
 
-  protected def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
+  def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     outputFiles.map:
       case OutputFile(name, prototype) ⇒
         val fileName = name.from(context)
@@ -125,11 +125,12 @@ object External:
         Variable(prototype, file)
 
   def contextFiles(outputs: PrototypeSet, context: Context): Seq[Variable[File]] =
-    InputOutputCheck.filterOutput(outputs, context).values.filter { v ⇒ v.prototype.`type` == ValType[File] }.map(_.asInstanceOf[Variable[File]]).toSeq
+    InputOutputCheck.filterOutput(outputs, context).values.filter(v => v.prototype.`type` == ValType[File]).map(_.asInstanceOf[Variable[File]]).toSeq
 
   def fetchOutputFiles(external: External, outputs: PrototypeSet, context: Context, resolver: PathResolver, workDirectories: Seq[File])(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     val resultContext = listOutputFiles(external.outputFiles, outputs, context, resolver, workDirectories)
-    val resultDirectory = newFile.newDir("externalresult")
+    // TODO use moleExecution directory here
+    val resultDirectory = TmpDirectory.newDirectory("externalresult")
     val outputContext = context ++ resultContext
     val result = outputContext ++ moveFilesOutOfWorkDirectory(outputs, outputContext, workDirectories, resultDirectory)
     fileService.deleteWhenEmpty(resultDirectory)
@@ -145,24 +146,24 @@ object External:
     do
       def parentMessage =
         if f.value.getParentFileSafe.exists()
-        then s"""its parent directory ${f.value.getParentFileSafe} contains [${f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ")}"]"""
+        then s"""its parent directory ${f.value.getParentFileSafe} contains [${f.value.getParentFileSafe.listFilesSafe.map(_.getName).mkString(", ")}]"""
         else s"""its parent directory ${f.value.getParentFileSafe} doesn't exist either"""
       throw new UserBadDataError(s"""Output file ${f.value.getAbsolutePath} (stored in variable ${f.prototype}) doesn't exist, $parentMessage""")
 
     // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =
-      allFiles.map { v ⇒ if (workDirectories.exists(_.isAParentOf(v.value))) Variable.copy(v)(value = v.value.realFile) else v }
+      allFiles.map { v ⇒ if workDirectories.exists(_.isAParentOf(v.value)) then Variable.copy(v)(value = v.value.realFile) else v }
 
     fetchedOutputFiles
 
   def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) =
-    val newFile = TmpDirectory(resultDirectory)
+    import org.openmole.tool.file.*
 
     contextFiles(outputs, context).map: v ⇒
       val movedFile =
         if workDirectories.exists(_.isAParentOf(v.value))
         then
-          val newDir = newFile.newDir("outputFile")
+          val newDir = resultDirectory.newDirectory("outputFile")
           newDir.mkdirs()
           val moved = fileService.wrapRemoveOnGC(newDir / v.value.getName)
           v.value.move(moved)

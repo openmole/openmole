@@ -1,48 +1,48 @@
 package org.openmole.plugin.environment.batch.environment
 
-import java.util.concurrent.Semaphore
+import org.openmole.tool.lock.PrioritySemaphore
 
-object AccessControl {
+object AccessControl:
 
-  def tryWithPermit[B](accessControl: AccessControl)(f: ⇒ B) = {
-    val t = tryAcquirePermit(accessControl)
-    if (t) try Some(f) finally releasePermit(accessControl)
-    else None
-  }
+  object Priority:
+    def apply(i: Int): Priority = i
 
-  def withPermit[B](accessControl: AccessControl)(f: ⇒ B) = {
-    aquirePermit(accessControl)
-    try f
-    finally releasePermit(accessControl)
-  }
+  object Bypass
+  opaque type Priority = Int | Bypass.type
+  
+  def defaultPrirority[T](f: Priority ?=> T) =
+    f(using 0)
 
-  private def tryAcquirePermit(accessControl: AccessControl) = {
-    val aq = accessControl.all.tryAcquire()
-    if (aq) permit(accessControl, Thread.currentThread())
-    aq
-  }
+  def bypassAccessControl[T](f: Priority ?=> T) =
+    f(using Bypass)
 
-  private def aquirePermit(accessControl: AccessControl) =
-    if (!isPermitted(accessControl, Thread.currentThread())) {
-      accessControl.all.acquire()
+  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: ⇒ B) =
+    priority match
+      case Bypass => f
+      case p: Int =>
+        acquirePermit(accessControl, p)
+        try f
+        finally releasePermit(accessControl)
+
+  private def acquirePermit(accessControl: AccessControl, priority: Int) =
+    if !isPermitted(accessControl, Thread.currentThread())
+    then
+      accessControl.semaphore.acquire(priority)
       permit(accessControl, Thread.currentThread())
-    }
 
-  private def releasePermit(accessControl: AccessControl) = {
+  private def releasePermit(accessControl: AccessControl) =
     revokePermit(accessControl, Thread.currentThread())
-    accessControl.all.release()
-  }
+    accessControl.semaphore.release()
 
   private def isPermitted(accessControl: AccessControl, thread: Thread) = accessControl.permittedThreads.synchronized(accessControl.permittedThreads.contains(thread.getId))
   private def permit(accessControl: AccessControl, thread: Thread) = accessControl.permittedThreads.synchronized(accessControl.permittedThreads.add(thread.getId))
   private def revokePermit(accessControl: AccessControl, thread: Thread) = accessControl.permittedThreads.synchronized(accessControl.permittedThreads.remove(thread.getId))
 
-}
 
-case class AccessControl(nbTokens: Int) { la ⇒
+case class AccessControl(nbTokens: Int):
   lazy val permittedThreads = collection.mutable.Set[Long]()
-  lazy val all = new Semaphore(nbTokens)
+  lazy val semaphore = new PrioritySemaphore(nbTokens)
 
-  def apply[T](f: ⇒ T): T = AccessControl.withPermit(this)(f)
-}
+  def apply[T](f: ⇒ T)(using AccessControl.Priority): T = AccessControl.withPermit(this)(f)
+
 

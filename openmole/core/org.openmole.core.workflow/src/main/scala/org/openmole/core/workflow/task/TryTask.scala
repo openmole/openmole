@@ -56,9 +56,11 @@ case class TryTask(
 
   override def validate: Validate = ValidateTask.validate(task)
 
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p =>
-    import p._
-    try Task.process(task, executionContext).from(context)
-    catch
-      case t: Throwable =>
-        p.context
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    val taskProcessing = task(taskExecutionBuildContext)
+    TaskExecution: p =>
+      import p.*
+      try TaskExecution.execute(taskProcessing, executionContext).from(context)
+      catch
+        case t: Throwable =>
+          p.context

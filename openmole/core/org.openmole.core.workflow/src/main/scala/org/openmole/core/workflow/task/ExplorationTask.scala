@@ -47,33 +47,33 @@ object ExplorationTask:
     def sampling() = isSampling(s)
     build(sampling)
 
-  inline def build(inline sampling: () => Sampling)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("ExplorationTask") { p ⇒
-      import p._
+  inline def build(inline sampling: () => Sampling)(using sourcecode.Name, DefinitionScope) =
+    FromContextTask("ExplorationTask") { p =>
+      import p.*
 
       val variablesValues =
         val sValue = sampling()
         val samplingValue = sValue.sampling.from(context).toVector
 
         val values =
-          TreeMap.empty[Val[_], Array[_]] ++ sValue.outputs.map { p ⇒
-             p → p.`type`.manifest.newArray(samplingValue.size)
+          TreeMap.empty[Val[?], Array[?]] ++ sValue.outputs.map { p =>
+             p -> p.`type`.manifest.newArray(samplingValue.size)
           }
 
         for
-           (sample, i) ← samplingValue.zipWithIndex
-           v ← sample
+           (sample, i) <- samplingValue.zipWithIndex
+           v <- sample
         do
           values.get(v.prototype) match
-            case Some(b) ⇒ java.lang.reflect.Array.set(b, i, v.value)
-            case None    ⇒ throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
+            case Some(b) => java.lang.reflect.Array.set(b, i, v.value)
+            case None    => throw new InternalProcessingError(s"Missing sample value for variable $v at position $i")
 
         values
 
-       variablesValues.map { (k, v) ⇒
+       variablesValues.map { (k, v) =>
          try Variable.unsecure(k.toArray, v)
          catch
-           case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
+           case e: ArrayStoreException => throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
        }: Context
      } set (
        inputs ++= sampling().inputs.toSeq,
@@ -89,4 +89,4 @@ object ExplorationTask:
    */
   def explored(c: MoleCapsule, mole: Mole, sources: Sources, hooks: Hooks) =
     val taskOutputs = Task.outputs(c.task(mole, sources, hooks))
-    (p: Val[_]) ⇒ taskOutputs.explored(p)
+    (p: Val[?]) => taskOutputs.explored(p)

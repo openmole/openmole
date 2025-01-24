@@ -21,12 +21,12 @@ import org.openmole.core.highlight.HighLight
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   override def stop(context: BundleContext): Unit =
     PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
+  override def start(context: BundleContext): Unit =
     import org.openmole.core.highlight.HighLight._
 
     val keyWords: Vector[HighLight] =
@@ -44,7 +44,8 @@ class Activator extends BundleActivator {
         PatternHighLight(objectName(NSGA3Evolution)),
         PatternHighLight(objectName(OSEEvolution)),
         PatternHighLight(objectName(PSEEvolution)),
-        WordHighLight(Stochastic.getClass),
+        WordHighLight(objectName(Stochastic)),
+        WordHighLight(objectName(Island)),
         HookHighLight(objectName(SavePopulationHook))
       )
 
@@ -54,5 +55,3 @@ class Activator extends BundleActivator {
       highLight = keyWords,
       methodNames = Vector(EvolutionMetadata.method)
     )
-  }
-}

@@ -25,49 +25,38 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
 import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext}
 import scaladget.bootstrapnative.bsn
-import scala.concurrent.duration.*
 
+import scala.concurrent.duration.*
 import scala.scalajs.js
 
-object TopLevelExports {
+object TopLevelExports:
   @JSExportTopLevel("authentication_egi")
-  val egi = js.Object {
+  val egi = js.Object:
     new org.openmole.gui.plugin.authentication.egi.EGIAuthenticationGUIFactory
-  }
-}
 
 class EGIAuthenticationGUIFactory extends AuthenticationPluginFactory:
   type AuthType = EGIAuthenticationData
-  def buildEmpty: AuthenticationPlugin = new EGIAuthenticationGUI
-  def build(data: AuthType): AuthenticationPlugin = new EGIAuthenticationGUI(data)
+  def buildEmpty = new EGIAuthenticationGUI
+  def build(data: AuthType) = new EGIAuthenticationGUI(data)
   def name = "EGI"
-  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] =
-    PluginFetch.futureError(_.egiAuthentications(()).future)
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.egiAuthentications(()).future)
+  def test(data: AuthType)(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60.second))
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentications(data, true).future)
 
-
-
-class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin:
-  type AuthType = EGIAuthenticationData
-
+class EGIAuthenticationGUI(data: EGIAuthenticationData = EGIAuthenticationData()) extends AuthenticationPlugin[EGIAuthenticationData]:
   val password = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
-
-  val certificateUpload = FileUploaderUI(data.privateKey, Some(SafePath(Seq("egi.p12"), ServerFileSystemContext.Authentication)))
-
+  val certificateUpload = AuthenticationUploaderUI(data.privateKey.map(_.name), EGIAuthenticationData.directory)
   val voInputContent = Var[String]("")
   val voInput = inputTag("").amend(placeholder := "vo1,vo2", onInput.mapToValue --> voInputContent)
-  //val voInput = input(bsn.formControl, value := voInputContent).amend(placeholder := "vo1,vo2")
 
+  def name = "egi.p12"
 
-  def factory = new EGIAuthenticationGUIFactory
+  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
+    import scaladget.tools.*
 
-  def remove(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentications(()).future)
-
-  def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) = {
-    import scaladget.tools._
-      //      _.foreach { c ⇒ a.voInput.ref.value = c }
-      //    }
     div(
       flexColumn, width := "400px", height := "220",
       div(cls := "verticalFormItem", div("Password", width := "150px"), password),
@@ -76,8 +65,6 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
       EventStream.fromFuture(PluginFetch.futureError(_.getVOTests(()).future), true) --> Observer[Seq[String]] { v => voInput.ref.value = v.mkString(",") }
     )
 
-  }
-
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
     def vos =
       voInputContent.now() match
@@ -85,11 +72,9 @@ class EGIAuthenticationGUI(val data: EGIAuthenticationData = EGIAuthenticationDa
         case s => s.trim.split(',').map(_.trim).toSeq
 
     for
-      _ <- remove
-      _ <- PluginFetch.futureError(_.addAuthentication(EGIAuthenticationData(password = password.ref.value, privateKey = certificateUpload.file.now())).future)
+      _ <- PluginFetch.futureError(_.removeAuthentications(data, false).future)
+      _ <- PluginFetch.futureError(_.addAuthentication(EGIAuthenticationData(password = password.ref.value, privateKey = certificateUpload.file.now().map(n => EGIAuthenticationData.directory / n))).future)
       _ <- PluginFetch.futureError(_.setVOTests(vos).future)
     yield ()
-
-  def test(using BasePath, NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future, warningTimeout = Some(60.second))
 
 

@@ -32,7 +32,7 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        EnvironmentHighLight(classOf[SSHEnvironment[_]])
+        EnvironmentHighLight(classOf[SSHEnvironment])
       )
 
     PluginRegistry.register(

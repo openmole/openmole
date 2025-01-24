@@ -17,7 +17,7 @@
 
 package org.openmole.core.workflow.execution
 
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.*
 import java.util.logging.Level
 import org.openmole.core.event.{ Event, EventDispatcher }
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
@@ -48,20 +48,20 @@ object Environment:
 
   def errors(environment: Environment) =
     environment match
-      case e: SubmissionEnvironment ⇒ e.errors
-      case _: LocalEnvironment      ⇒ Seq()
+      case e: SubmissionEnvironment => e.errors
+      case _: LocalEnvironment      => Seq()
 
   def clearErrors(environment: Environment) =
     environment match
-      case e: SubmissionEnvironment ⇒ e.clearErrors
-      case _                        ⇒ Seq()
+      case e: SubmissionEnvironment => e.clearErrors
+      case _                        => Seq()
 
   def submit(environment: Environment, job: JobGroup): Long =
     val moleExecution = JobGroup.moleExecution(job)
 
     environment match
-      case env: SubmissionEnvironment ⇒ env.submit(job)
-      case env: LocalEnvironment ⇒
+      case env: SubmissionEnvironment => env.submit(job)
+      case env: LocalEnvironment =>
         env.submit(
           job,
           moleExecution.partialTaskExecutionContext
@@ -96,18 +96,18 @@ object LocalEnvironment:
   def apply(
     threads:      OptionalArgument[Int]    = None,
     deinterleave: Boolean                  = false,
-    name:         OptionalArgument[String] = None
+    name:         OptionalArgument[String] = None,
+    remote:       Boolean                  = false
   )(implicit varName: sourcecode.Name) =
-    EnvironmentProvider { ms ⇒
+    EnvironmentBuilder: ms =>
       import ms._
-      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)))
-    }
+      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)), remote)
 
-  def apply(threads: Int, deinterleave: Boolean) =
-    EnvironmentProvider { ms ⇒
+  def apply(threads: Int, deinterleave: Boolean, remote: Boolean) =
+    EnvironmentBuilder: ms =>
       import ms._
-      new LocalEnvironment(threads, deinterleave, None)
-    }
+      new LocalEnvironment(threads, deinterleave, None, remote)
+
 
 /**
  * Local environment
@@ -117,7 +117,8 @@ object LocalEnvironment:
 class LocalEnvironment(
   val threads:       Int,
   val deinterleave:  Boolean,
-  override val name: Option[String]
+  override val name: Option[String],
+  val remote:      Boolean
 )(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
 
   val pool = Cache(new ExecutorPool(threads, WeakReference(this), threadProvider))
@@ -127,12 +128,12 @@ class LocalEnvironment(
 
   def submit(job: JobGroup, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
-    submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobs(job), Some(JobGroup.moleExecution(job))))
+    submit(LocalExecutionJob(id, executionContext, JobGroup.moleJobsValue(job), Some(JobGroup.moleExecution(job))))
     id
 
   def submit(moleJob: Job, executionContext: TaskExecutionContext.Partial): Long =
     val id = jobId.getAndIncrement()
-    submit(LocalExecutionJob(id, executionContext, List(moleJob), None))
+    submit(LocalExecutionJob(id, executionContext, moleJob, None))
     id
 
   private def submit(ejob: LocalExecutionJob): Unit =

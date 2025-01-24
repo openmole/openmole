@@ -13,7 +13,7 @@ object OsgiProject {
     OsgiKeys.bundleSymbolicName := (name.value + ";singleton:=" + Osgi.singleton.value),
     autoAPIMappings := true,
     OsgiKeys.packageWithJVMJar := true,
-    OsgiKeys.cacheStrategy := Some(OsgiKeys.CacheStrategy.LastModified),
+    OsgiKeys.cacheStrategy := Some(OsgiKeys.CacheStrategy.Hash),
 
     Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 

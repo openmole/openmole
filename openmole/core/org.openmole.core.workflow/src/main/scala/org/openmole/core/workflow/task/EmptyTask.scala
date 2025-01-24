@@ -17,15 +17,34 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.setter._
+import org.openmole.core.context.Context
+import org.openmole.core.argument.FromContext
+import org.openmole.core.setter.*
+
+import monocle.Focus
 
 object EmptyTask:
 
+  given InputOutputBuilder[EmptyTask] = InputOutputBuilder(Focus[EmptyTask](_.config))
+  given InfoBuilder[EmptyTask] = InfoBuilder(Focus[EmptyTask](_.info))
+
   /**
-   * The empty Task does nothing ([[ClosureTask]] with identity function)
+   * The empty Task does nothing ([[EmptyTask]] with identity function)
    * @param name
    * @param definitionScope
    * @return
    */
-  def apply()(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    ClosureTask("EmptyTask") { (ctx, _, _) ⇒ ctx }
+  def apply()(using sourcecode.Name, DefinitionScope) =
+    new EmptyTask(
+      InputOutputConfig(),
+      InfoConfig()
+    )
+
+case class EmptyTask(
+  config:                 InputOutputConfig,
+  info:                   InfoConfig) extends Task:
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
+    TaskExecution: p =>
+      p.context
+
+

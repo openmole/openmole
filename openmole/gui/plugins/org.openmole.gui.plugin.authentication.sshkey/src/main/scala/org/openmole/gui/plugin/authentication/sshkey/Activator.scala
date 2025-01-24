@@ -22,7 +22,7 @@ import org.osgi.framework.{BundleActivator, BundleContext}
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.server.ext.{GUIPluginInfo, GUIPluginRegistry, OMRouter}
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
 
   def info = GUIPluginInfo(
     authentication = Some(classOf[PrivateKeyAuthenticationFactory]),
@@ -31,4 +31,4 @@ class Activator extends BundleActivator {
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)
   override def stop(context: BundleContext): Unit = GUIPluginRegistry.unregister(this)
-}
+

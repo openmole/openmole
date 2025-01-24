@@ -2,7 +2,7 @@ package org.openmole.core.dsl
 
 package object extension:
   export org.openmole.core.argument.{FromContext, ScalaCompilation, ToFromContext, OptionalArgument, DefaultSet}
-
+  
   type DefinitionScope = org.openmole.core.setter.DefinitionScope
   def DefinitionScope = org.openmole.core.setter.DefinitionScope
 
@@ -20,10 +20,13 @@ package object extension:
   def Source = org.openmole.core.workflow.mole.Source
 
   type FromContextTask = org.openmole.core.workflow.task.FromContextTask
-  export org.openmole.core.workflow.task.ClosureTask
   export org.openmole.core.workflow.task.Task
 
+  export org.openmole.core.workflow.task.TaskExecutionInfo
+  export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
+  export org.openmole.core.workflow.task.TaskExecutionBuildContext
+
 
   type Grouping = org.openmole.core.workflow.grouping.Grouping
 
@@ -32,15 +35,16 @@ package object extension:
   def Sampling = org.openmole.core.workflow.sampling.Sampling
   type IsSampling[-T] = org.openmole.core.workflow.sampling.IsSampling[T]
 
-  type BoundedFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedFromContextDomain[D, T]
-  type BoundedDomain[-D, +T] = org.openmole.core.workflow.domain.BoundedDomain[D, T]
-  type FixDomain[-D, +T] = org.openmole.core.workflow.domain.FixDomain[D, T]
-  type DiscreteDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteDomain[D, T]
-  type DiscreteFromContextDomain[-D, +T] = org.openmole.core.workflow.domain.DiscreteFromContextDomain[D, T]
+  export org.openmole.core.workflow.domain.BoundedFromContextDomain
+  export org.openmole.core.workflow.domain.BoundedDomain
+  export org.openmole.core.workflow.domain.FixDomain
+  export org.openmole.core.workflow.domain.DiscreteDomain
+  export org.openmole.core.workflow.domain.DiscreteFromContextDomain
 
-  type DomainCenter[-D, +T] = org.openmole.core.workflow.domain.DomainCenter[D, T]
-  type DomainCenterFromContext[-D, +T] = org.openmole.core.workflow.domain.DomainCenterFromContext[D, T]
-  type DomainSize[-D] = org.openmole.core.workflow.domain.DomainSize[D]
+  export org.openmole.core.workflow.domain.DomainCenter
+  export org.openmole.core.workflow.domain.DomainCenterFromContext
+  export org.openmole.core.workflow.domain.DomainSize
+  export org.openmole.core.workflow.domain.DomainStep
 
   type Domain[+D] = org.openmole.core.workflow.domain.Domain[D]
   def Domain = org.openmole.core.workflow.domain.Domain
@@ -60,9 +64,7 @@ package object extension:
   type ValType[T] = org.openmole.core.context.ValType[T]
   def ValType = org.openmole.core.context.ValType
 
-  type Context = org.openmole.core.context.Context
-  def Context = org.openmole.core.context.Context
-
+  export org.openmole.core.context.Context
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}
@@ -103,7 +105,7 @@ package object extension:
   type Validate = org.openmole.core.argument.Validate
   def Validate = org.openmole.core.argument.Validate
 
-  export org.openmole.core.exception.{UserBadDataError, InternalProcessingError}
+  export org.openmole.core.exception.{UserBadDataError, InternalProcessingError, MultipleException}
 
   type RandomProvider = org.openmole.tool.random.RandomProvider
   type PrototypeSet = org.openmole.core.context.PrototypeSet
@@ -115,9 +117,10 @@ package object extension:
   def Logger = org.openmole.tool.logger.LoggerService
 
   export org.openmole.tool.types.TypeTool.ManifestDecoration
+  export org.openmole.tool.crypto.Cypher
 
   export org.openmole.core.replication.ReplicaCatalog
-  export org.openmole.core.workflow.execution.EnvironmentProvider
+  export org.openmole.core.workflow.execution.EnvironmentBuilder
   export org.openmole.core.timeservice.TimeService
   export org.openmole.core.pluginmanager.PluginManager
   export org.openmole.core.workflow.validation.ValidateTask
@@ -142,5 +145,9 @@ package object extension:
 
   export org.openmole.core.setter.DefaultBuilder
   export org.openmole.core.script.ScriptSourceData
+  export org.openmole.core.authentication.AuthenticationStore
+
+
+  export org.openmole.core.preference.PreferenceLocation
 
 

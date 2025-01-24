@@ -56,7 +56,9 @@ case class RetryTask(
 
   override def validate: Validate = ValidateTask.validate(task)
 
-  override protected def process(executionContext: TaskExecutionContext): FromContext[Context] = FromContext: p =>
-    import p.*
-    Retry.retry(time):
-      Task.process(task, executionContext).from(context)
+  override def apply(taskBuildContext: TaskExecutionBuildContext) =
+    val taskProcess = task(taskBuildContext)
+    TaskExecution: p =>
+      import p.*
+      Retry.retry(time):
+        TaskExecution.execute(taskProcess, executionContext).from(context)

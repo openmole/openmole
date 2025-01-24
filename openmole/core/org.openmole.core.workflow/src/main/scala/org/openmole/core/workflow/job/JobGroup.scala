@@ -17,47 +17,48 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.mole._
+import org.openmole.core.workflow.mole.*
 
 /**
  * A computation job to be executed
  */
 sealed trait JobGroup
 
-object JobGroup {
+object JobGroup:
 
-  def apply(moleExecution: MoleExecution, moleJobs: Iterable[Job]): JobGroup =
-    (moleJobs.size == 1) match {
-      case true  ⇒ JobGroup(moleExecution, moleJobs.head)
-      case false ⇒ MultiJobGroup(moleExecution, moleJobs.toArray)
-    }
+  def apply(moleExecution: MoleExecution, moleJobs: IArray[Job]): JobGroup =
+    if moleJobs.size == 1
+    then JobGroup(moleExecution, moleJobs.head)
+    else MultiJobGroup(moleExecution, moleJobs)
 
   def apply(moleExecution: MoleExecution, moleJob: Job): JobGroup = SingleJobGroup(moleExecution, moleJob)
 
   case class SingleJobGroup(moleExecution: MoleExecution, moleJob: Job) extends JobGroup
-  case class MultiJobGroup(moleExecution: MoleExecution, moleJobs: Array[Job]) extends JobGroup
+  case class MultiJobGroup(moleExecution: MoleExecution, moleJobs: IArray[Job]) extends JobGroup
 
   /**
    * the [[Job]] in this job
    *
    * @return
    */
-  def moleJobs(job: JobGroup) =
-    job match {
-      case sj: SingleJobGroup ⇒ Vector(sj.moleJob)
-      case mj: MultiJobGroup  ⇒ mj.moleJobs.toIterable
-    }
+  def moleJobs(job: JobGroup): IArray[Job] =
+    job match
+      case sj: SingleJobGroup => IArray(sj.moleJob)
+      case mj: MultiJobGroup  => mj.moleJobs
+
+  def moleJobsValue(job: JobGroup): Job | IArray[Job] =
+    job match
+      case sj: SingleJobGroup => sj.moleJob
+      case mj: MultiJobGroup => mj.moleJobs
+
 
   /**
    * Execution of the job
    * @return
    */
   def moleExecution(job: JobGroup): MoleExecution =
-    job match {
-      case sj: SingleJobGroup ⇒ sj.moleExecution
-      case mj: MultiJobGroup  ⇒ mj.moleExecution
-    }
+    job match
+      case sj: SingleJobGroup => sj.moleExecution
+      case mj: MultiJobGroup  => mj.moleExecution
 
-  implicit def ordering: Ordering[JobGroup] = Ordering.by[JobGroup, Iterable[Job]](moleJobs)
-
-}
+  given Ordering[JobGroup] = Ordering.by[JobGroup, Iterable[Job]](moleJobs)

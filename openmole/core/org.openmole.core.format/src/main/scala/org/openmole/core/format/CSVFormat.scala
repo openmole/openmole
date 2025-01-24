@@ -32,12 +32,12 @@ object CSVFormat:
 
   def isCSV(f: File) = f.getName.endsWith(".csv")
 
-  def header(prototypes: Seq[Val[_]], values: Seq[Any], arrayOnRow: Boolean) =
+  def header(prototypes: Seq[Val[?]], values: Seq[Any], arrayOnRow: Boolean) =
     if (!arrayOnRow) prototypes.map(_.name).mkString(",")
     else
       def arrayHeaders(v: Any, h: String): Seq[String] =
         v match
-          case v: Array[_] ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
+          case v: Array[?] ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
           case v: Seq[_]   ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
           case v           ⇒ Seq(h)
 
@@ -47,7 +47,7 @@ object CSVFormat:
 
   def writeVariablesToCSV(
     file: File,
-    variables: Seq[Variable[_]],
+    variables: Seq[Variable[?]],
     unrollArray: Boolean = false,
     arrayOnRow: Boolean = false,
     gzip: Boolean = false,
@@ -75,13 +75,13 @@ object CSVFormat:
     def csvLine(v: Seq[Any]): String =
       def format(v: Any): String =
         v match
-          case v: Array[_] ⇒ s"[${v.map(format).mkString(",")}]"
+          case v: Array[?] ⇒ s"[${v.map(format).mkString(",")}]"
           case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
           case v           ⇒ v.prettify()
 
       def quote(v: Any): String =
         v match
-          case v: Array[_] ⇒ s""""${format(v)}""""
+          case v: Array[?] ⇒ s""""${format(v)}""""
           case v: Seq[_]   ⇒ s""""${format(v)}""""
           case v           ⇒ v.prettify()
 
@@ -104,7 +104,7 @@ object CSVFormat:
 
       val lists: Seq[List[Any]] =
         v map:
-          case v: Array[_] ⇒ v.toList
+          case v: Array[?] ⇒ v.toList
           case v: Seq[_]   ⇒ v.toList
           case v           ⇒ List(v)
 
@@ -113,7 +113,7 @@ object CSVFormat:
     def onRow(v: Seq[Any]) =
       def arrayValues(v: Any): Seq[Any] =
         v match
-          case v: Array[_] ⇒ v.flatMap(arrayValues)
+          case v: Array[?] ⇒ v.flatMap(arrayValues)
           case v: Seq[_]   ⇒ v.flatMap(arrayValues)
           case v           ⇒ Seq(v)
 
@@ -130,8 +130,8 @@ object CSVFormat:
    */
   def csvToVariables(
     file:      File,
-    columns:   Seq[(String, Val[_])],
-    separator: Option[Char]          = None): Iterator[Iterable[Variable[_]]] =
+    columns:   Seq[(String, Val[?])],
+    separator: Option[Char]          = None): Iterator[Iterable[Variable[?]]] =
     val reader = new CSVReader(new FileReader(file), separator.getOrElse(','))
     val headers = reader.readNext.toArray
 
@@ -145,7 +145,7 @@ object CSVFormat:
     Iterator.continually(reader.readNext).takeWhile(_ != null).map: line ⇒
       (columns zip columnsIndexes).map { case ((name, v), i) ⇒ Variable.unsecure(v, matchConverter(v, line(i), name)) }
 
-  def matchConverter(v: Val[_], s: String, name: String): Any =
+  def matchConverter(v: Val[?], s: String, name: String): Any =
     def matchArray[T: ClassTag](s: String, convert: String ⇒ T): Array[T] =
       val trimed = s.trim
       if (!trimed.startsWith("[") || !trimed.endsWith("]")) throw new UserBadDataError(s"Array in CSV files should have the following format [.., .., ..], found $s")

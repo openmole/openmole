@@ -23,36 +23,38 @@ import java.io.File
 import org.openmole.core.workflow.execution.ExecutionState
 import org.openmole.core.communication.storage._
 
-object BatchJobControl {
+object BatchJobControl:
 
-  def tryStdOutErr(batchJob: BatchJobControl) = util.Try(batchJob.stdOutErr())
+  def tryStdOutErr(batchJob: BatchJobControl)(using priority: AccessControl.Priority) = util.Try(batchJob.stdOutErr(priority))
+  def download(batchJobControl: BatchJobControl)(from: String, to: File, option: TransferOptions)(using priority: AccessControl.Priority) = batchJobControl.download(from, to, option, priority)
+  def updateState(batchJobControl: BatchJobControl)(using priority: AccessControl.Priority) = batchJobControl.updateState(priority)
+  def delete(batchJobControl: BatchJobControl)(using priority: AccessControl.Priority) = batchJobControl.delete(priority)
 
-  def apply(
-    updateInterval: () ⇒ UpdateInterval,
-    storageId:      () ⇒ String,
-    updateState:    () ⇒ ExecutionState,
-    delete:         () ⇒ Unit,
-    stdOutErr:      () ⇒ (String, String),
-    resultPath:     () ⇒ String,
-    download:       (String, File, TransferOptions) ⇒ Unit,
-    clean:          () ⇒ Unit): BatchJobControl = new BatchJobControl(
-    updateInterval,
-    storageId,
-    updateState,
-    delete,
-    stdOutErr,
-    download,
-    resultPath,
-    clean)
+//  def apply(
+//    updateInterval: () ⇒ UpdateInterval,
+//    storageId:      () ⇒ String,
+//    updateState:    AccessControl.Priority ⇒ ExecutionState,
+//    delete:         AccessControl.Priority ⇒ Unit,
+//    stdOutErr:      AccessControl.Priority ⇒ (String, String),
+//    resultPath:     () ⇒ String,
+//    download:       (String, File, TransferOptions, AccessControl.Priority) ⇒ Unit,
+//    clean:          AccessControl.Priority ⇒ Unit): BatchJobControl = new BatchJobControl(
+//    updateInterval,
+//    storageId,
+//    updateState,
+//    delete,
+//    stdOutErr,
+//    download,
+//    resultPath,
+//    clean)
 
-}
 
 class BatchJobControl(
   val updateInterval: () ⇒ UpdateInterval,
   val storageId:      () ⇒ String,
-  val updateState:    () ⇒ ExecutionState,
-  val delete:         () ⇒ Unit,
-  val stdOutErr:      () ⇒ (String, String),
-  val download:       (String, File, TransferOptions) ⇒ Unit,
+  val updateState:    AccessControl.Priority ⇒ ExecutionState,
+  val delete:         AccessControl.Priority ⇒ Unit,
+  val stdOutErr:      AccessControl.Priority ⇒ (String, String),
+  val download:       (String, File, TransferOptions, AccessControl.Priority) ⇒ Unit,
   val resultPath:     () ⇒ String,
-  val clean:          () ⇒ Unit)
+  val clean:          AccessControl.Priority ⇒ Unit)

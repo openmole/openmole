@@ -16,13 +16,13 @@ package object json:
   given Encoder[java.io.File] = f => Json.fromString(f.getAbsolutePath)
   given Decoder[java.io.File] = j => j.as[String].map(new java.io.File(_))
 
-  def variablesToJObject(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None) =
+  def variablesToJObject(variables: Seq[Variable[?]], default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None) =
     JObject(variables.toList.map { v ⇒ v.name -> toJSONValue(v.value, Some(v), default = default, file = file) })
 
-  def variablesToJValues(variables: Seq[Variable[_]], default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): Seq[JValue] =
+  def variablesToJValues(variables: Seq[Variable[?]], default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): Seq[JValue] =
     variables.toList.map { v ⇒ toJSONValue(v.value, Some(v), default = default, file = file) }
 
-  def toJSONValue(v: Any, variable: Option[Variable[_]] = None, default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): org.json4s.JValue =
+  def toJSONValue(v: Any, variable: Option[Variable[?]] = None, default: Option[Any => org.json4s.JValue] = None, file: Option[java.io.File => org.json4s.JValue] = None): org.json4s.JValue =
     import org.json4s.*
 
     v match
@@ -32,7 +32,7 @@ package object json:
       case v: Float        ⇒ JDouble(v)
       case v: Double       ⇒ JDouble(v)
       case v: Boolean      ⇒ JBool(v)
-      case v: Array[_]     ⇒ JArray(v.map(v => toJSONValue(v, variable, default = default, file = file)).toList)
+      case v: Array[?]     ⇒ JArray(v.map(v => toJSONValue(v, variable, default = default, file = file)).toList)
       case v: java.io.File ⇒ file.map(_(v)).getOrElse(JString(v.getAbsolutePath))
       case v: Seq[_]       ⇒ JArray(v.map(v => toJSONValue(v, variable, default = default, file = file)).toList)
       case _               ⇒
@@ -46,10 +46,10 @@ package object json:
   def cannotConvertFromJSON[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
   def jValueToVariable(
-    jValue: JValue, v: Val[_],
+    jValue: JValue, v: Val[?],
     unwrapArrays: Boolean = false,
-    default: Option[(JValue, Class[_]) => Any] = None,
-    file: Option[JValue => java.io.File] = None): Variable[_] =
+    default: Option[(JValue, Class[?]) => Any] = None,
+    file: Option[JValue => java.io.File] = None): Variable[?] =
     import org.json4s.*
 
     def jValueToInt(jv: JValue) =
@@ -107,7 +107,7 @@ package object json:
       case (value: JArray, v) ⇒
         import scala.jdk.CollectionConverters._
 
-        def jValueToValue(value: Any, arrayType: Class[_]) =
+        def jValueToValue(value: Any, arrayType: Class[?]) =
           (value, arrayType) match
             case (value: JValue, c) if c == classOf[Double] ⇒ jValueToDouble(value)
             case (value: JValue, c) if c == classOf[Int] ⇒ jValueToInt(value)
@@ -148,6 +148,6 @@ package object json:
     import org.json4s.jackson.JsonMethods.*
     parse(objectMapper.writeValueAsString(a))
 
-  def jValueToAny(value: JValue, clazz: Class[_]): Any =
+  def jValueToAny(value: JValue, clazz: Class[?]): Any =
     import org.json4s.jackson.JsonMethods.*
     objectMapper.readValue(compact(render(value)), clazz)

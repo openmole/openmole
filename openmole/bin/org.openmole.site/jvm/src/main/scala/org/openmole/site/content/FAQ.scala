@@ -24,25 +24,12 @@ import org.openmole.site.stylesheet._
 import DocumentationPages._
 import org.openmole.site.content.Native._
 
-object FAQ extends PageContent(html"""
-
+def FAQ =  PageContent(html"""
 
 ${h2{"Which Java version should I use?"}}
 
-OpenMOLE is fully working under ${b{"OpenJDK 11 and higher"}}, thus it is our recommended option.
+OpenMOLE is fully working under ${b{"OpenJDK 21 and higher"}}, thus it is our recommended option.
 You can check which Java version you're running by typing ${code{"java -version"}} in a console.
-
-$br
-
-If you use the ${b{"closed-source Oracle Java virtual machine"}} (which is probably the case if you are working on Mac or Windows), you have to ${b{"install the Java Cryptography Extension (JCE)"}} available at the bottom of this ${aa("page", href := shared.link.jce)} in order for OpenMOLE to be fully functional.
-JCE is an archive containing a bunch of files that you should replace in the ${i{"jre/lib/security"}} directory of your java installation.
-It enables strong cryptographic algorithms.
-
-$br
-
-Another concern for ${b{"Mac users"}} are the concurrent versions of Java that are often present on the same system.
-Some Mac OS ships with a default Java 6 that is not suitable to execute OpenMOLE.
-You must install Java 11 or greater and ${b{"set the environment variable JAVA_HOME"}} to the install location on your machine (typically the directory containing ${i{".../bin/java"}}).
 
 
 ${h2{"Where do I find previous versions of OpenMOLE?"}}
@@ -71,7 +58,7 @@ In such a case, we'll have to investigate multiple options, as SSH public key au
 $br
 
 Public key authentication usually has a higher priority than password-based authentication when trying to connect to a remote server.
-Thus, when you attempt an SSH connection to the the target environment, if your client asks you to enter a password (please note that a passphrase is different from a password), then your public key authentication is not taken into account.
+Thus, when you attempt an SSH connection to the target environment, if your client asks you to enter a password (please note that a passphrase is different from a password), then your public key authentication is not taken into account.
 SSH will skip your public key in case of bad configuration.
 The most common cases of badly configured keypairs are the following:
 ${ul(

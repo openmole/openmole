@@ -81,7 +81,7 @@ object PageTree {
 
 
 
-sealed trait PageTree {
+sealed trait PageTree:
   def page: Page
   def name: String = page.name
   def title: Option[String] = page.title
@@ -89,29 +89,26 @@ sealed trait PageTree {
   def content: Text.all.Frag = page.content
   def hasSon(pageTree: PageTree) = sons.contains(pageTree)
   def sons: Vector[PageTree]
-}
 
 case class PageNode(page: Page, sons: Vector[PageTree]) extends PageTree
 
-case class PageLeaf(page: Page) extends PageTree {
+case class PageLeaf(page: Page) extends PageTree:
   val sons = Vector()
-}
 
-object Page {
+object Page:
 
-  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None, source: Option[String] = None) = {
+  def apply(name: String, content: Frag, details: Seq[Page] = Seq(), title: Option[String] = None, extraMenu: Option[SideMenu] = None, source: Option[String] = None) =
     val (_name, _content, _details, _title, _extraMenu, _source) = (name, content, details, title, extraMenu, source)
 
-    new Page {
+    new Page:
       override def name: String = _name
       override def content = _content
       override def title = _title
       override def source = _source
-    }
-  }
-}
 
-trait Page {
+
+
+trait Page:
   def content: Frag
   def name: String
   def title: Option[String] = Some(s"OpenMOLE - $name")
@@ -119,7 +116,6 @@ trait Page {
   def file = Pages.file(this)
   def source: Option[(String)]
   def anchor(name: String) = s"$file#${name.replaceAll(" ", "")}"
-}
 
 object DocumentationPage {
 
@@ -138,7 +134,7 @@ object DocumentationPage {
     location: Option[String]           = None,
     title:    Option[String]           = None,
     source:   => Option[String]           = None
-  ) = {
+  ) =
     def _name = name
     def _content = content
     def _details = details
@@ -146,26 +142,24 @@ object DocumentationPage {
     def _title = title
     def _source = source
 
-    new DocumentationPage {
+    new DocumentationPage:
       def name = _name
       def content = _content
       override def location = _location.getOrElse(name)
       override def title = _title.orElse(Some(name))
       override def source = _source
-    }
-  }
+
 }
 
-abstract class DocumentationPage extends Page {
+abstract class DocumentationPage extends Page:
 
   override def equals(o: scala.Any): Boolean =
-    o match {
+    o match
       case p2: DocumentationPage ⇒ this.location == p2.location
       case _                     ⇒ false
-    }
 
   override def hashCode(): Int = location.hashCode()
-}
+
 
 import PageTree._
 
@@ -328,7 +322,7 @@ object DocumentationPages:
   //        ul(
   //          entries.sortBy(_.entry.name.toLowerCase).map {
   //            de ⇒ li(entryContent(de))
-  //          }: _*
+  //          } *
   //        )
   //
   //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
@@ -346,7 +340,7 @@ object DocumentationPages:
   //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
   //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
   //
-  //        div(scalatags.Text.all.id := "market-entry")(content: _*)
+  //        div(scalatags.Text.all.id := "market-entry")(content *)
   //      }
   //
   //      def themes: Seq[Market.Tag] = {
@@ -354,7 +348,6 @@ object DocumentationPages:
   //      }
   //
   //    }
-
 
 
 case class PageContent(content: Frag*)(implicit val file: sourcecode.File)

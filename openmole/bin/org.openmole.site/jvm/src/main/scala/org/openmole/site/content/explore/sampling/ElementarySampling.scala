@@ -67,7 +67,7 @@ ${ul(
   li{html"${code{"aggregation"}} ($optional) ${a(href := DocumentationPages.aggregationSampling.file, "is some aggregation functions")} to be called on the outputs of your evaluation task. The format is ${code{"variable evaluate function"}}. OpenMOLE provides some aggregation functions to such as: ${code{"median, medianAbsoluteDeviation, average, meanSquaredError, rootMeanSquaredError"}}. If no a variable is listed and no aggregate function is provided, the values are aggregated in a array."}
 )}
 
-For Double sequence samplings, a convenient primitive provides logarithmic ranges the following way: ${code{"input_j in LogRangeDomain(min,max,number_of_steps)"}} where the third argument is the number of steps in the range. The syntax can be simplified with the ${code{"logSteps"}} keyword like this:  ${code("input_j in (Range(1e-2,0.1) logSteps 4")}.
+For Double sequence samplings, a convenient primitive provides logarithmic ranges the following way: ${code{"input_j in LogRangeDomain(min,max,number_of_steps)"}} where the third argument is the number of steps in the range.
 
 The ${code{"hook"}} keyword is used to save or display results generated during the execution of a workflow.
 The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/file\")"}} to save the results in a file, or ${code{"hook display"}} to display the results in the standard output.

@@ -157,17 +157,19 @@ class ServerState:
     executionInfo(key) = info
   }
 
-
-  def modifyState(key: ExecutionId, state: ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
-    executionInfo.updateWith(key) { _.map(e => e.copy(moleExecution = state)) }.isDefined
+  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
+    executionInfo.updateWith(key) {
+      _.map(e => e.copy(moleExecution = state(e.moleExecution)))
+    }.isDefined
   }
+
 
   def cancel(key: ExecutionId) =
     val moleExecution =
       atomic { implicit ctx ⇒
         val moleExecution = executionInfo.get(key).map(_.moleExecution)
         moleExecution match
-          case None | Some(_: ServerState.Preparing) => modifyState(key, ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
+          case None | Some(_: ServerState.Preparing) => modifyState(key)(_ => ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
           case _ =>
         moleExecution
       }
@@ -253,26 +255,25 @@ class ServerState:
             case DefinitionScope.User           ⇒ "user"
             case DefinitionScope.Internal(name) ⇒ name
 
-        lazy val statuses = moleExecution.capsuleStatuses.toVector.map:
-          case (k, v) ⇒
-            import org.openmole.core.dsl.extension.Task
-            def isUser(t: Task) = t.info.definitionScope == DefinitionScope.User
+        lazy val statuses = moleExecution.capsuleStatuses.toVector.map: (k, v) =>
+          import org.openmole.core.dsl.extension.Task
+          def isUser(t: Task) = t.info.definitionScope == DefinitionScope.User
 
-            val task = k.task(moleExecution.mole, moleExecution.sources, moleExecution.hooks)
+          val task = k.task(moleExecution.mole, moleExecution.sources, moleExecution.hooks)
 
-            def cardinality(t: Task): Int =
-              t match
-                case m: MoleTask => MoleTask.tasks(m).map(cardinality).sum
-                case t if isUser(t) => 1
-                case t => 0
+          def cardinality(t: Task): Int =
+            t match
+              case m: MoleTask => MoleTask.tasks(m).map(cardinality).sum
+              case t if isUser(t) => 1
+              case t => 0
 
-            CapsuleExecution(
-              name = task.simpleName,
-              scope = scopeToString(task.info.definitionScope),
-              statuses = convertStatuses(v),
-              user = isUser(task),
-              userCardinality = cardinality(task)
-            )
+          CapsuleExecution(
+            name = task.simpleName,
+            scope = scopeToString(task.info.definitionScope),
+            statuses = convertStatuses(v),
+            user = isUser(task),
+            userCardinality = cardinality(task)
+          )
 
         moleExecution.exception match
           case Some(t) ⇒

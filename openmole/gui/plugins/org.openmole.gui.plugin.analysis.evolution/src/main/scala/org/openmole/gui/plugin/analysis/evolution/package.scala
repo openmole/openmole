@@ -19,8 +19,6 @@ package org.openmole.gui.plugin.analysis
 
 import org.openmole.gui.client.ext.*
 
-package object evolution {
+package object evolution:
  class APIClientImpl(val settings: ClientSettings) extends EvolutionAnalysisAPI with APIClient
-
  def PluginFetch = Fetch(new APIClientImpl(_))
-}

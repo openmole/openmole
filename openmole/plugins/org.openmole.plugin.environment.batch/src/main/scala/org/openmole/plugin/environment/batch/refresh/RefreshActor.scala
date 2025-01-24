@@ -19,13 +19,13 @@ package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchJobControl }
+import org.openmole.plugin.environment.batch.environment.*
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 object RefreshActor:
 
-  def receive(refresh: Refresh)(implicit services: BatchEnvironment.Services) =
+  def receive(refresh: Refresh)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     import services._
 
     val Refresh(job, environment, bj, delay, updateErrorsInARow) = refresh
@@ -33,7 +33,7 @@ object RefreshActor:
     JobManager.killOr(job, Kill(job, environment, Some(bj))): () ⇒
       try
         val oldState = job.state
-        BatchEnvironment.setExecutionJobSate(environment, job, bj.updateState())
+        BatchEnvironment.setExecutionJobSate(environment, job, BatchJobControl.updateState(bj))
         job.state match
           case DONE ⇒ JobManager ! GetResult(job, environment, bj.resultPath(), bj)
           case FAILED ⇒

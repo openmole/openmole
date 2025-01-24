@@ -20,12 +20,6 @@ object URLImportPanel:
 
     val manager = panels.treeNodePanel.treeNodeManager
 
-    case class URLFile(name: String, extension: String) {
-      def file = s"$name.$extension"
-    }
-
-    //private val downloadedFile: Var[Option[SafePath]] = Var(None)
-
     lazy val downloading: Var[ProcessState] = Var(Processed())
 
     def download(url: String) =
@@ -33,22 +27,20 @@ object URLImportPanel:
 
       def doDownload(url: String) =
         downloading.set(Processing())
-        api.downloadHTTP(url, sp, extractCheckBox.isChecked, overwriteSwitch.isChecked).foreach { d ⇒
+        api.downloadHTTP(url, sp, extractCheckBox.checked.now(), overwriteSwitch.checked.now()).foreach { d ⇒
           downloading.set(Processed())
           panels.treeNodePanel.refresh
           panels.closeExpandable
         }
 
-      overwriteSwitch.isChecked match {
+      overwriteSwitch.checked.now() match
         case true => doDownload(url)
         case false =>
-          api.exists(sp).foreach {
-            _ match
-              case true =>
-                panels.notifications.showGetItNotification(NotificationLevel.Error, s"${sp.name}/${url.split("/").last} already exists", div("Turn overwrite to true to fix this problem"))
-              case false => doDownload(url)
-          }
-      }
+          api.exists(sp).foreach:
+            case true =>
+              panels.notifications.showGetItNotification(NotificationLevel.Error, s"${sp.name}/${url.split("/").last} already exists", div("Turn overwrite to true to fix this problem"))
+            case false => doDownload(url)
+
 
 
     def deleteFileAndDownloadURL(sp: SafePath, url: String) =
@@ -63,7 +55,7 @@ object URLImportPanel:
 
     val downloadButton = button(
       cls := "btn btn-purple",
-      downloading.withTransferWaiter { _ ⇒ span("Download") },
+      downloading.withTransferWaiter() { _ ⇒ span("Download") },
       height := "38", width := "150", marginTop := "20",
       onClick --> { _ ⇒ download(urlInput.ref.value) }
     )

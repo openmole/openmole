@@ -73,6 +73,13 @@ object FileDisplayer:
       case _ ⇒
         val tab = buildTab(safePath)
         tab.foreach:
-          case Some((tabData, content)) => panels.tabContent.addTab(tabData, content)
-          case _ =>
+          case Some((tabData, content)) => 
+            panels.tabContent.addTab(tabData, content)
+          case _ => 
 
+  def update(safePath: SafePath, onUpdated: ()=> Unit = () => {})(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins) =
+    buildTab(safePath).foreach:
+      case Some((td, content))=> 
+        panels.tabContent.updateTab(safePath, content)
+        onUpdated()
+      case _=>

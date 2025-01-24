@@ -34,19 +34,18 @@ import org.scalatest._
 class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.*
-
-
+  
   "A hook" should "intercept the execution of a task" in {
     val executed = new AtomicInteger(0)
     val p = Val[String]
 
     val t1 =
-      TestTask { _ + (p → "test") } set (
+      TestTask { _ + (p -> "test") } set (
         name := "Test",
         outputs += p
       )
 
-    val hook = TestHook { context ⇒
+    val hook = TestHook { context =>
       context.contains(p) should equal(true)
       context(p) should equal("test")
       executed.incrementAndGet()
@@ -59,17 +58,17 @@ class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed.get should equal(1)
   }
 
-  "A hook" should "intercept the execution of a master capsule" in {
+  it should "intercept the execution of a master capsule" in {
     @transient var executed = false
 
     val p = Val[String]("p")
 
     val t1 =
-      TestTask { _ + (p → "test") } set (
+      TestTask { _ + (p -> "test") } set (
         outputs += p
       )
 
-    val hook = TestHook { context ⇒
+    val hook = TestHook { context =>
       context.contains(p) should equal(true)
       context(p) should equal("test")
       executed = true

@@ -102,6 +102,8 @@ package object ext {
 
   lazy val fileActionItems = cls := "file-action-items"
 
+  lazy val verticalLine = cls := "file-action-border"
+
   lazy val navBarItem = cls := "navbar-item"
 
   lazy val toolBoxColor = "#795c85"

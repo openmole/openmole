@@ -31,69 +31,59 @@ object OutputManager {
   lazy val outputDispatcher = new PrintStream(OutputManager.dispatchOutput)
   lazy val errorDispatcher = new PrintStream(OutputManager.dispatchError)
 
-  def install = {
+  def install = 
     redirectSystemOutput(outputDispatcher)
     redirectSystemError(errorDispatcher)
-  }
 
-  def uninstall = {
+  def uninstall = 
     redirectSystemOutput(systemOutput)
     redirectSystemError(systemError)
-  }
 
   private lazy val output = mutable.WeakHashMap[ThreadGroup, PrintStream]()
   private lazy val error = mutable.WeakHashMap[ThreadGroup, PrintStream]()
 
-  private def findRedirect(group: ThreadGroup, map: mutable.Map[ThreadGroup, PrintStream]): Option[PrintStream] = {
+  private def findRedirect(group: ThreadGroup, map: mutable.Map[ThreadGroup, PrintStream]): Option[PrintStream] =
     def parentThreadGroups(group: ThreadGroup) =
       Iterator.iterate(group)(_.getParent).takeWhile(_ != null)
 
     parentThreadGroups(group).map(map.get).find(_.isDefined).map(_.get)
-  }
 
   private def redirectedOutput[T](f: OutputStream ⇒ T) = output.synchronized {
-    findRedirect(Thread.currentThread().getThreadGroup, output) match {
+    findRedirect(Thread.currentThread().getThreadGroup, output) match
       case None                               ⇒ f(systemOutput)
       case Some(os) if os == outputDispatcher ⇒ f(systemOutput)
       case Some(os)                           ⇒ f(os)
-    }
   }
 
   private def redirectedError[T](f: OutputStream ⇒ T) = error.synchronized {
-    findRedirect(Thread.currentThread().getThreadGroup, error) match {
+    findRedirect(Thread.currentThread().getThreadGroup, error) match 
       case None                              ⇒ f(systemError)
       case Some(os) if os == errorDispatcher ⇒ f(systemError)
       case Some(os)                          ⇒ f(os)
-    }
   }
 
-  class RedirectedOutput extends OutputStream {
+  class RedirectedOutput extends OutputStream:
     override def write(i: Int): Unit = redirectedOutput(_.write(i))
     override def flush(): Unit = redirectedOutput(_.flush())
-  }
 
-  class RedirectError extends OutputStream {
+  class RedirectError extends OutputStream:
     override def write(i: Int): Unit = redirectedError(_.write(i))
     override def flush(): Unit = redirectedError(_.flush())
-  }
 
   lazy val dispatchOutput = new RedirectedOutput
   lazy val dispatchError = new RedirectError
 
-  def redirectSystemOutput(ps: PrintStream) = {
+  def redirectSystemOutput(ps: PrintStream) = 
     System.setOut(ps)
     TypeTool.call(Console, "setOutDirect", Seq(classOf[PrintStream]), Seq(ps))
-  }
 
-  def redirectSystemError(ps: PrintStream) = {
+  def redirectSystemError(ps: PrintStream) = 
     System.setErr(ps)
     TypeTool.call(Console, "setErrDirect", Seq(classOf[PrintStream]), Seq(ps))
-  }
 
-  private def unregister(thread: ThreadGroup) = {
+  private def unregister(thread: ThreadGroup) = 
     output.synchronized { output.remove(thread) }
     error.synchronized { error.remove(thread) }
-  }
 
   private def redirectOutput(thread: ThreadGroup, stream: PrintStream) = output.synchronized {
     output.put(thread, stream)

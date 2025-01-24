@@ -15,8 +15,8 @@ object OutputFormat:
   )
 
   object SectionContent:
-    given Conversion[(String, Seq[Variable[_]]), SectionContent] = s => SectionContent(Some(s._1), s._2)
-    given Conversion[Seq[Variable[_]], SectionContent] = s => SectionContent(None, s)
+    given Conversion[(String, Seq[Variable[?]]), SectionContent] = s => SectionContent(Some(s._1), s._2)
+    given Conversion[Seq[Variable[?]], SectionContent] = s => SectionContent(None, s)
 
-  case class SectionContent(name: Option[String], variables: Seq[Variable[_]], indexes: Seq[String] = Seq())
+  case class SectionContent(name: Option[String], variables: Seq[Variable[?]], indexes: Seq[String] = Seq())
   case class OutputContent(section: SectionContent*)

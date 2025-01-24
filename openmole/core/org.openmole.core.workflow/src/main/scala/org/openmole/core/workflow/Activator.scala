@@ -17,10 +17,10 @@ class Activator extends BundleActivator:
     val highLight = 
       import org.openmole.core.context._
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
-      import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ClosureTask, ToArrayTask, MoleTask, FromContextTask }
+      import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
-        WordHighLight(classOf[Val[_]]),
+        WordHighLight(classOf[Val[?]]),
         WordHighLight(objectName(Capsule)),
         WordHighLight(objectName(Slot)),
         WordHighLight("Strain"),
@@ -48,7 +48,7 @@ class Activator extends BundleActivator:
         EnvironmentHighLight(classOf[LocalEnvironment]),
         TaskHighLight(objectName(EmptyTask)),
         TaskHighLight(objectName(ExplorationTask)),
-        TaskHighLight(objectName(ClosureTask)),
+        TaskHighLight(objectName(Task)),
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
         TaskHighLight(objectName(TryTask)),

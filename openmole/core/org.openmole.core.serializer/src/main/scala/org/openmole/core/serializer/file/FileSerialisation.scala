@@ -40,7 +40,6 @@ object FileSerialisation:
   def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, fury: Fury)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir ⇒
     val fileInfo = HashMap() ++ files.map: file ⇒
       val name = UUID.randomUUID
-
       val toArchive =
         if file.isDirectory
         then
@@ -53,7 +52,6 @@ object FileSerialisation:
       then tos.addFile(toArchive, fileDir + "/" + name.toString)
 
       (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
-
 
     newFile.withTmpFile: tmpFile ⇒
       tmpFile.withOutputStream(os => fury.serialize(os, fileInfo))
@@ -71,14 +69,14 @@ object FileSerialisation:
         def fileContent =
           if isDirectory
           then
-            val dest = newFile.newDir("directoryFromArchive")
+            val dest = TmpDirectory.newDirectory("directoryFromArchive")
             dest.mkdirs()
             if exists
             then fromArchive.extract(dest, archive = ArchiveType.Tar)
             else dest.delete
             dest
           else
-            val dest = newFile.newFile("fileFromArchive", ".bin")
+            val dest = TmpDirectory.newFile("fileFromArchive", ".bin")
             dest.createParentDirectory
             if exists
             then fromArchive.move(dest)

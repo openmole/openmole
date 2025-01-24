@@ -25,12 +25,12 @@ object RepeatSampling {
   implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = s ⇒ {
     def validate: Validate = s.sampling(s.s).validate ++ s.times.validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
-    def outputs: Iterable[Val[_]] = s.sampling(s.s).outputs.map(_.toArray)
-    def apply: FromContext[Iterator[Iterable[Variable[_]]]] = FromContext { p ⇒
+    def outputs: Iterable[Val[?]] = s.sampling(s.s).outputs.map(_.toArray)
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
       import p._
 
       def sampled =
-        val samplingValue: Seq[Seq[Variable[_]]] = s.sampling(s.s).sampling.from(context).map(_.toSeq).toSeq.transpose
+        val samplingValue: Seq[Seq[Variable[?]]] = s.sampling(s.s).sampling.from(context).map(_.toSeq).toSeq.transpose
 
         for {
           vs ← samplingValue

@@ -2,7 +2,7 @@ package org.openmole.plugin.environment.batch.refresh
 
 import org.openmole.tool.exception.Retry.retry
 import org.openmole.core.workflow.execution.ExecutionState
-import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, BatchExecutionJob, BatchJobControl, JobStore }
+import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment, BatchExecutionJob, BatchJobControl, JobStore}
 
 /*
  * Copyright (C) 2019 Romain Reuillon
@@ -21,37 +21,37 @@ import org.openmole.plugin.environment.batch.environment.{ BatchEnvironment, Bat
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object KillActor {
+object KillActor:
 
-  def receive(msg: Kill)(implicit services: BatchEnvironment.Services) = {
+  def receive(msg: Kill)(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     import services._
     import msg._
 
     BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.KILLED)
 
-    if (!JobManager.canceled(job.storedJob) && !environment.stopped) {
+    if !JobManager.canceled(job.storedJob) && !environment.stopped
+    then
       val loadedJob = JobStore.load(job.storedJob)
-      JobManager.sendToMoleExecution(job.storedJob) { state ⇒
-        if (!JobManager.jobIsFinished(state, job.storedJob)) environment.submit(loadedJob)
-      }
-    }
-
+      JobManager.sendToMoleExecution(job.storedJob): state ⇒
+        if !JobManager.jobIsFinished(state, job.storedJob) 
+        then environment.submit(loadedJob)
+    
     try BatchEnvironment.finishedExecutionJob(environment, job)
     finally tryKillAndClean(job, environment, batchJob)
-  }
 
-  def tryKillAndClean(job: BatchExecutionJob, environment: BatchEnvironment, bj: Option[BatchJobControl])(implicit services: BatchEnvironment.Services) = {
+  def tryKillAndClean(job: BatchExecutionJob, environment: BatchEnvironment, bj: Option[BatchJobControl])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     JobStore.clean(job.storedJob)
 
-    def kill(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete())
-    def clean(bj: BatchJobControl)(implicit services: BatchEnvironment.Services) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean())
+    def kill(bj: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete(priority))
+    def clean(bj: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean(priority))
 
-    try bj.foreach(kill) catch {
+    try bj.foreach(kill)
+    catch
       case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
-    }
 
-    try bj.foreach(clean) catch {
+    try bj.foreach(clean)
+    catch
       case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
-    }
-  }
-}
+
+
+

@@ -22,7 +22,7 @@ import org.openmole.core.workflow.task.{ EmptyTask, MoleTask }
 
 package object pattern {
 
-  def wrap(evaluation: DSL, inputVals: Seq[Val[_]], outputVals: Seq[Val[_]], wrap: Boolean = true)(implicit definitionScope: DefinitionScope) =
+  def wrap(evaluation: DSL, inputVals: Seq[Val[?]], outputVals: Seq[Val[?]], wrap: Boolean = true)(implicit definitionScope: DefinitionScope) =
     if (wrap) {
       val moleTask = MoleTask(evaluation) set (inputs ++= inputVals, outputs ++= outputVals)
       DSLContainer(moleTask, (), delegate = Vector(moleTask))

@@ -17,56 +17,82 @@
 
 package org.openmole.core.workflow.task
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import org.openmole.core.context.Val
 import org.openmole.core.argument.DefaultSet
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.setter._
-import org.openmole.core.workflow.domain._
-import org.scalatest._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.sampling.ExplicitSampling
-import org.openmole.core.workflow.test.TestTask
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.domain.*
+import org.scalatest.*
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.mole.*
 
-class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  import org.openmole.core.workflow.test._
+  import org.openmole.core.workflow.test.*
+  import Stubs.*
 
-  "Task " should "be the same after serialization and deserialization" in {
+  "Task" should "be the same after serialization and deserialization" in:
     val p = Val[Int]("p")
 
-    val t = EmptyTask() set (
-      inputs += p,
-      outputs += p
-    )
+    val t =
+      EmptyTask() set (
+        inputs += p,
+        outputs += p
+      )
 
-    val t2 = serializeDeserialize(t)
-    t2.config.inputs.contains(p.name) should equal(true)
-    t2.config.outputs.contains(p.name) should equal(true)
-  }
+    val mole: Mole = t
+    val rt = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, TaskExecutionBuildContext(cache)).head._2
 
-  "Transient lazy field" should "not be null in defaultSet" in {
+    val rt2 = serializeDeserialize(rt)
+    rt2.taskExecutionInfo.inputs.contains(p.name) should equal(true)
+    rt2.taskExecutionInfo.outputs.contains(p.name) should equal(true)
+
+  "MoleTask" should "be able to run after serialization and deserialization" in :
+    val p = Val[Int]("p")
+    var executed = false
+
+    val t =
+      TestTask: c =>
+        executed = true
+        c
+      .set(
+        inputs += p,
+        outputs += p,
+        p := 1
+      )
+
+    val rt =
+      MoleExecution.runtimeTasks(MoleTask(t), Sources.empty, Hooks.empty, TaskExecutionBuildContext(cache)).head
+
+    MoleExecution(
+      Mole(rt._1),
+      runtimeTask = Some(Map(rt))
+    ).run
+
+    executed should equal(true)
+
+  "Transient lazy field" should "not be null in defaultSet" in:
     val defaults = DefaultSet()
     defaults.defaultMap.get("test")
     val d2 = serializeDeserialize(defaults)
     defaults.defaultMap should equal(d2.defaultMap)
-  }
 
   // -Ydelambdafy:inline makes it work on scala 2.13
   // inlining isSampling parameter makes it work on scala 3
-  "Exploration " should "run after serialization and deserialization" in {
+  "Exploration " should "run after serialization and deserialization" in:
     val data = List("A", "B", "C")
     val i = Val[String]("i")
 
-    implicit def listFactor: DiscreteFromContextDomain[List[String], String] = domain ⇒ Domain(domain.iterator)
+    inline given DiscreteFromContextDomain[List[String], String] = domain => Domain(domain.iterator)
 
     val exp = ExplorationTask(i in data)
     val t = EmptyTask() set (inputs += i)
+    
     val t2 = serializeDeserialize(exp -< t)
     t2.run().hangOn()
-  }
 
-  "Compiled code" should "be detetected as such by the serializer" in {
+  "Compiled code" should "be detected as such by the serializer" in:
     val interpreter = org.openmole.core.compiler.Interpreter()
     val i = interpreter.eval("""
     class InterpretedClass {
@@ -78,6 +104,4 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
     class OpenMOLEClass
     org.openmole.core.compiler.Interpreter.isInterpretedClass(classOf[OpenMOLEClass]) should equal(false)
-  }
 
-}

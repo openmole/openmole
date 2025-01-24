@@ -193,8 +193,8 @@ object FromContext extends LowPriorityFromContext:
    * @param tmpDirectory
    * @param fileService
    */
-  case class Parameters(val context: Context)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
-  //case class ValidationParameters(inputs: Seq[Val[_]], implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
+  case class Parameters(context: Context)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
+  //case class ValidationParameters(inputs: Seq[Val[?]], implicit val tmpDirectory: TmpDirectory, implicit val fileService: FileService)
 
   /**
    * Construct a FromContext from a function of [[Parameters]]
@@ -237,7 +237,7 @@ object FromContext extends LowPriorityFromContext:
     def map[S](f: A => S) = fr.map(f)
     def map2[B, C](fb: FromContext[B])(f: (A, B) => C) = fr.map2(fb)(f)
 
-case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs: Seq[Val[_]], defaults: DefaultSet, stringValue: Option[String]):
+case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs: Seq[Val[?]], defaults: DefaultSet, stringValue: Option[String]):
   def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T =
     def fullContext = DefaultSet.completeContext(defaults, context)
     val parameters: FromContext.Parameters = FromContext.Parameters(fullContext)(rng, tmpDirectory, fileService)
@@ -249,7 +249,7 @@ case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs:
   def validate = Validate.withExtraInputs(v, i => DefaultSet.defaultVals(i, defaults))
 
   def withValidate(validate: Validate): FromContext[T] = copy(v = v ++ validate)
-  def withInputs(v: Seq[Val[_]]): FromContext[T] = copy(inputs = inputs ++ v)
+  def withInputs(v: Seq[Val[?]]): FromContext[T] = copy(inputs = inputs ++ v)
 
   def using(fs: FromContext[_]*): FromContext[T] =
     this.withValidate(fs.map(_.validate)).withInputs(fs.flatMap(_.inputs))

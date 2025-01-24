@@ -23,7 +23,7 @@ import org.openmole.tool.types._
 
 import scala.reflect.ClassTag
 
-package collection {
+package collection:
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits:
@@ -31,12 +31,19 @@ package collection {
     implicit def iterableIsDiscreteFromContext[T]: DiscreteFromContextDomain[Iterable[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
     implicit def iterableIsFix[T]: FixDomain[Iterable[T], T] = domain ⇒ Domain(domain)
     implicit def iterableIsSized[T]: DomainSize[Iterable[T]] = domain ⇒ domain.size
-}
 
-package object collection extends LowPriorityImplicits {
+
+package object collection extends LowPriorityImplicits:
+
+  implicit def rangeIsBounded: BoundedDomain[scala.Range, Int] = r => Domain((r.min, r.max))
+  implicit def doubleRangeIsBounded: BoundedDomain[DoubleRange, Double] = r => Domain((r.low, r.high))
+
+  implicit def rangeIsStep: DomainStep[scala.Range, Int] = r => r.step
+  implicit def doubleRangeIsStep: DomainStep[DoubleRange, Double] = r => r.step
 
   implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] = domain ⇒ Domain(FromContext { _ ⇒ (domain.map(implicitly[ToArray[A1]].apply[T])).iterator })
   implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray]: FixDomain[Iterable[A1[T]], Array[T]] = domain ⇒ Domain(domain.map(implicitly[ToArray[A1]].apply[T]))
+  
   implicit def arrayIsDiscrete[T]: DiscreteFromContextDomain[Array[T], T] = domain ⇒ Domain(FromContext { _ ⇒ domain.iterator })
   implicit def arrayIsFix[T]: FixDomain[Array[T], T] = domain ⇒ Domain(domain.toIterable)
   implicit def arrayIsSized[T]: DomainSize[Array[T]] = domain ⇒ domain.size
@@ -53,4 +60,3 @@ package object collection extends LowPriorityImplicits {
       inputs = Seq(domain)
     )
 
-}

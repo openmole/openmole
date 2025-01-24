@@ -42,15 +42,15 @@ package object sensitivity {
     //    }
 
     /**
-     * Casts a Val[_] (value of something) to a Val[Double]
+     * Casts a Val[?] (value of something) to a Val[Double]
      * (value containing a Double), and throws a nice
      * exception in case it's not possible
      */
-    def toValDouble(v: Val[_]): Val[Double] = v match
+    def toValDouble(v: Val[?]): Val[Double] = v match
       case Val.caseDouble(vd) ⇒ vd
       case _                  ⇒ throw new IllegalArgumentException("expect inputs of type Double, but received " + v)
 
-    def variableResults(inputs: Seq[Val[_]], outputs: Seq[Val[_]], coefficient: (Val[_], Val[_]) ⇒ Val[_]) = FromContext { p ⇒
+    def variableResults(inputs: Seq[Val[?]], outputs: Seq[Val[?]], coefficient: (Val[?], Val[?]) ⇒ Val[?]) = FromContext { p ⇒
       import p._
 
       def results =

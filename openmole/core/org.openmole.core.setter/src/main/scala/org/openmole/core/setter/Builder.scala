@@ -12,10 +12,10 @@ trait OutputBuilder[T]:
   def outputs: monocle.Lens[T, PrototypeSet]
 
 trait MappedInputBuilder[T]:
-  def mappedInputs: monocle.Lens[T, Vector[Mapped[_]]]
+  def mappedInputs: monocle.Lens[T, Vector[ Mapped[?]]]
 
 trait MappedOutputBuilder[T]:
-  def mappedOutputs: monocle.Lens[T, Vector[Mapped[_]]]
+  def mappedOutputs: monocle.Lens[T, Vector[ Mapped[?]]]
 
 object DefaultBuilder:
 
@@ -46,7 +46,7 @@ object InputOutputBuilder:
 object MappedInputOutputBuilder:
 
   def apply[T](mapped: Lens[T, MappedInputOutputConfig]) = new MappedInputOutputBuilder[T]:
-    override def mappedInputs: Lens[T, Vector[Mapped[_]]] = mapped andThen Focus[MappedInputOutputConfig](_.inputs)
-    override def mappedOutputs: Lens[T, Vector[Mapped[_]]] = mapped andThen Focus[MappedInputOutputConfig](_.outputs)
+    override def mappedInputs: Lens[T, Vector[ Mapped[?]]] = mapped andThen Focus[MappedInputOutputConfig](_.inputs)
+    override def mappedOutputs: Lens[T, Vector[ Mapped[?]]] = mapped andThen Focus[MappedInputOutputConfig](_.outputs)
 
 

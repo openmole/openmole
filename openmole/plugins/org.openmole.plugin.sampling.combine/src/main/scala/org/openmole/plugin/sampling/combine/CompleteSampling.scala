@@ -29,25 +29,25 @@ object CompleteSampling {
       s.inputs,
       s.validate)
 
-  def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)
+  def apply(samplings: Sampling*) = new CompleteSampling(samplings *)
 }
 
 case class CompleteSampling(samplings: Sampling*) {
 
   def validate: Validate = samplings.flatMap(_.validate)
   def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
-  def outputs: Iterable[Val[_]] = samplings.flatMap { _.outputs }
+  def outputs: Iterable[Val[?]] = samplings.flatMap { _.outputs }
 
   def apply() = FromContext { p ⇒
     import p._
     if (samplings.isEmpty) Iterator.empty
     else
-      samplings.tail.foldLeft[Iterator[Iterable[Variable[_]]]](samplings.head.sampling.from(context)) {
+      samplings.tail.foldLeft[Iterator[Iterable[Variable[?]]]](samplings.head.sampling.from(context)) {
         (a, b) ⇒ combine(a, b).from(context)
       }
   }
 
-  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling) = FromContext { p ⇒
+  def combine(s1: Iterator[Iterable[Variable[?]]], s2: Sampling) = FromContext { p ⇒
     import p._
     for (x ← s1; y ← s2.sampling.from(context ++ x)) yield x ++ y
   }

@@ -4,7 +4,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.preference.{ Preference, PreferenceLocation }
 import org.openmole.core.workflow.execution.{ExceptionEvent, ExecutionState}
-import org.openmole.core.workflow.execution.{ Environment, EnvironmentProvider, ExecutionJob, SubmissionEnvironment }
+import org.openmole.core.workflow.execution.{ Environment, EnvironmentBuilder, ExecutionJob, SubmissionEnvironment }
 import org.openmole.core.workflow.job.{ JobGroup, JobId }
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.core.event._
@@ -18,10 +18,10 @@ object DispatchEnvironment {
   val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
 
   object DestinationProvider {
-    implicit def toDestinationProvider(on: On[Int, EnvironmentProvider]): DestinationProvider = DestinationProvider(on.on, on.value)
+    implicit def toDestinationProvider(on: On[Int, EnvironmentBuilder]): DestinationProvider = DestinationProvider(on.on, on.value)
   }
 
-  case class DestinationProvider(environment: EnvironmentProvider, slot: Int)
+  case class DestinationProvider(environment: EnvironmentBuilder, slot: Int)
 
   case class Destination(environment: Environment, slot: Int)
 
@@ -83,31 +83,31 @@ object DispatchEnvironment {
       submitToEnvironment(dispatchEnvironment, environment)
     }
 
-  def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = {
+  def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = 
     case (env: Environment, e: Environment.JobStateChanged) ⇒
-      def isActive(s: ExecutionState) = s match {
-        case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING ⇒ true
-        case _ ⇒ false
-      }
+      def isActive(s: ExecutionState) = 
+        s match 
+          case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING ⇒ true
+          case _ ⇒ false
+        
 
-      if (!isActive(e.newState))
-        dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job, e.newState))
-  }
+      if !isActive(e.newState)
+      then dispatchEnvironment.get.foreach(dispatch ⇒ jobFinished(dispatch, env, e.id, e.job, e.newState))
 
   def apply(
     slot: Seq[DestinationProvider],
     name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentProvider.multiple: (ms, cache, c1) ⇒
+    EnvironmentBuilder.multiple: (ms, c1) ⇒
       import ms._
 
-      val c2 = EnvironmentProvider.build(slot.map(_.environment), ms, cache, c1)
+      val c2 = EnvironmentBuilder.build(slot.map(_.environment), ms, c1)
 
       val dispatchEnvironment =
         new DispatchEnvironment(
           destination = slot.map(e ⇒ Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
       for

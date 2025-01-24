@@ -76,13 +76,15 @@ object Plot {
     .xaxis(axis.title(xTitle))
     .yaxis(axis.title(yTitle))
     .font(Font.family("gi").size(14))
-    .margin(Margin.t(0))
+    .margin(Margin.l(20).r(20))
+    .width(1200)
 
   val splomLayout = Layout
     .showlegend(false)
     .height(600)
     .autosize(true)
     .font(Font.family("gi").size(14))
+    .width(1200)
 
 
   case class LayoutedPlot(element: HtmlElement, layout: Layout)

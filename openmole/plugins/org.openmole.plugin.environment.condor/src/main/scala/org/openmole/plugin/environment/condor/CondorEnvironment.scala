@@ -29,10 +29,9 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import squants.Time
 import squants.information._
-import _root_.gridscale.effectaside
 import org.openmole.core.replication.ReplicaCatalog
 
-object CondorEnvironment {
+object CondorEnvironment:
 
   def apply(
     user: OptionalArgument[String] = None,
@@ -50,6 +49,7 @@ object CondorEnvironment {
     workDirectory:        OptionalArgument[String]      = None,
     requirements:         OptionalArgument[String]      = None,
     timeout:              OptionalArgument[Time]        = None,
+    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     localSubmission:      Boolean                       = false,
@@ -69,8 +69,8 @@ object CondorEnvironment {
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentProvider: (ms, cache) ⇒
-      import ms._
+    EnvironmentBuilder: ms  =>
+      import ms.*
 
       if !localSubmission
       then
@@ -83,16 +83,17 @@ object CondorEnvironment {
           host = hostValue,
           port = portValue,
           timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+          reconnect = reconnect,
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
       else
         new CondorLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms, cache)
+          services = BatchEnvironment.Services(ms)
         )
 
 
@@ -108,108 +109,107 @@ object CondorEnvironment {
     storageSharedLocally: Boolean,
     modules:              Seq[String])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_, _])(implicit services: BatchEnvironment.Services) =
+  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
       batchExecutionJob,
       storage,
       space,
-      jobService.submit(_, _, _),
-      jobService.state(_),
-      jobService.delete(_),
-      jobService.stdOutErr(_)
+      jobService.submit,
+      jobService.state,
+      jobService.delete,
+      jobService.stdOutErr
     )
 
-}
 
 class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
   val user:              String,
   val host:              String,
   val port:              Int,
   val timeout:           Time,
+  val reconnect:         Option[Time],
   val parameters:        CondorEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) {
-  env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env =>
 
   import services._
 
-  implicit val sshInterpreter: gridscale.effectaside.Effect[gridscale.ssh.SSH] = gridscale.ssh.SSH()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
+  implicit lazy val ssh: gridscale.ssh.SSH =
+    val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
+    gridscale.ssh.SSH(sshServer, reconnect = reconnect)
 
-  override def start() = {
+  override def start() =
     storageService
-  }
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = true)
 
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    cleanSSHStorage(storageService, background = false)
+    AccessControl.defaultPrirority:
+      cleanSSHStorage(storageService, background = false)
     BatchEnvironment.waitJobKilled(this)
-    sshInterpreter().close
-  }
+    ssh.close
 
   lazy val accessControl = AccessControl(preference(SSHEnvironment.maxConnections))
-  lazy val sshServer = gridscale.ssh.SSHServer(host, port, timeout)(authentication)
 
   lazy val storageService =
-    if (parameters.storageSharedLocally) Left {
-      val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
-      (localStorageSpace(local), local)
-    }
+    if parameters.storageSharedLocally
+    then
+      Left:
+        val local = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
+        (localStorageSpace(local), local)
     else
-      Right {
+      Right:
         val ssh =
           sshStorage(
             user = user,
             host = host,
             port = port,
-            sshServer = sshServer,
             accessControl = accessControl,
             environment = env,
             sharedDirectory = parameters.sharedDirectory
           )
 
         (sshStorageSpace(ssh), ssh)
-      }
 
-  def execute(batchExecutionJob: BatchExecutionJob) =
-    storageService match {
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    storageService match
       case Left((space, local)) ⇒ CondorEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
       case Right((space, ssh))  ⇒ CondorEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
-    }
 
   lazy val installRuntime =
-    storageService match {
-      case Left((space, local)) ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ new RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
-    }
+    storageService match
+      case Left((space, local)) ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
-    storageService match {
-      case Left((space, local)) ⇒ new CondorJobService(local, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-      case Right((space, ssh))  ⇒ new CondorJobService(ssh, space.tmpDirectory, installRuntime, parameters, sshServer, accessControl)
-    }
+    import _root_.gridscale.cluster.HeadNode
+    storageService match
+      case Left((space, local)) ⇒ CondorJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  ⇒ CondorJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
-}
 
 class CondorLocalEnvironment(
   val parameters:        CondorEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState()) { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  env ⇒
 
   import services._
 
-  implicit val localInterpreter: gridscale.effectaside.Effect[gridscale.local.Local] = gridscale.local.Local()
-  implicit val systemInterpreter: gridscale.effectaside.Effect[gridscale.effectaside.System] = effectaside.System()
+  override def start() =
+    storage
+    space
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = true)
 
-  override def start() = { storage; space }
-  override def stop() = {
+  override def stop() =
     state.stopped = true
-    HierarchicalStorageSpace.clean(storage, space, background = false)
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, space, background = false)
     BatchEnvironment.waitJobKilled(this)
-  }
 
   import env.services.preference
   import org.openmole.plugin.environment.ssh._
@@ -217,13 +217,11 @@ class CondorLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob) = CondorEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
+    CondorEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
 
-  lazy val installRuntime = new RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
+  lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 
-  import _root_.gridscale.local.LocalHost
+  lazy val jobService = CondorJobService(storage, space.tmpDirectory, installRuntime, parameters, _root_.gridscale.cluster.LocalHeadNode(), AccessControl(preference(SSHEnvironment.maxConnections)))
 
-  lazy val jobService = new CondorJobService(storage, space.tmpDirectory, installRuntime, parameters, LocalHost(), AccessControl(preference(SSHEnvironment.maxConnections)))
-
-}
 

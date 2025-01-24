@@ -1,3 +1,3 @@
 package org.openmole.core.setter
 
-case class MappedInputOutputConfig(inputs: Vector[Mapped[_]] = Vector(), outputs: Vector[Mapped[_]] = Vector())
+case class MappedInputOutputConfig(inputs: Vector[ Mapped[?]] = Vector(), outputs: Vector[ Mapped[?]] = Vector())

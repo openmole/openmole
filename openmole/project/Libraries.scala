@@ -69,7 +69,6 @@ object Libraries {
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
-
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
 
 
@@ -79,6 +78,10 @@ object Libraries {
   lazy val xzJava = "org.openmole.library" %% "xzjava" % xzVersion
   lazy val guava = "org.openmole.library" %% "com-google-guava" % guavaVersion
   lazy val jline = "org.openmole.library" %% "org-jline-jline" % jlineVersion
+
+  lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+  lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
+  lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
 
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -94,7 +97,7 @@ object Libraries {
   lazy val gridscaleSSH =
     Seq(
       "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
-      "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
+      sshj
     )
 
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion

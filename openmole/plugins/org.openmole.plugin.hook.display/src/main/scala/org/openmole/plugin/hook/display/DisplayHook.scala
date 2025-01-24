@@ -30,17 +30,17 @@ object DisplayHook {
       context
     } withValidate { toDisplay.validate }
 
-  def apply(out: PrintStream, prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook =
+  def apply(out: PrintStream, prototypes: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook =
     Hook("DisplayHook") { parameters ⇒
       import parameters._
       if (!prototypes.isEmpty) {
-        val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])): _*)
+        val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])) *)
         outputRedirection.output.println(filtered.toString)
       }
       else outputRedirection.output.println(context.toString)
       context
     }
 
-  def apply(prototypes: Val[_]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook = apply(System.out, prototypes: _*)
+  def apply(prototypes: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook = apply(System.out, prototypes *)
 
 }

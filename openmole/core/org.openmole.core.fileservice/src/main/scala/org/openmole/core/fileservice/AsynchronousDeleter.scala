@@ -25,17 +25,16 @@ import org.openmole.tool.file._
 
 import scala.ref.{ ReferenceQueue, WeakReference }
 
-private class AsynchronousDeleter(fileService: WeakReference[FileService]) { fd ⇒
-
+private class AsynchronousDeleter(fileService: WeakReference[FileService]):
   def stop = !fileService.get.isDefined
 
   private val cleanFiles = new LinkedBlockingQueue[File]
   def asynchronousRemove(file: File) = cleanFiles.add(file)
 
-  private def run: Runnable = {
-    while (!cleanFiles.isEmpty || !stop) cleanFiles.take.recursiveDelete
-  }
+  private def run =
+    while !cleanFiles.isEmpty || !stop
+    do cleanFiles.take.recursiveDelete
 
-  def start(implicit threadProvider: ThreadProvider) = threadProvider.pool.submit(run)
+  def start(implicit threadProvider: ThreadProvider) = threadProvider.virtual(() => run)
 
-}
+

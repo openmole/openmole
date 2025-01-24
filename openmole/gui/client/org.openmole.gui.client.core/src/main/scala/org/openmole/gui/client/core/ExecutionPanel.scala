@@ -16,10 +16,12 @@ import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.api.features.unitArrows
 import com.raquo.laminar.api.Laminar
+import com.raquo.laminar.nodes.ReactiveElement
 import org.openmole.gui.client.core.Panels.ExpandablePanel
 import org.openmole.gui.client.ext.ClientUtil
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
+import org.scalajs.dom.HTMLDivElement
 
 import concurrent.duration.*
 import scaladget.bootstrapnative.bsn.*
@@ -131,9 +133,9 @@ class ExecutionPanel:
   //def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
 
 
-  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false) =
+  def contextBlock(info: String, content: String, alwaysOpaque: Boolean = false, link: Boolean = false, blockWidth: Int = 150) =
     div(columnFlex,
-      div(cls := "contextBlock",
+      div(cls := "contextBlock", width := blockWidth.toString,
         if (!alwaysOpaque) backgroundOpacityCls else emptyMod,
         div(info, cls := "info"), div(content, cls := (if !link then "infoContent" else "infoContentLink")))
     )
@@ -218,15 +220,16 @@ class ExecutionPanel:
       )
     )
 
-  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) = div(cls := "execButtons",
-    child <-- showControls.signal.map: c =>
-      if c
-      then
-        div(display.flex, flexDirection.column, alignItems.center,
-          button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
-          button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
-        )
-      else div()
+  def controls(id: ExecutionId, state: ExecutionDetails.State, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
+     div(
+      child <-- showControls.signal.map: c =>
+        if c
+        then
+          div(display.flex, flexDirection.column, alignItems.center,
+            button("Stop", onClick --> cancel(id), btn_danger, cls := "controlButton"),
+            button("Clean", onClick --> remove(id), btn_secondary, cls := "controlButton"),
+          )
+        else div()
   )
 
   def ratio(completed: Long, running: Long, ready: Long) = s"${
@@ -238,7 +241,7 @@ class ExecutionPanel:
   def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
-      contextBlock("Start time", ClientUtil.longToDate(details.startDate)),
+      contextBlock("Start time", ClientUtil.longToDate(details.startDate), blockWidth = 220),
       //contextBlock("Method", "???"),
       durationBlock(details.duration, details.executionTime),
       statusBlock("Running", details.running.toString),
@@ -285,7 +288,7 @@ class ExecutionPanel:
     def filterExecutions(execs: Executions): (Executions, Seq[ExecutionId]) =
       import ExecutionPanel.ExecutionDetails.State
       val (ids, cleanIds) =
-        if autoRemoveFailed.isChecked
+        if autoRemoveFailed.checked.now()
         then
           val idsForPath =
             execs.groupBy(_._2.path).toSeq
@@ -309,7 +312,7 @@ class ExecutionPanel:
       finally queryingState = false
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
-      div(columnFlex, marginTop := "20px",
+      div(columnFlex, marginTop := "5px", maxWidth := "1520px",
         for
           e <- envStates
         yield jobRow(executionId, e)
@@ -347,9 +350,9 @@ class ExecutionPanel:
 
       div(columnFlex,
         div(rowFlex, justifyContent.center,
-          contextBlock("Resource", e.taskName, true).amend(width := "180"),
-          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true),
-          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true),
+          contextBlock("Resource", e.taskName, true, blockWidth = 180),
+          contextBlock("Execution time", CoreUtils.approximatedYearMonthDay(e.executionActivity.executionTime), true, blockWidth = 220),
+          contextBlock("Uploads", displaySize(e.networkActivity.uploadedSize, e.networkActivity.readableUploadedSize, e.networkActivity.uploadingFiles), true, blockWidth = 200),
           contextBlock("Downloads", displaySize(e.networkActivity.downloadedSize, e.networkActivity.readableDownloadedSize, e.networkActivity.downloadingFiles), true),
           contextBlock("Submitted", e.submitted.toString, true),
           contextBlock("Running", e.running.toString, true),
@@ -370,7 +373,7 @@ class ExecutionPanel:
                   val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
                   errors.zipWithIndex.map: (e, i) =>
                     div(flexRow,
-                      cls := "docEntry", width := "1140", margin := "0 4 0 3",
+                      cls := "docEntry", width := "100%",
                       backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
@@ -384,12 +387,12 @@ class ExecutionPanel:
       )
 
     def expander(id: ExecutionId, details: ExecutionDetails) =
-      div(height := "500", rowFlex, justifyContent.center, alignItems.flexStart,
+      div(height := "500", rowFlex, justifyContent.center,
         child <-- showExpander.signal.map:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
             val size = Var(1000)
-            val raw: Var[Boolean] = Var(false)
+            //val ansi: Var[Boolean] = Var(true)
 
             div(
               child <--
@@ -402,62 +405,44 @@ class ExecutionPanel:
 
                       def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
 
-                      lazy val ansiOutputDiv =
+                      def ansiOutputDiv =
                         val d = baseOutputDiv
                         d.ref.innerHTML = convert.toHtml(output.output.replace(" ", "&nbsp;")).asInstanceOf[String]
                         d
 
-                      lazy val rawOutput =
+                      def rawOutputDiv =
                         val d = baseOutputDiv
-                        d.ref.innerHTML =  output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
+                        d.ref.innerHTML = output.output.replace(" ", "&nbsp;").replace("\n", "<br/>")
                         d
 
-                      def outputDiv =
-                        div(
-                          child <-- raw.signal.map:
-                            case false => ansiOutputDiv
-                            case true => rawOutput
-                        )
+                      val ansiSwitch = Component.Switch("ansi", true)
 
-                      def rawDiv =
-                        div(display.flex, flexDirection.column, width := "800", height := "30",
-                          div(cursor.pointer, alignSelf.flexEnd, marginTop := "10",
-                            child <-- raw.signal.map:
-                              case false => "ansi"
-                              case true => del("ansi"),
-                            onClick --> raw.update(!_)
-                          )
-                        )
+                      val outputDiv =
+                        ansiSwitch.checked.signal.map:
+                          case true => ansiOutputDiv
+                          case false => rawOutputDiv
 
                       def more =
-                        if true //output.listed < output.total
+                        if output.listed < output.total
                         then
-                          div(cursor.pointer, textAlign := "center",
-                            i(cls := "bi bi-plus"),
-                            br(),
-                            i(fontSize := "12", s"${output.listed}/${output.total}"),
+                          div(cursor.pointer, display.flex, justifyContent.flexEnd, alignItems.center,
+                            i(s"${output.listed}/${output.total}"),
+                            i(cls := "bi bi-plus plusButton"),
                             onClick --> { _ => size.update(_ * 2) }
                           )
                         else div()
 
-
-                      def bottom =
-                        div(/*position := "absolute", top := "760", left := "973",*/ cursor.pointer, textAlign := "center",
-                          i(cls := "bi bi-caret-down"),
-                          onClick --> { _ =>
-                            if raw.now()
-                            then rawOutput.ref.scrollTop = rawOutput.ref.scrollHeight
-                            else ansiOutputDiv.ref.scrollTop = ansiOutputDiv.ref.scrollHeight
-                          }
-                        )
-
                       div(
-                        display.flex, flexDirection.column, alignItems.center,
+                        display.flex, flexDirection.row, marginTop := "50px",
                         height := "500",
-                        rawDiv,
-                        outputDiv,
-                        bottom,
-                        more
+                        child <-- outputDiv,
+                        outputDiv.toObservable --> Observer[ReactiveElement[HTMLDivElement]](e => e.ref.scrollTop = e.ref.scrollHeight),
+                        div(
+                          columnFlex,
+                          marginTop := "20px",
+                          ansiSwitch.element.amend(justifyContent.flexEnd),
+                          more
+                        )
                       )
                       //outputDiv ++ more ++ Seq(bottom)
                     case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
@@ -521,7 +506,8 @@ class ExecutionPanel:
                 autoRemoveFailed.element.amend(width := "180", marginTop := "5")
               )
             case false => emptyNode,
-        div(cls := "bi-three-dots-vertical execControls", onClick --> showGlobalControls.update(!_))
+        div(cls := "bi-three-dots-vertical execControls", color := "#373f46", backgroundColor := "white",
+          onClick --> showGlobalControls.update(!_))
       ),
       showExpander.toObservable.distinct --> Observer { e => if e == None then triggerStateUpdate },
       currentOpenSimulation.toObservable -->

@@ -27,7 +27,7 @@ import org.openmole.core.serializer.PluginAndFilesListing
 class PluginClassConverter(serializer: PluginAndFilesListing) extends JavaClassConverter(new ClassLoaderReference(classOf[XStream].getClassLoader)) {
 
   override def toString(obj: Object) = {
-    val c = obj.asInstanceOf[Class[_]]
+    val c = obj.asInstanceOf[Class[?]]
     serializer.classUsed(c)
     super.toString(obj)
   }

@@ -9,7 +9,7 @@
 ////TODO: try to get rid of this fix after scala 2.13 migration
 //class HashMapConverter(mapper: Mapper) extends AbstractCollectionConverter(mapper) {
 //
-//  def canConvert(clazz: Class[_]) =
+//  def canConvert(clazz: Class[?]) =
 //    classOf[scala.collection.immutable.HashMap[_, _]] == clazz || scala.collection.immutable.HashMap.empty.getClass == clazz
 //
 //  def marshal(value: Any, writer: HierarchicalStreamWriter, context: MarshallingContext) = {
@@ -31,6 +31,6 @@
 //      list += k -> v
 //      reader.moveUp()
 //    }
-//    scala.collection.immutable.HashMap(list.toSeq: _*)
+//    scala.collection.immutable.HashMap(list.toSeq *)
 //  }
 //}

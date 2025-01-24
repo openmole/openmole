@@ -34,7 +34,7 @@ import scala.annotation.tailrec
 
     Market.MarketRepository(
       repository = Market.githubMarket,
-      entries = yaml.parser.parse(indexString).toTry.get.as[Seq[Market.MarketEntry]].toTry.get: _*
+      entries = yaml.parser.parse(indexString).toTry.get.as[Seq[Market.MarketEntry]].toTry.get *
     )
 
   val entries =

@@ -62,8 +62,8 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "file" / "list-recursive", jsonRequest[(SafePath, Option[String], Boolean)]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
 
   //  def isEmpty(safePath: SafePath): Boolean
-  val move: ErrorEndpoint[Seq[(SafePath, SafePath)], Unit] =
-    errorEndpoint(post(path / prefix / "file" / "move", jsonRequest[Seq[(SafePath, SafePath)]]), ok(jsonResponse[Unit]))
+  val move: ErrorEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    errorEndpoint(post(path / prefix / "file" / "move", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
 
   val duplicate: ErrorEndpoint[(SafePath, String), SafePath] =
    errorEndpoint(post(path / prefix / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
@@ -80,7 +80,6 @@ trait CoreAPI extends RESTAPI:
   val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
     errorEndpoint(get(path / prefix / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
 
-
   val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
 
@@ -92,6 +91,48 @@ trait CoreAPI extends RESTAPI:
 
   val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
     errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
+
+  val cloneRepository: ErrorEndpoint[(String, SafePath, Boolean), Option[SafePath]] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath, Boolean)]), ok(jsonResponse[Option[SafePath]]))
+
+  val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
+    
+  val revert: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "revert", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
+  val add: ErrorEndpoint[Seq[SafePath], Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "add", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+
+  val pull: ErrorEndpoint[SafePath, MergeStatus] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "pull", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))
+  
+  val push: ErrorEndpoint[SafePath, PushStatus] =
+    errorEndpoint(post(path / "git" / "push", jsonRequest[SafePath]), ok(jsonResponse[PushStatus]))
+
+  val branchList: ErrorEndpoint[SafePath, Option[BranchData]] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "branch-list", jsonRequest[SafePath]), ok(jsonResponse[Option[BranchData]]))
+    
+  val checkout: ErrorEndpoint[(SafePath, String), Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "checkout", jsonRequest[(SafePath, String)]), ok(jsonResponse[Unit]))
+    
+  val stash: ErrorEndpoint[SafePath, Unit] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "stash", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+
+  val stashPop: ErrorEndpoint[SafePath, MergeStatus] =
+    errorEndpoint(post(path / prefix / "file" / "git" / "stash-pop", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))
+
+  val gitAuthentications: ErrorEndpoint[Unit, Seq[GitPrivateKeyAuthenticationData]] =
+    errorEndpoint(get(path /  "git" / "authentications"), ok(jsonResponse[Seq[GitPrivateKeyAuthenticationData]]))
+
+  val addGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
+    errorEndpoint(post(path / "git" / "add-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+
+  val removeGitAuthentication: ErrorEndpoint[(GitPrivateKeyAuthenticationData, Boolean), Unit] =
+    errorEndpoint(post(path / "git" / "remove-authentication", jsonRequest[(GitPrivateKeyAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
+
+  val testGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Seq[Test]] =
+    errorEndpoint(post(path / "git" / "test-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))
 
 
   // ---------- Executions --------------------
@@ -213,6 +254,6 @@ trait CoreAPI extends RESTAPI:
     errorEndpoint(post(path / prefix / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
 
 
-  //TODO ------------ refactor -------------------
+//TODO ------------ refactor -------------------
   // def appendToPluggedIfPlugin(safePath: SafePath): Unit =
 

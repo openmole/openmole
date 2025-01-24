@@ -20,11 +20,11 @@ package org.openmole.core.context
 import scala.collection.immutable.TreeMap
 
 object PrototypeSet {
-  implicit def traversableToProtoypeSet(ps: Iterable[Val[_]]): PrototypeSet = PrototypeSet(ps.toSeq)
+  implicit def traversableToProtoypeSet(ps: Iterable[Val[?]]): PrototypeSet = PrototypeSet(ps.toSeq)
   val empty = PrototypeSet(Vector.empty)
 
-  def apply(prototypes: Seq[Val[_]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.reverse.distinct.reverse, explore)
-  def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[_]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
+  def apply(prototypes: Seq[Val[?]], explore: Set[String] = Set.empty) = new PrototypeSet(prototypes.reverse.distinct.reverse, explore)
+  def copy(prototypeSet: PrototypeSet)(prototypes: Seq[Val[?]] = prototypeSet.prototypes, explore: Set[String] = prototypeSet.explore) = apply(prototypes, explore)
 }
 
 /**
@@ -32,10 +32,10 @@ object PrototypeSet {
  * @param prototypes the sequence of prototypes
  * @param explore names of prototypes which have already been explored
  */
-class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.empty) extends Iterable[Val[_]] { self ⇒
+class PrototypeSet(val prototypes: Seq[Val[?]], val explore: Set[String] = Set.empty) extends Iterable[Val[?]] { self ⇒
 
-  @transient lazy val prototypeMap: Map[String, Val[_]] =
-    TreeMap.empty[String, Val[_]] ++ prototypes.map { d ⇒ (d.name, d) }
+  @transient lazy val prototypeMap: Map[String, Val[?]] =
+    TreeMap.empty[String, Val[?]] ++ prototypes.map { d ⇒ (d.name, d) }
 
   /**
    * Get the prototype by its name as an Option.
@@ -43,7 +43,7 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param name the name of the prototype
    * @return Some(data) if it is present in the prototype set, None otherwise
    */
-  def apply(name: String): Option[Val[_]] = prototypeMap.get(name)
+  def apply(name: String): Option[Val[?]] = prototypeMap.get(name)
 
   /**
    * Test if a variable with a given name is present in the data set.
@@ -58,16 +58,16 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * get the explored prototypes
    * @return
    */
-  def explored: Seq[Val[_]] = prototypes.filter(explored)
+  def explored: Seq[Val[?]] = prototypes.filter(explored)
 
   /**
    * check if a prototype has been explored
    * @param p
    * @return
    */
-  def explored(p: Val[_]): Boolean = p.`type`.isArray && explore.contains(p.name)
+  def explored(p: Val[?]): Boolean = p.`type`.isArray && explore.contains(p.name)
 
-  override def iterator: Iterator[Val[_]] = prototypes.iterator
+  override def iterator: Iterator[Val[?]] = prototypes.iterator
 
   /**
    * Explore the given prototypes (by name)
@@ -81,7 +81,7 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d
    * @return
    */
-  def ++(d: Iterable[Val[_]]) = PrototypeSet.copy(this)(prototypes = prototypes ++ d)
+  def ++(d: Iterable[Val[?]]) = PrototypeSet.copy(this)(prototypes = prototypes ++ d)
 
   /**
    * Prepend a PrototypeSet
@@ -95,21 +95,21 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param d
    * @return
    */
-  def +(d: Val[_]) = PrototypeSet.copy(this)(prototypes = prototypes ++ Seq(d))
+  def +(d: Val[?]) = PrototypeSet.copy(this)(prototypes = prototypes ++ Seq(d))
 
   /**
    * Remove a prototype
    * @param d
    * @return
    */
-  def -(d: Val[_]) = PrototypeSet.copy(this)(prototypes = prototypes.filter(_.name != d.name).toList)
+  def -(d: Val[?]) = PrototypeSet.copy(this)(prototypes = prototypes.filter(_.name != d.name).toList)
 
   /**
    * Remove a set of prototypes
    * @param d
    * @return
    */
-  def --(d: Iterable[Val[_]]) =
+  def --(d: Iterable[Val[?]]) =
     val dset = d.map(_.name).toSet
     PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
 
@@ -118,7 +118,7 @@ class PrototypeSet(val prototypes: Seq[Val[_]], val explore: Set[String] = Set.e
    * @param data
    * @return
    */
-  def contains(data: Val[_]) = prototypeMap.contains(data.name)
+  def contains(data: Val[?]) = prototypeMap.contains(data.name)
 
   def toMap = prototypeMap
 

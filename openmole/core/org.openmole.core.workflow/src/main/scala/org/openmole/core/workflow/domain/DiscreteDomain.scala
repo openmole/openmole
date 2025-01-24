@@ -30,7 +30,7 @@ trait DiscreteDomain[-D, +T]:
   def apply(domain: D): Domain[Iterator[T]]
 
 object DiscreteFromContextDomain:
-  implicit def discreteIsContextDiscrete[D, T](implicit d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] = domain ⇒
+  given discreteIsContextDiscrete[D, T](using d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] = domain =>
     val dv = d(domain)
     dv.copy(domain = FromContext.value(dv.domain))
 

@@ -32,6 +32,7 @@ $br
 
 Batch systems generally work by exposing an entry point on which the user can log in and submit jobs.
 OpenMOLE accesses this entry point using SSH.
+
 Different environments can be assigned to delegate the workload resulting of different tasks or groups of tasks.
 However, not all clusters expose the same features, so options may vary from one environment to another.
 
@@ -40,13 +41,49 @@ $br$br
 Before being able to use a batch system, you should first provide your ${aa("authentication", href := DocumentationPages.gui.file)} information to OpenMOLE.
 
 
+${h3{"Singularity"}}
+
+To make sure that OpenMOLE tasks runs on your cluster you might want to ensure that Singularity or Apptainer is properly working on the cluster nodes.
+$br
+To test it you should first use a Linux system on which are root. First, install Singularity on this Linux system and then build the ${i{"lolcow.sif"}} image:
+
+${code("""
+sudo singularity build lolcow.sif library://sylabs-jms/testing/lolcow""")}
+
+Copy the ${i{"lolcow.sif"}} image on your cluster and log to a worker node (from the head node you can submit an interactive job, see the doc of your cluster). Then try running these 2 commands:
+${code(
+  """singularity overlay create -S -s 20000 test.img
+    |singularity exec --overlay test.img lolcow.sif cowsay OpenMOLE""".stripMargin)}
+
+If you see a cow saying OpenMOLE, congrats the OpenMOLE tasks should work fine on the cluster. In case there is an error, you can report it to the cluster admin team and ask for help.
+
+$br$br
+
+Sometimes to make Singularity or Apptainer available you might have to load the corresponding modules. To check the available modules:
+
+${code("""
+module avail""")}
+
+And to load it:
+${code("""
+module load apptainer""")}
+
+In the case you need to load a module, mind passing it to your OpenMOLE environment as well, for instance:
+$br
+${hl.openmole("""
+  val env =
+    SLURMEnvironment(
+      "login",
+      "machine.domain",
+      modules = Seq("apptainer")
+    )""")}
+
+
 ${h3{"Grouping"}}
 
 You should also note that the use of a batch environment is generally not suited for short tasks, ${i{"i.e."}} less than 1 minute for a cluster.
 In case your tasks are short, you can group several executions with the keyword ${code{"by"}} in your workflow.
 For instance, the workflow below groups the execution of ${b{"model"}} by 100 in each job submitted to the environment:
-
-$br$br
 
 ${hl.openmole(s"""
 // Define the variables that are transmitted between the tasks
@@ -61,13 +98,13 @@ val model =
   )
 
 // Define a local environment
-val env = LocalEnvironment(10)
+val env = SLURMEnvironment("login", "machine.domain")
 
 // Make the model run on the the local environment
 DirectSampling(
-  evaluation = model on env by 100 hook display,
+  evaluation = model hook display,
   sampling = i in (0.0 to 1000.0 by 1.0)
-)
+) on env by 100
 """)}
 
 
@@ -77,9 +114,7 @@ ${h2{"PBS"}}
 ${aa("PBS", href := shared.link.batchSystem)} is a venerable batch system for clusters.
 It is also referred to as Torque.
 You may use a PBS computing environment as follows:
-
-$br$br
-
+    
 ${hl.openmole("""
 val env =
   PBSEnvironment(
@@ -101,10 +136,11 @@ ${ul(
  li{html"$openMOLEMemory,"},
  li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
  li{html"$threads,"},
- li{html"${apiEntryTitle{"coreByNodes"}} An alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified."},
- li{html"${apiEntryTitle{"flavour"}} Specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}}. Defaults to ${hl.openmoleNoTest{"flavour = Torque"}}"},
+ li{html"${apiEntryTitle{"coreByNodes"}} an alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified,"},
+ li{html"${apiEntryTitle{"flavour"}} specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}} (defaults to ${hl.openmoleNoTest{"flavour = Torque"}}),"},
  li{html"$modules,"},
- li{html"$localSubmission."},
+ li{html"$reconnect,"},
+ li{html"$localSubmission."}
 )}
 
 
@@ -112,8 +148,6 @@ ${ul(
 ${h2{"SGE"}}
 
 To delegate some computation load to a ${aa("SGE", href := shared.link.gridEngine)} based cluster you can use the ${code{"SGEEnvironment"}} as follows:
-
-$br$br
 
 ${hl.openmole("""
 val env =
@@ -136,7 +170,8 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
   li{html"$modules,"},
-  li{html"$localSubmission."},
+  li{html"$reconnect,"},
+  li{html"$localSubmission."}
 )}
 
 
@@ -144,8 +179,6 @@ ${ul(
 ${h2{"Slurm"}}
 
 To delegate the workload to a ${aa("Slurm", href := shared.link.slurm)} based cluster you can use the ${code{"SLURMEnvironment"}} as follows:
-
-$br$br
 
 ${hl.openmole("""
 val env =
@@ -171,14 +204,15 @@ ${ul(
   li{html"${wallTime{"time"}},"},
   li{html"$memory,"},
   li{html"$openMOLEMemory,"},
-  li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
+  li{html"${apiEntryTitle{"nodes"}} number of nodes requested,"},
   li{html"$threads, it automatically sets the ${i{"cpuPerTask"}} entry,"},
-  li{html"${apiEntryTitle{"cpuPerTask"}} An alternative to specifying the number of threads. ${i{"cpuPerTask"}} takes the value of the ${i{"threads"}} when not specified, or 1 if none of them is specified."},
+  li{html"${apiEntryTitle{"cpuPerTask"}} specify the number of thread requested on the execution nodes, you should use it if your executable is multi-threaded, if not specified ${i{"cpuPerTask"}} takes the value of the ${i{"threads"}} when it is specified,"},
   li{html"${apiEntryTitle{"reservation"}} name of a SLURM reservation,"},
   li{html"${apiEntryTitle{"qos"}} Quality of Service (QOS) as defined in the Slurm database"},
   li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance ${hl.openmoleNoTest{"gres = List( Gres(\"resource\", 1) )"}}"},
   li{html"${apiEntryTitle{"constraints"}} a list of SLURM defined constraints which selected nodes must match,"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 
@@ -186,8 +220,6 @@ ${ul(
 ${h2{"Condor"}}
 
 ${aa("Condor", href := shared.link.condor)} clusters can be leveraged using the following syntax:
-
-$br$br
 
 ${hl.openmole("""
 val env =
@@ -208,6 +240,7 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 
@@ -215,8 +248,6 @@ ${ul(
 ${h2{"OAR"}}
 
 Similarly, ${aa("OAR", href := shared.link.oar)} clusters are reached as follows:
-
-$br$br
 
 ${hl.openmole("""
 val env =
@@ -241,6 +272,7 @@ ${ul(
   li{html"${apiEntryTitle{"cpu"}} number of CPUs allocated for each job,"},
   li{html"${apiEntryTitle{"bestEffort"}} a boolean for setting the best effort mode (true by default),"},
   li{html"$modules,"},
+  li{html"$reconnect,"},
   li{html"$localSubmission."}
 )}
 

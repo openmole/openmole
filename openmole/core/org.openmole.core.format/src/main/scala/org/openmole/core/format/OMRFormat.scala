@@ -270,7 +270,7 @@ object OMRFormat:
     omrFile: File,
     relativePath: Boolean = false,
     dataFile: Option[String] = None,
-    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     val dataFileValue = dataFile getOrElse index.`data-file`.last
     OMRFormat.readDataStream(omrFile, dataFileValue): is =>
@@ -280,7 +280,7 @@ object OMRFormat:
     omrFile: File,
     is: java.io.InputStream,
     relativePath: Boolean = false,
-    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[_]])] =
+    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     val omrDirectory = omrFile.getParentFile
 

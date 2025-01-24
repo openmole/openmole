@@ -17,62 +17,73 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.domain
 
-object LogRangeDomain {
+import org.openmole.core.tools.math.BigDecimalOperations
+import java.math.{BigDecimal, MathContext, RoundingMode}
 
-  implicit def isDiscrete[T]: DiscreteFromContextDomain[LogRangeDomain[T], T] = domain ⇒
+object LogRangeDomain:
+
+  private val scale = 128
+  private val mc = new MathContext(scale, RoundingMode.HALF_UP)
+
+  object Log:
+    given doubleLog: Log[Double] =
+      new Log[Double]:
+        def log(t: Double) = Math.log(t)
+        def exp(t: Double) = Math.exp(t)
+
+    given bigDecimalLog: Log[BigDecimal] =
+      new Log[BigDecimal]:
+        def log(t: BigDecimal) = BigDecimalOperations.ln(t, scale)
+        def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
+
+  trait Log[T]:
+    def log(t: T): T
+    def exp(t: T): T
+
+
+  given isDiscrete[T]: DiscreteFromContextDomain[LogRangeDomain[T], T] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
       domain.validate
     )
 
-  implicit def isBounded[T]: BoundedFromContextDomain[LogRangeDomain[T], T] = domain ⇒
+  given isBounded[T]: BoundedFromContextDomain[LogRangeDomain[T], T] = domain =>
     Domain(
       (domain.min, domain.max),
       domain.inputs,
       domain.validate
     )
 
-  implicit def center[T]: DomainCenterFromContext[LogRangeDomain[T], T] = domain ⇒ RangeDomain.rangeCenter(domain.range)
+  given center[T]: DomainCenterFromContext[LogRangeDomain[T], T] = domain =>
+    FromContext: p =>
+      import p.*
+      import domain.ops.*
+      val min = domain.min.from(context)
+      val max = domain.max.from(context)
+      min + ((max - min) / fromInt(2))
 
-  def apply[T: Log](range: RangeDomain[T], steps: FromContext[Int]) =
-    new LogRangeDomain[T](range, steps)
 
-  def apply[T: RangeValue: Log](
-    min:   FromContext[T],
-    max:   FromContext[T],
-    steps: FromContext[Int]
-  ): LogRangeDomain[T] =
-    LogRangeDomain[T](RangeDomain[T](min, max), steps)
 
-}
+case class LogRangeDomain[T](min: FromContext[T], max: FromContext[T], steps: FromContext[Int])(using lg: LogRangeDomain.Log[T], val ops: RangeDomain.RangeValue[T]):
 
-sealed class LogRangeDomain[T](val range: RangeDomain[T], val steps: FromContext[Int])(implicit lg: Log[T]) {
-
-  import range._
-
-  def iterator = FromContext { p =>
+  def iterator = FromContext: p =>
     import p.*
     
-    val logMin: T = lg.log(range.min.from(context))
-    val logMax: T = lg.log(range.max.from(context))
+    val logMin: T = lg.log(min.from(context))
+    val logMax: T = lg.log(max.from(context))
 
     val stepsValue = steps.from(context)
 
-    import ops._
+    import ops.*
 
-    val logStep = (logMax - logMin) / (fromInt(stepsValue - 1))
+    val logStep = (logMax - logMin) / fromInt(stepsValue - 1)
     Iterator.iterate(logMin)(_ + logStep).map(lg.exp).take(stepsValue)
-  }
 
-  def max = range.max
-  def min = range.min
+  def inputs = min.inputs ++ max.inputs ++ steps.inputs
+  def validate = min.validate ++ max.validate ++ steps.validate
 
-  def inputs = range.inputs ++ steps.inputs
-  def validate = range.validate ++ steps.validate
-
-}

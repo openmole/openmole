@@ -17,15 +17,14 @@
 
 package org.openmole.core.workflow.job
 
-import org.openmole.core.workflow.job.State._
 import org.openmole.core.workflow.task._
 import org.openmole.core.context._
 
-case class RuntimeTask(task: Task, strain: Boolean)
+case class RuntimeTask(taskProcessing: TaskExecution, taskExecutionInfo: TaskExecutionInfo, strain: Boolean)
 
-object Job {
+object Job:
 
-  implicit val moleJobOrdering: Ordering[Job] = Ordering.by((_: Job).id)
+  given Ordering[Job] = Ordering.by((_: Job).id)
 
   /**
    * Construct from context and UUID
@@ -57,24 +56,21 @@ object Job {
 
   class SubMoleCanceled extends Exception
 
-  object CallBack {
-    def apply(jobFinished: JobFinished, canceled: Canceled) = Instance(jobFinished, canceled)
+  object CallBack:
+    def apply(jobFinished: JobFinished, canceled: Canceled): CallBack = Instance(jobFinished, canceled)
 
-    case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack {
+    case class Instance(_jobFinished: JobFinished, _canceled: Canceled) extends CallBack:
       def subMoleCanceled() = _canceled()
       def jobFinished(job: JobId, result: Either[Context, Throwable]) = _jobFinished(job, result)
-    }
-  }
 
-  trait CallBack {
+  trait CallBack:
     def jobFinished(id: JobId, result: Either[Context, Throwable]): Unit
     def subMoleCanceled(): Boolean
-  }
 
-  type JobFinished = (JobId, Either[Context, Throwable]) ⇒ Unit
-  type Canceled = () ⇒ Boolean
+  type JobFinished = (JobId, Either[Context, Throwable]) => Unit
+  type Canceled = () => Boolean
 
-}
+  //def compact(job: Job) = Array(job.task, job.compressedContext, job.id, job.callBack)
 
 import Job._
 
@@ -88,23 +84,20 @@ import Job._
  */
 class Job(
   val task:          RuntimeTask,
-  compressedContext: CompactedContext,
+  private val compressedContext: CompactedContext,
   val id:            JobId,
-  val callBack:      CallBack) {
+  val callBack:      CallBack):
 
   def context: Context = CompactedContext.expand(compressedContext)
 
   def perform(executionContext: TaskExecutionContext): Either[Context, Throwable] =
-    if (!callBack.subMoleCanceled()) {
+    if !callBack.subMoleCanceled()
+    then
       val ctx = context
-      try {
-        val performResult = Task.perform(task.task, ctx, executionContext)
+      try
+        val performResult = TaskExecution.perform(task.taskProcessing, task.taskExecutionInfo, ctx, executionContext)
         Left(if (task.strain) ctx + performResult else performResult)
-      }
-      catch {
-        case t: Throwable ⇒ Right(t)
-      }
-    }
+      catch
+        case t: Throwable => Right(t)
     else Right(new SubMoleCanceled)
 
-}

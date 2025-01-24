@@ -11,7 +11,6 @@ import org.openmole.plugin.method.evolution.Objective.ToObjective
 import org.openmole.tool.types.ToDouble
 import squants.time.Time
 
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 import monocle._
@@ -62,7 +61,7 @@ object OSE {
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = (Array.empty, Array.empty))
+        def initialState = EvolutionState(s = (Archive.empty, Array.empty))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p ⇒
@@ -72,7 +71,10 @@ object OSE {
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-            val outputValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
+            val outputValues =
+              if includeOutputs
+              then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype))
+              else Seq()
 
             genomes ++ fitness ++ Seq(generated) ++ outputValues
 
@@ -159,11 +161,11 @@ object OSE {
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = (Array.empty, Array.empty))
+        def initialState = EvolutionState(s = (Archive.empty, Array.empty))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
-            import p._
+          FromContext: p =>
+            import p.*
 
             val res = MGONoisyOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), Genome.continuous(om.genome), om.limit, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
@@ -171,7 +173,10 @@ object OSE {
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-            val outputValues = if (includeOutputs) StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory)) else Seq()
+            val outputValues =
+              if includeOutputs
+              then StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory))
+              else Seq()
 
             genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
 
@@ -222,14 +227,12 @@ object OSE {
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
-
     }
   }
 
-  import org.openmole.core.dsl._
+  import org.openmole.core.dsl.*
 
   object OriginAxe:
-
     implicit def fromDoubleDomainToOriginAxe[D](f: Factor[D, Double])(implicit fix: FixDomain[D, Double]): OriginAxe =
       val domain = fix(f.domain).domain.toVector
       ContinuousOriginAxe(GenomeBound.ScalarDouble(f.value, domain.min, domain.max), domain)
@@ -261,7 +264,6 @@ object OSE {
       case ds: DiscreteSequenceOriginAxe   ⇒ ds.p
       case en: EnumerationOriginAxe => en.p
 
-
     def fullGenome(origin: Seq[OriginAxe], genome: Genome): Genome =
       origin.map(genomeBound) ++ genome
 
@@ -275,8 +277,7 @@ object OSE {
           case DiscreteSequenceOriginAxe(p, scale)   ⇒ mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
           case EnumerationOriginAxe(p) => Vector(Genome.discreteValue(fg, p.v, discrete))
 
-
-      grid(_, _)
+      grid
 
 
   sealed trait OriginAxe
@@ -359,7 +360,7 @@ object OSE {
 
 }
 
-import EvolutionWorkflow._
+import EvolutionWorkflow.*
 
 object OSEEvolution:
 

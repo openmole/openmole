@@ -21,7 +21,7 @@ import scala.collection.mutable.Queue
 
 class MovingAverage(period: Int, queue: Queue[Double]) {
 
-  def this(period: Int, values: Double*) = this(period, Queue(values.slice(values.size - period, values.size): _*))
+  def this(period: Int, values: Double*) = this(period, Queue(values.slice(values.size - period, values.size) *))
 
   def put(n: Double) = synchronized {
     queue.enqueue(n)

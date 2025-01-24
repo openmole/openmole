@@ -53,8 +53,7 @@ import org.openmole.tool.random
  * @param lockRepository
  * @param moleExecution
  */
-object TaskExecutionContext {
-  case class Remote(threads: Int)
+object TaskExecutionContext:
 
   def apply(
     moleExecutionDirectory: File,
@@ -73,8 +72,7 @@ object TaskExecutionContext {
     timeService: TimeService,
     cache: KeyValueCache,
     lockRepository: LockRepository[LockKey],
-    moleExecution: Option[MoleExecution] = None,
-    remote: Option[TaskExecutionContext.Remote] = None): TaskExecutionContext =
+    moleExecution: Option[MoleExecution] = None): TaskExecutionContext =
     TaskExecutionContext(
       moleExecutionDirectory = moleExecutionDirectory,
       taskExecutionDirectory = taskExecutionDirectory,
@@ -82,8 +80,7 @@ object TaskExecutionContext {
       cache = cache,
       lockRepository = lockRepository,
       moleExecution = moleExecution,
-      localEnvironment = localEnvironment,
-      remote = remote)(
+      localEnvironment = localEnvironment)(
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -111,8 +108,7 @@ object TaskExecutionContext {
     timeService:                   TimeService,
     cache:                         KeyValueCache,
     lockRepository:                LockRepository[LockKey],
-    moleExecution:                 Option[MoleExecution]               = None,
-    remote:                        Option[TaskExecutionContext.Remote] = None) =
+    moleExecution:                 Option[MoleExecution]               = None) =
     Partial(
       moleExecutionDirectory = moleExecutionDirectory,
       applicationExecutionDirectory = applicationExecutionDirectory)(
@@ -128,8 +124,7 @@ object TaskExecutionContext {
       timeService = timeService,
       cache = cache,
       lockRepository = lockRepository,
-      moleExecution = moleExecution,
-      remote = remote
+      moleExecution = moleExecution
     )
 
   def complete(partialTaskExecutionContext: Partial, taskExecutionDirectory: File, localEnvironment: LocalEnvironment) =
@@ -141,8 +136,7 @@ object TaskExecutionContext {
       localEnvironment = localEnvironment,
       cache = cache,
       lockRepository = lockRepository,
-      moleExecution = moleExecution,
-      remote = remote)(using
+      moleExecution = moleExecution)(using
       preference = preference,
       threadProvider = threadProvider,
       fileService = fileService,
@@ -170,10 +164,7 @@ object TaskExecutionContext {
     val timeService:       TimeService,
     val cache:             KeyValueCache,
     val lockRepository:    LockRepository[LockKey],
-    val moleExecution:     Option[MoleExecution]               = None,
-    val remote:            Option[TaskExecutionContext.Remote] = None)
-
-}
+    val moleExecution:     Option[MoleExecution]               = None)
 
 case class TaskExecutionContext(
   moleExecutionDirectory: File,
@@ -182,8 +173,7 @@ case class TaskExecutionContext(
   localEnvironment: LocalEnvironment,
   cache: KeyValueCache,
   lockRepository: LockRepository[LockKey],
-  moleExecution: Option[MoleExecution],
-  remote: Option[TaskExecutionContext.Remote])(
+  moleExecution: Option[MoleExecution])(
   implicit
   val preference: Preference,
   val threadProvider: ThreadProvider,
@@ -196,6 +186,19 @@ case class TaskExecutionContext(
   val networkService: NetworkService,
   val timeService: TimeService)
 
+
+case class TaskExecutionBuildContext(
+  cache: KeyValueCache)(
+  using
+  val tmpDirectory: TmpDirectory,
+  val fileService: FileService,
+  val workspace: Workspace,
+  val preference: Preference,
+  val threadProvider: ThreadProvider,
+  val outputRedirection: OutputRedirection,
+  val networkService: NetworkService,
+  val serializerService: SerializerService)
+
 object Task:
 
   /**
@@ -207,44 +210,86 @@ object Task:
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
   def definitionScope(t: Task) = t.info.definitionScope
 
-  def apply(className: String)(fromContext: FromContextTask.Parameters ⇒ Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
+  def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-  /**
-   * Perform this task.
-   *
-   * @param context the context in which the task will be executed
-   * @param executionContext context of the environment in which the Task is executed
-   * @return
-   */
-  def perform(task: Task, context: Context, executionContext: TaskExecutionContext): Context =
-    lazy val rng = Lazy(Task.buildRNG(context))
-    InputOutputCheck.perform(
-      task,
-      Task.inputs(task),
-      Task.outputs(task),
-      Task.defaults(task),
-      task.process(executionContext)
-    )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
 
-  def process(task: Task, executionContext: TaskExecutionContext): FromContext[Context] = task.process(executionContext)
+  extension (task: Task)
+    def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
+    def outputs: PrototypeSet = task.config.outputs
+    def defaults: DefaultSet = task.config.defaults
 
-  def inputs(task: Task): PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
-  def outputs(task: Task): PrototypeSet = task.config.outputs
-  def defaults(task: Task): DefaultSet = task.config.defaults
+
+  object TaskExecution:
+    import org.openmole.tool.random.*
+
+    def context(context: Context, executionContext: TaskExecutionContext)(using RandomProvider, TmpDirectory, FileService) =
+      ProcessingContext(context, executionContext)
+
+
+    object TaskExecutionInfo:
+      def apply(task: Task) =
+        new TaskExecutionInfo(
+          task = task.toString,
+          inputs = Task.inputs(task),
+          outputs = Task.outputs(task),
+          defaults = Task.defaults(task)
+        )
+
+    case class TaskExecutionInfo(task: String, inputs: PrototypeSet, outputs: PrototypeSet, defaults: DefaultSet)
+    case class ProcessingContext(context: Context, executionContext: TaskExecutionContext)(implicit val random: RandomProvider, val tmpDirectory: TmpDirectory, val fileService: FileService)
+
+    /**
+     * Perform this task.
+     *
+     * @param context          the context in which the task will be executed
+     * @param executionContext context of the environment in which the Task is executed
+     * @return
+     */
+    def perform(process: TaskExecution, executionInfo: TaskExecutionInfo, context: Context, executionContext: TaskExecutionContext): Context =
+      lazy val rng = Lazy(Task.buildRNG(context))
+      InputOutputCheck.perform(
+        executionInfo.task,
+        executionInfo.inputs,
+        executionInfo.outputs,
+        executionInfo.defaults,
+        process(executionContext)
+      )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+
+    def execute(taskExecution: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = taskExecution(executionContext)
+
+    def withPlugins(p: Seq[File])(process: ProcessingContext => Context): TaskExecution =
+      new TaskExecution with org.openmole.core.serializer.plugin.Plugins:
+        override val plugins = p
+
+        override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
+          import p.*
+          process(TaskExecution.context(p.context, executionContext))
+
+    def apply(process: ProcessingContext => Context): TaskExecution =
+      //NOTE: Do not simplify here for xStream serialisation
+      new TaskExecution:
+        override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
+          import p.*
+          process(TaskExecution.context(p.context, executionContext))
+
+
+  trait TaskExecution:
+    /**
+     * The actual processing of the Task, wrapped by the [[perform]] method
+     *
+     * @param executionContext
+     * @return
+     */
+    def apply(executionContext: TaskExecutionContext): FromContext[Context]
+
 
 /**
  * A Task is a fundamental unit for the execution of a workflow.
  */
 trait Task extends Name with Id:
 
-  /**
-   * The actual processing of the Task, wrapped by the [[perform]] method
-   * @param executionContext
-   * @return
-   */
-  protected def process(executionContext: TaskExecutionContext): FromContext[Context]
-
+  def apply(taskBuildContext: TaskExecutionBuildContext): TaskExecution
   /**
    * Configuration for inputs/outputs
    * @return
@@ -266,8 +311,7 @@ trait Task extends Name with Id:
    */
   lazy val id = new Object {}
 
-  def inputs: PrototypeSet = Task.inputs(this)
-  def outputs: PrototypeSet = Task.outputs(this)
-  def defaults: DefaultSet = Task.defaults(this)
 
 
+export Task.TaskExecution
+export Task.TaskExecution.TaskExecutionInfo

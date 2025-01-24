@@ -28,9 +28,9 @@ import org.openmole.core.argument.{ FromContext, Validate }
  */
 object ExplicitSampling {
 
-  implicit def isSampling[T]: IsSampling[ExplicitSampling[T]] = s ⇒
+  implicit def isSampling[T]: IsSampling[ExplicitSampling[T]] = s =>
     Sampling(
-      s.data.map { v ⇒ List(Variable(s.prototype, v)) }.iterator,
+      s.data.map { v => List(Variable(s.prototype, v)) }.iterator,
       Seq(s.prototype)
     )
 
