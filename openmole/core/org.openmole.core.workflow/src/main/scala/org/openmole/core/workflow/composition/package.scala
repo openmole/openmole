@@ -490,6 +490,9 @@ object DSLContainer {
       val container = toDSLContainer(t.value)
       container.copy(hooks = container.hooks ++ Seq(t.h))
 
+    def apply[T, D](f: T => DSLContainer[D]) =
+      new ExplorationMethod[T, D]:
+        def apply(t: T) = f(t)
 
   trait ExplorationMethod[-T, +D]:
     def apply(t: T): DSLContainer[D]

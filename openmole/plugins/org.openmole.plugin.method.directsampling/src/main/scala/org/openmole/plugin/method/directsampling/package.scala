@@ -31,8 +31,6 @@ object AggregationMetaData:
 
 case class AggregationMetaData(output: ValData, aggregated: ValData) derives derivation.ConfiguredCodec
 
-
-
 type Aggregation = AggregateTask.AggregateVal[_, _]
 
 object Replication:
@@ -50,31 +48,32 @@ object Replication:
 
   case class Method(seed: Val[?], sample: Int, aggregation: Seq[Aggregation])
 
-  implicit def method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
-    implicit def defScope: DefinitionScope = r.scope
+  given method[T]: ExplorationMethod[Replication[T], Method] =
+    ExplorationMethod: r =>
+      implicit def defScope: DefinitionScope = r.scope
 
-    val aggregateTask: OptionalArgument[DSL] =
-      r.aggregation match
-        case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s)
+      val aggregateTask: OptionalArgument[DSL] =
+        r.aggregation match
+          case Seq() ⇒ None
+          case s     ⇒ AggregateTask(s)
 
-    val s =
-      MapReduce(
-        evaluation = r.evaluation,
-        sampler = r.exploration,
-        aggregation = aggregateTask,
-        wrap = r.wrap
-      )
-
-    DSLContainer(
-      s,
-      method =
-        Method(
-          seed = r.seed,
-          sample = r.sample,
-          aggregation = r.aggregation
+      val s =
+        MapReduce(
+          evaluation = r.evaluation,
+          sampler = r.exploration,
+          aggregation = aggregateTask,
+          wrap = r.wrap
         )
-    )
+
+      DSLContainer(
+        s,
+        method =
+          Method(
+            seed = r.seed,
+            sample = r.sample,
+            aggregation = r.aggregation
+          )
+      )
 
 case class Replication[T: Distribution](
   evaluation:       DSL,

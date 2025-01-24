@@ -34,7 +34,7 @@ object DiscreteFromContextDomain:
     val dv = d(domain)
     dv.copy(domain = FromContext.value(dv.domain))
 
-  inline def apply[D, T](f: D => Domain[FromContext[Iterator[T]]]): DiscreteFromContextDomain[D, T] =
+  def apply[D, T](f: D => Domain[FromContext[Iterator[T]]]): DiscreteFromContextDomain[D, T] =
     new DiscreteFromContextDomain[D, T]:
       def apply(d: D) = f(d)
 

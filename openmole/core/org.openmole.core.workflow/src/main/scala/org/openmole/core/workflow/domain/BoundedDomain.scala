@@ -37,6 +37,11 @@ object BoundedFromContextDomain:
     val (min, max) = domain.domain
     domain.copy(domain = (FromContext.value(min), FromContext.value(max)))
 
+  def apply[D, T](f: D => Domain[(FromContext[T], FromContext[T])]) =
+    new BoundedFromContextDomain[D, T]:
+      def apply(d: D) = f(d)
+
+
 
 @implicitNotFound("${D} is not a bounded variation domain of type T | FromContext[${T}]")
 trait BoundedFromContextDomain[-D, +T]:

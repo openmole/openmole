@@ -32,6 +32,10 @@ trait DomainCenter[-D, +T]:
 object DomainCenterFromContext:
   given centerIsContextCenter[D, T](using c: DomainCenter[D, T]): DomainCenterFromContext[D, T] = d => FromContext.value(c(d))
 
+  def apply[D, T](f: D => FromContext[T]) =
+    new DomainCenterFromContext[D, T]:
+      def apply(d: D) = f(d)
+
 @implicitNotFound("${D} is not a variation domain with a center of type T | FromContext[${T}]")
 trait DomainCenterFromContext[-D, +T]:
   def apply(domain: D): FromContext[T]
