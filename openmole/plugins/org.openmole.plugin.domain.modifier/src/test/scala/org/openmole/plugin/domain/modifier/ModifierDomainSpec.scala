@@ -25,12 +25,23 @@ import org.openmole.plugin.domain.file._
 import org.scalatest._
 
 class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
+  import org.openmole.core.workflow.test.*
+  import Stubs.*
 
   "inputs of modified domain" should "be as expected" in:
     val size = Val[Int]
     val range = RangeDomain[Int](0, 10, 1)
     val take = range.take(size)
     TakeDomain.isDiscrete(take).inputs should contain(size)
+
+  "Domains" should "be serializable" in :
+    val size = Val[Int]
+    val range = RangeDomain[Int](0, 10, 1)
+
+    val take = serializeDeserialize(TakeDomain(range, size))
+    
+    TakeDomain.isDiscrete(take).inputs should contain(size)
+    TakeDomain.isDiscrete(take).domain.from(Context(size -> 3)).toVector should contain(Vector(0, 1, 2))
 
   "range" should "work with modifiers" in:
     RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)

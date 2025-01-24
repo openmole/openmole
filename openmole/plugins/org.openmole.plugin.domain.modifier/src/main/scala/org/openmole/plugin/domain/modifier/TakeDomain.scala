@@ -20,24 +20,21 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object TakeDomain {
-
-  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[TakeDomain[D, T], T] = domain ⇒
+object TakeDomain:
+  given isDiscrete[D, T]: DiscreteFromContextDomain[TakeDomain[D, T], T] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
       domain.validate
     )
 
-}
-
-case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(implicit discrete: DiscreteFromContextDomain[D, T]) {
-  def iterator = FromContext { p ⇒
-    import p._
-    val s = size.from(context)
-    discrete(domain).domain.from(context).slice(0, s)
-  }
+case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(using discrete: DiscreteFromContextDomain[D, T]):
+  def iterator =
+    FromContext: p =>
+      import p._
+      val s = size.from(context)
+      discrete(domain).domain.from(context).slice(0, s)
 
   def inputs = size.inputs ++ discrete(domain).inputs
   def validate = size.validate ++ discrete(domain).validate
-}
+
