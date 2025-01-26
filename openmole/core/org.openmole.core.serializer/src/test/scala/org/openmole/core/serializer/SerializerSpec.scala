@@ -21,7 +21,7 @@ object SerializerSpec:
 
   class MetaClass
   case class C1(f1: File) extends plugin.Plugins:
-    override def plugins(using TmpDirectory, FileService, KeyValueCache): Seq[File] = Seq(pluginFile)
+    override def plugins: Seq[File] = Seq(pluginFile)
 
   case class TestClass(f2: File, c1: C1, fgc: File, c: Class[MetaClass], t: TestEnum)
 

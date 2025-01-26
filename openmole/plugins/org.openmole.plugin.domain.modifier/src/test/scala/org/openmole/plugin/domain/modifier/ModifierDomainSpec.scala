@@ -41,7 +41,7 @@ class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val take = serializeDeserialize(TakeDomain(range, size))
     
     TakeDomain.isDiscrete(take).inputs should contain(size)
-    TakeDomain.isDiscrete(take).domain.from(Context(size -> 3)).toVector should contain(Vector(0, 1, 2))
+    TakeDomain.isDiscrete(take).domain.from(Context(size -> 3)).toVector should equal(Vector(0, 1, 2))
 
   "range" should "work with modifiers" in:
     RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)

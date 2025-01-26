@@ -26,16 +26,26 @@ import scala.annotation.implicitNotFound
  * @tparam D domain type
  * @tparam T variable type
  */
+object BoundedDomain:
+  def apply[D, T](f: D => Domain[(T, T)]) =
+    new BoundedDomain[D, T]:
+      def apply(d: D) = f(d)
+
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
 trait BoundedDomain[-D, +T]:
   def apply(domain: D): Domain[(T, T)]
 
 object BoundedFromContextDomain:
 
-  given boundsIsContextBounds[D, T](using bounds: BoundedDomain[D, T]): BoundedFromContextDomain[D, T] = d =>
-    val domain = bounds(d)
-    val (min, max) = domain.domain
-    domain.copy(domain = (FromContext.value(min), FromContext.value(max)))
+  given boundsIsContextBounds[D, T](using bounds: BoundedDomain[D, T]): BoundedFromContextDomain[D, T] =
+    BoundedFromContextDomain: d =>
+      val domain = bounds(d)
+      val (min, max) = domain.domain
+      domain.copy(domain = (FromContext.value(min), FromContext.value(max)))
+
+  def apply[D, T](f: D => Domain[(FromContext[T], FromContext[T])]) =
+    new BoundedFromContextDomain[D, T]:
+      def apply(d: D) = f(d)
 
 
 @implicitNotFound("${D} is not a bounded variation domain of type T | FromContext[${T}]")

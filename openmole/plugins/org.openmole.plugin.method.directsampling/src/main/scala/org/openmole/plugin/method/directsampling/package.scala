@@ -31,8 +31,6 @@ object AggregationMetaData:
 
 case class AggregationMetaData(output: ValData, aggregated: ValData) derives derivation.ConfiguredCodec
 
-
-
 type Aggregation = AggregateTask.AggregateVal[_, _]
 
 object Replication:
@@ -42,15 +40,15 @@ object Replication:
     given MethodMetaData[MetaData] = MethodMetaData[MetaData](methodName)
 
     def apply(m: Method): MetaData =
-      val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
+      val aggregation = if (m.aggregation.isEmpty) then None else Some(m.aggregation.map(AggregationMetaData.apply))
       MetaData(seed = ValData(m.seed), m.sample, aggregation)
 
   case class MetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
 
   case class Method(seed: Val[?], sample: Int, aggregation: Seq[Aggregation])
 
-  given method[T]: ExplorationMethod[Replication[T], Method] = r ⇒
-    implicit def defScope: DefinitionScope = r.scope
+  given [T]: ExplorationMethod[Replication[T], Method] = r =>
+    given DefinitionScope = r.scope
 
     val aggregateTask: OptionalArgument[DSL] =
       r.aggregation match
@@ -90,7 +88,6 @@ case class Replication[T: Distribution](
     index.option match
       case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
       case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
-
 
 
 implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):

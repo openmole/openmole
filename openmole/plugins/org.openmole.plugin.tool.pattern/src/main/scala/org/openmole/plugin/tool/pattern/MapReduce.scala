@@ -3,20 +3,20 @@ package org.openmole.plugin.tool.pattern
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object MapReduce {
+object MapReduce:
 
   def apply(
     sampler:     Task,
     evaluation:  DSL,
     aggregation: OptionalArgument[DSL] = None,
     condition:   Condition             = Condition.True,
-    wrap:        Boolean               = false)(implicit scope: DefinitionScope = "map reduce") = {
+    wrap:        Boolean               = false)(implicit scope: DefinitionScope = "map reduce") =
 
     val explored = (sampler: DSL).outputs(explore = true)
     val wrapped = org.openmole.plugin.tool.pattern.wrap(evaluation, explored, evaluation.outputs, wrap = wrap)
 
-    aggregation.option match {
-      case Some(aggregation) ⇒
+    aggregation.option match
+      case Some(aggregation) =>
         val output = EmptyTask()
 
         val p =
@@ -28,7 +28,5 @@ object MapReduce {
       case None ⇒
         val p = Strain(sampler) -< Strain(wrapped) when condition
         DSLContainer(p, (), delegate = wrapped.delegate)
-    }
-  }
 
-}
+

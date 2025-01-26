@@ -19,6 +19,13 @@ import scala.annotation.implicitNotFound
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+object DomainStep:
+  def apply[D, T](f: D => T) =
+    new DomainStep[D, T]:
+      def apply(d: D) = f(d)
+
+
 @implicitNotFound("${D} is not a domain with a defined step of type ${T}")
 trait DomainStep[-D, +T] :
   def apply(domain: D): T

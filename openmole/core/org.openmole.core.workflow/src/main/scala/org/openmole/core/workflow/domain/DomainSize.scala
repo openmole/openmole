@@ -2,6 +2,13 @@ package org.openmole.core.workflow.domain
 
 import scala.annotation.implicitNotFound
 
+
+object DomainSize:
+  def apply[D](f: D => Int) =
+    new DomainSize[D]:
+      def apply(d: D) = f(d)
+
+
 /**
  * Property of having a size for a domain
  * @tparam D

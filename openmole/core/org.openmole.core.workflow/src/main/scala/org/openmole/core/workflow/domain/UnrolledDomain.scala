@@ -20,18 +20,18 @@ import org.openmole.core.context._
 import org.openmole.core.argument._
 import cats.implicits._
 
-object UnrolledDomain {
+object UnrolledDomain:
 
-  implicit def isDiscrete[D, T: Manifest]: DiscreteDomain[UnrolledDomain[D, T], Array[T]] = domain =>
-    Domain(
-      domain = Seq(domain.discrete(domain.d).domain.toArray).iterator,
-      inputs = domain.discrete(domain.d).inputs,
-      validation = domain.discrete(domain.d).validation
-    )
+  given isDiscrete[D, T: Manifest]: DiscreteDomain[UnrolledDomain[D, T], Array[T]] =
+    DiscreteDomain: domain =>
+      Domain(
+        domain = Seq(domain.discrete(domain.d).domain.toArray).iterator,
+        inputs = domain.discrete(domain.d).inputs,
+        validation = domain.discrete(domain.d).validation
+      )
 
   def apply[D[_], T: Manifest](domain: D[T])(implicit discrete: DiscreteDomain[D[T], T]) =
     new UnrolledDomain[D[T], T](domain)
 
-}
 
 class UnrolledDomain[D, T: Manifest](val d: D)(implicit val discrete: DiscreteDomain[D, T])

@@ -20,6 +20,11 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.argument._
 import scala.annotation.implicitNotFound
 
+object DiscreteDomain:
+  def apply[D, T](f: D => Domain[Iterator[T]]) =
+    new DiscreteDomain[D, T]:
+      def apply(d: D) = f(d)
+
 /**
  * Property of being discrete for a domain
  * @tparam D
@@ -30,11 +35,12 @@ trait DiscreteDomain[-D, +T]:
   def apply(domain: D): Domain[Iterator[T]]
 
 object DiscreteFromContextDomain:
-  given discreteIsContextDiscrete[D, T](using d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] = domain =>
-    val dv = d(domain)
-    dv.copy(domain = FromContext.value(dv.domain))
+  given discreteIsContextDiscrete[D, T](using d: DiscreteDomain[D, T]): DiscreteFromContextDomain[D, T] =
+    DiscreteFromContextDomain: domain =>
+      val dv = d(domain)
+      dv.copy(domain = FromContext.value(dv.domain))
 
-  inline def apply[D, T](f: D => Domain[FromContext[Iterator[T]]]): DiscreteFromContextDomain[D, T] =
+  def apply[D, T](f: D => Domain[FromContext[Iterator[T]]]): DiscreteFromContextDomain[D, T] =
     new DiscreteFromContextDomain[D, T]:
       def apply(d: D) = f(d)
 

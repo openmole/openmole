@@ -66,27 +66,30 @@ object RangeDomain:
 
   opaque type DefaultStep[T] = T
 
-  given isBounded[T]: BoundedFromContextDomain[RangeDomain[T], T] = domain =>
-    Domain(
-      (domain.min, domain.max),
-      domain.inputs,
-      domain.validate
-    )
+  given isBounded[T]: BoundedFromContextDomain[RangeDomain[T], T] =
+    BoundedFromContextDomain: domain =>
+      Domain(
+        (domain.min, domain.max),
+        domain.inputs,
+        domain.validate
+      )
 
-  given hasCenter[T]: DomainCenterFromContext[RangeDomain[T], T] = domain =>
-    FromContext: p =>
-      import p.*
-      import domain.ops._
-      val min = domain.min.from(context)
-      val max = domain.max.from(context)
-      min + ((max - min) / fromInt(2))
+  given hasCenter[T]: DomainCenterFromContext[RangeDomain[T], T] =
+    DomainCenterFromContext: domain =>
+      FromContext: p =>
+        import p.*
+        import domain.ops._
+        val min = domain.min.from(context)
+        val max = domain.max.from(context)
+        min + ((max - min) / fromInt(2))
 
-  given isDiscrete[T](using step: DefaultStep[T]): DiscreteFromContextDomain[RangeDomain[T], T] = domain =>
-    Domain(
-      domain.iterator,
-      domain.inputs,
-      domain.validate
-    )
+  given isDiscrete[T](using step: DefaultStep[T]): DiscreteFromContextDomain[RangeDomain[T], T] =
+    DiscreteFromContextDomain: domain =>
+      Domain(
+        domain.iterator,
+        domain.inputs,
+        domain.validate
+      )
 
   def apply[T: RangeValue](
     min: FromContext[T],

@@ -55,7 +55,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     (d hook display by 10): DSL
   }
 
-  "Direct sampling" should "transmit explored inputs to replicated model" in {
+  it should "transmit explored inputs to replicated model" in {
     val i = Val[Int]
     val seed = Val[Int]
 
@@ -81,7 +81,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct sampling" should "transmit explored inputs to replicated model even wrapped in a task" in {
+  it should "transmit explored inputs to replicated model even wrapped in a task" in {
     val i = Val[Int]
     val j = Val[Int]
     val seed = Val[Int]
@@ -113,7 +113,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct sampling" should "compose with loop" in {
+  it should "compose with loop" in {
     val counter = new AtomicInteger(0)
 
     val step = Val[Long]
@@ -147,7 +147,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     counter.intValue() should equal(12)
   }
 
-  "Direct samplings" should "transmit inputs" in {
+  it should "transmit inputs" in {
     val l = Val[Double]
     val i = Val[Int]
 
@@ -174,7 +174,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct samplings" should "transmit explored value" in {
+  it should "transmit explored value" in {
     val l = Val[Double]
     val i = Val[Int]
     val seed = Val[Int]
@@ -205,7 +205,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct samplings" should "transmit explored value to post aggregation task" in {
+  it should "transmit explored value to post aggregation task" in {
     val l = Val[Double]
     val i = Val[Int]
     val j = Val[Int]
@@ -231,7 +231,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct samplings" should "transmit explored value to a hook in an nested exploration" in {
+  it should "transmit explored value to a hook in an nested exploration" in {
     val l = Val[Double]
     val i = Val[Double]
     val seed = Val[Int]
@@ -248,7 +248,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
   }
 
-  "Direct samplings" should "accept display hook" in {
+  it should "accept display hook" in {
     val l = Val[Double]
 
     val model = EmptyTask() set (inputs += l)
@@ -262,5 +262,19 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     (ds hook display): DSL
     (ds hook display hook "/tmp/test.csv"): DSL
   }
+
+  "Replication" should "be serializable" in:
+    val l = Val[Long]
+    val model = EmptyTask() set (inputs += l)
+
+    val replication: DSLContainer[?] =
+      Replication(
+        evaluation = model,
+        seed = l,
+        sample = 10
+      )
+
+    val r2 = serializeDeserialize(replication)
+    r2.run()
 
 }

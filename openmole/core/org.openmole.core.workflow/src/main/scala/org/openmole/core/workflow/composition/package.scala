@@ -475,7 +475,7 @@ case class oo(a: TransitionOrigin, b: Vector[TransitionDestination], filterValue
 
 case class &(a: DSL, b: DSL) extends DSL
 
-object DSLContainer {
+object DSLContainer:
   def taskNodes(container: DSLContainer[?]) =
     val output = container.output.map { o => TaskNode(o, hooks = container.hooks) }
     val delegate = container.delegate.map { t => TaskNode(t, environment = container.environment, grouping = container.grouping) }
@@ -490,12 +490,15 @@ object DSLContainer {
       val container = toDSLContainer(t.value)
       container.copy(hooks = container.hooks ++ Seq(t.h))
 
+    def apply[T, D](f: T => DSLContainer[D]) =
+      new ExplorationMethod[T, D]:
+        def apply(t: T) = f(t)
 
   trait ExplorationMethod[-T, +D]:
     def apply(t: T): DSLContainer[D]
 
   implicit def convert[T, C](t: T)(implicit toDSLContainer: ExplorationMethod[T, C]): DSLContainer[C] = toDSLContainer(t)
-}
+
 
 case class DSLContainer[+T](
   dsl:         DSL,
@@ -534,14 +537,14 @@ trait CompositionPackage {
   export org.openmole.core.workflow.composition.ExplorationMethodSetter
 
   def DSLContainer[T](
-                       dsl:         DSL,
-                       method:      T,
-                       output:      Option[Task]                = None,
-                       delegate:    Vector[Task]                = Vector.empty,
-                       environment: Option[EnvironmentBuilder] = None,
-                       grouping:    Option[Grouping]            = None,
-                       hooks:       Vector[Hook]                = Vector.empty,
-                       validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
+    dsl:         DSL,
+    method:      T,
+    output:      Option[Task]                = None,
+    delegate:    Vector[Task]                = Vector.empty,
+    environment: Option[EnvironmentBuilder] = None,
+    grouping:    Option[Grouping]            = None,
+    hooks:       Vector[Hook]                = Vector.empty,
+    validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
     dsl match
       case dsl: DSLContainer[?] =>
         org.openmole.core.workflow.composition.DSLContainer[T](
