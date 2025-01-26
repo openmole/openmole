@@ -96,12 +96,9 @@ class SerializerService:
   private def pluginAndFileListing() = new PluginAndFilesListing(buildXStream())
   private def deserializerWithFileInjection() = new FileInjection(buildXStream())
 
-  def deserialize[T](file: File)(using NotGiven[T =:= Nothing]): T =
-    val is = new FileInputStream(file)
-    try deserialize[T](is)
-    finally is.close
+  //  def deserialize[T](file: File): T = file.withFileInputStream(deserialize[T])
 
-//  def deserialize[T](is: InputStream): T =
+  //  def deserialize[T](is: InputStream): T =
 //    buildXStream().fromXML(is).asInstanceOf[T]
 
 //  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
@@ -156,6 +153,8 @@ class SerializerService:
 
     fury
 
+  //lazy val furyInstance = buildFury()
+
 
   def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
     def inject[T](fury: Fury, is: InputStream, files: Map[String, File]) =
@@ -171,9 +170,12 @@ class SerializerService:
 
     inject[T](buildFury(), is, files)
 
-//  def deserialize[T](file: File): T = file.withFileInputStream(deserialize[T])
-
   def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = buildFury().deserialize(new FuryInputStream(is)).asInstanceOf[T]
+
+  def deserialize[T](file: File)(using NotGiven[T =:= Nothing]): T =
+    val is = new FileInputStream(file)
+    try deserialize[T](is)
+    finally is.close
 
   def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)
