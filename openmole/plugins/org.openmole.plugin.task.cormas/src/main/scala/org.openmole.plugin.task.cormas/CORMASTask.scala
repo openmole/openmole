@@ -51,7 +51,7 @@ object CORMASTask:
           stdErr = stdErr,
           config = InputOutputConfig(),
           external = external,
-          info = info)(taskExecutionBuildContext)
+          info = info)
 
       ExternalTask.execution: p =>
         import p.*

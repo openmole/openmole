@@ -99,7 +99,7 @@ object JuliaTask:
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info)(taskExecutionBuildContext)
+        info = info)
 
     ExternalTask.execution: p =>
       import org.json4s.jackson.JsonMethods._

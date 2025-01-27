@@ -111,8 +111,9 @@ object DispatchEnvironment {
         )
 
       for
-        env ← slot.map(_.environment)
-      do c2(env) listen stateChangedListener(WeakReference(dispatchEnvironment))
+        env <- slot.map(_.environment)
+      do
+        c2(env).listen(stateChangedListener(WeakReference(dispatchEnvironment)))
 
       (dispatchEnvironment, c2)
 

@@ -19,7 +19,7 @@ package org.openmole.core.event
 export EventDispatcher.Listner
 
 implicit class EventDispatcherDecorator[T](o: T):
-  def listen(listener: EventDispatcher.Listner[T])(implicit eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
+  def listen(listener: EventDispatcher.Listner[T])(using eventDispatcher: EventDispatcher) = eventDispatcher.listen(o)(listener)
   
 
 

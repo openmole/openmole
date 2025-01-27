@@ -21,14 +21,14 @@ import java.util.concurrent.atomic.AtomicLong
 
 import scala.collection.mutable.{ ListBuffer, WeakHashMap }
 
-object EventDispatcher {
+object EventDispatcher:
   type Listner[T] = PartialFunction[(T, Event[T]), Unit]
 
   def apply() = new EventDispatcher
   case class EventListnerKey[T](obj: Any, listner: Listner[T])
-}
 
-class EventDispatcher {
+
+class EventDispatcher:
 
   private val _eventId = new AtomicLong
   private lazy val listenerMap = new WeakHashMap[Any, collection.mutable.Set[Any]]
@@ -51,4 +51,4 @@ class EventDispatcher {
     } l.asInstanceOf[Listner[T]].lift(obj, event)
   }
 
-}
+

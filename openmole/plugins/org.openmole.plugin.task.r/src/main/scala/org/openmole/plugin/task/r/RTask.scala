@@ -90,7 +90,7 @@ object RTask:
           stdErr = stdErr,
           config = config,
           external = external,
-          info = info)(taskExecutionBuildContext)
+          info = info)
 
       ExternalTask.execution: executionParameters =>
         import executionParameters.*

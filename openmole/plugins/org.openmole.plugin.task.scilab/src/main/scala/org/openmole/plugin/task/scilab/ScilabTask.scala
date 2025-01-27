@@ -67,7 +67,7 @@ object ScilabTask:
           stdErr = stdErr,
           config = config,
           external = external,
-          info = info)(taskExecutionBuildContext)
+          info = info)
 
       ExternalTask.execution: p =>
 

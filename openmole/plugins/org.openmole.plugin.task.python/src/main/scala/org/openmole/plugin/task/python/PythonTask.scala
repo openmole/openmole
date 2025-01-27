@@ -74,7 +74,7 @@ object PythonTask:
           stdErr = stdErr,
           external = external,
           config = config,
-          info = info)(taskExecutionBuildContext)
+          info = info)
 
       ExternalTask.execution: p =>
         import org.json4s.jackson.JsonMethods._
