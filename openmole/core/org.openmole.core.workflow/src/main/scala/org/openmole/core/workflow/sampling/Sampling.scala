@@ -21,9 +21,7 @@ import org.openmole.core.context._
 import org.openmole.core.argument._
 
 object Sampling:
-  inline given [T: IsSampling as isSampling]: Conversion[T, Sampling] =
-    new Conversion[T, Sampling]:
-      override def apply(t: T): Sampling = isSampling(t)
+  given [T: IsSampling as isSampling]: Conversion[T, Sampling] = t => isSampling(t)
 
 case class Sampling(
   sampling: FromContext[Iterator[Iterable[Variable[?]]]],
