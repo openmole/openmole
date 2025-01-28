@@ -10,7 +10,7 @@ NAME=$1
 VERSION=$2
 
 cd $NAME/$VERSION && \
-docker build --pull . -t openmole/$NAME:$VERSION && \
+docker buildx build --pull . -t openmole/$NAME:$VERSION && \
 docker push openmole/$NAME:$VERSION &&
 docker rmi openmole/$NAME:$VERSION
 
