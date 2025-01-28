@@ -167,6 +167,7 @@ object GAMATask:
     finalStep:              FromContext[Int],
     seed:                   OptionalArgument[Val[Long]]         = None,
     frameRate:              OptionalArgument[Int]               = None,
+    temporaryVolumes:       Seq[String]                         = Seq.empty,
     install:                Seq[String]                         = Seq.empty,
     containerImage:         ContainerImage                      = "gamaplatform/gama:1.9.2",
     memory:                 OptionalArgument[Information]       = None,
@@ -244,12 +245,16 @@ object GAMATask:
           s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>${parsedInputXML.mkString("")}"""
 
         val (_, volumes) = GAMATask.volumes(project, gaml)
+        val temporaryVolumeMapping =
+          temporaryVolumes.map: d =>
+            val emptyDirectory = executionContext.taskExecutionDirectory.newDirectory("result", create = true)
+            emptyDirectory-> s"$gamaWorkspaceDirectory/$d"
 
         def containerTask =
           containerTaskExecution.set(
             resources += (inputFile, inputFilePath, true),
             resources += (outputDirectory, outputDirectoryPath, true),
-            volumes.map { (lv, cv) ⇒ resources += (lv, cv, true) },
+            (temporaryVolumeMapping ++ volumes).map((lv, cv) => resources += (lv, cv, true)),
             Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
             Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
           )
