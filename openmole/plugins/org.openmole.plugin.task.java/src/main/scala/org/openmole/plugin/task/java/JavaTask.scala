@@ -52,7 +52,7 @@ object JavaTask:
     fewerThreads: Boolean = true,
     version: String = "21.2",
     jvmVersion: String = "21",
-    containerSystem: ContainerSystem = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
+    containerSystem: OptionalArgument[ContainerSystem] = None)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("JavaTask"): buildContext =>
       import buildContext.*

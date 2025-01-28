@@ -38,12 +38,12 @@ object PythonTask:
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
     hostFiles:              Seq[HostFile]                      = Vector.empty,
-    environmentVariables:   Seq[EnvironmentVariable] = Vector.empty,
+    environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
     returnValue:            OptionalArgument[Val[Int]]         = None,
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
+    containerSystem:        OptionalArgument[ContainerSystem]  = None)(using sourcecode.Name, DefinitionScope) =
 
     
     ExternalTask.build("PythonTask"): buildParamters =>

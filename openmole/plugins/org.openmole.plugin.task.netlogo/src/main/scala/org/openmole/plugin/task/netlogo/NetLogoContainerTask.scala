@@ -36,23 +36,23 @@ object NetLogoContainerTask:
   def apply(
     script: File,
     go: Seq[FromContext[String]],
-    setup: Seq[FromContext[String]]                          = Seq(),
-    embedWorkspace: Boolean                                  = false,
-    seed: OptionalArgument[Val[Int]]                         = None,
-    switch3d: Boolean                                        = false,
+    setup: Seq[FromContext[String]]                             = Seq(),
+    embedWorkspace: Boolean                                     = false,
+    seed: OptionalArgument[Val[Int]]                            = None,
+    switch3d: Boolean                                           = false,
     //steps:                  Option[FromContext[Int]]         = None,
-    install:                Seq[String]                      = Seq.empty,
-    memory:                 Information                      = 1.gigabyte,
-    version:                String                           = "6.4.0",
-    errorOnReturnValue:     Boolean                          = true,
-    returnValue:            OptionalArgument[Val[Int]]       = None,
-    stdOut:                 OptionalArgument[Val[String]]    = None,
-    stdErr:                 OptionalArgument[Val[String]]    = None,
-    environmentVariables:   Seq[EnvironmentVariable]         = Vector.empty,
-    hostFiles:              Seq[HostFile]                    = Vector.empty,
+    install:                Seq[String]                         = Seq.empty,
+    memory:                 Information                         = 1.gigabyte,
+    version:                String                              = "6.4.0",
+    errorOnReturnValue:     Boolean                             = true,
+    returnValue:            OptionalArgument[Val[Int]]          = None,
+    stdOut:                 OptionalArgument[Val[String]]       = None,
+    stdErr:                 OptionalArgument[Val[String]]       = None,
+    environmentVariables:   Seq[EnvironmentVariable]            = Vector.empty,
+    hostFiles:              Seq[HostFile]                       = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
-    clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
+    clearContainerCache:    Boolean                             = false,
+    containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("NetLogoContainerTask"): buildParameters =>
       import buildParameters.*

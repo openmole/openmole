@@ -71,7 +71,7 @@ object JuliaTask:
     returnValue:            OptionalArgument[Val[Int]]         = None,
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
-    containerSystem:        ContainerSystem                    = ContainerSystem.default,
+    containerSystem:        OptionalArgument[ContainerSystem]  = None,
     clearCache:             Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
   ExternalTask.build("JuliaTask"): buildParameters =>

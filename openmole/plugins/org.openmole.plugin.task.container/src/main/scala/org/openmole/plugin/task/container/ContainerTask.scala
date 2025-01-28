@@ -48,7 +48,7 @@ object ContainerTask:
   def apply(
     image:                  ContainerImage,
     command:                Commands,
-    containerSystem:        ContainerSystem                                    = ContainerSystem.default,
+    containerSystem:        OptionalArgument[ContainerSystem]                  = None,
     install:                Seq[String]                                        = Vector.empty,
     installFiles:           Seq[File]                                          = Vector.empty,
     workDirectory:          OptionalArgument[String]                           = None,
@@ -90,13 +90,13 @@ object ContainerTask:
       validateContainer(command.value, environmentVariables, info.external)
 
   def install(
-    containerSystem: ContainerSystem,
+    containerSystem: Option[ContainerSystem],
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
     errorDetail: Int ⇒ Option[String] = _ ⇒ None,
-    clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService): ContainerSystem.InstalledImage =
-    containerSystem match
+    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): ContainerSystem.InstalledImage =
+    containerSystem.getOrElse(ContainerSystem.default) match
       case containerSystem: ContainerSystem.SingularitySIF => installSIF(containerSystem, image, install, volumes, errorDetail, clearCache)
       case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
 

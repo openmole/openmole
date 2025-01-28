@@ -63,7 +63,7 @@ object RTask:
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     clearContainerCache:        Boolean                            = false,
-    containerSystem:            ContainerSystem                    = ContainerSystem.default
+    containerSystem:            OptionalArgument[ContainerSystem]  = None
   )(using sourcecode.Name, DefinitionScope) =
     ExternalTask.build("RTask"): buildParameters =>
       import buildParameters.*

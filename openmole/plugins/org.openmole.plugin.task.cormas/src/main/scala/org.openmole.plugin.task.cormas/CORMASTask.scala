@@ -15,17 +15,17 @@ object CORMASTask:
 
   def apply(
     script:               RunnableScript,
-    forceUpdate:          Boolean                       = false,
-    errorOnReturnValue:   Boolean                       = true,
-    returnValue:          OptionalArgument[Val[Int]]    = None,
-    stdOut:               OptionalArgument[Val[String]] = None,
-    stdErr:               OptionalArgument[Val[String]] = None,
-    environmentVariables: Vector[EnvironmentVariable]   = Vector.empty,
-    hostFiles:            Vector[HostFile]              = Vector.empty,
-    install:              Seq[String]                   = Seq.empty,
-    clearContainerCache:    Boolean                     = false,
-    version:                String                      = "latest",
-    containerSystem:        ContainerSystem             = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
+    forceUpdate:          Boolean                               = false,
+    errorOnReturnValue:   Boolean                               = true,
+    returnValue:          OptionalArgument[Val[Int]]            = None,
+    stdOut:               OptionalArgument[Val[String]]         = None,
+    stdErr:               OptionalArgument[Val[String]]         = None,
+    environmentVariables: Vector[EnvironmentVariable]           = Vector.empty,
+    hostFiles:            Vector[HostFile]                      = Vector.empty,
+    install:              Seq[String]                           = Seq.empty,
+    clearContainerCache:    Boolean                             = false,
+    version:                String                              = "latest",
+    containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("CORMASTask"): buildParameters =>
       import buildParameters.*

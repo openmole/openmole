@@ -26,13 +26,13 @@ object GAMATask:
     model:                  String,
     experiment:             String,
     install:                Seq[String],
-    installContainerSystem: ContainerSystem,
+    containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     val installedImage =
       ContainerTask.install(
-        installContainerSystem,
+        containerSystem,
         image,
         install,
         Seq(),
@@ -165,21 +165,21 @@ object GAMATask:
     gaml:                   String,
     experiment:             String,
     finalStep:              FromContext[Int],
-    seed:                   OptionalArgument[Val[Long]]      = None,
-    frameRate:              OptionalArgument[Int]            = None,
-    install:                Seq[String]                      = Seq.empty,
-    containerImage:         ContainerImage                   = "gamaplatform/gama:1.9.2",
-    memory:                 OptionalArgument[Information]    = None,
-    version:                OptionalArgument[String]         = None,
-    errorOnReturnValue:     Boolean                          = true,
-    returnValue:            OptionalArgument[Val[Int]]       = None,
-    stdOut:                 OptionalArgument[Val[String]]    = None,
-    stdErr:                 OptionalArgument[Val[String]]    = None,
-    environmentVariables:   Seq[EnvironmentVariable]         = Vector.empty,
-    hostFiles:              Seq[HostFile]                    = Vector.empty,
+    seed:                   OptionalArgument[Val[Long]]         = None,
+    frameRate:              OptionalArgument[Int]               = None,
+    install:                Seq[String]                         = Seq.empty,
+    containerImage:         ContainerImage                      = "gamaplatform/gama:1.9.2",
+    memory:                 OptionalArgument[Information]       = None,
+    version:                OptionalArgument[String]            = None,
+    errorOnReturnValue:     Boolean                             = true,
+    returnValue:            OptionalArgument[Val[Int]]          = None,
+    stdOut:                 OptionalArgument[Val[String]]       = None,
+    stdErr:                 OptionalArgument[Val[String]]       = None,
+    environmentVariables:   Seq[EnvironmentVariable]            = Vector.empty,
+    hostFiles:              Seq[HostFile]                       = Vector.empty,
     //    workDirectory:          OptionalArgument[String]       = None,
-    clearContainerCache:    Boolean                          = false,
-    containerSystem:        ContainerSystem                  = ContainerSystem.default)(using sourcecode.Name, DefinitionScope) =
+    clearContainerCache:    Boolean                             = false,
+    containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("GAMATask"): buildParameters =>
       import buildParameters.*
