@@ -27,7 +27,7 @@ object ScilabTask:
     script:                 RunnableScript,
     install:                Seq[String]                         = Seq.empty,
     prepare:                Seq[String]                         = Seq.empty,
-    version:                String                              = "2023.0.0",
+    version:                String                              = "2025.0.0",
     errorOnReturnValue:     Boolean                             = true,
     returnValue:            OptionalArgument[Val[Int]]          = None,
     stdOut:                 OptionalArgument[Val[String]]       = None,
