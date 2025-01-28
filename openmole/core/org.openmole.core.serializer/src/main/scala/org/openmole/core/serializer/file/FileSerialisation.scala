@@ -37,7 +37,7 @@ object FileSerialisation:
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, fury: Fury)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir ⇒
+  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, serialize: (java.io.OutputStream, AnyRef) => Unit)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir ⇒
     val fileInfo = HashMap() ++ files.map: file ⇒
       val name = UUID.randomUUID
       val toArchive =
@@ -54,13 +54,13 @@ object FileSerialisation:
       (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
 
     newFile.withTmpFile: tmpFile ⇒
-      tmpFile.withOutputStream(os => fury.serialize(os, fileInfo))
+      tmpFile.withOutputStream(os => serialize(os, fileInfo))
       tos.addFile(tmpFile, fileDir + "/" + filesInfo)
 
 
-  def deserialiseFileReplacements(archiveExtractDir: File, fury: Fury, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
+  def deserialiseFileReplacements(archiveExtractDir: File, deserialize: java.io.InputStream => AnyRef, deleteOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): Map[String, File] =
     val fileInfoFile = archiveExtractDir / s"$fileDir/$filesInfo"
-    val fi = fileInfoFile.withInputStream(is => fury.deserialize(new FuryInputStream(is))).asInstanceOf[FilesInfo]
+    val fi = fileInfoFile.withInputStream(is => deserialize(is)).asInstanceOf[FilesInfo]
 
     HashMap() ++ fi.map:
       case (name, FileInfo(originalPath, isDirectory, exists)) ⇒
