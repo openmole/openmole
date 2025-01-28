@@ -140,7 +140,7 @@ object FlatContainerTask:
 
             FlatContainerTask.Cached(image = pooledImage, isolatedDirectories = isolatedDirectoryMapping)
 
-      val pool = executionContext.cache.getOrElseUpdate(image.containerSystem.cacheKey)(createPool)
+      val pool = executionContext.cache.getOrElseUpdate(image.cacheKey)(createPool)
 
       val outBuilder = new StringOutputStream
       val errBuilder = new StringOutputStream

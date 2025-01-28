@@ -445,7 +445,7 @@ object ContainerTask:
                     then image
                     else _root_.container.Singularity.copyOverlay(image, overlay)
 
-            val overlayCache = executionContext.cache.getOrElseUpdate(containerSystem.cacheKey)(createPool)
+            val overlayCache = executionContext.cache.getOrElseUpdate(image.cacheKey)(createPool)
 
             overlayCache: overlay =>
               runCommandInSIFContainer(
