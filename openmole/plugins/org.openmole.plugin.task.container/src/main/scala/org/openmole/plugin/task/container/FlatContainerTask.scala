@@ -81,19 +81,19 @@ object FlatContainerTask:
   case class Cached(image: _root_.container.FlatImage, isolatedDirectories: Seq[VolumeInfo])
 
   def process(
-               image:                  InstalledSingularityImage.InstalledFlatImage,
-               command:                FlatContainerTask.Commands,
-               workDirectory:          Option[String],
-               relativePathRoot:       Option[String],
-               hostFiles:              Seq[HostFile],
-               environmentVariables:   Seq[EnvironmentVariable],
-               errorOnReturnValue:     Boolean,
-               returnValue:            Option[Val[Int]],
-               stdOut:                 Option[Val[String]],
-               stdErr:                 Option[Val[String]],
-               config:                 InputOutputConfig,
-               external:               External,
-               info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
+    image:                  InstalledSingularityImage.InstalledFlatImage,
+    command:                FlatContainerTask.Commands,
+    workDirectory:          Option[String],
+    relativePathRoot:       Option[String],
+    hostFiles:              Seq[HostFile],
+    environmentVariables:   Seq[EnvironmentVariable],
+    errorOnReturnValue:     Boolean,
+    returnValue:            Option[Val[Int]],
+    stdOut:                 Option[Val[String]],
+    stdErr:                 Option[Val[String]],
+    config:                 InputOutputConfig,
+    external:               External,
+    info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
     FromContext[Context]: parameters =>
       import _root_.container.FlatImage
       import parameters.*
@@ -105,7 +105,6 @@ object FlatContainerTask:
       def relativeWorkDirectoryValue(image: FlatImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
       def rootDirectory(image: FlatImage) = image.file / _root_.container.FlatImage.rootfsName
 
-
       def containerPathResolver(image: FlatImage, path: String): File =
         val rootDirectory = File("/")
         if File(path).isAbsolute
@@ -116,7 +115,7 @@ object FlatContainerTask:
 
       def createPool =
         if executionContext.localEnvironment.remote && executionContext.localEnvironment.threads == 1
-        then WithInstance[FlatContainerTask.Cached](pooled = false) { () ⇒ FlatContainerTask.Cached(image.image, Seq()) }
+        then WithInstance[FlatContainerTask.Cached](pooled = false) { () => FlatContainerTask.Cached(image.image, Seq()) }
         else
           WithInstance[FlatContainerTask.Cached](pooled = image.containerSystem.reuseContainer): () ⇒
             val pooledImage =
@@ -159,10 +158,10 @@ object FlatContainerTask:
         else new PrintStream(MultiplexedOutputStream(executionContext.outputRedirection.error, tailBuilder))
 
       def prepareVolumes(
-                          preparedFilesInfo:        Iterable[FileInfo],
-                          containerPathResolver:    String ⇒ File,
-                          hostFiles:                Seq[HostFile],
-                          volumesInfo:              Seq[VolumeInfo]): Iterable[MountPoint] =
+        preparedFilesInfo:        Iterable[FileInfo],
+        containerPathResolver:    String ⇒ File,
+        hostFiles:                Seq[HostFile],
+        volumesInfo:              Seq[VolumeInfo]): Iterable[MountPoint] =
         val volumes =
           volumesInfo.map((f, d) ⇒ f.toString -> d) ++
             hostFiles.map(h ⇒ h.path -> h.destination) ++

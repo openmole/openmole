@@ -300,19 +300,19 @@ object ContainerTask:
   type ContainerId = String
 
   def execution(
-                 image: InstalledSingularityImage,
-                 command: Commands,
-                 environmentVariables: Seq[EnvironmentVariable],
-                 errorOnReturnValue: Boolean,
-                 returnValue: Option[Val[Int]],
-                 stdOut: Option[Val[String]],
-                 stdErr: Option[Val[String]],
-                 external: External,
-                 info: InfoConfig,
-                 hostFiles: Seq[HostFile] = Seq(),
-                 workDirectory: Option[String] = None,
-                 relativePathRoot: Option[String] = None,
-                 config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
+    image: InstalledSingularityImage,
+    command: Commands,
+    environmentVariables: Seq[EnvironmentVariable],
+    errorOnReturnValue: Boolean,
+    returnValue: Option[Val[Int]],
+    stdOut: Option[Val[String]],
+    stdErr: Option[Val[String]],
+    external: External,
+    info: InfoConfig,
+    hostFiles: Seq[HostFile] = Seq(),
+    workDirectory: Option[String] = None,
+    relativePathRoot: Option[String] = None,
+    config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
     ContainerTaskExecution(
       image = image,
       command = command,
@@ -333,19 +333,19 @@ object ContainerTask:
 
 
   def process(
-               image:                  InstalledSingularityImage.InstalledSIFImage,
-               command:                Commands,
-               workDirectory:          Option[String],
-               relativePathRoot:       Option[String],
-               hostFiles:              Seq[HostFile],
-               environmentVariables:   Seq[EnvironmentVariable],
-               errorOnReturnValue:     Boolean,
-               returnValue:            Option[Val[Int]],
-               stdOut:                 Option[Val[String]],
-               stdErr:                 Option[Val[String]],
-               config:                 InputOutputConfig,
-               external:               External,
-               info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
+    image:                  InstalledSingularityImage.InstalledSIFImage,
+    command:                Commands,
+    workDirectory:          Option[String],
+    relativePathRoot:       Option[String],
+    hostFiles:              Seq[HostFile],
+    environmentVariables:   Seq[EnvironmentVariable],
+    errorOnReturnValue:     Boolean,
+    returnValue:            Option[Val[Int]],
+    stdOut:                 Option[Val[String]],
+    stdErr:                 Option[Val[String]],
+    config:                 InputOutputConfig,
+    external:               External,
+    info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
     FromContext[Context]: parameters =>
       import executionContext.networkService
       import parameters.*
@@ -546,19 +546,19 @@ object ContainerTaskExecution:
   given ExternalBuilder[ContainerTaskExecution] = ExternalBuilder(Focus[ContainerTaskExecution](_.external))
 
 case class ContainerTaskExecution(
-                                   image: InstalledSingularityImage,
-                                   command: ContainerTask.Commands,
-                                   workDirectory: Option[String],
-                                   relativePathRoot: Option[String],
-                                   hostFiles: Seq[HostFile],
-                                   environmentVariables: Seq[EnvironmentVariable],
-                                   errorOnReturnValue: Boolean,
-                                   returnValue: Option[Val[Int]],
-                                   stdOut: Option[Val[String]],
-                                   stdErr: Option[Val[String]],
-                                   config: InputOutputConfig,
-                                   external: External,
-                                   info: InfoConfig) extends TaskExecution:
+  image: InstalledSingularityImage,
+  command: ContainerTask.Commands,
+  workDirectory: Option[String],
+  relativePathRoot: Option[String],
+  hostFiles: Seq[HostFile],
+  environmentVariables: Seq[EnvironmentVariable],
+  errorOnReturnValue: Boolean,
+  returnValue: Option[Val[Int]],
+  stdOut: Option[Val[String]],
+  stdErr: Option[Val[String]],
+  config: InputOutputConfig,
+  external: External,
+  info: InfoConfig) extends TaskExecution:
 
     override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
       import p.*
