@@ -44,18 +44,19 @@ import org.openmole.tool.lock.*
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{FileInjection, FileSerialisation, FileWithGCConverter}
 
-import scala.util.NotGiven
-import org.apache.fury.*
-import org.apache.fury.config.*
-import org.apache.fury.io.*
-import org.apache.fury.memory.*
-import org.apache.fury.serializer.*
+//import scala.util.NotGiven
+//import org.apache.fury.*
+//import org.apache.fury.config.*
+//import org.apache.fury.io.*
+//import org.apache.fury.memory.*
+//import org.apache.fury.serializer.*
+
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService.FileWithGC
 import org.openmole.core.workspace
 
 object SerializerService:
-  org.apache.fury.logging.LoggerFactory.disableLogging()
+//  org.apache.fury.logging.LoggerFactory.disableLogging()
   def apply() = new SerializerService
   def stub() = apply()
 

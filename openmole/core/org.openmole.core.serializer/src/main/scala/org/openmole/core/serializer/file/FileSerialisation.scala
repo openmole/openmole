@@ -25,10 +25,7 @@ import org.openmole.tool.archive.*
 import scala.collection.immutable.HashMap
 import java.util.UUID
 import java.io.{File, FileOutputStream}
-import com.thoughtworks.xstream.XStream
 import org.openmole.core.fileservice.FileService
-import org.apache.fury.*
-import org.apache.fury.io.FuryInputStream
 
 object FileSerialisation:
   case class FileInfo(originalPath: String, directory: Boolean, exists: Boolean)
