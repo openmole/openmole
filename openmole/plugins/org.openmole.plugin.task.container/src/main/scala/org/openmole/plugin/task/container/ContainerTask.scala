@@ -142,9 +142,16 @@ object ContainerTask:
             serializerService.serialize(singularityImage, serializedSingularityImage)
             singularityImage
 
-    val initializedOverlay = initializeOverlay(containerSystem)
+    containerSystem match
+      case overlay : SingularityOverlay if overlay.copy =>
+        val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
+        val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
+        ContainerSystem.InstalledSIFOverlayImage(installedImage, overlay, Some(initializedOverlay))
+      case overlay: SingularityOverlay =>
+        ContainerSystem.InstalledSIFOverlayImage(installedImage, overlay, None)
+      case memory: SingularityMemory =>
+        ContainerSystem.InstalledSIFMemoryImage(installedImage, memory)
 
-    ContainerSystem.InstalledSIFImage(installedImage, initializedOverlay)
 
   def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if install.isEmpty
@@ -193,8 +200,22 @@ object ContainerTask:
     output: PrintStream,
     error: PrintStream)(using TmpDirectory, NetworkService) =
     image match
-      case image: ContainerSystem.InstalledSIFImage =>
-        def execute(overlay: Option[_root_.container.Singularity.OverlayImage]) =
+      case image: ContainerSystem.InstalledSIFMemoryImage =>
+        runCommandInSIFContainer(
+          image.image,
+          commands = commands,
+          volumes = volumes,
+          environmentVariables = environmentVariables,
+          workDirectory = workDirectory,
+          verbose = verbose,
+          output = output,
+          error = error,
+          overlay = None,
+          tmpFS = true
+        )
+
+      case image: ContainerSystem.InstalledSIFOverlayImage =>
+        TmpDirectory.withTmpFile: overlayFile =>
           runCommandInSIFContainer(
             image.image,
             commands = commands,
@@ -204,16 +225,9 @@ object ContainerTask:
             verbose = verbose,
             output = output,
             error = error,
-            overlay = overlay,
-            tmpFS = overlay.isEmpty
+            overlay = Some(_root_.container.Singularity.createOverlay(overlayFile, image.containerSystem.size, output = output, error = error)),
+            tmpFS = false
           )
-
-        image.containerSystem match
-          case cs: SingularityOverlay =>
-            TmpDirectory.withTmpFile: overlayFile =>
-              val overlay = _root_.container.Singularity.createOverlay(overlayFile, cs.size, output = output, error = error)
-              execute(Some(overlay))
-          case cs: SingularityMemory => execute(None)
 
       case image: ContainerSystem.InstalledFlatImage =>
         runCommandInFlatImageContainer(
@@ -278,13 +292,6 @@ object ContainerTask:
         verbose = verbose
       )
 
-  def initializeOverlay(containerSystem: ContainerSystem.SingularitySIF)(using TmpDirectory, OutputRedirection) =
-    containerSystem match
-      case overlay: SingularityOverlay if overlay.copy =>
-        val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
-        val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
-        overlay.copy(overlay = Some(initializedOverlay))
-      case _ => containerSystem
 
   type FileInfo = (External.DeployedFile, File)
   type VolumeInfo = (File, String)
@@ -324,7 +331,6 @@ object ContainerTask:
     )
 
 
-
   def process(
     image:                  ContainerSystem.InstalledSIFImage,
     command:                Commands,
@@ -345,7 +351,8 @@ object ContainerTask:
 
       case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-      def workDirectoryValue(image: ContainerSystem.InstalledSIFImage) = workDirectory.orElse(image.image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
+      def workDirectoryValue(image: ContainerSystem.InstalledSIFImage) =
+        workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
 
       def relativeWorkDirectoryValue(image: ContainerSystem.InstalledSIFImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
 
@@ -429,23 +436,23 @@ object ContainerTask:
       val copyVolume = resultDirectory.getAbsolutePath -> resultDirectoryBind
 
       val retCode =
-        image.containerSystem match
-          case containerSystem: SingularityOverlay =>
-            def createPool =
-              WithInstance[_root_.container.Singularity.OverlayImage](pooled = containerSystem.reuse): () ⇒
+        image match
+          case image: ContainerSystem.InstalledSIFOverlayImage =>
+            def createOverlayPool =
+              WithInstance[_root_.container.Singularity.OverlayImage](pooled = image.containerSystem.reuse): () ⇒
                 val overlay =
-                  if containerSystem.reuse
+                  if image.containerSystem.reuse
                   then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
                   else executionContext.taskExecutionDirectory.newFile("overlay", ".img")
 
-                containerSystem.overlay match
-                  case None => _root_.container.Singularity.createOverlay(overlay, containerSystem.size, output = out, error = err)
-                  case Some(image) =>
-                    if containerSystem.reuse && executionContext.localEnvironment.threads == 1
-                    then image
-                    else _root_.container.Singularity.copyOverlay(image, overlay)
+                image.overlay match
+                  case None => _root_.container.Singularity.createOverlay(overlay, image.containerSystem.size, output = out, error = err)
+                  case Some(existingOverlay) =>
+                    if image.containerSystem.reuse && executionContext.localEnvironment.threads == 1
+                    then existingOverlay
+                    else _root_.container.Singularity.copyOverlay(existingOverlay, overlay)
 
-            val overlayCache = executionContext.cache.getOrElseUpdate(image.cacheKey)(createPool)
+            val overlayCache = executionContext.cache.getOrElseUpdate(image.cacheKey)(createOverlayPool)
 
             overlayCache: overlay =>
               runCommandInSIFContainer(
@@ -457,10 +464,10 @@ object ContainerTask:
                 error = err,
                 volumes = volumes ++ Seq(copyVolume),
                 environmentVariables = containerEnvironmentVariables,
-                verbose = containerSystem.verbose
+                verbose = image.containerSystem.verbose
               )
 
-          case containerSystem: SingularityMemory =>
+          case image: ContainerSystem.InstalledSIFMemoryImage =>
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
@@ -470,7 +477,7 @@ object ContainerTask:
               error = err,
               volumes = volumes ++ Seq(copyVolume),
               environmentVariables = containerEnvironmentVariables,
-              verbose = containerSystem.verbose
+              verbose = image.containerSystem.verbose
             )
 
       if errorOnReturnValue && !returnValue.isDefined && retCode != 0
