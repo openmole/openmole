@@ -64,7 +64,7 @@ object JuliaTask:
     install:                Seq[String]                        = Seq.empty,
     installFiles:           Seq[File]                          = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
-    version:                String                             = "1.10.4",
+    version:                String                             = "1.10.8",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
