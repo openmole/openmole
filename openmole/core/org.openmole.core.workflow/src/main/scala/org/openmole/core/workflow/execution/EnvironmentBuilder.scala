@@ -26,7 +26,7 @@ object EnvironmentBuilder:
 
   def apply(build: MoleServices => LocalEnvironment): LocalEnvironmentBuilder = LocalEnvironmentBuilder(build)
 
-  def apply[T <: Environment](build: MoleServices => T): EnvironmentBuilder = GenericEnvironmentBuilder(build)
+  def apply(build: MoleServices => Environment): EnvironmentBuilder = GenericEnvironmentBuilder(build)
 
   def multiple(build: (MoleServices, Cache) => (Environment, Cache)) = MultipleEnvironmentBuilder(build)
 
