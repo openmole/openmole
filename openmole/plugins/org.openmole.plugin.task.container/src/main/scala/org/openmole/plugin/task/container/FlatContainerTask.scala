@@ -69,7 +69,7 @@ object FlatContainerTask:
           serializerService.serialize(installedImage, serializedFlatImage)
           installedImage
 
-    ContainerSystem.InstalledFlatImage(installedImage, containerSystem)
+    InstalledSingularityImage.InstalledFlatImage(installedImage, containerSystem)
 
   export ContainerTask.Commands
 
@@ -81,19 +81,19 @@ object FlatContainerTask:
   case class Cached(image: _root_.container.FlatImage, isolatedDirectories: Seq[VolumeInfo])
 
   def process(
-    image:                  ContainerSystem.InstalledFlatImage,
-    command:                FlatContainerTask.Commands,
-    workDirectory:          Option[String],
-    relativePathRoot:       Option[String],
-    hostFiles:              Seq[HostFile],
-    environmentVariables:   Seq[EnvironmentVariable],
-    errorOnReturnValue:     Boolean,
-    returnValue:            Option[Val[Int]],
-    stdOut:                 Option[Val[String]],
-    stdErr:                 Option[Val[String]],
-    config:                 InputOutputConfig,
-    external:               External,
-    info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
+               image:                  InstalledSingularityImage.InstalledFlatImage,
+               command:                FlatContainerTask.Commands,
+               workDirectory:          Option[String],
+               relativePathRoot:       Option[String],
+               hostFiles:              Seq[HostFile],
+               environmentVariables:   Seq[EnvironmentVariable],
+               errorOnReturnValue:     Boolean,
+               returnValue:            Option[Val[Int]],
+               stdOut:                 Option[Val[String]],
+               stdErr:                 Option[Val[String]],
+               config:                 InputOutputConfig,
+               external:               External,
+               info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
     FromContext[Context]: parameters =>
       import _root_.container.FlatImage
       import parameters.*

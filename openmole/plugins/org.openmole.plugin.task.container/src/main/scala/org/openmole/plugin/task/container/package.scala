@@ -91,44 +91,40 @@ def ArchiveNotFound(archive: File) = Seq(new UserBadDataError(s"Cannot find spec
 
 lazy val ArchiveOK = Seq.empty[UserBadDataError]
 
-object ContainerSystem:
-  def default: ContainerSystem = SingularityOverlay()
+object InstalledSingularityImage:
   def sudo(containerSystem: ContainerSystem, cmd: String) = s"fakeroot $cmd"
 
   type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImage]]
   type FlatImageKey = CacheKey[WithInstance[FlatContainerTask.Cached]]
 
-  object InstalledImage:
-    extension (img: InstalledImage)
-      def workDirectory =
-        img match
-          case i: InstalledSIFOverlayImage => i.image.workDirectory
-          case i: InstalledSIFMemoryImage => i.image.workDirectory
-          case i: InstalledFlatImage => i.image.workDirectory
+  extension (img: InstalledSingularityImage)
+    def workDirectory =
+      img match
+        case i: InstalledSIFOverlayImage => i.image.workDirectory
+        case i: InstalledSIFMemoryImage => i.image.workDirectory
+        case i: InstalledFlatImage => i.image.workDirectory
 
-  sealed trait InstalledImage
+  case class InstalledSIFMemoryImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityMemory) extends InstalledSingularityImage:
+    lazy val cacheKey: OverlayKey = CacheKey()
 
-  case class InstalledSIFMemoryImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityMemory) extends InstalledImage:
-    lazy val cacheKey: ContainerSystem.OverlayKey = CacheKey()
+  case class InstalledSIFOverlayImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityOverlay, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends InstalledSingularityImage:
+    lazy val cacheKey: OverlayKey = CacheKey()
 
-  case class InstalledSIFOverlayImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityOverlay, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends InstalledImage:
-    lazy val cacheKey: ContainerSystem.OverlayKey = CacheKey()
-
-  case class InstalledFlatImage(image: _root_.container.FlatImage, containerSystem: SingularityFlatImage) extends InstalledImage:
-    lazy val cacheKey: ContainerSystem.FlatImageKey = CacheKey()
+  case class InstalledFlatImage(image: _root_.container.FlatImage, containerSystem: SingularityFlatImage) extends InstalledSingularityImage:
+    lazy val cacheKey: FlatImageKey = CacheKey()
 
 
   type InstalledSIFImage = InstalledSIFMemoryImage | InstalledSIFOverlayImage
-  type SingularitySIF = SingularityOverlay | SingularityMemory
+
+sealed trait InstalledSingularityImage
+
 
 
 sealed trait ContainerSystem
-
 case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, verbose: Boolean = false, copy: Boolean = false) extends ContainerSystem
 case class SingularityMemory(verbose: Boolean = false) extends ContainerSystem
 case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem
 
-export ContainerSystem.{InstalledImage as InstalledContainerImage}
 
 /**
  * Trait for either string scripts or script file runnable in tasks based on the container task

@@ -44,6 +44,7 @@ object ContainerTask:
     implicit def seqOfString(f: Seq[String]): Commands = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
     implicit def seqOfFromContext(f: Seq[FromContext[String]]): Commands = Commands(f.toVector)
 
+  type SingularitySIF = SingularityOverlay | SingularityMemory
 
   def apply(
     image:                  ContainerImage,
@@ -95,13 +96,13 @@ object ContainerTask:
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
     errorDetail: Int ⇒ Option[String] = _ ⇒ None,
-    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): ContainerSystem.InstalledImage =
-    containerSystem.getOrElse(ContainerSystem.default) match
-      case containerSystem: ContainerSystem.SingularitySIF => installSIF(containerSystem, image, install, volumes, errorDetail, clearCache)
+    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): InstalledSingularityImage =
+    containerSystem.getOrElse(SingularityOverlay()) match
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, errorDetail, clearCache)
       case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
 
   def installSIF(
-    containerSystem: ContainerSystem.SingularitySIF,
+    containerSystem: SingularitySIF,
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
@@ -146,11 +147,11 @@ object ContainerTask:
       case overlay : SingularityOverlay if overlay.copy =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
-        ContainerSystem.InstalledSIFOverlayImage(installedImage, overlay, Some(initializedOverlay))
+        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, Some(initializedOverlay))
       case overlay: SingularityOverlay =>
-        ContainerSystem.InstalledSIFOverlayImage(installedImage, overlay, None)
+        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, None)
       case memory: SingularityMemory =>
-        ContainerSystem.InstalledSIFMemoryImage(installedImage, memory)
+        InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory)
 
 
   def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
@@ -191,16 +192,16 @@ object ContainerTask:
   def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
 
   def runCommandInContainer(
-    image: ContainerSystem.InstalledImage,
-    commands: Seq[String],
-    volumes: Seq[(String, String)] = Seq.empty,
-    environmentVariables: Seq[(String, String)] = Seq.empty,
-    workDirectory: Option[String] = None,
-    verbose: Boolean = false,
-    output: PrintStream,
-    error: PrintStream)(using TmpDirectory, NetworkService) =
+                             image: InstalledSingularityImage,
+                             commands: Seq[String],
+                             volumes: Seq[(String, String)] = Seq.empty,
+                             environmentVariables: Seq[(String, String)] = Seq.empty,
+                             workDirectory: Option[String] = None,
+                             verbose: Boolean = false,
+                             output: PrintStream,
+                             error: PrintStream)(using TmpDirectory, NetworkService) =
     image match
-      case image: ContainerSystem.InstalledSIFMemoryImage =>
+      case image: InstalledSingularityImage.InstalledSIFMemoryImage =>
         runCommandInSIFContainer(
           image.image,
           commands = commands,
@@ -214,7 +215,7 @@ object ContainerTask:
           tmpFS = true
         )
 
-      case image: ContainerSystem.InstalledSIFOverlayImage =>
+      case image: InstalledSingularityImage.InstalledSIFOverlayImage =>
         TmpDirectory.withTmpFile: overlayFile =>
           runCommandInSIFContainer(
             image.image,
@@ -229,7 +230,7 @@ object ContainerTask:
             tmpFS = false
           )
 
-      case image: ContainerSystem.InstalledFlatImage =>
+      case image: InstalledSingularityImage.InstalledFlatImage =>
         runCommandInFlatImageContainer(
           image.image,
           commands = commands,
@@ -299,19 +300,19 @@ object ContainerTask:
   type ContainerId = String
 
   def execution(
-    image: ContainerSystem.InstalledImage,
-    command: Commands,
-    environmentVariables: Seq[EnvironmentVariable],
-    errorOnReturnValue: Boolean,
-    returnValue: Option[Val[Int]],
-    stdOut: Option[Val[String]],
-    stdErr: Option[Val[String]],
-    external: External,
-    info: InfoConfig,
-    hostFiles: Seq[HostFile] = Seq(),
-    workDirectory: Option[String] = None,
-    relativePathRoot: Option[String] = None,
-    config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
+                 image: InstalledSingularityImage,
+                 command: Commands,
+                 environmentVariables: Seq[EnvironmentVariable],
+                 errorOnReturnValue: Boolean,
+                 returnValue: Option[Val[Int]],
+                 stdOut: Option[Val[String]],
+                 stdErr: Option[Val[String]],
+                 external: External,
+                 info: InfoConfig,
+                 hostFiles: Seq[HostFile] = Seq(),
+                 workDirectory: Option[String] = None,
+                 relativePathRoot: Option[String] = None,
+                 config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
     ContainerTaskExecution(
       image = image,
       command = command,
@@ -332,31 +333,31 @@ object ContainerTask:
 
 
   def process(
-    image:                  ContainerSystem.InstalledSIFImage,
-    command:                Commands,
-    workDirectory:          Option[String],
-    relativePathRoot:       Option[String],
-    hostFiles:              Seq[HostFile],
-    environmentVariables:   Seq[EnvironmentVariable],
-    errorOnReturnValue:     Boolean,
-    returnValue:            Option[Val[Int]],
-    stdOut:                 Option[Val[String]],
-    stdErr:                 Option[Val[String]],
-    config:                 InputOutputConfig,
-    external:               External,
-    info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
+               image:                  InstalledSingularityImage.InstalledSIFImage,
+               command:                Commands,
+               workDirectory:          Option[String],
+               relativePathRoot:       Option[String],
+               hostFiles:              Seq[HostFile],
+               environmentVariables:   Seq[EnvironmentVariable],
+               errorOnReturnValue:     Boolean,
+               returnValue:            Option[Val[Int]],
+               stdOut:                 Option[Val[String]],
+               stdErr:                 Option[Val[String]],
+               config:                 InputOutputConfig,
+               external:               External,
+               info:                   InfoConfig)(executionContext: TaskExecutionContext): FromContext[Context] =
     FromContext[Context]: parameters =>
       import executionContext.networkService
       import parameters.*
 
       case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-      def workDirectoryValue(image: ContainerSystem.InstalledSIFImage) =
+      def workDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage) =
         workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
 
-      def relativeWorkDirectoryValue(image: ContainerSystem.InstalledSIFImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
+      def relativeWorkDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
 
-      def containerPathResolver(image: ContainerSystem.InstalledSIFImage, path: String): File =
+      def containerPathResolver(image: InstalledSingularityImage.InstalledSIFImage, path: String): File =
         val rootDirectory = File("/")
         if File(path).isAbsolute
         then rootDirectory / path
@@ -437,7 +438,7 @@ object ContainerTask:
 
       val retCode =
         image match
-          case image: ContainerSystem.InstalledSIFOverlayImage =>
+          case image: InstalledSingularityImage.InstalledSIFOverlayImage =>
             def createOverlayPool =
               WithInstance[_root_.container.Singularity.OverlayImage](pooled = image.containerSystem.reuse): () ⇒
                 val overlay =
@@ -467,7 +468,7 @@ object ContainerTask:
                 verbose = image.containerSystem.verbose
               )
 
-          case image: ContainerSystem.InstalledSIFMemoryImage =>
+          case image: InstalledSingularityImage.InstalledSIFMemoryImage =>
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
@@ -545,24 +546,24 @@ object ContainerTaskExecution:
   given ExternalBuilder[ContainerTaskExecution] = ExternalBuilder(Focus[ContainerTaskExecution](_.external))
 
 case class ContainerTaskExecution(
-  image: InstalledContainerImage,
-  command: ContainerTask.Commands,
-  workDirectory: Option[String],
-  relativePathRoot: Option[String],
-  hostFiles: Seq[HostFile],
-  environmentVariables: Seq[EnvironmentVariable],
-  errorOnReturnValue: Boolean,
-  returnValue: Option[Val[Int]],
-  stdOut: Option[Val[String]],
-  stdErr: Option[Val[String]],
-  config: InputOutputConfig,
-  external: External,
-  info: InfoConfig) extends TaskExecution:
+                                   image: InstalledSingularityImage,
+                                   command: ContainerTask.Commands,
+                                   workDirectory: Option[String],
+                                   relativePathRoot: Option[String],
+                                   hostFiles: Seq[HostFile],
+                                   environmentVariables: Seq[EnvironmentVariable],
+                                   errorOnReturnValue: Boolean,
+                                   returnValue: Option[Val[Int]],
+                                   stdOut: Option[Val[String]],
+                                   stdErr: Option[Val[String]],
+                                   config: InputOutputConfig,
+                                   external: External,
+                                   info: InfoConfig) extends TaskExecution:
 
     override def apply(executionContext: TaskExecutionContext) = FromContext: p =>
       import p.*
       image match
-        case image: ContainerSystem.InstalledSIFImage =>
+        case image: InstalledSingularityImage.InstalledSIFImage =>
           ContainerTask.process(
             image = image,
             command = command,
@@ -577,7 +578,7 @@ case class ContainerTaskExecution(
             config = config,
             external = external,
             info = info)(executionContext).from(context)
-        case image: ContainerSystem.InstalledFlatImage =>
+        case image: InstalledSingularityImage.InstalledFlatImage =>
           FlatContainerTask.process(
             image = image,
             command = command,
