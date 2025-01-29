@@ -3,7 +3,6 @@ package org.openmole.core.serializer
 import org.scalatest.*
 import org.openmole.tool.file.*
 import org.openmole.tool.stream.{StringInputStream, StringOutputStream}
-import fury.*
 import org.openmole.core.fileservice
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.fileservice.FileService.FileWithGC
