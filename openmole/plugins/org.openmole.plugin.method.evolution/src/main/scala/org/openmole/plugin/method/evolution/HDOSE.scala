@@ -32,6 +32,8 @@ import monocle.syntax.all.*
 
 object HDOSE:
 
+  def distanceVal = Val[Double]("distance", GAIntegration.namespace)
+
   case class DeterministicHDOSE(
     mu:                  Int,
     limit:               Vector[Double],
@@ -89,10 +91,11 @@ object HDOSE:
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
+            val distance = Variable(distanceVal, MGOHDOSE.distanceLens.get(state))
 
             val outputValues = if includeOutputs then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
-            genomes ++ fitness ++ Seq(generated) ++ outputValues
+            genomes ++ fitness ++ Seq(generated, distance) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
           FromContext: p ⇒
@@ -210,13 +213,14 @@ object HDOSE:
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
+            val distance = Variable(distanceVal, MGONoisyHDOSE.distanceLens.get(state))
 
             val outputValues =
               if includeOutputs
               then StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory))
               else Seq()
 
-            genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
+            genomes ++ fitness ++ Seq(samples, generated, distance) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
           FromContext: p ⇒
