@@ -41,6 +41,7 @@ object HDOSE:
     significanceC:       Vector[Double],
     significanceD:       Vector[Int],
     archiveSize:         Int,
+    distance:            Double,
     phenotypeContent:    PhenotypeContent,
     objectives:          Seq[Objective],
     operatorExploration: Double,
@@ -80,7 +81,7 @@ object HDOSE:
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState: S = MGOHDOSE.initialState
+        def initialState: S = MGOHDOSE.initialState(om.distance)
 
         def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = MGOHDOSE.distanceByComponent(om.significanceC, om.significanceD)
 
@@ -158,6 +159,7 @@ object HDOSE:
     significanceC: Vector[Double],
     significanceD: Vector[Int],
     archiveSize: Int,
+    distance: Double,
     phenotypeContent: PhenotypeContent,
     objectives: Seq[Objective],
     historySize: Int,
@@ -200,7 +202,7 @@ object HDOSE:
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = MGONoisyHDOSE.initialState
+        def initialState = MGONoisyHDOSE.initialState(om.distance)
 
         def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = mgo.evolution.algorithm.HDOSE.distanceByComponent(om.significanceC, om.significanceD)
 
@@ -360,6 +362,7 @@ object HDOSE:
     origin: Seq[OriginAxe],
     objective: Seq[OSE.FitnessPattern],
     archiveSize: Int = 1000,
+    distance: Double = 1.0,
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
     stochastic: OptionalArgument[Stochastic] = None,
@@ -381,6 +384,7 @@ object HDOSE:
             significanceC = significanceC,
             significanceD = significanceD,
             archiveSize = archiveSize,
+            distance = distance,
             phenotypeContent = phenotypeContent,
             objectives = exactObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
@@ -405,6 +409,7 @@ object HDOSE:
             significanceC = significanceC,
             significanceD = significanceD,
             archiveSize = archiveSize,
+            distance = distance,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
@@ -429,6 +434,7 @@ object HDOSEEvolution:
         origin = p.origin,
         objective = p.objective,
         archiveSize = p.archiveSize,
+        distance = p.distance,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         populationSize = p.populationSize,
@@ -459,6 +465,7 @@ case class HDOSEEvolution(
   termination:    OMTermination,
   archiveSize:    Int                          = 1000,
   populationSize: Int                          = 200,
+  distance:       Double                       = 1.0,
   stochastic:     OptionalArgument[Stochastic] = None,
   reject:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
