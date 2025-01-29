@@ -238,7 +238,7 @@ object FromContext extends LowPriorityFromContext:
     def map2[B, C](fb: FromContext[B])(f: (A, B) => C) = fr.map2(fb)(f)
 
 case class FromContext[+T](c: FromContext.Parameters ⇒ T, v: Validate, inputs: Seq[Val[?]], defaults: DefaultSet, stringValue: Option[String]):
-  def apply(context: ⇒ Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T =
+  def apply(context: => Context)(implicit rng: RandomProvider, tmpDirectory: TmpDirectory, fileService: FileService): T =
     def fullContext = DefaultSet.completeContext(defaults, context)
     val parameters: FromContext.Parameters = FromContext.Parameters(fullContext)(rng, tmpDirectory, fileService)
     val result = c(parameters)

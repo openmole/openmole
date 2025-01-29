@@ -27,14 +27,14 @@ class Activator extends BundleActivator:
     PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit =
-    import org.openmole.core.highlight.HighLight._
+    import org.openmole.core.highlight.HighLight.*
 
     val keyWords: Vector[HighLight] =
       Vector(
-        WordHighLight("as"),
-        WordHighLight("inputFiles"),
-        WordHighLight("outputFiles"),
-        WordHighLight("resources")
+        WordHighLight(objectName(inputFiles)),
+        WordHighLight(objectName(outputFiles)),
+        WordHighLight(objectName(resources)),
+        WordHighLight(objectName(EmptyDirectory))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

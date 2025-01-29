@@ -58,23 +58,35 @@ lazy val outputFiles = new OutputFilesKeyword
 
 object ResourcesKeyword:
   object ResourceSetter:
-    given [T: ExternalBuilder as eb]: Setter[ResourceSetter, T] = setter =>
-      def resource = External.Resource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
-      if setter.head
-      then eb.resources add (resource, head = true)
-      else eb.resources add resource
+    given [T: ExternalBuilder as eb]: Setter[ResourceSetter, T] =
+      case setter: FileResourceSetter =>
+        def resource = External.FileResource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
+        eb.resources.add(resource, head = setter.head)
+      case setter: EmptyDirectoryResourceSetter =>
+        def resource = External.EmptyDirectoryResource(setter.name, os = setter.os)
+        eb.resources.add(resource, head = setter.head)
 
-  case class ResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean)
+  trait ResourceSetter
+  case class FileResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean) extends ResourceSetter
+  case class EmptyDirectoryResourceSetter(name: FromContext[String], os: OS, head: Boolean) extends ResourceSetter
 
+  case class EmptyDirectory()
 
 class ResourcesKeyword:
   /**
    * Copy a file from your computer in the workspace of the task
    */
-  def +=(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) = ResourcesKeyword.ResourceSetter(file, name, link = link, os = os, head = head)
+  def +=(file: File | ResourcesKeyword.EmptyDirectory, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) =
+    file match
+      case file: File => ResourcesKeyword.FileResourceSetter(file, name, link = link, os = os, head = head)
+      case _: ResourcesKeyword.EmptyDirectory =>
+        val nameValue = name.getOrElse(throw UserBadDataError("Empty resource must have a name"))
+        ResourcesKeyword.EmptyDirectoryResourceSetter(nameValue, os, head)
+
+
 
 lazy val resources = new ResourcesKeyword
-
+export ResourcesKeyword.EmptyDirectory
 
 object EnvironmentVariable:
   implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
