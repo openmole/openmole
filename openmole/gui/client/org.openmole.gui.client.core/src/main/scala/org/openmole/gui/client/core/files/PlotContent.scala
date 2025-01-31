@@ -256,7 +256,7 @@ object PlotContent:
         case MetadataState(_)=> MetadataState() 
 
     def switchFromState(state: ContentState, states: ContentStates): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
     def switchFromResultView(resultView: ResultView): Unit = 
@@ -265,7 +265,7 @@ object PlotContent:
       switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
 
     def switchSection(section: Section): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section.name)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section.name, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
     val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchFromResultView(Raw))
