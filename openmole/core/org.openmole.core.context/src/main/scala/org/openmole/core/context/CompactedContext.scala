@@ -21,11 +21,10 @@ object CompactedContext:
 
   inline val minCompressionSize = 10240
 
-  def compactBytes(variables: Iterable[Variable[?]]): CompactedContext =
-    val middle = variables.size
-
-    val vals = Array.ofDim[Any](middle)
-    val values = Array.ofDim[Any](middle)
+  def compactVariablesBytes(variables: Iterable[Variable[?]]): CompactedContext =
+    val size = variables.size
+    val vals = Array.ofDim[Any](size)
+    val values = Array.ofDim[Any](size)
 
     for
       (v, i) <- variables.zipWithIndex
@@ -34,13 +33,10 @@ object CompactedContext:
       values(i) = v.value
 
     val serialized = fury.serialize(values)
-    val compacted =
-      if serialized.length <= minCompressionSize
-      then serialized
-      else compressArray(serialized)
 
-    IArray[Any](vals, compacted)
-
+    if serialized.length <= minCompressionSize
+    then compactRef(variables)
+    else IArray[Any](vals, compressArray(serialized))
 
   def compressArray(bytes: Array[Byte]): Array[Byte] =
     import java.io.ByteArrayOutputStream
@@ -75,7 +71,7 @@ object CompactedContext:
 
     f
 
-  def expandVariablesRef(compacted: Array[Any]) =
+  def expandVariablesRef(compacted: CompactedContext) =
     val middle = compacted.length / 2
     (0 until middle).map: i =>
       Variable(compacted(i).asInstanceOf[Val[Any]], compacted(middle + i))
@@ -98,14 +94,10 @@ object CompactedContext:
       out.toByteArray
     finally ungzip.close()
 
-  def expandVariablesBytes(compacted: CompactedContext) =
+  def expandVariablesBytes(compacted: CompactedContext): Seq[Variable[?]] =
     val values =
-      val rawArray = compacted(1).asInstanceOf[Array[Byte]]
-      val values =
-        if isGzip(rawArray)
-        then decompress(rawArray)
-        else rawArray
-
+      def rawArray = compacted(1).asInstanceOf[Array[Byte]]
+      val values = decompress(rawArray)
       fury.deserialize(values).asInstanceOf[Array[Any]]
 
     val vals = compacted(0).asInstanceOf[Array[Any]]
@@ -113,24 +105,33 @@ object CompactedContext:
     (vals zip values).map: (v, x) =>
       Variable(v.asInstanceOf[Val[Any]], x)
 
-  lazy val gzipHeader = CompactedContext.compressArray(Array(0)).take(10)
-  def isGzip(a: Array[Byte]) = a.startsWith(gzipHeader)
 
-  inline def compact = compactBytes
+  def isCompactedRef(compacted: CompactedContext) = classOf[Val[?]].isAssignableFrom(compacted.head.getClass)
+//  lazy val gzipHeader = CompactedContext.compressArray(Array(0)).take(10)
+//  def isGzip(a: Array[Byte]) = a.startsWith(gzipHeader)
+
+  inline def compactVariables = compactVariablesBytes
   def compact(context: Context): CompactedContext =
-    compact(context.variables.toSeq.map(_._2))
+    compactVariables(context.variables.toSeq.map(_._2))
 
-  inline def expandVariables = expandVariablesBytes
+  def expandVariables(compacted: CompactedContext): Seq[Variable[?]] =
+    if compacted.isEmpty
+    then Seq.empty
+    else
+      if isCompactedRef(compacted)
+      then expandVariablesRef(compacted)
+      else expandVariablesBytes(compacted)
+
   def expand(compacted: CompactedContext): Context = Context(expandVariables(compacted)*)
 
   inline def merge = mergeBytes
   def mergeBytes(c1: CompactedContext, c2: CompactedContext): CompactedContext =
     compact:
-      Context(expandVariables(c1) ++ expandVariables(c2) *)
+      Context(expandVariables(c1) ++ expandVariables(c2)*)
 
-  def megeRef(c1: CompactedContext, c2: CompactedContext): CompactedContext =
-    val (p1, v1) = c1.splitAt(c1.size / 2)
-    val (p2, v2) = c2.splitAt(c2.size / 2)
-    (p1 ++ p2 ++ v1 ++ v2)
+//  def mergeRef(c1: CompactedContext, c2: CompactedContext): CompactedContext =
+//    val (p1, v1) = c1.splitAt(c1.size / 2)
+//    val (p2, v2) = c2.splitAt(c2.size / 2)
+//    (p1 ++ p2 ++ v1 ++ v2)
 
 opaque type CompactedContext = IArray[Any]
