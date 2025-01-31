@@ -194,7 +194,7 @@ object MoleExecution:
 
           subMoleExecutionState.masterCapsuleExecutor.submit:
             try
-              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).getOrElse(Context.empty)
+              val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).map(CompactedContext.expand).getOrElse(Context.empty)
               val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
               def jobCallBack = Job.CallBack((_, _) => (), () => subMoleExecutionState.canceled)
               val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, jobCallBack)
@@ -217,7 +217,9 @@ object MoleExecution:
               Job.finish(moleJob, result) // Does nothing
 
               result match
-                case Left(newContext) => subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, MasterCapsule.toPersist(master, newContext))
+                case Left(newContext) =>
+                  val compacted = CompactedContext.compact(MasterCapsule.toPersist(master, newContext))
+                  subMoleExecutionState.masterCapsuleRegistry.register(capsule, ticket.parentOrException, compacted)
                 case _                =>
 
               MoleExecutionMessage.send(subMoleExecutionState.moleExecution):
@@ -539,7 +541,7 @@ object MoleExecution:
     lazy val transitionRegistry: TransitionRegistry = RegistryWithTicket()
     lazy val aggregationTransitionRegistry: RegistryWithTicket[AggregationTransition, AggregationTransitionRegistryRecord] = RegistryWithTicket()
     lazy val children = collection.mutable.LongMap[SubMoleExecutionState]()
-    lazy val masterCapsuleRegistry: RegistryWithTicket[MoleCapsule, Context] = RegistryWithTicket()
+    lazy val masterCapsuleRegistry: RegistryWithTicket[MoleCapsule, CompactedContext] = RegistryWithTicket()
     lazy val masterCapsuleExecutor = Executors.newSingleThreadExecutor(threadProvider.threadFactory)
 
   def cachedValidTypes(moleExecution: MoleExecution, transitionSlot: TransitionSlot) =

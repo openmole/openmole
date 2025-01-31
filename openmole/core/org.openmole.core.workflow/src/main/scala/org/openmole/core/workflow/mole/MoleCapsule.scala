@@ -169,8 +169,10 @@ object StrainerCapsule {
   def apply(task: Task) = MoleCapsule(task, strain = true)
 }
 
-object MasterCapsule {
+object MasterCapsule:
   def apply(task: Task, persist: Seq[Val[?]], strain: Boolean) = MoleCapsule(task, strain = strain, master = Some(MoleCapsule.Master(persist.map(_.name))))
   def apply(t: Task, persist: Val[?]*): MoleCapsule = apply(t, persist, false)
-  def toPersist(master: MoleCapsule.Master, context: Context): Context = master.persist.map { n => context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context")) }
-}
+  def toPersist(master: MoleCapsule.Master, context: Context): Context =
+    master.persist.map: n =>
+      context.variables.getOrElse(n, throw new UserBadDataError(s"Variable $n has not been found in the context"))
+

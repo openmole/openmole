@@ -463,7 +463,7 @@ case class HDOSEEvolution(
   objective:      Seq[OSE.FitnessPattern],
   evaluation:     DSL,
   termination:    OMTermination,
-  archiveSize:    Int                          = 1000,
+  archiveSize:    Int                          = 500,
   populationSize: Int                          = 200,
   distance:       Double                       = 1.0,
   stochastic:     OptionalArgument[Stochastic] = None,

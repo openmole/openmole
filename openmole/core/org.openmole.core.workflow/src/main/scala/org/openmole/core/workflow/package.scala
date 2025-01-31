@@ -19,7 +19,6 @@ package org.openmole.core
 
 package workflow {
 
-  import org.openmole.core.context.ContextPackage
   import org.openmole.core.argument._
   import org.openmole.core.keyword.KeyWordPackage
   import org.openmole.core.script.CodePackage
@@ -38,7 +37,6 @@ package workflow {
     with BuilderPackage
     with TypesPackage
     with CodePackage
-    with ContextPackage
     with ExpansionPackage
     with KeyWordPackage
     with HookPackage:

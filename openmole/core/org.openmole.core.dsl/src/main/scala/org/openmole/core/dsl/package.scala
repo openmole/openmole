@@ -33,7 +33,7 @@ import scala.collection.immutable.NumericRange
 
 package dsl:
   trait DSLPackage:
-    export org.openmole.core.context.Val
+    export org.openmole.core.context.{Vec, Context, Val, Variable}
     export org.openmole.core.workflow.execution.LocalEnvironment
 
     export org.openmole.core.workflow.task.EmptyTask

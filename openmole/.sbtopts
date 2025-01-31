@@ -7,3 +7,4 @@
 #-J-XX:MaxHeapFreeRatio=20
 #-Dlog4j2.disable.jmx=true 
 #-J-Dlog4j.shutdownHookEnabled=false
+#-J--add-opens=java.base/java.lang=ALL-UNNAMED 

@@ -15,13 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.core
+package org.openmole.core.context
 
-package context {
-  trait ContextPackage {
-    def Vec[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
-  }
-}
+def Vec[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
 
-package object context extends ContextPackage:
-  type CompactedContext = IArray[Any]

@@ -196,7 +196,9 @@ lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = S
   libraryDependencies ++= Libraries.monocle) dependsOn (pluginRegistry)
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
-  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless), defaultActivator
+  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless),
+  libraryDependencies += Libraries.fury,
+  defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings *)
 
 lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) dependsOn(context, openmoleArgument, keyword) settings (coreSettings *)
@@ -256,7 +258,8 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = Seq
   coreSettings,
   OsgiKeys.bundleActivator := None,
   libraryDependencies += Libraries.circe,
-  libraryDependencies += Libraries.opencsv
+  libraryDependencies += Libraries.opencsv,
+  libraryDependencies += "com.volkhart.memory" % "measurer" % "0.1.1",
 ) dependsOn(context, json, timeService, openmoleArgument, openmoleBuildInfo)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings

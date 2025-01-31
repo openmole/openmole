@@ -108,7 +108,7 @@ package object extension:
   export org.openmole.core.exception.{UserBadDataError, InternalProcessingError, MultipleException}
 
   type RandomProvider = org.openmole.tool.random.RandomProvider
-  type PrototypeSet = org.openmole.core.context.PrototypeSet
+  export org.openmole.core.context.PrototypeSet
 
   type Time = squants.Time
   type Information = squants.information.Information
