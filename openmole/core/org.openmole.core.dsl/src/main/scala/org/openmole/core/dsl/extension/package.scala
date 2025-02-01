@@ -65,6 +65,9 @@ package object extension:
   def ValType = org.openmole.core.context.ValType
 
   export org.openmole.core.context.Context
+  export org.openmole.core.context.CompactedContext
+  export org.openmole.core.context.CompactedArray
+
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}

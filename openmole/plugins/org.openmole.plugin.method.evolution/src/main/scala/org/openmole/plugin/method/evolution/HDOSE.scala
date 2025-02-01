@@ -69,7 +69,7 @@ object HDOSE:
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -83,7 +83,7 @@ object HDOSE:
 
         def initialState: S = MGOHDOSE.initialState(om.distance)
 
-        def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = MGOHDOSE.distanceByComponent(om.significanceC, om.significanceD)
+        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = MGOHDOSE.tooCloseByComponent(om.significanceC, om.significanceD)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p ⇒
@@ -189,7 +189,7 @@ object HDOSE:
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
@@ -204,7 +204,7 @@ object HDOSE:
 
         def initialState = MGONoisyHDOSE.initialState(om.distance)
 
-        def distance: mgo.evolution.algorithm.HDOSEOperation.Distance = mgo.evolution.algorithm.HDOSE.distanceByComponent(om.significanceC, om.significanceD)
+        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = mgo.evolution.algorithm.HDOSE.tooCloseByComponent(om.significanceC, om.significanceD)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>

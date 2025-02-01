@@ -13,11 +13,11 @@ object Phenotype:
         case x: Float  ⇒ x.isNaN
         case _         ⇒ false
 
-    t.value.exists(anyIsNaN)
+    t.values.exists(anyIsNaN)
 
 
   def toContext(content: PhenotypeContent, phenotype: Phenotype) =
-    (PhenotypeContent.toVals(content) zip phenotype.value).map { case (v, va) ⇒ Variable.unsecure(v, va) }
+    (PhenotypeContent.toVals(content) zip phenotype.values).map { case (v, va) ⇒ Variable.unsecure(v, va) }
 
   def objectives(content: PhenotypeContent, phenotype: Phenotype) =
     val context: Context = toContext(content, phenotype)
@@ -27,12 +27,11 @@ object Phenotype:
     val context: Context = toContext(content, phenotype)
     content.outputs.map(v ⇒ context.apply(v)).toArray
 
-  def fromContext(context: Context, content: PhenotypeContent) =
+  def fromContext(context: Context, content: PhenotypeContent): Phenotype =
     val value = PhenotypeContent.toVals(content).map(o ⇒ context(o))
-    new Phenotype(value.toArray)
+    Phenotype(IArray.from(value))
 
-
-class Phenotype(val value: Array[Any]) extends AnyVal
+case class Phenotype(values: IArray[Any]) extends AnyVal
 
 object PhenotypeContent:
   def toVals(p: PhenotypeContent) =

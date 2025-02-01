@@ -107,8 +107,6 @@ object CompactedContext:
 
 
   def isCompactedRef(compacted: CompactedContext) = classOf[Val[?]].isAssignableFrom(compacted.head.getClass)
-//  lazy val gzipHeader = CompactedContext.compressArray(Array(0)).take(10)
-//  def isGzip(a: Array[Byte]) = a.startsWith(gzipHeader)
 
   inline def compactVariables = compactVariablesBytes
   def compact(context: Context): CompactedContext =
@@ -129,9 +127,31 @@ object CompactedContext:
     compact:
       Context(expandVariables(c1) ++ expandVariables(c2)*)
 
+
+
 //  def mergeRef(c1: CompactedContext, c2: CompactedContext): CompactedContext =
 //    val (p1, v1) = c1.splitAt(c1.size / 2)
 //    val (p2, v2) = c2.splitAt(c2.size / 2)
 //    (p1 ++ p2 ++ v1 ++ v2)
 
 opaque type CompactedContext = IArray[Any]
+
+//object CompactedArray:
+//  import CompactedContext.*
+//  lazy val gzipHeader = CompactedContext.compressArray(Array(0)).take(10)
+//
+//  def isGzip(a: IArray[Byte]) = a.startsWith(gzipHeader)
+//
+//  def compact(values: Seq[Any]): CompactedArray =
+//    val serialized = fury.serialize(values)
+//
+//    if serialized.length <= minCompressionSize
+//    then IArray.unsafeFromArray(serialized)
+//    else IArray.unsafeFromArray(compressArray(serialized))
+//
+//  def expand(compactedArray: CompactedArray) =
+//    if isGzip(compactedArray)
+//    then fury.deserialize(decompress(compactedArray))
+//    else fury.deserialize(compactedArray)
+
+opaque type CompactedArray = IArray[Byte]

@@ -81,13 +81,13 @@ object Profile {
     def niche(genome: Genome, profiled: Seq[ProfileElement]) =
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.continuousProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.continuousValues get, x, nX)
+        mgo.evolution.niche.continuousProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.continuousVectorValues get, x, nX)
 
       def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteValues get, x)
+        mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteVectorValues get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousVectorValues(CDGenome.continuousVectorValues.get(i.genome), continuous), x, intervals)
 
       val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
         case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(index, c.n)
@@ -120,7 +120,7 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
@@ -191,13 +191,13 @@ object Profile {
       import CDGenome.NoisyIndividual.Individual
 
       def continuousProfile(x: Int, nX: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.continuousProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.continuousValues).get, x, nX)
+        mgo.evolution.niche.continuousProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.continuousVectorValues).get, x, nX)
 
       def discreteProfile(x: Int): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteValues).get, x)
+        mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteVectorValues).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous), x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousVectorValues(CDGenome.continuousVectorValues.get(i.genome), continuous), x, intervals)
 
       val niches =
         (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
@@ -221,7 +221,7 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
