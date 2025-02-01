@@ -432,7 +432,7 @@ object StochasticGAIntegration:
     population.filter(_.historyAge > 0).map(_.copy(generation = generation, initial = false)).map(keepIslandHistoryPart)
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[IArray[Phenotype]]) =
-    val outputs = phenotypeHistories.map { _.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }.transpose }
+    val outputs = phenotypeHistories.map { _.toArray.map { p => Phenotype.outputs(phenotypeContent, p) }.transpose }
     (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
 
 object MGOAPI:
