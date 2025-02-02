@@ -77,14 +77,14 @@ object PlotContent:
   case class PlotView(view: HtmlElement, resultPlot: ResultPlot) extends SectionView
 
   def buildTab(
-                safePath: SafePath,
-                extension: FileContentType,
-                contentSections: Seq[ContentSection],
-                currentSection: String,
-                states: ContentStates = ContentStates(),
-                currentState: ContentState = TableState(),
-                omrMetadata: Option[OMRMetadata] = None,
-                currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+    safePath: SafePath,
+    extension: FileContentType,
+    contentSections: Seq[ContentSection],
+    currentSection: String,
+    states: ContentStates = ContentStates(),
+    currentState: ContentState = TableState(),
+    omrMetadata: Option[OMRMetadata] = None,
+    currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
     import ResultView.*
     
     def buildSectionView(sectionName: String) =
@@ -125,8 +125,7 @@ object PlotContent:
 
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
-            case ms: MetadataState => 
-              val sliderValueText = Var("")
+            case ms: MetadataState =>
               val metadataHistory = 
                 div(
                   child <--
@@ -134,53 +133,59 @@ object PlotContent:
                       def valueTypeToInt(vt: ValueType): Int = unwrap(vt).toString.toInt
                       def sliderValueToInt(s: Any) = s.toString.toDouble.toInt
 
-                      val dIndexValues = dataIndex.map(d => d.map(_.values)).getOrElse(Seq()).flatten
-                      val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
+                      val dIndexValues = dataIndex.map(d => d.head.values).getOrElse(Seq())
 
-                      val first2 = dIndexValues.slice(0, 2)
+                      if dIndexValues.size > 1
+                      then
+                        val sliderValueText = Var("")
 
-                      val sortedKeys = indexMap.keys.toSeq.sorted
-                      val maxIndex = sortedKeys.last
-                      sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
+                        val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
 
-                      val element = div(width := "500", marginRight := "50", marginTop := "20")
-                      noUiSlider.create(
-                        element.ref, Options
-                          .range(Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
-                          .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
-                          .step(1.0)
-                          .connect(Options.Lower)
-                          .tooltips(false)
-                      )
+                        val first2 = dIndexValues.slice(0, 2)
 
-                      element.noUiSlider.on(event.ChangeEvent, (value, handle) =>
-                        sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
-                      )
+                        val sortedKeys = indexMap.keys.toSeq.sorted
+                        val maxIndex = sortedKeys.last
+                        sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
 
-                      val sliderValueDiv = div(
-                        child <--
-                          sliderValueText.signal.map(t=>
-                            div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
-                          )
-                      )
+                        val element = div(width := "500", marginRight := "50", marginTop := "20")
+                        noUiSlider.create(
+                          element.ref, Options
+                            .range(Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
+                            .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
+                            .step(1.0)
+                            .connect(Options.Lower)
+                            .tooltips(false)
+                        )
 
-                      val loadDataButton =
-                        button(
-                          btn_primary, "Load data",
-                          onClick --> { _ =>
-                            val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
+                        element.noUiSlider.on(event.ChangeEvent, (value, handle) =>
+                          sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
+                        )
 
-                            val dataFile =
-                              dataIndex flatMap: dis=>
-                                (dis.map : di=>
-                                  di.fileIndex(newCurrentIndex)).headOption
+                        val sliderValueDiv = div(
+                          child <--
+                            sliderValueText.signal.map(t=>
+                              div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
+                            )
+                        )
 
-                            api.omrContent(safePath, dataFile).map: guiContent =>
-                              panels.tabContent.removeTab(safePath)
-                              val (tabData, content) = OMRContent.buildTab(safePath, guiContent, currentIndex = Some(newCurrentIndex.toInt))
-                              panels.tabContent.addTab(tabData, content)
-                          })
-                      div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
+                        val loadDataButton =
+                          button(
+                            btn_primary, "Load data",
+                            onClick --> { _ =>
+                              val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
+
+                              val dataFile =
+                                dataIndex flatMap: dis=>
+                                  (dis.map : di=>
+                                    di.fileIndex(newCurrentIndex)).headOption
+
+                              api.omrContent(safePath, dataFile).map: guiContent =>
+                                panels.tabContent.removeTab(safePath)
+                                val (tabData, content) = OMRContent.buildTab(safePath, guiContent, currentIndex = Some(newCurrentIndex.toInt))
+                                panels.tabContent.addTab(tabData, content)
+                            })
+                        div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
+                      else div()
                 )
 
               BasicView(
