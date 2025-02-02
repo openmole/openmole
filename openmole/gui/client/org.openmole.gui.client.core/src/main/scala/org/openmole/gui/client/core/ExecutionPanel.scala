@@ -241,7 +241,7 @@ class ExecutionPanel:
   def executionRow(id: ExecutionId, details: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit) =
     div(rowFlex, justifyContent.center,
       showHideBlock(Expand.Script, "Script", details.path.name, details.path.name),
-      contextBlock("Start time", ClientUtil.longToDate(details.startDate), blockWidth = 220),
+      contextBlock("Start time", ClientUtil.longToDate(details.startDate), blockWidth = 225),
       //contextBlock("Method", "???"),
       durationBlock(details.duration, details.executionTime),
       statusBlock("Running", details.running.toString),
