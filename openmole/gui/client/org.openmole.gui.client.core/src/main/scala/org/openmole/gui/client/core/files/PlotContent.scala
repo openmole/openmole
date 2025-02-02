@@ -300,10 +300,10 @@ object PlotContent:
       })
                    
     val sectionStates: Seq[ToggleState[Section]] =
-      (contentSections.map: cs=>
+      contentSections.map: cs=>
         val section = Section(cs.section)
         ToggleState(section, cs.section, s"btn ${btn_success_string}", _ => switchSection(section))
-      ).toSeq
+
     lazy val sectionSwitchButton = exclusiveRadio(sectionStates, btn_secondary_string, 0)
           
     val content =
@@ -311,15 +311,14 @@ object PlotContent:
         div(display.flex, flexDirection.column, width := "100%",
           div(display.flex, flexDirection.row, alignItems.center,
             div(
-              child <-- refreshing.signal.map: p=>
-                p match
-                  case false => refreshButton
-                  case true => Waiter.waiter("#794985")
+              child <-- refreshing.signal.map:
+                case false => refreshButton
+                case true => Waiter.waiter("#794985")
             ),
-            (sectionStates.size match
+            sectionStates.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
-              ),
+            ,
             switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
             bottomSwitch.map(_.element.amend(marginLeft := "100px")).getOrElse(div())
           ),
