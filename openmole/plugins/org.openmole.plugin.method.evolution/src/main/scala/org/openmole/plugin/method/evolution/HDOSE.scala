@@ -132,7 +132,8 @@ object HDOSE:
               om.significanceD,
               om.archiveSize,
               Genome.continuous(om.genome),
-              Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)) apply (s, population, candidates, rng)
+              Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
+              om.distance) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
           def isTooCloseFromArchive =
@@ -264,7 +265,8 @@ object HDOSE:
               om.significanceC,
               om.significanceD,
               om.archiveSize,
-              om.limit) apply(s, population, candidates, rng)
+              om.limit,
+              om.distance) apply(s, population, candidates, rng)
 
 
         def mergeIslandState(state: S, islandState: S): S =
