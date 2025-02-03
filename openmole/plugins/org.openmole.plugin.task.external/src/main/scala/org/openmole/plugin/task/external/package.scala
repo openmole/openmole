@@ -70,7 +70,7 @@ object ResourcesKeyword:
   case class FileResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean) extends ResourceSetter
   case class EmptyDirectoryResourceSetter(name: FromContext[String], os: OS, head: Boolean) extends ResourceSetter
 
-  case class EmptyDirectory()
+  case class EmptyDirectory(name: FromContext[String])
 
 class ResourcesKeyword:
   /**
@@ -79,10 +79,9 @@ class ResourcesKeyword:
   def +=(file: File | ResourcesKeyword.EmptyDirectory, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) =
     file match
       case file: File => ResourcesKeyword.FileResourceSetter(file, name, link = link, os = os, head = head)
-      case _: ResourcesKeyword.EmptyDirectory =>
-        val nameValue = name.getOrElse(throw UserBadDataError("Empty resource must have a name"))
+      case e: ResourcesKeyword.EmptyDirectory =>
+        val nameValue = name.getOrElse(e.name)
         ResourcesKeyword.EmptyDirectoryResourceSetter(nameValue, os, head)
-
 
 
 lazy val resources = new ResourcesKeyword
