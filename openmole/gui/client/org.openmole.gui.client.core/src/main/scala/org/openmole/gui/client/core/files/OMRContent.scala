@@ -20,9 +20,16 @@ object OMRContent:
     currentIndex: Option[Int] = None
     )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
 
+    println("omr " + guiOMRContent.section)
+
     val rowData = ResultData.fromOMR(guiOMRContent.section)
+
+    println(rowData)
+
     val pcSections = guiOMRContent.section.map: s =>
       ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
+
+
     val scriptText =
       guiOMRContent.script match
         case Some(gos: GUIOMRScript)=>
@@ -50,6 +57,8 @@ object OMRContent:
     def replaceWithHTML(s: String): HtmlElement =
       val html = s"<div>${s.replace(" ", "&nbsp;").replace("\n", "<br/>")}</div>"
       foreignHtmlElement(DomApi.unsafeParseHtmlString(html))
+
+
 
     PlotContent.buildTab(
       safePath,

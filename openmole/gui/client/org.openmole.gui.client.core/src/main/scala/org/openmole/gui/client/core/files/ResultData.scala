@@ -33,7 +33,7 @@ object Column {
 
 case class ColumnData(columns: Seq[Column])
 
-object ResultData {
+object ResultData:
 
 
   // Convert a string to an array, considering it is of dimension 1
@@ -121,29 +121,33 @@ object ResultData {
     def safepathToLink(f: SafePath) = a(href := org.openmole.gui.shared.api.downloadFile(f), cls := "downloadLink", f.name)
 
     def beautify(valueType: ValueType): Array[RowData.Content] =
-      valueType match
-        case ValueLong(l) => Array(l.toString)
-        case ValueInt(i) => Array(i.toString)
-        case ValueDouble(d) => Array(d.toString)
-        case ValueString(s) => Array(s)
-        case ValueBoolean(b) => Array(b.toString)
-        case ValueFile(f) => Array(f.name)
-        case ValueArrayLong(aL) => aL.map(_.toString)
-        case ValueArrayInt(aI) => aI.map(_.toString)
-        case ValueArrayDouble(aD) => aD.map(_.toString)
-        case ValueArrayString(aS) => aS.map(x => x)
-        case ValueArrayBoolean(aB) => aB.map(_.toString)
-        case ValueArrayFile(aF) => aF.map(f => RowData.Content(f.name, Some(safepathToLink(f))))
-        case ValueArrayArrayLong(aaL) => aaL.map(_.map(_.toString).beautify)
-        case ValueArrayArrayInt(aaI) => aaI.map(_.map(_.toString).beautify)
-        case ValueArrayArrayDouble(aaD) => aaD.map(_.map(_.toString).beautify)
-        case ValueArrayArrayString(aaS) => aaS.map(_.beautify)
-        case ValueArrayArrayBoolean(aaB) => aaB.map(_.map(_.toString).beautify)
-        case ValueArrayArrayFile(aaF) =>
-          aaF.map: af =>
-            val html: HtmlElement = div("[", af.map(safepathToLink).flatMap(c => Seq[HtmlElement](c, span(","))).dropRight(1), "]")
-            val content = af.map(_.name).beautify
-            RowData.Content(content, Some(html))
+      val result: Array[RowData.Content] =
+        valueType match
+          case ValueLong(l) => Array(l.toString)
+          case ValueInt(i) => Array(i.toString)
+          case ValueDouble(d) => Array(d.toString)
+          case ValueString(s) => Array(s)
+          case ValueBoolean(b) => Array(b.toString)
+          case ValueFile(f) => Array(f.name)
+          case ValueArrayLong(aL) => aL.map(_.toString)
+          case ValueArrayInt(aI) => aI.map(_.toString)
+          case ValueArrayDouble(aD) => aD.map(_.toString)
+          case ValueArrayString(aS) => aS.map(x => x)
+          case ValueArrayBoolean(aB) => aB.map(_.toString)
+          case ValueArrayFile(aF) => aF.map(f => RowData.Content(f.name, Some(safepathToLink(f))))
+          case ValueArrayArrayLong(aaL) => aaL.map(_.map(_.toString).beautify)
+          case ValueArrayArrayInt(aaI) => aaI.map(_.map(_.toString).beautify)
+          case ValueArrayArrayDouble(aaD) => aaD.map(_.map(_.toString).beautify)
+          case ValueArrayArrayString(aaS) => aaS.map(_.beautify)
+          case ValueArrayArrayBoolean(aaB) => aaB.map(_.map(_.toString).beautify)
+          case ValueArrayArrayFile(aaF) =>
+            aaF.map: af =>
+              val html: HtmlElement = div("[", af.map(safepathToLink).flatMap(c => Seq[HtmlElement](c, span(","))).dropRight(1), "]")
+              val content = af.map(_.name).beautify
+              RowData.Content(content, Some(html))
+      if result.isEmpty
+      then Array(RowData.Content("no data"))
+      else result
 
     def dimension(valueType: ValueType) =
       valueType match
@@ -152,20 +156,22 @@ object ResultData {
         case ValueArrayArrayLong(_) | ValueArrayArrayInt(_) | ValueArrayArrayBoolean(_) | ValueArrayArrayDouble(_)
              | ValueArrayArrayFile(_) | ValueArrayArrayString(_) => 1
 
-    (sections map : sec =>
-      val headers = sec.variables map (_.name)
+    sections.map: sec =>
+      val headers = sec.variables.map(_.name)
       val columns = sec.variables.flatMap(_.value.map(beautify))
+
       val maxSize = columns.map(_.size).max
+
       val normalizedColumns = columns.map: c=>
         c.size match
           case 1 => Array.fill(maxSize)(c.head)
-          case _=> c
+          case _ => c
 
       val rows = normalizedColumns.transpose
       val dimensions = sec.variables.map(_.value.headOption.map(dimension).getOrElse(0))
 
       RowData(headers, rows, dimensions)
-    ).head
+    .head
 
 
-}
+

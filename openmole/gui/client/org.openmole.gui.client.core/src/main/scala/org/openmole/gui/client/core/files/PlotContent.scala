@@ -86,10 +86,10 @@ object PlotContent:
     omrMetadata: Option[OMRMetadata] = None,
     currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
     import ResultView.*
-    
+
     def buildSectionView(sectionName: String) =
       contentSections.find(_.section == sectionName) match
-        case Some(cs: ContentSection)=>
+        case Some(cs: ContentSection) =>
           currentState match
             case RawState(scrollDown, resultView) => 
               val editor = EditorPanelUI(safePath, cs.rawContent, "initialHash")
