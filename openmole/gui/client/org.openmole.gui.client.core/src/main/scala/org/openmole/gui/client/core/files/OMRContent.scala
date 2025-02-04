@@ -20,11 +20,7 @@ object OMRContent:
     currentIndex: Option[Int] = None
     )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
 
-    println("omr " + guiOMRContent.section)
-
     val rowData = ResultData.fromOMR(guiOMRContent.section)
-
-    println(rowData)
 
     val pcSections = guiOMRContent.section.map: s =>
       ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
