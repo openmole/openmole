@@ -20,11 +20,9 @@ object OMRContent:
     currentIndex: Option[Int] = None
     )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
 
-    val rowData = ResultData.fromOMR(guiOMRContent.section)
-
     val pcSections = guiOMRContent.section.map: s =>
+      val rowData = ResultData.fromOMR(s)
       ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
-
 
     val scriptText =
       guiOMRContent.script match

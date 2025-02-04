@@ -114,7 +114,7 @@ object ResultData:
   }
 
 
-  def fromOMR(sections: Seq[GUIOMRSectionContent]) =
+  def fromOMR(sec: GUIOMRSectionContent) =
     implicit class WrapStringArray(content: Array[String]):
       def beautify: String = s"[${content.mkString(", ")}]"
 
@@ -156,22 +156,20 @@ object ResultData:
         case ValueArrayArrayLong(_) | ValueArrayArrayInt(_) | ValueArrayArrayBoolean(_) | ValueArrayArrayDouble(_)
              | ValueArrayArrayFile(_) | ValueArrayArrayString(_) => 1
 
-    sections.map: sec =>
-      val headers = sec.variables.map(_.name)
-      val columns = sec.variables.flatMap(_.value.map(beautify))
+    val headers = sec.variables.map(_.name)
+    val columns = sec.variables.flatMap(_.value.map(beautify))
 
-      val maxSize = columns.map(_.size).max
+    val maxSize = columns.map(_.size).max
 
-      val normalizedColumns = columns.map: c=>
-        c.size match
-          case 1 => Array.fill(maxSize)(c.head)
-          case _ => c
+    val normalizedColumns = columns.map: c=>
+      c.size match
+        case 1 => Array.fill(maxSize)(c.head)
+        case _ => c
 
-      val rows = normalizedColumns.transpose
-      val dimensions = sec.variables.map(_.value.headOption.map(dimension).getOrElse(0))
+    val rows = normalizedColumns.transpose
+    val dimensions = sec.variables.map(_.value.headOption.map(dimension).getOrElse(0))
 
-      RowData(headers, rows, dimensions)
-    .head
+    RowData(headers, rows, dimensions)
 
 
 
