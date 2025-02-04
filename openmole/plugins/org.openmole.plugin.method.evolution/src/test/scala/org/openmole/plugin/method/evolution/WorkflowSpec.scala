@@ -607,31 +607,49 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   it should "be serializable" in:
     val a = Val[Double]
     val b = Val[Double]
-//    val axea: HDOSE.OriginAxe = (a in (0.0 to 10.0 by 5.0))
-//
-//    val ar = Val[Array[Double]]
-//    val axear: HDOSE.OriginAxe = (ar in Vector.fill(10)(0.0 to 10.0 by 2.0))
-//
-//    val ar2 = Val[Array[Int]]
-//    val axear2: HDOSE.OriginAxe = (ar2 in Vector.fill(10)(0 to 100 by 20))
-//
-//    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).size should equal(11)
-//    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).size should equal(10)
-//
-//    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).distinct should equal(Seq(5.0, 2.0))
-//    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).distinct should equal(Seq(20))
-//
-//    HDOSEEvolution(
-//      origin = Seq(axea, axear, axear2),
-//      evaluation = EmptyTask(),
-//      objective = Seq(a under 9, b under 3.0),
-//      termination = 100,
-//      stochastic = Stochastic()
-//    )
-
     val exactObjectives = Objectives.toExact(OSE.FitnessPattern.toObjectives( Seq(a under 9, b under 3.0)))
     val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), Seq())
 
     serializeDeserialize(phenotypeContent)
+
+  "OSE" should "be serializable" in:
+
+    val x = Val[Int]
+    val y = Val[Int]
+    val z = Val[Double]
+
+    val o1 = Val[Int]
+    val o2 = Val[Double]
+
+    val mySeed = Val[Long]
+
+    val model =
+      EmptyTask() set (
+        inputs += (x, y, z, mySeed),
+        outputs += (o1, o2),
+        o1 := 28,
+        o2 := 72
+      )
+
+    val ose =
+      OSEEvolution(
+        evaluation = model,
+        termination = 10,
+        origin = Seq(
+          x in Seq(1, 2),
+          y in (5 to 56 by 1),
+          z in (0.01 to 0.2 by 0.01)
+        ),
+        objective = Seq(
+          o1 delta 28 under 0.1,
+          o2 delta 72 under 0.1
+        ),
+        stochastic = Stochastic(seed = mySeed)
+      )
+
+
+    serializeDeserialize(ose).run()
+
+
 
 }
