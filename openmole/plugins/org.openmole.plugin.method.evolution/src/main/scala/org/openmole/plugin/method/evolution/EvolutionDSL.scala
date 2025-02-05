@@ -117,13 +117,13 @@ object EvolutionWorkflow:
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (Vector[Double], Vector[Int]), Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (IArray[Double], IArray[Int]), Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type MGOAG = AG
       def mgoAG = ag
 
-      type V = (Vector[Double], Vector[Int])
+      type V = (IArray[Double], IArray[Int])
       type P = Phenotype
 
       val integration = algorithm
@@ -368,10 +368,11 @@ object GAIntegration:
   def generatedVal = Val[Long]("generated", namespace)
   def generationVal = Val[Long]("generation", namespace)
   def evaluatedVal = Val[Long]("evaluated", namespace)
+  def archiveVal = Val[Boolean]("archive", namespace)
 
   def genomeToVariable(
     genome: Genome,
-    values: (Vector[Double], Vector[Int]),
+    values: (IArray[Double], IArray[Int]),
     scale:  Boolean) =
     val (continuous, discrete) = values
     Genome.toVariables(genome, continuous, discrete, scale)
@@ -381,7 +382,7 @@ object GAIntegration:
     values: Vector[(Vector[Double], Vector[Int])],
     scale:  Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { (continuous, discrete) ⇒ Genome.toVariables(genome, continuous, discrete, scale) }
+    val variables = values.map { (continuous, discrete) ⇒ Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
     genome.zipWithIndex.map { (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
 
   def genomeDoubleToVariable(
@@ -404,7 +405,7 @@ object GAIntegration:
         phenotypeValues.map(_(i)).toArray
       )
 
-  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ Vector[Double], discrete: G ⇒ Vector[Int]) =
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ IArray[Double], discrete: G ⇒ IArray[Int]) =
     FromContext: p ⇒
       import p._
       (g: G) ⇒

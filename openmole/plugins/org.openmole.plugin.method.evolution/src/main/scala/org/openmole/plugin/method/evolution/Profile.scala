@@ -87,7 +87,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteVectorValues get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousVectorValues(CDGenome.continuousVectorValues.get(i.genome), continuous), x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous).toVector, x, intervals)
 
       val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
         case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(index, c.n)
@@ -98,7 +98,7 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    given MGOAPI.Integration[DeterministicProfile, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicProfile, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -120,9 +120,9 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -151,14 +151,14 @@ object Profile {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             mgo.evolution.algorithm.Profile.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(population: Vector[I], n: Int, s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
@@ -197,7 +197,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteVectorValues).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousVectorValues(CDGenome.continuousVectorValues.get(i.genome), continuous), x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues.get(i.genome), continuous).toVector, x, intervals)
 
       val niches =
         (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
@@ -207,7 +207,7 @@ object Profile {
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
 
-    given MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticProfile, (Vector[Double], Vector[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -221,9 +221,9 @@ object Profile {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -252,7 +252,7 @@ object Profile {
           import p._
           val continuous = Genome.continuous(om.genome)
           val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
           NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
@@ -260,7 +260,7 @@ object Profile {
           import p._
 
           val discrete = Genome.discrete(om.genome)
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
           NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), discrete) apply (s, individuals, rng)
         }
 

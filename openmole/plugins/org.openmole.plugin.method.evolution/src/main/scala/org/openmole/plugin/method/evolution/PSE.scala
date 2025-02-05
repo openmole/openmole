@@ -63,7 +63,7 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, PSE ⇒ MGOPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[DeterministicPSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[DeterministicPSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -86,10 +86,10 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]): G =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -122,7 +122,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGOPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         private def pattern(phenotype: Phenotype) =
@@ -135,7 +135,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGOPSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
@@ -184,7 +184,7 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, NoisyPSE ⇒ MGONoisyPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[StochasticPSE, (Vector[Double], Vector[Int]), Phenotype] = new MGOAPI.Integration[StochasticPSE, (Vector[Double], Vector[Int]), Phenotype] { api ⇒
+    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] { api ⇒
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[HitMapState]
@@ -208,9 +208,9 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -225,7 +225,7 @@ object PSE {
 
           val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
           val res = MGONoisyPSE.result(population, aggregate, om.pattern, Genome.continuous(om.genome))
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(r => aggregate(r.individual.phenotypeHistory.toVector)))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
@@ -242,7 +242,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGONoisyPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
@@ -250,7 +250,7 @@ object PSE {
             import p.*
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGONoisyPSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,

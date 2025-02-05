@@ -53,7 +53,7 @@ object HDOSE:
     import mgo.evolution.algorithm.HDOSE.*
     import mgo.evolution.algorithm.{ HDOSE => MGOHDOSE, * }
 
-    given MGOAPI.Integration[DeterministicHDOSE, (Vector[Double], Vector[Int]), Phenotype] with
+    given MGOAPI.Integration[DeterministicHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
       api =>
 
       type G = CDGenome.Genome
@@ -69,10 +69,10 @@ object HDOSE:
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -103,7 +103,7 @@ object HDOSE:
             import p.*
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGOHDOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
@@ -111,7 +111,7 @@ object HDOSE:
             import p.*
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGOHDOSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
@@ -173,7 +173,7 @@ object HDOSE:
     import mgo.evolution.algorithm.NoisyHDOSE.*
     import mgo.evolution.algorithm.{NoisyHDOSE ⇒ MGONoisyHDOSE, *}
 
-    given MGOAPI.Integration[StochasticHDOSE, (Vector[Double], Vector[Int]), Phenotype] with
+    given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
       api =>
 
       type G = CDGenome.Genome
@@ -190,10 +190,10 @@ object HDOSE:
         def startTimeLens = GenLens[S](_.startTime)
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousVectorValues.get, CDGenome.discreteVectorValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (Vector[Double], Vector[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
 
           buildGenome(Genome.fromVariables(vs, om.genome))
 
@@ -231,7 +231,7 @@ object HDOSE:
 
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
             MGONoisyHDOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
@@ -239,7 +239,7 @@ object HDOSE:
             import p.*
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues.toVector, _.discreteValues.toVector).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
 
             MGONoisyHDOSE.adaptiveBreeding[Phenotype](
               n,

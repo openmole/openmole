@@ -164,19 +164,19 @@ object Genome:
       case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map(v => D(0, v.size - 1))
     .flatten
 
-  def continuousValue(genome: Genome, v: Val[?], continuous: Vector[Double]) =
+  def continuousValue(genome: Genome, v: Val[?], continuous: IArray[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous(index)
 
-  def continuousSequenceValue(genome: Genome, v: Val[?], size: Int, continuous: Vector[Double]) =
+  def continuousSequenceValue(genome: Genome, v: Val[?], size: Int, continuous: IArray[Double]) =
     val index = Genome.continuousIndex(genome, v).get
     continuous.slice(index, index + size)
 
-  def discreteValue(genome: Genome, v: Val[?], discrete: Vector[Int]) =
+  def discreteValue(genome: Genome, v: Val[?], discrete: IArray[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete(index)
 
-  def discreteSequenceValue(genome: Genome, v: Val[?], size: Int, discrete: Vector[Int]) =
+  def discreteSequenceValue(genome: Genome, v: Val[?], size: Int, discrete: IArray[Int]) =
     val index = Genome.discreteIndex(genome, v).get
     discrete.slice(index, index + size)
 
@@ -218,9 +218,9 @@ object Genome:
   def fromVariables(variables: Seq[Variable[?]], genome: Genome) =
     val vContext = Context() ++ variables
 
-    @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (Vector[Double], Vector[Int]) =
+    @tailrec def fromVariables0(genome: List[Genome.GenomeBound], accInt: List[Int], accDouble: List[Double]): (IArray[Double], IArray[Int]) =
       genome match
-        case Nil                                 ⇒ (accDouble.reverse.toVector, accInt.reverse.toVector)
+        case Nil                                 ⇒ (IArray.from(accDouble.reverse), IArray.from(accInt.reverse))
         case (h: GenomeBound.ScalarDouble) :: t  ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
         case (h: GenomeBound.ContinuousInt) :: t ⇒ fromVariables0(t, accInt, valueOf(vContext, h.v).asInstanceOf[Double].normalize(h.low, h.high) :: accDouble)
         case (h: GenomeBound.SequenceOfDouble) :: t ⇒
@@ -245,7 +245,7 @@ object Genome:
 
     fromVariables0(genome.toList, List(), List())
 
-  def toVariables(genome: Genome, continuousValues: Vector[Double], discreteValue: Vector[Int], scale: Boolean = true) =
+  def toVariables(genome: Genome, continuousValues: IArray[Double], discreteValue: IArray[Int], scale: Boolean = true) =
 
     @tailrec def toVariables0(genome: List[Genome.GenomeBound], continuousValues: List[Double], discreteValues: List[Int], acc: List[Variable[?]]): Vector[Variable[?]] =
       genome match
