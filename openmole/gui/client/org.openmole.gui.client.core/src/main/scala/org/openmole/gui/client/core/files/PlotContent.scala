@@ -300,7 +300,7 @@ object PlotContent:
       })
                    
     val sectionStates: Seq[ToggleState[Section]] =
-      contentSections.map: cs=>
+      contentSections.map: cs =>
         val section = Section(cs.section)
         ToggleState(section, cs.section, s"btn ${btn_success_string}", _ => switchSection(section))
 
