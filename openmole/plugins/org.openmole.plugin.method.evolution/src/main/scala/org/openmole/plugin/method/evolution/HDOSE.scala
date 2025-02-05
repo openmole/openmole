@@ -93,10 +93,11 @@ object HDOSE:
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGOHDOSE.distanceLens.get(state))
+            val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
 
             val outputValues = if includeOutputs then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
-            genomes ++ fitness ++ Seq(generated, distance) ++ outputValues
+            genomes ++ fitness ++ Seq(generated, distance, archive) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
           FromContext: p ⇒
@@ -217,13 +218,15 @@ object HDOSE:
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGONoisyHDOSE.distanceLens.get(state))
+            val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
+
 
             val outputValues =
               if includeOutputs
               then StochasticGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotypeHistory))
               else Seq()
 
-            genomes ++ fitness ++ Seq(samples, generated, distance) ++ outputValues
+            genomes ++ fitness ++ Seq(samples, generated, distance, archive) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
           FromContext: p ⇒
