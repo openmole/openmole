@@ -115,6 +115,7 @@ object MoleExecution:
       def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
       EnvironmentBuilder.buildLocal(defaultEnvironment.getOrElse(defaultDefaultEnvironment), executionContext.services)
 
+    val runtimeTaskValue = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext))
 
     new MoleExecution(
       mole,
@@ -128,7 +129,7 @@ object MoleExecution:
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
       lockRepository = lockRepository,
-      runtimeTask = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext)),
+      runtimeTask = runtimeTaskValue,
       environments = builtEnvironments.values.toSeq,
       environmentForCapsule = environmentForCapsule,
       defaultEnvironment = builtDefaultEnvironment
@@ -589,7 +590,7 @@ object MoleExecution:
 
 sealed trait MoleExecutionMessage
 
-object MoleExecutionMessage {
+object MoleExecutionMessage:
   case class PerformTransition(subMoleExecution: SubMoleExecution)(val operation: SubMoleExecutionState => Unit) extends MoleExecutionMessage
   case class JobFinished(subMoleExecution: SubMoleExecution)(val job: JobId, val result: Either[CompactedContext, Throwable], val capsule: MoleCapsule, val ticket: Ticket) extends MoleExecutionMessage
   case class WithMoleExecutionSate(operation: MoleExecution => Unit) extends MoleExecutionMessage
@@ -644,8 +645,6 @@ object MoleExecutionMessage {
       dispatch(moleExecution, msg)
 
 
-
-}
 
 class MoleExecution(
   val mole:                        Mole,
@@ -709,7 +708,7 @@ class MoleExecution(
   /* Caches to speedup workflow execution */
   private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
   private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
-  
+
   lazy val partialTaskExecutionContext =
     import executionContext.services._
 
