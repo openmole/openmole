@@ -108,7 +108,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
     var nbJobs = 0
 
-    ex.environments(env).listen:
+    ex.environments.head.listen:
       case (_, j: Environment.JobSubmitted) => nbJobs += 1
 
     ex.run
@@ -136,7 +136,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
 
     val mole = toMoleExecution(emptyT on env)
 
-    mole.environments.head._2 listen:
+    mole.environments.head.listen:
       case (_, _: Environment.JobSubmitted) => sub += 1
 
     mole.run

@@ -90,7 +90,7 @@ object MoleExecution:
     mole:                        Mole,
     sources:                     Iterable[(MoleCapsule, Source)]            = Iterable.empty,
     hooks:                       Iterable[(MoleCapsule, Hook)]              = Iterable.empty,
-    environments:                Map[MoleCapsule, EnvironmentBuilder]      = Map.empty,
+    environments:                Map[MoleCapsule, EnvironmentBuilder]       = Map.empty,
     grouping:                    Map[MoleCapsule, Grouping]                 = Map.empty,
     implicits:                   Context                                    = Context.empty,
     defaultEnvironment:          OptionalArgument[LocalEnvironmentBuilder] = None,
@@ -101,26 +101,37 @@ object MoleExecution:
     runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None
   )(using moleServices: MoleServices): MoleExecution =
 
-    def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
+
     val executionBuildContext =
       import moleServices.*
       TaskExecutionBuildContext(taskCache)
+
+    val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices)
+    val builtEnvironments = EnvironmentBuilder.build(environments.values.toVector, executionContext.services)
+    val environmentForCapsule: Map[MoleCapsule, Environment] = environments.toVector.map((k, v) => k -> builtEnvironments(v)).toMap
+
+
+    val builtDefaultEnvironment =
+      def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
+      EnvironmentBuilder.buildLocal(defaultEnvironment.getOrElse(defaultDefaultEnvironment), executionContext.services)
+
 
     new MoleExecution(
       mole,
       listOfTupleToMap(sources),
       listOfTupleToMap(hooks),
-      environments,
       grouping,
-      defaultEnvironment.getOrElse(defaultDefaultEnvironment),
       cleanOnFinish,
       implicits,
-      MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices),
+      executionContext,
       startStopDefaultEnvironment,
       id = UUID.randomUUID().toString,
       keyValueCache = taskCache,
       lockRepository = lockRepository,
-      runtimeTask = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext))
+      runtimeTask = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext)),
+      environments = builtEnvironments.values.toSeq,
+      environmentForCapsule = environmentForCapsule,
+      defaultEnvironment = builtDefaultEnvironment
     )
 
   type CapsuleStatuses = Map[MoleCapsule, JobStatuses]
@@ -345,7 +356,7 @@ object MoleExecution:
 
       def startEnvironments() =
         if (moleExecution.startStopDefaultEnvironment) moleExecution.defaultEnvironment.start()
-        moleExecution.environments.values.foreach(_.start())
+        moleExecution.environments.foreach(_.start())
 
       import moleExecution.executionContext.services._
 
@@ -371,7 +382,7 @@ object MoleExecution:
       moleExecution.executionContext.services.threadProvider.virtual: ()  =>
         def stopEnvironments() =
           if moleExecution.startStopDefaultEnvironment then moleExecution.defaultEnvironment.stop()
-          moleExecution.environments.values.foreach(_.stop())
+          moleExecution.environments.foreach(_.stop())
 
         try stopEnvironments()
         finally MoleExecutionMessage.send(moleExecution)(MoleExecutionMessage.CleanMoleExecution())
@@ -473,8 +484,8 @@ object MoleExecution:
     val length = jobs.length
 
     val runningSet: java.util.HashSet[Long] =
-      def submissionEnvironments = moleExecution.environments.values.toSeq.collect { case e: SubmissionEnvironment => e }
-      def localEnvironments = moleExecution.environments.values.toSeq.collect { case e: LocalEnvironment => e } ++ Seq(moleExecution.defaultEnvironment)
+      def submissionEnvironments = moleExecution.environments.collect { case e: SubmissionEnvironment => e }
+      def localEnvironments = moleExecution.environments.collect { case e: LocalEnvironment => e } ++ Seq(moleExecution.defaultEnvironment)
 
       val set = new java.util.HashSet[Long](length + 1, 1.0f)
 
@@ -640,9 +651,7 @@ class MoleExecution(
   val mole:                        Mole,
   val sources:                     Sources,
   val hooks:                       Hooks,
-  val environmentProviders:        Map[MoleCapsule, EnvironmentBuilder],
   val grouping:                    Map[MoleCapsule, Grouping],
-  val defaultEnvironmentProvider:  LocalEnvironmentBuilder,
   val cleanOnFinish:               Boolean,
   val implicits:                   Context,
   val executionContext:            MoleExecutionContext,
@@ -650,7 +659,10 @@ class MoleExecution(
   val id:                          MoleExecution.Id,
   val keyValueCache:               KeyValueCache,
   val lockRepository:              LockRepository[LockKey],
-  val runtimeTask:                 Map[MoleCapsule, RuntimeTask]
+  val runtimeTask:                 Map[MoleCapsule, RuntimeTask],
+  val environments:                Seq[Environment],
+  val environmentForCapsule:       Map[MoleCapsule, Environment],
+  val defaultEnvironment:          LocalEnvironment
 ):
   moleExecution =>
 
@@ -698,7 +710,6 @@ class MoleExecution(
   private val validTypeCache = collection.mutable.HashMap[TransitionSlot, Iterable[TypeUtil.ValidType]]()
   private val capsuleInputCache = collection.mutable.HashMap[MoleCapsule, PrototypeSet]()
   
-  
   lazy val partialTaskExecutionContext =
     import executionContext.services._
 
@@ -720,19 +731,13 @@ class MoleExecution(
       timeService = timeService
     )
 
-  lazy val environments = EnvironmentBuilder.build(environmentProviders.values.toVector, executionContext.services)
-  lazy val environmentForCapsule = environmentProviders.toVector.map { case (k, v) => k -> environments(v) }.toMap
-  lazy val defaultEnvironment = EnvironmentBuilder.buildLocal(defaultEnvironmentProvider, executionContext.services)
-
-  def allEnvironments = (environments.values ++ Seq(defaultEnvironment)).toVector.distinct
+  def allEnvironments = (environments ++ Seq(defaultEnvironment)).toVector.distinct
 
   lazy val rootSubMoleExecution = MoleExecution.newSubMoleExecution(None, this, IArray.empty)
   lazy val subMoleExecutions = collection.mutable.LongMap[SubMoleExecutionState]()
 
   private[mole] var currentSubMoleExecutionId = 0L
-
   private[mole] val jobs = collection.mutable.LongMap[MoleCapsule]()
-
   private[workflow] val dataChannelRegistry = RegistryWithTicket[DataChannel, CompactedContext]()
   private[mole] var _exception = Option.empty[MoleExecutionFailed]
 
