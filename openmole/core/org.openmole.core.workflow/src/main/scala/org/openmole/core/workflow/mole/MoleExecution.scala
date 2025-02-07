@@ -100,9 +100,8 @@ object MoleExecution:
     lockRepository:              LockRepository[LockKey]                    = LockRepository(),
     runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None
   )(using moleServices: MoleServices): MoleExecution =
-
-
-    val executionBuildContext =
+    
+    def executionBuildContext(capsule: MoleCapsule) =
       import moleServices.*
       TaskExecutionBuildContext(taskCache)
 
@@ -581,10 +580,10 @@ object MoleExecution:
     given KeyValueCache = moleExecution.keyValueCache
     Validation(moleExecution.mole, moleExecution.implicits, moleExecution.sources, moleExecution.hooks)
 
-  def runtimeTasks(mole: Mole, sources: Sources, hooks: Hooks, taskBuildContext: TaskExecutionBuildContext): Map[MoleCapsule, RuntimeTask] =
+  def runtimeTasks(mole: Mole, sources: Sources, hooks: Hooks, taskBuildContext: MoleCapsule => TaskExecutionBuildContext): Map[MoleCapsule, RuntimeTask] =
     mole.capsules.map: capsule =>
       val task = capsule.task(mole, sources, hooks)
-      capsule -> RuntimeTask(task(taskBuildContext), TaskExecutionInfo(task), capsule.strain)
+      capsule -> RuntimeTask(task(taskBuildContext(capsule)), TaskExecutionInfo(task), capsule.strain)
     .toMap
 
 

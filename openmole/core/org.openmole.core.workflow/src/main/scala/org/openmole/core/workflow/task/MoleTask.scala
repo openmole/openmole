@@ -96,7 +96,7 @@ case class MoleTask(
 
   def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     // TODO: should we build a dedicated buildContext?
-    val runtimeTasks = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, taskExecutionBuildContext)
+    val runtimeTasks = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, _ => taskExecutionBuildContext)
 
     TaskExecution: p =>
       import p.*
