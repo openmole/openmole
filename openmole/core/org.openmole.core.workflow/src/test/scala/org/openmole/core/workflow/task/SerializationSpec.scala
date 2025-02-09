@@ -42,7 +42,7 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
       )
 
     val mole: Mole = t
-    val rt = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, TaskExecutionBuildContext(cache)).head._2
+    val rt = MoleExecution.runtimeTasks(mole, Sources.empty, Hooks.empty, _ => TaskExecutionBuildContext(cache)).head._2
 
     val rt2 = serializeDeserialize(rt)
     rt2.taskExecutionInfo.inputs.contains(p.name) should equal(true)
@@ -63,7 +63,7 @@ class SerializationSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
       )
 
     val rt =
-      MoleExecution.runtimeTasks(MoleTask(t), Sources.empty, Hooks.empty, TaskExecutionBuildContext(cache)).head
+      MoleExecution.runtimeTasks(MoleTask(t), Sources.empty, Hooks.empty, _=> TaskExecutionBuildContext(cache)).head
 
     MoleExecution(
       Mole(rt._1),
