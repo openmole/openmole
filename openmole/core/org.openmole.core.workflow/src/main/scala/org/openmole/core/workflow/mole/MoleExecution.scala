@@ -50,7 +50,7 @@ object MoleExecution:
 
   class Started extends Event[MoleExecution]
   case class Finished(canceled: Boolean) extends Event[MoleExecution]
-  case class JobCreated(moleJob: Job, capsule: MoleCapsule) extends Event[MoleExecution]
+  case class JobCreated(moleJob: JobId, capsule: MoleCapsule) extends Event[MoleExecution]
   case class JobSubmitted(moleJob: JobGroup, capsule: MoleCapsule, environment: Environment) extends Event[MoleExecution]
   case class JobFinished(moleJob: JobId, context: Context, capsule: MoleCapsule) extends Event[MoleExecution]
   case class Cleaned() extends Event[MoleExecution]
@@ -210,7 +210,7 @@ object MoleExecution:
               def jobCallBack = Job.CallBack((_, _) => (), () => subMoleExecutionState.canceled)
               val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, jobCallBack)
 
-              eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
+              eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(jobId, capsule))
 
               val taskExecutionDirectory = moleExecutionDirectory.newDirectory("taskExecution")
               val result =
@@ -251,7 +251,7 @@ object MoleExecution:
           val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
           val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 
-          eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(moleJob, capsule))
+          eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(jobId, capsule))
 
           group(subMoleExecutionState.moleExecution, moleJob, newContext, capsule)
 
