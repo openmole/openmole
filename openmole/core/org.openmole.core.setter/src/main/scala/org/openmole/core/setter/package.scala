@@ -165,7 +165,7 @@ trait BuilderPackage:
      * @param name
      * @return
      */
-    def mapped(name: String) = Mapped(p, Some(name))
+    infix def mapped(name: String) = Mapped(p, Some(name))
 
   final lazy val name = new Name
 
