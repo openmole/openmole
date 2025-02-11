@@ -32,10 +32,9 @@ import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.composition.DSL.{ToDestination, ToOrigin}
 import org.openmole.core.workflow.execution.{EnvironmentBuilder, LocalEnvironmentBuilder}
 import org.openmole.core.workflow.hook.{Hook, OMRFileHook}
-import org.openmole.core.workflow.mole.{MasterCapsule, Mole, MoleCapsule, MoleExecution, MoleExecutionContext, MoleServices, Source}
+import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.sampling.Sampling
 import org.openmole.core.workflow.task.{EmptyTask, ExplorationTask, MoleTask, Task}
-import org.openmole.core.workflow.grouping.{ByGrouping, Grouping}
 import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.format.*
@@ -277,7 +276,6 @@ object DSL {
     given [T <: Task]: ToTaskNode[T] = t => TaskNode(t)
     given ToTaskNode[TaskNode] = t => t
     given byToNode[T: ToTaskNode]: ToTaskNode[By[T, Grouping]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(t.by))
-    given byIntToNode[T: ToTaskNode]: ToTaskNode[By[T, Int]] = t => summon[ToTaskNode[T]](t.value).copy(grouping = Some(ByGrouping(t.by)))
     given [T: ToTaskNode]: ToTaskNode[On[T, EnvironmentBuilder]] = t => summon[ToTaskNode[T]](t.value).copy(environment = Some(t.on))
 
   trait ToTaskNode[-T]:
@@ -484,7 +482,6 @@ object DSLContainer:
   object ExplorationMethod:
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
     given byGrouping[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t => toDSLContainer(t.value).copy(grouping = Some(t.by))
-    given byInt[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t => toDSLContainer(t.value).copy(grouping = Some(ByGrouping(t.by)))
     given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentBuilder], C] = t => toDSLContainer(t.value).copy(environment = Some(t.on))
     given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t =>
       val container = toDSLContainer(t.value)

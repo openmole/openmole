@@ -26,10 +26,7 @@ package object extension:
   export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
   export org.openmole.core.workflow.task.TaskExecutionBuildContext
-
-
-  type Grouping = org.openmole.core.workflow.grouping.Grouping
-
+  
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling

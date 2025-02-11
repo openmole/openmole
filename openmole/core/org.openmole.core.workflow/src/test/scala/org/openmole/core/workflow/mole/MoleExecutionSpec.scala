@@ -33,19 +33,12 @@ import org.scalatest._
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.execution.{ Environment, LocalEnvironment }
-import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.tool.random.RandomProvider
 
 class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
-
-  class JobGroupingBy2Test extends Grouping:
-    def apply(context: Context, groups: Iterable[(MoleJobGroup, Iterable[Job])])(using newGroup: NewGroup, randomProvider: RandomProvider): MoleJobGroup =
-      groups.find((_, g) => g.size < 2) match
-        case Some((mg, _)) => mg
-        case None          => newGroup()
 
 
   "Grouping jobs" should "not impact a normal mole execution" in:
@@ -62,25 +55,7 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
         context
       .set (inputs += i.array)
 
-    val ex = ExplorationTask(sampling) -< (emptyT by new JobGroupingBy2Test) >- testT
-
-    ex.run
-
-  it should "accept int for by grouping" in:
-    val data = List.fill(10)("A")
-    val i = Val[String]("i")
-
-    val sampling = ExplicitSampling(i, data)
-    val emptyT = EmptyTask() set ((inputs, outputs) += i)
-
-    val testT =
-      TestTask: context =>
-        context.contains(i.toArray) should equal(true)
-        context(i.toArray).sorted.toVector should equal(data.toVector)
-        context
-      .set (inputs += i.array)
-
-    val ex = ExplorationTask(sampling) -< (emptyT by 10) >- testT
+    val ex = ExplorationTask(sampling) -< (emptyT by 2) >- testT
 
     ex.run
 

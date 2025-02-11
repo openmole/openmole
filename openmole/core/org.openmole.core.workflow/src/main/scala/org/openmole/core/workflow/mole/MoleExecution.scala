@@ -27,7 +27,6 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.workflow.composition.Puzzle
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.execution.*
-import org.openmole.core.workflow.grouping.Grouping
 import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
 import org.openmole.core.workflow.job.State.*
 import org.openmole.core.workflow.job.*
@@ -44,7 +43,7 @@ import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.core.argument.*
 
 import scala.collection.mutable
-import scala.collection.mutable.{Buffer, ListBuffer}
+import scala.collection.mutable.{Buffer, ArrayBuffer}
 
 object MoleExecution:
 
@@ -421,10 +420,8 @@ object MoleExecution:
   def group(moleExecution: MoleExecution, moleJob: Job, context: Context, capsule: MoleCapsule) =
     val submitJob =
       moleExecution.grouping.get(capsule) match
-        case Some(strategy) =>
-          val groups = moleExecution.waitingJobs.getOrElseUpdate(capsule, collection.mutable.Map())
-          val category = strategy.apply(context, groups.toVector)(using moleExecution.newGroup, moleExecution.executionContext.services.defaultRandom)
-          val jobs = groups.getOrElseUpdate(category, ListBuffer())
+        case Some(_) =>
+          val jobs = moleExecution.waitingJobs.getOrElseUpdate(capsule, ArrayBuffer())
           jobs.append(moleJob)
           moleExecution.nbWaiting += 1
           None
@@ -441,9 +438,14 @@ object MoleExecution:
 
   def submitAll(moleExecution: MoleExecution) =
     for
-      (capsule, groups) <- moleExecution.waitingJobs
-      (_, jobs) <- groups.toList
-    do submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(jobs.toArray)), capsule)
+      (capsule, jobs) <- moleExecution.waitingJobs
+    do
+      val size = moleExecution.grouping.getOrElse(capsule, 1)
+      val shuffled = moleExecution.executionContext.services.defaultRandom().shuffle(jobs.toSeq)
+      for
+       group <- shuffled.grouped(size)
+      do submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
+
     moleExecution.nbWaiting = 0
     moleExecution.waitingJobs.clear
 
@@ -696,7 +698,7 @@ class MoleExecution(
 
   private[mole] val newGroup = NewGroup()
 
-  private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, collection.mutable.Map[MoleJobGroup, ListBuffer[Job]]]()
+  private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, ArrayBuffer[Job]]()
   private[mole] var nbWaiting = 0
 
   private[mole] val completed =
