@@ -119,13 +119,6 @@ object InstalledSingularityImage:
 sealed trait InstalledSingularityImage
 
 
-
-sealed trait ContainerSystem
-case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, verbose: Boolean = false, copy: Boolean = false) extends ContainerSystem
-case class SingularityMemory(verbose: Boolean = false) extends ContainerSystem
-case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem
-
-
 /**
  * Trait for either string scripts or script file runnable in tasks based on the container task
  */
