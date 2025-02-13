@@ -3,9 +3,11 @@ package org.openmole.core.argument
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.tool.types.{ToDouble, TypeConverter}
 
-object OptionalArgument:
-  given [T]: Conversion[None.type, OptionalArgument[Nothing]] = _ => OptionalArgument.empty
+trait LowPriorityOptionalArgumentImplicit:
   given [T]: Conversion[T, OptionalArgument[T]] = v => OptionalArgument(v)
+
+object OptionalArgument extends LowPriorityOptionalArgumentImplicit:
+  given [T]: Conversion[None.type, OptionalArgument[Nothing]] = _ => OptionalArgument.empty
   given [T]: Conversion[OptionalArgument[T], Option[T]] = o => o
   given [T1, T2](using toFromContext: ToFromContext[T1, T2]): Conversion[T1, OptionalArgument[FromContext[T2]]] = v => OptionalArgument(FromContext.contextConverter(v))
   given [T1, T2](using tc: TypeConverter[T1, T2]): Conversion[T1, OptionalArgument[T2]] = v => OptionalArgument(summon[TypeConverter[T1, T2]].apply(v))

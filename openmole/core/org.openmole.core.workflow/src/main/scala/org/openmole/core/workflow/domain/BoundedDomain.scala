@@ -17,7 +17,8 @@
 
 package org.openmole.core.workflow.domain
 
-import org.openmole.core.argument._
+import org.openmole.core.argument.*
+import org.openmole.core.keyword.*
 import scala.annotation.implicitNotFound
 
 /**
@@ -27,9 +28,14 @@ import scala.annotation.implicitNotFound
  * @tparam T variable type
  */
 object BoundedDomain:
+
   def apply[D, T](f: D => Domain[(T, T)]) =
     new BoundedDomain[D, T]:
       def apply(d: D) = f(d)
+
+  given [K, D, T](using inner: InnerDomain[K, D], b: BoundedDomain[D, T]): BoundedDomain[K, T] =
+    BoundedDomain: d =>
+      b(inner(d))
 
 @implicitNotFound("${D} is not a bounded variation domain of type ${T}")
 trait BoundedDomain[-D, +T]:
@@ -47,6 +53,9 @@ object BoundedFromContextDomain:
     new BoundedFromContextDomain[D, T]:
       def apply(d: D) = f(d)
 
+  given [K, D, T](using inner: InnerDomain[K, D], b: BoundedFromContextDomain[D, T]): BoundedFromContextDomain[K, T] =
+    BoundedFromContextDomain: d =>
+      b(inner(d))
 
 @implicitNotFound("${D} is not a bounded variation domain of type T | FromContext[${T}]")
 trait BoundedFromContextDomain[-D, +T]:

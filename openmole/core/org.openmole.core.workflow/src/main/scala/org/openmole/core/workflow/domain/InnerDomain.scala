@@ -1,9 +1,7 @@
 package org.openmole.core.workflow.domain
 
-import scala.annotation.implicitNotFound
-
 /*
- * Copyright (C) 2024 Romain Reuillon
+ * Copyright (C) 2025 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,17 +19,14 @@ import scala.annotation.implicitNotFound
 
 import org.openmole.core.keyword.*
 
-object DomainStep:
+object InnerDomain:
+
   def apply[D, T](f: D => T) =
-    new DomainStep[D, T]:
+    new InnerDomain[D, T]:
       def apply(d: D) = f(d)
 
-  given [D, T]: DomainStep[By[D, T], T] = DomainStep(_.by)
-  given [D]: DomainStep[By[D, Int], Int] = DomainStep(_ => 1)
-  given intToDouble[D]: DomainStep[By[D, Int], Double] = DomainStep(_ => 1.0)
-  given [D]: DomainStep[By[D, Double], Double] = DomainStep(_ => 1.0)
+  given [D, W]: InnerDomain[Weight[D, W], D] = InnerDomain(_.value)
+  given [D, W]: InnerDomain[By[D, W], D] = InnerDomain(_.value)
 
-
-@implicitNotFound("${D} is not a domain with a defined step of type ${T}")
-trait DomainStep[-D, +T] :
-  def apply(domain: D): T
+trait InnerDomain[I, D]:
+  def apply(i: I): D

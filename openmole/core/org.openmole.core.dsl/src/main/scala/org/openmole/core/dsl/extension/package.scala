@@ -26,11 +26,13 @@ package object extension:
   export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
   export org.openmole.core.workflow.task.TaskExecutionBuildContext
-  
+
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
   def Sampling = org.openmole.core.workflow.sampling.Sampling
   type IsSampling[-T] = org.openmole.core.workflow.sampling.IsSampling[T]
+
+//  export org.openmole.core.workflow.sampling.IsFactor
 
   export org.openmole.core.workflow.domain.BoundedFromContextDomain
   export org.openmole.core.workflow.domain.BoundedDomain
@@ -42,6 +44,7 @@ package object extension:
   export org.openmole.core.workflow.domain.DomainCenterFromContext
   export org.openmole.core.workflow.domain.DomainSize
   export org.openmole.core.workflow.domain.DomainStep
+  export org.openmole.core.workflow.domain.DomainWeight
 
   type Domain[+D] = org.openmole.core.workflow.domain.Domain[D]
   def Domain = org.openmole.core.workflow.domain.Domain
@@ -75,15 +78,16 @@ package object extension:
 
   def ExpandedString = org.openmole.core.argument.ExpandedString
 
-  type Negative[+A] = org.openmole.core.keyword.Negative[A]
-  type Under[+A, +B] = org.openmole.core.keyword.Under[A, B]
-  type In[+A, +B] = org.openmole.core.keyword.In[A, B]
-  type :=[+A, +B] = org.openmole.core.keyword.:=[A, B]
-  type Evaluate[+A, B] = org.openmole.core.keyword.Evaluate[A, B]
-  type Delta[+A, +B] = org.openmole.core.keyword.Delta[A, B]
-  type As[+A, +B] = org.openmole.core.keyword.As[A, B]
-  type On[+A, +B] = org.openmole.core.keyword.On[A, B]
-  type By[+A, +B] = org.openmole.core.keyword.By[A, B]
+  export org.openmole.core.keyword.Negative
+  export org.openmole.core.keyword.Under
+  export org.openmole.core.keyword.In
+  export org.openmole.core.keyword.:=
+  export org.openmole.core.keyword.Evaluate
+  export org.openmole.core.keyword.Delta
+  export org.openmole.core.keyword.As
+  export org.openmole.core.keyword.On
+  export org.openmole.core.keyword.By
+  export org.openmole.core.keyword.Weight
 
   export org.openmole.core.setter.{
       ValueAssignment,
@@ -97,8 +101,6 @@ package object extension:
       Setter
     }
 
-  def On = org.openmole.core.keyword.On
-  def By = org.openmole.core.keyword.By
   def Aggregate = org.openmole.core.keyword.Evaluate
 
 

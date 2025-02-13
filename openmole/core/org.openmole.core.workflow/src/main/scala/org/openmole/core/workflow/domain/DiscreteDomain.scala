@@ -25,6 +25,10 @@ object DiscreteDomain:
     new DiscreteDomain[D, T]:
       def apply(d: D) = f(d)
 
+  given [K, D, T](using inner: InnerDomain[K, D], b: DiscreteDomain[D, T]): DiscreteDomain[K, T] =
+    DiscreteDomain: d =>
+      b(inner(d))
+
 /**
  * Property of being discrete for a domain
  * @tparam D
@@ -44,6 +48,9 @@ object DiscreteFromContextDomain:
     new DiscreteFromContextDomain[D, T]:
       def apply(d: D) = f(d)
 
+  given [K, D, T](using inner: InnerDomain[K, D], b: DiscreteFromContextDomain[D, T]): DiscreteFromContextDomain[K, T] =
+    DiscreteFromContextDomain: d =>
+      b(inner(d))
 
 @implicitNotFound("${D} is not a discrete variation domain of type T | FromContext[${T}]")
 trait DiscreteFromContextDomain[-D, +T]:

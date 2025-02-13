@@ -579,25 +579,49 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       stochastic = Stochastic()
     )
 
-  "HDOSE" should "support ranges" in :
+  "HDOSE" should "support syntax for origin" in :
     val a = Val[Double]
     val b = Val[Double]
-    val axea: HDOSE.OriginAxe = (a in (0.0 to 10.0 by 5.0))
+
+    def isOriginAxe(o: HDOSE.OriginAxe) = o
+
+    isOriginAxe(a in (0.0 to 10.0))
+    isOriginAxe(a in (0.0 to 10.0 weight 5.0))
 
     val ar = Val[Array[Double]]
-    val axear: HDOSE.OriginAxe = (ar in Vector.fill(10)(0.0 to 10.0 by 2.0))
+    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0))
+    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0 weight 2.0))
 
-    val ar2 = Val[Array[Int]]
-    val axear2: HDOSE.OriginAxe = (ar2 in Vector.fill(10)(0 to 100 by 20))
+    val i1 = Val[Int]
+    isOriginAxe(i1 in (0.0 to 10.0))
+    isOriginAxe(i1 in (0 to 10))
+    isOriginAxe(i1 in (0.0 to 10.0 weight 5.0))
+    isOriginAxe(i1 in (0 to 10 weight 5.0))
 
-    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).size should equal(11)
-    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).size should equal(10)
+    val ai2 = Val[Array[Int]]
+    isOriginAxe(ai2 in Vector.fill(10)(0 to 100))
+    isOriginAxe(ai2 in Vector.fill(10)(0 to 100 weight 20.0))
 
-    HDOSE.OriginAxe.significanceC(Seq(axea, axear, axear2)).distinct should equal(Seq(5.0, 2.0))
-    HDOSE.OriginAxe.significanceD(Seq(axea, axear, axear2)).distinct should equal(Seq(20))
-    
+    val bo = Val[Boolean]
+    isOriginAxe(bo in TrueFalse)
+    isOriginAxe(bo in (TrueFalse weight 10.0))
+
+    val bao = Val[Boolean]
+    isOriginAxe(bao in Vector.fill(10)(TrueFalse))
+    isOriginAxe(bao in Vector.fill(10)(TrueFalse weight 10.0))
+
+
+  it should "support syntax for method definition" in :
+    val ar = Val[Array[Double]]
+    val i1 = Val[Int]
+    val a = Val[Double]
+    val b = Val[Double]
+
     HDOSEEvolution(
-      origin = Seq(axea, axear, axear2),
+      origin = Seq(
+        ar in Vector.fill(10)(0.0 to 10.0 weight 2.0),
+        i1 in (0.0 to 10.0 weight 5.0)
+      ),
       evaluation = EmptyTask(),
       objective = Seq(a under 9, b under 3.0),
       termination = 100,

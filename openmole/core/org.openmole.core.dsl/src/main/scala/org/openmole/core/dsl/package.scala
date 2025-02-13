@@ -118,6 +118,8 @@ package dsl:
     export Predef.intWrapper
     export Predef.doubleWrapper
 
+    val TrueFalse = Seq(true, false)
+
 
 package object dsl extends dsl.DSLPackage
   with workflow.ExportedPackage

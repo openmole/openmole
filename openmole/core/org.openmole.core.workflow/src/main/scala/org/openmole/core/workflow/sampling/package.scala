@@ -93,3 +93,28 @@ type Factor[D, T] = In[Val[T], D]
  */
 def Factor[D, T](p: Val[T], d: D) = In(p, d)
 
+//given [F, D, T](using isFactor: IsFactor[F, D, T]): Conversion[F, Factor[D, T]] = t => isFactor(t)
+//
+//object IsFactor:
+//
+//  def apply[F, D, T](f: F => Factor[D, T]) =
+//    new IsFactor[F, D, T]:
+//      def apply(x: F) = f(x)
+//
+//  given [D, T]: IsFactor[Factor[D, T], D, T] = IsFactor(identity)
+//
+//  given IsFactor[Val[Boolean], Seq[Boolean], Boolean] =
+//    IsFactor(v => v in Seq(true, false))
+//
+//  given seqIsFactor[F, D, T](using isf: IsFactor[F, D, T]): IsFactor[Seq[F], Seq[D], T] =
+//    IsFactor(v => v.map(isf.apply))
+//
+//  given weightFactor[F, D, T, B](using isf: IsFactor[F, D, T]): IsFactor[Weight[F, B], D, T] =
+//    IsFactor(w => isf(w.value))
+//
+//  given byFactor[F, D, T, B](using isf: IsFactor[F, D, T]): IsFactor[By[F, B], D, T] =
+//    IsFactor(w => isf(w.value))
+//
+//trait IsFactor[F, D, T]:
+//  def apply(f: F): Factor[D, T]
+

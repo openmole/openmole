@@ -38,8 +38,8 @@ object HDOSE:
     mu:                  Int,
     limit:               Vector[Double],
     genome:              Genome,
-    significanceC:       Vector[Double],
-    significanceD:       Vector[Int],
+    weightC:             Vector[Double],
+    weightD:             Vector[Double],
     archiveSize:         Int,
     distance:            Double,
     phenotypeContent:    PhenotypeContent,
@@ -83,7 +83,7 @@ object HDOSE:
 
         def initialState: S = MGOHDOSE.initialState(om.distance)
 
-        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = MGOHDOSE.tooCloseByComponent(om.significanceC, om.significanceD)
+        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = MGOHDOSE.tooCloseByComponent(om.weightC, om.weightD, Genome.discrete(om.genome))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p ⇒
@@ -118,8 +118,8 @@ object HDOSE:
               om.operatorExploration,
               continuous,
               discrete,
-              om.significanceC,
-              om.significanceD,
+              om.weightC,
+              om.weightD,
               Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
               rejectValue) apply (s, individuals, rng)
 
@@ -129,10 +129,11 @@ object HDOSE:
             MGOHDOSE.elitism[Phenotype](
               om.mu,
               om.limit,
-              om.significanceC,
-              om.significanceD,
+              om.weightC,
+              om.weightD,
               om.archiveSize,
               Genome.continuous(om.genome),
+              Genome.discrete(om.genome),
               Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
               om.distance) apply (s, population, candidates, rng)
 
@@ -141,7 +142,8 @@ object HDOSE:
             HDOSEOperation.isTooCloseFromArchive[G, I](
               distance,
               MGOHDOSE.archiveLens.get(state),
-              CDGenome.scaledValues(Genome.continuous(om.genome)),
+              _.continuousValues,
+              _.discreteValues,
               _.genome,
               MGOHDOSE.distanceLens.get(state)
             )
@@ -158,8 +160,8 @@ object HDOSE:
     mu: Int,
     limit: Vector[Double],
     genome: Genome,
-    significanceC: Vector[Double],
-    significanceD: Vector[Int],
+    weightC: Vector[Double],
+    weightD: Vector[Double],
     archiveSize: Int,
     distance: Double,
     phenotypeContent: PhenotypeContent,
@@ -206,7 +208,7 @@ object HDOSE:
 
         def initialState = MGONoisyHDOSE.initialState(om.distance)
 
-        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = mgo.evolution.algorithm.HDOSE.tooCloseByComponent(om.significanceC, om.significanceD)
+        def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = mgo.evolution.algorithm.HDOSE.tooCloseByComponent(om.weightC, om.weightD, Genome.discrete(om.genome))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
@@ -251,8 +253,8 @@ object HDOSE:
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               continuous,
               discrete,
-              om.significanceC,
-              om.significanceD,
+              om.weightC,
+              om.weightD,
               om.limit,
               rejectValue) apply(s, individuals, rng)
 
@@ -265,8 +267,9 @@ object HDOSE:
               om.historySize,
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               Genome.continuous(om.genome),
-              om.significanceC,
-              om.significanceD,
+              Genome.discrete(om.genome),
+              om.weightC,
+              om.weightD,
               om.archiveSize,
               om.limit,
               om.distance) apply(s, population, candidates, rng)
@@ -277,7 +280,8 @@ object HDOSE:
             HDOSEOperation.isTooCloseFromArchive[G, I](
               distance,
               MGONoisyHDOSE.archiveLens.get(state),
-              CDGenome.scaledValues(Genome.continuous(om.genome)),
+              _.continuousValues,
+              _.discreteValues,
               _.genome,
               MGONoisyHDOSE.distanceLens.get(state)
             )
@@ -288,46 +292,48 @@ object HDOSE:
           .apply(state)
 
 
-
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
 
   object OriginAxe:
-    given factorDouble[D](using bounds: BoundedDomain[D, Double], step: DomainStep[D, Double]): Conversion[Factor[D, Double], OriginAxe] = f =>
+    given factorDouble[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[D, Double], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
-      ContinuousOriginAxe(Genome.GenomeBound.ScalarDouble(f.value, min, max), step(f.domain))
+      ContinuousOriginAxe(Genome.GenomeBound.ScalarDouble(f.value, min, max), weight(f.domain))
 
-    given doubleRange[D]: Conversion[Factor[Seq[DoubleRange], Array[Double]], OriginAxe] = f =>
+    given factorSeqDouble[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Double]], OriginAxe] = f =>
       ContinuousSequenceOriginAxe(
-        Genome.GenomeBound.SequenceOfDouble(f.value, f.domain.map(_.low).toArray, f.domain.map(_.high).toArray, f.domain.size),
-        f.domain.map(_.step).toVector
+        Genome.GenomeBound.SequenceOfDouble(f.value, f.domain.map(d => bounds(d).domain._1).toArray, f.domain.map(d => bounds(d).domain._2).toArray, f.domain.size),
+        f.domain.map(d => weight(d)).toVector
       )
 
-    given factorInt[D](using bounds: BoundedDomain[D, Int], step: DomainStep[D, Int]): Conversion[Factor[D, Int], OriginAxe] = f =>
+    given factorInt[D](using bounds: BoundedDomain[D, Int], weight: DomainWeight[D, Double]): Conversion[Factor[D, Int], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
-      DiscreteOriginAxe(Genome.GenomeBound.ScalarInt(f.value, min, max), step(f.domain))
+      DiscreteOriginAxe(Genome.GenomeBound.ScalarInt(f.value, min, max), weight(f.domain))
 
-    given intRange[D]: Conversion[Factor[Seq[Range], Array[Int]], OriginAxe] = f =>
+    given factorContinuousInt[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[D, Int], OriginAxe] = f =>
+      val (min, max) = bounds(f.domain).domain
+      ContinousDiscreteOriginAxe(Genome.GenomeBound.ContinuousInt(f.value, min.toInt, max.toInt), weight(f.domain))
+
+    given factorSeqInt[D](using bounds: BoundedDomain[D, Int], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Int]], OriginAxe] = f =>
       DiscreteSequenceOriginAxe(
-        Genome.GenomeBound.SequenceOfInt(f.value, f.domain.map(_.start).toArray, f.domain.map(_.end).toArray, f.domain.size),
-        f.domain.map(_.step).toVector
+        Genome.GenomeBound.SequenceOfInt(f.value, f.domain.map(d => bounds(d).domain._1).toArray, f.domain.map(d => bounds(d).domain._2).toArray, f.domain.size),
+        f.domain.map(d => weight(d)).toVector
       )
 
-    given boolean: Conversion[Val[Boolean], OriginAxe] = v =>
-      EnumerationOriginAxe(
-        Genome.GenomeBound.Enumeration(v, Vector(true, false))
-      )
-
-    given booleanArray: Conversion[Factor[Int, Array[Boolean]], OriginAxe] = f =>
-      EnumerationSequenceOriginAxe(
-        Genome.GenomeBound.SequenceOfEnumeration(f.value, Vector.fill(f.domain)(Array(true, false)))
-      )
-
-
-    given enumeration[D, T](using fix: FixDomain[D, T]): Conversion[Factor[D, T], OriginAxe] = f =>
+    given enumeration[D, T](using fix: FixDomain[D, T], weight: DomainWeight[D, Double]): Conversion[Factor[D, T], OriginAxe] = f =>
       val domain = fix(f.domain).domain.toVector
-      EnumerationOriginAxe(Genome.GenomeBound.Enumeration(f.value, domain))
+      EnumerationOriginAxe(
+        Genome.GenomeBound.Enumeration(f.value, domain),
+        weight(f.domain)
+      )
+
+    given enumerationSeq[D, T: ClassTag](using fix: FixDomain[D, T], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], T], OriginAxe] = f =>
+      EnumerationSequenceOriginAxe(
+        Genome.GenomeBound.SequenceOfEnumeration(f.value, f.domain.map(d => fix(d).domain.toArray).toVector),
+        f.domain.map(d => weight(d)).toVector
+      )
+
 
     def genomeBound(originAxe: OriginAxe) = originAxe match
       case c: ContinuousOriginAxe ⇒ c.p
@@ -336,31 +342,34 @@ object HDOSE:
       case ds: DiscreteSequenceOriginAxe ⇒ ds.p
       case en: EnumerationOriginAxe => en.p
       case en: EnumerationSequenceOriginAxe => en.p
+      case d: ContinousDiscreteOriginAxe => d.p
 
     def toGenome(axes: Seq[OriginAxe]): Genome = axes.map(genomeBound)
 
-    def significanceC(axes: Seq[OriginAxe]): Vector[Double] =
+    def weightC(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case c: ContinuousOriginAxe ⇒ Seq(c.step)
-        case cs: ContinuousSequenceOriginAxe ⇒ cs.step
+        case c: ContinuousOriginAxe ⇒ Seq(c.weight)
+        case cs: ContinuousSequenceOriginAxe ⇒ cs.weight
         case _ => Seq()
 
-    def significanceD(axes: Seq[OriginAxe]): Vector[Int] =
+    def weightD(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case d: DiscreteOriginAxe ⇒ Seq(d.step)
-        case ds: DiscreteSequenceOriginAxe ⇒ ds.step
-        case en: EnumerationOriginAxe => Seq(1)
-        case en: EnumerationSequenceOriginAxe => en.p.values.map(_ => 1)
+        case d: DiscreteOriginAxe ⇒ Seq(d.weight)
+        case ds: DiscreteSequenceOriginAxe ⇒ ds.weight
+        case en: EnumerationOriginAxe => Seq(en.weight)
+        case en: EnumerationSequenceOriginAxe => en.weight
+        case d: ContinousDiscreteOriginAxe => Seq(d.weight)
         case _ => Seq()
 
 
   sealed trait OriginAxe
-  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, step: Double) extends OriginAxe
-  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, step: Vector[Double]) extends OriginAxe
-  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, step: Int) extends OriginAxe
-  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, step: Vector[Int]) extends OriginAxe
-  case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[?]) extends OriginAxe
-  case class EnumerationSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfEnumeration[?]) extends OriginAxe
+  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, weight: Double) extends OriginAxe
+  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, weight: Vector[Double]) extends OriginAxe
+  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, weight: Double) extends OriginAxe
+  case class ContinousDiscreteOriginAxe(p: Genome.GenomeBound.ContinuousInt, weight: Double) extends OriginAxe
+  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, weight: Vector[Double]) extends OriginAxe
+  case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[?], weight: Double) extends OriginAxe
+  case class EnumerationSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfEnumeration[?], weight: Vector[Double]) extends OriginAxe
 
 
   def apply(
@@ -374,8 +383,8 @@ object HDOSE:
     reject: OptionalArgument[Condition] = None): EvolutionWorkflow =
 
     val genomeValue = OriginAxe.toGenome(origin)
-    val significanceC = OriginAxe.significanceC(origin)
-    val significanceD = OriginAxe.significanceD(origin)
+    val weightC = OriginAxe.weightC(origin)
+    val weightD = OriginAxe.weightD(origin)
 
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match
       case None ⇒
@@ -386,8 +395,8 @@ object HDOSE:
           DeterministicHDOSE(
             mu = populationSize,
             genome = genomeValue,
-            significanceC = significanceC,
-            significanceD = significanceD,
+            weightC = weightC,
+            weightD = weightD,
             archiveSize = archiveSize,
             distance = distance,
             phenotypeContent = phenotypeContent,
@@ -411,8 +420,8 @@ object HDOSE:
           StochasticHDOSE(
             mu = populationSize,
             genome = genomeValue,
-            significanceC = significanceC,
-            significanceD = significanceD,
+            weightC = weightC,
+            weightD = weightD,
             archiveSize = archiveSize,
             distance = distance,
             phenotypeContent = phenotypeContent,

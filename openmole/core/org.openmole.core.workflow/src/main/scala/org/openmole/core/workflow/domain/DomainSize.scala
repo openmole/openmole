@@ -8,6 +8,9 @@ object DomainSize:
     new DomainSize[D]:
       def apply(d: D) = f(d)
 
+  given [K, D](using inner: InnerDomain[K, D], b: DomainSize[D]): DomainSize[K] =
+    DomainSize: d =>
+      b(inner(d))
 
 /**
  * Property of having a size for a domain

@@ -44,6 +44,7 @@ class Activator extends BundleActivator:
         PatternHighLight(objectName(NSGA3Evolution)),
         PatternHighLight(objectName(OSEEvolution)),
         PatternHighLight(objectName(PSEEvolution)),
+        PatternHighLight(objectName(HDOSEEvolution)),
         WordHighLight(objectName(Stochastic)),
         WordHighLight(objectName(Island)),
         HookHighLight(objectName(SavePopulationHook))

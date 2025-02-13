@@ -3,20 +3,22 @@ package org.openmole.core
 /**
  * Generic keywords and their DSL
  */
-package keyword {
+package keyword:
 
   import monocle._
 
-  case class In[+A, +B](value: A, domain: B)
-  case class Under[+A, +B](value: A, under: B)
-  case class :=[+A, +B](value: A, equal: B)
-  case class Negative[+A](value: A)
+  infix case class In[+A, +B](value: A, domain: B)
+  infix case class Under[+A, +B](value: A, under: B)
+  infix case class :=[+A, +B](value: A, equal: B)
+  infix case class Negative[+A](value: A)
 
   // Covariance on type B causes problem for Some implicit conversion, see: DirectSampling
-  case class Evaluate[+A, B](value: A, evaluate: B)
+  infix case class Evaluate[+A, B](value: A, evaluate: B)
 
-  case class Delta[+A, +B](value: A, delta: B)
-  case class As[+A, +B](value: A, as: B)
+  infix case class Delta[+A, +B](value: A, delta: B)
+  infix case class As[+A, +B](value: A, as: B)
+
+  infix case class Weight[+A, +B](value: A, weight: B)
 
   object By:
     def value[A, B] = Focus[By[A, B]](_.value)
@@ -59,6 +61,7 @@ package keyword {
     implicit class OnDecorator[A](a: A):
       infix def on[B](b: B) = On(a, b)
 
-}
+    extension [A](a: A)
+      infix def weight[B](b: B) = Weight(a, b)
 
 package object keyword extends KeyWordPackage

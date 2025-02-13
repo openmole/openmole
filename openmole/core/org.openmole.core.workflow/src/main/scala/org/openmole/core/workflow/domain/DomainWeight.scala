@@ -1,9 +1,7 @@
 package org.openmole.core.workflow.domain
 
-import scala.annotation.implicitNotFound
-
 /*
- * Copyright (C) 2024 Romain Reuillon
+ * Copyright (C) 2025 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,19 +17,22 @@ import scala.annotation.implicitNotFound
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.keyword.*
 
-object DomainStep:
+import org.openmole.core.keyword.*
+import scala.annotation.implicitNotFound
+
+trait LowPriorityDomainWeightImplicit:
+  given one[D]: DomainWeight[D, Double] = DomainWeight[D, Double](_ => 1.0)
+
+object DomainWeight extends LowPriorityDomainWeightImplicit:
   def apply[D, T](f: D => T) =
-    new DomainStep[D, T]:
+    new DomainWeight[D, T]:
       def apply(d: D) = f(d)
 
-  given [D, T]: DomainStep[By[D, T], T] = DomainStep(_.by)
-  given [D]: DomainStep[By[D, Int], Int] = DomainStep(_ => 1)
-  given intToDouble[D]: DomainStep[By[D, Int], Double] = DomainStep(_ => 1.0)
-  given [D]: DomainStep[By[D, Double], Double] = DomainStep(_ => 1.0)
+  given [D, T]: DomainWeight[Weight[D, T], T] = DomainWeight(_.weight)
+  given [K, D, T](using inner: InnerDomain[K, D], b: DomainWeight[D, T]): DomainWeight[K, T] = DomainWeight(d => b(inner(d)))
 
 
-@implicitNotFound("${D} is not a domain with a defined step of type ${T}")
-trait DomainStep[-D, +T] :
+@implicitNotFound("${D} is not a domain with a defined weight of type ${T}")
+trait DomainWeight[-D, +T] :
   def apply(domain: D): T

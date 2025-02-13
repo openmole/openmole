@@ -20,6 +20,17 @@ package org.openmole.core.workflow.domain
 import org.openmole.core.argument._
 import scala.annotation.implicitNotFound
 
+object DomainCenter:
+
+  def apply[D, T](f: D => T) =
+    new DomainCenter[D, T]:
+      def apply(d: D) = f(d)
+
+  given [K, D, T](using inner: InnerDomain[K, D], b: DomainCenter[D, T]): DomainCenter[K, T] =
+    DomainCenter: d =>
+      b(inner(d))
+
+
 /**
  * Property of being centered for a domain
  * @tparam D
@@ -35,6 +46,10 @@ object DomainCenterFromContext:
   def apply[D, T](f: D => FromContext[T]) =
     new DomainCenterFromContext[D, T]:
       def apply(d: D) = f(d)
+
+  given [K, D, T](using inner: InnerDomain[K, D], b: DomainCenterFromContext[D, T]): DomainCenterFromContext[K, T] =
+    DomainCenterFromContext: d =>
+      b(inner(d))
 
 @implicitNotFound("${D} is not a variation domain with a center of type T | FromContext[${T}]")
 trait DomainCenterFromContext[-D, +T]:
