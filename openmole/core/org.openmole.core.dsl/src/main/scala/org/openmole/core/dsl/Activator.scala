@@ -20,10 +20,10 @@ package org.openmole.core.dsl
 import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
 import org.osgi.framework.{ BundleActivator, BundleContext }
 
-class Activator extends BundleActivator {
+class Activator extends BundleActivator:
   override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
+  override def start(context: BundleContext): Unit =
     import org.openmole.core.highlight.HighLight._
 
     val highLight = Vector(
@@ -58,9 +58,9 @@ class Activator extends BundleActivator {
       WordHighLight("hour"),
       WordHighLight("hours"),
       WordHighLight("day"),
-      WordHighLight("days")
+      WordHighLight("days"),
+      WordHighLight("TrueFalse")
     )
 
     PluginRegistry.register(this, highLight = highLight)
-  }
-}
+
