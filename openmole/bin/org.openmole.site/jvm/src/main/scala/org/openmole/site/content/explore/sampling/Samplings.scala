@@ -60,7 +60,7 @@ val j = Val[Double]
 val k = Val[String]
 val l = Val[Long]
 val m = Val[File]
-
+val b = Val[Boolean]
 val exploration =
   DirectSampling(
     evaluation = myModel,
@@ -69,7 +69,8 @@ val exploration =
       (j in (0.0 to 5.0 by 0.5)) x
       (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
       (l in (UniformDistribution[Long]() take 10)) x
-      (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+      (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv"))) x
+      (b in TrueFalse) 
   ) hook(workDirectory / "path/of/a/file")
 """, header = "val myModel = EmptyTask()", name = "several inputs")}
 

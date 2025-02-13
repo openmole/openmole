@@ -184,6 +184,7 @@ If you want to calibrate an important number of parameters you can use arrays di
 ${hl.openmole("""
 val param1 = Val[Array[Double]]
 val param2 = Val[Double]
+val param3 = Val[Boolean]
 
 val distance = Val[Double]
 
@@ -195,7 +196,8 @@ NSGA2Evolution(
   populationSize = 200,
   genome = Seq(
     param1 in Array.fill(100)(0.0, 99.0),
-    param2 in (1.0, 10.0)),
+    param2 in (1.0 to 10.0),
+    param3 in TrueFalse),
   termination = 100,
   parallelism = 10
 ) hook display
