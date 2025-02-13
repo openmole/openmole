@@ -299,25 +299,31 @@ object HDOSE:
   object OriginAxe:
     given factorDouble[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[D, Double], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
-      ContinuousOriginAxe(Genome.GenomeBound.ScalarDouble(f.value, min, max), weight(f.domain))
+      ScalarDoubleOriginAxe(Genome.GenomeBound.ScalarDouble(f.value, min, max), weight(f.domain))
 
     given factorSeqDouble[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Double]], OriginAxe] = f =>
-      ContinuousSequenceOriginAxe(
+      SequenceOfDoubleOriginAxe(
         Genome.GenomeBound.SequenceOfDouble(f.value, f.domain.map(d => bounds(d).domain._1).toArray, f.domain.map(d => bounds(d).domain._2).toArray, f.domain.size),
         f.domain.map(d => weight(d)).toVector
       )
 
     given factorInt[D](using bounds: BoundedDomain[D, Int], weight: DomainWeight[D, Double]): Conversion[Factor[D, Int], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
-      DiscreteOriginAxe(Genome.GenomeBound.ScalarInt(f.value, min, max), weight(f.domain))
+      ScalarIntOriginAxe(Genome.GenomeBound.ScalarInt(f.value, min, max), weight(f.domain))
+
+    given factorSeqInt[D](using bounds: BoundedDomain[D, Int], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Int]], OriginAxe] = f =>
+      SequenceOfIntOriginAxe(
+        Genome.GenomeBound.SequenceOfInt(f.value, f.domain.map(d => bounds(d).domain._1).toArray, f.domain.map(d => bounds(d).domain._2).toArray, f.domain.size),
+        f.domain.map(d => weight(d)).toVector
+      )
 
     given factorContinuousInt[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[D, Int], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
-      ContinousDiscreteOriginAxe(Genome.GenomeBound.ContinuousInt(f.value, min.toInt, max.toInt), weight(f.domain))
+      ContinuousIntOriginAxe(Genome.GenomeBound.ContinuousInt(f.value, min.toInt, max.toInt), weight(f.domain))
 
-    given factorSeqInt[D](using bounds: BoundedDomain[D, Int], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Int]], OriginAxe] = f =>
-      DiscreteSequenceOriginAxe(
-        Genome.GenomeBound.SequenceOfInt(f.value, f.domain.map(d => bounds(d).domain._1).toArray, f.domain.map(d => bounds(d).domain._2).toArray, f.domain.size),
+    given factorSeqContinousInt[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[Int]], OriginAxe] = f =>
+      SequenceOfContinuousIntOriginAxe(
+        Genome.GenomeBound.SequenceOfContinuousInt(f.value, f.domain.map(d => bounds(d).domain._1.toInt).toArray, f.domain.map(d => bounds(d).domain._2.toInt).toArray, f.domain.size),
         f.domain.map(d => weight(d)).toVector
       )
 
@@ -329,47 +335,50 @@ object HDOSE:
       )
 
     given enumerationSeq[D, T: ClassTag](using fix: FixDomain[D, T], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], T], OriginAxe] = f =>
-      EnumerationSequenceOriginAxe(
+      SequenceOfEnumerationOriginAxe(
         Genome.GenomeBound.SequenceOfEnumeration(f.value, f.domain.map(d => fix(d).domain.toArray).toVector),
         f.domain.map(d => weight(d)).toVector
       )
 
 
     def genomeBound(originAxe: OriginAxe) = originAxe match
-      case c: ContinuousOriginAxe ⇒ c.p
-      case d: DiscreteOriginAxe ⇒ d.p
-      case cs: ContinuousSequenceOriginAxe ⇒ cs.p
-      case ds: DiscreteSequenceOriginAxe ⇒ ds.p
+      case c: ScalarDoubleOriginAxe ⇒ c.p
+      case d: ScalarIntOriginAxe ⇒ d.p
+      case cs: SequenceOfDoubleOriginAxe ⇒ cs.p
+      case ds: SequenceOfIntOriginAxe ⇒ ds.p
       case en: EnumerationOriginAxe => en.p
-      case en: EnumerationSequenceOriginAxe => en.p
-      case d: ContinousDiscreteOriginAxe => d.p
+      case en: SequenceOfEnumerationOriginAxe => en.p
+      case d: ContinuousIntOriginAxe => d.p
+      case d: SequenceOfContinuousIntOriginAxe => d.p
 
     def toGenome(axes: Seq[OriginAxe]): Genome = axes.map(genomeBound)
 
     def weightC(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case c: ContinuousOriginAxe ⇒ Seq(c.weight)
-        case cs: ContinuousSequenceOriginAxe ⇒ cs.weight
+        case c: ScalarDoubleOriginAxe ⇒ Seq(c.weight)
+        case cs: SequenceOfDoubleOriginAxe ⇒ cs.weight
+        case d: ContinuousIntOriginAxe => Seq(d.weight)
+        case d: SequenceOfContinuousIntOriginAxe => d.weight
         case _ => Seq()
 
     def weightD(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case d: DiscreteOriginAxe ⇒ Seq(d.weight)
-        case ds: DiscreteSequenceOriginAxe ⇒ ds.weight
+        case d: ScalarIntOriginAxe ⇒ Seq(d.weight)
+        case ds: SequenceOfIntOriginAxe ⇒ ds.weight
         case en: EnumerationOriginAxe => Seq(en.weight)
-        case en: EnumerationSequenceOriginAxe => en.weight
-        case d: ContinousDiscreteOriginAxe => Seq(d.weight)
+        case en: SequenceOfEnumerationOriginAxe => en.weight
         case _ => Seq()
 
 
   sealed trait OriginAxe
-  case class ContinuousOriginAxe(p: Genome.GenomeBound.ScalarDouble, weight: Double) extends OriginAxe
-  case class ContinuousSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, weight: Vector[Double]) extends OriginAxe
-  case class DiscreteOriginAxe(p: Genome.GenomeBound.ScalarInt, weight: Double) extends OriginAxe
-  case class ContinousDiscreteOriginAxe(p: Genome.GenomeBound.ContinuousInt, weight: Double) extends OriginAxe
-  case class DiscreteSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfInt, weight: Vector[Double]) extends OriginAxe
+  case class ScalarDoubleOriginAxe(p: Genome.GenomeBound.ScalarDouble, weight: Double) extends OriginAxe
+  case class SequenceOfDoubleOriginAxe(p: Genome.GenomeBound.SequenceOfDouble, weight: Vector[Double]) extends OriginAxe
+  case class ScalarIntOriginAxe(p: Genome.GenomeBound.ScalarInt, weight: Double) extends OriginAxe
+  case class SequenceOfIntOriginAxe(p: Genome.GenomeBound.SequenceOfInt, weight: Vector[Double]) extends OriginAxe
+  case class ContinuousIntOriginAxe(p: Genome.GenomeBound.ContinuousInt, weight: Double) extends OriginAxe
+  case class SequenceOfContinuousIntOriginAxe(p: Genome.GenomeBound.SequenceOfContinuousInt, weight: Vector[Double]) extends OriginAxe
   case class EnumerationOriginAxe(p: Genome.GenomeBound.Enumeration[?], weight: Double) extends OriginAxe
-  case class EnumerationSequenceOriginAxe(p: Genome.GenomeBound.SequenceOfEnumeration[?], weight: Vector[Double]) extends OriginAxe
+  case class SequenceOfEnumerationOriginAxe(p: Genome.GenomeBound.SequenceOfEnumeration[?], weight: Vector[Double]) extends OriginAxe
 
 
   def apply(
@@ -385,6 +394,9 @@ object HDOSE:
     val genomeValue = OriginAxe.toGenome(origin)
     val weightC = OriginAxe.weightC(origin)
     val weightD = OriginAxe.weightD(origin)
+
+    assert(Genome.discrete(genomeValue).size == weightD.size, s"Discrete ${Genome.discrete(genomeValue)} should be of the same size as weights ${weightD}")
+    assert(Genome.continuous(genomeValue).size == weightC.size, s"Discrete ${Genome.continuous(genomeValue)} should be of the same size as weights ${weightC}")
 
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match
       case None ⇒
