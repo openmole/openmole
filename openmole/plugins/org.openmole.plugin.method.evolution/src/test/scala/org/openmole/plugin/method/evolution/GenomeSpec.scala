@@ -22,7 +22,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 import org.openmole.plugin.domain.collection.{*, given}
-import org.openmole.plugin.domain.bounds._
+import org.openmole.plugin.domain.bounds.{*, given}
 
 class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 

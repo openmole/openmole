@@ -21,7 +21,7 @@ import org.scalatest._
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.plugin.domain.collection.*
+import org.openmole.plugin.domain.collection.{*, given}
 
 class CombineSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.Stubs._

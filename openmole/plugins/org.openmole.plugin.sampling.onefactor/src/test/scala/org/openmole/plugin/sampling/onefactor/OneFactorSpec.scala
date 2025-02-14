@@ -3,7 +3,7 @@ package org.openmole.plugin.sampling.onefactor
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.scalatest._
-import org.openmole.plugin.domain.collection._
+import org.openmole.plugin.domain.collection.{*, given}
 
 /*
  * Copyright (C) 2021 Romain Reuillon
