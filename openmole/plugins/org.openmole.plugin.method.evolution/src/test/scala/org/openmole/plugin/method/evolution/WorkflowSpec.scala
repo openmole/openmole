@@ -247,12 +247,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     }
   }
 
-  "Genome bounds" should "compile" in {
-    import org.openmole.plugin.domain.collection._
-    val ba = Val[Array[Boolean]]
-    val b1: GenomeBound = ba in Seq(Vector(true, false), Vector(true, false))
-    val b2: GenomeBound = ba in 2
-  }
 
   "NSGAEvolution" should "be valid" in {
     val a = Val[Double]

@@ -50,5 +50,14 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     g5.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt] should equal(true)
     g5.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt].size should equal(10)
 
+    val b = Val[Boolean]
+    val ba = Val[Array[Boolean]]
+    val b1: Genome = Seq(ba in Seq.fill(2)(TrueFalse))
+    val b2: Genome = Seq(b in TrueFalse)
+    b1.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]] should equal(true)
+    b2.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.Enumeration[?]] should equal(true)
+
+
+
 
 
