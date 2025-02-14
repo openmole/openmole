@@ -45,8 +45,8 @@ object Genome:
       SequenceOfEnumeration(f.value, f.domain.map(d => fix(d).domain.toArray).toVector)
 
   object GenomeBound extends GenomeBoundLowPriorityImplicits:
-    import org.openmole.core.workflow.domain._
-    import org.openmole.core.workflow.sampling._
+    import org.openmole.core.workflow.domain.*
+    import org.openmole.core.workflow.sampling.*
 
     given [D](using bounded: BoundedDomain[D, Double]): Conversion[Factor[D, Double], ScalarDouble] = f =>
       val (min, max) = bounded(f.domain).domain
@@ -60,14 +60,14 @@ object Genome:
       val (min, max) = bounded(f.domain).domain
       ContinuousInt(f.value, min.toInt, max.toInt)
 
-    given [D](using bounded: BoundedDomain[D, Double]): Conversion[Factor[Seq[D], Array[Double]], SequenceOfDouble] = f =>
+    given asd[D](using bounded: BoundedDomain[D, Double]): Conversion[Factor[Seq[D], Array[Double]], SequenceOfDouble] = f =>
       val (min, max) = f.domain.map(d => bounded(d).domain).unzip
       SequenceOfDouble(f.value, min.toArray, max.toArray, f.domain.size)
 
     given [D](using bounded: BoundedDomain[D, Int]): Conversion[Factor[Seq[D], Array[Int]], SequenceOfInt] = f =>
       val (min, max) = f.domain.map(d => bounded(d).domain).unzip
       SequenceOfInt(f.value, min.toArray, max.toArray, f.domain.size)
-    
+
     given [D](using bounded: BoundedDomain[D, Double]): Conversion[Factor[Seq[D], Array[Int]], SequenceOfContinuousInt] = f =>
       val (min, max) = f.domain.map(d => bounded(d).domain).unzip
       SequenceOfContinuousInt(f.value, min.map(_.toInt).toArray, max.map(_.toInt).toArray, f.domain.size)

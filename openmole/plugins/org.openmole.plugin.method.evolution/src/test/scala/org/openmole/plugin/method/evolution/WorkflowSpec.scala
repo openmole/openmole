@@ -22,7 +22,7 @@ import org.openmole.core.workflow.composition.DSL.tasks
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation.*
-import org.openmole.plugin.domain.collection.*
+import org.openmole.plugin.domain.collection.{*, given}
 import org.scalatest.*
 import org.openmole.plugin.domain.bounds.*
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
@@ -57,7 +57,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
   }
 
-  def conflict = {
+  def conflict = 
     import EvolutionWorkflow._
 
     val population = Val[Double]
@@ -79,7 +79,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       parallelism = 10,
       termination = 10
     )
-  }
 
   "Bounds" should "be accepted for arrays" in {
     val xArray = Val[Array[Double]]

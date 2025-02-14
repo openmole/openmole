@@ -27,34 +27,34 @@ package collection:
 
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits:
-    implicit def iterableIsDiscrete[T]: DiscreteDomain[Iterable[T], T] = DiscreteDomain(domain => Domain(domain.iterator))
-    implicit def iterableIsDiscreteFromContext[T]: DiscreteFromContextDomain[Iterable[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
-    implicit def iterableIsFix[T]: FixDomain[Iterable[T], T] = FixDomain(domain => Domain(domain))
-    implicit def iterableIsSized[T]: DomainSize[Iterable[T]] = DomainSize(domain => domain.size)
+    given [T]: DiscreteDomain[Iterable[T], T] = DiscreteDomain(domain => Domain(domain.iterator))
+    given [T]: DiscreteFromContextDomain[Iterable[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
+    given [T]: FixDomain[Iterable[T], T] = FixDomain(domain => Domain(domain))
+    given [T]: DomainSize[Iterable[T]] = DomainSize(domain => domain.size)
 
 package object collection extends LowPriorityImplicits:
 
-  implicit def rangeIsBounded: BoundedDomain[scala.Range, Int] = BoundedDomain(r => Domain((r.min, r.max)))
-  implicit def doubleRangeIsBounded: BoundedDomain[DoubleRange, Double] = BoundedDomain(r => Domain((r.low, r.high)))
+  given BoundedDomain[scala.Range, Int] = BoundedDomain(r => Domain((r.min, r.max)))
+  given BoundedDomain[DoubleRange, Double] = BoundedDomain(r => Domain((r.low, r.high)))
 
-  implicit def rangeIsStep: DomainStep[scala.Range, Int] = DomainStep(r => r.step)
-  implicit def doubleRangeIsStep: DomainStep[DoubleRange, Double] = DomainStep(r => r.step)
+  given DomainStep[scala.Range, Int] = DomainStep(r => r.step)
+  given DomainStep[DoubleRange, Double] = DomainStep(r => r.step)
 
-  implicit def iterableOfToArrayIsFinite[T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] =
+  given [T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] =
     DiscreteFromContextDomain: domain ⇒
       Domain(FromContext(_ => (domain.map(implicitly[ToArray[A1]].apply[T])).iterator))
 
-  implicit def iterableOfToArrayIsFix[T: ClassTag, A1[_]: ToArray]: FixDomain[Iterable[A1[T]], Array[T]] = FixDomain(domain => Domain(domain.map(implicitly[ToArray[A1]].apply[T])))
+  given [T: ClassTag, A1[_]: ToArray]: FixDomain[Iterable[A1[T]], Array[T]] = FixDomain(domain => Domain(domain.map(implicitly[ToArray[A1]].apply[T])))
   
-  implicit def arrayIsDiscrete[T]: DiscreteFromContextDomain[Array[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
-  implicit def arrayIsFix[T]: FixDomain[Array[T], T] = FixDomain(domain => Domain(domain.toIterable))
-  implicit def arrayIsSized[T]: DomainSize[Array[T]] = DomainSize(domain => domain.size)
+  given [T]: DiscreteFromContextDomain[Array[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
+  given [T]: FixDomain[Array[T], T] = FixDomain(domain => Domain(domain.toIterable))
+  given [T]: DomainSize[Array[T]] = DomainSize(domain => domain.size)
   //implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain ⇒ Domain(domain)
-  implicit def fromContextIteratorIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterator[T]], T] = DiscreteFromContextDomain(domain => Domain(domain))
+  given [T]: DiscreteFromContextDomain[FromContext[Iterator[T]], T] = DiscreteFromContextDomain(domain => Domain(domain))
 
-  implicit def booleanValIsFactor(p: Val[Boolean]): Factor[Vector[Boolean], Boolean] = Factor(p, Vector(true, false))
+  given Conversion[Val[Boolean], Factor[Vector[Boolean], Boolean]] = p => Factor(p, Vector(true, false))
 
-  implicit def arrayValIsFinite[T]: DiscreteFromContextDomain[Val[Array[T]], T] =
+  given [T]: DiscreteFromContextDomain[Val[Array[T]], T] =
     DiscreteFromContextDomain: domain =>
       Domain(
         FromContext { p ⇒
@@ -62,4 +62,3 @@ package object collection extends LowPriorityImplicits:
         },
         inputs = Seq(domain)
       )
-

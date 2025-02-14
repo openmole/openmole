@@ -4,8 +4,8 @@ package org.openmole.plugin.sampling.onefactor
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.workflow.domain.DiscreteFromContextDomain
-import org.openmole.plugin.domain.collection._
-import org.openmole.plugin.sampling.combine._
+import org.openmole.plugin.domain.collection.{*, given}
+import org.openmole.plugin.sampling.combine.{*, given}
 
 case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: DiscreteFromContextDomain[D, T]) {
   def nominalSampling: Sampling = factor.value in Seq(nominalValue)

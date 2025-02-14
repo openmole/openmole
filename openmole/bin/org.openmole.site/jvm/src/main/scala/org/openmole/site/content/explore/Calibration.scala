@@ -195,7 +195,7 @@ NSGA2Evolution(
   objective = distance,
   populationSize = 200,
   genome = Seq(
-    param1 in Array.fill(100)(0.0, 99.0),
+    param1 in Seq.fill(100)(0.0 to 99.0),
     param2 in (1.0 to 10.0),
     param3 in TrueFalse),
   termination = 100,
