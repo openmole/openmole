@@ -59,7 +59,8 @@ class Activator extends BundleActivator:
       WordHighLight("hours"),
       WordHighLight("day"),
       WordHighLight("days"),
-      WordHighLight("TrueFalse")
+      WordHighLight("TrueFalse"),
+      WordHighLight("to"),
     )
 
     PluginRegistry.register(this, highLight = highLight)

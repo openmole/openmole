@@ -61,7 +61,7 @@ package keyword:
     implicit class OnDecorator[A](a: A):
       infix def on[B](b: B) = On(a, b)
 
-    extension [A](a: A)
+    implicit class WeightDecorator[A](a: A):
       infix def weight[B](b: B) = Weight(a, b)
 
 package object keyword extends KeyWordPackage
