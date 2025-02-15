@@ -17,12 +17,12 @@ package org.openmole.plugin.method.evolution
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalatest._
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
-
+import org.scalatest.*
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.domain.collection.{*, given}
 import org.openmole.plugin.domain.bounds.{*, given}
+import org.openmole.plugin.method.evolution.HDOSE.OriginAxe.genomeBound
 
 class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
@@ -55,10 +55,41 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     val b = Val[Boolean]
     val ba = Val[Array[Boolean]]
-    val b1: Genome = Seq(ba in Seq.fill(2)(TrueFalse))
-    val b2: Genome = Seq(b in TrueFalse)
-    b1.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]] should equal(true)
-    b2.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.Enumeration[?]] should equal(true)
+    val b1: HDOSE.OriginAxe = ba in Seq.fill(10)(TrueFalse)
+    val b2: HDOSE.OriginAxe = b in TrueFalse
+    genomeBound(b1).isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]] should equal(true)
+    genomeBound(b1).asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]].values.size should equal(10)
+
+    genomeBound(b2).isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.Enumeration[?]] should equal(true)
+
+    def isOriginAxe(o: HDOSE.OriginAxe) = o
+
+    val a = Val[Double]
+
+    isOriginAxe(a in (0.0 to 10.0))
+    isOriginAxe(a in (0.0 to 10.0 weight 5.0))
+
+    val ar = Val[Array[Double]]
+    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0))
+    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0 weight 2.0))
+
+    val i1 = Val[Int]
+    isOriginAxe(i1 in (0.0 to 10.0))
+    isOriginAxe(i1 in (0 to 10))
+    isOriginAxe(i1 in (0.0 to 10.0 weight 5.0))
+    isOriginAxe(i1 in (0 to 10 weight 5.0))
+
+    val ai2 = Val[Array[Int]]
+    isOriginAxe(ai2 in Vector.fill(10)(0 to 100))
+    isOriginAxe(ai2 in Vector.fill(10)(0 to 100 weight 20.0))
+
+    val bo = Val[Boolean]
+    isOriginAxe(bo in TrueFalse)
+    isOriginAxe(bo in (TrueFalse weight 10.0))
+
+    val bao = Val[Array[Boolean]]
+    isOriginAxe(bao in Vector.fill(10)(TrueFalse))
+    isOriginAxe(bao in Vector.fill(10)(TrueFalse weight 10.0))
 
 
 

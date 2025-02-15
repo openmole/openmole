@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation.*
 import org.openmole.plugin.domain.collection.{*, given}
 import org.scalatest.*
-import org.openmole.plugin.domain.bounds.*
+import org.openmole.plugin.domain.bounds.{*, given}
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
 
 object WorkflowSpec:
@@ -57,7 +57,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
   }
 
-  def conflict = 
+  def conflict =
     import EvolutionWorkflow._
 
     val population = Val[Double]
@@ -99,18 +99,20 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     @volatile var executed = 0
 
     val a = Val[Double]
+    val ba = Val[Array[Boolean]]
 
     val testTask =
       FromContextTask("test") { p ⇒
         import p._
         executed += 1
+        assert(context(ba).size == 10)
         context
-      } set ((inputs, outputs) += a)
+      } set ((inputs, outputs) += (a, ba))
 
     val nsga = NSGA2Evolution(
       evaluation = testTask,
       objective = Seq(a),
-      genome = Seq(a in (0.0, 1.0)),
+      genome = Seq(a in (0.0, 1.0), ba in Seq.fill(10)(TrueFalse)),
       termination = 100,
       parallelism = 10
     )
@@ -572,54 +574,39 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       stochastic = Stochastic()
     )
 
-  "HDOSE" should "support syntax for origin" in :
-    val a = Val[Double]
-    val b = Val[Double]
 
-    def isOriginAxe(o: HDOSE.OriginAxe) = o
-
-    isOriginAxe(a in (0.0 to 10.0))
-    isOriginAxe(a in (0.0 to 10.0 weight 5.0))
-
-    val ar = Val[Array[Double]]
-    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0))
-    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0 weight 2.0))
-
-    val i1 = Val[Int]
-    isOriginAxe(i1 in (0.0 to 10.0))
-    isOriginAxe(i1 in (0 to 10))
-    isOriginAxe(i1 in (0.0 to 10.0 weight 5.0))
-    isOriginAxe(i1 in (0 to 10 weight 5.0))
-
-    val ai2 = Val[Array[Int]]
-    isOriginAxe(ai2 in Vector.fill(10)(0 to 100))
-    isOriginAxe(ai2 in Vector.fill(10)(0 to 100 weight 20.0))
-
-    val bo = Val[Boolean]
-    isOriginAxe(bo in TrueFalse)
-    isOriginAxe(bo in (TrueFalse weight 10.0))
-
-    val bao = Val[Boolean]
-    isOriginAxe(bao in Vector.fill(10)(TrueFalse))
-    isOriginAxe(bao in Vector.fill(10)(TrueFalse weight 10.0))
-
-
-  it should "support syntax for method definition" in :
+  "HDOSE" should "support syntax for method definition" in :
     val ar = Val[Array[Double]]
     val i1 = Val[Int]
     val a = Val[Double]
     val b = Val[Double]
+    val ba = Val[Array[Boolean]]
+    val bi = Val[Array[Int]]
 
-    HDOSEEvolution(
-      origin = Seq(
-        ar in Vector.fill(10)(0.0 to 10.0 weight 2.0),
-        i1 in (0.0 to 10.0 weight 5.0)
-      ),
-      evaluation = EmptyTask(),
-      objective = Seq(a under 9, b under 3.0),
-      termination = 100,
-      stochastic = Stochastic()
-    )
+    val testTask =
+      FromContextTask("test") { p ⇒
+        import p._
+        context(ba).size should equal(10)
+        context(bi).size should equal(10)
+        context
+      } set ((inputs, outputs) += (ba, bi), outputs += (a, b), a := 8, b := 1.0)
+
+
+    val hdose =
+      HDOSEEvolution(
+        origin = Seq(
+          ar in Vector.fill(10)(0.0 to 10.0 weight 2.0),
+          i1 in (0.0 to 10.0 weight 5.0),
+          ba in Seq.fill(10)(TrueFalse),
+          bi in Seq.fill(10)(1 to 100)
+        ),
+        evaluation = testTask,
+        objective = Seq(a under 9, b under 3.0),
+        termination = 100,
+        stochastic = Stochastic()
+      )
+
+    hdose.run()
 
   it should "be serializable" in:
     val a = Val[Double]

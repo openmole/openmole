@@ -295,7 +295,7 @@ object HDOSE:
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
-
+  
   object OriginAxe:
     given factorDouble[D](using bounds: BoundedDomain[D, Double], weight: DomainWeight[D, Double]): Conversion[Factor[D, Double], OriginAxe] = f =>
       val (min, max) = bounds(f.domain).domain
@@ -333,8 +333,7 @@ object HDOSE:
         Genome.GenomeBound.Enumeration(f.value, domain),
         weight(f.domain)
       )
-
-    given enumerationSeq[D, T: ClassTag](using fix: FixDomain[D, T], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], T], OriginAxe] = f =>
+    given enumerationSeq[D, T: ClassTag](using fix: FixDomain[D, T], weight: DomainWeight[D, Double]): Conversion[Factor[Seq[D], Array[T]], OriginAxe] = f =>
       SequenceOfEnumerationOriginAxe(
         Genome.GenomeBound.SequenceOfEnumeration(f.value, f.domain.map(d => fix(d).domain.toArray).toVector),
         f.domain.map(d => weight(d)).toVector
