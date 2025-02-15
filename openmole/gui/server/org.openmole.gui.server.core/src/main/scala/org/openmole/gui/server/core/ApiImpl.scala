@@ -28,9 +28,11 @@ import org.openmole.core.module
 import org.openmole.core.market
 import org.openmole.core.preference.{ConfigurationString, Preference, PreferenceLocation}
 import org.openmole.core.project.*
-import org.openmole.core.services.Services
+import org.openmole.core.services.{Services, ServicesContainer}
 import org.openmole.core.threadprovider.{ThreadProvider, toExecutionContext}
 import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+
 import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
@@ -46,6 +48,7 @@ import org.openmole.gui.server.git.GitService
 import org.openmole.gui.shared.data
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.outputredirection.OutputRedirection
+
 import scala.jdk.FutureConverters.*
 
 /*
@@ -292,33 +295,30 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def validateScript(script: SafePath) =
     import services.*
     val outputStream = StringPrintStream(Some(preference(outputSize)))
-    synchronousCompilation(script, outputStream) match
+    compileToDSL(script, outputStream) match
       case e: ErrorData => Some(e)
-      case e: MoleExecution =>
+      case (s, _, dsl: DSL) =>
         try
-          e.validate
+          given KeyValueCache = KeyValueCache()
+          org.openmole.core.workflow.validation.Validation(dsl)
           None
         catch
           case e: Throwable => Some(ErrorData(e))
-        finally
-          MoleExecution.clean(e)
+        finally TmpDirectory.dispose(s.tmpDirectory)
 
-  def synchronousCompilation(
-    scriptPath: SafePath,
-    outputStream: StringPrintStream): ErrorData | MoleExecution =
+  def scriptCompilationError(t: Throwable): ErrorData =
+    t match
+      case ce: Interpreter.CompilationError =>
+        def toErrorWithLocation(em: Interpreter.ErrorMessage) =
+          ScriptError(
+            em.rawMessage,
+            position = em.position.map { p => ScriptError.Position(p.line, p.point, p.start, p.end) }
+          )
 
-    def scriptError(t: Throwable): ErrorData =
-      t match
-        case ce: Interpreter.CompilationError ⇒
-          def toErrorWithLocation(em: Interpreter.ErrorMessage) =
-            ScriptError(
-              em.rawMessage,
-              position = em.position.map { p => ScriptError.Position(p.line, p.point, p.start, p.end) }
-            )
+        ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
+      case _ ⇒ ErrorData(t)
 
-          ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
-        case _ ⇒ ErrorData(t)
-
+  def compileToDSL(scriptPath: SafePath, outputStream: StringPrintStream): ErrorData | (ServicesContainer, Compiled, DSL) =
     def message(message: String) = MessageErrorData(message, None)
 
     val script: File =
@@ -338,30 +338,41 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     try
       Project.compile(script.getParentFileSafe, script)(runServices) match
         case ScriptFileDoesNotExists() ⇒ ErrorData("Script file does not exist")
-        case ErrorInCode(e) ⇒ scriptError(e)
-        case ErrorInCompiler(e) ⇒ scriptError(e)
+        case ErrorInCode(e) ⇒ scriptCompilationError(e)
+        case ErrorInCompiler(e) ⇒ scriptCompilationError(e)
         case compiled: Compiled ⇒
           if Thread.interrupted() then throw new InterruptedIOException()
-          import runServices._
+
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
+            case Failure(e) ⇒ scriptCompilationError(e)
+            case Success(dsl) ⇒ (runServices, compiled, dsl)
+    catch
+      case t: Throwable ⇒ scriptCompilationError(t)
+
+  def synchronousCompilation(
+    scriptPath: SafePath,
+    outputStream: StringPrintStream): ErrorData | MoleExecution =
+
+    try
+      compileToDSL(scriptPath, outputStream) match
+        case e: ErrorData => e
+        case (runServices: ServicesContainer, compiled, dsl: DSL) =>
+          import runServices.*
 
           val executionServices =
             MoleServices.create(
               applicationExecutionDirectory = runServices.workspace.tmpDirectory,
-              moleExecutionDirectory = Some(executionTmpDirectory),
-              outputRedirection = Some(executionOutputRedirection),
+              moleExecutionDirectory = Some(runServices.tmpDirectory.directory),
+              outputRedirection = Some(runServices.outputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
-            case Failure(e) ⇒ scriptError(e)
-            case Success(dsl) ⇒
-              Try(MoleExecution(dsl)(executionServices)) match
-                case Success(ex) ⇒ ex
-                case Failure(e) ⇒
-                  MoleServices.clean(executionServices)
-                  scriptError(e)
-
+          Try(MoleExecution(dsl)(executionServices)) match
+            case Success(ex) ⇒ ex
+            case Failure(e) ⇒
+              MoleServices.clean(executionServices)
+              scriptCompilationError(e)
     catch
-      case t: Throwable ⇒ scriptError(t)
+      case t: Throwable ⇒ scriptCompilationError(t)
 
 
   def launchScript(script: SafePath, validateScript: Boolean) =
