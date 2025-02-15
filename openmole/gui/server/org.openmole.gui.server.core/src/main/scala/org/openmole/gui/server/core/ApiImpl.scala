@@ -300,8 +300,14 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case (s, _, dsl: DSL) =>
         try
           given KeyValueCache = KeyValueCache()
-          org.openmole.core.workflow.validation.Validation(dsl)
-          None
+          val validationErrors = org.openmole.core.workflow.validation.Validation(dsl)
+
+          if validationErrors.nonEmpty
+          then
+            Some:
+              ErrorData:
+                new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s):\n" + validationErrors.mkString("\n"))
+          else None
         catch
           case e: Throwable => Some(ErrorData(e))
         finally TmpDirectory.dispose(s.tmpDirectory)
