@@ -8,6 +8,7 @@ import scaladget.nouislider.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.nouislider.NoUISliderImplicits.*
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.client.core.{CoreFetch, Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
@@ -215,50 +216,24 @@ object PlotContent:
 
     val tabData = TabData(safePath, None)    
 
-    def stayAtTheEnd = 
-      currentState match
-        case rs: RawState => rs.scrollDown
-        case ts: TableState => ts.scrollDown
-        case _ => false  
-
-    def setScrollToBottom(element: HtmlElement) =
-      element.ref.scrollTop = element.ref.scrollHeight
-  
-    def buildBottomSwitch = 
-      def switchComponent(action: () => Unit) =  
-        Component.Switch(
-          "End",
-          stayAtTheEnd,
-          onChange =
-            case true => action()
-            case false => ()
-        )
-      
-      currentState match
-          case r: RawState =>
-            sectionView match 
-              case EditorView(_, editor) => Some(switchComponent(() => editor.scrollToBottom))
-              case _=> None
-          case ts: TableState=> 
-            sectionView match
-              case BasicView(view)=> Some(switchComponent(()=> setScrollToBottom(view)))
-              case _=> None    
-          case _=> None 
-
-    val bottomSwitch = buildBottomSwitch
+    def setScrollToBottom: Unit =
+      sectionView match
+          case EditorView(_, editor) => editor.scrollToBottom
+          case BasicView(view) => view.ref.scrollTop = view.ref.scrollHeight
+          case _ =>
 
     def updatedContentState = 
       currentState match
-        case TableState(_,_) => TableState(bottomSwitch.map(_.checked.now()).getOrElse(false))
-        case RawState(_,_)=> RawState(bottomSwitch.map(_.checked.now()).getOrElse(false))
-        case PlotState(_,_)=> 
+        case _: TableState => TableState()
+        case _: RawState => RawState()
+        case _: PlotState =>
             sectionView match
               case PlotView(view, resultPlot) => 
                 val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.t)
                 val numberOfColumToBePlotted = resultPlot.oneTwoNRadio.selected.now().map(x=> x.t).head
                 PlotState(numberOfColumToBePlotted, selectedAxis)
-              case _=> PlotState(NumberOfColumToBePlotted.One, Seq())
-        case MetadataState(_)=> MetadataState() 
+              case _ => PlotState(NumberOfColumToBePlotted.One, Seq())
+        case _: MetadataState => MetadataState()
 
     def switchFromState(state: ContentState, states: ContentStates): Unit = 
       val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata)
@@ -315,29 +290,32 @@ object PlotContent:
                 case false => refreshButton
                 case true => Waiter.waiter("#794985")
             ),
+            currentState match
+              case _: RawState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
+              case _: TableState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
+              case _ => div(),
             sectionStates.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
             ,
             switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
-            bottomSwitch.map(_.element.amend(marginLeft := "100px")).getOrElse(div())
           ),
           sectionView.view
         )
       )
 
-    timers.setTimeout(500) {  
-       currentState match
-          case r: RawState if r.scrollDown => 
-            sectionView match 
-              case EditorView(_, editor) => editor.scrollToBottom
-              case _=> 
-          case ts: TableState if ts.scrollDown => 
-            sectionView match
-              case BasicView(view)=> setScrollToBottom(view)
-              case _=> 
-          case _=>  
-    }
+//    timers.setTimeout(500) {
+//       currentState match
+//          case r: RawState if r.scrollDown =>
+//            sectionView match
+//              case EditorView(_, editor) => editor.scrollToBottom
+//              case _=>
+//          case ts: TableState if ts.scrollDown =>
+//            sectionView match
+//              case BasicView(view)=> setScrollToBottom(view)
+//              case _=>
+//          case _=>
+//    }
 
     (tabData, content)
 
