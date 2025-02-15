@@ -349,7 +349,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     catch
       case t: Throwable ⇒ scriptCompilationError(t)
 
-  def synchronousCompilation(
+  def compileToMoleExecution(
     scriptPath: SafePath,
     outputStream: StringPrintStream): ErrorData | MoleExecution =
 
@@ -406,7 +406,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
     def compileAndRun =
-      synchronousCompilation(script, outputStream) match
+      compileToMoleExecution(script, outputStream) match
         case e: MoleExecution =>
           if Thread.interrupted() then throw new InterruptedIOException()
           processRun(execId, e, validateScript)
