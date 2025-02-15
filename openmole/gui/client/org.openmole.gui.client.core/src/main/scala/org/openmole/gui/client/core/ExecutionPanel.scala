@@ -392,7 +392,7 @@ class ExecutionPanel:
           case Some(Expand.Script) => div(execTextArea(details.script))
           case Some(Expand.Console) =>
             val size = Var(1000)
-            //val ansi: Var[Boolean] = Var(true)
+            val showConsoleControls = Var(false)
 
             div(
               child <--
@@ -403,7 +403,12 @@ class ExecutionPanel:
                       val convert = scalajs.js.Dynamic.newInstance(Convert)()
                       convert.options.newline = true
 
-                      def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", marginTop := "0", marginBottom := "10")
+                      def widthValue =
+                        showConsoleControls.signal.map:
+                          case true => "800"
+                          case false => "900"
+
+                      def baseOutputDiv = div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", width <-- widthValue, overflow := "scroll", marginTop := "0", marginBottom := "10")
 
                       def ansiOutputDiv =
                         val d = baseOutputDiv
@@ -423,7 +428,7 @@ class ExecutionPanel:
                           case false => rawOutputDiv
 
                       def more =
-                        if output.listed < output.total
+                        if true //output.listed < output.total
                         then
                           div(cursor.pointer, display.flex, justifyContent.flexEnd, alignItems.center,
                             i(s"${output.listed}/${output.total}"),
@@ -437,12 +442,21 @@ class ExecutionPanel:
                         height := "500",
                         child <-- outputDiv,
                         outputDiv.toObservable --> Observer[ReactiveElement[HTMLDivElement]](e => e.ref.scrollTop = e.ref.scrollHeight),
-                        div(
-                          columnFlex,
-                          marginTop := "20px",
-                          ansiSwitch.element.amend(justifyContent.flexEnd),
-                          more
-                        )
+
+                        div(display.flex, flexDirection.row, alignItems.center, height := "100",
+                          child <--
+                            showConsoleControls.signal.map:
+                              case true =>
+                                div(
+                                  columnFlex,
+                                  marginTop := "20px",
+                                  ansiSwitch.element.amend(justifyContent.flexEnd),
+                                  more
+                                )
+                              case false => emptyNode,
+                          div(cls := "bi-three-dots-vertical execControls", color := "#373f46", backgroundColor := "white",
+                            onClick --> showConsoleControls.update(!_))
+                        ),
                       )
                       //outputDiv ++ more ++ Seq(bottom)
                     case None => i(cls := "bi bi-hourglass-split", textAlign := "center")
