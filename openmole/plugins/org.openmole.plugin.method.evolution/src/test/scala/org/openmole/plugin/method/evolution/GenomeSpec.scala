@@ -52,6 +52,29 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       case s: org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt if s.size == 10 =>
 
 
+  "OSE Origin Axe" should "support the following cases" in :
+
+    def originAxe(o: OSE.OriginAxe) = o
+
+    val ad = Val[Double]
+
+    originAxe(ad in (0.0 to 10.0)) shouldBe a[OSE.ScalarDoubleOriginAxe]
+
+    val ar = Val[Array[Double]]
+    originAxe(ar in Vector.fill(10)(0.0 to 10.0)) shouldBe a[OSE.SequenceOfDoubleOriginAxe]
+
+    val i1 = Val[Int]
+    originAxe(i1 in (0 to 10)) shouldBe a [OSE.ScalarIntOriginAxe]
+    originAxe(i1 in (0.0 to 10.0)) shouldBe a [OSE.ContinuousIntOriginAxe]
+
+    val ai2 = Val[Array[Int]]
+    originAxe(ai2 in Vector.fill(10)(0 to 100)) shouldBe a[OSE.SequenceOfIntOriginAxe]
+    originAxe(ai2 in Vector.fill(10)(0.0 to 100.0)) shouldBe a[OSE.SequenceOfContinuousIntOriginAxe]
+
+    val bo = Val[Boolean]
+    originAxe(bo in TrueFalse) shouldBe a[OSE.EnumerationOriginAxe]
+
+
   "HDOSE Origin Axe" should "support the following cases" in:
     def originAxe(o: HDOSE.OriginAxe) = o
 
