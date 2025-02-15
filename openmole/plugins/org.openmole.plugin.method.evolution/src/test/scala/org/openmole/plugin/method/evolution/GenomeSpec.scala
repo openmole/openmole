@@ -17,80 +17,72 @@ package org.openmole.plugin.method.evolution
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalatest.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.domain.collection.{*, given}
 import org.openmole.plugin.domain.bounds.{*, given}
 import org.openmole.plugin.method.evolution.HDOSE.OriginAxe.genomeBound
 
+import org.scalatest.*
+
 class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  "syntax x to y" should "be converted to bounds" in:
+  "Genome" should "support the following cases" in:
+    def genomeBound(g: Genome.GenomeBound) = g
+
     val x = Val[Double]
-    val g1: Genome = Seq(x in (1.0 to 2.0))
-    g1.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble] should equal(true)
+    genomeBound(x in (1.0 to 2.0)) shouldBe a [org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble]
+    genomeBound(x in (0.0, 99.0)) shouldBe a [org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble]
+    genomeBound(x in (0.5 to 1.0)) should matchPattern:
+      case g: Genome.GenomeBound.ScalarDouble if g.low == 0.5 && g.high == 1.0 =>
 
     val y = Val[Int]
-    val g2: Genome = Seq(y in (1 to 20))
-    g2.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarInt] should equal(true)
-
-    val g3: Genome = Seq(x in (0.5 to 1.0))
-    val g3part = g3.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarDouble]
-    g3part.low should equal(0.5)
-    g3part.high should equal(1.0)
+    genomeBound(y in (1 to 20)) shouldBe a [org.openmole.plugin.method.evolution.Genome.GenomeBound.ScalarInt]
 
     val vx = Val[Array[Double]]
-    val g4: Genome = Seq(vx in Seq.fill(10)(0.0 to 1.0))
-    g4.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble] should equal(true)
-    g4.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble].size should equal(10)
+    genomeBound(vx in Seq.fill(10)(0.0 to 1.0)) shouldBe a [org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble]
+    genomeBound(vx in Seq.fill(10)(0.0 to 1.0)) should matchPattern:
+      case s: org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble if s.size == 10 =>
+
+    genomeBound(vx in Seq.fill(100)(0.0, 99.0)) shouldBe a[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfDouble]
 
     val ai = Val[Array[Int]]
-    val g5: Genome = Seq(ai in Seq.fill(10)(0 to 100))
-    g5.head.isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt] should equal(true)
-    g5.head.asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt].size should equal(10)
+    genomeBound(ai in Seq.fill(10)(0 to 100)) shouldBe a [org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt]
+    genomeBound(ai in Seq.fill(10)(0 to 100)) should matchPattern:
+      case s: org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfInt if s.size == 10 =>
 
-    val g6: Genome = Seq(vx in Seq.fill(100)(0.0, 99.0))
-    val g7: Genome = Seq(x in (0.0, 99.0))
 
-    val b = Val[Boolean]
-    val ba = Val[Array[Boolean]]
-    val b1: HDOSE.OriginAxe = ba in Seq.fill(10)(TrueFalse)
-    val b2: HDOSE.OriginAxe = b in TrueFalse
-    genomeBound(b1).isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]] should equal(true)
-    genomeBound(b1).asInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.SequenceOfEnumeration[?]].values.size should equal(10)
+  "HDOSE Origin Axe" should "support the following cases" in:
+    def originAxe(o: HDOSE.OriginAxe) = o
 
-    genomeBound(b2).isInstanceOf[org.openmole.plugin.method.evolution.Genome.GenomeBound.Enumeration[?]] should equal(true)
+    val ad = Val[Double]
 
-    def isOriginAxe(o: HDOSE.OriginAxe) = o
-
-    val a = Val[Double]
-
-    isOriginAxe(a in (0.0 to 10.0))
-    isOriginAxe(a in (0.0 to 10.0 weight 5.0))
+    originAxe(ad in (0.0 to 10.0)) shouldBe a [HDOSE.ScalarDoubleOriginAxe]
+    originAxe(ad in (0.0 to 10.0 weight 5.0)) shouldBe a [HDOSE.ScalarDoubleOriginAxe]
 
     val ar = Val[Array[Double]]
-    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0))
-    isOriginAxe(ar in Vector.fill(10)(0.0 to 10.0 weight 2.0))
+    originAxe(ar in Vector.fill(10)(0.0 to 10.0)) shouldBe a [HDOSE.SequenceOfDoubleOriginAxe]
+    originAxe(ar in Vector.fill(10)(0.0 to 10.0 weight 2.0)) shouldBe a [HDOSE.SequenceOfDoubleOriginAxe]
 
     val i1 = Val[Int]
-    isOriginAxe(i1 in (0.0 to 10.0))
-    isOriginAxe(i1 in (0 to 10))
-    isOriginAxe(i1 in (0.0 to 10.0 weight 5.0))
-    isOriginAxe(i1 in (0 to 10 weight 5.0))
+    originAxe(i1 in (0 to 10)) shouldBe a [HDOSE.ScalarIntOriginAxe]
+    originAxe(i1 in (0 to 10 weight 5.0)) shouldBe a [HDOSE.ScalarIntOriginAxe]
+    originAxe(i1 in (0.0 to 10.0)) shouldBe a [HDOSE.ContinuousIntOriginAxe]
+    originAxe(i1 in (0.0 to 10.0 weight 5.0)) shouldBe a [HDOSE.ContinuousIntOriginAxe]
 
     val ai2 = Val[Array[Int]]
-    isOriginAxe(ai2 in Vector.fill(10)(0 to 100))
-    isOriginAxe(ai2 in Vector.fill(10)(0 to 100 weight 20.0))
+    originAxe(ai2 in Vector.fill(10)(0 to 100)) shouldBe a [HDOSE.SequenceOfIntOriginAxe]
+    originAxe(ai2 in Vector.fill(10)(0 to 100 weight 20.0))  shouldBe a [HDOSE.SequenceOfIntOriginAxe]
 
     val bo = Val[Boolean]
-    isOriginAxe(bo in TrueFalse)
-    isOriginAxe(bo in (TrueFalse weight 10.0))
+    originAxe(bo in TrueFalse) shouldBe a [HDOSE.EnumerationOriginAxe]
+    originAxe(bo in (TrueFalse weight 10.0)) shouldBe a [HDOSE.EnumerationOriginAxe]
 
     val bao = Val[Array[Boolean]]
-    isOriginAxe(bao in Vector.fill(10)(TrueFalse))
-    isOriginAxe(bao in Vector.fill(10)(TrueFalse weight 10.0))
-
+    originAxe(bao in Vector.fill(10)(TrueFalse)) shouldBe a [HDOSE.SequenceOfEnumerationOriginAxe]
+    originAxe(bao in Vector.fill(10)(TrueFalse weight 10.0)) shouldBe a [HDOSE.SequenceOfEnumerationOriginAxe]
+    originAxe(bao in Vector.fill(10)(TrueFalse weight 10.0)) should matchPattern:
+      case s: HDOSE.SequenceOfEnumerationOriginAxe if s.p.values.size == 10 =>
 
 
 
