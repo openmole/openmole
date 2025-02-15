@@ -40,16 +40,15 @@ object Profile {
 
   import org.openmole.core.keyword._
 
-  object ToProfileElement {
+  object ToProfileElement:
     implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] = v ⇒ IntervalDoubleProfileElement(v, 100)
     implicit def valIntToProfileElement: ToProfileElement[Val[Int]] = v ⇒ IntervalIntProfileElement(v)
     implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] = t ⇒ IntervalDoubleProfileElement(t.value, t.domain)
     implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]): ToProfileElement[In[Val[Double], D]] = t ⇒ FixDomainProfileElement(t.value, fix(t.domain).domain.toVector)
-  }
 
-  trait ToProfileElement[-T] {
+
+  trait ToProfileElement[-T]:
     def apply(t: T): ProfileElement
-  }
 
   object ProfileElement {
     implicit def toProfileElement[T: ToProfileElement](t: T): ProfileElement = implicitly[ToProfileElement[T]].apply(t)
