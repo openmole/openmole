@@ -57,7 +57,7 @@ object Site {
       """.stripMargin
     )
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = 
     case class Parameters(
                            target: Option[File] = None,
                            test: Boolean = false,
@@ -227,5 +227,4 @@ object Site {
       //  }
       //
     }
-  }
 }

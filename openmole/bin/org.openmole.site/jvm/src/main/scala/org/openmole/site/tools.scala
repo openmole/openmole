@@ -44,16 +44,17 @@ object tools {
 
   def comment(c: String): Frag = ""
 
-  object hl {
+  object hl:
 
     def apply(content: String, lang: String, clazz: Option[String] = Some("doc-code")) = highlight(content, lang)
 
-    def highlight(string: String, lang: String, clazz: Option[String] = Some("doc-code")) = {
+    def highlight(string: String, lang: String, clazz: Option[String] = Some("doc-code")) =
       val lines = string.split("\n", -1)
 
       val modif: Seq[Modifier] = clazz.toSeq.map(c ⇒ cls := c)
 
-      if (lines.length == 1) {
+      if lines.length == 1
+      then
         scalatags.Text.all.code(
           cls := lang + " " + "hljs",
           modif,
@@ -61,8 +62,7 @@ object tools {
           padding := 0,
           margin := 0,
           lines(0))
-      }
-      else {
+      else
         val minIndent = lines.filter(_.trim != "").map(_.takeWhile(_ == ' ').length).min
         val stripped = lines.map(_.drop(minIndent))
           .dropWhile(_ == "")
@@ -74,17 +74,14 @@ object tools {
             cls := lang + " " + "hljs",
             stripped)
         )
-      }
-    }
 
-    object OptionalName {
+    object OptionalName:
       implicit def fromString(s: String): OptionalName = OptionalName(Some(s))
-    }
 
     case class OptionalName(name: Option[String])
 
-    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None)) =
-      Test.list(Test(header + "\n" + code, name.name))
+    def openmole(code: String, header: String = "", name: OptionalName = OptionalName(None))(using sourceFile: sourcecode.File, sourceLine: sourcecode.Line) =
+      Test.list(Test(header + "\n" + code, name.name, sourceFile.value, sourceLine.value))
       apply(code, "scala")
 
     def code(code: String) = openmoleNoTest(code)
@@ -93,39 +90,34 @@ object tools {
     def openmoleNoTest(code: String) = apply(code, "scala")
     def python(code: String) = apply(code, "python")
     def json(code: String) = apply(code, "json")
-  }
+
 
   def openmole(code: String, header: String = "", name: hl.OptionalName = hl.OptionalName(None)) = hl.openmole(code, header, name)
   def code(code: String) = hl.code(code)
   def plain(code: String) = hl.plain(code)
 
   /** heavily inspired from Section.scala **/
-  object links {
+  object links:
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
-      link(elements) match {
+      link(elements) match
         case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -60, position := "relative", display := "block"))
         case None    ⇒ Seq()
-      }
 
     def link(elements: Seq[Any]) = elements.collect { case x: String ⇒ x }.headOption
     def linkIcon(elements: Seq[Any]): Seq[Modifier] =
-      link(elements) match {
+      link(elements) match
         case Some(t) ⇒ Seq(" ", a(href := s"#${shared.anchor(t)}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
         case None    ⇒ Seq()
-      }
 
     def toModifier(element: Any): Modifier =
-      element match {
+      element match
         case e: String ⇒ e
         case e: TypedTag[String] ⇒ e
         case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
         case e: AttrPair ⇒ e
         case e: SeqFrag[_] => e
         case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
-      }
-
-  }
 
   object sitemap {
 

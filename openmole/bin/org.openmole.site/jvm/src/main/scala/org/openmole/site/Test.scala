@@ -37,7 +37,9 @@ object Test:
       def name: String = t.name.getOrElse(s"test${i}")
 
       (target / s"${i}_$name.omt").content =
-        s"""${t.code}
+        s"""// Test for snippet ${t.file} line ${t.line}
+           |
+           |${t.code}
            |EmptyTask()
          """.stripMargin
 
@@ -60,4 +62,4 @@ object Test:
 //  }
 
 
-case class Test(code: String, name: Option[String])
+case class Test(code: String, name: Option[String], file: String, line: Int)
