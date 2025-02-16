@@ -126,20 +126,14 @@ object PlotContent:
 
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
-<<<<<<< HEAD
             case ms: MetadataState =>
-=======
-            case ms: MetadataState => 
-              val sliderValueText = Var("")
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
-              val metadataHistory = 
+              val metadataHistory =
                 div(
                   child <--
                     Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
                       def valueTypeToInt(vt: ValueType): Int = unwrap(vt).toString.toInt
                       def sliderValueToInt(s: Any) = s.toString.toDouble.toInt
 
-<<<<<<< HEAD
                       val dIndexValues = dataIndex.map(d => d.head.values).getOrElse(Seq())
 
                       if dIndexValues.size > 1
@@ -193,55 +187,6 @@ object PlotContent:
                             })
                         div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
                       else div()
-=======
-                      val dIndexValues = dataIndex.map(d => d.map(_.values)).getOrElse(Seq()).flatten
-                      val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
-
-                      val first2 = dIndexValues.slice(0, 2)
-
-                      val sortedKeys = indexMap.keys.toSeq.sorted
-                      val maxIndex = sortedKeys.last
-                      sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
-
-                      val element = div(width := "500", marginRight := "50", marginTop := "20")
-                      noUiSlider.create(
-                        element.ref, Options
-                          .range(Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
-                          .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
-                          .step(1.0)
-                          .connect(Options.Lower)
-                          .tooltips(false)
-                      )
-
-                      element.noUiSlider.on(event.ChangeEvent, (value, handle) =>
-                        sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
-                      )
-
-                      val sliderValueDiv = div(
-                        child <--
-                          sliderValueText.signal.map(t=>
-                            div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
-                          )
-                      )
-
-                      val loadDataButton =
-                        button(
-                          btn_primary, "Load data",
-                          onClick --> { _ =>
-                            val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
-
-                            val dataFile =
-                              dataIndex flatMap: dis=>
-                                (dis.map : di=>
-                                  di.fileIndex(newCurrentIndex)).headOption
-
-                            api.omrContent(safePath, dataFile).map: guiContent =>
-                              panels.tabContent.removeTab(safePath)
-                              val (tabData, content) = OMRContent.buildTab(safePath, guiContent, currentIndex = Some(newCurrentIndex.toInt))
-                              panels.tabContent.addTab(tabData, content)
-                          })
-                      div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
                 )
 
               BasicView(
@@ -271,7 +216,6 @@ object PlotContent:
 
     val tabData = TabData(safePath, None)    
 
-<<<<<<< HEAD
     def setScrollToBottom: Unit =
       sectionView match
           case EditorView(_, editor) => editor.scrollToBottom
@@ -319,80 +263,7 @@ object PlotContent:
     val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
     val refreshing: Var[Boolean] = Var(false)             
 
-=======
-    def stayAtTheEnd = 
-      currentState match
-        case rs: RawState => rs.scrollDown
-        case ts: TableState=> ts.scrollDown 
-        case _=> false  
-
-    def setScrollToBottom(element: HtmlElement) =
-      element.ref.scrollTop = element.ref.scrollHeight
-  
-    def buildBottomSwitch = 
-      def switchComponent(action: () => Unit) =  
-      Component.Switch(
-        "SStay at the end",
-        stayAtTheEnd,
-        onClickAction = () => action()
-      )
-      
-      currentState match
-          case r: RawState =>
-            sectionView match 
-              case EditorView(_, editor) => Some(switchComponent(()=> editor.scrollToBottom))
-              case _=> None
-          case ts: TableState=> 
-            sectionView match
-              case BasicView(view)=> Some(switchComponent(()=> setScrollToBottom(view)))
-              case _=> None    
-          case _=> None 
-
-    val bottomSwitch = buildBottomSwitch
-
-    def updatedContentState = 
-      currentState match
-        case TableState(_,_) => TableState(bottomSwitch.map(_.isChecked).getOrElse(false))
-        case RawState(_,_)=> RawState(bottomSwitch.map(_.isChecked).getOrElse(false))
-        case PlotState(_,_)=> 
-            sectionView match
-              case PlotView(view, resultPlot) => 
-                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.t)
-                val numberOfColumToBePlotted = resultPlot.oneTwoNRadio.selected.now().map(x=> x.t).head
-                PlotState(numberOfColumToBePlotted, selectedAxis)
-              case _=> PlotState(NumberOfColumToBePlotted.One, Seq())
-        case MetadataState(_)=> MetadataState() 
-
-    def switchFromState(state: ContentState, states: ContentStates): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state)
-      panels.tabContent.updateTab(safePath, content)
-
-    def switchFromResultView(resultView: ResultView): Unit = 
-      val newState = updatedContentState
-      val updatedStates = states.update(newState)
-      switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
-
-    def switchSection(section: Section): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section.name)
-      panels.tabContent.updateTab(safePath, content)
-
-    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchFromResultView(Raw))
-    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchFromResultView(Table))
-    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchFromResultView(Plot))
-    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ ⇒ switchFromResultView(Metadata))
-
-    def viewIndex(state: ContentState) =
-      state match
-        case TableState(_,_) => 0
-        case PlotState(_,_) => 1
-        case RawState(_,_) => 2
-        case _=> 3 
-
-    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
-    val refreshing: Var[Boolean] = Var(false)             
-
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
-    val refreshButton = 
+    val refreshButton =
       button(btn_purple, cls := "refreshOMR", glyph_refresh, marginLeft := "10px", onClick --> {_ => 
         refreshing.set(true)
         val plotContentState = updatedContentState
@@ -404,17 +275,10 @@ object PlotContent:
       })
                    
     val sectionStates: Seq[ToggleState[Section]] =
-<<<<<<< HEAD
       contentSections.map: cs =>
         val section = Section(cs.section)
         ToggleState(section, cs.section, s"btn ${btn_success_string}", _ => switchSection(section))
 
-=======
-      (contentSections.map: cs=>
-        val section = Section(cs.section)
-        ToggleState(section, cs.section, s"btn ${btn_success_string}", _ => switchSection(section))
-      ).toSeq
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
     lazy val sectionSwitchButton = exclusiveRadio(sectionStates, btn_secondary_string, 0)
           
     val content =
@@ -422,7 +286,6 @@ object PlotContent:
         div(display.flex, flexDirection.column, width := "100%",
           div(display.flex, flexDirection.row, alignItems.center,
             div(
-<<<<<<< HEAD
               child <-- refreshing.signal.map:
                 case false => refreshButton
                 case true => Waiter.waiter("#794985")
@@ -436,25 +299,11 @@ object PlotContent:
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
             ,
             switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
-=======
-              child <-- refreshing.signal.map: p=>
-                p match
-                  case false => refreshButton
-                  case true => Waiter.waiter("#794985")
-            ),
-            (sectionStates.size match
-              case 1 => div()
-              case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
-              ),
-            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
-            bottomSwitch.map(_.element.amend(marginLeft := "100px")).getOrElse(div())
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
           ),
           sectionView.view
         )
       )
 
-<<<<<<< HEAD
 //    timers.setTimeout(500) {
 //       currentState match
 //          case r: RawState if r.scrollDown =>
@@ -467,20 +316,6 @@ object PlotContent:
 //              case _=>
 //          case _=>
 //    }
-=======
-    timers.setTimeout(500) {  
-       currentState match
-          case r: RawState if r.scrollDown => 
-            sectionView match 
-              case EditorView(_, editor) => editor.scrollToBottom
-              case _=> 
-          case ts: TableState if ts.scrollDown => 
-            sectionView match
-              case BasicView(view)=> setScrollToBottom(view)
-              case _=> 
-          case _=>  
-    }
->>>>>>> ac61dc9ee7091c58443f9bdbffae118ef4583d76
 
     (tabData, content)
 
