@@ -57,6 +57,6 @@ OSEEvolution(
 """, name = "OSE", header = "val modelTask = EmptyTask()")}
 
 
-${i{"origin"}} describes the discrete space of possible origins. Each cell is considered a potential origin. ${i{"objective"}} describe the pattern to reach with inequalities. The sought patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
+${i{"origin"}} describes the discrete space of possible origins. Each cell is considered a potential origin. ${i{"objective"}} describe the pattern to reach with inequalities. The patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
 
 """)

@@ -68,6 +68,6 @@ ${i{"origin"}} describes the genome of the optimisation. To compute the distance
 
 $br
 
-${i{"objective"}} describe the pattern to reach with inequalities. The sought patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
+${i{"objective"}} describe the pattern to reach with inequalities. The patten is considered as reached when all the objective are under their threshold value. In this example HDOSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
 
 """)
