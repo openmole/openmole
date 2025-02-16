@@ -23,7 +23,7 @@ object OSE extends PageContent(html"""
 
 ${h2{"OSE description"}}
 
-The Origin Space Exploration (OSE) method is used to ${b{"explore the multiples antecedents of a pattern"}}. Input parameter values which produce a given pattern are selected. OSE optimize the fitness and when it founds solutions that are good enough it keep them and blacklist the part of the inputs space containing these solution. The optimization process keep going in order to find multiple solution producing the pattern.
+The Origin Space Exploration (OSE) method is used to ${b{"explore the multiples antecedents of a pattern"}}. It produces input parameter values that produce a given pattern described by a set of constraints on the objectives (i.e. objectives should be under given thresholds). OSE optimizes the fitness and when it finds solutions that are good enough it keep them and blacklist the part of the inputs space containing these solution. The optimization process keep going in order to find multiple solutions producing the pattern, in all parts of the input space.
 
 The hook arguments for the ${code{"OSEEvolution"}} are:
 ${Evolution.hookOptions}
@@ -35,15 +35,13 @@ Here is a use example of the OSE method in an OpenMOLE script:
 $br$br
 
 ${hl.openmole("""
-// Seed declaration for random number generation
-val myseed = Val[Int]
+val myseed = Val[Long]
 
 val param1 = Val[Double]
 val param2 = Val[Double]
 val output1 = Val[Double]
 val output2 = Val[Double]
 
-// PSE method
 OSEEvolution(
   evaluation = modelTask,
   parallelism = 10,

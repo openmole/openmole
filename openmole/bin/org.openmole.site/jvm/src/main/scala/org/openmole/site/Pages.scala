@@ -28,55 +28,48 @@ import org.openmole.tool.file._
 import scalatags.Text
 
 import PageTree._
-object Pages {
+object Pages:
 
   val all: Vector[PageTree] = DocumentationPages.allPages.toVector
 
   //def rawFile(page: Page) = page.location.mkString("_") + ".html"
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
 
-  def isDoc(page: Page) = page match {
+  def isDoc(page: Page) = page match
     case d: DocumentationPage ⇒ true
     case _                    ⇒ false
-  }
-}
+
 
 object PageTree {
   implicit def fromPage(p: Page): PageLeaf = PageLeaf(p)
 
-  implicit def fromSeqPage(ps: Seq[Page]): Seq[PageLeaf] = ps.map {
-    fromPage
-  }
+  implicit def fromSeqPage(ps: Seq[Page]): Seq[PageLeaf] = ps.map { fromPage }
 
   implicit def fromPageTreeS(pageNode: PageTree): Seq[Page] = pageNode.sons.map(_.page)
 
   implicit def fromPageTree(pageTree: PageTree): Page = pageTree.page
 
-  def pageNode(page: Page, sons: Vector[PageTree]): PageTree = {
+  def pageNode(page: Page, sons: Vector[PageTree]): PageTree =
     PageNode(page, sons)
-  }
 
   // def pageNode(sons: Vector[PageTree]): PageNode = PageNode(None, sons)
 
   def pageNode(page: Page): PageTree = PageLeaf(page)
 
-  lazy val parentsMap = {
+  lazy val parentsMap =
     DocumentationPages.headPages.flatMap { hp ⇒
       hp.sons.map { s ⇒ s.name -> hp }
     }.filterNot(_._1.isEmpty).toMap
-  }
 
-  def parents(pageTree: PageTree) = {
+  def parents(pageTree: PageTree) =
 
-    def parents0(pageTree: PageTree, pars: Seq[PageTree]): Seq[PageTree] = {
+    def parents0(pageTree: PageTree, pars: Seq[PageTree]): Seq[PageTree] =
       parentsMap.get(pageTree.name) match {
         case Some(p: PageTree) ⇒ parents0(p, pars :+ p)
         case None              ⇒ pars
       }
-    }
 
     parents0(pageTree, Seq())
-  }
 }
 
 
@@ -206,7 +199,7 @@ object DocumentationPages:
   lazy val container = DocumentationPage.fromContent(name = "Any Other Executable", content = org.openmole.site.content.plug.Container)
 
   // Explore
-  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, abc))
+  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, hdose, abc))
 
   lazy val explore = DocumentationPage.fromContent(name = "Explore", content = org.openmole.site.content.explore.Explore, title = Some("Explore Your Model"))
 
@@ -230,6 +223,7 @@ object DocumentationPages:
   lazy val profile = DocumentationPage.fromContent(name = "Profile", content = org.openmole.site.content.explore.Profile)
   lazy val pse = DocumentationPage.fromContent(name = "PSE", content = org.openmole.site.content.explore.PSE, title = Some("Pattern Space Exploration"))
   lazy val ose = DocumentationPage.fromContent(name = "OSE", content = org.openmole.site.content.explore.OSE, title = Some("Origin Space Exploration"))
+  lazy val hdose = DocumentationPage.fromContent(name = "HDOSE", content = org.openmole.site.content.explore.HDOSE, title = Some("High dimension Origin Space Exploration"))
   lazy val abc = DocumentationPage.fromContent(name = "ABC", content = org.openmole.site.content.explore.ABC, title = Some("Approximate Bayesian computation"))
 
   // Scale
