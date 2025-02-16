@@ -11,11 +11,10 @@ object Component:
 
     private val in: Input = 
       input(
-        `type` := "checkbox", 
+        `type` := "checkbox",
         L.checked := activated,
         onClick.mapToChecked --> checked
       )
-
     val element = 
       div(display.flex, flexDirection.row, cls := cl,
         div(name, height := "34px", marginRight := "10px", display.flex, flexDirection.row, alignItems.center),
@@ -25,4 +24,3 @@ object Component:
         ),
         checked.toObservable --> Observer[Boolean](onChange)
       )
-

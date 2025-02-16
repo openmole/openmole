@@ -127,7 +127,7 @@ object PlotContent:
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
             case ms: MetadataState =>
-              val metadataHistory = 
+              val metadataHistory =
                 div(
                   child <--
                     Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
@@ -263,7 +263,7 @@ object PlotContent:
     val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
     val refreshing: Var[Boolean] = Var(false)             
 
-    val refreshButton = 
+    val refreshButton =
       button(btn_purple, cls := "refreshOMR", glyph_refresh, marginLeft := "10px", onClick --> {_ => 
         refreshing.set(true)
         val plotContentState = updatedContentState
