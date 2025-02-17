@@ -86,10 +86,10 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]): G =
-          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(om.genome.discrete)(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -105,7 +105,7 @@ object PSE {
             import p._
 
             val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
-            val res = MGOPSE.result[Phenotype](population, Genome.continuous(om.genome), toFitness andThen om.pattern)
+            val res = MGOPSE.result[Phenotype](population, Genome.continuous(om.genome), om.genome.discrete, toFitness andThen om.pattern)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
@@ -122,7 +122,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGOPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         private def pattern(phenotype: Phenotype) =
@@ -135,7 +135,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGOPSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
@@ -148,7 +148,7 @@ object PSE {
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p ⇒
             import p._
-            MGOPSE.elitism[Phenotype](pattern(_).from(context), Genome.continuous(om.genome)) apply (s, population, candidates, rng)
+            MGOPSE.elitism[Phenotype](pattern(_).from(context)) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
           def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
@@ -208,9 +208,9 @@ object PSE {
         def generationLens = GenLens[S](_.generation)
         def evaluatedLens = GenLens[S](_.evaluated)
 
-        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues.get)(genome)
+        def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues.get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
-          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(v._1, None, v._2, None)
+          def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(om.genome.discrete)(v._1, None, v._2, None)
           buildGenome(Genome.fromVariables(vs, om.genome))
 
         def genomeToVariables(g: G): FromContext[Vector[Variable[?]]] =
@@ -224,7 +224,7 @@ object PSE {
           import p._
 
           val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
-          val res = MGONoisyPSE.result(population, aggregate, om.pattern, Genome.continuous(om.genome))
+          val res = MGONoisyPSE.result(population, aggregate, om.pattern, Genome.continuous(om.genome), om.genome.discrete)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(r => aggregate(r.individual.phenotypeHistory.toVector)))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -242,7 +242,7 @@ object PSE {
             import p._
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONoisyPSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
@@ -250,7 +250,7 @@ object PSE {
             import p.*
             val continuous = Genome.continuous(om.genome)
             val discrete = Genome.discrete(om.genome)
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONoisyPSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
@@ -270,7 +270,8 @@ object PSE {
               om.pattern,
               Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
               om.historySize,
-              Genome.continuous(om.genome)) apply (s, population, candidates, rng)
+              Genome.continuous(om.genome),
+              om.genome.discrete) apply (s, population, candidates, rng)
 
 
         def mergeIslandState(state: S, islandState: S): S =

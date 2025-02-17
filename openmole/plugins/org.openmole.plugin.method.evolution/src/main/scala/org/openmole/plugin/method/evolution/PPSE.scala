@@ -99,7 +99,7 @@
 //        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
 //          import p._
 //          val continuous = Genome.continuous(om.genome)
-//          //val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+//          //val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
 //          mgo.evolution.algorithm.EMPPSE.initialGenomes(n, continuous, rng)
 //        }
 //

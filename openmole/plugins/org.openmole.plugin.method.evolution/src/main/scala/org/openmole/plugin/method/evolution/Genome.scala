@@ -99,35 +99,40 @@ object Genome:
   import _root_.mgo.evolution.{ C, D }
   import cats.implicits.*
 
-  def continuousGenome(genome: Genome): Genome =
-    genome.toVector.collect:
-      case s: GenomeBound.ScalarDouble          => s
-      case s: GenomeBound.SequenceOfDouble      => s
-      case s: GenomeBound.ContinuousInt         => s
-      case s: GenomeBound.SequenceOfContinuousInt => s
+  extension (genome: Genome)
+    def continuousGenome: Genome =
+      genome.toVector.collect:
+        case s: GenomeBound.ScalarDouble          => s
+        case s: GenomeBound.SequenceOfDouble      => s
+        case s: GenomeBound.ContinuousInt         => s
+        case s: GenomeBound.SequenceOfContinuousInt => s
 
-  def discreteGenome(genome: Genome): Genome =
-    genome.toVector.collect:
-      case s: GenomeBound.ScalarInt ⇒ s
-      case s: GenomeBound.SequenceOfInt ⇒ s
-      case s: GenomeBound.Enumeration[?] ⇒ s
-      case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s
+    def discreteGenome: Genome =
+      genome.toVector.collect:
+        case s: GenomeBound.ScalarInt ⇒ s
+        case s: GenomeBound.SequenceOfInt ⇒ s
+        case s: GenomeBound.Enumeration[?] ⇒ s
+        case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s
 
-  def continuous(genome: Genome): Vector[C] =
-    genome.toVector.collect:
-      case s: GenomeBound.ScalarDouble             => Vector(C(s.low, s.high))
-      case s: GenomeBound.SequenceOfDouble         => (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
-      case s: GenomeBound.ContinuousInt            => Vector(C(s.low, s.high))
-      case s: GenomeBound.SequenceOfContinuousInt    => (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
-    .flatten
+    def continuous: Vector[C] =
+      genome.toVector.collect:
+        case s: GenomeBound.ScalarDouble             => Vector(C(s.low, s.high))
+        case s: GenomeBound.SequenceOfDouble         => (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
+        case s: GenomeBound.ContinuousInt            => Vector(C(s.low, s.high))
+        case s: GenomeBound.SequenceOfContinuousInt    => (s.low zip s.high).toVector.map((l, h) ⇒ C(l, h))
+      .flatten
 
-  def discrete(genome: Genome): Vector[D] =
-    genome.toVector.collect:
-      case s: GenomeBound.ScalarInt                ⇒ Vector(D(s.low, s.high))
-      case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ D(l, h))
-      case s: GenomeBound.Enumeration[?]           ⇒ Vector(D(0, s.values.size - 1))
-      case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map(v => D(0, v.size - 1))
-    .flatten
+    def discrete: Vector[D] =
+      genome.toVector.collect:
+        case s: GenomeBound.ScalarInt                ⇒ Vector(D(s.low, s.high))
+        case s: GenomeBound.SequenceOfInt            ⇒ (s.low zip s.high).toVector.map((l, h) ⇒ D(l, h))
+        case s: GenomeBound.Enumeration[?]           ⇒ Vector(D(0, s.values.size - 1))
+        case s: GenomeBound.SequenceOfEnumeration[?] ⇒ s.values.map(v => D(0, v.size - 1))
+      .flatten
+
+    def toVals = genome.map(GenomeBound.toVal)
+    def sizes = genome.map(GenomeBound.size)
+
 
   def continuousValue(genome: Genome, v: Val[?], continuous: IArray[Double]) =
     val index = Genome.continuousIndex(genome, v).get
@@ -145,10 +150,6 @@ object Genome:
     val index = Genome.discreteIndex(genome, v).get
     discrete.slice(index, index + size)
 
-
-
-  def toVals(genome: Genome) = genome.map(GenomeBound.toVal)
-  def sizes(genome: Genome) = genome.map(GenomeBound.size)
 
   def continuousIndex(genome: Genome, v: Val[?]): Option[Int] =
     def indexOf0(l: List[GenomeBound], index: Int): Option[Int] =
