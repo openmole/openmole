@@ -21,22 +21,21 @@ object Objective:
 
     def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double]) =
       def value(noisy: Boolean) =
-        if (!noisy) {
+        if !noisy
+        then
           def aggregate = FromContext { p ⇒
             import p._
             (v: T) ⇒ fromContext.from(Context(o -> v))
           }
 
           ComputeValue(o, aggregate, aggregateString = true)
-        }
-        else {
+        else
           def aggregate = FromContext { p ⇒
             import p._
             (v: Array[T]) ⇒ fromContext.from(Context(o.toArray -> v))
           }
 
           ComputeValue(o.array, aggregate, aggregateString = true)
-        }
 
       Objective(
         value,

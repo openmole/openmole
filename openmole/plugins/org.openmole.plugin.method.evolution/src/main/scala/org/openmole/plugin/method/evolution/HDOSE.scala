@@ -20,12 +20,12 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import cats.implicits.*
+import mgo.evolution.algorithm.NoisyHDOSE as MGONoisyHDOSE
 import monocle.macros.GenLens
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import squants.time.Time
 
 import scala.reflect.ClassTag
-
 import monocle.*
 import monocle.syntax.all.*
 
@@ -153,8 +153,13 @@ object HDOSE:
             a ++ notTooClose
           .apply(state)
 
-        def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
+        def migrateToIsland(population: Vector[I], state: S) =
+          val islandState = MGOHDOSE.archiveLens[Phenotype].modify(_.map(_.copy(initial = true)))(state)
+          (DeterministicGAIntegration.migrateToIsland(population), islandState)
+
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          val islandState =  MGOHDOSE.archiveLens[Phenotype].modify(_.filterNot(_.initial))(state)
+          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), islandState)
 
   case class StochasticHDOSE(
     mu: Int,
@@ -291,8 +296,13 @@ object HDOSE:
           .apply(state)
 
 
-        def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
+        def migrateToIsland(population: Vector[I], state: S) =
+          val islandState = MGONoisyHDOSE.archiveLens[Phenotype].modify(_.map(_.copy(initial = true)))(state)
+          (StochasticGAIntegration.migrateToIsland(population), islandState)
+
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          val islandState =  MGONoisyHDOSE.archiveLens[Phenotype].modify(_.filterNot(_.initial))(state)
+          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), islandState)
 
   
   object OriginAxe:
