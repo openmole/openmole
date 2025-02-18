@@ -83,7 +83,7 @@
 //          val res = mgo.evolution.algorithm.EMPPSE.result[Phenotype](
 //            population,
 //            state,
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply _,
 //            om.pattern
 //          )
@@ -98,7 +98,7 @@
 //
 //        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
 //          import p._
-//          val continuous = Genome.continuous(om.genome)
+//          val continuous = om.genome.continuous
 //          //val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
 //          mgo.evolution.algorithm.EMPPSE.initialGenomes(n, continuous, rng)
 //        }
@@ -110,10 +110,10 @@
 //
 //        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
 //          import p._
-//          //val discrete = Genome.discrete(om.genome)
+//          //val discrete = om.genome.discrete
 //          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[Vector[Double]](f, om.genome, identity, _ => Vector()).from(context))
 //          mgo.evolution.algorithm.EMPPSEOperation.breeding[S, I, G](
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            identity,
 //            n,
 //            rejectValue,
@@ -128,7 +128,7 @@
 //            _.genome,
 //            _.phenotype,
 //            pattern(_).from(context),
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            rejectValue,
 //            Focus[S](_.s.probabilityMap),
 //            Focus[S](_.s.hitmap),
