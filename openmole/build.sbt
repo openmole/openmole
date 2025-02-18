@@ -1399,6 +1399,13 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
       tag = Some(version.value)
     )
   ),
+  docker / buildOptions := BuildOptions(
+    //cache = false,
+    //removeIntermediateContainers = BuildOptions.Remove.Always,
+    pullBaseImage = BuildOptions.Pull.Always
+    //platforms = List("linux/arm64/v8"),
+    //additionalArguments = Seq("--add-host", "127.0.0.1:12345", "--compress")
+  ),
   docker / dockerfile := new Dockerfile {
     from("debian:testing")
     maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
