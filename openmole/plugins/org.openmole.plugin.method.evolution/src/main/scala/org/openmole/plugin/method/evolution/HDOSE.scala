@@ -138,18 +138,18 @@ object HDOSE:
               om.distance) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
+          def genomeValue(i: I) = (i.genome.continuousValues, i.genome.discreteValues(om.genome.discrete))
+
           def isTooCloseFromArchive =
-            HDOSEOperation.isTooCloseFromArchive[G, I](
+            HDOSEOperation.isTooCloseFromArchive(
               distance,
               MGOHDOSE.archiveLens.get(state),
-              _.continuousValues,
-              CDGenome.discreteValues(om.genome.discrete).get,
-              _.genome,
+              genomeValue,
               MGOHDOSE.distanceLens.get(state)
             )
 
           MGOHDOSE.archiveLens[Phenotype].modify: a =>
-            def notTooClose = MGOHDOSE.archiveLens.get(islandState).sortBy(_.generation).filterNot(i => isTooCloseFromArchive(i.genome))
+            def notTooClose = MGOHDOSE.archiveLens.get(islandState).sortBy(_.generation).filterNot(i => isTooCloseFromArchive(genomeValue(i)))
             a ++ notTooClose
           .apply(state)
 
@@ -280,18 +280,18 @@ object HDOSE:
 
 
         def mergeIslandState(state: S, islandState: S): S =
+          def genomeValue(i: I) = (i.genome.continuousValues, i.genome.discreteValues(om.genome.discrete))
+
           def isTooCloseFromArchive =
-            HDOSEOperation.isTooCloseFromArchive[G, I](
+            HDOSEOperation.isTooCloseFromArchive(
               distance,
               MGONoisyHDOSE.archiveLens.get(state),
-              _.continuousValues,
-              CDGenome.discreteValues(om.genome.discrete).get,
-              _.genome,
+              genomeValue,
               MGONoisyHDOSE.distanceLens.get(state)
             )
 
           MGONoisyHDOSE.archiveLens[Phenotype].modify: a =>
-            def notTooClose = MGONoisyHDOSE.archiveLens.get(islandState).sortBy(_.generation).filterNot(i => isTooCloseFromArchive(i.genome))
+            def notTooClose = MGONoisyHDOSE.archiveLens.get(islandState).sortBy(_.generation).filterNot(i => isTooCloseFromArchive(genomeValue(i)))
             a ++ notTooClose
           .apply(state)
 
