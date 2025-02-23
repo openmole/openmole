@@ -56,7 +56,7 @@ object common {
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
   def slf4jVersion = "2.0.9"
-  def furyVersion = "0.9.0"
+  def furyVersion = "0.10.0"
   def jgitVersion = "7.0.0.202409031743-r"
   def gearsVersion = "0.2.0"
 
