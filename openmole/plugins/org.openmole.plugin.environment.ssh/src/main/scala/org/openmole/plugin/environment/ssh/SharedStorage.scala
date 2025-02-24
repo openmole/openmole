@@ -87,6 +87,9 @@ object SharedStorage extends JavaLogger:
 
     path
 
+  object JobScript:
+    def defaultModules = Seq("apptainer", "singularity")
+
   case class JobScript(content: String, jobWorkDirectory: String):
     override def toString = content
 
@@ -99,7 +102,7 @@ object SharedStorage extends JavaLogger:
     serializedJob:  SerializedJob,
     outputPath:     String,
     storage:        S,
-    modules:        Seq[String],
+    modules:        Option[Seq[String]],
     debug:          Boolean             = false)(using newFile: TmpDirectory, preference: Preference, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority) =
     val runtime = runtimePath(serializedJob.runtime) //preparedRuntime(serializedJob.runtime)
     val result = outputPath
@@ -108,7 +111,7 @@ object SharedStorage extends JavaLogger:
     val remoteScript =
       newFile.withTmpFile("run", ".sh"): script ⇒
 
-        val loadModules = modules.map(m ⇒ s"module load $m")
+        val loadModules = modules.getOrElse(JobScript.defaultModules).map(m ⇒ s"module load $m")
 
         val commands =
           loadModules ++
