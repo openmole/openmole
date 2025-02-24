@@ -57,7 +57,7 @@ object SSHEnvironment extends JavaLogger:
     storageSharedLocally: Boolean                       = false,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     name:                 OptionalArgument[String]      = None,
-    modules:              Seq[String]                   = Vector(),
+    modules:              OptionalArgument[Seq[String]] = None,
     debug:                Boolean                       = false
   )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
@@ -133,7 +133,7 @@ class SSHEnvironment(
   val reconnect:            Option[Time],
   val name:                 Option[String],
   val authentication:       SSHAuthentication,
-  val modules:              Seq[String],
+  val modules:              Option[Seq[String]],
   val debug:                Boolean,
   val services:             BatchEnvironment.Services
 ) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒

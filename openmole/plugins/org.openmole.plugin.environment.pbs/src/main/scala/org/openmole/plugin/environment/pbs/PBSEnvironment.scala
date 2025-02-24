@@ -50,7 +50,7 @@ object PBSEnvironment extends JavaLogger:
     flavour:              gridscale.pbs.PBSFlavour      = Torque,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
-    modules: Seq[String] = Vector(),
+    modules:              OptionalArgument[Seq[String]] = None,
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -107,7 +107,7 @@ object PBSEnvironment extends JavaLogger:
     threads:              Option[Int],
     storageSharedLocally: Boolean,
     flavour:              _root_.gridscale.pbs.PBSFlavour,
-    modules:              Seq[String])
+    modules:              Option[Seq[String]])
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(

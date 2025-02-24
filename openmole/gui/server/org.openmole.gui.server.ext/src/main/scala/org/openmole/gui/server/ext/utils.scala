@@ -408,3 +408,22 @@ object utils:
     a.flatMap: a =>
       a.privateKeyPath.map: k =>
         GitAuthentication.PrivateKey(utils.safePathToFile(k), a.password)
+
+  def testSSHKeyPassword(path: String, password: String): Option[Throwable] =
+    import net.schmizz.sshj.*
+
+    val sshClient = new SSHClient()
+
+    try
+      val verifier = new transport.verification.HostKeyVerifier:
+        def verify(hostname: String, port: Int, key: java.security.PublicKey): Boolean = true
+        def findExistingAlgorithms(hostname: String, port: Int): java.util.List[String] = new java.util.ArrayList()
+
+      sshClient.addHostKeyVerifier(verifier)
+      val keyProvider = sshClient.loadKeys(path, password)
+      keyProvider.getPublic
+      None
+    catch
+      case e: java.io.IOException => Some(e)
+    finally sshClient.close()
+

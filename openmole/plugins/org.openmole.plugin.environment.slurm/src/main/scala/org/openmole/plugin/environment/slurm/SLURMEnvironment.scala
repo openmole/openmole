@@ -59,7 +59,7 @@ object SLURMEnvironment:
     localSubmission:      Boolean                       = false,
     forceCopyOnNode:      Boolean                       = false,
     refresh:              OptionalArgument[Time]        = None,
-    modules:              Seq[String]                   = Vector(),
+    modules:              OptionalArgument[Seq[String]] = None,
     debug:                Boolean                       = false
   )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
@@ -133,7 +133,7 @@ object SLURMEnvironment:
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
-    modules:              Seq[String],
+    modules:              Option[Seq[String]],
     debug:                Boolean)
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =

@@ -788,7 +788,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
 
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(apiGUI, workspace, module, services, serverGit) settings(
   libraryDependencies += Libraries.equinoxOSGi,
-  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.jgit),
+  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.jgit, Libraries.sshj),
   guiSettings,
   scalaJSSettings)
 
