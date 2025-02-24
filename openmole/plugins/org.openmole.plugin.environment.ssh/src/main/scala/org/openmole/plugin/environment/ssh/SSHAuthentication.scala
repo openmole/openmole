@@ -75,10 +75,10 @@ object SSHAuthentication:
 
   def test(a: SSHAuthentication)(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference) =
     val server = gridscale.ssh.SSHServer(a.host, a.port, preference(SSHEnvironment.timeOut))(a)
-    gridscale.ssh.SSH.withSSH(server):
-      Try:
-        gridscale.ssh.home()
-      .map(_ ⇒ true)
+    Try:
+      gridscale.ssh.SSH.withSSH(server):
+          gridscale.ssh.home()
+        .map(_ ⇒ true)
 
 
 sealed trait SSHAuthentication:

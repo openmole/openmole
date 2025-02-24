@@ -34,7 +34,7 @@ import org.openmole.gui.server.ext.utils.*
 import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
 
 class PrivateKeyAuthenticationServer(s: Services)
-  extends APIServer with PrivateKeyAuthenticationAPI {
+  extends APIServer with PrivateKeyAuthenticationAPI:
 
   val privateKeyAuthenticationsRoute =
     privateKeyAuthentications.errorImplementedBy { _ => impl.privateKeyAuthentications() }
@@ -52,7 +52,7 @@ class PrivateKeyAuthenticationServer(s: Services)
     routesFromEndpoints(privateKeyAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationRoute, testAuthenticationRoute)
   )
 
-  object impl {
+  object impl:
     import s._
 
     private def coreObject(data: PrivateKeyAuthenticationData) =
@@ -92,12 +92,20 @@ class PrivateKeyAuthenticationServer(s: Services)
       then safePathToFile(data.directory).recursiveDelete
 
     def testAuthentication(data: PrivateKeyAuthenticationData): Seq[Test] =
-      Seq(
-        coreObject(data).map: co ⇒
-          SSHAuthentication.test(co) match
-            case Success(_) ⇒ Test.passed()
-            case Failure(f) ⇒ Test.error("failed", ErrorData(f))
-      ).flatten
+      val sshKey = coreObject(data)
 
-  }
-}
+      sshKey match
+        case None => Seq()
+        case Some(value) =>
+          def testConnection =
+            SSHAuthentication.test(value).failed.toOption.map: f =>
+              Test.error("Connection failed", ErrorData(f))
+
+          def testPassword =
+            testSSHKeyPassword(value.privateKey.getAbsolutePath, value.password).map: f =>
+              Test.error("Password is incorrect", ErrorData(f))
+
+          testPassword orElse testConnection  match
+            case None => Seq(Test.passed())
+            case Some(t) => Seq(t)
+
