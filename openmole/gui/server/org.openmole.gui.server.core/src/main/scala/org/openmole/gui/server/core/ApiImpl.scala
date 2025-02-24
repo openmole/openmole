@@ -827,25 +827,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def testGitAuthentication(d: GitPrivateKeyAuthenticationData) =
     import services.{cypher, workspace}
 
-    def isPasswordCorrect(path: String, password: String): Option[Throwable] =
-      import net.schmizz.sshj.*
-
-      val sshClient = new SSHClient()
-      try
-        val verifier = new transport.verification.HostKeyVerifier:
-          def verify(hostname: String, port: Int, key: java.security.PublicKey): Boolean = true
-          def findExistingAlgorithms(hostname: String, port: Int): java.util.List[String] = new java.util.ArrayList()
-
-        sshClient.addHostKeyVerifier(verifier)
-        val keyProvider = sshClient.loadKeys(path, password)
-        None
-      catch
-        case e: IOException => Some(e)
-      finally sshClient.close()
-
     d.privateKeyPath.map: file =>
       val privateKey = safePathToFile(file)
-      isPasswordCorrect(privateKey.getAbsolutePath, d.password) match
+      testSSHKeyPassword(privateKey.getAbsolutePath, d.password) match
         case None => Seq(PassedTest("Password is correct"))
         case Some(e) => Seq(FailedTest("Password is incorrect", ErrorData(e)))
     .getOrElse(Seq(FailedTest("Private key not set", ErrorData.empty)))
