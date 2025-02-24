@@ -118,10 +118,10 @@ It takes the following parameters:
 ${ul(
   li{html"${code{"evaluation"}}: the OpenMOLE task that runs the simulation (${i{"i.e."}} the model),"},
   li{html"${code{"objective"}}: a list of the distance measures (which in the single criterion case will contain only one measure),"},
-  li{html"${code{"populationSize"}}: the population size,"},
   li{html"${code{"genome"}}: a list of the model parameters and their respective variation intervals,"},
   li{html"${code{"termination"}}: the total number of evaluations (execution of the task passed to the parameter \"evaluation\") to be executed,"},
   li{html"${code{"parallelism"}}: $optional, the number of simulations that will be run in parallel, defaults to 1,"},
+  li{html"${code{"populationSize"}}: $optional, the population size, defaults to 200,"},
   li{html"${code{"stochastic"}}: $optional, the seed provider, mandatory if your model contains randomness,"},
   li{html"${code{"distribution"}}: $optional, computation distribution strategy, default is \"SteadyState\"."},
   li{html"${code{"reject"}}: $optional, a predicate which is true for genomes that must be rejected by the genome sampler (for instance \"i1 > 50\")."}
@@ -165,7 +165,6 @@ val distance2 = Val[Double]
 NSGA2Evolution(
   evaluation = modelTask,
   objective = Seq(distance1, distance2),
-  populationSize = 200,
   genome = Seq(
     param1 in (0.0, 99.0),
     param2 in (0.0, 99.0),
@@ -193,7 +192,6 @@ val model = ScalaTask("val distance = param1.sum * param2") set (inputs += (para
 NSGA2Evolution(
   evaluation = model ,
   objective = distance,
-  populationSize = 200,
   genome = Seq(
     param1 in Seq.fill(100)(0.0 to 99.0),
     param2 in (1.0 to 10.0),

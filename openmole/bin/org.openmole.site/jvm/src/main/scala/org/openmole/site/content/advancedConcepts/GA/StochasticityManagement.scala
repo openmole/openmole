@@ -59,13 +59,11 @@ ${hl.openmole(s"""
 
   val evolution =
     NSGA2Evolution(
-      populationSize = 100, // populationSize is the size of the population
       genome = Seq(x in (0.0, 1.0), y in (0.0, 1.0)), // genome (of individuals) is the inputs prototype and their variation ranges
       objective = Seq(o1, o2), // objective sets the objectives to minimise
       // OpenMOLE provides a seed for your stochastic model to use (it is optional)
-      // 20% of the evaluations are used for replicating existing solutions
       // 100 replication are stored at max for each individual
-      stochastic = Stochastic(seed = mySeed, reevaluate = 0.2, sample = 100),
+      stochastic = Stochastic(seed = mySeed, sample = 100),
       evaluation = model,
       termination = 100
     )
@@ -129,7 +127,7 @@ $br
 
 This method adds only two new parameters:
     ${ol(
-      li{html"""${code{"reevaluate"}}, the probability of resampling an individual at each generation"""},
+      li{html"""${code{"reevaluate"}}, $optional, the probability of resampling an individual at each generation, the default is 0.1,"""},
       li{html"${code{"sample"}}, the maximum number of evaluation values for an individual, to limit the memory used to store an individual."}
     )}
 
