@@ -10,16 +10,12 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class AggregateValSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class AggregateValSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
-  import AggregateTask._
-
-  "Aggregate Val" should "be converted from Aggregate" in {
+  "Aggregate Val" should "be converted from Aggregate" in:
+    def aggregateVal[A, B](d: AggregateTask.AggregateVal[A, B]) = d
 
     val d = Val[Double]
-    val a: AggregateVal[_, _] = AggregateVal.fromEvaluate[Double, Double, Seq](d aggregate median)
-    val b: AggregateVal[_, _] = d aggregate median
+    aggregateVal(d evaluate median)
 
-  }
 
-}
