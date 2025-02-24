@@ -50,7 +50,7 @@ object OAREnvironment {
     timeout:              OptionalArgument[Time]        = None,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     localSubmission:      Boolean                       = false,
-    modules: Seq[String] = Vector(),
+    modules:              OptionalArgument[Seq[String]] = None,
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -106,7 +106,7 @@ object OAREnvironment {
     threads:              Option[Int],
     storageSharedLocally: Boolean,
     bestEffort:           Boolean,
-    modules:              Seq[String])
+    modules:              Option[Seq[String]])
 
   def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
 

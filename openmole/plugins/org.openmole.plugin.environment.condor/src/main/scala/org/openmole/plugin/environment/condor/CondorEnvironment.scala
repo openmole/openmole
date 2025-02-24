@@ -53,7 +53,7 @@ object CondorEnvironment:
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     localSubmission:      Boolean                       = false,
-    modules:              Seq[String]                   = Vector(),
+    modules:              OptionalArgument[Seq[String]] = None,
     name:                 OptionalArgument[String]      = None
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
@@ -107,7 +107,7 @@ object CondorEnvironment:
     requirements:         Option[String],
     threads:              Option[Int],
     storageSharedLocally: Boolean,
-    modules:              Seq[String])
+    modules:              Option[Seq[String]])
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
