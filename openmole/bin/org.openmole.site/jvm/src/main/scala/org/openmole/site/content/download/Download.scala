@@ -20,11 +20,11 @@ package org.openmole.site.content.download
 import org.openmole.site.content.header.*
 
 object Download extends PageContent(html"""
-${h2("Try our demo website")}
+${h2("Try the demo website")}
 
 Before downloading OpenMOLE, you might want to get a preview of what you can do with it.
 You can try OpenMOLE online using our ${aa("demo website", href := shared.link.demo)}.
-Please note that the service is reset every 6 hours, so don't be surprised if your current script suddenly vanishes :-)
+Please note that the service hosted on a slow machine and is reset every 6 hours, so don't be surprised if it is a bit slow or if your script suddenly vanishes :-)
 
 ${h2("Install OpenMOLE")}
 
@@ -33,7 +33,7 @@ ${h3("Prerequisites")}
 ${
   ul(
     li(html"${i("A Linux System")}: OpenMOLE runs on Linux, in order to run it on other systems please consider using the ${a("docker package", href := "#RuninDocker")}"),
-    li(html"${i("Java >= 11")}: to run on your own computer, OpenMOLE requires Java version 11 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information"),
+    li(html"${i("Java >= 21")}: to run on your own computer, OpenMOLE requires Java version 21 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information"),
     li(html"${i("Node.js")}: to run on your own computer, OpenMOLE GUI requires ${aa("Node.js", href := shared.link.nodejs)}"),
     li(html"${i("Singularity")}: most of OpenMOLE tasks require ${org.openmole.site.content.Native.singularity}")
   )
@@ -42,6 +42,10 @@ ${
 $br
 
 ${i("NB")}: If you have docker installed on your computer, the most convenient way to run OpenMOLE might be ${a("to run OpenMOLE in docker", href := "#RuninDocker")}.
+
+$br
+
+${i("NB")}: For users working in public institutions, we also propose an ${aa("hosted OpenMOLE service", href := "https://my.openmole.org")} on which you can ask for an account.
 
 ${h3("Download")}
 
@@ -145,9 +149,9 @@ version: "3"
       restart: on-failure:100000""".stripMargin, "plain")}
 
 
-${h3{"Multi-user OpenMOLE server"}}
+${h3{"OpenMOLE server"}}
 
-OpenMOLE connect, a multi-user OpenMOLE service based on K3S has been developed. The instructions to deploy it are ${a("available here", href := "https://github.com/openmole/connect")}.
+OpenMOLE connect is a multi-user OpenMOLE service based on ${aa("K3S", href := "https://k3s.io/")}. It is pretty handy to deploy, the instructions are ${a("available here", href := "https://github.com/openmole/connect")}.
 
 ${h3{"Build From Sources"}}
 
