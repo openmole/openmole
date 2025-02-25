@@ -206,6 +206,7 @@ object DocumentationPages:
   def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, advancedSampling, aggregationSampling))
 
   lazy val samplings = DocumentationPage.fromContent(name = "Samplings", content = org.openmole.site.content.explore.sampling.Samplings)
+
   lazy val elementarySamplings = DocumentationPage.fromContent(name = "Elementary Samplings", content = org.openmole.site.content.explore.sampling.ElementarySampling)
   //lazy val gridSampling = DocumentationPage.fromScalatex(name = "Grid Sampling", content = scalatex.documentation.explore.sampling.GridSampling)
   //lazy val oneFactorSampling = DocumentationPage.fromScalatex(name = "One Factor at a Time", content = scalatex.documentation.explore.sampling.OneFactorSampling)

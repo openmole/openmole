@@ -21,6 +21,25 @@ import org.openmole.site.content.header.*
 
 object Samplings extends PageContent(html"""
 
+${h2{"Execute a Single Run"}}
+Before exploring you model your model you might want to run it for an single set of inputs. To achieve it, the syntax is the following:
+
+
+${hl.openmole("""
+   val input_i = Val[Int]
+   val input_j = Val[Double]
+
+   SingleRun(
+     evaluation = my_own_model,
+     input = Seq(
+       input_i := 10,
+       input_j := 10.0)
+   ) hook display
+""", header = "val my_own_model = EmptyTask()", name = "syntax of SingleRun method")}
+
+This run the model ${i("my_own_model")} once and display the result.
+
+
 ${h2{"Design of Experiment"}}
 
 Design of Experiment (DoE) is the art of setting up an experimentation.
@@ -34,8 +53,6 @@ For higher dimension input space, specific statistics techniques ensuring low di
 $br
 
 You can also use your own DoE in OpenMOLE, by providing a ${a("CSV file", href := DocumentationPages.customSampling.file)} containing your samples to OpenMOLE.
-
-
 
 ${h2{"The DirectSampling method"}}
 
@@ -61,6 +78,7 @@ val k = Val[String]
 val l = Val[Long]
 val m = Val[File]
 val b = Val[Boolean]
+
 val exploration =
   DirectSampling(
     evaluation = myModel,
