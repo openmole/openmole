@@ -19,6 +19,7 @@ package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+
 import org.openmole.plugin.sampling.combine.*
 import org.openmole.plugin.domain.distribution.*
 import org.openmole.plugin.domain.modifier.*
@@ -184,8 +185,11 @@ object SingleRun:
   given ExplorationMethod[SingleRun, Method] = r =>
     given DefinitionScope = r.scope
 
+    val firstTask =
+      EmptyTask() set (r.input, outputs ++= r.input.map(_.value))
+
     DSLContainer(
-      Strain(r.evaluation),
+      firstTask -- Strain(r.evaluation),
       method =
         Method(
           input = r.input.map(_.value)
@@ -196,4 +200,4 @@ object SingleRun:
 case class SingleRun(
    evaluation:  DSL,
    input:       Seq[ValueAssignment.Untyped],
-   scope:       DefinitionScope           = "one run")
+   scope:       DefinitionScope           = "single run")

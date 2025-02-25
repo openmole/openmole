@@ -37,3 +37,19 @@ class TaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   "Task" should "capture name" in:
     val myTask = EmptyTask()
     myTask.name should equal(Some("myTask"))
+
+  it should "support default values" in:
+    val i = Val[Double]
+    val task = EmptyTask()
+
+    task set (i := 10.0)
+    task set (Seq.fill(10)(i := 10))
+
+  it should "support untyped default values" in :
+    val i = Val[Double]
+    val task = EmptyTask()
+
+    val d: ValueAssignment.Untyped = i := 10.0
+
+    task set (d)
+    task set (Seq.fill(10)(d))

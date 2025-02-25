@@ -2,7 +2,9 @@
 package org.openmole.plugin.method.directsampling
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.context.Variable
 import org.openmole.core.workflow.mole.MoleCapsule
@@ -288,3 +290,16 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
       )
     )
 
+  it should "provide inputs to the task" in :
+    val x = Val[Double]
+
+    val task = EmptyTask() set (
+      inputs += x
+    )
+
+    SingleRun(
+      evaluation = task,
+      input = Seq(
+        x := 10.0
+      )
+    ).run
