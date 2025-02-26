@@ -31,7 +31,7 @@ import org.openmole.plugin.environment.batch.environment.BatchEnvironment
 import org.openmole.tool.file.readableByteCount
 import org.openmole.tool.stream.StringPrintStream
 
-import scala.concurrent.stm.*
+import java.util.concurrent.atomic.AtomicLong
 
 case class RunningEnvironment(
   environment:       Environment,
@@ -60,24 +60,24 @@ object ServerState:
     moleExecution: MoleExecutionState,
     environments: Map[EnvironmentId, RunningEnvironment])
 
+
 class ServerState:
 
-  import ExecutionState._
+  import ExecutionState.*
 
-  private val executionInfo = TMap[ExecutionId, ServerState.ExecutionInfo]()
+  private val executionInfo = collection.mutable.Map[ExecutionId, ServerState.ExecutionInfo]()
+  private val notificationEvents = collection.mutable.LongMap[NotificationEvent]()
+  private val notificationEventId = new AtomicLong(0)
 
-  private val notificationEvents = TSet[NotificationEvent]()
-  private val notificationEventId = Ref[Long](0)
-
-  private def updateRunningEnvironment(executionId: ExecutionId, envId: EnvironmentId)(update: RunningEnvironment => RunningEnvironment) = atomic { implicit ctx =>
-    for
-      info <- executionInfo.get(executionId)
-      environment <- info.environments.get(envId)
-    do
-      val newEnvironment = update(environment)
-      val newInfo = info.copy(environments = info.environments.updated(envId, newEnvironment))
-      executionInfo(executionId) = newInfo
-  }
+  private def updateRunningEnvironment(executionId: ExecutionId, envId: EnvironmentId)(update: RunningEnvironment => RunningEnvironment) =
+    synchronized:
+      for
+        info <- executionInfo.get(executionId)
+        environment <- info.environments.get(envId)
+      do
+        val newEnvironment = update(environment)
+        val newInfo = info.copy(environments = info.environments.updated(envId, newEnvironment))
+        executionInfo(executionId) = newInfo
 
   def moleExecutionListener(execId: ExecutionId, script: SafePath): EventDispatcher.Listner[MoleExecution] =
     case (ex: MoleExecution, f: MoleExecution.Finished) =>
@@ -138,50 +138,51 @@ class ServerState:
         val ex = env.executionActivity
         env.copy(executionActivity = ex.copy(executionTime = ex.executionTime + j.log.executionEndTime - j.log.executionBeginTime))
 
-  def setEnvironments(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx =>
-    executionInfo.updateWith(id): execution =>
-      execution.map: e =>
-        e.copy(environments = envIds.toMap.mapValues(env => RunningEnvironment(env)).toMap)
-  }
+  def setEnvironments(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) =
+    synchronized:
+      executionInfo.updateWith(id): execution =>
+        execution.map: e =>
+          e.copy(environments = envIds.toMap.mapValues(env => RunningEnvironment(env)).toMap)
 
-  def getEnvironments(executionId: ExecutionId, envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx =>
-    executionInfo.get(executionId) match
-      case Some(info) =>
-        if envIds.nonEmpty
-        then envIds.flatMap(id => info.environments.get(id).map(id -> _))
-        else info.environments.toSeq.sortBy(_._2.environment.name)
-      case None => Seq()
-  }
+  def getEnvironments(executionId: ExecutionId, envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] =
+    synchronized:
+      executionInfo.get(executionId) match
+        case Some(info) =>
+          if envIds.nonEmpty
+          then envIds.flatMap(id => info.environments.get(id).map(id -> _))
+          else info.environments.toSeq.sortBy(_._2.environment.name)
+        case None => Seq()
 
-  def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) = atomic { implicit ctx =>
-    executionInfo(key) = info
-  }
+  def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) =
+    synchronized:
+      executionInfo(key) = info
 
-  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) = atomic { implicit ctx =>
-    executionInfo.updateWith(key) {
-      _.map(e => e.copy(moleExecution = state(e.moleExecution)))
-    }.isDefined
-  }
+  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) =
+    synchronized:
+      executionInfo.updateWith(key) {
+        _.map(e => e.copy(moleExecution = state(e.moleExecution)))
+      }.isDefined
 
 
   def cancel(key: ExecutionId) =
     val moleExecution =
-      atomic { implicit ctx =>
+      synchronized:
         val moleExecution = executionInfo.get(key).map(_.moleExecution)
         moleExecution match
           case None | Some(_: ServerState.Preparing) => modifyState(key)(_ => ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
           case _ =>
         moleExecution
-      }
 
     moleExecution match
       case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
       case Some(ServerState.Active(e: MoleExecution)) => e.cancel
-      case _ | None =>
+      case _ =>
 
 
   def remove(key: ExecutionId) =
-    val moleExecution = atomic { implicit ctx => executionInfo.remove(key) }
+    val moleExecution =
+      synchronized:
+        executionInfo.remove(key)
 
     moleExecution.map(_.moleExecution) match
       case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
@@ -309,43 +310,45 @@ class ServerState:
   
 
 
-  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx =>
-    val executions =
-      for
-        id <- if ids.isEmpty then executionInfo.keys else ids
-        info ← executionInfo.get(id)
-      yield
-        val stateValue = state(info)
-        val executionTime = info.environments.values.map(_.executionActivity.executionTime).sum
-        ExecutionData(id, info.path, info.script, info.startDate, stateValue, executionTime)
+  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] =
+    synchronized:
+      val executions =
+        for
+          id <- if ids.isEmpty then executionInfo.keys else ids
+          info ← executionInfo.get(id)
+        yield
+          val stateValue = state(info)
+          val executionTime = info.environments.values.map(_.executionActivity.executionTime).sum
+          ExecutionData(id, info.path, info.script, info.startDate, stateValue, executionTime)
 
-    executions.toSeq.sortBy(_.startDate)
-  }
+      executions.toSeq.sortBy(_.startDate)
 
-  def executionOutput(id: ExecutionId, l: Int) = atomic { implicit ctx =>
-    val info = executionInfo.get(id)
+
+  def executionOutput(id: ExecutionId, l: Int) =
+    val info =
+      synchronized:
+        executionInfo.get(id)
+
     val res =
       info.map: info =>
         val lines = info.output.toString.lines.toArray
         val output = lines.takeRight(l)
         ExecutionOutput(lines.takeRight(l).mkString("\n"), output.length, lines.length)
     res.getOrElse(ExecutionOutput("", 0, 0))
-  }
 
-  def executionIds = executionInfo.single.keys
+  def executionIds = synchronized(executionInfo.keysIterator.toSeq)
 
-  def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx =>
-    val id = notificationEventId()
-    notificationEventId.update(id + 1)
-    notificationEvents.add(notificationEvent(id))
-  }
+  def addNotification(notificationEvent: Long => NotificationEvent) =
+    synchronized:
+      val id = notificationEventId.getAndIncrement()
+      notificationEvents.put(id, notificationEvent(id))
 
-  def clearNotification(ids: Seq[Long]) = atomic { implicit ctx =>
-    if ids.isEmpty
-    then notificationEvents.clear()
-    else
-      val idSet = ids.toSet
-      notificationEvents.filterInPlace(e => !idSet.contains(NotificationEvent.id(e)))
-  }
+  def clearNotification(ids: Seq[Long]) =
+    synchronized:
+      if ids.isEmpty
+      then notificationEvents.clear()
+      else notificationEvents.subtractAll(ids)
 
-  def listNotification() = notificationEvents.single.toSeq
+  def listNotification() =
+    synchronized:
+      notificationEvents.valuesIterator.toSeq

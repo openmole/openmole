@@ -22,7 +22,6 @@ import scala.util.{Failure, Success, Try}
 import org.openmole.core.workflow.mole.{MoleExecution, MoleExecutionContext, MoleServices}
 import org.openmole.tool.stream.StringPrintStream
 
-import scala.concurrent.stm.*
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.module
 import org.openmole.core.market
@@ -439,25 +438,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def clearEnvironmentErrors(executionId: ExecutionId, environmentId: EnvironmentId): Unit = serverState.clearEnvironmentErrors(executionId: ExecutionId, environmentId)
 
   def listEnvironmentErrors(executionId: ExecutionId, environmentId: EnvironmentId, lines: Int): Seq[EnvironmentError] =
-    atomic {
-      implicit ctx =>
-        val environmentErrors = serverState.environmentErrors(executionId, environmentId)
-
-        //      def groupedErrors =
-        //          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
-        //            case (_, err) =>
-        //              val dates = err.map { _.date }.sorted
-        //              EnvironmentErrorGroup(err.head, dates.max, dates.size)
-        //          }.takeRight(lines)
-
-        val (errors, warning) = environmentErrors.partition(_.level == ErrorStateLevel.Error)
-        val res = (errors.sortBy(_.date).reverse ++ warning.sortBy(_.date).reverse).take(lines)
-        res
-      //    EnvironmentErrorData(Seq(
-      //      (EnvironmentError(environmentId, "YOur error man", Error("stansatienasitenasiruet a anuisetnasirte "), 2334454L, ErrorLevel()), 33345L, 2),
-      //      (EnvironmentError(environmentId, "YOur error man 4", Error("stansatienasitenasiruet a anuaeiaiueaiueaieisetnasirte "), 2334454L, ErrorLevel()), 31345L, 1)
-      //    ))
-    }
+    val environmentErrors = serverState.environmentErrors(executionId, environmentId)
+    val (errors, warning) = environmentErrors.partition(_.level == ErrorStateLevel.Error)
+    val res = (errors.sortBy(_.date).reverse ++ warning.sortBy(_.date).reverse).take(lines)
+    res
 
   def marketIndex() =
     import services._
