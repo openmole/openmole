@@ -21,6 +21,6 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
 sealed trait ContainerSystem
-case class SingularityOverlay(reuse: Boolean = true, size: Information = 20.gigabyte, verbose: Boolean = false, copy: Boolean = false) extends ContainerSystem
+case class SingularityOverlay(reuse: Boolean = true, size: Information = 2.gigabyte, verbose: Boolean = false, copy: Boolean = false) extends ContainerSystem
 case class SingularityMemory(verbose: Boolean = false) extends ContainerSystem
 case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem
