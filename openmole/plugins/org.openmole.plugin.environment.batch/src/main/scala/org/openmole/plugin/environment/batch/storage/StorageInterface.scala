@@ -38,7 +38,7 @@ object StorageInterface:
 //        AccessControl.defaultPrirority:
 //          StorageService.download(s, src, dest, options)
 
-  def upload(compressed: Boolean, uploadStream: (() ⇒ InputStream, String) ⇒ Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit =
+  def upload(compressed: Boolean, uploadStream: (() => InputStream, String) => Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit =
     def fileStream() = src.bufferedInputStream()
 
     if compressed
@@ -47,7 +47,7 @@ object StorageInterface:
       if (!options.raw) uploadStream(compressedFileStream, dest) else uploadStream(fileStream, dest)
     else uploadStream(fileStream, dest)
 
-  def download(compressed: Boolean, downloadStream: (String, InputStream ⇒ Unit) ⇒ Unit)(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit =
+  def download(compressed: Boolean, downloadStream: (String, InputStream => Unit) => Unit)(src: String, dest: File, options: TransferOptions = TransferOptions.default): Unit =
     def downloadFile(is: InputStream) = Files.copy(is, dest.toPath)
     if compressed
     then

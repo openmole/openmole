@@ -20,25 +20,25 @@ object ErrorActor {
     def defaultMessage = """Failed to get the result for the job"""
 
     val (level, message, cause) = exception match {
-      case _: AuthenticationException ⇒ (SEVERE, defaultMessage, exception)
-      case _: UserBadDataError ⇒ (SEVERE, defaultMessage, exception)
-      case _: FileNotFoundException ⇒ (SEVERE, defaultMessage, exception)
-      case e: GetResultActor.JobRemoteExecutionException ⇒ (WARNING, e.message, e.cause)
-      case _ ⇒ (FINE, defaultMessage, exception)
+      case _: AuthenticationException => (SEVERE, defaultMessage, exception)
+      case _: UserBadDataError => (SEVERE, defaultMessage, exception)
+      case _: FileNotFoundException => (SEVERE, defaultMessage, exception)
+      case e: GetResultActor.JobRemoteExecutionException => (WARNING, e.message, e.cause)
+      case _ => (FINE, defaultMessage, exception)
     }
 
     val detailedException =
       output match {
-        case None ⇒ exception
-        case Some((stdOut, stdErr)) ⇒
+        case None => exception
+        case Some((stdOut, stdErr)) =>
 
           def openMOLEOutputMessage =
             openMOLEOutput match {
-              case Some(o) ⇒
+              case Some(o) =>
                 s"""OpenMOLE output was:
                    |$o
                    |""".stripMargin
-              case None ⇒ ""
+              case None => ""
             }
 
           FailedJobExecution(
@@ -55,17 +55,17 @@ object ErrorActor {
 
     def details =
       (output, openMOLEOutput) match {
-        case (None, None) ⇒ None
-        case _ ⇒
+        case (None, None) => None
+        case _ =>
           def openMOLEOutputMessage =
-            openMOLEOutput map { o ⇒
+            openMOLEOutput map { o =>
               s"""OpenMOLE output was:
                  |$o""".stripMargin
             }
 
           def outputMessage =
             output map {
-              case (stdOut, stdErr) ⇒
+              case (stdOut, stdErr) =>
                 s"""Stdout of the job was:
                 |$stdOut
                 |Stderr of the job was:

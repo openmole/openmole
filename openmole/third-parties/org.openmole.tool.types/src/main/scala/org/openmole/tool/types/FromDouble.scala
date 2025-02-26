@@ -2,7 +2,7 @@ package org.openmole.tool.types
 
 object FromDouble {
 
-  def apply[T](f: Double ⇒ T): FromDouble[T] = new FromDouble[T] {
+  def apply[T](f: Double => T): FromDouble[T] = new FromDouble[T] {
     override def apply(s: Double) = f(s)
   }
 

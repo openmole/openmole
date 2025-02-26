@@ -2,7 +2,7 @@ package org.openmole.site
 
 import scala.scalajs.js.annotation._
 import scaladget.lunr.{IIndexSearchResult, Importedjs, Index}
-import scala.scalajs.js.Dynamic.{literal ⇒ lit}
+import scala.scalajs.js.Dynamic.{literal => lit}
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel
 import com.raquo.laminar.api.L._
@@ -51,14 +51,14 @@ object SiteJS {
   }
 
   def doIndex(indexArray: js.Array[js.Any]) = {
-    val index = Importedjs.lunr((i: Index) ⇒ {
+    val index = Importedjs.lunr((i: Index) => {
       i.field("title", lit("boost" → 15).value)
       i.field("h2", lit("boost" -> 10).value)
       i.field("h3", lit("boost" -> 8).value)
       i.field("pre", lit("boost" -> 5).value) // for code tags
       i.field("body", lit("boost" → 1).value)
       i.ref("url")
-      indexArray.foreach(p ⇒ {
+      indexArray.foreach(p => {
         i.add(p)
         val ie = p.asInstanceOf[IndexEntry]
         entries.update(ie.url, ie.title)
@@ -71,18 +71,18 @@ object SiteJS {
   def getIndex: Option[Index] =
   //Load index cache
     lunrIndex.now() match {
-      case None ⇒ indexArray.now().size match {
-        case 0 ⇒ None
-        case _ ⇒
+      case None => indexArray.now().size match {
+        case 0 => None
+        case _ =>
           doIndex(indexArray.now())
           getIndex
       }
-      case i: Option[Index] ⇒ i
+      case i: Option[Index] => i
     }
 
   def search(content: String): Seq[IIndexSearchResult] = {
     getIndex.map {
-      ind ⇒ ind.search(content).toSeq
+      ind => ind.search(content).toSeq
     }.getOrElse(Seq())
   }
 

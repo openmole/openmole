@@ -21,7 +21,7 @@ import org.openmole.core.dsl.extension._
 
 object ConcatenateSampling {
 
-  implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = s ⇒ {
+  implicit def isSampling[S1, S2]: IsSampling[ConcatenateSampling[S1, S2]] = s => {
     def validate: Validate = s.sampling1(s.s1).validate ++ s.sampling2(s.s2).validate
     def inputs = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
     val outputs = {
@@ -29,12 +29,12 @@ object ConcatenateSampling {
       val p2 = s.sampling2(s.s2).outputs.toSet
       p1 intersect p2
     }
-    def apply = FromContext { p ⇒
+    def apply = FromContext { p =>
       import p._
       val ps = outputs.toSet
 
-      s.sampling1(s.s1).sampling.from(context).map(_.filter(v ⇒ ps.contains(v.prototype))) ++
-        s.sampling2(s.s2).sampling.from(context).map(_.filter(v ⇒ ps.contains(v.prototype)))
+      s.sampling1(s.s1).sampling.from(context).map(_.filter(v => ps.contains(v.prototype))) ++
+        s.sampling2(s.s2).sampling.from(context).map(_.filter(v => ps.contains(v.prototype)))
     }
 
     Sampling(

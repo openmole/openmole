@@ -29,7 +29,7 @@ object NSGA3 {
   sealed trait References
 
   object DeterministicNSGA3 {
-    import mgo.evolution.algorithm.{ CDGenome, NSGA3 ⇒ MGONSGA3, _ }
+    import mgo.evolution.algorithm.{ CDGenome, NSGA3 => MGONSGA3, _ }
 
     implicit def integration: MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] {
       type G = CDGenome.Genome
@@ -59,7 +59,7 @@ object NSGA3 {
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             val res = MGONSGA3.result[Phenotype](population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
@@ -74,21 +74,21 @@ object NSGA3 {
             genomes ++ fitness ++ Seq(generated) ++ outputsValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONSGA3.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue, lambda = n)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             MGONSGA3.elitism[S, Phenotype](om.mu, om.references, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
 
@@ -109,7 +109,7 @@ object NSGA3 {
     reject:              Option[Condition])
 
   object StochasticNSGA3 {
-    import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 ⇒ MGONoisyNSGA3, _ }
+    import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 => MGONoisyNSGA3, _ }
 
     implicit def integration: MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] {
       type G = CDGenome.Genome
@@ -140,7 +140,7 @@ object NSGA3 {
         def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val res = MGONoisyNSGA3.result(population, aggregate.from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
@@ -155,23 +155,23 @@ object NSGA3 {
             genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONoisyNSGA3.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONoisyNSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.cloneProbability, om.genome.continuous, om.genome.discrete, aggregate.from(context), rejectValue, lambda = n) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             MGONoisyNSGA3.elitism(om.mu, om.references, om.historySize, aggregate.from(context), om.genome.continuous, om.genome.discrete) apply (s, population, candidates, rng)
 
@@ -205,7 +205,7 @@ object NSGA3 {
     reject:         OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
-      case None ⇒
+      case None =>
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
@@ -215,7 +215,7 @@ object NSGA3 {
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
         )
-      case Some(stochasticValue) ⇒
+      case Some(stochasticValue) =>
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
@@ -246,9 +246,9 @@ object NSGA3Evolution {
     p =>
       val refPoints =
         p.references match
-          case NSGA3.References.None ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.toSeq(p.objective).size)
-          case NSGA3.References.Division(i) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.toSeq(p.objective).size)
-          case NSGA3.References.List(p) ⇒ mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
+          case NSGA3.References.None => mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(50, Objectives.toSeq(p.objective).size)
+          case NSGA3.References.Division(i) => mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(i, Objectives.toSeq(p.objective).size)
+          case NSGA3.References.List(p) => mgo.evolution.algorithm.NSGA3Operations.ReferencePoints(p)
 
       NSGA3(
         populationSize = p.populationSize,
@@ -261,7 +261,7 @@ object NSGA3Evolution {
       )
 
   given ExplorationMethod[NSGA3Evolution, EvolutionWorkflow] =
-    p ⇒
+    p =>
       EvolutionWorkflow(
         method = p,
         evaluation = p.evaluation,
@@ -273,7 +273,7 @@ object NSGA3Evolution {
       )
 
 
-  given ExplorationMethodSetter[NSGA3Evolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[NSGA3Evolution, EvolutionPattern] = (e, p) => e.copy(distribution = p)
 
 }
 

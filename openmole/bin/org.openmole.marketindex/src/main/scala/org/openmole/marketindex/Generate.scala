@@ -18,10 +18,10 @@ import scala.annotation.tailrec
   )
 
   @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-    case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-    case "--market" :: tail ⇒ parse(tail.tail, c.copy(market = tail.headOption.map(new File(_))))
-    case s :: tail          ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-    case Nil                ⇒ c
+    case "--target" :: tail => parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+    case "--market" :: tail => parse(tail.tail, c.copy(market = tail.headOption.map(new File(_))))
+    case s :: tail          => parse(tail, c.copy(ignored = s :: c.ignored))
+    case Nil                => c
   }
 
   val parameters = parse(args.toList.map(_.trim))

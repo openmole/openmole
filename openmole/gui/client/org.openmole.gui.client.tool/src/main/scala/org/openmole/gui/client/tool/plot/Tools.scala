@@ -19,7 +19,7 @@ object Tools {
   }
 
   def dataArrayIndexes(row: Array[String]) =
-    row.zipWithIndex.filter { case (r, i) ⇒ isDataArray(r) }.map {
+    row.zipWithIndex.filter { case (r, i) => isDataArray(r) }.map {
       _._2
     }
 
@@ -30,7 +30,7 @@ object Tools {
   }.head.tail.dropRight(1).split(',').toSeq
 
   def getDataArrays(dataCol: Seq[String]) = {
-    dataCol.map { d ⇒
+    dataCol.map { d =>
       arrayRegEx.exec(d).map {
         _.get
       }.head.tail.dropRight(1).split(',').toSeq

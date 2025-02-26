@@ -54,10 +54,10 @@ object Runtime extends JavaLogger {
 
   import squants.time.TimeConversions._
 
-  def retry[T](f: ⇒ T, retry: Option[Int]) = {
+  def retry[T](f: => T, retry: Option[Int]) = {
     retry match {
-      case None    ⇒ f
-      case Some(r) ⇒ Retry.retry(f, r, Some(1 seconds))
+      case None    => f
+      case Some(r) => Retry.retry(f, r, Some(1 seconds))
     }
 
   }
@@ -83,7 +83,7 @@ class Runtime {
     logger.fine("Downloading input message")
 
     val executionMessage =
-      newFile.withTmpFile: executionMessageFileCache ⇒
+      newFile.withTmpFile: executionMessageFileCache =>
         retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
         serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
 
@@ -103,10 +103,10 @@ class Runtime {
 
     def getReplicatedFile(replicatedFile: ReplicatedFile, transferOptions: TransferOptions) =
       ReplicatedFile.download(replicatedFile):
-        (path, file) ⇒
+        (path, file) =>
           try retry(storage.download(path, file, transferOptions), transferRetry)
           catch
-            case e: Exception ⇒ throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
+            case e: Exception => throw new InternalProcessingError(s"Error downloading $replicatedFile", e)
 
     val beginTime = System.currentTimeMillis
 
@@ -126,7 +126,7 @@ class Runtime {
 
         logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 
-        PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+        PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e) }
 
         logger.fine("Loaded plugins: " + PluginManager.bundles.map(_.getSymbolicName).mkString(", "))
 
@@ -208,7 +208,7 @@ class Runtime {
           val files = serializerService.listFiles(contextResults)
 
           val replicated =
-            files.map: file ⇒
+            files.map: file =>
               def uploadOnStorage(f: File) = retry(storage.upload(f, None, TransferOptions(noLink = true, canMove = true)), transferRetry)
               ReplicatedFile.upload(file, uploadOnStorage)
 
@@ -220,7 +220,7 @@ class Runtime {
         val endTime = System.currentTimeMillis
         Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
       catch
-        case t: Throwable ⇒
+        case t: Throwable =>
           if (debug) logger.log(SEVERE, "", t)
           Failure(t)
       finally
@@ -233,7 +233,7 @@ class Runtime {
 
     val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
 
-    newFile.withTmpFile("output", ".tgz"): outputLocal ⇒
+    newFile.withTmpFile("output", ".tgz"): outputLocal =>
       logger.fine(s"Serializing result to $outputLocal")
       serializerService.serializeAndArchiveFiles(runtimeResult, outputLocal, gz = true)
       logger.fine(s"Upload the serialized result to $outputMessagePath on $storage")

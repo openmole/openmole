@@ -38,7 +38,7 @@ case class IndependentPriors(priors: Seq[UnivariatePrior]) {
   val v = priors.map { _.v }
 
   def density(p: FromContextTask.Parameters)(x: Array[Double]): Double =
-    (priors zip x).map { case (prior, xi) ⇒ prior.density(p)(xi) }.product
+    (priors zip x).map { case (prior, xi) => prior.density(p)(xi) }.product
 
   def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] =
     priors.toArray.map { _.sample(p) }
@@ -58,13 +58,13 @@ object UnivariatePrior {
     import org.openmole.core.workflow.domain._
     import org.openmole.core.workflow.sampling._
 
-    def apply[T](f: T ⇒ UnivariatePrior) =
+    def apply[T](f: T => UnivariatePrior) =
       new ToUnivariatePrior[T] {
         def apply(t: T) = f(t)
       }
 
     implicit def factorIsPrior[D](implicit bounded: BoundedFromContextDomain[D, Double]): ToUnivariatePrior[Factor[D, Double]] =
-      ToUnivariatePrior[Factor[D, Double]] { f ⇒
+      ToUnivariatePrior[Factor[D, Double]] { f =>
         val (min, max) = bounded(f.domain).domain
         UniformPrior(f.value, min, max)
       }

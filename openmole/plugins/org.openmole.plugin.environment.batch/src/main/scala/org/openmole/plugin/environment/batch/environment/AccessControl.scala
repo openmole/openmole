@@ -16,7 +16,7 @@ object AccessControl:
   def bypassAccessControl[T](f: Priority ?=> T) =
     f(using Bypass)
 
-  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: ⇒ B) =
+  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: => B) =
     priority match
       case Bypass => f
       case p: Int =>
@@ -43,6 +43,6 @@ case class AccessControl(nbTokens: Int):
   lazy val permittedThreads = collection.mutable.Set[Long]()
   lazy val semaphore = new PrioritySemaphore(nbTokens)
 
-  def apply[T](f: ⇒ T)(using AccessControl.Priority): T = AccessControl.withPermit(this)(f)
+  def apply[T](f: => T)(using AccessControl.Priority): T = AccessControl.withPermit(this)(f)
 
 

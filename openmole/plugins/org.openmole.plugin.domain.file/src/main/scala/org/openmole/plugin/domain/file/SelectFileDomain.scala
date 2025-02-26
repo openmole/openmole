@@ -25,7 +25,7 @@ import org.openmole.core.argument.FileFromContext
 
 object SelectFileDomain {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain ⇒
+  implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain =>
     Domain(
       domain.iterator,
       domain.provider.inputs,
@@ -36,5 +36,5 @@ object SelectFileDomain {
 }
 
 class SelectFileDomain(val provider: FromContext[File]) {
-  def iterator = provider.map(p ⇒ Iterator(p))
+  def iterator = provider.map(p => Iterator(p))
 }

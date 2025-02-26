@@ -20,7 +20,7 @@
 //import java.net.URI
 //
 //import fr.iscpif.gridscale.http.{ DPMWebDAVStorage, HTTPSAuthentication, WebDAVLocation }
-//import fr.iscpif.gridscale.storage.{ ListEntry, Storage ⇒ GSStorage }
+//import fr.iscpif.gridscale.storage.{ ListEntry, Storage => GSStorage }
 //import org.openmole.core.communication.storage.{ RemoteStorage, _ }
 //import org.openmole.core.preference.Preference
 //import org.openmole.core.threadprovider.ThreadProvider
@@ -70,13 +70,13 @@ import org.openmole.tool.file.*
 //  //  def download(src: String, dest: File, options: TransferOptions)(implicit newFile: NewFile): Unit =
 //  //    try {
 //  //      if (options.raw) download(src, dest)
-//  //      else newFile.withTmpFile { tmpFile ⇒
+//  //      else newFile.withTmpFile { tmpFile =>
 //  //        download(src, tmpFile)
 //  //        tmpFile.copyUncompressFile(dest)
 //  //      }
 //  //    }
 //  //    catch {
-//  //      case e: Throwable ⇒ throw new IOException(s"Error downloading $src to $dest from $url with option $options", e)
+//  //      case e: Throwable => throw new IOException(s"Error downloading $src to $dest from $url with option $options", e)
 //  //    }
 //
 //  //private def download(src: String, dest: File): Unit = run(downloadCommand(url.resolve(src), dest.getAbsolutePath))
@@ -84,13 +84,13 @@ import org.openmole.tool.file.*
 //  //  def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit =
 //  //    try {
 //  //      if (options.raw) upload(src, dest)
-//  //      else newFile.withTmpFile { tmpFile ⇒
+//  //      else newFile.withTmpFile { tmpFile =>
 //  //        src.copyCompressFile(tmpFile)
 //  //        upload(tmpFile, dest)
 //  //      }
 //  //    }
 //  //    catch {
-//  //      case e: Throwable ⇒ throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
+//  //      case e: Throwable => throw new IOException(s"Error uploading $src to $dest from $url with option $options", e)
 //  //    }
 //
 //  //private def upload(src: File, dest: String): Unit = run(uploadCommand(src.getAbsolutePath, url.resolve(dest)))
@@ -120,7 +120,7 @@ import org.openmole.tool.file.*
 //trait EGIWebDAVStorageService <: EGIStorageService
 //
 
-//class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val timeout: Time, val debug: Boolean) extends RemoteStorage with NativeCommandCopy { s ⇒
+//class CurlRemoteStorage(val host: String, val port: Int, val voName: String, val timeout: Time, val debug: Boolean) extends RemoteStorage with NativeCommandCopy { s =>
 //  lazy val curl = new Curl(voName, debug, timeout)
 //
 //  @transient lazy val url = new URI("https", null, host, port, null, null, null)
@@ -130,7 +130,7 @@ import org.openmole.tool.file.*
 //  override def upload(src: File, dest: String, options: TransferOptions)(implicit newFile: NewFile): Unit =
 //    try super.upload(src, dest, options)
 //    catch {
-//      case t: Throwable ⇒
+//      case t: Throwable =>
 //        Try(run(s"${curl.curl} -X DELETE ${url.resolve(dest)}"))
 //        throw t
 //    }
@@ -154,8 +154,8 @@ object CurlRemoteStorage {
 
     val logger =
       ProcessLogger(
-        (o: String) ⇒ output.append("\n" + o),
-        (e: String) ⇒ error.append("\n" + e)
+        (o: String) => output.append("\n" + o),
+        (e: String) => error.append("\n" + e)
       )
 
     val exit = Process(Seq("bash", "-c", s"unset http_proxy; unset https_proxy; $cmd")) ! logger
@@ -184,20 +184,20 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
     try {
       try {
         if (options.raw) CurlRemoteStorage.run(curl.upload(src.getAbsolutePath, resolve(uploadDestination)))
-        else newFile.withTmpFile { tmpFile ⇒
+        else newFile.withTmpFile { tmpFile =>
           src.copyCompressFile(tmpFile)
           CurlRemoteStorage.run(curl.upload(tmpFile.getAbsolutePath, resolve(uploadDestination)))
         }
         uploadDestination
       }
       catch {
-        case e: Throwable ⇒
+        case e: Throwable =>
           util.Try(CurlRemoteStorage.run(curl.delete(resolve(uploadDestination))))
           throw new java.io.IOException(s"Error uploading $src to $dest to $location with option $options", e)
       }
     }
     catch {
-      case t: Throwable ⇒
+      case t: Throwable =>
         util.Try(CurlRemoteStorage.run(s"${curl} -X DELETE ${resolve(uploadDestination)}"))
         throw t
     }
@@ -206,13 +206,13 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
   override def download(src: String, dest: File, options: storage.TransferOptions)(implicit newFile: TmpDirectory): Unit = {
     try {
       if (options.raw) CurlRemoteStorage.run(curl.download(resolve(src), dest.getAbsolutePath))
-      else newFile.withTmpFile { tmpFile ⇒
+      else newFile.withTmpFile { tmpFile =>
         CurlRemoteStorage.run(curl.download(resolve(src), tmpFile.getAbsolutePath))
         tmpFile.copyUncompressFile(dest)
       }
     }
     catch {
-      case e: Throwable ⇒ throw new java.io.IOException(s"Error downloading $src to $dest from $location with option $options", e)
+      case e: Throwable => throw new java.io.IOException(s"Error downloading $src to $dest from $location with option $options", e)
     }
   }
 

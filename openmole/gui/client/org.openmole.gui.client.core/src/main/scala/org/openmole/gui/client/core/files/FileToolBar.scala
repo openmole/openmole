@@ -55,9 +55,9 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
   def filterTool(using api: ServerAPI, basePath: BasePath) = div(
     cls := "file-filter",
     //  label("# of entries ", width := "30px", margin := "0 15 0 10"),
-    // form(thresholdInput, onSubmit.preventDefault --> { _ ⇒ filterSubmit }),
+    // form(thresholdInput, onSubmit.preventDefault --> { _ => filterSubmit }),
     label("Find ", width := "30px", margin := "0 10 0 10"),
-    form(findInput, onMountFocus, onSubmit.preventDefault --> { _ ⇒ treeNodeManager.find(findInput.ref.value) })
+    form(findInput, onMountFocus, onSubmit.preventDefault --> { _ => treeNodeManager.find(findInput.ref.value) })
   )
 
   def sortingGroup(using api: ServerAPI, basePath: BasePath) =
@@ -66,16 +66,16 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
         centerInDiv,
         div(
           sorting match
-            case ListSorting.AlphaSorting ⇒ "Aa"
-            case ListSorting.TimeSorting ⇒ OMTags.glyph_clock
-            case ListSorting.SizeSorting ⇒ OMTags.glyph_data
+            case ListSorting.AlphaSorting => "Aa"
+            case ListSorting.TimeSorting => OMTags.glyph_clock
+            case ListSorting.SizeSorting => OMTags.glyph_data
           ,
           cls <-- treeNodeManager.fileSorting.signal.map: s =>
             if s.fileSorting == sorting
             then "sorting-files-item-selected"
             else "sorting-files-item"
         ),
-        onClick --> { _ ⇒
+        onClick --> { _ =>
           val currentSorting = treeNodeManager.fileSorting.now()
           if currentSorting.fileSorting == sorting
           then
@@ -113,8 +113,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
                       previous.now().foreach(p=> opts.set(p))
                       treeNodePanel.multiTool.set(Git)
                       treeNodePanel.confirmationDiv.set(
-                        Some(treeNodePanel.confirmation(s"Modifications pending, stash or commit your changes.", "Stash", () ⇒
-                          api.stash(treeNodeManager.directory.now()).andThen { _ ⇒
+                        Some(treeNodePanel.confirmation(s"Modifications pending, stash or commit your changes.", "Stash", () =>
+                          api.stash(treeNodeManager.directory.now()).andThen { _ =>
                             checkout(b)
                             treeNodePanel.closeMultiTool
                           }
@@ -127,7 +127,7 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
       ),
       div(
         cls := "sorting-files",
-        children <-- treeNodeManager.fileSorting.signal.map: fs ⇒
+        children <-- treeNodeManager.fileSorting.signal.map: fs =>
           Seq(
             item(ListSorting.AlphaSorting),
             item(ListSorting.TimeSorting),
@@ -136,8 +136,8 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
               cls := "sorting-file-item-caret",
               marginTop := "4",
               fs.firstLast match
-                case FirstLast.Last ⇒ glyph_triangle_up
-                case FirstLast.First ⇒ glyph_triangle_down
+                case FirstLast.Last => glyph_triangle_up
+                case FirstLast.First => glyph_triangle_down
             )
           )
 

@@ -44,17 +44,17 @@ package object stream:
 
       try futureRead.get(timeout.millis, TimeUnit.MILLISECONDS)
       catch {
-        case (e: TimeoutException) ⇒
+        case (e: TimeoutException) =>
           futureRead.cancel(true)
           throw new IOException(s"Timeout on reading $bufferSize bytes, read was longer than $timeout ms.", e)
       }
     }.takeWhile(_ != -1).foreach {
-      count ⇒
+      count =>
         val futureWrite = pool.submit(new WriterRunnable(buffer, outputStream, count))
 
         try futureWrite.get(timeout.millis, TimeUnit.MILLISECONDS)
         catch {
-          case (e: TimeoutException) ⇒
+          case (e: TimeoutException) =>
             futureWrite.cancel(true)
             throw new IOException(s"Timeout on writing $count bytes, write was longer than $timeout ms.", e)
         }
@@ -113,7 +113,7 @@ package object stream:
 
 
 
-  def withClosable[C <: { def close(): Unit }, T](open: ⇒ C)(f: C ⇒ T): T =
+  def withClosable[C <: { def close(): Unit }, T](open: => C)(f: C => T): T =
     val c = open
     try f(c)
     finally c.close()

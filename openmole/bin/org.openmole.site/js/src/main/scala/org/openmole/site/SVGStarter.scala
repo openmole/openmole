@@ -46,10 +46,10 @@ object SVGStarter {
 
     val svgString = "position:absolute;margin-top:-70px"
     button.addEventListener("click", {
-      (e: MouseEvent) ⇒
+      (e: MouseEvent) =>
         animation.beginElement()
         button.setAttribute("style", "opacity:0;ponter:unset;" + svgString)
-        org.scalajs.dom.window.setTimeout(() ⇒ button.setAttribute("style", "opacity:1;" + svgString), timeOut)
+        org.scalajs.dom.window.setTimeout(() => button.setAttribute("style", "opacity:1;" + svgString), timeOut)
     })
 
   }

@@ -33,13 +33,13 @@ package argument:
 
     class Parameters(val inputs: Seq[Val[?]])(implicit val tmpDirectory: TmpDirectory, val fileService: FileService, val cache: KeyValueCache, val outputRedirection: OutputRedirection)
 
-    case class LeafValidate(validate: Parameters ⇒ Seq[Throwable]) extends Validate:
+    case class LeafValidate(validate: Parameters => Seq[Throwable]) extends Validate:
       def apply(inputs: Seq[Val[?]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = validate(new Parameters(inputs))
 
     case class SeqValidate(validate: Seq[Validate]) extends Validate:
       def apply(inputs: Seq[Val[?]])(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): Seq[Throwable] = validate.flatMap(_.apply(inputs))
 
-    def apply(f: Parameters ⇒ Seq[Throwable]): Validate = LeafValidate(f)
+    def apply(f: Parameters => Seq[Throwable]): Validate = LeafValidate(f)
     def apply(vs: Validate*): Validate = SeqValidate(vs)
 
     def withExtraInputs(v: Validate, extraInputs: Seq[Val[?]] => Seq[Val[?]]): Validate = new Validate:
@@ -50,22 +50,22 @@ package argument:
 
     def ++(v1: Validate, v2: Validate) =
       (v1, v2) match
-        case (Validate.success, Validate.success) ⇒ Validate.success
-        case (v, Validate.success)                ⇒ v
-        case (Validate.success, v)                ⇒ v
-        case (v1, v2)                             ⇒ SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
+        case (Validate.success, Validate.success) => Validate.success
+        case (v, Validate.success)                => v
+        case (Validate.success, v)                => v
+        case (v1, v2)                             => SeqValidate(toIterable(v1).toSeq ++ toIterable(v2))
 
     implicit def fromSeqValidate(v: Seq[Validate]): Validate = apply(v *)
-    implicit def fromThrowables(t: Seq[Throwable]): Validate = Validate { _ ⇒ t }
+    implicit def fromThrowables(t: Seq[Throwable]): Validate = Validate { _ => t }
 
     implicit def toIterable(v: Validate): Iterable[Validate] =
       v match
-        case s: SeqValidate  ⇒ s.validate
-        case l: LeafValidate ⇒ Iterable(l)
-        case success         ⇒ Iterable.empty
+        case s: SeqValidate  => s.validate
+        case l: LeafValidate => Iterable(l)
+        case success         => Iterable.empty
 
   trait ExpansionPackage:
-    implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e ⇒ toFromContext.convert(e))
+    implicit def seqToSeqOfFromContext[T](s: Seq[T])(implicit toFromContext: ToFromContext[T, T]): Seq[FromContext[T]] = s.map(e => toFromContext.convert(e))
     implicit def optionalArgumentToOption[T](optionalArgument: OptionalArgument[T]): Option[T] = optionalArgument.option
 
     type Condition = argument.Condition

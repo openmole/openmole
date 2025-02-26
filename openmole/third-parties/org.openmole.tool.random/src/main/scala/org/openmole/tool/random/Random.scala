@@ -21,7 +21,7 @@ import java.util.UUID
 
 import org.apache.commons.math3.random.{ RandomAdaptor, RandomGenerator, Well44497b }
 
-object Random { random ⇒
+object Random { random =>
   def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
 
   def apply(seed: Long) = new SynchronizedRandom(new Well44497b(seed))

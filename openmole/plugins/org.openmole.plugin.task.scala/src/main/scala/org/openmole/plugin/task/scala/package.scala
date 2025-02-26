@@ -39,10 +39,10 @@ object libraries:
 
 object plugins:
   def +=[T: JVMLanguageBuilder](plugins: Seq[File]*) =
-    plugins.flatten[File].foreach { plugin ⇒
+    plugins.flatten[File].foreach { plugin =>
       PluginManager.bundle(plugin) match {
-        case None ⇒ throw new UserBadDataError(s"Plugin $plugin is not loaded")
-        case _ ⇒
+        case None => throw new UserBadDataError(s"Plugin $plugin is not loaded")
+        case _ =>
       }
     }
     implicitly[JVMLanguageBuilder[T]].plugins.modify(_ ++ plugins.flatten)

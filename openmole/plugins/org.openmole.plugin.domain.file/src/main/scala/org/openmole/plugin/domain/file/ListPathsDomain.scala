@@ -25,7 +25,7 @@ import org.openmole.core.argument.OptionalArgument
 
 object ListPathsDomain {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[ListPathsDomain, Path] = domain ⇒
+  implicit def isDiscrete: DiscreteFromContextDomain[ListPathsDomain, Path] = domain =>
     Domain(
       domain.iterator,
       domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs),

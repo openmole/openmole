@@ -20,7 +20,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val i = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context
       } set (inputs += i)
@@ -60,7 +60,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val seed = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context
       } set (inputs += (i, seed))
@@ -86,7 +86,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val seed = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context + (j -> 9)
       } set (inputs += (i, seed), outputs += j)
@@ -119,7 +119,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val l = Val[Double]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         counter.incrementAndGet()
         context + (step -> (context(step) + 1))
       } set (
@@ -154,7 +154,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     )
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(l) should equal(2.0)
         context
       } set (

@@ -29,7 +29,7 @@ import java.io.File
 object JVMLanguageTask:
   lazy val workDirectory = Val[File]("workDirectory")
 
-  def process(executionContext: TaskExecutionContext, libraries: Seq[File], external: External, processCode: FromContext[Context], outputs: PrototypeSet) = FromContext: p ⇒
+  def process(executionContext: TaskExecutionContext, libraries: Seq[File], external: External, processCode: FromContext[Context], outputs: PrototypeSet) = FromContext: p =>
     import p.*
 
     val pwd = executionContext.taskExecutionDirectory.newDirectory("jvmpwd")

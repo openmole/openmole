@@ -86,7 +86,7 @@ object HDOSE:
         def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = MGOHDOSE.tooCloseByComponent(om.weightC, om.weightD, om.genome.discrete)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p.*
             val res = MGOHDOSE.result[Phenotype](state, population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
@@ -100,19 +100,19 @@ object HDOSE:
             genomes ++ fitness ++ Seq(generated, distance, archive) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p.*
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGOHDOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p.*
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGOHDOSE.adaptiveBreeding[Phenotype](
               n,
               om.operatorExploration,
@@ -124,7 +124,7 @@ object HDOSE:
               rejectValue) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p.*
             MGOHDOSE.elitism[Phenotype](
               om.mu,
@@ -179,7 +179,7 @@ object HDOSE:
   object StochasticHDOSE:
 
     import mgo.evolution.algorithm.NoisyHDOSE.*
-    import mgo.evolution.algorithm.{NoisyHDOSE ⇒ MGONoisyHDOSE, *}
+    import mgo.evolution.algorithm.{NoisyHDOSE => MGONoisyHDOSE, *}
 
     given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
       api =>
@@ -235,12 +235,12 @@ object HDOSE:
             genomes ++ fitness ++ Seq(samples, generated, distance, archive) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             MGONoisyHDOSE.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) =
@@ -248,7 +248,7 @@ object HDOSE:
             import p.*
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
 
             MGONoisyHDOSE.adaptiveBreeding[Phenotype](
               n,
@@ -350,10 +350,10 @@ object HDOSE:
 
 
     def genomeBound(originAxe: OriginAxe) = originAxe match
-      case c: ScalarDoubleOriginAxe ⇒ c.p
-      case d: ScalarIntOriginAxe ⇒ d.p
-      case cs: SequenceOfDoubleOriginAxe ⇒ cs.p
-      case ds: SequenceOfIntOriginAxe ⇒ ds.p
+      case c: ScalarDoubleOriginAxe => c.p
+      case d: ScalarIntOriginAxe => d.p
+      case cs: SequenceOfDoubleOriginAxe => cs.p
+      case ds: SequenceOfIntOriginAxe => ds.p
       case en: EnumerationOriginAxe => en.p
       case en: SequenceOfEnumerationOriginAxe => en.p
       case d: ContinuousIntOriginAxe => d.p
@@ -363,16 +363,16 @@ object HDOSE:
 
     def weightC(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case c: ScalarDoubleOriginAxe ⇒ Seq(c.weight)
-        case cs: SequenceOfDoubleOriginAxe ⇒ cs.weight
+        case c: ScalarDoubleOriginAxe => Seq(c.weight)
+        case cs: SequenceOfDoubleOriginAxe => cs.weight
         case d: ContinuousIntOriginAxe => Seq(d.weight)
         case d: SequenceOfContinuousIntOriginAxe => d.weight
         case _ => Seq()
 
     def weightD(axes: Seq[OriginAxe]): Vector[Double] =
       axes.toVector.flatMap:
-        case d: ScalarIntOriginAxe ⇒ Seq(d.weight)
-        case ds: SequenceOfIntOriginAxe ⇒ ds.weight
+        case d: ScalarIntOriginAxe => Seq(d.weight)
+        case ds: SequenceOfIntOriginAxe => ds.weight
         case en: EnumerationOriginAxe => Seq(en.weight)
         case en: SequenceOfEnumerationOriginAxe => en.weight
         case _ => Seq()
@@ -407,7 +407,7 @@ object HDOSE:
     assert(Genome.continuous(genomeValue).size == weightC.size, s"Discrete ${Genome.continuous(genomeValue)} should be of the same size as weights ${weightC}")
 
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match
-      case None ⇒
+      case None =>
         val exactObjectives = Objectives.toExact(OSE.FitnessPattern.toObjectives(objective))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
@@ -428,7 +428,7 @@ object HDOSE:
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
         )
-      case Some(stochasticValue) ⇒
+      case Some(stochasticValue) =>
         val noisyObjectives = Objectives.toNoisy(OSE.FitnessPattern.toObjectives(objective))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
@@ -476,7 +476,7 @@ object HDOSEEvolution:
       )
 
   given ExplorationMethod[HDOSEEvolution, EvolutionWorkflow] =
-    p ⇒
+    p =>
       EvolutionWorkflow(
         method = p,
         evaluation = p.evaluation,
@@ -487,7 +487,7 @@ object HDOSEEvolution:
         scope = p.scope
       )
 
-  given ExplorationMethodSetter[HDOSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[HDOSEEvolution, EvolutionPattern] = (e, p) => e.copy(distribution = p)
 
 
 import EvolutionWorkflow.*

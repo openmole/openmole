@@ -35,12 +35,12 @@ object OMTags:
     text:     String,
     buttonCB: HESetters,
     glyCA:    HESetters,
-    todo:     () ⇒ Unit
+    todo:     () => Unit
   ): HtmlElement = {
     button(
       `type` := "button",
       buttonCB,
-      onClick --> { _ ⇒ todo() },
+      onClick --> { _ => todo() },
       span(aria.hidden := true, glyCA)
     )
   }
@@ -77,39 +77,39 @@ object OMTags:
   def glyph_stash_pop = img(src := "img/stashPop.svg")
   val glyph_git = cls("bi-git")
 
-  case class AlertAction(action: () ⇒ Unit)
+  case class AlertAction(action: () => Unit)
 
   def alert(alertType: HESetters, content: HtmlElement, actions: Seq[AlertAction], buttonGroupClass: HESetters = Seq(float := "left", marginLeft := "20"), okString: String = "OK", cancelString: String = "Cancel"): HtmlElement =
     actions.size match {
-      case 1 ⇒ alert(alertType, content, actions.head.action, buttonGroupClass, okString)
-      case 2 ⇒ alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString, cancelString)
-      case _ ⇒ div()
+      case 1 => alert(alertType, content, actions.head.action, buttonGroupClass, okString)
+      case 2 => alert(alertType, content, actions.head.action, actions(1).action, buttonGroupClass, okString, cancelString)
+      case _ => div()
     }
 
-  def alert(alertType: HESetters, content: HtmlElement, todook: () ⇒ Unit, buttonGroupClass: HESetters, okString: String): HtmlElement =
+  def alert(alertType: HESetters, content: HtmlElement, todook: () => Unit, buttonGroupClass: HESetters, okString: String): HtmlElement =
     div(
       role := "alert",
       content,
-      button(okString, alertType, paddingTop := "20", onClick --> (_ ⇒ todook()))
+      button(okString, alertType, paddingTop := "20", onClick --> (_ => todook()))
     )
 
-  def alert(alertType: HESetters, content: HtmlElement, todook: () ⇒ Unit, todocancel: () ⇒ Unit, buttonGroupClass: HESetters, okString: String, cancelString: String): HtmlElement =
+  def alert(alertType: HESetters, content: HtmlElement, todook: () => Unit, todocancel: () => Unit, buttonGroupClass: HESetters, okString: String, cancelString: String): HtmlElement =
     div(role := "alert", overflowY := "scroll", height := "600", padding := "20",
       content,
       div(
         paddingTop := "20",
         buttonGroup.amend(
           buttonGroupClass,
-          button(okString, alertType, onClick --> (_ ⇒ todook())),
-          button(cancelString, btn_secondary, onClick --> (_ ⇒ todocancel()))
+          button(okString, alertType, onClick --> (_ => todook())),
+          button(cancelString, btn_secondary, onClick --> (_ => todocancel()))
         )
       )
     )
 
-  def glyphSpan(glyCA: HESetters, linkName: String = "", todo: ⇒ Unit = () ⇒ {}): HtmlElement =
-    span(cursor := "pointer", glyCA, linkName, onClick --> (_ ⇒ todo))
+  def glyphSpan(glyCA: HESetters, linkName: String = "", todo: => Unit = () => {}): HtmlElement =
+    span(cursor := "pointer", glyCA, linkName, onClick --> (_ => todo))
 
-  def uploadButton(todo: Input ⇒ Unit): HtmlElement = {
+  def uploadButton(todo: Input => Unit): HtmlElement = {
     span(
       cls := "btn-file",
       cursor.pointer,

@@ -28,7 +28,7 @@ object PythonTask:
     val effintsall = install ++
       (if (major == 2) Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py") else Seq.empty)
 
-    (effintsall ++ libraries.map { l ⇒ "pip"+major+" install " + l }).toVector
+    (effintsall ++ libraries.map { l => "pip"+major+" install " + l }).toVector
 
   def apply(
     script:                 RunnableScript,
@@ -90,16 +90,16 @@ object PythonTask:
           import org.json4s._
           import org.json4s.jackson.JsonMethods._
           val outputValues = parse(file.content)
-          (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+          (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) => jValueToVariable(jvalue, v, unwrapArrays = true) }
       
         def inputMapping(dicoName: String): String =
           noFile(mapped.inputs)
             .zipWithIndex
-            .map { (m, i) ⇒ s"${m.name} = $dicoName[${i}]" }
+            .map { (m, i) => s"${m.name} = $dicoName[${i}]" }
             .mkString("\n")
       
         def outputMapping: String =
-          s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
+          s"""[${noFile(mapped.outputs).map { m => m.name }.mkString(",")}]"""
       
         val resultContext: Context =
           val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".py")

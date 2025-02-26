@@ -47,20 +47,20 @@ package object sensitivity {
      * exception in case it's not possible
      */
     def toValDouble(v: Val[?]): Val[Double] = v match
-      case Val.caseDouble(vd) ⇒ vd
-      case _                  ⇒ throw new IllegalArgumentException("expect inputs of type Double, but received " + v)
+      case Val.caseDouble(vd) => vd
+      case _                  => throw new IllegalArgumentException("expect inputs of type Double, but received " + v)
 
-    def variableResults(inputs: Seq[Val[?]], outputs: Seq[Val[?]], coefficient: (Val[?], Val[?]) ⇒ Val[?]) = FromContext { p ⇒
+    def variableResults(inputs: Seq[Val[?]], outputs: Seq[Val[?]], coefficient: (Val[?], Val[?]) => Val[?]) = FromContext { p =>
       import p._
 
       def results =
-        outputs.map { o ⇒
-          val vs = inputs.map { i ⇒ coefficient(i, o) }
-          Seq(o.name) ++ vs.map(v ⇒ context(v))
+        outputs.map { o =>
+          val vs = inputs.map { i => coefficient(i, o) }
+          Seq(o.name) ++ vs.map(v => context(v))
         }
 
       def allVals = Seq(Val[String]("output")) ++ inputs
-      (results.transpose(using identity) zip allVals).map { (value, v) ⇒ Variable.unsecure(v.array, value) }
+      (results.transpose(using identity) zip allVals).map { (value, v) => Variable.unsecure(v.array, value) }
     }
 
   }

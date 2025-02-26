@@ -60,7 +60,7 @@ object SystemExecTask:
     shell:                Shell                         = Bash,
     environmentVariables: Vector[EnvironmentVariable]   = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): SystemExecTask =
     new SystemExecTask(
-      command = command.map(c ⇒ OSCommands(OS(), c)).toVector,
+      command = command.map(c => OSCommands(OS(), c)).toVector,
       workDirectory = workDirectory,
       errorOnReturnValue = errorOnReturnValue,
       returnValue = returnValue,
@@ -100,40 +100,40 @@ case class SystemExecTask private (
         e <- exp.validate(allInputs)
       yield e
 
-    val variableErrors = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
+    val variableErrors = environmentVariables.flatMap(v => Seq(v.name, v.value)).flatMap(_.validate(allInputs))
 
     commandsError ++ variableErrors ++ External.validate(external)(allInputs)
 
 
   override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
-    TaskExecution: p ⇒
+    TaskExecution: p =>
       import p.*
 
-      tmpDirectory.withTmpDir: tmpDir ⇒
+      tmpDirectory.withTmpDir: tmpDir =>
         val preparedContext = External.deployInputFilesAndResources(external, p.context, External.relativeResolver(tmpDir))
 
         val workDir =
           workDirectory match
-            case None ⇒ tmpDir
-            case Some(d) ⇒ new File(tmpDir, d)
+            case None => tmpDir
+            case Some(d) => new File(tmpDir, d)
 
         val context = p.context + (External.PWD → workDir.getAbsolutePath)
 
         val osCommandLines =
           command.find { _.os.compatible }
-            .map { cmd ⇒ cmd.expanded }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
+            .map { cmd => cmd.expanded }.getOrElse(throw new UserBadDataError("No command line found for " + OS.actualOS))
 
         val expandedCommands = osCommandLines.map(_.from(preparedContext))
 
         val shellCommands =
           shell match
-            case Bash ⇒ expandedCommands.map(cmd ⇒ ExecutionCommand.Parsed("bash", "-c", cmd))
-            case NoShell ⇒ expandedCommands.map(ExecutionCommand.Raw(_))
+            case Bash => expandedCommands.map(cmd => ExecutionCommand.Parsed("bash", "-c", cmd))
+            case NoShell => expandedCommands.map(ExecutionCommand.Raw(_))
 
         val executionResult =
           executeAll(
             workDir,
-            environmentVariables.map { v ⇒ v.name.from(context) → v.value.from(preparedContext) },
+            environmentVariables.map { v => v.name.from(context) → v.value.from(preparedContext) },
             shellCommands.toList,
             errorOnReturnValue && !returnValue.isDefined,
             stdOut.isDefined,
@@ -146,8 +146,8 @@ case class SystemExecTask private (
 
         retContext ++
           List(
-            stdOut.map { o ⇒ Variable(o, executionResult.output.get) },
-            stdErr.map { e ⇒ Variable(e, executionResult.errorOutput.get) },
-            returnValue.map { r ⇒ Variable(r, executionResult.returnCode) }
+            stdOut.map { o => Variable(o, executionResult.output.get) },
+            stdErr.map { e => Variable(e, executionResult.errorOutput.get) },
+            returnValue.map { r => Variable(r, executionResult.returnCode) }
           ).flatten
 

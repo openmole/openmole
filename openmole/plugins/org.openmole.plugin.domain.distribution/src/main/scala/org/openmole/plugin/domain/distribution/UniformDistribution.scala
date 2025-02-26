@@ -25,19 +25,19 @@ object UniformDistribution:
   given[T]: DiscreteFromContextDomain[UniformDistribution[T], T] =
     DiscreteFromContextDomain: domain =>
       Domain(
-        FromContext: p ⇒
+        FromContext: p =>
           import p._
           import domain._
 
           val distRandom: scala.util.Random =
             seed.option match
-              case Some(s) ⇒ Random(s.from(context))
-              case None    ⇒ p.random()
+              case Some(s) => Random(s.from(context))
+              case None    => p.random()
 
           Iterator.continually:
             max.option match
-              case Some(i) ⇒ domain.distribution.next(distRandom, i)
-              case None    ⇒ domain.distribution.next(distRandom)
+              case Some(i) => domain.distribution.next(distRandom, i)
+              case None    => domain.distribution.next(distRandom)
         ,
         domain.seed.option.toSeq.flatMap(_.inputs),
         domain.seed.option.map(_.validate).toSeq

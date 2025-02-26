@@ -87,34 +87,34 @@ object TypeTool {
 
   def toClass(s: String) = classEquivalence(
     s match {
-      case "Byte"       ⇒ classOf[Byte]
-      case "Short"      ⇒ classOf[Short]
-      case "Int"        ⇒ classOf[Int]
-      case "int"        ⇒ classOf[Int]
-      case "Long"       ⇒ classOf[Long]
-      case "long"       ⇒ classOf[Long]
-      case "Float"      ⇒ classOf[Float]
-      case "Double"     ⇒ classOf[Double]
-      case "double"     ⇒ classOf[Double]
-      case "Char"       ⇒ classOf[Char]
-      case "Boolean"    ⇒ classOf[Boolean]
-      case "String"     ⇒ classOf[String]
-      case "File"       ⇒ classOf[java.io.File]
-      case "BigInteger" ⇒ classOf[java.math.BigInteger]
-      case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
-      case _ ⇒ try {
+      case "Byte"       => classOf[Byte]
+      case "Short"      => classOf[Short]
+      case "Int"        => classOf[Int]
+      case "int"        => classOf[Int]
+      case "Long"       => classOf[Long]
+      case "long"       => classOf[Long]
+      case "Float"      => classOf[Float]
+      case "Double"     => classOf[Double]
+      case "double"     => classOf[Double]
+      case "Char"       => classOf[Char]
+      case "Boolean"    => classOf[Boolean]
+      case "String"     => classOf[String]
+      case "File"       => classOf[java.io.File]
+      case "BigInteger" => classOf[java.math.BigInteger]
+      case "BigDecimal" => classOf[java.math.BigDecimal]
+      case _ => try {
         TypeTool.getClass.getClassLoader.loadClass(s)
       }
       catch {
-        case e: ClassNotFoundException ⇒ throw new ClassNotFoundException("The class " + s + " has not been found", e)
+        case e: ClassNotFoundException => throw new ClassNotFoundException("The class " + s + " has not been found", e)
       }
     }
   )
 
   def clazzOf(v: Any) = {
     v match {
-      case null      ⇒ classOf[Null]
-      case r: AnyRef ⇒ r.getClass
+      case null      => classOf[Null]
+      case r: AnyRef => r.getClass
     }
   }
 
@@ -131,7 +131,7 @@ object TypeTool {
 
   def assignable(from: Manifest[?], to: Manifest[?]): Boolean =
     unArrayify(from, to) match {
-      case (c1, c2, _) ⇒
+      case (c1, c2, _) =>
         val eqFrom = classEquivalence(from.runtimeClass).map(_.manifest).getOrElse(from)
         val eqTo = classEquivalence(to.runtimeClass).map(_.manifest).getOrElse(to)
         eqTo.runtimeClass.isAssignableFrom(eqFrom.runtimeClass)
@@ -151,7 +151,7 @@ object TypeTool {
 
   def fillArray(m: Manifest[?], s: Seq[_]) =
     val values = m.newArray(s.size)
-    s.zipWithIndex.foreach { case (v, i) ⇒ java.lang.reflect.Array.set(values, i, v) }
+    s.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(values, i, v) }
     values
 
   def toString[T](replaceObject$: Boolean = true, rootPrefix: Boolean = true)(implicit manifest: Manifest[T]) =

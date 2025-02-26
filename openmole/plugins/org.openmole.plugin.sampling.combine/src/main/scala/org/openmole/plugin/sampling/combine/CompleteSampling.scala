@@ -22,7 +22,7 @@ import org.openmole.core.argument.{ FromContext, Validate }
 import org.openmole.core.workflow.sampling._
 
 object CompleteSampling {
-  implicit def isSampling: IsSampling[CompleteSampling] = s ⇒
+  implicit def isSampling: IsSampling[CompleteSampling] = s =>
     Sampling(
       s.apply(),
       s.outputs,
@@ -38,16 +38,16 @@ case class CompleteSampling(samplings: Sampling*) {
   def inputs = PrototypeSet.empty ++ samplings.flatMap { _.inputs }
   def outputs: Iterable[Val[?]] = samplings.flatMap { _.outputs }
 
-  def apply() = FromContext { p ⇒
+  def apply() = FromContext { p =>
     import p._
     if (samplings.isEmpty) Iterator.empty
     else
       samplings.tail.foldLeft[Iterator[Iterable[Variable[?]]]](samplings.head.sampling.from(context)) {
-        (a, b) ⇒ combine(a, b).from(context)
+        (a, b) => combine(a, b).from(context)
       }
   }
 
-  def combine(s1: Iterator[Iterable[Variable[?]]], s2: Sampling) = FromContext { p ⇒
+  def combine(s1: Iterator[Iterable[Variable[?]]], s2: Sampling) = FromContext { p =>
     import p._
     for (x ← s1; y ← s2.sampling.from(context ++ x)) yield x ++ y
   }
@@ -56,16 +56,16 @@ case class CompleteSampling(samplings: Sampling*) {
 
 object XSampling {
 
-  implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = s ⇒ {
+  implicit def isSampling[S1, S2]: IsSampling[XSampling[S1, S2]] = s => {
     def validate =
-      s.sampling1(s.s1).validate ++ Validate { p ⇒
+      s.sampling1(s.s1).validate ++ Validate { p =>
         import p._
         s.sampling2(s.s2).validate.apply(p.inputs ++ s.sampling1(s.s1).outputs)
       }
 
     def inputs = s.sampling1(s.s1).inputs ++ s.sampling2(s.s2).inputs
     def outputs = s.sampling1(s.s1).outputs ++ s.sampling2(s.s2).outputs
-    def apply = FromContext { p ⇒
+    def apply = FromContext { p =>
       import p._
       for {
         x ← s.sampling1(s.s1).sampling.from(context)

@@ -32,7 +32,7 @@ object KillActor:
     if !JobManager.canceled(job.storedJob) && !environment.stopped
     then
       val loadedJob = JobStore.load(job.storedJob)
-      JobManager.sendToMoleExecution(job.storedJob): state ⇒
+      JobManager.sendToMoleExecution(job.storedJob): state =>
         if !JobManager.jobIsFinished(state, job.storedJob) 
         then environment.submit(loadedJob)
     
@@ -47,11 +47,11 @@ object KillActor:
 
     try bj.foreach(kill)
     catch
-      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
+      case e: Throwable => JobManager ! Error(job, environment, e, None, None)
 
     try bj.foreach(clean)
     catch
-      case e: Throwable ⇒ JobManager ! Error(job, environment, e, None, None)
+      case e: Throwable => JobManager ! Error(job, environment, e, None, None)
 
 
 

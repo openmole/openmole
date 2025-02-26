@@ -23,15 +23,15 @@ import org.openmole.core.dsl._
 import org.openmole.core.setter.*
 
 class NetLogoInputs:
-  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[?], n: String): T ⇒ T = inputs += p mapped n
-  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[?]): T ⇒ T = this.+=[T](p, p.name)
+  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[?], n: String): T => T = inputs += p mapped n
+  def +=[T: MappedInputBuilder : InputOutputBuilder](p: Val[?]): T => T = this.+=[T](p, p.name)
 
 @deprecated
 lazy val netLogoInputs = new NetLogoInputs
 
 class NetLogoOutputs:
-  def +=[T: MappedOutputBuilder : InputOutputBuilder](n: String, p: Val[?]): T ⇒ T = outputs += p mapped n
-  def +=[T: MappedOutputBuilder : InputOutputBuilder](p: Val[?]): T ⇒ T = this.+=[T](p.name, p)
+  def +=[T: MappedOutputBuilder : InputOutputBuilder](n: String, p: Val[?]): T => T = outputs += p mapped n
+  def +=[T: MappedOutputBuilder : InputOutputBuilder](p: Val[?]): T => T = this.+=[T](p.name, p)
 
 @deprecated
 lazy val netLogoOutputs = new NetLogoOutputs

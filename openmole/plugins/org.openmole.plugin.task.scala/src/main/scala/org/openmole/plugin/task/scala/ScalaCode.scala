@@ -26,7 +26,7 @@ object ScalaCode:
     def defaults = Focus[ScalaCode](_.defaults)
 
   given [T: Manifest]: DiscreteFromContextDomain[ScalaCode | String, T] =
-    code ⇒ implicitly[DiscreteFromContextDomain[FromContext[Iterable[T]], T]].apply(ScalaCode.fromContext[Iterable[T]](code))
+    code => implicitly[DiscreteFromContextDomain[FromContext[Iterable[T]], T]].apply(ScalaCode.fromContext[Iterable[T]](code))
 
   def fromContext[T: Manifest](code: ScalaCode | String) =
     code match

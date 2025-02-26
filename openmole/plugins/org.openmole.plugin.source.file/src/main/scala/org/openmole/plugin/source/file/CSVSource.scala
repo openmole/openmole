@@ -56,7 +56,7 @@ case class CSVSource(
   separator: Option[Char]
 ) extends Source {
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters =>
     import parameters._
 
     val file = new File(path.from(context))

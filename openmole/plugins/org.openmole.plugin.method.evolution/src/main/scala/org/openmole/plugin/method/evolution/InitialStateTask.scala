@@ -27,7 +27,7 @@ import org.openmole.core.workflow.task._
 object InitialStateTask:
 
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Task("InitialStateTask"): p ⇒
+    Task("InitialStateTask"): p =>
       import p._
       def initialisedState =
         evolution.operations.startTimeLens.set(System.currentTimeMillis) andThen
@@ -38,7 +38,7 @@ object InitialStateTask:
     .set (
       inputs += (evolution.stateVal, evolution.populationVal),
       outputs += (evolution.stateVal, evolution.populationVal),
-      evolution.stateVal := FromContext(p ⇒ evolution.operations.initialState),
+      evolution.stateVal := FromContext(p => evolution.operations.initialState),
       evolution.populationVal := Array.empty[evolution.I](evolution.integration.iManifest)
     )
 

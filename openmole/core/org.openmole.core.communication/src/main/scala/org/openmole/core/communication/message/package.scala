@@ -49,7 +49,7 @@ class RunnableTask(val task: RuntimeTask, val context: Context, val id: JobId)
 case class FileMessage(path: String, hash: String)
 
 object ReplicatedFile:
-  def download(replicatedFile: ReplicatedFile)(download: (String, File) ⇒ Unit, verifyHash: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =
+  def download(replicatedFile: ReplicatedFile)(download: (String, File) => Unit, verifyHash: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =
     val localDirectory = TmpDirectory.makeNewDir("replica")
     try
       def verify(cache: File) =
@@ -80,13 +80,13 @@ object ReplicatedFile:
 
       dl
     catch
-      case t: Throwable ⇒
+      case t: Throwable =>
         localDirectory.recursiveDelete
         throw t
 
     finally fileService.deleteWhenEmpty(localDirectory)
 
-  def upload(file: File, upload: File ⇒ String)(using TmpDirectory) =
+  def upload(file: File, upload: File => String)(using TmpDirectory) =
     val isDir = file.isDirectory
 
     val toReplicate =

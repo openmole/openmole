@@ -38,7 +38,7 @@ case class BundlesInfo(
   files:                Map[File, (Long, Long)],
   providedDependencies: Set[Long]
 ) {
-  lazy val hashes = files.keys.map(f ⇒ f → f.hash()).toMap
+  lazy val hashes = files.keys.map(f => f → f.hash()).toMap
 }
 
 object PluginManager extends JavaLogger {
@@ -56,7 +56,7 @@ object PluginManager extends JavaLogger {
   def allPluginDependencies(b: Bundle) = PluginManager.synchronized {
     resolvedPluginDependenciesCache.
       getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
-      filter(isPlugin).map(l ⇒ Activator.contextOrException.getBundle(l))
+      filter(isPlugin).map(l => Activator.contextOrException.getBundle(l))
   }
 
   private def installBundle(f: File) = PluginManager.synchronized {
@@ -66,20 +66,20 @@ object PluginManager extends JavaLogger {
       bundle
     }
     catch {
-      case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
+      case t: Throwable => throw new InternalProcessingError(t, "Installing bundle " + f)
     }
   }
 
   private def infos: BundlesInfo = PluginManager.synchronized {
     bundlesInfo match {
-      case None ⇒
+      case None =>
         val bs = bundles
-        val providedDependencies = dependencies(bs.filter(b ⇒ b.isProvided)).map(_.getBundleId).toSet
-        val files = bs.map(b ⇒ b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
+        val providedDependencies = dependencies(bs.filter(b => b.isProvided)).map(_.getBundleId).toSet
+        val files = bs.map(b => b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
         val info = BundlesInfo(files, providedDependencies)
         bundlesInfo = Some(info)
         info
-      case Some(bundlesInfo) ⇒ bundlesInfo
+      case Some(bundlesInfo) => bundlesInfo
     }
   }
 
@@ -95,8 +95,8 @@ object PluginManager extends JavaLogger {
     val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
 
     bundles match {
-      case Some(s) ⇒ wiring.refreshBundles(s.asJava, listener)
-      case None    ⇒ wiring.refreshBundles(null, listener)
+      case Some(s) => wiring.refreshBundles(s.asJava, listener)
+      case None    => wiring.refreshBundles(null, listener)
     }
 
     // FIX: The listener is not called by the framework, enable at some point
@@ -107,7 +107,7 @@ object PluginManager extends JavaLogger {
   def bundleFiles = infos.files.keys
 
   def dependencies(file: File): Option[Iterable[File]] =
-    infos.files.get(file).map { case (id, _) ⇒ allPluginDependencies(Activator.contextOrException.getBundle(id)).map { _.file } }
+    infos.files.get(file).map { case (id, _) => allPluginDependencies(Activator.contextOrException.getBundle(id)).map { _.file } }
 
   def isClassProvidedByAPlugin(c: Class[?]) = 
     val b = FrameworkUtil.getBundle(c)
@@ -115,7 +115,7 @@ object PluginManager extends JavaLogger {
     else false
 
   def fileProviding(c: Class[?]) =
-    bundleForClass(c).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
+    bundleForClass(c).map(b => Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
   def bundleForClass(c: Class[?]): Option[Bundle] =
     Option(FrameworkUtil.getBundle(c))
@@ -130,10 +130,10 @@ object PluginManager extends JavaLogger {
     bundle.toSeq.flatMap(allPluginDependencies).map(_.file)
   }
 
-  def allDepending(file: File, filter: Bundle ⇒ Boolean): Iterable[File] =
+  def allDepending(file: File, filter: Bundle => Boolean): Iterable[File] =
     bundle(file) match {
-      case Some(b) ⇒ allDependingBundles(b, filter).map { _.file }
-      case None    ⇒ Iterable.empty
+      case Some(b) => allDependingBundles(b, filter).map { _.file }
+      case None    => Iterable.empty
     }
 
   def isBundle(file: File): Boolean =
@@ -164,14 +164,14 @@ object PluginManager extends JavaLogger {
 
   def tryLoad(files: Iterable[File]): Iterable[(File, Throwable)] = synchronized {
     val bundleFiles = files.flatMap { listBundles }
-    val loaded = bundleFiles.map { b ⇒ b → Try(installBundle(b)) }
-    def bundles = loaded.collect { case (f, Success(b)) ⇒ f → b }
-    def loadError = loaded.collect { case (f, Failure(e)) ⇒ f → e }
+    val loaded = bundleFiles.map { b => b → Try(installBundle(b)) }
+    def bundles = loaded.collect { case (f, Success(b)) => f → b }
+    def loadError = loaded.collect { case (f, Failure(e)) => f → e }
     loadError ++ bundles.flatMap {
-      case (f, b) ⇒
+      case (f, b) =>
         Try(b.start) match {
-          case Success(_) ⇒ None
-          case Failure(e) ⇒
+          case Success(_) => None
+          case Failure(e) =>
             b.uninstall()
             Some(f → e)
         }
@@ -181,7 +181,7 @@ object PluginManager extends JavaLogger {
   def load(files: Iterable[File]) = synchronized {
     val bundles = files.flatMap { listBundles }.map { installBundle }.toList
     bundles.foreach {
-      b ⇒
+      b =>
         logger.fine(s"Stating bundle ${b.getLocation}")
         b.start
     }
@@ -189,7 +189,7 @@ object PluginManager extends JavaLogger {
   }
 
   def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized {
-    val bundles = plugins.filterNot(f ⇒ infos.files.contains(f)).map(installBundle).toList
+    val bundles = plugins.filterNot(f => infos.files.contains(f)).map(installBundle).toList
     bundles.foreach { _.start }
   }
 
@@ -198,7 +198,7 @@ object PluginManager extends JavaLogger {
   def loadDir(path: File): Unit =
     if (path.exists && path.isDirectory) load(listBundles(path))
 
-  def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
+  def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id => Activator.contextOrException.getBundle(id._1) }
 
   private def allDependencies(b: Bundle) = dependencies(List(b))
 
@@ -223,8 +223,8 @@ object PluginManager extends JavaLogger {
   }
 
   def remove(b: Bundle) = synchronized {
-    val additionalBundles = Seq(b) ++ allDependingBundles(b, b ⇒ !b.isProvided)
-    additionalBundles.foreach(b ⇒ if (b.getState == Bundle.ACTIVE) b.uninstall())
+    val additionalBundles = Seq(b) ++ allDependingBundles(b, b => !b.isProvided)
+    additionalBundles.foreach(b => if (b.getState == Bundle.ACTIVE) b.uninstall())
     updateBundles()
   }
 
@@ -247,7 +247,7 @@ object PluginManager extends JavaLogger {
     seen.toList
   }
 
-  def allDependingBundles(b: Bundle, filter: Bundle ⇒ Boolean): Iterable[Bundle] = {
+  def allDependingBundles(b: Bundle, filter: Bundle => Boolean): Iterable[Bundle] = {
     val seen = mutable.Set[Bundle]()
     val toProcess = ListBuffer[Bundle]()
 
@@ -274,7 +274,7 @@ object PluginManager extends JavaLogger {
         for {
           wires ← Option(b.adapt(classOf[BundleWiring]))
           requiered ← Option(wires.getRequiredWires(null).asScala).map(_.filter(_ != null))
-          bundles = requiered.flatMap(w ⇒ Option(w.getProvider)).flatMap(p ⇒ Option(p.getBundle))
+          bundles = requiered.flatMap(w => Option(w.getProvider)).flatMap(p => Option(p.getBundle))
         } yield bundles.filter(_.getBundleId != Constants.SYSTEM_BUNDLE_ID).distinct
 
       bundles.map(_.toSeq).getOrElse(Seq.empty)
@@ -284,18 +284,18 @@ object PluginManager extends JavaLogger {
     b.adapt(classOf[BundleWiring]).
       getProvidedWires(null).asScala.
       map(_.getRequirer.getBundle).
-      filter(b ⇒ b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).
+      filter(b => b.getBundleId != Constants.SYSTEM_BUNDLE_ID && !b.isFullDynamic).
       distinct
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
       _.getState match {
-        case Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING ⇒ true
-        case _ ⇒ false
+        case Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING => true
+        case _ => false
       }
     }.map {
-      b ⇒ b → Try(b.start)
-    }.collect { case (b: Bundle, Failure(e)) ⇒ b → e }
+      b => b → Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) => b → e }
 
   def bundleHashes = infos.hashes.values
 

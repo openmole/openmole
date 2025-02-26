@@ -22,11 +22,11 @@ import org.openmole.core.dsl.extension._
 
 object RepeatSampling {
 
-  implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = s ⇒ {
+  implicit def isSampling[S]: IsSampling[RepeatSampling[S]] = s => {
     def validate: Validate = s.sampling(s.s).validate ++ s.times.validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
     def outputs: Iterable[Val[?]] = s.sampling(s.s).outputs.map(_.toArray)
-    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p =>
       import p._
 
       def sampled =

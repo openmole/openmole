@@ -24,7 +24,7 @@ import org.openmole.core.dsl.extension._
 object FileSource {
 
   def apply(path: FromContext[String], prototype: Val[File])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Source("FileSource") { p ⇒
+    Source("FileSource") { p =>
       import p._
       val expandedPath = new File(path.from(context))
       Variable(prototype, expandedPath)

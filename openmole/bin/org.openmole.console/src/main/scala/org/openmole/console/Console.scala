@@ -99,9 +99,9 @@ object Console extends JavaLogger:
     def executionError = 6
     def restart = 254
 
-  def dealWithLoadError(load: ⇒ Iterable[(File, Throwable)], interactive: Boolean) =
+  def dealWithLoadError(load: => Iterable[(File, Throwable)], interactive: Boolean) =
     val res = load
-    res.foreach { case (f, e) ⇒ Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
+    res.foreach { case (f, e) => Log.logger.log(Log.WARNING, s"Error loading bundle $f", e) }
     if interactive && !res.isEmpty
     then
       print(s"Would you like to remove the failing bundles (${res.unzip._1.map(_.getName).mkString(", ")})? [y/N] ")
@@ -126,7 +126,7 @@ object Console extends JavaLogger:
 
 import org.openmole.console.Console._
 
-class Console(script: Option[String] = None) { console ⇒
+class Console(script: Option[String] = None) { console =>
 
   def commandsName = "_commands_"
 
@@ -137,24 +137,24 @@ class Console(script: Option[String] = None) { console ⇒
       println(consoleUsage)
 
     script match
-      case None ⇒
+      case None =>
         import services._
         val variables = ConsoleVariables(args = args, workDirectory = workDirectory.getOrElse(currentDirectory), experiment = ConsoleVariables.Experiment("console"))
-        withREPL(variables): loop ⇒
+        withREPL(variables): loop =>
           //loop.storeErrors = false
           //loop.loopWithExitCode
           loop.loop(Some(terminal))
           0
 
-      case Some(script) ⇒
+      case Some(script) =>
         val scriptFile = new File(script)
         load(scriptFile, args, workDirectory) match
           case Right(dsl) =>
             Try(Command.start(dsl.dsl, dsl.compilationContext).hangOn()) match
-              case Failure(e) ⇒
+              case Failure(e) =>
                 println(e.stackString)
                 ExitCodes.executionError
-              case Success(_) ⇒
+              case Success(_) =>
                 ExitCodes.ok
           case Left(c) => c
 
@@ -164,24 +164,24 @@ class Console(script: Option[String] = None) { console ⇒
       Services.copy(services)(fileServiceCache = FileServiceCache())
 
     Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match
-      case ScriptFileDoesNotExists() ⇒
+      case ScriptFileDoesNotExists() =>
         println("File " + script + " doesn't exist.")
         Left(ExitCodes.scriptDoesNotExist)
-      case e: CompilationError ⇒
+      case e: CompilationError =>
         services.tmpDirectory.directory.recursiveDelete
         println(e.error.stackString)
         Left(ExitCodes.compilationError)
-      case compiled: Compiled ⇒
+      case compiled: Compiled =>
         Try(compiled.eval(args)) match
-          case Success(res) ⇒ Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
-          case Failure(e) ⇒
+          case Success(res) => Right(Console.CompiledDSL(res, compiled.compilationContext, compiled.result))
+          case Failure(e) =>
             services.tmpDirectory.directory.recursiveDelete
             println(s"Error during script evaluation: ")
             print(e.stackString)
             Left(ExitCodes.compilationError)
 
 
-  def withREPL[T](args: ConsoleVariables)(f: REPL ⇒ T)(using TmpDirectory, FileService, Terminal) =
+  def withREPL[T](args: ConsoleVariables)(f: REPL => T)(using TmpDirectory, FileService, Terminal) =
     args.workDirectory.mkdirs()
 
     val loop = OpenMOLEREPL.newREPL(quiet = false)

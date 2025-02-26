@@ -21,7 +21,7 @@ import collection.mutable
 import com.thoughtworks.xstream.XStream
 import collection.mutable.ListBuffer
 
-class Factory[T](build: () ⇒ T, initialize: T ⇒ Unit, clean: T ⇒ Unit = (_: T) ⇒ {}) {
+class Factory[T](build: () => T, initialize: T => Unit, clean: T => Unit = (_: T) => {}) {
 
   private val pool = new mutable.Stack[T]
   private val _instantiated = ListBuffer.empty[T]
@@ -43,7 +43,7 @@ class Factory[T](build: () ⇒ T, initialize: T ⇒ Unit, clean: T ⇒ Unit = (_
     finally pool.push(serial)
   }
 
-  def exec[A](f: T ⇒ A): A = {
+  def exec[A](f: T => A): A = {
     val o = borrow
     try f(o)
     finally release(o)

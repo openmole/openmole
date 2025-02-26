@@ -22,7 +22,7 @@ object ArrayUtils {
   def unsecureBuild(t: Manifest[?], values: Any*) = {
     val res = t.newArray(values.size)
     values.zipWithIndex.foreach {
-      case (v, i) ⇒ java.lang.reflect.Array.set(res, i, v)
+      case (v, i) => java.lang.reflect.Array.set(res, i, v)
     }
     res
   }
@@ -30,7 +30,7 @@ object ArrayUtils {
   def unsecureConcat(t: Manifest[?], a1: Array[?], a2: Array[?]): Array[?] = {
     val res = t.newArray(a1.size + a2.size)
     (a1 ++ a2).zipWithIndex.foreach {
-      case (v, i) ⇒ java.lang.reflect.Array.set(res, i, v)
+      case (v, i) => java.lang.reflect.Array.set(res, i, v)
     }
     res
   }

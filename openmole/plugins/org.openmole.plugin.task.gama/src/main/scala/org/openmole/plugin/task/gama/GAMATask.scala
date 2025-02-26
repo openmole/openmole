@@ -50,7 +50,7 @@ object GAMATask:
         val ret =
           ContainerTask.runCommandInContainer(
             installedImage,
-            volumes = volumesValue.map((lv, cv) ⇒ lv.getAbsolutePath -> cv) ++ Seq(outputDirectory.getAbsolutePath -> outputDirectoryPath),
+            volumes = volumesValue.map((lv, cv) => lv.getAbsolutePath -> cv) ++ Seq(outputDirectory.getAbsolutePath -> outputDirectoryPath),
             commands = inputFileCommands,
             output = outputRedirection.output,
             error = outputRedirection.error
@@ -83,7 +83,7 @@ object GAMATask:
       new RewriteRule:
         override def transform(n: Node): Seq[Node] =
           (n, value(n), frameRate) match
-            case (n: Elem, Some(v), _) ⇒ n.copy(attributes = n.attributes.remove("value").append(Attribute(null, "value", v, Null)))
+            case (n: Elem, Some(v), _) => n.copy(attributes = n.attributes.remove("value").append(Attribute(null, "value", v, Null)))
             case (n: Elem, _, _) if n.label == "Simulation" =>
               n.copy(attributes =
                 n.attributes
@@ -92,7 +92,7 @@ object GAMATask:
               )
             case (n: Elem, _, Some(f)) if n.label == "Output" =>
               n.copy(attributes = n.attributes.remove("framerate").append(Attribute(null, "framerate", f.toString, Null)))
-            case _ ⇒ n
+            case _ => n
 
     new RuleTransformer(rewrite)
 
@@ -234,7 +234,7 @@ object GAMATask:
 
         val seedValue = math.abs(seed.map(_.from(context)).getOrElse(random().nextLong))
 
-        def inputMap = Mapped.noFile(mapped.inputs).map { m ⇒ m.name -> context(m.v).toString }.toMap
+        def inputMap = Mapped.noFile(mapped.inputs).map { m => m.name -> context(m.v).toString }.toMap
 
         val parsedInputXML =
           val parsedInputXML = XML.loadString(inputXML)
@@ -250,8 +250,8 @@ object GAMATask:
             resources += (inputFile, inputFilePath, true),
             resources += (outputDirectory, outputDirectoryPath, true),
             volumes.map((lv, cv) => resources += (lv, cv, true)),
-            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+            Mapped.files(mapped.inputs).map { m => inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { m => outputFiles += (m.name, m.v) }
           )
 
         val resultContext = containerTask(executionContext).from(context)

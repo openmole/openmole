@@ -19,20 +19,20 @@ package org.openmole.tool.collection
 
 import scala.concurrent.stm._
 
-class OrderedSlidingList[T](size: () ⇒ Int)(implicit o: Ordering[T]) {
+class OrderedSlidingList[T](size: () => Int)(implicit o: Ordering[T]) {
 
   private val _values = Ref(List[T]())
 
   def values = _values.single()
 
-  def +=(e: T) = atomic { implicit ctx ⇒
+  def +=(e: T) = atomic { implicit ctx =>
     import o._
 
     def insertValue(reversedHead: List[T], tail: List[T]): List[T] = {
       tail match {
-        case Nil                    ⇒ (e :: reversedHead).reverse
-        case l @ (h :: _) if h >= e ⇒ reversedHead.reverse ::: (e :: tail)
-        case h :: t                 ⇒ insertValue(h :: reversedHead, t)
+        case Nil                    => (e :: reversedHead).reverse
+        case l @ (h :: _) if h >= e => reversedHead.reverse ::: (e :: tail)
+        case h :: t                 => insertValue(h :: reversedHead, t)
       }
     }
 
@@ -40,7 +40,7 @@ class OrderedSlidingList[T](size: () ⇒ Int)(implicit o: Ordering[T]) {
     if (_values().size >= size()) _values() = _values().drop(1)
   }
 
-  def clear() = atomic { implicit ctx ⇒
+  def clear() = atomic { implicit ctx =>
     val res = _values()
     _values() = List.empty
     res

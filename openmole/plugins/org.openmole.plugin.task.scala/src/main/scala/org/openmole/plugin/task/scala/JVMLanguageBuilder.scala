@@ -21,7 +21,7 @@ import monocle.Lens
 
 import java.io.File
 
-trait JVMLanguageBuilder[T] { builder ⇒
+trait JVMLanguageBuilder[T] { builder =>
   def libraries: Lens[T, Vector[File]]
   def plugins: Lens[T, Vector[File]]
 }

@@ -24,10 +24,10 @@ import org.openmole.core.workflow.execution.ExecutionState._
 object GridScaleJobService {
   def translateStatus(state: JobState) =
     state match {
-      case JobState.Submitted ⇒ SUBMITTED
-      case JobState.Running   ⇒ RUNNING
-      case JobState.Done      ⇒ DONE
-      case JobState.Failed    ⇒ FAILED
+      case JobState.Submitted => SUBMITTED
+      case JobState.Running   => RUNNING
+      case JobState.Done      => DONE
+      case JobState.Failed    => FAILED
     }
 }
 
@@ -40,10 +40,10 @@ object GridScaleJobService {
 //
 //  private def translateStatus(state: JobState) =
 //    state match {
-//      case Submitted ⇒ SUBMITTED
-//      case Running   ⇒ RUNNING
-//      case Done      ⇒ DONE
-//      case Failed    ⇒ FAILED
+//      case Submitted => SUBMITTED
+//      case Running   => RUNNING
+//      case Done      => DONE
+//      case Failed    => FAILED
 //    }
 //
 //}

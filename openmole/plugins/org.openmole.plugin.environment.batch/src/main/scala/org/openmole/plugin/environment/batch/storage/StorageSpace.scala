@@ -33,14 +33,14 @@ object HierarchicalStorageSpace extends JavaLogger:
   val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
   val TmpDirCreation = PreferenceLocation("StorageService", "TmpDirCreation", Some(1 hours))
 
-  def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable ⇒ Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
+  def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable => Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
     val persistent = "persistent/"
     val tmp = "tmp/"
 
     val baseDirectory =
       try createBasePath(s, root, isConnectionError)
       catch
-        case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating base directory $root on storage $s", e)
+        case e: Throwable => throw new InternalProcessingError(s"Error creating base directory $root on storage $s", e)
 
     val replicaDirectory = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
 
@@ -48,7 +48,7 @@ object HierarchicalStorageSpace extends JavaLogger:
       if !storageInterface.exists(s, replicaDirectory)
       then hierarchicalStorageInterface.makeDir(s, replicaDirectory)
     catch
-      case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating replica directory $replicaDirectory on storage $s", e)
+      case e: Throwable => throw new InternalProcessingError(s"Error creating replica directory $replicaDirectory on storage $s", e)
 
     val tmpDirectory = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
 
@@ -56,7 +56,7 @@ object HierarchicalStorageSpace extends JavaLogger:
       if !storageInterface.exists(s, tmpDirectory)
       then hierarchicalStorageInterface.makeDir(s, tmpDirectory)
     catch
-      case e: Throwable ⇒ throw new InternalProcessingError(s"Error creating tmp directory $tmpDirectory on storage $s", e)
+      case e: Throwable => throw new InternalProcessingError(s"Error creating tmp directory $tmpDirectory on storage $s", e)
 
 
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
@@ -71,7 +71,7 @@ object HierarchicalStorageSpace extends JavaLogger:
     if (time.isEmpty) None
     else Try(time.toLong).toOption
 
-  def ignoreErrors[T](f: ⇒ T): Unit = Try(f)
+  def ignoreErrors[T](f: => T): Unit = Try(f)
 
   def cleanTmpDirectory[S](s: S, tmpDirectory: String, background: Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
@@ -94,7 +94,7 @@ object HierarchicalStorageSpace extends JavaLogger:
       }.getOrElse(true)
 
     val entries = hierarchicalStorageInterface.list(s, persistentPath)
-    val inReplica = services.replicaCatalog.forPaths(entries.map { e ⇒ StorageService.child(s, persistentPath, e.name) }, Seq(storageId)).map(_.path).toSet
+    val inReplica = services.replicaCatalog.forPaths(entries.map { e => StorageService.child(s, persistentPath, e.name) }, Seq(storageId)).map(_.path).toSet
 
     for
       e ← entries
@@ -107,20 +107,20 @@ object HierarchicalStorageSpace extends JavaLogger:
         then ignoreErrors(StorageService.rmDirectory(s, path, background))
         else ignoreErrors(StorageService.rmFile(s, path, background))
 
-  def createBasePath[S](s: S, root: String, isConnectionError: Throwable ⇒ Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
+  def createBasePath[S](s: S, root: String, isConnectionError: Throwable => Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
     def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 
     def mkRootDir: String = synchronized:
-      val paths = Iterator.iterate[Option[String]](Some(root))(p ⇒ p.flatMap(hierarchicalStorageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
+      val paths = Iterator.iterate[Option[String]](Some(root))(p => p.flatMap(hierarchicalStorageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
 
       paths.tail.foldLeft(paths.head):
-        (path, file) ⇒
+        (path, file) =>
           val childPath = StorageService.child(s, path, hierarchicalStorageInterface.name(s, file))
           try
             hierarchicalStorageInterface.makeDir(s, childPath)
           catch
-            case e: Throwable if isConnectionError(e) ⇒ throw e
-            case e: Throwable                         ⇒ Log.logger.log(Log.FINE, "Error creating base directory " + root, e)
+            case e: Throwable if isConnectionError(e) => throw e
+            case e: Throwable                         => Log.logger.log(Log.FINE, "Error creating base directory " + root, e)
 
           childPath
 
@@ -128,8 +128,8 @@ object HierarchicalStorageSpace extends JavaLogger:
     val rootPath = mkRootDir
     val basePath = StorageService.child(s, rootPath, baseDirName)
     util.Try(hierarchicalStorageInterface.makeDir(s, basePath)) match 
-      case util.Success(_) ⇒ basePath
-      case util.Failure(e) ⇒
+      case util.Success(_) => basePath
+      case util.Failure(e) =>
         if (isConnectionError(e)) throw e
         else if (storageInterface.exists(s, basePath)) basePath
         else throw e

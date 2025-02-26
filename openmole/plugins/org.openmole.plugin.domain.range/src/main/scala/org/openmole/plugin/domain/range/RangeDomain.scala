@@ -108,7 +108,7 @@ class RangeDomain[T](val min: FromContext[T], val max: FromContext[T], val step:
   def validate = min.validate ++ max.validate
 
   def iterator: FromContext[Iterator[T]] =
-    FromContext: p ⇒
+    FromContext: p =>
       import p.*
       val mi: T = min.from(context)
       val ma: T = max.from(context)

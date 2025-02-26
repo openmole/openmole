@@ -8,7 +8,7 @@ import cats.instances.int
 import org.openmole.core.exception.InternalProcessingError
 
 object REPL:
-  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[File] = Seq.empty, quiet: Boolean = true)(using TmpDirectory, FileService) =
+  def apply(priorityBundles: => Seq[Bundle] = Nil, jars: Seq[File] = Seq.empty, quiet: Boolean = true)(using TmpDirectory, FileService) =
     val interpreter = Interpreter(priorityBundles, jars, quiet)
     new REPL(interpreter)
 

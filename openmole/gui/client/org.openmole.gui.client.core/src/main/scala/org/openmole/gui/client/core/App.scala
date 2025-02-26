@@ -73,7 +73,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     api.restart()
 
     def checkAlive(): Unit =
-      api.isAlive().foreach { x ⇒
+      api.isAlive().foreach { x =>
         if x
         then CoreUtils.setRoute(s"/${connectionRoute}")
         else setTimeout(5000) {
@@ -100,7 +100,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global
-    api.fetchGUIPlugins { plugins ⇒
+    api.fetchGUIPlugins { plugins =>
       given GUIPlugins = plugins
 
       val authenticationPanel = AuthenticationPanel.render
@@ -117,7 +117,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         panels.treeNodePanel.plusFile.set(false)
         panels.treeNodePanel.clearCurrentErrorView
 
-      dom.window.onkeydown = (k: KeyboardEvent) ⇒ {
+      dom.window.onkeydown = (k: KeyboardEvent) => {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
         else if k.keyCode == 27
         then undo
@@ -126,11 +126,11 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //START BUTTON
       lazy val theNavBar = div(
         cls := "nav-container",
-        child <-- openFileTree.signal.map { oft ⇒
+        child <-- openFileTree.signal.map { oft =>
           div(
             navBarItem,
             if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               openFileTree.update(!_)
             }
           )
@@ -147,21 +147,21 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
               _.map { _.id }.contains(4)
             ,
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               ExecutionPanel.open
             }).tooltip("Executions"),
           div(glyph_lock, navBarItem,
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
               _.map { _.id }.contains(2)
             ,
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               panels.expandTo(authenticationPanel, 2)
             }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem,
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
               _.map { _.id }.contains(1)
             ,
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               panels.pluginPanel.getPlugins
               panels.expandTo(panels.pluginPanel.render, 1)
             }).tooltip("Plugins"),
@@ -169,10 +169,10 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
               _.map { _.id }.contains(5)
             ,
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
-          a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+          a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets =>
             s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html"
           }).map { _.getOrElse("") }
           ).tooltip("Documentation"),
@@ -200,7 +200,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           div(
             cls := "main-container",
             div(
-              cls <-- openFileTree.signal.map { oft ⇒
+              cls <-- openFileTree.signal.map { oft =>
                 "file-section" + {
                   if (oft) "" else " closed"
                 }
@@ -230,7 +230,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
                     case _ => "close"
                 },
               div(cls := "splitter"),
-              child <-- panels.expandablePanel.signal.map: p ⇒
+              child <-- panels.expandablePanel.signal.map: p =>
                 p.map { _.element }.getOrElse(div(top := "1000px", color.white))
             )
           )

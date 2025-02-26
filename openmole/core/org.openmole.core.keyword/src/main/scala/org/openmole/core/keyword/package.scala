@@ -47,7 +47,7 @@ package keyword:
       @deprecated("15", "use evaluate")
       infix def aggregate[B](b: B): Evaluate[A, B] = evaluate(b)
       infix def evaluate[B](b: B) = Evaluate(a, b)
-      //def aggregate[B, C](b: B ⇒ C) = Aggregate(a, b)
+      //def aggregate[B, C](b: B => C) = Aggregate(a, b)
 
     implicit class DeltaDecorator[A](a: A):
       infix def delta[B](b: B) = Delta(a, b)

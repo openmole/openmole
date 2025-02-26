@@ -33,8 +33,8 @@ object MasterSlave {
     val masterSlaveLast = Strain(EmptyTask())
 
     val skel = stop.option match {
-      case Some(s) ⇒ bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
-      case None    ⇒ bootstrap -< slave -- masterCapsule
+      case Some(s) => bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
+      case None    => bootstrap -< slave -- masterCapsule
     }
 
     val wf =

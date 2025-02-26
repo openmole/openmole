@@ -53,8 +53,8 @@ object Replication:
 
     val aggregateTask: OptionalArgument[DSL] =
       r.aggregation match
-        case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s)
+        case Seq() => None
+        case s     => AggregateTask(s)
 
     val s =
       MapReduce(
@@ -109,7 +109,7 @@ object DirectSampling:
   object MetaData:
     def apply(m: Method): MetaData =
       val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
-      MetaData(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
+      MetaData(m.sampled.map(v => ValData(v)), aggregation, m.output.map(v => ValData(v)))
 
     given MethodMetaData[MetaData] = MethodMetaData(methodName)
 
@@ -122,8 +122,8 @@ object DirectSampling:
 
     val aggregateTask: OptionalArgument[DSL] =
       m.aggregation match
-        case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s)
+        case Seq() => None
+        case s     => AggregateTask(s)
 
     val s =
       MapReduce(

@@ -38,7 +38,7 @@ object GitClonePanel:
             "Clone",
             cls := "btn btn-purple",
             height := "38", width := "150", marginTop := "20",
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               val clonePanel = panels.expandablePanel.now()
               processing.set(true)
               val sp = manager.directory.now()
@@ -49,7 +49,7 @@ object GitClonePanel:
                   panels.closeExpandable
                   panels.treeNodePanel.confirmationDiv.set:
                     Some:
-                      panels.treeNodePanel.confirmation(s"A file named \"${exist.name}\" exists, overwrite it?", "Overwrite", () ⇒
+                      panels.treeNodePanel.confirmation(s"A file named \"${exist.name}\" exists, overwrite it?", "Overwrite", () =>
                         panels.treeNodePanel.confirmationDiv.set(None)
                         panels.expandablePanel.set(clonePanel)
                         processing.set(true)

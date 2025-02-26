@@ -44,11 +44,11 @@ package object file {
     def select(path: FromContext[String]) = SelectFileDomain(f, path)
   }
 
-  implicit def prototypeOfFileIsFinite: DiscreteFromContextDomain[Val[File], File] = prototype ⇒ Domain(FromContext.prototype(prototype).map { _.listFilesSafe.iterator })
-  implicit def fileIsDiscrete: DiscreteFromContextDomain[File, File] = f ⇒
+  implicit def prototypeOfFileIsFinite: DiscreteFromContextDomain[Val[File], File] = prototype => Domain(FromContext.prototype(prototype).map { _.listFilesSafe.iterator })
+  implicit def fileIsDiscrete: DiscreteFromContextDomain[File, File] = f =>
     Domain(
       FromContext.value(f.listFilesSafe.iterator),
-      validation = Validate { _ ⇒
+      validation = Validate { _ =>
         if (!f.exists()) Seq(throw UserBadDataError(s"Directory $f used in domain doesn't exist"))
         else if (!f.isDirectory) Seq(throw UserBadDataError(s"File $f used in domain, should be a directory")) else Seq()
       }

@@ -42,10 +42,10 @@ object Project:
   def scriptsObjects(script: File) = 
 
     def makeImportTree(tree: Tree): String =
-      tree.children.map(c ⇒ makePackage(c.name, c.tree)).mkString("\n")
+      tree.children.map(c => makePackage(c.name, c.tree)).mkString("\n")
 
     def makePackage(name: String, tree: Tree): String =
-      if (!tree.files.isEmpty) tree.files.distinct.map(f ⇒ makeVal(name, f)).mkString("\n")
+      if (!tree.files.isEmpty) tree.files.distinct.map(f => makeVal(name, f)).mkString("\n")
       else
         s"""
             |class ${name}Clazz {
@@ -80,9 +80,9 @@ object Project:
 
         def filterTermAndAddLazy(stat: Stat) =
           stat match 
-            case _: Term ⇒ None
-            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy ⇒ x }.isEmpty ⇒ Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
-            case s ⇒ Some(s)
+            case _: Term => None
+            case v: Defn.Val if v.mods.collect { case x: Mod.Lazy => x }.isEmpty => Some(v.copy(mods = v.mods ++ Seq(Mod.Lazy())))
+            case s => Some(s)
 
         val newCls = cls.copy(templ = cls.templ.copy(stats = cls.templ.stats.flatMap(filterTermAndAddLazy)))
         source.copy(stats = source.stats.dropRight(1) ++ Seq(newCls))
@@ -167,10 +167,10 @@ object Project:
         val loop = repl.getOrElse { Project.newREPL() }
         try 
           Option(loop.compile(content)) match 
-            case Some(compiled) ⇒ Compiled(compiled, loop, CompilationContext(loop.classDirectory, loop.classLoader), workDirectory = workDirectory, script = script)
-            case None           ⇒ throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
+            case Some(compiled) => Compiled(compiled, loop, CompilationContext(loop.classDirectory, loop.classLoader), workDirectory = workDirectory, script = script)
+            case None           => throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
         catch 
-          case ce: Interpreter.CompilationError ⇒
+          case ce: Interpreter.CompilationError =>
             def positionLens =
               Focus[Interpreter.CompilationError](_.errorMessages) composeTraversal
                 each composeLens
@@ -188,7 +188,7 @@ object Project:
                 (positionLens composeLens Focus[ErrorPosition](_.point) modify { _ - headerOffset })
 
             ErrorInCode(adjusted(ce))
-          case e: Throwable ⇒ ErrorInCompiler(e)
+          case e: Throwable => ErrorInCompiler(e)
         
 
       val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = returnUnit)
@@ -218,15 +218,15 @@ case class Compiled(result: Interpreter.RawCompiled, repl: REPL, compilationCont
     import services._
 
     repl.evalCompiled(result) match
-      case p: Project.OMSScript ⇒
+      case p: Project.OMSScript =>
         def consoleVariables = ConsoleVariables(args, workDirectory, experiment = ConsoleVariables.Experiment(ConsoleVariables.experimentName(script)))
         workDirectory.mkdirs()
 
         p.run(consoleVariables) match 
-          case p: DSL ⇒ p
-          case e ⇒ throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+          case p: DSL => p
+          case e => throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         
-      case e ⇒ throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
+      case e => throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     
 
 

@@ -27,7 +27,7 @@ import org.openmole.tool.stream._
 object AppendToFileHook {
 
   def apply(file: FromContext[File], content: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Hook("AppendToFileHook") { p ⇒
+    Hook("AppendToFileHook") { p =>
       import p._
       val f = file.from(context)
       f.createParentDirectory

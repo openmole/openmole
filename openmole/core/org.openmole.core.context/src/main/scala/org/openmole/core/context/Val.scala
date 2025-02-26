@@ -113,7 +113,7 @@ object ValType:
         m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
       yield 
         (0 until level).foldLeft(ValType.unsecure(m)) {
-          (c, _) ⇒ c.toArray.asInstanceOf[ValType[Any]]
+          (c, _) => c.toArray.asInstanceOf[ValType[Any]]
         }
     native getOrElse t
 
@@ -188,8 +188,8 @@ object Val:
     new Typeable[Val[T]] {
       override def cast(t: Any): Option[Val[T]] =
         t match {
-          case v: Val[?] if v.`type`.manifest == manifest[T] ⇒ Some(v.asInstanceOf[Val[T]])
-          case _ ⇒ None
+          case v: Val[?] if v.`type`.manifest == manifest[T] => Some(v.asInstanceOf[Val[T]])
+          case _ => None
         }
       override def castable(t: Any): Boolean = cast(t).isDefined
       override def describe = s"Val[${manifest[T].toString}]"
@@ -314,7 +314,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    * @param context
    * @return
    */
-  def from(context: ⇒ Context): T = context(this)
+  def from(context: => Context): T = context(this)
 
   /**
    * Unique id : name and type define a prototype

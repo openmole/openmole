@@ -38,12 +38,12 @@ object CoreUtils {
       else sequence
     }
 
-    def updatedFirst(cond: T ⇒ Boolean, s: T): Seq[T] =
-      sequence.find(cond).map { e ⇒ updatedFirst(e, s) }.getOrElse(sequence)
+    def updatedFirst(cond: T => Boolean, s: T): Seq[T] =
+      sequence.find(cond).map { e => updatedFirst(e, s) }.getOrElse(sequence)
 
   
   def createFile(safePath: SafePath, fileName: String, directory: Boolean = false)(using panels: Panels, api: ServerAPI, path: BasePath): Future[Unit] =
-    api.createFile(safePath, fileName, directory).flatMap { b ⇒
+    api.createFile(safePath, fileName, directory).flatMap { b =>
       if b
       then Future.successful(())
       else
@@ -52,7 +52,7 @@ object CoreUtils {
     }
   
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
-    api.deleteFiles(paths).andThen { _ ⇒ treeNodePanel.refresh }
+    api.deleteFiles(paths).andThen { _ => treeNodePanel.refresh }
 
   def listFiles(safePath: SafePath, fileFilter: FileSorting = FileSorting(), withHidden: Boolean = true)(using api: ServerAPI, path: BasePath): Future[FileListData] = api.listFiles(safePath, fileFilter, withHidden)
   

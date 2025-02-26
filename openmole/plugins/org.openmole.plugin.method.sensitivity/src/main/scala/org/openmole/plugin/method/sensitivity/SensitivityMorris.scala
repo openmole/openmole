@@ -48,7 +48,7 @@ object SensitivityMorris {
   object MorrisHook:
 
     def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) =
-      Hook("MorrisHook"): p ⇒
+      Hook("MorrisHook"): p =>
         import p._
         import WritableOutput._
 
@@ -123,20 +123,20 @@ object SensitivityMorris {
 
       // indices of results in which the input had been changed
       val indicesWithEffect: Array[Int] = factorChanged.zipWithIndex
-        .collect { case (name, idx) if (input.name == name) ⇒ idx }
+        .collect { case (name, idx) if (input.name == name) => idx }
       val r: Int = indicesWithEffect.length
 
       MorrisSampling.Log.logger.fine("measuring the elementary effects of " + input + " on " + output + " based on " + r + " repetitions")
-      indicesWithEffect.foreach(idxChanged ⇒ MorrisSampling.Log.logger.fine("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")"))
+      indicesWithEffect.foreach(idxChanged => MorrisSampling.Log.logger.fine("For a delta: " + deltas(idxChanged) + ", value changed from " + outputValues(idxChanged - 1) + " to " + outputValues(idxChanged) + " => " + (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)) + ")"))
 
       // ... so we know each index - 1 leads to the case before changing the factor
       // elementary effects
-      val elementaryEffects: Array[Double] = indicesWithEffect.map(idxChanged ⇒ (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)))
+      val elementaryEffects: Array[Double] = indicesWithEffect.map(idxChanged => (outputValues(idxChanged) - outputValues(idxChanged - 1)) / (deltas(idxChanged)))
       // leading to indicators
       val rD: Double = r.toDouble
       val mu: Double = elementaryEffects.sum / rD
       val muStar: Double = elementaryEffects.reduceLeft(sumAbs) / rD
-      val sigma: Double = Math.sqrt(elementaryEffects.map(ee ⇒ squaredDiff(ee, mu)).sum / rD)
+      val sigma: Double = Math.sqrt(elementaryEffects.map(ee => squaredDiff(ee, mu)).sum / rD)
 
       MorrisSampling.Log.logger.fine("=> aggregate impact of " + input + " on " + output + ": mu=" + mu + ", mu*=" + muStar + ", sigma=" + sigma)
 
@@ -162,11 +162,11 @@ object SensitivityMorris {
           o ← modelOutputs
         } yield (i, o)
 
-      val muOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ SensitivityMorris.mu(i, o) }
-      val muStarOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ SensitivityMorris.muStar(i, o) }
-      val sigmaOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) ⇒ SensitivityMorris.sigma(i, o) }
+      val muOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) => SensitivityMorris.mu(i, o) }
+      val muStarOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) => SensitivityMorris.muStar(i, o) }
+      val sigmaOutputs = morrisOutputs(modelInputs, modelOutputs).map { case (i, o) => SensitivityMorris.sigma(i, o) }
 
-      Task("MorrisAggregation") { p ⇒
+      Task("MorrisAggregation") { p =>
         import p._
 
         // retrieve the metadata passed by the sampling method
@@ -177,7 +177,7 @@ object SensitivityMorris {
         // into the variables passed by the user
         val effects: Seq[Seq[Double]] =
           morrisOutputs(modelInputs, modelOutputs).map {
-            case (input, output) ⇒
+            case (input, output) =>
               val outputValues: Array[Double] = context(output.toArray)
               MorrisSampling.Log.logger.fine("Processing the elementary change for input " + input + " on " + output)
               val (mu, muStar, sigma) = elementaryEffect(input, output, outputValues, factorChanged, deltas)
@@ -189,9 +189,9 @@ object SensitivityMorris {
         def sigma = effects(2)
 
         context ++
-          (muOutputs zip mu).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
-          (muStarOutputs zip muStar).map { case (v, i) ⇒ Variable.unsecure(v, i) } ++
-          (sigmaOutputs zip sigma).map { case (v, i) ⇒ Variable.unsecure(v, i) }
+          (muOutputs zip mu).map { case (v, i) => Variable.unsecure(v, i) } ++
+          (muStarOutputs zip muStar).map { case (v, i) => Variable.unsecure(v, i) } ++
+          (sigmaOutputs zip sigma).map { case (v, i) => Variable.unsecure(v, i) }
       } set (
         // we expect as inputs:
         // ... the outputs of the model we want to analyze
@@ -227,7 +227,7 @@ object SensitivityMorris {
 
   object MorrisSampling extends JavaLogger {
 
-    implicit def isSampling: IsSampling[MorrisSampling] = s ⇒
+    implicit def isSampling: IsSampling[MorrisSampling] = s =>
       Sampling(
         s.apply(),
         s.outputs,
@@ -260,7 +260,7 @@ object SensitivityMorris {
      */
     def seed(k: Int, p: Int, rng: scala.util.Random): Array[Double] = {
       val delta: Double = 1.0 / p.toDouble
-      (1 to k).map(_ ⇒ (rng.nextInt(p - 1) + 1).toDouble * delta).toArray
+      (1 to k).map(_ => (rng.nextInt(p - 1) + 1).toDouble * delta).toArray
     }
 
     /**
@@ -342,7 +342,7 @@ object SensitivityMorris {
      * to execute in a given context. Replaces the index of factor by the variable name,
      * and scales each of the points in a n-dimensional [0:1] space into their actual range.
      */
-    def trajectoryToVariables(t: Trajectory, idTraj: Int): FromContext[List[List[Variable[?]]]] = FromContext { p ⇒
+    def trajectoryToVariables(t: Trajectory, idTraj: Int): FromContext[List[List[Variable[?]]]] = FromContext { p =>
 
       import p._
       // forge the list of variables for the first run (reference run)
@@ -354,7 +354,7 @@ object SensitivityMorris {
       // forge lists of lists of variables for the runs of the trajectory
       val variablesForElementaryEffects = 
         (t.points zip t.deltas zip t.variableOrder.zipWithIndex).map {
-          case ((point, delta), order2idx) ⇒ 
+          case ((point, delta), order2idx) =>
             val factoridx = order2idx._1
             val iterationId = order2idx._2 + 1
             List(
@@ -367,7 +367,7 @@ object SensitivityMorris {
 
     }
 
-    def apply(): FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { ctxt ⇒
+    def apply(): FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { ctxt =>
       import ctxt._
       val r: Int = repetitions.from(context)
       val p: Int = levels.from(context)
@@ -381,14 +381,14 @@ object SensitivityMorris {
         trajectoriesRaw.length + " trajectories")
 
       trajectoriesRaw.zipWithIndex.flatMap {
-        case (t, idTraj) ⇒
+        case (t, idTraj) =>
           trajectoryToVariables(t, idTraj).from(context)
       }.iterator
     }
 
   }
 
-  implicit def method: ExplorationMethod[SensitivityMorris, Method] = m ⇒ {
+  implicit def method: ExplorationMethod[SensitivityMorris, Method] = m => {
     implicit def defScope: DefinitionScope = m.scope
 
     // the sampling for Morris is a One At a Time one,

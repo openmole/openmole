@@ -28,8 +28,8 @@ object Plot {
   object PlotDimension {
     def plotModes(plotDimension: PlotDimension): Seq[PlotMode] =
       plotDimension match {
-        case ColumnPlot ⇒ Seq(ScatterMode, SplomMode, XYMode)
-        case LinePlot   ⇒ Seq(HeatMapMode)
+        case ColumnPlot => Seq(ScatterMode, SplomMode, XYMode)
+        case LinePlot   => Seq(HeatMapMode)
       }
   }
 

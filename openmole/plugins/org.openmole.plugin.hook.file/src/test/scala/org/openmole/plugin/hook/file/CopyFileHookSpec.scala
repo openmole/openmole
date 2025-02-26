@@ -37,7 +37,7 @@ class CopyFileHookSpec extends flatspec.AnyFlatSpec with matchers.should.Matcher
 
     val p = Val[File]("p")
 
-    val t1 = TestTask { context ⇒ context + (p → f) } set (outputs += p)
+    val t1 = TestTask { context => context + (p → f) } set (outputs += p)
 
     val fDest = File.createTempFile("test", ".tmp")
 

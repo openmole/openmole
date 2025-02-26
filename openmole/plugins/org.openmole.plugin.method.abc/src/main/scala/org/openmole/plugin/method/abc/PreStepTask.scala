@@ -19,7 +19,7 @@ object PreStepTask {
     stepState: Val[MonAPMC.StepState],
     step:      Val[Int],
     seed:      SeedVariable)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("preStepTask") { p ⇒
+    FromContextTask("preStepTask") { p =>
       import p._
 
       val s = context(state)
@@ -29,7 +29,7 @@ object PreStepTask {
       val rng = random()
       val samples =
         (prior.v zip matrix.toVector.transpose).flatMap {
-          case (v, samples) ⇒
+          case (v, samples) =>
             Seq(Variable(v.array, samples.toArray)) ++ seed.array(samples.size, rng).toSeq
         }
 

@@ -47,8 +47,8 @@ package object buildinfo:
 
   def siteURL =
     development match
-      case true  ⇒ "http://next.openmole.org"
-      case false ⇒ s"http://openmole.org/all/${version.value}"
+      case true  => "http://next.openmole.org"
+      case false => s"http://openmole.org/all/${version.value}"
 
   def marketName = "market.json"
   def marketAddress = marketURL(marketName)

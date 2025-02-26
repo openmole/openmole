@@ -25,7 +25,7 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
   def submit(serializedJob: SerializedJob, outputPath: String, storageLocation: String)(using AccessControl.Priority) =
     import org.openmole.tool.file.*
 
-    newFile.withTmpFile("script", ".sh"): script ⇒
+    newFile.withTmpFile("script", ".sh"): script =>
       script.content = JobScript.create(
         serializedJob,
         outputPath,
@@ -50,7 +50,7 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
       accessControl:
         gridscale.dirac.submit(diracService, jobDescription, tokenCache(), Some(diracJobGroup))
 
-  lazy val jobStateCache = TimeCache { () ⇒
+  lazy val jobStateCache = TimeCache { () =>
     // FIXME enable again with semaphore with priority
     val states = gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup))
     //val states = accessControl { gridscale.dirac.queryState(diracService, tokenCache(), groupId = Some(diracJobGroup)) }

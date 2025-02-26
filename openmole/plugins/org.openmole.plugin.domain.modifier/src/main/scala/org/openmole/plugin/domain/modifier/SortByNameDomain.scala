@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object SortByNameDomain {
 
-  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] = domain ⇒
+  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
@@ -33,7 +33,7 @@ object SortByNameDomain {
 
 case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File]) {
   def iterator =
-    FromContext { p ⇒
+    FromContext { p =>
       import p._
       def extractNumber(name: String) = {
         val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse
@@ -41,7 +41,7 @@ case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromCon
         else n.toInt
       }
 
-      discrete(domain).domain.from(context).toSeq.sortBy(f ⇒ extractNumber(f.getName)).iterator
+      discrete(domain).domain.from(context).toSeq.sortBy(f => extractNumber(f.getName)).iterator
     }
 
   def inputs = discrete(domain).inputs

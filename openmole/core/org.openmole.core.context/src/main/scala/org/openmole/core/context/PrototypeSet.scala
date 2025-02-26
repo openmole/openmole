@@ -32,10 +32,10 @@ object PrototypeSet {
  * @param prototypes the sequence of prototypes
  * @param explore names of prototypes which have already been explored
  */
-class PrototypeSet(val prototypes: Seq[Val[?]], val explore: Set[String] = Set.empty) extends Iterable[Val[?]] { self ⇒
+class PrototypeSet(val prototypes: Seq[Val[?]], val explore: Set[String] = Set.empty) extends Iterable[Val[?]] { self =>
 
   @transient lazy val prototypeMap: Map[String, Val[?]] =
-    TreeMap.empty[String, Val[?]] ++ prototypes.map { d ⇒ (d.name, d) }
+    TreeMap.empty[String, Val[?]] ++ prototypes.map { d => (d.name, d) }
 
   /**
    * Get the prototype by its name as an Option.
@@ -111,7 +111,7 @@ class PrototypeSet(val prototypes: Seq[Val[?]], val explore: Set[String] = Set.e
    */
   def --(d: Iterable[Val[?]]) =
     val dset = d.map(_.name).toSet
-    PrototypeSet.copy(this)(prototypes = prototypes.filter(p ⇒ !dset.contains(p.name)).toList)
+    PrototypeSet.copy(this)(prototypes = prototypes.filter(p => !dset.contains(p.name)).toList)
 
   /**
    * Check if a prototype is in the set by name

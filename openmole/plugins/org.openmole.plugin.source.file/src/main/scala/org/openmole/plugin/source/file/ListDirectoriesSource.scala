@@ -49,13 +49,13 @@ case class ListDirectoriesSource(
   info:      InfoConfig
 ) extends Source {
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters =>
     import parameters._
     val expandedPath = new File(path.from(context))
     val expandedRegExp = regExp.from(context)
     Variable(
       prototype,
-      expandedPath.listRecursive { (f: File) ⇒ f.isDirectory && f.getName.matches(expandedRegExp) } toArray
+      expandedPath.listRecursive { (f: File) => f.isDirectory && f.getName.matches(expandedRegExp) } toArray
     )
   }
 }

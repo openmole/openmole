@@ -42,12 +42,12 @@ object ExpandedString {
 
   //  def expandValues(s: String, context: Context) =
   //    parse(new StringInputStream(s)).map {
-  //      case UnexpandedElement(s) ⇒ s
-  //      case ValueElement(v)      ⇒ v
-  //      case CodeElement(code) ⇒
+  //      case UnexpandedElement(s) => s
+  //      case ValueElement(v)      => v
+  //      case CodeElement(code) =>
   //        context.variable[Any](code) match {
-  //          case Some(v) ⇒ v.value
-  //          case None    ⇒ throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
+  //          case Some(v) => v.value
+  //          case None    => throw new UserBadDataError(s"'$code' is not a value, cannot expands string '$s'")
   //        }
   //    }.mkString
 
@@ -59,7 +59,7 @@ object ExpandedString {
   def apply(is: InputStream): FromContext[String] = {
     val expandedFC = parse(is).map(ExpansionElement.fromContext)
 
-    FromContext { p ⇒
+    FromContext { p =>
       import p._
       expandedFC.map(_.from(context)).mkString
     } withValidate { expandedFC.map(_.validate) }
@@ -76,11 +76,11 @@ object ExpandedString {
       while (it.hasNext && opened > 0) {
         val c = it.next
         c match {
-          case '{' ⇒
+          case '{' =>
             res.append(c.toChar); opened += 1
-          case '}' ⇒
+          case '}' =>
             opened -= 1; if (opened > 0) res.append(c.toChar)
-          case _ ⇒ res.append(c.toChar)
+          case _ => res.append(c.toChar)
         }
       }
       if (opened != 0) throw new UserBadDataError("Malformed ${expr} expression, unmatched opened {")
@@ -93,7 +93,7 @@ object ExpandedString {
     while (it.hasNext) {
       val c = it.next
       c match {
-        case '{' ⇒
+        case '{' =>
           if (dollar) {
             expandedElements += UnexpandedElement(os.clear())
             val toExpand = nextToExpand(it)
@@ -101,10 +101,10 @@ object ExpandedString {
           }
           else os.write(c)
           dollar = false
-        case '$' ⇒
+        case '$' =>
           if (dollar) os.write('$')
           dollar = true
-        case _ ⇒
+        case _ =>
           if (dollar) os.write('$')
           os.write(c)
           dollar = false
@@ -129,24 +129,24 @@ object ExpandedString {
         Try(code.toDouble).toOption orElse
           Try(code.toLong).toOption orElse
           Try(code.toLowerCase.toBoolean).toOption match {
-            case Some(v) ⇒ true
-            case None    ⇒ false
+            case Some(v) => true
+            case None    => false
           }
       }
 
     def fromContext(expansionElement: ExpansionElement) =
       expansionElement match {
-        case e: UnexpandedElement ⇒ FromContext(_ ⇒ e.string)
-        case e: ValueElement      ⇒ FromContext(_ ⇒ e.v)
-        case e: CodeElement ⇒
-          FromContext { p ⇒
+        case e: UnexpandedElement => FromContext(_ => e.string)
+        case e: ValueElement      => FromContext(_ => e.v)
+        case e: CodeElement =>
+          FromContext { p =>
             import p._
             context.variable(e.code) match {
-              case Some(value) ⇒ value.value.toString
-              case None        ⇒ e.proxy().from(context).toString
+              case Some(value) => value.value.toString
+              case None        => e.proxy().from(context).toString
             }
           } withValidate {
-            Validate { p ⇒
+            Validate { p =>
               import p._
               if (p.inputs.exists(_.name == e.code)) Seq()
               else e.proxy.validate(inputs)

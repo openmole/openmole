@@ -19,7 +19,7 @@ object XYPlot:
 
     lazy val plotDiv = Plot.baseDiv
 
-    val data = yContents.map { y ⇒
+    val data = yContents.map { y =>
       val xContent = y.zipWithIndex.map{_._2}.toJSArray
       plotSettings.plotDataBuilder
         .x(xContent)

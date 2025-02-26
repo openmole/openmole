@@ -49,7 +49,7 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
 //        Right(Analysis.analyse(omrData, methodData, path.toFile.getParentFile))
 //      }
 //      catch {
-//        case e: Throwable ⇒ Left(ErrorData(e))
+//        case e: Throwable => Left(ErrorData(e))
 //      }
 //    }
 
@@ -62,7 +62,7 @@ class EvolutionAnalysisServer(services: Services) extends APIServer with Evoluti
         Right(Analysis.generation(omrData, methodData, path.toFile.getParentFile, generation = generation, all = all))
       }
       catch {
-        case e: Throwable ⇒ Left(ErrorData(e))
+        case e: Throwable => Left(ErrorData(e))
       }
     }*/
 

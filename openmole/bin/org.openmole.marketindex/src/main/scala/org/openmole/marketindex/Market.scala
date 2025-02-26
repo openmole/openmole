@@ -149,7 +149,7 @@ case class GeneratedMarketEntry(
 //class Market(repositories: Seq[MarketRepository], destination: File) {
 
 // def test(directory: File, project: MarketEntry): Boolean = true
-//DSLTest.withTmpServices { implicit servivces ⇒
+//DSLTest.withTmpServices { implicit servivces =>
 //    Try {
 //      PluginManager.synchronized {
 //        val projectDirectory = directory / project.directory
@@ -165,11 +165,11 @@ case class GeneratedMarketEntry(
 //
 //          def compiles = for { file ← files } yield {
 //            consoleProject.compile(file, Seq.empty) match {
-//              case Compiled(_) ⇒ true
-//              case e: CompilationError ⇒
+//              case Compiled(_) => true
+//              case e: CompilationError =>
 //                Log.logger.log(Log.WARNING, exclusion + s" because there was an error during compilation of file ${file.getName}.", e)
 //                false
-//              case e ⇒
+//              case e =>
 //                Log.logger.log(Log.WARNING, exclusion + s" because the compilation of file ${file.getName} raise the error $e")
 //                false
 //            }
@@ -182,10 +182,10 @@ case class GeneratedMarketEntry(
 //        }
 //      }
 //    } match {
-//      case Failure(e) ⇒
+//      case Failure(e) =>
 //        Log.logger.log(Log.WARNING, s"Error durring $project test.", e)
 //        false
-//      case Success(_) ⇒ true
+//      case Success(_) => true
 //    }
 //  }
 

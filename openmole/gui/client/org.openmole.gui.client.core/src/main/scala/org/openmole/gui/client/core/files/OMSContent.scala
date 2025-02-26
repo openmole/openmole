@@ -37,27 +37,27 @@ object OMSContent:
       import scala.concurrent.duration._
 
       div(display.flex, flexDirection.row, height := "6vh", alignItems.center,
-        child <-- compileDisabled.signal.map { compDisabled ⇒
+        child <-- compileDisabled.signal.map { compDisabled =>
           if compDisabled
           then Waiter.waiter()
           else
             div(display.flex, flexDirection.row,
-              button("RUN", btn_primary, marginLeft := "10", onClick --> { _ ⇒
+              button("RUN", btn_primary, marginLeft := "10", onClick --> { _ =>
                 editor.unsetErrors
-                panels.tabContent.save(tabData, saveUnmodified = true).foreach: saved ⇒
+                panels.tabContent.save(tabData, saveUnmodified = true).foreach: saved =>
                   if saved
                   then
                     api.launchScript(safePath, true).foreach: execID =>
                       panels.executionPanel.currentOpenSimulation.set(Some(execID))
                     ExecutionPanel.open
               }),
-              button("CHECK", btn_secondary, marginLeft := "10", onClick --> { _ ⇒
+              button("CHECK", btn_secondary, marginLeft := "10", onClick --> { _ =>
                 println("Check")
                 editor.unsetErrors
                 editor.editor.getSession().clearBreakpoints()
                 compileDisabled.set(true)
 
-                panels.tabContent.save(tabData, saveUnmodified = true).flatMap: saved ⇒
+                panels.tabContent.save(tabData, saveUnmodified = true).flatMap: saved =>
                   if saved
                   then
                     api.validateScript(safePath).map: errorDataOption =>

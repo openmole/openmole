@@ -30,11 +30,11 @@ object EvolutionMetadata:
 
     def name(data: GenomeBoundData) =
       data match
-        case d: DoubleBound         ⇒ d.value.name
-        case d: IntBound            ⇒ d.value.name
-        case d: DoubleSequenceBound ⇒ d.value.name
-        case d: IntSequenceBound    ⇒ d.value.name
-        case d: Enumeration         ⇒ d.value.name
+        case d: DoubleBound         => d.value.name
+        case d: IntBound            => d.value.name
+        case d: DoubleSequenceBound => d.value.name
+        case d: IntSequenceBound    => d.value.name
+        case d: Enumeration         => d.value.name
 
   case class Objective(
     name:     String,

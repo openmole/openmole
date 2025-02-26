@@ -7,13 +7,13 @@ import org.openmole.core.dsl.extension._
 object ABCHook {
 
   def apply(method: ABC.ABCParameters, dir: FromContext[File], frequency: Long = 1)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Hook("ABCHook") { p ⇒
+    Hook("ABCHook") { p =>
       import p._
 
       if (context(method.step) % frequency == 0) {
         context(method.state) match {
-          case MonAPMC.Empty() ⇒ ()
-          case MonAPMC.State(_, s) ⇒
+          case MonAPMC.Empty() => ()
+          case MonAPMC.State(_, s) =>
             val step = context(method.step)
 
             val filePath = dir / s"step${step}.csv"
@@ -36,7 +36,7 @@ object ABCHook {
                 s.rhos zip
                 s.weights zip
                 s.thetas).map {
-                  case ((((((epsilon, pAcc), t), ti), rhoi), wi), thetai) ⇒
+                  case ((((((epsilon, pAcc), t), ti), rhoi), wi), thetai) =>
                     epsilon.formatted("%.12f") ++ "," ++
                       pAcc.formatted("%.12f") ++ "," ++
                       t.formatted("%d") ++ "," ++

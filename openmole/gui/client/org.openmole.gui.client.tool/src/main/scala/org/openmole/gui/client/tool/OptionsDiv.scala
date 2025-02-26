@@ -24,21 +24,21 @@ import com.raquo.laminar.api.L._
 
 object OptionsDiv {
 
-  case class BoxedOption[T](option: T, naming: T ⇒ String, checkBox: Input)
+  case class BoxedOption[T](option: T, naming: T => String, checkBox: Input)
 
-  def apply[T](options: Seq[T], naming: T ⇒ String) = new OptionsDiv(options, naming)
+  def apply[T](options: Seq[T], naming: T => String) = new OptionsDiv(options, naming)
 }
 
 object CheckBox {
-  def apply(option: String = "", default: Boolean = false, classKey: HESetters = Seq(), onchecked: Input ⇒ Unit = HTMLInputElement ⇒ {}) =
+  def apply(option: String = "", default: Boolean = false, classKey: HESetters = Seq(), onchecked: Input => Unit = HTMLInputElement => {}) =
     new CheckBox(option, default, classKey, onchecked)
 }
 
 import OptionsDiv._
 
-class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
+class OptionsDiv[T](options: Seq[T], naming: T => String) {
 
-  val boxedOptions = options.map { o ⇒
+  val boxedOptions = options.map { o =>
     BoxedOption(o, naming, checkbox(true))
   }
 
@@ -52,7 +52,7 @@ class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
     )
   )
 
-  def result: Seq[T] = boxedOptions.filter { bo ⇒
+  def result: Seq[T] = boxedOptions.filter { bo =>
     bo.checkBox.ref.checked
   }.map {
     _.option
@@ -60,9 +60,9 @@ class OptionsDiv[T](options: Seq[T], naming: T ⇒ String) {
 
 }
 
-class CheckBox(name: String, default: Boolean, classKey: HESetters, onchecked: Input ⇒ Unit) {
+class CheckBox(name: String, default: Boolean, classKey: HESetters, onchecked: Input => Unit) {
 
-  private lazy val cb: Input = checkbox(default).amend(onClick --> (_ ⇒ onchecked(cb)))
+  private lazy val cb: Input = checkbox(default).amend(onClick --> (_ => onchecked(cb)))
   private val cbSpan = span(name, position.relative, marginRight := "5", marginLeft := "5", top := "-3")
 
   lazy val withNameFirst = div(classKey, cbSpan, cb)

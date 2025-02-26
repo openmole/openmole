@@ -92,7 +92,7 @@ class Context(val variables: TreeMap[String, Variable[?]]):
    * @param f default value
    * @return
    */
-  def getOrElse[T](v: Val[T], f: ⇒ T): T = option(v).getOrElse(f)
+  def getOrElse[T](v: Val[T], f: => T): T = option(v).getOrElse(f)
 
   /**
    * Get a variable value given a prototype name. This method get the variable by its
@@ -154,7 +154,7 @@ class Context(val variables: TreeMap[String, Variable[?]]):
    * @param vs the variables to add
    * @return the new context
    */
-  def ++(vs: Iterable[Variable[?]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name → v }))
+  def ++(vs: Iterable[Variable[?]]): Context = Context.fromMap(variables ++ (vs.map { v => v.prototype.name → v }))
 
   /**
    * Build a new context containing the variables of the current context minus the
@@ -172,8 +172,8 @@ class Context(val variables: TreeMap[String, Variable[?]]):
    */
   def contains(p: Val[?]): Boolean =
     variable(p.name) match
-      case None    ⇒ false
-      case Some(v) ⇒ p.isAssignableFrom(v.prototype)
+      case None    => false
+      case Some(v) => p.isAssignableFrom(v.prototype)
 
   def contains(name: String) =
     variables.contains(name)
@@ -210,7 +210,7 @@ class Context(val variables: TreeMap[String, Variable[?]]):
 
   def prettified(stripSize: Int): String =
     "{" + (if (variables.values.isEmpty) ""
-    else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
+    else variables.values.map(v => if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
 
   def prettified(using preference: Preference): String = prettified(preference(Context.ErrorArraySnipSize))
 

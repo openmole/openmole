@@ -8,7 +8,7 @@ import org.openmole.core.workflow.task.FromContextTask
 object SplitTask {
 
   def apply(masterState: Val[MonAPMC.MonState], islandState: Val[MonAPMC.MonState], n: Int)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("splitTask") { p ⇒
+    FromContextTask("splitTask") { p =>
       import p._
 
       def generateStates(s: MonAPMC.MonState, acc: List[MonAPMC.MonState], cpt: Int): (MonAPMC.MonState, Array[MonAPMC.MonState]) = {

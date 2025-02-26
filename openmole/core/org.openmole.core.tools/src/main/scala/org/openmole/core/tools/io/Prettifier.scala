@@ -33,19 +33,19 @@ object Prettifier extends JavaLogger {
 
   def snip[T <: Any](o: Iterable[T], size: Int = Int.MaxValue) =
     "[" +
-      (if (o.size <= size) o.map { e ⇒ prettify(e, size) }.mkString(", ")
-      else o.take(size - 1).map { e ⇒ prettify(e, size) }.mkString(", ") + "..., " + o.last) +
+      (if (o.size <= size) o.map { e => prettify(e, size) }.mkString(", ")
+      else o.take(size - 1).map { e => prettify(e, size) }.mkString(", ") + "..., " + o.last) +
       "]"
 
   def prettify(o: Any, snipArray: Int = Int.MaxValue): String =
     try o match {
-      case null                       ⇒ "null"
-      case o: Array[?]                ⇒ snip(o, snipArray)
-      case o: Seq[_]                  ⇒ snip(o, snipArray)
-      case o: java.util.Collection[_] ⇒ snip(o.asScala, snipArray)
-      case o                          ⇒ o.toString
+      case null                       => "null"
+      case o: Array[?]                => snip(o, snipArray)
+      case o: Seq[_]                  => snip(o, snipArray)
+      case o: java.util.Collection[_] => snip(o.asScala, snipArray)
+      case o                          => o.toString
     } catch {
-      case t: Throwable ⇒
+      case t: Throwable =>
         logger.log(WARNING, "Error during pretification", t)
         o.toString
     }

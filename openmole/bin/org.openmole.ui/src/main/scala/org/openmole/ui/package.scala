@@ -45,7 +45,7 @@ import java.net.URI
 //      // above code mimicks: java.awt.Desktop.getDesktop().browse()
 //    }
 //    catch {
-//      case ignore: Exception ⇒ // library not available or failed
+//      case ignore: Exception => // library not available or failed
 //        println(ignore)
 //        val osName = System.getProperty("os.name")
 //        if (osName.startsWith("Mac OS")) {
@@ -57,13 +57,13 @@ import java.net.URI
 //          Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url)
 //        else { // assume Unix or Linux
 //          val b =
-//            browsers.find { b ⇒
+//            browsers.find { b =>
 //              val is = Runtime.getRuntime().exec("which", Array(b)).getInputStream()
 //              try is.read() != -1
 //              finally is.close
 //            }
 //
-//          b.foreach { b ⇒ Runtime.getRuntime().exec(b, Array(url)) }
+//          b.foreach { b => Runtime.getRuntime().exec(b, Array(url)) }
 //        }
 //    }
 //

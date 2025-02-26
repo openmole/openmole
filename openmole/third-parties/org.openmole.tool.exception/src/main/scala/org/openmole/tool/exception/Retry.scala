@@ -25,22 +25,22 @@ import scala.annotation.tailrec
 
 object Retry:
 
-  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T =
-    def retryOrElse[T](f: ⇒ T): T = if (nbTry > 1) retryOnTimeout(f, nbTry - 1) else f
+  def retryOnTimeout[T](f: => T, nbTry: Int): T =
+    def retryOrElse[T](f: => T): T = if (nbTry > 1) retryOnTimeout(f, nbTry - 1) else f
     try f
     catch
-      case t: TimeoutException       ⇒ retryOrElse(throw t)
-      case t: SocketTimeoutException ⇒ retryOrElse(throw t)
+      case t: TimeoutException       => retryOrElse(throw t)
+      case t: SocketTimeoutException => retryOrElse(throw t)
 
-  @tailrec def retry[T](f: ⇒ T, nbTry: Int, coolDown: Option[Time] = None): T =
+  @tailrec def retry[T](f: => T, nbTry: Int, coolDown: Option[Time] = None): T =
     try f
     catch
-      case t: Throwable ⇒
+      case t: Throwable =>
         if nbTry > 1
         then
-          coolDown.foreach(c ⇒ Thread.sleep(c.millis))
+          coolDown.foreach(c => Thread.sleep(c.millis))
           retry(f, nbTry - 1)
         else throw t
 
-  def retry[T](nbTry: Int)(f: ⇒ T): T = retry(f, nbTry)
+  def retry[T](nbTry: Int)(f: => T): T = retry(f, nbTry)
 

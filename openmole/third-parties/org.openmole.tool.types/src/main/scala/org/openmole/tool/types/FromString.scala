@@ -12,19 +12,19 @@ trait FromString[+T] {
 
 object FromString {
 
-  def apply[T](f: String ⇒ T): FromString[T] = new FromString[T] {
+  def apply[T](f: String => T): FromString[T] = new FromString[T] {
     override def apply(s: String) = f(s)
   }
 
   implicit def doubleFromString: FromString[Double] = FromString[Double](_.toDouble)
-  implicit def fileFromString: FromString[java.io.File] = FromString[java.io.File](s ⇒ new java.io.File(s))
+  implicit def fileFromString: FromString[java.io.File] = FromString[java.io.File](s => new java.io.File(s))
   implicit def intFromString: FromString[Int] = FromString[Int](_.toInt)
   implicit def longFromString: FromString[Long] = FromString[Long](_.toLong)
   implicit def floatFromString: FromString[Float] = FromString[Float](_.toFloat)
-  implicit def bigDecimalFromString: FromString[BigDecimal] = FromString[BigDecimal](s ⇒ BigDecimal(s, MathContext.DECIMAL128))
-  implicit def bigIntFromString: FromString[BigInt] = FromString[BigInt](s ⇒ BigInt(s))
-  implicit def javaBigDecimalFromString: FromString[java.math.BigDecimal] = FromString[java.math.BigDecimal](s ⇒ BigDecimal(s, MathContext.DECIMAL128).bigDecimal)
-  implicit def javaBigIntegerFromString: FromString[java.math.BigInteger] = FromString[java.math.BigInteger](s ⇒ BigInt(s).underlying)
+  implicit def bigDecimalFromString: FromString[BigDecimal] = FromString[BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128))
+  implicit def bigIntFromString: FromString[BigInt] = FromString[BigInt](s => BigInt(s))
+  implicit def javaBigDecimalFromString: FromString[java.math.BigDecimal] = FromString[java.math.BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128).bigDecimal)
+  implicit def javaBigIntegerFromString: FromString[java.math.BigInteger] = FromString[java.math.BigInteger](s => BigInt(s).underlying)
   implicit def stringFromString: FromString[String] = FromString[String](identity)
   implicit def booleanFromString: FromString[Boolean] = FromString[Boolean](_.toBoolean)
   implicit def timeFromString: FromString[Time] = FromString[Time](_.toTime.get)

@@ -22,10 +22,10 @@ import org.openmole.core.dsl.extension._
 
 object DistinctDomain {
 
-  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[DistinctDomain[D, T], T] = domain ⇒ {
+  implicit def isDiscrete[D, T]: DiscreteFromContextDomain[DistinctDomain[D, T], T] = domain => {
     val domainValue = domain.discrete(domain.domain)
     Domain(
-      FromContext { p ⇒
+      FromContext { p =>
         import p._
         domainValue.domain.from(context).toSeq.distinct.iterator
       },

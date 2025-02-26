@@ -18,7 +18,7 @@ object ThreadProvider:
 
   def stub() = apply()(Preference.stub())
 
-  type Closure = () ⇒ Unit
+  type Closure = () => Unit
 
   class RunClosure(queue: BlockingPriorityQueue[Closure]) extends Runnable:
     override def run =
@@ -27,8 +27,8 @@ object ThreadProvider:
 
   def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = r =>
       val t = parentGroup match
-        case Some(p) ⇒ new Thread(p, r)
-        case None    ⇒ new Thread(r)
+        case Some(p) => new Thread(p, r)
+        case None    => new Thread(r)
 
       t.setDaemon(true)
       t
@@ -58,12 +58,12 @@ class ThreadProvider(poolSize: Int):
 
   def virtual(task: ThreadProvider.Closure) = virtualThreadPool.execute(() => task())
 
-  def submit[T](t: ⇒ T) = scala.concurrent.Future[T] { t }
+  def submit[T](t: => T) = scala.concurrent.Future[T] { t }
 
   def newThread(runnable: Runnable, groupName: Option[String] = None) =
     synchronized:
       if (stopped) throw new RuntimeException("Thread provider has been stopped")
-      val group = groupName.map(n ⇒ new ThreadGroup(parentGroup, n)).getOrElse(parentGroup)
+      val group = groupName.map(n => new ThreadGroup(parentGroup, n)).getOrElse(parentGroup)
       val t = new Thread(group, runnable)
       t.setDaemon(true)
       t

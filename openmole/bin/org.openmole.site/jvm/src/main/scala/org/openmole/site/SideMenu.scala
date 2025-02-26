@@ -54,11 +54,11 @@ object SideMenu {
             for { p ← m.links } yield {
               val basicButton = div(paddingTop := 10)(linkButton(p.name, p.link, m.menuStyle, m.otherTab))
               currentPage match {
-                case Some(page) ⇒ {
+                case Some(page) => {
                   if ((page.name == p.name) && selectMode) div(paddingTop := 10)(linkButton(p.name, p.link, openInOtherTab = m.otherTab))
                   else basicButton
                 }
-                case _ ⇒ basicButton
+                case _ => basicButton
               }
             }
           )
@@ -81,7 +81,7 @@ object SideMenu {
   def details(pages: Seq[Page]) = SideMenu(pages, classIs(btn, btn_default), otherTab = true)
 
 //  def fromStrings(title: String, stringMenus: String*) =
-//    SideMenu(preText = title, links = stringMenus.map { a ⇒ Link(a, Link.intern(a)) })
+//    SideMenu(preText = title, links = stringMenus.map { a => Link(a, Link.intern(a)) })
 
   val plug = SideMenu(DocumentationPages.plugPages, classIs(btn, btn_default), "Available tasks", topLink = Some(DocumentationPages.plug.link))
   val explore = SideMenu(DocumentationPages.explorePages, classIs(btn, btn_default), "Available methods", topLink = Some(DocumentationPages.explore.link))

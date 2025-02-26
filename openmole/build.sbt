@@ -1120,7 +1120,7 @@ lazy val openmoleNaked =
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
     },
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
-    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     resourcesAssemble += {
       IO.withTemporaryDirectory { modules =>
         import sys.process._
@@ -1173,7 +1173,7 @@ lazy val openmole =
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
-    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     cleanFiles ++= (openmoleNaked / cleanFiles).value
   ) dependsOn (toDependencies(openmoleDependencies) *) settings (excludeTransitiveScala2)
@@ -1183,7 +1183,7 @@ lazy val openmoleRuntime =
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
-    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     setExecutable ++= Seq("run.sh"),
     tarName := "runtime.tar.gz",
     libraryDependencies ++= requieredRuntimeLibraries,
@@ -1195,8 +1195,8 @@ lazy val openmoleRuntime =
 
 lazy val api = Project("api", binDir / "target" / "api") settings (scala3Settings *) enablePlugins (ScalaUnidocPlugin) settings (
   //compile := sbt.inc.Analysis.Empty,
-  ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(openmoleDependencies.map(p ⇒ p: ProjectReference) *)
-  // -- inProjects(Libraries.projects.map(p ⇒ p: ProjectReference) ++ ThirdParties.projects.map(p ⇒ p: ProjectReference)*/
+  ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(openmoleDependencies.map(p => p: ProjectReference) *)
+  // -- inProjects(Libraries.projects.map(p => p: ProjectReference) ++ ThirdParties.projects.map(p => p: ProjectReference)*/
   //  Tar.name := "openmole-api.tar.gz",
   //  Tar.folder := (UnidocKeys.unidoc in Compile).map(_.head).value
   )
@@ -1353,7 +1353,7 @@ lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true,
     bundle -> (assemblyPath.value / "plugins" / bundle.getName)
   },
   //Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value,
-  resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b ⇒ b → (assemblyPath.value / "plugins" / b.getName)),
+  resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
   resourcesAssemble += ((Compile / resourceDirectory).value / "modules") -> (assemblyPath.value / "modules"),
   resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
   libraryDependencies ++= requieredRuntimeLibraries,

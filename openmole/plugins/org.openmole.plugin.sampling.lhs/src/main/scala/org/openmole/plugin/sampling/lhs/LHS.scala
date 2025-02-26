@@ -23,13 +23,13 @@ import org.openmole.core.workflow.sampling.ScalableValue
 
 object LHS {
 
-  implicit def isSampling: IsSampling[LHS] = lhs ⇒ {
-    def apply = FromContext { p ⇒
+  implicit def isSampling: IsSampling[LHS] = lhs => {
+    def apply = FromContext { p =>
       import p._
       val s = lhs.sample.from(context)
       val vectorSize = lhs.factor.map(_.size(context)).sum
       def values = LHS.lhsValues(vectorSize, s, random())
-      values.map(v ⇒ ScalableValue.toVariables(lhs.factor, v).from(context)).iterator
+      values.map(v => ScalableValue.toVariables(lhs.factor, v).from(context)).iterator
     }
 
     Sampling(
@@ -41,7 +41,7 @@ object LHS {
   }
 
   def lhsValues(dimensions: Int, samples: Int, rng: scala.util.Random) = Array.fill(dimensions) {
-    org.openmole.tool.random.shuffled(0 until samples)(rng).map { i ⇒ (i + rng.nextDouble) / samples }.toArray
+    org.openmole.tool.random.shuffled(0 until samples)(rng).map { i => (i + rng.nextDouble) / samples }.toArray
   }.transpose
 
 }

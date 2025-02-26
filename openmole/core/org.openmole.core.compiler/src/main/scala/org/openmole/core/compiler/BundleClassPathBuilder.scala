@@ -57,7 +57,7 @@
 //    abstract class BundleEntry(url: URL, parent: DirEntry) extends AbstractFile {
 //      require(url != null, s"url must not be null: $bundle")
 //      lazy val (path: String, name: String) = getPathAndName(url)
-//      lazy val fullName: String = (path :: name :: Nil).filter(n ⇒ !n.isEmpty).mkString("/")
+//      lazy val fullName: String = (path :: name :: Nil).filter(n => !n.isEmpty).mkString("/")
 //
 //      /**
 //       * @return null
@@ -167,7 +167,7 @@
 //
 //      def lookupName(name: String, directory: Boolean): AbstractFile = {
 //        val entry = bundle.getEntry(fullName + "/" + name)
-//        nullOrElse(entry) { entry ⇒
+//        nullOrElse(entry) { entry =>
 //          if (directory)
 //            new DirEntry(entry, DirEntry.this)
 //          else
@@ -201,7 +201,7 @@
 //      def delete = unsupported("create() is unsupported")
 //    }
 //
-//    Option(bundle.getResource("/")).map { url ⇒
+//    Option(bundle.getResource("/")).map { url =>
 //      new DirEntry(url, null) {
 //        override def toString = "AbstractFile[" + bundle + "]"
 //      }
@@ -215,7 +215,7 @@
 //   * @param f
 //   * @return <code>f(s)</code> if s is not <code>null</code>, <code>null</code> otherwise.
 //   */
-//  def nullOrElse[S, T](s: S)(f: S ⇒ T): T =
+//  def nullOrElse[S, T](s: S)(f: S => T): T =
 //    if (s == null) null.asInstanceOf[T]
 //    else f(s)
 //
@@ -224,7 +224,7 @@
 //   * @param default
 //   * @return <code>t</code> or <code>default</code> if <code>null</code>.
 //   */
-//  def valueOrElse[T](t: T)(default: ⇒ T) =
+//  def valueOrElse[T](t: T)(default: => T) =
 //    if (t == null) default
 //    else t
 //

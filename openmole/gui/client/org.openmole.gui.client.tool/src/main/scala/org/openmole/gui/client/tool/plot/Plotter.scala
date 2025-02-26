@@ -44,8 +44,8 @@ object Plotter {
 
     closureFilter.filteredAxis.map {
       _.fullSequenceIndex
-    }.map { colToBeFiltered ⇒
-      Table.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v ⇒ jsClosure(closureFilter, v._1.value, colToBeFiltered)).map {
+    }.map { colToBeFiltered =>
+      Table.column(colToBeFiltered, dataRows).values.zipWithIndex.filter(v => jsClosure(closureFilter, v._1.value, colToBeFiltered)).map {
         _._2
       }
     }.getOrElse(0 to nbLines - 1)
@@ -66,16 +66,16 @@ object Plotter {
       val filteredColumn = filterColumn(dataRows, plotter, dataNbLines)
 
       val dims = plotter.plotDimension match {
-        case ColumnPlot ⇒
+        case ColumnPlot =>
           if (dataNbColumns >= nbDims) {
-            indexes.foldLeft(Array[Dim]()) { (acc, col) ⇒
-              acc :+ Dim(Table.column(col, dataRows).values.zipWithIndex.filter { id ⇒ filteredColumn.contains(id._2) }.map {
+            indexes.foldLeft(Array[Dim]()) { (acc, col) =>
+              acc :+ Dim(Table.column(col, dataRows).values.zipWithIndex.filter { id => filteredColumn.contains(id._2) }.map {
                 _._1.value
               }, sequenceData.header.lift(col).getOrElse(""))
             }
           }
           else Array[Dim]()
-        case _ ⇒ sequenceData.content.zipWithIndex.map { case (v, id) ⇒ Dim(v, id.toString) }.toArray
+        case _ => sequenceData.content.zipWithIndex.map { case (v, id) => Dim(v, id.toString) }.toArray
       }
 
       val (xValues, yValues) = {
@@ -86,7 +86,7 @@ object Plotter {
             val arrays = Tools.getDataArrays(dims.head.values)
 
             val xSize = arrays.headOption.map { _.length }.getOrElse(1)
-            (Dim((1 to xSize).map { _.toString }, ""), arrays.map { d ⇒ Dim(d, dims.last.label) }.toArray)
+            (Dim((1 to xSize).map { _.toString }, ""), arrays.map { d => Dim(d, dims.last.label) }.toArray)
           }
           else
             (dims.head, Array(dims.last))
@@ -101,7 +101,7 @@ object Plotter {
 //          Serie(xValues, yValues),
 //          false,
 //          plotter,
-//          plotter.error.map { e ⇒
+//          plotter.error.map { e =>
 //            Serie(yValues = Array(Dim(Table.column(e.fullSequenceIndex, dataRows).values, sequenceData.header.lift(e.fullSequenceIndex).getOrElse(""))))
 //          }
 //        )
@@ -113,12 +113,12 @@ object Plotter {
 
   def toBePlotted(plotter: Plotter, data: SequenceData): (Plotter, SequenceData) = {
     val (newToBePlotted, newSequenceData) = plotter.plotDimension match {
-      case ColumnPlot ⇒
+      case ColumnPlot =>
         plotter.plotMode match {
-          case SplomMode ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(5)), data)
-          case _         ⇒ (ToBePloted(plotter.toBePlotted.indexes.take(2)), data.withRowIndexes)
+          case SplomMode => (ToBePloted(plotter.toBePlotted.indexes.take(5)), data)
+          case _         => (ToBePloted(plotter.toBePlotted.indexes.take(2)), data.withRowIndexes)
         }
-      case LinePlot ⇒ (ToBePloted((1 to data.content.size)), data)
+      case LinePlot => (ToBePloted((1 to data.content.size)), data)
     }
 
     (plotter.copy(toBePlotted = newToBePlotted), newSequenceData)
@@ -126,11 +126,11 @@ object Plotter {
 
   def availableForError(header: SequenceHeader, plotter: Plotter) = {
     plotter.plotDimension match {
-      case LinePlot ⇒ Seq()
-      case ColumnPlot ⇒
+      case LinePlot => Seq()
+      case ColumnPlot =>
         header.zipWithIndex.filterNot {
-          case (x, i) ⇒ plotter.toBePlotted.indexes.contains(i)
-        }.map { afe ⇒
+          case (x, i) => plotter.toBePlotted.indexes.contains(i)
+        }.map { afe =>
           IndexedAxis(afe._1, afe._2)
         }
     }
@@ -139,9 +139,9 @@ object Plotter {
   def jsClosure(closureFilter: ClosureFilter, value: String, col: Int) = {
     if (closureFilter.closure.isEmpty) true
     else {
-      closureFilter.filteredAxis.find(_.fullSequenceIndex == col).map { pc ⇒
+      closureFilter.filteredAxis.find(_.fullSequenceIndex == col).map { pc =>
         value + closureFilter.closure
-      }.map { cf ⇒
+      }.map { cf =>
         scala.util.Try(scala.scalajs.js.eval(s"function func() { return ${cf};} func()").asInstanceOf[Boolean]).toOption.getOrElse(true)
       }.getOrElse(true)
     }

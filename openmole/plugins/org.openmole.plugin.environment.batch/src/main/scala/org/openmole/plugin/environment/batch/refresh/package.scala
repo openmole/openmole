@@ -19,7 +19,7 @@ package org.openmole.core.batch
 
 package object refresh {
 
-  def withRunFinalization[T](f: ⇒ T) =
+  def withRunFinalization[T](f: => T) =
     try f
     finally System.runFinalization()
 

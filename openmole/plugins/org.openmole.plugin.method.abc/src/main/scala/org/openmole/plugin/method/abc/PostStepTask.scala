@@ -23,7 +23,7 @@ object PostStepTask {
     termination:          OptionalArgument[Int],
     stop:                 Val[Boolean],
     step:                 Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("postStepTask") { p ⇒
+    FromContextTask("postStepTask") { p =>
       import p._
 
       def zipObserved(obs: Array[Array[Array[Double]]]) = {
@@ -36,27 +36,27 @@ object PostStepTask {
         obs.reduceLeft { zip2 }
       }
 
-      val xs = zipObserved(observed.toArray.map(o ⇒ ABC.Observed.fromContext(o, context)))
+      val xs = zipObserved(observed.toArray.map(o => ABC.Observed.fromContext(o, context)))
 
-      val s = Try(MonAPMC.postStep(n, nAlpha, prior.density(p), observed.flatMap(o ⇒ ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
+      val s = Try(MonAPMC.postStep(n, nAlpha, prior.density(p), observed.flatMap(o => ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
 
       s match {
-        case Success(s) ⇒
+        case Success(s) =>
           def stopValue(s: MonAPMC.MonState) =
-            minAcceptedRatio.map(ar ⇒ MonAPMC.stop(n, nAlpha, ar, stopSampleSizeFactor, s)).getOrElse(false) ||
+            minAcceptedRatio.map(ar => MonAPMC.stop(n, nAlpha, ar, stopSampleSizeFactor, s)).getOrElse(false) ||
               termination.option.map(_ <= context(step)).getOrElse(false)
 
           context + Variable(state, s) + Variable(stop, stopValue(s)) + Variable(step, context(step) + 1)
 
-        case Failure(f: APMC.SingularCovarianceException) ⇒
+        case Failure(f: APMC.SingularCovarianceException) =>
           def copyState(s: Option[MonAPMC.MonState], ns: APMC.State) =
             s match {
-              case Some(MonAPMC.Empty()) | None ⇒ MonAPMC.Empty()
-              case Some(s: MonAPMC.State)       ⇒ s.copy(s = ns)
+              case Some(MonAPMC.Empty()) | None => MonAPMC.Empty()
+              case Some(s: MonAPMC.State)       => s.copy(s = ns)
             }
 
           context + Variable(state, context.getOrElse(state, MonAPMC.Empty())) + Variable(stop, true) + Variable(step, context(step) + 1)
-        case Failure(f) ⇒ throw f
+        case Failure(f) => throw f
       }
     } set (
       inputs += stepState,

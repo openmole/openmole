@@ -19,11 +19,11 @@ object IslandTerminationTask {
     implicit
     name:            sourcecode.Name,
     definitionScope: DefinitionScope) =
-    FromContextTask("appendTask") { p ⇒
+    FromContextTask("appendTask") { p =>
       import p._
 
       val stopValue =
-        maxStep.option.map(ms ⇒ context(step) >= ms).getOrElse(false) ||
+        maxStep.option.map(ms => context(step) >= ms).getOrElse(false) ||
           MonAPMC.stop(n, nAlpha, minAcceptedRatio, stopSampleSizeFactor, context(state))
 
       context + (stop -> stopValue)

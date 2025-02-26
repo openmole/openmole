@@ -22,7 +22,7 @@ import scalatags.Text.all._
 //import com.github.rjeschke._
 //import org.apache.commons.math3.genetics.GeneticAlgorithm
 
-//import scalatex.{ openmole ⇒ scalatex }
+//import scalatex.{ openmole => scalatex }
 import org.openmole.tool.file._
 
 import scalatags.Text
@@ -36,8 +36,8 @@ object Pages:
   def file(page: Page) = java.net.URLEncoder.encode(page.location, "UTF-8") + ".html"
 
   def isDoc(page: Page) = page match
-    case d: DocumentationPage ⇒ true
-    case _                    ⇒ false
+    case d: DocumentationPage => true
+    case _                    => false
 
 
 object PageTree {
@@ -57,16 +57,16 @@ object PageTree {
   def pageNode(page: Page): PageTree = PageLeaf(page)
 
   lazy val parentsMap =
-    DocumentationPages.headPages.flatMap { hp ⇒
-      hp.sons.map { s ⇒ s.name -> hp }
+    DocumentationPages.headPages.flatMap { hp =>
+      hp.sons.map { s => s.name -> hp }
     }.filterNot(_._1.isEmpty).toMap
 
   def parents(pageTree: PageTree) =
 
     def parents0(pageTree: PageTree, pars: Seq[PageTree]): Seq[PageTree] =
       parentsMap.get(pageTree.name) match {
-        case Some(p: PageTree) ⇒ parents0(p, pars :+ p)
-        case None              ⇒ pars
+        case Some(p: PageTree) => parents0(p, pars :+ p)
+        case None              => pars
       }
 
     parents0(pageTree, Seq())
@@ -115,15 +115,15 @@ object DocumentationPage {
   def fromContent(
     name: String,
     content: => PageContent,
-    details: ⇒ Seq[DocumentationPage] = Seq.empty,
+    details: => Seq[DocumentationPage] = Seq.empty,
     location: Option[String] = None,
     title: Option[String] = None) =
     apply(name, content.content, details, location, title, source = Some(content.file.value.split("/").reverse.takeWhile(_ != "scala").reverse.mkString("/")))
 
   def apply(
     name:     String,
-    content:  ⇒ Frag,
-    details:  ⇒ Seq[DocumentationPage] = Seq.empty,
+    content:  => Frag,
+    details:  => Seq[DocumentationPage] = Seq.empty,
     location: Option[String]           = None,
     title:    Option[String]           = None,
     source:   => Option[String]           = None
@@ -148,8 +148,8 @@ abstract class DocumentationPage extends Page:
 
   override def equals(o: scala.Any): Boolean =
     o match
-      case p2: DocumentationPage ⇒ this.location == p2.location
-      case _                     ⇒ false
+      case p2: DocumentationPage => this.location == p2.location
+      case _                     => false
 
   override def hashCode(): Int = location.hashCode()
 
@@ -157,7 +157,7 @@ abstract class DocumentationPage extends Page:
 import PageTree._
 
 object DocumentationPages:
-  index ⇒
+  index =>
 
   def allPages = docPages.flatMap { _.sons } ++ tutoPages.sons ++ communityPages.sons ++ downloadPages.sons ++ headPages
 
@@ -316,24 +316,24 @@ object DocumentationPages:
   //      def tagContent(entries: Seq[GeneratedMarketEntry]) =
   //        ul(
   //          entries.sortBy(_.entry.name.toLowerCase).map {
-  //            de ⇒ li(entryContent(de))
+  //            de => li(entryContent(de))
   //          } *
   //        )
   //
   //      def entryContent(deployedMarketEntry: GeneratedMarketEntry) = {
   //        def title: Modifier =
   //          deployedMarketEntry.viewURL match {
-  //            case None    ⇒ deployedMarketEntry.entry.name
-  //            case Some(l) ⇒ a(deployedMarketEntry.entry.name, href := l)
+  //            case None    => deployedMarketEntry.entry.name
+  //            case Some(l) => a(deployedMarketEntry.entry.name, href := l)
   //          }
   //
   //        def content =
   //          Seq[Modifier](
   //            deployedMarketEntry.readme.map {
-  //              rm ⇒ RawFrag(txtmark.Processor.process(rm))
+  //              rm => RawFrag(txtmark.Processor.process(rm))
   //            }.getOrElse(p("No README.md available yet.")),
   //            a("Packaged archive", href := deployedMarketEntry.archive), " (can be imported in OpenMOLE)"
-  //          ) ++ deployedMarketEntry.viewURL.map(u ⇒ br(a("Source repository", href := u)))
+  //          ) ++ deployedMarketEntry.viewURL.map(u => br(a("Source repository", href := u)))
   //
   //        div(scalatags.Text.all.id := "market-entry")(content *)
   //      }

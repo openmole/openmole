@@ -37,12 +37,12 @@ object JobManager:
 
   def messagePriority(message: DispatchedMessage) =
     message match
-      case _: Refresh   ⇒ 5
-      case _: Submit    ⇒ 50
-      case _: GetResult ⇒ 50
-      case _: Kill      ⇒ 10
-      case _: Error     ⇒ 100 // This is very quick to process
-      case _            ⇒ 1
+      case _: Refresh   => 5
+      case _: Submit    => 50
+      case _: GetResult => 50
+      case _: Kill      => 10
+      case _: Error     => 100 // This is very quick to process
+      case _            => 1
 
   def dispatch(msg: DispatchedMessage)(using services: BatchEnvironment.Services) =
     given AccessControl.Priority = AccessControl.Priority(messagePriority(msg))
@@ -71,14 +71,14 @@ object JobManager:
         services.eventDispatcher.trigger(environment, Environment.JobSubmitted(bej.id, bej))
         self ! Submit(bej, environment)
 
-      case Delay(msg, delay) ⇒
+      case Delay(msg, delay) =>
         services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
-      case Submitted(job, environment, bj) ⇒
-        killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () ⇒ self ! Delay(Refresh(job, environment, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
+      case Submitted(job, environment, bj) =>
+        killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () => self ! Delay(Refresh(job, environment, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
 
-      case MoleJobError(mj, j, environment, e, output, host) ⇒
-        def detail = output.map { output ⇒
+      case MoleJobError(mj, j, environment, e, output, host) =>
+        def detail = output.map { output =>
           s"""OpenMOLE output on remote node ${host} was:
              |$output""".stripMargin
         }.getOrElse(s"OpenMOLE output on remote node ${host} was empty")
@@ -89,23 +89,23 @@ object JobManager:
         Logger.fine("Error during job execution, it will be resubmitted.", e)
 
 
-  def sendToMoleExecution(job: StoredJob)(f: MoleExecution ⇒ Unit) =
+  def sendToMoleExecution(job: StoredJob)(f: MoleExecution => Unit) =
     MoleExecutionMessage.send(job.moleExecution) { MoleExecutionMessage.WithMoleExecutionSate(f) }
 
   def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(JobStore.subMoleCanceled)
 
-  def killOr(batchJob: BatchExecutionJob, kill: Kill)(op: () ⇒ Any)(implicit services: BatchEnvironment.Services) =
+  def killOr(batchJob: BatchExecutionJob, kill: Kill)(op: () => Any)(implicit services: BatchEnvironment.Services) =
     if (batchJob.state == ExecutionState.KILLED) ()
     else if (canceled(batchJob.storedJob)) self ! kill
     else op()
 
-  def killOr(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () ⇒ Unit)(implicit services: BatchEnvironment.Services) =
+  def killOr(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () => Unit)(implicit services: BatchEnvironment.Services) =
     if environment.stopped || canceled(storedJob)
     then self ! kill
     else
-      sendToMoleExecution(storedJob): state ⇒
+      sendToMoleExecution(storedJob): state =>
         if !jobIsFinished(state, storedJob) then op() else self ! kill
 
   def jobIsFinished(moleExecution: MoleExecution, job: StoredJob) =
-    job.storedMoleJobs.map(_.id).forall(mj ⇒ moleJobIsFinished(moleExecution, mj))
+    job.storedMoleJobs.map(_.id).forall(mj => moleJobIsFinished(moleExecution, mj))
 

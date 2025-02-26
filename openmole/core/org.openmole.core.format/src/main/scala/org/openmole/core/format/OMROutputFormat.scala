@@ -30,15 +30,15 @@ object OMROutputFormat:
     FromContext: p =>
       import p.*
       output match
-        case WritableOutput.Display(ps) ⇒
+        case WritableOutput.Display(ps) =>
           def writeStream(ps: java.io.PrintStream, section: Option[String], variables: Seq[Variable[?]]) =
             def headerLine(variables: Seq[Variable[?]]) = CSVFormat.header(variables.map(_.prototype), variables.map(_.value), arrayOnRow = false)
 
             section match
-              case None ⇒
+              case None =>
                 val header = Some(headerLine(variables))
                 CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value))
-              case Some(section) ⇒
+              case Some(section) =>
                 ps.println(section + ":")
                 val header = Some(headerLine(variables))
                 CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), margin = "  ")
@@ -46,7 +46,7 @@ object OMROutputFormat:
           for {(section, i) ← content.section.zipWithIndex}
             val sectionName = if content.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
             writeStream(ps, sectionName, section.variables)
-        case WritableOutput.Store(file) ⇒
+        case WritableOutput.Store(file) =>
           OMROutputFormat.writeFile(executionContext, file.from(p.context), content, method, option = option).from(context)
 
 
@@ -76,14 +76,14 @@ object OMROutputFormat:
 
       def script =
         scriptData match
-          case data: ScriptSourceData.ScriptData if option.script ⇒
+          case data: ScriptSourceData.ScriptData if option.script =>
             val scriptContent = ScriptSourceData.scriptContent(scriptData)
             val imports =
-              val is = Imports.directImportedFiles(data.script).map(i ⇒ OMRContent.Import(ImportedFile.identifier(i), i.file.content))
+              val is = Imports.directImportedFiles(data.script).map(i => OMRContent.Import(ImportedFile.identifier(i), i.file.content))
               if is.isEmpty then None else Some(is)
 
             Some(OMRContent.Script(scriptContent, imports))
-          case _ ⇒ None
+          case _ => None
 
 
       OMRFormat.write(

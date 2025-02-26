@@ -80,7 +80,7 @@ class FileService(implicit preference: Preference):
   def hashNoCache(file: File, hashType: HashType = SHA1)(using TmpDirectory) =
     if file.isDirectory
     then
-      TmpDirectory.withTmpFile: archive ⇒
+      TmpDirectory.withTmpFile: archive =>
         file.archive(archive, time = false)
         hashFile(archive, hashType)
     else hashFile(file, hashType)

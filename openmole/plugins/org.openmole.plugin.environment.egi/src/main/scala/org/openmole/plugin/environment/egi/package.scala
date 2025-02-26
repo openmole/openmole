@@ -33,21 +33,21 @@ package object egi extends JavaLogger {
     _root_.gridscale.egi.BDIIServer(uri.getHost, uri.getPort)
   }
 
-  def findFirstWorking[S, T](servers: Seq[S])(f: S ⇒ T, service: String = "server"): T = {
+  def findFirstWorking[S, T](servers: Seq[S])(f: S => T, service: String = "server"): T = {
     def findWorking0(servers: List[S]): T =
       servers match {
-        case Nil      ⇒ throw new RuntimeException(s"List of $service is empty")
-        case h :: Nil ⇒ f(h)
-        case h :: tail ⇒
+        case Nil      => throw new RuntimeException(s"List of $service is empty")
+        case h :: Nil => f(h)
+        case h :: tail =>
           try f(h)
           catch {
-            case t: Throwable ⇒ findWorking0(tail)
+            case t: Throwable => findWorking0(tail)
           }
       }
 
     try findWorking0(servers.toList)
     catch {
-      case t: Throwable ⇒ throw new RuntimeException(s"No $service is working among $servers", t)
+      case t: Throwable => throw new RuntimeException(s"No $service is working among $servers", t)
     }
   }
 

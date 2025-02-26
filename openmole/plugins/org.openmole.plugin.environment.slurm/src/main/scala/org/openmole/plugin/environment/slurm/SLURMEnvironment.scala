@@ -205,17 +205,17 @@ class SLURMEnvironment(
 
   lazy val pbsJobService =
     storageService match
-      case Left((space, local)) ⇒
+      case Left((space, local)) =>
         val installRuntime = RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
         SLURMJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, sshAccessControl)
-      case Right((space, ssh)) ⇒
+      case Right((space, ssh)) =>
         val installRuntime = RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
         SLURMJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, sshAccessControl)
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) ⇒ SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
-      case Right((space, ssh))  ⇒ SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
+      case Left((space, local)) => SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
+      case Right((space, ssh))  => SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
 
 
 class SLURMLocalEnvironment(

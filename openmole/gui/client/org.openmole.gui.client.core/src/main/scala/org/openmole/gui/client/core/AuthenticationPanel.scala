@@ -69,7 +69,7 @@ object AuthenticationPanel:
           bsn.btn_warning,
           _.name,
           onclose =
-            () ⇒ currentAuthentication.set:
+            () => currentAuthentication.set:
               authenticationSelector.content.now().map: s =>
                 DisplayedAuthentication(s.buildEmpty, s.name)
           )
@@ -96,10 +96,10 @@ object AuthenticationPanel:
 
     val cancelButton =
       button("Cancel", btn_secondary_outline, onClick -->
-        currentAuthentication.update: as ⇒
+        currentAuthentication.update: as =>
           as match
-            case None ⇒ panels.closeExpandable
-            case _ ⇒
+            case None => panels.closeExpandable
+            case _ =>
           None
       )
 
@@ -115,10 +115,10 @@ object AuthenticationPanel:
         )
 
         test match
-          case t: PassedTest ⇒ lab(t.message).amend(background := "#a5be21")
-          case t: FailedTest ⇒ lab(t.message).amend(
+          case t: PassedTest => lab(t.message).amend(background := "#a5be21")
+          case t: FailedTest => lab(t.message).amend(
             background := "#c8102e", color := "white", cursor.pointer,
-            onClick --> { _ ⇒
+            onClick --> { _ =>
               currentStack.set(t.error.map(ErrorData.stackTrace).getOrElse(""))
               errorOn.update(!_)
             }
@@ -163,7 +163,7 @@ object AuthenticationPanel:
     val authPanel =
       div(marginTop := "50",
         child <-- currentAuthentication.signal.map:
-          case Some(p) ⇒
+          case Some(p) =>
             div(
               padding := "20",
               getAuthSelector(p.factoryName).selector,
@@ -176,11 +176,11 @@ object AuthenticationPanel:
                 )
               )
             )
-          case None ⇒
+          case None =>
             div(
               children <--
-                testingAuthentications.signal.map: as ⇒
-                  as.zipWithIndex.map: (a, i) ⇒
+                testingAuthentications.signal.map: as =>
+                  as.zipWithIndex.map: (a, i) =>
                     //for (a ← auths()) yield {
                     val r = Reactive(a, i)
                     div(flexColumn,
@@ -197,7 +197,7 @@ object AuthenticationPanel:
 
     div(
       div(margin := "20px", flexRow, alignItems.center,
-        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ => panels.closeExpandable }),
         newButton
       ),
       authPanel,

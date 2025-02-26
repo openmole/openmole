@@ -24,7 +24,7 @@ import org.openmole.core.argument.OptionalArgument
 
 object ListFilesDomain extends JavaLogger {
 
-  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain ⇒
+  implicit def isDiscrete: DiscreteFromContextDomain[ListFilesDomain, File] = domain =>
     Domain(
       domain.iterator,
       domain.directory.toSeq.flatMap(_.inputs) ++ domain.filter.toSeq.flatMap(_.inputs),
@@ -49,12 +49,12 @@ class ListFilesDomain(
   private val filter:    Option[FromContext[String]] = None
 ) {
 
-  def iterator = FromContext { p ⇒
+  def iterator = FromContext { p =>
     import p._
     def toFilter(f: File) =
-      filter.map(e ⇒ f.getName.matches(e.from(context))).getOrElse(true)
+      filter.map(e => f.getName.matches(e.from(context))).getOrElse(true)
 
-    val dir = directory.map(s ⇒ new File(base, s.from(context))).getOrElse(base)
+    val dir = directory.map(s => new File(base, s.from(context))).getOrElse(base)
 
     if (!dir.exists) {
       Log.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")

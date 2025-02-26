@@ -36,7 +36,7 @@ object JSPack:
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(using newFile: TmpDirectory): Unit =
-    newFile.withTmpFile("lib", ".jar") { jar ⇒
+    newFile.withTmpFile("lib", ".jar") { jar =>
 
       JSPack.getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
 
@@ -62,7 +62,7 @@ object JSPack:
     }
 
   def webpack(entryJSFile: File, nodeModulesFile: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
-    newFile.withTmpDir { targetDir ⇒
+    newFile.withTmpDir { targetDir =>
       org.openmole.tool.archive.Zip.unzip(nodeModulesFile, targetDir, overwrite = true)
 
       //3- build the js deps with webpack

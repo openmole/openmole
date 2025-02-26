@@ -64,7 +64,7 @@ trait ServerAPI:
   def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]]
   def omrDataIndex(path: SafePath)(using BasePath): Future[Seq[GUIOMRDataIndex]]
 
-  def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath): Future[Unit]
+  def fetchGUIPlugins(f: GUIPlugins => Unit)(using BasePath): Future[Unit]
 
   def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit]
 
@@ -83,8 +83,8 @@ trait ServerAPI:
   def mdToHtml(safePath: SafePath)(using BasePath): Future[String]
   def sequence(safePath: SafePath)(using BasePath): Future[SequenceData]
 
-  def upload(fileList: Seq[(org.scalajs.dom.File, SafePath)], fileTransferState: ProcessState ⇒ Unit = _ => ())(using BasePath): Future[Seq[(RelativePath, SafePath)]]
-  def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
+  def upload(fileList: Seq[(org.scalajs.dom.File, SafePath)], fileTransferState: ProcessState => Unit = _ => ())(using BasePath): Future[Seq[(RelativePath, SafePath)]]
+  def download(safePath: SafePath, fileTransferState: ProcessState => Unit = _ => (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])]
 
   def cloneRepository(repository: String, destination: SafePath, overwrite: Boolean)(using BasePath): Future[Option[SafePath]]
   def commitFiles(files: Seq[SafePath], message: String)(using BasePath): Future[Unit]

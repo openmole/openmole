@@ -150,33 +150,33 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import org.openmole.tool.archive.*
     val name = f.getName
     name match
-      case n if n.endsWith(".tar") ⇒ Some(ArchiveType.Tar)
-      case n if n.endsWith(".tgz") | n.endsWith(".tar.gz") ⇒ Some(ArchiveType.TarGZ)
-      case n if n.endsWith(".zip") ⇒ Some(ArchiveType.Zip)
-      case n if n.endsWith(".tar.xz") | n.endsWith("txz") ⇒ Some(ArchiveType.TarXZ)
-      case _ ⇒ None
+      case n if n.endsWith(".tar") => Some(ArchiveType.Tar)
+      case n if n.endsWith(".tgz") | n.endsWith(".tar.gz") => Some(ArchiveType.TarGZ)
+      case n if n.endsWith(".zip") => Some(ArchiveType.Zip)
+      case n if n.endsWith(".tar.xz") | n.endsWith("txz") => Some(ArchiveType.TarXZ)
+      case _ => None
 
   private def extractArchiveFromFiles(from: File, to: File) =
     import org.openmole.tool.archive.*
     Try {
       val name = from.getName
       archiveType(name) match
-        case Some(ArchiveType.Tar) ⇒
+        case Some(ArchiveType.Tar) =>
           from.extract(to, archive = ArchiveType.Tar)
-          to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case Some(ArchiveType.TarGZ) ⇒
+          to.applyRecursive((f: File) => f.setWritable(true))
+        case Some(ArchiveType.TarGZ) =>
           from.extract(to, true, archive = ArchiveType.TarGZ)
-          to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case Some(ArchiveType.Zip) ⇒
+          to.applyRecursive((f: File) => f.setWritable(true))
+        case Some(ArchiveType.Zip) =>
           import org.openmole.tool.archive
           from.extract(to, true, archive = ArchiveType.Zip)
-        case Some(ArchiveType.TarXZ) ⇒
+        case Some(ArchiveType.TarXZ) =>
           from.extract(to, true, archive = ArchiveType.TarXZ)
-          to.applyRecursive((f: File) ⇒ f.setWritable(true))
-        case None ⇒ throw new Throwable("Unknown compression format for file " + from)
+          to.applyRecursive((f: File) => f.setWritable(true))
+        case None => throw new Throwable("Unknown compression format for file " + from)
     } match
-      case Success(_) ⇒ None
-      case Failure(t) ⇒ Some(ErrorData(t))
+      case Success(_) => None
+      case Failure(t) => Some(ErrorData(t))
 
   def extractArchive(safePath: SafePath, to: SafePath) =
     import services.*
@@ -248,7 +248,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val file = safePathToFile(path)
     if !file.exists() then file.content = ""
 
-    file.withLock { _ ⇒
+    file.withLock { _ =>
       def save() =
         val tmpFile = Files.createTempFile(file.getParentFile, s".${file.getName}", ".tmp").toFile
         tmpFile.mode = file
@@ -263,10 +263,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
       if (overwrite) save()
       else hash match {
-        case Some(expectedHash: String) ⇒
+        case Some(expectedHash: String) =>
           val hashOnDisk = services.fileService.hashNoCache(file).toString
           if (hashOnDisk == expectedHash) save() else (false, hashOnDisk)
-        case _ ⇒ save()
+        case _ => save()
       }
     }
 
@@ -279,10 +279,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val content = safePath.toFile.content.split("\n")
     val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?|true|false""".r
 
-    content.headOption.map { h ⇒
+    content.headOption.map { h =>
       SequenceData(
         h.split(',').toSeq,
-        content.tail.map { row ⇒ regex.findAllIn(row).toSeq }.toSeq
+        content.tail.map { row => regex.findAllIn(row).toSeq }.toSeq
       )
     }.getOrElse(SequenceData())
   }
@@ -322,7 +322,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           )
 
         ErrorData(ce.errorMessages.map(toErrorWithLocation), t)
-      case _ ⇒ ErrorData(t)
+      case _ => ErrorData(t)
 
   def compileToDSL(scriptPath: SafePath, outputStream: StringPrintStream): ErrorData | (ServicesContainer, Compiled, DSL) =
     def message(message: String) = MessageErrorData(message, None)
@@ -343,17 +343,17 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     try
       Project.compile(script.getParentFileSafe, script)(runServices) match
-        case ScriptFileDoesNotExists() ⇒ ErrorData("Script file does not exist")
-        case ErrorInCode(e) ⇒ scriptCompilationError(e)
-        case ErrorInCompiler(e) ⇒ scriptCompilationError(e)
-        case compiled: Compiled ⇒
+        case ScriptFileDoesNotExists() => ErrorData("Script file does not exist")
+        case ErrorInCode(e) => scriptCompilationError(e)
+        case ErrorInCompiler(e) => scriptCompilationError(e)
+        case compiled: Compiled =>
           if Thread.interrupted() then throw new InterruptedIOException()
 
           catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
-            case Failure(e) ⇒ scriptCompilationError(e)
-            case Success(dsl) ⇒ (runServices, compiled, dsl)
+            case Failure(e) => scriptCompilationError(e)
+            case Success(dsl) => (runServices, compiled, dsl)
     catch
-      case t: Throwable ⇒ scriptCompilationError(t)
+      case t: Throwable => scriptCompilationError(t)
 
   def compileToMoleExecution(
     scriptPath: SafePath,
@@ -373,12 +373,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               compilationContext = Some(compiled.compilationContext))
 
           Try(MoleExecution(dsl)(executionServices)) match
-            case Success(ex) ⇒ ex
-            case Failure(e) ⇒
+            case Success(ex) => ex
+            case Failure(e) =>
               MoleServices.clean(executionServices)
               scriptCompilationError(e)
     catch
-      case t: Throwable ⇒ scriptCompilationError(t)
+      case t: Throwable => scriptCompilationError(t)
 
 
   def launchScript(script: SafePath, validateScript: Boolean) =
@@ -394,7 +394,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       import services._
 
       val envIds =
-        try ex.allEnvironments.map { env ⇒ EnvironmentId(randomId) → env }
+        try ex.allEnvironments.map { env => EnvironmentId(randomId) → env }
         catch
           case e: Throwable =>
             serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
@@ -402,12 +402,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
       serverState.setEnvironments(execId, envIds)
       ex.listen(serverState.moleExecutionListener(execId, script))
-      envIds.foreach { (envId, env) ⇒ env.listen(serverState.environmentListener(execId, envId)) }
+      envIds.foreach { (envId, env) => env.listen(serverState.environmentListener(execId, envId)) }
 
       catchAll(ex.start(validateScript)) match
-        case Failure(e) ⇒
+        case Failure(e) =>
           serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
-        case Success(_) ⇒
+        case Success(_) =>
           val inserted = serverState.modifyState(execId)(_ => ex)
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
@@ -440,12 +440,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def listEnvironmentErrors(executionId: ExecutionId, environmentId: EnvironmentId, lines: Int): Seq[EnvironmentError] =
     atomic {
-      implicit ctx ⇒
+      implicit ctx =>
         val environmentErrors = serverState.environmentErrors(executionId, environmentId)
 
         //      def groupedErrors =
         //          environmentErrors.groupBy { _.errorMessage }.toSeq.map {
-        //            case (_, err) ⇒
+        //            case (_, err) =>
         //              val dates = err.map { _.date }.sorted
         //              EnvironmentErrorGroup(err.head, dates.max, dates.size)
         //          }.takeRight(lines)
@@ -463,7 +463,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     def mapToMd(marketIndex: MarketIndex) =
       marketIndex.copy(entries = marketIndex.entries.map {
-        e ⇒
+        e =>
           e.copy(readme = e.readme.map {
             MarkDownProcessor(_)
           })
@@ -479,9 +479,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   private def toPluginList(currentPlugins: Seq[String]) =
     import services.*
-    val currentPluginsSafePath = currentPlugins.map { s ⇒ SafePath(s.split("/"), ServerFileSystemContext.Project) }
+    val currentPluginsSafePath = currentPlugins.map { s => SafePath(s.split("/"), ServerFileSystemContext.Project) }
 
-    currentPluginsSafePath.flatMap { csp ⇒
+    currentPluginsSafePath.flatMap { csp =>
       val file = safePathToFile(csp)
       val date = file.lastModified
       if file.exists
@@ -491,14 +491,14 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def activatePlugins =
     import services.*
-    val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s ⇒ safePathToFile(SafePath(s.split("/"), ServerFileSystemContext.Project))).filter(_.exists)
+    val plugins = services.preference.preferenceOption(GUIServer.plugins).getOrElse(Seq()).map(s => safePathToFile(SafePath(s.split("/"), ServerFileSystemContext.Project))).filter(_.exists)
     PluginManager.tryLoad(plugins)
 
   //  private def isPlugged(safePath: SafePath) =
   //    import services._
   //    utils.isPlugged(safePathToFile(safePath), listPlugins())(workspace)
 
-  private def updatePluggedList(set: Seq[String] ⇒ Seq[String]): Unit =
+  private def updatePluggedList(set: Seq[String] => Seq[String]): Unit =
     import services._
     preference.updatePreference(GUIServer.plugins)(p => Some(set(p.getOrElse(Seq()))))
 
@@ -506,7 +506,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     val errors = utils.addPlugin(safePath)
     if (errors.isEmpty) {
-      updatePluggedList { pList ⇒ (pList :+ safePath.path.value.mkString("/")).distinct }
+      updatePluggedList { pList => (pList :+ safePath.path.value.mkString("/")).distinct }
     }
     errors
 
@@ -660,11 +660,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
 
     val paths =
-      resources.all.map(_.safePath).distinct.map: sp ⇒
+      resources.all.map(_.safePath).distinct.map: sp =>
         Resource(sp, sp.toFile.length)
 
     val implicitResource =
-      resources.implicits.map: r ⇒
+      resources.implicits.map: r =>
         Resource(r.safePath, r.safePath.toFile.length)
 
     Resources(
@@ -686,8 +686,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     val checkedURL =
       java.net.URI.create(url).getScheme match
-        case null ⇒ "http://" + url
-        case _ ⇒ url
+        case null => "http://" + url
+        case _ => url
 
     NetworkService.withResponse(checkedURL): response =>
       val nameHeader =
@@ -719,7 +719,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         def extractName = checkedURL.split("/").last
         val dest = safePathToFile(path / nameHeader.getOrElse(extractName))
         if !dest.exists() || overwrite
-        then dest.withOutputStream(os ⇒ copy(response.getEntity.getContent, os))
+        then dest.withOutputStream(os => copy(response.getEntity.getContent, os))
         else throw new IOException(s"Destination file $dest already exists and overwrite is not set")
 
   def cloneRepository(remoteURL: String, destination: SafePath, overwrite: Boolean): Option[SafePath] =

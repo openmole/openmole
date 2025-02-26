@@ -29,8 +29,8 @@ object SobolSampling:
       v ← Iterator.continually(sequence.nextVector()).slice(1, 1 + samples)
     yield v.toSeq
 
-  given IsSampling[SobolSampling] = sobol ⇒
-    def apply = FromContext: p ⇒
+  given IsSampling[SobolSampling] = sobol =>
+    def apply = FromContext: p =>
       import p._
       sobolValues(sobol.factor.size, sobol.sample.from(context)).map { ScalableValue.toVariables(sobol.factor, _)(context) }
 

@@ -34,7 +34,7 @@ object Switch {
     val last = Strain(EmptyTask())
 
     cases.map {
-      case Case(condition, dsl) ⇒
+      case Case(condition, dsl) =>
         first -- Slot(dsl) when condition
     }.reduce[DSL](_ & _) -- Slot(last)
 

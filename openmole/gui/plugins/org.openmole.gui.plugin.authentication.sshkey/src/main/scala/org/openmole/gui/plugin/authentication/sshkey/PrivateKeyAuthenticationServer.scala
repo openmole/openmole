@@ -67,7 +67,7 @@ class PrivateKeyAuthenticationServer(s: Services)
 
     def privateKeyAuthentications(): Seq[PrivateKeyAuthenticationData] =
       SSHAuthentication().flatMap:
-        case key: PrivateKey ⇒
+        case key: PrivateKey =>
           val safePath = key.privateKey.toSafePath(using ServerFileSystemContext.Authentication)
           Seq:
             PrivateKeyAuthenticationData(
@@ -78,15 +78,15 @@ class PrivateKeyAuthenticationServer(s: Services)
               port = key.port.toString,
               directory = safePath.parent
             )
-        case _ ⇒ None
+        case _ => None
 
 
     def addAuthentication(data: PrivateKeyAuthenticationData): Unit =
-      coreObject(data).foreach: co ⇒
+      coreObject(data).foreach: co =>
         SSHAuthentication += co
 
     def removeAuthentication(data: PrivateKeyAuthenticationData, deleteKey: Boolean): Unit =
-      coreObject(data).foreach: co ⇒
+      coreObject(data).foreach: co =>
         SSHAuthentication -= co
       if deleteKey && data.directory.parent == SafePath.root(ServerFileSystemContext.Authentication) 
       then safePathToFile(data.directory).recursiveDelete

@@ -130,7 +130,7 @@ class XStreamSerializerService extends SerializerService:
   def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = xStream(_.fromXML(is).asInstanceOf[T])
 
   def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(using TmpDirectory, FileService): T =
-    TmpDirectory.withTmpDir: archiveExtractDir ⇒
+    TmpDirectory.withTmpDir: archiveExtractDir =>
       tis.extract(archiveExtractDir)
       xStream: xs =>
         val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, xs.fromXML, deleteOnGC = deleteFilesOnGC)
@@ -141,7 +141,7 @@ class XStreamSerializerService extends SerializerService:
     deserializerWithFileInjection(_.fromXML[T](is, files))
 
   def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(using TmpDirectory): Unit =
-    TmpDirectory.withTmpFile: objSerial ⇒
+    TmpDirectory.withTmpFile: objSerial =>
       serialize(obj, objSerial)
       tos.addFile(objSerial, SerializerService.content)
 
@@ -209,7 +209,7 @@ class XStreamSerializerService extends SerializerService:
 //  def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = buildFury().deserialize(new FuryInputStream(is)).asInstanceOf[T]
 //
 //  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(using TmpDirectory, FileService): T =
-//    summon[TmpDirectory].withTmpDir: archiveExtractDir ⇒
+//    summon[TmpDirectory].withTmpDir: archiveExtractDir =>
 //      tis.extract(archiveExtractDir)
 //      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, buildFury().serialize, deleteOnGC = deleteFilesOnGC)
 //      val contentFile = new File(archiveExtractDir, SerializerService.content)
@@ -223,7 +223,7 @@ class XStreamSerializerService extends SerializerService:
 //    finally os.close()
 //
 //  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(using TmpDirectory): Unit =
-//    summon[TmpDirectory].withTmpFile: objSerial ⇒
+//    summon[TmpDirectory].withTmpFile: objSerial =>
 //      serialize(obj, objSerial)
 //      tos.addFile(objSerial, SerializerService.content)
 //

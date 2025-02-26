@@ -21,9 +21,9 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 object SeqDomain {
-  implicit def isFinite[T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain ⇒
+  implicit def isFinite[T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain =>
     Domain(
-      FromContext { p ⇒
+      FromContext { p =>
         import p._
         domain.values.iterator.map(_.from(context))
       },

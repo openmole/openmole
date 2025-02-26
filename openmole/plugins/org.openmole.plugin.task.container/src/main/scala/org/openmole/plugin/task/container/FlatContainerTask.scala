@@ -39,15 +39,15 @@ import org.openmole.tool.stream.*
 
 object FlatContainerTask:
 
-  def install(containerSystem: SingularityFlatImage, image: ContainerImage, install: Seq[String], volumes: Seq[(File, String)] = Seq.empty, errorDetail: Int ⇒ Option[String] = _ ⇒ None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
+  def install(containerSystem: SingularityFlatImage, image: ContainerImage, install: Seq[String], volumes: Seq[(File, String)] = Seq.empty, errorDetail: Int => Option[String] = _ => None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
       image match
-        case image: DockerImage      ⇒ Seq(image.image, image.tag, image.registry)
-        case image: SavedDockerImage ⇒ Seq(image.file.hash().toString)
+        case image: DockerImage      => Seq(image.image, image.tag, image.registry)
+        case image: SavedDockerImage => Seq(image.file.hash().toString)
 
-    val volumeCacheKey = volumes.map { (f, _) ⇒ fileService.hashNoCache(f).toString } ++ volumes.map { (_, d) ⇒ d }
+    val volumeCacheKey = volumes.map { (f, _) => fileService.hashNoCache(f).toString } ++ volumes.map { (_, d) => d }
     val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey ++ "flat").mkString("\n")).toString
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"
@@ -117,7 +117,7 @@ object FlatContainerTask:
         if executionContext.localEnvironment.remote && executionContext.localEnvironment.threads == 1
         then WithInstance[FlatContainerTask.Cached](pooled = false) { () => FlatContainerTask.Cached(image.image, Seq()) }
         else
-          WithInstance[FlatContainerTask.Cached](pooled = image.containerSystem.reuseContainer): () ⇒
+          WithInstance[FlatContainerTask.Cached](pooled = image.containerSystem.reuseContainer): () =>
             val pooledImage =
               if image.containerSystem.duplicateImage && isolatedDirectories.isEmpty
               then
@@ -159,17 +159,17 @@ object FlatContainerTask:
 
       def prepareVolumes(
         preparedFilesInfo:        Iterable[FileInfo],
-        containerPathResolver:    String ⇒ File,
+        containerPathResolver:    String => File,
         hostFiles:                Seq[HostFile],
         volumesInfo:              Seq[VolumeInfo]): Iterable[MountPoint] =
         val volumes =
-          volumesInfo.map((f, d) ⇒ f.toString -> d) ++
-            hostFiles.map(h ⇒ h.path -> h.destination) ++
-            preparedFilesInfo.map((f, d) ⇒ d.getAbsolutePath -> containerPathResolver(f.expandedUserPath).toString)
+          volumesInfo.map((f, d) => f.toString -> d) ++
+            hostFiles.map(h => h.path -> h.destination) ++
+            preparedFilesInfo.map((f, d) => d.getAbsolutePath -> containerPathResolver(f.expandedUserPath).toString)
 
         volumes.sortBy((_, bind) => bind.split("/").length)
 
-      pool: container ⇒
+      pool: container =>
         def uniquePathResolver(path: String): File =
           import org.openmole.tool.hash.*
           executionContext.taskExecutionDirectory /> path.hash().toString / path
@@ -185,7 +185,7 @@ object FlatContainerTask:
           ).toVector
 
         val containerEnvironmentVariables =
-          environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
+          environmentVariables.map(v => v.name.from(preparedContext) -> v.value.from(preparedContext))
 
         def ignoreRetCode = !errorOnReturnValue || returnValue.isDefined
         def retCodeVariable = "_PROCESS_RET_CODE_"
@@ -234,8 +234,8 @@ object FlatContainerTask:
             // last line might have been truncated
             val lst = tailBuilder.toString
             if lst.size >= tailSize
-            then lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
-            else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
+            then lst.split('\n').drop(1).map(l => s"|$l").mkString("\n")
+            else lst.split('\n').map(l => s"|$l").mkString("\n")
 
           def command = commandValue.mkString(" ; ")
 
@@ -268,7 +268,7 @@ object FlatContainerTask:
           )
 
         retContext ++
-          returnValue.map(v ⇒ Variable(v, retCode)) ++
-          stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
-          stdErr.map(v ⇒ Variable(v, errBuilder.toString))
+          returnValue.map(v => Variable(v, retCode)) ++
+          stdOut.map(v => Variable(v, outBuilder.toString)) ++
+          stdErr.map(v => Variable(v, errBuilder.toString))
 

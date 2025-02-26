@@ -10,8 +10,8 @@ object External {
 
   def run(name: String, args: Seq[String], workingDir: File, env: Seq[(String, String)] = Seq()): Unit = {
     val cmd = sys.props("os.name").toLowerCase match {
-      case os if os.contains("win") ⇒ Seq("cmd", "/c", name)
-      case _                        ⇒ Seq(name)
+      case os if os.contains("win") => Seq("cmd", "/c", name)
+      case _                        => Seq(name)
     }
 
     runProcess(cmd ++: args, workingDir, env)

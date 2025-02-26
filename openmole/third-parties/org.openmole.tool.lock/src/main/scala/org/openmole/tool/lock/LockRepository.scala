@@ -29,7 +29,7 @@ class LockRepository[T]:
 
   val locks = new mutable.HashMap[T, (ReentrantLock, AtomicInteger)]
 
-  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { (_, users) ⇒ users.get }.getOrElse(0))
+  def nbLocked(k: T) = locks.synchronized(locks.get(k).map { (_, users) => users.get }.getOrElse(0))
 
   private def getLock(obj: T) = locks.synchronized:
     val (lock, users) = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
@@ -38,14 +38,14 @@ class LockRepository[T]:
 
   private def cleanLock(obj: T) = locks.synchronized:
     locks.get(obj) match
-      case Some((lock, users)) ⇒
+      case Some((lock, users)) =>
         val value = users.decrementAndGet
         if (value <= 0) locks.remove(obj)
         lock
-      case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
+      case None => throw new IllegalArgumentException("Unlocking an object that has not been locked.")
 
 
-  def withLock[A](obj: T)(op: ⇒ A) =
+  def withLock[A](obj: T)(op: => A) =
     val lock = getLock(obj)
     lock.lock()
     try op

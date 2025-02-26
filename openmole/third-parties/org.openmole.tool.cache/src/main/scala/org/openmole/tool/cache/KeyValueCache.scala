@@ -22,7 +22,7 @@ case class KeyValueCache():
   private val lock = LockRepository[UUID]()
   private val cache = collection.mutable.HashMap[CacheKey[_], CacheValue]()
 
-  def getOrElseUpdate[T](key: CacheKey[T])(t: ⇒ T): T = lock.withLock(key.id):
+  def getOrElseUpdate[T](key: CacheKey[T])(t: => T): T = lock.withLock(key.id):
     cache.synchronized(cache.get(key)) match
       case Some(v) => v.value.asInstanceOf[T]
       case None =>

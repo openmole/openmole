@@ -69,7 +69,7 @@ class ServerState:
   private val notificationEvents = TSet[NotificationEvent]()
   private val notificationEventId = Ref[Long](0)
 
-  private def updateRunningEnvironment(executionId: ExecutionId, envId: EnvironmentId)(update: RunningEnvironment ⇒ RunningEnvironment) = atomic { implicit ctx ⇒
+  private def updateRunningEnvironment(executionId: ExecutionId, envId: EnvironmentId)(update: RunningEnvironment => RunningEnvironment) = atomic { implicit ctx =>
     for
       info <- executionInfo.get(executionId)
       environment <- info.environments.get(envId)
@@ -95,12 +95,12 @@ class ServerState:
         )
 
   def environmentListener(executionId: ExecutionId, envId: EnvironmentId): EventDispatcher.Listner[Environment] =
-    case (env: Environment, bdl: BeginDownload) ⇒
+    case (env: Environment, bdl: BeginDownload) =>
       updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(networkActivity = na.copy(downloadingFiles = na.downloadingFiles + 1))
 
-    case (env: Environment, edl: EndDownload) ⇒
+    case (env: Environment, edl: EndDownload) =>
       updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(
@@ -114,12 +114,12 @@ class ServerState:
             )
         )
 
-    case (env: Environment, bul: BeginUpload) ⇒
+    case (env: Environment, bul: BeginUpload) =>
       updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(networkActivity = na.copy(uploadingFiles = na.uploadingFiles + 1))
 
-    case (env: Environment, eul: EndUpload) ⇒
+    case (env: Environment, eul: EndUpload) =>
       updateRunningEnvironment(executionId, envId): env =>
         val na = env.networkActivity
         env.copy(
@@ -133,18 +133,18 @@ class ServerState:
             )
         )
 
-    case (env: Environment, j: Environment.JobCompleted) ⇒
+    case (env: Environment, j: Environment.JobCompleted) =>
       updateRunningEnvironment(executionId, envId): env =>
         val ex = env.executionActivity
         env.copy(executionActivity = ex.copy(executionTime = ex.executionTime + j.log.executionEndTime - j.log.executionBeginTime))
 
-  def setEnvironments(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx ⇒
+  def setEnvironments(id: ExecutionId, envIds: Seq[(EnvironmentId, Environment)]) = atomic { implicit ctx =>
     executionInfo.updateWith(id): execution =>
       execution.map: e =>
         e.copy(environments = envIds.toMap.mapValues(env => RunningEnvironment(env)).toMap)
   }
 
-  def getEnvironments(executionId: ExecutionId, envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx ⇒
+  def getEnvironments(executionId: ExecutionId, envIds: EnvironmentId*): Seq[(EnvironmentId, RunningEnvironment)] = atomic { implicit ctx =>
     executionInfo.get(executionId) match
       case Some(info) =>
         if envIds.nonEmpty
@@ -153,11 +153,11 @@ class ServerState:
       case None => Seq()
   }
 
-  def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) = atomic { implicit ctx ⇒
+  def addExecutionInfo(key: ExecutionId, info: ServerState.ExecutionInfo) = atomic { implicit ctx =>
     executionInfo(key) = info
   }
 
-  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) = atomic { implicit ctx ⇒
+  def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) = atomic { implicit ctx =>
     executionInfo.updateWith(key) {
       _.map(e => e.copy(moleExecution = state(e.moleExecution)))
     }.isDefined
@@ -166,7 +166,7 @@ class ServerState:
 
   def cancel(key: ExecutionId) =
     val moleExecution =
-      atomic { implicit ctx ⇒
+      atomic { implicit ctx =>
         val moleExecution = executionInfo.get(key).map(_.moleExecution)
         moleExecution match
           case None | Some(_: ServerState.Preparing) => modifyState(key)(_ => ExecutionState.Canceled(Seq.empty, Seq.empty, 0L, true))
@@ -181,7 +181,7 @@ class ServerState:
 
 
   def remove(key: ExecutionId) =
-    val moleExecution = atomic { implicit ctx ⇒ executionInfo.remove(key) }
+    val moleExecution = atomic { implicit ctx => executionInfo.remove(key) }
 
     moleExecution.map(_.moleExecution) match
       case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
@@ -194,9 +194,9 @@ class ServerState:
 
     val errors = Environment.errors(info.environment)
 
-    errors.map: ex ⇒
+    errors.map: ex =>
       ex.detail match
-        case Some(detail) ⇒
+        case Some(detail) =>
           val exceptionMessage = Option(ex.exception.getMessage)
 
           def completeMessage =
@@ -211,7 +211,7 @@ class ServerState:
             ),
             ex.creationTime,
             utils.javaLevelToErrorLevel(ex.level))
-        case None ⇒
+        case None =>
           EnvironmentError(
             environmentId,
             Option(ex.exception.getMessage),
@@ -226,7 +226,7 @@ class ServerState:
   def state(info: ServerState.ExecutionInfo): ExecutionState =
     def environmentState(env: Map[EnvironmentId, RunningEnvironment]): Seq[EnvironmentState] =
       env.toSeq.sortBy(_._2.environment.name).map:
-        case (envId, e) ⇒
+        case (envId, e) =>
           EnvironmentState(
             envId = envId,
             taskName = e.environment.simpleName,
@@ -242,18 +242,18 @@ class ServerState:
     implicit def moleExecutionAccess: MoleExecution.SynchronisationContext = MoleExecution.UnsafeAccess
 
 //    def launchStatus =
-//      instantiation.get(key).map { i ⇒ if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
+//      instantiation.get(key).map { i => if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
     info.moleExecution match
       case ServerState.Preparing(_) => Preparing()
-      case ServerState.Terminated(s) ⇒ s
-      case ServerState.Active(moleExecution) ⇒
+      case ServerState.Terminated(s) => s
+      case ServerState.Active(moleExecution) =>
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
 
         def scopeToString(scope: DefinitionScope) =
           scope match
-            case DefinitionScope.User           ⇒ "user"
-            case DefinitionScope.Internal(name) ⇒ name
+            case DefinitionScope.User           => "user"
+            case DefinitionScope.Internal(name) => name
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map: (k, v) =>
           import org.openmole.core.dsl.extension.Task
@@ -276,7 +276,7 @@ class ServerState:
           )
 
         moleExecution.exception match
-          case Some(t) ⇒
+          case Some(t) =>
             Failed(
               capsules = statuses,
               error = ErrorData(t.exception),
@@ -284,7 +284,7 @@ class ServerState:
               duration = moleExecution.duration.getOrElse(0L),
               clean = moleExecution.cleaned
             )
-          case _ ⇒
+          case _ =>
             if (moleExecution.canceled)
               Canceled(
                 capsules = statuses,
@@ -309,7 +309,7 @@ class ServerState:
   
 
 
-  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx ⇒
+  def executionData(ids: Seq[ExecutionId]): Seq[ExecutionData] = atomic { implicit ctx =>
     val executions =
       for
         id <- if ids.isEmpty then executionInfo.keys else ids
@@ -322,7 +322,7 @@ class ServerState:
     executions.toSeq.sortBy(_.startDate)
   }
 
-  def executionOutput(id: ExecutionId, l: Int) = atomic { implicit ctx ⇒
+  def executionOutput(id: ExecutionId, l: Int) = atomic { implicit ctx =>
     val info = executionInfo.get(id)
     val res =
       info.map: info =>
@@ -334,13 +334,13 @@ class ServerState:
 
   def executionIds = executionInfo.single.keys
 
-  def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx ⇒
+  def addNotification(notificationEvent: Long => NotificationEvent) = atomic { implicit ctx =>
     val id = notificationEventId()
     notificationEventId.update(id + 1)
     notificationEvents.add(notificationEvent(id))
   }
 
-  def clearNotification(ids: Seq[Long]) = atomic { implicit ctx ⇒
+  def clearNotification(ids: Seq[Long]) = atomic { implicit ctx =>
     if ids.isEmpty
     then notificationEvents.clear()
     else

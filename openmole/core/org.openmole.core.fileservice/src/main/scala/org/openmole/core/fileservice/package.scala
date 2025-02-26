@@ -36,12 +36,12 @@ package object fileservice {
 
   implicit class FileServiceDecorator(file: File) {
 
-    def cache(get: File ⇒ Unit): File = {
-      lockFile(file).withLock { _ ⇒
+    def cache(get: File => Unit): File = {
+      lockFile(file).withLock { _ =>
         if (!file.exists())
           try get(file)
           catch {
-            case t: Throwable ⇒
+            case t: Throwable =>
               file.delete()
               throw t
           }
@@ -49,16 +49,16 @@ package object fileservice {
       file
     }
 
-    def updateIfTooOld(tooOld: Time)(update: File ⇒ Unit) = {
+    def updateIfTooOld(tooOld: Time)(update: File => Unit) = {
       def timeStamp(f: File) = new File(f.getPath + "-timestamp")
-      lockFile(file).withLock { _ ⇒
+      lockFile(file).withLock { _ =>
         val ts = timeStamp(file)
         val upToDate =
           if (!file.exists || !ts.exists) false
           else
             Try(ts.content.toLong) match {
-              case Success(v) ⇒ v + tooOld.millis > System.currentTimeMillis
-              case Failure(_) ⇒ ts.delete; false
+              case Success(v) => v + tooOld.millis > System.currentTimeMillis
+              case Failure(_) => ts.delete; false
             }
 
         if (!upToDate) {

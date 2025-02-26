@@ -101,13 +101,13 @@ object JavaTask:
 
         def readOutputData(file: File) =
           val outputValues = executionContext.serializerService.deserialize[Array[Any]](file)
-          (outputValues zip noFile(mapped.outputs).map(_.v)).map { case (value, v) ⇒ Variable.unsecureUntyped(v, value) }
+          (outputValues zip noFile(mapped.outputs).map(_.v)).map { case (value, v) => Variable.unsecureUntyped(v, value) }
 
         def inputMapping(dicoName: String): String =
-          noFile(mapped.inputs).zipWithIndex.map { case (m, i) ⇒ s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.toTypeString(m.v.`type`)}]" }.mkString("\n")
+          noFile(mapped.inputs).zipWithIndex.map { case (m, i) => s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.toTypeString(m.v.`type`)}]" }.mkString("\n")
 
         def outputMapping: String =
-          s"""Array[Any](${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")})"""
+          s"""Array[Any](${noFile(mapped.outputs).map { m => m.name }.mkString(",")})"""
 
         def librariesContent =
           libraries.map(l => s"//>using dep \"$l\"").mkString("\n")

@@ -265,16 +265,16 @@
 //
 //  override def sequence(safePath: SafePath)(using BasePath): Future[SequenceData] = Future.successful(SequenceData.empty)
 //
-//  override def upload(files: Seq[(File, SafePath)], fileTransferState: ProcessState ⇒ Unit)(using BasePath): Future[Seq[(RelativePath, SafePath)]] = Future.successful(Seq())
+//  override def upload(files: Seq[(File, SafePath)], fileTransferState: ProcessState => Unit)(using BasePath): Future[Seq[(RelativePath, SafePath)]] = Future.successful(Seq())
 //
-//  override def download(safePath: SafePath, fileTransferState: ProcessState ⇒ Unit = _ ⇒ (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])] =
+//  override def download(safePath: SafePath, fileTransferState: ProcessState => Unit = _ => (), hash: Boolean = false)(using BasePath): Future[(String, Option[String])] =
 //    val content = files(safePath).content
 //    val h = if hash then Some(content.hashCode.toString) else None
 //    Future.successful((content, h))
 //
-//  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
+//  override def fetchGUIPlugins(f: GUIPlugins => Unit)(using BasePath) =
 //    import org.openmole.gui.plugin.authentication.sshlogin.*
-//    val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp ⇒ Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
+//    val authFact = Seq(new LoginAuthenticationFactory(using new LoginAuthenticationStubAPI())) //p.authentications.map { gp => Plugins.buildJSObject[AuthenticationPluginFactory](gp) }
 //    val wizardFactories = Seq()
 //    val analysisPlugin = Map[String, MethodAnalysisPlugin]()
 //    Future.successful(f(client.ext.GUIPlugins(authFact, wizardFactories, analysisPlugin)))

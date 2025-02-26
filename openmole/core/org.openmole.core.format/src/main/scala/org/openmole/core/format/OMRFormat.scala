@@ -187,7 +187,7 @@ object OMRFormat:
 
       val dataFile = directory / fileName
 
-      dataFile.withPrintStream(append = option.append, create = true, gz = true): ps ⇒
+      dataFile.withPrintStream(append = option.append, create = true, gz = true): ps =>
         if option.append && existingData.nonEmpty then ps.print(",\n")
         ps.print(compact(render(jsonContent)))
 

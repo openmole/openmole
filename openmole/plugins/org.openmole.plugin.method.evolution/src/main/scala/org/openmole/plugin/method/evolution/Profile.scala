@@ -41,10 +41,10 @@ object Profile {
   import org.openmole.core.keyword._
 
   object ToProfileElement:
-    implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] = v ⇒ IntervalDoubleProfileElement(v, 100)
-    implicit def valIntToProfileElement: ToProfileElement[Val[Int]] = v ⇒ IntervalIntProfileElement(v)
-    implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] = t ⇒ IntervalDoubleProfileElement(t.value, t.domain)
-    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]): ToProfileElement[In[Val[Double], D]] = t ⇒ FixDomainProfileElement(t.value, fix(t.domain).domain.toVector)
+    implicit def valDoubleToProfileElement: ToProfileElement[Val[Double]] = v => IntervalDoubleProfileElement(v, 100)
+    implicit def valIntToProfileElement: ToProfileElement[Val[Int]] = v => IntervalIntProfileElement(v)
+    implicit def inToProfileElement: ToProfileElement[In[Val[Double], Int]] = t => IntervalDoubleProfileElement(t.value, t.domain)
+    implicit def fromDoubleDomainToPatternAxe[D](implicit fix: FixDomain[D, Double]): ToProfileElement[In[Val[Double], D]] = t => FixDomainProfileElement(t.value, fix(t.domain).domain.toVector)
 
 
   trait ToProfileElement[-T]:
@@ -67,9 +67,9 @@ object Profile {
     def toTry[T](o: Option[T], v: Val[?]): util.Try[T] = o.map(util.Success.apply).getOrElse(util.Failure(notFoundInGenome(v)))
 
     profiled.toVector.map:
-      case c: IntervalDoubleProfileElement ⇒ toTry(Genome.continuousIndex(genome, c.v), c.v)
-      case c: IntervalIntProfileElement ⇒ toTry(Genome.discreteIndex(genome, c.v), c.v)
-      case c: FixDomainProfileElement ⇒ toTry(Genome.continuousIndex(genome, c.v), c.v)
+      case c: IntervalDoubleProfileElement => toTry(Genome.continuousIndex(genome, c.v), c.v)
+      case c: IntervalIntProfileElement => toTry(Genome.discreteIndex(genome, c.v), c.v)
+      case c: FixDomainProfileElement => toTry(Genome.continuousIndex(genome, c.v), c.v)
 
   def indexesOfProfiled(profiled: Seq[ProfileElement], genome: Genome) = indexesOfProfiledTry(profiled, genome).map(_.get)
 
@@ -86,12 +86,12 @@ object Profile {
         mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteVectorValues(discrete) get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
 
       val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
-        case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(genome.continuous, index, c.n)
-        case (c: IntervalIntProfileElement, index) ⇒ discreteProfile(genome.discrete, index)
-        case (c: FixDomainProfileElement, index) ⇒ gridContinuousProfile(genome.continuous, index, c.intervals)
+        case (c: IntervalDoubleProfileElement, index) => continuousProfile(genome.continuous, index, c.n)
+        case (c: IntervalIntProfileElement, index) => discreteProfile(genome.discrete, index)
+        case (c: FixDomainProfileElement, index) => gridContinuousProfile(genome.continuous, index, c.intervals)
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.DeterministicIndividual.Individual[Phenotype], Int](niches))
 
@@ -132,7 +132,7 @@ object Profile {
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
@@ -146,21 +146,21 @@ object Profile {
             genomes ++ fitness ++ Seq(generated) ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             val continuous = om.genome.continuous
             val discrete = om.genome.discrete
-            val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+            val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             mgo.evolution.algorithm.Profile.initialGenomes(n, continuous, discrete, rejectValue, rng)
 
         def breeding(population: Vector[I], n: Int, s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
             mgo.evolution.algorithm.Profile.adaptiveBreeding[Phenotype](n, om.operatorExploration, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue) apply (s, population, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
@@ -195,13 +195,13 @@ object Profile {
         mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteVectorValues(discrete)).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i ⇒ scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
 
       val niches =
         (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
-          case (c: IntervalDoubleProfileElement, index) ⇒ continuousProfile(genome.continuous, index, c.n)
-          case (c: IntervalIntProfileElement, index) ⇒ discreteProfile(genome.discrete, index)
-          case (c: FixDomainProfileElement, index) ⇒ gridContinuousProfile(genome.continuous, index, c.intervals)
+          case (c: IntervalDoubleProfileElement, index) => continuousProfile(genome.continuous, index, c.n)
+          case (c: IntervalIntProfileElement, index) => discreteProfile(genome.discrete, index)
+          case (c: FixDomainProfileElement, index) => gridContinuousProfile(genome.continuous, index, c.intervals)
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
 
@@ -232,7 +232,7 @@ object Profile {
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
-          FromContext: p ⇒
+          FromContext: p =>
             import p._
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
@@ -246,23 +246,23 @@ object Profile {
 
             genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p =>
           import p._
           val continuous = om.genome.continuous
           val discrete = om.genome.discrete
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+          val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
           NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
         }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p =>
           import p._
 
-          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
+          val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
           NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
         }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          FromContext { p ⇒
+          FromContext { p =>
             import p._
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
@@ -305,7 +305,7 @@ object Profile {
     reject:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
-      case None ⇒
+      case None =>
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
@@ -327,7 +327,7 @@ object Profile {
           phenotypeContent,
           validate = validation
         )
-      case Some(stochasticValue) ⇒
+      case Some(stochasticValue) =>
         val noisyObjectives = Objectives.toNoisy(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(noisyObjectives), outputs)
 
@@ -379,7 +379,7 @@ object ProfileEvolution {
       )
 
   given ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
-    p ⇒
+    p =>
       EvolutionWorkflow(
         method = p,
         evaluation = p.evaluation,
@@ -390,7 +390,7 @@ object ProfileEvolution {
         scope = p.scope
       )
 
-  given ExplorationMethodSetter[ProfileEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+  given ExplorationMethodSetter[ProfileEvolution, EvolutionPattern] = (e, p) => e.copy(distribution = p)
 
 }
 

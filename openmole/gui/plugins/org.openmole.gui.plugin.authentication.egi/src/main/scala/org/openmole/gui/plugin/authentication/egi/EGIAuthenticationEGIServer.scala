@@ -66,21 +66,21 @@ class EGIAuthenticationEGIServer(s: Services)
 
   object impl {
     private def coreObject(data: EGIAuthenticationData) =
-      data.privateKey.map { pk ⇒ P12Certificate(data.password, safePathToFile(pk)) }
+      data.privateKey.map { pk => P12Certificate(data.password, safePathToFile(pk)) }
 
     def egiAuthentications(): Seq[EGIAuthenticationData] =
       EGIAuthentication() match
-        case Some(p12: P12Certificate) ⇒
+        case Some(p12: P12Certificate) =>
           Seq(
             EGIAuthenticationData(
               p12.password,
               Some(p12.certificate.toSafePath(using ServerFileSystemContext.Authentication))
             )
           )
-        case _ ⇒ Seq()
+        case _ => Seq()
 
     def addAuthentication(data: EGIAuthenticationData): Unit =
-      coreObject(data).foreach: a ⇒
+      coreObject(data).foreach: a =>
         EGIAuthentication.update(a, test = false)
 
     def removeAuthentications(data: EGIAuthenticationData, removeFile: Boolean) =
@@ -89,16 +89,16 @@ class EGIAuthenticationEGIServer(s: Services)
 
     def testAuthentication(data: EGIAuthenticationData): Seq[Test] =
 
-      def testPassword(data: EGIAuthenticationData, test: EGIAuthentication ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
+      def testPassword(data: EGIAuthenticationData, test: EGIAuthentication => Try[Boolean]): Test = coreObject(data).map { d =>
         test(d) match
-          case Success(_) ⇒ Test.passed()
-          case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
+          case Success(_) => Test.passed()
+          case Failure(f) => Test.error("Invalid Password", ErrorData(f))
       }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown error", None)))
 
-      def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) ⇒ Try[Boolean]): Test = coreObject(data).map { d ⇒
+      def test(data: EGIAuthenticationData, voName: String, test: (EGIAuthentication, String) => Try[Boolean]): Test = coreObject(data).map { d =>
         test(d, voName) match
-          case Success(_) ⇒ Test.passed(voName)
-          case Failure(f) ⇒ Test.error("Invalid Password", ErrorData(f))
+          case Success(_) => Test.passed(voName)
+          case Failure(f) => Test.error("Invalid Password", ErrorData(f))
       }.getOrElse(Test.error("Unknown error", MessageErrorData("Unknown error", None)))
 
       val vos = services.preference(EGIAuthenticationAPIServer.voTest)
@@ -108,10 +108,10 @@ class EGIAuthenticationEGIServer(s: Services)
         val error = all.flatMap(_.error).headOption
 
         error match
-          case Some(e) ⇒ Test.error("failed", e)
-          case _ ⇒ Test.passed(message)
+          case Some(e) => Test.error("failed", e)
+          case _ => Test.passed(message)
 
-      vos.map { voName ⇒
+      vos.map { voName =>
         Try {
           aggregate(
             voName,
@@ -120,8 +120,8 @@ class EGIAuthenticationEGIServer(s: Services)
             test(data, voName, EGIAuthentication.testDIRACAccess(_, _))
           )
         } match {
-          case Success(a) ⇒ a
-          case Failure(f) ⇒ Test.error("Error", ErrorData(f))
+          case Success(a) => a
+          case Failure(f) => Test.error("Error", ErrorData(f))
         }
       }
 

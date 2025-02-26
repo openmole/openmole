@@ -30,13 +30,13 @@ import scala.util.{ Failure, Success, Try }
 object Authentication extends JavaLogger:
   def category[T](using m: Manifest[T]): String = s"${m.runtimeClass.getCanonicalName}.json"
 
-  def save[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) ⇒ Boolean)(using authenticationStore: AuthenticationStore) =
+  def save[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) => Boolean)(using authenticationStore: AuthenticationStore) =
     authenticationStore.modify[T](category, s => s.filterNot(eq(_, t)) ++ Seq(t))
 
   def load[T: Manifest: Decoder](using authenticationStore: AuthenticationStore) =
     authenticationStore.load[T](category)
 
-  def remove[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) ⇒ Boolean)(using authenticationStore: AuthenticationStore) =
+  def remove[T: Manifest: Encoder: Decoder](t: T, eq: (T, T) => Boolean)(using authenticationStore: AuthenticationStore) =
     authenticationStore.modify[T](category, s => s.filterNot(eq(_, t)))
 
   def clear[T](using m: Manifest[T], authenticationStore: AuthenticationStore): Unit =

@@ -40,7 +40,7 @@ import org.openmole.core.workspace.TmpDirectory
 //import scala.tools.nsc.io.AbstractFile
 import org.openmole.tool.osgi._
 import org.openmole.tool.file._
-import java.io.{ File ⇒ JFile }
+import java.io.{ File => JFile }
 
 import scala.reflect.ClassTag
 //import scala.tools.nsc
@@ -58,9 +58,9 @@ object Interpreter {
 
   def compilationMessage(errorMessages: List[ErrorMessage], code: String, lineOffset: Int = 0, fullCode: Option[String] = None) =
     def readableErrorMessages(error: ErrorMessage) =
-      error.position.map(p ⇒ s"(line ${p.line - lineOffset}) ").getOrElse("") + error.decoratedMessage
+      error.position.map(p => s"(line ${p.line - lineOffset}) ").getOrElse("") + error.decoratedMessage
 
-    val (importsErrors, codeErrors) = errorMessages.partition(e ⇒ e.position.map(_.line < 0).getOrElse(false))
+    val (importsErrors, codeErrors) = errorMessages.partition(e => e.position.map(_.line < 0).getOrElse(false))
 
     def fullCodePart =
       fullCode.map: fc =>
@@ -89,7 +89,7 @@ object Interpreter {
     diagnostic.position.toScala match 
       case None => ErrorMessage(diagnostic.message, diagnostic.message, None, diagnostic.level() == dotty.tools.dotc.interfaces.Diagnostic.ERROR)
       case Some(pos) =>
-        val firstLine = 0 //compiled.zipWithIndex.find { case (l, _) ⇒ l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
+        val firstLine = 0 //compiled.zipWithIndex.find { case (l, _) => l.contains(firstLineTag) }.map(_._2 + 1).getOrElse(0)
 
         def errorPos = ErrorPosition(pos.line - firstLine, pos.startColumn(), pos.endColumn(), pos.column())
         def decoratedMessage =
@@ -102,13 +102,13 @@ object Interpreter {
         
 
      /* error.position match {
-        case None                   ⇒ errorMessage ::= error
-        case Some(p) if p.line >= 0 ⇒ errorMessage ::= error
-        case _                      ⇒
+        case None                   => errorMessage ::= error
+        case Some(p) if p.line >= 0 => errorMessage ::= error
+        case _                      =>
       }*/
 
 
-  def classLoader(priorityBundles: ⇒ Seq[Bundle], jars: Seq[JFile]) =
+  def classLoader(priorityBundles: => Seq[Bundle], jars: Seq[JFile]) =
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
@@ -159,10 +159,10 @@ object Interpreter {
 
     (driver, classLoaderValue)
 
-  type Compiled = () ⇒ Any
+  type Compiled = () => Any
   case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
-  def apply(priorityBundles: ⇒ Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def apply(priorityBundles: => Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(TmpDirectory.newDirectory("classDirectory"))
     val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet)
     //    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
@@ -225,10 +225,10 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
   //
   //    try {
   //      val compiled = scripted.compile("\n" + omIMain.firstLineTag + "\n" + code)
-  //      () ⇒ compiled.eval()
+  //      () => compiled.eval()
   //    }
   //    catch {
-  //      case e: Throwable ⇒ throw messageToException(e, omIMain.omReporter.errorMessage, code)
+  //      case e: Throwable => throw messageToException(e, omIMain.omReporter.errorMessage, code)
   //    }
   //  }
 

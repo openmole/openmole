@@ -33,13 +33,13 @@ package object pluginmanager {
   implicit class BundleDecorator(b: Bundle) {
 
     def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
-    def headerExists(f: (String, String) ⇒ Boolean) = b.getHeaders.asScala.toSeq.exists { case (k, v) ⇒ f(k, v) }
+    def headerExists(f: (String, String) => Boolean) = b.getHeaders.asScala.toSeq.exists { case (k, v) => f(k, v) }
 
     def openMOLEScope: Seq[String] =
-      b.getHeaders.asScala.toSeq.find { case (k, v) ⇒ k.toLowerCase == "openmole-scope" }.toSeq.flatMap(_._2.split(","))
+      b.getHeaders.asScala.toSeq.find { case (k, v) => k.toLowerCase == "openmole-scope" }.toSeq.flatMap(_._2.split(","))
     def isProvided = openMOLEScope.exists(_.toLowerCase == "provided")
 
-    def isFullDynamic = headerExists { (k, v) ⇒ k.contains("DynamicImport-Package") && v.split(",").toSet.contains("*") }
+    def isFullDynamic = headerExists { (k, v) => k.contains("DynamicImport-Package") && v.split(",").toSet.contains("*") }
 
     def file = {
       val (ref, url) = if (b.getLocation.startsWith("reference:"))
@@ -58,8 +58,8 @@ package object pluginmanager {
 
       if (ref)
         openMOLELocationOption match {
-          case Some(oMLoc) ⇒ new File(oMLoc, decodedLocation)
-          case None        ⇒ new File(decodedLocation)
+          case Some(oMLoc) => new File(oMLoc, decodedLocation)
+          case None        => new File(decodedLocation)
         }
       else new File(decodedLocation)
     }

@@ -41,7 +41,7 @@ object ContainerTask:
   object Commands:
     implicit def fromContext(f: FromContext[String]): Commands = Commands(Vector(f))
     implicit def fromString(f: String): Commands = Commands(Vector(f))
-    implicit def seqOfString(f: Seq[String]): Commands = Commands(f.map(x ⇒ x: FromContext[String]).toVector)
+    implicit def seqOfString(f: Seq[String]): Commands = Commands(f.map(x => x: FromContext[String]).toVector)
     implicit def seqOfFromContext(f: Seq[FromContext[String]]): Commands = Commands(f.toVector)
 
   type SingularitySIF = SingularityOverlay | SingularityMemory
@@ -95,7 +95,7 @@ object ContainerTask:
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
-    errorDetail: Int ⇒ Option[String] = _ ⇒ None,
+    errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
       case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, errorDetail, clearCache)
@@ -106,17 +106,17 @@ object ContainerTask:
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
-    errorDetail: Int ⇒ Option[String] = _ ⇒ None,
+    errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
 
     import org.openmole.tool.hash.*
 
     def cacheId(image: ContainerImage): Seq[String] =
       image match
-        case image: DockerImage      ⇒ Seq(image.image, image.tag, image.registry)
-        case image: SavedDockerImage ⇒ Seq(image.file.hash().toString)
+        case image: DockerImage      => Seq(image.image, image.tag, image.registry)
+        case image: SavedDockerImage => Seq(image.file.hash().toString)
 
-    val volumeCacheKey = volumes.map((f, _) ⇒ fileService.hashNoCache(f).toString) ++ volumes.map((_, d) ⇒ d)
+    val volumeCacheKey = volumes.map((f, _) => fileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
 
     val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey++ Seq("sif")).mkString("\n")).toString
 
@@ -154,22 +154,22 @@ object ContainerTask:
         InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory)
 
 
-  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int ⇒ Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
+  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if install.isEmpty
     then image
     else
       val retCode = runCommandInFlatImageContainer(image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n))
-      if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m ⇒ s": $m").getOrElse(""))
+      if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m => s": $m").getOrElse(""))
       image
 
   def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean)(using networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
     image match
-      case image: DockerImage ⇒
+      case image: DockerImage =>
         if clearCache then _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(workspace), DockerImage.toRegistryImage(image)).recursiveDelete
         val savedImage = downloadImage(image, repositoryDirectory(workspace))
         _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
-      case image: SavedDockerImage ⇒
-        tmpDirectory.withTmpDir: imageDirectory ⇒
+      case image: SavedDockerImage =>
+        tmpDirectory.withTmpDir: imageDirectory =>
           val savedImage = extractImage(image, imageDirectory)
           _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
 
@@ -186,7 +186,7 @@ object ContainerTask:
       timeout = preference(RegistryTimeout),
       retry = Some(preference(RegistryRetryOnError)),
       executor = ImageDownloader.Executor.parallel(threadProvider.virtualThreadPool),
-      proxy = networkService.httpProxy.map(p ⇒ ImageDownloader.HttpProxy(p.hostURI))
+      proxy = networkService.httpProxy.map(p => ImageDownloader.HttpProxy(p.hostURI))
     )
 
   def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
@@ -252,7 +252,7 @@ object ContainerTask:
     verbose: Boolean = false,
     output: PrintStream,
     error: PrintStream)(using tmpDirectory: TmpDirectory, networkService: NetworkService): Int =
-    tmpDirectory.withTmpDir: directory ⇒
+    tmpDirectory.withTmpDir: directory =>
       _root_.container.Singularity.executeFlatImage(
         image,
         directory / "tmp",
@@ -277,7 +277,7 @@ object ContainerTask:
     verbose: Boolean = false,
     output: PrintStream,
     error: PrintStream)(using tmpDirectory: TmpDirectory, networkService: NetworkService) =
-    tmpDirectory.withTmpDir: directory ⇒
+    tmpDirectory.withTmpDir: directory =>
       _root_.container.Singularity.executeImage(
         image,
         directory / "tmp",
@@ -381,13 +381,13 @@ object ContainerTask:
 
       def prepareVolumes(
         preparedFilesInfo: Iterable[FileInfo],
-        containerPathResolver: String ⇒ File,
+        containerPathResolver: String => File,
         hostFiles: Seq[HostFile],
         volumesInfo: Seq[VolumeInfo] = Seq()): Iterable[MountPoint] =
         val volumes =
-          volumesInfo.map((f, d) ⇒ f.toString -> d) ++
-            hostFiles.map(h ⇒ h.path -> h.destination) ++
-            preparedFilesInfo.map((f, d) ⇒ d.getAbsolutePath -> containerPathResolver(f.expandedUserPath).toString)
+          volumesInfo.map((f, d) => f.toString -> d) ++
+            hostFiles.map(h => h.path -> h.destination) ++
+            preparedFilesInfo.map((f, d) => d.getAbsolutePath -> containerPathResolver(f.expandedUserPath).toString)
 
         volumes.sortBy((_, bind) => bind.split("/").length)
 
@@ -405,7 +405,7 @@ object ContainerTask:
         ).toVector
 
       val containerEnvironmentVariables =
-        environmentVariables.map(v ⇒ v.name.from(preparedContext) -> v.value.from(preparedContext))
+        environmentVariables.map(v => v.name.from(preparedContext) -> v.value.from(preparedContext))
 
       def ignoreRetCode = !errorOnReturnValue || returnValue.isDefined
       def retCodeVariable = "_PROCESS_RET_CODE_"
@@ -440,7 +440,7 @@ object ContainerTask:
         image match
           case image: InstalledSingularityImage.InstalledSIFOverlayImage =>
             def createOverlayPool =
-              WithInstance[_root_.container.Singularity.OverlayImage](pooled = image.containerSystem.reuse): () ⇒
+              WithInstance[_root_.container.Singularity.OverlayImage](pooled = image.containerSystem.reuse): () =>
                 val overlay =
                   if image.containerSystem.reuse
                   then executionContext.moleExecutionDirectory.newFile("overlay", ".img")
@@ -487,8 +487,8 @@ object ContainerTask:
           // last line might have been truncated
           val lst = tailBuilder.toString
           if lst.size >= tailSize
-          then lst.split('\n').drop(1).map(l ⇒ s"|$l").mkString("\n")
-          else lst.split('\n').map(l ⇒ s"|$l").mkString("\n")
+          then lst.split('\n').drop(1).map(l => s"|$l").mkString("\n")
+          else lst.split('\n').map(l => s"|$l").mkString("\n")
 
         def command = commandValue.mkString(" ; ")
 
@@ -521,9 +521,9 @@ object ContainerTask:
         )
 
       retContext ++
-        returnValue.map(v ⇒ Variable(v, retCode)) ++
-        stdOut.map(v ⇒ Variable(v, outBuilder.toString)) ++
-        stdErr.map(v ⇒ Variable(v, errBuilder.toString))
+        returnValue.map(v => Variable(v, retCode)) ++
+        stdOut.map(v => Variable(v, outBuilder.toString)) ++
+        stdErr.map(v => Variable(v, errBuilder.toString))
 
   def validateContainer(
     commands: Seq[FromContext[String]],
@@ -533,7 +533,7 @@ object ContainerTask:
       import p.*
   
       val allInputs = External.PWD :: p.inputs.toList
-      val validateVariables = environmentVariables.flatMap(v ⇒ Seq(v.name, v.value)).flatMap(_.validate(allInputs))
+      val validateVariables = environmentVariables.flatMap(v => Seq(v.name, v.value)).flatMap(_.validate(allInputs))
   
       commands.flatMap(_.validate(allInputs)) ++
         validateVariables ++

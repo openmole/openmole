@@ -43,7 +43,7 @@ object SharedStorage extends JavaLogger:
       val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
       if !storageInterface.exists(storage, workdir) then hierarchicalStorageInterface.makeDir(storage, workdir)
 
-      newFile.withTmpFile("install", ".sh"): script ⇒
+      newFile.withTmpFile("install", ".sh"): script =>
 
         val tmpDirName = runtimePrefix + UUID.randomUUID.toString
         val scriptName = uniqName("install", ".sh")
@@ -55,7 +55,7 @@ object SharedStorage extends JavaLogger:
             "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
             s"cp ${runtime.runtime.path} runtime.tar.gz && gunzip runtime.tar.gz && tar -xf runtime.tar; rm runtime.tar && " +
             s"mkdir -p envplugins && PLUGIN=0 && " +
-            runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
+            runtime.environmentPlugins.map { p => "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
             s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
             s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
             s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
@@ -73,11 +73,11 @@ object SharedStorage extends JavaLogger:
     Log.logger.fine("Begin install")
 
     frontend.run(command) match
-      case util.Failure(e) ⇒ throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
-      case util.Success(r) ⇒
+      case util.Failure(e) => throw new InternalProcessingError(e, "There was an error during the runtime installation process.")
+      case util.Success(r) =>
         r.returnCode match
-          case 0 ⇒
-          case _ ⇒
+          case 0 =>
+          case _ =>
             throw new InternalProcessingError(s"Unexpected return status for the install process ${r.returnCode}.\nstdout:\n${r.stdOut}\nstderr:\n${r.stdErr}")
 
     val path = StorageService.child(storage, workdir, runtimeInstall)
@@ -94,7 +94,7 @@ object SharedStorage extends JavaLogger:
     override def toString = content
 
   def buildScript[S](
-    runtimePath:    Runtime ⇒ String,
+    runtimePath:    Runtime => String,
     jobDirectory:   String,
     workDirectory:  String,
     openMOLEMemory: Option[Information],
@@ -109,9 +109,9 @@ object SharedStorage extends JavaLogger:
     val workspace = StorageService.child(storage, workDirectory, s"openmole_${UUID.randomUUID.toString}")
 
     val remoteScript =
-      newFile.withTmpFile("run", ".sh"): script ⇒
+      newFile.withTmpFile("run", ".sh"): script =>
 
-        val loadModules = modules.getOrElse(JobScript.defaultModules).map(m ⇒ s"module load $m")
+        val loadModules = modules.getOrElse(JobScript.defaultModules).map(m => s"module load $m")
 
         val commands =
           loadModules ++

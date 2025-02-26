@@ -56,9 +56,9 @@ case class SaveHook(
 
   override def validate = file.validate
 
-  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters =>
     import parameters._
-    val saveContext: Context = prototypes.map(p ⇒ context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
+    val saveContext: Context = prototypes.map(p => context.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found")))
     val to = file.from(context)
     to.createParentDirectory
     serializerService.serializeAndArchiveFiles(saveContext, to)

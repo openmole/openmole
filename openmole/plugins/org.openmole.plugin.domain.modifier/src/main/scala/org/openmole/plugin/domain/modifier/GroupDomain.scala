@@ -24,9 +24,9 @@ import cats.implicits._
 
 object GroupDomain {
 
-  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] = domain ⇒ {
+  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] = domain => {
     import domain._
-    def iterator = (discrete(d).domain map2 size)((it, s) ⇒ it.grouped(s) map (_.toArray))
+    def iterator = (discrete(d).domain map2 size)((it, s) => it.grouped(s) map (_.toArray))
     Domain(
       iterator,
       discrete(d).inputs ++ domain.size.inputs,

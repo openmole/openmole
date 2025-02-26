@@ -33,7 +33,7 @@ object GUIPluginRegistry:
   def authentications: Seq[String] = plugins.values.flatMap(_.authentication).map(toGUIPlugins).toSeq
   def wizards: Seq[String] = plugins.values.flatMap(_.wizard).map(toGUIPlugins).toSeq
 
-  def analysis: Seq[(String, String)] = plugins.values.flatMap(_.analysis).map(a ⇒ a._1 -> toGUIPlugins(a._2)).toSeq
+  def analysis: Seq[(String, String)] = plugins.values.flatMap(_.analysis).map(a => a._1 -> toGUIPlugins(a._2)).toSeq
 
   def all = plugins.values
 
@@ -41,7 +41,7 @@ object GUIPluginRegistry:
   def register(key: AnyRef, info: GUIPluginInfo) = GUIPluginRegistry.plugins += key → info
 
 case class GUIPluginInfo(
-  router:         Option[Services ⇒ OMRouter]    = None,
+  router:         Option[Services => OMRouter]    = None,
   authentication: Option[Class[?]]               = None,
   wizard:         Option[Class[?]]               = None,
   analysis:       Option[(String, Class[?])]     = None)

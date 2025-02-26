@@ -26,7 +26,7 @@ object AssignTask:
 
   def apply(assignments: (Val[?], Val[?])*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("AssignTask"): p =>
-      assignments.map { case (from, to) ⇒ Variable.unsecure(to, p.context(from)) }
+      assignments.map { case (from, to) => Variable.unsecure(to, p.context(from)) }
     .set (
       inputs ++= assignments.map(_._1),
       outputs ++= assignments.map(_._2)

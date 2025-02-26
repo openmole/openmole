@@ -58,7 +58,7 @@ object module {
       ModuleEntry("Sensitivity", "Statistical sensitivity analisys", components(org.openmole.plugin.method.sensitivity.SensitivityMorris), method)
     )
 
-  def generate(modules: Seq[ModuleEntry], copy: File ⇒ String) = {
+  def generate(modules: Seq[ModuleEntry], copy: File => String) = {
     def allFiles = modules.flatMap(_.components)
 
     case class Copied(name: String, hash: String)
@@ -70,12 +70,12 @@ object module {
           f -> Copied(name = copy(f), h)
       map.toMap
 
-    modules.map { m ⇒
+    modules.map { m =>
       Module(
         m.name,
         m.description,
         m.components.map {
-          f ⇒
+          f =>
             val c = copied(f)
             Component(c.name, c.hash)
         }

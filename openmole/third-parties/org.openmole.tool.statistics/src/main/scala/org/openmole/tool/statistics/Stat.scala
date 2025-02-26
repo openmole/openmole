@@ -22,8 +22,8 @@ import scala.math._
 
 trait Stat {
 
-  def head = (sequence: Seq[Double]) ⇒ sequence.head
-  def sum = (sequence: Seq[Double]) ⇒ sequence.sum
+  def head = (sequence: Seq[Double]) => sequence.head
+  def sum = (sequence: Seq[Double]) => sequence.sum
 
   def median(sequence: Seq[Double]) =
     val sortedSerie = sequence.toArray.filterNot(_.isNaN).sorted
@@ -35,15 +35,15 @@ trait Stat {
 
   def medianAbsoluteDeviation = (sequence: Seq[Double]) =>
     val m = median(sequence)
-    median(sequence.map { v ⇒ math.abs(v - m) })
+    median(sequence.map { v => math.abs(v - m) })
 
-  def average = (sequence: Seq[Double]) ⇒ sequence.sum / sequence.size
+  def average = (sequence: Seq[Double]) => sequence.sum / sequence.size
 
-  def meanSquaredError = (sequence: Seq[Double]) ⇒ variance(sequence)
+  def meanSquaredError = (sequence: Seq[Double]) => variance(sequence)
 
   def variance(sequence: Seq[Double])=
     val avg = average(sequence)
-    average(sequence.map { v ⇒ math.pow(v - avg, 2) })
+    average(sequence.map { v => math.pow(v - avg, 2) })
 
   def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
   def standardDeviation(sequence: Seq[Double]) = sqrt(variance(sequence))
@@ -55,12 +55,12 @@ trait Stat {
   /* ------ Difference on series ----- */
 
   def absoluteDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) ⇒ math.abs(v1v - v2v) }.sum
+    (v1 zip v2).map { case (v1v, v2v) => Math.abs(v1v - v2v) }.sum
 
   def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
+    (v1 zip v2).map { case (v1v, v2v) => Math.pow(v1v - v2v, 2) }.sum
 
-  def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double = {
+  def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double =
     import org.openmole.tool.dtw.timeseries.TimeSeries
     import org.openmole.tool.dtw.util.DistanceFunctionFactory
 
@@ -70,14 +70,13 @@ trait Stat {
 
     if (fast) org.openmole.tool.dtw.dtw.FastDTW.getWarpDistBetween(ta, tb, df)
     else org.openmole.tool.dtw.dtw.DTW.getWarpDistBetween(ta, tb, df)
-  }
 
   /**
    * Compute the confidence interval half-width for the given confidence level.
    *
    * @param p the confidence level
    */
-  def confidenceInterval(p: Double = .95) = (sequence: Seq[Double]) ⇒ {
+  def confidenceInterval(p: Double = .95) = (sequence: Seq[Double]) => {
     /**
      * Compute the p-th quantile for the "standard normal distribution" function.
      * This function returns an approximation of the "inverse" cumulative
@@ -206,8 +205,8 @@ trait Stat {
 
   def klDivergence(p1: Seq[Double], p2: Seq[Double]) = {
     val s = (p1 zip p2).
-      filter { case (p1, p2) ⇒ p1 != 0.0 && p2 != 0.0 }.
-      map { case (p1, p2) ⇒ p1 * math.log(p1 / p2) }.sum
+      filter { case (p1, p2) => p1 != 0.0 && p2 != 0.0 }.
+      map { case (p1, p2) => p1 * math.log(p1 / p2) }.sum
 
     s / math.log(2)
   }
@@ -238,6 +237,6 @@ trait Stat {
     import org.apache.commons.math3.stat.descriptive.rank.Percentile
     val c = new Percentile()
     c.setData(s.toArray)
-    n.map(n ⇒ c.evaluate(n))
+    n.map(n => c.evaluate(n))
 
 }
