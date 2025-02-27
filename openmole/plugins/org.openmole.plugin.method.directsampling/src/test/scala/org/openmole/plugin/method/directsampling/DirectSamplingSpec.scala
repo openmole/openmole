@@ -293,9 +293,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
   it should "provide inputs to the task" in :
     val x = Val[Double]
 
-    val task = EmptyTask() set (
-      inputs += x
-    )
+    val task = EmptyTask() set (inputs += x)
 
     SingleRun(
       evaluation = task,
@@ -303,3 +301,21 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         x := 10.0
       )
     ).run
+
+  it should "be able to tranmit inputs to the task" in :
+    val x = Val[Double]
+    val y = Val[Double]
+
+    val task1 = EmptyTask() set(outputs += y, y := 1.0)
+    val task = EmptyTask() set (inputs += (x, y))
+
+    val dsl =
+      task1 -- 
+        SingleRun(
+          evaluation = task,
+          input = Seq(
+            x := 10.0
+          )
+        )
+    
+    dsl.run

@@ -189,7 +189,7 @@ object SingleRun:
       EmptyTask() set (r.input, outputs ++= r.input.map(_.value))
 
     DSLContainer(
-      firstTask -- Strain(r.evaluation),
+      Strain(firstTask) -- Strain(r.evaluation),
       method =
         Method(
           input = r.input.map(_.value)
