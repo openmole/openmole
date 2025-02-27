@@ -305,7 +305,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           then
             Some:
               ErrorData:
-                new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s):\n" + validationErrors.mkString("\n"))
+                new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s):\n" + validationErrors.mkString("\n").split("\n").map(l => s"  $l").mkString("\n") )
           else None
         catch
           case e: Throwable => Some(ErrorData(e))
