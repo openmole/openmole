@@ -71,7 +71,6 @@ class TreeNodePanel {
     onMountFocus
   )
 
-  val scriptErrors: Var[Seq[EditorPanelUI]] = Var(Seq())
   val plusFile = Var(false)
   
   // New file tool
@@ -559,24 +558,42 @@ class TreeNodePanel {
   def clearCurrentErrorView(using panels: Panels) =
     clearErrorView(panels.tabContent.current.now().map(_.safePath))
     
-  def clearErrorView(safePath: Option[SafePath]) =
-    scriptErrors.update: s=>
-      val ePUI = s.find(pui=> Some(pui.safePath) == safePath)
-      ePUI.map: pui=>
-        pui.unsetErrors
-        s.filterNot(_== pui)
-      .getOrElse(s)
+  def clearErrorView(safePath: Option[SafePath])(using panels: Panels) =
+    for
+      path <- safePath
+      editor <- panels.tabContent.editorPanelUI(path)
+    do editor.unsetErrors
 
   def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
-      div(
-        child <-- scriptErrors.signal.combineWith(panels.tabContent.current.signal).map: (se,curTab)=> 
-          curTab match
-            case Some(td: TabData)=> 
-              se.filter(_.safePath == td.safePath).headOption match
-                case Some(e: EditorPanelUI)=> e.errorView
-                case _=> treeView
-            case _ => treeView
+
+    def scriptErrorSignal(using panels: Panels): Signal[Option[String]] =
+      panels.tabContent.current.signal.flatMap:
+        case None => Signal.fromValue(None)
+        case Some(current) =>
+          panels.tabContent.editorPanelUI(current.safePath) match
+            case Some(editor) => editor.errorMessage.signal
+            case None => Signal.fromValue(None)
+
+    def errorView(message: String) =
+      div(display.flex, cls := "scriptError",
+        textArea(
+          flexRow,
+          message,
+          cls := "errorTextArea",
+        ),
+        span(
+          flexDirection.row, alignItems.center,
+          cls := "close-button close-button-tab bi-x", color := "white", marginLeft := "5px",
+          onClick --> { e => panels.treeNodePanel.clearCurrentErrorView}
+        )
       )
+
+    div(
+      child <--
+        scriptErrorSignal.map:
+          case Some(m) => errorView(m)
+          case _ => treeView
+    )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
     if refresh then panels.tabContent.removeTab(safePath)
