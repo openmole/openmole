@@ -43,6 +43,7 @@ object OMSContent:
                       panels.executionPanel.currentOpenSimulation.set(Some(execID))
                     ExecutionPanel.open
               }),
+
               button("CHECK", btn_secondary, marginLeft := "10", onClick --> { _ =>
                 editor.unsetErrors
                 editor.editor.getSession().clearBreakpoints()
