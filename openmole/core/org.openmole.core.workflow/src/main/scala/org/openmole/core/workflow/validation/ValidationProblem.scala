@@ -45,28 +45,22 @@ trait ValidateHook:
 trait ValidateTransition:
   def validate: Validate
 
-object ValidationProblem {
+object ValidationProblem:
 
-  case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem {
-    override def toString = s"Errors in validation of task $task:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
-  }
+  case class TaskValidationProblem(task: Task, errors: Seq[Throwable]) extends ValidationProblem:
+    override def toString = s"Errors in validation of task ${task.simpleName}:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
 
-  case class SourceValidationProblem(source: Source, errors: Seq[Throwable]) extends ValidationProblem {
+  case class SourceValidationProblem(source: Source, errors: Seq[Throwable]) extends ValidationProblem:
     override def toString = s"Errors in validation of source $source:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
-  }
 
-  case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem {
+  case class HookValidationProblem(hook: Hook, errors: Seq[Throwable]) extends ValidationProblem:
     override def toString = s"Errors in validation of hook $hook:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
-  }
 
-  case class TransitionValidationProblem(transition: Transition, errors: Seq[Throwable]) extends ValidationProblem {
+  case class TransitionValidationProblem(transition: Transition, errors: Seq[Throwable]) extends ValidationProblem:
     override def toString = s"Errors in validation of transition $transition:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
-  }
 
-  case class MoleValidationProblem(mole: Mole, errors: Seq[Throwable]) extends ValidationProblem {
+  case class MoleValidationProblem(mole: Mole, errors: Seq[Throwable]) extends ValidationProblem:
     override def toString = s"Errors in validation of mole:\n" + errors.map(e => Prettifier.ExceptionPretiffier(e).stackStringWithMargin).mkString("\n")
-  }
 
-}
 
 trait ValidationProblem extends Problem

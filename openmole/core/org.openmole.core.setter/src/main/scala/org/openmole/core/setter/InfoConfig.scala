@@ -3,7 +3,7 @@ package org.openmole.core.setter
 import monocle._
 
 object InfoConfig:
-  def apply()(implicit name: sourcecode.Name, definitionScope: DefinitionScope): InfoConfig =
+  def apply()(using name: sourcecode.Name, definitionScope: DefinitionScope): InfoConfig =
     new InfoConfig(Some(name.value), definitionScope)
 
 case class InfoConfig(
