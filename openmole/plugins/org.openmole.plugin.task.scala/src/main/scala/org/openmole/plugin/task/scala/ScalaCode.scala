@@ -34,3 +34,5 @@ object ScalaCode:
       case code: String => FromContext.codeToFromContext[T](code)
 
 case class ScalaCode(source: String, defaults: DefaultSet = DefaultSet.empty)
+
+export org.openmole.plugin.task.scala.{ScalaCode => Evaluation}
