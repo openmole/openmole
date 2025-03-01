@@ -73,6 +73,9 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
   val fileContentType = FileContentType(safePath)
   val modified = Var(false)
+  val errors: Var[Option[ErrorData]] = Var(None)
+  val errorMessage: Var[Option[String]] = Var(None)
+  val errorAreaSize: Var[String] = Var("100px")
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
@@ -127,10 +130,6 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
   def scrollToBottom = editor.renderer.scrollToLine(99999.0, false, true, ()=> {})
 
-  val errors: Var[Option[ErrorData]] = Var(None)
-  val errorMessage: Var[Option[String]] = Var(None)
-  val errorAreaSize: Var[String] = Var("100px")
-
   def unsetErrors =
     errors.set(None)
     errorMessage.set(None)
@@ -153,24 +152,6 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
   def updateFont(lHeight: Int) =  lineHeight.set(lHeight)
 
-  val errorView =
-    div(
-      children <--
-        errorMessage.signal.map: em =>
-            em.toSeq.map: message =>
-              div(display.flex, cls := "scriptError",
-                textArea(
-                  flexRow,
-                  message,
-                  cls := "errorTextArea",
-                  ),
-                  span(
-                  flexDirection.row, alignItems.center, 
-                  cls := "close-button close-button-tab bi-x", color := "white", marginLeft := "5px", 
-                  onClick --> { e => panels.treeNodePanel.clearCurrentErrorView}
-                )
-              )
-    )  
 
   val view =
     div(
