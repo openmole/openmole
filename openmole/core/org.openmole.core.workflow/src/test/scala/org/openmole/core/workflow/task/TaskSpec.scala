@@ -21,7 +21,7 @@ import org.openmole.core.context.Val
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.setter
 import org.openmole.core.setter.*
-import org.openmole.core.setter.DefinitionScope.DefinitionLine
+import org.openmole.core.setter.DefinitionScope.UserDefinitionScope
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.puzzle.*
@@ -58,5 +58,5 @@ class TaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     task set (Seq.fill(10)(d))
 
   it should "contains the definition line number" in :
-    val (t1, t2) = (EmptyTask(), {given setter.DefinitionScope.DefinitionLine = DefinitionLine(10) ; EmptyTask()})
+    val (t1, t2) = (EmptyTask(), {given setter.DefinitionScope.UserDefinitionScope = UserDefinitionScope(10) ; EmptyTask()})
     (definitionScope(t1).asInstanceOf[DefinitionScope.UserScope].line - definitionScope(t2).asInstanceOf[DefinitionScope.UserScope].line) should equal(10)

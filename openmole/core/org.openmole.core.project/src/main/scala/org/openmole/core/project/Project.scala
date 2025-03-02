@@ -89,8 +89,21 @@ object Project:
 
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
+      def fileString(f: File) = s"""File(new java.net.URI("${f.toURI}").getPath)"""
+
       val name = uniqueName(sourceFile.file)
-      val definitionLineClass = classOf[org.openmole.core.setter.DefinitionScope.DefinitionLine].getCanonicalName
+
+      val userDefinitionScopeString =
+        val definitionScopeClass = classOf[org.openmole.core.setter.DefinitionScope.UserDefinitionScope].getCanonicalName
+        val scope =
+          sourceFile.importedBy match
+            case Some(value) =>
+              val importedDefinitionClass = classOf[org.openmole.core.setter.DefinitionScope.ImportedUserDefinitionScope].getCanonicalName
+              s"""$importedDefinitionClass("${value.`import`.fromImport}", ${fileString(value.file)})"""
+            case None =>
+              s"$definitionScopeClass.default"
+
+        s"""implicit private val _om_definitionLine: ${definitionScopeClass} = $scope"""
 
       val classContent =
         s"""object ${name} {
@@ -101,8 +114,8 @@ object Project:
            |
            |import _imports._
            |
-           |@transient private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
-           |implicit private val _om_definitionLine : ${definitionLineClass} = ${definitionLineClass}.imported
+           |@transient private lazy val ${ConsoleVariables.workDirectory} = ${fileString(sourceFile.file.getParentFileSafe)}
+           |$userDefinitionScopeString
            |
            |${sourceFile.file.content}
            |}
@@ -149,10 +162,11 @@ object Project:
            |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
-      val definitionLineClass = classOf[org.openmole.core.setter.DefinitionScope.DefinitionLine].getCanonicalName
+      val definitionScopeClass = classOf[org.openmole.core.setter.DefinitionScope.UserDefinitionScope].getCanonicalName
+      val userScriptDefinitionScope = classOf[org.openmole.core.setter.DefinitionScope.UserScriptUserDefinitionScope].getCanonicalName
 
       s"""$headerContent
-         |given $definitionLineClass = $definitionLineClass(${headerContent.split("\n").length + 1})""".stripMargin
+         |given $definitionScopeClass = $userScriptDefinitionScope(-${headerContent.split("\n").length + 1})""".stripMargin
 
     def scriptFooter =
       s"""}

@@ -18,26 +18,28 @@ package org.openmole.core.setter
  */
 
 
-import sourcecode.Line
+import org.openmole.tool.file.*
 
 object DefinitionScope:
   case class InternalScope(name: String) extends DefinitionScope
-  case class UserScope(line: Option[Int]) extends DefinitionScope
+  case class UserScope(scope: UserDefinitionScope) extends DefinitionScope
 
   given Conversion[String, InternalScope] = scope => InternalScope(scope)
 
   object user:
-    inline implicit def default(using line: SourcePosition, relativizeLine: DefinitionLine): DefinitionScope =
-      if DefinitionLine.isNoLine(relativizeLine)
-      then UserScope(None)
-      else UserScope(Some(line.line - relativizeLine.offset))
+    inline implicit def default(using line: SourcePosition, userScope: UserDefinitionScope): DefinitionScope =
+      userScope match
+        case u: UserScriptUserDefinitionScope => UserScope(u.copy(line.line + u.line))
+        case x => UserScope(x)
 
-  object DefinitionLine:
-    def isNoLine(relativizeLine: DefinitionLine) = relativizeLine == noLine
-    given noLine: DefinitionLine = DefinitionLine(-1)
-    def imported = noLine
+  object UserDefinitionScope:
+    given default: UserDefinitionScope = OutOfUserDefinitionScope
 
-  case class DefinitionLine(offset: Int)
+  trait UserDefinitionScope
+  case class ImportedUserDefinitionScope(`import`: String, importedFrom: File) extends UserDefinitionScope
+  case class UserScriptUserDefinitionScope(line: Int) extends UserDefinitionScope
+  case object OutOfUserDefinitionScope extends UserDefinitionScope
+
 
   def isUser(scope: DefinitionScope) =
     scope match
