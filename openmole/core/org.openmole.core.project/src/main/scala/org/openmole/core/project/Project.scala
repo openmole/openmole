@@ -90,6 +90,7 @@ object Project:
       def imports = makeImportTree(Tree.insertAll(sourceFile.importedFiles))
 
       val name = uniqueName(sourceFile.file)
+      val definitionLineClass = classOf[org.openmole.core.setter.DefinitionScope.DefinitionLine].getCanonicalName
 
       val classContent =
         s"""object ${name} {
@@ -101,11 +102,12 @@ object Project:
            |import _imports._
            |
            |@transient private lazy val ${ConsoleVariables.workDirectory} = File(new java.net.URI("${sourceFile.file.getParentFileSafe.toURI}").getPath)
+           |implicit private val _om_definitionLine : ${definitionLineClass} = ${definitionLineClass}.imported
            |
            |${sourceFile.file.content}
            |}
         """.stripMargin
-
+      
       removeTerms(classContent)
 
     val allImports = Imports.importedFiles(script)
@@ -130,20 +132,27 @@ object Project:
       else s"def run($variableParameter: ${classOf[ConsoleVariables].getCanonicalName}): ${classOf[DSL].getCanonicalName}"
 
     def traitName =
-      if (returnUnit) s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
+      if returnUnit
+      then s"${classOf[Project.OMSScriptUnit].getCanonicalName}"
       else s"${classOf[Project.OMSScript].getCanonicalName}"
 
     def scriptHeader =
-      s"""new $traitName {
-         |
-         |$functionPrototype = {
-         |import $variableParameter._
-         |import $variableParameter.services._
-         |
-         |${scriptsObjects(script)}
-         |
-         |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
-         |import ${Project.uniqueName(script)}._imports._""".stripMargin
+      val headerContent =
+        s"""new $traitName {
+           |
+           |$functionPrototype = {
+           |import $variableParameter._
+           |import $variableParameter.services._
+           |
+           |${scriptsObjects(script)}
+           |
+           |implicit def _scriptSourceData: ${classOf[ScriptSourceData.ScriptData].getCanonicalName} = ${ScriptSourceData.applySource(workDirectory, script)}
+           |import ${Project.uniqueName(script)}._imports._""".stripMargin
+
+      val definitionLineClass = classOf[org.openmole.core.setter.DefinitionScope.DefinitionLine].getCanonicalName
+
+      s"""$headerContent
+         |given $definitionLineClass = $definitionLineClass(${headerContent.split("\n").length + 1})""".stripMargin
 
     def scriptFooter =
       s"""}

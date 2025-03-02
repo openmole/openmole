@@ -589,7 +589,7 @@ trait CompositionPackage {
   
     def outputs: Seq[Val[?]] = outputs(false)
     def outputs(explore: Boolean): Seq[Val[?]] =
-      given DefinitionScope.Internal("outputs")
+      given DefinitionScope.InternalScope("outputs")
       val last = EmptyTask()
       val p = if !explore then DSL.toPuzzle(t1 -- last) else DSL.toPuzzle(t1 -< last)
       val mole = Puzzle.toMole(p)

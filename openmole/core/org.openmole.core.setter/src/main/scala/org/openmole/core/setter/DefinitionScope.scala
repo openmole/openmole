@@ -18,13 +18,31 @@ package org.openmole.core.setter
  */
 
 
-object DefinitionScope:
-  case class Internal(name: String) extends DefinitionScope
-  case object User extends DefinitionScope
+import sourcecode.Line
 
-  given Conversion[String, Internal] = scope => Internal(scope)
+object DefinitionScope:
+  case class InternalScope(name: String) extends DefinitionScope
+  case class UserScope(line: Option[Int]) extends DefinitionScope
+
+  given Conversion[String, InternalScope] = scope => InternalScope(scope)
 
   object user:
-    implicit def default: DefinitionScope = User
+    inline implicit def default(using line: SourcePosition, relativizeLine: DefinitionLine): DefinitionScope =
+      if DefinitionLine.isNoLine(relativizeLine)
+      then UserScope(None)
+      else UserScope(Some(line.line - relativizeLine.offset))
+
+  object DefinitionLine:
+    def isNoLine(relativizeLine: DefinitionLine) = relativizeLine == noLine
+    given noLine: DefinitionLine = DefinitionLine(-1)
+    def imported = noLine
+
+  case class DefinitionLine(offset: Int)
+
+  def isUser(scope: DefinitionScope) =
+    scope match
+      case _: UserScope => true
+      case _ => false
+
 
 sealed trait DefinitionScope

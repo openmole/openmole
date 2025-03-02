@@ -253,12 +253,12 @@ class ServerState:
 
         def scopeToString(scope: DefinitionScope) =
           scope match
-            case DefinitionScope.User           => "user"
-            case DefinitionScope.Internal(name) => name
+            case _: DefinitionScope.UserScope        => "user"
+            case DefinitionScope.InternalScope(name) => name
 
         lazy val statuses = moleExecution.capsuleStatuses.toVector.map: (k, v) =>
           import org.openmole.core.dsl.extension.Task
-          def isUser(t: Task) = t.info.definitionScope == DefinitionScope.User
+          def isUser(t: Task) = DefinitionScope.isUser(t.info.definitionScope)
 
           val task = k.task(moleExecution.mole, moleExecution.sources, moleExecution.hooks)
 
