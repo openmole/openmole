@@ -51,7 +51,7 @@ object common {
   def execVersion = "1.4.0"
   def asmVersion = "9.4"
   def guavaVersion = "31.1-jre"
-  def scalaMetaVersion = "4.9.9"
+  def scalaMetaVersion = "4.13.2"
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
