@@ -441,7 +441,8 @@ object OMRFormat:
       )
 
     val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.deepDropNullValues.noSpaces).asInstanceOf[org.json4s.JObject]
-    destination.content =
+    destination.withOutputStream: os =>
       import org.json4s.jackson
       val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
-      jackson.prettyJson(jackson.renderJValue(fullObject))
+      val writer = jackson.JsonMethods.mapper.writerWithDefaultPrettyPrinter()
+      writer.writeValue(os, jackson.renderJValue(fullObject))
