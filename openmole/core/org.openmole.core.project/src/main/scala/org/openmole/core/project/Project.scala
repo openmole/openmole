@@ -163,7 +163,7 @@ object Project:
            |import ${Project.uniqueName(script)}._imports._""".stripMargin
 
       val definitionScopeClass = classOf[org.openmole.core.setter.DefinitionScope.UserDefinitionScope].getCanonicalName
-      val userScriptDefinitionScope = classOf[org.openmole.core.setter.DefinitionScope.UserScriptUserDefinitionScope].getCanonicalName
+      val userScriptDefinitionScope = classOf[org.openmole.core.setter.DefinitionScope.UserScriptDefinitionScope].getCanonicalName
 
       s"""$headerContent
          |given $definitionScopeClass = $userScriptDefinitionScope(-${headerContent.split("\n").length + 1})""".stripMargin

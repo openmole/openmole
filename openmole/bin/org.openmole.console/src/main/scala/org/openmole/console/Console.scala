@@ -24,7 +24,7 @@ import org.openmole.core.compiler.*
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.preference.Preference
 import org.openmole.core.project.*
-import org.openmole.core.tools.io.Prettifier.*
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.*
@@ -152,7 +152,7 @@ class Console(script: Option[String] = None) { console =>
           case Right(dsl) =>
             Try(Command.start(dsl.dsl, dsl.compilationContext).hangOn()) match
               case Failure(e) =>
-                println(e.stackString)
+                println(Prettifier.stackString(e))
                 ExitCodes.executionError
               case Success(_) =>
                 ExitCodes.ok
@@ -169,7 +169,7 @@ class Console(script: Option[String] = None) { console =>
         Left(ExitCodes.scriptDoesNotExist)
       case e: CompilationError =>
         services.tmpDirectory.directory.recursiveDelete
-        println(e.error.stackString)
+        println(Prettifier.stackString(e.error))
         Left(ExitCodes.compilationError)
       case compiled: Compiled =>
         Try(compiled.eval(args)) match
@@ -177,7 +177,7 @@ class Console(script: Option[String] = None) { console =>
           case Failure(e) =>
             services.tmpDirectory.directory.recursiveDelete
             println(s"Error during script evaluation: ")
-            print(e.stackString)
+            print(Prettifier.stackString(e))
             Left(ExitCodes.compilationError)
 
 

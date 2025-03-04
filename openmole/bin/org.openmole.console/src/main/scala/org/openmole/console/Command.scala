@@ -26,7 +26,7 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.project.*
-import org.openmole.core.tools.io.Prettifier.*
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{Mole, MoleExecution, MoleServices}
 import org.openmole.core.workflow.validation.Validation
@@ -167,7 +167,7 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
     def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console.classDirectory, console.classLoader))
     def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
-    private def exceptionToString(e: Throwable) = e.stackString
+    private def exceptionToString(e: Throwable) = Prettifier.stackString(e)
 
     implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 

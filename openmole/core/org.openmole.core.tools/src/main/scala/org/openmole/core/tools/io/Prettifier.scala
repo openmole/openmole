@@ -18,50 +18,37 @@
 package org.openmole.core.tools.io
 
 import java.io.{ PrintWriter, StringWriter }
-
 import org.openmole.tool.logger.JavaLogger
+import scala.jdk.CollectionConverters.*
 
-import scala.jdk.CollectionConverters._
-
-object Prettifier extends JavaLogger {
-
-  import Log._
-
-  implicit class objectPrettifier(o: Any) {
-    def prettify(snipArray: Int = Int.MaxValue): String = Prettifier.prettify(o, snipArray)
-  }
+object Prettifier extends JavaLogger:
 
   def snip[T <: Any](o: Iterable[T], size: Int = Int.MaxValue) =
-    "[" +
-      (if (o.size <= size) o.map { e => prettify(e, size) }.mkString(", ")
-      else o.take(size - 1).map { e => prettify(e, size) }.mkString(", ") + "..., " + o.last) +
-      "]"
+    def content =
+      if o.size <= size
+      then o.map { e => prettify(e, size) }.mkString(", ")
+      else o.take(size - 1).map { e => prettify(e, size) }.mkString(", ") + "..., " + o.last
+
+    s"[$content]"
 
   def prettify(o: Any, snipArray: Int = Int.MaxValue): String =
-    try o match {
+    o match
       case null                       => "null"
       case o: Array[?]                => snip(o, snipArray)
       case o: Seq[_]                  => snip(o, snipArray)
       case o: java.util.Collection[_] => snip(o.asScala, snipArray)
       case o                          => o.toString
-    } catch {
-      case t: Throwable =>
-        logger.log(WARNING, "Error during pretification", t)
-        o.toString
-    }
 
-  implicit class ExceptionPretiffier(t: Throwable) {
+  def insertMargin(s: String, size: Int = 1) =
+    val margin = (" " * size) +  "| "
+    s.split("\n").map(margin + _).mkString("\n")
 
-    def addMargin(s: String) = s.split("\n").map(" | " + _).mkString("\n")
+  def stackString(t: Throwable): String =
+    val sw = new StringWriter()
+    val pw = new PrintWriter(sw)
+    t.printStackTrace(pw)
+    sw.toString
 
-    def stackString: String = {
-      val sw = new StringWriter()
-      val pw = new PrintWriter(sw)
-      t.printStackTrace(pw)
-      sw.toString
-    }
+  def stackStringWithMargin(t: Throwable, size: Int = 1) = insertMargin(stackString(t), size)
 
-    def stackStringWithMargin = addMargin(stackString)
-  }
 
-}

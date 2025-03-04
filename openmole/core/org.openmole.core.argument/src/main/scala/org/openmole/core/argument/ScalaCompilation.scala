@@ -101,13 +101,15 @@ object ScalaCompilation {
     } match
       case util.Success(s) => Success(s)
       case util.Failure(e: Interpreter.CompilationError) =>
-        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = Some(script.code))
-        val userBadDataError =
-          new UserBadDataError(
-            s"""${errors}
-               |With interpreter $errorMsg"
-               |""".stripMargin
-          )
+        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = None)
+        val userBadDataError = UserBadDataError(errors)
+//        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = Some(script.code))
+//        val userBadDataError =
+//          new UserBadDataError(
+//            s"""${errors}
+//               |With interpreter $errorMsg"
+//               |""".stripMargin
+//          )
         util.Failure(userBadDataError)
       case util.Failure(e) => util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
 

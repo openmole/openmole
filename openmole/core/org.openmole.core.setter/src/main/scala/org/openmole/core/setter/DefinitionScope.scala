@@ -29,7 +29,7 @@ object DefinitionScope:
   object user:
     inline implicit def default(using line: SourcePosition, userScope: UserDefinitionScope): DefinitionScope =
       userScope match
-        case u: UserScriptUserDefinitionScope => UserScope(u.copy(line.line + u.line))
+        case u: UserScriptDefinitionScope => UserScope(u.copy(line.line + u.line))
         case x => UserScope(x)
 
   object UserDefinitionScope:
@@ -37,14 +37,23 @@ object DefinitionScope:
 
   trait UserDefinitionScope
   case class ImportedUserDefinitionScope(`import`: String, importedFrom: File) extends UserDefinitionScope
-  case class UserScriptUserDefinitionScope(line: Int) extends UserDefinitionScope
+  case class UserScriptDefinitionScope(line: Int) extends UserDefinitionScope
   case object OutOfUserDefinitionScope extends UserDefinitionScope
-
 
   def isUser(scope: DefinitionScope) =
     scope match
       case _: UserScope => true
       case _ => false
 
+  extension (scope: DefinitionScope)
+    def line: Option[Int] =
+      scope match
+        case UserScope(u: UserScriptDefinitionScope) => Some(u.line)
+        case _ => None
+
+    def imported: Option[ImportedUserDefinitionScope] =
+      scope match
+        case UserScope(imp: ImportedUserDefinitionScope) => Some(imp)
+        case _ => None
 
 sealed trait DefinitionScope

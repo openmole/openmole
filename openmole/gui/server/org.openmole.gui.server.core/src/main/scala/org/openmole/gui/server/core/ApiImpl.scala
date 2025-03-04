@@ -303,9 +303,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
           if validationErrors.nonEmpty
           then
+            val error =
+              import org.openmole.core.workflow.validation.*
+              UserBadDataError(s"Formal validation has failed, ${ValidationProblem.errorsString(validationErrors.size)}:\n" + validationErrors.map(e => s"- $e").mkString("\n").split("\n").map(l => s"  $l").mkString("\n") )
+
             Some:
-              ErrorData:
-                new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s):\n" + validationErrors.mkString("\n").split("\n").map(l => s"  $l").mkString("\n") )
+              ErrorData(error)
           else None
         catch
           case e: Throwable => Some(ErrorData(e))

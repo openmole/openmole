@@ -25,7 +25,7 @@ import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.argument._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.setter.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -58,11 +58,10 @@ object AbstractNetLogoTask {
    */
   def wrapError[T](msg: String)(f: => T): T =
     try f
-    catch {
+    catch
       case e: InternalProcessingError => throw e
       case e: Throwable =>
-        throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
-    }
+        throw new UserBadDataError(s"$msg:\n" + Prettifier.stackStringWithMargin(e))
 
   def deployWorkspace(workspace: Workspace, directory: File) = {
     import org.openmole.tool.file._
@@ -240,12 +239,11 @@ object AbstractNetLogoTask {
         AbstractNetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
       }
     }
-    catch {
+    catch
       case e: Throwable =>
         throw new UserBadDataError(
-          s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
+          s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + Prettifier.stackStringWithMargin(e)
         )
-    }
 }
 
 /**

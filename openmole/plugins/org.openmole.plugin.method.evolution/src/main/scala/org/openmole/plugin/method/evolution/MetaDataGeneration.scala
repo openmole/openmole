@@ -6,7 +6,7 @@ import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.generic.semiauto.*
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.tools.io.Prettifier
 import Genome.GenomeBound
 import org.openmole.tool.types.TypeTool
 import org.openmole.core.dsl.extension.*
@@ -25,8 +25,8 @@ object MetadataGeneration:
       case b: GenomeBound.SequenceOfDouble         => GenomeBoundData.DoubleSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
       case b: GenomeBound.SequenceOfContinuousInt  => GenomeBoundData.IntSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
       case b: GenomeBound.SequenceOfInt            => GenomeBoundData.IntSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
-      case b: GenomeBound.Enumeration[?]           => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
-      case b: GenomeBound.SequenceOfEnumeration[?] => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(_.prettify()))
+      case b: GenomeBound.Enumeration[?]           => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
+      case b: GenomeBound.SequenceOfEnumeration[?] => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
 
   def objectiveData(o: Objective) =
     EvolutionMetadata.Objective(Objective.resultPrototype(o).name, o.delta, o.negative, o.noisy)

@@ -2,6 +2,7 @@ package org.openmole.core.format
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.context.ValType
+import org.openmole.core.tools.io.Prettifier
 
 import scala.reflect.ClassTag
 
@@ -77,13 +78,13 @@ object CSVFormat:
         v match
           case v: Array[?] => s"[${v.map(format).mkString(",")}]"
           case v: Seq[_]   => s"[${v.map(format).mkString(",")}]"
-          case v           => v.prettify()
+          case v           => Prettifier.prettify(v)
 
       def quote(v: Any): String =
         v match
           case v: Array[?] => s""""${format(v)}""""
           case v: Seq[_]   => s""""${format(v)}""""
-          case v           => v.prettify()
+          case v           => Prettifier.prettify(v)
 
       v.map(quote).mkString(",")
 

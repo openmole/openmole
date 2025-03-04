@@ -19,36 +19,26 @@ package org.openmole.plugin.environment
 
 import java.net.URI
 
-import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.workflow.validation.DataflowProblem.Output
 import org.openmole.tool.logger.JavaLogger
-
-import scala.util.{ Failure, Success, Try }
 
 package object egi extends JavaLogger {
 
-  implicit def stringToBDII(s: String): _root_.gridscale.egi.BDIIServer = {
+  implicit def stringToBDII(s: String): _root_.gridscale.egi.BDIIServer =
     val uri = new URI(s)
     _root_.gridscale.egi.BDIIServer(uri.getHost, uri.getPort)
-  }
 
-  def findFirstWorking[S, T](servers: Seq[S])(f: S => T, service: String = "server"): T = {
+  def findFirstWorking[S, T](servers: Seq[S])(f: S => T, service: String = "server"): T =
     def findWorking0(servers: List[S]): T =
-      servers match {
+      servers match
         case Nil      => throw new RuntimeException(s"List of $service is empty")
         case h :: Nil => f(h)
         case h :: tail =>
           try f(h)
-          catch {
+          catch
             case t: Throwable => findWorking0(tail)
-          }
-      }
 
     try findWorking0(servers.toList)
-    catch {
+    catch
       case t: Throwable => throw new RuntimeException(s"No $service is working among $servers", t)
-    }
-  }
 
 }

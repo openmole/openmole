@@ -18,7 +18,7 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.random
 import shapeless3.typeable.Typeable
@@ -199,6 +199,6 @@ object Variable:
  */
 case class Variable[@specialized T](prototype: Val[T], value: T):
   override def toString: String = prettified(Int.MaxValue)
-  def prettified(snipArray: Int): String = s"${prototype.name}=${if (value != null) value.prettify(snipArray) else "null"}"
+  def prettified(snipArray: Int): String = s"${prototype.name}=${Prettifier.prettify(value, snipArray)}"
   def name = prototype.name
 
