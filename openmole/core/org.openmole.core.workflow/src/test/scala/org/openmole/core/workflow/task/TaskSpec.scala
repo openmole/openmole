@@ -58,5 +58,6 @@ class TaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     task set (Seq.fill(10)(d))
 
   it should "contains the definition line number" in :
-    val (t1, t2) = (EmptyTask(), {given setter.DefinitionScope.UserDefinitionScope = UserDefinitionScope(10) ; EmptyTask()})
-    (definitionScope(t1).asInstanceOf[DefinitionScope.UserScope].line - definitionScope(t2).asInstanceOf[DefinitionScope.UserScope].line) should equal(10)
+    import setter.DefinitionScope.*
+    val (t1, t2) = ({given UserDefinitionScope = UserScriptDefinitionScope(0) ; EmptyTask()}, {given UserDefinitionScope = UserScriptDefinitionScope(-10) ; EmptyTask()})
+    (definitionScope(t1).line.get - definitionScope(t2).line.get) should equal(10)
