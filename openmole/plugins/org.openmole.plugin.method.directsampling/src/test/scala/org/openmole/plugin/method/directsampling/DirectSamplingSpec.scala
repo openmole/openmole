@@ -319,3 +319,22 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         )
     
     dsl.run
+
+  it should "output a scalar variable" in :
+    val x = Val[Double]
+    val y = Val[Double]
+    val ya = Val[Array[Double]]
+
+    val task = EmptyTask() set (inputs += x, outputs += (y, ya))
+
+    val run: DSL =
+      SingleRun(
+        evaluation = task,
+        input = Seq(
+          x := 10.0
+        )
+      )
+
+    run.outputs.find(_.name == "y").get should equal(y)
+    run.outputs.find(_.name == "ya").get should equal(ya)
+        

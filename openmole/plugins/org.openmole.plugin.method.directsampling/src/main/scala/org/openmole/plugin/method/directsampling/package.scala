@@ -209,7 +209,7 @@ implicit class SingleRunHookDecorator[M](t: M)(implicit method: ExplorationMetho
     values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = false)))
 
 
 
