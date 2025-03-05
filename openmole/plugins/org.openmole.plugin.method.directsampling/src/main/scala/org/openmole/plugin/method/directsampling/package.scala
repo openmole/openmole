@@ -206,11 +206,10 @@ case class SingleRun(
 implicit class SingleRunHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, SingleRun.Method]) extends MethodHookDecorator[M, SingleRun.Method](t):
   def hook(
     output: WritableOutput,
-    values: Seq[Val[?]]    = Vector.empty,
-    append: Boolean = false)(using ScriptSourceData): Hooked[M] =
+    values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = append)))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = true)))
 
 
 
