@@ -19,13 +19,13 @@ package org.openmole.plugin.method.directsampling
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-
 import org.openmole.plugin.sampling.combine.*
 import org.openmole.plugin.domain.distribution.*
 import org.openmole.plugin.domain.modifier.*
 import org.openmole.plugin.tool.pattern.*
 import org.openmole.plugin.hook.file.*
 import io.circe.*
+import org.openmole.core.workflow.composition.DSL.delegate
 
 object AggregationMetaData:
   def apply(ag: Aggregation) = new AggregationMetaData(ValData(ag.value), ValData(ag.outputVal))
@@ -193,7 +193,8 @@ object SingleRun:
       method =
         Method(
           input = r.input.map(_.value)
-        )
+        ),
+      delegate = delegate(r.evaluation)
     )
 
 

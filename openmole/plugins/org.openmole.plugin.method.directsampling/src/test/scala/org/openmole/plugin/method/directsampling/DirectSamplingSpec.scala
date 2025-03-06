@@ -337,4 +337,17 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     run.outputs.find(_.name == "y").get should equal(y)
     run.outputs.find(_.name == "ya").get should equal(ya)
-        
+
+
+  it should "delegate the task" in :
+
+    val seed = Val[Int]
+    val task = EmptyTask()
+
+    val run: DSL =
+      SingleRun(
+        evaluation = Replication(task, seed = seed, sample = 10),
+        input = Seq()
+      )
+
+    DSL.delegate(run).head should equal(task)
