@@ -626,8 +626,12 @@ object MoleExecutionMessage:
             moleExecution.subMoleExecutions.get(msg.subMoleExecution).foreach: state =>
               if !state.canceled then msg.operation(state)
               MoleExecution.checkIfSubMoleIsFinished(state)
+              MoleExecution.checkAllWaiting(moleExecution)
 
-        case msg: JobFinished           => MoleExecution.processJobFinished(moleExecution, msg)
+        case msg: JobFinished           =>
+          MoleExecution.processJobFinished(moleExecution, msg)
+          MoleExecution.checkAllWaiting(moleExecution)
+
         case msg: StartMoleExecution    => MoleExecution.start(moleExecution, msg.context)
         case msg: CancelMoleExecution   => MoleExecution.cancel(moleExecution, None)
         case msg: WithMoleExecutionSate => msg.operation(moleExecution)
@@ -635,8 +639,6 @@ object MoleExecutionMessage:
         case msg: MoleExecutionError    => MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(msg.t)))
     catch
       case t: Throwable => MoleExecution.cancel(moleExecution, Some(MoleExecution.MoleExecutionError(t)))
-
-    MoleExecution.checkAllWaiting(moleExecution)
     MoleExecution.checkMoleExecutionIsFinished(moleExecution)
 
   def dispatcher(moleExecution: MoleExecution) =
