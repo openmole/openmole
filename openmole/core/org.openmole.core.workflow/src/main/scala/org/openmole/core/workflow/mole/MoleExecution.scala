@@ -69,9 +69,8 @@ object MoleExecution:
   sealed trait MoleExecutionFailed:
     def exception: Throwable
 
-  case class JobFailed(moleJob: JobId, capsule: MoleCapsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed {
+  case class JobFailed(moleJob: JobId, capsule: MoleCapsule, exception: Throwable) extends Event[MoleExecution] with MoleExecutionFailed:
     def level = Level.SEVERE
-  }
 
   case class ExceptionRaised(moleJob: JobId, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class SourceExceptionRaised(source: Source, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
@@ -79,7 +78,6 @@ object MoleExecution:
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
   private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) }
-
 
   def apply(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
     val p = DSL.toPuzzle(dsl)
@@ -155,18 +153,17 @@ object MoleExecution:
 
     removeSubMole(subMoleExecution)
 
-  def removeJob(subMoleExecutionState: SubMoleExecutionState, job: JobId) = {
+  def removeJob(subMoleExecutionState: SubMoleExecutionState, job: JobId) =
     val removed = subMoleExecutionState.jobs.remove(job)
     subMoleExecutionState.moleExecution.jobs.remove(job)
     if (removed) updateNbJobs(subMoleExecutionState, -1)
-  }
 
   def addJob(subMoleExecution: SubMoleExecutionState, job: JobId, capsule: MoleCapsule) =
-    if (!subMoleExecution.canceled) {
+    if !subMoleExecution.canceled
+    then
       subMoleExecution.jobs.add(job)
       subMoleExecution.moleExecution.jobs.put(job, capsule)
       updateNbJobs(subMoleExecution, 1)
-    }
 
   def updateNbJobs(subMoleExecutionState: SubMoleExecutionState, v: Int): Unit =
     import subMoleExecutionState.moleExecution.executionContext.services._
@@ -263,6 +260,7 @@ object MoleExecution:
       if !state.canceled then MoleExecution.processFinalState(state, msg.job, msg.result.swap.map(CompactedContext.expand).swap, msg.capsule, msg.ticket)
       removeJob(state, msg.job)
       MoleExecution.checkIfSubMoleIsFinished(state)
+    moleExecution.submittedJobs -= 1
 
   def performHooksAndTransitions(subMoleExecutionState: SubMoleExecutionState, job: JobId, context: Context, capsule: MoleCapsule, ticket: Ticket) =
     val mole = subMoleExecutionState.moleExecution.mole
@@ -423,7 +421,6 @@ object MoleExecution:
         case Some(_) =>
           val jobs = moleExecution.waitingJobs.getOrElseUpdate(capsule, ArrayBuffer())
           jobs.append(moleJob)
-          moleExecution.nbWaiting += 1
           None
         case None =>
           val job = JobGroup(moleExecution, moleJob)
@@ -434,6 +431,7 @@ object MoleExecution:
   def submit(moleExecution: MoleExecution, job: JobGroup, capsule: MoleCapsule) =
     val env = moleExecution.environmentForCapsule.getOrElse(capsule, moleExecution.defaultEnvironment)
     Environment.submit(env, job)
+    moleExecution.submittedJobs += JobGroup.size(job)
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
 
   def submitAll(moleExecution: MoleExecution) =
@@ -446,7 +444,6 @@ object MoleExecution:
        group <- shuffled.grouped(size)
       do submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
 
-    moleExecution.nbWaiting = 0
     moleExecution.waitingJobs.clear
 
   def removeSubMole(subMoleExecutionState: SubMoleExecutionState) =
@@ -464,9 +461,7 @@ object MoleExecution:
   def moleJobIsFinished(moleExecution: MoleExecution, id: JobId) = !moleExecution.jobs.contains(id)
 
   def checkAllWaiting(moleExecution: MoleExecution) =
-    if
-      moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting &&
-        moleExecution.transitionToPerform <= 0
+    if moleExecution.submittedJobs <= 0 && moleExecution.transitionToPerform <= 0
     then MoleExecution.submitAll(moleExecution)
 
   def checkMoleExecutionIsFinished(moleExecution: MoleExecution) =
@@ -708,7 +703,8 @@ class MoleExecution(
   private[mole] val newGroup = NewGroup()
 
   private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, ArrayBuffer[Job]]()
-  private[mole] var nbWaiting = 0
+
+  private[mole] var submittedJobs = 0
   private[mole] var transitionToPerform = 0
 
   private[mole] val completed =
