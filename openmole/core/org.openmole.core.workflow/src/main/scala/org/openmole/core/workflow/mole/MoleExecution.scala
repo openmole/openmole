@@ -464,7 +464,9 @@ object MoleExecution:
   def moleJobIsFinished(moleExecution: MoleExecution, id: JobId) = !moleExecution.jobs.contains(id)
 
   def checkAllWaiting(moleExecution: MoleExecution) =
-    if moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting
+    if
+      moleExecution.rootSubMoleExecution.nbJobs <= moleExecution.nbWaiting &&
+        moleExecution.transitionToPerform <= 0
     then MoleExecution.submitAll(moleExecution)
 
   def checkMoleExecutionIsFinished(moleExecution: MoleExecution) =
@@ -612,6 +614,10 @@ object MoleExecutionMessage:
       case _                      => 1
 
   def send(moleExecution: MoleExecution)(moleExecutionMessage: MoleExecutionMessage, priority: Option[Int] = None) =
+    moleExecutionMessage match
+      case _: PerformTransition => moleExecution.transitionToPerform += 1
+      case _ =>
+
     moleExecution.messageQueue.enqueue(moleExecutionMessage, priority getOrElse messagePriority(moleExecutionMessage))
 
   def dispatch(moleExecution: MoleExecution, msg: MoleExecutionMessage) = moleExecution.synchronized:
@@ -621,6 +627,7 @@ object MoleExecutionMessage:
     try
       msg match
         case msg: PerformTransition =>
+          moleExecution.transitionToPerform -= 1
           if !moleExecution._canceled
           then
             moleExecution.subMoleExecutions.get(msg.subMoleExecution).foreach: state =>
@@ -702,6 +709,7 @@ class MoleExecution(
 
   private[mole] val waitingJobs = collection.mutable.Map[MoleCapsule, ArrayBuffer[Job]]()
   private[mole] var nbWaiting = 0
+  private[mole] var transitionToPerform = 0
 
   private[mole] val completed =
     val map = collection.mutable.Map[MoleCapsule, Long]()
