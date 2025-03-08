@@ -17,13 +17,13 @@ object MatrixHook {
   implicit def isInfo: InfoBuilder[MatrixHook] = InfoBuilder(Focus[MatrixHook](_.info))
 
   object ToMatrix {
-    implicit def arrayInt: ToMatrix[Array[Int]] = a ⇒ a.toIterator.map(_.toString)
-    implicit def arrayDouble: ToMatrix[Array[Double]] = a ⇒ a.toIterator.map(_.toString)
-    implicit def arrayLong: ToMatrix[Array[Long]] = a ⇒ a.toIterator.map(_.toString)
+    implicit def arrayInt: ToMatrix[Array[Int]] = a => a.toIterator.map(_.toString)
+    implicit def arrayDouble: ToMatrix[Array[Double]] = a => a.toIterator.map(_.toString)
+    implicit def arrayLong: ToMatrix[Array[Long]] = a => a.toIterator.map(_.toString)
 
-    implicit def arrayArrayInt: ToMatrix[Array[Array[Int]]] = a ⇒ a.toIterator.map(_.mkString(","))
-    implicit def arrayArrayLong: ToMatrix[Array[Array[Long]]] = a ⇒ a.toIterator.map(_.mkString(","))
-    implicit def arrayArrayDouble: ToMatrix[Array[Array[Double]]] = a ⇒ a.toIterator.map(_.mkString(","))
+    implicit def arrayArrayInt: ToMatrix[Array[Array[Int]]] = a => a.toIterator.map(_.mkString(","))
+    implicit def arrayArrayLong: ToMatrix[Array[Array[Long]]] = a => a.toIterator.map(_.mkString(","))
+    implicit def arrayArrayDouble: ToMatrix[Array[Array[Double]]] = a => a.toIterator.map(_.mkString(","))
   }
 
   @implicitNotFound("${T} is not a matrix")
@@ -55,7 +55,7 @@ case class MatrixHook(
 
   override def validate = file.validate
 
-  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters =>
     import parameters._
 
     val f = file.from(context)

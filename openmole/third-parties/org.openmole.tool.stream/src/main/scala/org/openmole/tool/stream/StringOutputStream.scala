@@ -57,8 +57,8 @@ class SynchronizedRingBuilder(size: Int) extends Builder {
 class StringOutputStream(maxCharacters: Option[Int] = None) extends OutputStream {
   lazy val builder =
     maxCharacters match {
-      case None    ⇒ new SynchronizedBuilder
-      case Some(n) ⇒ new SynchronizedRingBuilder(n)
+      case None    => new SynchronizedBuilder
+      case Some(n) => new SynchronizedRingBuilder(n)
     }
 
   override def write(b: Int) = builder.append(b.toChar)

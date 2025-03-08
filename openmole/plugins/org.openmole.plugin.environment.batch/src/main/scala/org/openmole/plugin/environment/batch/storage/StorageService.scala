@@ -35,7 +35,7 @@ object StorageService extends JavaLogger:
       false
 
     if background
-    then JobManager ! RetryAction(() ⇒ action)
+    then JobManager ! RetryAction(() => action)
     else rmFile(s, path)
 
   def rmDirectory[S](s: S, path: String, background: Boolean)(using services: BatchEnvironment.Services, storageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority): Unit =
@@ -44,7 +44,7 @@ object StorageService extends JavaLogger:
       false
 
     if background
-    then JobManager ! RetryAction(() ⇒ action)
+    then JobManager ! RetryAction(() => action)
     else rmDirectory(s, path)
 
   def rmFile[S](s: S, directory: String)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority): Unit =

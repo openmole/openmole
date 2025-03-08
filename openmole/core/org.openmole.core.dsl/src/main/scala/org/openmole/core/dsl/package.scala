@@ -104,7 +104,7 @@ package dsl:
     def encrypt(s: String)(implicit cypher: Cypher) = cypher.encrypt(s)
 
     implicit def seqIsFunctor: Functor[Seq] = new Functor[Seq]:
-      override def map[A, B](fa: Seq[A])(f: (A) ⇒ B): Seq[B] = fa.map(f)
+      override def map[A, B](fa: Seq[A])(f: (A) => B): Seq[B] = fa.map(f)
 
     type Data = File
 

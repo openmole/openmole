@@ -26,7 +26,7 @@ class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     authentication = Some(classOf[EGIAuthenticationGUIFactory]),
-    router = Some(s ⇒ OMRouter(new EGIAuthenticationEGIServer(s).routes))
+    router = Some(s => OMRouter(new EGIAuthenticationEGIServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

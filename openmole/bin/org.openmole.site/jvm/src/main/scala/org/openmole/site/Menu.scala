@@ -34,7 +34,7 @@ object Menu {
   def bannerSpace = div(paddingTop := 130)
 
   //  def banner(sitePage: SitePage) = match {
-  //    case cp: ContentPage ⇒ div(
+  //    case cp: ContentPage => div(
   //      marginTop := 10,
   //      textAlign := "center",
   //      display := "block",
@@ -47,7 +47,7 @@ object Menu {
   //          href := "http://exmodelo.org", target := "_blank"
   //        )
   //      )
-  //    case _ ⇒ div
+  //    case _ => div
   //  }
 
   import scalatags.generic._

@@ -72,9 +72,9 @@ class RESTAPI(services: Services):
           def workDirectoryValue = HTTP.multipartContent(parts, "workDirectory")
 
           (scriptValue, workDirectoryValue) match
-            case (_, None) ⇒ ExpectationFailed(Error("Missing mandatory workDirectory parameter.").toJson)
-            case (None, _) ⇒ ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
-            case (Some(script), Some(archive)) ⇒
+            case (_, None) => ExpectationFailed(Error("Missing mandatory workDirectory parameter.").toJson)
+            case (None, _) => ExpectationFailed(Error("Missing mandatory script parameter.").toJson)
+            case (Some(script), Some(archive)) =>
               logger.info("starting the create operation")
 
               val id = ExecutionId(UUID.randomUUID().toString)
@@ -94,8 +94,8 @@ class RESTAPI(services: Services):
 
               def start(ex: MoleExecution) =
                 Try(ex.start(true)) match
-                  case Failure(e) ⇒ error(e)
-                  case Success(ex) ⇒
+                  case Failure(e) => error(e)
+                  case Success(ex) =>
                     moles.put(id, Execution(directory, ex))
                     Ok(id.toJson)
 
@@ -109,13 +109,13 @@ class RESTAPI(services: Services):
                 )
 
               Project.compile(directory.workDirectory, directory.workDirectory / script)(jobServices) match
-                case ScriptFileDoesNotExists() ⇒
+                case ScriptFileDoesNotExists() =>
                   def content = directory.workDirectory.listFiles().map(_.getName).mkString(", ")
                   ExpectationFailed(Error(s"The script doesn't exist in the workDirectory. The content of the workDirectory is: $content").toJson)
-                case e: CompilationError       ⇒ error(e.error)
-                case compiled: Compiled ⇒
+                case e: CompilationError       => error(e.error)
+                case compiled: Compiled =>
                   Try(compiled.eval(Seq.empty)(jobServices)) match
-                    case Success(res) ⇒
+                    case Success(res) =>
                       import jobServices._
 
                       val moleServices =
@@ -128,16 +128,16 @@ class RESTAPI(services: Services):
                       Try:
                         MoleExecution(res)(moleServices)
                       match
-                        case Success(ex) ⇒ start(ex)
-                        case Failure(e) ⇒
+                        case Success(ex) => start(ex)
+                        case Failure(e) =>
                           MoleServices.clean(moleServices)
                           error(e)
-                    case Failure(e) ⇒ error(e)
+                    case Failure(e) => error(e)
       case req @ GET -> "job" /: rest if rest.segments.size > 1 && rest.segments(1).decoded() == "workDirectory" =>
         val id = rest.segments(0).decoded()
         val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
 
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val file = ex.jobDirectory.workDirectory / path
 
           if !file.exists()
@@ -156,7 +156,7 @@ class RESTAPI(services: Services):
         val id = rest.segments(0).decoded()
         val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
 
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val file = ex.jobDirectory.workDirectory / path
 
           if !file.exists()
@@ -166,11 +166,11 @@ class RESTAPI(services: Services):
             then
               def filter(fs: Array[File]) =
                 req.params.get("last") match
-                  case Some(l) ⇒ fs.sortBy(-_.lastModified).take(l.toInt)
-                  case None    ⇒ fs.sortBy(-_.lastModified)
+                  case Some(l) => fs.sortBy(-_.lastModified).take(l.toInt)
+                  case None    => fs.sortBy(-_.lastModified)
 
               val entries =
-                filter(file.listFilesSafe).toVector.map: f ⇒
+                filter(file.listFilesSafe).toVector.map: f =>
                   val size = if (f.isFile) Some(f.size) else None
                   val entryType = if (f.isDirectory) FileType.directory else FileType.file
                   DirectoryEntry(f.getName, modified = f.lastModified(), size = size, `type` = entryType)
@@ -185,7 +185,7 @@ class RESTAPI(services: Services):
         val id = rest.segments(0).decoded()
         val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
 
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val file = ex.jobDirectory.workDirectory / path
           checkIsOMR(file):
             HTTP.convertOMR(req, file, org.openmole.gui.shared.data.GUIOMRContent.ExportFormat.CSV, history = false)
@@ -194,7 +194,7 @@ class RESTAPI(services: Services):
         val id = rest.segments(0).decoded()
         val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
 
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val file = ex.jobDirectory.workDirectory / path
           checkIsOMR(file):
             HTTP.convertOMR(req, file, org.openmole.gui.shared.data.GUIOMRContent.ExportFormat.JSON, history = false)
@@ -203,7 +203,7 @@ class RESTAPI(services: Services):
         val id = rest.segments(0).decoded()
         val path = rest.segments.drop(2).map(_.decoded()).mkString("/")
 
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val file = ex.jobDirectory.workDirectory / path
 
           checkIsOMR(file):
@@ -216,27 +216,27 @@ class RESTAPI(services: Services):
               case None =>
                 ExpectationFailed(Error(s"The OMR file does not contain files").toJson)
       case req @ GET -> Root / "job" / id / "output" =>
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           Ok(ex.jobDirectory.readOutput)
       case req @ GET -> Root / "job" / id / "state" =>
-        getExecution(ExecutionId(id)): ex ⇒
+        getExecution(ExecutionId(id)): ex =>
           val moleExecution = ex.moleExecution
           val state =
             (moleExecution.exception, moleExecution.finished) match
-              case (Some(t), _) ⇒
+              case (Some(t), _) =>
                 MoleExecution.MoleExecutionFailed.capsule(t) match
-                  case Some(c) ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed when executing capsule: ${c}")).toJson
-                  case None    ⇒ Failed(Error(t.exception).copy(message = s"Mole execution failed")).toJson
+                  case Some(c) => Failed(Error(t.exception).copy(message = s"Mole execution failed when executing capsule: ${c}")).toJson
+                  case None    => Failed(Error(t.exception).copy(message = s"Mole execution failed")).toJson
 
-              case (None, true) ⇒ Finished().toJson
-              case _ ⇒
+              case (None, true) => Finished().toJson
+              case _ =>
                 def environments = moleExecution.environments ++ Seq(moleExecution.defaultEnvironment)
                 def environmentStatus = environments.map: env =>
-                  def environmentErrors = Environment.clearErrors(env).map(e ⇒ Error(e.exception).copy(level = Some(e.level.toString)))
+                  def environmentErrors = Environment.clearErrors(env).map(e => Error(e.exception).copy(level = Some(e.level.toString)))
                   EnvironmentStatus(name = env.name, submitted = env.submitted, running = env.running, done = env.done, failed = env.failed, environmentErrors)
 
                 val statuses = moleExecution.capsuleStatuses
-                val capsuleStates = statuses.toVector.map { (c, states) ⇒ c.toString -> CapsuleState(states.ready, states.running, states.completed) }
+                val capsuleStates = statuses.toVector.map { (c, states) => c.toString -> CapsuleState(states.ready, states.running, states.completed) }
                 val ready = capsuleStates.map(_._2.ready).sum
                 val running = capsuleStates.map(_._2.running).sum
                 val completed = capsuleStates.map(_._2.completed).sum
@@ -246,8 +246,8 @@ class RESTAPI(services: Services):
           Ok(state)
       case req @ DELETE -> Root / "job" / id =>
         moles.remove(ExecutionId(id)) match
-          case None ⇒ NotFound(Error("Execution not found").toJson)
-          case Some(ex) ⇒
+          case None => NotFound(Error("Execution not found").toJson)
+          case Some(ex) =>
             ex.moleExecution.cancel
             ex.jobDirectory.clean
             Ok()
@@ -259,7 +259,7 @@ class RESTAPI(services: Services):
       case req @ GET -> Root / "plugin" =>
         import services._
         val plugins =
-          org.openmole.core.module.pluginDirectory.listFilesSafe.map: p ⇒
+          org.openmole.core.module.pluginDirectory.listFilesSafe.map: p =>
             Plugin(
               p.getName,
               active = org.openmole.core.pluginmanager.PluginManager.bundle(p).isDefined
@@ -272,8 +272,8 @@ class RESTAPI(services: Services):
           import services._
           def fileValue = HTTP.listMultipartContent(parts, "file", shouldBeFile = true)
           fileValue match
-            case Seq() ⇒ ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
-            case files ⇒
+            case Seq() => ExpectationFailed(Error("Missing mandatory file parameter.").toJson)
+            case files =>
               val extractDirectory = baseDirectory.newDirectory("plugins")
               extractDirectory.mkdirs()
 
@@ -295,13 +295,13 @@ class RESTAPI(services: Services):
                 finally extractDirectory.recursiveDelete
 
               if errors.nonEmpty
-              then InternalServerError(errors.map(e ⇒ PluginError(e._1.getName, Error(e._2))).toJson)
+              then InternalServerError(errors.map(e => PluginError(e._1.getName, Error(e._2))).toJson)
               else Ok()
       case req @ DELETE -> Root / "plugin" =>
         import services._
         req.multiParams.get("name") match
-          case None ⇒ ExpectationFailed(Error("Missing mandatory name parameter.").toJson)
-          case Some(names) ⇒
+          case None => ExpectationFailed(Error("Missing mandatory name parameter.").toJson)
+          case Some(names) =>
             import org.openmole.core.pluginmanager._
 
             val allNames =
@@ -309,13 +309,13 @@ class RESTAPI(services: Services):
                 name ← names
               yield
                 val file = org.openmole.core.module.pluginDirectory / name
-                val allDependingFiles = PluginManager.allDepending(file, b ⇒ !b.isProvided)
+                val allDependingFiles = PluginManager.allDepending(file, b => !b.isProvided)
 
                 val allNames = allDependingFiles.map(_.getName)
                 val bundle = PluginManager.bundle(file)
 
                 bundle.foreach(PluginManager.remove)
-                allDependingFiles.filter(f ⇒ !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
+                allDependingFiles.filter(f => !PluginManager.bundle(f).isDefined).foreach(_.recursiveDelete)
                 file.recursiveDelete
                 allNames
 
@@ -323,10 +323,10 @@ class RESTAPI(services: Services):
 
 
 
-  def getExecution[T](id: ExecutionId)(success: Execution ⇒ T) =
+  def getExecution[T](id: ExecutionId)(success: Execution => T) =
     moles.get(id) match
-      case None     ⇒ NotFound(Error("Execution not found").toJson)
-      case Some(ex) ⇒ success(ex)
+      case None     => NotFound(Error("Execution not found").toJson)
+      case Some(ex) => success(ex)
 
   def checkIsOMR[T](file: File)(f: => T) =
     if !file.exists()

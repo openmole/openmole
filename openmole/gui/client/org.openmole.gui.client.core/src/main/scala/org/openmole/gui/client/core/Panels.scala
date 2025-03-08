@@ -39,8 +39,8 @@ object Panels:
     def closeExpandable = panels.expandablePanel.set(None)
     def expandTo(el: HtmlElement, id: Int) =
       panels.expandablePanel.update:
-        case Some(ep: ExpandablePanel) ⇒ if (ep.id == id) None else Some(ExpandablePanel(id, el))
-        case None ⇒ Some(ExpandablePanel(id, el))
+        case Some(ep: ExpandablePanel) => if (ep.id == id) None else Some(ExpandablePanel(id, el))
+        case None => Some(ExpandablePanel(id, el))
 
   def apply() =
     val expandablePanel: Var[Option[Panels.ExpandablePanel]] = Var(None)

@@ -70,7 +70,7 @@ object JobScript:
     val init =
       val script = ListBuffer[String]()
 
-      proxy.foreach { p ⇒ script += s"export X509_USER_PROXY=$$PWD/$p" }
+      proxy.foreach { p => script += s"export X509_USER_PROXY=$$PWD/$p" }
 
       script += "ARGS=()"
       script += """while [[ $# -gt 0 ]]; do

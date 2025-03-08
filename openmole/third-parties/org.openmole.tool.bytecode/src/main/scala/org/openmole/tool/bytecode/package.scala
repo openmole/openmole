@@ -30,20 +30,20 @@ package object bytecode:
   object ClassSource:
     def path(c: ClassSource) =
       c match
-        case ClassFile(path, _) ⇒ path
-        case ClassByteCode(path, _) ⇒ path
+        case ClassFile(path, _) => path
+        case ClassByteCode(path, _) => path
 
     def openInputStream(c: ClassSource) =
       c match
-        case ClassFile(_, file) ⇒ file.bufferedInputStream()
-        case ClassByteCode(_, byteCode) ⇒ new ByteArrayInputStream(byteCode)
+        case ClassFile(_, file) => file.bufferedInputStream()
+        case ClassByteCode(_, byteCode) => new ByteArrayInputStream(byteCode)
 
     def allClasses(directory: File): Seq[ClassFile] =
       import java.nio.file._
       import scala.collection.JavaConverters._
       Files.walk(directory.toPath).
-        filter(p ⇒ Files.isRegularFile(p) && p.toFile.getName.endsWith(".class")).iterator().asScala.
-        map { p ⇒
+        filter(p => Files.isRegularFile(p) && p.toFile.getName.endsWith(".class")).iterator().asScala.
+        map { p =>
           val path = directory.toPath.relativize(p)
           ClassFile(path.toString, p.toFile)
         }.toList

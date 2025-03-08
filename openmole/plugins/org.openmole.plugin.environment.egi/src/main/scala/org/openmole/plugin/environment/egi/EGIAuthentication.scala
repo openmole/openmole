@@ -47,7 +47,7 @@ object EGIAuthentication extends JavaLogger {
 
   def CACertificatesDir(implicit workspace: Workspace, preference: Preference): File =
     (workspace.persistentDir / "CACertificates").updateIfTooOld(preference(EGIEnvironment.CACertificatesCacheTime)) {
-      caDir ⇒
+      caDir =>
         caDir.mkdir
         downloadCACertificates(preference(EGIEnvironment.CACertificatesSite), caDir)
     }
@@ -63,7 +63,7 @@ object EGIAuthentication extends JavaLogger {
       finally tis.close()
 
     val tarEntries = gridscale.http.list(site, "/")
-    tarEntries.foreach: tarEntry ⇒
+    tarEntries.foreach: tarEntry =>
       if (tarEntry.`type` != gridscale.FileType.Directory)
         gridscale.http.readStream[Unit](site, tarEntry.name, downloadCertificate(tarEntry.name))
 
@@ -88,7 +88,7 @@ object EGIAuthentication extends JavaLogger {
   def update(a: EGIAuthentication, test: Boolean = true)(implicit cypher: Cypher, workspace: Workspace, authenticationStore: AuthenticationStore) =
     if test then testPassword(a).get
     a match
-      case a: P12Certificate ⇒ Authentication.save[EGIAuthentication](a.copy(cypheredPassword = cypher.encrypt(a.cypheredPassword)), (_, _) => true)
+      case a: P12Certificate => Authentication.save[EGIAuthentication](a.copy(cypheredPassword = cypher.encrypt(a.cypheredPassword)), (_, _) => true)
 
   def apply()(implicit workspace: Workspace, authenticationStore: AuthenticationStore, cypher: Cypher) =
     Authentication.load[EGIAuthentication].headOption.map:
@@ -101,9 +101,9 @@ object EGIAuthentication extends JavaLogger {
   //    serverURLs: Seq[String],
   //    voName:     String,
   //    fqan:       Option[String]
-  //  )(implicit cypher: Cypher, workspace: Workspace, preference: Preference): () ⇒ GlobusAuthentication.Proxy =
+  //  )(implicit cypher: Cypher, workspace: Workspace, preference: Preference): () => GlobusAuthentication.Proxy =
   //    a match {
-  //      case a: P12Certificate ⇒
+  //      case a: P12Certificate =>
   //        VOMSAuthentication.setCARepository(EGIAuthentication.CACertificatesDir)
   //        val p12 =
   //          P12VOMSAuthentication(
@@ -115,7 +115,7 @@ object EGIAuthentication extends JavaLogger {
   //            fqan
   //          )
   //
-  //        () ⇒ implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
+  //        () => implicitly[GlobusAuthenticationProvider[P12VOMSAuthentication]].apply(p12)
   //    }
   //
 
@@ -138,18 +138,18 @@ object EGIAuthentication extends JavaLogger {
       def vomses = voms.map(v => Seq(v)) orElse getVOMS(voName)
 
       vomses match
-        case Some(vomses) ⇒ util.Try(findFirstWorking(vomses)(queryProxy, "VOMS server"))
-        case None         ⇒ util.Failure(new UserBadDataError(s"No VOMS server found for VO $voName"))
+        case Some(vomses) => util.Try(findFirstWorking(vomses)(queryProxy, "VOMS server"))
+        case None         => util.Failure(new UserBadDataError(s"No VOMS server found for VO $voName"))
 
   def testPassword[A: EGIAuthenticationInterface](a: A) =
     a match
-      case a: P12Certificate ⇒ P12Authentication.testPassword(P12Authentication(a.certificate, a.password))
+      case a: P12Certificate => P12Authentication.testPassword(P12Authentication(a.certificate, a.password))
 
   def testProxy[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
-    proxy(a, voName, None, None).map(_ ⇒ true)
+    proxy(a, voName, None, None).map(_ => true)
 
   def testDIRACAccess[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
-    util.Try(getToken(a, voName)).map(_ ⇒ true)
+    util.Try(getToken(a, voName)).map(_ => true)
 
   def getToken[A: EGIAuthenticationInterface](a: A, voName: String)(implicit workspace: Workspace, preference: Preference) =
     HTTP.withHTTP:
@@ -178,7 +178,7 @@ case class P12Certificate(private[egi] val cypheredPassword: String, certificate
 
 object EGIAuthenticationInterface:
   implicit def p12CertificateIsEGIAuthentication: EGIAuthenticationInterface[EGIAuthentication] =
-    case p12: P12Certificate ⇒ P12Authentication(p12.certificate, p12.password)
+    case p12: P12Certificate => P12Authentication(p12.certificate, p12.password)
 
 trait EGIAuthenticationInterface[A]:
   def apply(a: A): gridscale.authentication.P12Authentication

@@ -2,7 +2,9 @@
 package org.openmole.plugin.method.directsampling
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.context.Variable
 import org.openmole.core.workflow.mole.MoleCapsule
@@ -11,14 +13,14 @@ import org.openmole.plugin.tool.pattern._
 import org.scalatest._
 import org.openmole.core.workflow.test._
 
-class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.Stubs._
 
-  "Direct sampling" should "transmit explored inputs" in {
+  "Direct sampling" should "transmit explored inputs" in:
     val i = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context
       } set (inputs += i)
@@ -30,9 +32,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
       )
 
     mole.run
-  }
 
-  "Grouping" should "be accepted on direct sampling" in {
+  it should "be accepted grouping" in:
     val i = Val[Int]
 
     val d = DirectSampling(
@@ -41,9 +42,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     )
 
     val dsl: DSL = d hook display by 10
-  }
 
-  "Direct Sampling" should "be hookable" in {
+  it should "be hookable" in:
     val i = Val[Int]
 
     val d = DirectSampling(
@@ -53,14 +53,14 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     (d hook TestHook()): DSL
     (d hook display by 10): DSL
-  }
 
-  it should "transmit explored inputs to replicated model" in {
+
+  it should "transmit explored inputs to replicated model" in:
     val i = Val[Int]
     val seed = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context
       } set (inputs += (i, seed))
@@ -79,15 +79,14 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
       )
 
     mole.run
-  }
 
-  it should "transmit explored inputs to replicated model even wrapped in a task" in {
+  it should "transmit explored inputs to replicated model even wrapped in a task" in:
     val i = Val[Int]
     val j = Val[Int]
     val seed = Val[Int]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(1)
         context + (j -> 9)
       } set (inputs += (i, seed), outputs += j)
@@ -111,9 +110,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val m: org.openmole.core.workflow.mole.MoleExecution = mole
 
     mole.run
-  }
 
-  it should "compose with loop" in {
+  it should "compose with loop" in:
     val counter = new AtomicInteger(0)
 
     val step = Val[Long]
@@ -121,7 +119,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val l = Val[Double]
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         counter.incrementAndGet()
         context + (step -> (context(step) + 1))
       } set (
@@ -145,9 +143,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     mole.run
 
     counter.intValue() should equal(12)
-  }
 
-  it should "transmit inputs" in {
+  it should "transmit inputs" in:
     val l = Val[Double]
     val i = Val[Int]
 
@@ -157,7 +154,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     )
 
     val model =
-      TestTask { context ⇒
+      TestTask { context =>
         context(l) should equal(2.0)
         context
       } set (
@@ -172,9 +169,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         )
 
     mole.run
-  }
 
-  it should "transmit explored value" in {
+  it should "transmit explored value" in:
     val l = Val[Double]
     val i = Val[Int]
     val seed = Val[Int]
@@ -203,9 +199,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         ) -- agg
 
     mole.run
-  }
 
-  it should "transmit explored value to post aggregation task" in {
+  it should "transmit explored value to post aggregation task" in:
     val l = Val[Double]
     val i = Val[Int]
     val j = Val[Int]
@@ -229,9 +224,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         ) -- globalAgg
 
     mole.run
-  }
 
-  it should "transmit explored value to a hook in an nested exploration" in {
+  it should "transmit explored value to a hook in an nested exploration" in:
     val l = Val[Double]
     val i = Val[Double]
     val seed = Val[Int]
@@ -246,9 +240,8 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
       )
 
     mole.run
-  }
 
-  it should "accept display hook" in {
+  it should "accept display hook" in:
     val l = Val[Double]
 
     val model = EmptyTask() set (inputs += l)
@@ -261,7 +254,6 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     (ds hook display): DSL
     (ds hook display hook "/tmp/test.csv"): DSL
-  }
 
   "Replication" should "be serializable" in:
     val l = Val[Long]
@@ -277,4 +269,85 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val r2 = serializeDeserialize(replication)
     r2.run()
 
-}
+  "SingleRun" should "support assignment syntax" in:
+    val x = Val[Double]
+    val y = Val[Int]
+    val a = Val[Array[String]]
+
+    SingleRun(
+      evaluation = EmptyTask(),
+      input = Seq(
+        x := 10.0
+      )
+    )
+
+    SingleRun(
+      evaluation = EmptyTask(),
+      input = Seq(
+        x := 10.0,
+        y := 10,
+        a := Array("test", "test")
+      )
+    )
+
+  it should "provide inputs to the task" in :
+    val x = Val[Double]
+
+    val task = EmptyTask() set (inputs += x)
+
+    SingleRun(
+      evaluation = task,
+      input = Seq(
+        x := 10.0
+      )
+    ).run
+
+  it should "be able to tranmit inputs to the task" in :
+    val x = Val[Double]
+    val y = Val[Double]
+
+    val task1 = EmptyTask() set(outputs += y, y := 1.0)
+    val task = EmptyTask() set (inputs += (x, y))
+
+    val dsl =
+      task1 -- 
+        SingleRun(
+          evaluation = task,
+          input = Seq(
+            x := 10.0
+          )
+        )
+    
+    dsl.run
+
+  it should "output a scalar variable" in :
+    val x = Val[Double]
+    val y = Val[Double]
+    val ya = Val[Array[Double]]
+
+    val task = EmptyTask() set (inputs += x, outputs += (y, ya))
+
+    val run: DSL =
+      SingleRun(
+        evaluation = task,
+        input = Seq(
+          x := 10.0
+        )
+      )
+
+    run.outputs.find(_.name == "y").get should equal(y)
+    run.outputs.find(_.name == "ya").get should equal(ya)
+
+
+  it should "delegate the task" in :
+
+    val seed = Val[Int]
+    val task = EmptyTask()
+
+    val run: DSL =
+      SingleRun(
+        evaluation = Replication(task, seed = seed, sample = 10),
+        input = Seq()
+      )
+
+    DSL.delegate(run).head should equal(task)

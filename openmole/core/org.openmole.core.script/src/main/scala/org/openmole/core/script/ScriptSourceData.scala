@@ -17,8 +17,8 @@ object ScriptSourceData:
 
   def scriptContent(scriptData: ScriptSourceData) =
     scriptData match
-      case NoData        ⇒ ""
-      case s: ScriptData ⇒ s.content
+      case NoData        => ""
+      case s: ScriptData => s.content
 
 
 sealed trait ScriptSourceData

@@ -55,7 +55,7 @@ object TemplateFileTask:
    file: Seq[(File, Val[File])] = Seq(),
    variable: Seq[(Val[File], Val[File])] = Seq())(using sourcecode.Name, DefinitionScope): FromContextTask =
     val expanded = file.map: (template, v) =>
-      template.withInputStream: is ⇒
+      template.withInputStream: is =>
         (template.getName, ExpandedString(is), v)
 
     Task("TemplateFileTask"): p =>
@@ -73,7 +73,7 @@ object TemplateFileTask:
         for
           (v, output) <- variable
         yield
-          val expanded = context(v).withInputStream { is ⇒ ExpandedString(is).from(context) }
+          val expanded = context(v).withInputStream { is => ExpandedString(is).from(context) }
           val file = executionContext.moleExecutionDirectory.newFile("template", ".tmp")
           file.content = expanded
           Variable(output, file)

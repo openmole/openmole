@@ -93,15 +93,15 @@ object SSHStorage:
 
 
   def isConnectionError(t: Throwable) = t match
-    case _: _root_.gridscale.ssh.ConnectionError ⇒ true
-    case _: _root_.gridscale.authentication.AuthenticationException ⇒ true
-    case _ ⇒ false
+    case _: _root_.gridscale.ssh.ConnectionError => true
+    case _: _root_.gridscale.authentication.AuthenticationException => true
+    case _ => false
 
 
-def sshRoot[S](home: String, child: (String, String) ⇒ String, sharedDirectory: Option[String]) =
+def sshRoot[S](home: String, child: (String, String) => String, sharedDirectory: Option[String]) =
   sharedDirectory match
-    case Some(p) ⇒ p
-    case None    ⇒ child(home, ".openmole/.tmp/ssh/")
+    case Some(p) => p
+    case None    => child(home, ".openmole/.tmp/ssh/")
 
 def localStorage(
   environment:     BatchEnvironment,
@@ -115,7 +115,7 @@ def localStorage(
 
 def localStorageSpace(local: LocalStorage)(using preference: Preference) =
   AccessControl.defaultPrirority:
-    HierarchicalStorageSpace.create(local, local.root, local.id, _ ⇒ false)
+    HierarchicalStorageSpace.create(local, local.root, local.id, _ => false)
 
 def sshStorage(
   user:                 String,
@@ -206,11 +206,11 @@ def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: Environme
       () => refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
       () => StorageService.id(storage),
       priority => state(job, priority),
-      priority ⇒ delete(job, priority),
-      priority ⇒ stdOutErr(job, priority),
+      priority => delete(job, priority),
+      priority => stdOutErr(job, priority),
       download,
-      () ⇒ outputPath,
-      priority ⇒ clean(priority)
+      () => outputPath,
+      priority => clean(priority)
     )
   catch
     case t: Throwable =>
@@ -220,8 +220,8 @@ def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: Environme
 
 def cleanSSHStorage(storage: Either[(StorageSpace, LocalStorage), (StorageSpace, SSHStorage)], background: Boolean)(using services: BatchEnvironment.Services, s: _root_.gridscale.ssh.SSH, priority: AccessControl.Priority) =
   storage match
-    case Left((space, local)) ⇒ HierarchicalStorageSpace.clean(local, space,background)
-    case Right((space, ssh))  ⇒ HierarchicalStorageSpace.clean(ssh, space, background)
+    case Left((space, local)) => HierarchicalStorageSpace.clean(local, space,background)
+    case Right((space, ssh))  => HierarchicalStorageSpace.clean(ssh, space, background)
 
 
 object SSHProxy:

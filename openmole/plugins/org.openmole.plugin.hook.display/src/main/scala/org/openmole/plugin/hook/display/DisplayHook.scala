@@ -24,17 +24,17 @@ import java.io.PrintStream
 object DisplayHook {
 
   def apply(toDisplay: FromContext[String])(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextHook =
-    Hook("DisplayHook") { parameters ⇒
+    Hook("DisplayHook") { parameters =>
       import parameters._
       outputRedirection.output.println(toDisplay.from(context))
       context
     } withValidate { toDisplay.validate }
 
   def apply(out: PrintStream, prototypes: Val[?]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): Hook =
-    Hook("DisplayHook") { parameters ⇒
+    Hook("DisplayHook") { parameters =>
       import parameters._
       if (!prototypes.isEmpty) {
-        val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Val[Any]])) *)
+        val filtered = Context(prototypes.flatMap(p => context.variable(p.asInstanceOf[Val[Any]])) *)
         outputRedirection.output.println(filtered.toString)
       }
       else outputRedirection.output.println(context.toString)

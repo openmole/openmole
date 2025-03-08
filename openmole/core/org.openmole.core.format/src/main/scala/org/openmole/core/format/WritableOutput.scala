@@ -33,8 +33,8 @@ object WritableOutput {
 
   def file(writableOutput: WritableOutput) =
     writableOutput match {
-      case Store(file) ⇒ Some(file)
-      case _           ⇒ None
+      case Store(file) => Some(file)
+      case _           => None
     }
 
 }

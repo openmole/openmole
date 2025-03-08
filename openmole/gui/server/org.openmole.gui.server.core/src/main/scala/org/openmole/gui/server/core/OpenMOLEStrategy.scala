@@ -21,7 +21,7 @@
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-//class OpenMOLEtrategy(protected override val app: ScalatraBase, authenticated: () ⇒ Boolean) extends ScentryStrategy[UserID] {
+//class OpenMOLEtrategy(protected override val app: ScalatraBase, authenticated: () => Boolean) extends ScentryStrategy[UserID] {
 //
 //  def authenticate()(
 //    implicit
@@ -31,8 +31,8 @@
 //
 //    //println("pawword " + password)
 //    authenticated() match {
-//      case false ⇒ None
-//      case _ ⇒
+//      case false => None
+//      case _ =>
 //        // Workspace.setPassword(password)
 //        Some(UserID("FIXME"))
 //    }

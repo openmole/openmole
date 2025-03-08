@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
-import scalatags.Text.{ all ⇒ tags }
+import scalatags.Text.{ all => tags }
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 
@@ -81,7 +81,7 @@ object GUIServerServices {
     scala.util.Try(Workspace.clean(services.workspace))
     scala.util.Try(services.threadProvider.stop())
 
-  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level], password: Option[String])(f: GUIServerServices ⇒ T) =
+  def withServices[T](workspace: Workspace, httpProxy: Option[String], logLevel: Option[Level], logFileLevel: Option[Level], password: Option[String])(f: GUIServerServices => T) =
     val services = GUIServerServices(workspace, httpProxy, logLevel, logFileLevel, password)
     try f(services)
     finally dispose(services)
@@ -114,7 +114,7 @@ object GUIServlet:
     tags.head(
       tags.link(tags.rel := "icon", tags.href := "img/favicon.svg", tags.`type` := "img/svg+xml"),
       tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
-      cssFiles.map { f ⇒ tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
+      cssFiles.map { f => tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
       tags.script(tags.`type` := "text/javascript", tags.src := "js/plotly.min.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
       tags.script(tags.`type` := "text/javascript", tags.src := "js/nouislider.min.js"),

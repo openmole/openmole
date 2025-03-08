@@ -58,10 +58,10 @@ import Waiter._
 
 class ProcessStateWaiter(processingState: Var[ProcessState]) {
 
-  def withTransferWaiter[T <: HTMLElement](foregroundColor: String = "black")(f: ProcessState ⇒ HtmlElement): HtmlElement = {
+  def withTransferWaiter[T <: HTMLElement](foregroundColor: String = "black")(f: ProcessState => HtmlElement): HtmlElement = {
 
     div(
-      child <-- processingState.signal.map { pState ⇒
+      child <-- processingState.signal.map { pState =>
         val ratio = pState.ratio
         val waiterSpan = div(
           ext.flexColumn, alignItems.center,
@@ -71,9 +71,9 @@ class ProcessStateWaiter(processingState: Var[ProcessState]) {
         )
 
         pState match {
-          case x @ (Processing(_) | Finalizing(_, _)) ⇒ waiterSpan
-          case y @ (Processed(_))                     ⇒ f(pState)
-          case _                                      ⇒ div()
+          case x @ (Processing(_) | Finalizing(_, _)) => waiterSpan
+          case y @ (Processed(_))                     => f(pState)
+          case _                                      => div()
         }
       }
     )
@@ -90,8 +90,8 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
 
     val processing: Var[HtmlElement] = Var(waiter(foregroundColor))
     waitingForFuture.andThen {
-      case Success(s) ⇒ processing.set(onsuccessElement)
-      case Failure(_) ⇒ processing.set(div("Failed to load data"))
+      case Success(s) => processing.set(onsuccessElement)
+      case Failure(_) => processing.set(div("Failed to load data"))
     }
 
     div(
@@ -101,16 +101,16 @@ class FutureWaiter[S](waitingForFuture: Future[S]) {
 
   def withFutureWaiterAndSideEffect[T <: HTMLElement](
     waitingString:    String,
-    onsuccessElement: S ⇒ Any,
+    onsuccessElement: S => Any,
     foregroundColor: String = "black"
   ): HtmlElement = {
 
     val processing: Var[HtmlElement] = Var(waiter(foregroundColor))
     waitingForFuture.andThen {
-      case Success(s) ⇒
+      case Success(s) =>
         onsuccessElement(s)
         processing.set(div())
-      case Failure(_) ⇒ processing.set(div("Failed to load data"))
+      case Failure(_) => processing.set(div("Failed to load data"))
     }
 
     div(child <-- processing.signal)

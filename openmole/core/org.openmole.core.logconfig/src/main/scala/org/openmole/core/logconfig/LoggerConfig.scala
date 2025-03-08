@@ -17,7 +17,7 @@
 
 package org.openmole.core.logconfig
 
-import org.apache.log4j.{ Appender ⇒ L4JAppender, Level ⇒ L4JLevel, Logger ⇒ L4JLogger }
+import org.apache.log4j.{ Appender => L4JAppender, Level => L4JLevel, Logger => L4JLogger }
 import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 

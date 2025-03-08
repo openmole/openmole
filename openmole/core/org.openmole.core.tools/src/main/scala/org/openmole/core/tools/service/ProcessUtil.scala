@@ -35,7 +35,7 @@ object ProcessUtil {
       pump.start
       try process.waitFor
       catch {
-        case e: Throwable ⇒
+        case e: Throwable =>
           def kill(p: ProcessHandle) = p.destroyForcibly()
           process.descendants().forEach(kill)
           kill(process.toHandle)

@@ -26,7 +26,7 @@ object LocalHostName {
   @transient lazy val localHostName: Option[String] =
     try Some(InetAddress.getLocalHost.getCanonicalHostName)
     catch {
-      case _: Throwable ⇒ None
+      case _: Throwable => None
     }
 
 }

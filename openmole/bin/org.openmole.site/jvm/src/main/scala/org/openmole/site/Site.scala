@@ -66,18 +66,18 @@ object Site {
                          )
 
     @tailrec def parse(args: List[String], c: Parameters = Parameters()): Parameters = args match {
-      case "--target" :: tail ⇒ parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
-      case "--test" :: tail ⇒ parse(tail, c.copy(test = true))
-//      case "--test-urls" :: tail ⇒ parse(tail, c.copy(testUrls = true))
-      case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-      case Nil ⇒ c
+      case "--target" :: tail => parse(tail.tail, c.copy(target = tail.headOption.map(new File(_))))
+      case "--test" :: tail => parse(tail, c.copy(test = true))
+//      case "--test-urls" :: tail => parse(tail, c.copy(testUrls = true))
+      case s :: tail => parse(tail, c.copy(ignored = s :: c.ignored))
+      case Nil => c
     }
 
     val parameters = parse(args.toList.map(_.trim))
 
     val dest = parameters.target match {
-      case Some(t) ⇒ t
-      case None ⇒ throw new RuntimeException("Missing argument --target")
+      case Some(t) => t
+      case None => throw new RuntimeException("Missing argument --target")
     }
 
     if parameters.test then Test.generate(dest)
@@ -90,7 +90,7 @@ object Site {
 
       // def mdFiles = (parameters.resources.get / "md").listFilesSafe.filter(_.getName.endsWith(".md"))
 
-      object Site { site ⇒
+      object Site { site =>
         def headFrags(page: org.openmole.site.Page) =
           Seq(
             scalatags.Text.tags2.title(page.title),
@@ -123,23 +123,23 @@ object Site {
 
           val (sitePage, elementClass) =
             pageTree.page match
-              case _ ⇒ (UserGuide.integrate(pageTree), `class` := "page-element")
+              case _ => (UserGuide.integrate(pageTree), `class` := "page-element")
 
           body(position := "relative", minHeight := "100%")(
             Menu.build(sitePage),
             div(id := "main-content")(
               sitePage.header(
-                pageTree.source.map(source ⇒ tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn, btn_danger))(stylesheet.suggest)
+                pageTree.source.map(source => tools.linkButton("Suggest edits", tools.modificationLink(source), classIs(btn, btn_danger))(stylesheet.suggest)
                 )),
               div(elementClass, id := "padding-element")(
                 if (pageTree.name == DocumentationPages.documentation.name) div
-                else sitePage.parents.map { p ⇒ innerLink(p.page, p.name) }.distinct.reduceLeftOption((x1, x2) ⇒ span(x1, span(" > "), x2)).getOrElse(span),
+                else sitePage.parents.map { p => innerLink(p.page, p.name) }.distinct.reduceLeftOption((x1, x2) => span(x1, span(" > "), x2)).getOrElse(span),
                 sitePage.element
               )
             ),
             sitePage match {
-              case s: IntegratedPage ⇒ Seq(s.leftMenu) ++ s.rightMenu.toSeq
-              case _ ⇒ div()
+              case s: IntegratedPage => Seq(s.leftMenu) ++ s.rightMenu.toSeq
+              case _ => div()
             },
             Footer.build,
             //onload := "SiteJS.toto();",
@@ -153,17 +153,17 @@ object Site {
           def commonJS = s"$siteJS.loadIndex(index);"
 
           sitepage.page match
-            case DocumentationPages.profile      ⇒ s"$siteJS.profileAnimation();" + commonJS
-            case DocumentationPages.pse          ⇒ s"$siteJS.pseAnimation();" + commonJS
-            case DocumentationPages.simpleSAFire ⇒ s"$siteJS.sensitivityAnimation();" + commonJS
-            case _                               ⇒ commonJS
+            case DocumentationPages.profile      => s"$siteJS.profileAnimation();" + commonJS
+            case DocumentationPages.pse          => s"$siteJS.pseAnimation();" + commonJS
+            case DocumentationPages.simpleSAFire => s"$siteJS.sensitivityAnimation();" + commonJS
+            case _                               => commonJS
 
 
         def generateHtml(outputRoot: File) =
           import scalatags.Text.all._
           outputRoot.mkdirs()
 
-          val res = Pages.all.map: page ⇒
+          val res = Pages.all.map: page =>
             val txt = html(
               head(headFrags(page)),
               bodyFrag(page)
@@ -181,11 +181,11 @@ object Site {
 
         lazy val pagesFrag = Pages.all.map {
           _.content
-        } /*.toVector.traverseU { p ⇒ Pages.decorate(p).map(PageFrag(p, _)) }.run(new java.io.File("") /*parameters.resources.get*/)*/
+        } /*.toVector.traverseU { p => Pages.decorate(p).map(PageFrag(p, _)) }.run(new java.io.File("") /*parameters.resources.get*/)*/
 
-        def content = Pages.all.map { p ⇒ p.file → (site.headFrags(p), p.content) }.toMap
+        def content = Pages.all.map { p => p.file → (site.headFrags(p), p.content) }.toMap
 
-        // def content = //pagesFrag.map { case PageFrag(p, f) ⇒ p.file → (site.headFrags(p), f) }.toMap
+        // def content = //pagesFrag.map { case PageFrag(p, f) => p.file → (site.headFrags(p), f) }.toMap
 
       }
 
@@ -200,24 +200,24 @@ object Site {
       //    for {
       //      r ← Resource.marketResources(marketEntries)
       //    } r match {
-      //      //      case RenameFileResource(source, destination) ⇒
+      //      //      case RenameFileResource(source, destination) =>
       //      //        val from = parameters.resources.get / source
       //      //        val f = new File(dest, destination)
       //      //        from copy f
-      //      //      case ArchiveResource(name, dir) ⇒
+      //      //      case ArchiveResource(name, dir) =>
       //      //        val f = new File(dest, dir)
       //      //        f.mkdirs
       //      //        val resource = parameters.resources.get / name
       //      //        withClosable(new TarInputStream(new GZIPInputStream(new FileInputStream(resource)))) {
       //      //          _.extract(f)
       //      //        }
-      //      case MarketResource(entry) ⇒
+      //      case MarketResource(entry) =>
       //        val f = new File(dest, entry.entry.name)
       //        entry.location copy f
       //    }
 
       //
-      //  def generateModules(baseDirectory: File, moduleLocation: File ⇒ String, index: File) = {
+      //  def generateModules(baseDirectory: File, moduleLocation: File => String, index: File) = {
       //    import org.json4s._
       //    import org.json4s.jackson.Serialization
       //    implicit val formats = Serialization.formats(NoTypeHints)

@@ -27,7 +27,7 @@ object URLImportPanel:
 
       def doDownload(url: String) =
         downloading.set(Processing())
-        api.downloadHTTP(url, sp, extractCheckBox.checked.now(), overwriteSwitch.checked.now()).foreach { d ⇒
+        api.downloadHTTP(url, sp, extractCheckBox.checked.now(), overwriteSwitch.checked.now()).foreach { d =>
           downloading.set(Processed())
           panels.treeNodePanel.refresh
           panels.closeExpandable
@@ -44,7 +44,7 @@ object URLImportPanel:
 
 
     def deleteFileAndDownloadURL(sp: SafePath, url: String) =
-      api.deleteFiles(Seq(sp)).foreach { d ⇒
+      api.deleteFiles(Seq(sp)).foreach { d =>
         download(url)
       }
 
@@ -55,9 +55,9 @@ object URLImportPanel:
 
     val downloadButton = button(
       cls := "btn btn-purple",
-      downloading.withTransferWaiter() { _ ⇒ span("Download") },
+      downloading.withTransferWaiter() { _ => span("Download") },
       height := "38", width := "150", marginTop := "20",
-      onClick --> { _ ⇒ download(urlInput.ref.value) }
+      onClick --> { _ => download(urlInput.ref.value) }
     )
 
     div(flexColumn,

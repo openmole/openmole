@@ -41,7 +41,7 @@ object utils:
   def workspaceRoot(implicit workspace: Workspace) = workspace.location
 
   def allPluggableIn(path: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
-    path.toFile.listFilesSafe.filter { f ⇒ PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
+    path.toFile.listFilesSafe.filter { f => PluginManager.isBundle(f) }.map(_.toSafePath).toSeq
 
   def treeNodeToSafePath(tnd: TreeNodeData, parent: SafePath): SafePath =
     parent ++ tnd.name
@@ -54,8 +54,8 @@ object utils:
 
   def fileToSafePath(f: File)(implicit context: ServerFileSystemContext = ServerFileSystemContext.Project, workspace: Workspace): SafePath =
     context match
-      case ServerFileSystemContext.Project ⇒ SafePath(getPathArray(f, Some(projectsDirectory)), context)
-      case ServerFileSystemContext.Absolute ⇒ SafePath(getPathArray(f, None), context)
+      case ServerFileSystemContext.Project => SafePath(getPathArray(f, Some(projectsDirectory)), context)
+      case ServerFileSystemContext.Absolute => SafePath(getPathArray(f, None), context)
       case ServerFileSystemContext.Authentication => SafePath(getPathArray(f, Some(authenticationKeysDirectory)), context)
 
   def safePathToFile(s: SafePath)(using workspace: Workspace): File =
@@ -71,8 +71,8 @@ object utils:
       getFile0(paths, root)
 
     s.context match
-      case ServerFileSystemContext.Project ⇒ getFile(Some(projectsDirectory), s.path.value)
-      case ServerFileSystemContext.Absolute ⇒ getFile(Some(File("/")), s.path.value)
+      case ServerFileSystemContext.Project => getFile(Some(projectsDirectory), s.path.value)
+      case ServerFileSystemContext.Absolute => getFile(Some(File("/")), s.path.value)
       case ServerFileSystemContext.Authentication => getFile(Some(authenticationKeysDirectory), s.path.value)
 
   def isPlugged(file: File, pluggedList: Seq[Plugin])(implicit workspace: Workspace): Boolean =
@@ -149,7 +149,7 @@ object utils:
       val currentFile = safePathToFile(path)
 
       def treeNodesData =
-        currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f ⇒
+        currentFile.listFilesSafe.toSeq.filter(filterHidden).flatMap: f =>
           val gitStatus = currentDirGit match
             case Some(g: Git) =>
               val relativeName = GitService.relativeName(f, g)
@@ -190,14 +190,14 @@ object utils:
     safePathToFile(safePath).exists
 
   def existsIn(safePaths: Seq[SafePath], to: SafePath)(implicit workspace: Workspace): Seq[SafePath] =
-    safePaths.map { sp ⇒
+    safePaths.map { sp =>
       to ++ sp.name
     }.filter(exists)
 
   def copyFiles(safePaths: Seq[(SafePath, SafePath)], overwrite: Boolean)(implicit workspace: Workspace): Seq[SafePath] =
     import org.openmole.core.format.OMRFormat
     val existing = ListBuffer[SafePath]()
-    safePaths.foreach: (p, d) ⇒
+    safePaths.foreach: (p, d) =>
       val destination = d.toFile
 
       def copy(): Unit =
@@ -223,7 +223,7 @@ object utils:
     else f.recursiveDelete
 
   def deleteFiles(safePaths: Seq[SafePath])(implicit workspace: Workspace): Unit =
-    safePaths.foreach: sp ⇒
+    safePaths.foreach: sp =>
       deleteFile(sp)
 
   def deleteEmptyDirectories(s: SafePath)(using workspace: Workspace) =
@@ -241,20 +241,20 @@ object utils:
   val webpackJsonPackage = "package.json"
   val nodeModulesFileName = "node_modules.zip"
 
-  def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File ⇒ Unit)(implicit fileService: FileService, newFile: TmpDirectory) =
+  def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File => Unit)(implicit fileService: FileService, newFile: TmpDirectory) =
     import org.openmole.core.fileservice._
 
     def hash(f: File) = hashFile.getOrElse(new File(f.toString + "-hash"))
 
-    lockFile(file).withLock: _ ⇒
+    lockFile(file).withLock: _ =>
       val hashFile = hash(file)
       lazy val currentHash = fileService.hashNoCache(file).toString
       val upToDate =
         if (!file.exists || !hashFile.exists) false
         else
           Try(hashFile.content) match
-            case Success(v) ⇒ currentHash == v
-            case Failure(_) ⇒
+            case Success(v) => currentHash == v
+            case Failure(_) =>
               hashFile.delete
               false
 
@@ -264,11 +264,11 @@ object utils:
         hashFile.content = currentHash
 
 
-  def catchAll[T](f: ⇒ T): Try[T] =
+  def catchAll[T](f: => T): Try[T] =
     val res =
       try Success(f)
       catch
-        case t: Throwable ⇒ Failure(t)
+        case t: Throwable => Failure(t)
     res
 
   def authenticationKeysDirectory(implicit workspace: Workspace) = workspace.userDir / "keys"
@@ -276,7 +276,7 @@ object utils:
   def addPlugin(safePath: SafePath)(implicit workspace: Workspace, newFile: TmpDirectory): Seq[ErrorData] =
     val file = safePathToFile(safePath)
     val errors = org.openmole.core.pluginmanager.PluginManager.tryLoad(Seq(file))
-    errors.map(e ⇒ ErrorData(e._2)).toSeq
+    errors.map(e => ErrorData(e._2)).toSeq
 
 
   def removePlugin(safePath: SafePath)(implicit workspace: Workspace): Unit = synchronized {

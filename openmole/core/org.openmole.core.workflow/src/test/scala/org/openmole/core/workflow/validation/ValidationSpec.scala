@@ -44,7 +44,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(MissingInput(_, `p`, _)) => }
   }
 
-  "Validation" should "not detect a missing input error" in {
+  it should "not detect a missing input error" in {
     val p = Val[String]("t")
 
     val t1 = EmptyTask()
@@ -55,7 +55,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should be(true)
   }
 
-  "Validation" should "detect a type error" in {
+  it should "detect a type error" in {
     val pInt = Val[Int]("t")
     val pString = Val[String]("t")
 
@@ -68,7 +68,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(WrongType(_, `pString`, `pInt`)) => }
   }
 
-  "Validation" should "detect a topology error" in {
+  it should "detect a topology error" in {
     val p = Val[String]
 
     val t1 = EmptyTask()
@@ -80,7 +80,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     assert(!errors.isEmpty)
   }
 
-  "Validation" should "detect a duplicated transition" in {
+  it should "detect a duplicated transition" in {
     val t1 = EmptyTask()
     val t2 = EmptyTask()
 
@@ -90,7 +90,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     assert(!errors.isEmpty)
   }
 
-  "Validation" should "detect a missing input error due to datachannel filtering" in {
+  it should "detect a missing input error due to datachannel filtering" in {
     val p = Val[String]
 
     val t1 = TestTask { _ + (p, "test") } set (outputs += p)
@@ -105,7 +105,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(MissingInput(_, `p`, _)) => }
   }
 
-  "Validation" should "detect a missing input in the submole" in {
+  it should "detect a missing input in the submole" in {
     val p = Val[String]
 
     val t1 = EmptyTask()
@@ -119,7 +119,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
   }
 
-  "Validation" should "detect an incorect level of the last capsule of a mole task" in {
+  it should "detect an incorect level of the last capsule of a mole task" in {
     val t1 = EmptyTask()
     val t2 = EmptyTask()
 
@@ -130,7 +130,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(MoleTaskLastCapsuleProblem(_, _, _)) => }
   }
 
-  "Validation" should "not detect a missing input" in {
+  it should "not detect a missing input" in {
     val p = Val[String]
 
     val t1 = TestTask { _ + (p, "test") } set (outputs += p)
@@ -143,7 +143,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     assert(errors.isEmpty)
   }
 
-  "Validation" should "not detect a missing input when provided by the implicits" in {
+  it should "not detect a missing input when provided by the implicits" in {
     val p = Val[String]
 
     val t1 = TestTask { _ + (p, "test") } set (outputs += p)
@@ -159,17 +159,17 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     assert(errors.isEmpty)
   }
 
-  "Validation" should "detect a duplicated name error" in {
+  it should "detect a duplicated name error" in {
     val pInt = Val[Int]("t")
     val pString = Val[String]("t")
 
     val t1 = EmptyTask() set (outputs += (pInt, pString))
 
     val errors = Validation.duplicatedName(t1, Sources.empty, Hooks.empty)
-    errors.headOption should matchPattern { case Some(DuplicatedName(_, _, _, Output)) => }
+    errors.headOption should matchPattern { case Some(DuplicatedName(_, _, _, SlotType.Output)) => }
   }
 
-  "Validation" should "detect a missing input error for the hook" in {
+  it should "detect a missing input error for the hook" in {
     val i = Val[Int]
 
     val t1 = EmptyTask()
@@ -181,7 +181,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(MissingHookInput(_, _, _)) => }
   }
 
-  "Validation" should "detect a wrong input type error for the misc" in {
+  it should "detect a wrong input type error for the misc" in {
     val iInt = Val[Int]("i")
     val iString = Val[String]("i")
 
@@ -194,7 +194,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(WrongHookType(_, _, _, _)) => }
   }
 
-  "Validation" should "take into account outputs produced by a source" in {
+  it should "take into account outputs produced by a source" in {
     val t = Val[Int]
 
     val t1 = EmptyTask() set (inputs += t)
@@ -206,7 +206,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     assert(errors.isEmpty)
   }
 
-  "Validation" should "detect a missing input for a source" in {
+  it should "detect a missing input for a source" in {
     val t = Val[Int]
 
     val t1 = EmptyTask()
@@ -217,7 +217,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(MissingSourceInput(_, _, _)) => }
   }
 
-  "Validation" should "detect a data channel error when a data channel is going from a level to a lower level" in {
+  it should "detect a data channel error when a data channel is going from a level to a lower level" in {
     val i = Val[String]
 
     val exc = ExplorationTask(EmptySampling())
@@ -231,6 +231,38 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     val errors = Validation.dataChannelErrors(mole)
 
     errors.headOption should matchPattern { case Some(DataChannelNegativeLevelProblem(_)) => }
+  }
+
+  it should "detect a incoherent input in slot" in {
+    val pInt = Val[Int]("t")
+    val pString = Val[String]("t")
+
+    val t0 = EmptyTask()
+
+    val t1 = EmptyTask() set (outputs += pInt)
+    val t2 = EmptyTask() set (outputs += pString)
+    val t3 = EmptyTask() set (inputs += pInt)
+
+    val mole = t0 -- (t1, t2) -- t3
+
+    val errors = Validation.incoherentTypeAggregation(mole, Sources.empty, Hooks.empty)
+    errors.headOption should matchPattern { case Some(IncoherentTypeAggregation(_, _)) => }
+  }
+
+  it should "detect a incoherent input between slots" in {
+    val pInt = Val[Int]("t")
+    val pString = Val[String]("t")
+
+    val t0 = EmptyTask()
+
+    val t1 = EmptyTask() set (outputs += pInt)
+    val t2 = EmptyTask() set (outputs += pString)
+    val t3 = EmptyTask() set (inputs += pInt)
+
+    val mole = t0 -- (t1 -- Slot(t3), t2 -- Slot(t3))
+
+    val errors = Validation.incoherentTypeBetweenSlots(mole, Sources.empty, Hooks.empty)
+    errors.headOption should matchPattern { case Some(IncoherentTypesBetweenSlots(_, _, _)) => }
   }
 
   "Merge between aggregation and simple transition" should "be supported" in {
@@ -249,38 +281,6 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     val mole = (exploration -< t1 >- agg) & (exploration -- agg)
 
     assert(Validation(mole).isEmpty)
-  }
-
-  "Validation" should "detect a incoherent input in slot" in {
-    val pInt = Val[Int]("t")
-    val pString = Val[String]("t")
-
-    val t0 = EmptyTask()
-
-    val t1 = EmptyTask() set (outputs += pInt)
-    val t2 = EmptyTask() set (outputs += pString)
-    val t3 = EmptyTask() set (inputs += pInt)
-
-    val mole = t0 -- (t1, t2) -- t3
-
-    val errors = Validation.incoherentTypeAggregation(mole, Sources.empty, Hooks.empty)
-    errors.headOption should matchPattern { case Some(IncoherentTypeAggregation(_, _)) => }
-  }
-
-  "Validation" should "detect a incoherent input between slots" in {
-    val pInt = Val[Int]("t")
-    val pString = Val[String]("t")
-
-    val t0 = EmptyTask()
-
-    val t1 = EmptyTask() set (outputs += pInt)
-    val t2 = EmptyTask() set (outputs += pString)
-    val t3 = EmptyTask() set (inputs += pInt)
-
-    val mole = t0 -- (t1 -- Slot(t3), t2 -- Slot(t3))
-
-    val errors = Validation.incoherentTypeBetweenSlots(mole, Sources.empty, Hooks.empty)
-    errors.headOption should matchPattern { case Some(IncoherentTypesBetweenSlots(_, _, _)) => }
   }
 
   "Workflow with exploration and strainer" should "be ok" in {

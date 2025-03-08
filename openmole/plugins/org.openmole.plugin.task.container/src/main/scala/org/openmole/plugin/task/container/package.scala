@@ -78,7 +78,7 @@ def outputPathResolver(fileBindings: Seq[FileBinding], rootDirectory: File, cont
     fileBindings.
       map((local, bind) => (local, containerPathResolver(bind))).
       sortBy((_, bind) => bind.getPath.split("/").length).
-      findLast((_, bind) ⇒ isOneOfParents(bind, f)).
+      findLast((_, bind) => isOneOfParents(bind, f)).
       map: (local, bind) =>
         File(local) / relativiseFromParent(bind, f).getPath
 
@@ -128,8 +128,8 @@ object RunnableScript:
 
   def content(script: RunnableScript): String =
     script match
-      case RawScript(s)  ⇒ s
-      case FileScript(f) ⇒ f.content
+      case RawScript(s)  => s
+      case FileScript(f) => f.content
 
 
 sealed trait RunnableScript

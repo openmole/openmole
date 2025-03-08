@@ -23,7 +23,7 @@ import org.openmole.core.dsl.extension.*
 object SavePopulationHook:
 
   def resultVariables(t: EvolutionWorkflow, keepAll: Boolean, includeOutputs: Boolean, filter: Seq[String]) =
-    FromContext: p ⇒
+    FromContext: p =>
       import p._
       val state = context(t.stateVal)
 
@@ -40,7 +40,7 @@ object SavePopulationHook:
           ).from(context)
 
       val filterSet = filter.toSet
-      all.filter(v ⇒ !filterSet.contains(v.name))
+      all.filter(v => !filterSet.contains(v.name))
 
 
   def apply[F](
@@ -50,7 +50,7 @@ object SavePopulationHook:
     keepHistory:    Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[?]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) = Hook("SavePopulationHook") { p ⇒
+    filter:         Seq[Val[?]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) = Hook("SavePopulationHook") { p =>
     import p._
 
     val state = context(evolution.stateVal)

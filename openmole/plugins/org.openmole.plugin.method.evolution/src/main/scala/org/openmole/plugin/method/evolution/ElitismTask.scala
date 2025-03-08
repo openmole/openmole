@@ -23,7 +23,7 @@ import org.openmole.core.dsl.extension._
 object ElitismTask:
 
   def apply[T](evolution: EvolutionWorkflow)(using sourcecode.Name, DefinitionScope) =
-    Task("ElitismTask") { p ⇒
+    Task("ElitismTask") { p =>
       import p._
 
       val (newState, newPopulation) =
@@ -51,7 +51,7 @@ object ElitismTask:
 object IslandElitismTask:
 
   def apply[T](evolution: EvolutionWorkflow, islandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
-    Task("IslandElitismTask") { p ⇒
+    Task("IslandElitismTask") { p =>
       import p._
 
       def state = context(evolution.stateVal)

@@ -6,12 +6,12 @@ import org.openmole.tool.types.ToDouble
 object DeltaTask {
 
   def apply(objective: Delta*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Task("DeltaTask") { p ⇒
+    Task("DeltaTask") { p =>
       import p._
       context ++ objective.map {
-        case DeltaDouble(v, o) ⇒ Variable(v, math.abs(context(v) - o))
-        case DeltaInt(v, o)    ⇒ Variable(v, math.abs(context(v) - o))
-        case DeltaLong(v, o)   ⇒ Variable(v, math.abs(context(v) - o))
+        case DeltaDouble(v, o) => Variable(v, math.abs(context(v) - o))
+        case DeltaInt(v, o)    => Variable(v, math.abs(context(v) - o))
+        case DeltaLong(v, o)   => Variable(v, math.abs(context(v) - o))
       }
     } set (
       (inputs, outputs) ++= objective.map(Delta.v)
@@ -29,9 +29,9 @@ object DeltaTask {
 
     def v(delta: Delta) =
       delta match {
-        case DeltaDouble(v, _) ⇒ v
-        case DeltaInt(v, _)    ⇒ v
-        case DeltaLong(v, _)   ⇒ v
+        case DeltaDouble(v, _) => v
+        case DeltaInt(v, _)    => v
+        case DeltaLong(v, _)   => v
       }
 
   }

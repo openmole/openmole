@@ -28,7 +28,7 @@ package collection:
   // Avoid clash with iterableOfToArrayIsFix when T is of type Array[T]
   trait LowPriorityImplicits:
     given [T]: DiscreteDomain[Iterable[T], T] = DiscreteDomain(domain => Domain(domain.iterator))
-    given [T]: DiscreteFromContextDomain[Iterable[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
+    given [T]: DiscreteFromContextDomain[Iterable[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ => domain.iterator }))
     given [T]: FixDomain[Iterable[T], T] = FixDomain(domain => Domain(domain))
     given [T]: DomainSize[Iterable[T]] = DomainSize(domain => domain.size)
 
@@ -41,15 +41,15 @@ package object collection extends LowPriorityImplicits:
   given DomainStep[DoubleRange, Double] = DomainStep(r => r.step)
 
   given [T: ClassTag, A1[_]: ToArray]: DiscreteFromContextDomain[Iterable[A1[T]], Array[T]] =
-    DiscreteFromContextDomain: domain ⇒
+    DiscreteFromContextDomain: domain =>
       Domain(FromContext(_ => (domain.map(implicitly[ToArray[A1]].apply[T])).iterator))
 
   given [T: ClassTag, A1[_]: ToArray]: FixDomain[Iterable[A1[T]], Array[T]] = FixDomain(domain => Domain(domain.map(implicitly[ToArray[A1]].apply[T])))
   
-  given [T]: DiscreteFromContextDomain[Array[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ ⇒ domain.iterator }))
+  given [T]: DiscreteFromContextDomain[Array[T], T] = DiscreteFromContextDomain(domain => Domain(FromContext { _ => domain.iterator }))
   given [T]: FixDomain[Array[T], T] = FixDomain(domain => Domain(domain.toIterable))
   given [T]: DomainSize[Array[T]] = DomainSize(domain => domain.size)
-  //implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain ⇒ Domain(domain)
+  //implicit def iteratorIsDiscrete[T]: DiscreteFromContextDomain[Iterator[T], T] = domain => Domain(domain)
   given [T]: DiscreteFromContextDomain[FromContext[Iterator[T]], T] = DiscreteFromContextDomain(domain => Domain(domain))
 
   given Conversion[Val[Boolean], Factor[Vector[Boolean], Boolean]] = p => Factor(p, Vector(true, false))
@@ -57,7 +57,7 @@ package object collection extends LowPriorityImplicits:
   given [T]: DiscreteFromContextDomain[Val[Array[T]], T] =
     DiscreteFromContextDomain: domain =>
       Domain(
-        FromContext { p ⇒
+        FromContext { p =>
           p.context(domain).iterator
         },
         inputs = Seq(domain)

@@ -27,14 +27,7 @@ object UserBadDataError {
  * @param exception
  * @param message
  */
-class UserBadDataError(exception: Throwable, val message: String) extends Exception(message, exception) {
+class UserBadDataError(exception: Throwable, val message: String) extends Exception(message, exception):
+  def this(message: String) = this(null, message)
+  def this(e: Throwable) = this(e, null)
 
-  def this(message: String) = {
-    this(null, message)
-  }
-
-  def this(e: Throwable) = {
-    this(e, null)
-  }
-
-}

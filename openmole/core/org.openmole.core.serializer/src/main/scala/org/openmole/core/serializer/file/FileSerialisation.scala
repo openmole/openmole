@@ -34,8 +34,8 @@ object FileSerialisation:
   def filesInfo = "filesInfo.xml"
   def fileDir = "files"
 
-  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, serialize: (java.io.OutputStream, AnyRef) => Unit)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir ⇒
-    val fileInfo = HashMap() ++ files.map: file ⇒
+  def serialiseFiles(files: Iterable[File], tos: TarArchiveOutputStream, serialize: (java.io.OutputStream, AnyRef) => Unit)(implicit newFile: TmpDirectory) = newFile.withTmpDir: tmpDir =>
+    val fileInfo = HashMap() ++ files.map: file =>
       val name = UUID.randomUUID
       val toArchive =
         if file.isDirectory
@@ -50,7 +50,7 @@ object FileSerialisation:
 
       (name.toString, FileInfo(file.getPath, file.isDirectory, file.exists))
 
-    newFile.withTmpFile: tmpFile ⇒
+    newFile.withTmpFile: tmpFile =>
       tmpFile.withOutputStream(os => serialize(os, fileInfo))
       tos.addFile(tmpFile, fileDir + "/" + filesInfo)
 
@@ -60,7 +60,7 @@ object FileSerialisation:
     val fi = fileInfoFile.withInputStream(is => deserialize(is)).asInstanceOf[FilesInfo]
 
     HashMap() ++ fi.map:
-      case (name, FileInfo(originalPath, isDirectory, exists)) ⇒
+      case (name, FileInfo(originalPath, isDirectory, exists)) =>
         val fromArchive = new File(archiveExtractDir, fileDir + "/" + name)
 
         def fileContent =

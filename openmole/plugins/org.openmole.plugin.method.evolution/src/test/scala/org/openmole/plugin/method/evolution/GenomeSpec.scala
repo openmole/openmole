@@ -109,3 +109,10 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
 
 
+
+
+  "OSE fitness pattern" should "support the following cases" in:
+    def pattern(p: OSE.FitnessPattern) = p
+
+    val o = Val[Double]
+    pattern(o evaluate "o.map(x => math.abs(x - 28.0)).max" under 1)

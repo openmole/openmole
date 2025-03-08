@@ -35,8 +35,8 @@ object SSHAuthentication:
   given isGridScaleAuthentication: _root_.gridscale.ssh.SSHAuthentication[org.openmole.plugin.environment.ssh.SSHAuthentication] with
     override def login(a: org.openmole.plugin.environment.ssh.SSHAuthentication) =
       a match
-        case a: LoginPassword ⇒ a.login
-        case a: PrivateKey    ⇒ a.login
+        case a: LoginPassword => a.login
+        case a: PrivateKey    => a.login
 
     override def authenticate(a: org.openmole.plugin.environment.ssh.SSHAuthentication, sshClient: _root_.gridscale.ssh.sshj.SSHClient) =
       a match
@@ -78,7 +78,7 @@ object SSHAuthentication:
     Try:
       gridscale.ssh.SSH.withSSH(server):
           gridscale.ssh.home()
-        .map(_ ⇒ true)
+        .map(_ => true)
 
 
 sealed trait SSHAuthentication:

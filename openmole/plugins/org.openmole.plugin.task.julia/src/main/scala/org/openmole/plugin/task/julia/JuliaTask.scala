@@ -115,15 +115,15 @@ object JuliaTask:
         import org.json4s._
         import org.json4s.jackson.JsonMethods._
         val outputValues = parse(file.content)
-        (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+        (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { case (jvalue, v) => jValueToVariable(jvalue, v, unwrapArrays = true) }
 
       def inputMapping(dicoName: String): String =
         noFile(mapped.inputs).zipWithIndex.map {
-          (m, i) ⇒ s"${m.name} = $dicoName[\"${m.name}\"]"
+          (m, i) => s"${m.name} = $dicoName[\"${m.name}\"]"
         }.mkString("\n")
 
       def outputMapping: String =
-        s"""[${noFile(mapped.outputs).map { m ⇒ m.name }.mkString(",")}]"""
+        s"""[${noFile(mapped.outputs).map { m => m.name }.mkString(",")}]"""
 
 
       val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".jl")

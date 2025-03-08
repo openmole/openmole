@@ -42,9 +42,9 @@ object NetworkService:
     val hostURIOpt: Option[String] = preference.preferenceOption(NetworkService.httpProxyURI)
 
     (isEnabledOpt, hostURIOpt) match {
-      case (Some(false) | None, _) ⇒ None
-      case (_, Some(hostURI: String)) if hostURI.trim.isEmpty ⇒ None
-      case (_, Some(hostURI)) ⇒ Some(HttpHost(hostURI))
+      case (Some(false) | None, _) => None
+      case (_, Some(hostURI: String)) if hostURI.trim.isEmpty => None
+      case (_, Some(hostURI)) => Some(HttpHost(hostURI))
       case _ => None
     }
   }
@@ -82,8 +82,8 @@ object NetworkService:
 
   private def newClient(using networkService: NetworkService) =
     networkService.httpProxy match {
-      case Some(httpHost: HttpHost) ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
-      case _ ⇒ HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
+      case Some(httpHost: HttpHost) => HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).setProxy(httpHost.toHost).build()
+      case _ => HttpClients.custom().setConnectionManager(new BasicHttpClientConnectionManager()).build()
     }
 
   def withResponse[T](url: String, headers: Seq[(String, String)] = Seq.empty)(f: CloseableHttpResponse => T)(using NetworkService): T =
@@ -114,14 +114,14 @@ object NetworkService:
 
   def proxyVariables(using networkService: NetworkService) =
     networkService.httpProxy match
-      case Some(proxy) ⇒
+      case Some(proxy) =>
         Seq(
           "http_proxy" -> proxy.hostURI,
           "HTTP_PROXY" -> proxy.hostURI,
           "https_proxy" -> proxy.hostURI,
           "HTTPS_PROXY" -> proxy.hostURI
         )
-      case None ⇒ Seq()
+      case None => Seq()
 
 
 class NetworkService(val httpProxy: Option[NetworkService.HttpHost])

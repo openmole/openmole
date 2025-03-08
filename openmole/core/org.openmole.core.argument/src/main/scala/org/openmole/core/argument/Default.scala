@@ -31,4 +31,4 @@ import org.openmole.core.context.{Val, Variable}
  * @tparam T type of the Val
  */
 case class Default[T](prototype: Val[T], value: FromContext[T], `override`: Boolean):
-  def toVariable = value.map(v ⇒ Variable(prototype, v))
+  def toVariable = value.map(v => Variable(prototype, v))

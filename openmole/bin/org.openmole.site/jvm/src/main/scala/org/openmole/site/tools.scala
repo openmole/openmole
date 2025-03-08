@@ -51,7 +51,7 @@ object tools {
     def highlight(string: String, lang: String, clazz: Option[String] = Some("doc-code")) =
       val lines = string.split("\n", -1)
 
-      val modif: Seq[Modifier] = clazz.toSeq.map(c ⇒ cls := c)
+      val modif: Seq[Modifier] = clazz.toSeq.map(c => cls := c)
 
       if lines.length == 1
       then
@@ -101,23 +101,23 @@ object tools {
 
     def anchor(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match
-        case Some(t) ⇒ Seq(a(id := s"${shared.anchor(t)}", top := -60, position := "relative", display := "block"))
-        case None    ⇒ Seq()
+        case Some(t) => Seq(a(id := s"${shared.anchor(t)}", top := -60, position := "relative", display := "block"))
+        case None    => Seq()
 
-    def link(elements: Seq[Any]) = elements.collect { case x: String ⇒ x }.headOption
+    def link(elements: Seq[Any]) = elements.collect { case x: String => x }.headOption
     def linkIcon(elements: Seq[Any]): Seq[Modifier] =
       link(elements) match
-        case Some(t) ⇒ Seq(" ", a(href := s"#${shared.anchor(t)}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
-        case None    ⇒ Seq()
+        case Some(t) => Seq(" ", a(href := s"#${shared.anchor(t)}", tag("font")(size := 4, opacity := 0.4)("\uD83D\uDD17")))
+        case None    => Seq()
 
     def toModifier(element: Any): Modifier =
       element match
-        case e: String ⇒ e
-        case e: TypedTag[String] ⇒ e
-        case e: scalatags.generic.StylePair[Any, String] ⇒ e.s := e.v
-        case e: AttrPair ⇒ e
+        case e: String => e
+        case e: TypedTag[String] => e
+        case e: scalatags.generic.StylePair[Any, String] => e.s := e.v
+        case e: AttrPair => e
         case e: SeqFrag[_] => e
-        case _ ⇒ throw new RuntimeException("Unknown element type " + element.getClass)
+        case _ => throw new RuntimeException("Unknown element type " + element.getClass)
 
   object sitemap {
 
@@ -209,8 +209,8 @@ object tools {
     span(buttonStyle, `type` := "button", title)
 
   /*def getPageTitle(page: Page) = page.title match {
-    case None    ⇒ page.name
-    case Some(x) ⇒ x
+    case None    => page.name
+    case Some(x) => x
   }*/
 
   lazy val nav: String = "nav"

@@ -48,18 +48,18 @@ object OutputManager {
 
     parentThreadGroups(group).map(map.get).find(_.isDefined).map(_.get)
 
-  private def redirectedOutput[T](f: OutputStream ⇒ T) = output.synchronized {
+  private def redirectedOutput[T](f: OutputStream => T) = output.synchronized {
     findRedirect(Thread.currentThread().getThreadGroup, output) match
-      case None                               ⇒ f(systemOutput)
-      case Some(os) if os == outputDispatcher ⇒ f(systemOutput)
-      case Some(os)                           ⇒ f(os)
+      case None                               => f(systemOutput)
+      case Some(os) if os == outputDispatcher => f(systemOutput)
+      case Some(os)                           => f(os)
   }
 
-  private def redirectedError[T](f: OutputStream ⇒ T) = error.synchronized {
+  private def redirectedError[T](f: OutputStream => T) = error.synchronized {
     findRedirect(Thread.currentThread().getThreadGroup, error) match 
-      case None                              ⇒ f(systemError)
-      case Some(os) if os == errorDispatcher ⇒ f(systemError)
-      case Some(os)                          ⇒ f(os)
+      case None                              => f(systemError)
+      case Some(os) if os == errorDispatcher => f(systemError)
+      case Some(os)                          => f(os)
   }
 
   class RedirectedOutput extends OutputStream:
@@ -95,7 +95,7 @@ object OutputManager {
 
   case class Outputs(output: String, error: String)
 
-  def withStringOutput[T](f: ⇒ T): (T, Outputs) = {
+  def withStringOutput[T](f: => T): (T, Outputs) = {
     val o = StringPrintStream()
     val e = StringPrintStream()
     redirectOutput(o, e)
@@ -107,7 +107,7 @@ object OutputManager {
     (res, Outputs(o.toString, e.toString))
   }
 
-  def withStreamOutputs[T](out: PrintStream, err: PrintStream)(f: ⇒ T): T = {
+  def withStreamOutputs[T](out: PrintStream, err: PrintStream)(f: => T): T = {
     redirectOutput(out, err)
     val res =
       try f

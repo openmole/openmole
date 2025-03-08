@@ -61,7 +61,7 @@ object NetLogoContainerTask:
       val volumesValue = volumes(script, embedWorkspace)
       val preparedImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) ⇒ lv -> cv }, clearCache = clearContainerCache)
+        ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) => lv -> cv }, clearCache = clearContainerCache)
 
       import NetLogoContainerTask.{workspace, netLogoWorkspace}
 
@@ -113,7 +113,7 @@ object NetLogoContainerTask:
 
         def readOutputData(file: File) =
           val outputValues = executionContext.serializerService.deserialize[Array[AnyRef]](file)
-          (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) ⇒
+          (outputValues zip Mapped.noFile(mapped.outputs)).map: (value, v) =>
             AbstractNetLogoTask.netLogoValueToVal(value, v)
 
         createInputFile(inputFile)
@@ -135,7 +135,7 @@ object NetLogoContainerTask:
         resultContext ++ readOutputData(resultFile)
 
     .withValidate: info =>
-      Validate: p ⇒
+      Validate: p =>
         import p._
         val allInputs = External.PWD :: p.inputs.toList
         go.flatMap(_.validate(allInputs)) ++

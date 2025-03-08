@@ -46,7 +46,7 @@ object shared {
     lazy val rVersion = "4.0.2"
   }
 
-  def anchor(title: String) = title.filter(c ⇒ c.isLetterOrDigit)
+  def anchor(title: String) = title.filter(c => c.isLetterOrDigit)
 
   object link {
     // OpenMOLE

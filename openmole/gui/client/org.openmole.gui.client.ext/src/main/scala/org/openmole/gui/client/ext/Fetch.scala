@@ -67,7 +67,7 @@ class Fetch[API](api: EndpointsSettings => API) {
 
     val future = f(api(EndpointsSettings().withTimeout(timeout).withBaseUri(BasePath.value(baseURI))))
     future.andThen {
-      case f@Failure(_: scala.concurrent.TimeoutException) ⇒
+      case f@Failure(_: scala.concurrent.TimeoutException) =>
         stopTimeout
         if notifyError then Fetch.onTimeout()
         f
@@ -101,7 +101,7 @@ class Fetch[API](api: EndpointsSettings => API) {
         val throwable = Fetch.ServerError(e)
         Fetch.onFailed(throwable)
         Failure(throwable)
-      case Failure(t: scala.concurrent.TimeoutException) ⇒
+      case Failure(t: scala.concurrent.TimeoutException) =>
         stopTimeout
         Fetch.onTimeout()
         Failure(t)
@@ -117,8 +117,8 @@ class Fetch[API](api: EndpointsSettings => API) {
 //    r: API => scala.concurrent.Future[O],
 //    timeout: FiniteDuration = 60 seconds,
 //    warningTimeout: FiniteDuration = 10 seconds,
-//    onTimeout: () ⇒ Unit = () ⇒ {},
-//    onWarningTimeout: () ⇒ Unit = () ⇒ {},
+//    onTimeout: () => Unit = () => {},
+//    onWarningTimeout: () => Unit = () => {},
 //    onFailed: Throwable => Unit = _ => {})(action: O => R) = {
 //    //import scala.concurrent.ExecutionContext.Implicits.global
 //    //    org.openmole.gui.client.core.APIClient.uuid(()).future.onComplete { i => println("uuid " + i.get.uuid) }
@@ -131,7 +131,7 @@ class Fetch[API](api: EndpointsSettings => API) {
 //      onFailed = onFailed)
 //
 //    f.onComplete {
-//      case Success(r) ⇒ action(r)
+//      case Success(r) => action(r)
 //      case _ =>
 //    }
 //  }

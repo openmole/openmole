@@ -45,7 +45,7 @@ package file {
   import java.util
 
   trait FilePackage:
-    p ⇒
+    p =>
 
     type File = java.io.File
     def File(s: String): File = new File(s)
@@ -72,7 +72,7 @@ package file {
 
     implicit val fileOrdering: Ordering[File] = Ordering.by((_: File).getPath)
 
-    implicit def predicateToFileFilter(predicate: File ⇒ Boolean): FileFilter = p1 ⇒ predicate(p1)
+    implicit def predicateToFileFilter(predicate: File => Boolean): FileFilter = p1 => predicate(p1)
 
     def getCopyOptions(followSymlinks: Boolean) = Seq(StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING) ++
       (if (followSymlinks) Seq.empty[CopyOption] else Seq(LinkOption.NOFOLLOW_LINKS))
@@ -91,16 +91,16 @@ package file {
         else file.size == 0L
 
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
-      def listFilesSafe(filter: File ⇒ Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
+      def listFilesSafe(filter: File => Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
       def listFileSafeIterator = Files.list(file.toPath).iterator().asScala
       
-      def recursiveListFilesSafe(filter: File ⇒ Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
+      def recursiveListFilesSafe(filter: File => Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 
       def getParentFileSafe: File =
         file.getParentFile() match {
-          case null ⇒
+          case null =>
             if (file.isAbsolute) file else new File(".")
-          case f ⇒ f
+          case f => f
         }
 
       /////// copiers ////////
@@ -137,12 +137,12 @@ package file {
           _.copy(to, maxRead, timeout)
         }
 
-      def copyCompressFile(toF: File): File = withClosable(new GZIPOutputStream(toF.bufferedOutputStream())) { to ⇒
+      def copyCompressFile(toF: File): File = withClosable(new GZIPOutputStream(toF.bufferedOutputStream())) { to =>
         Files.copy(file, to)
         toF
       }
 
-      def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream())) { from ⇒
+      def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream())) { from =>
         Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
         toF
       }
@@ -156,13 +156,13 @@ package file {
         then move
         else
           Try(move) match
-            case Success(_) ⇒
-            case Failure(_) ⇒ DirUtils.move(file, to)
+            case Success(_) =>
+            case Failure(_) => DirUtils.move(file, to)
 
       def forceFileDelete = wrapError:
         try Files.deleteIfExists(file)
         catch
-          case t: Throwable ⇒
+          case t: Throwable =>
             FileTools.setAllPermissions(file)
             Files.deleteIfExists(file)
 
@@ -183,7 +183,7 @@ package file {
             val f = toProceed.remove(0)
             // wrap with try catch in case CARE Archive generates d--------- directories
             try
-              f.withDirectoryStream(): s ⇒
+              f.withDirectoryStream(): s =>
                 for
                   f ← s.asScala
                 do
@@ -191,7 +191,7 @@ package file {
                   then boundary.break(false)
                   else if (Files.isDirectory(f)) toProceed += f
             catch
-              case e: java.nio.file.AccessDeniedException ⇒ Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
+              case e: java.nio.file.AccessDeniedException => Logger.getLogger(this.getClass.getName).warning(s"Unable to browse directory ${e.getFile}")
 
           true
 
@@ -225,7 +225,7 @@ package file {
         else
           try Files.size(file)
           catch {
-            case e: NoSuchFileException ⇒ 0L
+            case e: NoSuchFileException => 0L
           }
 
       def mode =
@@ -268,7 +268,7 @@ package file {
       def content: String = content()
       def content(gz: Boolean = false): String =
         if gz
-        then withGzippedInputStream(is ⇒ Source.fromInputStream(is).mkString)
+        then withGzippedInputStream(is => Source.fromInputStream(is).mkString)
         else Files.readString(file.toPath)
 
       def append(s: String) = Files.write(file, s.getBytes, StandardOpenOption.APPEND)
@@ -282,7 +282,7 @@ package file {
       def contentOption =
         try Some(file.content)
         catch
-          case e: IOException ⇒ None
+          case e: IOException => None
 
       def isTextFile(bytes: Int = 10240) =
         withInputStream: is =>
@@ -321,9 +321,9 @@ package file {
         lastModification
 
       // TODO replace with DirectoryStream
-      def listRecursive(filter: File ⇒ Boolean = _ => true) =
+      def listRecursive(filter: File => Boolean = _ => true) =
         val ret = new ListBuffer[File]
-        applyRecursive((f: File) ⇒ if (filter(f)) ret += f)
+        applyRecursive((f: File) => if (filter(f)) ret += f)
         ret
 
       ///////// creation of new elements ////////
@@ -369,31 +369,31 @@ package file {
 
         try Files.createSymbolicLink(file, target)
         catch
-          case _: UnsupportedOperationException ⇒ unsupported
-          case e: FileAlreadyExistsException    ⇒ throw e
-          case _: FileSystemException           ⇒ unsupported
-          case e: IOException                   ⇒ throw e
+          case _: UnsupportedOperationException => unsupported
+          case e: FileAlreadyExistsException    => throw e
+          case _: FileSystemException           => unsupported
+          case e: IOException                   => throw e
 
 
       def createParentDirectory = wrapError {
         file.getCanonicalFile.getParentFileSafe.mkdirs
       }
 
-      def withLock[T](f: OutputStream ⇒ T): T =
+      def withLock[T](f: OutputStream => T): T =
         jvmLevelFileLock.withLock(file.getCanonicalPath):
-          withClosable(new FileOutputStream(file, true)) { fos ⇒
-            withClosable(new BufferedOutputStream(fos)) { bfos ⇒
+          withClosable(new FileOutputStream(file, true)) { fos =>
+            withClosable(new BufferedOutputStream(fos)) { bfos =>
               val lock = fos.getChannel.lock
               try f(bfos)
               finally lock.release
             }
           }
 
-      def withLockInDirectory[T](f: ⇒ T, lockName: String = ".lock"): T =
+      def withLockInDirectory[T](f: => T, lockName: String = ".lock"): T =
         file.mkdirs()
         val lockFile = file / lockName
         lockFile.createNewFile()
-        try lockFile.withLock { _ ⇒ f }
+        try lockFile.withLock { _ => f }
         finally lockFile.delete()
 
       def bufferedInputStream(gz: Boolean = false) =
@@ -424,7 +424,7 @@ package file {
         if (create) file.createParentDirectory
         withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append, gz = gz))) _
 
-      def atomicWithPrintStream[T](f: PrintStream ⇒ T) =
+      def atomicWithPrintStream[T](f: PrintStream => T) =
         file.createParentDirectory
         val tmpFile = java.io.File.createTempFile("stream", ".tmp", file.getParentFile)
         try
@@ -443,11 +443,11 @@ package file {
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append) *))(_)
 
-      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] ⇒ T): T = {
+      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] => T): T = {
         def open =
           filter match {
-            case None    ⇒ Files.newDirectoryStream(file)
-            case Some(f) ⇒ Files.newDirectoryStream(file, f)
+            case None    => Files.newDirectoryStream(file)
+            case Some(f) => Files.newDirectoryStream(file, f)
           }
 
         val stream = open
@@ -457,10 +457,10 @@ package file {
 
       def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream()))(_)
 
-      def wrapError[T](f: ⇒ T): T =
+      def wrapError[T](f: => T): T =
         try f
         catch
-          case t: Throwable ⇒ throw new IOException(s"For file $file", t)
+          case t: Throwable => throw new IOException(s"For file $file", t)
 
       ////// synchronized operations //////
       def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
@@ -480,10 +480,10 @@ package file {
       }
 
       ///////// helpers ///////
-      def applyRecursive(operation: File ⇒ Unit): Unit =
+      def applyRecursive(operation: File => Unit): Unit =
         applyRecursive(operation, Set.empty)
 
-      def applyRecursive(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
+      def applyRecursive(operation: File => Unit, stopPath: Iterable[File]): Unit =
         recurse(file)(operation, stopPath)
 
       def isAParentOf(f: File) = f.getCanonicalPath.startsWith(file.getCanonicalPath)
@@ -500,13 +500,13 @@ package file {
 
 
     private def block(file: File, stopPath: Iterable[File]) =
-      stopPath.exists: f ⇒
+      stopPath.exists: f =>
         if f.exists() && file.exists() then Files.isSameFile(f, file) else false
 
-    private def recurse(file: File)(operation: File ⇒ Unit, stopPath: Iterable[File]): Unit =
+    private def recurse(file: File)(operation: File => Unit, stopPath: Iterable[File]): Unit =
       if !block(file, stopPath)
       then
-        def authorizeListFiles[T](f: File)(g: ⇒ T): T =
+        def authorizeListFiles[T](f: File)(g: => T): T =
           val originalMode = f.mode
           f.setExecutable(true)
           f.setReadable(true)

@@ -31,7 +31,7 @@ object RetryActionActor {
       if (retry) JobManager ! Delay(msg, BatchEnvironment.getTokenInterval)
     }
     catch {
-      case t: Throwable ⇒
+      case t: Throwable =>
         LoggerService.fine("Error when deleting a file", t)
     }
   }

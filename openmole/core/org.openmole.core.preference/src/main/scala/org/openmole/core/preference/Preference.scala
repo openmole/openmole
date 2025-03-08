@@ -59,8 +59,8 @@ trait Preference:
 
   def preferenceOption[T: ConfigurationString](location: PreferenceLocation[T])(implicit cypher: Cypher): Option[T] =
     location match
-      case c: ClearPreferenceLocation[T]    ⇒ preferenceOption(c)
-      case c: CypheredPreferenceLocation[T] ⇒ preferenceOption(c)
+      case c: ClearPreferenceLocation[T]    => preferenceOption(c)
+      case c: CypheredPreferenceLocation[T] => preferenceOption(c)
 
   def preferenceOption[T](location: ClearPreferenceLocation[T])(implicit fromString: ConfigurationString[T]): Option[T] = synchronized:
     val confVal = getRawPreference(location)
@@ -73,8 +73,8 @@ trait Preference:
 
   def setPreference[T: ConfigurationString](location: PreferenceLocation[T], value: T)(implicit cypher: Cypher): Unit =
     location match
-      case c: ClearPreferenceLocation[T]    ⇒ setPreference(c, value)
-      case c: CypheredPreferenceLocation[T] ⇒ setPreference(c, value)
+      case c: ClearPreferenceLocation[T]    => setPreference(c, value)
+      case c: CypheredPreferenceLocation[T] => setPreference(c, value)
 
   def setPreference[T](location: ClearPreferenceLocation[T], value: T)(implicit configurationString: ConfigurationString[T]) = synchronized:
     val v = configurationString.toString(value)
@@ -118,7 +118,7 @@ case class FilePreference(configurationFile: ConfigurationFile) extends Preferen
   def clear() =
     val uniqueId = getRawPreference(Preference.uniqueID)
     try configurationFile.clear()
-    finally uniqueId.foreach(prop ⇒ setPreference(Preference.uniqueID, prop))
+    finally uniqueId.foreach(prop => setPreference(Preference.uniqueID, prop))
     //      _password = None
     //      setPreference(Workspace.uniqueIDLocation, uniqueId)
     //    }

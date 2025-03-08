@@ -19,8 +19,8 @@ package object abc {
     object Observed {
 
       object Observable {
-        given Observable[Int] = i ⇒ Array(i.toDouble)
-        given Observable[Double] = d ⇒ Array(d)
+        given Observable[Int] = i => Array(i.toDouble)
+        given Observable[Double] = d => Array(d)
         given arrayDouble: Observable[Array[Double]] = identity
         given arrayInt: Observable[Array[Int]] = i => i.map(_.toDouble)
       }
@@ -37,7 +37,7 @@ package object abc {
       implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])): Observed[Array[Double]] = Observed(t._1, t._2)
       //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
 
-      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v ⇒ observed.obs(v))
+      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v => observed.obs(v))
       def value[T](observed: Observed[T]) = observed.obs(observed.observed)
     }
 
@@ -45,7 +45,7 @@ package object abc {
 
     case class ABCParameters(state: Val[MonAPMC.MonState], step: Val[Int], prior: IndependentPriors)
 
-    implicit def method: ExplorationMethod[ABC, ABCParameters] = m ⇒ {
+    implicit def method: ExplorationMethod[ABC, ABCParameters] = m => {
       implicit def defScope: DefinitionScope = m.scope
       val stepState = Val[MonAPMC.StepState]("stepState", abcNamespace)
       val step = Val[Int]("step", abcNamespace)
@@ -90,7 +90,7 @@ package object abc {
     scope:                DefinitionScope          = "abc")
 
   object IslandABC {
-    implicit def method: ExplorationMethod[IslandABC, ABC.ABCParameters] = m ⇒ {
+    implicit def method: ExplorationMethod[IslandABC, ABC.ABCParameters] = m => {
       implicit def defScope: DefinitionScope = m.scope
 
       val masterState = Val[MonAPMC.MonState]("masterState", ABC.abcNamespace)

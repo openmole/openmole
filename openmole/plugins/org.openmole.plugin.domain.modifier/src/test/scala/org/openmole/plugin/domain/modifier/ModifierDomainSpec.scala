@@ -44,8 +44,8 @@ class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     TakeDomain.isDiscrete(take).domain.from(Context(size -> 3)).toVector should equal(Vector(0, 1, 2))
 
   "range" should "work with modifiers" in:
-    RangeDomain[Double](0.0, 10.0, 0.1).map(x ⇒ x * x)
-    RangeDomain[Int](0, 10).map(x ⇒ x * x)
+    RangeDomain[Double](0.0, 10.0, 0.1).map(x => x * x)
+    RangeDomain[Int](0, 10).map(x => x * x)
 
     val range = RangeDomain[Int](0, 10, 1)
     val take = range.take(10)
@@ -55,5 +55,5 @@ class ModifierDomainSpec extends flatspec.AnyFlatSpec with matchers.should.Match
   "files" should "work with modifiers" in:
     val f = Val[File]
 
-    f in (File("/tmp").files().filter(f ⇒ f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
+    f in (File("/tmp").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv")))
 

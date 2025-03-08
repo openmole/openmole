@@ -21,7 +21,7 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 object ZipWithIndexDomain {
-  implicit def isDiscrete[D, I]: DiscreteFromContextDomain[ZipWithIndexDomain[D, I], (I, Int)] = domain ⇒
+  implicit def isDiscrete[D, I]: DiscreteFromContextDomain[ZipWithIndexDomain[D, I], (I, Int)] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
@@ -29,9 +29,9 @@ object ZipWithIndexDomain {
     )
 }
 
-case class ZipWithIndexDomain[D, I](domain: D)(implicit discrete: DiscreteFromContextDomain[D, I]) { d ⇒
+case class ZipWithIndexDomain[D, I](domain: D)(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>
 
-  def iterator = FromContext { p ⇒
+  def iterator = FromContext { p =>
     import p._
     discrete(domain).domain.from(context).zipWithIndex
   }

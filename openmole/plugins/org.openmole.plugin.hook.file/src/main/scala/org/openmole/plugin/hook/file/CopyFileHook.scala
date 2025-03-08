@@ -67,7 +67,7 @@ case class CopyFileHook(
 
   override def validate = copies.flatMap(_._2.validate)
 
-  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters =>
     import parameters._
 
     def copyFile(

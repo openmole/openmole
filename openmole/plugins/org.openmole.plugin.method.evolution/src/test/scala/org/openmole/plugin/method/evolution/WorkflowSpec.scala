@@ -102,7 +102,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val ba = Val[Array[Boolean]]
 
     val testTask =
-      FromContextTask("test") { p ⇒
+      FromContextTask("test") { p =>
         import p._
         executed += 1
         assert(context(ba).size == 10)
@@ -141,7 +141,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val a = Val[Double]
 
     val testTask =
-      FromContextTask("test") { p ⇒
+      FromContextTask("test") { p =>
         import p._
         executed += 1
         context
@@ -163,7 +163,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val a = Val[Double]
 
     val testTask =
-      FromContextTask("test") { p ⇒
+      FromContextTask("test") { p =>
         import p._
         context
       } set ((inputs, outputs) += a)
@@ -196,7 +196,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val a = Val[Double]
 
     val testTask =
-      FromContextTask("test") { p ⇒
+      FromContextTask("test") { p =>
         import p._
         executed += 1
         context
@@ -211,12 +211,12 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       ) hook ("/tmp/test.txt", frequency = 2)
 
     Validation(nsga) match 
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
     Validation(nsga by Island(10)) match 
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
     
   }
 
@@ -224,13 +224,13 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val mole: Mole = nsga2
 
     Validation(mole).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
     }
 
     Validation(conflict).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
@@ -238,13 +238,13 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     import EvolutionWorkflow._
 
     Validation(nsga2 by Island(10)).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
 
     Validation(conflict by Island(10)).toList match {
-      case Nil ⇒
-      case l   ⇒ sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case Nil =>
+      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
   }
 
@@ -584,7 +584,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val bi = Val[Array[Int]]
 
     val testTask =
-      FromContextTask("test") { p ⇒
+      FromContextTask("test") { p =>
         import p._
         context(ba).size should equal(10)
         context(bi).size should equal(10)

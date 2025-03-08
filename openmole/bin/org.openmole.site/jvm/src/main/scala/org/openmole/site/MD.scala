@@ -53,11 +53,11 @@
 //    val HTMLTransformer = new xml.transform.RuleTransformer(new xml.transform.RewriteRule {
 //      override def transform(node: xml.Node) =
 //        node match {
-//          case image @ <img/> ⇒
+//          case image @ <img/> =>
 //            val newSrc = prefix + image \ "@src"
 //            val alt = image \ "@alt"
 //            xml.XML.loadString(s"""<img src="$newSrc" style="max-width:100%;" alt="$alt"/>""")
-//          case link @ <a>{ stuff }</a> ⇒
+//          case link @ <a>{ stuff }</a> =>
 //            val uri = new java.net.URI(link \ "@href" text)
 //            if (!uri.isAbsolute) {
 //              val newTarget = prefix + link \ "@href"
@@ -66,7 +66,7 @@
 //                |</a>""".stripMargin)
 //            }
 //            else link
-//          case passthrough ⇒ passthrough
+//          case passthrough => passthrough
 //        }
 //    })
 //
@@ -80,7 +80,7 @@
 //
 //  //  def generatePage(entry:
 //  // )(implicit parent: Parent[DocumentationPage]) =
-//  //    entry.readme.map { md ⇒
+//  //    entry.readme.map { md =>
 //  //      import scalatags.Text.all._
 //  //      def frag = RawFrag(relativiseLinks(MD.mdToHTML(md), entry.entry.name + "/"))
 //  //      DocumentationPages(entry.entry.name, frag, location = Some(Seq(entry.entry.name, entry.entry.name)))

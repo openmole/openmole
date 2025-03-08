@@ -51,7 +51,7 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ABC.Observed(o2, 0.0)
   )
 
-  val testTask = TestTask { context ⇒
+  val testTask = TestTask { context =>
     val input = Vector(context(x1), context(x2))
     val Vector(o1Value, o2Value) = toyModel(input, rng)
     context + (o1 -> o1Value) + (o2 -> o2Value)
@@ -60,14 +60,14 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     outputs += (o1, o2)
   )
 
-  val testTaskDeterministic = TestTask { context ⇒ context + (o1 -> context(x1)) + (o2 -> context(x2)) } set (
+  val testTaskDeterministic = TestTask { context => context + (o1 -> context(x1)) + (o2 -> context(x2)) } set (
     inputs += (x1, x2),
     outputs += (o1, o2)
   )
 
   val seed = Val[Long]
 
-  val testTaskSeed = TestTask { context ⇒ context + (o1 -> context(x1)) + (o2 -> context(x2)) } set (
+  val testTaskSeed = TestTask { context => context + (o1 -> context(x1)) + (o2 -> context(x2)) } set (
     inputs += (x1, x2, seed),
     outputs += (o1, o2)
   )
@@ -132,9 +132,9 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val initialValue = Val[Double]
     val o1 = Val[Double]
 
-    val testTask = TestTask { context ⇒ context + (initialValue -> 1.0) } set (outputs += initialValue)
+    val testTask = TestTask { context => context + (initialValue -> 1.0) } set (outputs += initialValue)
 
-    val model = TestTask { context ⇒ context + (o1 -> context(theta1)) } set (
+    val model = TestTask { context => context + (o1 -> context(theta1)) } set (
       inputs += (theta1, initialValue, seed),
       outputs += o1
     )

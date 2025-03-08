@@ -176,26 +176,26 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) ⇒ CondorEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ CondorEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => CondorEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => CondorEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
 
   lazy val installRuntime =
     storageService match
-      case Left((space, local)) ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+      case Left((space, local)) => RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  => RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
     import _root_.gridscale.cluster.HeadNode
     storageService match
-      case Left((space, local)) ⇒ CondorJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
-      case Right((space, ssh))  ⇒ CondorJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Left((space, local)) => CondorJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  => CondorJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 
 class CondorLocalEnvironment(
   val parameters:        CondorEnvironment.Parameters,
   val name:              Option[String],
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
-  env ⇒
+  env =>
 
   import services._
 

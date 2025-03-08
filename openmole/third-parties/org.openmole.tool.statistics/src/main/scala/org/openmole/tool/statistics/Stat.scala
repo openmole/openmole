@@ -18,12 +18,15 @@
 package org.openmole.tool.statistics
 
 import scala.annotation.tailrec
-import scala.math._
+import scala.math.*
 
-trait Stat {
+trait Stat:
+  def head(sequence: Seq[Double]) = sequence.head
+  def sum(sequence: Seq[Double]) = sequence.sum
 
-  def head = (sequence: Seq[Double]) ⇒ sequence.head
-  def sum = (sequence: Seq[Double]) ⇒ sequence.sum
+  def normalise(p: Seq[Double]) =
+    val sum = p.sum
+    p.map(_ / sum)
 
   def median(sequence: Seq[Double]) =
     val sortedSerie = sequence.toArray.filterNot(_.isNaN).sorted
@@ -33,17 +36,17 @@ trait Stat {
       else sortedSerie((size / 2))
     else Double.NaN
 
-  def medianAbsoluteDeviation = (sequence: Seq[Double]) =>
+  def medianAbsoluteDeviation(sequence: Seq[Double]) =
     val m = median(sequence)
-    median(sequence.map { v ⇒ math.abs(v - m) })
+    median(sequence.map { v => math.abs(v - m) })
 
-  def average = (sequence: Seq[Double]) ⇒ sequence.sum / sequence.size
+  def average(sequence: Seq[Double]) = sequence.sum / sequence.size
 
-  def meanSquaredError = (sequence: Seq[Double]) ⇒ variance(sequence)
+  def meanSquaredError(sequence: Seq[Double]) = variance(sequence)
 
-  def variance(sequence: Seq[Double])=
+  def variance(sequence: Seq[Double]) =
     val avg = average(sequence)
-    average(sequence.map { v ⇒ math.pow(v - avg, 2) })
+    average(sequence.map { v => math.pow(v - avg, 2) })
 
   def rootMeanSquaredError(sequence: Seq[Double]) = standardDeviation(sequence)
   def standardDeviation(sequence: Seq[Double]) = sqrt(variance(sequence))
@@ -55,12 +58,12 @@ trait Stat {
   /* ------ Difference on series ----- */
 
   def absoluteDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) ⇒ math.abs(v1v - v2v) }.sum
+    (v1 zip v2).map { case (v1v, v2v) => Math.abs(v1v - v2v) }.sum
 
   def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) ⇒ math.pow(v1v - v2v, 2) }.sum
+    (v1 zip v2).map { case (v1v, v2v) => Math.pow(v1v - v2v, 2) }.sum
 
-  def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double = {
+  def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double =
     import org.openmole.tool.dtw.timeseries.TimeSeries
     import org.openmole.tool.dtw.util.DistanceFunctionFactory
 
@@ -70,14 +73,13 @@ trait Stat {
 
     if (fast) org.openmole.tool.dtw.dtw.FastDTW.getWarpDistBetween(ta, tb, df)
     else org.openmole.tool.dtw.dtw.DTW.getWarpDistBetween(ta, tb, df)
-  }
 
   /**
    * Compute the confidence interval half-width for the given confidence level.
    *
    * @param p the confidence level
    */
-  def confidenceInterval(p: Double = .95) = (sequence: Seq[Double]) ⇒ {
+  def confidenceInterval(sequence: Seq[Double], p: Double = 0.95) =
     /**
      * Compute the p-th quantile for the "standard normal distribution" function.
      * This function returns an approximation of the "inverse" cumulative
@@ -95,7 +97,7 @@ trait Stat {
      *
      * @param p the p-th quantile, e.g., .95 (95%)
      */
-    def normalInv(p: Double = .95): Double = {
+    def normalInv(p: Double = .95): Double =
       if (p < 0 || p > 1) throw new IllegalArgumentException("parameter p must be in the range [0, 1]")
 
       // Coefficients in rational approximations
@@ -137,7 +139,7 @@ trait Stat {
       val r = q * q
       (((((a(0) * r + a(1)) * r + a(2)) * r + a(3)) * r + a(4)) * r + a(5)) * q /
         (((((b(0) * r + b(1)) * r + b(2)) * r + b(3)) * r + b(4)) * r + 1)
-    } // normalInv
+    // normalInv
 
     //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /**
@@ -155,7 +157,7 @@ trait Stat {
      * @param p the p-th quantile, e.g., 95 (95%)
      * @param df the degrees of freedom
      */
-    def studentTInv(p: Double = .95, df: Int = 10): Double = {
+    def studentTInv(p: Double = .95, df: Int = 10): Double =
       if (p < 0 || p > 1) throw new IllegalArgumentException("parameter p must be in the range [0, 1]")
       if (df <= 0) throw new IllegalArgumentException("parameter df must be positive")
 
@@ -172,64 +174,72 @@ trait Stat {
       var x = 0.0
       for (i ← h.length - 1 to 0 by -1) x = (x + h(i)) / df
       if (p >= 0.5) z1 + x else -(z1 + x)
-    } // studentTInv
+    // studentTInv
 
     val n = sequence.size
     val df = n - 1 // degrees of freedom
-    if (df < 1) 0.0 // flaw ("interval", "must have at least 2 observations")
-    else {
+    if df < 1
+    then 0.0 // flaw ("interval", "must have at least 2 observations")
+    else
       val pp = 1 - (1 - p) / 2.0
       // e.g., .95 --> .975 (two tails)
       val t = studentTInv(pp, df)
       t * rootMeanSquaredError(sequence) / sqrt(n.toDouble)
-    }
-  } // interval
 
-  def ksTest(d1: Seq[Double], d2: Seq[Double]): Option[Double] =
-    if (d1.size < 2 || d2.size < 2) None
-    else {
-      import org.apache.commons.math3.stat.inference._
+  end confidenceInterval
 
+
+  def ksTest(d1: Seq[Double], d2: Seq[Double]): Option[Double] = kolmogorovSmirnovTest(d1, d2)
+  def kolmogorovSmirnovTest(d1: Seq[Double], d2: Seq[Double]): Option[Double] =
+    if d1.size < 2 || d2.size < 2
+    then None
+    else
+      import org.apache.commons.math3.stat.inference.*
       val test = new KolmogorovSmirnovTest()
-      Some(test.kolmogorovSmirnovTest(d1.toArray, d2.toArray))
-    }
+      Some:
+        test.kolmogorovSmirnovTest(normalise(d1).toArray, normalise(d2).toArray)
 
-  def ksTestGaussian(data: Seq[Double], mu: Double, sigma: Double, unsound: Double = 1.0): Option[Double] =
-    if (data.size < 2) None
-    else {
+  def ksDivergence(p: Seq[Double], q: Seq[Double]) = kolmogorovSmirnovDivergence(p, q)
+  def kolmogorovSmirnovDivergence(p: Seq[Double], q: Seq[Double]) =
+    (normalise(p) zip normalise(q)).map((x, y) => math.abs(x - y)).max
+
+  def ksTestGaussian(data: Seq[Double], mu: Double, sigma: Double): Option[Double] =
+    if data.size < 2
+    then None
+    else
       import org.apache.commons.math3.stat.inference._
       import org.apache.commons.math3.distribution._
 
       val test = new KolmogorovSmirnovTest()
       Some(test.kolmogorovSmirnovTest(new NormalDistribution(null, mu, sigma), data.toArray))
-    }
 
-  def klDivergence(p1: Seq[Double], p2: Seq[Double]) = {
-    val s = (p1 zip p2).
-      filter { case (p1, p2) ⇒ p1 != 0.0 && p2 != 0.0 }.
-      map { case (p1, p2) ⇒ p1 * math.log(p1 / p2) }.sum
+  def klDivergence(p1: Seq[Double], p2: Seq[Double]) = kullbackLeiblerDivergence(p1, p2)
+  def kullbackLeiblerDivergence(p: Seq[Double], q: Seq[Double], epsilon: Option[Double] = Some(1e-10)): Double =
+    val epsilonValue = epsilon.map(e => Math.max(0, e)).getOrElse(0.0)
+    (normalise(p) zip normalise(q)).map: (x, y) =>
+      val yValue = Math.max(epsilonValue, y)
+      if yValue == 0 || x == 0 then 0 else x * math.log(x / yValue)
+    .sum
 
-    s / math.log(2)
-  }
+  def jeffreysDivergence(p: Seq[Double], q: Seq[Double], epsilon: Option[Double] = Some(1e-10)): Double =
+    kullbackLeiblerDivergence(p, q, epsilon) + kullbackLeiblerDivergence(q, p, epsilon)
 
-  def probabilityDistribution(s: Seq[Double], beans: Int) = {
+  def probabilityDistribution(s: Seq[Double], beans: Int) =
     val ssorted = s.sorted
     val smin = ssorted.head
     val smax = ssorted.last
     val step = (smax - smin) / beans
 
-    @tailrec def recurse(lowBound: BigDecimal, ssorted: List[Double], beans: List[Int]): List[Int] = {
+    @tailrec def recurse(lowBound: BigDecimal, ssorted: List[Double], beans: List[Int]): List[Int] =
       val highBound = lowBound + step
-      if (highBound >= smax) (ssorted.size :: beans).reverse
-      else {
+      if highBound >= smax
+      then (ssorted.size :: beans).reverse
+      else
         def bean = ssorted.takeWhile(_ <= highBound).size
         recurse(highBound, ssorted.dropWhile(_ <= highBound), bean :: beans)
-      }
-    }
 
     val size = ssorted.size
     recurse(BigDecimal(smin), ssorted.toList, List()).map(_.toDouble / size)
-  }
 
   def percentile(s: Seq[Double], n: Double): Double =
     percentile(s, Seq(n)).head
@@ -238,6 +248,5 @@ trait Stat {
     import org.apache.commons.math3.stat.descriptive.rank.Percentile
     val c = new Percentile()
     c.setData(s.toArray)
-    n.map(n ⇒ c.evaluate(n))
+    n.map(n => c.evaluate(n))
 
-}

@@ -37,7 +37,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
         encoder.setParent(app)
       }
       catch {
-        case e: IOException ⇒
+        case e: IOException =>
       }
       super.start
     }
@@ -51,7 +51,7 @@ class OpenMOLEAppender extends AppenderBase[ILoggingEvent] with JavaLogger {
       byteOutputStream.reset
     }
     catch {
-      case e: IOException ⇒
+      case e: IOException =>
     }
   }
 

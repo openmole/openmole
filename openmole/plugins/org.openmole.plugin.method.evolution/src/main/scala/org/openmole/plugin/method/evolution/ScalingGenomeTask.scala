@@ -24,7 +24,7 @@ import org.openmole.core.workflow.task._
 object ScalingGenomeTask {
 
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    FromContextTask("ScalingGenomeTask") { p ⇒
+    FromContextTask("ScalingGenomeTask") { p =>
       import p._
       context ++ evolution.genomeToVariables(context(evolution.genomeVal)).from(context)
     } set (

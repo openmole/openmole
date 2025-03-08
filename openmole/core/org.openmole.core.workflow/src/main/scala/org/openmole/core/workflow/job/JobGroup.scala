@@ -46,6 +46,11 @@ object JobGroup:
       case sj: SingleJobGroup => IArray(sj.moleJob)
       case mj: MultiJobGroup  => mj.moleJobs
 
+  def size(job: JobGroup) =
+    job match
+      case _: SingleJobGroup => 1
+      case m: MultiJobGroup => m.moleJobs.size
+
   def moleJobsValue(job: JobGroup): Job | IArray[Job] =
     job match
       case sj: SingleJobGroup => sj.moleJob

@@ -179,21 +179,21 @@ class PBSEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) ⇒ PBSEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ PBSEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => PBSEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => PBSEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
 
   def frontend = Frontend.ssh(host, port, timeout, authentication)
 
   lazy val installRuntime =
     storageService match 
-      case Left((space, local)) ⇒ RuntimeInstallation(frontend, local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+      case Left((space, local)) => RuntimeInstallation(frontend, local, space.baseDirectory)
+      case Right((space, ssh))  => RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
   lazy val pbsJobService =
     import _root_.gridscale.cluster.HeadNode
     storageService match 
-      case Left((space, local)) ⇒ PBSJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
-      case Right((space, ssh))  ⇒ PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Left((space, local)) => PBSJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  => PBSJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 
 

@@ -37,12 +37,12 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val state = Val[Int]
     val sampling = ExplorationTask(ExplicitSampling(i, List(1, 2, 3)))
 
-    val master = FromContextTask("master") { p ⇒
+    val master = FromContextTask("master") { p =>
       import p._
       context + (state -> (context(state) + 1)) + (i.array -> Array(context(state)))
     } set ((inputs, outputs) += state, state := 0, exploredOutputs += i.array)
 
-    val slave = FromContextTask("slave") { p ⇒
+    val slave = FromContextTask("slave") { p =>
       import p._
       slaveExecuted += 1
       context
@@ -65,13 +65,13 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     @volatile var testExecuted = false
     @volatile var lastExecuted = false
 
-    val test = FromContextTask("test") { p ⇒
+    val test = FromContextTask("test") { p =>
       import p._
       testExecuted = true
       context
     }
 
-    val last = FromContextTask("last") { p ⇒
+    val last = FromContextTask("last") { p =>
       import p._
       lastExecuted = true
       context
@@ -88,13 +88,13 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     @volatile var testExecuted = 0
     @volatile var lastExecuted = 0
 
-    val test = FromContextTask("test") { p ⇒
+    val test = FromContextTask("test") { p =>
       import p._
       testExecuted += 1
       context
     }
 
-    val last = FromContextTask("last") { p ⇒
+    val last = FromContextTask("last") { p =>
       import p._
       lastExecuted += 1
       context
@@ -116,13 +116,13 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val i = Val[Int]
 
     val increment =
-      TestTask { context ⇒
+      TestTask { context =>
         testExecuted += 1
         context + (i -> (context(i) + 1))
       } set ((inputs, outputs) += i, i := 0)
 
     val test =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(10)
         context
       } set (inputs += i)
@@ -138,18 +138,18 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val i = Val[Int]
 
     val preceding =
-      TestTask { context ⇒
+      TestTask { context =>
         context + (i -> 0)
       } set (outputs += i)
 
     val increment =
-      TestTask { context ⇒
+      TestTask { context =>
         testExecuted += 1
         context + (i -> (context(i) + 1))
       } set ((inputs, outputs) += i)
 
     val test =
-      TestTask { context ⇒
+      TestTask { context =>
         context(i) should equal(10)
         context
       } set (inputs += i)

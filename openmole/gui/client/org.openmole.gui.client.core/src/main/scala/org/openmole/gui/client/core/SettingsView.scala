@@ -44,11 +44,11 @@ object SettingsView:
       NotificationManager.Alternative.cancel
     )
 
-    button(btn_danger, marginBottom := "10px", message, onClick --> { _ ⇒ notification })
+    button(btn_danger, marginBottom := "10px", message, onClick --> { _ => notification })
 
   def version(using api: ServerAPI, basePath: BasePath) =
     div(color := "#333", marginBottom := "30px",
-      child <-- Signal.fromFuture(api.omSettings().map { sets ⇒
+      child <-- Signal.fromFuture(api.omSettings().map { sets =>
         div(flexColumn,
           div(sets.version, color:= "#3086b5", fontSize := "22px", fontWeight.bold),
           div(sets.versionName),

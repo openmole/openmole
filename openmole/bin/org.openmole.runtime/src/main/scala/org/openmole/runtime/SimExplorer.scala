@@ -58,37 +58,37 @@ object SimExplorer extends JavaLogger {
       val parser = new OptionParser[Config]("OpenMOLE") {
         head("OpenMOLE runtime", "0.x")
         opt[String]('s', "storage") text ("Storage") action {
-          (v, c) ⇒ c.copy(storage = Some(v))
+          (v, c) => c.copy(storage = Some(v))
         }
         opt[String]('i', "input") text ("Path of the input message") action {
-          (v, c) ⇒ c.copy(inputMessage = Some(v))
+          (v, c) => c.copy(inputMessage = Some(v))
         }
         opt[String]('o', "output") text ("Path of the output message") action {
-          (v, c) ⇒ c.copy(outputMessage = Some(v))
+          (v, c) => c.copy(outputMessage = Some(v))
         }
         opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
-          (v, c) ⇒ c.copy(pluginPath = Some(v))
+          (v, c) => c.copy(pluginPath = Some(v))
         }
         opt[Int]('t', "thread") text ("Number of threads for the execution") action {
-          (v, c) ⇒ c.copy(thread = Some(v))
+          (v, c) => c.copy(thread = Some(v))
         }
         opt[String]('w', "workspace") text ("Workspace location") action {
-          (v, c) ⇒ c.copy(workspace = Some(v))
+          (v, c) => c.copy(workspace = Some(v))
         }
         opt[Int]("transfer-retry") text ("Retry fail transfer on failure") action {
-          (v, c) ⇒ c.copy(transferRetry = Some(v))
+          (v, c) => c.copy(transferRetry = Some(v))
         }
         opt[Unit]('d', "debug") text ("Switch on the debug mode") action {
-          (_, c) ⇒ c.copy(debug = true)
+          (_, c) => c.copy(debug = true)
         }
         opt[Unit]("test") text ("Switch on test mode") action {
-          (_, c) ⇒ c.copy(test = true)
+          (_, c) => c.copy(test = true)
         }
       }
 
-      parser.parse(args, Config()) foreach { config ⇒
+      parser.parse(args, Config()) foreach { config =>
         config.test match {
-          case false ⇒
+          case false =>
 
             if (config.debug) LoggerConfig.level(Level.FINEST)
 
@@ -108,8 +108,8 @@ object SimExplorer extends JavaLogger {
             implicit val timeService: TimeService = TimeService()
 
             try
-              PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error starting bundle $b", e) }
-              PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+              PluginManager.startAll.foreach { case (b, e) => logger.log(WARNING, s"Error starting bundle $b", e) }
+              PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e) }
 
               logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
 
@@ -124,13 +124,13 @@ object SimExplorer extends JavaLogger {
                 config.transferRetry
               )
             finally threadProvider.stop()
-          case true ⇒ logger.info("The runtime is working")
+          case true => logger.info("The runtime is working")
         }
 
       }
     }
     catch {
-      case t: Throwable ⇒
+      case t: Throwable =>
         logger.log(SEVERE, "Error during runtime execution", t)
         throw t
     }

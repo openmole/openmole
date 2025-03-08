@@ -23,14 +23,14 @@ import java.util.concurrent.locks._
 package object lock {
 
   implicit class LockDecorator(lock: Lock):
-    def apply[T](block: ⇒ T): T =
+    def apply[T](block: => T): T =
       lock.lock()
       try
         block
       finally lock.unlock()
 
   implicit class SemaphoreDecorator(s: Semaphore):
-    def apply[T](block: ⇒ T): T =
+    def apply[T](block: => T): T =
       s.acquire()
       try block
       finally s.release()
@@ -41,12 +41,12 @@ package object lock {
 
   implicit class ReadWriteLockDecorator(l: ReadWriteLock):
 
-    def read[T](t: ⇒ T) =
+    def read[T](t: => T) =
       l.readLock.lock
       try t
       finally l.readLock.unlock
 
-    def write[T](t: ⇒ T) =
+    def write[T](t: => T) =
       l.writeLock.lock
       try t
       finally l.writeLock.unlock

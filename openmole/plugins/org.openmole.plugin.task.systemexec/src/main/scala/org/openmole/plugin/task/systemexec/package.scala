@@ -57,7 +57,7 @@ package systemexec {
    * @see Command
    */
   case class OSCommands(os: OS, parts: Command*) {
-    @transient lazy val expanded = parts.map(c ⇒ ExpandedString(c.command))
+    @transient lazy val expanded = parts.map(c => ExpandedString(c.command))
   }
 
   object OSCommands {
@@ -65,7 +65,7 @@ package systemexec {
     implicit def stringToCommands(s: String): OSCommands = OSCommands(OS(), s)
 
     /** A sequence of command lines is considered local (non-remote) by default */
-    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s ⇒ Command(s)) *)
+    implicit def seqOfStringToCommands(s: Seq[String]): OSCommands = OSCommands(OS(), s.map(s => Command(s)) *)
   }
 
 }
@@ -85,10 +85,10 @@ package object systemexec {
 
     private def appendOption(o1: Option[String], o2: Option[String]) =
       (o1, o2) match {
-        case (None, None)         ⇒ None
-        case (o1, None)           ⇒ o1
-        case (None, o2)           ⇒ o2
-        case (Some(v1), Some(v2)) ⇒ Some(v1 + v2)
+        case (None, None)         => None
+        case (o1, None)           => o1
+        case (None, o2)           => o2
+        case (Some(v1), Some(v2)) => Some(v1 + v2)
       }
   }
 
@@ -123,36 +123,36 @@ package object systemexec {
 
     for (character ← line) {
       (inDoubleQuote, inSingleQuote, blocked, character, afterSpace) match {
-        case (_, _, true, c, _) ⇒
+        case (_, _, true, c, _) =>
           currentArguments.append(c)
           blocked = false
 
-        case (_, _, false, '\\', _) ⇒
+        case (_, _, false, '\\', _) =>
           blocked = true
 
-        case (false, false, false, ' ', _) ⇒
+        case (false, false, false, ' ', _) =>
           if (!currentArguments.isEmpty) addArgument()
 
-        case (false, false, false, '"', _) ⇒
+        case (false, false, false, '"', _) =>
           inDoubleQuote = true
           if (keepQuotes) currentArguments.append('"')
 
-        case (true, false, false, '"', false) ⇒
+        case (true, false, false, '"', false) =>
           inDoubleQuote = false
           if (keepQuotes) currentArguments.append('"')
 
-        case (false, false, false, '\'', _) ⇒
+        case (false, false, false, '\'', _) =>
           inSingleQuote = true
           if (keepQuotes) currentArguments.append('\'')
 
-        case (false, true, false, '\'', false) ⇒
+        case (false, true, false, '\'', false) =>
           inSingleQuote = false
           if (keepQuotes) currentArguments.append(character)
 
-        case (false, false, false, c, _) ⇒ currentArguments.append(c)
-        case (true, false, false, c, _)  ⇒ currentArguments.append(c)
-        case (false, true, false, c, _)  ⇒ currentArguments.append(c)
-        case _                           ⇒ throw new RuntimeException(s"Error while parsing command line: $line")
+        case (false, false, false, c, _) => currentArguments.append(c)
+        case (true, false, false, c, _)  => currentArguments.append(c)
+        case (false, true, false, c, _)  => currentArguments.append(c)
+        case _                           => throw new RuntimeException(s"Error while parsing command line: $line")
       }
 
       afterSpace = character == ' '
@@ -195,24 +195,24 @@ package object systemexec {
 
     val out: PrintStream =
       (displayOutput, captureOutput) match
-        case (true, false)  ⇒ stdOut
-        case (false, true)  ⇒ new PrintStream(outBuilder)
-        case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(outBuilder, stdOut))
-        case (false, false) ⇒ new PrintStream(new NullOutputStream)
+        case (true, false)  => stdOut
+        case (false, true)  => new PrintStream(outBuilder)
+        case (true, true)   => new PrintStream(MultiplexedOutputStream(outBuilder, stdOut))
+        case (false, false) => new PrintStream(new NullOutputStream)
 
     val err =
       (displayError, captureError) match
-        case (true, false)  ⇒ stdErr
-        case (false, true)  ⇒ new PrintStream(errBuilder)
-        case (true, true)   ⇒ new PrintStream(MultiplexedOutputStream(errBuilder, stdErr))
-        case (false, false) ⇒ new PrintStream(new NullOutputStream)
+        case (true, false)  => stdErr
+        case (false, true)  => new PrintStream(errBuilder)
+        case (true, true)   => new PrintStream(MultiplexedOutputStream(errBuilder, stdErr))
+        case (false, false) => new PrintStream(new NullOutputStream)
 
     val runtime = Runtime.getRuntime
 
     import scala.jdk.CollectionConverters._
-    val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) ⇒ s"$key=$value" }.toArray
+    val inheritedEnvironment: Array[String] = System.getenv.asScala.map { case (key, value) => s"$key=$value" }.toArray
 
-    val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) ⇒ name + "=" + value }.toArray
+    val openmoleEnvironment: Array[String] = environmentVariables.map { case (name, value) => name + "=" + value }.toArray
 
     //FIXES java.io.IOException: error=26
     val process = runtime.synchronized:
@@ -237,7 +237,7 @@ package object systemexec {
     if (errorOnReturnValue && result.returnCode != 0) throw error(command.toVector, result)
     result
   catch
-    case e: IOException ⇒
+    case e: IOException =>
       import org.openmole.tool.file.*
       def directoryContentInformation(directory: File, margin: String = "  ") =
         def fileInformation(file: File) =
@@ -255,7 +255,7 @@ package object systemexec {
 
           s"""${directory.toPath.relativize(file.toPath)} (type=$fileType, permissions=$permissions)"""
 
-        directory.listRecursive(_ ⇒ true).filter(_ != directory).map(fileInformation).map(i ⇒ s"$margin$i").mkString("\n")
+        directory.listRecursive(_ => true).filter(_ != directory).map(fileInformation).map(i => s"$margin$i").mkString("\n")
 
       throw new InternalProcessingError(
         e,
@@ -275,8 +275,8 @@ package object systemexec {
    * @return
    */
   def error(commandLine: Vector[String], executionResult: ExecutionResult) = {
-    def output = executionResult.output.map(o ⇒ s"\nStandard output was:\n$o")
-    def error = executionResult.errorOutput.map(e ⇒ s"\nError output was:\n$e")
+    def output = executionResult.output.map(o => s"\nStandard output was:\n$o")
+    def error = executionResult.errorOutput.map(e => s"\nError output was:\n$e")
 
     throw new InternalProcessingError(
       s"""Error executing command:
@@ -305,8 +305,8 @@ package object systemexec {
 
     def parse(executionCommand: ExecutionCommand): Vector[String] =
       executionCommand match {
-        case c: Raw    ⇒ c.command.zip(c.keepQuotes).map { case (com, k) ⇒ systemexec.parse(com, k) }.reduce(_ ++ _)
-        case p: Parsed ⇒ p.command.toVector
+        case c: Raw    => c.command.zip(c.keepQuotes).map { case (com, k) => systemexec.parse(com, k) }.reduce(_ ++ _)
+        case p: Parsed => p.command.toVector
       }
 
     implicit def stringToRaw(c: String): Raw = Raw(c)
@@ -342,8 +342,8 @@ package object systemexec {
     @annotation.tailrec
     def executeAll0(commands: List[ExecutionCommand], acc: ExecutionResult): ExecutionResult =
       commands match {
-        case Nil ⇒ acc
-        case cmd :: t ⇒
+        case Nil => acc
+        case cmd :: t =>
           val cl = ExecutionCommand.parse(cmd)
           val result = execute(cl.toArray, workDirectory, environmentVariables, captureOutput = captureOutput, captureError = captureError, errorOnReturnValue = false)
           if (errorOnReturnValue && result.returnCode != 0) throw error(cl, result)

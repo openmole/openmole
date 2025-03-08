@@ -19,15 +19,15 @@ implicit def arrayOfTuplesIsBounds[T: Manifest]: BoundedDomain[Array[(T, T)], Ar
 
 implicit def iterableOfStringTuplesIsBounds[T: {FromString, Manifest}]: BoundedFromContextDomain[Iterable[(String, String)], Array[T]] =
   BoundedFromContextDomain: domain =>
-    def min = domain.map(_._1).toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
-    def max = domain.map(_._2).toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    def min = domain.map(_._1).toVector.traverse(v => FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    def max = domain.map(_._2).toVector.traverse(v => FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
     Domain((min, max))
 
 
 implicit def arrayOfStringTuplesIsBounds[T: {FromString, Manifest}]: BoundedFromContextDomain[Array[(String, String)], Array[T]] =
   BoundedFromContextDomain: domain =>
-    def min = domain.map(_._1).toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
-    def max = domain.map(_._2).toVector.traverse(v ⇒ FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    def min = domain.map(_._1).toVector.traverse(v => FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
+    def max = domain.map(_._2).toVector.traverse(v => FromContext.codeToFromContext[T](v): FromContext[T]).map(_.toArray)
     Domain((min, max))
 
 

@@ -38,8 +38,8 @@ object GenerateIslandTask:
       def samples =
         if (p.isEmpty) Vector.empty
         else sample match 
-          case Some(s) ⇒ random().shuffle(p.toVector).take(s)
-          case None    ⇒ p.toVector
+          case Some(s) => random().shuffle(p.toVector).take(s)
+          case None    => p.toVector
 
       def populations = Array.fill(size)(samples.toArray)
       Variable(outputPopulation.toArray, populations)

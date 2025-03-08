@@ -32,7 +32,7 @@ class InputFilter(initValue: String, pHolder: String, size: String = "100%") {
     placeholder := pHolder,
     width := size,
     onMountFocus,
-    inContext { node ⇒ onInput --> { _ ⇒ nameFilter.set(node.ref.value) } }
+    inContext { node => onInput --> { _ => nameFilter.set(node.ref.value) } }
   )
 
   def contains(st: String) = st.toUpperCase.contains(nameFilter.now().toUpperCase)

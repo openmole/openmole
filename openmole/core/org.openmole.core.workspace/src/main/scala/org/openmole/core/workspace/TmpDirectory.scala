@@ -23,17 +23,17 @@ object TmpDirectory:
   def newDirectory(prefix: String = fixedDir, create: Boolean = false)(using tmpDirectory: TmpDirectory): File = tmpDirectory.directory.newDirectory(prefix, create = create)
   def newFile(prefix: String = fixedPrefix, suffix: String = fixedPostfix)(using tmpDirectory: TmpDirectory): File = tmpDirectory.directory.newFile(prefix, suffix)
 
-  def withTmpFile[T](prefix: String, postfix: String)(f: File ⇒ T)(using TmpDirectory): T =
+  def withTmpFile[T](prefix: String, postfix: String)(f: File => T)(using TmpDirectory): T =
     val file = newFile(prefix, postfix)
     try f(file)
     finally file.delete
 
-  def withTmpFile[T](f: File ⇒ T)(using TmpDirectory): T =
+  def withTmpFile[T](f: File => T)(using TmpDirectory): T =
     val file = newFile()
     try f(file)
     finally file.delete
 
-  def withTmpDir[T](f: File ⇒ T)(using TmpDirectory): T =
+  def withTmpDir[T](f: File => T)(using TmpDirectory): T =
     val file = newFile()
     try
       file.mkdirs()

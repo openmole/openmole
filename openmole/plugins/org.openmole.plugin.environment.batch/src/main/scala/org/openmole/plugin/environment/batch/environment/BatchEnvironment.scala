@@ -68,13 +68,13 @@ object BatchEnvironment {
     def size = file.size
   }
 
-  def signalUpload(id: Long, upload: ⇒ String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String =
+  def signalUpload(id: Long, upload: => String, file: File, environment: BatchEnvironment, storageId: String)(implicit eventDispatcher: EventDispatcher): String =
     val size = file.size
     eventDispatcher.trigger(environment, BeginUpload(id, file, storageId))
     val path =
       try upload
       catch {
-        case e: Throwable ⇒
+        case e: Throwable =>
           eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Failure(e), size))
           throw e
       }
@@ -82,12 +82,12 @@ object BatchEnvironment {
     eventDispatcher.trigger(environment, EndUpload(id, file, storageId, util.Success(path), size))
     path
 
-  def signalDownload[T](id: Long, download: ⇒ T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T = 
+  def signalDownload[T](id: Long, download: => T, path: String, environment: BatchEnvironment, storageId: String, file: File)(implicit eventDispatcher: EventDispatcher): T =
     eventDispatcher.trigger(environment, BeginDownload(id, file, path, storageId))
     val res =
       try download
       catch {
-        case e: Throwable ⇒
+        case e: Throwable =>
           eventDispatcher.trigger(environment, EndDownload(id, file, path, storageId, Some(e)))
           throw e
       }
@@ -122,8 +122,8 @@ object BatchEnvironment {
   def getTokenInterval(implicit preference: Preference, randomProvider: RandomProvider) = preference(GetTokenInterval) * randomProvider().nextDouble
 
   def openMOLEMemoryValue(openMOLEMemory: Option[Information])(implicit preference: Preference) = openMOLEMemory match 
-    case None    ⇒ preference(MemorySizeForRuntime)
-    case Some(m) ⇒ m
+    case None    => preference(MemorySizeForRuntime)
+    case Some(m) => m
 
   def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
 
@@ -203,7 +203,7 @@ object BatchEnvironment {
     upload: (File, TransferOptions) => String,
     storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob =
     import services.*
-    TmpDirectory.withTmpFile("job", ".tar") { jobFile ⇒
+    TmpDirectory.withTmpFile("job", ".tar") { jobFile =>
       def tasks: RunnableTaskSequence = job.runnableTasks
       serializerService.serialize(tasks, jobFile, gz = true)
 
@@ -228,13 +228,13 @@ object BatchEnvironment {
 
       /* ---- upload the execution message ----*/
       val inputPath =
-        newFile.withTmpFile("job", ".tar") { executionMessageFile ⇒
+        newFile.withTmpFile("job", ".tar") { executionMessageFile =>
           serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
           signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
         }
 
       val serializedStorage =
-        services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile ⇒
+        services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile =>
           import org.openmole.tool.hash._
           import services._
           services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
@@ -251,7 +251,7 @@ object BatchEnvironment {
     environment:      BatchEnvironment,
     replicate: (File, TransferOptions) => ReplicatedFile,
   )(implicit services: BatchEnvironment.Services) =
-    val environmentPluginPath = shuffled(environment.environmentPlugins)(services.randomProvider()).map { p ⇒ replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }.sortBy(_.path)
+    val environmentPluginPath = shuffled(environment.environmentPlugins)(services.randomProvider()).map { p => replicate(p, TransferOptions(raw = true)) }.map { FileMessage(_) }.sortBy(_.path)
     val runtimeFileMessage = FileMessage(replicate(environment.runtime, TransferOptions(raw = true)))
     val jvmLinuxX64FileMessage = FileMessage(replicate(environment.jvmLinuxX64, TransferOptions(raw = true)))
 
@@ -293,11 +293,11 @@ object BatchEnvironment {
     if job.state != KILLED && newState != job.state
     then
       newState match
-        case DONE if job.state != DONE ⇒ environment.state._done.incrementAndGet()
-        case FAILED ⇒
+        case DONE if job.state != DONE => environment.state._done.incrementAndGet()
+        case FAILED =>
           if job.state == DONE then environment.state._done.decrementAndGet()
           environment.state._failed.incrementAndGet()
-        case _ ⇒
+        case _ =>
 
       eventDispatcher.trigger(environment, Environment.JobStateChanged(job.id, job, newState, job.state))
       job._state = newState

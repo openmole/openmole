@@ -29,7 +29,7 @@ object DefaultBuilder:
 trait DefaultBuilder[T]:
   def defaults: monocle.Lens[T, DefaultSet]
 
-trait NameBuilder[T] { builder ⇒
+trait NameBuilder[T] { builder =>
   def name: monocle.Lens[T, Option[String]]
 }
 

@@ -103,8 +103,8 @@ object SSHEnvironment extends JavaLogger:
     def update(job: SSHJob, state: SSHRunState) = queuesLock { jobsStates.put(job, state) }
     def get(job: SSHJob) = queuesLock { jobsStates.get(job) }
     def remove(job: SSHJob) = queuesLock { jobsStates.remove(job) }
-    def submitted = queuesLock { jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) ⇒ (j, id) } }
-    def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) ⇒ (job, desc, bj) } }
+    def submitted = queuesLock { jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) => (j, id) } }
+    def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) => (job, desc, bj) } }
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
@@ -136,7 +136,7 @@ class SSHEnvironment(
   val modules:              Option[Seq[String]],
   val debug:                Boolean,
   val services:             BatchEnvironment.Services
-) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒
+) extends BatchEnvironment(BatchEnvironmentState(services)) { env =>
 
   implicit def servicesImplicit: BatchEnvironment.Services = services
   import services._
@@ -196,13 +196,13 @@ class SSHEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) ⇒ SSHEnvironment.submit(env, batchExecutionJob, local, space, sshJobService)
-      case Right((space, ssh))  ⇒ SSHEnvironment.submit(env, batchExecutionJob, ssh, space, sshJobService)
+      case Left((space, local)) => SSHEnvironment.submit(env, batchExecutionJob, local, space, sshJobService)
+      case Right((space, ssh))  => SSHEnvironment.submit(env, batchExecutionJob, ssh, space, sshJobService)
 
   lazy val sshJobService =
     storageService match
-      case Left((space, local)) ⇒ SSHJobService(local, space, services, env, accessControl)
-      case Right((space, ssh))  ⇒ SSHJobService(ssh, space, services, env, accessControl)
+      case Left((space, local)) => SSHJobService(local, space, services, env, accessControl)
+      case Right((space, ssh))  => SSHJobService(ssh, space, services, env, accessControl)
 
 }
 

@@ -25,7 +25,7 @@ import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.argument._
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.setter.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -56,23 +56,22 @@ object AbstractNetLogoTask {
    * @tparam T
    * @return
    */
-  def wrapError[T](msg: String)(f: ⇒ T): T =
+  def wrapError[T](msg: String)(f: => T): T =
     try f
-    catch {
-      case e: InternalProcessingError ⇒ throw e
-      case e: Throwable ⇒
-        throw new UserBadDataError(s"$msg:\n" + e.stackStringWithMargin)
-    }
+    catch
+      case e: InternalProcessingError => throw e
+      case e: Throwable =>
+        throw new UserBadDataError(s"$msg:\n" + Prettifier.stackStringWithMargin(e))
 
   def deployWorkspace(workspace: Workspace, directory: File) = {
     import org.openmole.tool.file._
 
     val resolver = External.relativeResolver(directory)(_)
     workspace match {
-      case s: AbstractNetLogoTask.Workspace.Script ⇒
+      case s: AbstractNetLogoTask.Workspace.Script =>
         s.script.realFile.copy(resolver(s.name))
         (directory, directory / s.name)
-      case w: AbstractNetLogoTask.Workspace.Directory ⇒
+      case w: AbstractNetLogoTask.Workspace.Directory =>
         w.directory.realFile.copy(resolver(w.name))
         (directory / w.name, directory / w.name / w.script)
     }
@@ -99,7 +98,7 @@ object AbstractNetLogoTask {
       wrapError(s"Error while executing command $cmd") {
         try netLogo.command(cmd)
         catch {
-          case t: Throwable ⇒
+          case t: Throwable =>
             if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
         }
       }
@@ -110,7 +109,7 @@ object AbstractNetLogoTask {
       wrapError(s"Error while setting $variable") {
         try netLogo.setGlobal(variable, value)
         catch {
-          case t: Throwable ⇒
+          case t: Throwable =>
             if (ignoreError && netLogo.isNetLogoException(t)) {} else throw t
         }
       }
@@ -124,7 +123,7 @@ object AbstractNetLogoTask {
       try netLogo.dispose()
       catch {
         //FIXME it hapen with the nw extension, this error actually leaks memory. Bug report: https://github.com/NetLogo/NetLogo/issues/1766
-        case t: NoClassDefFoundError ⇒ if (!ignoreErrorOnDispose) throw t
+        case t: NoClassDefFoundError => if (!ignoreErrorOnDispose) throw t
       }
     }
 
@@ -139,7 +138,7 @@ object AbstractNetLogoTask {
       dispose(instance.netLogo, ignoreErrorOnDispose)
     }
 
-    WithInstance[AbstractNetLogoTask.NetoLogoInstance](close = destroyInstance, pooled = cached) { () ⇒ createInstance }
+    WithInstance[AbstractNetLogoTask.NetoLogoInstance](close = destroyInstance, pooled = cached) { () => createInstance }
   }
 
   /**
@@ -149,24 +148,24 @@ object AbstractNetLogoTask {
    */
   def netLogoCompatibleType(x: Any) = {
     def convertArray(x: Any): AnyRef = x match {
-      case a: Array[?] ⇒ a.asInstanceOf[Array[?]].map { x ⇒ convertArray(x.asInstanceOf[AnyRef]) }
-      case x           ⇒ safeType(x)
+      case a: Array[?] => a.asInstanceOf[Array[?]].map { x => convertArray(x.asInstanceOf[AnyRef]) }
+      case x           => safeType(x)
     }
 
     def safeType(x: Any): AnyRef = {
       val v = x match {
-        case i: Int    ⇒ i.toDouble
-        case l: Long   ⇒ l.toDouble
-        case fl: Float ⇒ fl.toDouble
-        case f: File   ⇒ f.getAbsolutePath
-        case x: AnyRef ⇒ x // Double, String and Boolean are unchanged
+        case i: Int    => i.toDouble
+        case l: Long   => l.toDouble
+        case fl: Float => fl.toDouble
+        case f: File   => f.getAbsolutePath
+        case x: AnyRef => x // Double, String and Boolean are unchanged
       }
       v.asInstanceOf[AnyRef]
     }
 
     x match {
-      case x: Array[?] ⇒ convertArray(x)
-      case x           ⇒ safeType(x)
+      case x: Array[?] => convertArray(x)
+      case x           => safeType(x)
     }
   }
 
@@ -177,20 +176,20 @@ object AbstractNetLogoTask {
     try {
       clazz match {
         // all netlogo numeric are java.lang.Double
-        case c if c == classOf[Double]  ⇒ value.asInstanceOf[java.lang.Double].doubleValue()
-        case c if c == classOf[Float]   ⇒ value.asInstanceOf[java.lang.Double].floatValue()
-        case c if c == classOf[Int]     ⇒ value.asInstanceOf[java.lang.Double].intValue()
-        case c if c == classOf[Long]    ⇒ value.asInstanceOf[java.lang.Double].longValue()
+        case c if c == classOf[Double]  => value.asInstanceOf[java.lang.Double].doubleValue()
+        case c if c == classOf[Float]   => value.asInstanceOf[java.lang.Double].floatValue()
+        case c if c == classOf[Int]     => value.asInstanceOf[java.lang.Double].intValue()
+        case c if c == classOf[Long]    => value.asInstanceOf[java.lang.Double].longValue()
         // target boolean
-        case c if c == classOf[Boolean] ⇒ value.asInstanceOf[java.lang.Boolean].booleanValue()
+        case c if c == classOf[Boolean] => value.asInstanceOf[java.lang.Boolean].booleanValue()
         // target string assume the origin type has a toString
-        case c if c == classOf[String]  ⇒ value.toString
+        case c if c == classOf[String]  => value.toString
         // try casting anyway - NOTE : untested
-        case c                          ⇒ c.cast(value)
+        case c                          => c.cast(value)
       }
     }
     catch {
-      case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${clazz}")
+      case e: Throwable => throw new UserBadDataError(e, s"Error when casting a variable of type ${value.getClass} to target type ${clazz}")
     }
 
   /**
@@ -209,17 +208,17 @@ object AbstractNetLogoTask {
    * @param inputs
    * @return
    */
-  def validateNetLogoInputTypes = Validate { p ⇒
+  def validateNetLogoInputTypes = Validate { p =>
     import p._
     def acceptedType(c: Class[?]): Boolean =
       if (c.isArray()) acceptedType(c.getComponentType)
       else Seq(classOf[String], classOf[Int], classOf[Double], classOf[Long], classOf[Float], classOf[File], classOf[Boolean]).contains(c)
 
     inputs.flatMap {
-      case v ⇒
+      case v =>
         v.`type`.runtimeClass.asInstanceOf[Class[?]] match {
-          case c if acceptedType(c) ⇒ None
-          case _                    ⇒ Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
+          case c if acceptedType(c) => None
+          case _                    => Some(new UserBadDataError(s"""Error for netLogoInput ${v.name} : type ${v.`type`.runtimeClass.toString()} is not managed by NetLogo."""))
         }
     }
   }
@@ -240,12 +239,11 @@ object AbstractNetLogoTask {
         AbstractNetLogoTask.netLogoArrayToVariable(netLogoCollection, mapped.v)
       }
     }
-    catch {
-      case e: Throwable ⇒
+    catch
+      case e: Throwable =>
         throw new UserBadDataError(
-          s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + e.stackStringWithMargin
+          s"Error when fetching netlogo output ${mapped.name} in variable ${mapped.v}:\n" + Prettifier.stackStringWithMargin(e)
         )
-    }
 }
 
 /**
@@ -291,20 +289,20 @@ trait AbstractNetLogoTask extends Task with ValidateTask:
       External.validate(external)(allInputs) ++
       AbstractNetLogoTask.validateNetLogoInputTypes(mapped.inputs.map(_.v))
 
-  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) = TaskExecution: parameters ⇒
+  override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) = TaskExecution: parameters =>
     import parameters._
 
     val pool = executionContext.cache.getOrElseUpdate(netLogoInstanceKey):
       AbstractNetLogoTask.createPool(netLogoFactory, workspace, reuseWorkspace, ignoreErrorOnDispose = ignoreErrorOnDispose, switch3d = switch3d)
 
-    pool: instance ⇒
+    pool: instance =>
 
       val resolver = External.relativeResolver(instance.workspaceDirectory)(_)
       val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
       AbstractNetLogoTask.executeNetLogo(instance.netLogo, "clear-all")
-      seed.foreach { s ⇒ AbstractNetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
+      seed.foreach { s => AbstractNetLogoTask.executeNetLogo(instance.netLogo, s"random-seed ${context(s)}") }
 
       for (cmd ← setup.map(_.from(context))) AbstractNetLogoTask.executeNetLogo(instance.netLogo, cmd, ignoreError)
 
@@ -317,7 +315,7 @@ trait AbstractNetLogoTask extends Task with ValidateTask:
 
 
       val contextResult =
-        External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map { mapped ⇒
+        External.fetchOutputFiles(external, netlogoTask.outputs, preparedContext, resolver, Seq(instance.workspaceDirectory)) ++ mapped.outputs.map { mapped =>
           def outputValue = AbstractNetLogoTask.report(instance.netLogo, mapped.name)
           AbstractNetLogoTask.netLogoValueToVal(outputValue, mapped)
         }

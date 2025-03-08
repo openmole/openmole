@@ -32,9 +32,9 @@ object Updater:
       try
         val resubmit = updatable.update()
         System.runFinalization
-        if resubmit then threadProvider.get.foreach(tp ⇒ delay(this)(tp))
+        if resubmit then threadProvider.get.foreach(tp => delay(this)(tp))
       catch
-        case e: Throwable ⇒ Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
+        case e: Throwable => Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
 
   def registerForUpdate(updatable: IUpdatableWithVariableDelay)(implicit threadProvider: ThreadProvider) =
     val task = new UpdaterTask(updatable, WeakReference(threadProvider))
@@ -60,7 +60,7 @@ object Updater:
 
 
 object IUpdatable:
-  def apply(f: () ⇒ Boolean) = new IUpdatable:
+  def apply(f: () => Boolean) = new IUpdatable:
     override def update(): Boolean = f()
 
 

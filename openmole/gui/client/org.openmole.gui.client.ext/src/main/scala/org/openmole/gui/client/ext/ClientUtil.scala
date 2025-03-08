@@ -27,14 +27,14 @@ object ClientUtil:
   def longToDate(date: Long) = s"${new Date(date).toLocaleDateString}, ${new Date(date).toLocaleTimeString}"
 
   implicit class TagCollapserOnClickRX(triggerCondition: Signal[Boolean]):
-    def expandDiv(inner: HtmlElement, onended: () ⇒ Unit = () ⇒ {}) =
+    def expandDiv(inner: HtmlElement, onended: () => Unit = () => {}) =
       val expanded = div(
         cls := "hidden-div",
         cls.toggle("expanded") <-- triggerCondition,
         inner
       )
 
-      expanded.ref.addEventListener("transitionend", (e: Event) ⇒ { onended() })
+      expanded.ref.addEventListener("transitionend", (e: Event) => { onended() })
       expanded
 
   def toJSObject(pluginFactory: GUIPluginFactory) = new js.Object {

@@ -52,11 +52,11 @@ case class LoadSource(
   serializerService: SerializerService
 ) extends Source {
 
-  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters ⇒
+  override protected def process(executionContext: MoleExecutionContext) = FromContext { parameters =>
     import parameters._
     val from = new File(file.from(context))
     val loadedContext = serializerService.deserializeAndExtractFiles[Context](from, deleteFilesOnGC = true, gz = false)
-    context ++ prototypes.map(p ⇒ loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
+    context ++ prototypes.map(p => loadedContext.variable(p).getOrElse(throw new UserBadDataError(s"Variable $p has not been found in the loaded context")))
   }
 
 }

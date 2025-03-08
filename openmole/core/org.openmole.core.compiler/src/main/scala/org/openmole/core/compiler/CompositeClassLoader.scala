@@ -25,14 +25,14 @@ import scala.util._
 
 object CompositeClassLoader {
 
-  def loop[T](classLoaders: Seq[ClassLoader])(f: ClassLoader ⇒ T, cl: List[ClassLoader] = classLoaders.toList): Option[T] = {
+  def loop[T](classLoaders: Seq[ClassLoader])(f: ClassLoader => T, cl: List[ClassLoader] = classLoaders.toList): Option[T] = {
     cl match {
-      case Nil ⇒ None
-      case h :: t ⇒
+      case Nil => None
+      case h :: t =>
         Try(f(h)) match {
-          case Success(null) ⇒ loop(classLoaders)(f, t)
-          case Failure(_)    ⇒ loop(classLoaders)(f, t)
-          case Success(r)    ⇒ Some(r)
+          case Success(null) => loop(classLoaders)(f, t)
+          case Failure(_)    => loop(classLoaders)(f, t)
+          case Success(r)    => Some(r)
         }
     }
   }

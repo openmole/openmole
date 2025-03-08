@@ -462,11 +462,11 @@ package object ext {
 
   def executionState(state: ExecutionState) = Seq(
     state match {
-      case _: ExecutionState.Failed   ⇒ color := "#CC3A36"
-      case _: ExecutionState.Running  ⇒ color := "yellow"
-      case _: ExecutionState.Finished ⇒ color := "#a6bf26"
-      case _: ExecutionState.Canceled ⇒ color := "orange"
-      case _                         ⇒ color := "#fff"
+      case _: ExecutionState.Failed   => color := "#CC3A36"
+      case _: ExecutionState.Running  => color := "yellow"
+      case _: ExecutionState.Finished => color := "#a6bf26"
+      case _: ExecutionState.Canceled => color := "orange"
+      case _                         => color := "#fff"
     },
     fontWeight := "bold"
   )

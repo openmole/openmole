@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object MapDomain {
 
-  implicit def isDiscrete[D, I, O]: DiscreteFromContextDomain[MapDomain[D, I, O], O] = domain ⇒
+  implicit def isDiscrete[D, I, O]: DiscreteFromContextDomain[MapDomain[D, I, O], O] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
@@ -31,9 +31,9 @@ object MapDomain {
 
 }
 
-case class MapDomain[D, -I, +O](domain: D, f: FromContext[I ⇒ O])(implicit discrete: DiscreteFromContextDomain[D, I]) { d ⇒
+case class MapDomain[D, -I, +O](domain: D, f: FromContext[I => O])(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>
 
-  def iterator = FromContext { p ⇒
+  def iterator = FromContext { p =>
     import p._
     val fVal = f.from(context)
     discrete(domain).domain.from(context).map { fVal }

@@ -32,12 +32,12 @@ class AssociativeCache[K, T] {
 
   def cached(cacheAssociation: Object, key: K): Option[T] = cacheMaps.synchronized {
     cacheMaps.get(cacheAssociation) match {
-      case None      ⇒ None
-      case Some(map) ⇒ map.synchronized { map.get(key) }
+      case None      => None
+      case Some(map) => map.synchronized { map.get(key) }
     }
   }
 
-  def cache(cacheAssociation: Object, key: K, preCompute: Boolean = true)(cacheable: K ⇒ T): T = {
+  def cache(cacheAssociation: Object, key: K, preCompute: Boolean = true)(cacheable: K => T): T = {
     def cache = {
       val computedCache = if (preCompute) Some(cacheable(key)) else None
       cacheMaps.synchronized {
