@@ -27,13 +27,13 @@ object SubmitActor:
 
     val Submit(job, environment) = submit
 
-    JobManager.killOr(job, Kill(job, environment, None)): () ⇒
+    JobManager.killOr(job, Kill(job, environment, None)): () =>
       try
         val bj = environment.execute(job)
         BatchEnvironment.setExecutionJobSate(environment, job, SUBMITTED)
         JobManager ! Submitted(job, environment, bj)
       catch
-        case e: Throwable ⇒
+        case e: Throwable =>
           JobManager ! Error(job, environment, e, None, None)
           JobManager ! Delay(Submit(job, environment), preference(BatchEnvironment.SubmitRetryInterval))
 

@@ -28,13 +28,13 @@ case class Case(condition: Condition, dsl: DSL)
 
 object Switch {
 
-  def apply(cases: Case*)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("switch")) = {
+  def apply(cases: Case*)(implicit definitionScope: DefinitionScope = DefinitionScope.InternalScope("switch")) = {
 
     val first = Strain(EmptyTask())
     val last = Strain(EmptyTask())
 
     cases.map {
-      case Case(condition, dsl) ⇒
+      case Case(condition, dsl) =>
         first -- Slot(dsl) when condition
     }.reduce[DSL](_ & _) -- Slot(last)
 

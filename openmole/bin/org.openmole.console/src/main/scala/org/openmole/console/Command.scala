@@ -26,7 +26,7 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.project.*
-import org.openmole.core.tools.io.Prettifier.*
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{Mole, MoleExecution, MoleServices}
 import org.openmole.core.workflow.validation.Validation
@@ -59,18 +59,18 @@ object Command:
   def load(variables: ConsoleVariables, file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
     def loadAny(file: File, args: Seq[String] = Seq.empty)(implicit services: Services) =
       Project.compile(variables.workDirectory, file) match
-        case ScriptFileDoesNotExists() ⇒ throw new IOException("File " + file + " doesn't exist.")
-        case e: CompilationError ⇒ throw e.error
-        case compiled: Compiled ⇒
+        case ScriptFileDoesNotExists() => throw new IOException("File " + file + " doesn't exist.")
+        case e: CompilationError => throw e.error
+        case compiled: Compiled =>
           util.Try(compiled.eval(args)) match
-            case util.Success(res) ⇒ Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
-            case util.Failure(e) ⇒ throw UserBadDataError(s"Error during evaluation of the script $file", e)
+            case util.Success(res) => Console.CompiledDSL(res, compiled.compilationContext, compiled.result)
+            case util.Failure(e) => throw UserBadDataError(s"Error during evaluation of the script $file", e)
 
     loadAny(file)
   end load
 
 
-class Command(val console: REPL, val variables: ConsoleVariables, val terminal: Terminal) { commands ⇒
+class Command(val console: REPL, val variables: ConsoleVariables, val terminal: Terminal) { commands =>
 
   given Terminal = terminal
 
@@ -98,7 +98,7 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
     def print(moleExecution: MoleExecution, debug: Boolean = false): Unit =
       def environmentErrors(environment: Environment, level: Level) =
         def filtered =
-          Environment.clearErrors(environment).filter: e ⇒
+          Environment.clearErrors(environment).filter: e =>
             e.level.intValue() >= level.intValue()
 
         for
@@ -106,8 +106,8 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
         do
           def detail =
             error.detail match
-              case None    ⇒ ""
-              case Some(m) ⇒ s"\n$m\n"
+              case None    => ""
+              case Some(m) => s"\n$m\n"
 
           println(
             s"""${error.level.toString}: ${error.exception.getMessage}$detail
@@ -144,13 +144,13 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
       println("\n--- Errors ---\n")
 
       moleExecution.exception match
-        case Some(e) ⇒
+        case Some(e) =>
           MoleExecution.MoleExecutionFailed.capsule(e) match
-            case Some(c) ⇒ System.out.println(s"Mole execution failed while executing ${c}:")
-            case None    ⇒ System.out.println(s"Mole execution failed:")
+            case Some(c) => System.out.println(s"Mole execution failed while executing ${c}:")
+            case None    => System.out.println(s"Mole execution failed:")
 
           System.out.println(exceptionToString(e.exception))
-        case None ⇒
+        case None =>
 
 
       println("\n--- Environments ---\n")
@@ -167,7 +167,7 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
     def start(dsl: DSL)(implicit services: Services): MoleExecution = Command.start(dsl, CompilationContext(console.classDirectory, console.classLoader))
     def start(dsl: Console.CompiledDSL)(implicit services: Services): MoleExecution = Command.start(dsl.dsl, dsl.compilationContext)
 
-    private def exceptionToString(e: Throwable) = e.stackString
+    private def exceptionToString(e: Throwable) = Prettifier.stackString(e)
 
     implicit def stringToLevel(s: String): Level = Level.parse(s.toUpperCase)
 
@@ -186,8 +186,8 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
       val installedBundles = PluginManager.bundleHashes.map(_.toString).toSet
       def installed(components: Seq[String]) = (components.toSet -- installedBundles).isEmpty
 
-      urls.getOrElse(org.openmole.core.module.indexes).flatMap: url ⇒
-        org.openmole.core.module.modules(url).map: m ⇒
+      urls.getOrElse(org.openmole.core.module.indexes).flatMap: url =>
+        org.openmole.core.module.modules(url).map: m =>
           def installedString = if (installed(m.components.map(_.hash))) " (installed)" else ""
           m.name + installedString
 
@@ -195,13 +195,13 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
 
     def install(name: String*)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, workspace: Workspace, fileService: FileService): Unit = install(name)
     def install(names: Seq[String], urls: OptionalArgument[Seq[String]] = None)(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, workspace: Workspace, fileService: FileService): Unit =
-      val toInstall = urls.getOrElse(org.openmole.core.module.indexes).flatMap(url ⇒ org.openmole.core.module.selectableModules(url)).filter(sm ⇒ names.contains(sm.module.name))
+      val toInstall = urls.getOrElse(org.openmole.core.module.indexes).flatMap(url => org.openmole.core.module.selectableModules(url)).filter(sm => names.contains(sm.module.name))
       if toInstall.isEmpty
       then println("The module(s) is/are already installed.")
       else
         Console.dealWithLoadError(org.openmole.core.module.install(toInstall), interactive = true) match
-          case Seq() ⇒ println("The module(s) has/have been successfully installed, please restart the console to enable it/them.")
-          case e ⇒ println("There was some errors during the installation, please restart the console to enable the installed module(s).")
+          case Seq() => println("The module(s) has/have been successfully installed, please restart the console to enable it/them.")
+          case e => println("There was some errors during the installation, please restart the console to enable the installed module(s).")
 
 
 }

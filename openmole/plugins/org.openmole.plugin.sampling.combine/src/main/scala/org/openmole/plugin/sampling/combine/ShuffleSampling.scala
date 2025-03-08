@@ -23,11 +23,11 @@ import org.openmole.tool.random._
 
 object ShuffleSampling {
 
-  implicit def isSampling[S]: IsSampling[ShuffleSampling[S]] = s ⇒ {
+  implicit def isSampling[S]: IsSampling[ShuffleSampling[S]] = s => {
     def validate: Validate = s.sampling(s.s).validate
     def inputs: PrototypeSet = s.sampling(s.s).inputs
     def outputs: Iterable[Val[?]] = s.sampling(s.s).outputs
-    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p ⇒
+    def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext { p =>
       import p._
       val array = s.sampling(s.s).sampling.from(context).toArray
       shuffle(array)(random())

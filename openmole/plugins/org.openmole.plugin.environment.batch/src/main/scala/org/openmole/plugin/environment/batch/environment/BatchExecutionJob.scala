@@ -44,17 +44,17 @@ object BatchExecutionJob:
 
       def toVersionedPackage(c: Class[?]) =
         val p = c.getName.reverse.dropWhile(_ != '.').drop(1).reverse
-        PluginManager.bundleForClass(c).map { b ⇒ VersionedPackage(p, Some(b.getVersion.toString)) }
+        PluginManager.bundleForClass(c).map { b => VersionedPackage(p, Some(b.getVersion.toString)) }
 
       val packages = mentionedClasses.flatMap(toVersionedPackage).distinct
       val plugins = mentionedClasses.flatMap(PluginManager.pluginsForClass).distinct
 
       val exported =
-        allClassFiles.flatMap(c ⇒ Option(new File(c.path).getParent)).distinct.
+        allClassFiles.flatMap(c => Option(new File(c.path).getParent)).distinct.
           filter(PluginAndFilesListing.looksLikeREPLClassName).
           map(_.replace("/", "."))
 
-      val replClassFiles = allClassFiles.filter(c ⇒ PluginAndFilesListing.looksLikeREPLClassName(c.path.replace("/", ".")))
+      val replClassFiles = allClassFiles.filter(c => PluginAndFilesListing.looksLikeREPLClassName(c.path.replace("/", ".")))
 
       BatchExecutionJob.ClosuresBundle(replClassFiles, exported, packages, plugins)
 
@@ -64,7 +64,7 @@ object BatchExecutionJob:
         val bundle = newFile.newFile("closureBundle", ".jar")
         try createBundle("closure-" + UUID.randomUUID.toString, "1.0", closures.classes, closures.exported, closures.dependencies, bundle)
         catch
-          case e: Throwable ⇒
+          case e: Throwable =>
             bundle.delete()
             throw e
         Some(fileService.wrapRemoveOnGC(bundle))

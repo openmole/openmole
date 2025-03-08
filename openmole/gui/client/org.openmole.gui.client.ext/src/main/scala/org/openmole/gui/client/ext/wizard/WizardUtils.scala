@@ -32,7 +32,7 @@ object WizardUtils:
 
   def mkVals(modelMetadata: ModelMetadata, prototype: PrototypeData*) =
     def vals =
-      ((modelMetadata.inputs ++ modelMetadata.outputs ++ prototype).map { p ⇒ (p.name, p.`type`.scalaString) } distinct).map: p =>
+      ((modelMetadata.inputs ++ modelMetadata.outputs ++ prototype).map { p => (p.name, p.`type`.scalaString) } distinct).map: p =>
         s"val ${p._1} = Val[${p._2}]"
 
     vals.mkString("\n")
@@ -49,32 +49,32 @@ object WizardUtils:
     def setElements(inputs: Seq[PrototypeData], outputs: Seq[PrototypeData]) =
       def ioString(protos: Seq[PrototypeData], keyString: String) =
         if protos.nonEmpty
-        then Seq(Seq(s"$keyString += (", ")").mkString(protos.map { i ⇒ s"${i.name}" }.mkString(", ")))
+        then Seq(Seq(s"$keyString += (", ")").mkString(protos.map { i => s"${i.name}" }.mkString(", ")))
         else Seq()
 
       def imapString(protos: Seq[PrototypeData], keyString: String) =
-        protos.flatMap: i ⇒
+        protos.flatMap: i =>
           i.mapping.map { mapping => s"""$keyString += ${i.name} mapped \"\"\"${mapping}\"\"\"""" }
 
       def omapString(protos: Seq[PrototypeData], keyString: String) =
-        protos.flatMap: o ⇒
+        protos.flatMap: o =>
           o.mapping.map: mapping =>
             s"""$keyString += ${o.name} mapped \"\"\"${mapping}\"\"\""""
 
       def default(key: String, value: String) = s"$key := $value"
 
-      val (rawimappings, ins) = inputs.partition(i ⇒ i.mapping.isDefined)
-      val (rawomappings, ous) = outputs.partition(o ⇒ o.mapping.isDefined)
+      val (rawimappings, ins) = inputs.partition(i => i.mapping.isDefined)
+      val (rawomappings, ous) = outputs.partition(o => o.mapping.isDefined)
       val (ifilemappings, imappings) = rawimappings.partition(_.`type` == PrototypeData.File)
       val (ofilemappings, omappings) = rawomappings.partition(_.`type` == PrototypeData.File)
 
-      //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r ⇒ s"workDirectory / $r" }.mkString(",")})\n""" else ""
+      //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r => s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
       val defaultValues =
-        (inputs.map { p ⇒ (p.name, p.default) } ++
-          ifilemappings.map { p ⇒ (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
+        (inputs.map { p => (p.name, p.default) } ++
+          ifilemappings.map { p => (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
           _._2.isEmpty
-        }.map { p ⇒ default(p._1, p._2) }
+        }.map { p => default(p._1, p._2) }
 
       ioString(ins, "inputs") ++
         ioString(ous, "outputs") ++

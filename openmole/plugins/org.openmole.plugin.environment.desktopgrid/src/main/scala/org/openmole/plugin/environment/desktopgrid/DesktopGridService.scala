@@ -50,7 +50,7 @@ trait DesktopGridJobService extends JobService {
   override type J = String
 }
 
-class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit services: BatchEnvironment.Services) { service ⇒
+class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit services: BatchEnvironment.Services) { service =>
   import services._
   import threadProvider.pool
 
@@ -113,7 +113,7 @@ class DesktopGridService(port: Int, passwordHash: Hash, path: File)(implicit ser
     val desktopJobMessage = DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, memory, inputFile)
 
     val tmpJobFile = tmpJobSubmissionFile(jobId)
-    tmpJobFile.withGzippedOutputStream(os ⇒
+    tmpJobFile.withGzippedOutputStream(os =>
       services.serializerService.serialise(desktopJobMessage, os))
 
     tmpJobFile.move(jobSubmissionFile(jobId))

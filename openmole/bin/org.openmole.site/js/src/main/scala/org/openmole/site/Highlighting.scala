@@ -3,7 +3,7 @@ package org.openmole.site
 import scaladget.highlightjs.HighlightJS
 
 import scala.scalajs.js
-import js.Dynamic.{ literal ⇒ lit }
+import js.Dynamic.{ literal => lit }
 
 /*
  * Copyright (C) 12/04/17 // mathieu.leclaire@openmole.org

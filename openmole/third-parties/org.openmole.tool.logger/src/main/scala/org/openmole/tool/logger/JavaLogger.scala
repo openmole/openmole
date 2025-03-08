@@ -17,7 +17,7 @@
 
 package org.openmole.tool.logger
 
-import java.util.logging.{ Logger ⇒ JLogger, Level }
+import java.util.logging.{ Logger => JLogger, Level }
 
 trait Levels {
   def SEVERE = Level.SEVERE
@@ -35,12 +35,12 @@ trait Levels {
   def finest = Level.FINEST
 }
 
-trait JavaLogger { l ⇒
+trait JavaLogger { l =>
 
   object Log extends Levels {
     @transient lazy val logger = JLogger.getLogger(l.getClass.getName)
 
-    def log(level: Level, message: ⇒ String) =
+    def log(level: Level, message: => String) =
       if (logger.isLoggable(level)) logger.log(level, message)
   }
 

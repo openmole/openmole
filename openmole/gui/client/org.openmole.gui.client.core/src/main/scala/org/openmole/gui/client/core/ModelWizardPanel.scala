@@ -96,7 +96,7 @@ object ModelWizardPanel:
         for
           list <- api.listFiles(tmpDirectory, withHidden = true)
           _ <- api.deleteFiles(list.data.map(f => tmpDirectory / f.name))
-          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p ⇒ transferring.set(p))
+          uploaded <- api.upload(fInput.ref.files.toSeq.map(f => f -> tmpDirectory / f.path), p => transferring.set(p))
           f <- factory(uploaded)
           _ <-
             f match
@@ -120,7 +120,7 @@ object ModelWizardPanel:
         cls := "inputFileStyle",
         margin := "15px",
         transferring.withTransferWaiter():
-          _ ⇒
+          _ =>
             div(
               child <--
                 uploadDirectorySwitch.checked.signal.map: directory =>
@@ -131,7 +131,7 @@ object ModelWizardPanel:
                   ),
               div(
                 child <-- modelMetadata.signal.map:
-                  case Some(mmd) ⇒
+                  case Some(mmd) =>
                     div(
                       flexRow,
                       div(mmd.files.map(p => p._1.mkString).mkString(", "), btn_primary, cls := " badgeUploadModel"),
@@ -158,7 +158,7 @@ object ModelWizardPanel:
       (mmd.data.inputs ++ mmd.data.outputs).find(p => p.name == variableName).getOrElse(defaultPrototype)
 
     def browseToPath(safePath: SafePath)(using panels: Panels) =
-      a(safePath.path.mkString, onClick --> { _ ⇒ panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
+      a(safePath.path.mkString, onClick --> { _ => panels.treeNodePanel.treeNodeManager.switch(safePath.parent)})
 
     def buildTask(directory: SafePath, tmpDirectory: SafePath, mmd: Option[ParsedModelMetadata])(using panels: Panels): Future[Unit] =
       mmd match
@@ -188,7 +188,7 @@ object ModelWizardPanel:
     def buildButton(tmpDirectory: SafePath) =
       button("Build", width := "150px", margin := "0 25 10 25", OMTags.btn_purple,
         onClick --> {
-          _ ⇒
+          _ =>
             buildTask(currentDirectory.now(), tmpDirectory, modelMetadata.now()).andThen {
               case util.Failure(exception) => NotificationManager.toService(panels.notifications).notifyError(s"Error while generating code", exception)
               case util.Success(_) =>

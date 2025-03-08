@@ -53,7 +53,7 @@ package object market:
     path.applyRecursive(_.setExecutable(true))
   }
   catch {
-    case e: IOException ⇒ throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)
+    case e: IOException => throw new InternalProcessingError(s"Cannot download entry at url ${entry.url}", e)
   }
 
 

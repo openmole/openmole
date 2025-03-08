@@ -26,7 +26,7 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
 
   override def update(): Boolean =
     fileService.get match {
-      case Some(fileService) ⇒
+      case Some(fileService) =>
         fileService.deleteEmpty.synchronized {
           def deleteEmpty(files: Vector[File]): Vector[File] = {
             val (deletedDirectories, nonEmptyDirectories) = files.filter(_.exists()).partition(_.delete())
@@ -39,6 +39,6 @@ class FileServiceGC(fileService: WeakReference[FileService]) extends IUpdatable 
           fileService.deleteEmpty ++= nonEmpty
         }
         true
-      case None ⇒ false
+      case None => false
     }
 }

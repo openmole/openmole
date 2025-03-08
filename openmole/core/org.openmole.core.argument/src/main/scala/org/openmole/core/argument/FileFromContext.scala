@@ -22,7 +22,7 @@ import java.io.File
 
 object FileFromContext:
   def apply(directory: File, name: FromContext[String]) = 
-    FromContext: p ⇒
+    FromContext: p =>
       import p.*
       new File(directory, name.from(context))
   

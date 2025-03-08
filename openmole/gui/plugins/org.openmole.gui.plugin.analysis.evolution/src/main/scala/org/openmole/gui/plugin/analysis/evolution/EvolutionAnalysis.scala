@@ -41,18 +41,18 @@ class EvolutionAnalysis extends MethodAnalysisPlugin:
 
     div(
       child <-- metadata.signal.map:
-        case None ⇒ p("")
-        case Some(value) ⇒
+        case None => p("")
+        case Some(value) =>
           value match
-  //              case c: AnalysisData.StochasticNSGA2.Convergence ⇒
+  //              case c: AnalysisData.StochasticNSGA2.Convergence =>
   //                val layout = Layout
   //                  .title("Hypervolume")
   //                  .yaxis(Axis.title("Hypervolume"))
   //                  .xaxis(Axis.title("Generation"))
   //
   //                val hvData =
-  //                  c.generations.flatMap { g ⇒
-  //                    g.hypervolume.map(hv ⇒ g.generation -> hv)
+  //                  c.generations.flatMap { g =>
+  //                    g.hypervolume.map(hv => g.generation -> hv)
   //                  }
   //
   //                val data = PlotData
@@ -73,6 +73,6 @@ class EvolutionAnalysis extends MethodAnalysisPlugin:
   //                val plotDiv = div()
   //                Plotly.plot(plotDiv.ref, js.Array(data), layout, config = config)
   //                plotDiv
-            case _ ⇒ p(value.toString)
+            case _ => p(value.toString)
     )
 

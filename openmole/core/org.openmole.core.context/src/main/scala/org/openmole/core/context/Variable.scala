@@ -18,7 +18,7 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.Prettifier._
+import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.random
 import shapeless3.typeable.Typeable
@@ -81,7 +81,7 @@ object Variable:
   def constructArray[CA: Manifest](
     prototype:  Val[?],
     collection: CA,
-    toValue:    (Any, Class[?]) ⇒ Any)(implicit construct: ConstructArray[CA]) =
+    toValue:    (Any, Class[?]) => Any)(implicit construct: ConstructArray[CA]) =
     import scala.jdk.CollectionConverters.*
 
     val (multiArrayType, depth): (ValType[?], Int) = ValType.unArrayify(prototype.`type`)
@@ -123,20 +123,20 @@ object Variable:
         currentArray: AnyRef,
         arrayType:    Class[?],
         maxDepth:     Int,
-        toValue:      (Any, Class[?]) ⇒ Any): Unit =
+        toValue:      (Any, Class[?]) => Any): Unit =
         assert(maxDepth >= 1)
 
         def fillArray =
           construct.iterable(collection).iterator().asScala.zipWithIndex.foreach: (v, i) =>
             try java.lang.reflect.Array.set(currentArray, i, toValue(v, arrayType))
             catch
-              case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${arrayType}")
+              case e: Throwable => throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${arrayType}")
 
         def recurse =
           construct.iterable(collection).iterator().asScala.zipWithIndex.foreach: (v, i) =>
             v match
-              case v: CA ⇒ constructMultiDimensionalArray(v, java.lang.reflect.Array.get(currentArray, i), arrayType, maxDepth - 1, toValue(_, _))
-              case _ ⇒ throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v} is not an instance of class ${implicitly[Manifest[CA]]}")
+              case v: CA => constructMultiDimensionalArray(v, java.lang.reflect.Array.get(currentArray, i), arrayType, maxDepth - 1, toValue(_, _))
+              case _ => throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v} is not an instance of class ${implicitly[Manifest[CA]]}")
 
         if maxDepth == 1 then fillArray else recurse
 
@@ -153,12 +153,12 @@ object Variable:
 //            else
 //              val v = construct.iterable(collection).iterator().next()
 //              v match
-//                case v: CA ⇒ extractDimensions0(v, dims ++ Seq(size), maxDepth - 1)
-//                case _     ⇒ throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v} of type ${v.getClass} found expected ${manifest[CA]}")
+//                case v: CA => extractDimensions0(v, dims ++ Seq(size), maxDepth - 1)
+//                case _     => throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v} of type ${v.getClass} found expected ${manifest[CA]}")
 //
 //        try extractDimensions0(collection, Seq.empty, depth)
 //        catch
-//          case e: Throwable ⇒ throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
+//          case e: Throwable => throw new UserBadDataError(e, s"Error when mapping a prototype array of depth ${depth} and type ${multiArrayType} with nested LogoLists")
 //
 //      val dimensions = extractDimensions(collection, depth)
       val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[?]], dimensions *)
@@ -171,7 +171,7 @@ object Variable:
       def constructMultiDimensionalArray(
         value: Any,
         valType: ValType[?],
-        toValue: (Any, Class[?]) ⇒ Any): Any =
+        toValue: (Any, Class[?]) => Any): Any =
         import org.openmole.tool.types.TypeTool._
         import scala.jdk.CollectionConverters.*
         value match
@@ -199,6 +199,6 @@ object Variable:
  */
 case class Variable[@specialized T](prototype: Val[T], value: T):
   override def toString: String = prettified(Int.MaxValue)
-  def prettified(snipArray: Int): String = s"${prototype.name}=${if (value != null) value.prettify(snipArray) else "null"}"
+  def prettified(snipArray: Int): String = s"${prototype.name}=${Prettifier.prettify(value, snipArray)}"
   def name = prototype.name
 

@@ -32,20 +32,20 @@ case class QualityControl(hysteresis: Int) {
   def successRate = _successRate.get
   def time = operationTime.get
 
-  def apply[A](op: ⇒ A): A = timed {
+  def apply[A](op: => A): A = timed {
     try {
       val ret = op
       success
       ret
     }
     catch {
-      case e: Throwable ⇒
+      case e: Throwable =>
         failed
         throw e
     }
   }
 
-  def timed[A](op: ⇒ A): A = {
+  def timed[A](op: => A): A = {
     val begin = System.currentTimeMillis
     val a = op
     operationTime.put(System.currentTimeMillis - begin)

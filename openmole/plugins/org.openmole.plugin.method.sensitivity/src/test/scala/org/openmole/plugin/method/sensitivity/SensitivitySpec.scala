@@ -31,7 +31,7 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
    *           STI2 = (13.0 / 144.0) / (40.0 / 144.0) ~= 0.325
    */
 
-  val model = TestTask { context ⇒
+  val model = TestTask { context =>
     context +
       (y1 -> (context(x1) + 0.5 * context(x2))) +
       (y2 -> (context(x1) + 0.5 * context(x2) + context(x1) * context(x2))) +

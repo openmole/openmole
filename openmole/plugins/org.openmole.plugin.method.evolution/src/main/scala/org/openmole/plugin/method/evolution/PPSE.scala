@@ -28,7 +28,7 @@
 //  def densityVal = Val[Double]("density", GAIntegration.namespace)
 //
 //  case class DeterministicParams(
-//    pattern:          Vector[Double] ⇒ Vector[Int],
+//    pattern:          Vector[Double] => Vector[Int],
 //    genome:           GenomeDouble,
 //    phenotypeContent: PhenotypeContent,
 //    objectives:       Seq[Objective],
@@ -42,10 +42,10 @@
 //
 //  object DeterministicParams {
 //
-//    import mgo.evolution.algorithm.{ PSE ⇒ _, _ }
+//    import mgo.evolution.algorithm.{ PSE => _, _ }
 //    import cats.data._
 //
-//    implicit def integration: MGOAPI.Integration[DeterministicParams, Vector[Double], Phenotype] = new MGOAPI.Integration[DeterministicParams, Vector[Double], Phenotype] { api ⇒
+//    implicit def integration: MGOAPI.Integration[DeterministicParams, Vector[Double], Phenotype] = new MGOAPI.Integration[DeterministicParams, Vector[Double], Phenotype] { api =>
 //      type G = (Array[Double], Double)
 //      type I = mgo.evolution.algorithm.EMPPSE.Individual[Phenotype]
 //      type S = EvolutionState[mgo.evolution.algorithm.EMPPSE.EMPPSEState]
@@ -78,12 +78,12 @@
 //        def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
 //        def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 //
-//        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p ⇒
+//        def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext { p =>
 //          import p._
 //          val res = mgo.evolution.algorithm.EMPPSE.result[Phenotype](
 //            population,
 //            state,
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply _,
 //            om.pattern
 //          )
@@ -96,39 +96,39 @@
 //          genomes ++ fitness ++ densities ++ outputValues
 //        }
 //
-//        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p ⇒
+//        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p =>
 //          import p._
-//          val continuous = Genome.continuous(om.genome)
-//          //val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, _.discreteValues).from(context))
+//          val continuous = om.genome.continuous
+//          //val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
 //          mgo.evolution.algorithm.EMPPSE.initialGenomes(n, continuous, rng)
 //        }
 //
-//        private def pattern(phenotype: Phenotype) = FromContext { p ⇒
+//        private def pattern(phenotype: Phenotype) = FromContext { p =>
 //          import p._
 //          om.pattern(Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply(phenotype))
 //        }
 //
-//        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p ⇒
+//        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p =>
 //          import p._
-//          //val discrete = Genome.discrete(om.genome)
-//          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[Vector[Double]](f, om.genome, identity, _ => Vector()).from(context))
+//          //val discrete = om.genome.discrete
+//          val rejectValue = om.reject.map(f => GAIntegration.rejectValue[Vector[Double]](f, om.genome, identity, _ => Vector()).from(context))
 //          mgo.evolution.algorithm.EMPPSEOperation.breeding[S, I, G](
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            identity,
 //            n,
 //            rejectValue,
 //            Focus[S](_.s.gmm).get)(s, individuals, rng)
 //        }
 //
-//        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p ⇒
+//        def elitism(population: Vector[I], candidates: Vector[I], s: S, evaluated: Long, rng: scala.util.Random) = FromContext { p =>
 //          import p._
 //
-//          val rejectValue = om.reject.map(f ⇒ GAIntegration.rejectValue[Vector[Double]](f, om.genome, identity, _ => Vector()).from(context))
+//          val rejectValue = om.reject.map(f => GAIntegration.rejectValue[Vector[Double]](f, om.genome, identity, _ => Vector()).from(context))
 //          val (s2, elited) = mgo.evolution.algorithm.EMPPSEOperation.elitism[S, I, Phenotype](
 //            _.genome,
 //            _.phenotype,
 //            pattern(_).from(context),
-//            Genome.continuous(om.genome),
+//            om.genome.continuous,
 //            rejectValue,
 //            Focus[S](_.s.probabilityMap),
 //            Focus[S](_.s.hitmap),
@@ -146,7 +146,7 @@
 //
 //        def migrateToIsland(population: Vector[I]) = ??? //population.map(PSEAlgorithm.Individual.foundedIsland.set(true))
 //        def migrateFromIsland(population: Vector[I], state: S) = ???
-//        //          population.filter(i ⇒ !PSEAlgorithm.Individual.foundedIsland.get(i)).
+//        //          population.filter(i => !PSEAlgorithm.Individual.foundedIsland.get(i)).
 //        //            map(PSEAlgorithm.Individual.foundedIsland.set(false))
 //      }
 //
@@ -188,7 +188,7 @@
 //  import org.openmole.core.dsl.DSL
 //
 //  implicit def method: ExplorationMethod[PPSEEvolution, EvolutionWorkflow] =
-//    p ⇒
+//    p =>
 //      EvolutionPattern.build(
 //        algorithm =
 //          PPSE(
@@ -207,7 +207,7 @@
 //        scope = p.scope
 //      )
 //
-//  implicit def patternContainer: ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) ⇒ e.copy(distribution = p)
+//  implicit def patternContainer: ExplorationMethodSetter[PSEEvolution, EvolutionPattern] = (e, p) => e.copy(distribution = p)
 //
 //}
 //

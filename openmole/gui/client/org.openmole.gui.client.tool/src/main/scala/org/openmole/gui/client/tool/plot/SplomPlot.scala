@@ -50,7 +50,7 @@ object SplomPlot {
       val arraySize = contents.headOption.map {
         _.length
       }.getOrElse(0)
-      val colors = (0 to arraySize).toJSArray map { x ⇒ x.toDouble / arraySize }
+      val colors = (0 to arraySize).toJSArray map { x => x.toDouble / arraySize }
 
       val data = splom
         .set(dimensions)

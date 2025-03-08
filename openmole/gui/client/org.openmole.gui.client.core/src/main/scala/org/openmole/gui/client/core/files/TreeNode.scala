@@ -29,9 +29,9 @@ enum TreeNodeType(name: String):
   case File extends TreeNodeType("File")
   case Folder extends TreeNodeType("Folder")
 
-case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit, cancelaction: () ⇒ Unit)
+case class TreeNodeError(message: String, filesInError: Seq[SafePath], okaction: () => Unit, cancelaction: () => Unit)
 
-case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () ⇒ Unit)
+case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okaction: () => Unit)
 
 sealed trait TreeNode:
   val id = randomId
@@ -45,14 +45,14 @@ def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.tre
 object TreeNode:
 
   implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
-    case Some(dd: TreeNodeData.Directory) ⇒ Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty, tnd.gitStatus)
-    case _ ⇒ TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState, tnd.gitStatus)
+    case Some(dd: TreeNodeData.Directory) => Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty, tnd.gitStatus)
+    case _ => TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState, tnd.gitStatus)
   }
 
   implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
     val (dOf, pluginState) = tn match {
-      case TreeNode.Directory(_, _, _, isEmpty,_) ⇒ (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
-      case f: TreeNode.File ⇒ (None, f.pluginState)
+      case TreeNode.Directory(_, _, _, isEmpty,_) => (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
+      case f: TreeNode.File => (None, f.pluginState)
     }
 
     TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf, tn.gitStatus)

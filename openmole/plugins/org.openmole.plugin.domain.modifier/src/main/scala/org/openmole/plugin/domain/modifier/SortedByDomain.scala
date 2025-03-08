@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object SortedByDomain {
 
-  implicit def isDiscrete[D, T, S]: DiscreteFromContextDomain[SortedByDomain[D, T, S], T] = domain ⇒
+  implicit def isDiscrete[D, T, S]: DiscreteFromContextDomain[SortedByDomain[D, T, S], T] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
@@ -30,8 +30,8 @@ object SortedByDomain {
     )
 }
 
-case class SortedByDomain[D, T, S](domain: D, s: FromContext[T ⇒ S])(implicit discrete: DiscreteFromContextDomain[D, T], sOrdering: scala.Ordering[S]) {
-  def iterator = FromContext { p ⇒
+case class SortedByDomain[D, T, S](domain: D, s: FromContext[T => S])(implicit discrete: DiscreteFromContextDomain[D, T], sOrdering: scala.Ordering[S]) {
+  def iterator = FromContext { p =>
     import p._
     discrete(domain).domain.from(context).toSeq.sortBy(s.from(context)).iterator
   }

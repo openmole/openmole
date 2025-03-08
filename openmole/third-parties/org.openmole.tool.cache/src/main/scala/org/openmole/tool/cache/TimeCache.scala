@@ -20,10 +20,10 @@ package org.openmole.tool.cache
 import squants._
 
 object TimeCache {
-  def apply[T](f: () ⇒ (T, Time)) = new TimeCache[T](f)
+  def apply[T](f: () => (T, Time)) = new TimeCache[T](f)
 }
 
-class TimeCache[T](f: () ⇒ (T, Time)) {
+class TimeCache[T](f: () => (T, Time)) {
 
   var cache: Option[T] = None
   var cacheExpiration = Long.MinValue
@@ -31,12 +31,12 @@ class TimeCache[T](f: () ⇒ (T, Time)) {
   def apply() = synchronized {
     if (System.currentTimeMillis > cacheExpiration) cache = None
     cache match {
-      case None ⇒
+      case None =>
         val (v, t) = f()
         cache = Some(v)
         cacheExpiration = System.currentTimeMillis + t.millis
         v
-      case Some(c) ⇒ c
+      case Some(c) => c
     }
   }
 

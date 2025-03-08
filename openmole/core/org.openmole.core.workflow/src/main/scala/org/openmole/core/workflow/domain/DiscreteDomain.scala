@@ -44,6 +44,9 @@ object DiscreteFromContextDomain:
       val dv = d(domain)
       dv.copy(domain = FromContext.value(dv.domain))
 
+  given fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain => Domain(domain.map(v => Iterator(v)))
+  given fromContextIterableIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterable[T]], T] = domain => Domain(domain.map(v => v.iterator))
+
   def apply[D, T](f: D => Domain[FromContext[Iterator[T]]]): DiscreteFromContextDomain[D, T] =
     new DiscreteFromContextDomain[D, T]:
       def apply(d: D) = f(d)

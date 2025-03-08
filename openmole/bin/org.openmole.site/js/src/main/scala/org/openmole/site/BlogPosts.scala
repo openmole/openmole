@@ -70,8 +70,8 @@
 //        }
 //
 //      future.onComplete {
-//        case Failure(f) ⇒ f.getStackTrace.mkString(" ")
-//        case Success(s) ⇒
+//        case Failure(f) => f.getStackTrace.mkString(" ")
+//        case Success(s) =>
 //          org.scalajs.dom.window.sessionStorage.setItem(shared.blogposts, s)
 //          all() = stringToPost(s)
 //      }
@@ -87,11 +87,11 @@
 //        val head = rs.head
 //        val value = head.value
 //        head.name match {
-//          case n if n.startsWith(titleTag)    ⇒ blogPost.copy(title = value)
-//          case n if n.startsWith(categoryTag) ⇒ blogPost.copy(category = value)
-//          case n if n.startsWith(linkTag)     ⇒ blogPost.copy(link = value)
-//          case n if n.startsWith(dateTag)     ⇒ blogPost.copy(date = Some(new scalajs.js.Date(value)))
-//          case _                              ⇒ blogPost
+//          case n if n.startsWith(titleTag)    => blogPost.copy(title = value)
+//          case n if n.startsWith(categoryTag) => blogPost.copy(category = value)
+//          case n if n.startsWith(linkTag)     => blogPost.copy(link = value)
+//          case n if n.startsWith(dateTag)     => blogPost.copy(date = Some(new scalajs.js.Date(value)))
+//          case _                              => blogPost
 //        }
 //      })
 //    }
@@ -112,7 +112,7 @@
 //    } yield {
 //      val node = nodes.item(ns)
 //      ReadNode(i, node.nodeName, node.textContent)
-//    }).filter { rn ⇒ searchedTags.contains(rn.name)
+//    }).filter { rn => searchedTags.contains(rn.name)
 //    }.groupBy(_.index).values.map { readNodeToBlogPost }.toSeq
 //  }
 //

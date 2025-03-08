@@ -30,6 +30,11 @@ class FileInjection(xStream: XStream):
   def getMatchingFile(file: String): File =
     injectedFiles.getOrElse(file, throw InternalProcessingError(s"Replacement for file $file not found among $injectedFiles"))
 
-  def fromXML[T](is: InputStream): T = xStream.fromXML(is).asInstanceOf[T]
+  def fromXML[T](is: InputStream, files: Map[String, File]): T =
+    injectedFiles = files
+    try
+      xStream.fromXML(is).asInstanceOf[T]
+    finally
+      injectedFiles = null
 
 

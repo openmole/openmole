@@ -19,11 +19,14 @@ package org.openmole.core.workflow.task
 
 import org.openmole.core.context.Val
 import org.openmole.core.exception.InternalProcessingError
+import org.openmole.core.setter
 import org.openmole.core.setter.*
+import org.openmole.core.setter.DefinitionScope.UserDefinitionScope
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.puzzle.*
 import org.openmole.core.workflow.sampling.ExplicitSampling
+import org.openmole.core.workflow.task.Task.definitionScope
 import org.openmole.core.workflow.test.TestTask
 import org.openmole.core.workflow.transition.*
 import org.scalatest.*
@@ -37,3 +40,24 @@ class TaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   "Task" should "capture name" in:
     val myTask = EmptyTask()
     myTask.name should equal(Some("myTask"))
+
+  it should "support default values" in:
+    val i = Val[Double]
+    val task = EmptyTask()
+
+    task set (i := 10.0)
+    task set (Seq.fill(10)(i := 10))
+
+  it should "support untyped default values" in :
+    val i = Val[Double]
+    val task = EmptyTask()
+
+    val d: ValueAssignment.Untyped = i := 10.0
+
+    task set (d)
+    task set (Seq.fill(10)(d))
+
+  it should "contains the definition line number" in :
+    import setter.DefinitionScope.*
+    val (t1, t2) = ({given UserDefinitionScope = UserScriptDefinitionScope(0) ; EmptyTask()}, {given UserDefinitionScope = UserScriptDefinitionScope(-10) ; EmptyTask()})
+    (definitionScope(t1).line.get - definitionScope(t2).line.get) should equal(10)

@@ -121,7 +121,7 @@ object GUIServer:
 
     Router("/" -> routes)
 
-  case class ApplicationControl(stop: () ⇒ Unit)
+  case class ApplicationControl(stop: () => Unit)
 
   sealed trait ExitStatus
   case object Ok extends ExitStatus
@@ -194,7 +194,7 @@ class GUIServer(
     val control = GUIServer.Control()
     val applicationControl =
       GUIServer.ApplicationControl(
-        () ⇒ control.stop()
+        () => control.stop()
       )
 
     val serviceProvider = GUIServerServices.ServicesProvider(services)

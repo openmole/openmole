@@ -81,7 +81,7 @@ object XZ:
     val infile = new FileInputStream(file)
     val buffer = new Array[Byte](8192)
 
-    Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size ⇒ outxz.write(buffer, 0, size) }
+    Iterator.continually(infile.read(buffer)).takeWhile(_ != -1).foreach { size => outxz.write(buffer, 0, size) }
 
     outxz.finish
 
@@ -157,7 +157,7 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
       includeTopDirectoryName)
 
   // TODO detect hard links and tar them as so not as separated files
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarArchiveOutputStream, directory: File, additionalCommand: TarArchiveEntry ⇒ Unit, includeDirectoryName: Boolean) =
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarArchiveOutputStream, directory: File, additionalCommand: TarArchiveEntry => Unit, includeDirectoryName: Boolean) =
 
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
@@ -184,7 +184,7 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
 
       def archiveDirectory =
         // walk the directory tree to add all its entries to stack
-        source.withDirectoryStream(): stream ⇒
+        source.withDirectoryStream(): stream =>
           for f ← stream.asScala
           do
             val newSource = source.resolve(f.getFileName)
@@ -231,7 +231,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
   def entryIterator: Iterator[TarArchiveEntry] =
     Iterator.continually(tis.getNextTarEntry).takeWhile(_ != null)
 
-  def applyAndClose[T](f: TarArchiveEntry ⇒ T): Iterable[T] =
+  def applyAndClose[T](f: TarArchiveEntry => T): Iterable[T] =
     try
       val ret = new ListBuffer[T]
 
@@ -260,7 +260,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
     case class LinkData(dest: Path, linkName: String, hard: Boolean)
     val linkData = ListBuffer[LinkData]()
 
-    Iterator.continually(tis.getNextTarEntry).takeWhile(_ != null).foreach: e ⇒
+    Iterator.continually(tis.getNextTarEntry).takeWhile(_ != null).foreach: e =>
       val dest = Paths.get(directory.toString, e.getName)
 
       //if dest.toFile.getName.contains(".opq") then println("create " + dest)
@@ -277,7 +277,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
         then linkData += LinkData(dest, e.getLinkName, e.isLink)
         // file copy from an InputStream does not support COPY_ATTRIBUTES, nor NOFOLLOW_LINKS
         else
-          Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite } *)
+          Files.copy(tis, dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ => overwrite } *)
           setMode(dest, e.getMode)
 
       dest.toFile.setLastModified(e.getModTime.getTime)
@@ -302,7 +302,7 @@ implicit class TarInputStreamDecorator(tis: TarArchiveInputStream):
               l.dest.toFile.delete()
               Files.createLink(l.dest, link)
             case e: java.nio.file.FileSystemException =>
-              Files.copy(link, l.dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ ⇒ overwrite } *)
+              Files.copy(link, l.dest, Seq(StandardCopyOption.REPLACE_EXISTING).filter { _ => overwrite } *)
               setMode(l.dest, link.toFile.mode)
 
 

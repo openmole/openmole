@@ -18,13 +18,13 @@ object JobStore:
       val moleJobs = JobGroup.moleJobs(job)
       if moleJobs.size == 1
       then store(jobStore, moleJobs.head)
-      else moleJobs.map(mj ⇒ store(jobStore, mj))
+      else moleJobs.map(mj => store(jobStore, mj))
 
     new StoredJob(JobGroup.moleExecution(job), storedMoleJobs)
 
   def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob =
     val f = jobStore.store.newFile("storedjob", ".bin")
-    f.withOutputStream { os ⇒ serializer.serialize(moleJob.context, os) }
+    f.withOutputStream { os => serializer.serialize(moleJob.context, os) }
     new StoredMoleJob(
       f,
       moleJob.task,
@@ -36,7 +36,7 @@ object JobStore:
     JobGroup(storedJob.moleExecution, moleJobs)
 
   def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): Job =
-    val context = storedMoleJob.context.withInputStream { is ⇒ serializerService.deserialize[Context](is) }
+    val context = storedMoleJob.context.withInputStream { is => serializerService.deserialize[Context](is) }
     Job(
       task = storedMoleJob.task,
       context = context,

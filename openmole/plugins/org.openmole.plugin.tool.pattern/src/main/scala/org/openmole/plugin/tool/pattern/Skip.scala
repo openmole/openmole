@@ -22,7 +22,7 @@ import org.openmole.core.setter.DefinitionScope
 
 object Skip {
 
-  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("skip")) = {
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.InternalScope("skip")) = {
     val first = Strain(EmptyTask())
     val last = Strain(EmptyTask())
 
@@ -34,7 +34,7 @@ object Skip {
 
 object If {
 
-  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.Internal("if")) =
+  def apply(dsl: DSL, condition: Condition)(implicit definitionScope: DefinitionScope = DefinitionScope.InternalScope("if")) =
     Skip(dsl = dsl, condition = !condition)
 
 }

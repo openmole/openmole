@@ -108,7 +108,7 @@ class TabContent:
     tab(safePath).foreach { t => tabsUI.remove(t.tabID) }
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabsUI.tabs.now().find { t ⇒ t.t.safePath.path == safePath.path }.map {
+    tabsUI.tabs.now().find { t => t.t.safePath.path == safePath.path }.map {
       _.tabID
     }
 
@@ -126,7 +126,7 @@ class TabContent:
           if editorPanelUI.hasBeenModified || saveUnmodified =>
         val (content, hash) = editorPanelUI.code
         api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
-          case (saved, savedHash) ⇒
+          case (saved, savedHash) =>
             if saved
             then
               editorPanelUI.onSaved(savedHash)
@@ -138,7 +138,7 @@ class TabContent:
                 div("Which version do you want to keep?"),
                 Alternative(
                   "Yours",
-                  _ ⇒
+                  _ =>
                     panels.tabContent
                       .save(tabData, overwrite = true, saveUnmodified = true)
                 ),
@@ -147,7 +147,7 @@ class TabContent:
                   _ =>
                     panels.treeNodePanel
                       .downloadFile(tabData.safePath, hash = true)
-                      .map: (content: String, hash: Option[String]) ⇒
+                      .map: (content: String, hash: Option[String]) =>
                         tabData.editorPanelUI
                           .foreach(_.setCode(content, hash.get))
                 )
@@ -163,7 +163,7 @@ class TabContent:
       .foreach: tab =>
         api
           .exists(tab.t.safePath)
-          .foreach: e ⇒
+          .foreach: e =>
             if !e then removeTab(tab.t.safePath)
 
   def rename(
@@ -195,7 +195,7 @@ class TabContent:
       cursor.pointer,
       padding := "5",
       cls <-- selection.getOrElse(Var("")),
-      onClick --> { _ ⇒
+      onClick --> { _ =>
         for {
           ts ← tabsUI.tabs.now()
         } yield {

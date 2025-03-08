@@ -24,7 +24,7 @@ object TerminationTask {
   import EvolutionWorkflow._
 
   def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Task("TerminationTask") { p ⇒
+    Task("TerminationTask") { p =>
       import p._
       val term = OMTermination.toTermination(termination, evolution)
 

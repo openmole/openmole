@@ -35,7 +35,7 @@ object CSVSampling {
     override def mappedOutputs: Lens[CSVSampling, Vector[ Mapped[?]]] = Focus[CSVSampling](_.columns)
   }
 
-  implicit def isSampling: IsSampling[CSVSampling] = s ⇒
+  implicit def isSampling: IsSampling[CSVSampling] = s =>
     Sampling(
       s.apply(),
       s.outputs,
@@ -68,7 +68,7 @@ case class CSVSampling(
   def inputs = config.inputs
   def outputs = config.outputs
   
-  def apply() = FromContext { p ⇒
+  def apply() = FromContext { p =>
     import p._
 
     CSVFormat.csvToVariables(

@@ -26,33 +26,33 @@ import java.util.zip.GZIPOutputStream
 
 object LoggerService {
 
-  def log(l: Level, msg: ⇒ String, exception: Option[Throwable] = None)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) = {
+  def log(l: Level, msg: => String, exception: Option[Throwable] = None)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) = {
     def outputError(p: PrintStream) = {
       p.println(s"""${name.value}:${line.value} - $msg""")
       exception match {
-        case Some(e) ⇒
+        case Some(e) =>
           p.print(s"Caused by: ${e}")
           e.printStackTrace(p)
-        case None ⇒
+        case None =>
       }
     }
 
     if (l.intValue() >= loggerService.level.getOrElse(Level.WARNING).intValue()) outputError(outputRedirection.error)
 
     (loggerService.file, loggerService.fileLevel) match {
-      case (Some(f), Some(ll)) if l.intValue() >= ll.intValue() ⇒
+      case (Some(f), Some(ll)) if l.intValue() >= ll.intValue() =>
         f.getParentFile.mkdirs()
         val ps = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(f, true))))
         try outputError(ps)
         finally ps.close()
-      case _ ⇒
+      case _ =>
     }
   }
 
-  def fine(msg: ⇒ String, exception: Throwable)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
+  def fine(msg: => String, exception: Throwable)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
     log(Level.FINE, msg, Some(exception))
 
-  def fine(msg: ⇒ String)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
+  def fine(msg: => String)(implicit name: FullName, line: Line, loggerService: LoggerService, outputRedirection: OutputRedirection) =
     log(Level.FINE, msg, None)
 
   def apply(

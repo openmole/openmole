@@ -40,31 +40,20 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.stream
 import org.openmole.tool.archive.*
 import org.openmole.tool.lock.*
-
+import org.openmole.tool.cache.*
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{FileInjection, FileSerialisation, FileWithGCConverter}
-
-//import scala.util.NotGiven
-//import org.apache.fury.*
-//import org.apache.fury.config.*
-//import org.apache.fury.io.*
-//import org.apache.fury.memory.*
-//import org.apache.fury.serializer.*
-
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService.FileWithGC
 import org.openmole.core.workspace
 
-object SerializerService:
-//  org.apache.fury.logging.LoggerFactory.disableLogging()
-  def apply() = new SerializerService
-  def stub() = apply()
+import scala.util.NotGiven
 
-/**
- * Serializer
- */
-class SerializerService:
-  service =>
+object SerializerService:
+  private[serializer] val content = "content.xml"
+
+  def apply(): SerializerService = new XStreamSerializerService
+  def stub(): SerializerService = apply()
 
   def buildXStream() =
     val lookup = new DefaultConverterLookup()
@@ -74,7 +63,7 @@ class SerializerService:
       new XStream(
         null,
         driver,
-        new ClassLoaderReference(service.getClass.getClassLoader),
+        new ClassLoaderReference(SerializerService.getClass.getClassLoader),
         null: Mapper,
         lookup,
         new ConverterRegistry:
@@ -91,68 +80,97 @@ class SerializerService:
 
     xs
 
-  private val content = "content.xml"
 
-  private def fileListing() = new FilesListing(buildXStream())
-  private def pluginAndFileListing() = new PluginAndFilesListing(buildXStream())
-  private def deserializerWithFileInjection() = new FileInjection(buildXStream())
 
-  def deserialize[T](file: File): T = file.withFileInputStream(deserialize[T])
-  def deserialize[T](is: InputStream): T = buildXStream().fromXML(is).asInstanceOf[T]
+trait SerializerService:
+  private[serializer] val fileListing = WithInstance()(() => new FilesListing(SerializerService.buildXStream()))
+  private[serializer] val pluginAndFileListing = WithInstance()(() => new PluginAndFilesListing(SerializerService.buildXStream()))
+  private[serializer] val xStream = WithInstance()(() => SerializerService.buildXStream())
 
-  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService): T =
+  def listFiles(obj: Any) = fileListing(_.list(obj))
+  def listPluginsAndFiles(obj: Any) = pluginAndFileListing(_.list(obj))
+
+  def deserialize[T](file: File)(using NotGiven[T =:= Nothing]): T = file.withFileInputStream(deserialize[T])
+  def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T
+  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(using TmpDirectory, FileService): T =
     val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
     try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
     finally tis.close
 
-  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(implicit newFile: TmpDirectory, fileService: FileService): T =
-    TmpDirectory.withTmpDir: archiveExtractDir ⇒
-      tis.extract(archiveExtractDir)
-      val xstream = buildXStream()
-      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, xstream.fromXML, deleteOnGC = deleteFilesOnGC)
-      val contentFile = new File(archiveExtractDir, content)
-      deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
+  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(using TmpDirectory, FileService): T
 
   def deserializeReplaceFiles[T](file: File, files: Map[String, File], gz: Boolean = false): T =
     val is = file.bufferedInputStream(gz = gz)
     try deserializeReplaceFiles[T](is, files)
     finally is.close()
 
-  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
-    val serializer = deserializerWithFileInjection()
-    serializer.injectedFiles = files
-    try serializer.fromXML[T](is)
-    finally serializer.injectedFiles = null
+  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T
 
 
-  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(implicit newFile: TmpDirectory): Unit =
+  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(using TmpDirectory): Unit =
     val os = TarArchiveOutputStream(f.bufferedOutputStream(gz = gz))
     try serializeAndArchiveFiles(obj, os)
     finally os.close()
 
-  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(implicit newFile: TmpDirectory): Unit =
-    TmpDirectory.withTmpFile: objSerial ⇒
+  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(using TmpDirectory): Unit
+
+  def serialize(obj: Any, os: OutputStream): Unit
+
+  def serialize(obj: Any, file: File, gz: Boolean = false): Unit
+
+
+/**
+ * Serializer
+ */
+class XStreamSerializerService extends SerializerService:
+  service =>
+
+  val deserializerWithFileInjection = WithInstance()(() => new FileInjection(SerializerService.buildXStream()))
+
+  def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = xStream(_.fromXML(is).asInstanceOf[T])
+
+  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(using TmpDirectory, FileService): T =
+    TmpDirectory.withTmpDir: archiveExtractDir =>
+      tis.extract(archiveExtractDir)
+      xStream: xs =>
+        val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, xs.fromXML, deleteOnGC = deleteFilesOnGC)
+        val contentFile = new File(archiveExtractDir, SerializerService.content)
+        deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
+
+  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
+    deserializerWithFileInjection(_.fromXML[T](is, files))
+
+  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(using TmpDirectory): Unit =
+    TmpDirectory.withTmpFile: objSerial =>
       serialize(obj, objSerial)
-      tos.addFile(objSerial, content)
+      tos.addFile(objSerial, SerializerService.content)
 
-    val files = fileListing().list(obj)
-    val xStream = buildXStream()
-    FileSerialisation.serialiseFiles(files, tos, (os, obj) => xStream.toXML(obj, os))
+    val files = fileListing(_.list(obj))
+    xStream: xs =>
+      FileSerialisation.serialiseFiles(files, tos, (os, obj) => xs.toXML(obj, os))
 
-
-  def listFiles(obj: Any) = fileListing().list(obj)
-  def listPluginsAndFiles(obj: Any) = pluginAndFileListing().list(obj)
-
-  def serialize(obj: Any, os: OutputStream) = buildXStream().toXML(obj, os)
+  def serialize(obj: Any, os: OutputStream) = xStream(_.toXML(obj, os))
 
   def serialize(obj: Any, file: File, gz: Boolean = false): Unit =
     val os = file.bufferedOutputStream(gz = gz)
-    try buildXStream().toXML(obj, os)
+    try xStream(_.toXML(obj, os))
     finally os.close()
 
 
   /* ------------  Fury ------------ */
+
+//class FurySerializerService extends SerializerService:
+//
+//  import scala.util.NotGiven
+//  import org.apache.fury.*
+//  import org.apache.fury.config.*
+//  import org.apache.fury.io.*
+//  import org.apache.fury.memory.*
+//  import org.apache.fury.serializer.*
+//
 //  def buildFury() =
+//    org.apache.fury.logging.LoggerFactory.disableLogging()
+//
 //    import org.apache.fury.serializer.scala.ScalaSerializers
 //
 //    class FileWithGCGerializer(fury: Fury) extends Serializer(fury, classOf[File]):
@@ -173,7 +191,7 @@ class SerializerService:
 //    fury.registerSerializer(classOf[FileWithGC], new FileWithGCGerializer(fury))
 //
 //    fury
-
+//
 //  def deserializeReplaceFiles[T](is: InputStream, files: Map[String, File]): T =
 //    def inject[T](fury: Fury, is: InputStream, files: Map[String, File]) =
 //      class FileInjector(fury: Fury, fileSerializer: Serializer[File], inject: Map[String, File]) extends Serializer(fury, classOf[File]):
@@ -190,24 +208,12 @@ class SerializerService:
 //
 //  def deserialize[T](is: InputStream)(using NotGiven[T =:= Nothing]): T = buildFury().deserialize(new FuryInputStream(is)).asInstanceOf[T]
 //
-//  def deserialize[T](file: File)(using NotGiven[T =:= Nothing]): T =
-//    val is = new FileInputStream(file)
-//    try deserialize[T](is)
-//    finally is.close
-//
-
-//
-//  def deserializeAndExtractFiles[T](file: File, deleteFilesOnGC: Boolean, gz: Boolean = false)(using TmpDirectory, FileService): T =
-//    val tis = TarArchiveInputStream(file.bufferedInputStream(gz = gz))
-//    try deserializeAndExtractFiles(tis, deleteFilesOnGC = deleteFilesOnGC)
-//    finally tis.close
-//
 //  def deserializeAndExtractFiles[T](tis: TarArchiveInputStream, deleteFilesOnGC: Boolean)(using TmpDirectory, FileService): T =
-//    summon[TmpDirectory].withTmpDir: archiveExtractDir ⇒
+//    summon[TmpDirectory].withTmpDir: archiveExtractDir =>
 //      tis.extract(archiveExtractDir)
-//      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, buildFury(), deleteOnGC = deleteFilesOnGC)
-//      val contentFile = new File(archiveExtractDir, content)
-//      deserializeReplaceFiles[T](contentFile, fileReplacement, gz = false)
+//      val fileReplacement = FileSerialisation.deserialiseFileReplacements(archiveExtractDir, buildFury().serialize, deleteOnGC = deleteFilesOnGC)
+//      val contentFile = new File(archiveExtractDir, SerializerService.content)
+//      deserializeReplaceFiles[T](contentFile, fileReplacement)
 //
 //  def serialize(obj: Any, os: OutputStream) = buildFury().serialize(os, obj)
 //
@@ -216,15 +222,10 @@ class SerializerService:
 //    try buildFury().serialize(os, obj)
 //    finally os.close()
 //
-//  def serializeAndArchiveFiles(obj: Any, f: File, gz: Boolean = false)(using TmpDirectory): Unit =
-//    val os = TarArchiveOutputStream(f.bufferedOutputStream(gz = gz))
-//    try serializeAndArchiveFiles(obj, os)
-//    finally os.close()
-//
 //  def serializeAndArchiveFiles(obj: Any, tos: TarArchiveOutputStream)(using TmpDirectory): Unit =
-//    summon[TmpDirectory].withTmpFile: objSerial ⇒
+//    summon[TmpDirectory].withTmpFile: objSerial =>
 //      serialize(obj, objSerial)
-//      tos.addFile(objSerial, content)
+//      tos.addFile(objSerial, SerializerService.content)
 //
 //    val files = listFiles(obj)
-//    FileSerialisation.serialiseFiles(files, tos, buildFury())
+//    FileSerialisation.serialiseFiles(files, tos, (os, obj) => buildFury().serialize(os, obj))

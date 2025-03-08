@@ -19,7 +19,7 @@
 //
 //import java.io.InputStream
 //
-//import fr.iscpif.gridscale.storage.{ ListEntry, Storage ⇒ GSStorage }
+//import fr.iscpif.gridscale.storage.{ ListEntry, Storage => GSStorage }
 //import org.openmole.core.communication.storage._
 //import org.openmole.plugin.environment.batch.storage.Storage
 //

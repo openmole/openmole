@@ -31,8 +31,8 @@ object DefaultSet {
 
   lazy val empty = DefaultSet(Iterable.empty)
 
-  type DefaultAssignment = DefaultSet ⇒ DefaultSet
-  def fromAssignments(assignments: Seq[DefaultAssignment]): DefaultSet = assignments.foldLeft(empty)((ds, a) ⇒ a(ds))
+  type DefaultAssignment = DefaultSet => DefaultSet
+  def fromAssignments(assignments: Seq[DefaultAssignment]): DefaultSet = assignments.foldLeft(empty)((ds, a) => a(ds))
 
   def apply(p: Default[?]*): DefaultSet = DefaultSet(p)
 
@@ -46,7 +46,7 @@ object DefaultSet {
   def completeContext(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     context ++
       defaults.flatMap {
-        parameter ⇒
+        parameter =>
           if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
           else Option.empty[Variable[?]]
       }
@@ -55,7 +55,7 @@ object DefaultSet {
 
   def defaultVals(inputs: PrototypeSet, defaults: DefaultSet): Seq[Val[?]] =
     defaults.flatMap {
-      parameter ⇒
+      parameter =>
         if (parameter.`override` || !inputs.contains(parameter.prototype.name)) Some(parameter.prototype)
         else None
     }
@@ -69,7 +69,7 @@ object DefaultSet {
 case class DefaultSet(defaults: Iterable[Default[?]]) {
 
   @transient lazy val defaultMap =
-    TreeMap.empty[String, Default[?]] ++ defaults.map { p ⇒ (p.prototype.name, p) }
+    TreeMap.empty[String, Default[?]] ++ defaults.map { p => (p.prototype.name, p) }
 
   /**
    * add a Default to the DefaultSet

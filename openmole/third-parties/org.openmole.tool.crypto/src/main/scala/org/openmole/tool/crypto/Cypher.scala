@@ -27,8 +27,8 @@ object Cypher:
 case class Cypher(private val password: Option[String]):
   lazy val encryptor =
     password match
-      case Some(p) ⇒ Cypher.textEncryptor(p)
-      case None    ⇒ Cypher.Obfuscator
+      case Some(p) => Cypher.textEncryptor(p)
+      case None    => Cypher.Obfuscator
 
   def encrypt(s: String) = encryptor.encrypt(s)
   def decrypt(s: String) = if s == null || s.isEmpty then s else encryptor.decrypt(s)

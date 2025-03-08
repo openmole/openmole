@@ -70,7 +70,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     expireAfterAccess(preference(ReplicaCacheTime).millis, TimeUnit.MILLISECONDS).
     build[ReplicaCacheKey, Replica]
 
-  def clean(storageId: String, removeOnStorage: String ⇒ Unit) = {
+  def clean(storageId: String, removeOnStorage: String => Unit) = {
     val time = System.currentTimeMillis
 
     // Note: Destination file will be cleaned while cleaning the replicaDirectory
@@ -82,9 +82,9 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   }
 
   def uploadAndGet[S](
-    upload:    ⇒ String,
-    exists:    String ⇒ Boolean,
-    remove:    String ⇒ Unit,
+    upload:    => String,
+    exists:    String => Boolean,
+    remove:    String => Unit,
     srcPath:   File,
     hash:      String,
     storageId: String
@@ -104,9 +104,9 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   }
 
   @tailrec private def uploadAndGetLocked(
-    upload:    ⇒ String,
-    exists:    String ⇒ Boolean,
-    remove:    String ⇒ Unit,
+    upload:    => String,
+    exists:    String => Boolean,
+    remove:    String => Unit,
     srcPath:   File,
     hash:      String,
     storageId: String,
@@ -114,12 +114,12 @@ class ReplicaCatalog(database: Database, preference: Preference) {
   ): Replica = {
     val replica =
       Option(replicaCache.getIfPresent(cacheKey)) match {
-        case Some(r) ⇒ r
-        case None ⇒
+        case Some(r) => r
+        case None =>
           //If replica is already present on the storage with another hash
           def cleanOldReplicas = {
             val sameSource = database.deleteSameSourceWithDifferentHash(srcPath.getCanonicalPath, storageId, hash)
-            sameSource.foreach { replica ⇒
+            sameSource.foreach { replica =>
               logger.fine(s"Remove obsolete $replica")
               remove(replica.path)
             }
@@ -131,8 +131,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
             import scala.concurrent.ExecutionContext.Implicits.global
 
             replicas.lastOption match {
-              case Some(r) ⇒ r
-              case None ⇒
+              case Some(r) => r
+              case None =>
                 val newFile = upload
 
                 sealed trait InsertionResult
@@ -142,10 +142,10 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                 val inserted = database.insert(srcPath.getCanonicalPath, storageId, newFile, hash, System.currentTimeMillis)
 
                 inserted match {
-                  case Transactor.AlreadyInDb(replica) ⇒
+                  case Transactor.AlreadyInDb(replica) =>
                     remove(newFile)
                     replica
-                  case Transactor.Inserted(replica) ⇒ replica
+                  case Transactor.Inserted(replica) => replica
                 }
             }
           }
@@ -159,8 +159,8 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     def itsTimeToCheck(r: Replica) = r.lastCheckExists + preference(CheckFileExistsInterval).toMillis < System.currentTimeMillis
     def stillExists(r: Replica) =
       Try(exists(r.path)) match {
-        case Success(e) ⇒ e
-        case _          ⇒ false
+        case Success(e) => e
+        case _          => false
       }
 
     if (itsTimeToCheck(replica)) {
@@ -191,7 +191,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
 
   def deleteReplicas(storageId: String): Unit = {
     val replica = database.deleteOnStorage(storageId)
-    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
+    replica.foreach { r => replicaCache.invalidate(cacheKey(r)) }
   }
 
   private def cacheKey(r: Replica) = (r.source, r.hash, r.storage)
@@ -202,7 +202,7 @@ class ReplicaCatalog(database: Database, preference: Preference) {
     val (source, storage, path) = if (replica.nonEmpty) (replica.get.source, replica.get.storage, replica.get.path) else ("None", "None", "None")
     logger.fine(s"Remove replica with id $id, from source $source, storage $storage, path $path")
 
-    replica.foreach { r ⇒ replicaCache.invalidate(cacheKey(r)) }
+    replica.foreach { r => replicaCache.invalidate(cacheKey(r)) }
   }
 
 }

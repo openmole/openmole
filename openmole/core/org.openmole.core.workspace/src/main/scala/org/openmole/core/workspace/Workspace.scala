@@ -34,9 +34,6 @@ import org.openmole.tool.random
 import org.openmole.tool.random.Random
 import org.openmole.tool.random.Random.*
 
-import scala.concurrent.stm.{Ref, atomic}
-import squants.information.*
-
 import java.io.FileOutputStream
 
 object Workspace:

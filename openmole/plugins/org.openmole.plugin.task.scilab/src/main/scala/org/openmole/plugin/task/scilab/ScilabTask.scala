@@ -76,14 +76,14 @@ object ScilabTask:
         val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".sci")
 
         def scilabInputMapping =
-          mapped.inputs.map { m ⇒ s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
+          mapped.inputs.map { m => s"${m.name} = ${ScilabTask.toScilab(context(m.v))}" }.mkString("\n")
 
         def outputFileName(v: Val[?]) = s"$workDirectory/${v.name}.openmole"
 
         def outputValName(v: Val[?]) = v.withName(v.name + "File").withType[File]
 
         def scilabOutputMapping =
-          (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m ⇒ s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
+          (Seq("lines(0, 1000000000)") ++ mapped.outputs.map { m => s"""print("${outputFileName(m.v)}", ${m.name})""" }).mkString("\n")
 
         scriptFile.content =
           s"""
@@ -97,11 +97,11 @@ object ScilabTask:
         def containerTask =
           taskExecution.set(
             resources += (scriptFile, scriptName, true),
-            mapped.outputs.map(m ⇒ outputFiles += (outputFileName(m.v), outputValName(m.v)))
+            mapped.outputs.map(m => outputFiles += (outputFileName(m.v), outputValName(m.v)))
           )
 
         val resultContext = containerTask(executionContext).from(context)
-        resultContext ++ mapped.outputs.map { m ⇒ ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
+        resultContext ++ mapped.outputs.map { m => ScilabTask.fromScilab(resultContext(outputValName(m.v)).content, m.v) }
 
   .set(outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   .withValidate: info =>
@@ -117,17 +117,17 @@ object ScilabTask:
     // flatten the array after multidimensional transposition
     def recTranspose(v: Any): Seq[_] =
       v match
-        case v: Array[Array[Array[?]]] ⇒ v.map { a ⇒ recTranspose(a) }.toSeq.transpose.flatten
-        case v: Array[Array[?]]        ⇒ v.map { _.toSeq }.toSeq.transpose.flatten
+        case v: Array[Array[Array[?]]] => v.map { a => recTranspose(a) }.toSeq.transpose.flatten
+        case v: Array[Array[?]]        => v.map { _.toSeq }.toSeq.transpose.flatten
 
     def getDimensions(v: Any): Seq[Int] =
       @tailrec def getdims(v: Any, dims: Seq[Int]): Seq[Int] =
         v match
-          case v: Array[Array[?]] ⇒ getdims(v(0), dims ++ Seq(v.length))
-          case v: Array[?]        ⇒ dims ++ Seq(v.length)
+          case v: Array[Array[?]] => getdims(v(0), dims ++ Seq(v.length))
+          case v: Array[?]        => dims ++ Seq(v.length)
       getdims(v, Seq.empty)
 
-    val scilabVals = recTranspose(v).map { vv ⇒ toScilab(vv) }
+    val scilabVals = recTranspose(v).map { vv => toScilab(vv) }
     val dimensions = getDimensions(v)
     // scilab syntax for hypermat
     // M = hypermat([2 3 2 2],data) with data being flat column vector
@@ -136,19 +136,19 @@ object ScilabTask:
 
   def toScilab(v: Any): String =
     v match
-      case v: Int                    ⇒ v.toString
-      case v: Long                   ⇒ v.toString
-      case v: Double                 ⇒ v.toString
-      case v: Boolean                ⇒ if (v) "%T" else "%F"
-      case v: String                 ⇒ '"' + v + '"'
-      case v: Array[Array[Array[?]]] ⇒ multiArrayScilab(v)
+      case v: Int                    => v.toString
+      case v: Long                   => v.toString
+      case v: Double                 => v.toString
+      case v: Boolean                => if (v) "%T" else "%F"
+      case v: String                 => '"' + v + '"'
+      case v: Array[Array[Array[?]]] => multiArrayScilab(v)
       //multiArrayScilab(v.map { _.map { _.toSeq }.toSeq }.toSeq)
       //throw new UserBadDataError(s"The array of more than 2D $v of type ${v.getClass} is not convertible to Scilab")
-      case v: Array[Array[?]] ⇒
+      case v: Array[Array[?]] =>
         def line(v: Array[?]) = v.map(toScilab).mkString(", ")
         "[" + v.map(line).mkString("; ") + "]"
-      case v: Array[?] ⇒ "[" + v.map(toScilab).mkString(", ") + "]"
-      case _ ⇒
+      case v: Array[?] => "[" + v.map(toScilab).mkString(", ") + "]"
+      case _ =>
         throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to Scilab")
 
   def fromScilab(s: String, v: Val[?]) =
@@ -165,14 +165,14 @@ object ScilabTask:
       def toBoolean(s: String) = s.trim == "T"
 
       def variable = v
-      def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String ⇒ T) =
+      def fromArray[T: ClassTag](v: Val[Array[T]], fromString: String => T) =
         val value: Array[T] =
           if lines.head.trim == "[]"
           then Array.empty
           else lines.head.trim.replaceAll("  *", " ").split(" ").map(fromString).toArray
         Variable(v, value)
 
-      def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String ⇒ T) =
+      def fromArrayArray[T: ClassTag](v: Val[Array[Array[T]]], fromString: String => T) =
         val value: Array[Array[T]] =
           if lines.head.trim == "[]"
           then Array.empty
@@ -180,27 +180,27 @@ object ScilabTask:
         Variable(v, value)
 
       v match
-        case Val.caseInt(v)               ⇒ Variable.unsecure(v, toInt(lines.head))
-        case Val.caseDouble(v)            ⇒ Variable.unsecure(v, toDouble(lines.head))
-        case Val.caseLong(v)              ⇒ Variable.unsecure(v, toLong(lines.head))
-        case Val.caseString(v)            ⇒ Variable.unsecure(v, toString(lines.head))
-        case Val.caseBoolean(v)           ⇒ Variable.unsecure(v, toBoolean(lines.head))
+        case Val.caseInt(v)               => Variable.unsecure(v, toInt(lines.head))
+        case Val.caseDouble(v)            => Variable.unsecure(v, toDouble(lines.head))
+        case Val.caseLong(v)              => Variable.unsecure(v, toLong(lines.head))
+        case Val.caseString(v)            => Variable.unsecure(v, toString(lines.head))
+        case Val.caseBoolean(v)           => Variable.unsecure(v, toBoolean(lines.head))
 
-        case Val.caseArrayInt(v)          ⇒ fromArray(v, toInt)
-        case Val.caseArrayDouble(v)       ⇒ fromArray(v, toDouble)
-        case Val.caseArrayLong(v)         ⇒ fromArray(v, toLong)
-        case Val.caseArrayString(v)       ⇒ fromArray(v, toString)
-        case Val.caseArrayBoolean(v)      ⇒ fromArray(v, toBoolean)
+        case Val.caseArrayInt(v)          => fromArray(v, toInt)
+        case Val.caseArrayDouble(v)       => fromArray(v, toDouble)
+        case Val.caseArrayLong(v)         => fromArray(v, toLong)
+        case Val.caseArrayString(v)       => fromArray(v, toString)
+        case Val.caseArrayBoolean(v)      => fromArray(v, toBoolean)
 
-        case Val.caseArrayArrayInt(v)     ⇒ fromArrayArray(v, toInt)
-        case Val.caseArrayArrayDouble(v)  ⇒ fromArrayArray(v, toDouble)
-        case Val.caseArrayArrayLong(v)    ⇒ fromArrayArray(v, toLong)
-        case Val.caseArrayArrayString(v)  ⇒ fromArrayArray(v, toString)
-        case Val.caseArrayArrayBoolean(v) ⇒ fromArrayArray(v, toBoolean)
+        case Val.caseArrayArrayInt(v)     => fromArrayArray(v, toInt)
+        case Val.caseArrayArrayDouble(v)  => fromArrayArray(v, toDouble)
+        case Val.caseArrayArrayLong(v)    => fromArrayArray(v, toLong)
+        case Val.caseArrayArrayString(v)  => fromArrayArray(v, toString)
+        case Val.caseArrayArrayBoolean(v) => fromArrayArray(v, toBoolean)
 
-        case _                            ⇒ throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
+        case _                            => throw new UserBadDataError(s"Value ${s} cannot be fetched in OpenMOLE variable $v")
     catch
-      case t: Throwable ⇒
+      case t: Throwable =>
         throw new InternalProcessingError(s"Error parsing scilab value $s to OpenMOLE variable $v", t)
 
 

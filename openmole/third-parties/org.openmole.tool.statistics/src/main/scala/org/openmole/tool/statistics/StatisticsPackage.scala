@@ -2,7 +2,7 @@ package org.openmole.tool.statistics
 
 import org.openmole.tool.types.ToDouble
 
-trait StatisticsPackage extends Stat { stat ⇒
+trait StatisticsPackage extends Stat { stat =>
 
   implicit class StatisticIterableOfDoubleDecorator[T](s: Seq[T])(implicit td: ToDouble[T]) {
     def median: Double = stat.median(s.map(td.apply))

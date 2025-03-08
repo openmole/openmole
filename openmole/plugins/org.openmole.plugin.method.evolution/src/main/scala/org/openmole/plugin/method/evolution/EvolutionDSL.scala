@@ -44,7 +44,7 @@ object EvolutionWorkflow:
     suggestion: Genome.SuggestedValues,
     scope: DefinitionScope)(using evolutionMethod: EvolutionMethod[M]): DSLContainer[EvolutionWorkflow] =
     distribution match
-      case s: SteadyState ⇒
+      case s: SteadyState =>
         SteadyStateEvolution(
           method = method,
           evaluation = evaluation,
@@ -54,7 +54,7 @@ object EvolutionWorkflow:
           suggestion = suggestion,
           scope = scope
         )
-      case i: Island ⇒
+      case i: Island =>
         val steadyState =
           SteadyStateEvolution(
             method = method,
@@ -77,10 +77,10 @@ object EvolutionWorkflow:
 
   def stochasticity(objectives: Objectives, stochastic: Option[Stochastic]) =
     (Objectives.onlyExact(objectives), stochastic) match
-      case (true, None)     ⇒ None
-      case (true, Some(s))  ⇒ Some(s)
-      case (false, Some(s)) ⇒ Some(s)
-      case (false, None)    ⇒ throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
+      case (true, None)     => None
+      case (true, Some(s))  => Some(s)
+      case (false, Some(s)) => Some(s)
+      case (false, None)    => throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
 
   def deterministicGAIntegration[AG, VA](
     ag:               AG,
@@ -136,7 +136,7 @@ object EvolutionWorkflow:
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] = FromContext { p ⇒
+      def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] = FromContext { p =>
         import p._
         val (continuous, discrete) = operations.genomeValues(g)
         val seeder = replication.seed
@@ -149,9 +149,9 @@ object EvolutionWorkflow:
   object OMTermination:
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match
-        case AfterEvaluated(e) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterEvaluated(e, integration.operations.evaluatedLens)(s, population)
-        case AfterGeneration(g) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterGeneration(g, integration.operations.generationLens)(s, population)
-        case AfterDuration(d) ⇒ (s: integration.S, population: Vector[integration.I]) ⇒ mgo.evolution.stop.afterDuration(d, integration.operations.startTimeLens)(s, population)
+        case AfterEvaluated(e) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterEvaluated(e, integration.operations.evaluatedLens)(s, population)
+        case AfterGeneration(g) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterGeneration(g, integration.operations.generationLens)(s, population)
+        case AfterDuration(d) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterDuration(d, integration.operations.startTimeLens)(s, population)
 
   sealed trait OMTermination
   case class AfterEvaluated(steps: Long) extends OMTermination
@@ -382,20 +382,20 @@ object GAIntegration:
     values: Vector[(Vector[Double], Vector[Int])],
     scale:  Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { (continuous, discrete) ⇒ Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
-    genome.zipWithIndex.map { (g, i) ⇒ Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+    val variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
+    genome.zipWithIndex.map { (g, i) => Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
 
   def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
-    Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) ⇒
+    Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) =>
       Variable(
         objective.withType[Array[Double]],
         phenotypeValues.map(_(i)).toArray
       )
 
-  def rejectValue[G](reject: Condition, genome: Genome, continuous: G ⇒ IArray[Double], discrete: G ⇒ IArray[Int]) =
-    FromContext: p ⇒
+  def rejectValue[G](reject: Condition, genome: Genome, continuous: G => IArray[Double], discrete: G => IArray[Int]) =
+    FromContext: p =>
       import p._
-      (g: G) ⇒
+      (g: G) =>
         val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
         reject.from(genomeVariables)
 
@@ -407,8 +407,8 @@ object DeterministicGAIntegration:
   def migrateFromIsland[P](population: Vector[CDGenome.DeterministicIndividual.Individual[P]], generation: Long) = population.filter(!_.initial).map(_.copy(generation = generation))
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypes: Seq[Phenotype]) =
-    val outputs = phenotypes.map { p ⇒ Phenotype.outputs(phenotypeContent, p) }
-    (phenotypeContent.outputs zip outputs.transpose).map { (v, va) ⇒ Variable.unsecure(v.toArray, va) }
+    val outputs = phenotypes.map { p => Phenotype.outputs(phenotypeContent, p) }
+    (phenotypeContent.outputs zip outputs.transpose).map { (v, va) => Variable.unsecure(v.toArray, va) }
 
 object StochasticGAIntegration:
   import mgo.evolution.algorithm._
@@ -421,7 +421,7 @@ object StochasticGAIntegration:
 
   def outputValues(phenotypeContent: PhenotypeContent, phenotypeHistories: Seq[IArray[Phenotype]]) =
     val outputs = phenotypeHistories.map { _.toArray.map { p => Phenotype.outputs(phenotypeContent, p) }.transpose }
-    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) ⇒ Variable.unsecure(v.toArray.toArray, va) }
+    (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) => Variable.unsecure(v.toArray.toArray, va) }
 
 object MGOAPI:
 
@@ -463,6 +463,6 @@ object MGOAPI:
 
   import mgo.evolution.algorithm._
 
-  def paired[G, C, D](continuous: G ⇒ C, discrete: G ⇒ D) = (g: G) ⇒ (continuous(g), discrete(g))
+  def paired[G, C, D](continuous: G => C, discrete: G => D) = (g: G) => (continuous(g), discrete(g))
 
 

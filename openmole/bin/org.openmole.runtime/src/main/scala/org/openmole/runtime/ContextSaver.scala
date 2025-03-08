@@ -41,10 +41,10 @@ class ContextSaver(val nbJobs: Int) {
 
   def save(job: JobId, result: Either[Context, Throwable]) = synchronized {
     result match {
-      case Left(context) ⇒
+      case Left(context) =>
         logger.fine(s"Job success ${job} ${context}")
         _results += job → Success(context)
-      case Right(t) ⇒
+      case Right(t) =>
         logger.log(FINE, s"Job failure ${job}", t)
         _results += job → Failure(t)
     }

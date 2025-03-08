@@ -122,7 +122,7 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
   val parameters:        SGEEnvironment.Parameters,
   val name:              Option[String],
   val authentication:    A,
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)) { env =>
 
   import services._
 
@@ -166,28 +166,28 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) ⇒ SGEEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  ⇒ SGEEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => SGEEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => SGEEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
 
 
   lazy val installRuntime =
     storageService match
-      case Left((space, local)) ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
-      case Right((space, ssh))  ⇒ RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
+      case Left((space, local)) => RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), local, space.baseDirectory)
+      case Right((space, ssh))  => RuntimeInstallation(Frontend.ssh(host, port, timeout, authentication), ssh, space.baseDirectory)
 
 
   lazy val pbsJobService =
     import _root_.gridscale.cluster.HeadNode
     storageService match
-      case Left((space, local)) ⇒ SGEJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
-      case Right((space, ssh))  ⇒ SGEJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Left((space, local)) => SGEJobService(local, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
+      case Right((space, ssh))  => SGEJobService(ssh, space.tmpDirectory, installRuntime, parameters, HeadNode.ssh, accessControl)
 
 }
 
 class SGELocalEnvironment(
   val parameters:        SGEEnvironment.Parameters,
   val name:              Option[String],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)) { env ⇒
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)) { env =>
 
   import services._
 

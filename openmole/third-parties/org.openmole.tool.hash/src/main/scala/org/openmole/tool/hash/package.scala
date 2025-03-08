@@ -51,11 +51,11 @@ package object hash {
     val buffer = new Array[Byte](DefaultBufferSize)
     val md =
       hashType match {
-        case SHA1   ⇒ MessageDigest.getInstance("SHA-1")
-        case SHA256 ⇒ MessageDigest.getInstance("SHA-256")
+        case SHA1   => MessageDigest.getInstance("SHA-1")
+        case SHA256 => MessageDigest.getInstance("SHA-256")
       }
     Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
-      count ⇒ md.update(buffer, 0, count)
+      count => md.update(buffer, 0, count)
     }
     Hash(md.digest)
   }

@@ -48,7 +48,7 @@ trait CodePackage extends FilePackage with StatisticsPackage with MathPackage:
   def classLoader[C: Manifest] = manifest[C].erasure.getClassLoader
   def classLoader(a: Any) = a.getClass.getClassLoader
 
-  def withThreadClassLoader[R](classLoader: ClassLoader)(f: ⇒ R) =
+  def withThreadClassLoader[R](classLoader: ClassLoader)(f: => R) =
     org.openmole.tool.thread.withThreadClassLoader(classLoader)(f)
 
   def abs(d: Double) = math.abs(d)
@@ -76,7 +76,7 @@ object CodePackage extends CodePackage {
   def namespace = s"${this.getClass.getPackage.getName}.${classOf[CodePackage].getSimpleName}"
 }
 
-trait MathPackage { mp ⇒
+trait MathPackage { mp =>
 
   def round(d: Double, n: Int = 0) = {
     val s = math pow (10, n)

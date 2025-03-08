@@ -24,7 +24,7 @@ import cats.implicits._
 
 object TakeWhileDomain {
 
-  implicit def isFinite[D, T]: DiscreteFromContextDomain[TakeWhileDomain[D, T], T] = domain ⇒
+  implicit def isFinite[D, T]: DiscreteFromContextDomain[TakeWhileDomain[D, T], T] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
@@ -33,9 +33,9 @@ object TakeWhileDomain {
 
 }
 
-case class TakeWhileDomain[D, T](domain: D, predicate: FromContext[T ⇒ Boolean])(implicit discrete: DiscreteFromContextDomain[D, T]) {
+case class TakeWhileDomain[D, T](domain: D, predicate: FromContext[T => Boolean])(implicit discrete: DiscreteFromContextDomain[D, T]) {
   def iterator =
-    (discrete(domain).domain map2 predicate)((d, p) ⇒ d.takeWhile(p))
+    (discrete(domain).domain map2 predicate)((d, p) => d.takeWhile(p))
 
   def inputs = discrete(domain).inputs ++ predicate.inputs
   def validate = discrete(domain).validate ++ predicate.validate

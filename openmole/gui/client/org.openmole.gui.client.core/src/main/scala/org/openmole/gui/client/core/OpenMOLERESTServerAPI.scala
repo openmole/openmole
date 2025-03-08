@@ -102,7 +102,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
   override def upload(
     files: Seq[(File, SafePath)],
-    fileTransferState: ProcessState ⇒ Unit)(using basePath: BasePath): Future[Seq[(RelativePath, SafePath)]] = {
+    fileTransferState: ProcessState => Unit)(using basePath: BasePath): Future[Seq[(RelativePath, SafePath)]] = {
     val formData = new FormData
 
     val destinationPaths = files.unzip._2
@@ -116,13 +116,13 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
     val xhr = new XMLHttpRequest
 
-    xhr.upload.onprogress = e ⇒
+    xhr.upload.onprogress = e =>
       fileTransferState(Processing((e.loaded.toDouble * 100 / e.total).toInt))
 
-    xhr.upload.onloadend = e ⇒
+    xhr.upload.onloadend = e =>
       fileTransferState(Finalizing())
 
-    xhr.onloadend = e ⇒
+    xhr.onloadend = e =>
       fileTransferState(Processed())
 
     val p = scala.concurrent.Promise[Seq[(RelativePath, SafePath)]]()
@@ -154,15 +154,15 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
 
   override def download(
     safePath: SafePath,
-    fileTransferState: ProcessState ⇒ Unit = _ ⇒ (),
+    fileTransferState: ProcessState => Unit = _ => (),
     hash: Boolean = false)(using basePath: BasePath): Future[(String, Option[String])] =
-    size(safePath).flatMap { size ⇒
+    size(safePath).flatMap { size =>
       val xhr = new XMLHttpRequest
 
-      xhr.onprogress = (e: ProgressEvent) ⇒
+      xhr.onprogress = (e: ProgressEvent) =>
         fileTransferState(Processing((e.loaded * 100 / size).toInt))
 
-      xhr.onloadend = e ⇒
+      xhr.onloadend = e =>
         fileTransferState(Processed())
 
       val p = scala.concurrent.Promise[(String, Option[String])]()
@@ -191,7 +191,7 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
       case Failure(t) => notificationService.notify(NotificationLevel.Error, s"Error while downloading file", div(ErrorData.stackTrace(ErrorData(t))))
     }
 
-  override def fetchGUIPlugins(f: GUIPlugins ⇒ Unit)(using BasePath) =
+  override def fetchGUIPlugins(f: GUIPlugins => Unit)(using BasePath) =
     def successOrNotify[T](t: util.Try[T]) =
       t match
         case util.Success(r) => Some(r)
@@ -199,11 +199,11 @@ class OpenMOLERESTServerAPI(fetch: CoreFetch, notificationService: NotificationS
           notificationService.notify(NotificationLevel.Error, s"Error while instantiating plugin", div(ErrorData.stackTrace(ErrorData(t))))
           None
 
-    fetch.futureError(_.guiPlugins(()).future).map: p ⇒
+    fetch.futureError(_.guiPlugins(()).future).map: p =>
       val authFact =
-        p.authentications.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) } ++
+        p.authentications.flatMap { gp => successOrNotify(Plugins.buildJSObject[AuthenticationPluginFactory](gp)) } ++
           Seq(new GitPrivateKeyAuthenticationFactory(api))
 
-      val wizardFactories = p.wizards.flatMap { gp ⇒ successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
-      val analysisFactories = p.analysis.flatMap { (method, gp) ⇒ successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
+      val wizardFactories = p.wizards.flatMap { gp => successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
+      val analysisFactories = p.analysis.flatMap { (method, gp) => successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
       f(GUIPlugins(authFact, wizardFactories, analysisFactories))

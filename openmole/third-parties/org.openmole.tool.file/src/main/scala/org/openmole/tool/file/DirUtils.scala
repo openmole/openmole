@@ -84,7 +84,7 @@ object DirUtils:
       val list =
         try file.listFilesSafe
         catch
-          case t: IOException ⇒
+          case t: IOException =>
             FileTools.setAllPermissions(file)
             file.listFilesSafe
 

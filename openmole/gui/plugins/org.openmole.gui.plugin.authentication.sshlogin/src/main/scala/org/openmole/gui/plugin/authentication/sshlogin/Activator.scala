@@ -25,7 +25,7 @@ class Activator extends BundleActivator {
 
   def info = GUIPluginInfo(
     authentication = Some(classOf[LoginAuthenticationFactory]),
-    router = Some(s ⇒ OMRouter(LoginAuthenticationServer(s).routes))
+    router = Some(s => OMRouter(LoginAuthenticationServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

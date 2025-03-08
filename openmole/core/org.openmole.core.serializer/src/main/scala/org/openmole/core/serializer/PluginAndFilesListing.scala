@@ -33,6 +33,7 @@ import scala.collection.immutable.{HashSet, TreeSet}
 object PluginAndFilesListing:
   def looksLikeREPLClassName(p: String) = p.startsWith("$line")
 
+
 class FilesListing(xStream: XStream):
   private var listedFiles: TreeSet[File] = null
   xStream.registerConverter(new FileConverterNotifier(fileUsed))

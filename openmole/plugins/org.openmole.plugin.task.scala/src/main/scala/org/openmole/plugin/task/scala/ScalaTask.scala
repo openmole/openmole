@@ -48,10 +48,10 @@ object ScalaTask:
       mapped = MappedInputOutputConfig()
     )
 
-  def apply(f: (Context, ⇒ _root_.scala.util.Random) ⇒ Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(f: (Context, => _root_.scala.util.Random) => Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("ScalaTask")(p => Context(f(p.context, p.random())*))
 
-  def apply(f: Context ⇒ Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(f: Context => Seq[Variable[?]])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("ScalaTask")(p => Context(f(p.context)*))
 
 
@@ -106,23 +106,23 @@ case class ScalaTask(
     )
 
   override def validate =
-    def libraryErrors: Seq[Throwable] = libraries.flatMap: l ⇒
+    def libraryErrors: Seq[Throwable] = libraries.flatMap: l =>
       if !l.exists()
       then Some(new UserBadDataError(s"Library file $l does not exist"))
       else None
 
-    def pluginsErrors: Seq[Throwable] = userPlugins.flatMap: l ⇒
+    def pluginsErrors: Seq[Throwable] = userPlugins.flatMap: l =>
       if !l.exists()
       then Some(new UserBadDataError(s"Plugin file $l does not exist"))
       else None
 
-    Validate: p ⇒
+    Validate: p =>
       import p._
 
       def compilationError =
         Try(cache.getOrElseUpdate(compilation)(compile(mappedInputs.toSeq))) match
-          case Success(_) ⇒ Seq.empty
-          case Failure(e) ⇒ Seq(e)
+          case Success(_) => Seq.empty
+          case Failure(e) => Seq(e)
 
       libraryErrors ++ pluginsErrors ++ compilationError
 
@@ -143,7 +143,7 @@ case class ScalaTask(
         context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
 
       def processCode =
-        FromContext: p ⇒
+        FromContext: p =>
           import p._
 
           val scalaCompilation =
@@ -151,7 +151,7 @@ case class ScalaTask(
 
           val map = scalaCompilation(context, p.random, p.tmpDirectory)
           mappedOutputs.toSeq.map {
-            o ⇒ Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
+            o => Variable.unsecure(o, Option(map.get(o.name)).getOrElse(new InternalProcessingError(s"Not found output $o")))
           }: Context
 
       def mappedContext = toMappedInputContext(context, noFileInputs)

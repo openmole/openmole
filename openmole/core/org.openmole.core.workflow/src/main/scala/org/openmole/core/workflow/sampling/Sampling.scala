@@ -29,6 +29,3 @@ case class Sampling(
   inputs:   PrototypeSet                                 = PrototypeSet.empty,
   validate: Validate                                     = Validate.success)
 
-trait IsSampling[-S]:
-  def apply(s: S): Sampling
-

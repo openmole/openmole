@@ -27,27 +27,27 @@ package object thread {
   object L extends JavaLogger
   import L._
 
-  implicit def future2Function[A](f: Future[A]): () => A = () ⇒ f.get
-  implicit def function2Callable[F](f: ⇒ F): Callable[F] = new Callable[F] { def call = f }
-  implicit def function2Runable(f: ⇒ Unit): Runnable = new Runnable { def run = f }
-  def thread(f: ⇒ Unit) = new Thread { override def run = f }
+  implicit def future2Function[A](f: Future[A]): () => A = () => f.get
+  implicit def function2Callable[F](f: => F): Callable[F] = new Callable[F] { def call = f }
+  implicit def function2Runable(f: => Unit): Runnable = new Runnable { def run = f }
+  def thread(f: => Unit) = new Thread { override def run = f }
 
-  def background[F](f: ⇒ F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
+  def background[F](f: => F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
 
-  def timeout[F](f: ⇒ F)(duration: Duration)(implicit pool: ThreadPoolExecutor): F = try {
+  def timeout[F](f: => F)(duration: Duration)(implicit pool: ThreadPoolExecutor): F = try {
     val r = pool.submit(f)
     try r.get(duration.toMillis, TimeUnit.MILLISECONDS)
     catch {
-      case e: TimeoutException ⇒ r.cancel(true); throw e
+      case e: TimeoutException => r.cancel(true); throw e
     }
   }
   catch {
-    case e: RejectedExecutionException ⇒
+    case e: RejectedExecutionException =>
       Log.logger.log(Log.WARNING, "Execution rejected, operation executed in the caller thread with no timeout", e)
       f
   }
 
-  def withThreadClassLoader[T](classLoader: ClassLoader)(f: ⇒ T): T = {
+  def withThreadClassLoader[T](classLoader: ClassLoader)(f: => T): T = {
     val threadClassLoader = Thread.currentThread().getContextClassLoader
     Thread.currentThread().setContextClassLoader(classLoader)
     try f

@@ -13,7 +13,7 @@ object Cache {
    * @tparam T the type of the lazily computed value
    * @param f the function to compute the value
    */
-  def apply[T](f: ⇒ T) = new Cache(f)
+  def apply[T](f: => T) = new Cache(f)
 
   /**
    * Defines ordering on lazy proxies
@@ -28,7 +28,7 @@ object Cache {
  * @tparam T the type of the lazily computed value
  * @param f a function to compute the value
  */
-class Cache[T](f: ⇒ T) {
+class Cache[T](f: => T) {
 
   /** Cache for value memoization */
   @volatile @transient private var value: T = _

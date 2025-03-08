@@ -59,7 +59,7 @@ class DesktopGridEnvironment(
   override val threads:        Option[Int],
   override val name:           Option[String],
   passwordHash:                Hash
-)(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment { env ⇒
+)(implicit val services: BatchEnvironment.Services) extends SimpleBatchEnvironment { env =>
   import services._
   import threadProvider.pool
 

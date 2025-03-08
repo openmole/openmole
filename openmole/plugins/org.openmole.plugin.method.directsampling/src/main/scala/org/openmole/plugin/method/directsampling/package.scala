@@ -25,6 +25,7 @@ import org.openmole.plugin.domain.modifier.*
 import org.openmole.plugin.tool.pattern.*
 import org.openmole.plugin.hook.file.*
 import io.circe.*
+import org.openmole.core.workflow.composition.DSL.delegate
 
 object AggregationMetaData:
   def apply(ag: Aggregation) = new AggregationMetaData(ValData(ag.value), ValData(ag.outputVal))
@@ -40,7 +41,7 @@ object Replication:
     given MethodMetaData[MetaData] = MethodMetaData[MetaData](methodName)
 
     def apply(m: Method): MetaData =
-      val aggregation = if (m.aggregation.isEmpty) then None else Some(m.aggregation.map(AggregationMetaData.apply))
+      val aggregation = if m.aggregation.isEmpty then None else Some(m.aggregation.map(AggregationMetaData.apply))
       MetaData(seed = ValData(m.seed), m.sample, aggregation)
 
   case class MetaData(seed: ValData, sample: Int, aggregation: Option[Seq[AggregationMetaData]]) derives derivation.ConfiguredCodec
@@ -52,8 +53,8 @@ object Replication:
 
     val aggregateTask: OptionalArgument[DSL] =
       r.aggregation match
-        case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s)
+        case Seq() => None
+        case s     => AggregateTask(s)
 
     val s =
       MapReduce(
@@ -86,8 +87,8 @@ case class Replication[T: Distribution](
   def exploration =
     implicit def s: DefinitionScope = scope
     index.option match
-      case None        ⇒ ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
-      case Some(index) ⇒ ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
+      case None        => ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
+      case Some(index) => ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
 
 
 implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):
@@ -108,7 +109,7 @@ object DirectSampling:
   object MetaData:
     def apply(m: Method): MetaData =
       val aggregation = if (m.aggregation.isEmpty) None else Some(m.aggregation.map(AggregationMetaData.apply))
-      MetaData(m.sampled.map(v ⇒ ValData(v)), aggregation, m.output.map(v ⇒ ValData(v)))
+      MetaData(m.sampled.map(v => ValData(v)), aggregation, m.output.map(v => ValData(v)))
 
     given MethodMetaData[MetaData] = MethodMetaData(methodName)
 
@@ -116,14 +117,13 @@ object DirectSampling:
 
   case class Method(sampled: Seq[Val[?]], aggregation: Seq[Aggregation], output: Seq[Val[?]])
 
-  implicit def method[S]: ExplorationMethod[DirectSampling[S], Method] = m ⇒
+  given [S]: ExplorationMethod[DirectSampling[S], Method] = m =>
     implicit def defScope: DefinitionScope = m.scope
 
     val aggregateTask: OptionalArgument[DSL] =
-      m.aggregation match {
-        case Seq() ⇒ None
-        case s     ⇒ AggregateTask(s)
-      }
+      m.aggregation match
+        case Seq() => None
+        case s     => AggregateTask(s)
 
     val s =
       MapReduce(
@@ -163,9 +163,54 @@ case class DirectSampling[S: IsSampling](
 implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, DirectSampling.Method]) extends MethodHookDecorator[M, DirectSampling.Method](t):
   def hook(
     output: WritableOutput,
-    values: Seq[Val[?]]    = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[M] =
+    values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), option = OMROption(append = true)))
+
+
+object SingleRun:
+  def methodName = MethodMetaData.name(SingleRun)
+
+  object MetaData:
+    given MethodMetaData[MetaData] = MethodMetaData[MetaData](methodName)
+
+    def apply(m: Method): MetaData =
+      MetaData(input = m.input.map(v => ValData(v)))
+
+  case class MetaData(input: Seq[ValData]) derives derivation.ConfiguredCodec
+
+  case class Method(input: Seq[Val[?]])
+
+  given ExplorationMethod[SingleRun, Method] = r =>
+    given DefinitionScope = r.scope
+
+    val firstTask =
+      EmptyTask() set (r.input, outputs ++= r.input.map(_.value))
+
+    DSLContainer(
+      Strain(firstTask) -- Strain(r.evaluation),
+      method =
+        Method(
+          input = r.input.map(_.value)
+        ),
+      delegate = delegate(r.evaluation)
+    )
+
+
+case class SingleRun(
+   evaluation:  DSL,
+   input:       Seq[ValueAssignment.Untyped],
+   scope:       DefinitionScope           = "single run")
+
+
+implicit class SingleRunHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, SingleRun.Method]) extends MethodHookDecorator[M, SingleRun.Method](t):
+  def hook(
+    output: WritableOutput,
+    values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
+    val dsl = method(t)
+    implicit val defScope: DefinitionScope = dsl.scope
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = true)))
+
 
 

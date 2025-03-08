@@ -248,10 +248,10 @@ object PlotContent:
       val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section.name, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
-    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ ⇒ switchFromResultView(Raw))
-    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ ⇒ switchFromResultView(Table))
-    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ ⇒ switchFromResultView(Plot))
-    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ ⇒ switchFromResultView(Metadata))
+    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ => switchFromResultView(Raw))
+    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ => switchFromResultView(Table))
+    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ => switchFromResultView(Plot))
+    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ => switchFromResultView(Metadata))
 
     def viewIndex(state: ContentState) =
       state match

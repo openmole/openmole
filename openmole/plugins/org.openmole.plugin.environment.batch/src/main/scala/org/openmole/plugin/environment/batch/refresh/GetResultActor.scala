@@ -43,16 +43,16 @@ object GetResultActor {
 
     val GetResult(job, environment, resultPath, batchJob) = msg
 
-    JobManager.killOr(job, Kill(job, environment, Some(batchJob))): () ⇒
+    JobManager.killOr(job, Kill(job, environment, Some(batchJob))): () =>
       try getResult(environment, resultPath, job, batchJob)
       catch
-        case e: Throwable ⇒
+        case e: Throwable =>
           BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.FAILED)
           def stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
 
           e match
-            case e: JobRemoteExecutionException ⇒ JobManager ! Error(job, environment, e, stdOutErr, e.output)
-            case _                              ⇒ JobManager ! Error(job, environment, e, stdOutErr, None)
+            case e: JobRemoteExecutionException => JobManager ! Error(job, environment, e, stdOutErr, e.output)
+            case _                              => JobManager ! Error(job, environment, e, stdOutErr, None)
 
       finally JobManager ! Kill(job, environment, Some(batchJob))
 
@@ -67,11 +67,11 @@ object GetResultActor {
       def displayOutput(stream: PrintStream) = display(runtimeResult.stdOut, s"Output on ${runtimeResult.info.hostName}", stream)
       displayOutput(batchJob.storedJob.moleExecution.executionContext.services.outputRedirection.output)
 
-      def stringOutput = runtimeResult.stdOut.map { file ⇒ file.content }
+      def stringOutput = runtimeResult.stdOut.map { file => file.content }
 
       runtimeResult.result match
-        case Failure(exception) ⇒ throw JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception, stringOutput)
-        case Success((serializedContextResults, log)) ⇒
+        case Failure(exception) => throw JobRemoteExecutionException("Fatal exception thrown during the execution of the job execution on the execution node", exception, stringOutput)
+        case Success((serializedContextResults, log)) =>
           val contextResults = getContextResults(serializedContextResults, storageId, environment, download)
 
           services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
@@ -83,29 +83,29 @@ object GetResultActor {
             then
               val executionResult = contextResults.results(moleJob.id)
               executionResult match
-                case Success(context) ⇒ JobStore.finish(moleJob, Left(context))
-                case Failure(e) ⇒
+                case Success(context) => JobStore.finish(moleJob, Left(context))
+                case Failure(e) =>
                   val error = JobRemoteExecutionException("A workflow job execution failed during the a job execution on the execution node", e, stringOutput)
                   JobManager ! MoleJobError(moleJob.id, batchJob, environment, error, output = stringOutput, host = runtimeResult.info.hostName)
 
     finally
       runtimeResult.stdOut.foreach(_.delete)
 
-  private def getRuntimeResult(outputFilePath: String, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit)(implicit services: BatchEnvironment.Services): RuntimeResult =
+  private def getRuntimeResult(outputFilePath: String, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) => Unit)(implicit services: BatchEnvironment.Services): RuntimeResult =
     import services._
     retry(preference(BatchEnvironment.downloadResultRetry)):
-      newFile.withTmpFile: resultFile ⇒
+      newFile.withTmpFile: resultFile =>
         signalDownload(eventDispatcher.eventId, download(outputFilePath, resultFile, TransferOptions.default), outputFilePath, environment, storageId, resultFile)
         serializerService.deserializeAndExtractFiles[RuntimeResult](resultFile, deleteFilesOnGC = true, gz = true)
 
 
   private def display(output: Option[File], description: String, stream: PrintStream) = 
-    output.foreach { file ⇒ execution.display(stream, description, file.content) }
+    output.foreach { file => execution.display(stream, description, file.content) }
 
-  private def getContextResults(serializedResults: SerializedContextResults, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) ⇒ Unit)(implicit services: BatchEnvironment.Services): ContextResults =
+  private def getContextResults(serializedResults: SerializedContextResults, storageId: String, environment: BatchEnvironment, download: (String, File, TransferOptions) => Unit)(implicit services: BatchEnvironment.Services): ContextResults =
     import services._
     serializedResults match
-      case serializedResults: IndividualFilesContextResults ⇒
+      case serializedResults: IndividualFilesContextResults =>
         val fileReplacement =
           serializedResults.files.map: replicated =>
               val downloaded =
@@ -117,7 +117,7 @@ object GetResultActor {
           .toMap
 
         serializerService.deserializeReplaceFiles[ContextResults](serializedResults.contextResults, fileReplacement, gz = true)
-      case serializedResults: ArchiveContextResults ⇒
+      case serializedResults: ArchiveContextResults =>
         serializerService.deserializeAndExtractFiles[ContextResults](serializedResults.contextResults, deleteFilesOnGC = true, gz = true)
 
 

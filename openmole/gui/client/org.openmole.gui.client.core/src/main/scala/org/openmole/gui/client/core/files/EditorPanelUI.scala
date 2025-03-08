@@ -55,13 +55,13 @@ object EditorPanelUI:
 
   def highlightedFile(fileContentType: FileContentType)(using plugins: GUIPlugins): Option[HighlightedFile] =
     fileContentType match
-      case FileContentType.OpenMOLEScript ⇒ Some(HighlightedFile("openmole"))
-      case FileContentType.Scala ⇒ Some(HighlightedFile("scala"))
-      case FileContentType.Shell ⇒ Some(HighlightedFile("sh"))
-      case FileContentType.CSV ⇒ Some(HighlightedFile("csv"))
+      case FileContentType.OpenMOLEScript => Some(HighlightedFile("openmole"))
+      case FileContentType.Scala => Some(HighlightedFile("scala"))
+      case FileContentType.Shell => Some(HighlightedFile("sh"))
+      case FileContentType.CSV => Some(HighlightedFile("csv"))
       case FileContentType.Python => Some(HighlightedFile("python"))
       case ReadableFileType(_, true, Some(hl)) => Some(HighlightedFile(hl))
-      case _ ⇒ None
+      case _ => None
 
   case class HighlightedFile(highlighter: String)
 
@@ -96,7 +96,7 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
     ed.setTheme("ace/theme/github")
 
-    EditorPanelUI.highlightedFile(fileContentType).foreach { h ⇒
+    EditorPanelUI.highlightedFile(fileContentType).foreach { h =>
       session.setMode("ace/mode/" + h.highlighter)
     }
 
@@ -122,7 +122,7 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
   lazy val lineHeight = Var(17)
 
-  val lineHeightObserver = Observer[Int] { (i: Int) ⇒
+  val lineHeightObserver = Observer[Int] { (i: Int) =>
     editor.container.style.lineHeight = s"${i}px"
     editor.container.style.fontSize = s"${i - 3}px"
     editor.renderer.updateFontSize()
@@ -158,12 +158,12 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
       edDiv.amend(
           lineHeight --> lineHeightObserver,
           fileContentType match
-            case FileContentType.OpenMOLEScript ⇒
+            case FileContentType.OpenMOLEScript =>
               errors -->
                 Observer[Option[ErrorData]]:
                   case Some(errors: CompilationErrorData) =>
                     editor.getSession().clearBreakpoints()
-                    errors.errors.foreach: e ⇒
+                    errors.errors.foreach: e =>
                       e.position.foreach: p =>
                         editor.getSession().setBreakpoint(p.line - 1)
                     errors.errors.sortBy(_.position.map(_.line).getOrElse(-1)).headOption.foreach: e =>

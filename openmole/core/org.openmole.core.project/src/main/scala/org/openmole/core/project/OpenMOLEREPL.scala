@@ -27,7 +27,7 @@ import org.openmole.core.workspace.TmpDirectory
 object OpenMOLEREPL:
 
   def autoImports: Seq[String] =
-    PluginRegistry.pluginsInfo.flatMap(_.namespaces).flatMap(n ⇒ Seq(s"${n.value}.*", s"${n.value}.given"))
+    PluginRegistry.pluginsInfo.flatMap(_.namespaces).flatMap(n => Seq(s"${n.value}.*", s"${n.value}.given"))
 
   def keywordNamespace = "om"
 

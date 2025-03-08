@@ -26,7 +26,7 @@ import java.io.File
 object HttpURLSource {
 
   def apply[T](url: FromContext[String], prototype: Val[T])(implicit name: sourcecode.Name, definitionScope: DefinitionScope, networkService: NetworkService) =
-    Source("URLSource") { p ⇒
+    Source("URLSource") { p =>
       import p._
 
       val urlraw = url.from(context)
@@ -35,12 +35,12 @@ object HttpURLSource {
       val response = NetworkService.get(urlraw)
 
       val value: AnyRef = prototype.`type`.runtimeClass match {
-        case s if s == classOf[String] ⇒ response
-        case f if f == classOf[File] ⇒
+        case s if s == classOf[String] => response
+        case f if f == classOf[File] =>
           val v = newFile.newFile()
           v.withWriter()(_.write(response))
           v
-        case _ ⇒ throw new UserBadDataError(s"URL can not be mapped to a ${prototype.`type`} prototype (only String and File supported)")
+        case _ => throw new UserBadDataError(s"URL can not be mapped to a ${prototype.`type`} prototype (only String and File supported)")
       }
 
       Variable.unsecure(prototype, value)

@@ -47,17 +47,17 @@ package object module:
   implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   def modules(url: String) = Serialization.read[Seq[Module]](http.get(url))
-  def selectableModules(url: String) = modules(url).map(m ⇒ SelectableModule(gridscale.RemotePath.parent(url).get, m))
+  def selectableModules(url: String) = modules(url).map(m => SelectableModule(gridscale.RemotePath.parent(url).get, m))
 
   case class SelectableModule(baseURL: String, module: Module)
 
   def install(modules: Seq[SelectableModule])(implicit newFile: TmpDirectory, workspace: Workspace) =
-    TmpDirectory.withTmpDir: dir ⇒
+    TmpDirectory.withTmpDir: dir =>
       case class DownloadableComponent(baseURL: String, component: Component)
-      val downloadableComponents = modules.flatMap { m ⇒ m.module.components.map(c ⇒ DownloadableComponent(m.baseURL, c)) }
+      val downloadableComponents = modules.flatMap { m => m.module.components.map(c => DownloadableComponent(m.baseURL, c)) }
       val hashes = downloadableComponents.map(_.component.hash).distinct.toSet -- PluginManager.bundleHashes.map(_.toString)
       val files =
-        downloadableComponents.filter(c ⇒ hashes.contains(c.component.hash)).map: c ⇒
+        downloadableComponents.filter(c => hashes.contains(c.component.hash)).map: c =>
           val f = dir / gridscale.RemotePath.name(c.component.name)
           http.getStream(gridscale.RemotePath.child(c.baseURL, c.component.name))(_.copy(f))
           f

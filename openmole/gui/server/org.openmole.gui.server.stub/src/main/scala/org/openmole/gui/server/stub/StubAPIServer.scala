@@ -211,9 +211,9 @@
 //          import org.openmole.gui.shared.data.ServerFileSystemContext
 //          def rootFile(fileType: String) =
 //            fileType match
-//              case ServerFileSystemContext.Project.typeName ⇒ utils.projectsDirectory
-//              case ServerFileSystemContext.Authentication.typeName ⇒ utils.authenticationKeysDirectory
-//              case ServerFileSystemContext.Absolute.typeName ⇒ new java.io.File("/")
+//              case ServerFileSystemContext.Project.typeName => utils.projectsDirectory
+//              case ServerFileSystemContext.Authentication.typeName => utils.authenticationKeysDirectory
+//              case ServerFileSystemContext.Absolute.typeName => new java.io.File("/")
 //
 //          for ((file, fileType) ← fileParts zip fileTypes) {
 //            val path = new java.net.URI(file.name.get).getPath
@@ -284,7 +284,7 @@
 //            }
 //          }
 //          else {
-//            f.withLock { _ ⇒
+//            f.withLock { _ =>
 //              StaticFile.fromFile(f, Some(req)).getOrElseF(Status.NotFound.apply()).map { r =>
 //                val r2 =
 //                  r.withHeaders(

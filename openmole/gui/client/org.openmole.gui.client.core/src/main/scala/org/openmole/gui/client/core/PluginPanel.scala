@@ -33,13 +33,13 @@ class PluginPanel:
 
   private lazy val plugins: Var[Seq[Plugin]] = Var(Seq())
 
-  def getPlugins(using api: ServerAPI, basePath: BasePath) = api.listPlugins().map { p ⇒ plugins.set(p.toSeq) }
+  def getPlugins(using api: ServerAPI, basePath: BasePath) = api.listPlugins().map { p => plugins.set(p.toSeq) }
 
   def pluginTable(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(
       children <-- plugins.signal.combineWith(panels.expandablePanel.signal).map {
-        case (ps, _) ⇒
-          ps.zipWithIndex.map { case (p, i) ⇒
+        case (ps, _) =>
+          ps.zipWithIndex.map { case (p, i) =>
             div(
               cls := "docEntry",
               backgroundColor := {
@@ -50,7 +50,7 @@ class PluginPanel:
                 cls := "badgeOM",
                 bsn.badge_dark,
                 CoreUtils.longTimeToString(p.time)
-              ), onClick --> { _ ⇒
+              ), onClick --> { _ =>
                 panels.treeNodePanel.treeNodeManager.switch(p.projectSafePath.parent)
                 //panels.treeNodePanel.treeNodeManager.computeCurrentSons
                 panels.closeExpandable
@@ -63,7 +63,7 @@ class PluginPanel:
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels): HtmlElement =
     div(
       div(margin := "20px", flexRow, alignItems.center,
-        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
+        div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ => panels.closeExpandable }),
       ),
       pluginTable
     )

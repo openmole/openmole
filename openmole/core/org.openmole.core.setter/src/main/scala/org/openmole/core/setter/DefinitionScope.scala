@@ -18,13 +18,42 @@ package org.openmole.core.setter
  */
 
 
-object DefinitionScope:
-  case class Internal(name: String) extends DefinitionScope
-  case object User extends DefinitionScope
+import org.openmole.tool.file.*
 
-  given Conversion[String, Internal] = scope => Internal(scope)
+object DefinitionScope:
+  case class InternalScope(name: String) extends DefinitionScope
+  case class UserScope(scope: UserDefinitionScope) extends DefinitionScope
+
+  given Conversion[String, InternalScope] = scope => InternalScope(scope)
 
   object user:
-    implicit def default: DefinitionScope = User
+    inline implicit def default(using line: SourcePosition, userScope: UserDefinitionScope): DefinitionScope =
+      userScope match
+        case u: UserScriptDefinitionScope => UserScope(u.copy(line.line + u.line))
+        case x => UserScope(x)
+
+  object UserDefinitionScope:
+    given default: UserDefinitionScope = OutOfUserDefinitionScope
+
+  trait UserDefinitionScope
+  case class ImportedUserDefinitionScope(`import`: String, importedFrom: File) extends UserDefinitionScope
+  case class UserScriptDefinitionScope(line: Int) extends UserDefinitionScope
+  case object OutOfUserDefinitionScope extends UserDefinitionScope
+
+  def isUser(scope: DefinitionScope) =
+    scope match
+      case _: UserScope => true
+      case _ => false
+
+  extension (scope: DefinitionScope)
+    def line: Option[Int] =
+      scope match
+        case UserScope(u: UserScriptDefinitionScope) => Some(u.line)
+        case _ => None
+
+    def imported: Option[ImportedUserDefinitionScope] =
+      scope match
+        case UserScope(imp: ImportedUserDefinitionScope) => Some(imp)
+        case _ => None
 
 sealed trait DefinitionScope

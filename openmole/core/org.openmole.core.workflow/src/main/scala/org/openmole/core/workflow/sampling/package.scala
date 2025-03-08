@@ -29,27 +29,18 @@ import org.openmole.core.workflow.domain._
 import cats.implicits._
 import org.openmole.core.tools.io.Prettifier
 
-trait SamplingPackage {
 
-  implicit class PrototypeFactorDecorator[T](p: Val[T]) {
-    def is(d: FromContext[T]) = Factor(p, d)
-  }
-
-  implicit def fromContextIsDiscrete[T]: DiscreteFromContextDomain[FromContext[T], T] = domain => Domain(domain.map(v => Vector(v).iterator))
-  implicit def fromContextIterableIsDiscrete[T]: DiscreteFromContextDomain[FromContext[Iterable[T]], T] = domain => Domain(domain.map(v => v.iterator))
-
-  implicit def factorIsSampling[D, T](implicit domain: DiscreteFromContextDomain[D, T]): IsSampling[Factor[D, T]] = f => {
-    def inputs = {
+object IsSampling:
+  given factorIsSampling[D, T](using domain: DiscreteFromContextDomain[D, T]): IsSampling[Factor[D, T]] = f =>
+    def inputs =
       val domainValue = domain(f.domain)
       domain(f.domain).inputs ++ domainValue.inputs
-    }
 
     def outputs = List(f.value)
 
-    def validate: Validate = {
+    def validate: Validate =
       val domainValue = domain(f.domain)
       domainValue.domain.validate ++ domainValue.validation
-    }
 
     Sampling(
       domain(f.domain).domain.map { values => values.map { v => List(Variable(f.value, v)) } },
@@ -57,22 +48,29 @@ trait SamplingPackage {
       inputs,
       validate,
     )
-  }
+
+trait IsSampling[-S]:
+  def apply(s: S): Sampling
+
+
+trait SamplingPackage:
+
+  implicit class PrototypeFactorDecorator[T](p: Val[T]):
+    def is(d: FromContext[T]) = Factor(p, d)
 
   type Sampling = org.openmole.core.workflow.sampling.Sampling
 
-  object EmptySampling {
-    implicit def isSampling: IsSampling[EmptySampling] = s =>
+  object EmptySampling:
+    given IsSampling[EmptySampling] = s =>
       Sampling(
         FromContext.value(Iterator.empty),
         Seq(),
         Seq(),
         Validate.success
       )
-  }
 
   case class EmptySampling()
-}
+
 
 
 import org.openmole.core.context._
@@ -102,6 +100,8 @@ def Factor[D, T](p: Val[T], d: D) = In(p, d)
 //      def apply(x: F) = f(x)
 //
 //  given [D, T]: IsFactor[Factor[D, T], D, T] = IsFactor(identity)
+//
+//  given equalIsFactor[D, T]: IsFactor[:=[Val[T], D], D, T] = IsFactor(f => Factor(f.value, f.equal))
 //
 //  given IsFactor[Val[Boolean], Seq[Boolean], Boolean] =
 //    IsFactor(v => v in Seq(true, false))

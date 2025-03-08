@@ -9,7 +9,7 @@ import java.io.PrintStream
 
 class CSVSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
-  def result(f: PrintStream ⇒ Unit): String = {
+  def result(f: PrintStream => Unit): String = {
     val result = new StringOutputStream()
     val printStream = new PrintStream(result)
     f(printStream)

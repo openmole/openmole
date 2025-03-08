@@ -27,20 +27,20 @@ object SpatialSampling {
   )(implicit rng: scala.util.Random): Iterator[List[Variable[?]]] = {
 
     val morphologies: Array[Array[Double]] = if (morphologyPrototype.isDefined) {
-      values.map { v ⇒
+      values.map { v =>
         val m = Morphology(v)(rng)
         Array(m.height, m.width, m.area, m.moran, m.avgDistance, m.entropy, m.slope._1, m.slope._2, m.density, m.components, m.avgDetour, m.avgBlockArea, m.avgComponentArea, m.fullDilationSteps, m.fullErosionSteps)
       }
     }
     else Array.fill(values.length)(Array.empty)
 
-    val arrayParams: List[(Val[?], Array[Double])] = parameters.map { case (p, v) ⇒ (p, v.toArray) }.toList
+    val arrayParams: List[(Val[?], Array[Double])] = parameters.map { case (p, v) => (p, v.toArray) }.toList
 
     values.zip(morphologies).zipWithIndex.map {
-      case ((v, morph), i) ⇒
+      case ((v, morph), i) =>
         List(Variable(prototype, v)) ++
           (if (morphologyPrototype.isDefined) List(Variable(morphologyPrototype.get.asInstanceOf[Val[Any]], morph)) else List()) ++
-          arrayParams.map { case (p, vv) ⇒ Variable(p.asInstanceOf[Val[Any]], vv(i)) }
+          arrayParams.map { case (p, vv) => Variable(p.asInstanceOf[Val[Any]], vv(i)) }
     }.iterator
   }
 
@@ -61,7 +61,7 @@ object ExpMixtureThresholdSpatialSamplingTask {
     gridSize:  FromContext[Int],
     center:    FromContext[Int],
     radius:    FromContext[Double],
-    threshold: FromContext[Double])(implicit scope: DefinitionScope) = Task("ExpMixtureThresholdSpatialSamplingTask") { p ⇒
+    threshold: FromContext[Double])(implicit scope: DefinitionScope) = Task("ExpMixtureThresholdSpatialSamplingTask") { p =>
     import p._
 
     val size = gridSize.from(context)
@@ -71,7 +71,7 @@ object ExpMixtureThresholdSpatialSamplingTask {
     val t = threshold.from(context)
 
     Context(
-      grid -> Generation.expMixtureGrid(Left(size), nc, 1.0, r)(random()).map { _.map { d ⇒ if (d > t) 1.0 else 0.0 } }
+      grid -> Generation.expMixtureGrid(Left(size), nc, 1.0, r)(random()).map { _.map { d => if (d > t) 1.0 else 0.0 } }
     )
   } set (
     inputs ++= gridSize.inputs ++ center.inputs ++ radius.inputs ++ threshold.inputs,
@@ -97,7 +97,7 @@ object PercolationGridSpatialSamplingTask {
     bordPoint:    FromContext[Int],
     linkWidth:    FromContext[Double],
     maxIteration: Int                       = 10000
-  )(implicit scope: DefinitionScope) = Task("PercolationGridSpatialSamplingTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("PercolationGridSpatialSamplingTask") { p =>
     import p._
 
     val size = gridSize.from(context)
@@ -107,7 +107,7 @@ object PercolationGridSpatialSamplingTask {
     val w = linkWidth.from(context)
 
     Context(
-      grid -> Generation.percolationGrid(size, pp, b, w, maxIteration)(random()).map { _.map { d ⇒ if (d > 0.0) 1.0 else 0.0 } }
+      grid -> Generation.percolationGrid(size, pp, b, w, maxIteration)(random()).map { _.map { d => if (d > 0.0) 1.0 else 0.0 } }
     )
   } set (
     inputs ++= gridSize.inputs ++ percolation.inputs ++ bordPoint.inputs ++ linkWidth.inputs,
@@ -131,7 +131,7 @@ object BlocksGridSpatialSamplingTask {
     number:   FromContext[Int],
     minSize:  FromContext[Int],
     maxSize:  FromContext[Int]
-  )(implicit scope: DefinitionScope) = Task("BlocksGridSpatialSamplingTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("BlocksGridSpatialSamplingTask") { p =>
     import p._
 
     val size = gridSize.from(context)
@@ -141,7 +141,7 @@ object BlocksGridSpatialSamplingTask {
     val bmi = minSize.from(context)
 
     Context(
-      grid -> Generation.blocksGrid(Left(size), bn, bma, bmi)(random()).map { _.map { case d ⇒ if (d > 0.0) 1.0 else 0.0 } }
+      grid -> Generation.blocksGrid(Left(size), bn, bma, bmi)(random()).map { _.map { case d => if (d > 0.0) 1.0 else 0.0 } }
     )
   } set (
     inputs ++= gridSize.inputs ++ number.inputs ++ minSize.inputs ++ maxSize.inputs,
@@ -159,13 +159,13 @@ object RandomSpatialSamplingTask {
     grid:     Val[Array[Array[Double]]],
     gridSize: FromContext[Int],
     density:  FromContext[Double]       = 0.5
-  )(implicit scope: DefinitionScope) = Task("RandomSpatialSamplingTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("RandomSpatialSamplingTask") { p =>
     import p._
 
     val size = gridSize.from(context)
     val densityValue = density.from(context)
 
-    val values: RasterLayerData[Double] = Generation.randomGrid(Left(size))(random()).map { _.map { dd ⇒ if (dd < densityValue) 1.0 else 0.0 } }
+    val values: RasterLayerData[Double] = Generation.randomGrid(Left(size))(random()).map { _.map { dd => if (dd < densityValue) 1.0 else 0.0 } }
     Context(
       grid -> values
     )
@@ -200,12 +200,12 @@ object OSMBuildingsGridSampling {
     prototype:           Val[?],
     morphologyPrototype: Option[Val[?]] = None
   ) = Sampling {
-    p ⇒
+    p =>
       import p._
       val coords: Array[(Double, Double)] = coordinates.from(context)
       val wsize = windowSize.from(context)
       val size = worldSize.from(context)
-      val values = coords.map { case (lon, lat) ⇒ OSMGridGenerator(lon, lat, wsize, size).generateGrid(random()) }
+      val values = coords.map { case (lon, lat) => OSMGridGenerator(lon, lat, wsize, size).generateGrid(random()) }
 
       SpatialSampling.buildVariables(prototype, values, morphologyPrototype)
   } prototypes { Seq(prototype) }
@@ -244,9 +244,9 @@ object ExponentialMixtureSpatialSampling {
     def checkParamSize(param: FromContext[Either[Double, Seq[Double]]]) = {
       // test user parameters, duplicate in case of single value and multiple prototypes
       (param.from(context), protos.toSeq.size) match {
-        case (Left(d), n)                   ⇒ Right(Seq.fill(n)(d))
-        case (Right(dd), n) if n != dd.size ⇒ throw new UserBadDataError("Wrong number of parameters")
-        case (Right(dd), n) if n == dd.size ⇒ Right(dd)
+        case (Left(d), n)                   => Right(Seq.fill(n)(d))
+        case (Right(dd), n) if n != dd.size => throw new UserBadDataError("Wrong number of parameters")
+        case (Right(dd), n) if n == dd.size => Right(dd)
       }
     }
 
@@ -260,8 +260,8 @@ object ExponentialMixtureSpatialSampling {
     )
 
     values.map {
-      case raster ⇒ raster.zip(prototypes).map {
-        case (layer, proto) ⇒ Variable(proto.asInstanceOf[Val[Any]], layer)
+      case raster => raster.zip(prototypes).map {
+        case (layer, proto) => Variable(proto.asInstanceOf[Val[Any]], layer)
       }
     }.toIterator
   } prototypes {protos.toSeq}
@@ -319,7 +319,7 @@ object ReactionDiffusionSpatialTask {
     nBeta:           FromContext[Int]          = 1,
     growthRate:      FromContext[Double]       = 100.0,
     totalPopulation: FromContext[Double]       = 1000.0
-  )(implicit scope: DefinitionScope) = Task("ReactionDiffusionSpatialTask") { p ⇒
+  )(implicit scope: DefinitionScope) = Task("ReactionDiffusionSpatialTask") { p =>
     import p._
     Context(
       grid -> Generation.reactionDiffusionGrid(Left(gridSize.from(context)), growthRate.from(context), totalPopulation.from(context).toInt, alpha.from(context), beta.from(context), nBeta.from(context))(random())

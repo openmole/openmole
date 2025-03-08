@@ -37,7 +37,7 @@ object MarketPanel:
   def render(using api: ServerAPI, basePath: BasePath, panels: Panels): Div =
 
     val marketIndex: Var[Option[MarketIndex]] = Var(None)
-    api.marketIndex().foreach { m ⇒
+    api.marketIndex().foreach { m =>
       marketIndex.set(Some(m))
     }
 
@@ -51,24 +51,24 @@ object MarketPanel:
       }
     }.getOrElse(Seq()))
 
-    def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) =
+    def downloadButton(entry: MarketIndexEntry, todo: () => Unit = () => {}) =
       downloading.signal.map {
         _.find { _._1 == entry }.map {
-          case (e, state: Var[ProcessState]) ⇒
-            state.withTransferWaiter() { _ ⇒
-              glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ ⇒ todo() }).amend("Download")
+          case (e, state: Var[ProcessState]) =>
+            state.withTransferWaiter() { _ =>
+              glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ => todo() }).amend("Download")
             }
-          case _ ⇒ div()
+          case _ => div()
         }.getOrElse(div())
       }
 
     def overwrite(sp: SafePath, marketIndexEntry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
-      api.deleteFiles(Seq(sp)).foreach { d ⇒
+      api.deleteFiles(Seq(sp)).foreach { d =>
         download(marketIndexEntry)
       }
 
     def exists(sp: SafePath, entry: MarketIndexEntry)(using api: ServerAPI, basePath: BasePath) =
-      api.exists(sp).foreach { b ⇒
+      api.exists(sp).foreach { b =>
         if (b)
         then
           lazy val notif: NotificationManager.NotificationLine = panels.notifications.addAndShowNotificaton(
@@ -95,8 +95,8 @@ object MarketPanel:
       val path = manager.directory.now() ++ entry.name
       downloading.set(downloading.now().updatedFirst(_._1 == entry, (entry, Var(Processing()))))
 
-      api.getMarketEntry(entry, path).foreach { d ⇒
-        downloading.update(d ⇒ d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
+      api.getMarketEntry(entry, path).foreach { d =>
+        downloading.update(d => d.updatedFirst(_._1 == entry, (entry, Var(Processed()))))
         panels.treeNodePanel.refresh
       }
 
@@ -112,7 +112,7 @@ object MarketPanel:
         a(entry.name, float.left, color := "#222", width := "350px", cursor.pointer),
         entry.tags.map { e => span(cls := "badgeOM", e) }).expandOnclick(
         div(height := "200", backgroundColor := "#333", padding := "20", overflow.scroll,
-          child <-- downloadButton(entry, () ⇒ {
+          child <-- downloadButton(entry, () => {
             exists(panels.treeNodePanel.treeNodeManager.directory.now() ++ entry.name, entry)
           }),
           div(cls := "mdRendering", paddingTop := "40", htmlDiv, colSpan := 12)
@@ -121,8 +121,8 @@ object MarketPanel:
 
     div(cls := "marketList",
       children <-- tagFilter.nameFilter.signal.combineWith(marketIndex.signal).combineWith(selectedEntry.signal).map { case (nf, marketIndex, sEntry) =>
-        marketIndex.map { mindex ⇒
-          mindex.entries.filter { e ⇒ tagFilter.exists(e.tags :+ e.name) }.zipWithIndex.map { case (entry, id) ⇒
+        marketIndex.map { mindex =>
+          mindex.entries.filter { e => tagFilter.exists(e.tags :+ e.name) }.zipWithIndex.map { case (entry, id) =>
             val isSelected = Some(entry) == sEntry
             row(entry, id, isSelected)
           }
@@ -132,25 +132,25 @@ object MarketPanel:
 
 
 
-//      case (_, marketIndex, sEntry) ⇒
+//      case (_, marketIndex, sEntry) =>
 
 //    val marketPanel = new MarketPanel(manager)
 //
 //    marketPanel.overwriteAlert.signal.combineWith(manager.dirNodeLine.signal).map {
-//      case (oAlert, current) ⇒
+//      case (oAlert, current) =>
 //        oAlert match {
-//          case Some(e: MarketIndexEntry) ⇒
+//          case Some(e: MarketIndexEntry) =>
 //            panels.alertPanel.string(
 //              e.name + " already exists. Overwrite ? ",
-//              () ⇒ {
+//              () => {
 //                marketPanel.overwriteAlert.set(None)
 //                marketPanel.overwrite(current ++ e.name, e)
-//              }, () ⇒ {
+//              }, () => {
 //                marketPanel.overwriteAlert.set(None)
 //              }, CenterPagePosition
 //            )
 //            div
-//          case _ ⇒
+//          case _ =>
 //        }
 //    }
 //    marketPanel
@@ -167,16 +167,16 @@ object MarketPanel:
 //  def marketTable(using api: ServerAPI) = div(
 //    paddingTop := "20",
 //    children <-- tagFilter.nameFilter.signal.combineWith(marketIndex.signal).combineWith(selectedEntry.signal).map {
-//      case (_, marketIndex, sEntry) ⇒
-//        marketIndex.map { mindex ⇒
-//          mindex.entries.filter { e ⇒ tagFilter.exists(e.tags :+ e.name) }.flatMap { entry ⇒
+//      case (_, marketIndex, sEntry) =>
+//        marketIndex.map { mindex =>
+//          mindex.entries.filter { e => tagFilter.exists(e.tags :+ e.name) }.flatMap { entry =>
 //            val isSelected = Some(entry) == sEntry
 //            Seq(
 //              div(
 //                cls := "docEntry",
 //                div(colBS(3), (paddingTop := "7"),
 //                  a(entry.name, cursor := "pointer", color := omsheet.WHITE,
-//                    onClick --> { _ ⇒
+//                    onClick --> { _ =>
 //                      selectedEntry.set(
 //                        if (isSelected) None
 //                        else Some(entry)
@@ -185,7 +185,7 @@ object MarketPanel:
 //                ),
 //                div(
 //                  colBS(2),
-//                  downloadButton(entry, () ⇒ {
+//                  downloadButton(entry, () => {
 //                    exists(manager.dirNodeLine.now() ++ entry.name, entry)
 //                  })),
 //                div(colBS(7), (paddingTop := "7"),
@@ -194,7 +194,7 @@ object MarketPanel:
 //                div(
 //                  // if (isSelected)
 //                  cls := "docEntry", //else emptyMod,
-//                  sEntry.map { se ⇒
+//                  sEntry.map { se =>
 //                    if (isSelected) div(cls := "mdRendering", paddingTop := "40", se.readme, colSpan := 12)
 //                    else div()
 //                  }.getOrElse(div())
@@ -208,17 +208,17 @@ object MarketPanel:
 //
 //
 //
-//  def downloadButton(entry: MarketIndexEntry, todo: () ⇒ Unit = () ⇒ {}) = div()
+//  def downloadButton(entry: MarketIndexEntry, todo: () => Unit = () => {}) = div()
 //
 //  //    downloading.signal.map {
 //  //    _.find {
 //  //      _._1 == entry
 //  //    }.map {
-//  //      case (e, state: Var[ProcessState]) ⇒
-//  //        state.withTransferWaiter { _ ⇒
-//  //          if (selectedEntry.now == Some(e)) glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ ⇒ todo() }).amend("Download") else div()
+//  //      case (e, state: Var[ProcessState]) =>
+//  //        state.withTransferWaiter { _ =>
+//  //          if (selectedEntry.now == Some(e)) glyphSpan(Seq(btn_danger, glyph_download_alt), onClick --> { _ => todo() }).amend("Download") else div()
 //  //        }
-//  //      case _ ⇒ div()
+//  //      case _ => div()
 //  //    }.getOrElse(div())
 //  //}
 //
@@ -230,23 +230,23 @@ object MarketPanel:
 //    marketTable
 //  )
 //
-//  def marketFooter(using api: ServerAPI) = closeButton("Close", () ⇒ modalDialog.hide).amend(btn_secondary)
+//  def marketFooter(using api: ServerAPI) = closeButton("Close", () => modalDialog.hide).amend(btn_secondary)
 //
 //  def modalDialog(using api: ServerAPI): ModalDialog = ModalDialog(
 //    marketHeader,
 //    marketBody,
 //    marketFooter,
 //    omsheet.panelWidth(92),
-//    onopen = () ⇒ {
+//    onopen = () => {
 //      marketIndex.now() match {
-//        case None ⇒
-//          api.marketIndex().foreach { m ⇒
+//        case None =>
+//          api.marketIndex().foreach { m =>
 //            marketIndex.set(Some(m))
 //          }
-//        case _ ⇒
+//        case _ =>
 //      }
 //    },
-//    onclose = () ⇒ {}
+//    onclose = () => {}
 //  )
 //
 //

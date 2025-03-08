@@ -199,9 +199,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           import org.openmole.gui.shared.data.ServerFileSystemContext
           def rootFile(fileType: String) =
             fileType match
-              case ServerFileSystemContext.Project.typeName ⇒ utils.projectsDirectory
-              case ServerFileSystemContext.Authentication.typeName ⇒ utils.authenticationKeysDirectory
-              case ServerFileSystemContext.Absolute.typeName ⇒ new java.io.File("/")
+              case ServerFileSystemContext.Project.typeName => utils.projectsDirectory
+              case ServerFileSystemContext.Authentication.typeName => utils.authenticationKeysDirectory
+              case ServerFileSystemContext.Absolute.typeName => new java.io.File("/")
 
           (fileParts zip fileTypes).map: (file, fileType) =>
             val destination = rootFile(fileType)

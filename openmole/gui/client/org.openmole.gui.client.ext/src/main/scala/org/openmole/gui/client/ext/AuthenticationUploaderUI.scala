@@ -37,12 +37,12 @@ class AuthenticationUploaderUI(val directory: SafePath):
 
   def view(using api: ServerAPI, path: BasePath) =
     label(
-      fileInput: fInput ⇒
+      fileInput: fInput =>
         fInput.ref.files.headOption.foreach: f =>
           val to = directory / f.name
           api.upload:
             fInput.ref.files.toSeq.map(f => f -> to)
-          .map: _ ⇒
+          .map: _ =>
             file.set(Some(f.name))
             fInput.ref.value = "",
       child <-- file.signal.map:

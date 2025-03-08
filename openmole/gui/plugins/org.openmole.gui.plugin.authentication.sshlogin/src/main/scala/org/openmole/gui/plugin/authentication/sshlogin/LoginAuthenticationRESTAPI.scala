@@ -76,20 +76,20 @@ class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthent
     def removeAuthentication(data: LoginAuthenticationData): Unit = SSHAuthentication -= coreObject(data)
 
     def loginAuthentications(): Seq[LoginAuthenticationData] = SSHAuthentication().flatMap:
-      case lp: LoginPassword ⇒
+      case lp: LoginPassword =>
         Some(LoginAuthenticationData(
           lp.login,
           lp.password,
           lp.host,
           lp.port.toString
         ))
-      case _ ⇒ None
+      case _ => None
 
     def testAuthentication(data: LoginAuthenticationData): Seq[Test] =
       Seq(
         SSHAuthentication.test(coreObject(data)) match {
-          case Success(_) ⇒ Test.passed()
-          case Failure(f) ⇒ Test.error("failed", ErrorData(f))
+          case Success(_) => Test.passed()
+          case Failure(f) => Test.error("failed", ErrorData(f))
         }
       )
 

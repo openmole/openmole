@@ -82,13 +82,13 @@ object Application extends JavaLogger {
 
     def takeArg(args: List[String]) =
       args match
-        case h :: t ⇒ h
-        case Nil    ⇒ ""
+        case h :: t => h
+        case Nil    => ""
 
     def dropArg(args: List[String]) =
       args match
-        case h :: t ⇒ t
-        case Nil    ⇒ Nil
+        case h :: t => t
+        case Nil    => Nil
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -128,46 +128,46 @@ object Application extends JavaLogger {
       def script(tail: List[String]) = parse(dropArg(tail), c.copy(scriptFile = Some(takeArg(tail)), launchMode = ConsoleMode))
       def console(tail: List[String]) = parse(tail, c.copy(launchMode = ConsoleMode))
       args match
-        case "-p" :: tail                            ⇒ plugins(tail)
-        case "--plugins" :: tail                     ⇒ plugins(tail)
-        case "-c" :: tail                            ⇒ console(tail)
-        case "--console" :: tail                     ⇒ console(tail)
-        case "-s" :: tail                            ⇒ script(tail)
-        case "--script" :: tail                      ⇒ script(tail)
-        case "--port" :: tail                        ⇒ parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
-        case "--password" :: tail                    ⇒ parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
-        case "--password-file" :: tail               ⇒ parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
-        case "--workspace" :: tail                   ⇒ parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
-        case "--rest" :: tail                        ⇒ parse(tail, c.copy(launchMode = RESTMode))
-        case "--load-workspace-plugins" :: tail      ⇒ parse(tail, c.copy(loadHomePlugins = Some(true)))
-        case "--console-work-directory" :: tail      ⇒ parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
-        case "--logger-level" :: tail                ⇒ parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
-        case "--logger-file-level" :: tail           ⇒ parse(tail.tail, c.copy(loggerFileLevel = Some(tail.head)))
-        case "--remote" :: tail                      ⇒ parse(tail, c.copy(remote = true))
-        case "--no-browser" :: tail                  ⇒ parse(tail, c.copy(browse = false))
-        case "--unoptimizedJS" :: tail               ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--unoptimized-js" :: tail              ⇒ parse(tail, c.copy(unoptimizedJS = true))
-        case "--gui-extra-header" :: tail            ⇒ parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
-        case "--gui-extra-header-file" :: tail       ⇒ parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
-        case "--reset" :: tail                       ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
-        case "--reset-password" :: tail              ⇒ parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
-        case "--proxy" :: tail                       ⇒ parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
-        case "--debug-no-output-redirection" :: tail ⇒ parse(tail, c.copy(debugNoOutputRedirection = true))
-        case "--" :: tail                            ⇒ parse(Nil, c.copy(args = tail))
-        case "-h" :: tail                            ⇒ help(tail)
-        case "--help" :: tail                        ⇒ help(tail)
-        case "--version" :: tail                     ⇒ parse(tail, c.copy(launchMode = VersionMode))
-        case "--test-compile" :: tail                ⇒ parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p ⇒ new File(p)))))
-        case s :: tail                               ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
-        case Nil                                     ⇒ c
+        case "-p" :: tail                            => plugins(tail)
+        case "--plugins" :: tail                     => plugins(tail)
+        case "-c" :: tail                            => console(tail)
+        case "--console" :: tail                     => console(tail)
+        case "-s" :: tail                            => script(tail)
+        case "--script" :: tail                      => script(tail)
+        case "--port" :: tail                        => parse(tail.tail, c.copy(port = Some(tail.head.toInt)))
+        case "--password" :: tail                    => parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
+        case "--password-file" :: tail               => parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
+        case "--workspace" :: tail                   => parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
+        case "--rest" :: tail                        => parse(tail, c.copy(launchMode = RESTMode))
+        case "--load-workspace-plugins" :: tail      => parse(tail, c.copy(loadHomePlugins = Some(true)))
+        case "--console-work-directory" :: tail      => parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
+        case "--logger-level" :: tail                => parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
+        case "--logger-file-level" :: tail           => parse(tail.tail, c.copy(loggerFileLevel = Some(tail.head)))
+        case "--remote" :: tail                      => parse(tail, c.copy(remote = true))
+        case "--no-browser" :: tail                  => parse(tail, c.copy(browse = false))
+        case "--unoptimizedJS" :: tail               => parse(tail, c.copy(unoptimizedJS = true))
+        case "--unoptimized-js" :: tail              => parse(tail, c.copy(unoptimizedJS = true))
+        case "--gui-extra-header" :: tail            => parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
+        case "--gui-extra-header-file" :: tail       => parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
+        case "--reset" :: tail                       => parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
+        case "--reset-password" :: tail              => parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
+        case "--proxy" :: tail                       => parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
+        case "--debug-no-output-redirection" :: tail => parse(tail, c.copy(debugNoOutputRedirection = true))
+        case "--" :: tail                            => parse(Nil, c.copy(args = tail))
+        case "-h" :: tail                            => help(tail)
+        case "--help" :: tail                        => help(tail)
+        case "--version" :: tail                     => parse(tail, c.copy(launchMode = VersionMode))
+        case "--test-compile" :: tail                => parse(dropArgs(tail), c.copy(launchMode = TestCompile(takeArgs(tail).map(p => new File(p)))))
+        case s :: tail                               => parse(tail, c.copy(ignored = s :: c.ignored))
+        case Nil                                     => c
 
-    PluginManager.startAll.foreach { case (b, e) ⇒ logger.log(WARNING, s"Error staring bundle $b", e) }
+    PluginManager.startAll.foreach { case (b, e) => logger.log(WARNING, s"Error staring bundle $b", e) }
 
     val config = parse(args.toVector.map(_.trim).toList)
 
-    val logLevel = config.loggerLevel.map(l ⇒ Level.parse(l.toUpperCase))
+    val logLevel = config.loggerLevel.map(l => Level.parse(l.toUpperCase))
     logLevel.foreach(LoggerConfig.level)
-    val logFileLevel = config.loggerFileLevel.map(l ⇒ Level.parse(l.toUpperCase))
+    val logFileLevel = config.loggerFileLevel.map(l => Level.parse(l.toUpperCase))
 
     if (config.debugNoOutputRedirection) OutputManager.uninstall
 
@@ -184,57 +184,57 @@ object Application extends JavaLogger {
       if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
-        existingUserPlugins.flatMap { p ⇒ PluginManager.listBundles(new File(p)) } ++ module.allModules
+        existingUserPlugins.flatMap { p => PluginManager.listBundles(new File(p)) } ++ module.allModules
 
       logger.fine(s"Loading user plugins " + userPlugins)
 
       PluginManager.tryLoad(userPlugins)
 
-    def displayErrors(load: ⇒ Iterable[(File, Throwable)]) =
-      load.foreach { case (f, e) ⇒ logger.log(WARNING, s"Error loading bundle $f", e) }
+    def displayErrors(load: => Iterable[(File, Throwable)]) =
+      load.foreach { case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e) }
 
     def password = config.password orElse config.passwordFile.map(_.lines.head)
 
     if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.reverse.mkString(" "))
 
     config.launchMode match
-      case VersionMode ⇒
+      case VersionMode =>
         println(
           s"""OpenMOLE version: ${org.openmole.core.buildinfo.version.value} - ${org.openmole.core.buildinfo.name}
           |Built: ${org.openmole.core.buildinfo.version.generationDate} at ${org.openmole.core.buildinfo.version.generationTime}""".stripMargin)
         Console.ExitCodes.ok
-      case HelpMode ⇒
+      case HelpMode =>
         println(usage)
         Console.ExitCodes.ok
-      case Reset(initialisePassword) ⇒
+      case Reset(initialisePassword) =>
         Console.withTerminal:
           given Preference = Services.preference(workspace)
           given AuthenticationStore = Services.authenticationStore(workspace)
           Services.resetPassword
           if initialisePassword then Console.initPassword
           Console.ExitCodes.ok
-      case RESTMode ⇒
+      case RESTMode =>
         given Preference = Services.preference(workspace)
         displayErrors(loadPlugins)
 
-        Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel): services ⇒
+        Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel): services =>
           Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
           val server = new RESTServer(config.port, !config.remote, services)
           server.run()
 
         Console.ExitCodes.ok
-      case ConsoleMode ⇒
+      case ConsoleMode =>
         Console.withTerminal:
           given Preference = Services.preference(workspace)
           
           Console.dealWithLoadError(loadPlugins, !config.scriptFile.isDefined)
-          Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services ⇒
+          Services.withServices(workspaceDirectory, config.password, config.proxyURI, logLevel, logFileLevel) { implicit services =>
             Runtime.getRuntime.addShutdownHook(thread(Services.dispose(services)))
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
 
-      case GUIMode ⇒
+      case GUIMode =>
         given preference: Preference = Services.preference(workspace)
 
         // FIXME switch to a GUI display in the plugin panel
@@ -247,7 +247,7 @@ object Application extends JavaLogger {
             catch
               case t: Throwable => logger.warning("Unable to open OpenMOLE app page in the browser")
 
-        GUIServer.lockFile.withFileOutputStream: fos ⇒
+        GUIServer.lockFile.withFileOutputStream: fos =>
           val launch = config.remote || fos.getChannel.tryLock != null
           if launch
           then
@@ -261,7 +261,7 @@ object Application extends JavaLogger {
 
             GUIServer.urlFile.content = url
             
-            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel, config.password): services ⇒
+            GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel, config.password): services =>
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               val s = newServer.start()
@@ -284,32 +284,32 @@ object Application extends JavaLogger {
               warmup()
 
               s.join() match
-                case GUIServer.Ok      ⇒ Console.ExitCodes.ok
+                case GUIServer.Ok      => Console.ExitCodes.ok
 
               //newServer.stop()
           else
             browse(GUIServer.urlFile.content)
             Console.ExitCodes.ok
-      case TestCompile(files) ⇒
+      case TestCompile(files) =>
         import org.openmole.tool.hash._
 
         def success(f: File) = f.getParentFileSafe / (f.hash().toString + ".success")
         def toFile(f: File) =
-          if (f.isDirectory) f.listRecursive(_.isFile).toList.map(c ⇒ f -> c)
+          if (f.isDirectory) f.listRecursive(_.isFile).toList.map(c => f -> c)
           else Seq((f.getParentFile, f))
 
         def isTestable(f: File) = f.getName.endsWith(".omt") || f.getName.endsWith(".oms")
 
-        val results = Test.withTmpServices { implicit services ⇒
+        val results = Test.withTmpServices { implicit services =>
 
           import services._
-          files.flatMap(toFile).filter { (_, file) ⇒ isTestable(file) }.map: (root, file) ⇒
+          files.flatMap(toFile).filter { (_, file) => isTestable(file) }.map: (root, file) =>
 
             def processResult(c: CompileResult) =
               c match
-                case s: ScriptFileDoesNotExists ⇒ util.Failure(new IOException("File doesn't exists"))
-                case s: CompilationError        ⇒ util.Failure(s.error)
-                case s: Compiled                ⇒ util.Success("Compilation succeeded")
+                case s: ScriptFileDoesNotExists => util.Failure(new IOException("File doesn't exists"))
+                case s: CompilationError        => util.Failure(s.error)
+                case s: Compiled                => util.Success("Compilation succeeded")
 
             def displayName(file: File) = s"${root.relativize(file).getPath}"
 
@@ -331,8 +331,8 @@ object Application extends JavaLogger {
 
         val errors =
           results.filter:
-            case (_, util.Success(_)) ⇒ false
-            case _                    ⇒ true
+            case (_, util.Success(_)) => false
+            case _                    => true
 
         if (errors.isEmpty) Console.ExitCodes.ok
         else Console.ExitCodes.compilationError

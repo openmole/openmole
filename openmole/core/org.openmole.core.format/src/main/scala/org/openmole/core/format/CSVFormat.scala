@@ -2,6 +2,7 @@ package org.openmole.core.format
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.context.ValType
+import org.openmole.core.tools.io.Prettifier
 
 import scala.reflect.ClassTag
 
@@ -37,12 +38,12 @@ object CSVFormat:
     else
       def arrayHeaders(v: Any, h: String): Seq[String] =
         v match
-          case v: Array[?] ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
-          case v: Seq[_]   ⇒ v.zipWithIndex.flatMap { case (e, i) ⇒ arrayHeaders(e, s"${h}$$${i}") }
-          case v           ⇒ Seq(h)
+          case v: Array[?] => v.zipWithIndex.flatMap { case (e, i) => arrayHeaders(e, s"${h}$$${i}") }
+          case v: Seq[_]   => v.zipWithIndex.flatMap { case (e, i) => arrayHeaders(e, s"${h}$$${i}") }
+          case v           => Seq(h)
 
       (prototypes zip values).flatMap {
-        case (p, v) ⇒ arrayHeaders(v, "").map(h ⇒ s"${p.name}$h")
+        case (p, v) => arrayHeaders(v, "").map(h => s"${p.name}$h")
       }.mkString(",")
 
   def writeVariablesToCSV(
@@ -64,26 +65,26 @@ object CSVFormat:
 
   def appendVariablesToCSV(
     output:      PrintStream,
-    header:      ⇒ Option[String] = None,
+    header:      => Option[String] = None,
     values:      Seq[Any],
     unrollArray: Boolean          = false,
     arrayOnRow:  Boolean          = false,
     margin:      String           = ""): Unit =
 
-    header.foreach(h ⇒ output.appendLine { margin + h })
+    header.foreach(h => output.appendLine { margin + h })
 
     def csvLine(v: Seq[Any]): String =
       def format(v: Any): String =
         v match
-          case v: Array[?] ⇒ s"[${v.map(format).mkString(",")}]"
-          case v: Seq[_]   ⇒ s"[${v.map(format).mkString(",")}]"
-          case v           ⇒ v.prettify()
+          case v: Array[?] => s"[${v.map(format).mkString(",")}]"
+          case v: Seq[_]   => s"[${v.map(format).mkString(",")}]"
+          case v           => Prettifier.prettify(v)
 
       def quote(v: Any): String =
         v match
-          case v: Array[?] ⇒ s""""${format(v)}""""
-          case v: Seq[_]   ⇒ s""""${format(v)}""""
-          case v           ⇒ v.prettify()
+          case v: Array[?] => s""""${format(v)}""""
+          case v: Seq[_]   => s""""${format(v)}""""
+          case v           => Prettifier.prettify(v)
 
       v.map(quote).mkString(",")
 
@@ -96,26 +97,26 @@ object CSVFormat:
         then
           val skipHead =
             lists.map:
-              case h :: Nil ⇒ h :: Nil
-              case _ :: t   ⇒ t
-              case Nil      ⇒ Nil
+              case h :: Nil => h :: Nil
+              case _ :: t   => t
+              case Nil      => Nil
 
           writeLines(skipHead)
 
       val lists: Seq[List[Any]] =
         v map:
-          case v: Array[?] ⇒ v.toList
-          case v: Seq[_]   ⇒ v.toList
-          case v           ⇒ List(v)
+          case v: Array[?] => v.toList
+          case v: Seq[_]   => v.toList
+          case v           => List(v)
 
       if lists.forall(!_.isEmpty) then writeLines(lists)
 
     def onRow(v: Seq[Any]) =
       def arrayValues(v: Any): Seq[Any] =
         v match
-          case v: Array[?] ⇒ v.flatMap(arrayValues)
-          case v: Seq[_]   ⇒ v.flatMap(arrayValues)
-          case v           ⇒ Seq(v)
+          case v: Array[?] => v.flatMap(arrayValues)
+          case v: Seq[_]   => v.flatMap(arrayValues)
+          case v           => Seq(v)
 
       output.appendLine(margin + csvLine(arrayValues(v)))
 
@@ -136,36 +137,36 @@ object CSVFormat:
     val headers = reader.readNext.toArray
 
     val columnsIndexes = columns.map {
-      case (name, _) ⇒
+      case (name, _) =>
         val i = headers.indexOf(name)
         if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
         else i
     }
 
-    Iterator.continually(reader.readNext).takeWhile(_ != null).map: line ⇒
-      (columns zip columnsIndexes).map { case ((name, v), i) ⇒ Variable.unsecure(v, matchConverter(v, line(i), name)) }
+    Iterator.continually(reader.readNext).takeWhile(_ != null).map: line =>
+      (columns zip columnsIndexes).map { case ((name, v), i) => Variable.unsecure(v, matchConverter(v, line(i), name)) }
 
   def matchConverter(v: Val[?], s: String, name: String): Any =
-    def matchArray[T: ClassTag](s: String, convert: String ⇒ T): Array[T] =
+    def matchArray[T: ClassTag](s: String, convert: String => T): Array[T] =
       val trimed = s.trim
       if (!trimed.startsWith("[") || !trimed.endsWith("]")) throw new UserBadDataError(s"Array in CSV files should have the following format [.., .., ..], found $s")
-      s.drop(1).dropRight(1).split(",").map { s ⇒ convert(s.trim) }
+      s.drop(1).dropRight(1).split(",").map { s => convert(s.trim) }
 
     v match
-      case Val.caseDouble(v)            ⇒ s.toDouble
-      case Val.caseString(v)            ⇒ s
-      case Val.caseBoolean(v)           ⇒ s.toBoolean
-      case Val.caseInt(v)               ⇒ s.toInt
-      case Val.caseLong(v)              ⇒ s.toLong
-      case Val.caseArrayDouble(v)       ⇒ matchArray(s, _.toDouble)
-      case Val.caseArrayInt(v)          ⇒ matchArray(s, _.toInt)
-      case Val.caseArrayLong(v)         ⇒ matchArray(s, _.toLong)
-      case Val.caseArrayString(v)       ⇒ matchArray(s, identity)
-      case Val.caseArrayBoolean(v)      ⇒ matchArray(s, _.toBoolean)
-      case Val.caseArrayArrayDouble(v)  ⇒ matchArray(s, matchArray(_, _.toDouble))
-      case Val.caseArrayArrayInt(v)     ⇒ matchArray(s, matchArray(_, _.toInt))
-      case Val.caseArrayArrayLong(v)    ⇒ matchArray(s, matchArray(_, _.toLong))
-      case Val.caseArrayArrayString(v)  ⇒ matchArray(s, matchArray(_, identity))
-      case Val.caseArrayArrayBoolean(v) ⇒ matchArray(s, matchArray(_, _.toBoolean))
-      case _                            ⇒ throw new UserBadDataError(s"Unsupported type in CSV sampling prototype $v mapped to column $name")
+      case Val.caseDouble(v)            => s.toDouble
+      case Val.caseString(v)            => s
+      case Val.caseBoolean(v)           => s.toBoolean
+      case Val.caseInt(v)               => s.toInt
+      case Val.caseLong(v)              => s.toLong
+      case Val.caseArrayDouble(v)       => matchArray(s, _.toDouble)
+      case Val.caseArrayInt(v)          => matchArray(s, _.toInt)
+      case Val.caseArrayLong(v)         => matchArray(s, _.toLong)
+      case Val.caseArrayString(v)       => matchArray(s, identity)
+      case Val.caseArrayBoolean(v)      => matchArray(s, _.toBoolean)
+      case Val.caseArrayArrayDouble(v)  => matchArray(s, matchArray(_, _.toDouble))
+      case Val.caseArrayArrayInt(v)     => matchArray(s, matchArray(_, _.toInt))
+      case Val.caseArrayArrayLong(v)    => matchArray(s, matchArray(_, _.toLong))
+      case Val.caseArrayArrayString(v)  => matchArray(s, matchArray(_, identity))
+      case Val.caseArrayArrayBoolean(v) => matchArray(s, matchArray(_, _.toBoolean))
+      case _                            => throw new UserBadDataError(s"Unsupported type in CSV sampling prototype $v mapped to column $name")
 

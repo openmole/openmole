@@ -62,7 +62,7 @@ object ProjectPanel:
 
     
     div(margin := "20px", flexRow, alignItems.flexStart,
-      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ ⇒ panels.closeExpandable }),
+      div(cls := "close-button bi-x", backgroundColor := "#bdadc4", borderRadius := "20px", onClick --> { _ => panels.closeExpandable }),
       theTabs.build.render.amend(marginLeft := "40", width := "100%")
     )
 

@@ -30,7 +30,7 @@ object Webpack extends JavaLogger:
 
     if (!nodeModulesDirectory.exists) {
       fromNodeModules copy nodeModulesDirectory
-      extraModules.foreach { em ⇒ em.jsFile copy nodeModulesDirectory / em.nodeModuleSubdirectory / em.jsFile.getName }
+      extraModules.foreach { em => em.jsFile copy nodeModulesDirectory / em.nodeModuleSubdirectory / em.jsFile.getName }
     }
 
     import scala.sys.process.{BasicIO, Process, ProcessLogger}

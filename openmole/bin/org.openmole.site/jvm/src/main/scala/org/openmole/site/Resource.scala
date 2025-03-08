@@ -295,7 +295,7 @@ object Resource {
     this.getClass.getClassLoader.getResourceAsStream(fileResource.file).mkString
 
   //  val marketResources(entries: Seq[GeneratedMarketEntry]) =
-  //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto ⇒ MarketResource(tuto) }
+  //    entries.filter(_.tags.exists(_ == Market.Tags.tutorial)).map { tuto => MarketResource(tuto) }
 }
 
 sealed trait Resource

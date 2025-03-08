@@ -16,9 +16,9 @@
  */
 package org.openmole.tool.cache
 
-def unwrap[T](f: ⇒ T): T =
+def unwrap[T](f: => T): T =
   try f
   catch 
-    case t: Throwable ⇒ throw t.getCause
+    case t: Throwable => throw t.getCause
 
 

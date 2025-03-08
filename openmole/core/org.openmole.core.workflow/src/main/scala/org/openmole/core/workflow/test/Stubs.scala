@@ -18,7 +18,7 @@ import org.openmole.tool.random.{RandomProvider, Seeder}
 
 object Stubs:
 
-  implicit val scope: org.openmole.core.setter.DefinitionScope = org.openmole.core.setter.DefinitionScope.User
+  export org.openmole.core.setter.DefinitionScope.user.*
 
   val dir = java.io.File.createTempFile("test", "")
   dir.delete()

@@ -20,18 +20,16 @@ import org.openmole.core.dsl._
 import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.task.{ EmptyTask, MoleTask }
 
-package object pattern {
+package object pattern:
 
   def wrap(evaluation: DSL, inputVals: Seq[Val[?]], outputVals: Seq[Val[?]], wrap: Boolean = true)(implicit definitionScope: DefinitionScope) =
-    if (wrap) {
+    if wrap
+    then
       val moleTask = MoleTask(evaluation) set (inputs ++= inputVals, outputs ++= outputVals)
       DSLContainer(moleTask, (), delegate = Vector(moleTask))
-    }
-    else {
+    else
       val firstEvaluation = EmptyTask() set ((inputs, outputs) ++= inputVals)
       val lastEvaluation = EmptyTask() set ((inputs, outputs) ++= outputVals)
       val puzzle = Strain(firstEvaluation) -- Capsule(evaluation) -- lastEvaluation
       DSLContainer(puzzle, (), delegate = DSL.delegate(evaluation))
-    }
 
-}

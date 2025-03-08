@@ -38,7 +38,7 @@ package object osgi:
     importedPackages: Seq[VersionedPackage],
     bundle:           File
   ) = {
-    def versionedToString(p: VersionedPackage) = s"${p.name}${p.version.map(v ⇒ s""";${Constants.VERSION_ATTRIBUTE}="$v"""").getOrElse("")}"
+    def versionedToString(p: VersionedPackage) = s"${p.name}${p.version.map(v => s""";${Constants.VERSION_ATTRIBUTE}="$v"""").getOrElse("")}"
 
     val manifest =
       s"""${Attributes.Name.MANIFEST_VERSION}: 1.0
@@ -46,7 +46,7 @@ package object osgi:
         |${Constants.BUNDLE_NAME}: $name
         |${Constants.BUNDLE_VERSION}: $version
         |${Constants.EXPORT_PACKAGE}: ${exportedPackages.mkString(",")}
-        |${Constants.IMPORT_PACKAGE}: ${importedPackages.map(p ⇒ versionedToString(p)).mkString(",")}""".stripMargin
+        |${Constants.IMPORT_PACKAGE}: ${importedPackages.map(p => versionedToString(p)).mkString(",")}""".stripMargin
 
     val os = new JarOutputStream(bundle.bufferedOutputStream())
     try {

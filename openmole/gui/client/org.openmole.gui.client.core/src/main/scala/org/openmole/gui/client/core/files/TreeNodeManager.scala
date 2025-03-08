@@ -52,8 +52,8 @@ class TreeNodeManager:
 
   def setSelected(sp: SafePath, b: Boolean) = {
     b match {
-      case true ⇒ selected.update(s ⇒ (s :+ sp).distinct)
-      case false ⇒ selected.update(s ⇒ s.filterNot(_ == sp))
+      case true => selected.update(s => (s :+ sp).distinct)
+      case false => selected.update(s => s.filterNot(_ == sp))
     }
   }
 
@@ -82,8 +82,8 @@ class TreeNodeManager:
       if fileSorting.fileSorting == newListSorting
       then
         fileSorting.firstLast match
-          case FirstLast.First ⇒ FirstLast.Last
-          case _ ⇒ FirstLast.First
+          case FirstLast.First => FirstLast.Last
+          case _ => FirstLast.First
       else FirstLast.First
 
     fileSorting.copy(fileSorting = newListSorting, firstLast = fl)
@@ -112,8 +112,8 @@ class TreeNodeManager:
 //      CoreUtils.listFiles(safePath, fileFilter.now()).foreach { lf => sons.update { s => s.updated(cur, ListFiles(lf)) } }
 //
 //    cur match
-//      case safePath: SafePath ⇒ if !sons.now().contains(safePath) then updateSons(safePath)
-//      case _ ⇒ Future(ListFilesData.empty)
+//      case safePath: SafePath => if !sons.now().contains(safePath) then updateSons(safePath)
+//      case _ => Future(ListFilesData.empty)
 
 
   def resetFileFinder = findFilesContaining.set((None, Seq()))

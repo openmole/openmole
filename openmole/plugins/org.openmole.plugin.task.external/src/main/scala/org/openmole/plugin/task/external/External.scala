@@ -61,7 +61,7 @@ object External:
     case InputFile, Resource
 
   case class DeployedFile(file: File, expandedUserPath: String, link: Boolean, deployedFileType: DeployedFileType)
-  type PathResolver = String ⇒ File
+  type PathResolver = String => File
 
   def validate(external: External): Validate =
     def resourceExists(resource: External.Resource) = Validate:
@@ -79,7 +79,7 @@ object External:
 
   protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map:
-      case InputFile(prototype, name, link) ⇒
+      case InputFile(prototype, name, link) =>
         prototype -> DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
 
   protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(using RandomProvider, TmpDirectory, FileService): Iterable[DeployedFile] =
@@ -116,7 +116,7 @@ object External:
 
   def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) =
     val (copiedFilesVariable, copiedFilesInfo) =
-      listInputFiles(external.inputFiles, context).map { case (p, f) ⇒
+      listInputFiles(external.inputFiles, context).map { case (p, f) =>
         val d = destination(resolver, f)
         copyFile(f, d)
         (Variable(p, d), f → d)
@@ -134,7 +134,7 @@ object External:
 
   def outputFileVariables(outputFiles: Vector[External.OutputFile], context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
     outputFiles.map:
-      case OutputFile(name, prototype) ⇒
+      case OutputFile(name, prototype) =>
         val fileName = name.from(context)
         val file = resolver(fileName)
         Variable(prototype, file)
@@ -167,14 +167,14 @@ object External:
 
     // If the file path contains a symbolic link, the link will be deleted by the cleaning operation
     val fetchedOutputFiles =
-      allFiles.map { v ⇒ if workDirectories.exists(_.isAParentOf(v.value)) then Variable.copy(v)(value = v.value.realFile) else v }
+      allFiles.map { v => if workDirectories.exists(_.isAParentOf(v.value)) then Variable.copy(v)(value = v.value.realFile) else v }
 
     fetchedOutputFiles
 
   def moveFilesOutOfWorkDirectory(outputs: PrototypeSet, context: Context, workDirectories: Seq[File], resultDirectory: File)(implicit fileService: FileService) =
     import org.openmole.tool.file.*
 
-    contextFiles(outputs, context).map: v ⇒
+    contextFiles(outputs, context).map: v =>
       val movedFile =
         if workDirectories.exists(_.isAParentOf(v.value))
         then

@@ -51,7 +51,7 @@ case class RelativePath(value: Seq[String]):
 
 object SafePath:
   def root(context: ServerFileSystemContext) = SafePath(path = Seq(""), context = context)
-  def naming = (sp: SafePath) ⇒ sp.name
+  def naming = (sp: SafePath) => sp.name
 
   def apply(path: Iterable[String], context: ServerFileSystemContext): SafePath =
     new SafePath(ArraySeq.from(path.filter(!_.isEmpty)), context)
@@ -109,7 +109,9 @@ object ErrorData:
 
   def apply(errors: Seq[ScriptError], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
 
-  def apply(t: Throwable): MessageErrorData = MessageErrorData(Option(t.getMessage).getOrElse(""), Some(toStackTrace(t)))
+  def apply(t: Throwable, stack: Boolean = true): MessageErrorData =
+    println(t.getMessage)
+    MessageErrorData(Option(t.getMessage).getOrElse(""), if stack then Some(toStackTrace(t)) else None)
 
   def apply(message: String) = MessageErrorData(message, None)
 
@@ -272,8 +274,8 @@ object FileSorting:
     def alphaOrdering = new Ordering[TreeNodeData]:
       def isDirectory(tnd: TreeNodeData) =
         tnd.directory match
-          case None ⇒ false
-          case _ ⇒ true
+          case None => false
+          case _ => true
 
       def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
         if isDirectory(tn1)
@@ -290,9 +292,9 @@ object FileSorting:
 
     def ordering =
       fs match
-        case ListSorting.AlphaSorting ⇒ alphaOrdering
-        case ListSorting.SizeSorting ⇒ fileSizeOrdering
-        case ListSorting.TimeSorting ⇒ timeOrdering
+        case ListSorting.AlphaSorting => alphaOrdering
+        case ListSorting.SizeSorting => fileSizeOrdering
+        case ListSorting.TimeSorting => timeOrdering
 
     filter.firstLast match
       case FirstLast.First => ordering
@@ -364,7 +366,7 @@ case class SequenceData(header: SequenceHeader = Seq(), content: Seq[Seq[String]
     val lineIndexes = (1 to content.length).map {
       _.toString
     }
-    copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) ⇒ l :+ i })
+    copy(header = header :+ "Row index", content = content.zip(lineIndexes).map { case (l, i) => l :+ i })
 
 
 object ScriptError:

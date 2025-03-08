@@ -86,7 +86,7 @@ object ScalaCompilation {
 
     def errorMsg =
       if osgiMode
-      then s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b ⇒ s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${Interpreter.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
+      then s"""in osgi mode with priority bundles [${priorityBundles(plugins).map(b => s"${b.getSymbolicName}").mkString(", ")}], libraries [${libraries.mkString(", ")}], classpath [${Interpreter.classPath(priorityBundles(plugins), libraries).mkString(", ")}]."""
       else s"""in non osgi mode with libraries ${libraries.mkString(", ")}"""
 
     Try {
@@ -99,17 +99,19 @@ object ScalaCompilation {
 
       (evaluated.asInstanceOf[RETURN], interpreter)
     } match
-      case util.Success(s) ⇒ Success(s)
-      case util.Failure(e: Interpreter.CompilationError) ⇒
-        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = Some(script.code))
-        val userBadDataError =
-          new UserBadDataError(
-            s"""${errors}
-               |With interpreter $errorMsg"
-               |""".stripMargin
-          )
+      case util.Success(s) => Success(s)
+      case util.Failure(e: Interpreter.CompilationError) =>
+        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = None)
+        val userBadDataError = UserBadDataError(errors)
+//        val errors = Interpreter.compilationMessage(e.errorMessages.filter(_.error), script.originalCode, lineOffset = script.headerLines + 2, fullCode = Some(script.code))
+//        val userBadDataError =
+//          new UserBadDataError(
+//            s"""${errors}
+//               |With interpreter $errorMsg"
+//               |""".stripMargin
+//          )
         util.Failure(userBadDataError)
-      case util.Failure(e) ⇒ util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
+      case util.Failure(e) => util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
 
   def function[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
     val s = script(inputs, source, wrapping, returnType)
@@ -146,7 +148,7 @@ object ScalaCompilation {
       s"""new ${classOf[CompilationClosure[_]].getName}[${ValType.toTypeString(returnType)}] {
          |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}): ${ValType.toTypeString(returnType)} = {
          |    object $inputObject {
-         |      ${inputs.toSeq.map(i ⇒ s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.toTypeString(i.`type`)}]""").mkString("; ")}
+         |      ${inputs.toSeq.map(i => s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.toTypeString(i.`type`)}]""").mkString("; ")}
          |    }
          |    import ${inputObject}._
          |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")}: ${manifest[RandomProvider].toString} = ${prefix}RNG
@@ -195,9 +197,9 @@ object ScalaCompilation {
         val duplicatedInputs = allInputMap.filter { _._2.size > 1 }.map(_._2)
 
         duplicatedInputs match
-          case Nil ⇒
+          case Nil =>
             def sortedInputNames = inputs.map(_.name).distinct.sorted
-            val scriptInputs = sortedInputNames.map(n ⇒ allInputMap(n).head)
+            val scriptInputs = sortedInputNames.map(n => allInputMap(n).head)
             def update =
               closure[R](scriptInputs, code, Seq.empty, Seq.empty, wrapping, returnType).map { (r, i) => ContextClosure[R](r.apply, i) }
 
@@ -205,20 +207,20 @@ object ScalaCompilation {
               scriptInputs,
               update
             )
-          case duplicated ⇒ throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
+          case duplicated => throw new UserBadDataError("Duplicated inputs: " + duplicated.mkString(", "))
 
-    def validate = Validate: p ⇒
+    def validate = Validate: p =>
       import p._
 
       compiled(inputs) match
-        case Success(_) ⇒ Seq()
-        case Failure(e) ⇒ Seq(e)
+        case Success(_) => Seq()
+        case Failure(e) => Seq(e)
 
-    def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p ⇒
+    def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p =>
       val closure: ContextClosure[R] = compiled(p.context).get
       try closure.apply(p.context, p.random, p.tmpDirectory)
       catch {
-        case t: Throwable ⇒ throw new UserBadDataError(t, s"Error in execution of compiled closure in context: ${p.context}")
+        case t: Throwable => throw new UserBadDataError(t, s"Error in execution of compiled closure in context: ${p.context}")
       }
     }
   }
@@ -236,7 +238,7 @@ object ScalaCompilation {
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
     new ScalaWrappedCompilation[R](code, wrapping)
 
-  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) ⇒ R, interpreter: Interpreter):
+  case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) => R, interpreter: Interpreter):
     def apply(context: Context, randomProvider: RandomProvider, tmpDirectory: TmpDirectory): R = f(context, randomProvider, tmpDirectory)
 
   trait OutputWrapping[+R]:
@@ -248,10 +250,10 @@ object ScalaCompilation {
    */
   case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]]:
     def wrapOutput =
-      s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p ⇒ s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava"""
+      s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p => s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava"""
 
 
-  case class RawOutput[T]() extends OutputWrapping[T] { compilation ⇒
+  case class RawOutput[T]() extends OutputWrapping[T] { compilation =>
     def wrapOutput = ""
   }
 

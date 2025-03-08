@@ -63,7 +63,7 @@ object CORMASTask:
 
         import org.openmole.core.json.*
 
-        def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i ⇒ i.name -> (toJSONValue(context(i.v)): JValue) }
+        def inputsFields: Seq[JField] = noFile(mapped.inputs).map { i => i.name -> (toJSONValue(context(i.v)): JValue) }
 
         def inputDictionary = JObject(inputsFields *)
 
@@ -72,7 +72,7 @@ object CORMASTask:
           import org.json4s.jackson.JsonMethods._
           val outputValues = parse(file.content)
           val outputMap = outputValues.asInstanceOf[JObject].obj.toMap
-          noFile(mapped.outputs).map: o ⇒
+          noFile(mapped.outputs).map: o =>
             jValueToVariable(
               outputMap.getOrElse(o.name, throw new UserBadDataError(s"Output named $name not found in the resulting json file ($outputJSONName) content is ${file.content}.")).asInstanceOf[JValue],
               o.v,

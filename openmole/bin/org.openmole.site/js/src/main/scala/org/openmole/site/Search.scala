@@ -42,7 +42,7 @@ object Search {
 
     val item = Var(Item())
 
-    def search = () ⇒ {
+    def search = () => {
       val oo = SiteJS.search(s"*${searchInput.ref.value}*")
       result.set(oo)
       item.set(Item())
@@ -53,7 +53,7 @@ object Search {
 
     val resultDiv = {
       val results = div(
-        onKeyDown --> { (k: KeyboardEvent) ⇒
+        onKeyDown --> { (k: KeyboardEvent) =>
           val curItem = item.now()
           if (k.keyCode == 40 && curItem.index < result.now().size - 1) {
             item.set(curItem.copy(index = curItem.index + 1))
@@ -91,11 +91,11 @@ object Search {
               form(
                 results,
                 onKeyUp --> {
-                  (k: KeyboardEvent) ⇒
+                  (k: KeyboardEvent) =>
                     if (k.keyCode != 38 && k.keyCode != 40)
                       search()
                 },
-                onSubmit.preventDefault --> { _ ⇒
+                onSubmit.preventDefault --> { _ =>
                   if (item.now().ref != "")
                     org.scalajs.dom.window.location.href = item.now().ref
                 }
@@ -112,12 +112,12 @@ object Search {
     val ddd = org.scalajs.dom.window.document.getElementById(shared.searchImg)
 
     ddd.addEventListener("mouseover", {
-      (e: dom.MouseEvent) ⇒
+      (e: dom.MouseEvent) =>
         SiteJS.getIndex
     })
 
     ddd.addEventListener("click", {
-      (e: dom.MouseEvent) ⇒
+      (e: dom.MouseEvent) =>
         searchOpen.update(!_)
         searchInput.ref.focus()
     })

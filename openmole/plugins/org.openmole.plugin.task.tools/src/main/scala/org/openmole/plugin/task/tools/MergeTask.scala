@@ -30,7 +30,7 @@ object MergeTask:
   def apply[S](result: Val[Array[S]], prototypes: Val[Array[S]]*)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("MergeTask"): p =>
       import p.*
-      val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
+      val flattened = prototypes.map { p => context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
       Variable(result, flattened)
     .set (
       dsl.inputs ++= prototypes,

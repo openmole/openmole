@@ -19,9 +19,9 @@ object RTask:
       def dependencies(d: Boolean) = if(d) "T" else "F"
 
       installCommand match
-        case RLibrary(name, None, d) ⇒
+        case RLibrary(name, None, d) =>
           s"""R --slave -e 'install.packages(c("$name"), dependencies = ${dependencies(d)}); library("$name")'"""
-        case RLibrary(name, Some(version), d) ⇒
+        case RLibrary(name, Some(version), d) =>
           s"""R --slave -e 'library(remotes); remotes::install_version("$name",version = "$version", dependencies = ${dependencies(d)}); library("$name")'"""
 
     def toCommandNoVersion(libraries: Seq[String], dependencies: Boolean): String =
@@ -98,12 +98,12 @@ object RTask:
         import org.json4s.jackson.JsonMethods.*
 
         def writeInputsJSON(inputs: Vector[Mapped[?]], file: File) =
-          def values = inputs.map { m ⇒ m.v.`type`.manifest.array(context(m.v)) }
+          def values = inputs.map { m => m.v.`type`.manifest.array(context(m.v)) }
 
           file.content = compact(render(toJSONValue(values.toArray[Any])))
 
         def rInputMapping(inputs: Vector[Mapped[?]], arrayName: String) =
-          inputs.zipWithIndex.map { (m, i) ⇒ s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
+          inputs.zipWithIndex.map { (m, i) => s"${m.name} = $arrayName[[${i + 1}]][[1]]" }.mkString("\n")
 
         def rOutputMapping =
           s"""list(${
@@ -116,7 +116,7 @@ object RTask:
           import org.json4s._
           import org.json4s.jackson.JsonMethods._
           val outputValues = parse(file.content)
-          (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) ⇒ jValueToVariable(jvalue, v, unwrapArrays = true) }
+          (outputValues.asInstanceOf[JArray].arr zip noFile(mapped.outputs).map(_.v)).map { (jvalue, v) => jValueToVariable(jvalue, v, unwrapArrays = true) }
 
         val jsonInputs = executionContext.taskExecutionDirectory.newFile("input", ".json")
         val scriptFile = executionContext.taskExecutionDirectory.newFile("script", ".R")
@@ -140,8 +140,8 @@ object RTask:
             resources += (scriptFile, rScriptPath),
             resources += (jsonInputs, inputJSONPath),
             outputFiles += (outputJSONPath, outputFile),
-            Mapped.files(mapped.inputs).map { m ⇒ inputFiles += (m.v, m.name, true) },
-            Mapped.files(mapped.outputs).map { m ⇒ outputFiles += (m.name, m.v) }
+            Mapped.files(mapped.inputs).map { m => inputFiles += (m.v, m.name, true) },
+            Mapped.files(mapped.outputs).map { m => outputFiles += (m.name, m.v) }
           )
 
         val resultContext =

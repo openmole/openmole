@@ -40,9 +40,9 @@
 //  def dynamicContext_=(ctx: ScriptContext): Unit = scriptContextRep.callEither("set", ctx)
 //
 //  def dynamicContext: ScriptContext = scriptContextRep.callEither("value") match {
-//    case Right(ctx: ScriptContext) ⇒ ctx
-//    case Left(e)                   ⇒ throw e
-//    case Right(other)              ⇒ throw new ScriptException(s"Unexpected value for context: $other")
+//    case Right(ctx: ScriptContext) => ctx
+//    case Left(e)                   => throw e
+//    case Right(other)              => throw new ScriptException(s"Unexpected value for context: $other")
 //  }
 //
 //  if (intp.initializeComplete) {
@@ -80,7 +80,7 @@
 //  // Set the context for dynamic resolution and run the body.
 //  // Defines attributes available for evaluation.
 //  // Avoid reflective access if using default context.
-//  def withScriptContext[A](context: ScriptContext)(body: ⇒ A): A =
+//  def withScriptContext[A](context: ScriptContext)(body: => A): A =
 //    if (context eq getContext) body else {
 //      val saved = dynamicContext
 //      dynamicContext = context
@@ -88,7 +88,7 @@
 //      finally dynamicContext = saved
 //    }
 //  // Defines attributes available for compilation.
-//  def withCompileContext[A](context: ScriptContext)(body: ⇒ A): A = {
+//  def withCompileContext[A](context: ScriptContext)(body: => A): A = {
 //    val saved = compileContext
 //    compileContext = context
 //    try body
@@ -109,14 +109,14 @@
 //      //ClassUtils.callByName[IMain, Either[IR.Result, intp.Request]](intp, "compile", Vector(cat, false))
 //
 //      intp.compile(cat, synthetic = false, fatally = true) match {
-//        case Right(req) ⇒
+//        case Right(req) =>
 //          code = ""
 //          new WrappedRequest(req)
-//        case Left(s) ⇒
+//        case Left(s) =>
 //          code = ""
 //          throw s match {
-//            case Results.Incomplete ⇒ new ScriptException(s"Compile-time error, the input is incomplete. It might be caused by an unclosed multi-line comment '/*'.")
-//            case _                  ⇒ new ScriptException(s"Compile-time error (result is $s)")
+//            case Results.Incomplete => new ScriptException(s"Compile-time error, the input is incomplete. It might be caused by an unclosed multi-line comment '/*'.")
+//            case _                  => new ScriptException(s"Compile-time error (result is $s)")
 //          }
 //      }
 //    }
@@ -147,10 +147,10 @@
 //    override def eval(context: ScriptContext) = withScriptContext(context) {
 //      if (first) {
 //        val result = req.lineRep.evalEither match {
-//          case Left(e: RuntimeException) ⇒ throw e
-//          case Left(e: Exception)        ⇒ throw new ScriptException(e)
-//          case Left(e)                   ⇒ throw e
-//          case Right(result)             ⇒ result.asInstanceOf[Object]
+//          case Left(e: RuntimeException) => throw e
+//          case Left(e: Exception)        => throw new ScriptException(e)
+//          case Left(e)                   => throw e
+//          case Right(result)             => result.asInstanceOf[Object]
 //        }
 //        intp recordRequest req
 //        first = false
@@ -165,7 +165,7 @@
 //        }
 //        else {
 //          val instance = s"val $$INSTANCE = new ${req.lineRep.readPath};"
-//          val newline = (defines map (s ⇒ s"val ${s.name} = $$INSTANCE${req.accessPath}.${s.name}")).mkString(instance, ";", ";")
+//          val newline = (defines map (s => s"val ${s.name} = $$INSTANCE${req.accessPath}.${s.name}")).mkString(instance, ";", ";")
 //          //val newreq = intp.requestFromLine(newline).right.get
 //
 //          val newreq = TypeTool.callByName[IMain, Either[Result, intp.Request]](intp, "requestFromLine", Vector(newline)).right.get
@@ -173,10 +173,10 @@
 //          val ok = newreq.compile
 //
 //          val result = newreq.lineRep.evalEither match {
-//            case Left(e: RuntimeException) ⇒ throw e
-//            case Left(e: Exception)        ⇒ throw new ScriptException(e)
-//            case Left(e)                   ⇒ throw e
-//            case Right(result)             ⇒ intp recordRequest newreq; result.asInstanceOf[Object]
+//            case Left(e: RuntimeException) => throw e
+//            case Left(e: Exception)        => throw new ScriptException(e)
+//            case Left(e)                   => throw e
+//            case Right(result)             => intp recordRequest newreq; result.asInstanceOf[Object]
 //          }
 //          result
 //        }

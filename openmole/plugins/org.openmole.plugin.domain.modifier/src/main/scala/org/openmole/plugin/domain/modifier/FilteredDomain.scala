@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 
 object FilteredDomain {
 
-  implicit def isDiscrete[D, I]: DiscreteFromContextDomain[FilteredDomain[D, I], I] = domain ⇒
+  implicit def isDiscrete[D, I]: DiscreteFromContextDomain[FilteredDomain[D, I], I] = domain =>
     Domain(
       domain.iterator,
       domain.discreteValue.inputs ++ domain.f.inputs,
@@ -31,8 +31,8 @@ object FilteredDomain {
 
 }
 
-case class FilteredDomain[D, I](domain: D, f: FromContext[I ⇒ Boolean])(implicit discrete: DiscreteFromContextDomain[D, I]) { d ⇒
-  def iterator = FromContext { p ⇒
+case class FilteredDomain[D, I](domain: D, f: FromContext[I => Boolean])(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>
+  def iterator = FromContext { p =>
     import p._
     val fVal = f.from(context)
     discreteValue.domain.from(context).filter(fVal)

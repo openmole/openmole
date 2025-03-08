@@ -30,7 +30,7 @@ object Plugins extends JavaLogger {
     import scala.jdk.CollectionConverters.*
 
     def bundles =
-      PluginManager.bundles.filter { b ⇒
+      PluginManager.bundles.filter { b =>
         !b.openMOLEScope.exists(_.toLowerCase == "gui-provided")
       }
 
@@ -110,16 +110,16 @@ object Plugins extends JavaLogger {
     then
       update
       utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { identity } // Make sure hash file is created
-    else utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { _ ⇒ update }
+    else utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { _ => update }
 
     webui / utils.webpakedOpenmoleFileName
   }
 
   def expandDepsFile(template: File, to: File) = {
-    val rules = PluginRegistry.highLights.partition { kw ⇒
+    val rules = PluginRegistry.highLights.partition { kw =>
       kw match {
-        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) ⇒ false
-        case _ ⇒ true
+        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) => false
+        case _ => true
       }
     }
 
@@ -134,8 +134,8 @@ object Plugins extends JavaLogger {
 
   }
 
-//  def addPluginRoutes(route: OMRouter ⇒ Unit, services: Services) = {
+//  def addPluginRoutes(route: OMRouter => Unit, services: Services) = {
 //    Log.logger.info(s"Loading GUI plugins")
-//    GUIPluginRegistry.routers.foreach { r ⇒ route(r(services)) }
+//    GUIPluginRegistry.routers.foreach { r => route(r(services)) }
 //  }
 }

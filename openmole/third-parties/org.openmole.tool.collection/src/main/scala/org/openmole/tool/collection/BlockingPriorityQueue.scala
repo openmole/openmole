@@ -32,33 +32,33 @@ object PriorityQueue:
 
   def add[T](innerQueue: InnerQueue[T], t: T) =
     innerQueue match
-      case FILO(s) ⇒ s.push(t)
-      case FIFO(l) ⇒ l.add(t)
+      case FILO(s) => s.push(t)
+      case FIFO(l) => l.add(t)
 
   def pool[T](innerQueue: InnerQueue[T]) =
     innerQueue match
-      case FILO(s) ⇒ s.pop()
-      case FIFO(l) ⇒ l.poll()
+      case FILO(s) => s.pop()
+      case FIFO(l) => l.poll()
 
   def clear[T](innerQueue: InnerQueue[T]) =
     innerQueue match
-      case FILO(s) ⇒ s.clear()
-      case FIFO(l) ⇒ l.clear()
+      case FILO(s) => s.clear()
+      case FIFO(l) => l.clear()
 
   def size[T](innerQueue: InnerQueue[T]) =
     innerQueue match
-      case FILO(s) ⇒ s.size()
-      case FIFO(l) ⇒ l.size()
+      case FILO(s) => s.size()
+      case FIFO(l) => l.size()
 
   def isEmpty[T](innerQueue: InnerQueue[T]) =
     innerQueue match
-      case FILO(s) ⇒ s.isEmpty()
-      case FIFO(l) ⇒ l.isEmpty()
+      case FILO(s) => s.isEmpty()
+      case FIFO(l) => l.isEmpty()
 
   def toVector[T](innerQueue: InnerQueue[T]) =
     innerQueue match
-      case FILO(s) ⇒ s.iterator().asScala.toVector
-      case FIFO(l) ⇒ l.iterator().asScala.toVector
+      case FILO(s) => s.iterator().asScala.toVector
+      case FIFO(l) => l.iterator().asScala.toVector
 
 class PriorityQueue[T](fifo: Boolean):
 
@@ -70,8 +70,8 @@ class PriorityQueue[T](fifo: Boolean):
   def enqueue(e: T, priority: Int) =
     synchronized:
       queues.get(priority) match
-        case Some(queue) ⇒ PriorityQueue.add(queue, e)
-        case None ⇒
+        case Some(queue) => PriorityQueue.add(queue, e)
+        case None =>
           val q: PriorityQueue.InnerQueue[T] = if !fifo then PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
           PriorityQueue.add(q, e)
           queues.put(priority, q)
@@ -115,8 +115,8 @@ class BlockingPriorityQueue[T](fifo: Boolean):
   def enqueue(e: T, priority: Int) =
     synchronized:
       queues.get(priority) match
-        case Some(queue) ⇒ PriorityQueue.add(queue, e)
-        case None ⇒
+        case Some(queue) => PriorityQueue.add(queue, e)
+        case None =>
           val q: PriorityQueue.InnerQueue[T] = if !fifo then PriorityQueue.FILO[T]() else PriorityQueue.FIFO[T]()
           PriorityQueue.add(q, e)
           queues.put(priority, q)

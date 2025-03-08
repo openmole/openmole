@@ -11,7 +11,7 @@ import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
 
 object Test {
-  def withTmpServices[T](f: Services ⇒ T) = {
+  def withTmpServices[T](f: Services => T) = {
     val tmpDirectory = {
       val newF = java.io.File.createTempFile("workspace", "")
       newF.delete()

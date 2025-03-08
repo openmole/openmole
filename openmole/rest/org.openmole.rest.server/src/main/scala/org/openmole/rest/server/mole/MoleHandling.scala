@@ -28,7 +28,7 @@ import scala.reflect.ClassTag
 import scala.slick.driver.H2Driver.simple._
 import scala.util.Try*/
 
-/*trait MoleHandling { self: ScalatraBase ⇒
+/*trait MoleHandling { self: ScalatraBase =>
 
   implicit val codec = Codec.UTF8
 
@@ -46,8 +46,8 @@ import scala.util.Try*/
         val regex = """(.*),(.*)""".r
         is.getLines().map{
           _ match {
-            case regex(name: String, data: String) ⇒ name -> data
-            case _ ⇒ throw new RuntimeException("Invalidly formatted csv file")
+            case regex(name: String, data: String) => name -> data
+            case _ => throw new RuntimeException("Invalidly formatted csv file")
           }
         }.toMap
       } finally is.close
@@ -58,25 +58,25 @@ import scala.util.Try*/
     def fromString[T: FromString](s: String) = implicitly[FromString[T]].from(s)
 
     def createVariable[T: FromString](mI: MissingInput) =
-      csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
+      csvData get mI.data.prototype.name map (d => Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
 
     val a = Validation(mole.mole, sources = mole.sources, hooks = mole.hooks)
     val mIS = a.map(_ match {
-      case x: MissingInput       ⇒ x
-      case y: MissingSourceInput ⇒ MissingInput(y.slot, y.input)
-      case error                 ⇒ throw new RuntimeException(s"Malformed partial mole: $error")
+      case x: MissingInput       => x
+      case y: MissingSourceInput => MissingInput(y.slot, y.input)
+      case error                 => throw new RuntimeException(s"Malformed partial mole: $error")
     })
 
     val c = mIS.map {
-      mI ⇒
+      mI =>
         mI.data.prototype.`type`.runtimeClass match {
-          case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
-          case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
-          case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
-          case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
-          case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
-          case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
-          case _                              ⇒ throw new RuntimeException(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
+          case t if t.equals(classOf[Int])    => createVariable[Int](mI)
+          case t if t.equals(classOf[Double]) => createVariable[Double](mI)
+          case t if t.equals(classOf[Float])  => createVariable[Float](mI)
+          case t if t.equals(classOf[BigInt]) => createVariable[BigInt](mI)
+          case t if t.equals(classOf[String]) => createVariable[String](mI)
+          case t if t.equals(classOf[File])   => createVariable[File](mI)
+          case _                              => throw new RuntimeException(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
         }
     }
 
@@ -99,7 +99,7 @@ import scala.util.Try*/
 
   def registerMole(
     mole: PartialMoleExecution,
-    context: Option[PartialMoleExecution ⇒ Context],
+    context: Option[PartialMoleExecution => Context],
     encapsulate: Boolean,
     packed: Boolean) = {
 
@@ -131,15 +131,15 @@ import scala.util.Try*/
 
   def createMole(
     mole: FileItem,
-    context: Option[PartialMoleExecution ⇒ Context],
+    context: Option[PartialMoleExecution => Context],
     encapsulate: Boolean,
     packed: Boolean): Try[MoleExecution] = Try {
 
-    val moleStream = moleBinary map (b ⇒ new ByteArrayInputStream(b map (_.toByte)))
+    val moleStream = moleBinary map (b => new ByteArrayInputStream(b map (_.toByte)))
 
     val (moleExec, genPath) = if (pack)
     moleExec match {
-      case Left(pEx) ⇒ {
+      case Left(pEx) => {
         val ctxt = reifyCSV(pEx, csvData)
 
         val clob = new SerialBlob(moleBinary)
@@ -150,30 +150,30 @@ import scala.util.Try*/
         //val id = UUID.randomUUID().toString
 
         val (me, path) = createMoleExecution(pEx, ctxt, encapsulate, genPath)
-        db withSession { implicit session ⇒
+        db withSession { implicit session =>
           MoleData.instance.insert((me.id, name, Stopped.toString, clob, ctxtClob, encapsulate, pack, outputBlob))
           MoleStats.instance.insert((me.id, 0, 0, 0, 0, 0))
         }
         cache.cacheMoleExecution(me, path, me.id)
         Right(me)
       }
-      case Right(error) ⇒ Left(error)
+      case Right(error) => Left(error)
     }
   }
 
   def getMoleKeys = cache.getMoleKeys
 
   def getMole(key: String): Option[MoleExecution] = { //TODO: move a large part of this to cache
-    lazy val mole: Option[MoleExecution] = db withSession { implicit session ⇒
+    lazy val mole: Option[MoleExecution] = db withSession { implicit session =>
       val row = MoleData.instance filter (_.id === key)
       val molePack = (row map (_.molePackage)).list.headOption.getOrElse(false)
       val outputDir = if (molePack) Some(Workspace.newDir) else None
-      val moleDeserialiser: InputStream ⇒ PartialMoleExecution = outputDir map (dir ⇒
-        (in: InputStream) ⇒ SerialiserService.deserialiseAndExtractFiles[PartialMoleExecution](new TarInputStream(in), dir)
+      val moleDeserialiser: InputStream => PartialMoleExecution = outputDir map (dir =>
+        (in: InputStream) => SerialiserService.deserialiseAndExtractFiles[PartialMoleExecution](new TarInputStream(in), dir)
       ) getOrElse (SerialiserService.deserialise[PartialMoleExecution](_))
 
-      val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
-        case (pMClob, ctxtClob, e) ⇒ (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
+      val r = (row map (r => (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
+        case (pMClob, ctxtClob, e) => (moleDeserialiser(pMClob.getAsciiStream), SerialiserService.deserialise[Context](ctxtClob.getAsciiStream), e)
       }
 
       r map Function.tupled(createMoleExecution(_, _, _, outputDir)) map Function.tupled(cache.cacheMoleExecution(_, _, key))
@@ -212,8 +212,8 @@ import scala.util.Try*/
   //todo fix to remove decached moles
   def setStatus(mole: MoleExecution, status: Status) = cache.setStatus(mole, status)
 
-  def isEncapsulated(key: String): Boolean = db withSession { implicit session ⇒
-    (for { m ← MoleData.instance if m.id === key } yield m.encapsulated).list.forall(b ⇒ b)
+  def isEncapsulated(key: String): Boolean = db withSession { implicit session =>
+    (for { m ← MoleData.instance if m.id === key } yield m.encapsulated).list.forall(b => b)
   }
 
   //TODO - FRAGILE

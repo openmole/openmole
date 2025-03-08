@@ -23,12 +23,12 @@ import org.openmole.core.dsl.extension._
 object AppendDomain {
 
   implicit def isDiscrete[D1, D2, T]: DiscreteFromContextDomain[AppendDomain[D1, D2, T], T] =
-    domain ⇒ {
+    domain => {
       val d1Value = domain.domain1(domain.d1)
       val d2Value = domain.domain2(domain.d2)
 
       Domain(
-        FromContext { p ⇒
+        FromContext { p =>
           import p._
           d1Value.domain.from(context).iterator ++ d2Value.domain.from(context).iterator
         },

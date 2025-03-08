@@ -14,9 +14,9 @@ package object network {
   def isPortAcceptingConnections(host: String, port: Int) = {
     val s = Try(new Socket(host, port))
     s match {
-      case Success(s) ⇒
+      case Success(s) =>
         s.close(); true
-      case Failure(_) ⇒ false
+      case Failure(_) => false
     }
   }
 

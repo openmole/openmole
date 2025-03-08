@@ -19,7 +19,7 @@ package org.openmole.site
 
 object DSLTest {
 
-  //  def withTmpServices[T](f: Services ⇒ T) = {
+  //  def withTmpServices[T](f: Services => T) = {
   //    val tmpDirectory = {
   //      val newF = java.io.File.createTempFile("workspace", "")
   //      newF.delete()
@@ -70,7 +70,7 @@ object DSLTest {
   //
   //  def runTest =
   //    Try {
-  //      withTmpServices { implicit services ⇒
+  //      withTmpServices { implicit services =>
   //        val repl = Project.newREPL(ConsoleVariables.empty)
   //        repl.compile(testCode)
   //      }

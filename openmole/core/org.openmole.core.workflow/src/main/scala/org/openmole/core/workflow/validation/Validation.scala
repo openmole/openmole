@@ -111,14 +111,12 @@ object Validation {
   def taskValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection) =
     def taskValidates = mole.capsules.map(_.task(mole, sources, hooks)).collect { case v: ValidateTask => v }
 
-    taskValidates.flatMap { t =>
-      t.validate(Task.inputs(t).toSeq).toList match {
+    taskValidates.flatMap: t =>
+      t.validate(Task.inputs(t).toSeq).toList match
         case Nil => None
         case e   => Some(TaskValidationProblem(t, e))
-      }
-    }
 
-  def sourceErrors(mole: Mole, implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection) = {
+  def sourceErrors(mole: Mole, implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection) =
     val implicitMap = prototypesToMap(implicits)
 
     def inputErrors =
@@ -167,7 +165,6 @@ object Validation {
       }
 
     inputErrors.flatten ++ validationErrors.flatten
-  }
 
   def typeErrorsTopMole(mole: Mole, implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks) =
     taskTypeErrors(mole)(mole.capsules, implicits, sources, hooks)
@@ -175,7 +172,7 @@ object Validation {
   def typeErrorsMoleTask(mole: Mole, implicits: Iterable[Val[?]]) =
     taskTypeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits, Sources.empty, Hooks.empty)
 
-  def topologyErrors(mole: Mole) = {
+  def topologyErrors(mole: Mole) =
     val seen = new HashMap[MoleCapsule, (List[(List[MoleCapsule], Int)])]
     val toProcess = new Queue[(MoleCapsule, Int, List[MoleCapsule])]
 
@@ -199,33 +196,29 @@ object Validation {
         case (caps, paths) =>
           paths.filter { case (_, level) => level < 0 }.map { case (path, level) => NegativeLevelProblem(caps, path.reverse, level) }
       } ++ (mole.transitions.map(_.start).toSet -- seen.keys).toVector.map { capsule => UnreachableCapsuleProblem(capsule) }
-  }
 
-  def moleTaskTopologyError(moleTask: MoleTask, capsule: MoleCapsule) = {
-    moleTask.mole.level(moleTask.last) match {
+  def moleTaskTopologyError(moleTask: MoleTask, capsule: MoleCapsule) =
+    moleTask.mole.level(moleTask.last) match
       case 0 => List()
       case l => List(MoleTaskLastCapsuleProblem(capsule, moleTask, l))
-    }
-  }
 
   def duplicatedTransitions(mole: Mole) =
-    for {
+    for
       end <- mole.capsules
       slot <- mole.slots(end)
       (_, transitions) <- mole.inputTransitions(slot).toList.map { t => t.start -> t }.groupBy { case (c, _) => c }
       if (transitions.size > 1)
-    } yield DuplicatedTransition(transitions.unzip._2)
+    yield
+      DuplicatedTransition(transitions.unzip._2)
 
-  def duplicatedName(mole: Mole, sources: Sources, hooks: Hooks) = {
+  def duplicatedName(mole: Mole, sources: Sources, hooks: Hooks) =
     def duplicated(data: PrototypeSet) =
       data.prototypes.groupBy(_.name).filter { case (_, d) => d.map(_.`type`).distinct.size > 1 }
 
-    mole.capsules.flatMap {
-      c =>
-        duplicated(c.inputs(mole, sources, hooks)).map { case (name, data) => new DuplicatedName(c, name, data, Input) } ++
-          duplicated(c.outputs(mole, sources, hooks)).map { case (name, data) => new DuplicatedName(c, name, data, Output) }
-    }
-  }
+    mole.capsules.flatMap: c =>
+      duplicated(c.inputs(mole, sources, hooks)).map { (name, data) => DuplicatedName(c, name, data, SlotType.Input) } ++
+        duplicated(c.outputs(mole, sources, hooks)).map { (name, data) => DuplicatedName(c, name, data, SlotType.Output) }
+
 
   def transitionValidationErrors(mole: Mole, sources: Sources, hooks: Hooks)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection) =
     val errors =
@@ -355,16 +348,15 @@ object Validation {
       hooks = puzzle.hooks
     )
 
-  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(implicit newFile: TmpDirectory, fileService: FileService, cache: KeyValueCache, outputRedirection: OutputRedirection): List[Problem] =
-    allMoles(mole, sources, hooks).flatMap {
+  def apply(mole: Mole, implicits: Context = Context.empty, sources: Sources = Sources.empty, hooks: Hooks = Hooks.empty)(using TmpDirectory, FileService, KeyValueCache, OutputRedirection): List[Problem] =
+    allMoles(mole, sources, hooks).flatMap:
       case (m, mt) =>
-        def moleTaskImplicits(moleTask: MoleTask) = {
+        def moleTaskImplicits(moleTask: MoleTask) =
           val inputs = moleTaskInputMaps(moleTask)
           moleTask.implicits.flatMap(i => inputs.get(i))
-        }
 
         def sourceHookOrMtError =
-          mt match {
+          mt match
             case Some((t, c)) =>
               moleTaskImplicitsErrors(t, c) ++
                 typeErrorsMoleTask(m, moleTaskImplicits(t)).map { e => MoleTaskDataFlowProblem(c, e) } ++
@@ -373,7 +365,6 @@ object Validation {
               sourceErrors(m, implicits.prototypes, sources, hooks) ++
                 hookErrors(m, implicits.prototypes, sources, hooks) ++
                 typeErrorsTopMole(m, implicits.prototypes, sources, hooks)
-          }
 
         sourceHookOrMtError ++
           topologyErrors(m) ++
@@ -385,6 +376,6 @@ object Validation {
           taskValidationErrors(m, sources, hooks) ++
           transitionValidationErrors(m, sources, hooks) ++
           moleValidateErrors(m)
-    }
+
 
 }

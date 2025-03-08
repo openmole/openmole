@@ -39,27 +39,27 @@ package object modifier {
     def group(n: FromContext[Int])(implicit m: Manifest[T]) = GroupDomain(domain, n)
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = SlidingDomain(domain, n, s)
 
-    def map[O](f: T ⇒ O) = MapDomain[D, T, O](domain, f)
-    def map[O: Manifest](s: String)(implicit m: Manifest[T]) = MapDomain[D, T, O](domain, FromContext.codeToFromContext[T ⇒ O](s))
+    def map[O](f: T => O) = MapDomain[D, T, O](domain, f)
+    def map[O: Manifest](s: String)(implicit m: Manifest[T]) = MapDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](s))
 
-    def filter(f: T ⇒ Boolean) = FilteredDomain(domain, f)
+    def filter(f: T => Boolean) = FilteredDomain(domain, f)
 
-    def zipWith[O](f: T ⇒ O) = ZipWithDomain[D, T, O](domain, f)
-    def zipWith[O: Manifest](f: String)(implicit m: Manifest[T]) = ZipWithDomain[D, T, O](domain, FromContext.codeToFromContext[T ⇒ O](f))
+    def zipWith[O](f: T => O) = ZipWithDomain[D, T, O](domain, f)
+    def zipWith[O: Manifest](f: String)(implicit m: Manifest[T]) = ZipWithDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](f))
 
     def zipWithIndex = ZipWithIndexDomain[D, T](domain)
     def zipWithName(implicit cgn: CanGetName[T]) = zipWith(cgn.apply _)
 
     def sort(implicit o: Ordering[T]) = SortedByDomain(domain, identity[T] _)
 
-    def sortBy[S: Ordering](s: T ⇒ S) = SortedByDomain(domain, s)
-    def sortBy[S: Ordering: Manifest](s: String)(implicit m: Manifest[T]) = SortedByDomain(domain, FromContext.codeToFromContext[T ⇒ S](s))
+    def sortBy[S: Ordering](s: T => S) = SortedByDomain(domain, s)
+    def sortBy[S: Ordering: Manifest](s: String)(implicit m: Manifest[T]) = SortedByDomain(domain, FromContext.codeToFromContext[T => S](s))
 
     def shuffle = ShuffleDomain(domain)
     def distinct = DistinctDomain(domain)
 
-    def takeWhile(predicate: T ⇒ Boolean) = TakeWhileDomain(domain, predicate)
-    def takeWhile(predicate: String)(implicit m: Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T ⇒ Boolean](predicate))
+    def takeWhile(predicate: T => Boolean) = TakeWhileDomain(domain, predicate)
+    def takeWhile(predicate: String)(implicit m: Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T => Boolean](predicate))
 
     def ++[D2](d2: D2)(implicit discrete2: DiscreteFromContextDomain[D2, T]) = AppendDomain(domain, d2)
   }
@@ -68,19 +68,19 @@ package object modifier {
   //    def take(n: FromContext[Int]) = factor.copy(domain = factor.domain.take(n))
   //    def group(n: FromContext[Int])(implicit m: Manifest[T]) = factor.copy(domain = factor.domain.group(n))
   //    def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(implicit m: Manifest[T]) = factor.copy(domain = factor.domain.sliding(n, s))
-  //    def map[O](f: T ⇒ O) = factor.copy(domain = factor.domain.map(f))
-  //    def filter(f: T ⇒ Boolean) = factor.copy(domain = factor.domain.filter(f))
-  //    def zipWith[O](f: T ⇒ O) = factor.copy(domain = factor.domain.zipWith(f))
+  //    def map[O](f: T => O) = factor.copy(domain = factor.domain.map(f))
+  //    def filter(f: T => Boolean) = factor.copy(domain = factor.domain.filter(f))
+  //    def zipWith[O](f: T => O) = factor.copy(domain = factor.domain.zipWith(f))
   //    def zipWithIndex = factor.copy(domain = factor.domain.zipWithIndex)
   //    def zipWithName(implicit cgn: CanGetName[T]) = factor.copy(domain = factor.domain.zipWithName)
   //  }
   //
   //  implicit def finiteFactorModifierDecorator[D, T](factor: Factor[D, T])(implicit finite: FiniteFromContext[D, T], inputs: DomainInputs[D]) = new {
   //    def sort(implicit o: Ordering[T]) = factor.copy(domain = factor.domain.sort)
-  //    def sortBy[S: Ordering](s: T ⇒ S) = factor.copy(domain = factor.domain.sortBy(s))
+  //    def sortBy[S: Ordering](s: T => S) = factor.copy(domain = factor.domain.sortBy(s))
   //    def shuffle = factor.copy(domain = factor.copy(domain = factor.domain.shuffle))
   //    def distinct = factor.copy(domain = factor.domain.distinct)
-  //    def takeWhile(predicate: FromContext[T ⇒ Boolean]) = factor.copy(domain = factor.domain.takeWhile(predicate))
+  //    def takeWhile(predicate: FromContext[T => Boolean]) = factor.copy(domain = factor.domain.takeWhile(predicate))
   //  }
 
 }
