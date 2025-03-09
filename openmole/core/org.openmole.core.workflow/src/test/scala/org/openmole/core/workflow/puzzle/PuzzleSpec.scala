@@ -1,13 +1,14 @@
 package org.openmole.core.workflow.puzzle
 
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.dsl._
+import org.openmole.core.workflow.composition.DSL.delegate
+import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.execution.LocalEnvironment
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.test.TestHook
 import org.openmole.core.workflow.validation.Validation
-import org.scalatest._
+import org.scalatest.*
 
 class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
@@ -48,7 +49,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     lastExecuted should equal(true)
   }
 
-  "Strain" should "pass a val through a sequence of tasks" in {
+  it should "pass a val through a sequence of tasks" in {
     @volatile var lastExecuted = false
 
     val i = Val[Int]
@@ -104,6 +105,16 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     Validation(wf).isEmpty should be(true)
   }
+
+  it should "delegate the correct task" in:
+    val t = EmptyTask()
+    val dsl: DSL = DSLContainer(t, method = (), delegate = Vector(t))
+
+    val dsl2 = dsl -- EmptyTask()
+
+    DSL.delegate(dsl) should equal(Vector(t))
+    DSL.delegate(dsl2) should equal(Vector(t))
+
 
   "By" should "be convertible to DSL" in {
     val t = EmptyTask()
