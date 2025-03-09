@@ -193,8 +193,7 @@ object SingleRun:
       method =
         Method(
           input = r.input.map(_.value)
-        ),
-      delegate = delegate(r.evaluation)
+        )
     )
 
 

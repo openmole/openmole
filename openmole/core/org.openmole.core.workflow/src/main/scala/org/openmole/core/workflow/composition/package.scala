@@ -255,7 +255,7 @@ object DSL {
         case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
         case c => innerDSL(c).flatMap(toDelegate)
 
-    val del =toDelegate(t)
+    val del = toDelegate(t)
     if del.nonEmpty
     then del.toVector
     else tasks(t).map(_.task)
