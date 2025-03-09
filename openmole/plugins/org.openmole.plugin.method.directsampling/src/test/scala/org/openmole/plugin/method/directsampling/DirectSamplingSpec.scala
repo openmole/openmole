@@ -351,3 +351,23 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
       )
 
     DSL.delegate(run).head should equal(task)
+
+
+  "Nested method" should "delegate the correct task" in:
+    val o = Val[Double]
+    val seed = Val[Int]
+    val t = EmptyTask() set(outputs += o)
+
+    val dsl =
+      SingleRun(
+        evaluation =
+          Replication(
+            evaluation = t,
+            sample = 100,
+            seed = seed,
+            aggregation = Seq(o)
+          ) -- EmptyTask(),
+        input = Seq()
+      )
+
+    DSL.delegate(dsl) should equal(Vector(t))

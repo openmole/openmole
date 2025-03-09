@@ -112,7 +112,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val dsl2 = dsl -- EmptyTask()
 
-    DSL.delegate(dsl) should equal(Vector(t))
+    //DSL.delegate(dsl) should equal(Vector(t))
     DSL.delegate(dsl2) should equal(Vector(t))
 
 

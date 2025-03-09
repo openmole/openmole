@@ -237,21 +237,27 @@ object DSL {
   def delegate(t: DSL): Vector[Task] =
     def innerDSL(t: DSL): Seq[DSL] =
       t match
-        case --(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
-        case -<(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
-        case >-(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
-        case >|(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
-        case -<-(o, d, _, _, _) => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
-        case oo(o, d, _)        => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(innerDSL)
+        case c: DSLContainer[?] => Seq(c.dsl)
+        case --(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case -<(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case >-(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case >|(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case -<-(o, d, _, _, _) => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case oo(o, d, _)        => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
         case &(a, b)            => innerDSL(a) ++ innerDSL(b)
         case Slot(d)            => innerDSL(d)
         case Capsule(d, _)      => innerDSL(d)
-        case c: DSLContainer[?] => Seq(c.dsl)
         case TaskNodeDSL(n)     => Seq()
 
-    val dsl = innerDSL(t)
-    if dsl.nonEmpty
-    then dsl.toVector.flatMap(delegate)
+
+    def toDelegate(t: DSL): Seq[Task] =
+      t match
+        case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
+        case c => innerDSL(c).flatMap(toDelegate)
+
+    val del =toDelegate(t)
+    if del.nonEmpty
+    then del.toVector
     else tasks(t).map(_.task)
 
   object DSLSelector:
