@@ -88,6 +88,7 @@ package object extension:
   export org.openmole.core.keyword.On
   export org.openmole.core.keyword.By
   export org.openmole.core.keyword.Weight
+  export org.openmole.core.keyword.Or
 
   export org.openmole.core.setter.{
       ValueAssignment,

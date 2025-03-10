@@ -141,8 +141,8 @@ val myModel = ScalaTask("val o = x1 + x2") set (
 DirectSampling(
   evaluation = myModel hook display,
   sampling = OneFactorSampling(
-    (x1 in (0.0 to 1.0 by 0.2)) nominal 0.5,
-    (x2 in (0.0 to 1.0 by 0.2)) nominal 0.5
+    x1 in ((0.0 to 1.0 by 0.2) or 0.5),
+    x2 in ((0.0 to 1.0 by 0.2) or 0.5)
   )
 )
 """, name="example of one factor at a time")}

@@ -20,6 +20,8 @@ package keyword:
 
   infix case class Weight[+A, +B](value: A, weight: B)
 
+  infix case class Or[+A, +B](value: A, or: B)
+
   object By:
     def value[A, B] = Focus[By[A, B]](_.value)
 
@@ -63,5 +65,8 @@ package keyword:
 
     implicit class WeightDecorator[A](a: A):
       infix def weight[B](b: B) = Weight(a, b)
+
+    implicit class OrDecorator[A](a: A):
+      infix def or[B](b: B) = Or(a, b)
 
 package object keyword extends KeyWordPackage
