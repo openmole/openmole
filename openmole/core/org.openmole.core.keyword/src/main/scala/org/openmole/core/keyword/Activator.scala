@@ -21,7 +21,8 @@ class Activator extends BundleActivator:
         WordHighLight(":="),
         WordHighLight("weight"),
         WordHighLight("by"),
-        WordHighLight("on")
+        WordHighLight("on"),
+        WordHighLight("or")
       )
 
     PluginRegistry.register(
