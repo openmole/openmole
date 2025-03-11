@@ -33,8 +33,10 @@ object Environment:
   def storageSharedLocally = newEntry("storageSharedLocally", " When set to ", hl.openmoleNoTest("true"), ", OpenMOLE will use symbolic links instead of physically copying files to the remote environment. This ", b("assumes that the OpenMOLE instance has access to the same storage space as the remote environment"), " (think same NFS filesystem on desktop machine and cluster). Defaults to ", hl.openmoleNoTest("false"), " and shouldn't be used unless you're 100% sure of what you're doing!")
   def workDirectory = newEntry("workDirectory", " the directory in which OpenMOLE will execute on the remote server, for instance ", hl.openmoleNoTest("workDirectory = \"/tmp\""), "(defaults to ", hl.openmoleNoTest("\"/tmp\")"))
   def localSubmission = newEntry("localSubmission", " set to true if you are running OpenMOLE from a node of the cluster (useful for example if you have a cluster that you can only ssh behind a VPN but you can not set up the VPN where your OpenMOLE is running); user and host are not mandatory in this case")
-  def modules = newEntry("modules", "a sequence of String to load modules on the execution environment using \"module load name\", for instance ", hl.openmoleNoTest(s"""modules = Seq("singularity")"""))
-  def reconnect = newEntry("reconect", "when set, the interval at which the SSH connection is reconnected, for instance ", hl.openmoleNoTest(s"modules = 1 minute"), " (bx default the ssh connection is connected once and for all)")
+  def modules = newEntry("modules", "a sequence of String to load modules on the execution environment using \"module load name\", for instance ", hl.openmoleNoTest(s"""modules = Seq("mpi")"""))
+  def reconnect = newEntry("reconnect", "when set, the interval at which the SSH connection is reconnected, for instance ", hl.openmoleNoTest(s"reconnect = 1 minute"), " (by default the ssh connection is connected once and for all)")
+  def submittedJobs = newEntry("submittedJobs", "cap the number of jobs submitted at given time to the environment, for instance ", hl.openmoleNoTest(s"submittedJobs = 1000"), " (by default no job cap is set)")
+
 
   def apiEntryTitle(entryName: String): Frag = Seq[Frag](b(entryName), ": ")
   def newEntry(name: String, body: Frag*): Frag = Seq[Frag](apiEntryTitle(name), body)

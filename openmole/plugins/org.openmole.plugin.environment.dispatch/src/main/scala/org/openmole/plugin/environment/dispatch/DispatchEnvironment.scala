@@ -15,6 +15,11 @@ import scala.collection.mutable
 import scala.ref.WeakReference
 
 object DispatchEnvironment:
+  def queue(jobs: Option[Int])(environment: EnvironmentBuilder)(using varName: sourcecode.Name) =
+    jobs match
+      case Some(j) => DispatchEnvironment(Seq(DestinationProvider(environment, j)), name = s"${varName.value}-queue")
+      case None => environment
+
   object DestinationProvider:
     given Conversion[On[Int, EnvironmentBuilder], DestinationProvider] = on => DestinationProvider(on.on, on.value)
 
@@ -35,7 +40,7 @@ object DispatchEnvironment:
       state.jobQueue.size
 
     def register(state: State, environment: Environment, id: Long, dispatchedId: Long) = state.synchronized:
-      val idMap = state.submitted.getOrElseUpdate(environment, mutable.Map())
+      val idMap = state.submitted.getOrElseUpdate(environment, mutable.LongMap())
       idMap(dispatchedId) = id
 
     def remove(state: State, environment: Environment, dispatchedId: Long) = state.synchronized:
@@ -44,7 +49,7 @@ object DispatchEnvironment:
 
   class State:
     val jobQueue = mutable.Queue[State.Queued]()
-    val submitted = mutable.Map[Environment, mutable.Map[Long, Long]]()
+    val submitted = mutable.Map[Environment, mutable.LongMap[Long]]()
 
   case class DispatchJob(moleJobIds: Iterable[JobId]) extends ExecutionJob
 
@@ -66,7 +71,7 @@ object DispatchEnvironment:
 
   def jobFinished(dispatchEnvironment: DispatchEnvironment, environment: Environment, id: Long, executionJob: ExecutionJob, state: ExecutionState) =
     State.remove(dispatchEnvironment.state, environment, id).foreach: dispatchId =>
-      dispatchEnvironment.services.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), ExecutionState.SUBMITTED, state))
+      dispatchEnvironment.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), ExecutionState.SUBMITTED, state))
       submitToEnvironment(dispatchEnvironment, environment)
 
   def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = 
@@ -81,7 +86,7 @@ object DispatchEnvironment:
 
   def apply(
     slot: Seq[DestinationProvider],
-    name: OptionalArgument[String] = None)(using replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+    name: OptionalArgument[String] = None)(using varName: sourcecode.Name) =
 
     EnvironmentBuilder.multiple: (ms, c1) =>
       import ms._
@@ -92,7 +97,7 @@ object DispatchEnvironment:
         new DispatchEnvironment(
           destination = slot.map(e => Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          eventDispatcher = ms.eventDispatcher
         )
 
       for env <- slot.map(_.environment)
@@ -102,9 +107,9 @@ object DispatchEnvironment:
 
 
 class DispatchEnvironment(
-  val destination: Seq[DispatchEnvironment.Destination],
-  val name:        Option[String],
-  val services:    BatchEnvironment.Services) extends SubmissionEnvironment:
+  val destination:        Seq[DispatchEnvironment.Destination],
+  val name:               Option[String],
+  val eventDispatcher:    EventDispatcher) extends SubmissionEnvironment:
   env =>
 
   val state = new DispatchEnvironment.State
@@ -119,13 +124,21 @@ class DispatchEnvironment(
     DispatchEnvironment.fillFreeSlots(env)
     id
 
-  override def submitted: Long = DispatchEnvironment.State.queueSize(state)
 
   override def jobs: Iterable[ExecutionJob] = Seq()
   override def runningJobs: Seq[ExecutionJob] = Seq()
   override def clean: Boolean = true
   override def errors: Seq[ExceptionEvent] = Seq()
   override def clearErrors: Seq[ExceptionEvent] = Seq()
+
+  override def ready: Long = 0
+
+  override def submitted: Long =
+    DispatchEnvironment.State.queueSize(state) +
+      destination.map(_.environment.submitted).sum +
+      destination.map(d => Environment.ready(d.environment)).sum
+
+
   override def running: Long = destination.map(_.environment.running).sum
   override def done: Long = destination.map(_.environment.done).sum
   override def failed: Long = destination.map(_.environment.failed).sum

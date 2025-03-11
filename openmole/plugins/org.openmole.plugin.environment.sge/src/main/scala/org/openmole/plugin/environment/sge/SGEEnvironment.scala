@@ -26,6 +26,7 @@ import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.environment.dispatch.*
 import org.openmole.tool.crypto.Cypher
 import squants.Time
 import squants.information._
@@ -43,6 +44,7 @@ object SGEEnvironment {
     workDirectory:        OptionalArgument[String]      = None,
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
+    submittedJobs:        OptionalArgument[Int]         = None,
     timeout:              OptionalArgument[Time]        = None,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     name:                 OptionalArgument[String]      = None,
@@ -60,32 +62,34 @@ object SGEEnvironment {
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentBuilder: ms =>
-      import ms._
 
-      if !localSubmission
-      then
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
-
-        new SGEEnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
-          reconnect = reconnect,
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
-        )
-      else
-        new SGELocalEnvironment(
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
-        )
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms =>
+        import ms._
+  
+        if !localSubmission
+        then
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
+  
+          new SGEEnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+            reconnect = reconnect,
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+            services = BatchEnvironment.Services(ms)
+          )
+        else
+          new SGELocalEnvironment(
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            services = BatchEnvironment.Services(ms)
+          )
 
 
   case class Parameters(

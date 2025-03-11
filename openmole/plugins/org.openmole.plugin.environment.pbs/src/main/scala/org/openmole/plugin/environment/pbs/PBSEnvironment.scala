@@ -21,6 +21,7 @@ import org.openmole.core.authentication._
 import org.openmole.plugin.environment.batch.environment._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.plugin.environment.ssh._
+import org.openmole.plugin.environment.dispatch.*
 import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.logger.JavaLogger
 import squants._
@@ -48,6 +49,7 @@ object PBSEnvironment extends JavaLogger:
     timeout:              OptionalArgument[Time]        = None,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     flavour:              gridscale.pbs.PBSFlavour      = Torque,
+    submittedJobs:        OptionalArgument[Int]         = None,
     name:                 OptionalArgument[String]      = None,
     localSubmission:      Boolean                       = false,
     modules:              OptionalArgument[Seq[String]] = None,
@@ -68,31 +70,32 @@ object PBSEnvironment extends JavaLogger:
       modules = modules
     )
 
-    EnvironmentBuilder: ms =>
-      import ms._
-
-      if !localSubmission
-      then
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
-
-        new PBSEnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
-          reconnect = reconnect,
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms =>
+        import ms._
+  
+        if !localSubmission
+        then
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
+  
+          new PBSEnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+            reconnect = reconnect,
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+            services = BatchEnvironment.Services(ms)
+          )
+        else new PBSLocalEnvironment(
           parameters = parameters,
           name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
           services = BatchEnvironment.Services(ms)
         )
-      else new PBSLocalEnvironment(
-        parameters = parameters,
-        name = Some(name.getOrElse(varName.value)),
-        services = BatchEnvironment.Services(ms)
-      )
 
 
   case class Parameters(
