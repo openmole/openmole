@@ -31,5 +31,5 @@ package object pattern:
       val firstEvaluation = EmptyTask() set ((inputs, outputs) ++= inputVals)
       val lastEvaluation = EmptyTask() set ((inputs, outputs) ++= outputVals)
       val puzzle = Strain(firstEvaluation) -- Capsule(evaluation) -- lastEvaluation
-      DSLContainer(puzzle, (), delegate = DSL.delegate(evaluation))
+      DSLContainer(puzzle, (), delegate = Vector(evaluation))
 

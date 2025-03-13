@@ -13,12 +13,39 @@ import org.scalatest.*
 class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
-  "A single task" should "be a valid mole" in {
+  "A single task" should "be a valid mole" in:
     val t = EmptyTask()
     t.run()
-  }
 
-//  "HList containing dsl container" should "be usable like a dsl container" in {
+  "A single task" should "be a delegatable" in :
+    val t = EmptyTask()
+    val env = LocalEnvironment()
+
+    val dsl: DSL = t on env by 10
+
+    DSL.delegate(dsl) should equal(Vector(t))
+
+    val puzzle = DSL.toPuzzle(dsl)
+    puzzle.environments.values should contain(env)
+    puzzle.environments.keys.map(_._task) should contain(t)
+    puzzle.grouping.keys.map(_._task) should contain(t)
+    puzzle.grouping.values should contain(10)
+
+
+  "A DSL" should "delegate task" in :
+    val t1 = EmptyTask()
+    val t2 = EmptyTask()
+    val env = LocalEnvironment()
+
+    val dsl: DSL = t1 -- (t2 on env by 10)
+
+    val puzzle = DSL.toPuzzle(dsl)
+    puzzle.environments.values should contain(env)
+    puzzle.environments.keys.map(_._task) should contain(t2)
+    puzzle.grouping.keys.map(_._task) should contain(t2)
+    puzzle.grouping.values should contain(10)
+
+  //  "HList containing dsl container" should "be usable like a dsl container" in {
 //
 //    val task = EmptyTask()
 //    val test = (DSLContainer(task, ()), 9)

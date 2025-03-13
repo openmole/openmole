@@ -231,7 +231,7 @@ object DSL {
       case &(a, b)            => tasks(a) ++ tasks(b)
       case Slot(d)            => tasks(d)
       case Capsule(d, _)      => tasks(d)
-      case c: DSLContainer[?] => DSLContainer.taskNodes(c) ++ tasks(c.dsl)
+      case c: DSLContainer[?] => tasks(c.dsl)
       case TaskNodeDSL(n)     => Vector(n)
 
   def delegate(t: DSL): Vector[Task] =
@@ -252,7 +252,10 @@ object DSL {
 
     def toDelegate(t: DSL): Seq[Task] =
       t match
-        case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
+        case c: DSLContainer[?] if c.delegate.nonEmpty =>
+          c.delegate.flatMap:
+            case t: Task => Seq(t)
+            case d: DSL => delegate(d)
         case c => innerDSL(c).flatMap(toDelegate)
 
     val del = toDelegate(t)
@@ -326,8 +329,8 @@ object DSL {
 
   def toPuzzle(t: DSL): Puzzle =
     val taskNodeList = DSL.tasks(t)
-    val taskEnvironment = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.environment).headOption).toMap
-    val taskGrouping = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.grouping).headOption).toMap
+    //val taskEnvironment = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.environment).headOption).toMap
+    //val taskGrouping = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.grouping).headOption).toMap
 
     def taskToSlot(dsl: DSL) =
       def buildCapsule(task: Task, ns: Vector[TaskNode]) =
@@ -352,8 +355,8 @@ object DSL {
 
       Puzzle.add(
         puzzle,
-        environments = taskEnvironment(n.task).map(slot.capsule -> _).toMap,
-        grouping = taskGrouping(n.task).map(slot.capsule -> _).toMap,
+        environments = Map() ++ n.environment.map(slot.capsule -> _),
+        grouping = Map() ++ n.grouping.map(slot.capsule -> _),
         hooks = n.hooks.map(slot.capsule -> _),
         sources = n.sources.map(slot.capsule -> _)
       )
@@ -404,14 +407,21 @@ object DSL {
 
         val environments =
           for
-            c <- container.delegate.map(d => slots(d).capsule)
+            c <- DSL.delegate(container).map(d => slots(d).capsule)
             e <- container.environment
           yield c -> e
+
+        val grouping =
+          for
+            c <- DSL.delegate(container).map(d => slots(d).capsule)
+            g <- container.grouping
+          yield c -> g
 
         Puzzle.add(
           puzzle,
           hooks = hooks,
           environments = environments.toMap,
+          grouping = grouping.toMap,
           validate = container.validate
         )
 
@@ -495,10 +505,6 @@ case class oo(a: TransitionOrigin, b: Vector[TransitionDestination], filterValue
 case class &(a: DSL, b: DSL) extends DSL
 
 object DSLContainer:
-  def taskNodes(container: DSLContainer[?]) =
-    val output = container.output.map { o => TaskNode(o, hooks = container.hooks) }
-    val delegate = container.delegate.map { t => TaskNode(t, environment = container.environment, grouping = container.grouping) }
-    delegate ++ output
 
   object ExplorationMethod:
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
@@ -521,8 +527,8 @@ object DSLContainer:
 case class DSLContainer[+T](
   dsl:         DSL,
   output:      Option[Task]                = None,
-  delegate:    Vector[Task]                = Vector.empty,
-  environment: Option[EnvironmentBuilder] = None,
+  delegate:    Vector[Task | DSL]          = Vector.empty,
+  environment: Option[EnvironmentBuilder]  = None,
   grouping:    Option[Grouping]            = None,
   hooks:       Vector[Hook]                = Vector.empty,
   validate:    Validate                    = Validate.success,
@@ -558,7 +564,7 @@ trait CompositionPackage {
     dsl:         DSL,
     method:      T,
     output:      Option[Task]                = None,
-    delegate:    Vector[Task]                = Vector.empty,
+    delegate:    Vector[Task | DSL]          = Vector.empty,
     environment: Option[EnvironmentBuilder] = None,
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,

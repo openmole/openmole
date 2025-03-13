@@ -72,7 +72,7 @@ package object abc {
           condition = !(stop: Condition)
         )
 
-      DSLContainer(loop, output = Some(postStepTask), delegate = mapReduce.delegate, method = ABCParameters(state, step, priorValue))
+      DSLContainer(loop, output = Some(postStepTask), method = ABCParameters(state, step, priorValue))
     }
 
   }
