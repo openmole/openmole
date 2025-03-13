@@ -27,6 +27,7 @@ import org.openmole.plugin.environment.ssh._
 import org.openmole.tool.crypto.Cypher
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.environment.dispatch.*
 import squants._
 import squants.information._
 
@@ -49,6 +50,7 @@ object OAREnvironment {
     bestEffort:           Boolean                       = true,
     timeout:              OptionalArgument[Time]        = None,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
+    submittedJobs:        OptionalArgument[Int]         = None,
     localSubmission:      Boolean                       = false,
     modules:              OptionalArgument[Seq[String]] = None,
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
@@ -67,32 +69,33 @@ object OAREnvironment {
       modules = modules
     )
 
-    EnvironmentBuilder: ms =>
-      import ms._
-
-      if !localSubmission
-      then
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
-
-        new OAREnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
-          reconnect = reconnect,
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
-        )
-      else
-        new OARLocalEnvironment(
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
-        )
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms =>
+        import ms._
+  
+        if !localSubmission
+        then
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
+  
+          new OAREnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+            reconnect = reconnect,
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+            services = BatchEnvironment.Services(ms)
+          )
+        else
+          new OARLocalEnvironment(
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            services = BatchEnvironment.Services(ms)
+          )
 
 
   case class Parameters(

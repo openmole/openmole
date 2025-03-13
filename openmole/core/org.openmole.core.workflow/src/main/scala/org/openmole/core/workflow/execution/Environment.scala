@@ -56,6 +56,11 @@ object Environment:
       case e: SubmissionEnvironment => e.clearErrors
       case _                        => Seq()
 
+  def ready(environment: Environment): Long =
+    environment match
+      case env: SubmissionEnvironment => env.ready
+      case _: LocalEnvironment => 0
+
   def submit(environment: Environment, job: JobGroup): Long =
     val moleExecution = JobGroup.moleExecution(job)
 
@@ -86,6 +91,8 @@ trait SubmissionEnvironment extends Environment:
   def submit(job: JobGroup): Long
   def jobs: Iterable[ExecutionJob]
   def runningJobs: Seq[ExecutionJob]
+
+  def ready: Long
 
   def clean: Boolean
   def errors: Seq[ExceptionEvent]

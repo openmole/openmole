@@ -234,10 +234,31 @@ object DSL {
       case c: DSLContainer[?] => DSLContainer.taskNodes(c) ++ tasks(c.dsl)
       case TaskNodeDSL(n)     => Vector(n)
 
-  def delegate(t: DSL) =
-    t match
-      case c: DSLContainer[?] => c.delegate
-      case t                  => tasks(t).map(_.task)
+  def delegate(t: DSL): Vector[Task] =
+    def innerDSL(t: DSL): Seq[DSL] =
+      t match
+        case c: DSLContainer[?] => Seq(c.dsl)
+        case --(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case -<(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case >-(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case >|(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case -<-(o, d, _, _, _) => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case oo(o, d, _)        => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
+        case &(a, b)            => innerDSL(a) ++ innerDSL(b)
+        case Slot(d)            => innerDSL(d)
+        case Capsule(d, _)      => innerDSL(d)
+        case TaskNodeDSL(n)     => Seq()
+
+
+    def toDelegate(t: DSL): Seq[Task] =
+      t match
+        case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
+        case c => innerDSL(c).flatMap(toDelegate)
+
+    val del = toDelegate(t)
+    if del.nonEmpty
+    then del.toVector
+    else tasks(t).map(_.task)
 
   object DSLSelector:
     //def apply[T](implicit selector: DSLSelector[T]): DSLSelector[T] = selector

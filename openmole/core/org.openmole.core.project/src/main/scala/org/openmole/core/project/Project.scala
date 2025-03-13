@@ -99,7 +99,7 @@ object Project:
           sourceFile.importedBy match
             case Some(value) =>
               val importedDefinitionClass = classOf[org.openmole.core.setter.DefinitionScope.ImportedUserDefinitionScope].getCanonicalName
-              s"""$importedDefinitionClass("${value.`import`.fromImport}", ${fileString(value.file)})"""
+              s"""$importedDefinitionClass("${value.`import`.fromImport}", "${value.file.getAbsolutePath}")"""
             case None =>
               s"$definitionScopeClass.default"
 

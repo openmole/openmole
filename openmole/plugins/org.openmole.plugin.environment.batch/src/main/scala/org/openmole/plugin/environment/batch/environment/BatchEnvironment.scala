@@ -384,6 +384,7 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
   def errors: Seq[ExceptionEvent] = state._errors.elements
   def clearErrors: Seq[ExceptionEvent] = state._errors.clear()
 
+  def ready: Long = ExecutionJobRegistry.executionJobs(registry).count { _.state == ExecutionState.READY }
   def submitted: Long = ExecutionJobRegistry.executionJobs(registry).count { _.state == ExecutionState.SUBMITTED }
   def running: Long = ExecutionJobRegistry.executionJobs(registry).count { _.state == ExecutionState.RUNNING }
   def runningJobs = ExecutionJobRegistry.executionJobs(registry).filter(_.state == ExecutionState.RUNNING)

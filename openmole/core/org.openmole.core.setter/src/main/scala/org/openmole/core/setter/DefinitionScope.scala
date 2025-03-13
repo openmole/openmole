@@ -36,7 +36,9 @@ object DefinitionScope:
     given default: UserDefinitionScope = OutOfUserDefinitionScope
 
   trait UserDefinitionScope
-  case class ImportedUserDefinitionScope(`import`: String, importedFrom: File) extends UserDefinitionScope
+  case class ImportedUserDefinitionScope(`import`: String, importedFromPath: String) extends UserDefinitionScope:
+    def importedFrom: File = File(importedFromPath)
+
   case class UserScriptDefinitionScope(line: Int) extends UserDefinitionScope
   case object OutOfUserDefinitionScope extends UserDefinitionScope
 

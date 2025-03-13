@@ -17,7 +17,7 @@ object common {
   def sshjVersion = "0.38.0"
   def containerVersion = "1.33"
   def bouncyCastleVersion = "1.78.1"
-  def scalaTagsVersion = "0.11.1"
+  def scalaTagsVersion = "0.13.1"
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
@@ -62,10 +62,10 @@ object common {
 
   def http4sVersion = "0.23.12"
 
-  def endpoint4SHttp4SVersion = "10.3.1"
-  def endpoints4SVersion = "1.11.1"
-  def endpoint4SCirceSchemaVersion = "2.5.1"
-  def endpoint4SFetchClientCirceVersion = "3.2.1"
+  def endpoint4SHttp4SVersion = "11.0.1"
+  def endpoints4SVersion = "1.12.1"
+  def endpoint4SCirceSchemaVersion = "2.6.1"
+  def endpoint4SFetchClientCirceVersion = "4.0.1"
 
   def xzVersion = "1.10"
 

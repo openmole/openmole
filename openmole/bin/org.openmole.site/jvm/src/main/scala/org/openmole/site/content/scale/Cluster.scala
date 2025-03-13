@@ -108,74 +108,6 @@ DirectSampling(
 """)}
 
 
-
-${h2{"PBS"}}
-
-${aa("PBS", href := shared.link.batchSystem)} is a venerable batch system for clusters.
-It is also referred to as Torque.
-You may use a PBS computing environment as follows:
-    
-${hl.openmole("""
-val env =
-  PBSEnvironment(
-    "login",
-    "machine.domain"
-  )""")}
-
-$br
-
-$provideOptions:
-${ul(
- li{html"$port,"},
- li{html"$sharedDirectory,"},
- li{html"$storageSharedLocally,"},
- li{html"$workDirectory,"},
- li{html"${queue()},"},
- li{html"${wallTime()},"},
- li{html"$memory,"},
- li{html"$openMOLEMemory,"},
- li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
- li{html"$threads,"},
- li{html"${apiEntryTitle{"coreByNodes"}} an alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified,"},
- li{html"${apiEntryTitle{"flavour"}} specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}} (defaults to ${hl.openmoleNoTest{"flavour = Torque"}}),"},
- li{html"$modules,"},
- li{html"$reconnect,"},
- li{html"$localSubmission."}
-)}
-
-
-
-${h2{"SGE"}}
-
-To delegate some computation load to a ${aa("SGE", href := shared.link.gridEngine)} based cluster you can use the ${code{"SGEEnvironment"}} as follows:
-
-${hl.openmole("""
-val env =
-  SGEEnvironment(
-    "login",
-    "machine.domain"
-  )""")}
-
-$br
-
-$provideOptions:
-${ul(
-  li{html"$port,"},
-  li{html"$sharedDirectory,"},
-  li{html"$storageSharedLocally"},
-  li{html"$workDirectory,"},
-  li{html"${queue()},"},
-  li{html"${wallTime()},"},
-  li{html"$memory,"},
-  li{html"$openMOLEMemory,"},
-  li{html"$threads,"},
-  li{html"$modules,"},
-  li{html"$reconnect,"},
-  li{html"$localSubmission."}
-)}
-
-
-
 ${h2{"Slurm"}}
 
 To delegate the workload to a ${aa("Slurm", href := shared.link.slurm)} based cluster you can use the ${code{"SLURMEnvironment"}} as follows:
@@ -211,6 +143,75 @@ ${ul(
   li{html"${apiEntryTitle{"qos"}} Quality of Service (QOS) as defined in the Slurm database"},
   li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance ${hl.openmoleNoTest{"gres = List( Gres(\"resource\", 1) )"}}"},
   li{html"${apiEntryTitle{"constraints"}} a list of SLURM defined constraints which selected nodes must match,"},
+  li{html"$submittedJobs,"},
+  li{html"$modules,"},
+  li{html"$reconnect,"},
+  li{html"$localSubmission."}
+)}
+
+
+${h2{"PBS"}}
+
+${aa("PBS", href := shared.link.batchSystem)} is a venerable batch system for clusters.
+It is also referred to as Torque.
+You may use a PBS computing environment as follows:
+    
+${hl.openmole("""
+val env =
+  PBSEnvironment(
+    "login",
+    "machine.domain"
+  )""")}
+
+$br
+
+$provideOptions:
+${ul(
+ li{html"$port,"},
+ li{html"$sharedDirectory,"},
+ li{html"$storageSharedLocally,"},
+ li{html"$workDirectory,"},
+ li{html"${queue()},"},
+ li{html"${wallTime()},"},
+ li{html"$memory,"},
+ li{html"$openMOLEMemory,"},
+ li{html"${apiEntryTitle{"nodes"}} Number of nodes requested,"},
+ li{html"$threads,"},
+ li{html"${apiEntryTitle{"coreByNodes"}} an alternative to specifying the number of threads. ${hl.openmoleNoTest{"coreByNodes"}} takes the value of the ${hl.openmoleNoTest{"threads"}} when not specified, or 1 if none of them is specified,"},
+ li{html"${apiEntryTitle{"flavour"}} specify the declination of PBS installed on your cluster. You can choose between ${hl.openmoleNoTest{"Torque"}} (for the open source PBS/Torque) or ${hl.openmoleNoTest{"PBSPro"}} (defaults to ${hl.openmoleNoTest{"flavour = Torque"}}),"},
+ li{html"$submittedJobs,"},
+ li{html"$modules,"},
+ li{html"$reconnect,"},
+ li{html"$localSubmission."}
+)}
+
+
+
+${h2{"SGE"}}
+
+To delegate some computation load to a ${aa("SGE", href := shared.link.gridEngine)} based cluster you can use the ${code{"SGEEnvironment"}} as follows:
+
+${hl.openmole("""
+val env =
+  SGEEnvironment(
+    "login",
+    "machine.domain"
+  )""")}
+
+$br
+
+$provideOptions:
+${ul(
+  li{html"$port,"},
+  li{html"$sharedDirectory,"},
+  li{html"$storageSharedLocally"},
+  li{html"$workDirectory,"},
+  li{html"${queue()},"},
+  li{html"${wallTime()},"},
+  li{html"$memory,"},
+  li{html"$openMOLEMemory,"},
+  li{html"$threads,"},
+  li{html"$submittedJobs,"},
   li{html"$modules,"},
   li{html"$reconnect,"},
   li{html"$localSubmission."}
@@ -239,6 +240,7 @@ ${ul(
   li{html"$memory,"},
   li{html"$openMOLEMemory,"},
   li{html"$threads,"},
+  li{html"$submittedJobs,"},
   li{html"$modules,"},
   li{html"$reconnect,"},
   li{html"$localSubmission."}
@@ -271,6 +273,7 @@ ${ul(
   li{html"${apiEntryTitle{"core"}} number of cores allocated for each job,"},
   li{html"${apiEntryTitle{"cpu"}} number of CPUs allocated for each job,"},
   li{html"${apiEntryTitle{"bestEffort"}} a boolean for setting the best effort mode (true by default),"},
+  li{html"$submittedJobs,"},
   li{html"$modules,"},
   li{html"$reconnect,"},
   li{html"$localSubmission."}

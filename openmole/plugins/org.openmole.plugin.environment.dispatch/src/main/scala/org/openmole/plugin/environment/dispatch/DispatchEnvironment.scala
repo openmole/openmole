@@ -14,74 +14,65 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
 import scala.ref.WeakReference
 
-object DispatchEnvironment {
-  val updateInterval = PreferenceLocation("DispatchEnvironment", "UpdateInterval", Some(10 seconds))
+object DispatchEnvironment:
+  def queue(jobs: Option[Int])(environment: EnvironmentBuilder)(using varName: sourcecode.Name) =
+    jobs match
+      case Some(j) => DispatchEnvironment(Seq(DestinationProvider(environment, j)), name = s"${varName.value}-queue")
+      case None => environment
 
-  object DestinationProvider {
-    implicit def toDestinationProvider(on: On[Int, EnvironmentBuilder]): DestinationProvider = DestinationProvider(on.on, on.value)
-  }
+  object DestinationProvider:
+    given Conversion[On[Int, EnvironmentBuilder], DestinationProvider] = on => DestinationProvider(on.on, on.value)
 
   case class DestinationProvider(environment: EnvironmentBuilder, slot: Int)
 
   case class Destination(environment: Environment, slot: Int)
 
-  object State {
+  object State:
 
     case class Queued(group: JobGroup, id: Long)
 
     def enqueue(state: State, job: JobGroup, id: Long) = state.synchronized(state.jobQueue.enqueue(Queued(job, id)))
 
-    def dequeue(state: State, n: Int) = state.synchronized {
+    def dequeue(state: State, n: Int) = state.synchronized:
       Vector.fill(n)(state.jobQueue.dequeueFirst(_ => true)).flatten
-    }
 
-    def queueSize(state: State) = state.synchronized {
+    def queueSize(state: State) = state.synchronized:
       state.jobQueue.size
-    }
 
-    def register(state: State, environment: Environment, id: Long, dispatchedId: Long) = state.synchronized {
-      val idMap = state.submitted.getOrElseUpdate(environment, mutable.Map())
+    def register(state: State, environment: Environment, id: Long, dispatchedId: Long) = state.synchronized:
+      val idMap = state.submitted.getOrElseUpdate(environment, mutable.LongMap())
       idMap(dispatchedId) = id
-    }
 
-    def remove(state: State, environment: Environment, dispatchedId: Long) = state.synchronized {
+    def remove(state: State, environment: Environment, dispatchedId: Long) = state.synchronized:
       val idMap = state.submitted.getOrElse(environment, mutable.Map())
       idMap.remove(dispatchedId)
-    }
-  }
 
-  class State {
+  class State:
     val jobQueue = mutable.Queue[State.Queued]()
-    val submitted = mutable.Map[Environment, mutable.Map[Long, Long]]()
-  }
+    val submitted = mutable.Map[Environment, mutable.LongMap[Long]]()
 
   case class DispatchJob(moleJobIds: Iterable[JobId]) extends ExecutionJob
 
-  def fillFreeSlots(dispatchEnvironment: DispatchEnvironment) = dispatchEnvironment.state.synchronized {
+  def fillFreeSlots(dispatchEnvironment: DispatchEnvironment) = dispatchEnvironment.state.synchronized:
     def availableSlots(state: State, environments: Seq[DispatchEnvironment.Destination]) =
-      environments.map { env =>
+      environments.map: env =>
         val occupied = state.submitted.getOrElse(env.environment, mutable.Map()).size
         env.environment -> (env.slot - occupied)
-      }
 
-    for {
+    for
       (env, slots) ← availableSlots(dispatchEnvironment.state, dispatchEnvironment.destination)
       _ ← 0 until slots
-    } submitToEnvironment(dispatchEnvironment, env)
-  }
+    do submitToEnvironment(dispatchEnvironment, env)
 
-  def submitToEnvironment(dispatchEnvironment: DispatchEnvironment, environment: Environment) = dispatchEnvironment.state.synchronized {
-    State.dequeue(dispatchEnvironment.state, 1) foreach { job =>
+  def submitToEnvironment(dispatchEnvironment: DispatchEnvironment, environment: Environment) = dispatchEnvironment.state.synchronized:
+    State.dequeue(dispatchEnvironment.state, 1) foreach: job =>
       val dispatchedId = Environment.submit(environment, job.group)
       State.register(dispatchEnvironment.state, environment, job.id, dispatchedId)
-    }
-  }
 
   def jobFinished(dispatchEnvironment: DispatchEnvironment, environment: Environment, id: Long, executionJob: ExecutionJob, state: ExecutionState) =
-    State.remove(dispatchEnvironment.state, environment, id) foreach { dispatchId =>
-      dispatchEnvironment.services.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), ExecutionState.SUBMITTED, state))
+    State.remove(dispatchEnvironment.state, environment, id).foreach: dispatchId =>
+      dispatchEnvironment.eventDispatcher.trigger(dispatchEnvironment, Environment.JobStateChanged(dispatchId, DispatchJob(executionJob.moleJobIds), ExecutionState.SUBMITTED, state))
       submitToEnvironment(dispatchEnvironment, environment)
-    }
 
   def stateChangedListener(dispatchEnvironment: WeakReference[DispatchEnvironment]): PartialFunction[(Environment, Event[Environment]), Unit] = 
     case (env: Environment, e: Environment.JobStateChanged) =>
@@ -89,14 +80,13 @@ object DispatchEnvironment {
         s match 
           case ExecutionState.READY | ExecutionState.SUBMITTED | ExecutionState.RUNNING => true
           case _ => false
-        
 
       if !isActive(e.newState)
       then dispatchEnvironment.get.foreach(dispatch => jobFinished(dispatch, env, e.id, e.job, e.newState))
 
   def apply(
     slot: Seq[DestinationProvider],
-    name: OptionalArgument[String] = None)(implicit replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+    name: OptionalArgument[String] = None)(using varName: sourcecode.Name) =
 
     EnvironmentBuilder.multiple: (ms, c1) =>
       import ms._
@@ -107,23 +97,20 @@ object DispatchEnvironment {
         new DispatchEnvironment(
           destination = slot.map(e => Destination(c2(e.environment), e.slot)),
           name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
+          eventDispatcher = ms.eventDispatcher
         )
 
-      for
-        env <- slot.map(_.environment)
-      do
-        c2(env).listen(stateChangedListener(WeakReference(dispatchEnvironment)))
+      for env <- slot.map(_.environment)
+      do c2(env).listen(stateChangedListener(WeakReference(dispatchEnvironment)))
 
       (dispatchEnvironment, c2)
 
 
-}
-
 class DispatchEnvironment(
-  val destination: Seq[DispatchEnvironment.Destination],
-  val name:        Option[String],
-  val services:    BatchEnvironment.Services) extends SubmissionEnvironment { env =>
+  val destination:        Seq[DispatchEnvironment.Destination],
+  val name:               Option[String],
+  val eventDispatcher:    EventDispatcher) extends SubmissionEnvironment:
+  env =>
 
   val state = new DispatchEnvironment.State
   private val jobId = new AtomicLong(0L)
@@ -131,21 +118,28 @@ class DispatchEnvironment(
   override def start(): Unit = {}
   override def stop(): Unit = {}
 
-  override def submit(job: JobGroup): Long = {
+  override def submit(job: JobGroup): Long =
     val id = jobId.getAndIncrement
     DispatchEnvironment.State.enqueue(state, job, id)
     DispatchEnvironment.fillFreeSlots(env)
     id
-  }
 
-  override def submitted: Long = DispatchEnvironment.State.queueSize(state)
 
   override def jobs: Iterable[ExecutionJob] = Seq()
   override def runningJobs: Seq[ExecutionJob] = Seq()
   override def clean: Boolean = true
   override def errors: Seq[ExceptionEvent] = Seq()
   override def clearErrors: Seq[ExceptionEvent] = Seq()
+
+  override def ready: Long = 0
+
+  override def submitted: Long =
+    DispatchEnvironment.State.queueSize(state) +
+      destination.map(_.environment.submitted).sum +
+      destination.map(d => Environment.ready(d.environment)).sum
+
+
   override def running: Long = destination.map(_.environment.running).sum
   override def done: Long = destination.map(_.environment.done).sum
   override def failed: Long = destination.map(_.environment.failed).sum
-}
+

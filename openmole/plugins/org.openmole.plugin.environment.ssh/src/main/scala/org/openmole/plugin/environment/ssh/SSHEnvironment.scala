@@ -33,6 +33,7 @@ import org.openmole.tool.lock._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.environment.dispatch.*
 import squants.information._
 import squants.time.TimeConversions._
 import squants.time.Time
@@ -55,31 +56,33 @@ object SSHEnvironment extends JavaLogger:
     threads:              OptionalArgument[Int]         = None,
     killAfter:            OptionalArgument[Time]        = None,
     storageSharedLocally: Boolean                       = false,
+    submittedJobs:        OptionalArgument[Int]         = None,
     reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
     name:                 OptionalArgument[String]      = None,
     modules:              OptionalArgument[Seq[String]] = None,
     debug:                Boolean                       = false
   )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
-    EnvironmentBuilder: ms =>
-      new SSHEnvironment(
-        user = user,
-        host = host,
-        slots = slots,
-        port = port,
-        sharedDirectory = sharedDirectory,
-        workDirectory = workDirectory,
-        openMOLEMemory = openMOLEMemory,
-        threads = threads,
-        killAfter = killAfter,
-        storageSharedLocally = storageSharedLocally,
-        reconnect = reconnect,
-        name = Some(name.getOrElse(varName.value)),
-        authentication = SSHAuthentication.find(user, host, port),
-        modules = modules,
-        debug = debug,
-        services = BatchEnvironment.Services(ms)
-      )
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms =>
+        new SSHEnvironment(
+          user = user,
+          host = host,
+          slots = slots,
+          port = port,
+          sharedDirectory = sharedDirectory,
+          workDirectory = workDirectory,
+          openMOLEMemory = openMOLEMemory,
+          threads = threads,
+          killAfter = killAfter,
+          storageSharedLocally = storageSharedLocally,
+          reconnect = reconnect,
+          name = Some(name.getOrElse(varName.value)),
+          authentication = SSHAuthentication.find(user, host, port),
+          modules = modules,
+          debug = debug,
+          services = BatchEnvironment.Services(ms)
+        )
 
 
 

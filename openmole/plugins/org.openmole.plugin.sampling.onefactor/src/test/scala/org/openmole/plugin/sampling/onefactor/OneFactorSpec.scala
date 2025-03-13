@@ -25,7 +25,7 @@ import org.openmole.plugin.domain.collection.{*, given}
 class OneFactorSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   import org.openmole.core.workflow.test.Stubs._
 
-  "x keyword" should "create a complete sampling" in {
+  "keyword" should "create a one factor sampling" in:
     val x1 = Val[Double]
     val x2 = Val[Double]
     val x3 = Val[Double]
@@ -34,11 +34,10 @@ class OneFactorSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       OneFactorSampling(
         (x1 in (0.0 until 1.0 by 0.1)) nominal 0.5,
         (x2 in (0.0 until 1.0 by 0.1)) nominal 0.5,
-        (x3 in (0.0 until 1.0 by 0.1)) nominal 0.5
+        x3 in ((0.0 until 1.0 by 0.1) or 0.5)
       )
 
     (s: Sampling).outputs.toSet should equal(Set(x1, x2, x3))
-
     (s: Sampling).sampling.from(Context.empty).size should equal(30)
-  }
+
 }

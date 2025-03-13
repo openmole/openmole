@@ -7,12 +7,15 @@ import org.openmole.core.workflow.domain.DiscreteFromContextDomain
 import org.openmole.plugin.domain.collection.{*, given}
 import org.openmole.plugin.sampling.combine.{*, given}
 
-case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: DiscreteFromContextDomain[D, T]) {
+object NominalFactor:
+  given orConversion[D, T](using discrete: DiscreteFromContextDomain[D, T]): Conversion[Factor[D Or T, T], NominalFactor[D, T]] = f =>
+    NominalFactor[D, T](Factor(f.value, f.domain.value), f.domain.or, discrete)
+
+case class NominalFactor[D, T](factor: Factor[D, T], nominalValue: T, values: DiscreteFromContextDomain[D, T]):
   def nominalSampling: Sampling = factor.value in Seq(nominalValue)
   def prototype = factor.value
-}
 
-object OneFactorSampling {
+object OneFactorSampling:
   def apply(factors: NominalFactor[_, _]*) = new OneFactorSampling(factors *)
 
   implicit def isSampling: IsSampling[OneFactorSampling] = s => {
@@ -22,7 +25,8 @@ object OneFactorSampling {
     def apply: FromContext[Iterator[Iterable[Variable[?]]]] = FromContext {
       p =>
         import p._
-        if (s.factors.isEmpty) Iterator.empty
+        if s.factors.isEmpty
+        then Iterator.empty
         else s.factors.iterator.flatMap { n => oneFactorSampling(n, s.factors).from(context) }
     }
 
@@ -47,6 +51,6 @@ object OneFactorSampling {
     CompleteSampling(Seq(exploreSampling) ++ nominalSampling *)().from(context)
   }
 
-}
+
 
 case class OneFactorSampling(factors: NominalFactor[_, _]*)

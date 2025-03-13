@@ -28,6 +28,7 @@ import squants.information._
 import org.openmole.plugin.environment.batch.storage._
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.environment.dispatch.*
 import _root_.gridscale.cluster.*
 
 object SLURMEnvironment:
@@ -59,6 +60,7 @@ object SLURMEnvironment:
     localSubmission:      Boolean                       = false,
     forceCopyOnNode:      Boolean                       = false,
     refresh:              OptionalArgument[Time]        = None,
+    submittedJobs:        OptionalArgument[Int]         = None,
     modules:              OptionalArgument[Seq[String]] = None,
     debug:                Boolean                       = false
   )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
@@ -85,33 +87,34 @@ object SLURMEnvironment:
       modules = modules,
       debug = debug)
 
-    EnvironmentBuilder: ms =>
-      import ms._
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms =>
+        import ms._
 
-      if !localSubmission
-      then
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
+        if !localSubmission
+        then
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
 
-        new SLURMEnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
-          reconnect = reconnect,
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          proxy = proxy.map(SSHProxy.authenticated),
-          services = BatchEnvironment.Services(ms)
-        )
-      else
-        new SLURMLocalEnvironment(
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
-        )
+          new SLURMEnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+            reconnect = reconnect,
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+            proxy = proxy.map(SSHProxy.authenticated),
+            services = BatchEnvironment.Services(ms)
+          )
+        else
+          new SLURMLocalEnvironment(
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            services = BatchEnvironment.Services(ms)
+          )
 
 
   case class Parameters(

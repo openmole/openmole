@@ -29,6 +29,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import squants.Time
 import squants.information._
+import org.openmole.plugin.environment.dispatch.*
 import org.openmole.core.replication.ReplicaCatalog
 
 object CondorEnvironment:
@@ -53,6 +54,7 @@ object CondorEnvironment:
     threads:              OptionalArgument[Int]         = None,
     storageSharedLocally: Boolean                       = false,
     localSubmission:      Boolean                       = false,
+    submittedJobs:        OptionalArgument[Int]         = None,
     modules:              OptionalArgument[Seq[String]] = None,
     name:                 OptionalArgument[String]      = None
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
@@ -69,32 +71,33 @@ object CondorEnvironment:
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
-    EnvironmentBuilder: ms  =>
-      import ms.*
-
-      if !localSubmission
-      then
-        val userValue = user.mustBeDefined("user")
-        val hostValue = host.mustBeDefined("host")
-        val portValue = port.mustBeDefined("port")
-
-        new CondorEnvironment(
-          user = userValue,
-          host = hostValue,
-          port = portValue,
-          timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
-          reconnect = reconnect,
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          authentication = SSHAuthentication.find(userValue, hostValue, portValue),
-          services = BatchEnvironment.Services(ms)
-        )
-      else
-        new CondorLocalEnvironment(
-          parameters = parameters,
-          name = Some(name.getOrElse(varName.value)),
-          services = BatchEnvironment.Services(ms)
-        )
+    DispatchEnvironment.queue(submittedJobs):
+      EnvironmentBuilder: ms  =>
+        import ms.*
+  
+        if !localSubmission
+        then
+          val userValue = user.mustBeDefined("user")
+          val hostValue = host.mustBeDefined("host")
+          val portValue = port.mustBeDefined("port")
+  
+          new CondorEnvironment(
+            user = userValue,
+            host = hostValue,
+            port = portValue,
+            timeout = timeout.getOrElse(preference(SSHEnvironment.timeOut)),
+            reconnect = reconnect,
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            authentication = SSHAuthentication.find(userValue, hostValue, portValue),
+            services = BatchEnvironment.Services(ms)
+          )
+        else
+          new CondorLocalEnvironment(
+            parameters = parameters,
+            name = Some(name.getOrElse(varName.value)),
+            services = BatchEnvironment.Services(ms)
+          )
 
 
   case class Parameters(

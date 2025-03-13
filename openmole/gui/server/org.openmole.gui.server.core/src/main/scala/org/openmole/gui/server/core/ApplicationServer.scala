@@ -28,8 +28,6 @@ import org.openmole.gui.shared
 import org.openmole.gui.server.core
 import org.openmole.gui.server.core.{GUIServer, GUIServlet}
 import org.openmole.tool.crypto.Cypher
-import scalatags.Text.all as tags
-import scalatags.Text.all.*
 
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
