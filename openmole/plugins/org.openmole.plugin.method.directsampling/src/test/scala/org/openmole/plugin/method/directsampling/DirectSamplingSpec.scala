@@ -376,7 +376,10 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
   "Nested method" should "delegate the correct task" in:
     val o = Val[Double]
     val seed = Val[Int]
-    val t = EmptyTask() set(outputs += o)
+    val t = 
+      TestTask: ctx =>
+        ctx + (o -> 0.0)
+      .set(outputs += o)
 
     val env = LocalEnvironment(1)
 
@@ -392,5 +395,5 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
         input = Seq()
       ) on env
 
-    DSL.delegate(dsl) should equal(Vector(t))
     DSL.toPuzzle(dsl).environments.values should contain(env)
+    dsl.run().environments.head.done should equal(100)

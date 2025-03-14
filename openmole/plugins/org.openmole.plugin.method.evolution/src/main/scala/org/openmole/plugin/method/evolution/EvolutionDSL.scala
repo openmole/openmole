@@ -225,7 +225,6 @@ object EvolutionWorkflow:
     DSLContainer(
       puzzle,
       output = Some(masterTask),
-      delegate = Vector(wrapped),
       method = evolution,
       validate = evolution.validate)
 

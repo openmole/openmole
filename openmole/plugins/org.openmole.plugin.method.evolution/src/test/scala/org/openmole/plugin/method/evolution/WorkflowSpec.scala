@@ -122,7 +122,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed should be >= 100
   }
 
-  "Evolution" should "support single objective" in {
+  it should "support single objective" in {
     val a = Val[Double]
 
     val nsga = NSGA2Evolution(
@@ -133,6 +133,34 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       parallelism = 10
     )
   }
+
+  it should "accept hook" in:
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p =>
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = testTask,
+        objective = Seq(a),
+        genome = Seq(a in(0.0, 1.0)),
+        termination = 100
+      ) hook("/tmp/test.txt", frequency = 2)
+
+    Validation(nsga) match
+      case Nil =>
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+
+    Validation(nsga by Island(10)) match
+      case Nil =>
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
 
   "Island evolution" should "run" in {
@@ -159,7 +187,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed should be >= 100
   }
 
-  "Serialized Island Evolution" should "run" in {
+  it should "serialize and run" in {
     val a = Val[Double]
 
     val testTask =
@@ -190,35 +218,17 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     serializeDeserialize(nsga2) run
   }
 
-  "Hook" should "be valid" in {
-    @volatile var executed = 0
+  it should "have no validation error" in:
+    import EvolutionWorkflow._
 
-    val a = Val[Double]
-
-    val testTask =
-      FromContextTask("test") { p =>
-        import p._
-        executed += 1
-        context
-      } set ((inputs, outputs) += a)
-
-    val nsga =
-      NSGA2Evolution(
-        evaluation = testTask,
-        objective = Seq(a),
-        genome = Seq(a in (0.0, 1.0)),
-        termination = 100
-      ) hook ("/tmp/test.txt", frequency = 2)
-
-    Validation(nsga) match 
+    Validation(nsga2 by Island(10)).toList match
       case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
-    Validation(nsga by Island(10)) match 
+    Validation(conflict by Island(10)).toList match
       case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    
-  }
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+
 
   "Steady state workflow" should "have no validation error" in {
     val mole: Mole = nsga2
@@ -229,20 +239,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     }
 
     Validation(conflict).toList match {
-      case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
-
-  "Island workflow" should "have no validation error" in {
-    import EvolutionWorkflow._
-
-    Validation(nsga2 by Island(10)).toList match {
-      case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-
-    Validation(conflict by Island(10)).toList match {
       case Nil =>
       case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
     }
@@ -263,7 +259,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
-  "NSGAEvolution" should "be possible to generate" in {
+  it should "be possible to generate" in {
     val a = Val[Double]
     val b = Val[Double]
 
