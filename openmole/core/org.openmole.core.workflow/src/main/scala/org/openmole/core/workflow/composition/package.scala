@@ -219,7 +219,7 @@ sealed trait TransitionDestination
 case class TaskDestination(node: TaskNode) extends TransitionDestination
 case class TransitionDSLDestination(t: DSL) extends TransitionDestination
 
-object DSL {
+object DSL:
 
   def tasks(t: DSL): Vector[TaskNode] =
     t match
@@ -238,8 +238,7 @@ object DSL {
   def delegate(t: DSL): Seq[Task] =
     def delegated(t: DSL): Seq[Task] =
       t match
-        case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
-        case c: DSLContainer[?] => delegated(c.dsl)
+        case c: DSLContainer[?] => if c.delegate.nonEmpty then c.delegate else delegated(c.dsl)
         case TaskNodeDSL(n)     => Seq()
         case --(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
         case -<(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
@@ -330,11 +329,6 @@ object DSL {
           case d: DelegationContext.Delegate.Tasks => d.task.contains(t)
 
     case class DelegationContext(environment: Option[EnvironmentBuilder], grouping: Option[Grouping], delegate: DelegationContext.Delegate)
-
-    //val taskNodeList = DSL.tasks(t)
-    //val delegated = DSL.delegate(t).toSet
-    //val taskEnvironment = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.environment).headOption).toMap
-    //val taskGrouping = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.grouping).headOption).toMap
 
     def taskToSlot(dsl: DSL) =
       def buildCapsule(task: Task, ns: Vector[TaskNode]) =
@@ -456,7 +450,9 @@ object DSL {
       DelegationContext(
         None,
         None,
-        if d.isEmpty then DelegationContext.Delegate.All else DelegationContext.Delegate.Tasks(Set())
+        if d.isEmpty
+        then DelegationContext.Delegate.All
+        else DelegationContext.Delegate.Tasks(Set())
       )
 
     transitionDSLToPuzzle0(
@@ -465,7 +461,7 @@ object DSL {
       collection.mutable.Map(),
       delegationContext
     )
-}
+
 
 /* -------------------- Transition DSL ---------------------- */
 sealed trait DSL
@@ -587,13 +583,15 @@ trait CompositionPackage {
     environment: Option[EnvironmentBuilder]  = None,
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,
-    validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
+    validate:    Validate                    = Validate.success)(using definitionScope: DefinitionScope): DSLContainer[T] =
     val delegateValue: Vector[Task] =
       delegate.flatMap:
         case t: Task => Seq(t)
         case d: DSL =>
           val delegateValue = DSL.delegate(d)
-          if delegateValue.isEmpty then DSL.tasks(d).map(_.task) else delegateValue
+          if delegateValue.nonEmpty
+          then delegateValue
+          else DSL.tasks(d).map(_.task)
 
     dsl match
       case dsl: DSLContainer[?] =>
