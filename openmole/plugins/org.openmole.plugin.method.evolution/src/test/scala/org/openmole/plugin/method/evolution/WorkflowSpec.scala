@@ -245,7 +245,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
   }
 
 
-  "NSGAEvolution" should "be valid" in {
+  "NSGAEvolution" should "be valid" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -257,9 +257,31 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  it should "be possible to generate" in {
+
+  it should "be able to delegate task" in :
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val env = LocalEnvironment(1)
+    @volatile var executed = 0
+
+    val model =
+      TestTask: ctx =>
+        executed += 1
+        ctx + (b -> ctx(a))
+
+    val nsga = NSGA2Evolution(
+      evaluation = model set(inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100
+    ) on env
+
+    nsga.run().environments.head.done.toInt should equal(executed)
+    executed should be >= 100
+
+  it should "be possible to generate several executions" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -273,7 +295,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val wf = EmptyTask() -- (0 until 2).map(nsga)
     Validation(wf).isEmpty should equal(true)
-  }
 
   "Passing an input from previous task" should "be valid" in {
     val a1 = Val[Double]

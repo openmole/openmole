@@ -42,7 +42,7 @@ object MasterSlave {
         (masterCapsule -<- Slot(slave) slaves slaves) &
         (bootstrap oo masterCapsule keepAll state)
 
-    DSLContainer(wf, (), output = Some(master), delegate = DSL.tasks(slave).map(_.task))
+    DSLContainer(wf, (), output = Some(master), delegate = Vector(slave))
   }
 
 }
