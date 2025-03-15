@@ -130,7 +130,7 @@ object FromContext extends LowPriorityFromContext:
     FromContext[T] { p =>
       import p._
       proxy()().from(context)
-    } copy(stringValue = Some(code)) withValidate(proxy().validate)
+    }.copy(stringValue = Some(code)).withValidate(proxy().validate)
 
   //implicit def functionToFromContext[T](f: (Context => T)): FromContext[T] = contextConverter(f)
 

@@ -319,7 +319,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val wf = EmptyTask() -- (0 until 2).map(nsga)
     Validation(wf).isEmpty should equal(true)
 
-  "Passing an input from previous task" should "be valid" in {
+  it should "accept passing an input from previous task" in {
     val a1 = Val[Double]
     val a2 = Val[Double]
     val b = Val[Double]
@@ -343,7 +343,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "NSGAEvolution with island" should "be valid" in {
+  it should "accept island" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -355,9 +355,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "NSGAEvolution with delta" should "be valid" in {
+  it should "accept delta" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -371,7 +370,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "NSGAEvolution with maximisation" should "be valid" in {
+  it should "accept maximisation" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -385,7 +384,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "Stochastic NSGAEvolution" should "be valid" in {
+  it should "accept stochastic" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -398,9 +397,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ) by Island(1)
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "Stochastic NSGAEvolution with aggregate and delta" should "be valid" in {
+  it should "accept aggregate and delta with stochastic" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -413,9 +411,37 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "Stochastic NSGAEvolution with island" should "be valid" in {
+  it should "validate scala code" in :
+    import org.openmole.plugin.task.scala.*
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val code = ScalaCode("test")
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set(inputs += a, outputs += b),
+      objective = Seq(b evaluate code),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga) should not be empty
+
+    val nsga2 = NSGA2Evolution(
+      evaluation = EmptyTask() set(inputs += a, outputs += b),
+      objective = Seq(b evaluate "test"),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga2) should not be empty
+
+
+  it should "accept island with stochastic" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -431,7 +457,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
-  "Suggestion" should "be possible" in {
+  it should "accept suggestion" in {
     val a = Val[Double]
     val b = Val[Int]
 
@@ -444,7 +470,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
   }
 
-  "Aggregation" should "be possible in NSGA" in {
+  it should "accept aggregation" in {
 
     val a = Val[Double]
     val b = Val[Double]
@@ -461,7 +487,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
-  "Aggregation" should "be possible in stochastic NSGA" in {
+  it should "accept aggregation with stochastic" in {
 
     val a = Val[Double]
     val b = Val[Double]
@@ -470,7 +496,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objective = Seq(b aggregate f _ as "aggF"),
+      objective = Seq(b evaluate f as "aggF"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()
