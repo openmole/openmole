@@ -388,7 +388,7 @@ object GAIntegration:
     val variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
     genome.zipWithIndex.map { (g, i) => Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
 
-  def objectivesOfPopulationToVariables[I](objectives: Seq[Objective], phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
+  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) =>
       Variable(
         objective.withType[Array[Double]],

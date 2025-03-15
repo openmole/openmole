@@ -28,9 +28,12 @@ object MetadataGeneration:
       case b: GenomeBound.Enumeration[?]           => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
       case b: GenomeBound.SequenceOfEnumeration[?] => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
 
+  def objectivesData(o: Objectives) =
+    Objectives.toSeq(o).map(objectiveData)
+  
   def objectiveData(o: Objective) =
     EvolutionMetadata.Objective(Objective.resultPrototype(o).name, o.delta, o.negative, o.noisy)
-
+  
   def fromString(s: String): EvolutionMetadata =
     decode[EvolutionMetadata](s) match
       case Left(e)  => throw new InternalProcessingError(s"Error parsing metadata $s", e)

@@ -51,7 +51,7 @@ object PSE {
     pattern:             Vector[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     operatorExploration: Double,
     maxRareSample:       Int,
     reject:              Option[Condition],
@@ -76,7 +76,7 @@ object PSE {
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.PSE(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            objective = MetadataGeneration.objectivesData(om.objectives),
             grid = MetadataGeneration.grid(om.grid),
             generation = generationLens.get(state),
             saveOption = saveOption
@@ -171,7 +171,7 @@ object PSE {
     pattern:             Vector[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,
@@ -197,7 +197,7 @@ object PSE {
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticPSE(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            objective = MetadataGeneration.objectivesData(om.objectives),
             sample = om.historySize,
             grid = MetadataGeneration.grid(om.grid),
             generation = generationLens.get(state),

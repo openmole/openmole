@@ -110,7 +110,7 @@ object Profile {
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
           EvolutionMetadata.Profile(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            objective = MetadataGeneration.objectivesData(om.objectives),
             generation = generationLens.get(state),
             saveOption = saveOption
           )
@@ -179,7 +179,7 @@ object Profile {
     niche:               Seq[ProfileElement],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -290,7 +290,7 @@ object Profile {
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition])
