@@ -281,6 +281,29 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     nsga.run().environments.head.done.toInt should equal(executed)
     executed should be >= 100
 
+
+  it should "be able to delegate task when island is set" in :
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val env = LocalEnvironment(1)
+    @volatile var executed = 0
+
+    val model =
+      TestTask: ctx =>
+        executed += 1
+        ctx + (b -> ctx(a))
+
+    val nsga = NSGA2Evolution(
+      evaluation = model set(inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100
+    ) on env by Island(1)
+
+    math.abs(nsga.run().environments.head.done.toInt - executed) should be <= 10
+    executed should be >= 100
+
   it should "be possible to generate several executions" in:
     val a = Val[Double]
     val b = Val[Double]

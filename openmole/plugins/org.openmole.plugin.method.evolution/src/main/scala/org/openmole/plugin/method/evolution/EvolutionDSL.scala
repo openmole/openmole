@@ -206,11 +206,13 @@ object EvolutionWorkflow:
 
     val masterTask = MoleTask(master) set (exploredOutputs += evolution.genomeVal.toArray)
 
+    val slave = scaleGenome -- Strain(wrapped)
+    
     val masterSlave =
       MasterSlave(
         randomGenomes,
         master = masterTask,
-        slave = scaleGenome -- Strain(wrapped),
+        slave = slave,
         state = Seq(evolution.populationVal, evolution.stateVal),
         slaves = parallelism,
         stop = evolution.terminatedVal
@@ -226,7 +228,9 @@ object EvolutionWorkflow:
       puzzle,
       output = Some(masterTask),
       method = evolution,
-      validate = evolution.validate)
+      validate = evolution.validate,
+      delegate = Vector(slave)
+    )
 
   def IslandEvolution(
     island:      DSLContainer[EvolutionWorkflow],
