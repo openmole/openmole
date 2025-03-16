@@ -122,7 +122,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed should be >= 100
   }
 
-  "Evolution" should "support single objective" in {
+  it should "support single objective" in {
     val a = Val[Double]
 
     val nsga = NSGA2Evolution(
@@ -133,6 +133,34 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       parallelism = 10
     )
   }
+
+  it should "accept hook" in:
+    @volatile var executed = 0
+
+    val a = Val[Double]
+
+    val testTask =
+      FromContextTask("test") { p =>
+        import p._
+        executed += 1
+        context
+      } set ((inputs, outputs) += a)
+
+    val nsga =
+      NSGA2Evolution(
+        evaluation = testTask,
+        objective = Seq(a),
+        genome = Seq(a in(0.0, 1.0)),
+        termination = 100
+      ) hook("/tmp/test.txt", frequency = 2)
+
+    Validation(nsga) match
+      case Nil =>
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+
+    Validation(nsga by Island(10)) match
+      case Nil =>
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
 
   "Island evolution" should "run" in {
@@ -159,7 +187,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     executed should be >= 100
   }
 
-  "Serialized Island Evolution" should "run" in {
+  it should "serialize and run" in {
     val a = Val[Double]
 
     val testTask =
@@ -190,35 +218,17 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     serializeDeserialize(nsga2) run
   }
 
-  "Hook" should "be valid" in {
-    @volatile var executed = 0
+  it should "have no validation error" in:
+    import EvolutionWorkflow._
 
-    val a = Val[Double]
-
-    val testTask =
-      FromContextTask("test") { p =>
-        import p._
-        executed += 1
-        context
-      } set ((inputs, outputs) += a)
-
-    val nsga =
-      NSGA2Evolution(
-        evaluation = testTask,
-        objective = Seq(a),
-        genome = Seq(a in (0.0, 1.0)),
-        termination = 100
-      ) hook ("/tmp/test.txt", frequency = 2)
-
-    Validation(nsga) match 
+    Validation(nsga2 by Island(10)).toList match
       case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
-    Validation(nsga by Island(10)) match 
+    Validation(conflict by Island(10)).toList match
       case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    
-  }
+      case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
+
 
   "Steady state workflow" should "have no validation error" in {
     val mole: Mole = nsga2
@@ -234,22 +244,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     }
   }
 
-  "Island workflow" should "have no validation error" in {
-    import EvolutionWorkflow._
 
-    Validation(nsga2 by Island(10)).toList match {
-      case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-
-    Validation(conflict by Island(10)).toList match {
-      case Nil =>
-      case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
-
-
-  "NSGAEvolution" should "be valid" in {
+  "NSGAEvolution" should "be valid" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -261,9 +257,54 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "NSGAEvolution" should "be possible to generate" in {
+
+  it should "be able to delegate task" in :
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val env = LocalEnvironment(1)
+    @volatile var executed = 0
+
+    val model =
+      TestTask: ctx =>
+        executed += 1
+        ctx + (b -> ctx(a))
+
+    val nsga = NSGA2Evolution(
+      evaluation = model set(inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100
+    ) on env
+
+    nsga.run().environments.head.done.toInt should equal(executed)
+    executed should be >= 100
+
+
+  it should "be able to delegate task when island is set" in :
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val env = LocalEnvironment(1)
+    @volatile var executed = 0
+
+    val model =
+      TestTask: ctx =>
+        executed += 1
+        ctx + (b -> ctx(a))
+
+    val nsga = NSGA2Evolution(
+      evaluation = model set(inputs += a, outputs += b),
+      objective = Seq(b),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100
+    ) on env by Island(1)
+
+    math.abs(nsga.run().environments.head.done.toInt - executed) should be <= 10
+    executed should be >= 100
+
+  it should "be possible to generate several executions" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -277,9 +318,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val wf = EmptyTask() -- (0 until 2).map(nsga)
     Validation(wf).isEmpty should equal(true)
-  }
 
-  "Passing an input from previous task" should "be valid" in {
+  it should "accept passing an input from previous task" in {
     val a1 = Val[Double]
     val a2 = Val[Double]
     val b = Val[Double]
@@ -303,7 +343,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "NSGAEvolution with island" should "be valid" in {
+  it should "accept island" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -315,9 +355,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "NSGAEvolution with delta" should "be valid" in {
+  it should "accept delta" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -331,7 +370,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "NSGAEvolution with maximisation" should "be valid" in {
+  it should "accept maximisation" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -345,7 +384,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(wf).isEmpty should equal(true)
   }
 
-  "Stochastic NSGAEvolution" should "be valid" in {
+  it should "accept stochastic" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -358,9 +397,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ) by Island(1)
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "Stochastic NSGAEvolution with aggregate and delta" should "be valid" in {
+  it should "accept aggregate and delta with stochastic" in:
     val a = Val[Double]
     val b = Val[Double]
 
@@ -373,9 +411,37 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
 
     Validation(nsga).isEmpty should equal(true)
-  }
 
-  "Stochastic NSGAEvolution with island" should "be valid" in {
+  it should "validate scala code" in :
+    import org.openmole.plugin.task.scala.*
+
+    val a = Val[Double]
+    val b = Val[Double]
+
+    val code = ScalaCode("test")
+
+    val nsga = NSGA2Evolution(
+      evaluation = EmptyTask() set(inputs += a, outputs += b),
+      objective = Seq(b evaluate code),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga) should not be empty
+
+    val nsga2 = NSGA2Evolution(
+      evaluation = EmptyTask() set(inputs += a, outputs += b),
+      objective = Seq(b evaluate "test"),
+      genome = Seq(a in(0.0, 1.0)),
+      termination = 100,
+      stochastic = Stochastic()
+    )
+
+    Validation(nsga2) should not be empty
+
+
+  it should "accept island with stochastic" in {
     val a = Val[Double]
     val b = Val[Double]
 
@@ -391,7 +457,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
-  "Suggestion" should "be possible" in {
+  it should "accept suggestion" in {
     val a = Val[Double]
     val b = Val[Int]
 
@@ -404,7 +470,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     )
   }
 
-  "Aggregation" should "be possible in NSGA" in {
+  it should "accept aggregation" in {
 
     val a = Val[Double]
     val b = Val[Double]
@@ -421,7 +487,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     Validation(nsga).isEmpty should equal(true)
   }
 
-  "Aggregation" should "be possible in stochastic NSGA" in {
+  it should "accept aggregation with stochastic" in {
 
     val a = Val[Double]
     val b = Val[Double]
@@ -430,7 +496,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
     val nsga = NSGA2Evolution(
       evaluation = EmptyTask() set (inputs += a, outputs += b),
-      objective = Seq(b aggregate f _ as "aggF"),
+      objective = Seq(b evaluate f as "aggF"),
       genome = Seq(a in (0.0, 1.0)),
       termination = 100,
       stochastic = Stochastic()

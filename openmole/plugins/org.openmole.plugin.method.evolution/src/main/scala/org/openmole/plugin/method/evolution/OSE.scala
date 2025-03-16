@@ -24,7 +24,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -124,7 +124,7 @@ object OSE {
     limit:               Vector[Double],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     historySize:         Int,
     cloneProbability:    Double,
     operatorExploration: Double,

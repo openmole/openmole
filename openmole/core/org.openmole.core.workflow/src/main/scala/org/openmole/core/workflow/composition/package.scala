@@ -40,6 +40,7 @@ import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.format.*
 import org.openmole.core.format.WritableOutput.Display
 import org.openmole.core.script.ScriptSourceData
+import org.openmole.core.workflow.composition
 
 object Puzzle:
 
@@ -218,7 +219,7 @@ sealed trait TransitionDestination
 case class TaskDestination(node: TaskNode) extends TransitionDestination
 case class TransitionDSLDestination(t: DSL) extends TransitionDestination
 
-object DSL {
+object DSL:
 
   def tasks(t: DSL): Vector[TaskNode] =
     t match
@@ -231,34 +232,25 @@ object DSL {
       case &(a, b)            => tasks(a) ++ tasks(b)
       case Slot(d)            => tasks(d)
       case Capsule(d, _)      => tasks(d)
-      case c: DSLContainer[?] => DSLContainer.taskNodes(c) ++ tasks(c.dsl)
+      case c: DSLContainer[?] => tasks(c.dsl)
       case TaskNodeDSL(n)     => Vector(n)
 
-  def delegate(t: DSL): Vector[Task] =
-    def innerDSL(t: DSL): Seq[DSL] =
+  def delegate(t: DSL): Seq[Task] =
+    def delegated(t: DSL): Seq[Task] =
       t match
-        case c: DSLContainer[?] => Seq(c.dsl)
-        case --(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case -<(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case >-(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case >|(o, d, _, _)     => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case -<-(o, d, _, _, _) => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case oo(o, d, _)        => TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)
-        case &(a, b)            => innerDSL(a) ++ innerDSL(b)
-        case Slot(d)            => innerDSL(d)
-        case Capsule(d, _)      => innerDSL(d)
+        case c: DSLContainer[?] => if c.delegate.nonEmpty then c.delegate else delegated(c.dsl)
         case TaskNodeDSL(n)     => Seq()
+        case --(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case -<(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case >-(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case >|(o, d, _, _)     => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case -<-(o, d, _, _, _) => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case oo(o, d, _)        => (TransitionOrigin.dsl(o).toSeq ++ d.flatMap(TransitionDestination.dsl)).flatMap(delegated)
+        case &(a, b)            => delegated(a) ++ delegated(b)
+        case Slot(d)            => delegated(d)
+        case Capsule(d, _)      => delegated(d)
 
-
-    def toDelegate(t: DSL): Seq[Task] =
-      t match
-        case c: DSLContainer[?] if c.delegate.nonEmpty => c.delegate
-        case c => innerDSL(c).flatMap(toDelegate)
-
-    val del = toDelegate(t)
-    if del.nonEmpty
-    then del.toVector
-    else tasks(t).map(_.task)
+    delegated(t)
 
   object DSLSelector:
     //def apply[T](implicit selector: DSLSelector[T]): DSLSelector[T] = selector
@@ -325,9 +317,18 @@ object DSL {
     def apply(t: T): MoleExecution
 
   def toPuzzle(t: DSL): Puzzle =
-    val taskNodeList = DSL.tasks(t)
-    val taskEnvironment = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.environment).headOption).toMap
-    val taskGrouping = taskNodeList.groupBy(n => n.task).view.mapValues(_.flatMap(_.grouping).headOption).toMap
+    object DelegationContext:
+      enum Delegate:
+        case All extends Delegate
+        case Tasks(task: Set[Task]) extends Delegate
+
+    extension (d: DelegationContext)
+      def delegated(t: Task) =
+        d.delegate match
+          case DelegationContext.Delegate.All => true
+          case d: DelegationContext.Delegate.Tasks => d.task.contains(t)
+
+    case class DelegationContext(environment: Option[EnvironmentBuilder], grouping: Option[Grouping], delegate: DelegationContext.Delegate)
 
     def taskToSlot(dsl: DSL) =
       def buildCapsule(task: Task, ns: Vector[TaskNode]) =
@@ -345,30 +346,36 @@ object DSL {
         groupBy(_.task).map: (t, ns) =>
           t -> TransitionSlot(buildCapsule(t, ns))
 
-    def taskNodeToPuzzle(n: TaskNode, slots: Map[Task, TransitionSlot]) =
+    def taskNodeToPuzzle(n: TaskNode, slots: Map[Task, TransitionSlot], delegationContext: DelegationContext) =
       val task = n.task
       val slot = slots(task)
       val puzzle = Puzzle(slot)
 
+      val (environment, grouping) =
+        if delegationContext.delegated(task)
+        then (n.environment orElse delegationContext.environment, n.grouping orElse delegationContext.grouping)
+        else (n.environment, n.grouping)
+
       Puzzle.add(
         puzzle,
-        environments = taskEnvironment(n.task).map(slot.capsule -> _).toMap,
-        grouping = taskGrouping(n.task).map(slot.capsule -> _).toMap,
+        environments = environment.map(slot.capsule -> _).toMap,
+        grouping = grouping.map(slot.capsule -> _).toMap,
         hooks = n.hooks.map(slot.capsule -> _),
         sources = n.sources.map(slot.capsule -> _)
       )
 
-    def transitionDSLToPuzzle0(t: DSL, slots: Map[Task, TransitionSlot], converted: collection.mutable.Map[DSL, Puzzle]): Puzzle =
+
+    def transitionDSLToPuzzle0(t: DSL, slots: Map[Task, TransitionSlot], converted: collection.mutable.Map[DSL, Puzzle], delegationContext: DelegationContext): Puzzle =
       def transitionOriginToPuzzle(d: TransitionOrigin): Puzzle =
         d match
-          case TaskOrigin(n)          => taskNodeToPuzzle(n, slots)
-          case TransitionDSLOrigin(o) => transitionDSLToPuzzle0(o, slots, converted)
+          case TaskOrigin(n)          => taskNodeToPuzzle(n, slots, delegationContext)
+          case TransitionDSLOrigin(o) => transitionDSLToPuzzle0(o, slots, converted, delegationContext)
 
       def transitionDestinationToPuzzle(d: TransitionDestination): (Puzzle, Boolean) =
         d match
-          case TaskDestination(n)                => taskNodeToPuzzle(n, slots) -> false
-          case TransitionDSLDestination(t: Slot) => transitionDSLToPuzzle0(t, slots, converted) -> true
-          case TransitionDSLDestination(t)       => transitionDSLToPuzzle0(t, slots, converted) -> false
+          case TaskDestination(n)                => taskNodeToPuzzle(n, slots, delegationContext) -> false
+          case TransitionDSLDestination(t: Slot) => transitionDSLToPuzzle0(t, slots, converted, delegationContext) -> true
+          case TransitionDSLDestination(t)       => transitionDSLToPuzzle0(t, slots, converted, delegationContext) -> false
 
       def transitionsToPuzzle[T](o: TransitionOrigin, d: Vector[TransitionDestination], add: (Puzzle, Iterable[T]) => Puzzle)(transition: (MoleCapsule, TransitionSlot) => T) =
         val originPuzzle = transitionOriginToPuzzle(o)
@@ -387,14 +394,24 @@ object DSL {
         val plugged = Puzzle.copy(merged)(firstSlot = originPuzzle.firstSlot, lasts = destinationPuzzle.map(_._1).flatMap(_.lasts))
         add(plugged, transitions)
 
-      def dslContainerToPuzzle(container: DSLContainer[?]) =
-        val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted)
+      def dslContainerToPuzzle(container: DSLContainer[?], delegationContext: DelegationContext) =
+        def newDelegationContext =
+          DelegationContext(
+            environment = container.environment orElse delegationContext.environment,
+            grouping = container.grouping orElse delegationContext.grouping,
+            delegate =
+              delegationContext.delegate match
+                case DelegationContext.Delegate.All => DelegationContext.Delegate.All
+                case DelegationContext.Delegate.Tasks(tasks) => DelegationContext.Delegate.Tasks(tasks ++ container.delegate)
+          )
+
+        val puzzle = transitionDSLToPuzzle0(container.dsl, slots, converted, newDelegationContext)
 
         def outputs(dsl: DSL): Iterable[MoleCapsule] =
           dsl match
             case c: DSLContainer[?] if c.output.isDefined => Vector(slots(c.output.get).capsule)
             case c: DSLContainer[?]                       => outputs(c.dsl)
-            case dsl                                      => transitionDSLToPuzzle0(dsl, slots, converted).lasts
+            case dsl                                      => transitionDSLToPuzzle0(dsl, slots, converted, newDelegationContext).lasts
 
         val hooks =
           for
@@ -402,16 +419,9 @@ object DSL {
             h <- container.hooks
           yield o -> h
 
-        val environments =
-          for
-            c <- container.delegate.map(d => slots(d).capsule)
-            e <- container.environment
-          yield c -> e
-
         Puzzle.add(
           puzzle,
           hooks = hooks,
-          environments = environments.toMap,
           validate = container.validate
         )
 
@@ -426,17 +436,32 @@ object DSL {
           case >|(o, d, condition, filter)          => transitionsToPuzzle(o, d, addTransitions) { case (c, s) => new EndExplorationTransition(c, s, condition, filter) }
           case -<-(o, d, condition, filter, slaves) => transitionsToPuzzle(o, d, addTransitions) { case (c, s) => new SlaveTransition(c, s, condition, filter, slaves = slaves) }
           case oo(o, d, filter)                     => transitionsToPuzzle(o, d, addDataChannel) { case (c, s) => DataChannel(c, s, filter) }
-          case &(a, b)                              => Puzzle.merge(transitionDSLToPuzzle0(a, slots, converted), transitionDSLToPuzzle0(b, slots, converted))
-          case c: DSLContainer[?]                   => dslContainerToPuzzle(c)
-          case TaskNodeDSL(n)                       => taskNodeToPuzzle(n, slots)
-          case Capsule(d, _)                        => transitionDSLToPuzzle0(d, taskToSlot(d), collection.mutable.Map.empty) //taskNodeToPuzzle(n, taskToSlot(c))
-          case Slot(d)                              => transitionDSLToPuzzle0(d, slots, converted)
+          case &(a, b)                              => Puzzle.merge(transitionDSLToPuzzle0(a, slots, converted, delegationContext), transitionDSLToPuzzle0(b, slots, converted, delegationContext))
+          case c: DSLContainer[?]                   => dslContainerToPuzzle(c, delegationContext)
+          case TaskNodeDSL(n)                       => taskNodeToPuzzle(n, slots, delegationContext)
+          case Capsule(d, _)                        => transitionDSLToPuzzle0(d, taskToSlot(d), collection.mutable.Map.empty, delegationContext) //taskNodeToPuzzle(n, taskToSlot(c))
+          case Slot(d)                              => transitionDSLToPuzzle0(d, slots, converted, delegationContext)
 
       converted.getOrElseUpdate(t, p)
 
 
-    transitionDSLToPuzzle0(t, taskToSlot(t), collection.mutable.Map())
-}
+    def delegationContext =
+      val d = delegate(t)
+      DelegationContext(
+        None,
+        None,
+        if d.isEmpty
+        then DelegationContext.Delegate.All
+        else DelegationContext.Delegate.Tasks(Set())
+      )
+
+    transitionDSLToPuzzle0(
+      t,
+      taskToSlot(t),
+      collection.mutable.Map(),
+      delegationContext
+    )
+
 
 /* -------------------- Transition DSL ---------------------- */
 sealed trait DSL
@@ -495,10 +520,6 @@ case class oo(a: TransitionOrigin, b: Vector[TransitionDestination], filterValue
 case class &(a: DSL, b: DSL) extends DSL
 
 object DSLContainer:
-  def taskNodes(container: DSLContainer[?]) =
-    val output = container.output.map { o => TaskNode(o, hooks = container.hooks) }
-    val delegate = container.delegate.map { t => TaskNode(t, environment = container.environment, grouping = container.grouping) }
-    delegate ++ output
 
   object ExplorationMethod:
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
@@ -522,7 +543,7 @@ case class DSLContainer[+T](
   dsl:         DSL,
   output:      Option[Task]                = None,
   delegate:    Vector[Task]                = Vector.empty,
-  environment: Option[EnvironmentBuilder] = None,
+  environment: Option[EnvironmentBuilder]  = None,
   grouping:    Option[Grouping]            = None,
   hooks:       Vector[Hook]                = Vector.empty,
   validate:    Validate                    = Validate.success,
@@ -558,19 +579,28 @@ trait CompositionPackage {
     dsl:         DSL,
     method:      T,
     output:      Option[Task]                = None,
-    delegate:    Vector[Task]                = Vector.empty,
-    environment: Option[EnvironmentBuilder] = None,
+    delegate:    Vector[DSL | Task]          = Vector.empty,
+    environment: Option[EnvironmentBuilder]  = None,
     grouping:    Option[Grouping]            = None,
     hooks:       Vector[Hook]                = Vector.empty,
-    validate:    Validate                    = Validate.success)(implicit definitionScope: DefinitionScope): DSLContainer[T] =
+    validate:    Validate                    = Validate.success)(using definitionScope: DefinitionScope): DSLContainer[T] =
+    val delegateValue: Vector[Task] =
+      delegate.flatMap:
+        case t: Task => Seq(t)
+        case d: DSL =>
+          val delegateValue = DSL.delegate(d)
+          if delegateValue.nonEmpty
+          then delegateValue
+          else DSL.tasks(d).map(_.task)
+
     dsl match
       case dsl: DSLContainer[?] =>
         org.openmole.core.workflow.composition.DSLContainer[T](
           dsl,
           output orElse dsl.output,
-          delegate ++ dsl.delegate,
-          environment orElse dsl.environment,
-          grouping orElse dsl.grouping,
+          delegateValue,
+          environment, // orElse dsl.environment,
+          grouping, // orElse dsl.grouping,
           hooks ++ dsl.hooks,
           validate,
           method,
@@ -579,7 +609,7 @@ trait CompositionPackage {
         org.openmole.core.workflow.composition.DSLContainer[T](
           dsl,
           output,
-          delegate,
+          delegateValue,
           environment,
           grouping,
           hooks,

@@ -19,7 +19,7 @@ package org.openmole.plugin.tool.pattern
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object MasterSlave {
+object MasterSlave:
 
   def apply(
     bootstrap: DSL,
@@ -28,21 +28,19 @@ object MasterSlave {
     state:     Seq[Val[?]],
     slaves:    OptionalArgument[Int]       = None,
     stop:      OptionalArgument[Condition] = None
-  )(implicit scope: DefinitionScope = "master slave"): DSL = {
+  )(implicit scope: DefinitionScope = "master slave"): DSL =
     val masterCapsule = Master(master, persist = state *)
     val masterSlaveLast = Strain(EmptyTask())
 
-    val skel = stop.option match {
-      case Some(s) => bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
-      case None    => bootstrap -< slave -- masterCapsule
-    }
+    val skel =
+      stop.option match
+        case Some(s) => bootstrap -< slave -- (masterCapsule >| masterSlaveLast when s)
+        case None    => bootstrap -< slave -- masterCapsule
+
 
     val wf =
       skel &
         (masterCapsule -<- Slot(slave) slaves slaves) &
         (bootstrap oo masterCapsule keepAll state)
 
-    DSLContainer(wf, (), output = Some(master), delegate = DSL.tasks(slave).map(_.task))
-  }
-
-}
+    DSLContainer(wf, (), output = Some(master))

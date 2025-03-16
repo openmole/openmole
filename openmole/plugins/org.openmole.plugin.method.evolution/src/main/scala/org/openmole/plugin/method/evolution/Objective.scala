@@ -87,20 +87,21 @@ object Objective:
         else o.copy(noisy = true)
 
 
-  def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Seq[Objective]) = FromContext { p =>
-    import p._
-    (phenotype: Phenotype) =>
-      val context = Phenotype.toContext(phenotypeContent, phenotype)
-      objectives.toVector.map(_.value.from(context))
-  }
+  def toFitnessFunction(phenotypeContent: PhenotypeContent, objectives: Objectives) =
+    FromContext: p =>
+      import p.*
+      (phenotype: Phenotype) =>
+        val context = Phenotype.toContext(phenotypeContent, phenotype)
+        Objectives.values(objectives).from(context).toVector
 
-  def aggregate(phenotypeContent: PhenotypeContent, objectives: Seq[Objective]) = FromContext { p =>
-    import p._
+  def aggregate(phenotypeContent: PhenotypeContent, objectives: Objectives) =
+    FromContext: p =>
+      import p.*
 
-    (v: Vector[Phenotype]) =>
-      val aggregatedContext = ContextAggregator.aggregateSimilar(v.map(p => Phenotype.toContext(phenotypeContent, p)))
-      objectives.toVector.map { _.value.from(context ++ aggregatedContext.values) }
-  }
+      (v: Vector[Phenotype]) =>
+        val aggregatedContext =
+          context ++ ContextAggregator.aggregateSimilar(v.map(p => Phenotype.toContext(phenotypeContent, p))).values
+        Objectives.values(objectives).from(aggregatedContext).toVector
 
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray
 
@@ -142,13 +143,13 @@ case class Objective(
 
   lazy val computeValue = v(noisy)
 
-  private def value = computeValue(delta, negative)
-  private def prototype = computeValue.prototype
+  def value = computeValue(delta, negative)
+  def prototype = computeValue.prototype
 
 
 object Objectives:
 
-  def toSeq(o: Objectives) =
+  def toSeq(o: Objectives): Seq[Objective] =
     o match
       case o: Objective => Seq(o)
       case o: Seq[Objective] => o
@@ -157,11 +158,16 @@ object Objectives:
   def toExact(o: Objectives) = toSeq(o).map(o => Objective.toExact(o))
   def toNoisy(o: Objectives) = toSeq(o).map(o => Objective.toNoisy(o))
 
+  def values(o: Objectives) =
+    FromContext: p =>
+      import p.*
+      toSeq(o).map { _.value.from(context) }
+
   def resultPrototypes(o: Objectives) = toSeq(o).map(Objective.resultPrototype)
 
-  def validate(o: Objectives, outputs: Seq[Val[?]]) = Validate { p =>
-    import p._
-    toSeq(o) flatMap { o => o.validate(inputs ++ outputs) }
-  }
+  def validate(o: Objectives, outputs: Seq[Val[?]]) =
+    Validate: p =>
+      import p._
+      toSeq(o) flatMap { o => o.validate(inputs ++ outputs) }
 
   def prototypes(o: Objectives) = toSeq(o).map(Objective.prototype)

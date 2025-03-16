@@ -43,7 +43,7 @@ object HDOSE:
     archiveSize:         Int,
     distance:            Double,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     operatorExploration: Double,
     reject:              Option[Condition])
 
@@ -170,7 +170,7 @@ object HDOSE:
     archiveSize: Int,
     distance: Double,
     phenotypeContent: PhenotypeContent,
-    objectives: Seq[Objective],
+    objectives: Objectives,
     historySize: Int,
     cloneProbability: Double,
     operatorExploration: Double,

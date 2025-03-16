@@ -241,6 +241,26 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     mole.run
 
+
+  it should "delegate the task in an nested exploration" in :
+    val l = Val[Double]
+    val i = Val[Double]
+    val seed = Val[Int]
+    val env = LocalEnvironment(1)
+
+    val model = EmptyTask() set(inputs += (l, i, seed), outputs += i, i := 42)
+    val h = TestHook() set (inputs += l)
+
+    val dsl =
+      DirectSampling(
+        Replication(model on env, seed, 10, aggregation = Seq(i)),
+        ExplicitSampling(l, Seq(1.0, 2.0))
+      )
+
+    DSL.delegate(dsl) should equal(Vector(model))
+    DSL.toPuzzle(dsl).environments.values should contain(env)
+
+
   it should "accept display hook" in:
     val l = Val[Double]
 
@@ -356,7 +376,12 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
   "Nested method" should "delegate the correct task" in:
     val o = Val[Double]
     val seed = Val[Int]
-    val t = EmptyTask() set(outputs += o)
+    val t = 
+      TestTask: ctx =>
+        ctx + (o -> 0.0)
+      .set(outputs += o)
+
+    val env = LocalEnvironment(1)
 
     val dsl =
       SingleRun(
@@ -368,6 +393,7 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
             aggregation = Seq(o)
           ) -- EmptyTask(),
         input = Seq()
-      )
+      ) on env
 
-    DSL.delegate(dsl) should equal(Vector(t))
+    DSL.toPuzzle(dsl).environments.values should contain(env)
+    dsl.run().environments.head.done should equal(100)

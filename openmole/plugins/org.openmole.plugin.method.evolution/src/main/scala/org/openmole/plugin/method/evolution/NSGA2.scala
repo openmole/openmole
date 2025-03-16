@@ -27,12 +27,12 @@ import squants.time.Time
 import monocle._
 import monocle.syntax.all._
 
-object NSGA2 {
+object NSGA2:
 
-  object DeterministicNSGA2 {
+  object DeterministicNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 => MGONSGA2, _ }
     
-    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype]:
+    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype] with
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -63,7 +63,7 @@ object NSGA2 {
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.NSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            objective = MetadataGeneration.objectivesData(om.objectives),
             populationSize = om.mu,
             generation = generationLens.get(state),
             saveOption = saveOption
@@ -106,20 +106,19 @@ object NSGA2 {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
 
-  }
 
   case class DeterministicNSGA2(
     mu:                  Int,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     operatorExploration: Double,
     reject:              Option[Condition])
 
-  object StochasticNSGA2 {
+  object StochasticNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 => MGONoisyNSGA2, _ }
 
-    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] with
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = EvolutionState[Unit]
@@ -133,7 +132,7 @@ object NSGA2 {
         override def metadata(state: S, saveOption: SaveOption) =
           EvolutionMetadata.StochasticNSGA2(
             genome = MetadataGeneration.genomeData(om.genome),
-            objective = om.objectives.map(MetadataGeneration.objectiveData),
+            objective = MetadataGeneration.objectivesData(om.objectives),
             sample = om.historySize,
             populationSize = om.mu,
             generation = generationLens.get(state),
@@ -199,15 +198,15 @@ object NSGA2 {
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
-    }
-  }
+
+
 
   case class StochasticNSGA2(
     mu:                  Int,
     operatorExploration: Double,
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
-    objectives:          Seq[Objective],
+    objectives:          Objectives,
     historySize:         Int,
     cloneProbability:    Double,
     reject:              Option[Condition]
@@ -248,7 +247,7 @@ object NSGA2 {
           validate = validation
         )
 
-}
+
 
 import EvolutionWorkflow.*
 

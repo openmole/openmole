@@ -22,10 +22,13 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.domain.collection.{*, given}
 import org.openmole.plugin.domain.bounds.{*, given}
 import org.openmole.plugin.method.evolution.HDOSE.OriginAxe.genomeBound
+import org.openmole.plugin.task.scala.*
 
 import org.scalatest.*
 
 class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
+
+  import org.openmole.core.workflow.test.*
 
   "Genome" should "support the following cases" in:
     def genomeBound(g: Genome.GenomeBound) = g
@@ -108,11 +111,13 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       case s: HDOSE.SequenceOfEnumerationOriginAxe if s.p.values.size == 10 =>
 
 
-
-
-
   "OSE fitness pattern" should "support the following cases" in:
     def pattern(p: OSE.FitnessPattern) = p
 
     val o = Val[Double]
     pattern(o evaluate "o.map(x => math.abs(x - 28.0)).max" under 1)
+
+  "Code objective" should "validate code" in:
+    val d = Val[Double]
+    val o: Objective = d evaluate ScalaCode("d.error")
+    o.validate.apply(Seq(d)) should not be empty
