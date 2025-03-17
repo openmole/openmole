@@ -271,6 +271,7 @@ object PlotContent:
         api.omrContent(safePath).map: guiContent =>
           val (_, content) = OMRContent.buildTab(safePath, guiContent, contentStates = states.update(plotContentState), currentState = plotContentState)
           panels.tabContent.updateTab(safePath, content)
+        .andThen: _ =>
           refreshing.set(false)
       })
                    
