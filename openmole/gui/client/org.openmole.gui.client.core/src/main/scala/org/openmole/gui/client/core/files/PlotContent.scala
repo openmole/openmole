@@ -295,11 +295,11 @@ object PlotContent:
               case _: RawState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _: TableState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _ => div(),
+            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
             sectionStates.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
             ,
-            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
           ),
           sectionView.view
         )

@@ -33,7 +33,7 @@ class Activator extends BundleActivator {
         SourceHighLight(objectName(CSVSource)),
         SourceHighLight(objectName(FileSource)),
         SourceHighLight(objectName(ListDirectoriesSource)),
-        SourceHighLight(objectName(ListFilesSource)),
+        SourceHighLight(objectName(ListFileSource)),
         SourceHighLight(objectName(LoadSource))
       )
 

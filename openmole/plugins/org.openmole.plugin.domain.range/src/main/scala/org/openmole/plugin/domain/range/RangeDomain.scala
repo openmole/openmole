@@ -22,6 +22,8 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import org.openmole.core.workflow.domain
 
+import org.openmole.plugin.domain.modifier.*
+
 object RangeDomain:
 
   object RangeValue:
@@ -90,6 +92,9 @@ object RangeDomain:
         domain.inputs,
         domain.validate
       )
+
+
+  given [T]: DiscreteDomainModifiers[RangeDomain[T]] with {}
 
   def apply[T: RangeValue](
     min: FromContext[T],

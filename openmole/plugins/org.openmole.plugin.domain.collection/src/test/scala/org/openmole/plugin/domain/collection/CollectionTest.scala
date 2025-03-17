@@ -38,3 +38,5 @@ class CollectionTest extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val samplingI: Sampling = i in (0 to 1)
     samplingI.sampling.from(Context()).size shouldEqual 2
 
+
+

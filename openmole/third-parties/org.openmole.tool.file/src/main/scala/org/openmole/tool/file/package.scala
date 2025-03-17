@@ -90,6 +90,7 @@ package file {
         if (file.isDirectory) isDirectoryEmpty
         else file.size == 0L
 
+      def files = listFilesSafe
       def listFilesSafe = Option(file.listFiles).getOrElse(Array.empty[File])
       def listFilesSafe(filter: File => Boolean) = Option(file.listFiles(filter)).getOrElse(Array.empty[File])
       def listFileSafeIterator = Files.list(file.toPath).iterator().asScala

@@ -22,8 +22,8 @@ import org.openmole.core.dsl.extension._
 
 object AppendDomain {
 
-  implicit def isDiscrete[D1, D2, T]: DiscreteFromContextDomain[AppendDomain[D1, D2, T], T] =
-    domain => {
+  given [D1, D2, T]: DiscreteFromContextDomain[AppendDomain[D1, D2, T], T] =
+    domain =>
       val d1Value = domain.domain1(domain.d1)
       val d2Value = domain.domain2(domain.d2)
 
@@ -35,7 +35,9 @@ object AppendDomain {
         d1Value.inputs ++ d2Value.inputs,
         d1Value.validation ++ d2Value.validation
       )
-    }
+
+
+  given [T, D, A]: DiscreteDomainModifiers[AppendDomain[D, T, A]] with {}
 
 }
 

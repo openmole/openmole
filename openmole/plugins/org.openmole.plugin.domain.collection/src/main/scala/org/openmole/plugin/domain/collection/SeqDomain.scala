@@ -19,9 +19,10 @@ package org.openmole.plugin.domain.collection
 
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
+import org.openmole.plugin.domain.modifier.*
 
-object SeqDomain {
-  implicit def isFinite[T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain =>
+object SeqDomain:
+  given [T]: DiscreteFromContextDomain[SeqDomain[T], T] = domain =>
     Domain(
       FromContext { p =>
         import p._
@@ -32,6 +33,8 @@ object SeqDomain {
     )
 
   def apply[T](values: FromContext[T]*) = new SeqDomain[T](values *)
-}
+
+  given [T]: DiscreteDomainModifiers[SeqDomain[T]] with {}
+
 
 sealed class SeqDomain[T](val values: FromContext[T]*)

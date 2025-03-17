@@ -56,7 +56,7 @@ ${hl.openmole("""
 
   DirectSampling(
     evaluation = myModel,
-    sampling = (f in (workDirectory / "dir").filter(_.getName.endsWith(".nii.gz")) )
+    sampling = f in (workDirectory / "dir").files.filter(f => f.getName.endsWith(".nii.gz"))
   )
 """, header = "val myModel = EmptyTask()")}
 
@@ -81,7 +81,7 @@ ${hl.openmole("""
     evaluation =  myModel,
     sampling =
       (i in (0 to 10)) x
-      (f in (workDirectory / "dir").files("subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
+      (f in ListFileDomain((workDirectory / "dir"), "subdir${i}", recursive = true).filter(f => f.isDirectory && f.getName.startsWith("exp")))
   )
 """, header = "val myModel = EmptyTask()")}
 
@@ -119,7 +119,7 @@ ${hl.openmole("""
 
   DirectSampling(
     evaluation = myModel,
-    sampling = subjectPath in File(dataDir).paths(filter=".*\\.nii.gz") withName subjectID
+    sampling = subjectPath in ListPathDomain(dataDir, filter = ".*\\.nii.gz") withName subjectID
   )
 """, header = "val myModel = EmptyTask()")}
 

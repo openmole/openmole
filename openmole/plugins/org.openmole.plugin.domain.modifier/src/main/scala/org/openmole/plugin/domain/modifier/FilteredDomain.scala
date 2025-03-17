@@ -20,7 +20,7 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object FilteredDomain {
+object FilteredDomain:
 
   implicit def isDiscrete[D, I]: DiscreteFromContextDomain[FilteredDomain[D, I], I] = domain =>
     Domain(
@@ -29,7 +29,8 @@ object FilteredDomain {
       domain.discreteValue.validate ++ domain.f.validate
     )
 
-}
+  given [T, D]: DiscreteDomainModifiers[FilteredDomain[D, T]] with {}
+
 
 case class FilteredDomain[D, I](domain: D, f: FromContext[I => Boolean])(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>
   def iterator = FromContext { p =>

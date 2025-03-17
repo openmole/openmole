@@ -22,9 +22,9 @@ import org.openmole.core.dsl.extension._
 import cats._
 import cats.implicits._
 
-object GroupDomain {
+object GroupDomain:
 
-  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] = domain => {
+  implicit def isDiscrete[D, T: Manifest]: DiscreteFromContextDomain[GroupDomain[D, T], Array[T]] = domain =>
     import domain._
     def iterator = (discrete(d).domain map2 size)((it, s) => it.grouped(s) map (_.toArray))
     Domain(
@@ -32,8 +32,7 @@ object GroupDomain {
       discrete(d).inputs ++ domain.size.inputs,
       discrete(d).validate ++ domain.size.validate
     )
-  }
 
-}
+  given [T, D]: DiscreteDomainModifiers[GroupDomain[T, D]] with {}
 
 case class GroupDomain[D, T: Manifest](d: D, size: FromContext[Int])(implicit val discrete: DiscreteFromContextDomain[D, T])

@@ -29,7 +29,11 @@ object ShuffleDomain {
       domain.inputs,
       domain.validate
     )
+
+
+  given [T, D]: DiscreteDomainModifiers[ShuffleDomain[D, T]] with {}  
 }
+
 
 case class ShuffleDomain[D, +T](domain: D)(implicit discrete: DiscreteFromContextDomain[D, T]) {
   def iterator = FromContext { p =>

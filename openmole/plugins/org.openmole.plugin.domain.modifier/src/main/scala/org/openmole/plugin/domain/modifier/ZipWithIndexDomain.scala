@@ -27,6 +27,8 @@ object ZipWithIndexDomain {
       domain.inputs,
       domain.validate
     )
+
+  given [T, D]: DiscreteDomainModifiers[ZipWithIndexDomain[D, T]] with {}
 }
 
 case class ZipWithIndexDomain[D, I](domain: D)(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>

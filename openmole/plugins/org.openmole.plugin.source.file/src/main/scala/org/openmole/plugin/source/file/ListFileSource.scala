@@ -25,13 +25,13 @@ import org.openmole.core.dsl._
 import org.openmole.core.argument.FromContext
 import org.openmole.core.setter._
 import org.openmole.core.workflow.mole._
-object ListFilesSource {
+object ListFileSource {
 
-  implicit def isIO: InputOutputBuilder[ListFilesSource] = InputOutputBuilder(Focus[ListFilesSource](_.config))
-  implicit def isInfo: InfoBuilder[ListFilesSource] = InfoBuilder(Focus[ListFilesSource](_.info))
+  implicit def isIO: InputOutputBuilder[ListFileSource] = InputOutputBuilder(Focus[ListFileSource](_.config))
+  implicit def isInfo: InfoBuilder[ListFileSource] = InfoBuilder(Focus[ListFileSource](_.info))
 
   def apply(path: FromContext[String], prototype: Val[Array[File]], regExp: FromContext[String] = ".*")(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    new ListFilesSource(
+    new ListFileSource(
       path,
       prototype,
       regExp,
@@ -41,7 +41,7 @@ object ListFilesSource {
 
 }
 
-case class ListFilesSource(
+case class ListFileSource(
   path:      FromContext[String],
   prototype: Val[Array[File]],
   regExp:    FromContext[String],

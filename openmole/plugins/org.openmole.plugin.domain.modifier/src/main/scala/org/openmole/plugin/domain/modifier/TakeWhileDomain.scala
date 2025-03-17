@@ -22,7 +22,7 @@ import org.openmole.core.dsl.extension._
 import cats._
 import cats.implicits._
 
-object TakeWhileDomain {
+object TakeWhileDomain:
 
   implicit def isFinite[D, T]: DiscreteFromContextDomain[TakeWhileDomain[D, T], T] = domain =>
     Domain(
@@ -31,7 +31,8 @@ object TakeWhileDomain {
       domain.validate
     )
 
-}
+  given [T, D]: DiscreteDomainModifiers[TakeWhileDomain[D, T]] with {}
+
 
 case class TakeWhileDomain[D, T](domain: D, predicate: FromContext[T => Boolean])(implicit discrete: DiscreteFromContextDomain[D, T]) {
   def iterator =

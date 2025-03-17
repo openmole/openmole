@@ -24,28 +24,28 @@ import cats.implicits.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.argument.OptionalArgument
 
-package object file {
+package object file:
 
-  implicit class DomainFileDecorator(f: File) {
-    def files: ListFilesDomain = files()
-    def files(
-      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
-      recursive: Boolean                               = false,
-      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
-    ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
+//  implicit class DomainFileDecorator(f: File):
+//    def files: ListFilesDomain = files()
+//    def files(
+//      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
+//      recursive: Boolean                               = false,
+//      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
+//    ): ListFilesDomain = ListFilesDomain(f, directory, recursive, filter)
+//
+//    def paths: ListPathsDomain = paths()
+//    def paths(
+//      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
+//      recursive: Boolean                               = false,
+//      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
+//    ): ListPathsDomain = ListPathsDomain(f, directory, recursive, filter)
+//
+//    def select(path: FromContext[String]) = SelectFileDomain(f, path)
 
-    def paths: ListPathsDomain = paths()
-    def paths(
-      directory: OptionalArgument[FromContext[String]] = OptionalArgument(),
-      recursive: Boolean                               = false,
-      filter:    OptionalArgument[FromContext[String]] = OptionalArgument()
-    ): ListPathsDomain = ListPathsDomain(f, directory, recursive, filter)
+  given DiscreteFromContextDomain[Val[File], File] = prototype => Domain(FromContext.prototype(prototype).map { _.listFilesSafe.iterator })
 
-    def select(path: FromContext[String]) = SelectFileDomain(f, path)
-  }
-
-  implicit def prototypeOfFileIsFinite: DiscreteFromContextDomain[Val[File], File] = prototype => Domain(FromContext.prototype(prototype).map { _.listFilesSafe.iterator })
-  implicit def fileIsDiscrete: DiscreteFromContextDomain[File, File] = f =>
+  given DiscreteFromContextDomain[File, File] = f => //ListFilesDomain(f)
     Domain(
       FromContext.value(f.listFilesSafe.iterator),
       validation = Validate { _ =>
@@ -53,5 +53,3 @@ package object file {
         else if (!f.isDirectory) Seq(throw UserBadDataError(s"File $f used in domain, should be a directory")) else Seq()
       }
     )
-
-}

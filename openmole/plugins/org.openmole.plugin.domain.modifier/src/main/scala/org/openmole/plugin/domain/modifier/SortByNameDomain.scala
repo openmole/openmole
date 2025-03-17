@@ -20,16 +20,17 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object SortByNameDomain {
+object SortByNameDomain:
 
-  implicit def isDiscrete[D]: DiscreteFromContextDomain[SortByNameDomain[D], File] = domain =>
+  given [D]: DiscreteFromContextDomain[SortByNameDomain[D], File] = domain =>
     Domain(
       domain.iterator,
       domain.inputs,
       domain.validate
     )
 
-}
+  given [D]: DiscreteDomainModifiers[SortByNameDomain[D]] with {}
+
 
 case class SortByNameDomain[D](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, File]) {
   def iterator =
