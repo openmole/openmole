@@ -50,7 +50,8 @@ class SLURMJobService[S](
       gres = parameters.gres.toList,
       constraints = parameters.constraints.toList,
       reservation = parameters.reservation,
-      wckey = parameters.wckey
+      wckey = parameters.wckey,
+      exclusive = parameters.exclusive
     )
 
     accessControl { gridscale.slurm.submit(h, description) }
