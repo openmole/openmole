@@ -34,7 +34,7 @@ class Activator extends BundleActivator:
         WordHighLight(objectName(inputFiles)),
         WordHighLight(objectName(outputFiles)),
         WordHighLight(objectName(resources)),
-        WordHighLight(objectName(EmptyDirectory))
+        ObjectHighLight(objectName(EmptyDirectory))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

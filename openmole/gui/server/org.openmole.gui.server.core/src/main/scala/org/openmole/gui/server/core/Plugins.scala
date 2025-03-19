@@ -115,13 +115,11 @@ object Plugins extends JavaLogger {
     webui / utils.webpakedOpenmoleFileName
   }
 
-  def expandDepsFile(template: File, to: File) = {
-    val rules = PluginRegistry.highLights.partition { kw =>
-      kw match {
-        case _@ (HighLight.TaskHighLight(_) | HighLight.SourceHighLight(_) | HighLight.EnvironmentHighLight(_) | HighLight.HookHighLight(_) | HighLight.SamplingHighLight(_) | HighLight.DomainHighLight(_) | HighLight.PatternHighLight(_)) => false
+  def expandDepsFile(template: File, to: File) =
+    val rules =
+      PluginRegistry.highLights.partition:
+        case _: HighLight.ObjectHighLight => false
         case _ => true
-      }
-    }
 
     to.content =
       s"""${template.content}""" // ${AceOpenMOLEMode.content}
@@ -132,7 +130,6 @@ object Plugins extends JavaLogger {
           "##OMClasses##",
           s""" "${rules._2.map { _.name }.mkString("|")}" """)
 
-  }
 
 //  def addPluginRoutes(route: OMRouter => Unit, services: Services) = {
 //    Log.logger.info(s"Loading GUI plugins")

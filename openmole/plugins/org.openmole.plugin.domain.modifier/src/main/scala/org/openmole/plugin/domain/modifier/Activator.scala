@@ -28,19 +28,7 @@ class Activator extends BundleActivator {
     import org.openmole.core.highlight.HighLight._
 
     val highLight: Vector[HighLight] =
-      Vector(
-        "take",
-        "group",
-        "sliding",
-        "map",
-        "filter",
-        "zipWith",
-        "zipWithIndex",
-        "zipWithName",
-        "sort",
-        "sortBy",
-        "shuffle"
-      )
+      Vector()
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = highLight)
   }

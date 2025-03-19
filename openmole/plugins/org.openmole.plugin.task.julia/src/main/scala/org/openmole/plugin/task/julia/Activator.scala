@@ -15,7 +15,7 @@ class Activator extends BundleActivator:
     val keyWords: Vector[HighLight] =
       Vector(
         TaskHighLight(objectName(JuliaTask)),
-        OtherHighLight("JuliaPackageSpec")
+        ObjectHighLight(objectName(JuliaPackageSpec))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

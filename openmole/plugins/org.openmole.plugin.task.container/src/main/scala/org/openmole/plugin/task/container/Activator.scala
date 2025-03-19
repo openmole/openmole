@@ -30,10 +30,10 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        TaskHighLight("ContainerTask"),
-        WordHighLight(classOf[SingularityFlatImage]),
-        WordHighLight(classOf[SingularityMemory]),
-        WordHighLight(classOf[SingularityOverlay]),
+        TaskHighLight(objectName(ContainerTask)),
+        ObjectHighLight(objectName(SingularityFlatImage)),
+        ObjectHighLight(objectName(SingularityMemory)),
+        ObjectHighLight(objectName(SingularityOverlay)),
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
