@@ -153,10 +153,15 @@ object EvolutionWorkflow:
         case AfterGeneration(g) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterGeneration(g, integration.operations.generationLens)(s, population)
         case AfterDuration(d) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterDuration(d, integration.operations.startTimeLens)(s, population)
 
+    case class AfterEvaluated(steps: Long) extends OMTermination
+    case class AfterGeneration(steps: Long) extends OMTermination
+    case class AfterDuration(duration: Time) extends OMTermination
+
+    given Conversion[Long, OMTermination] = AfterEvaluated.apply
+    given Conversion[Int, OMTermination] = AfterEvaluated.apply
+    given Conversion[Time, OMTermination] = AfterDuration.apply
+
   sealed trait OMTermination
-  case class AfterEvaluated(steps: Long) extends OMTermination
-  case class AfterGeneration(steps: Long) extends OMTermination
-  case class AfterDuration(duration: Time) extends OMTermination
 
   sealed trait EvolutionPattern
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
