@@ -17,15 +17,10 @@
 
 package org.openmole.plugin.method.evolution
 
-import cats.implicits._
-import monocle.macros.{ GenLens }
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.plugin.method.evolution.Genome.Suggestion
-import squants.time.Time
-
 import monocle._
-import monocle.syntax.all._
 
 object NSGA2:
 
