@@ -32,20 +32,15 @@ object NSGA2:
   object DeterministicNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 => MGONSGA2, _ }
     
-    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: DeterministicNSGA2) = new Ops:
-        def startTimeLens = Focus[S](_.startTime)
-        def generationLens = Focus[S](_.generation)
-        def evaluatedLens = Focus[S](_.evaluated)
-
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -118,12 +113,11 @@ object NSGA2:
   object StochasticNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 => MGONoisyNSGA2, _ }
 
-    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
-      def iManifest = implicitly[Manifest[I]]
+      def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
@@ -138,10 +132,6 @@ object NSGA2:
             generation = generationLens.get(state),
             saveOption = saveOption
           )
-
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
@@ -225,7 +215,7 @@ object NSGA2:
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicNSGA2(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
@@ -239,7 +229,7 @@ object NSGA2:
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticNSGA2(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,

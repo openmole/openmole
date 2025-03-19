@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import cats.implicits.*
 import mgo.evolution.algorithm.NoisyHDOSE as MGONoisyHDOSE
-import monocle.macros.GenLens
+import monocle.*
 import org.openmole.plugin.method.evolution.Objective.ToObjective
 import squants.time.Time
 
@@ -64,11 +64,11 @@ object HDOSE:
       def gManifest = implicitly
       def sManifest = implicitly
 
-      def operations(om: DeterministicHDOSE) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
+      def startTimeLens = Focus[S](_.startTime)
+      def generationLens = Focus[S](_.generation)
+      def evaluatedLens = Focus[S](_.evaluated)
 
+      def operations(om: DeterministicHDOSE) = new Ops:
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -192,12 +192,13 @@ object HDOSE:
       def gManifest = implicitly
       def sManifest = implicitly
 
+      def startTimeLens = Focus[S](_.startTime)
+      def generationLens = Focus[S](_.generation)
+      def evaluatedLens = Focus[S](_.evaluated)
+
       def operations(om: StochasticHDOSE) = new Ops:
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -411,7 +412,7 @@ object HDOSE:
         val exactObjectives = Objectives.toExact(OSE.FitnessPattern.toObjectives(objective))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicHDOSE(
             mu = populationSize,
             genome = genomeValue,
@@ -436,7 +437,7 @@ object HDOSE:
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticHDOSE(
             mu = populationSize,
             genome = genomeValue,

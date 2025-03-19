@@ -31,19 +31,15 @@ object NSGA3 {
   object DeterministicNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA3 => MGONSGA3, _ }
 
-    implicit def integration: MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: DeterministicNSGA3) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -97,7 +93,7 @@ object NSGA3 {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
-  }
+
 
   case class DeterministicNSGA3(
     mu:                  Int,
@@ -111,19 +107,15 @@ object NSGA3 {
   object StochasticNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 => MGONoisyNSGA3, _ }
 
-    implicit def integration: MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly[Manifest[I]]
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: StochasticNSGA3) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -181,7 +173,6 @@ object NSGA3 {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
-  }
 
   case class StochasticNSGA3(
     mu:                  Int,
@@ -209,7 +200,7 @@ object NSGA3 {
         val exactObjectives = Objectives.toExact(objective)
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicNSGA3(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
           genome,
           phenotypeContent,
@@ -224,7 +215,7 @@ object NSGA3 {
           Objectives.validate(noisyObjectives, aOutputs)
         }
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticNSGA3(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
           genome,
           phenotypeContent,

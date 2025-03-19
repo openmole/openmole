@@ -97,10 +97,9 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -114,10 +113,6 @@ object Profile {
             generation = generationLens.get(state),
             saveOption = saveOption
           )
-
-        def startTimeLens = Focus[S](_.startTime)
-        def generationLens = Focus[S](_.generation)
-        def evaluatedLens = Focus[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -172,7 +167,6 @@ object Profile {
 
 
     }
-  }
 
   case class DeterministicProfile(
     nicheSize:           Int,
@@ -205,20 +199,15 @@ object Profile {
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
 
-    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: StochasticProfile) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
-
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(om.genome.discrete)(v._1, None, v._2, None)
@@ -282,7 +271,6 @@ object Profile {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
-  }
 
   case class StochasticProfile(
     nicheSize:           Int,
@@ -314,7 +302,7 @@ object Profile {
             indexesOfProfiledTry(niche, genome).collect:
               case util.Failure(t) => t
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicProfile(
             genome = genome,
             objectives = exactObjectives,
@@ -337,7 +325,7 @@ object Profile {
             indexesOfProfiledTry(niche, genome).collect:
               case util.Failure(t) => t
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticProfile(
             nicheSize = nicheSize,
             niche = niche,

@@ -3,7 +3,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import cats.implicits._
-import monocle.macros.GenLens
+import monocle.*
 import org.openmole.core.context.{ Context, Variable }
 import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }
 import org.openmole.plugin.method.evolution.Genome.{ GenomeBound, Suggestion }
@@ -34,8 +34,7 @@ object OSE {
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE => MGOOSE, _ }
 
-
-    implicit def integration: MGOAPI.Integration[DeterministicOSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicOSE, (IArray[Double], IArray[Int]), Phenotype] { api =>
+    given MGOAPI.Integration[DeterministicOSE, (IArray[Double], IArray[Int]), Phenotype]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -44,10 +43,11 @@ object OSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
+      def startTimeLens = Focus[S](_.startTime)
+      def generationLens = Focus[S](_.generation)
+      def evaluatedLens = Focus[S](_.evaluated)
+
       def operations(om: DeterministicOSE) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
@@ -116,7 +116,7 @@ object OSE {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
       
     }
-  }
+  
 
   case class StochasticOSE(
     mu:                  Int,
@@ -135,7 +135,7 @@ object OSE {
     import mgo.evolution.algorithm.NoisyOSE._
     import mgo.evolution.algorithm.{ NoisyOSE => MGONoisyOSE, _ }
 
-    implicit def integration: MGOAPI.Integration[StochasticOSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticOSE, (IArray[Double], IArray[Int]), Phenotype] { api =>
+    given MGOAPI.Integration[StochasticOSE, (IArray[Double], IArray[Int]), Phenotype]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -144,13 +144,13 @@ object OSE {
       def gManifest = implicitly
       def sManifest = implicitly
 
+      def startTimeLens = Focus[S](_.startTime)
+      def generationLens = Focus[S](_.generation)
+      def evaluatedLens = Focus[S](_.evaluated)
+
       def operations(om: StochasticOSE) = new Ops:
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
-
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -233,7 +233,6 @@ object OSE {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
-  }
 
   import org.openmole.core.dsl.*
 
@@ -337,7 +336,7 @@ object OSE {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
         val fg = OriginAxe.fullGenome(origin, genome)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicOSE(
             mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),
@@ -360,7 +359,7 @@ object OSE {
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticOSE(
             mu = populationSize,
             origin = OriginAxe.toOrigin(origin, genome),

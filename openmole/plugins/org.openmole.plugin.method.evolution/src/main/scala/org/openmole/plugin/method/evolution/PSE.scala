@@ -63,10 +63,9 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, PSE => MGOPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] { api =>
+    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
-      type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -81,10 +80,6 @@ object PSE {
             generation = generationLens.get(state),
             saveOption = saveOption
           )
-
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
@@ -165,7 +160,6 @@ object PSE {
           (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
 
     }
-  }
 
   case class StochasticPSE(
     pattern:             Vector[Double] => Vector[Int],
@@ -184,10 +178,9 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, NoisyPSE => MGONoisyPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] { api =>
+    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
-      type S = EvolutionState[HitMapState]
 
       def iManifest = implicitly
       def gManifest = implicitly
@@ -203,10 +196,6 @@ object PSE {
             generation = generationLens.get(state),
             saveOption = saveOption
           )
-
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -289,7 +278,6 @@ object PSE {
           (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
 
     }
-  }
 
   object PatternAxe {
     implicit def fromInExactToPatternAxe[T, D](v: In[T, D])(implicit fix: FixDomain[D, Double], te: ToObjective[T]): PatternAxe = PatternAxe(te.apply(v.value), fix(v.domain).domain.toVector)
@@ -321,7 +309,7 @@ object PSE {
         val exactObjectives = Objectives.toExact(objective.map(_.p))
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicPSE(
             mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome,
@@ -343,7 +331,7 @@ object PSE {
           val aOutputs = outputs.map(_.toArray)
           Objectives.validate(noisyObjectives, aOutputs)
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticPSE(
             pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
             genome = genome,
