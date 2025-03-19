@@ -15,10 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.math
+package org.openmole.tool.math
 
-import java.math.BigDecimal
-import java.math.BigInteger
+import java.math.{BigDecimal, BigInteger}
 
 object BigDecimalOperations {
 

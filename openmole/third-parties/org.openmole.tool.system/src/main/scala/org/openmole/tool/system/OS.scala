@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.service
+package org.openmole.tool.system
 
 object OS {
   val windows = "Windows"
@@ -28,7 +28,7 @@ object OS {
   lazy val actualOS = OS(System.getProperty("os.name"), System.getProperty("os.arch"))
 }
 
-import OS._
+import org.openmole.tool.system.OS.*
 
 case class OS(name: String = "", arch: String = "") {
   def compatibleWith(testOS: String, testArch: String) =

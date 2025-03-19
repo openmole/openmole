@@ -20,12 +20,12 @@ package org.openmole.core.workflow.execution
 import java.io.PrintStream
 import org.openmole.core.outputmanager.OutputManager
 import org.openmole.core.tools.service
-import org.openmole.core.workflow.execution.Environment._
-import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.execution.Environment.*
+import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole.MoleExecutionMessage
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.file._
+import org.openmole.tool.file.*
 
 import scala.ref.WeakReference
 
@@ -98,7 +98,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   display(stream, s"Output of local execution", output)
                   display(stream, s"Error of local execution", error)
 
-              environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, service.RuntimeInfo.localRuntimeInfo))
+              environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, RuntimeInfo.localRuntimeInfo))
             catch
               case e: InterruptedException => throw e
               case e: ThreadDeath          => throw e

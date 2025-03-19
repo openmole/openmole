@@ -19,8 +19,7 @@ package org.openmole.plugin.task.external
 
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-
-import org.openmole.core.tools.service.OS
+import org.openmole.tool.system.OS
 //import java.io._
 import org.openmole.core.context.Val
 import org.openmole.core.setter.{InputOutputBuilder, Setter}

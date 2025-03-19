@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.service
+package org.openmole.tool.osgi
 
-import org.openmole.core.exception.InternalProcessingError
 import org.osgi.framework.BundleContext
 
-trait OSGiActivator {
+trait OSGiActivator:
   def context: Option[BundleContext]
-  def contextOrException = context.getOrElse(throw new InternalProcessingError("Context uninitialized"))
+  def contextOrException = context.getOrElse(throw new RuntimeException("Context uninitialized"))
   def enabled = context.isDefined
-}

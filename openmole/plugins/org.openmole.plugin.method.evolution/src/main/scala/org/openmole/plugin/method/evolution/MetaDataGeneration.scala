@@ -6,10 +6,10 @@ import io.circe.generic.auto.*
 import io.circe.parser.*
 import io.circe.generic.semiauto.*
 import org.openmole.core.exception.InternalProcessingError
-import org.openmole.core.tools.io.Prettifier
 import Genome.GenomeBound
 import org.openmole.tool.types.TypeTool
 import org.openmole.core.dsl.extension.*
+import org.openmole.tool.logger.Prettifier
 
 object MetadataGeneration:
 

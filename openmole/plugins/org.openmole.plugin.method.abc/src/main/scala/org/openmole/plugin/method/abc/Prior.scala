@@ -6,7 +6,7 @@ import org.apache.commons.math3.random.RandomGenerator
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 import org.openmole.core.keyword.In
-import org.openmole.core.tools.math._
+import org.openmole.tool.math._
 import org.openmole.core.workflow.domain.BoundedFromContextDomain
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.plugin.tool.pattern._

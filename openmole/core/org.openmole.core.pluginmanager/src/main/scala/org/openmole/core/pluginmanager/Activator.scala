@@ -17,7 +17,7 @@
 
 package org.openmole.core.pluginmanager
 
-import org.openmole.core.tools.service.OSGiActivator
+import org.openmole.tool.osgi.OSGiActivator
 import org.osgi.framework.{BundleActivator, BundleContext, BundleEvent, BundleListener}
 
 object Activator extends OSGiActivator:

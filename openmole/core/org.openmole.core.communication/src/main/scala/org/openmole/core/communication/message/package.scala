@@ -17,22 +17,22 @@
 package org.openmole.core.communication.message
 
 import java.io.File
-
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.serializer.SerializerService
-import org.openmole.core.tools.service._
+import org.openmole.core.tools.service.*
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
-import org.openmole.core.workflow.job.Job._
-import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.execution.RuntimeInfo
+import org.openmole.core.workflow.job.Job.*
+import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.task.Task
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 
 import util.Try
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.tool.archive._
+import org.openmole.tool.file.*
+import org.openmole.tool.hash.*
+import org.openmole.tool.archive.*
 
 
 object FileMessage:

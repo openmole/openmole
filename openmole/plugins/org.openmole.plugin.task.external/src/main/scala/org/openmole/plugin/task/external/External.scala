@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.task.external
 
-import org.openmole.core.tools.service.OS
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.`extension`._
 import org.openmole.core.workflow.task.InputOutputCheck
+import org.openmole.tool.system.OS
 
 object External:
   val PWD = Val[String]("PWD")

@@ -266,7 +266,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     import EGIEnvironment._
-    import org.openmole.core.tools.math._
+    import org.openmole.tool.math._
     import org.openmole.tool.file._
 
     def selectStorage =

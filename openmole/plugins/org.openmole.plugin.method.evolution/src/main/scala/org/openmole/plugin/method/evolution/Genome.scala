@@ -3,7 +3,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.argument.FromContext
-import org.openmole.core.tools.math._
+import org.openmole.tool.math._
 import org.openmole.core.setter.ValueAssignment
 
 import org.openmole.core.dsl.*

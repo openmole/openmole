@@ -50,7 +50,7 @@ import scala.concurrent.duration.Duration
   //apiImpl.activatePlugins
 
   def stackError(t: Throwable) =
-    import org.openmole.core.tools.io.Prettifier.*
+    import org.openmole.tool.logger.Prettifier.*
     import io.circe.*
     import io.circe.syntax.*
     import io.circe.generic.auto.*

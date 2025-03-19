@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.io
+package org.openmole.tool.logger
 
-import java.io.{ PrintWriter, StringWriter }
 import org.openmole.tool.logger.JavaLogger
+
+import java.io.{PrintWriter, StringWriter}
 import scala.jdk.CollectionConverters.*
 
 object Prettifier extends JavaLogger:

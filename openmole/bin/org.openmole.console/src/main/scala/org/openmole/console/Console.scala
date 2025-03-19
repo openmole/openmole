@@ -24,9 +24,8 @@ import org.openmole.core.compiler.*
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.preference.Preference
 import org.openmole.core.project.*
-import org.openmole.core.tools.io.Prettifier
 import org.openmole.tool.crypto.Cypher
-import org.openmole.tool.logger.JavaLogger
+import org.openmole.tool.logger.{JavaLogger, Prettifier}
 import org.openmole.core.services.*
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workspace.TmpDirectory

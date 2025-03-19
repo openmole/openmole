@@ -19,16 +19,16 @@ package org.openmole.core.workflow.execution
 
 import java.util.concurrent.atomic.*
 import java.util.logging.Level
-import org.openmole.core.event.{ Event, EventDispatcher }
-import org.openmole.core.preference.{ Preference, PreferenceLocation }
+import org.openmole.core.event.{Event, EventDispatcher}
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.execution.ExecutionState._
-import org.openmole.core.workflow.job.{ JobGroup, Job, JobId }
+import org.openmole.core.tools.service.*
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.execution.ExecutionState.*
+import org.openmole.core.workflow.job.{Job, JobGroup, JobId}
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.{Name, TaskExecutionContext}
-import org.openmole.tool.cache._
+import org.openmole.tool.cache.*
 import org.openmole.core.argument.*
 
 import scala.ref.WeakReference

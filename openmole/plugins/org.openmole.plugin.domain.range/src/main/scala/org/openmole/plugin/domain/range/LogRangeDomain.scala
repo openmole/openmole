@@ -21,7 +21,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.domain
 
-import org.openmole.core.tools.math.BigDecimalOperations
+import org.openmole.tool.math.BigDecimalOperations
 import java.math.{BigDecimal, MathContext, RoundingMode}
 
 import org.openmole.plugin.domain.modifier.*

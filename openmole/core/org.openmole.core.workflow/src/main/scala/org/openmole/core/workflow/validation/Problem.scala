@@ -20,13 +20,13 @@ package org.openmole.core.workflow.validation
 import org.openmole.core.argument.Validate
 import org.openmole.core.exception.*
 import org.openmole.core.setter.*
-import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil.*
 import org.openmole.core.context.*
+import org.openmole.tool.logger.Prettifier
 
 object ValidateTask:
   def validate(task: Task): Validate =

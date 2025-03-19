@@ -27,7 +27,7 @@ import org.openmole.core.argument._
 import org.openmole.tool.types._
 import org.openmole.core.workflow.domain._
 import cats.implicits._
-import org.openmole.core.tools.io.Prettifier
+import org.openmole.tool.logger.Prettifier
 
 
 object IsSampling:

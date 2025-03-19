@@ -15,38 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.tools.service
+package org.openmole.tool.system
+
+import org.apache.commons.exec.{PumpStreamHandler, ShutdownHookProcessDestroyer}
 
 import java.io.PrintStream
-import org.apache.commons.exec.PumpStreamHandler
-import org.apache.commons.exec.ShutdownHookProcessDestroyer
 
-object ProcessUtil {
+object ProcessUtil:
   val processDestroyer = new ShutdownHookProcessDestroyer
 
-  def executeProcess(process: Process, out: PrintStream, err: PrintStream) = {
+  def executeProcess(process: Process, out: PrintStream, err: PrintStream) =
     val pump = new PumpStreamHandler(out, err)
 
     pump.setProcessOutputStream(process.getInputStream)
     pump.setProcessErrorStream(process.getErrorStream)
 
     processDestroyer.add(process)
-    try {
+    try
       pump.start
       try process.waitFor
-      catch {
+      catch
         case e: Throwable =>
           def kill(p: ProcessHandle) = p.destroyForcibly()
           process.descendants().forEach(kill)
           kill(process.toHandle)
 
           throw e
-      }
-      finally {
+      finally
         pump.stop
-      }
-    }
     finally processDestroyer.remove(process)
     process.exitValue
-  }
-}
+
