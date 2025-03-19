@@ -114,6 +114,7 @@ object SharedStorage extends JavaLogger:
         val loadModules = modules.getOrElse(JobScript.defaultModules).map(m => s"module load $m")
 
         val commands =
+          Seq(s"trap 'cleanup_work_directory' SIGTERM")
           loadModules ++
             Seq(
               s"export PATH=$runtime/jre/bin/:$$PATH",
@@ -126,7 +127,16 @@ object SharedStorage extends JavaLogger:
               "exit $RETURNCODE"
             )
 
-        val content = commands.mkString(" ; ")
+        val content =
+          s"""
+            |function cleanup_work_directory(){
+            |  rm -rf $workspace
+            |  exit 15
+            |}
+            |
+            |${commands.mkString(" ; ")}
+            |""".stripMargin
+
         Log.logger.fine("Script: " + content)
 
         script.content = content
