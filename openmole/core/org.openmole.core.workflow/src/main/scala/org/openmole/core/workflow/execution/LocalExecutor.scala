@@ -19,7 +19,6 @@ package org.openmole.core.workflow.execution
 
 import java.io.PrintStream
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.core.tools.service
 import org.openmole.core.workflow.execution.Environment.*
 import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.mole.MoleExecutionMessage

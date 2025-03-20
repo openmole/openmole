@@ -22,7 +22,6 @@ import java.util.logging.Level
 import org.openmole.core.event.{Event, EventDispatcher}
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.threadprovider.ThreadProvider
-import org.openmole.core.tools.service.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.workflow.execution.ExecutionState.*
 import org.openmole.core.workflow.job.{Job, JobGroup, JobId}
