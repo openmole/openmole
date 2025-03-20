@@ -17,8 +17,12 @@ package org.openmole.tool.system
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-def registerSignalCatcher(signal: Seq[String])(f: sun.misc.Signal => Unit): Unit =
-  import sun.misc.*
-  val handler: SignalHandler = s => f(s)
-  signal.foreach: sig =>
-    sun.misc.Signal.handle(new Signal(sig), handler)
+object Signal:
+
+  type Handler = sun.misc.Signal => Unit
+
+  def registerSignalCatcher(signal: Seq[String])(f: Handler): Unit =
+    import sun.misc.*
+    val handler: SignalHandler = s => f(s)
+    signal.foreach: sig =>
+      sun.misc.Signal.handle(new Signal(sig), handler)

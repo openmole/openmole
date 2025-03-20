@@ -20,8 +20,6 @@ import java.io.File
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.tools.service.*
 import org.openmole.core.workflow.execution.Environment.RuntimeLog
 import org.openmole.core.workflow.execution.RuntimeInfo
 import org.openmole.core.workflow.job.Job.*

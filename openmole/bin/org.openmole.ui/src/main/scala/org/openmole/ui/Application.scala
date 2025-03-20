@@ -266,7 +266,7 @@ object Application extends JavaLogger {
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               val s = newServer.start()
-              registerSignalCatcher(Seq("TERM", "INT")): si =>
+              Signal.registerSignalCatcher(Seq("TERM", "INT")): si =>
                 logger.info(s"Received signal $si, shutting down")
                 s.stop()
 

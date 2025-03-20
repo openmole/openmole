@@ -32,7 +32,7 @@ package object thread {
   implicit def function2Runable(f: => Unit): Runnable = new Runnable { def run = f }
   def thread(f: => Unit) = new Thread { override def run = f }
 
-  def background[F](f: => F)(implicit pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
+  def background[F](f: => F)(using pool: ThreadPoolExecutor): Future[F] = pool.submit(f)
 
   def timeout[F](f: => F)(duration: Duration)(implicit pool: ThreadPoolExecutor): F = try {
     val r = pool.submit(f)

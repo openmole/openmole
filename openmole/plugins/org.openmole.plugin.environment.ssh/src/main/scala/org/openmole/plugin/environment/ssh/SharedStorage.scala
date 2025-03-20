@@ -130,6 +130,7 @@ object SharedStorage extends JavaLogger:
         val content =
           s"""
             |function cleanup_work_directory(){
+            |  sleep 20
             |  rm -rf $workspace
             |  exit 15
             |}
