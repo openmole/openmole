@@ -39,3 +39,22 @@ def display(stream: PrintStream, label: String, content: String) =
 type ExecutionState = Byte
 
 
+object RuntimeLog:
+  @transient lazy val localHost: RuntimeInfo =
+    import org.openmole.tool.network.LocalHostName
+    LocalHostName.localHostName.getOrElse("fake:" + java.util.UUID.randomUUID().toString)
+
+  object RuntimeInfo:
+    extension (r: RuntimeInfo)
+      def hostName: String = r
+
+  opaque type RuntimeInfo = String
+
+case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
+
+object RuntimeSetting:
+  def apply(memoryOverlay: Boolean = false) =
+    new RuntimeSetting(memoryOverlay)
+
+case class RuntimeSetting(memoryOverlay: Boolean)
+

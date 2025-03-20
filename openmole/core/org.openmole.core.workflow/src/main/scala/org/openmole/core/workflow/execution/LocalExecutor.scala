@@ -97,7 +97,7 @@ class LocalExecutor(environment: WeakReference[LocalEnvironment]) extends Runnab
                   display(stream, s"Output of local execution", output)
                   display(stream, s"Error of local execution", error)
 
-              environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log, RuntimeInfo.localRuntimeInfo))
+              environment.eventDispatcherService.trigger(environment: Environment, Environment.JobCompleted(executionJob, log))
             catch
               case e: InterruptedException => throw e
               case e: ThreadDeath          => throw e

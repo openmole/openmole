@@ -40,7 +40,7 @@ import org.openmole.tool.system.*
 import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
 import util.{Failure, Success}
-import org.openmole.core.workflow.execution.Environment.RuntimeLog
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.exception.Retry
@@ -116,7 +116,13 @@ class Runtime:
 
     val beginTime = System.currentTimeMillis
 
-    val environment = new LocalEnvironment(threads = threads, false, Some("runtime local"), remote = true)
+    val environment = new LocalEnvironment(
+      threads = threads,
+      deinterleave = false,
+      remote = true,
+      runtimeSetting = executionMessage.runtimeSetting,
+      name = Some("runtime local")
+    )
     environment.start()
 
     Signal.registerSignalCatcher(Seq("TERM"))(Runtime.signalHandler(environment))
@@ -223,10 +229,12 @@ class Runtime:
           IndividualFilesContextResults(contextResultFile, replicated)
 
         val result =
-          if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
+          if executionMessage.archiveResult
+          then uploadArchive
+          else uploadIndividualFiles
 
         val endTime = System.currentTimeMillis
-        Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
+        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
       catch
         case t: Throwable =>
           if (debug) logger.log(SEVERE, "", t)
@@ -239,7 +247,7 @@ class Runtime:
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeLog.localHost)
 
     newFile.withTmpFile("output", ".tgz"): outputLocal =>
       logger.fine(s"Serializing result to $outputLocal")

@@ -41,9 +41,7 @@ object Environment:
   case class ExecutionJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, detail: Option[String] = None) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: ExecutionJob, exception: Throwable, level: Level, moleJob: JobId, detail: Option[String] = None) extends Event[Environment] with ExceptionEvent
 
-  case class JobCompleted(job: ExecutionJob, log: RuntimeLog, info: RuntimeInfo) extends Event[Environment]
-
-  case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
+  case class JobCompleted(job: ExecutionJob, log: RuntimeLog) extends Event[Environment]
 
   def errors(environment: Environment) =
     environment match
@@ -97,22 +95,20 @@ trait SubmissionEnvironment extends Environment:
   def errors: Seq[ExceptionEvent]
   def clearErrors: Seq[ExceptionEvent]
 
+
+
 object LocalEnvironment:
 
   def apply(
-    threads:      OptionalArgument[Int]    = None,
-    deinterleave: Boolean                  = false,
-    name:         OptionalArgument[String] = None,
-    remote:       Boolean                  = false
+    threads:        OptionalArgument[Int]    = None,
+    deinterleave:   Boolean                  = false,
+    name:           OptionalArgument[String] = None,
+    remote:         Boolean                  = false,
+    runtimeSetting: RuntimeSetting           = RuntimeSetting()
   )(implicit varName: sourcecode.Name) =
     EnvironmentBuilder: ms =>
       import ms._
-      new LocalEnvironment(threads.getOrElse(1), deinterleave, Some(name.getOrElse(varName.value)), remote)
-
-  def apply(threads: Int, deinterleave: Boolean, remote: Boolean) =
-    EnvironmentBuilder: ms =>
-      import ms._
-      new LocalEnvironment(threads, deinterleave, None, remote)
+      new LocalEnvironment(threads.getOrElse(1), deinterleave, name  = Some(name.getOrElse(varName.value)), remote = remote, runtimeSetting = runtimeSetting)
 
 
 /**
@@ -121,11 +117,12 @@ object LocalEnvironment:
  * @param deinterleave get the outputs of executions as strings
  */
 class LocalEnvironment(
-  val threads:       Int,
-  val deinterleave:  Boolean,
-  override val name: Option[String],
-  val remote:      Boolean
-)(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment {
+  val threads:        Int,
+  val deinterleave:   Boolean,
+  val runtimeSetting: RuntimeSetting,
+  val remote:         Boolean,
+  override val name:  Option[String]
+)(implicit val threadProvider: ThreadProvider, val eventDispatcherService: EventDispatcher) extends Environment:
 
   val pool = Cache(new ExecutorPool(threads, WeakReference(this), threadProvider))
 
@@ -160,4 +157,3 @@ class LocalEnvironment(
   def done: Long = _done.get()
   def failed: Long = _failed.get()
 
-}

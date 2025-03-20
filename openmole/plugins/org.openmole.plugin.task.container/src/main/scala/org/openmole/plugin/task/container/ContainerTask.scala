@@ -192,14 +192,14 @@ object ContainerTask:
   def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
 
   def runCommandInContainer(
-                             image: InstalledSingularityImage,
-                             commands: Seq[String],
-                             volumes: Seq[(String, String)] = Seq.empty,
-                             environmentVariables: Seq[(String, String)] = Seq.empty,
-                             workDirectory: Option[String] = None,
-                             verbose: Boolean = false,
-                             output: PrintStream,
-                             error: PrintStream)(using TmpDirectory, NetworkService) =
+    image: InstalledSingularityImage,
+    commands: Seq[String],
+    volumes: Seq[(String, String)] = Seq.empty,
+    environmentVariables: Seq[(String, String)] = Seq.empty,
+    workDirectory: Option[String] = None,
+    verbose: Boolean = false,
+    output: PrintStream,
+    error: PrintStream)(using TmpDirectory, NetworkService) =
     image match
       case image: InstalledSingularityImage.InstalledSIFMemoryImage =>
         runCommandInSIFContainer(
@@ -438,6 +438,18 @@ object ContainerTask:
 
       val retCode =
         image match
+          case image: InstalledSingularityImage.InstalledSIFOverlayImage if executionContext.localEnvironment.runtimeSetting.memoryOverlay =>
+            runCommandInSIFContainer(
+              image = image.image,
+              tmpFS = true,
+              commands = commandValue ++ copyCommand ++ exitCommand,
+              workDirectory = Some(workDirectoryValue(image)),
+              output = out,
+              error = err,
+              volumes = volumes ++ Seq(copyVolume),
+              environmentVariables = containerEnvironmentVariables,
+              verbose = image.containerSystem.verbose
+            )
           case image: InstalledSingularityImage.InstalledSIFOverlayImage =>
             def createOverlayPool =
               WithInstance[_root_.container.Singularity.OverlayImage](pooled = image.containerSystem.reuse): () =>

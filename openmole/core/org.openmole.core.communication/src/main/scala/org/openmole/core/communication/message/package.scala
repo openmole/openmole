@@ -20,11 +20,11 @@ import java.io.File
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.workflow.execution.Environment.RuntimeLog
-import org.openmole.core.workflow.execution.RuntimeInfo
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.job.Job.*
 import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.task.Task
+
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 
 import util.Try
@@ -103,13 +103,12 @@ object ReplicatedFile:
 
 
 case class ReplicatedFile(originalPath: String, name: String, directory: Boolean, hash: String, path: String, mode: Int)
-case class RuntimeSettings(archiveResult: Boolean)
+case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSetting: RuntimeSetting, archiveResult: Boolean = false)
 
-case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSettings: RuntimeSettings)
-
-case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
+case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeLog.RuntimeInfo)
 sealed trait SerializedContextResults
 case class ArchiveContextResults(contextResults: File) extends SerializedContextResults
 case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults
 case class ContextResults(results: PartialFunction[JobId, Try[Context]])
+
 

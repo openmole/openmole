@@ -64,6 +64,7 @@ object SLURMEnvironment:
     refresh:              OptionalArgument[Time]                           = None,
     submittedJobs:        OptionalArgument[Int]                            = None,
     modules:              OptionalArgument[Seq[String]]                    = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]                 = None,
     debug:                Boolean                                          = false
   )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
@@ -88,6 +89,7 @@ object SLURMEnvironment:
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
       modules = modules,
+      runtimeSetting = runtimeSetting,
       debug = debug)
 
     DispatchEnvironment.queue(submittedJobs):
@@ -141,6 +143,7 @@ object SLURMEnvironment:
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
     modules:              Option[Seq[String]],
+    runtimeSetting:       Option[RuntimeSetting],
     debug:                Boolean)
 
   def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
@@ -166,7 +169,7 @@ class SLURMEnvironment(
   val name:              Option[String],
   val authentication:    SSHAuthentication,
   val proxy:             Option[SSHProxy.Authenticated],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services), parameters.runtimeSetting):
   env =>
 
   import services.*

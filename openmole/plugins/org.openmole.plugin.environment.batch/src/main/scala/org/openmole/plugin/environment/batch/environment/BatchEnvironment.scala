@@ -52,7 +52,7 @@ import org.openmole.tool.crypto.Cypher
 
 import scala.collection.immutable.TreeSet
 
-object BatchEnvironment {
+object BatchEnvironment:
 
   trait Transfer:
     def id: Long
@@ -276,7 +276,7 @@ object BatchEnvironment {
       pluginReplicas.sortBy(_.originalPath),
       files.sortBy(_.originalPath),
       jobFile,
-      environment.runtimeSettings
+      runtimeSettings(environment)
     )
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = 
@@ -354,9 +354,11 @@ object BatchEnvironment {
     )
 
   type REPLClassCache = AssociativeCache[Set[String], Seq[File]]
-}
 
-trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvironment:
+  def runtimeSettings(environment: BatchEnvironment) = environment.runtimeSetting.getOrElse(RuntimeSetting())
+
+
+trait BatchEnvironment(val state: BatchEnvironmentState, val runtimeSetting: Option[RuntimeSetting] = None) extends SubmissionEnvironment:
   env =>
 
   def services: BatchEnvironment.Services
@@ -377,8 +379,6 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  def runtimeSettings = RuntimeSettings(archiveResult = false)
 
   def error(e: ExceptionEvent) = state._errors.put(e)
   def errors: Seq[ExceptionEvent] = state._errors.elements
