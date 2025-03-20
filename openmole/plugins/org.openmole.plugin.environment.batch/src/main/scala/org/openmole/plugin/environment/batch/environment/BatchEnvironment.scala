@@ -125,8 +125,6 @@ object BatchEnvironment:
     case None    => preference(MemorySizeForRuntime)
     case Some(m) => m
 
-  def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
-
   object Services:
 
     def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
@@ -197,6 +195,7 @@ object BatchEnvironment:
 
   def serializeJob(
     environment: BatchEnvironment,
+    runtimeSetting: Option[RuntimeSetting],
     job: BatchExecutionJob,
     remoteStorage: RemoteStorage,
     replicate: (File, TransferOptions) => ReplicatedFile,
@@ -218,13 +217,15 @@ object BatchEnvironment:
 
       val runtime = replicateTheRuntime(environment, replicate)
 
-      val executionMessage = createExecutionMessage(
-        jobFile,
-        files,
-        plugins,
-        replicate,
-        environment
-      )
+      val executionMessage =
+        createExecutionMessage(
+          jobFile,
+          files,
+          plugins,
+          replicate,
+          environment,
+          runtimeSetting
+        )
 
       /* ---- upload the execution message ----*/
       val inputPath =
@@ -266,7 +267,8 @@ object BatchEnvironment:
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
     replicate: (File, TransferOptions) => ReplicatedFile,
-    environment: BatchEnvironment
+    environment: BatchEnvironment,
+    runtimeSetting: Option[RuntimeSetting]
   )(implicit services: BatchEnvironment.Services): ExecutionMessage =
 
     val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
@@ -276,7 +278,7 @@ object BatchEnvironment:
       pluginReplicas.sortBy(_.originalPath),
       files.sortBy(_.originalPath),
       jobFile,
-      runtimeSettings(environment)
+      runtimeSetting.getOrElse(RuntimeSetting())
     )
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = 
@@ -355,10 +357,8 @@ object BatchEnvironment:
 
   type REPLClassCache = AssociativeCache[Set[String], Seq[File]]
 
-  def runtimeSettings(environment: BatchEnvironment) = environment.runtimeSetting.getOrElse(RuntimeSetting())
 
-
-trait BatchEnvironment(val state: BatchEnvironmentState, val runtimeSetting: Option[RuntimeSetting] = None) extends SubmissionEnvironment:
+trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvironment:
   env =>
 
   def services: BatchEnvironment.Services

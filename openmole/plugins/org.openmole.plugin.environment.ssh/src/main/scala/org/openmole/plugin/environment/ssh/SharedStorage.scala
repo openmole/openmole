@@ -98,7 +98,6 @@ object SharedStorage extends JavaLogger:
     jobDirectory:   String,
     workDirectory:  String,
     openMOLEMemory: Option[Information],
-    threads:        Option[Int],
     serializedJob:  SerializedJob,
     outputPath:     String,
     storage:        S,
@@ -121,7 +120,7 @@ object SharedStorage extends JavaLogger:
               s"cd $runtime",
               s"mkdir -p $workspace",
               s"sh run.sh ${BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt}m $workspace -s ${serializedJob.remoteStorage.path}" +
-                s" -p envplugins/ -i ${serializedJob.inputPath} -o $result -t ${BatchEnvironment.threadsValue(threads)}" + (if (debug) " --debug" else ""),
+                s" -p envplugins/ -i ${serializedJob.inputPath} -o $result" + (if debug then " --debug" else ""),
               "RETURNCODE=$?",
               s"rm -rf $workspace",
               "exit $RETURNCODE"

@@ -33,26 +33,26 @@ import org.openmole.core.dsl.extension.*
 object PBSEnvironment extends JavaLogger:
 
   def apply(
-    user:                 OptionalArgument[String]      = None,
-    host:                 OptionalArgument[String]      = None,
-    port:                 OptionalArgument[Int]         = 22,
-    queue:                OptionalArgument[String]      = None,
-    openMOLEMemory:       OptionalArgument[Information] = None,
-    wallTime:             OptionalArgument[Time]        = None,
-    memory:               OptionalArgument[Information] = None,
-    nodes:                OptionalArgument[Int]         = None,
-    coreByNode:           OptionalArgument[Int]         = None,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    threads:              OptionalArgument[Int]         = None,
-    storageSharedLocally: Boolean                       = false,
-    timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    flavour:              gridscale.pbs.PBSFlavour      = Torque,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    name:                 OptionalArgument[String]      = None,
-    localSubmission:      Boolean                       = false,
-    modules:              OptionalArgument[Seq[String]] = None,
+    user:                 OptionalArgument[String]           = None,
+    host:                 OptionalArgument[String]           = None,
+    port:                 OptionalArgument[Int]              = 22,
+    queue:                OptionalArgument[String]           = None,
+    openMOLEMemory:       OptionalArgument[Information]      = None,
+    wallTime:             OptionalArgument[Time]             = None,
+    memory:               OptionalArgument[Information]      = None,
+    nodes:                OptionalArgument[Int]              = None,
+    coreByNode:           OptionalArgument[Int]              = None,
+    sharedDirectory:      OptionalArgument[String]           = None,
+    workDirectory:        OptionalArgument[String]           = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]   = None,
+    storageSharedLocally: Boolean                            = false,
+    timeout:              OptionalArgument[Time]             = None,
+    reconnect:            OptionalArgument[Time]             = SSHConnection.defaultReconnect,
+    flavour:              gridscale.pbs.PBSFlavour           = Torque,
+    submittedJobs:        OptionalArgument[Int]              = None,
+    name:                 OptionalArgument[String]           = None,
+    localSubmission:      Boolean                            = false,
+    modules:              OptionalArgument[Seq[String]]      = None,
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -64,7 +64,7 @@ object PBSEnvironment extends JavaLogger:
       coreByNode = coreByNode,
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
-      threads = threads,
+      runtimeSetting = runtimeSetting,
       storageSharedLocally = storageSharedLocally,
       flavour = flavour,
       modules = modules
@@ -107,14 +107,15 @@ object PBSEnvironment extends JavaLogger:
     coreByNode:           Option[Int],
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
-    threads:              Option[Int],
+    runtimeSetting:       Option[RuntimeSetting],
     storageSharedLocally: Boolean,
     flavour:              _root_.gridscale.pbs.PBSFlavour,
     modules:              Option[Seq[String]])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -182,8 +183,8 @@ class PBSEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => PBSEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  => PBSEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => PBSEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => PBSEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService)
 
   def frontend = Frontend.ssh(host, port, timeout, authentication)
 
@@ -227,7 +228,7 @@ class PBSLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) = PBSEnvironment.submit(env, batchExecutionJob, storage, space, pbsJobService)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) = PBSEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, pbsJobService)
 
   lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

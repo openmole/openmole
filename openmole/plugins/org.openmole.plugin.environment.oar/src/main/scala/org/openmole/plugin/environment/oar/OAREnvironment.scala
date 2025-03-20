@@ -34,25 +34,25 @@ import squants.information._
 object OAREnvironment {
 
   def apply(
-    user:                 OptionalArgument[String]      = None,
-    host:                 OptionalArgument[String]      = None,
-    port:                 OptionalArgument[Int]         = 22,
-    queue:                OptionalArgument[String]      = None,
-    core:                 OptionalArgument[Int]         = None,
-    cpu:                  OptionalArgument[Int]         = None,
-    wallTime:             OptionalArgument[Time]        = None,
-    openMOLEMemory:       OptionalArgument[Information] = None,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    threads:              OptionalArgument[Int]         = None,
-    storageSharedLocally: Boolean                       = false,
-    name:                 OptionalArgument[String]      = None,
-    bestEffort:           Boolean                       = true,
-    timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    localSubmission:      Boolean                       = false,
-    modules:              OptionalArgument[Seq[String]] = None,
+    user:                 OptionalArgument[String]           = None,
+    host:                 OptionalArgument[String]           = None,
+    port:                 OptionalArgument[Int]              = 22,
+    queue:                OptionalArgument[String]           = None,
+    core:                 OptionalArgument[Int]              = None,
+    cpu:                  OptionalArgument[Int]              = None,
+    wallTime:             OptionalArgument[Time]             = None,
+    openMOLEMemory:       OptionalArgument[Information]      = None,
+    sharedDirectory:      OptionalArgument[String]           = None,
+    workDirectory:        OptionalArgument[String]           = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]   = None,
+    storageSharedLocally: Boolean                            = false,
+    name:                 OptionalArgument[String]           = None,
+    bestEffort:           Boolean                            = true,
+    timeout:              OptionalArgument[Time]             = None,
+    reconnect:            OptionalArgument[Time]             = SSHConnection.defaultReconnect,
+    submittedJobs:        OptionalArgument[Int]              = None,
+    localSubmission:      Boolean                            = false,
+    modules:              OptionalArgument[Seq[String]]      = None,
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -63,7 +63,7 @@ object OAREnvironment {
       openMOLEMemory = openMOLEMemory,
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
-      threads = threads,
+      runtimeSetting = runtimeSetting,
       storageSharedLocally = storageSharedLocally,
       bestEffort = bestEffort,
       modules = modules
@@ -106,16 +106,17 @@ object OAREnvironment {
     openMOLEMemory:       Option[Information],
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
-    threads:              Option[Int],
+    runtimeSetting:       Option[RuntimeSetting],
     storageSharedLocally: Boolean,
     bestEffort:           Boolean,
     modules:              Option[Seq[String]])
 
-  def nbCores(parameters: Parameters) = parameters.core orElse parameters.threads
+  def nbCores(parameters: Parameters) = parameters.core orElse parameters.runtimeSetting.flatMap(_.threads)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: OARJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -180,8 +181,8 @@ class OAREnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => OAREnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  => OAREnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => OAREnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => OAREnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService)
 
   lazy val installRuntime =
     storageService match
@@ -223,7 +224,7 @@ class OARLocalEnvironment(
   lazy val storage = localStorage(env, parameters.sharedDirectory, AccessControl(preference(SSHEnvironment.maxConnections)))
   lazy val space = localStorageSpace(storage)
 
-  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) = OAREnvironment.submit(env, batchExecutionJob, storage, space, jobService)
+  def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) = OAREnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

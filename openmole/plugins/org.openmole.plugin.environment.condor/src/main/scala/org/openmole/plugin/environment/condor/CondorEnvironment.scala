@@ -43,20 +43,20 @@ object CondorEnvironment:
     openMOLEMemory: OptionalArgument[Information] = None,
     // TODO not available in the GridScale plugin yet
     //wallTime: Option[Duration] = None,
-    memory:               OptionalArgument[Information] = None,
-    nodes:                OptionalArgument[Int]         = None,
-    coresByNode:          OptionalArgument[Int]         = None,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    requirements:         OptionalArgument[String]      = None,
-    timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    threads:              OptionalArgument[Int]         = None,
-    storageSharedLocally: Boolean                       = false,
-    localSubmission:      Boolean                       = false,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    modules:              OptionalArgument[Seq[String]] = None,
-    name:                 OptionalArgument[String]      = None
+    memory:               OptionalArgument[Information]     = None,
+    nodes:                OptionalArgument[Int]             = None,
+    coresByNode:          OptionalArgument[Int]             = None,
+    sharedDirectory:      OptionalArgument[String]          = None,
+    workDirectory:        OptionalArgument[String]          = None,
+    requirements:         OptionalArgument[String]          = None,
+    timeout:              OptionalArgument[Time]            = None,
+    reconnect:            OptionalArgument[Time]            = SSHConnection.defaultReconnect,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]  = None,
+    storageSharedLocally: Boolean                           = false,
+    localSubmission:      Boolean                           = false,
+    submittedJobs:        OptionalArgument[Int]             = None,
+    modules:              OptionalArgument[Seq[String]]     = None,
+    name:                 OptionalArgument[String]          = None
   )(implicit authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -67,7 +67,7 @@ object CondorEnvironment:
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
       requirements = requirements,
-      threads = threads,
+      runtimeSetting = runtimeSetting,
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
@@ -108,13 +108,14 @@ object CondorEnvironment:
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
     requirements:         Option[String],
-    threads:              Option[Int],
+    runtimeSetting:       Option[RuntimeSetting],
     storageSharedLocally: Boolean,
     modules:              Option[Seq[String]])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -179,8 +180,8 @@ class CondorEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => CondorEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  => CondorEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => CondorEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => CondorEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService)
 
   lazy val installRuntime =
     storageService match
@@ -221,7 +222,7 @@ class CondorLocalEnvironment(
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
-    CondorEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
+    CondorEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

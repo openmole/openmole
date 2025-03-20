@@ -78,7 +78,6 @@ class Runtime:
     storage:           RemoteStorage,
     inputMessagePath:  String,
     outputMessagePath: String,
-    threads:           Int,
     debug:             Boolean,
     transferRetry:     Option[Int]
   )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) =
@@ -117,7 +116,7 @@ class Runtime:
     val beginTime = System.currentTimeMillis
 
     val environment = new LocalEnvironment(
-      threads = threads,
+      threads = executionMessage.runtimeSetting.threads.getOrElse(1),
       deinterleave = false,
       remote = true,
       runtimeSetting = executionMessage.runtimeSetting,

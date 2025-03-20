@@ -26,7 +26,6 @@ class OARJobService[S](
         jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
-        parameters.threads,
         serializedJob,
         outputPath,
         s,

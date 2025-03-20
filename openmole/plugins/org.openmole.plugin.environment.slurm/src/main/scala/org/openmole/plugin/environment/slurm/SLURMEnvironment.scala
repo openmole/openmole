@@ -53,7 +53,6 @@ object SLURMEnvironment:
     exclusive:            OptionalArgument[SLURMJobDescription.Exclusive]  = None,
     sharedDirectory:      OptionalArgument[String]                         = None,
     workDirectory:        OptionalArgument[String]                         = None,
-    threads:              OptionalArgument[Int]                            = None,
     timeout:              OptionalArgument[Time]                           = None,
     reconnect:            OptionalArgument[Time]                           = SSHConnection.defaultReconnect,
     storageSharedLocally: Boolean                                          = false,
@@ -84,7 +83,6 @@ object SLURMEnvironment:
       wckey = wckey,
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
-      threads = threads,
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
@@ -138,7 +136,6 @@ object SLURMEnvironment:
     wckey:                Option[String],
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
-    threads:              Option[Int],
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
@@ -146,9 +143,10 @@ object SLURMEnvironment:
     runtimeSetting:       Option[RuntimeSetting],
     debug:                Boolean)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -169,10 +167,12 @@ class SLURMEnvironment(
   val name:              Option[String],
   val authentication:    SSHAuthentication,
   val proxy:             Option[SSHProxy.Authenticated],
-  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services), parameters.runtimeSetting):
+  implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
   env =>
 
   import services.*
+
+  export parameters.runtimeSetting
 
   implicit lazy val ssh: gridscale.ssh.SSH =
     def proxyValue = proxy.map(p => SSHProxy.toSSHServer(p, timeout))
@@ -224,8 +224,8 @@ class SLURMEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
-      case Right((space, ssh))  => SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
+      case Left((space, local)) => SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
+      case Right((space, ssh))  => SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
 
 
 class SLURMLocalEnvironment(
@@ -252,7 +252,7 @@ class SLURMLocalEnvironment(
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
-    SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
+    SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, jobService, parameters.refresh)
 
   lazy val jobService =
     val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)

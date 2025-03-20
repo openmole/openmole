@@ -108,7 +108,8 @@ object LocalEnvironment:
   )(implicit varName: sourcecode.Name) =
     EnvironmentBuilder: ms =>
       import ms._
-      new LocalEnvironment(threads.getOrElse(1), deinterleave, name  = Some(name.getOrElse(varName.value)), remote = remote, runtimeSetting = runtimeSetting)
+      val threadsValue = (threads orElse runtimeSetting.threads).getOrElse(1)
+      new LocalEnvironment(threadsValue, deinterleave, name  = Some(name.getOrElse(varName.value)), remote = remote, runtimeSetting = runtimeSetting)
 
 
 /**

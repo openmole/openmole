@@ -29,7 +29,6 @@ class PBSJobService[S](
         jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
-        parameters.threads,
         serializedJob,
         outputPath,
         s,
@@ -45,7 +44,7 @@ class PBSJobService[S](
       wallTime = parameters.wallTime,
       memory = parameters.memory,
       nodes = parameters.nodes,
-      coreByNode = parameters.coreByNode orElse parameters.threads,
+      coreByNode = parameters.coreByNode orElse parameters.runtimeSetting.flatMap(_.threads),
       flavour = parameters.flavour
     )
 

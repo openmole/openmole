@@ -19,8 +19,9 @@ package org.openmole.core.workflow.execution
 import org.jasypt.encryption.pbe.config.EnvironmentPBEConfig
 
 import java.io.PrintStream
-import org.openmole.core.workflow.mole.MoleServices
+import org.openmole.core.workflow.mole.*
 import org.openmole.tool.cache.KeyValueCache
+import org.openmole.core.argument.OptionalArgument
 
 
 def display(stream: PrintStream, label: String, content: String) =
@@ -53,8 +54,10 @@ object RuntimeLog:
 case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 
 object RuntimeSetting:
-  def apply(memoryOverlay: Boolean = false) =
-    new RuntimeSetting(memoryOverlay)
+  def apply(memoryOverlay: Boolean = false, threads: OptionalArgument[Int] = None) =
+    new RuntimeSetting(memoryOverlay, threads)
 
-case class RuntimeSetting(memoryOverlay: Boolean)
+class RuntimeSetting(
+  val memoryOverlay: Boolean,
+  val threads: Option[Int])
 

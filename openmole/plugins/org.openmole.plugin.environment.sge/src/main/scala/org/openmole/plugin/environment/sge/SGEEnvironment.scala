@@ -33,23 +33,23 @@ import squants.information._
 
 object SGEEnvironment {
   def apply(
-    user:                 OptionalArgument[String]      = None,
-    host:                 OptionalArgument[String]      = None,
-    port:                 OptionalArgument[Int]         = 22,
-    queue:                OptionalArgument[String]      = None,
-    openMOLEMemory:       OptionalArgument[Information] = None,
-    wallTime:             OptionalArgument[Time]        = None,
-    memory:               OptionalArgument[Information] = None,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    threads:              OptionalArgument[Int]         = None,
-    storageSharedLocally: Boolean                       = false,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    name:                 OptionalArgument[String]      = None,
-    localSubmission:      Boolean                       = false,
-    modules:              OptionalArgument[Seq[String]] = None)(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+    user:                 OptionalArgument[String]           = None,
+    host:                 OptionalArgument[String]           = None,
+    port:                 OptionalArgument[Int]              = 22,
+    queue:                OptionalArgument[String]           = None,
+    openMOLEMemory:       OptionalArgument[Information]      = None,
+    wallTime:             OptionalArgument[Time]             = None,
+    memory:               OptionalArgument[Information]      = None,
+    sharedDirectory:      OptionalArgument[String]           = None,
+    workDirectory:        OptionalArgument[String]           = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]   = None,
+    storageSharedLocally: Boolean                            = false,
+    submittedJobs:        OptionalArgument[Int]              = None,
+    timeout:              OptionalArgument[Time]             = None,
+    reconnect:            OptionalArgument[Time]             = SSHConnection.defaultReconnect,
+    name:                 OptionalArgument[String]           = None,
+    localSubmission:      Boolean                            = false,
+    modules:              OptionalArgument[Seq[String]]      = None)(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
       queue = queue,
@@ -58,7 +58,7 @@ object SGEEnvironment {
       memory = memory,
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
-      threads = threads,
+      runtimeSetting = runtimeSetting,
       storageSharedLocally = storageSharedLocally,
       modules = modules)
 
@@ -99,13 +99,14 @@ object SGEEnvironment {
     memory:               Option[Information],
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
-    threads:              Option[Int],
+    runtimeSetting:       Option[RuntimeSetting],
     storageSharedLocally: Boolean,
     modules:              Option[Seq[String]])
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SGEJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -170,8 +171,8 @@ class SGEEnvironment[A: gridscale.ssh.SSHAuthentication](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => SGEEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService)
-      case Right((space, ssh))  => SGEEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService)
+      case Left((space, local)) => SGEEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService)
+      case Right((space, ssh))  => SGEEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService)
 
 
   lazy val installRuntime =
@@ -212,7 +213,7 @@ class SGELocalEnvironment(
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
-    SGEEnvironment.submit(env, batchExecutionJob, storage, space, jobService)
+    SGEEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, jobService)
 
   lazy val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)
 

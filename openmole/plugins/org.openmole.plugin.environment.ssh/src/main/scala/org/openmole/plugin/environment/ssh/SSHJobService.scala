@@ -67,7 +67,6 @@ class SSHJobService[S](s: S, space: StorageSpace, services: BatchEnvironment.Ser
         jobDirectory,
         workDirectory,
         env.openMOLEMemory,
-        env.threads,
         serializedJob,
         outputPath,
         s,
