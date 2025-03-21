@@ -26,7 +26,7 @@ object Environment:
   def wallTime(name: String = "wallTime") = newEntry(name = name, " the maximum time a job is permitted to run before being killed, for instance ", hl.openmoleNoTest(s"$name = 1 hour"))
   def memory = newEntry("memory", " the memory for the job, for instance ", hl.openmoleNoTest("memory = 2 gigabytes"))
   def openMOLEMemory = newEntry("openMOLEMemory", " the memory of attributed to the OpenMOLE runtime on the execution node, if you run external tasks you can reduce the memory for the OpenMOLE runtime to 256MB in order to have more memory for you program on the execution node, for instance ", hl.openmoleNoTest("openMOLEMemory = 256 megabytes"))
-  def threads = newEntry("threads", " the number of threads for concurrent execution of OpenMOLE tasks on the worker node, for instance ", hl.openmoleNoTest("threads = 4"))
+  def runtimeSetting = newEntry("runtimeSetting", " the settings for the runtime, to set: ,the use of memory overlay instead of file system overlay by Singularity/Apptainer (default is false), the number of threads for concurrent task executions the worker node (default is 1), for instance ", hl.openmoleNoTest("RuntimeSetting(memoryOverlay = true, threads = 1)"))
   def queue(name: String = "queue") = newEntry(name, " the name of the queue on which jobs will be submitted, for instance ", hl.openmoleNoTest(s"""$name = \"longjobs\""""))
   def port = newEntry("port", " the port number used by the ssh server, by ", b("default it is set to 22"))
   def sharedDirectory = newEntry("sharedDirectory", " OpenMOLE uses this directory to communicate from the head node of the cluster to the worker nodes (defaults to ", hl.openmoleNoTest("\"/home/user/.openmole/.tmp/ssh\")"))
