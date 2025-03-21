@@ -141,7 +141,7 @@ ${ul(
   li{html"${apiEntryTitle{"cpuPerTask"}} specify the number of thread requested on the execution nodes, you should use it if your executable is multi-threaded, if not specified ${i{"cpuPerTask"}} takes the value of the ${i{"threads"}} when it is specified,"},
   li{html"${apiEntryTitle{"reservation"}} name of a SLURM reservation,"},
   li{html"${apiEntryTitle{"qos"}} Quality of Service (QOS) as defined in the Slurm database"},
-  li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. A Gres is a pair defined by the name of the resource and the number of resources requested (scalar). For instance ${hl.openmoleNoTest{"gres = Seq( \"gpu\" -> \"1\")"}}"},
+  li{html"${apiEntryTitle{"gres"}} a list of Generic Resource (GRES) requested. For instance ${hl.openmoleNoTest{"gres = Seq(\"gpu:1\")"}}"},
   li{html"${apiEntryTitle{"constraints"}} a list of SLURM defined constraints which selected nodes must match,"},
   li{html"${apiEntryTitle{"exclusive"}} set job node exclusivity, values can be set to (\"user\", \"mcs\", \"topo\"),"},
   li{html"$submittedJobs,"},
