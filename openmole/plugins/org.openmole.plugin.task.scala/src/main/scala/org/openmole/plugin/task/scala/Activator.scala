@@ -32,8 +32,8 @@ class Activator extends BundleActivator:
     val keyWords: Vector[HighLight] =
       Vector(
         TaskHighLight(objectName(ScalaTask)),
-        OtherHighLight(objectName(ScalaCode)),
-        OtherHighLight(objectName(Evaluation))
+        ObjectHighLight(objectName(ScalaCode)),
+        ObjectHighLight(objectName(Evaluation))
       )
 
     PluginRegistry.register(

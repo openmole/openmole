@@ -35,8 +35,8 @@ object ElitismTask:
         ).from(context)
 
       val incrementedState =
-        evolution.operations.generationLens.modify(_ + 1)
-        .andThen(evolution.operations.evaluatedLens.modify(_ + 1))
+        evolution.generationLens.modify(_ + 1)
+        .andThen(evolution.evaluatedLens.modify(_ + 1))
         .apply(newState)
 
       Context(
@@ -67,8 +67,8 @@ object IslandElitismTask:
         ).from(context)
 
       val incrementedState =
-        evolution.operations.generationLens.modify(_ + 1)
-          .andThen(evolution.operations.evaluatedLens.modify(_ + evolution.operations.evaluatedLens.get(islandState)))
+        evolution.generationLens.modify(_ + 1)
+          .andThen(evolution.evaluatedLens.modify(_ + evolution.evaluatedLens.get(islandState)))
           .apply(newState)
 
       Context(

@@ -31,6 +31,8 @@ object SlidingDomain {
       domain.validate
     )
 
+
+  given [T, D]: DiscreteDomainModifiers[SlidingDomain[D, T]] with {}
 }
 
 case class SlidingDomain[D, T: Manifest](domain: D, size: FromContext[Int], step: FromContext[Int] = 1)(implicit discrete: DiscreteFromContextDomain[D, T]) {

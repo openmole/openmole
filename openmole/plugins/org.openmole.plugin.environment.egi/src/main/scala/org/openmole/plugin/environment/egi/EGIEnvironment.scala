@@ -159,16 +159,17 @@ object EGIEnvironment extends JavaLogger {
 
   def apply(
     voName:         String,
-    service:        OptionalArgument[String]      = None,
-    group:          OptionalArgument[String]      = None,
-    bdii:           OptionalArgument[String]      = None,
-    storage:        OptionalArgument[Seq[String]] = None,
-    voms:           OptionalArgument[String]      = None,
-    fqan:           OptionalArgument[String]      = None,
-    cpuTime:        OptionalArgument[Time]        = None,
-    openMOLEMemory: OptionalArgument[Information] = None,
-    debug:          Boolean                       = false,
-    name:           OptionalArgument[String]      = None
+    service:        OptionalArgument[String]                  = None,
+    group:          OptionalArgument[String]                  = None,
+    bdii:           OptionalArgument[String]                  = None,
+    storage:        OptionalArgument[Seq[String]]             = None,
+    voms:           OptionalArgument[String]                  = None,
+    fqan:           OptionalArgument[String]                  = None,
+    cpuTime:        OptionalArgument[Time]                    = None,
+    openMOLEMemory: OptionalArgument[Information]             = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]    = None,
+    debug:          Boolean                                   = false,
+    name:           OptionalArgument[String]                  = None
   )(implicit authentication: EGIAuthentication, cypher: Cypher, workspace: Workspace, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     EnvironmentBuilder: ms =>
@@ -182,6 +183,7 @@ object EGIEnvironment extends JavaLogger {
         fqan = fqan,
         cpuTime = cpuTime,
         openMOLEMemory = openMOLEMemory,
+        runtimeSetting = runtimeSetting,
         debug = debug,
         name = name,
         authentication = authentication,
@@ -201,6 +203,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
   val fqan:              Option[String],
   val cpuTime:           Option[Time],
   val openMOLEMemory:    Option[Information],
+  val runtimeSetting:    Option[RuntimeSetting],
   val debug:             Boolean,
   val name:              Option[String],
   val authentication:    A,
@@ -266,7 +269,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     import EGIEnvironment._
-    import org.openmole.core.tools.math._
+    import org.openmole.tool.math._
     import org.openmole.tool.file._
 
     def selectStorage =
@@ -351,7 +354,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
       def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
 
-      val sj = BatchEnvironment.serializeJob(env, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+      val sj = BatchEnvironment.serializeJob(env, runtimeSetting, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
       val job = jobService.submit(sj, outputPath, storage.url)
 

@@ -29,8 +29,8 @@ object SavePopulationHook:
 
       def all =
         Seq[Variable[?]](
-          t.generationVal -> t.operations.generationLens.get(state),
-          t.evaluatedVal -> t.operations.evaluatedLens.get(state)
+          t.generationVal -> t.generationLens.get(state),
+          t.evaluatedVal -> t.evaluatedLens.get(state)
         ) ++
           t.operations.result(
             context(t.populationVal).toVector,
@@ -50,11 +50,11 @@ object SavePopulationHook:
     keepHistory:    Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
-    filter:         Seq[Val[?]]            = Vector.empty)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) = Hook("SavePopulationHook") { p =>
+    filter:         Seq[Val[?]]            = Vector.empty)(using sourcecode.Name, DefinitionScope, ScriptSourceData) = Hook("SavePopulationHook") { p =>
     import p._
 
     val state = context(evolution.stateVal)
-    val generation = evolution.operations.generationLens.get(state)
+    val generation = evolution.generationLens.get(state)
     val shouldBeSaved =
       frequency.map(generation % _ == 0).getOrElse(true) || 
         context(evolution.terminatedVal)

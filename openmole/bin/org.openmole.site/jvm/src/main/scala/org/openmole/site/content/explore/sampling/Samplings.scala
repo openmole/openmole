@@ -86,7 +86,7 @@ DirectSampling(
     (j in (0.0 to 5.0 by 0.5)) x
     (k in List("Leonardo", "Donatello", "Raphaël", "Michelangelo")) x
     (l in (UniformDistribution[Long]() take 10)) x
-    (m in (workDirectory / "dir").files().filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv"))) x
+    (m in (workDirectory / "dir").files.filter(f => f.getName.startsWith("exp") && f.getName.endsWith(".csv"))) x
     (b in TrueFalse)
 ) hook(workDirectory / "path/of/a/file")
 """, header = "val myModel = EmptyTask()", name = "several inputs")}

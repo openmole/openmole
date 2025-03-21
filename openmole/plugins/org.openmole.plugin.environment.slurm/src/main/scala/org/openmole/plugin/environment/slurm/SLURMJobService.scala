@@ -27,7 +27,6 @@ class SLURMJobService[S](
         jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
-        parameters.threads,
         serializedJob,
         outputPath,
         s,
@@ -45,12 +44,13 @@ class SLURMJobService[S](
       memory = parameters.memory,
       nodes = parameters.nodes,
       ntasks = parameters.nTasks,
-      cpuPerTask = parameters.cpuPerTask orElse parameters.threads,
+      cpuPerTask = parameters.cpuPerTask orElse parameters.runtimeSetting.flatMap(_.threads),
       qos = parameters.qos,
       gres = parameters.gres.toList,
       constraints = parameters.constraints.toList,
       reservation = parameters.reservation,
-      wckey = parameters.wckey
+      wckey = parameters.wckey,
+      exclusive = parameters.exclusive
     )
 
     accessControl { gridscale.slurm.submit(h, description) }

@@ -17,22 +17,20 @@
 package org.openmole.core.communication.message
 
 import java.io.File
-
 import org.openmole.core.context.Context
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.serializer.SerializerService
-import org.openmole.core.tools.service._
-import org.openmole.core.workflow.execution.Environment.RuntimeLog
-import org.openmole.core.workflow.job.Job._
-import org.openmole.core.workflow.job._
+import org.openmole.core.workflow.execution.*
+import org.openmole.core.workflow.job.Job.*
+import org.openmole.core.workflow.job.*
 import org.openmole.core.workflow.task.Task
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 
 import util.Try
-import org.openmole.tool.file._
-import org.openmole.tool.hash._
-import org.openmole.tool.archive._
+import org.openmole.tool.file.*
+import org.openmole.tool.hash.*
+import org.openmole.tool.archive.*
 
 
 object FileMessage:
@@ -105,13 +103,12 @@ object ReplicatedFile:
 
 
 case class ReplicatedFile(originalPath: String, name: String, directory: Boolean, hash: String, path: String, mode: Int)
-case class RuntimeSettings(archiveResult: Boolean)
+case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSetting: RuntimeSetting, archiveResult: Boolean = false)
 
-case class ExecutionMessage(plugins: Iterable[ReplicatedFile], files: Iterable[ReplicatedFile], jobs: File, runtimeSettings: RuntimeSettings)
-
-case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeInfo)
+case class RuntimeResult(stdOut: Option[File], result: Try[(SerializedContextResults, RuntimeLog)], info: RuntimeLog.RuntimeInfo)
 sealed trait SerializedContextResults
 case class ArchiveContextResults(contextResults: File) extends SerializedContextResults
 case class IndividualFilesContextResults(contextResults: File, files: Iterable[ReplicatedFile]) extends SerializedContextResults
 case class ContextResults(results: PartialFunction[JobId, Try[Context]])
+
 

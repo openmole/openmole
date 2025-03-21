@@ -29,9 +29,9 @@ class Activator extends BundleActivator {
     import org.openmole.core.highlight.HighLight._
 
     val keyWords =
-      Vector()
-    //        EnvironmentHighLight(classOf[DispatchEnvironment])
-    //      )
+      Vector(EnvironmentHighLight(
+        objectName(DispatchEnvironment))
+      )
 
     PluginRegistry.register(
       this,

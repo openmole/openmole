@@ -23,10 +23,10 @@ import org.osgi.framework._
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
-  override def start(context: BundleContext): Unit = {
+  override def start(context: BundleContext): Unit = 
     import org.openmole.core.highlight.HighLight._
-    val highLights = Vector(DomainHighLight(classOf[UniformDistribution[_]]))
+    val highLights = Vector(DomainHighLight(objectName(UniformDistribution)))
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = highLights)
-  }
+  
 }
 

@@ -26,7 +26,6 @@ class CondorJobService[S](
         jobDirectory,
         workDirectory,
         parameters.openMOLEMemory,
-        parameters.threads,
         serializedJob,
         outputPath,
         s,
@@ -41,7 +40,7 @@ class CondorJobService[S](
       workDirectory = jobDirectory,
       memory = parameters.memory,
       nodes = parameters.nodes,
-      coreByNode = parameters.coresByNode orElse parameters.threads,
+      coreByNode = parameters.coresByNode orElse parameters.runtimeSetting.flatMap(_.threads),
       requirements = parameters.requirements.map(_root_.gridscale.condor.CondorRequirement.apply)
     )
 

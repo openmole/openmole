@@ -5,6 +5,7 @@ import org.openmole.core.pluginregistry.PluginRegistry
 import org.openmole.core.preference.PreferenceLocation
 import org.openmole.core.argument.*
 import org.openmole.core.workflow.composition.*
+import org.openmole.core.workflow.execution.RuntimeSetting
 import org.openmole.core.workflow.task.*
 import org.osgi.framework.{BundleActivator, BundleContext}
 
@@ -20,9 +21,10 @@ class Activator extends BundleActivator:
       import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ToArrayTask, MoleTask, FromContextTask }
 
       Vector(
-        WordHighLight(classOf[Val[?]]),
-        WordHighLight(objectName(Capsule)),
-        WordHighLight(objectName(Slot)),
+        ObjectHighLight(classOf[Val[?]]),
+        ObjectHighLight(objectName(Capsule)),
+        ObjectHighLight(objectName(Slot)),
+        ObjectHighLight(objectName(RuntimeSetting)),
         WordHighLight("Strain"),
         WordHighLight("in"),
         WordHighLight("is"),
@@ -39,13 +41,13 @@ class Activator extends BundleActivator:
         WordHighLight("workDirectory"),
         WordHighLight("plugins"),
         WordHighLight("pluginsOf"),
-        TransitionHighLight("--"),
-        TransitionHighLight("-<"),
-        TransitionHighLight(">-"),
-        TransitionHighLight("-<-"),
-        TransitionHighLight(">|"),
-        TransitionHighLight("oo"),
-        EnvironmentHighLight(classOf[LocalEnvironment]),
+        WordHighLight("--"),
+        WordHighLight("-<"),
+        WordHighLight(">-"),
+        WordHighLight("-<-"),
+        WordHighLight(">|"),
+        WordHighLight("oo"),
+        EnvironmentHighLight(objectName(LocalEnvironment)),
         TaskHighLight(objectName(EmptyTask)),
         TaskHighLight(objectName(ExplorationTask)),
         TaskHighLight(objectName(Task)),

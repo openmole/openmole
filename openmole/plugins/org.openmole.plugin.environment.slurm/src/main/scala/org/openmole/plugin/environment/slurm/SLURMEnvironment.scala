@@ -30,39 +30,41 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.environment.dispatch.*
 import _root_.gridscale.cluster.*
+import _root_.gridscale.slurm.SLURMJobDescription
 
 object SLURMEnvironment:
 
   def apply(
     user:                 OptionalArgument[String],
     host:                 OptionalArgument[String],
-    port:                 OptionalArgument[Int]         = 22,
-    partition:            OptionalArgument[String]      = None,
-    openMOLEMemory:       OptionalArgument[Information] = None,
-    time:                 OptionalArgument[Time]        = None,
-    memory:               OptionalArgument[Information] = None,
-    qos:                  OptionalArgument[String]      = None,
-    gres:                 Seq[Gres]                     = Vector(),
-    constraints:          Seq[String]                   = Vector(),
-    nodes:                OptionalArgument[Int]         = None,
-    nTasks:               OptionalArgument[Int]         = None,
-    reservation:          OptionalArgument[String]      = None,
-    wckey:                OptionalArgument[String]      = None,
-    cpuPerTask:           OptionalArgument[Int]         = None,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    threads:              OptionalArgument[Int]         = None,
-    timeout:              OptionalArgument[Time]        = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    storageSharedLocally: Boolean                       = false,
-    proxy:                OptionalArgument[SSHProxy]    = None,
-    name:                 OptionalArgument[String]      = None,
-    localSubmission:      Boolean                       = false,
-    forceCopyOnNode:      Boolean                       = false,
-    refresh:              OptionalArgument[Time]        = None,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    modules:              OptionalArgument[Seq[String]] = None,
-    debug:                Boolean                       = false
+    port:                 OptionalArgument[Int]                            = 22,
+    partition:            OptionalArgument[String]                         = None,
+    openMOLEMemory:       OptionalArgument[Information]                    = None,
+    time:                 OptionalArgument[Time]                           = None,
+    memory:               OptionalArgument[Information]                    = None,
+    qos:                  OptionalArgument[String]                         = None,
+    gres:                 Seq[String]                                      = Vector(),
+    constraints:          Seq[String]                                      = Vector(),
+    nodes:                OptionalArgument[Int]                            = None,
+    nTasks:               OptionalArgument[Int]                            = None,
+    reservation:          OptionalArgument[String]                         = None,
+    wckey:                OptionalArgument[String]                         = None,
+    cpuPerTask:           OptionalArgument[Int]                            = None,
+    exclusive:            OptionalArgument[SLURMJobDescription.Exclusive]  = None,
+    sharedDirectory:      OptionalArgument[String]                         = None,
+    workDirectory:        OptionalArgument[String]                         = None,
+    timeout:              OptionalArgument[Time]                           = None,
+    reconnect:            OptionalArgument[Time]                           = SSHConnection.defaultReconnect,
+    storageSharedLocally: Boolean                                          = false,
+    proxy:                OptionalArgument[SSHProxy]                       = None,
+    name:                 OptionalArgument[String]                         = None,
+    localSubmission:      Boolean                                          = false,
+    forceCopyOnNode:      Boolean                                          = false,
+    refresh:              OptionalArgument[Time]                           = None,
+    submittedJobs:        OptionalArgument[Int]                            = None,
+    modules:              OptionalArgument[Seq[String]]                    = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]                 = None,
+    debug:                Boolean                                          = false
   )(using authenticationStore: AuthenticationStore, cypher: Cypher, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     val parameters = Parameters(
@@ -75,16 +77,17 @@ object SLURMEnvironment:
       constraints = constraints,
       nodes = nodes,
       cpuPerTask = cpuPerTask,
+      exclusive = exclusive,
       nTasks = nTasks,
       reservation = reservation,
       wckey = wckey,
       sharedDirectory = sharedDirectory,
       workDirectory = workDirectory,
-      threads = threads,
       storageSharedLocally = storageSharedLocally,
       forceCopyOnNode = forceCopyOnNode,
       refresh = refresh,
       modules = modules,
+      runtimeSetting = runtimeSetting,
       debug = debug)
 
     DispatchEnvironment.queue(submittedJobs):
@@ -123,25 +126,27 @@ object SLURMEnvironment:
     time:                 Option[Time],
     memory:               Option[Information],
     qos:                  Option[String],
-    gres:                 Seq[Gres],
+    gres:                 Seq[String],
     constraints:          Seq[String],
     nodes:                Option[Int],
     cpuPerTask:           Option[Int],
+    exclusive:            Option[SLURMJobDescription.Exclusive],
     nTasks:               Option[Int],
     reservation:          Option[String],
     wckey:                Option[String],
     sharedDirectory:      Option[String],
     workDirectory:        Option[String],
-    threads:              Option[Int],
     storageSharedLocally: Boolean,
     forceCopyOnNode:      Boolean,
     refresh:              Option[Time],
     modules:              Option[Seq[String]],
+    runtimeSetting:       Option[RuntimeSetting],
     debug:                Boolean)
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SLURMJobService[?], refresh: Option[Time])(using BatchEnvironment.Services, AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -166,6 +171,8 @@ class SLURMEnvironment(
   env =>
 
   import services.*
+
+  export parameters.runtimeSetting
 
   implicit lazy val ssh: gridscale.ssh.SSH =
     def proxyValue = proxy.map(p => SSHProxy.toSSHServer(p, timeout))
@@ -217,8 +224,8 @@ class SLURMEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => SLURMEnvironment.submit(env, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
-      case Right((space, ssh))  => SLURMEnvironment.submit(env, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
+      case Left((space, local)) => SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, local, space, pbsJobService, parameters.refresh)
+      case Right((space, ssh))  => SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, ssh, space, pbsJobService, parameters.refresh)
 
 
 class SLURMLocalEnvironment(
@@ -245,7 +252,7 @@ class SLURMLocalEnvironment(
   lazy val space = localStorageSpace(storage)
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
-    SLURMEnvironment.submit(env, batchExecutionJob, storage, space, jobService, parameters.refresh)
+    SLURMEnvironment.submit(env, parameters.runtimeSetting, batchExecutionJob, storage, space, jobService, parameters.refresh)
 
   lazy val jobService =
     val installRuntime = RuntimeInstallation(Frontend.local, storage, space.baseDirectory)

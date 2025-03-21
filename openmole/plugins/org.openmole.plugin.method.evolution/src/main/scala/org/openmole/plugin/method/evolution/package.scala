@@ -30,8 +30,6 @@ type Objectives = Seq[Objective] | Objective
 type Genome = Seq[Genome.GenomeBound]
 type GenomeDouble = Seq[Genome.GenomeBound.ScalarDouble]
 
-implicit def intToCounterTerminationConverter(n: Long): EvolutionWorkflow.AfterEvaluated = EvolutionWorkflow.AfterEvaluated(n)
-implicit def durationToDurationTerminationConverter(d: Time): EvolutionWorkflow.AfterDuration = EvolutionWorkflow.AfterDuration(d)
 implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v => method(patternContainer(v.value, v.by))
 
 implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]):
@@ -41,7 +39,7 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
   def hook(
     output:         WritableOutput,
     frequency:      OptionalArgument[Long] = None,
-    keepHistory:    Boolean         = false,
+    keepHistory:    Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[?]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[T] =

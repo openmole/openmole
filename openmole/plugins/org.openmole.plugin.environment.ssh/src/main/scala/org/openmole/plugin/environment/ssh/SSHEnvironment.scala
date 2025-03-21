@@ -49,18 +49,19 @@ object SSHEnvironment extends JavaLogger:
     user:                 String,
     host:                 String,
     slots:                Int,
-    port:                 Int                           = 22,
-    sharedDirectory:      OptionalArgument[String]      = None,
-    workDirectory:        OptionalArgument[String]      = None,
-    openMOLEMemory:       OptionalArgument[Information] = None,
-    threads:              OptionalArgument[Int]         = None,
-    killAfter:            OptionalArgument[Time]        = None,
-    storageSharedLocally: Boolean                       = false,
-    submittedJobs:        OptionalArgument[Int]         = None,
-    reconnect:            OptionalArgument[Time]        = SSHConnection.defaultReconnect,
-    name:                 OptionalArgument[String]      = None,
-    modules:              OptionalArgument[Seq[String]] = None,
-    debug:                Boolean                       = false
+    port:                 Int                               = 22,
+    sharedDirectory:      OptionalArgument[String]          = None,
+    workDirectory:        OptionalArgument[String]          = None,
+    openMOLEMemory:       OptionalArgument[Information]     = None,
+    threads:              OptionalArgument[Int]             = None,
+    killAfter:            OptionalArgument[Time]            = None,
+    storageSharedLocally: Boolean                           = false,
+    submittedJobs:        OptionalArgument[Int]             = None,
+    reconnect:            OptionalArgument[Time]            = SSHConnection.defaultReconnect,
+    name:                 OptionalArgument[String]          = None,
+    modules:              OptionalArgument[Seq[String]]     = None,
+    runtimeSetting:       OptionalArgument[RuntimeSetting]  = None,
+    debug:                Boolean                           = false
   )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     DispatchEnvironment.queue(submittedJobs):
@@ -80,6 +81,7 @@ object SSHEnvironment extends JavaLogger:
           name = Some(name.getOrElse(varName.value)),
           authentication = SSHAuthentication.find(user, host, port),
           modules = modules,
+          runtimeSetting = runtimeSetting,
           debug = debug,
           services = BatchEnvironment.Services(ms)
         )
@@ -109,9 +111,10 @@ object SSHEnvironment extends JavaLogger:
     def submitted = queuesLock { jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) => (j, id) } }
     def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) => (job, desc, bj) } }
 
-  def submit[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage](environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
+      runtimeSetting,
       batchExecutionJob,
       storage,
       space,
@@ -137,6 +140,7 @@ class SSHEnvironment(
   val name:                 Option[String],
   val authentication:       SSHAuthentication,
   val modules:              Option[Seq[String]],
+  val runtimeSetting:       Option[RuntimeSetting],
   val debug:                Boolean,
   val services:             BatchEnvironment.Services
 ) extends BatchEnvironment(BatchEnvironmentState(services)) { env =>
@@ -199,8 +203,8 @@ class SSHEnvironment(
 
   def execute(batchExecutionJob: BatchExecutionJob)(using AccessControl.Priority) =
     storageService match
-      case Left((space, local)) => SSHEnvironment.submit(env, batchExecutionJob, local, space, sshJobService)
-      case Right((space, ssh))  => SSHEnvironment.submit(env, batchExecutionJob, ssh, space, sshJobService)
+      case Left((space, local)) => SSHEnvironment.submit(env, runtimeSetting, batchExecutionJob, local, space, sshJobService)
+      case Right((space, ssh))  => SSHEnvironment.submit(env, runtimeSetting, batchExecutionJob, ssh, space, sshJobService)
 
   lazy val sshJobService =
     storageService match

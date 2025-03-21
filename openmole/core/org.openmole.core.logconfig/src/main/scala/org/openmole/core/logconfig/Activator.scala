@@ -17,8 +17,8 @@
 
 package org.openmole.core.logconfig
 
-import org.openmole.core.tools.service.OSGiActivator
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.osgi.framework.{BundleActivator, BundleContext}
+import org.openmole.tool.osgi.*
 
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None

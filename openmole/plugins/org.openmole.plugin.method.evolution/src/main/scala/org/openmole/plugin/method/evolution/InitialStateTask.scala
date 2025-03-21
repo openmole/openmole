@@ -30,15 +30,15 @@ object InitialStateTask:
     Task("InitialStateTask"): p =>
       import p._
       def initialisedState =
-        evolution.operations.startTimeLens.set(System.currentTimeMillis) andThen
-          evolution.operations.generationLens.set(0L) andThen
-          evolution.operations.evaluatedLens.set(0L) apply context(evolution.stateVal)
+        evolution.startTimeLens.set(System.currentTimeMillis) andThen
+          evolution.generationLens.set(0L) andThen
+          evolution.evaluatedLens.set(0L) apply context(evolution.stateVal)
 
       Context(Variable(evolution.stateVal, initialisedState))
     .set (
       inputs += (evolution.stateVal, evolution.populationVal),
       outputs += (evolution.stateVal, evolution.populationVal),
       evolution.stateVal := FromContext(p => evolution.operations.initialState),
-      evolution.populationVal := Array.empty[evolution.I](evolution.integration.iManifest)
+      evolution.populationVal := Array.empty[evolution.I]
     )
 

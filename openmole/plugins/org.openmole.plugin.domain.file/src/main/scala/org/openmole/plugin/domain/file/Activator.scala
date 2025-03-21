@@ -18,20 +18,20 @@
 package org.openmole.plugin.domain.file
 
 import org.openmole.core.highlight.HighLight
-import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
-import org.osgi.framework._
+import org.openmole.core.pluginregistry.{PluginInfo, PluginRegistry}
+import org.osgi.framework.*
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit = PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.highlight.HighLight._
+    import org.openmole.core.highlight.HighLight.*
 
     val highLight: Vector[HighLight] =
       Vector(
-        "file",
-        "select",
-        "paths"
+        DomainHighLight(objectName(ListFileDomain)),
+        DomainHighLight(objectName(ListPathDomain)),
+        DomainHighLight(objectName(SelectFileDomain))
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = highLight)

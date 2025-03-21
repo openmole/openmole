@@ -25,7 +25,6 @@ import scala.reflect.ClassTag
 import org.openmole.core.context.{ Context, Val, ValType, Variable }
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.core.argument._
-import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.setter.MappedInputOutputConfig
 import org.openmole.core.workflow.dsl._
 import org.openmole.core.workflow.task._
@@ -35,6 +34,7 @@ import org.openmole.plugin.task.external._
 import org.openmole.plugin.tool.netlogo.NetLogo
 import org.openmole.tool.cache._
 import org.openmole.core.dsl.extension.*
+import org.openmole.tool.logger.Prettifier
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer

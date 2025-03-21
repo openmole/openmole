@@ -30,18 +30,19 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        SamplingHighLight(classOf[CompleteSampling]),
-        "zip",
-        "withIndex",
-        "sample",
-        "repeat",
-        "bootstrap",
-        "shuffle",
-        "repeat",
-        "take",
-        "filter",
-        "withName",
-        "subset"
+        SamplingHighLight(objectName(CompleteSampling)),
+        SamplingHighLight(objectName(ConcatenateSampling)),
+        SamplingHighLight(objectName(DropSampling)),
+        SamplingHighLight(objectName(FilteredSampling)),
+        SamplingHighLight(objectName(RepeatSampling)),
+        SamplingHighLight(objectName(SampleSampling)),
+        SamplingHighLight(objectName(ShuffleSampling)),
+        SamplingHighLight(objectName(SubsetSampling)),
+        SamplingHighLight(objectName(TakeSampling)),
+        SamplingHighLight(objectName(TupledSampling)),
+        SamplingHighLight(objectName(ZipSampling)),
+        SamplingHighLight(objectName(ZipWithNameSampling)),
+        SamplingHighLight(objectName(ZipWithNameSampling))
       )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)

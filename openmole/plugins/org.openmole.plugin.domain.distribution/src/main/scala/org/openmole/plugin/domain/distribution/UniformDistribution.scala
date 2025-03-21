@@ -20,6 +20,7 @@ package org.openmole.plugin.domain.distribution
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.argument.OptionalArgument
+import org.openmole.plugin.domain.modifier.*
 
 object UniformDistribution:
   given[T]: DiscreteFromContextDomain[UniformDistribution[T], T] =
@@ -42,6 +43,8 @@ object UniformDistribution:
         domain.seed.option.toSeq.flatMap(_.inputs),
         domain.seed.option.map(_.validate).toSeq
       )
+
+  given [T]: DiscreteDomainModifiers[UniformDistribution[T]] with {}
 
 case class UniformDistribution[T](
   seed: OptionalArgument[FromContext[Long]] = None,

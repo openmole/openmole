@@ -18,8 +18,8 @@
 package org.openmole.core.context
 
 import org.openmole.core.exception.UserBadDataError
-import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workspace.Workspace
+import org.openmole.tool.logger.Prettifier
 import org.openmole.tool.random
 import shapeless3.typeable.Typeable
 

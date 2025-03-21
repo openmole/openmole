@@ -32,7 +32,7 @@ object BreedTask:
       val population = context(evolution.populationVal)
       val s = context(evolution.stateVal)
 
-      (population.isEmpty, evolution.operations.generationLens.get(s), suggestedGenomes.isEmpty) match {
+      (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match {
         case (true, 0, false) =>
           val gs =
             size - suggestedGenomes.size match {

@@ -46,7 +46,7 @@ val hello =
     outputs += result
   )
 
-val s = ListFilesSource(workDirectory / "directory", files)
+val s = ListFileSource(workDirectory / "directory", files)
 
 (hello source s)
 """, name = "plug a source")}
@@ -67,10 +67,10 @@ ${hl.openmole("""
   val txtFiles = Val[Array[File]]
   val files = Val[Array[File]]
 
-  val s1 = ListFilesSource(workDirectory / "directory", files)
+  val s1 = ListFileSource(workDirectory / "directory", files)
 
   val s2 =
-    ListFilesSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
+    ListFileSource(workDirectory / "/${someVariable}/", txtFiles, ".*\\.txt") set (
       inputs += someVariable
   )
 """, name = "list file source")}

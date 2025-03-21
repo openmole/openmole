@@ -19,8 +19,9 @@ package org.openmole.core.workflow.execution
 import org.jasypt.encryption.pbe.config.EnvironmentPBEConfig
 
 import java.io.PrintStream
-import org.openmole.core.workflow.mole.MoleServices
+import org.openmole.core.workflow.mole.*
 import org.openmole.tool.cache.KeyValueCache
+import org.openmole.core.argument.OptionalArgument
 
 
 def display(stream: PrintStream, label: String, content: String) =
@@ -38,4 +39,25 @@ def display(stream: PrintStream, label: String, content: String) =
 
 type ExecutionState = Byte
 
+
+object RuntimeLog:
+  @transient lazy val localHost: RuntimeInfo =
+    import org.openmole.tool.network.LocalHostName
+    LocalHostName.localHostName.getOrElse("fake:" + java.util.UUID.randomUUID().toString)
+
+  object RuntimeInfo:
+    extension (r: RuntimeInfo)
+      def hostName: String = r
+
+  opaque type RuntimeInfo = String
+
+case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
+
+object RuntimeSetting:
+  def apply(memoryOverlay: Boolean = false, threads: OptionalArgument[Int] = None) =
+    new RuntimeSetting(memoryOverlay, threads)
+
+class RuntimeSetting(
+  val memoryOverlay: Boolean,
+  val threads: Option[Int])
 

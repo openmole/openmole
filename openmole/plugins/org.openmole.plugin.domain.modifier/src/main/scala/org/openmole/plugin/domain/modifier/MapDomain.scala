@@ -20,7 +20,7 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
-object MapDomain {
+object MapDomain:
 
   implicit def isDiscrete[D, I, O]: DiscreteFromContextDomain[MapDomain[D, I, O], O] = domain =>
     Domain(
@@ -29,7 +29,8 @@ object MapDomain {
       domain.validate
     )
 
-}
+  given [T, D, O]: DiscreteDomainModifiers[MapDomain[D, T, O]] with {}
+
 
 case class MapDomain[D, -I, +O](domain: D, f: FromContext[I => O])(implicit discrete: DiscreteFromContextDomain[D, I]) { d =>
 

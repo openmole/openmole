@@ -11,12 +11,8 @@ import scala.concurrent.ExecutionContext
 object ThreadProvider:
 
   val maxPriority = Int.MaxValue
-  val maxPoolSize = PreferenceLocation("ThreadProvider", "MaxPoolSize", Some(50))
 
-  def apply(maxPoolSize: Option[Int] = None)(implicit preference: Preference) =
-    new ThreadProvider(maxPoolSize.getOrElse(preference(ThreadProvider.maxPoolSize)))
-
-  def stub() = apply()(Preference.stub())
+  def stub() = apply()
 
   type Closure = () => Unit
 
@@ -34,13 +30,13 @@ object ThreadProvider:
       t
 
 
-  def apply(poolSize: Int) = new ThreadProvider(poolSize)
+  def apply() = new ThreadProvider()
 
   extension (t: ThreadProvider)
     def newSingleThreadExecutor = Executors.newSingleThreadExecutor(t.threadFactory)
 
 
-class ThreadProvider(poolSize: Int):
+class ThreadProvider:
 
   lazy val parentGroup = new ThreadGroup("provider-" + UUID.randomUUID().toString)
 

@@ -82,21 +82,17 @@ object EvolutionWorkflow:
       case (false, Some(s)) => Some(s)
       case (false, None)    => throw new UserBadDataError("Aggregation have been specified for some objective, but no stochastic parameter is provided.")
 
-  def deterministicGAIntegration[AG, VA](
+  def deterministicGA[AG, VA](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
-      type MGOAG = AG
-
-      def mgoAG = ag
-
-      type V = VA
-      type P = Phenotype
+      type Integration = algorithm.type
 
       val integration = algorithm
+      def operations = integration.operations(ag)
 
       def validate = _validate
 
@@ -112,7 +108,7 @@ object EvolutionWorkflow:
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
 
 
-  def stochasticGAIntegration[AG](
+  def stochasticGA[AG](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
@@ -120,13 +116,10 @@ object EvolutionWorkflow:
     validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (IArray[Double], IArray[Int]), Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
-      type MGOAG = AG
-      def mgoAG = ag
-
-      type V = (IArray[Double], IArray[Int])
-      type P = Phenotype
+      type Integration = algorithm.type
 
       val integration = algorithm
+      def operations = integration.operations(ag)
 
       def validate = _validate
 
@@ -136,12 +129,12 @@ object EvolutionWorkflow:
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
 
-      def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] = FromContext { p =>
-        import p._
-        val (continuous, discrete) = operations.genomeValues(g)
-        val seeder = replication.seed
-        Genome.toVariables(genome, continuous, discrete, scale = true) ++ seeder(p.random())
-      }
+      def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] =
+        FromContext: p =>
+          import p.*
+          val (continuous, discrete) = operations.genomeValues(g)
+          val seeder = replication.seed
+          Genome.toVariables(genome, continuous, discrete, scale = true) ++ seeder(p.random())
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
 
@@ -149,14 +142,19 @@ object EvolutionWorkflow:
   object OMTermination:
     def toTermination(oMTermination: OMTermination, integration: EvolutionWorkflow) =
       oMTermination match
-        case AfterEvaluated(e) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterEvaluated(e, integration.operations.evaluatedLens)(s, population)
-        case AfterGeneration(g) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterGeneration(g, integration.operations.generationLens)(s, population)
-        case AfterDuration(d) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterDuration(d, integration.operations.startTimeLens)(s, population)
+        case AfterEvaluated(e) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterEvaluated(e, integration.evaluatedLens)(s, population)
+        case AfterGeneration(g) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterGeneration(g, integration.generationLens)(s, population)
+        case AfterDuration(d) => (s: integration.S, population: Vector[integration.I]) => mgo.evolution.stop.afterDuration(d, integration.startTimeLens)(s, population)
+
+    case class AfterEvaluated(steps: Long) extends OMTermination
+    case class AfterGeneration(steps: Long) extends OMTermination
+    case class AfterDuration(duration: Time) extends OMTermination
+
+    given Conversion[Long, OMTermination] = AfterEvaluated.apply
+    given Conversion[Int, OMTermination] = AfterEvaluated.apply
+    given Conversion[Time, OMTermination] = AfterDuration.apply
 
   sealed trait OMTermination
-  case class AfterEvaluated(steps: Long) extends OMTermination
-  case class AfterGeneration(steps: Long) extends OMTermination
-  case class AfterDuration(duration: Time) extends OMTermination
 
   sealed trait EvolutionPattern
   case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
@@ -310,21 +308,14 @@ object EvolutionWorkflow:
 end EvolutionWorkflow
 
 trait EvolutionWorkflow:
+  type Integration <: MGOAPI.Integration[?, ?, ?]
 
-  type MGOAG
-  def mgoAG: MGOAG
+  val integration: Integration
 
-  val integration: MGOAPI.Integration[MGOAG, V, P]
-  import integration._
+  export integration.{G, I, S}
+  export integration.{startTimeLens, generationLens, evaluatedLens}
 
-  def operations = integration.operations(mgoAG)
-
-  type G = integration.G
-  type I = integration.I
-  type S = integration.S
-
-  type V
-  type P
+  def operations: integration.Ops
 
   type Pop = Array[I]
 
@@ -333,7 +324,6 @@ trait EvolutionWorkflow:
   def genomeType = ValType[G]
   def stateType = ValType[S]
   def individualType = ValType[I]
-
   def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
 
   def buildIndividual(genome: G, context: Context, state: S): I
@@ -343,18 +333,14 @@ trait EvolutionWorkflow:
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]]
 
-  // Variables
-  import GAIntegration.namespace
-
-  def genomeVal = Val[G]("genome", namespace)(genomeType)
-
-  def individualVal = Val[I]("individual", namespace)(individualType)
-  def populationVal = Val[Pop]("population", namespace)(populationType)
-  def offspringPopulationVal = Val[Pop]("offspring", namespace)(populationType)
-  def stateVal = Val[S]("state", namespace)(stateType)
+  def genomeVal = Val[G]("genome", GAIntegration.namespace)(genomeType)
+  def individualVal = Val[I]("individual", GAIntegration.namespace)(individualType)
+  def populationVal = Val[Pop]("population", GAIntegration.namespace)(populationType)
+  def offspringPopulationVal = Val[Pop]("offspring", GAIntegration.namespace)(populationType)
+  def stateVal = Val[S]("state", GAIntegration.namespace)(stateType)
   def generationVal = GAIntegration.generationVal
   def evaluatedVal = GAIntegration.evaluatedVal
-  def terminatedVal = Val[Boolean]("terminated", namespace)
+  def terminatedVal = Val[Boolean]("terminated", GAIntegration.namespace)
 
 
 case class Stochastic(
@@ -397,7 +383,7 @@ object GAIntegration:
 
   def rejectValue[G](reject: Condition, genome: Genome, continuous: G => IArray[Double], discrete: G => IArray[Int]) =
     FromContext: p =>
-      import p._
+      import p.*
       (g: G) =>
         val genomeVariables = GAIntegration.genomeToVariable(genome, (continuous(g), discrete(g)), scale = true)
         reject.from(genomeVariables)
@@ -427,6 +413,14 @@ object StochasticGAIntegration:
     (phenotypeContent.outputs zip outputs.transpose).map { case (v, va) => Variable.unsecure(v.toArray.toArray, va) }
 
 object MGOAPI:
+  import monocle.*
+
+  trait MGOState[IS]:
+    type S = _root_.mgo.evolution.algorithm.EvolutionState[IS]
+
+    def startTimeLens = Focus[S](_.startTime)
+    def generationLens = Focus[S](_.generation)
+    def evaluatedLens = Focus[S](_.evaluated)
 
   trait Integration[A, V, P]:
     type I
@@ -436,6 +430,10 @@ object MGOAPI:
     implicit def iManifest: Manifest[I]
     implicit def gManifest: Manifest[G]
     implicit def sManifest: Manifest[S]
+
+    def startTimeLens: monocle.Lens[S, Long]
+    def generationLens: monocle.Lens[S, Long]
+    def evaluatedLens: monocle.Lens[S, Long]
 
     def operations(a: A): Ops
 
@@ -447,10 +445,6 @@ object MGOAPI:
 
       def buildGenome(context: Vector[Variable[?]]): G
       def buildIndividual(genome: G, phenotype: P, state: S): I
-
-      def startTimeLens: monocle.Lens[S, Long]
-      def generationLens: monocle.Lens[S, Long]
-      def evaluatedLens: monocle.Lens[S, Long]
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]

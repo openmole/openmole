@@ -41,6 +41,7 @@ import org.openmole.core.preference.*
 import org.openmole.core.services.*
 import org.openmole.core.networkservice.*
 import org.openmole.tool.outputredirection.OutputRedirection
+import org.openmole.tool.system.*
 
 object Application extends JavaLogger {
 
@@ -265,7 +266,7 @@ object Application extends JavaLogger {
               val newServer = GUIServer(port, !config.remote, services, config.password, !config.unoptimizedJS, extraHeader)
 
               val s = newServer.start()
-              registerSignalCatcher: si =>
+              Signal.registerSignalCatcher(Seq("TERM", "INT")): si =>
                 logger.info(s"Received signal $si, shutting down")
                 s.stop()
 
@@ -339,11 +340,5 @@ object Application extends JavaLogger {
 
   }
 
-
-  def registerSignalCatcher(f: sun.misc.Signal => Unit): Unit =
-    import sun.misc.*
-    val handler: SignalHandler = s => f(s)
-    sun.misc.Signal.handle(new Signal("TERM"), handler)
-    sun.misc.Signal.handle(new Signal("INT"), handler)
 
 }

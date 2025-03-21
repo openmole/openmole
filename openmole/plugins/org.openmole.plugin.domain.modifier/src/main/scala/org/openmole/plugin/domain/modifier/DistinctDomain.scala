@@ -34,6 +34,8 @@ object DistinctDomain {
     )
   }
 
+  given [T, D]: DiscreteDomainModifiers[DistinctDomain[D, T]] with {}
+
 }
 
 case class DistinctDomain[D, +T](domain: D)(implicit val discrete: DiscreteFromContextDomain[D, T])

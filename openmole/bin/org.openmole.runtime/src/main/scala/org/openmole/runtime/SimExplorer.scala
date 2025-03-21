@@ -48,7 +48,6 @@ object SimExplorer extends JavaLogger {
         inputMessage:  Option[String] = None,
         outputMessage: Option[String] = None,
         pluginPath:    Option[String] = None,
-        thread:        Option[Int]    = None,
         workspace:     Option[String] = None,
         transferRetry: Option[Int]    = None,
         test:          Boolean        = false,
@@ -68,9 +67,6 @@ object SimExplorer extends JavaLogger {
         }
         opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
           (v, c) => c.copy(pluginPath = Some(v))
-        }
-        opt[Int]('t', "thread") text ("Number of threads for the execution") action {
-          (v, c) => c.copy(thread = Some(v))
         }
         opt[String]('w', "workspace") text ("Workspace location") action {
           (v, c) => c.copy(workspace = Some(v))
@@ -92,14 +88,11 @@ object SimExplorer extends JavaLogger {
 
             if (config.debug) LoggerConfig.level(Level.FINEST)
 
-            val threads = config.thread.getOrElse(1)
-            logger.fine(s"running with: $threads threads")
-
             implicit val workspace: Workspace = Workspace(new File(config.workspace.get).getCanonicalFile)
             implicit val newFile: TmpDirectory = TmpDirectory(workspace)
             implicit val serializerService: SerializerService = SerializerService()
             implicit val preference: Preference = Preference.memory()
-            implicit val threadProvider: ThreadProvider = ThreadProvider(threads + 5)
+            implicit val threadProvider: ThreadProvider = ThreadProvider()
             implicit val fileService: FileService = FileService()
             implicit val fileServiceCache: FileServiceCache = FileServiceCache()
             implicit val eventDispatcher: EventDispatcher = EventDispatcher()
@@ -119,7 +112,6 @@ object SimExplorer extends JavaLogger {
                 storage,
                 config.inputMessage.get,
                 config.outputMessage.get,
-                threads,
                 config.debug,
                 config.transferRetry
               )

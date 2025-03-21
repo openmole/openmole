@@ -25,7 +25,6 @@ import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.tool.logger.{JavaLogger, LoggerService}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.core.tools.service.*
 import org.openmole.core.workflow.execution.*
 import org.openmole.core.communication.message.*
 import org.openmole.core.communication.storage.*
@@ -37,11 +36,11 @@ import org.openmole.core.serializer.*
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file.uniqName
-
+import org.openmole.tool.system.*
 import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
 import util.{Failure, Success}
-import org.openmole.core.workflow.execution.Environment.RuntimeLog
+import org.openmole.core.workflow.execution.*
 import org.openmole.core.workflow.job.Job
 import org.openmole.tool.cache.KeyValueCache
 import org.openmole.tool.exception.Retry
@@ -50,20 +49,27 @@ import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream.MultiplexedOutputStream
 import squants.*
 
-object Runtime extends JavaLogger {
+object Runtime extends JavaLogger:
 
   import squants.time.TimeConversions._
 
-  def retry[T](f: => T, retry: Option[Int]) = {
-    retry match {
+  def retry[T](f: => T, retry: Option[Int]) =
+    retry match
       case None    => f
       case Some(r) => Retry.retry(f, r, Some(1 seconds))
-    }
 
-  }
-}
+  def signalHandler(env: LocalEnvironment)(using tp: ThreadProvider): Signal.Handler =
+    si =>
+      Log.logger.warning(s"Received signal $si, shutting down")
+      import org.openmole.tool.thread.*
+      tp.virtual: () =>
+        try env.stop()
+        finally
+          Thread.sleep(20.seconds.millis)
+          Log.logger.warning(s"Waiting 20 seconds before killing the JVM")
+          System.exit(si.getNumber)
 
-class Runtime {
+class Runtime:
 
   import Runtime._
   import Log._
@@ -72,7 +78,6 @@ class Runtime {
     storage:           RemoteStorage,
     inputMessagePath:  String,
     outputMessagePath: String,
-    threads:           Int,
     debug:             Boolean,
     transferRetry:     Option[Int]
   )(implicit serializerService: SerializerService, newFile: TmpDirectory, fileService: FileService, fileServiceCache: FileServiceCache, preference: Preference, threadProvider: ThreadProvider, eventDispatcher: EventDispatcher, workspace: Workspace, loggerService: LoggerService, networkService: NetworkService, timeService: TimeService) =
@@ -110,6 +115,16 @@ class Runtime {
 
     val beginTime = System.currentTimeMillis
 
+    val environment = new LocalEnvironment(
+      threads = executionMessage.runtimeSetting.threads.getOrElse(1),
+      deinterleave = false,
+      remote = true,
+      runtimeSetting = executionMessage.runtimeSetting,
+      name = Some("runtime local")
+    )
+    environment.start()
+
+    Signal.registerSignalCatcher(Seq("TERM"))(Runtime.signalHandler(environment))
     
     val result =
       try
@@ -156,8 +171,6 @@ class Runtime {
 
         /* --- Submit all jobs to the local environment --*/
         logger.fine("Run the jobs")
-        val environment = new LocalEnvironment(threads = threads, false, Some("runtime local"), remote = true)
-        environment.start()
 
         try
           val taskExecutionContext = TaskExecutionContext.partial(
@@ -215,10 +228,12 @@ class Runtime {
           IndividualFilesContextResults(contextResultFile, replicated)
 
         val result =
-          if (executionMessage.runtimeSettings.archiveResult) uploadArchive else uploadIndividualFiles
+          if executionMessage.archiveResult
+          then uploadArchive
+          else uploadIndividualFiles
 
         val endTime = System.currentTimeMillis
-        Success(result → RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
+        Success(result -> RuntimeLog(beginTime, beginExecutionTime, endExecutionTime, endTime))
       catch
         case t: Throwable =>
           if (debug) logger.log(SEVERE, "", t)
@@ -231,7 +246,7 @@ class Runtime {
 
     val outputMessage = if (out.length != 0) Some(out) else None
 
-    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeInfo.localRuntimeInfo)
+    val runtimeResult = RuntimeResult(outputMessage, result, RuntimeLog.localHost)
 
     newFile.withTmpFile("output", ".tgz"): outputLocal =>
       logger.fine(s"Serializing result to $outputLocal")
@@ -241,4 +256,3 @@ class Runtime {
 
     result
 
-}

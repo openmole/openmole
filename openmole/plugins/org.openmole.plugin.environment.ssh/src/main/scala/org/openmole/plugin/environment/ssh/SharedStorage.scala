@@ -98,7 +98,6 @@ object SharedStorage extends JavaLogger:
     jobDirectory:   String,
     workDirectory:  String,
     openMOLEMemory: Option[Information],
-    threads:        Option[Int],
     serializedJob:  SerializedJob,
     outputPath:     String,
     storage:        S,
@@ -114,19 +113,30 @@ object SharedStorage extends JavaLogger:
         val loadModules = modules.getOrElse(JobScript.defaultModules).map(m => s"module load $m")
 
         val commands =
+          Seq(s"trap 'cleanup_work_directory' SIGTERM")
           loadModules ++
             Seq(
               s"export PATH=$runtime/jre/bin/:$$PATH",
               s"cd $runtime",
               s"mkdir -p $workspace",
               s"sh run.sh ${BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt}m $workspace -s ${serializedJob.remoteStorage.path}" +
-                s" -p envplugins/ -i ${serializedJob.inputPath} -o $result -t ${BatchEnvironment.threadsValue(threads)}" + (if (debug) " --debug" else ""),
+                s" -p envplugins/ -i ${serializedJob.inputPath} -o $result" + (if debug then " --debug" else ""),
               "RETURNCODE=$?",
               s"rm -rf $workspace",
               "exit $RETURNCODE"
             )
 
-        val content = commands.mkString(" ; ")
+        val content =
+          s"""
+            |function cleanup_work_directory(){
+            |  sleep 20
+            |  rm -rf $workspace
+            |  exit 15
+            |}
+            |
+            |${commands.mkString(" ; ")}
+            |""".stripMargin
+
         Log.logger.fine("Script: " + content)
 
         script.content = content

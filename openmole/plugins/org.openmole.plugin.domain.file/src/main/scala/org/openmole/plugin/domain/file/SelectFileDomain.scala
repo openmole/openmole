@@ -23,7 +23,9 @@ import org.openmole.core.dsl.extension._
 import cats.implicits._
 import org.openmole.core.argument.FileFromContext
 
-object SelectFileDomain {
+import org.openmole.plugin.domain.modifier.*
+
+object SelectFileDomain:
 
   implicit def isDiscrete: DiscreteFromContextDomain[SelectFileDomain, File] = domain =>
     Domain(
@@ -32,8 +34,10 @@ object SelectFileDomain {
       domain.provider.validate
     )
 
+  given DiscreteDomainModifiers[SelectFileDomain] with {}
+
   def apply(base: File, path: FromContext[String]) = new SelectFileDomain(FileFromContext(base, path))
-}
+
 
 class SelectFileDomain(val provider: FromContext[File]) {
   def iterator = provider.map(p => Iterator(p))

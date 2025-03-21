@@ -81,17 +81,17 @@ object TaskExecutionContext:
       lockRepository = lockRepository,
       moleExecution = moleExecution,
       localEnvironment = localEnvironment)(
-      preference = preference,
-      threadProvider = threadProvider,
-      fileService = fileService,
-      fileServiceCache = fileServiceCache,
-      workspace = workspace,
-      outputRedirection = outputRedirection,
-      loggerService = loggerService,
-      serializerService = serializerService,
-      networkService = networkService,
-      timeService = timeService
-    )
+      using
+        preference = preference,
+        threadProvider = threadProvider,
+        fileService = fileService,
+        fileServiceCache = fileServiceCache,
+        workspace = workspace,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService,
+        serializerService = serializerService,
+        networkService = networkService,
+        timeService = timeService)
 
   def partial(
     moleExecutionDirectory:        File,
@@ -136,17 +136,18 @@ object TaskExecutionContext:
       localEnvironment = localEnvironment,
       cache = cache,
       lockRepository = lockRepository,
-      moleExecution = moleExecution)(using
-      preference = preference,
-      threadProvider = threadProvider,
-      fileService = fileService,
-      fileServiceCache = fileServiceCache,
-      workspace = workspace,
-      outputRedirection = outputRedirection,
-      loggerService = loggerService,
-      serializerService = serializerService,
-      networkService = networkService,
-      timeService = timeService)
+      moleExecution = moleExecution)(
+      using
+        preference = preference,
+        threadProvider = threadProvider,
+        fileService = fileService,
+        fileServiceCache = fileServiceCache,
+        workspace = workspace,
+        outputRedirection = outputRedirection,
+        loggerService = loggerService,
+        serializerService = serializerService,
+        networkService = networkService,
+        timeService = timeService)
 
   case class Partial(
     moleExecutionDirectory:        File,

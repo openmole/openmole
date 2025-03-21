@@ -26,8 +26,8 @@ import org.openmole.core.setter._
 import org.openmole.core.workflow.task.TaskExecutionContext
 import org.openmole.core.workflow.validation.ValidateTask
 import org.openmole.plugin.task.external._
-import org.openmole.core.tools.service.OS
 import org.openmole.core.setter.InfoBuilder
+import org.openmole.tool.system.OS
 
 object SystemExecTask:
 

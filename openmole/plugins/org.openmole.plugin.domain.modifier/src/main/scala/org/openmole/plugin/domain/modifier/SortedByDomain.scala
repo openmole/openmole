@@ -28,6 +28,9 @@ object SortedByDomain {
       domain.inputs,
       domain.validate
     )
+  
+  given [T, D, S]: DiscreteDomainModifiers[SortedByDomain[D, T, S]] with {}  
+  
 }
 
 case class SortedByDomain[D, T, S](domain: D, s: FromContext[T => S])(implicit discrete: DiscreteFromContextDomain[D, T], sOrdering: scala.Ordering[S]) {

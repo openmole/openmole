@@ -2,7 +2,7 @@ package org.openmole.core.format
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.context.ValType
-import org.openmole.core.tools.io.Prettifier
+import org.openmole.tool.logger.Prettifier
 
 import scala.reflect.ClassTag
 
@@ -25,7 +25,7 @@ import scala.reflect.ClassTag
 object CSVFormat:
   import org.openmole.core.context.{Val, Variable}
   import org.openmole.core.exception.UserBadDataError
-  import org.openmole.core.tools.io.Prettifier.*
+  import Prettifier.*
   import org.openmole.tool.file.*
   import org.openmole.tool.stream.*
 

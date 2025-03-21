@@ -21,8 +21,10 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.domain
 
-import org.openmole.core.tools.math.BigDecimalOperations
+import org.openmole.tool.math.BigDecimalOperations
 import java.math.{BigDecimal, MathContext, RoundingMode}
+
+import org.openmole.plugin.domain.modifier.*
 
 object LogRangeDomain:
 
@@ -68,6 +70,7 @@ object LogRangeDomain:
       min + ((max - min) / fromInt(2))
 
 
+  given [T]: DiscreteDomainModifiers[LogRangeDomain[T]] with {}
 
 case class LogRangeDomain[T](min: FromContext[T], max: FromContext[T], steps: FromContext[Int])(using lg: LogRangeDomain.Log[T], val ops: RangeDomain.RangeValue[T]):
 

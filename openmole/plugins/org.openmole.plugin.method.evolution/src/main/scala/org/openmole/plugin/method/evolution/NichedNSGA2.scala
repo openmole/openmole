@@ -244,20 +244,15 @@ object NichedNSGA2 {
 
     import CDGenome.DeterministicIndividual
 
-    implicit def integration: MGOAPI.Integration[DeterministicNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[DeterministicNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[DeterministicNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: DeterministicNichedNSGA2) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
-
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
 
         def buildGenome(vs: Vector[Variable[?]]) =
@@ -307,7 +302,6 @@ object NichedNSGA2 {
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
     }
-  }
 
   case class DeterministicNichedNSGA2(
     nicheSize:           Int,
@@ -335,20 +329,15 @@ object NichedNSGA2 {
 
     }
 
-    implicit def integration: MGOAPI.Integration[StochasticNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] = new MGOAPI.Integration[StochasticNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] {
+    given MGOAPI.Integration[StochasticNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
-      type S = EvolutionState[Unit]
 
       def iManifest = implicitly
       def gManifest = implicitly
       def sManifest = implicitly
 
       def operations(om: StochasticNichedNSGA2) = new Ops:
-        def startTimeLens = GenLens[S](_.startTime)
-        def generationLens = GenLens[S](_.generation)
-        def evaluatedLens = GenLens[S](_.evaluated)
-
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
         def buildGenome(vs: Vector[Variable[?]]) =
           def buildGenome(v: (IArray[Double], IArray[Int])): G = CDGenome.buildGenome(om.genome.discrete)(v._1, None, v._2, None)
@@ -404,9 +393,7 @@ object NichedNSGA2 {
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) = (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state)
 
-
     }
-  }
 
   case class StochasticNichedNSGA2(
     nicheSize:           Int,
@@ -437,7 +424,7 @@ object NichedNSGA2 {
           niche.map(n => NichedElement.validate(n, outputs)) ++
             Objectives.validate(exactObjectives, outputs)
 
-        EvolutionWorkflow.deterministicGAIntegration(
+        EvolutionWorkflow.deterministicGA(
           DeterministicNichedNSGA2(
             genome = genome,
             objectives = exactObjectives,
@@ -461,7 +448,7 @@ object NichedNSGA2 {
           niche.map(n => NichedElement.validate(n, aOutputs)) ++
             Objectives.validate(noisyObjectives, aOutputs)
 
-        EvolutionWorkflow.stochasticGAIntegration(
+        EvolutionWorkflow.stochasticGA(
           StochasticNichedNSGA2(
             nicheSize = nicheSize,
             niche = StochasticNichedNSGA2.niche(phenotypeContent, niche.map(NichedElement.toNoisy)),

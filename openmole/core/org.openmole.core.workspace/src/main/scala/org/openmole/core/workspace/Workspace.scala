@@ -27,7 +27,6 @@ import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
 import org.openmole.tool.types.*
 import org.openmole.tool.crypto.Certificate
 import org.openmole.tool.file.*
-import org.openmole.core.tools.service.*
 import org.openmole.core.workspace.Workspace.{fixedDir, fixedPostfix, fixedPrefix}
 import org.openmole.tool.network.fixHostName
 import org.openmole.tool.random

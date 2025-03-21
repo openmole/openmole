@@ -162,8 +162,9 @@ object Frontend:
 trait Frontend:
   def run(command: String): util.Try[_root_.gridscale.ExecutionResult]
 
-def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: EnvironmentStorage, J](
+def submitToCluster[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}, J](
   environment: BatchEnvironment,
+  runtimeSetting: Option[RuntimeSetting],
   batchExecutionJob: BatchExecutionJob,
   storage: S,
   space: StorageSpace,
@@ -193,7 +194,7 @@ def submitToCluster[S: StorageInterface: HierarchicalStorageInterface: Environme
 
     def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
 
-    val sj = BatchEnvironment.serializeJob(environment, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
+    val sj = BatchEnvironment.serializeJob(environment, runtimeSetting, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
     val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))
 
     val job = submit(sj, outputPath, jobDirectory, priority)

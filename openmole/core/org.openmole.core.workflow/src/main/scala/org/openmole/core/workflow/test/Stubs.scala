@@ -31,7 +31,7 @@ object Stubs:
   implicit lazy val tmpDirectory: TmpDirectory = TmpDirectory(dir)
   implicit lazy val seeder: Seeder = Seeder()
   implicit val serializer: SerializerService = SerializerService()
-  implicit val threadProvider: ThreadProvider = ThreadProvider(Some(10))
+  implicit val threadProvider: ThreadProvider = ThreadProvider()
   implicit val eventDispatcher: EventDispatcher = EventDispatcher()
   implicit val fileService: FileService = FileService()
   implicit val randomProvider: RandomProvider = RandomProvider(seeder.newRNG)

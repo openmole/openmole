@@ -212,7 +212,7 @@ object PlotContent:
                 )
         case _=> BasicView(div())
 
-    val sectionView = buildSectionView(currentSection) 
+    val sectionView = buildSectionView(currentSection)
 
     val tabData = TabData(safePath, None)    
 
@@ -222,7 +222,7 @@ object PlotContent:
           case BasicView(view) => view.ref.scrollTop = view.ref.scrollHeight
           case _ =>
 
-    def updatedContentState = 
+    def updatedContentState =
       currentState match
         case _: TableState => TableState()
         case _: RawState => RawState()
@@ -244,8 +244,8 @@ object PlotContent:
       val updatedStates = states.update(newState)
       switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
 
-    def switchSection(section: Section): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section.name, omrMetadata = omrMetadata)
+    def switchSection(section: String): Unit =
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
     val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ => switchFromResultView(Raw))
@@ -271,16 +271,12 @@ object PlotContent:
         api.omrContent(safePath).map: guiContent =>
           val (_, content) = OMRContent.buildTab(safePath, guiContent, contentStates = states.update(plotContentState), currentState = plotContentState)
           panels.tabContent.updateTab(safePath, content)
+        .andThen: _ =>
           refreshing.set(false)
       })
-                   
-    val sectionStates: Seq[ToggleState[Section]] =
-      contentSections.map: cs =>
-        val section = Section(cs.section)
-        ToggleState(section, cs.section, s"btn ${btn_success_string}", _ => switchSection(section))
 
-    lazy val sectionSwitchButton = exclusiveRadio(sectionStates, btn_secondary_string, 0)
-          
+    lazy val sectionSwitchButton = Component.ExclusiveButtons(contentSections.map(_.section), initial = contentSections.map(_.section).indexOf(currentSection))
+
     val content =
       div(display.flex, flexDirection.row,
         div(display.flex, flexDirection.column, width := "100%",
@@ -294,28 +290,16 @@ object PlotContent:
               case _: RawState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _: TableState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _ => div(),
-            sectionStates.size match
+            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "25"),
+            contentSections.size match
               case 1 => div()
-              case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px")
-            ,
-            switchButton.element.amend(margin := "10", width := "150px", marginLeft := "30"),
+              case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px", marginLeft := "90"),
+            sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v =>
+              switchSection(contentSections(v).section) }
           ),
           sectionView.view
         )
       )
-
-//    timers.setTimeout(500) {
-//       currentState match
-//          case r: RawState if r.scrollDown =>
-//            sectionView match
-//              case EditorView(_, editor) => editor.scrollToBottom
-//              case _=>
-//          case ts: TableState if ts.scrollDown =>
-//            sectionView match
-//              case BasicView(view)=> setScrollToBottom(view)
-//              case _=>
-//          case _=>
-//    }
 
     (tabData, content)
 

@@ -45,9 +45,8 @@ class Activator extends BundleActivator:
         PatternHighLight(objectName(OSEEvolution)),
         PatternHighLight(objectName(PSEEvolution)),
         PatternHighLight(objectName(HDOSEEvolution)),
-        WordHighLight(objectName(Stochastic)),
-        WordHighLight(objectName(Island)),
-        HookHighLight(objectName(SavePopulationHook))
+        ObjectHighLight(objectName(Stochastic)),
+        ObjectHighLight(objectName(Island))
       )
 
     PluginRegistry.register(

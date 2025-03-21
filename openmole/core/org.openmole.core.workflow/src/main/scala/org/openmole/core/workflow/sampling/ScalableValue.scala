@@ -21,7 +21,7 @@ import cats.implicits.*
 import org.openmole.core.context.*
 import org.openmole.core.fileservice.*
 import org.openmole.core.argument.*
-import org.openmole.core.tools.math.*
+import org.openmole.tool.math.*
 import org.openmole.core.workflow.domain.*
 import org.openmole.core.workflow.sampling.*
 import org.openmole.core.workspace.*

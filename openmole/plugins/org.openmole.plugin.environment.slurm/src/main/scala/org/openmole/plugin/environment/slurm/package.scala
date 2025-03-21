@@ -17,7 +17,3 @@
 
 package org.openmole.plugin.environment
 
-package object slurm {
-  type Gres = _root_.gridscale.slurm.Gres
-  lazy val Gres = _root_.gridscale.slurm.Gres
-}

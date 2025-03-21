@@ -74,7 +74,7 @@ object GetResultActor {
         case Success((serializedContextResults, log)) =>
           val contextResults = getContextResults(serializedContextResults, storageId, environment, download)
 
-          services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log, runtimeResult.info))
+          services.eventDispatcher.trigger(environment: Environment, Environment.JobCompleted(batchJob, log))
 
           //Try to download the results for all the jobs of the group
           for moleJob <- batchJob.storedJob.storedMoleJobs

@@ -26,7 +26,6 @@ import org.openmole.core.dsl.extension.*
 import org.openmole.core.exception.UserBadDataError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.project.*
-import org.openmole.core.tools.io.Prettifier
 import org.openmole.core.workflow.execution.Environment
 import org.openmole.core.workflow.mole.{Mole, MoleExecution, MoleServices}
 import org.openmole.core.workflow.validation.Validation
@@ -42,6 +41,7 @@ import org.openmole.tool.crypto.Cypher
 import org.openmole.tool.random.{RandomProvider, Seeder}
 import org.openmole.tool.file.*
 import org.jline.terminal.Terminal
+import org.openmole.tool.logger.Prettifier
 
 object Command:
   def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =

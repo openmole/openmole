@@ -28,6 +28,8 @@ object TakeDomain:
       domain.validate
     )
 
+  given [T, D]: DiscreteDomainModifiers[TakeDomain[D, T]] with {}
+
 case class TakeDomain[D, +T](domain: D, size: FromContext[Int])(using discrete: DiscreteFromContextDomain[D, T]):
   def iterator =
     FromContext: p =>

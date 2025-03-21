@@ -52,9 +52,8 @@ package object extension:
   type Factor[D, T] = org.openmole.core.workflow.sampling.Factor[D, T]
   def Factor[D, T](p: Val[T], d: D) = org.openmole.core.workflow.sampling.Factor(p, d)
 
-  type Environment = org.openmole.core.workflow.execution.Environment
-  def Environment = org.openmole.core.workflow.execution.Environment
-
+  export org.openmole.core.workflow.execution.Environment
+  
   type Namespace = org.openmole.core.context.Namespace
   def Namespace = org.openmole.core.context.Namespace
 

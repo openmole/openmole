@@ -32,9 +32,12 @@ import squants.information.*
 import scala.collection.immutable.NumericRange
 
 package dsl:
+
   trait DSLPackage:
     export org.openmole.core.context.{Vec, Context, Val, Variable}
+
     export org.openmole.core.workflow.execution.LocalEnvironment
+    export org.openmole.core.workflow.execution.RuntimeSetting
 
     export org.openmole.core.workflow.task.EmptyTask
     export org.openmole.core.workflow.task.ExplorationTask
@@ -98,9 +101,6 @@ package dsl:
       def zettabyte = n zettabytes
       def yottabyte = n yottabytes
 
-    //implicit def intToMemory(i: Int): Information = (i megabytes)
-    //implicit def intToMemoryOptional(i: Int): OptionalArgument[Information] = OptionalArgument(intToMemory(i))
-
     def encrypt(s: String)(implicit cypher: Cypher) = cypher.encrypt(s)
 
     implicit def seqIsFunctor: Functor[Seq] = new Functor[Seq]:
@@ -113,12 +113,12 @@ package dsl:
       infix def to(h: Double) = org.openmole.tool.collection.DoubleRange.to(d, h)
       infix def until(h: Double) = org.openmole.tool.collection.DoubleRange.until(d, h)
 
-    //implicit def doubleRange(d: Double): org.openmole.tool.collection.DoubleRangeDecorator = new org.openmole.tool.collection.DoubleRangeDecorator(d)
     export Predef.longWrapper
     export Predef.intWrapper
     export Predef.doubleWrapper
 
     val TrueFalse = Seq(true, false)
+
 
 
 package object dsl extends dsl.DSLPackage

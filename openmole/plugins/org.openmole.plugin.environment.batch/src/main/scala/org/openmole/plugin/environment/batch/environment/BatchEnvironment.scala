@@ -52,7 +52,7 @@ import org.openmole.tool.crypto.Cypher
 
 import scala.collection.immutable.TreeSet
 
-object BatchEnvironment {
+object BatchEnvironment:
 
   trait Transfer:
     def id: Long
@@ -125,8 +125,6 @@ object BatchEnvironment {
     case None    => preference(MemorySizeForRuntime)
     case Some(m) => m
 
-  def threadsValue(threads: Option[Int]) = threads.getOrElse(1)
-
   object Services:
 
     def apply(ms: MoleServices)(implicit replicaCatalog: ReplicaCatalog) =
@@ -197,6 +195,7 @@ object BatchEnvironment {
 
   def serializeJob(
     environment: BatchEnvironment,
+    runtimeSetting: Option[RuntimeSetting],
     job: BatchExecutionJob,
     remoteStorage: RemoteStorage,
     replicate: (File, TransferOptions) => ReplicatedFile,
@@ -218,13 +217,15 @@ object BatchEnvironment {
 
       val runtime = replicateTheRuntime(environment, replicate)
 
-      val executionMessage = createExecutionMessage(
-        jobFile,
-        files,
-        plugins,
-        replicate,
-        environment
-      )
+      val executionMessage =
+        createExecutionMessage(
+          jobFile,
+          files,
+          plugins,
+          replicate,
+          environment,
+          runtimeSetting
+        )
 
       /* ---- upload the execution message ----*/
       val inputPath =
@@ -266,7 +267,8 @@ object BatchEnvironment {
     serializationFile:   Iterable[File],
     serializationPlugin: Iterable[File],
     replicate: (File, TransferOptions) => ReplicatedFile,
-    environment: BatchEnvironment
+    environment: BatchEnvironment,
+    runtimeSetting: Option[RuntimeSetting]
   )(implicit services: BatchEnvironment.Services): ExecutionMessage =
 
     val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
@@ -276,7 +278,7 @@ object BatchEnvironment {
       pluginReplicas.sortBy(_.originalPath),
       files.sortBy(_.originalPath),
       jobFile,
-      environment.runtimeSettings
+      runtimeSetting.getOrElse(RuntimeSetting())
     )
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = 
@@ -354,7 +356,7 @@ object BatchEnvironment {
     )
 
   type REPLClassCache = AssociativeCache[Set[String], Seq[File]]
-}
+
 
 trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvironment:
   env =>
@@ -377,8 +379,6 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 
   def runtime = BatchEnvironment.runtimeLocation
   def jvmLinuxX64 = BatchEnvironment.JVMLinuxX64Location
-
-  def runtimeSettings = RuntimeSettings(archiveResult = false)
 
   def error(e: ExceptionEvent) = state._errors.put(e)
   def errors: Seq[ExceptionEvent] = state._errors.elements

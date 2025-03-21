@@ -20,37 +20,34 @@ package org.openmole.plugin.domain.distribution
 import scala.util.Random
 
 
-object Distribution {
-  implicit lazy val intDistribution: Distribution[Int] = new Distribution[Int] {
+object Distribution:
+  given Distribution[Int] with
     override def next(rng: Random): Int = rng.nextInt
     override def next(rng: Random, max: Int): Int = rng.nextInt(max)
-  }
 
-  implicit lazy val longDistribution: Distribution[Long] = new Distribution[Long] {
+
+  given Distribution[Long] with
     override def next(rng: Random): Long = rng.nextLong
-    override def next(rng: Random, max: Long): Long = {
+    override def next(rng: Random, max: Long): Long =
       if (max <= 0) throw new IllegalArgumentException("max must be positive")
       var bits: Long = 0
       var value: Long = 0
-      while {
+      while
         bits = (rng.nextLong() << 1) >>> 1
         value = bits % max
         (bits - value + (max - 1) < 0L)
-      } do ()
+      do ()
       value
-    }
-  }
 
-  implicit lazy val doubleDistribution: Distribution[Double] = new Distribution[Double] {
+
+  given Distribution[Double] with
     override def next(rng: Random): Double = rng.nextDouble
     override def next(rng: Random, max: Double): Double = rng.nextDouble * max
-  }
-}
 
-trait Distribution[T] {
+
+trait Distribution[T]:
   def next(rng: Random): T
   def next(rng: Random, max: T): T
-}
 
 
 
