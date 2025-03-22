@@ -32,7 +32,6 @@ object JobScript:
     storageLocation: String,
     voName:          String,
     memory:          Int,
-    threads:         Int,
     debug:           Boolean,
     proxy:           Option[String] = None
   )(using preference: Preference) =
@@ -124,7 +123,7 @@ object JobScript:
 
       script += "export PATH=$PWD/jre/bin:$PATH"
       script += "export HOME=$PWD"
-      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath -t $threads --transfer-retry $retry""" + (if debug then " -d 2>&1" else "")
+      script += s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $$CUR/storage.bin -p $$CUR/envplugins/ -i $inputPath -o $resultPath --transfer-retry $retry""" + (if debug then " -d 2>&1" else "")
       script.mkString(" && ")
 
     val postDebugInfo = if (debug) "cat *.log ; " else ""
