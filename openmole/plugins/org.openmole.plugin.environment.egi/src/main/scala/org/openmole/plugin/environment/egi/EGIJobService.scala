@@ -32,7 +32,6 @@ class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environmen
         storageLocation,
         voName = voName,
         memory = BatchEnvironment.openMOLEMemoryValue(openMOLEMemory).toMegabytes.toInt,
-        threads = 1,
         debug = debug
       )
 
