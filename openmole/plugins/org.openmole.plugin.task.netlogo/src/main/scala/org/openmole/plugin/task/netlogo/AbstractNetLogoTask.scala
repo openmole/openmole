@@ -261,12 +261,12 @@ trait AbstractNetLogoTask extends Task with ValidateTask:
     import p.*
     def scriptExists =
       workspace match
-        case s: AbstractNetLogoTask.Workspace.Script if !s.script.exists => Seq(UserBadDataError(s"Script file ${s.script} doesn't exit"))
+        case s: AbstractNetLogoTask.Workspace.Script if !s.script.exists => Seq(UserBadDataError(s"File ${s.script} doesn't exit"))
         case d: AbstractNetLogoTask.Workspace.Directory =>
           if !d.directory.exists
           then Seq(UserBadDataError(s"Workspace directory ${d.directory} doesn't exit"))
           else if !(d.directory / d.script).exists
-          then Seq(UserBadDataError(s"Script ${d.script} doesn't exists in workspace directory ${d.directory}"))
+          then Seq(UserBadDataError(s"File ${d.script} doesn't exists in workspace directory ${d.directory}"))
           else Seq()
         case _ => Seq()
 
