@@ -110,7 +110,6 @@ object ErrorData:
   def apply(errors: Seq[ScriptError], t: Throwable) = CompilationErrorData(errors, toStackTrace(t))
 
   def apply(t: Throwable, stack: Boolean = true): MessageErrorData =
-    println(t.getMessage)
     MessageErrorData(Option(t.getMessage).getOrElse(""), if stack then Some(toStackTrace(t)) else None)
 
   def apply(message: String) = MessageErrorData(message, None)
