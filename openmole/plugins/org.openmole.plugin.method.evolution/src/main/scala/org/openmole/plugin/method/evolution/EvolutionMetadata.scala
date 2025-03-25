@@ -1,9 +1,9 @@
 package org.openmole.plugin.method.evolution
 
-import io.circe.derivation
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.format.*
 import io.circe.generic.auto.*
+import io.circe.*
 
 case class SaveOption(
   frequency: Option[Long],
@@ -11,7 +11,6 @@ case class SaveOption(
   keepHistory: Boolean)
 
 object EvolutionMetadata:
-  import io.circe.*
 
   given MethodMetaData[EvolutionMetadata] = MethodMetaData(EvolutionMetadata.method)
 
@@ -23,7 +22,7 @@ object EvolutionMetadata:
     case Enumeration(value: ValData, values: Seq[String])
 
   object GenomeBoundData:
-    enum IntervalType:
+    enum IntervalType derives derivation.ConfiguredEnumCodec:
       case Continuous, Discrete
 
     export IntervalType.{Continuous, Discrete}
