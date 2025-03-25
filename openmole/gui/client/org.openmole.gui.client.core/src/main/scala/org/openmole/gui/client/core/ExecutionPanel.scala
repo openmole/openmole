@@ -312,10 +312,9 @@ class ExecutionPanel:
       finally queryingState = false
 
     def jobs(executionId: ExecutionId, envStates: Seq[EnvironmentState]) =
-      div(columnFlex, marginTop := "5px", maxWidth := "1520px",
-        for
-          e <- envStates
-        yield jobRow(executionId, e)
+      div(columnFlex, marginTop := "80px", maxWidth := "1520px",
+        for e <- envStates
+        yield environmentRow(executionId, e)
       )
 
     def buildExecution(id: ExecutionId, executionDetails: ExecutionDetails, cancel: ExecutionId => Unit, remove: ExecutionId => Unit)(using panels: Panels) =
@@ -340,7 +339,7 @@ class ExecutionPanel:
     )
 
 
-    def jobRow(executionId: ExecutionId, e: EnvironmentState) =
+    def environmentRow(executionId: ExecutionId, e: EnvironmentState) =
       val openEnvironmentErrors: Var[Boolean] = Var(false)
 
       def cleanEnvironmentErrors(executionId: ExecutionId, id: EnvironmentId) =
@@ -360,7 +359,7 @@ class ExecutionPanel:
           contextBlock("Failed", e.failed.toString, true),
           contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
             onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
-          div(cls := "bi-three-dots-vertical execControls", onClick --> showEvironmentControls.update(!_)),
+          div(cls := "bi-three-dots-vertical execControls", onClick.mapToChecked --> showEvironmentControls),
           environmentControls(e.envId, id => cleanEnvironmentErrors(executionId, id)),
         ),
         child <-- openEnvironmentErrors.signal.map: opened =>
@@ -371,16 +370,21 @@ class ExecutionPanel:
               children <-- Signal.fromFuture(api.listEnvironmentError(executionId, e.envId, 200)).map:
                 case Some(ee) =>
                   val errors = ee.filter(_.level == ErrorStateLevel.Error).sortBy(_.date).reverse ++ ee.filter(_.level != ErrorStateLevel.Error).sortBy(_.date).reverse
-                  errors.zipWithIndex.map: (e, i) =>
+                  errors.zipWithIndex.map: (e, index) =>
                     div(flexRow,
                       cls := "docEntry", width := "100%",
-                      backgroundColor := { if i % 2 == 0 then "#bdadc4" else "#f4f4f4" },
+                      backgroundColor := (if index % 2 == 0 then "#bdadc4" else "#f4f4f4"),
                       div(CoreUtils.longTimeToString(e.date), minWidth := "100"),
                       a(e.errorMessage, float.left, color := "#222", cursor.pointer, flexGrow := "4"),
                       div(btn_danger, e.level.name)
-                    ).expandOnclick(
-                      div(height := "200", overflow.scroll, ClientUtil.errorTextArea(stackTrace(e.stack)))
-                    )
+                    ).expandOnclick:
+                       def stackTrace(e: ErrorData) =
+                         e match
+                           case MessageErrorData(msg, stackTrace) => msg + stackTrace.map("\nStack trace:\n" + _).getOrElse("")
+                           case CompilationErrorData(_, stackTrace) => stackTrace
+
+                       val errorStyle = Seq(height := "400px", padding := "10px", overflowWrap.breakWord, overflow.scroll, width := "100%", border := "0px")
+                       div(textArea(errorStyle, stackTrace(e.stack)))
                 case None => Seq()
             )
           else div()

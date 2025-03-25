@@ -198,14 +198,14 @@ class ServerState:
     errors.map: ex =>
       ex.detail match
         case Some(detail) =>
-          val exceptionMessage = Option(ex.exception.getMessage)
+          val exceptionMessage = ex.exception.getMessage
 
           def completeMessage =
             s"""$exceptionMessage\n$detail"""
 
           EnvironmentError(
             environmentId,
-            exceptionMessage,
+            Some(exceptionMessage),
             MessageErrorData(
               completeMessage,
               Some(ErrorData.toStackTrace(ex.exception))
