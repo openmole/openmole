@@ -70,7 +70,7 @@ object NetLogoContainerTask:
       val launchCommand = s"netlogo-headless $inputFileName $outputFileName"
       def param3D = if switch3d then "-Dorg.nlogo.is3d=true" else ""
       def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
-      def paramJVM = s"-XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
+      def paramJVM = JavaConfiguration.fewerThreadsParameters.mkString(" ") + s" -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
 
       val taskExecution =
         ContainerTask.execution(

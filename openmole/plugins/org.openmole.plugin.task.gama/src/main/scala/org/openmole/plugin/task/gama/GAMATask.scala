@@ -177,6 +177,7 @@ object GAMATask:
     stdErr:                 OptionalArgument[Val[String]]       = None,
     environmentVariables:   Seq[EnvironmentVariable]            = Vector.empty,
     hostFiles:              Seq[HostFile]                       = Vector.empty,
+    fewerThreads:           Boolean                             = true,
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                             = false,
     containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
@@ -210,6 +211,11 @@ object GAMATask:
           case None => s"gama-headless -hpc 1 $inputFilePath $outputDirectoryPath"
           case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFilePath $outputDirectoryPath"
 
+      def environmentVariablesValue =
+        def fewerThreadsEnvironmentVariable: EnvironmentVariable = ("_JAVA_OPTIONS", JavaConfiguration.fewerThreadsParameters.mkString(" "))
+        environmentVariables ++
+          (if fewerThreads then Seq(fewerThreadsEnvironmentVariable) else Seq())
+
       val containerTaskExecution =
         ContainerTask.execution(
           image = preparedImage,
@@ -219,7 +225,7 @@ object GAMATask:
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
+          environmentVariables = environmentVariablesValue,
           stdOut = stdOut,
           stdErr = stdErr,
           config = config,
