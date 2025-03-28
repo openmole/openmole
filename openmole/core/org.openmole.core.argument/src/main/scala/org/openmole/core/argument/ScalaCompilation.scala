@@ -158,7 +158,7 @@ object ScalaCompilation {
 
     def alignedSource =
       val lines = source.split('\n')
-      if lines.nonEmpty
+      if lines.exists(_.trim.nonEmpty)
         then
         val minSpace = lines.filter(_.trim.nonEmpty).map(_.takeWhile(_ == ' ').length).min
         val addedSpace = 4 - minSpace

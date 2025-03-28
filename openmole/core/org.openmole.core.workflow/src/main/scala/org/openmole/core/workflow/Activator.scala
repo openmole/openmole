@@ -16,16 +16,17 @@ class Activator extends BundleActivator:
   override def start(context: BundleContext): Unit = 
 
     val highLight = 
-      import org.openmole.core.context._
+      import org.openmole.core.context.*
       import org.openmole.core.workflow.execution.{ LocalEnvironment }
-      import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ToArrayTask, MoleTask, FromContextTask }
+      import org.openmole.core.workflow.task.{ EmptyTask, ExplorationTask, ToArrayTask, MoleTask }
+      import org.openmole.core.workflow.dsl.Strain
 
       Vector(
         ObjectHighLight(classOf[Val[?]]),
         ObjectHighLight(objectName(Capsule)),
         ObjectHighLight(objectName(Slot)),
         ObjectHighLight(objectName(RuntimeSetting)),
-        WordHighLight("Strain"),
+        ObjectHighLight(objectName(Strain)),
         WordHighLight("in"),
         WordHighLight("is"),
         WordHighLight("on"),
@@ -54,7 +55,8 @@ class Activator extends BundleActivator:
         TaskHighLight(objectName(ToArrayTask)),
         TaskHighLight(objectName(MoleTask)),
         TaskHighLight(objectName(TryTask)),
-        TaskHighLight(objectName(RetryTask))
+        TaskHighLight(objectName(RetryTask)),
+        TaskHighLight(objectName(EmptyTask))
       )
 
     PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))

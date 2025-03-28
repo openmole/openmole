@@ -28,7 +28,7 @@ import org.openmole.core.context.ValType
 object JavaTask:
 
   def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false, offline: Boolean = false) =
-    def threadsOptions = if fewerThreads then Seq("-XX:+UseG1GC", "-XX:ParallelGCThreads=1", "-XX:CICompilerCount=2", "-XX:ConcGCThreads=1", "-XX:G1ConcRefinementThreads=1") else Seq()
+    def threadsOptions = if fewerThreads then JavaConfiguration.fewerThreadsParameters else Seq()
     def allOptions = (threadsOptions ++ javaOptions).map("--java-opt " + _).mkString(" ")
     def offlineOption = if offline then "--suppress-experimental-warning --power --offline" else ""
     s"scala-cli run $offlineOption --server=$server -j $jvmVersion $allOptions"

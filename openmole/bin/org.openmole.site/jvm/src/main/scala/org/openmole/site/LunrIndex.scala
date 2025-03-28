@@ -24,10 +24,8 @@ object LunrIndex {
     Index(url, name, XML.loadString(text))
   }
 
-  def attributeValueEquals(value: String)(node: Node) = {
-    println("Val " + value + ", node " + node.text)
+  def attributeValueEquals(value: String)(node: Node) =
     node.attributes.exists(_.value.text == value)
-  }
 
   def Index(url: String, name: String, xml: Elem): JsObject = {
     val body = (xml \\ "body").text

@@ -416,7 +416,8 @@ object OMRFormat:
       `execution-id`: String,
       script: Option[OMRContent.Script],
       `time-start`: Long,
-      `time-save`: Long) derives derivation.ConfiguredCodec
+      `time-save`: Long,
+      method: Option[Json]) derives derivation.ConfiguredCodec
 
     import OMRContent.given
 
@@ -437,7 +438,8 @@ object OMRFormat:
         `execution-id` = index.`execution-id`,
         script = index.script,
         `time-start` = index.`time-start`,
-        `time-save` = index.`time-save`
+        `time-save` = index.`time-save`,
+        method = index.method
       )
 
     val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.deepDropNullValues.noSpaces).asInstanceOf[org.json4s.JObject]
