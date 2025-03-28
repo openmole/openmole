@@ -126,7 +126,7 @@ object JavaTask:
           writeInputData(inputData)
           scriptFile.content =
             s"""
-               |//>using dep "com.thoughtworks.xstream:xstream:1.4.20"
+               |//>using dep "com.thoughtworks.xstream:xstream:1.4.21"
                |$librariesContent
                |val __serializer__ =
                |  import com.thoughtworks.xstream.*
