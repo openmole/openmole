@@ -37,19 +37,27 @@ object SharedStorage extends JavaLogger:
     val runtimeInstall = runtimePrefix + runtime.runtime.hash
 
     val (workdir, scriptName) =
-      val installDir = StorageService.child(storage, baseDirectory, "install")
-      util.Try(hierarchicalStorageInterface.makeDir(storage, installDir))
-
-      val workdir = StorageService.child(storage, installDir, preference(Preference.uniqueID) + "_install")
-      if !storageInterface.exists(storage, workdir) then hierarchicalStorageInterface.makeDir(storage, workdir)
+      val workdir = StorageService.child(storage, baseDirectory, "install")
+      util.Try(hierarchicalStorageInterface.makeDir(storage, workdir))
 
       newFile.withTmpFile("install", ".sh"): script =>
 
         val tmpDirName = runtimePrefix + UUID.randomUUID.toString
         val scriptName = uniqName("install", ".sh")
 
+        val cleanOld =
+          s"""
+             |function cleanOtherRuntime(){
+             |TARGET_DIR="$$1"
+             |find "$$TARGET_DIR" -maxdepth 1 -type d -name "$runtimePrefix*" ! -name "$runtimeInstall" | while read -r dir; do
+             |  rm -rf $$dir
+             |done
+             |}
+             |""".stripMargin
+
         val content =
-          s"{ if [ -d $runtimeInstall ]; then exit 0; fi; } && " +
+          cleanOld +
+          s"{ if [ -d $runtimeInstall ]; then rm $scriptName ;exit 0; fi; } && " +
             s"mkdir -p $tmpDirName && cd $tmpDirName && { if [ `uname -m` = x86_64 ]; then cp ${runtime.jvmLinuxX64.path} jvm.tar.gz; " +
             """else echo "Unsupported architecture: " `uname -m`; exit 1; fi; } && """ +
             "gunzip jvm.tar.gz && tar -xf jvm.tar && rm jvm.tar && " +
@@ -58,7 +66,7 @@ object SharedStorage extends JavaLogger:
             runtime.environmentPlugins.map { p => "cp " + p.path + " envplugins/plugin$PLUGIN.jar && PLUGIN=`expr $PLUGIN + 1`" }.mkString(" && ") + " && " +
             s"PATH=$$PWD/jre/bin:$$PATH /bin/bash -x run.sh 256m test_run --test && rm -rf test_run && " +
             s"cd .. && { if [ -d $runtimeInstall ]; then rm -rf $tmpDirName; exit 0; fi } && " +
-            s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && { ls | grep '^$runtimePrefix' | grep -v '^$runtimeInstall' | xargs rm -rf ; }"
+            s"mv $tmpDirName $runtimeInstall && rm -rf $tmpDirName && rm $scriptName && cleanOtherRuntime $workdir"
 
         Log.logger.fine(s"Install script: $content")
 
