@@ -53,7 +53,7 @@ object WhoWeAre extends PageContent(
 
   member(Resource.img.people.etienne, "Étienne DELAY"),
   div(width := "75%", paddingLeft := 70) (
-    html"""PhD in geography, agent-based model addict, he is currently in a postdoctoral fellowship in Dakar (Senegal).
+    html"""Etienne Delay is a social geographer in CIRAD-ES and UMR SENS. He's inveterate on research issues proposed by landscape dynamics and cooperation processes and solidarities. He has developed a research methodology based on fieldwork and companion modeling combined with agent-based modeling formalization.
       Inside the OpenMOLE project, he is a beta-user and contributor to the communication and documentation efforts."""
   ),
 
