@@ -19,36 +19,34 @@ package org.openmole.tool.hash
 
 import scala.util.hashing.MurmurHash3
 
-object Hash {
+object Hash:
   val HEX_CHAR_TABLE = List('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f').map { _.toByte }.toArray
 
-  def hexString(raw: Array[Byte]): String = {
+  def hexString(raw: Array[Byte]): String =
     val hex = new Array[Byte](2 * raw.length)
     var index = 0
 
-    for (b ← raw) {
+    for (b <- raw)
+    do
       val v = b & 0xFF
       hex(index) = HEX_CHAR_TABLE(v >>> 4)
       index += 1
       hex(index) = HEX_CHAR_TABLE(v & 0xF)
       index += 1
-    }
+
     new String(hex, "ASCII")
-  }
 
   implicit val ordering: Ordering[Hash] = Ordering.by[Hash, String](_.toString)
-}
 
-case class Hash(content: Array[Byte]) {
+case class Hash(content: Array[Byte]):
   def ==(hash: String) = this.toString == hash
   def !=(hash: String) = !this.==(hash)
   def equals(hash: String) = this == hash
   override def toString: String = Hash.hexString(content)
   override def hashCode: Int = MurmurHash3.arrayHash(content)
-  override def equals(obj: Any): Boolean = {
+  override def equals(obj: Any): Boolean =
     if (obj == null) return false
     if (getClass != obj.asInstanceOf[AnyRef].getClass) return false
     val other = obj.asInstanceOf[Hash]
     content sameElements other.content
-  }
-}
+

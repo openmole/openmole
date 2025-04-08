@@ -27,7 +27,7 @@ import reflect.Selectable.reflectiveSelectable
 
 package object stream:
 
-  val DefaultBufferSize = 16 * 1024
+  val DefaultBufferSize = 64 * 1024
 
   def copy(inputStream: InputStream, outputStream: OutputStream) =
     val buffer = new Array[Byte](DefaultBufferSize)

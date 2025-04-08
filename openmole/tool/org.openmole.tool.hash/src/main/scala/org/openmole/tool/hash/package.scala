@@ -21,43 +21,39 @@ import java.security.MessageDigest
 import org.openmole.tool.stream._
 import org.openmole.tool.file._
 
-package object hash {
+package object hash:
 
-  sealed trait HashType
-  object SHA1 extends HashType
-  object SHA256 extends HashType
+  object HashType:
+    inline def default = HashType.SHA1
 
-  implicit class StringHashDecorator(s: String) {
-    def hash(hashType: HashType = SHA1) = hashString(s, hashType)
-  }
+  enum HashType:
+    case SHA1, SHA256
 
-  implicit class FileHashServiceDecorator(file: File) {
-    def hash(hashType: HashType = SHA1) = hashFile(file, hashType)
-  }
+  implicit class StringHashDecorator(s: String):
+    def hash(hashType: HashType = HashType.default) = hashString(s, hashType)
 
-  implicit class InputStreamHashServiceDecorator(is: InputStream) {
-    def hash(hashType: HashType = SHA1) = computeHash(is, hashType)
-  }
+  implicit class FileHashServiceDecorator(file: File):
+    def hash(hashType: HashType = HashType.default) = hashFile(file, hashType)
 
-  def hashString(s: String, hashType: HashType = SHA1) = computeHash(new StringInputStream(s), hashType)
+  implicit class InputStreamHashServiceDecorator(is: InputStream):
+    def hash(hashType: HashType = HashType.default) = computeHash(is, hashType)
 
-  def hashFile(file: File, hashType: HashType = SHA1): Hash = {
+  def hashString(s: String, hashType: HashType = HashType.default) = computeHash(new StringInputStream(s), hashType)
+
+  def hashFile(file: File, hashType: HashType = HashType.default): Hash =
     val is = new FileInputStream(file)
     try hash.computeHash(is, hashType)
     finally is.close
-  }
 
-  def computeHash(is: InputStream, hashType: HashType): Hash = {
+  def computeHash(is: InputStream, hashType: HashType): Hash =
     val buffer = new Array[Byte](DefaultBufferSize)
     val md =
-      hashType match {
-        case SHA1   => MessageDigest.getInstance("SHA-1")
-        case SHA256 => MessageDigest.getInstance("SHA-256")
-      }
-    Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
-      count => md.update(buffer, 0, count)
-    }
-    Hash(md.digest)
-  }
+      hashType match
+        case HashType.SHA1   => MessageDigest.getInstance("SHA-1")
+        case HashType.SHA256 => MessageDigest.getInstance("SHA-256")
 
-}
+    Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach:
+      count => md.update(buffer, 0, count)
+
+    Hash(md.digest)
+

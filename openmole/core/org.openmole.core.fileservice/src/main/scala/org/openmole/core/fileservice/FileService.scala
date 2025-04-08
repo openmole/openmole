@@ -77,7 +77,7 @@ class FileService(implicit preference: Preference):
 
   private[fileservice] val deleteEmpty = ListBuffer[File]()
 
-  def hashNoCache(file: File, hashType: HashType = SHA1)(using TmpDirectory) =
+  def hashNoCache(file: File, hashType: HashType = HashType.default)(using TmpDirectory) =
     if file.isDirectory
     then
       TmpDirectory.withTmpFile: archive =>
