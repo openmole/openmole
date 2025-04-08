@@ -200,7 +200,8 @@ object BatchEnvironment:
     remoteStorage: RemoteStorage,
     replicate: (File, TransferOptions) => ReplicatedFile,
     upload: (File, TransferOptions) => String,
-    storageId: String)(implicit services: BatchEnvironment.Services): SerializedJob =
+    storageId: String,
+    archiveResult: Boolean = false)(implicit services: BatchEnvironment.Services): SerializedJob =
     import services.*
     TmpDirectory.withTmpFile("job", ".tar") { jobFile =>
       def tasks: RunnableTaskSequence = job.runnableTasks
@@ -224,25 +225,26 @@ object BatchEnvironment:
           plugins,
           replicate,
           environment,
-          runtimeSetting
+          runtimeSetting,
+          archiveResult = archiveResult
         )
 
       /* ---- upload the execution message ----*/
       val inputPath =
-        newFile.withTmpFile("job", ".tar") { executionMessageFile =>
+        newFile.withTmpFile("job", ".tar"): executionMessageFile =>
           serializerService.serializeAndArchiveFiles(executionMessage, executionMessageFile, gz = true)
           signalUpload(eventDispatcher.eventId, upload(executionMessageFile, TransferOptions(noLink = true, canMove = true)), executionMessageFile, environment, storageId)
-        }
+
 
       val serializedStorage =
-        services.newFile.withTmpFile("remoteStorage", ".tar") { storageFile =>
+        services.newFile.withTmpFile("remoteStorage", ".tar"): storageFile =>
           import org.openmole.tool.hash._
           import services._
           services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
           val hash = Hash.file(storageFile).toString()
           val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
           FileMessage(path, hash)
-        }
+
 
       SerializedJob(inputPath, runtime, serializedStorage)
     }
@@ -268,7 +270,8 @@ object BatchEnvironment:
     serializationPlugin: Iterable[File],
     replicate: (File, TransferOptions) => ReplicatedFile,
     environment: BatchEnvironment,
-    runtimeSetting: Option[RuntimeSetting]
+    runtimeSetting: Option[RuntimeSetting],
+    archiveResult: Boolean
   )(implicit services: BatchEnvironment.Services): ExecutionMessage =
 
     val pluginReplicas = shuffled(serializationPlugin)(services.randomProvider()).map { replicate(_, TransferOptions(raw = true)) }
@@ -278,7 +281,8 @@ object BatchEnvironment:
       pluginReplicas.sortBy(_.originalPath),
       files.sortBy(_.originalPath),
       jobFile,
-      runtimeSetting.getOrElse(RuntimeSetting())
+      runtimeSetting.getOrElse(RuntimeSetting()),
+      archiveResult = archiveResult
     )
 
   def isClean(environment: BatchEnvironment)(implicit services: BatchEnvironment.Services) = 
