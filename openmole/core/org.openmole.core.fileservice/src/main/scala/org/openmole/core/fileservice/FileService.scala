@@ -66,7 +66,7 @@ class FileServiceCache(implicit preference: Preference):
   private[fileservice] val hashCache =
     CacheBuilder.newBuilder.maximumSize(preference(FileService.hashCacheSize)).
       expireAfterAccess(preference(FileService.hashCacheTime).millis, TimeUnit.MILLISECONDS).
-      build[String, Hash]()
+      build[(HashType, String), Hash]()
 
   private[fileservice] val archiveCache =
     CacheBuilder.newBuilder.maximumSize(preference(FileService.archiveCacheSize)).
@@ -85,9 +85,9 @@ class FileService(implicit preference: Preference):
         hashFile(archive, hashType)
     else hashFile(file, hashType)
 
-  def hash(file: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash =
-    def hash = hashFile(if file.isDirectory then archiveForDir(file) else file)
-    fileServiceCache.hashCache.get(file.getCanonicalPath, hash)
+  def hash(file: File, hashType: HashType = HashType.default)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash =
+    def hash = hashFile(if file.isDirectory then archiveForDir(file) else file, hashType)
+    fileServiceCache.hashCache.get((hashType, file.getCanonicalPath), hash)
 
   def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File =
     def archive =
