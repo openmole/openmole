@@ -82,11 +82,11 @@ class FileService(implicit preference: Preference):
     then
       TmpDirectory.withTmpFile: archive =>
         file.archive(archive, time = false)
-        hashFile(archive, hashType)
-    else hashFile(file, hashType)
+        Hash.file(archive, hashType)
+    else Hash.file(file, hashType)
 
   def hash(file: File, hashType: HashType = HashType.default)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): Hash =
-    def hash = hashFile(if file.isDirectory then archiveForDir(file) else file, hashType)
+    def hash = Hash.file(if file.isDirectory then archiveForDir(file) else file, hashType)
     fileServiceCache.hashCache.get((hashType, file.getCanonicalPath), hash)
 
   def archiveForDir(directory: File)(implicit newFile: TmpDirectory, fileServiceCache: FileServiceCache): File =

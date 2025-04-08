@@ -239,7 +239,7 @@ object BatchEnvironment:
           import org.openmole.tool.hash._
           import services._
           services.serializerService.serializeAndArchiveFiles(remoteStorage, storageFile, gz = true)
-          val hash = storageFile.hash().toString()
+          val hash = Hash.file(storageFile).toString()
           val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
           FileMessage(path, hash)
         }

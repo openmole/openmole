@@ -22,7 +22,7 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.task.external.*
 import org.openmole.tool.cache.*
-import org.openmole.tool.hash.hashString
+import org.openmole.tool.hash.*
 import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.*
 import org.openmole.tool.stream.*
@@ -114,11 +114,11 @@ object ContainerTask:
     def cacheId(image: ContainerImage): Seq[String] =
       image match
         case image: DockerImage      => Seq(image.image, image.tag, image.registry)
-        case image: SavedDockerImage => Seq(image.file.hash().toString)
+        case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
     val volumeCacheKey = volumes.map((f, _) => fileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
 
-    val cacheKey: String = hashString((cacheId(image) ++ install ++ volumeCacheKey++ Seq("sif")).mkString("\n")).toString
+    val cacheKey: String = Hash.string((cacheId(image) ++ install ++ volumeCacheKey++ Seq("sif")).mkString("\n")).toString
 
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedSingularityImage = cacheDirectory / "singularityImage.bin"
@@ -393,7 +393,7 @@ object ContainerTask:
 
       def uniquePathResolver(path: String): File =
         import org.openmole.tool.hash.*
-        executionContext.taskExecutionDirectory /> path.hash().toString / path
+        executionContext.taskExecutionDirectory /> Hash.string(path).toString / path
 
       val (preparedContext, preparedFilesInfo) = External.deployAndListInputFiles(external, context, uniquePathResolver)
 

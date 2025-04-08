@@ -24,7 +24,7 @@ import java.util.zip.ZipFile
 import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
-import org.openmole.tool.hash._
+import org.openmole.tool.hash.*
 import org.osgi.framework._
 import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
 
@@ -37,9 +37,9 @@ import scala.util.{ Failure, Success, Try }
 case class BundlesInfo(
   files:                Map[File, (Long, Long)],
   providedDependencies: Set[Long]
-) {
-  lazy val hashes = files.keys.map(f => f → f.hash()).toMap
-}
+):
+  lazy val hashes = files.keys.map(f => f -> Hash.file(f)).toMap
+
 
 object PluginManager extends JavaLogger {
 

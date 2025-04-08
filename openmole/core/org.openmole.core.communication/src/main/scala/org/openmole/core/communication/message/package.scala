@@ -53,7 +53,7 @@ object ReplicatedFile:
       def verify(cache: File) =
         if verifyHash
         then
-          val cacheHash = cache.hash().toString
+          val cacheHash = Hash.file(cache).toString
           if (cacheHash != replicatedFile.hash) throw new InternalProcessingError("Hash is incorrect for file " + replicatedFile.originalPath + " replicated at " + replicatedFile.path)
 
       val dl =
@@ -96,7 +96,7 @@ object ReplicatedFile:
       else file
 
     val mode = file.mode
-    val hash = toReplicate.hash().toString
+    val hash = Hash.file(toReplicate).toString
     val uploaded = upload(toReplicate)
     ReplicatedFile(file.getPath, file.getName, isDir, hash, uploaded, mode)
 

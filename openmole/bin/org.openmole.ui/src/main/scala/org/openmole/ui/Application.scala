@@ -47,7 +47,7 @@ object Application extends JavaLogger {
 
   import Log._
 
-  def run(args: Array[String]): Int = {
+  def run(args: Array[String]): Int =
 
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
@@ -294,7 +294,7 @@ object Application extends JavaLogger {
       case TestCompile(files) =>
         import org.openmole.tool.hash._
 
-        def success(f: File) = f.getParentFileSafe / (f.hash().toString + ".success")
+        def success(f: File) = f.getParentFileSafe / (Hash.file(f).toString + ".success")
         def toFile(f: File) =
           if (f.isDirectory) f.listRecursive(_.isFile).toList.map(c => f -> c)
           else Seq((f.getParentFile, f))
@@ -338,7 +338,6 @@ object Application extends JavaLogger {
         if (errors.isEmpty) Console.ExitCodes.ok
         else Console.ExitCodes.compilationError
 
-  }
 
 
 }

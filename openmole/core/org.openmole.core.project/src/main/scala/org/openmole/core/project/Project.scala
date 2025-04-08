@@ -37,7 +37,7 @@ object Project:
 
   def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
 
-  def uniqueName(source: File) = s"_${source.getCanonicalPath.hash()}"
+  def uniqueName(source: File) = s"_${Hash.string(source.getCanonicalPath)}"
 
   def scriptsObjects(script: File) = 
 

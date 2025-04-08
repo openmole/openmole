@@ -19,6 +19,11 @@ package org.openmole.tool.hash
 
 import scala.util.hashing.MurmurHash3
 
+import java.io.{File, FileInputStream, InputStream}
+import java.security.MessageDigest
+import org.openmole.tool.stream.*
+import org.openmole.tool.file.*
+
 object Hash:
   val HEX_CHAR_TABLE = List('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f').map { _.toByte }.toArray
 
@@ -35,6 +40,27 @@ object Hash:
       index += 1
 
     new String(hex, "ASCII")
+
+
+  def string(s: String, hashType: HashType = HashType.default) = computeHash(new StringInputStream(s), hashType)
+
+  def file(file: File, hashType: HashType = HashType.default): Hash =
+    val is = new FileInputStream(file)
+    try computeHash(is, hashType)
+    finally is.close
+
+  def computeHash(is: InputStream, hashType: HashType): Hash =
+    val buffer = new Array[Byte](DefaultBufferSize)
+    val md =
+      hashType match
+        case HashType.SHA1 => MessageDigest.getInstance("SHA-1")
+        case HashType.SHA256 => MessageDigest.getInstance("SHA-256")
+
+    Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach:
+      count => md.update(buffer, 0, count)
+
+    Hash(md.digest)
+
 
   implicit val ordering: Ordering[Hash] = Ordering.by[Hash, String](_.toString)
 

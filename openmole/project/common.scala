@@ -71,7 +71,7 @@ object common {
 
   def lang3Version = "3.12.0"
 
-  def codecVersion = "1.15"
+  def codecVersion = "1.18.0"
 
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.8.0"
