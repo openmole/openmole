@@ -82,4 +82,72 @@ ${ul(
     li(html"""${code{"memory"}} the memory allocated to the gama headless, $optional, for example ${code{"memory = 3000 megabytes"}}"""),
     li(html"""${code{"install"}} some command to run on the host system to initialise the container, for instance ${code("""Seq("apt update", "apt install mylib")""")}, $optional"""),
 )}
+
+
+${h2("Reproduce an error using GAMA headless")}
+
+The integration of GAMA into OpenMOLE is achieved through a container. OpenMOLE downloads the container for the version you're interested in and use it to run your simulation. Sometimes, issues can arise in the communication between these two tools.
+
+To get a clearer understanding, it's important to determine which of the two is causing the problem. Here, using the predator-prey model as a basis, we suggest testing your model within the virtual machine that will be used by OpenMole. This allows you to perform diagnostics in case of a failure.
+
+OpenMOLE communicates with Gama through XML injection. Therefore, to run GAMA in headless mode, you need to:
+${ul(
+    li(html"generate an XML file,"),
+    li(html"launch the simulation from this XML file.")
+  )}
+
+
+
+${h3("Using a existing GAMA installation")}
+
+You can run:
+${code("""
+./gama-headless.sh -xml <experiment_name> input.gaml output.xml
+./gama-headless.sh output.xml .
+""")}
+
+Once the headless has run, you should find a file named ${i("simulation-outputsXX.xml")}. Check that it exists, is well formed and contains the simulation results. Otherwise you can report the bug to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
+
+${h3("Using Docker")}
+
+To reproduce a behaviour close from what OpenMOLE executes you can run the GAMA docker image. You should have docker installed on your computer.
+
+$br
+
+Download the Gama Docker image. All available containers can be found on the ${aa("docker hub", href := "https://hub.docker.com/r/gamaplatform/gama")}.
+
+Here, we will use the alpha version.
+
+${code("""
+export GAMA_VERSION="alpha" # Replace by the version you want to test
+docker pull gamaplatform/gama:$GAMA_VERSION
+""")}
+
+To get an interactive shell into the GAMA docker:
+${code("""
+docker run -it -v "/tmp/gama model/":/work --entrypoint  /bin/bash gamaplatform/gama:$GAMA_VERSION
+""")}
+
+${i("-it")} stands for interactive terminal. ${i("-v \"/tmp/gama model/\":/work")} mounts is a volume between your host system and the container.
+${i("/tmp/gama model/")} is a folder on your computer. ${i("/work")} is the folder inside the container. This mount allows the container to access the model files.
+
+$br
+
+Once inside the Docker container, you're in the ${i("/opt/gama-platform/headless")} directory, and the model is in the folder ${i("/work")}.
+You can then run GAMA commands to generate XML files.
+
+${code(
+    """
+      |./gama-headless.sh -xml prey_predatorExp /work/predatorPrey.gaml /work/predatorPrey.xml""".stripMargin)}
+
+This command generates an XML file at the location you specify (it's the last part of the command line).
+
+Once the XML is created, it's the one that will be used by OpenMOLE to inject the values from the exploration plan you defined.
+You can launch the experiment from the XML like this :
+
+${code(
+    """
+      |./gama-headless.sh /work/predatorPrey.xml .""".stripMargin)}
+
+Once the headless has run, you should find a file named ${i("simulation-outputsXX.xml")}. Check that it exists, is well formed and contains the simulation results. Otherwise you can report the bug to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
 """)
