@@ -19,7 +19,7 @@ package org.openmole.tool.hash
 
 
 object HashType:
-  inline def default = HashType.SHA1
+  inline def default = HashType.Blake3
 
 enum HashType:
-  case SHA1, SHA256
+  case SHA1, SHA256, Blake3

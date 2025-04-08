@@ -18,7 +18,6 @@
 package org.openmole.tool.hash
 
 import scala.util.hashing.MurmurHash3
-
 import java.io.{File, FileInputStream, InputStream}
 import java.security.MessageDigest
 import org.openmole.tool.stream.*
@@ -51,15 +50,30 @@ object Hash:
 
   def computeHash(is: InputStream, hashType: HashType): Hash =
     val buffer = new Array[Byte](DefaultBufferSize)
-    val md =
-      hashType match
-        case HashType.SHA1 => MessageDigest.getInstance("SHA-1")
-        case HashType.SHA256 => MessageDigest.getInstance("SHA-256")
 
-    Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach:
-      count => md.update(buffer, 0, count)
+    def digestAll(is: InputStream, digest: MessageDigest) =
+      Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach:
+        count => digest.update(buffer, 0, count)
+      Hash(digest.digest)
 
-    Hash(md.digest)
+    def blakeHash(is: InputStream) =
+      import org.apache.commons.codec.digest.*
+      val hasher = Blake3.initHash()
+      try
+        var bytesRead = 0
+        while
+          bytesRead = is.read(buffer)
+          bytesRead != -1
+        do hasher.update(buffer, 0, bytesRead)
+      finally is.close()
+
+      Hash(hasher.doFinalize(32))
+
+    hashType match
+      case HashType.SHA1 => digestAll(is, MessageDigest.getInstance("SHA-1"))
+      case HashType.SHA256 => digestAll(is, MessageDigest.getInstance("SHA-256"))
+      case HashType.Blake3 => blakeHash(is)
+
 
 
   implicit val ordering: Ordering[Hash] = Ordering.by[Hash, String](_.toString)
