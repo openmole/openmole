@@ -36,7 +36,7 @@ class CondorJobService[S](
 
     val description = _root_.gridscale.condor.CondorJobDescription(
       executable = "/bin/bash",
-      arguments = remoteScript.content,
+      arguments = remoteScript.path,
       workDirectory = jobDirectory,
       memory = parameters.memory,
       nodes = parameters.nodes,

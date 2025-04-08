@@ -35,7 +35,7 @@ class SGEJobService[S](
     val remoteScript = buildScript(serializedJob, outputPath)
 
     val description = _root_.gridscale.sge.SGEJobDescription(
-      command = s"/bin/bash ${remoteScript.content}",
+      command = s"/bin/bash ${remoteScript.path}",
       queue = parameters.queue,
       workDirectory = jobDirectory,
       wallTime = parameters.wallTime,

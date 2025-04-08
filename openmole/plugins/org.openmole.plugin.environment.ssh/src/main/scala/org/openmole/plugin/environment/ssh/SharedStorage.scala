@@ -98,8 +98,8 @@ object SharedStorage extends JavaLogger:
   object JobScript:
     def defaultModules = Seq("apptainer", "singularity")
 
-  case class JobScript(content: String, jobWorkDirectory: String):
-    override def toString = content
+  case class JobScript(path: String, jobWorkDirectory: String):
+    override def toString = path
 
   def buildScript[S](
     runtimePath:    Runtime => String,

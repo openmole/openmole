@@ -76,7 +76,7 @@ class SSHJobService[S](s: S, space: StorageSpace, services: BatchEnvironment.Ser
 
     val remoteScript = buildScript(serializedJob)
     val jobDescription = gridscale.ssh.SSHJobDescription(
-      command = s"/bin/bash ${remoteScript.content}",
+      command = s"/bin/bash ${remoteScript.path}",
       workDirectory = jobDirectory,
       timeout = env.killAfter
     )

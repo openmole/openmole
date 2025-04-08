@@ -35,7 +35,7 @@ class OARJobService[S](
     val remoteScript = buildScript(serializedJob, outputPath)
 
     val description = gridscale.oar.OARJobDescription(
-      command = s"/bin/bash ${remoteScript.content}",
+      command = s"/bin/bash ${remoteScript.path}",
       workDirectory = jobDirectory,
       queue = parameters.queue,
       cpu = parameters.cpu,
