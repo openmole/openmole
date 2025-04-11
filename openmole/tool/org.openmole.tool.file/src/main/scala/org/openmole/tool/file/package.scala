@@ -537,11 +537,8 @@ package file {
 
     def uniqName(prefix: String, sufix: String, separator: String = "_") = prefix + separator + UUID.randomUUID.toString + sufix
 
-
     def acceptDirectory = new Filter[Path]:
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
-
-
 
 
   object FileTools {

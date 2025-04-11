@@ -147,9 +147,8 @@ package object extension:
 
   export org.openmole.core.setter.DefaultBuilder
   export org.openmole.core.script.ScriptSourceData
-  export org.openmole.core.authentication.AuthenticationStore
-
 
   export org.openmole.core.preference.PreferenceLocation
+  export org.openmole.core.authentication.{Authentication, AuthenticationStore}
 
 

@@ -30,31 +30,12 @@ object BatchJobControl:
   def updateState(batchJobControl: BatchJobControl)(using priority: AccessControl.Priority) = batchJobControl.updateState(priority)
   def delete(batchJobControl: BatchJobControl)(using priority: AccessControl.Priority) = batchJobControl.delete(priority)
 
-//  def apply(
-//    updateInterval: () => UpdateInterval,
-//    storageId:      () => String,
-//    updateState:    AccessControl.Priority => ExecutionState,
-//    delete:         AccessControl.Priority => Unit,
-//    stdOutErr:      AccessControl.Priority => (String, String),
-//    resultPath:     () => String,
-//    download:       (String, File, TransferOptions, AccessControl.Priority) => Unit,
-//    clean:          AccessControl.Priority => Unit): BatchJobControl = new BatchJobControl(
-//    updateInterval,
-//    storageId,
-//    updateState,
-//    delete,
-//    stdOutErr,
-//    download,
-//    resultPath,
-//    clean)
-
-
 class BatchJobControl(
-  val updateInterval: () => UpdateInterval,
-  val storageId:      () => String,
+  val updateInterval: UpdateInterval,
+  val storageId:      String,
   val updateState:    AccessControl.Priority => ExecutionState,
   val delete:         AccessControl.Priority => Unit,
   val stdOutErr:      AccessControl.Priority => (String, String),
   val download:       (String, File, TransferOptions, AccessControl.Priority) => Unit,
-  val resultPath:     () => String,
+  val resultPath:     String,
   val clean:          AccessControl.Priority => Unit)

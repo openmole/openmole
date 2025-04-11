@@ -75,7 +75,7 @@ object JobManager:
         services.threadProvider.scheduler.schedule((self ! msg): Runnable, delay.millis, TimeUnit.MILLISECONDS)
 
       case Submitted(job, environment, bj) =>
-        killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () => self ! Delay(Refresh(job, environment, bj, bj.updateInterval().minUpdateInterval), bj.updateInterval().minUpdateInterval) }
+        killOr(environment, job.storedJob, Kill(job, environment, Some(bj))) { () => self ! Delay(Refresh(job, environment, bj, bj.updateInterval.minUpdateInterval), bj.updateInterval.minUpdateInterval) }
 
       case MoleJobError(mj, j, environment, e, output, host) =>
         def detail = output.map { output =>

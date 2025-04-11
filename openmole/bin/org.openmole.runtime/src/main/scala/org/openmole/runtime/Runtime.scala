@@ -76,7 +76,7 @@ class Runtime:
 
   def apply(
     storage:           RemoteStorage,
-    inputMessagePath:  String,
+    inputMessage:      String | File,
     outputMessagePath: String,
     debug:             Boolean,
     transferRetry:     Option[Int]
@@ -88,9 +88,13 @@ class Runtime:
     logger.fine("Downloading input message")
 
     val executionMessage =
-      newFile.withTmpFile: executionMessageFileCache =>
-        retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
-        serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
+      inputMessage match
+        case inputMessagePath: String =>
+          newFile.withTmpFile: executionMessageFileCache =>
+            retry(storage.download(inputMessagePath, executionMessageFileCache), transferRetry)
+            serializerService.deserializeAndExtractFiles[ExecutionMessage](executionMessageFileCache, deleteFilesOnGC = true, gz = true)
+        case inputMessage: File =>
+          serializerService.deserializeAndExtractFiles[ExecutionMessage](inputMessage, deleteFilesOnGC = true, gz = true)
 
     val systemOut = OutputManager.systemOutput
     val systemErr = OutputManager.systemError

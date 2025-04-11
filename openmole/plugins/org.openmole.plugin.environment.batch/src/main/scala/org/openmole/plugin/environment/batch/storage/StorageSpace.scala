@@ -27,8 +27,6 @@ object StorageSpace:
 
   def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
 
-
-
 object HierarchicalStorageSpace extends JavaLogger:
   val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
   val TmpDirCreation = PreferenceLocation("StorageService", "TmpDirCreation", Some(1 hours))
@@ -57,8 +55,7 @@ object HierarchicalStorageSpace extends JavaLogger:
       then hierarchicalStorageInterface.makeDir(s, tmpDirectory)
     catch
       case e: Throwable => throw new InternalProcessingError(s"Error creating tmp directory $tmpDirectory on storage $s", e)
-
-
+    
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
 
   def clean[S](s: S, storageSpace: StorageSpace, background: Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
@@ -97,11 +94,11 @@ object HierarchicalStorageSpace extends JavaLogger:
     val inReplica = services.replicaCatalog.forPaths(entries.map { e => StorageService.child(s, persistentPath, e.name) }, Seq(storageId)).map(_.path).toSet
 
     for
-      e ← entries
+      e <- entries
       if graceIsOver(e.name)
     do
       val path = StorageService.child(s, persistentPath, e.name)
-      if (!inReplica.contains(path))
+      if !inReplica.contains(path)
       then
         if e.`type` == FileType.Directory
         then ignoreErrors(StorageService.rmDirectory(s, path, background))
@@ -111,7 +108,10 @@ object HierarchicalStorageSpace extends JavaLogger:
     def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
 
     def mkRootDir: String = synchronized:
-      val paths = Iterator.iterate[Option[String]](Some(root))(p => p.flatMap(hierarchicalStorageInterface.parent(s, _))).takeWhile(_.isDefined).toSeq.reverse.flatten
+      val paths =
+        Iterator.iterate[Option[String]](Some(root)): p =>
+          p.flatMap(hierarchicalStorageInterface.parent(s, _))
+        .takeWhile(_.isDefined).toSeq.reverse.flatten
 
       paths.tail.foldLeft(paths.head):
         (path, file) =>

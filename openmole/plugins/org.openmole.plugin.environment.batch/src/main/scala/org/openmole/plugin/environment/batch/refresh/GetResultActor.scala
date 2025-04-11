@@ -53,12 +53,11 @@ object GetResultActor {
           e match
             case e: JobRemoteExecutionException => JobManager ! Error(job, environment, e, stdOutErr, e.output)
             case _                              => JobManager ! Error(job, environment, e, stdOutErr, None)
-
       finally JobManager ! Kill(job, environment, Some(batchJob))
 
   def getResult(environment: BatchEnvironment, outputFilePath: String, batchJob: BatchExecutionJob, batchJobControl: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority): Unit =
 
-    val storageId = batchJobControl.storageId()
+    val storageId = batchJobControl.storageId
     val download = BatchJobControl.download(batchJobControl)
 
     val runtimeResult = getRuntimeResult(outputFilePath, storageId, environment, download)

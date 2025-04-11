@@ -22,7 +22,7 @@ import org.openmole.core.workspace.TmpDirectory
 import org.openmole.plugin.environment.batch.storage.{ StorageInterface, StorageSpace }
 import org.openmole.tool.file._
 
-object LogicalLinkStorage {
+object LogicalLinkStorage:
 
   def child(t: LogicalLinkStorage, parent: String, child: String): String = (File(parent) / child).getAbsolutePath
   def parent(t: LogicalLinkStorage, path: String): Option[String] = Option(File(path).getParent)
@@ -62,7 +62,6 @@ object LogicalLinkStorage {
         LogicalLinkStorage.download(s, src, dest, options)
 
 
-}
 
 case class LogicalLinkStorage(forceCopy: Boolean = false)
 

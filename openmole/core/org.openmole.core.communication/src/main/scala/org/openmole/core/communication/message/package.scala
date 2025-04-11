@@ -34,7 +34,6 @@ import org.openmole.tool.archive.*
 
 
 object FileMessage:
-  implicit def replicatedFile2FileMessage(r: ReplicatedFile): FileMessage = FileMessage(r)
   def apply(replicatedFile: ReplicatedFile): FileMessage = apply(replicatedFile.path, replicatedFile.hash)
 
 type RunnableTaskSequence = IArray[RunnableTask]
@@ -47,6 +46,10 @@ class RunnableTask(val task: RuntimeTask, val context: Context, val id: JobId)
 case class FileMessage(path: String, hash: String)
 
 object ReplicatedFile:
+  extension (r: ReplicatedFile)
+    def toFileMessage = FileMessage(r)
+
+
   def download(replicatedFile: ReplicatedFile)(download: (String, File) => Unit, verifyHash: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =
     val localDirectory = TmpDirectory.makeNewDir("replica")
     try

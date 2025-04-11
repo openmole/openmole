@@ -367,13 +367,13 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         StorageService.rmDirectory(storage, jobDirectory)
 
       BatchJobControl(
-        () => UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
-        () => StorageService.id(storage),
+        UpdateInterval.fixed(preference(EGIEnvironment.JobGroupRefreshInterval)),
+        StorageService.id(storage),
         jobService.state(job, _),
         jobService.delete(job, _),
         jobService.stdOutErr(job, _),
         download,
-        () => outputPath,
+        outputPath,
         clean
       )
     catch

@@ -172,7 +172,7 @@ object BatchEnvironment:
     exist: String => Boolean,
     remove: String => Unit,
     environment: BatchEnvironment,
-    storageId: String)(file: File, transferOptions: TransferOptions)(implicit services: BatchEnvironment.Services): ReplicatedFile = {
+    storageId: String)(file: File, transferOptions: TransferOptions)(using services: BatchEnvironment.Services): ReplicatedFile =
     import services._
 
     if !file.exists then throw new UserBadDataError(s"File $file is required but doesn't exist.")
@@ -191,7 +191,6 @@ object BatchEnvironment:
 
     val replica = services.replicaCatalog.uploadAndGet(uploadReplica, exist, remove, toReplicatePath, hash, storageId)
     ReplicatedFile(file.getPath, file.getName, isDir, hash, replica.path, fileMode)
-  }
 
   def serializeJob(
     environment: BatchEnvironment,
@@ -203,7 +202,7 @@ object BatchEnvironment:
     storageId: String,
     archiveResult: Boolean = false)(implicit services: BatchEnvironment.Services): SerializedJob =
     import services.*
-    TmpDirectory.withTmpFile("job", ".tar") { jobFile =>
+    TmpDirectory.withTmpFile("job", ".tar"): jobFile =>
       def tasks: RunnableTaskSequence = job.runnableTasks
       serializerService.serialize(tasks, jobFile, gz = true)
 
@@ -244,10 +243,8 @@ object BatchEnvironment:
           val hash = Hash.file(storageFile).toString()
           val path = signalUpload(eventDispatcher.eventId, upload(storageFile, TransferOptions(noLink = true, canMove = true, raw = true)), storageFile, environment, storageId)
           FileMessage(path, hash)
-
-
-      SerializedJob(inputPath, runtime, serializedStorage)
-    }
+      
+      SerializedJob(inputPath, runtime, serializedStorage, executionMessage)
 
   
   def replicateTheRuntime(

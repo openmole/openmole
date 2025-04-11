@@ -35,14 +35,14 @@ object RefreshActor:
         val oldState = job.state
         BatchEnvironment.setExecutionJobSate(environment, job, BatchJobControl.updateState(bj))
         job.state match
-          case DONE => JobManager ! GetResult(job, environment, bj.resultPath(), bj)
+          case DONE => JobManager ! GetResult(job, environment, bj.resultPath, bj)
           case FAILED =>
             val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
             val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
             JobManager ! Error(job, environment, exception, stdOutErr, None)
             JobManager ! Kill(job, environment, Some(bj))
           case SUBMITTED | RUNNING =>
-            val updateInterval = bj.updateInterval()
+            val updateInterval = bj.updateInterval
             val newDelay =
               if (oldState == job.state) (delay + updateInterval.incrementUpdateInterval) min updateInterval.maxUpdateInterval
               else updateInterval.minUpdateInterval

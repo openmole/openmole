@@ -100,6 +100,8 @@ object Libraries {
       sshj
     )
 
+  lazy val gridscaleMiniclust = "org.openmole.library" %% "gridscale-miniclust" % gridscaleVersion
+
   lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
   lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
   lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion

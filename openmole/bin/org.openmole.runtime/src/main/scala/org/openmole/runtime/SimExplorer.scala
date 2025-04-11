@@ -46,6 +46,7 @@ object SimExplorer extends JavaLogger {
       case class Config(
         storage:       Option[String] = None,
         inputMessage:  Option[String] = None,
+        inputMessageFile: Option[File] = None,
         outputMessage: Option[String] = None,
         pluginPath:    Option[String] = None,
         workspace:     Option[String] = None,
@@ -56,30 +57,24 @@ object SimExplorer extends JavaLogger {
 
       val parser = new OptionParser[Config]("OpenMOLE") {
         head("OpenMOLE runtime", "0.x")
-        opt[String]('s', "storage") text ("Storage") action {
+        opt[String]('s', "storage") text "Storage" action:
           (v, c) => c.copy(storage = Some(v))
-        }
-        opt[String]('i', "input") text ("Path of the input message") action {
+        opt[String]('i', "input") text "Path of the input message" action:
           (v, c) => c.copy(inputMessage = Some(v))
-        }
-        opt[String]('o', "output") text ("Path of the output message") action {
+        opt[String]("input-file") text "File containing the input message" action:
+          (v, c) => c.copy(inputMessageFile = Some(File(v)))
+        opt[String]('o', "output") text ("Path of the output message") action:
           (v, c) => c.copy(outputMessage = Some(v))
-        }
-        opt[String]('p', "plugin") text ("Path for plugin category to preload") action {
+        opt[String]('p', "plugin") text ("Path for plugin directory to preload") action:
           (v, c) => c.copy(pluginPath = Some(v))
-        }
-        opt[String]('w', "workspace") text ("Workspace location") action {
+        opt[String]('w', "workspace") text ("Workspace location") action:
           (v, c) => c.copy(workspace = Some(v))
-        }
-        opt[Int]("transfer-retry") text ("Retry fail transfer on failure") action {
+        opt[Int]("transfer-retry") text ("Retry fail transfer on failure") action:
           (v, c) => c.copy(transferRetry = Some(v))
-        }
-        opt[Unit]('d', "debug") text ("Switch on the debug mode") action {
+        opt[Unit]('d', "debug") text ("Switch on the debug mode") action:
           (_, c) => c.copy(debug = true)
-        }
-        opt[Unit]("test") text ("Switch on test mode") action {
+        opt[Unit]("test") text ("Switch on test mode") action:
           (_, c) => c.copy(test = true)
-        }
       }
 
       parser.parse(args, Config()) foreach { config =>
@@ -110,7 +105,7 @@ object SimExplorer extends JavaLogger {
 
               new Runtime().apply(
                 storage,
-                config.inputMessage.get,
+                config.inputMessageFile getOrElse config.inputMessage.get,
                 config.outputMessage.get,
                 config.debug,
                 config.transferRetry

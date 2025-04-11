@@ -27,9 +27,8 @@ import org.openmole.tool.logger.JavaLogger
 import squants.time.TimeConversions._
 
 object StorageService extends JavaLogger:
-  val DirRegenerate = PreferenceLocation("StorageService", "DirRegenerate", Some(1 hours))
 
-  def rmFile[S](s: S, path: String, background: Boolean)(implicit services: BatchEnvironment.Services, storageInterface: StorageInterface[S], priority: AccessControl.Priority): Unit =
+  def rmFile[S: StorageInterface](s: S, path: String, background: Boolean)(using BatchEnvironment.Services, AccessControl.Priority): Unit =
     def action =
       rmFile(s, path)
       false
@@ -66,7 +65,7 @@ object StorageService extends JavaLogger:
   def exists[S](s: S, path: String)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority) =
     storageInterface.exists(s, path)
 
-  def uploadInDirectory[S: StorageInterface: HierarchicalStorageInterface](s: S, file: File, directory: String, transferOptions: TransferOptions)(using AccessControl.Priority) =
+  def uploadInDirectory[S: {StorageInterface, HierarchicalStorageInterface}](s: S, file: File, directory: String, transferOptions: TransferOptions)(using AccessControl.Priority) =
     val path = child(s, directory, StorageSpace.timedUniqName)
     upload(s, file, path, transferOptions)
     path

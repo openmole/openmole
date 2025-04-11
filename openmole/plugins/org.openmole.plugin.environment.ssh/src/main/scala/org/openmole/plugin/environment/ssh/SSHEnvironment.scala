@@ -62,7 +62,7 @@ object SSHEnvironment extends JavaLogger:
     modules:              OptionalArgument[Seq[String]]     = None,
     runtimeSetting:       OptionalArgument[RuntimeSetting]  = None,
     debug:                Boolean                           = false
-  )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, serializerService: SerializerService, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
+  )(implicit cypher: Cypher, authenticationStore: AuthenticationStore, preference: Preference, replicaCatalog: ReplicaCatalog, varName: sourcecode.Name) =
 
     DispatchEnvironment.queue(submittedJobs):
       EnvironmentBuilder: ms =>

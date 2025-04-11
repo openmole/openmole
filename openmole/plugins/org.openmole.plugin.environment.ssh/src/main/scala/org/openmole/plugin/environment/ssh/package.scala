@@ -204,13 +204,13 @@ def submitToCluster[S: {StorageInterface, HierarchicalStorageInterface, Environm
       StorageService.download(storage, src, dest, options)
 
     BatchJobControl(
-      () => refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
-      () => StorageService.id(storage),
+      refresh.map(UpdateInterval.fixed) getOrElse BatchEnvironment.defaultUpdateInterval(services.preference),
+      StorageService.id(storage),
       priority => state(job, priority),
       priority => delete(job, priority),
       priority => stdOutErr(job, priority),
       download,
-      () => outputPath,
+      outputPath,
       priority => clean(priority)
     )
   catch

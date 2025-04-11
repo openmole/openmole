@@ -21,33 +21,11 @@ package org.openmole.plugin.environment.gridscale
 import gridscale._
 import org.openmole.core.workflow.execution.ExecutionState._
 
-object GridScaleJobService {
+object GridScaleJobService:
   def translateStatus(state: JobState) =
-    state match {
+    state match
       case JobState.Submitted => SUBMITTED
       case JobState.Running   => RUNNING
       case JobState.Done      => DONE
       case JobState.Failed    => FAILED
-    }
-}
 
-//trait GridScaleJobService extends BatchJobService {
-//
-//  val jobService: JS
-//
-//  protected def _state(j: J) = translateStatus(jobService.state(j))
-//  protected def _delete(j: J) = jobService.delete(j).get
-//
-//  private def translateStatus(state: JobState) =
-//    state match {
-//      case Submitted => SUBMITTED
-//      case Running   => RUNNING
-//      case Done      => DONE
-//      case Failed    => FAILED
-//    }
-//
-//}
-//
-//trait GSJobService[JS, J] {
-//  def state(js: JS, j: J): JobState
-//}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2015 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.batch.environment
+package org.openmole.plugin.environment.miniclust
 
-import org.openmole.plugin.environment.batch.storage._
-import org.openmole.core.communication.message._
+import org.openmole.core.highlight.HighLight
+import org.openmole.core.pluginregistry.{PluginInfo, PluginRegistry}
+import org.osgi.framework.*
 
-case class SerializedJob(
-  inputPath:     String,
-  runtime:       Runtime,
-  remoteStorage: FileMessage,
-  executionMessage: ExecutionMessage)
+class Activator extends BundleActivator:
+  override def stop(context: BundleContext): Unit =
+    PluginRegistry.unregister(this)
+
+  override def start(context: BundleContext): Unit =
+    import org.openmole.core.highlight.HighLight.*
+
+    val keyWords: Vector[HighLight] =
+      Vector(
+      )
+
+    PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)

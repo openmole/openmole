@@ -463,7 +463,7 @@ lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bound
 
 /* Environment */
 
-def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slurm, dispatch)
+def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slurm, dispatch, miniclust)
 
 lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
@@ -474,9 +474,9 @@ lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch",
     Libraries.gridscale,
     Libraries.h2,
     Libraries.guava,
-    Libraries.jasypt
-  )
-  ) settings (pluginSettings *)
+    Libraries.jasypt),
+  pluginSettings
+)
 
 
 //lazy val cluster = OsgiProject(pluginDir, "org.openmole.plugin.environment.cluster", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings (pluginSettings *)
@@ -506,6 +506,10 @@ lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm",
 
 lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale, json, dispatch) settings
   (libraryDependencies ++= Libraries.gridscaleSSH) settings (pluginSettings *)
+
+lazy val miniclust = OsgiProject(pluginDir, "org.openmole.plugin.environment.miniclust", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
+  (libraryDependencies += Libraries.gridscaleMiniclust, pluginSettings)
+
 
 lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.dispatch", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings (pluginSettings *)
 

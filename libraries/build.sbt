@@ -518,6 +518,16 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
   version := gridscaleVersion
 ) dependsOn(gridscale, gridscaleHTTP)
 
+lazy val gridscaleMiniclust = OsgiProject(dir, "gridscale.miniclust",
+  imports = Seq("!android.*", "!com.fasterxml.*", "!com.google.*", "!org.checkerframework.*", "!dalvik.*", "!javax.*", "!kotlin.*", "!org.bouncycastle.jsse.*", "!org.conscrypt.*", "!org.conscrypt.*", "!org.openjsse.*", "!org.simpleframework.*", "!org.xerial.*", "!sun.security.*", "io.circe.*", "*"),
+  exports = Seq("gridscale.miniclust.*", "miniclust.*", "io.minio.*"),
+  privatePackages = Seq("okhttp3.*", "okio.*", "com.google.*", "org.xerial.*", "kotlin.*", "org.simpleframework.*", "com.fasterxml.*"),
+  dynamicImports = Seq("org.bouncycastle.*")) settings (
+  settings,
+  libraryDependencies += "org.openmole.gridscale" %% "miniclust" % gridscaleVersion,
+  version := gridscaleVersion
+) dependsOn(gridscale, circe)
+
 lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (
   settings,
   libraryDependencies +=  "org.tukaani" % "xz" % xzVersion,
