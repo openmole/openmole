@@ -138,10 +138,10 @@ class Runtime:
 
         val plugins =
           for
-            plugin ← executionMessage.plugins
+            plugin <- executionMessage.plugins
           yield
             val pluginFile = getReplicatedFile(plugin, TransferOptions(raw = true))
-            plugin → pluginFile
+            plugin -> pluginFile
 
         logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 

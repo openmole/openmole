@@ -48,7 +48,7 @@ package object bytecode:
           ClassFile(path.toString, p.toFile)
         }.toList
 
-  sealed class ClassSource
+  sealed trait ClassSource
   case class ClassFile(path: String, file: File) extends ClassSource
   case class ClassByteCode(path: String, byteCode: Array[Byte]) extends ClassSource
 

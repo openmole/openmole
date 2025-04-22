@@ -69,6 +69,7 @@ object ReplicatedFile:
           val local = localDirectory / replicatedFile.name
           cache.extract(local, archive = ArchiveType.Tar)
           cache.delete
+
           local.mode = replicatedFile.mode
           local
         else

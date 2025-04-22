@@ -36,15 +36,18 @@ object MiniclustStorage:
   class Remote extends RemoteStorage:
     override def upload(src: File, dest: Option[String], options: TransferOptions)(using TmpDirectory): String =
       dest.foreach: d =>
+        val destFile = FileTools.homeDirectory / d
         if options.canMove
-        then src.move(File(d))
-        else src.copy(File(d))
+        then src.move(destFile)
+        else src.copy(destFile)
+
       dest.getOrElse("")
 
-    override def download(src: String, dest: File, options: TransferOptions)(using TmpDirectory): Unit = dest.createLinkTo(File(nodeInputPath(src)).getAbsoluteFile)
+    override def download(src: String, dest: File, options: TransferOptions)(using TmpDirectory): Unit =
+      dest.createLinkTo((FileTools.homeDirectory / nodeInputPath(src)).getAbsoluteFile)
 
-  def upload(f: File, option: TransferOptions)(using _root_.gridscale.miniclust.Miniclust) =
-    val path = s"openmole/${StorageSpace.timedUniqName}"
+  def upload(baseDir: String, f: File, option: TransferOptions)(using _root_.gridscale.miniclust.Miniclust) =
+    val path = s"$baseDir/${StorageSpace.timedUniqName}"
     _root_.gridscale.miniclust.upload(f, path)
     path
 

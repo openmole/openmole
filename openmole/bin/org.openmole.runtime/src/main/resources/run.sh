@@ -27,6 +27,18 @@ shift
 mkdir -p "${TMPDIR}"
 
 FULL_TMPDIR=`realpath ${TMPDIR}`
+HOME_DIRECTORY=${FULL_TMPDIR}
+
+ARGS=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --home-directory ) HOME_DIRECTORY="$2" ; shift ;;
+    * ) ARGS="$ARGS $1";;
+  esac
+  shift
+done
+echo $ARGS
 
 FLAG=""
 
@@ -69,12 +81,12 @@ if [ -n "$OM_LOCAL" ]; then
 fi
 
 ## Just to be sure
-export _JAVA_OPTIONS="-Duser.home=\"${FULL_TMPDIR}\" -Djava.io.tmpdir=\"${FULL_TMPDIR}\""
+export _JAVA_OPTIONS="-Duser.home=\"${HOME_DIRECTORY}\" -Djava.io.tmpdir=\"${FULL_TMPDIR}\""
 
-java -Djava.io.tmpdir="${FULL_TMPDIR}" -Duser.home="${FULL_TMPDIR}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.configuration.area="${OSGI_CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
+java -Djava.io.tmpdir="${FULL_TMPDIR}" -Duser.home="${HOME_DIRECTORY}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.configuration.area="${OSGI_CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -XX:+UseStringDeduplication \
   --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
-  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${OSGI_CONFIGDIR}" --osgi-locking-none -- --workspace "${OPENMOLE_WORKSPACE}" $@
+  -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${OSGI_CONFIGDIR}" --osgi-locking-none -- --workspace "${OPENMOLE_WORKSPACE}" $ARGS
 
 RETURNCODE=$?
 

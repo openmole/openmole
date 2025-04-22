@@ -82,7 +82,7 @@ class MiniclustEnvironment(
 
     def replicate =
       BatchEnvironment.toReplicatedFile(
-        upload = (p, t) => MiniclustStorage.upload(s"${persistentDirectory}/$p", t),
+        upload = (p, t) => MiniclustStorage.upload(persistentDirectory, p, t),
         exist = MiniclustStorage.exists,
         remove = MiniclustStorage.remove,
         environment = this,
@@ -96,7 +96,7 @@ class MiniclustEnvironment(
         job = batchExecutionJob,
         remoteStorage = MiniclustStorage.Remote(),
         replicate = replicate,
-        upload = (p, t) => MiniclustStorage.upload(s"$tmpDirectory/$p", t),
+        upload = (p, t) => MiniclustStorage.upload(tmpDirectory, p, t),
         storageId = MiniclustStorage.id,
         archiveResult = true
       )
@@ -111,8 +111,7 @@ class MiniclustEnvironment(
         import MiniclustStorage.nodeInputPath
         val runtime =
           Seq(
-            s"tar -xzf ${nodeInputPath(serializedJob.runtime.jvmLinuxX64.path)} >/dev/null",
-            s"tar -xzf ${nodeInputPath(serializedJob.runtime.runtime.path)} >/dev/null",
+            "ls -la",
             s"mkdir envplugins"
           )
 
@@ -124,22 +123,22 @@ class MiniclustEnvironment(
 
         val run =
           Seq(
-            "export PATH=$PWD/jre/bin:$PATH",
+            "export PATH=$PWD/jvm/jre/bin:$PATH",
             "export HOME=$PWD",
-            s"""/bin/sh run.sh ${memory}m ${UUID.randomUUID} -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $$PWD/${nodeInputPath(serializedJob.inputPath)} -o $${PWD}/${resultName}""" + (if debug then " -d 2>&1" else "")
+            s"""/bin/sh runtime/run.sh ${memory}m $$PWD/${UUID.randomUUID} --home-directory $$PWD -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $${PWD}/${nodeInputPath(serializedJob.inputPath)} -o ${resultName}""" + (if debug then " -d 2>&1" else "")
           )
 
         script.content =
           (runtime ++ plugins ++ run).mkString(" && ")
 
-        MiniclustStorage.upload(script, TransferOptions.default)
+        MiniclustStorage.upload(tmpDirectory, script, TransferOptions.default)
 
     val inputsFiles =
       val fileMessages: Seq[FileMessage] =
         (serializedJob.executionMessage.plugins.map(_.toFileMessage) ++
           serializedJob.executionMessage.files.map(_.toFileMessage) ++
           serializedJob.runtime.environmentPlugins ++
-          Seq(serializedJob.remoteStorage, serializedJob.runtime.jvmLinuxX64, serializedJob.runtime.runtime)).toSeq
+          Seq(serializedJob.remoteStorage)).toSeq
 
       // TODO make sure that files are hashed using blake 3
 
@@ -150,8 +149,10 @@ class MiniclustEnvironment(
       ++ Seq(
         InputFile(serializedJob.inputPath, MiniclustStorage.nodeInputPath(serializedJob.inputPath)),
         InputFile(runScriptPath, scriptName)
+      ) ++ Seq(
+        InputFile(serializedJob.runtime.jvmLinuxX64.path, "jvm", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.jvmLinuxX64.hash}", extract = true))),
+        InputFile(serializedJob.runtime.runtime.path, "runtime", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.runtime.hash}", extract = true)))
       )
-
 
     val outputFiles =
       Seq(

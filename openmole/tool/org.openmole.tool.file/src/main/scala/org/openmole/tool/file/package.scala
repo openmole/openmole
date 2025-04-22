@@ -99,28 +99,27 @@ package file {
       def recursiveListFilesSafe(filter: File => Boolean) = Option(file.listRecursive(filter).toArray).getOrElse(Array.empty[File])
 
       def getParentFileSafe: File =
-        file.getParentFile() match {
+        file.getParentFile() match
           case null =>
-            if (file.isAbsolute) file else new File(".")
+            if file.isAbsolute
+            then file
+            else new File(".")
           case f => f
-        }
+
 
       /////// copiers ////////
-      def copyContent(destination: File) = {
+      def copyContent(destination: File) =
         val ic = new FileInputStream(file).getChannel
-        try {
+        try
           val oc = new FileOutputStream(destination).getChannel
           try p.copyChannel(ic, oc)
           finally oc.close()
-        }
         finally ic.close()
-      }
 
-      private def copyFile(toF: File, followSymlinks: Boolean = false) = {
+      private def copyFile(toF: File, followSymlinks: Boolean = false) =
         val copyOptions = getCopyOptions(followSymlinks)
         Files.copy(file, toF, copyOptions *)
         toF.mode = file
-      }
 
       def copy(toF: File, followSymlinks: Boolean = false) = 
         // default options are NOFOLLOW_LINKS, COPY_ATTRIBUTES, REPLACE_EXISTING
@@ -134,20 +133,20 @@ package file {
           _.copy(to)
 
       // TODO replace with NIO
-      def copy(to: OutputStream, maxRead: Int, timeout: Time)(implicit pool: ThreadPoolExecutor): Unit =
+      def copy(to: OutputStream, maxRead: Int, timeout: Time)(using pool: ThreadPoolExecutor): Unit =
         withClosable(bufferedInputStream()) {
           _.copy(to, maxRead, timeout)
         }
 
-      def copyCompressFile(toF: File): File = withClosable(new GZIPOutputStream(toF.bufferedOutputStream())) { to =>
-        Files.copy(file, to)
-        toF
-      }
+      def copyCompressFile(toF: File): File =
+        withClosable(new GZIPOutputStream(toF.bufferedOutputStream())): to =>
+          Files.copy(file, to)
+          toF
 
-      def copyUncompressFile(toF: File): File = withClosable(new GZIPInputStream(file.bufferedInputStream())) { from =>
-        Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
-        toF
-      }
+      def copyUncompressFile(toF: File): File =
+        withClosable(new GZIPInputStream(file.bufferedInputStream())): from =>
+          Files.copy(from, toF, StandardCopyOption.REPLACE_EXISTING)
+          toF
 
       //////// modifiers ///////
       def move(to: File) = wrapError:
@@ -187,7 +186,7 @@ package file {
             try
               f.withDirectoryStream(): s =>
                 for
-                  f ← s.asScala
+                  f <- s.asScala
                 do
                   if Files.isRegularFile(f)
                   then boundary.break(false)
@@ -207,34 +206,34 @@ package file {
       def baseName = file.getName.takeWhile(_ != '.')
 
       def size: Long =
-        def sizeOfDirectory(directory: File) = {
+        def sizeOfDirectory(directory: File) =
           val size = new AtomicLong()
 
           Files.walkFileTree(
             directory,
-            new SimpleFileVisitor[Path]() {
-              override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-                if (attrs.isRegularFile) size.addAndGet(attrs.size)
+            new SimpleFileVisitor[Path]():
+              override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
+                if attrs.isRegularFile
+                then size.addAndGet(attrs.size)
                 FileVisitResult.CONTINUE
-              }
-            })
+          )
 
           size.get()
-        }
 
-        if (!file.exists()) 0L
+
+        if !file.exists()
+        then 0L
         else if (file.isDirectory) sizeOfDirectory(file)
         else
           try Files.size(file)
-          catch {
+          catch
             case e: NoSuchFileException => 0L
-          }
 
       def mode =
         val f = file.realPath
-        (if (Files.isReadable(f)) READ_MODE else 0) |
-          (if (Files.isWritable(f)) WRITE_MODE else 0) |
-          (if (Files.isExecutable(f)) EXEC_MODE else 0)
+        (if Files.isReadable(f) then READ_MODE else 0) |
+          (if Files.isWritable(f) then WRITE_MODE else 0) |
+          (if Files.isExecutable(f) then EXEC_MODE else 0)
 
       /** set mode from an integer as retrieved from a Tar archive */
       def mode_=(m: Int) =
@@ -254,11 +253,11 @@ package file {
       def setPosixMode(m: String) =
         def isPosix = FileSystems.getDefault().supportedFileAttributeViews().contains("posix")
 
-        if (isPosix) {
+        if isPosix
+        then
           val attrs = PosixFilePermissions.fromString(m)
           Files.setPosixFilePermissions(file, attrs)
           true
-        }
         else false
 
       def content_=(content: String) =
@@ -445,17 +444,15 @@ package file {
 
       def withWriter[T](append: Boolean = false) = withClosable[Writer, T](Files.newBufferedWriter(file.toPath, writeOptions(append = append) *))(_)
 
-      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] => T): T = {
+      def withDirectoryStream[T](filter: Option[java.nio.file.DirectoryStream.Filter[Path]] = None)(f: DirectoryStream[Path] => T): T =
         def open =
-          filter match {
+          filter match
             case None    => Files.newDirectoryStream(file)
             case Some(f) => Files.newDirectoryStream(file, f)
-          }
 
         val stream = open
         try f(stream)
         finally stream.close()
-      }
 
       def withSource[T] = withClosable[Source, T](Source.fromInputStream(bufferedInputStream()))(_)
 
@@ -541,7 +538,7 @@ package file {
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
 
 
-  object FileTools {
+  object FileTools:
     private val allPerms =
       import java.nio.file.attribute.PosixFilePermission
       val perms = new util.HashSet[PosixFilePermission]()
@@ -563,19 +560,19 @@ package file {
       import java.nio.file.FileSystems
       FileSystems.getDefault.supportedFileAttributeViews.contains("posix")
 
+    def homeDirectory = File(System.getProperty("user.home"))
+
     def setAllPermissions(path: Path) =
-      if (isPosix) Files.setPosixFilePermissions(path, allPerms)
-      else {
+      if isPosix
+      then Files.setPosixFilePermissions(path, allPerms)
+      else
         val f = path.toFile
         f.setReadable(true)
         f.setWritable(true)
         f.setExecutable(true)
-      }
 
-  }
 
 }
 
-package object file extends FilePackage {
+package object file extends FilePackage:
   val jvmLevelFileLock = new LockRepository[String]
-}
