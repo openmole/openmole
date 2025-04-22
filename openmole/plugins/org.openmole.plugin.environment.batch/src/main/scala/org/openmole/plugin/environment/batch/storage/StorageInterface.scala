@@ -28,16 +28,6 @@ import org.openmole.tool.stream._
 
 object StorageInterface:
 
-//  def remote[S: StorageInterface: HierarchicalStorageInterface](s: S, communicationDirectory: String) =
-//    new RemoteStorage:
-//      override def upload(src: File, dest: Option[String], options: TransferOptions)(using TmpDirectory): String =
-//        AccessControl.defaultPrirority:
-//          StorageService.uploadInDirectory(s, src, communicationDirectory, options)
-//
-//      override def download(src: String, dest: File, options: TransferOptions)(using TmpDirectory): Unit =
-//        AccessControl.defaultPrirority:
-//          StorageService.download(s, src, dest, options)
-
   def upload(compressed: Boolean, uploadStream: (() => InputStream, String) => Unit)(src: File, dest: String, options: TransferOptions = TransferOptions.default): Unit =
     def fileStream() = src.bufferedInputStream()
 
@@ -64,14 +54,11 @@ trait StorageInterface[T]:
   def upload(t: T, src: File, dest: String, options: TransferOptions = TransferOptions.default)(using AccessControl.Priority): Unit
   def download(t: T, src: String, dest: File, options: TransferOptions = TransferOptions.default)(using AccessControl.Priority): Unit
 
-trait HierarchicalStorageInterface[T]:
+trait HierarchicalStorageInterface[T] extends StorageInterface[T]:
   def rmDir(t: T, path: String)(using AccessControl.Priority): Unit
   def makeDir(t: T, path: String)(using AccessControl.Priority): Unit
   def child(t: T, parent: String, child: String)(using AccessControl.Priority): String
   def list(t: T, path: String)(using AccessControl.Priority): Seq[ListEntry]
   def parent(t: T, path: String)(using AccessControl.Priority): Option[String]
   def name(t: T, path: String): String
-
-trait EnvironmentStorage[S]:
-  def id(s: S): String
-  def environment(s: S): BatchEnvironment
+  def id(s: T): String

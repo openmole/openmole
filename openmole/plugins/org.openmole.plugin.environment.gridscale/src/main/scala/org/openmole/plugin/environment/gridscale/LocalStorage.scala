@@ -31,7 +31,7 @@ object LocalStorage:
   def home = Local.home()
   def child(parent: String, child: String) = (File(parent) / child).getAbsolutePath
 
-  implicit def isStorage: StorageInterface[LocalStorage] & HierarchicalStorageInterface[LocalStorage] & EnvironmentStorage[LocalStorage] = new StorageInterface[LocalStorage] with HierarchicalStorageInterface[LocalStorage] with EnvironmentStorage[LocalStorage]:
+  given HierarchicalStorageInterface[LocalStorage] with
     override def child(t: LocalStorage, parent: String, child: String)(using AccessControl.Priority): String = LocalStorage.child(parent, child)
     override def parent(t: LocalStorage, path: String)(using AccessControl.Priority): Option[String] = Option(File(path).getParent)
     override def name(t: LocalStorage, path: String): String = File(path).getName
@@ -49,7 +49,7 @@ object LocalStorage:
       StorageInterface.download(false, Local.readFile)(src, dest, options)
 
     override def id(s: LocalStorage): String = s.id
-    override def environment(s: LocalStorage): BatchEnvironment = s.environment
+    //override def environment(s: LocalStorage): BatchEnvironment = s.environment
   
 
 case class LocalStorage(accessControl: AccessControl, id: String, environment: BatchEnvironment, root: String)

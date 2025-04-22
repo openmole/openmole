@@ -46,7 +46,7 @@ object SSHStorage:
   def home(using gssh.SSH) = gssh.home()
   def child(parent: String, child: String) = _root_.gridscale.RemotePath.child(parent, child)
 
-  given StorageInterface[SSHStorage] with HierarchicalStorageInterface[SSHStorage] with EnvironmentStorage[SSHStorage] with
+  given HierarchicalStorageInterface[SSHStorage]:
     override def child(t: SSHStorage, parent: String, child: String)(using AccessControl.Priority): String = SSHStorage.child(parent, child)
     override def parent(t: SSHStorage, path: String)(using AccessControl.Priority): Option[String] = _root_.gridscale.RemotePath.parent(path)
     override def name(t: SSHStorage, path: String): String = _root_.gridscale.RemotePath.name(path)
@@ -89,7 +89,6 @@ object SSHStorage:
 
 
     override def id(s: SSHStorage): String = s.id
-    override def environment(s: SSHStorage): BatchEnvironment = s.environment
 
 
   def isConnectionError(t: Throwable) = t match
@@ -162,7 +161,7 @@ object Frontend:
 trait Frontend:
   def run(command: String): util.Try[_root_.gridscale.ExecutionResult]
 
-def submitToCluster[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}, J](
+def submitToCluster[S: HierarchicalStorageInterface, J](
   environment: BatchEnvironment,
   runtimeSetting: Option[RuntimeSetting],
   batchExecutionJob: BatchExecutionJob,

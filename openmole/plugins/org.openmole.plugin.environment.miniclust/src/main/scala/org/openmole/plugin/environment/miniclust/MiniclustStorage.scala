@@ -35,13 +35,13 @@ object MiniclustStorage:
 
   class Remote extends RemoteStorage:
     override def upload(src: File, dest: Option[String], options: TransferOptions)(using TmpDirectory): String =
-      dest.foreach: d =>
-        val destFile = FileTools.homeDirectory / d
-        if options.canMove
-        then src.move(destFile)
-        else src.copy(destFile)
+      val uploadDestination = FileTools.homeDirectory / dest.getOrElse(StorageSpace.timedUniqName)
 
-      dest.getOrElse("")
+      if options.canMove
+      then src.move(uploadDestination)
+      else src.copy(uploadDestination)
+
+      uploadDestination.getName
 
     override def download(src: String, dest: File, options: TransferOptions)(using TmpDirectory): Unit =
       dest.createLinkTo((FileTools.homeDirectory / nodeInputPath(src)).getAbsoluteFile)
@@ -56,29 +56,18 @@ object MiniclustStorage:
   def id(using mc: _root_.gridscale.miniclust.Miniclust) = s"${mc.bucket.server}-${mc.bucket.name}"
 
 
-//  given StorageInterface[MiniclustStorage] with HierarchicalStorageInterface[MiniclustStorage] with EnvironmentStorage[MiniclustStorage]:
-//    override def exists(t: MiniclustStorage, path: String)(using Priority): Boolean = MiniclustStorage.exists(path)(using t.miniclust)
-//    override def rmFile(t: MiniclustStorage, path: String)(using Priority): Unit = MiniclustStorage.remove(path)(using t.miniclust)
-//
-//    override def upload(t: MiniclustStorage, src: File, dest: String, options: TransferOptions)(using Priority): Unit = ???
-//
-//    override def download(t: MiniclustStorage, src: String, dest: File, options: TransferOptions)(using Priority): Unit = ???
-//
-//    override def rmDir(t: MiniclustStorage, path: String)(using Priority): Unit = ???
-//
-//    override def makeDir(t: MiniclustStorage, path: String)(using Priority): Unit = ???
-//
-//    override def child(t: MiniclustStorage, parent: String, child: String)(using Priority): String = ???
-//
-//    override def list(t: MiniclustStorage, path: String)(using Priority): Seq[Any] = ???
-//
-//    override def parent(t: MiniclustStorage, path: String)(using Priority): Option[String] = ???
-//
-//    override def name(t: MiniclustStorage, path: String): String = ???
-//
-//    override def id(s: MiniclustStorage): String = ???
-//
-//    override def environment(s: MiniclustStorage): BatchEnvironment = ???
-//
-//
-//case class MiniclustStorage(miniclust: _root_.gridscale.miniclust.Miniclust)
+  given HierarchicalStorageInterface[MiniclustStorage]:
+    override def exists(t: MiniclustStorage, path: String)(using Priority): Boolean =_root_.gridscale.miniclust.exists(path)(using t.miniclust)
+    override def rmFile(t: MiniclustStorage, path: String)(using Priority): Unit = _root_.gridscale.miniclust.rmFile(path)(using t.miniclust)
+    override def upload(t: MiniclustStorage, src: File, dest: String, options: TransferOptions)(using Priority): Unit = _root_.gridscale.miniclust.upload(src, dest)(using t.miniclust)
+    override def download(t: MiniclustStorage, src: String, dest: File, options: TransferOptions)(using Priority): Unit = _root_.gridscale.miniclust.download(src, dest)(using t.miniclust)
+    override def rmDir(t: MiniclustStorage, path: String)(using Priority): Unit = _root_.gridscale.miniclust.rmDir(path)(using t.miniclust)
+    override def makeDir(t: MiniclustStorage, path: String)(using Priority): Unit = ()
+    override def child(t: MiniclustStorage, parent: String, child: String)(using Priority): String = _root_.gridscale.RemotePath.child(parent, child)
+    override def list(t: MiniclustStorage, path: String)(using Priority) = _root_.gridscale.miniclust.list(path)(using t.miniclust)
+    override def parent(t: MiniclustStorage, path: String)(using Priority): Option[String] = gridscale.RemotePath.parent(path)
+    override def name(t: MiniclustStorage, path: String): String = gridscale.RemotePath.name(path)
+    override def id(s: MiniclustStorage): String = s"${s.miniclust.bucket.server}-${s.miniclust.bucket.name}"
+
+
+case class MiniclustStorage(miniclust: _root_.gridscale.miniclust.Miniclust)

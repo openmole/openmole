@@ -5,7 +5,6 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
 import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment, SerializedJob }
-import org.openmole.plugin.environment.batch.storage.EnvironmentStorage
 import org.openmole.tool.cache.TimeCache
 
 object EGIJobService:

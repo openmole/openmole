@@ -288,7 +288,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         val usedFilesInfo = usedFiles.map { f => f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
         val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
 
-        val onStorage: Map[String, Seq[Replica]] = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(implicitly[EnvironmentStorage[WebDavStorage]].id)).groupBy(_.storage)
+        val onStorage: Map[String, Seq[Replica]] = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(WebDavStorage.id)).groupBy(_.storage)
 
         def minOption(v: Seq[Double]) = if (v.isEmpty) None else Some(v.min)
 
@@ -303,7 +303,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         //        val minAvailability = minOption(availablities)
 
         def rate(ss: WebDavStorage) = {
-          val sizesOnStorage = usedFilesInfo.filter { case (_, info) => onStorage.getOrElse(implicitly[EnvironmentStorage[WebDavStorage]].id(ss), Seq.empty).exists(_.hash == info.hash) }.values.map {
+          val sizesOnStorage = usedFilesInfo.filter { case (_, info) => onStorage.getOrElse(WebDavStorage.id(ss), Seq.empty).exists(_.hash == info.hash) }.values.map {
             _.size
           }
           val sizeOnStorage = sizesOnStorage.sum

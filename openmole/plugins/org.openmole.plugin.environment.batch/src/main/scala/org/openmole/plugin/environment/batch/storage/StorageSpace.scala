@@ -58,9 +58,9 @@ object HierarchicalStorageSpace extends JavaLogger:
     
     StorageSpace(baseDirectory, replicaDirectory, tmpDirectory)
 
-  def clean[S](s: S, storageSpace: StorageSpace, background: Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], environmentStorage: EnvironmentStorage[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
-    services.replicaCatalog.clean(environmentStorage.id(s), StorageService.rmFile(s, _))
-    cleanReplicaDirectory(s, storageSpace.replicaDirectory, environmentStorage.id(s), background)
+  def clean[S](s: S, storageSpace: StorageSpace, background: Boolean)(using hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+    services.replicaCatalog.clean(hierarchicalStorageInterface.id(s), StorageService.rmFile(s, _))
+    cleanReplicaDirectory(s, storageSpace.replicaDirectory, hierarchicalStorageInterface.id(s), background)
     cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
 
   def extractTimeFromName(name: String) =
@@ -70,7 +70,7 @@ object HierarchicalStorageSpace extends JavaLogger:
 
   def ignoreErrors[T](f: => T): Unit = Try(f)
 
-  def cleanTmpDirectory[S](s: S, tmpDirectory: String, background: Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def cleanTmpDirectory[S](s: S, tmpDirectory: String, background: Boolean)(using hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
     val removalDate = System.currentTimeMillis - services.preference(TmpDirRemoval).toMillis
 

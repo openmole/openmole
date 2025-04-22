@@ -112,7 +112,7 @@ object PBSEnvironment extends JavaLogger:
     flavour:              _root_.gridscale.pbs.PBSFlavour,
     modules:              Option[Seq[String]])
 
-  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: HierarchicalStorageInterface](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: PBSJobService[?])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
       runtimeSetting,

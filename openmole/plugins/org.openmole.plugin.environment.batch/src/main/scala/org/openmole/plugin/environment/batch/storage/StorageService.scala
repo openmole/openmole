@@ -52,7 +52,7 @@ object StorageService extends JavaLogger:
   def rmDirectory[S](s: S, directory: String)(using hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority): Unit =
     hierarchicalStorageInterface.rmDir(s, directory)
 
-  def id[S](s: S)(implicit environmentStorage: EnvironmentStorage[S]) = environmentStorage.id(s)
+  def id[S: HierarchicalStorageInterface as hs](s: S) = hs.id(s)
 
   def download[S](s: S, src: String, dest: File, options: TransferOptions = TransferOptions.default)(using storageService: StorageInterface[S], priority: AccessControl.Priority) =
     storageService.download(s, src, dest, options)

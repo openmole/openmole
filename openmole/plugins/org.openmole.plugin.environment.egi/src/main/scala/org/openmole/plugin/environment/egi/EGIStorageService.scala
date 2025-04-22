@@ -214,8 +214,9 @@ case class CurlRemoteStorage(location: String, jobDirectory: String, voName: Str
 }
 
 object WebDavStorage:
+  def id(s: WebDavStorage): String = s.url
 
-  given (using _root_.gridscale.http.HTTP): StorageInterface[WebDavStorage] with EnvironmentStorage[WebDavStorage] with HierarchicalStorageInterface[WebDavStorage] with
+  given (using _root_.gridscale.http.HTTP): HierarchicalStorageInterface[WebDavStorage] with
       def webdavServer(location: WebDavStorage) = gridscale.webdav.WebDAVSServer(location.url, location.proxyCache().factory)
 
       override def child(t: WebDavStorage, parent: String, child: String)(using AccessControl.Priority): String = gridscale.RemotePath.child(parent, child)
@@ -238,8 +239,6 @@ object WebDavStorage:
           StorageInterface.download(true, gridscale.webdav.readStream[Unit](webdavServer(t), _, _))(src, dest, options)
 
 
-      override def id(s: WebDavStorage): String = s.url
-      override def environment(s: WebDavStorage): BatchEnvironment = s.environment
-
+      override def id(s: WebDavStorage): String = WebDavStorage.id(s)
 
 case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])

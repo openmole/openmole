@@ -111,7 +111,7 @@ object SSHEnvironment extends JavaLogger:
     def submitted = queuesLock { jobsStates.toSeq.collect { case (j, SSHEnvironment.Submitted(id)) => (j, id) } }
     def queued = queuesLock { jobsStates.collect { case (job, Queued(desc, bj)) => (job, desc, bj) } }
 
-  def submit[S: {StorageInterface, HierarchicalStorageInterface, EnvironmentStorage}](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: HierarchicalStorageInterface](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: SSHJobService[_])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
       runtimeSetting,
