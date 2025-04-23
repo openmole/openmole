@@ -20,6 +20,7 @@ package org.openmole.plugin.environment.miniclust
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.environment.batch.environment.*
+import org.openmole.plugin.environment.batch.storage.*
 import org.openmole.plugin.environment.batch.environment.AccessControl.*
 import org.openmole.core.communication.storage.*
 import org.openmole.core.communication.message.*
@@ -34,6 +35,7 @@ object MiniclustEnvironment:
     url: String,
     insecure: Boolean = false,
     openMOLEMemory: OptionalArgument[Information] = None,
+    core: OptionalArgument[Int] = None,
     runtimeSetting: OptionalArgument[RuntimeSetting] = None,
     debug: Boolean = false)(using varName: sourcecode.Name, store: AuthenticationStore, pref: Preference, cypher: Cypher, replicaCatalog: ReplicaCatalog) =
     EnvironmentBuilder: ms =>
@@ -41,6 +43,7 @@ object MiniclustEnvironment:
         url = url,
         insecure = insecure,
         openMOLEMemory = openMOLEMemory,
+        core = core,
         name = Some(varName.value),
         authentication = MiniclustAuthentication.find(login, url),
         runtimeSetting = runtimeSetting,
@@ -65,6 +68,7 @@ class MiniclustEnvironment(
   val url: String,
   val insecure: Boolean,
   val openMOLEMemory: Option[Information],
+  val core: Option[Int],
   val runtimeSetting: Option[RuntimeSetting],
   val name:              Option[String],
   val authentication: MiniclustAuthentication,
@@ -73,16 +77,20 @@ class MiniclustEnvironment(
 
   given mc: _root_.gridscale.miniclust.Miniclust = MiniclustEnvironment.toMiniclust(authentication, insecure = insecure)
 
+  val storage = MiniclustStorage(mc)
+  val storageSpace =
+    import services.*
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.create(storage, "openmole", _ => false)
+
   override def execute(batchExecutionJob: BatchExecutionJob)(using Priority): BatchJobControl =
     import services.*
 
-    // FIXME use storage service
-    val persistentDirectory = "/openmole/persistent"
-    val tmpDirectory = s"/openmole/tmp/${uniqName("", "")}"
+    val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, storageSpace)
 
     def replicate =
       BatchEnvironment.toReplicatedFile(
-        upload = (p, t) => MiniclustStorage.upload(persistentDirectory, p, t),
+        upload = StorageService.uploadInDirectory(storage, _, storageSpace.replicaDirectory, _),
         exist = MiniclustStorage.exists,
         remove = MiniclustStorage.remove,
         environment = this,
@@ -96,7 +104,7 @@ class MiniclustEnvironment(
         job = batchExecutionJob,
         remoteStorage = MiniclustStorage.Remote(),
         replicate = replicate,
-        upload = (p, t) => MiniclustStorage.upload(tmpDirectory, p, t),
+        upload = (p, t) => StorageService.uploadInDirectory(storage, p, jobDirectory, t),
         storageId = MiniclustStorage.id,
         archiveResult = true
       )
@@ -131,7 +139,7 @@ class MiniclustEnvironment(
         script.content =
           (runtime ++ plugins ++ run).mkString(" && ")
 
-        MiniclustStorage.upload(tmpDirectory, script, TransferOptions.default)
+        MiniclustStorage.upload(jobDirectory, script, TransferOptions.default)
 
     val inputsFiles =
       val fileMessages: Seq[FileMessage] =
@@ -165,7 +173,8 @@ class MiniclustEnvironment(
         inputFile = inputsFiles,
         outputFile = outputFiles,
         stdOut = Some(stdout),
-        stdErr = Some(stderr)
+        stdErr = Some(stderr),
+        resource = core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c))
       )
     )
 
@@ -180,7 +189,7 @@ class MiniclustEnvironment(
     def stdOutErr = (_root_.gridscale.miniclust.stdOut(job).getOrElse(""), _root_.gridscale.miniclust.stdErr(job).getOrElse(""))
 
     def clean =
-      _root_.gridscale.miniclust.rmDir(tmpDirectory)
+      StorageService.rmDirectory(storage, jobDirectory)
       _root_.gridscale.miniclust.clean(job)
 
     BatchJobControl(
@@ -195,5 +204,8 @@ class MiniclustEnvironment(
     )
 
   override def start(): Unit = ()
-  override def stop(): Unit = ()
+  override def stop(): Unit =
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, storageSpace, false)
+    BatchEnvironment.waitJobKilled(this)
 

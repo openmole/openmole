@@ -31,7 +31,7 @@ object HierarchicalStorageSpace extends JavaLogger:
   val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
   val TmpDirCreation = PreferenceLocation("StorageService", "TmpDirCreation", Some(1 hours))
 
-  def create[S](s: S, root: String, storageId: String, isConnectionError: Throwable => Boolean)(using storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
+  def create[S](s: S, root: String, isConnectionError: Throwable => Boolean)(using storageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
     val persistent = "persistent/"
     val tmp = "tmp/"
 
@@ -40,19 +40,19 @@ object HierarchicalStorageSpace extends JavaLogger:
       catch
         case e: Throwable => throw new InternalProcessingError(s"Error creating base directory $root on storage $s", e)
 
-    val replicaDirectory = hierarchicalStorageInterface.child(s, baseDirectory, persistent)
+    val replicaDirectory = storageInterface.child(s, baseDirectory, persistent)
 
     try
       if !storageInterface.exists(s, replicaDirectory)
-      then hierarchicalStorageInterface.makeDir(s, replicaDirectory)
+      then storageInterface.makeDir(s, replicaDirectory)
     catch
       case e: Throwable => throw new InternalProcessingError(s"Error creating replica directory $replicaDirectory on storage $s", e)
 
-    val tmpDirectory = hierarchicalStorageInterface.child(s, baseDirectory, tmp)
+    val tmpDirectory = storageInterface.child(s, baseDirectory, tmp)
 
     try
       if !storageInterface.exists(s, tmpDirectory)
-      then hierarchicalStorageInterface.makeDir(s, tmpDirectory)
+      then storageInterface.makeDir(s, tmpDirectory)
     catch
       case e: Throwable => throw new InternalProcessingError(s"Error creating tmp directory $tmpDirectory on storage $s", e)
     

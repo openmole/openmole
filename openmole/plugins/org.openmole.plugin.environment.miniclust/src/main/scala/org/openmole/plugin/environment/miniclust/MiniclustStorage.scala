@@ -55,7 +55,6 @@ object MiniclustStorage:
   def remove(f: String)(using _root_.gridscale.miniclust.Miniclust) = _root_.gridscale.miniclust.rmFile(f)
   def id(using mc: _root_.gridscale.miniclust.Miniclust) = s"${mc.bucket.server}-${mc.bucket.name}"
 
-
   given HierarchicalStorageInterface[MiniclustStorage]:
     override def exists(t: MiniclustStorage, path: String)(using Priority): Boolean =_root_.gridscale.miniclust.exists(path)(using t.miniclust)
     override def rmFile(t: MiniclustStorage, path: String)(using Priority): Unit = _root_.gridscale.miniclust.rmFile(path)(using t.miniclust)

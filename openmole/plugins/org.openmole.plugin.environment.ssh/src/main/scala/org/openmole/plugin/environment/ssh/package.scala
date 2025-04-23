@@ -114,7 +114,7 @@ def localStorage(
 
 def localStorageSpace(local: LocalStorage)(using preference: Preference) =
   AccessControl.defaultPrirority:
-    HierarchicalStorageSpace.create(local, local.root, local.id, _ => false)
+    HierarchicalStorageSpace.create(local, local.root, _ => false)
 
 def sshStorage(
   user:                 String,
@@ -130,7 +130,7 @@ def sshStorage(
 
 def sshStorageSpace(ssh: SSHStorage)(using preference: Preference) =
   AccessControl.defaultPrirority:
-    HierarchicalStorageSpace.create(ssh, ssh.root, ssh.id, SSHStorage.isConnectionError)
+    HierarchicalStorageSpace.create(ssh, ssh.root, SSHStorage.isConnectionError)
 
 case class RuntimeInstallation[S](
   frontend:       Frontend,

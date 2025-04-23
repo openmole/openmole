@@ -260,7 +260,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
             val storage = WebDavStorage(location, AccessControl(preference(EGIEnvironment.ConnexionsByWebDAVSE)), QualityControl(preference(BatchEnvironment.QualityHysteresis)), proxyCache, env)
             val storageSpace =
               AccessControl.defaultPrirority:
-                util.Try { HierarchicalStorageSpace.create(storage, "", location, isConnectionError) }
+                util.Try { HierarchicalStorageSpace.create(storage, "", isConnectionError) }
             storageSpace.map { s => (s, storage) }
         .map(Await.result(_, scala.concurrent.duration.Duration.Inf))
 
