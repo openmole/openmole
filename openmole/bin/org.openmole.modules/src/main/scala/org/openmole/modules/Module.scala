@@ -66,7 +66,7 @@ object module {
     val copied =
       val map =
         for { f ← allFiles.distinct } yield
-          val h = f.hash().toString
+          val h = Hash.file(f).toString
           f -> Copied(name = copy(f), h)
       map.toMap
 
