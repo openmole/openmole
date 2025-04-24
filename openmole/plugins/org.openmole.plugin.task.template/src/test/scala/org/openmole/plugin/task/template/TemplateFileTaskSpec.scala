@@ -54,7 +54,7 @@ class TemplateFileTaskSpec extends flatspec.AnyFlatSpec with matchers.should.Mat
     val a = Val[Int]
 
     val t1 = TemplateFileTask(templateFile, outputP) set (a := 6)
-    val testHook = TestHook { c => targetFile.hash() should equal(c(outputP).hash()) }
+    val testHook = TestHook { c => Hash.file(targetFile) should equal(Hash.file(c(outputP))) }
     (t1 hook testHook).run()
   }
 

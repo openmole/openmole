@@ -47,7 +47,7 @@ class CopyFileHookSpec extends flatspec.AnyFlatSpec with matchers.should.Matcher
 
     ex.run()
 
-    f.hash() should equal(fDest.hash())
+    Hash.file(f) should equal(Hash.file(fDest))
     f.delete
     fDest.delete
   }
