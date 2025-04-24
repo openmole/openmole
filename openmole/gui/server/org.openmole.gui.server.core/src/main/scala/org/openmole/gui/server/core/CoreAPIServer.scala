@@ -123,6 +123,9 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
 
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
+  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
+  type EFfect = super.Effect
+
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       omSettings.errorImplementedBy(_ => apiImpl.settings),

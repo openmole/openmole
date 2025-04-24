@@ -40,18 +40,18 @@ trait ToFromContextLowPriorityGiven:
   given ToFromContext[String, BigInt] = FromContext.codeToFromContext[BigInt]
   given ToFromContext[String, Boolean] = FromContext.codeToFromContext[Boolean]
 
-  given ToFromContext[File, String] = f => ExpandedString(f.getPath) copy (stringValue = Some(s"file:${f.getPath}"))
-  given ToFromContext[String, File] = s => ExpandedString(s).map(s => File(s)) copy (stringValue = Some(s"file:$s"))
-  given ToFromContext[Int, Long] = i => FromContext.value(i.toLong) copy (stringValue = Some(i.toString))
+  given ToFromContext[File, String] = f => ExpandedString(f.getPath).copy(stringValue = Some(s"file:${f.getPath}"))
+  given ToFromContext[String, File] = s => ExpandedString(s).map(s => File(s)).copy(stringValue = Some(s"file:$s"))
+  given ToFromContext[Int, Long] = i => FromContext.value(i.toLong).copy(stringValue = Some(i.toString))
   //given ToFromContext[Int, Int] = i => FromContext.value(i) copy(stringValue = Some(i.toString))
 
   given ToFromContext[Int, Double] = i =>
     val v = i.toDouble
-    FromContext.value(v) copy (stringValue = Some(v.toString))
+    FromContext.value(v).copy(stringValue = Some(v.toString))
 
   given ToFromContext[Long, Double] = i =>
     val v = i.toDouble
-    FromContext.value(v) copy (stringValue = Some(v.toString))
+    FromContext.value(v).copy(stringValue = Some(v.toString))
 
   given[T]: ToFromContext[FromContext[T], T] = identity
 
@@ -64,7 +64,7 @@ trait ToFromContextLowPriorityGiven:
       context(p).toString
 
 object ToFromContext extends ToFromContextLowPriorityGiven:
-  given ToFromContext[File, File] = f => ExpandedString(f.getPath).map(s => File(s)) copy (stringValue = Some(s"file:${f.getPath}"))
+  given ToFromContext[File, File] = f => ExpandedString(f.getPath).map(s => File(s)).copy(stringValue = Some(s"file:${f.getPath}"))
   given ToFromContext[String, String] = s => ExpandedString(s)
   given [T]: ToFromContext[T, T] = t => FromContext.value[T](t)
 
@@ -157,19 +157,18 @@ object FromContext extends LowPriorityFromContext:
    * @return
    */
   def prototype[T](v: Val[T]) =
-    FromContext[T] { param =>
+    FromContext[T]: param =>
       import param._
       context(v)
-    } withValidate {
-      Validate { p =>
+    .withValidate:
+      Validate: p =>
         import p._
-        inputs.find(_.name == v.name) match {
+        inputs.find(_.name == v.name) match
           case Some(i) if v == i => Seq()
           case None              => Seq(new UserBadDataError(s"FromContext validation failed, $v not found among inputs $inputs"))
           case Some(i)           => Seq(new UserBadDataError(s"FromContext validation failed, $v has incorrect type, should be $i, among inputs $inputs"))
-        }
-      }
-    } withInputs (Seq(v)) copy(stringValue = Some(s"val:$v"))
+    .withInputs(Seq(v))
+    .copy(stringValue = Some(s"val:$v"))
 
   /**
    * From context for a given value
@@ -182,7 +181,7 @@ object FromContext extends LowPriorityFromContext:
       t match
         case t: File => s"file:${t.getPath}"
         case t => t.toString
-    FromContext[T] { _ => t } copy(stringValue = Some(stringValue))
+    FromContext[T] { _ => t }.copy(stringValue = Some(stringValue))
 
   def fromString(s: String): FromContext[String] = s
 

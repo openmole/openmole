@@ -36,20 +36,16 @@ import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
 class PrivateKeyAuthenticationServer(s: Services)
   extends APIServer with PrivateKeyAuthenticationAPI:
 
-  val privateKeyAuthenticationsRoute =
-    privateKeyAuthentications.errorImplementedBy { _ => impl.privateKeyAuthentications() }
-
-  val addAuthenticationRoute =
-    addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
-
-  val removeAuthenticationRoute =
-    removeAuthentication.errorImplementedBy { impl.removeAuthentication }
-
-  val testAuthenticationRoute =
-    testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
+  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
+  type EFfect = super.Effect
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(privateKeyAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationRoute, testAuthenticationRoute)
+    routesFromEndpoints(
+      privateKeyAuthentications.errorImplementedBy { _ => impl.privateKeyAuthentications() },
+      addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) },
+      removeAuthentication.errorImplementedBy { impl.removeAuthentication },
+      testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
+    )
   )
 
   object impl:

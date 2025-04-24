@@ -43,21 +43,16 @@ trait LoginAuthenticationRESTAPI extends RESTAPI:
 
 
 class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthenticationRESTAPI:
-
-  val loginAuthenticationsRoute =
-    loginAuthentications.errorImplementedBy { _ => impl.loginAuthentications() }
-
-  val addAuthenticationRoute =
-    addAuthentication.errorImplementedBy { a => impl.addAuthentication(a) }
-
-  val removeAuthenticationRoute =
-    removeAuthentication.errorImplementedBy { a => impl.removeAuthentication(a) }
-
-  val testAuthenticationRoute =
-    testAuthentication.errorImplementedBy { a => impl.testAuthentication(a) }
-
+  
+  type EFfect = super.Effect
+  
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(loginAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationRoute, testAuthenticationRoute)
+    routesFromEndpoints(
+      loginAuthentications.errorImplementedBy(impl.loginAuthentications),
+      addAuthentication.errorImplementedBy(impl.addAuthentication),
+      removeAuthentication.errorImplementedBy(impl.removeAuthentication),
+      testAuthentication.errorImplementedBy(impl.testAuthentication)
+    )
   )
 
   object impl:
@@ -75,7 +70,7 @@ class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthent
 
     def removeAuthentication(data: LoginAuthenticationData): Unit = SSHAuthentication -= coreObject(data)
 
-    def loginAuthentications(): Seq[LoginAuthenticationData] = SSHAuthentication().flatMap:
+    def loginAuthentications(u: Unit): Seq[LoginAuthenticationData] = SSHAuthentication().flatMap:
       case lp: LoginPassword =>
         Some(LoginAuthenticationData(
           lp.login,

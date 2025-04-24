@@ -42,33 +42,25 @@ class EGIAuthenticationEGIServer(s: Services)
   implicit val services: Services = s
   import services._
 
-  val egiAuthenticationsRoute =
-    egiAuthentications.errorImplementedBy(_ => impl.egiAuthentications())
-
-  val addAuthenticationRoute =
-    addAuthentication.errorImplementedBy(a => impl.addAuthentication(a))
-
-  val removeAuthenticationsRoute =
-    removeAuthentications.errorImplementedBy(impl.removeAuthentications)
-
-  val setVOTestsRoute =
-    setVOTests.errorImplementedBy(vo => impl.setVOTest(vo))
-
-  val getVOTestsRoute =
-    getVOTests.errorImplementedBy(_ => impl.geVOTests())
-
-  val testAuthenticationRoute =
-    testAuthentication.errorImplementedBy(d => impl.testAuthentication(d))
+  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
+  type EFfect = super.Effect
 
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints(egiAuthenticationsRoute, addAuthenticationRoute, removeAuthenticationsRoute, setVOTestsRoute, getVOTestsRoute, testAuthenticationRoute)
+    routesFromEndpoints(
+      egiAuthentications.errorImplementedBy(impl.egiAuthentications),
+      addAuthentication.errorImplementedBy(a => impl.addAuthentication(a)),
+      removeAuthentications.errorImplementedBy(impl.removeAuthentications),
+      setVOTests.errorImplementedBy(vo => impl.setVOTest(vo)),
+      getVOTests.errorImplementedBy(_ => impl.geVOTests()),
+      testAuthentication.errorImplementedBy(d => impl.testAuthentication(d))
+    )
   )
 
   object impl {
     private def coreObject(data: EGIAuthenticationData) =
       data.privateKey.map { pk => P12Certificate(data.password, safePathToFile(pk)) }
 
-    def egiAuthentications(): Seq[EGIAuthenticationData] =
+    def egiAuthentications(u: Unit): Seq[EGIAuthenticationData] =
       EGIAuthentication() match
         case Some(p12: P12Certificate) =>
           Seq(

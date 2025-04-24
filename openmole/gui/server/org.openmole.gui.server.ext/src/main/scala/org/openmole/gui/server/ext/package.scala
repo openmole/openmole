@@ -21,8 +21,11 @@ import org.openmole.gui.shared.data.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.http4s
+import org.http4s.*
 
 abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs:
+
   implicit class EndpointDecorator[A, B](ep: Endpoint[A, Either[ErrorData, B]]):
     def errorImplementedBy(f: A => B) =
       ep.implementedBy: a =>

@@ -32,9 +32,13 @@ import org.openmole.gui.server.ext.utils.*
 
 class EvolutionAnalysisServer(services: Services) extends APIServer with EvolutionAnalysisAPI:
 
+  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
+  type EFfect = super.Effect
+
   val routes: HttpRoutes[IO] = HttpRoutes.of(
-    routesFromEndpoints:
+    routesFromEndpoints(
       analyse.errorImplementedBy(impl.analyse)
+    )
   )
 
   object impl:
