@@ -34,7 +34,7 @@ package keyword:
 
   trait KeyWordPackage:
     implicit class InDecorator[A](a: A):
-      infix def in[B](b: B) = In(a, b)
+      infix def in[B](b: B): In[A, B] = In(a, b)
 
     implicit class UnderDecorator[A](a: A):
       infix def under[B](b: B) = Under(a, b)

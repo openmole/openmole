@@ -15,56 +15,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.authentication.sshlogin
+package org.openmole.gui.plugin.authentication.miniclust
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
+import org.scalajs.dom.raw.HTMLElement
 import scaladget.bootstrapnative.bsn.*
 import scaladget.tools.*
-import org.scalajs.dom.raw.HTMLElement
-import org.openmole.gui.shared.data.*
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
 import scala.scalajs.js.annotation.*
-import com.raquo.laminar.api.L.*
-import org.openmole.gui.shared.api.*
-
-import scalajs.js
 
 object TopLevelExports:
-  @JSExportTopLevel("authentication_sshlogin")
+  @JSExportTopLevel("authentication_miniclust")
   val sshlogin = js.Object:
-    given LoginAuthenticationServerAPI()
-    new org.openmole.gui.plugin.authentication.sshlogin.LoginAuthenticationFactory
+    given MiniclustAuthenticationServerAPI()
+    new org.openmole.gui.plugin.authentication.miniclust.MiniclustAuthenticationFactory
 
-class LoginAuthenticationFactory(using api: LoginAuthenticationAPI) extends AuthenticationPluginFactory:
-  type AuthType = LoginAuthenticationData
-  def buildEmpty = new LoginAuthenticationGUI
-  def build(data: AuthType) = new LoginAuthenticationGUI(data)
-  def name = "Cluster SSH Login/Password"
+class MiniclustAuthenticationFactory(using api: MiniclustAuthenticationAPI) extends AuthenticationPluginFactory:
+  type AuthType = MiniclustAuthenticationData
+  def buildEmpty = new MiniclustAuthenticationGUI
+  def build(data: AuthType) = new MiniclustAuthenticationGUI(data)
+  def name = "Miniclust Login/Password"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = api.loginAuthentications()
   def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
   def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)
 
-class LoginAuthenticationGUI(val data: LoginAuthenticationData = LoginAuthenticationData())(using api: LoginAuthenticationAPI) extends AuthenticationPlugin[LoginAuthenticationData]:
-  def name = s"${data.login}@${data.target}"
+class MiniclustAuthenticationGUI(val data: MiniclustAuthenticationData = MiniclustAuthenticationData())(using api: MiniclustAuthenticationAPI) extends AuthenticationPlugin[MiniclustAuthenticationData]:
+  def name = s"${data.login}@${data.url}"
   
   val loginInput = inputTag(data.login).amend(placeholder := "Login")
   val passwordInput = inputTag(data.password).amend(placeholder := "Password", `type` := "password")
-  val targetInput = inputTag(data.target).amend(placeholder := "Host")
-  val portInput = inputTag(data.port).amend(placeholder := "Port")
+  val urlInput = inputTag(data.url).amend(placeholder := "https://miniclust.domain")
 
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): HtmlElement = div(
     flexColumn, width := "400px", height := "220",
     div(cls := "verticalFormItem", div("Login", width:="150px"), loginInput),
     div(cls := "verticalFormItem", div("Password", width:="150px"), passwordInput),
-    div(cls := "verticalFormItem", div("Target", width:="150px"), targetInput),
-    div(cls := "verticalFormItem", div("Port", width:="150px"), portInput)
+    div(cls := "verticalFormItem", div("URL", width:="150px"), urlInput),
   )
 
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
     for
       _ <- api.removeAuthentication(data)
-      _ <- api.addAuthentication(LoginAuthenticationData(loginInput.ref.value, passwordInput.ref.value, targetInput.ref.value, portInput.ref.value))
+      _ <- api.addAuthentication(MiniclustAuthenticationData(loginInput.ref.value, passwordInput.ref.value, urlInput.ref.value))
     yield ()
 

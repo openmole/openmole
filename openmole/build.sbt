@@ -531,7 +531,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
-  openmoleDSL, toolsTask, pattern, scala, collectionDomain % "test", boundsDomain % "test"
+  openmoleDSL, toolsTask, pattern, scalaTask, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   libraryDependencies += Libraries.mgo,
   libraryDependencies += Libraries.circe,
@@ -541,7 +541,7 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, boundsDomain % "test") settings (
   libraryDependencies += Libraries.mgo) settings (pluginSettings *)
 
-lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scala) settings (pluginSettings *)
+lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scalaTask) settings (pluginSettings *)
 
 lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (pluginSettings *)
 
@@ -576,64 +576,63 @@ lazy val httpURLSource = OsgiProject(pluginDir, "org.openmole.plugin.source.http
 
 /* Task */
 
-def allTask = Seq(toolsTask, external, netLogo, netLogo5, netLogo6, java, scala, template, systemexec, container, r, scilab, python, julia, gama, cormas, spatial, timing)
+def allTask = Seq(toolsTask, externalTask, netLogoTask, netLogo5Task, netLogo6Task, javaTask, scalaTask, templateTask, systemexecTask, containerTask, rTask, scilabTask, pythonTask, juliaTask, gamaTask, cormasTask, spatialTask, timingTask)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
-lazy val external = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings *)
+lazy val externalTask = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings *)
 
 // Because NetLogo bundle contains scala classes
 def noNetLogoInClassPath =
   Compile / dependencyClasspath := (Compile / dependencyClasspath).value.filter(!_.data.name.contains("ccl-northwestern-edu-netlogo"))
 
-lazy val netLogo = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, external, netLogoAPI, container) settings(
+lazy val netLogoTask = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, netLogoAPI, containerTask) settings(
   pluginSettings,
   libraryDependencies += Libraries.scalaXML)
 
-lazy val netLogo5 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogo, openmoleDSL, external, netLogo5API) settings (pluginSettings *) settings(
+lazy val netLogo5Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo5") dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo5API) settings (pluginSettings *) settings(
   noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo5)
 
-lazy val netLogo6 = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogo, openmoleDSL, external, netLogo6API) settings (pluginSettings *) settings(
+lazy val netLogo6Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo6API) settings (pluginSettings *) settings(
   noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo6)
 
-
-lazy val scala = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, external, openmoleCompiler) settings (pluginSettings *) settings (
+lazy val scalaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, openmoleCompiler) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.scalaXML
   )
 
-lazy val template = OsgiProject(pluginDir, "org.openmole.plugin.task.template", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
+lazy val templateTask = OsgiProject(pluginDir, "org.openmole.plugin.task.template", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
-lazy val systemexec = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, external, workspace) settings (
+lazy val systemexecTask = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, workspace) settings (
   libraryDependencies += Libraries.exec) settings (pluginSettings *)
 
-lazy val container = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, external, openmoleArgument, exception) settings (pluginSettings *) settings (
+lazy val containerTask = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, externalTask, openmoleArgument, exception) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.container)
 
-lazy val r = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, container, json) settings (
+lazy val rTask = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, containerTask, json) settings (
   libraryDependencies ++= Libraries.httpClient
   ) settings (pluginSettings *)
 
-lazy val java = OsgiProject(pluginDir, "org.openmole.plugin.task.java", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings *)
+lazy val javaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.java", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val scilab = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (container) settings (pluginSettings *)
+lazy val scilabTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (containerTask) settings (pluginSettings *)
 
-lazy val python = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings *)
+lazy val pythonTask = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val julia = OsgiProject(pluginDir, "org.openmole.plugin.task.julia", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings *)
+lazy val juliaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.julia", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val gama = OsgiProject(pluginDir, "org.openmole.plugin.task.gama", imports = Seq("*")) dependsOn (container) settings (pluginSettings *) settings (
+lazy val gamaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.gama", imports = Seq("*")) dependsOn (containerTask) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.scalaXML
   )
 
-lazy val cormas = OsgiProject(pluginDir, "org.openmole.plugin.task.cormas", imports = Seq("*")) dependsOn(container, json) settings (pluginSettings *) settings (
+lazy val cormasTask = OsgiProject(pluginDir, "org.openmole.plugin.task.cormas", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.json4s)
 
-lazy val timing = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
+lazy val timingTask = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
-lazy val spatial = OsgiProject(pluginDir, "org.openmole.plugin.task.spatial", imports = Seq("*")) dependsOn (openmoleDSL) settings(
+lazy val spatialTask = OsgiProject(pluginDir, "org.openmole.plugin.task.spatial", imports = Seq("*")) dependsOn (openmoleDSL) settings(
   libraryDependencies += Libraries.math,
   libraryDependencies += Libraries.spatialsampling
 ) settings (pluginSettings *)
@@ -785,7 +784,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   openmoleProject,
   openmoleDSL,
   batch,
-  container,
+  containerTask,
   openmoleStream,
   txtmark,
   openmoleCrypto,
@@ -914,6 +913,7 @@ def guiPlugins = Seq(
   guiEnvironmentSSHLoginPlugin,
   guiEnvironmentSSHKeyPlugin,
   guiEnvironmentEGIPlugin,
+  guiEnvironmentMiniclustPlugin,
   netlogoWizardPlugin,
   gamaWizardPlugin,
   rWizardPlugin,
@@ -949,6 +949,13 @@ lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.
   libraryDependencies += Libraries.equinoxOSGi,
   Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
+
+lazy val guiEnvironmentMiniclustPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.miniclust", imports = guiStrictImports) settings(
+  guiPluginSettings,
+  scalaJSSettings,
+  libraryDependencies += Libraries.equinoxOSGi,
+  Libraries.bootstrapnative
+) dependsOn(serverExt, clientExt, apiGUI, workspace, miniclust) enablePlugins (ScalaJSPlugin)
 
 lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = guiStrictImports) settings(
   guiPluginSettings,
@@ -1102,7 +1109,7 @@ def minimumPlugins =
     modifierDomain,
     rangeDomain,
     combineSampling,
-    scala
+    scalaTask
   )
 
 def openmoleNakedDependencies = allCore ++ Seq(openmoleUI) ++ minimumPlugins
