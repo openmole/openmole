@@ -36,6 +36,7 @@ object MiniclustEnvironment:
     insecure: Boolean = false,
     openMOLEMemory: OptionalArgument[Information] = None,
     core: OptionalArgument[Int] = None,
+    time: OptionalArgument[Int] = None,
     runtimeSetting: OptionalArgument[RuntimeSetting] = None,
     debug: Boolean = false)(using varName: sourcecode.Name, store: AuthenticationStore, pref: Preference, cypher: Cypher, replicaCatalog: ReplicaCatalog) =
     EnvironmentBuilder: ms =>
@@ -44,6 +45,7 @@ object MiniclustEnvironment:
         insecure = insecure,
         openMOLEMemory = openMOLEMemory,
         core = core,
+        time = time,
         name = Some(varName.value),
         authentication = MiniclustAuthentication.find(login, url),
         runtimeSetting = runtimeSetting,
@@ -69,6 +71,7 @@ class MiniclustEnvironment(
   val insecure: Boolean,
   val openMOLEMemory: Option[Information],
   val core: Option[Int],
+  val time: Option[Int],
   val runtimeSetting: Option[RuntimeSetting],
   val name:              Option[String],
   val authentication: MiniclustAuthentication,
@@ -174,7 +177,9 @@ class MiniclustEnvironment(
         outputFile = outputFiles,
         stdOut = Some(stdout),
         stdErr = Some(stderr),
-        resource = core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c))
+        resource =
+          core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c)) ++
+            time.toSeq.map(t => _root_.gridscale.miniclust.Resource.MaxTime(t))
       )
     )
 

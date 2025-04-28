@@ -30,6 +30,7 @@ class Activator extends BundleActivator:
 
     val keyWords: Vector[HighLight] =
       Vector(
+        EnvironmentHighLight(objectName(MiniclustEnvironment))
       )
 
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
