@@ -61,13 +61,7 @@ object Runtime extends JavaLogger:
   def signalHandler(env: LocalEnvironment)(using tp: ThreadProvider): Signal.Handler =
     si =>
       Log.logger.warning(s"Received signal $si, shutting down")
-      import org.openmole.tool.thread.*
-      tp.virtual: () =>
-        try env.stop()
-        finally
-          Thread.sleep(20.seconds.millis)
-          Log.logger.warning(s"Waiting 20 seconds before killing the JVM")
-          System.exit(si.getNumber)
+      System.exit(1)
 
 class Runtime:
 
