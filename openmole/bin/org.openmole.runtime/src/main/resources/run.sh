@@ -29,6 +29,13 @@ mkdir -p "${TMPDIR}"
 FULL_TMPDIR=`realpath ${TMPDIR}`
 HOME_DIRECTORY=${FULL_TMPDIR}
 
+cleanup() {
+  rm -rf ${FULL_TMPDIR}
+  exit 1
+}
+
+trap cleanup SIGTERM
+
 ARGS=""
 
 while [ "$#" -gt 0 ]; do
