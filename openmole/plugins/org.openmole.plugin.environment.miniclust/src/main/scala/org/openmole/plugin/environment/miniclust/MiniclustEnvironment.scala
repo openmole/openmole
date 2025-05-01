@@ -213,4 +213,5 @@ class MiniclustEnvironment(
     AccessControl.defaultPrirority:
       HierarchicalStorageSpace.clean(storage, storageSpace, false)
     BatchEnvironment.waitJobKilled(this)
+    mc.close()
 

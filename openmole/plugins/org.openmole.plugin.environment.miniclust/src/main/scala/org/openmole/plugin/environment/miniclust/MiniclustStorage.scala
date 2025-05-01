@@ -53,7 +53,7 @@ object MiniclustStorage:
 
   def exists(f: String)(using _root_.gridscale.miniclust.Miniclust) = _root_.gridscale.miniclust.exists(f)
   def remove(f: String)(using _root_.gridscale.miniclust.Miniclust) = _root_.gridscale.miniclust.rmFile(f)
-  def id(using mc: _root_.gridscale.miniclust.Miniclust) = s"${mc.bucket.server}-${mc.bucket.name}"
+  def id(using mc: _root_.gridscale.miniclust.Miniclust) = s"${mc.minio.server}-${mc.bucket.name}"
 
   given HierarchicalStorageInterface[MiniclustStorage]:
     override def exists(t: MiniclustStorage, path: String)(using Priority): Boolean =_root_.gridscale.miniclust.exists(path)(using t.miniclust)
@@ -66,7 +66,6 @@ object MiniclustStorage:
     override def list(t: MiniclustStorage, path: String)(using Priority) = _root_.gridscale.miniclust.list(path)(using t.miniclust)
     override def parent(t: MiniclustStorage, path: String)(using Priority): Option[String] = gridscale.RemotePath.parent(path)
     override def name(t: MiniclustStorage, path: String): String = gridscale.RemotePath.name(path)
-    override def id(s: MiniclustStorage): String = s"${s.miniclust.bucket.server}-${s.miniclust.bucket.name}"
-
+    override def id(s: MiniclustStorage): String = MiniclustStorage.id(using s.miniclust)
 
 case class MiniclustStorage(miniclust: _root_.gridscale.miniclust.Miniclust)
