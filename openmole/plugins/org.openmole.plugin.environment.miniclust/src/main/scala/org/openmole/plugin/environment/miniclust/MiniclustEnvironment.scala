@@ -30,6 +30,9 @@ import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import java.util.UUID
 
 object MiniclustEnvironment:
+
+  val maxConnections = PreferenceLocation("MiniclustEnvironment", "MaxConnections", Some(10))
+
   def apply(
     login: String,
     url: String,
@@ -78,15 +81,16 @@ class MiniclustEnvironment(
   val debug: Boolean,
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
 
+  val accessControl = AccessControl(services.preference(MiniclustEnvironment.maxConnections))
   given mc: _root_.gridscale.miniclust.Miniclust = MiniclustEnvironment.toMiniclust(authentication, insecure = insecure)
 
-  val storage = MiniclustStorage(mc)
+  val storage = MiniclustStorage(mc, accessControl)
   val storageSpace =
     import services.*
     AccessControl.defaultPrirority:
       HierarchicalStorageSpace.create(storage, "openmole", _ => false)
 
-  override def execute(batchExecutionJob: BatchExecutionJob)(using Priority): BatchJobControl =
+  override def execute(batchExecutionJob: BatchExecutionJob)(using Priority): BatchJobControl = accessControl:
     import services.*
 
     val jobDirectory = HierarchicalStorageSpace.createJobDirectory(storage, storageSpace)
@@ -94,10 +98,10 @@ class MiniclustEnvironment(
     def replicate =
       BatchEnvironment.toReplicatedFile(
         upload = StorageService.uploadInDirectory(storage, _, storageSpace.replicaDirectory, _),
-        exist = MiniclustStorage.exists,
-        remove = MiniclustStorage.remove,
+        exist = StorageService.exists(storage, _),
+        remove = StorageService.rmFile(storage, _),
         environment = this,
-        storageId = MiniclustStorage.id
+        storageId = StorageService.id(storage)
       )
 
     val serializedJob =
@@ -108,7 +112,7 @@ class MiniclustEnvironment(
         remoteStorage = MiniclustStorage.Remote(),
         replicate = replicate,
         upload = (p, t) => StorageService.uploadInDirectory(storage, p, jobDirectory, t),
-        storageId = MiniclustStorage.id,
+        storageId = StorageService.id(storage),
         archiveResult = true
       )
 
@@ -142,7 +146,9 @@ class MiniclustEnvironment(
         script.content =
           (runtime ++ plugins ++ run).mkString(" && ")
 
-        MiniclustStorage.upload(jobDirectory, script, TransferOptions.default)
+        val path = s"$jobDirectory/launch.sh"
+        StorageService.upload(storage, script, path, TransferOptions.default)
+        path
 
     val inputsFiles =
       val fileMessages: Seq[FileMessage] =
@@ -170,36 +176,40 @@ class MiniclustEnvironment(
         _root_.miniclust.message.OutputFile(resultName, resultName)
       )
 
-    val job = _root_.gridscale.miniclust.submit(
-      _root_.gridscale.miniclust.MinclustJobDescription(
-        command = s"bash -x ${scriptName}",
-        inputFile = inputsFiles,
-        outputFile = outputFiles,
-        stdOut = Some(stdout),
-        stdErr = Some(stderr),
-        resource =
-          core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c)) ++
-            time.toSeq.map(t => _root_.gridscale.miniclust.Resource.MaxTime(t))
+    val job =
+      _root_.gridscale.miniclust.submit(
+        _root_.gridscale.miniclust.MinclustJobDescription(
+          command = s"bash -x ${scriptName}",
+          inputFile = inputsFiles,
+          outputFile = outputFiles,
+          stdOut = Some(stdout),
+          stdErr = Some(stderr),
+          resource =
+            core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c)) ++
+              time.toSeq.map(t => _root_.gridscale.miniclust.Resource.MaxTime(t))
+        )
       )
-    )
 
     def downloadResult(r: String, local: File, options: TransferOptions, priority: AccessControl.Priority) =
-      _root_.gridscale.miniclust.download(_root_.miniclust.message.MiniClust.User.jobOutputPath(job.id, r), local)
+      StorageService.download(storage, _root_.miniclust.message.MiniClust.User.jobOutputPath(job.id, r), local)
 
-    def state =
+    def state = accessControl:
       GridScaleJobService.translateStatus:
         _root_.gridscale.miniclust.state(job)
     
-    def delete = _root_.gridscale.miniclust.cancel(job)
-    def stdOutErr = (_root_.gridscale.miniclust.stdOut(job).getOrElse(""), _root_.gridscale.miniclust.stdErr(job).getOrElse(""))
+    def delete = accessControl:
+      _root_.gridscale.miniclust.cancel(job)
 
-    def clean =
+    def stdOutErr =accessControl:
+      (_root_.gridscale.miniclust.stdOut(job).getOrElse(""), _root_.gridscale.miniclust.stdErr(job).getOrElse(""))
+
+    def clean = accessControl:
       StorageService.rmDirectory(storage, jobDirectory)
       _root_.gridscale.miniclust.clean(job)
 
     BatchJobControl(
       BatchEnvironment.defaultUpdateInterval(services.preference),
-      MiniclustStorage.id,
+      StorageService.id(storage),
       priority => state,
       priority => delete,
       priority => stdOutErr,

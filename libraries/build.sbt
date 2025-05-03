@@ -519,14 +519,16 @@ lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*
 ) dependsOn(gridscale, gridscaleHTTP)
 
 lazy val gridscaleMiniclust = OsgiProject(dir, "gridscale.miniclust",
-  imports = Seq("!android.*", "!com.fasterxml.*", "!com.google.*", "!org.checkerframework.*", "!dalvik.*", "!javax.*", "!kotlin.*", "!org.bouncycastle.jsse.*", "!org.conscrypt.*", "!org.conscrypt.*", "!org.openjsse.*", "!org.simpleframework.*", "!org.xerial.*", "!sun.security.*", "io.circe.*", "*"),
-  exports = Seq("gridscale.miniclust.*", "miniclust.*", "io.minio.*"),
-  privatePackages = Seq("okhttp3.*", "okio.*", "com.google.*", "org.xerial.*", "kotlin.*", "org.simpleframework.*", "com.fasterxml.*"),
+  //imports = Seq("!javax.*", "!org.bouncycastle.jsse.*", "!org.conscrypt.*",  "!org.openjsse.*", "!sun.security.*", "!com.aayushatharva.*", "!com.github.luben.*", "!com.google.*", "!com.jcraft.*", "!com.ning.*", "!com.oracle.svm.*", "!io.netty.*", "!kotlin.*", "!lzma.*", "!net.jpountz.*", "!org.apache.logging.*", "!org.bouncycastle.jcajce.*", "!org.eclipse.jetty.*", "!org.jboss.*", "!org.reactivestreams.*", "*"),
+
+  imports = Seq("gridscale.*", "io.circe.*", "squants.*", "scala.*", "org.slf4j.*", "org.apache.commons.logging.*"),
+  exports = Seq("gridscale.miniclust.*", "miniclust.*"),
+  privatePackages = Seq("org.apachae.codec.*","org.apache.http.*", "software.amazon.*", "io.netty.*", "org.reactivestreams.*"),
   dynamicImports = Seq("org.bouncycastle.*")) settings (
   settings,
   libraryDependencies += "org.openmole.gridscale" %% "miniclust" % gridscaleVersion,
   version := gridscaleVersion
-) dependsOn(gridscale, circe)
+) dependsOn(gridscale, circe, squants, slf4j, logging)
 
 lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (
   settings,
