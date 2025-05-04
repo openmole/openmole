@@ -9,26 +9,27 @@ object AccessControl:
 
   object Bypass
   opaque type Priority = Int | Bypass.type
-  
+
   def defaultPrirority[T](f: Priority ?=> T) =
     f(using 0)
 
   def bypassAccessControl[T](f: Priority ?=> T) =
     f(using Bypass)
 
-  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: => B) =
+  def withPermit[B](accessControl: AccessControl)(using priority: AccessControl.Priority)(f: Priority ?=> B) =
     priority match
-      case Bypass => f
+      case Bypass => f(using Bypass)
       case p: Int =>
-        acquirePermit(accessControl, p)
-        try f
-        finally releasePermit(accessControl)
+        if isPermitted(accessControl, Thread.currentThread())
+        then f(using Bypass)
+        else
+          acquirePermit(accessControl, p)
+          try f(using Bypass)
+          finally releasePermit(accessControl)
 
   private def acquirePermit(accessControl: AccessControl, priority: Int) =
-    if !isPermitted(accessControl, Thread.currentThread())
-    then
-      accessControl.semaphore.acquire(priority)
-      permit(accessControl, Thread.currentThread())
+    accessControl.semaphore.acquire(priority)
+    permit(accessControl, Thread.currentThread())
 
   private def releasePermit(accessControl: AccessControl) =
     revokePermit(accessControl, Thread.currentThread())
@@ -43,6 +44,7 @@ case class AccessControl(nbTokens: Int):
   lazy val permittedThreads = collection.mutable.Set[Long]()
   lazy val semaphore = new PrioritySemaphore(nbTokens)
 
-  def apply[T](f: => T)(using AccessControl.Priority): T = AccessControl.withPermit(this)(f)
+  def apply[T](f: AccessControl.Priority ?=> T)(using AccessControl.Priority): T =
+    AccessControl.withPermit(this)(f)
 
 

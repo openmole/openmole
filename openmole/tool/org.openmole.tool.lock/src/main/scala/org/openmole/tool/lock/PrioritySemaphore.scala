@@ -25,7 +25,7 @@ import java.util.concurrent.Semaphore
 
 
 class PrioritySemaphore(initialPermits: Int):
-  private var permits = initialPermits
+  var permits = initialPermits
   val locks = PriorityQueue[Semaphore]()
 
   def acquire(priority: Int): Unit =
