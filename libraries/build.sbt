@@ -523,7 +523,7 @@ lazy val gridscaleMiniclust = OsgiProject(dir, "gridscale.miniclust",
 
   imports = Seq("gridscale.*", "io.circe.*", "squants.*", "scala.*", "org.slf4j.*", "org.apache.commons.logging.*"),
   exports = Seq("gridscale.miniclust.*", "miniclust.*"),
-  privatePackages = Seq("org.apachae.codec.*","org.apache.http.*", "software.amazon.*", "io.netty.*", "org.reactivestreams.*"),
+  privatePackages = Seq("org.apache.commons.codec.*","org.apache.http.*", "software.amazon.*", "io.netty.*", "org.reactivestreams.*"),
   dynamicImports = Seq("org.bouncycastle.*")) settings (
   settings,
   libraryDependencies += "org.openmole.gridscale" %% "miniclust" % gridscaleVersion,
