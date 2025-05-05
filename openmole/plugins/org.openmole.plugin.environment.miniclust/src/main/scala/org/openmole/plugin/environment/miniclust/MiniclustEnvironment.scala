@@ -31,7 +31,7 @@ import java.util.UUID
 
 object MiniclustEnvironment:
 
-  val maxConnections = PreferenceLocation("MiniclustEnvironment", "MaxConnections", Some(10))
+  val maxConnections = PreferenceLocation("MiniclustEnvironment", "MaxConnections", Some(20))
 
   def apply(
     login: String,
