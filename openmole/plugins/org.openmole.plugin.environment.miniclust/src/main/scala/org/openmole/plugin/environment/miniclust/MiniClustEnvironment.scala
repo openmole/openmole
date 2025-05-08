@@ -68,7 +68,6 @@ object MiniClustEnvironment:
 
     _root_.gridscale.miniclust.Miniclust(server)
 
-export {MiniClustEnvironment as MiniclustEnvironment}
 
 class MiniClustEnvironment(
   val url: String,
@@ -225,3 +224,4 @@ class MiniClustEnvironment(
       HierarchicalStorageSpace.clean(storage, storageSpace, false)
     BatchEnvironment.waitJobKilled(this)
     mc.close()
+
