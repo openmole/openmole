@@ -59,18 +59,18 @@ class MiniclustAuthenticationServer(s: Services) extends APIServer with Miniclus
 
     import s.*
 
-    private def coreObject(data: MiniclustAuthenticationData) = MiniclustAuthentication.LoginPassword(
+    private def coreObject(data: MiniclustAuthenticationData) = MiniClustAuthentication.LoginPassword(
       data.url,
       data.login,
       data.password
     )
 
-    def addAuthentication(data: MiniclustAuthenticationData): Unit = MiniclustAuthentication += coreObject(data)
+    def addAuthentication(data: MiniclustAuthenticationData): Unit = MiniClustAuthentication += coreObject(data)
 
-    def removeAuthentication(data: MiniclustAuthenticationData): Unit = MiniclustAuthentication -= coreObject(data)
+    def removeAuthentication(data: MiniclustAuthenticationData): Unit = MiniClustAuthentication -= coreObject(data)
 
-    def loginAuthentications(u: Unit): Seq[MiniclustAuthenticationData] = MiniclustAuthentication().flatMap:
-      case lp: MiniclustAuthentication.LoginPassword =>
+    def loginAuthentications(u: Unit): Seq[MiniclustAuthenticationData] = MiniClustAuthentication().flatMap:
+      case lp: MiniClustAuthentication.LoginPassword =>
         Some:
           MiniclustAuthenticationData(
             lp.login,
@@ -81,7 +81,7 @@ class MiniclustAuthenticationServer(s: Services) extends APIServer with Miniclus
 
     def testAuthentication(data: MiniclustAuthenticationData): Seq[Test] =
       Seq(
-        MiniclustAuthentication.test(coreObject(data)) match 
+        MiniClustAuthentication.test(coreObject(data)) match 
           case Success(_) => Test.passed()
           case Failure(f) => Test.error("failed", ErrorData(f))
       )

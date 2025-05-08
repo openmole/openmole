@@ -29,7 +29,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleJobService
 
 import java.util.UUID
 
-object MiniclustEnvironment:
+object MiniClustEnvironment:
 
   val maxConnections = PreferenceLocation("MiniclustEnvironment", "MaxConnections", Some(20))
 
@@ -43,23 +43,23 @@ object MiniclustEnvironment:
     runtimeSetting: OptionalArgument[RuntimeSetting] = None,
     debug: Boolean = false)(using varName: sourcecode.Name, store: AuthenticationStore, pref: Preference, cypher: Cypher, replicaCatalog: ReplicaCatalog) =
     EnvironmentBuilder: ms =>
-      new MiniclustEnvironment(
+      new MiniClustEnvironment(
         url = url,
         insecure = insecure,
         openMOLEMemory = openMOLEMemory,
         core = core,
         time = time,
         name = Some(varName.value),
-        authentication = MiniclustAuthentication.find(login, url),
+        authentication = MiniClustAuthentication.find(login, url),
         runtimeSetting = runtimeSetting,
         debug = debug,
         services = BatchEnvironment.Services(ms)
       )
 
-  def toMiniclust(authentication: MiniclustAuthentication, insecure: Boolean) =
+  def toMiniclust(authentication: MiniClustAuthentication, insecure: Boolean) =
     val loginPassword =
       authentication match
-        case a: MiniclustAuthentication.LoginPassword => a
+        case a: MiniClustAuthentication.LoginPassword => a
 
     val auth = _root_.gridscale.authentication.UserPassword(loginPassword.login, loginPassword.password)
 
@@ -68,8 +68,9 @@ object MiniclustEnvironment:
 
     _root_.gridscale.miniclust.Miniclust(server)
 
+export {MiniClustEnvironment as MiniclustEnvironment}
 
-class MiniclustEnvironment(
+class MiniClustEnvironment(
   val url: String,
   val insecure: Boolean,
   val openMOLEMemory: Option[Information],
@@ -77,14 +78,14 @@ class MiniclustEnvironment(
   val time: Option[Int],
   val runtimeSetting: Option[RuntimeSetting],
   val name:              Option[String],
-  val authentication: MiniclustAuthentication,
+  val authentication: MiniClustAuthentication,
   val debug: Boolean,
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
 
-  val accessControl = AccessControl(services.preference(MiniclustEnvironment.maxConnections))
-  given mc: _root_.gridscale.miniclust.Miniclust = MiniclustEnvironment.toMiniclust(authentication, insecure = insecure)
+  val accessControl = AccessControl(services.preference(MiniClustEnvironment.maxConnections))
+  given mc: _root_.gridscale.miniclust.Miniclust = MiniClustEnvironment.toMiniclust(authentication, insecure = insecure)
 
-  val storage = MiniclustStorage(mc, accessControl)
+  val storage = MiniClustStorage(mc, accessControl)
   val storageSpace =
     import services.*
     AccessControl.defaultPrirority:
@@ -109,7 +110,7 @@ class MiniclustEnvironment(
         environment = this,
         runtimeSetting = runtimeSetting,
         job = batchExecutionJob,
-        remoteStorage = MiniclustStorage.Remote(),
+        remoteStorage = MiniClustStorage.Remote(),
         replicate = replicate,
         upload = (p, t) => StorageService.uploadInDirectory(storage, p, jobDirectory, t),
         storageId = StorageService.id(storage),
@@ -123,7 +124,7 @@ class MiniclustEnvironment(
 
     val runScriptPath =
       TmpDirectory.withTmpFile("script", ".sh"): script =>
-        import MiniclustStorage.nodeInputPath
+        import MiniClustStorage.nodeInputPath
         val runtime =
           Seq(
             "ls -la",
@@ -161,10 +162,10 @@ class MiniclustEnvironment(
 
       import _root_.miniclust.message.InputFile
       fileMessages.map: r =>
-        val nodePath = MiniclustStorage.nodeInputPath(r.path)
+        val nodePath = MiniClustStorage.nodeInputPath(r.path)
         InputFile(r.path, nodePath, Some(s"blake3:${r.hash}"))
       ++ Seq(
-        InputFile(serializedJob.inputPath, MiniclustStorage.nodeInputPath(serializedJob.inputPath)),
+        InputFile(serializedJob.inputPath, MiniClustStorage.nodeInputPath(serializedJob.inputPath)),
         InputFile(runScriptPath, scriptName)
       ) ++ Seq(
         InputFile(serializedJob.runtime.jvmLinuxX64.path, "jvm", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.jvmLinuxX64.hash}", extract = true))),
@@ -224,4 +225,3 @@ class MiniclustEnvironment(
       HierarchicalStorageSpace.clean(storage, storageSpace, false)
     BatchEnvironment.waitJobKilled(this)
     mc.close()
-

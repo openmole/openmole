@@ -27,7 +27,7 @@ import java.io.File
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object MiniclustStorage:
+object MiniClustStorage:
   def nodeInputPath(path: String) =
     import org.openmole.tool.hash.*
     val pathHash = Hash.string(path)
@@ -51,30 +51,30 @@ object MiniclustStorage:
   private def remove(f: String)(using _root_.gridscale.miniclust.Miniclust) = _root_.gridscale.miniclust.rmFile(f)
   private def id(using mc: _root_.gridscale.miniclust.Miniclust) = s"${mc.minio.server}-${mc.bucket.name}"
 
-  given HierarchicalStorageInterface[MiniclustStorage]:
-    override def exists(t: MiniclustStorage, path: String)(using Priority): Boolean = t.accessControl:
+  given HierarchicalStorageInterface[MiniClustStorage]:
+    override def exists(t: MiniClustStorage, path: String)(using Priority): Boolean = t.accessControl:
       _root_.gridscale.miniclust.exists(path)(using t.miniclust)
 
-    override def rmFile(t: MiniclustStorage, path: String)(using Priority): Unit = t.accessControl:
+    override def rmFile(t: MiniClustStorage, path: String)(using Priority): Unit = t.accessControl:
       _root_.gridscale.miniclust.rmFile(path)(using t.miniclust)
 
-    override def upload(t: MiniclustStorage, src: File, dest: String, options: TransferOptions)(using Priority): Unit = t.accessControl:
+    override def upload(t: MiniClustStorage, src: File, dest: String, options: TransferOptions)(using Priority): Unit = t.accessControl:
       _root_.gridscale.miniclust.upload(src, dest)(using t.miniclust)
 
-    override def download(t: MiniclustStorage, src: String, dest: File, options: TransferOptions)(using Priority): Unit = t.accessControl:
+    override def download(t: MiniClustStorage, src: String, dest: File, options: TransferOptions)(using Priority): Unit = t.accessControl:
       _root_.gridscale.miniclust.download(src, dest)(using t.miniclust)
 
-    override def rmDir(t: MiniclustStorage, path: String)(using Priority): Unit = t.accessControl:
+    override def rmDir(t: MiniClustStorage, path: String)(using Priority): Unit = t.accessControl:
       _root_.gridscale.miniclust.rmDir(path)(using t.miniclust)
 
-    override def makeDir(t: MiniclustStorage, path: String)(using Priority): Unit = ()
-    override def child(t: MiniclustStorage, parent: String, child: String)(using Priority): String = _root_.gridscale.RemotePath.child(parent, child)
+    override def makeDir(t: MiniClustStorage, path: String)(using Priority): Unit = ()
+    override def child(t: MiniClustStorage, parent: String, child: String)(using Priority): String = _root_.gridscale.RemotePath.child(parent, child)
 
-    override def list(t: MiniclustStorage, path: String)(using Priority) = t.accessControl:
+    override def list(t: MiniClustStorage, path: String)(using Priority) = t.accessControl:
       _root_.gridscale.miniclust.list(path)(using t.miniclust)
 
-    override def parent(t: MiniclustStorage, path: String)(using Priority): Option[String] = gridscale.RemotePath.parent(path)
-    override def name(t: MiniclustStorage, path: String): String = gridscale.RemotePath.name(path)
-    override def id(s: MiniclustStorage): String = MiniclustStorage.id(using s.miniclust)
+    override def parent(t: MiniClustStorage, path: String)(using Priority): Option[String] = gridscale.RemotePath.parent(path)
+    override def name(t: MiniClustStorage, path: String): String = gridscale.RemotePath.name(path)
+    override def id(s: MiniClustStorage): String = MiniClustStorage.id(using s.miniclust)
 
-case class MiniclustStorage(miniclust: _root_.gridscale.miniclust.Miniclust, accessControl: AccessControl)
+case class MiniClustStorage(miniclust: _root_.gridscale.miniclust.Miniclust, accessControl: AccessControl)

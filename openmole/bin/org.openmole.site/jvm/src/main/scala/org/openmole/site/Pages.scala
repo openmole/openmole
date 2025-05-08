@@ -228,7 +228,7 @@ object DocumentationPages:
   lazy val abc = DocumentationPage.fromContent(name = "ABC", content = org.openmole.site.content.explore.ABC, title = Some("Approximate Bayesian computation"))
 
   // Scale
-  def scalePages = pageNode(scale, Vector(multithread, ssh, cluster, egi, dispatch))
+  def scalePages = pageNode(scale, Vector(multithread, cluster, miniclust, ssh, dispatch, egi))
 
   lazy val scale = DocumentationPage.fromContent(name = "Scale Up", content = org.openmole.site.content.scale.Scale, title = Some("Scale Up Your Experiments"))
   lazy val multithread = DocumentationPage.fromContent(name = "Multithread", content = org.openmole.site.content.scale.Multithread)
@@ -236,6 +236,7 @@ object DocumentationPages:
   lazy val cluster = DocumentationPage.fromContent(name = "Cluster", content = org.openmole.site.content.scale.Cluster)
   lazy val egi = DocumentationPage.fromContent(name = "EGI", content = org.openmole.site.content.scale.EGI, title = Some("European Grid Infrastructure"))
   lazy val dispatch = DocumentationPage.fromContent(name = "Dispatch", content = org.openmole.site.content.scale.Dispatch, title = Some("Dispatch Jobs on Multiple Environments"))
+  lazy val miniclust = DocumentationPage.fromContent(name = "MiniClust", content = org.openmole.site.content.scale.MiniClust)
 
   // Language
   def languagePages = pageNode(language, Vector(fileManagement, scalaFunction, hook, transition, source, capsule))

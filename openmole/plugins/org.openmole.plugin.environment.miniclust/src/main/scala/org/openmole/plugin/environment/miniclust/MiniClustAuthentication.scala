@@ -23,41 +23,41 @@ import org.openmole.core.dsl.extension.*
 import io.circe.*
 import io.circe.generic.auto.*
 
-object MiniclustAuthentication:
+object MiniClustAuthentication:
 
-  def eq(a1: MiniclustAuthentication, a2: MiniclustAuthentication) =
+  def eq(a1: MiniClustAuthentication, a2: MiniClustAuthentication) =
     (a1, a2) match
       case (a1: LoginPassword, a2: LoginPassword) => (a1.login, a1.url) == (a2.login, a2.url)
 
   def apply()(using store: AuthenticationStore, cypher: Cypher): Seq[LoginPassword] =
-    Authentication.load[MiniclustAuthentication].map:
+    Authentication.load[MiniClustAuthentication].map:
       case l: LoginPassword => l.copy(password = cypher.decrypt(l.password))
 
-  def +=(a: MiniclustAuthentication)(using store: AuthenticationStore, cypher: Cypher): Unit =
+  def +=(a: MiniClustAuthentication)(using store: AuthenticationStore, cypher: Cypher): Unit =
     val s =
       a match
         case l: LoginPassword => l.copy(password = cypher.encrypt(l.password))
 
-    Authentication.save[MiniclustAuthentication](s, eq)
+    Authentication.save[MiniClustAuthentication](s, eq)
 
-  def -=(a: MiniclustAuthentication)(using AuthenticationStore): Unit =
-    Authentication.remove[MiniclustAuthentication](a, eq)
+  def -=(a: MiniClustAuthentication)(using AuthenticationStore): Unit =
+    Authentication.remove[MiniClustAuthentication](a, eq)
 
-  def find(login: String, url: String)(using AuthenticationStore, Cypher): MiniclustAuthentication =
+  def find(login: String, url: String)(using AuthenticationStore, Cypher): MiniClustAuthentication =
     val list = apply()
     val auth = list.findLast(a => (a.login, a.url) == (login, url))
     auth.getOrElse(throw new UserBadDataError(s"No authentication method found for $login@$url"))
 
-  def test(a: MiniclustAuthentication) =
+  def test(a: MiniClustAuthentication) =
     import scala.util.*
     Try:
-      MiniclustEnvironment.toMiniclust(a, insecure = true)
+      MiniClustEnvironment.toMiniclust(a, insecure = true)
     .map(_ => true)
 
 
-  case class LoginPassword(url: String, login: String, password: String) extends MiniclustAuthentication:
+  case class LoginPassword(url: String, login: String, password: String) extends MiniClustAuthentication:
     override def toString = s"$login@$url using password"
 
-sealed trait MiniclustAuthentication
+sealed trait MiniClustAuthentication
 
 
