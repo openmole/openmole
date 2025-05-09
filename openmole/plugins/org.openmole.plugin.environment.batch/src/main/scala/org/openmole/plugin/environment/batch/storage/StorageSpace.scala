@@ -1,21 +1,20 @@
 package org.openmole.plugin.environment.batch.storage
 
-import java.nio.file.spi.FileTypeDetector
+import com.github.f4b6a3.ulid.{Ulid, UlidCreator}
 
-import org.openmole.core.preference.{ PreferenceLocation, Preference }
+import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.replication.ReplicaCatalog
-import java.util.regex.Pattern
 
-import scala.util._
-import squants.time.TimeConversions._
-import gridscale._
+import scala.util.*
+import squants.time.TimeConversions.*
+import gridscale.*
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.outputmanager.OutputManager
-import org.openmole.plugin.environment.batch.environment.{ AccessControl, BatchEnvironment }
-import org.openmole.plugin.environment.batch.refresh.{ JobManager, RetryAction }
+import org.openmole.plugin.environment.batch.environment.{AccessControl, BatchEnvironment}
+import org.openmole.plugin.environment.batch.refresh.{JobManager, RetryAction}
 import org.openmole.tool.cache.Lazy
 import org.openmole.tool.logger.JavaLogger
-import squants._
+import squants.*
 
 object StorageSpace:
 
@@ -25,7 +24,12 @@ object StorageSpace:
     val sinceBeginingOfTheDay = time % modulo
     (time - sinceBeginingOfTheDay).toString
 
-  def timedUniqName = org.openmole.tool.file.uniqName(System.currentTimeMillis.toString, "", separator = "_")
+  def timedUniqName = UlidCreator.getUlid.toLowerCase
+
+  def extractTimeFromName(name: String) =
+    Try:
+      Ulid.from(name).getTime
+    .toOption
 
 object HierarchicalStorageSpace extends JavaLogger:
   val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
@@ -63,10 +67,6 @@ object HierarchicalStorageSpace extends JavaLogger:
     cleanReplicaDirectory(s, storageSpace.replicaDirectory, hierarchicalStorageInterface.id(s), background)
     cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
 
-  def extractTimeFromName(name: String) =
-    val time = name.takeWhile(_.isDigit)
-    if (time.isEmpty) None
-    else Try(time.toLong).toOption
 
   def ignoreErrors[T](f: => T): Unit = Try(f)
 
@@ -74,21 +74,24 @@ object HierarchicalStorageSpace extends JavaLogger:
     val entries = hierarchicalStorageInterface.list(s, tmpDirectory)
     val removalDate = System.currentTimeMillis - services.preference(TmpDirRemoval).toMillis
 
-    def remove(name: String) = extractTimeFromName(name).map(_ < removalDate).getOrElse(true)
+    def remove(name: String) =
+      StorageSpace.extractTimeFromName(name) match
+        case Some(t) => t < removalDate
+        case None => true
 
     for
       entry <- entries
       if remove(entry.name)
     do
       val path = StorageService.child(s, tmpDirectory, entry.name)
-      if (entry.`type` == FileType.Directory) ignoreErrors(StorageService.rmDirectory(s, path, background))
+      if entry.`type` == FileType.Directory then ignoreErrors(StorageService.rmDirectory(s, path, background))
       else ignoreErrors(StorageService.rmFile(s, path, background))
 
   def cleanReplicaDirectory[S](s: S, persistentPath: String, storageId: String, background: Boolean)(using services: BatchEnvironment.Services, storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], priority: AccessControl.Priority) =
     def graceIsOver(name: String) =
-      extractTimeFromName(name).map {
-        _ + services.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
-      }.getOrElse(true)
+      StorageSpace.extractTimeFromName(name) match
+        case Some(t) => t + services.preference(ReplicaCatalog.ReplicaGraceTime).toMillis < System.currentTimeMillis
+        case None => true
 
     val entries = hierarchicalStorageInterface.list(s, persistentPath)
     val inReplica = services.replicaCatalog.forPaths(entries.map { e => StorageService.child(s, persistentPath, e.name) }, Seq(storageId)).map(_.path).toSet
@@ -130,9 +133,12 @@ object HierarchicalStorageSpace extends JavaLogger:
     util.Try(hierarchicalStorageInterface.makeDir(s, basePath)) match 
       case util.Success(_) => basePath
       case util.Failure(e) =>
-        if (isConnectionError(e)) throw e
-        else if (storageInterface.exists(s, basePath)) basePath
-        else throw e
+        if isConnectionError(e)
+        then throw e
+        else
+          if storageInterface.exists(s, basePath)
+          then basePath
+          else throw e
 
   def createJobDirectory[S](s: S, storageSpace: StorageSpace)(using hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) = 
     val intervalDirectory = hierarchicalStorageInterface.child(s, storageSpace.tmpDirectory, StorageSpace.lastBegining(preference(TmpDirCreation)))

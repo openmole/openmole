@@ -35,6 +35,8 @@ import org.openmole.tool.stream._
 
 package file {
 
+  import com.github.f4b6a3.ulid.UlidCreator
+
   import java.nio.file.DirectoryStream.Filter
   import java.nio.file.attribute.PosixFilePermissions
   import java.util.concurrent.ThreadPoolExecutor
@@ -532,7 +534,9 @@ package file {
       else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
 
-    def uniqName(prefix: String, sufix: String, separator: String = "_") = prefix + separator + UUID.randomUUID.toString + sufix
+    def uniqName(prefix: String, sufix: String, separator: String = "_") =
+      val ulid = UlidCreator.getUlid
+      prefix + separator + ulid.toString + sufix
 
     def acceptDirectory = new Filter[Path]:
       def accept(entry: Path): Boolean = Files.isDirectory(entry)

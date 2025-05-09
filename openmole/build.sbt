@@ -122,7 +122,7 @@ def allTool = Seq(
 lazy val openmoleCache = OsgiProject(toolDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger, openmoleLock) settings (toolSettings, libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
 lazy val openmoleArchive = OsgiProject(toolDir, "org.openmole.tool.archive", imports = Seq("*")) dependsOn (openmoleFile) settings (toolSettings, libraryDependencies += Libraries.xzJava, libraryDependencies += Libraries.compress)
 lazy val openmoleDTW = OsgiProject(toolDir, "org.openmole.tool.dtw", imports = Seq("*")) settings (toolSettings)
-lazy val openmoleFile = OsgiProject(toolDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (toolSettings)
+lazy val openmoleFile = OsgiProject(toolDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (toolSettings, libraryDependencies += Libraries.ulid)
 lazy val openmoleLock = OsgiProject(toolDir, "org.openmole.tool.lock", imports = Seq("*")) dependsOn(openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.gears)
 lazy val openmoleLogger = OsgiProject(toolDir, "org.openmole.tool.logger", imports = Seq("*")) dependsOn (openmoleOutputRedirection) settings (toolSettings, libraryDependencies += Libraries.sourceCode)
 lazy val openmoleThread = OsgiProject(toolDir, "org.openmole.tool.thread", imports = Seq("*")) dependsOn(openmoleLogger, openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.squants)

@@ -345,14 +345,14 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
 
       def replicate(f: File, options: TransferOptions) =
         BatchEnvironment.toReplicatedFile(
-          StorageService.uploadInDirectory(storage, _, space.replicaDirectory, _),
+          StorageService.uploadTimedFileInDirectory(storage, _, space.replicaDirectory, _),
           StorageService.exists(storage, _),
           StorageService.rmFile(storage, _, background = true),
           env,
           StorageService.id(storage)
         )(f, options)
 
-      def upload(f: File, options: TransferOptions) = StorageService.uploadInDirectory(storage, f, jobDirectory, options)
+      def upload(f: File, options: TransferOptions) = StorageService.uploadTimedFileInDirectory(storage, f, jobDirectory, options)
 
       val sj = BatchEnvironment.serializeJob(env, runtimeSetting, batchExecutionJob, remoteStorage, replicate, upload, StorageService.id(storage))
       val outputPath = StorageService.child(storage, jobDirectory, uniqName("job", ".out"))

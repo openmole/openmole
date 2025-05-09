@@ -59,6 +59,7 @@ object common {
   def furyVersion = "0.10.0"
   def jgitVersion = "7.0.0.202409031743-r"
   def gearsVersion = "0.2.0"
+  def ulidCreatorVersion = "5.2.3"
 
   def http4sVersion = "0.23.12"
 

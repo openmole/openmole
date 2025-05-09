@@ -581,3 +581,9 @@ lazy val gears = OsgiProject(dir, "gears") settings (
   version := gearsVersion
 )
 
+lazy val uildCreator = OsgiProject(dir, "com.github.f4b6a3.ulid") settings (
+  settings,
+  libraryDependencies += "com.github.f4b6a3" % "ulid-creator" % ulidCreatorVersion,
+  version := ulidCreatorVersion
+)
+

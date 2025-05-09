@@ -65,7 +65,7 @@ object StorageService extends JavaLogger:
   def exists[S](s: S, path: String)(using storageInterface: StorageInterface[S], priority: AccessControl.Priority) =
     storageInterface.exists(s, path)
 
-  def uploadInDirectory[S: {StorageInterface, HierarchicalStorageInterface}](s: S, file: File, directory: String, transferOptions: TransferOptions)(using AccessControl.Priority) =
+  def uploadTimedFileInDirectory[S: {StorageInterface, HierarchicalStorageInterface}](s: S, file: File, directory: String, transferOptions: TransferOptions)(using AccessControl.Priority) =
     val path = child(s, directory, StorageSpace.timedUniqName)
     upload(s, file, path, transferOptions)
     path

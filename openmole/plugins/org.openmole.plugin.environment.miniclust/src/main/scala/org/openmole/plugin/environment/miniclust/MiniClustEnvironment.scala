@@ -97,7 +97,7 @@ class MiniClustEnvironment(
 
     def replicate =
       BatchEnvironment.toReplicatedFile(
-        upload = StorageService.uploadInDirectory(storage, _, storageSpace.replicaDirectory, _),
+        upload = StorageService.uploadTimedFileInDirectory(storage, _, storageSpace.replicaDirectory, _),
         exist = StorageService.exists(storage, _),
         remove = StorageService.rmFile(storage, _),
         environment = this,
@@ -111,7 +111,7 @@ class MiniClustEnvironment(
         job = batchExecutionJob,
         remoteStorage = MiniClustStorage.Remote(),
         replicate = replicate,
-        upload = (p, t) => StorageService.uploadInDirectory(storage, p, jobDirectory, t),
+        upload = (p, t) => StorageService.uploadTimedFileInDirectory(storage, p, jobDirectory, t),
         storageId = StorageService.id(storage),
         archiveResult = true
       )
