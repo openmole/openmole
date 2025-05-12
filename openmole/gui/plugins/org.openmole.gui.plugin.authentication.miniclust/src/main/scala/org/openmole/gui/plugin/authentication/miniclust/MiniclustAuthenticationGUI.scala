@@ -40,7 +40,7 @@ class MiniclustAuthenticationFactory(using api: MiniclustAuthenticationAPI) exte
   type AuthType = MiniclustAuthenticationData
   def buildEmpty = new MiniclustAuthenticationGUI
   def build(data: AuthType) = new MiniclustAuthenticationGUI(data)
-  def name = "Miniclust Login/Password"
+  def name = "MiniClust Login/Password"
   def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = api.loginAuthentications()
   def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = api.removeAuthentication(data)
   def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = api.testAuthentication(data)
