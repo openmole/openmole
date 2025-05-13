@@ -37,7 +37,7 @@ $br$br
 ${hl.openmole("""
   val env =
     MiniClustEnvironment(
-      "login"
+      "login",
       "https://babar.openmole.org"
     )
 """)}
