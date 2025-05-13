@@ -57,8 +57,52 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
   )
 
 
-  "Saltelli" should "run" in {
+  "Saltelli" should "run" in:
     saltelli.run()
-  }
+
+  it should "produce correct indices for the test function" in:
+    import scala.math.*
+
+    def IshigamiFunction(x: Array[Double]): Double =
+      require(x.length == 3, "Ishigami function expects 3 input variables.")
+      val a: Double = 7.0
+      val b: Double = 0.1
+      val x1 = x(0)
+      val x2 = x(1)
+      val x3 = x(2)
+      sin(x1) + a * pow(sin(x2), 2) + b * pow(x3, 4) * sin(x1)
+
+    val rng = scala.util.Random(42)
+
+    val a = Array.fill(1000, 3)(rng.nextDouble() * 2 * Pi - Pi)
+    val b = Array.fill(1000, 3)(rng.nextDouble() * 2 * Pi - Pi)
+    val c =
+      (0 until 3).map: i =>
+        SensitivitySaltelli.SaltelliSampling.buildC(i, a, b)
+      .toArray
+
+    val ra = a.map(IshigamiFunction)
+    val rb = b.map(IshigamiFunction)
+    val rc = c.map(_.map(IshigamiFunction))
+
+    val indices = SensitivitySaltelli.SaltelliAggregation.sobolIndices(ra, rb, rc)
+
+    // Use intervals of https://openturns.github.io/openturns/latest/auto_reliability_sensitivity/sensitivity_analysis/plot_sensitivity_sobol.html
+    indices.first(0) should be >= 0.2
+    indices.first(0) should be <= 0.45
+    indices.first(1) should be >= 0.3
+    indices.first(1) should be <= 0.6
+    indices.first(2) should be >= -0.1
+    indices.first(2) should be <= 0.1
+
+    indices.total(0) should be >= 0.4
+    indices.total(0) should be <= 0.7
+    indices.total(1) should be >= 0.3
+    indices.total(1) should be <= 0.7
+    indices.total(2) should be >= 0.15
+    indices.total(2) should be <= 0.4
+
+
+
 
 
