@@ -67,7 +67,7 @@ import scala.jdk.FutureConverters.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class ApiImpl(val services: Services, applicationControl: Option[ApplicationControl]) {
+class ApiImpl(val services: Services, applicationControl: Option[ApplicationControl]):
 
   import ExecutionState._
 
@@ -557,8 +557,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val omrFile = safePathToFile(result)
 
     def content =
-      OMRFormat.variables(omrFile, dataFile = dataFile).map: (s, v) =>
-        GUIOMRSectionContent(s.name, v.map(toGUIVariable))
+      OMRFormat.variables(omrFile, dataFile = dataFile).map: v =>
+        GUIOMRSectionContent(v.section.name, v.variables.map(toGUIVariable))
 
     val omrContent = OMRFormat.omrContent(omrFile)
 
@@ -821,4 +821,3 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case Some(e) => Seq(FailedTest("Password is incorrect", ErrorData(e)))
     .getOrElse(Seq(FailedTest("Private key not set", ErrorData.empty)))
     
-}

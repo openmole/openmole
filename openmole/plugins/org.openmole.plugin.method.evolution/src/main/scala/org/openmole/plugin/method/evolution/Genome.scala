@@ -311,7 +311,7 @@ object Genome:
 
       if OMRFormat.isOMR(f)
       then
-        val ctx = Context(OMRFormat.variables(f).head._2 *)
+        val ctx = Context(OMRFormat.variables(f).head.variables *)
         val vals = genome.map(g => GenomeBound.toVal(g))
         val values =
           vals.map(v => ctx.variable(v.array).getOrElse:

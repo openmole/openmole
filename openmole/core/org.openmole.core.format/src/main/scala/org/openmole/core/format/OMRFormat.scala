@@ -270,7 +270,7 @@ object OMRFormat:
     omrFile: File,
     relativePath: Boolean = false,
     dataFile: Option[String] = None,
-    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[?]])] =
+    indexOnly: Boolean = false): Seq[(section: OMRContent.DataContent.SectionData, variables: Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     val dataFileValue = dataFile getOrElse index.`data-file`.last
     OMRFormat.readDataStream(omrFile, dataFileValue): is =>
@@ -280,7 +280,7 @@ object OMRFormat:
     omrFile: File,
     is: java.io.InputStream,
     relativePath: Boolean = false,
-    indexOnly: Boolean = false): Seq[(OMRContent.DataContent.SectionData, Seq[Variable[?]])] =
+    indexOnly: Boolean = false): Seq[(section: OMRContent.DataContent.SectionData, variables: Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     val omrDirectory = omrFile.getParentFile
 
@@ -384,7 +384,7 @@ object OMRFormat:
     then
       CSVFormat.writeVariablesToCSV(
         destination,
-        variable.head._2,
+        variable.head.variables,
         unrollArray = unrollArray,
         arrayOnRow = arrayOnRow,
         gzip = gzip)
@@ -423,11 +423,11 @@ object OMRFormat:
 
     def jsonData =
       org.json4s.JArray(
-        variablesValues.map: (s, variables) =>
+        variablesValues.map: v =>
           def content: Seq[(String, org.json4s.JValue)] =
             def fileToJSON(f: File) = JString(f.getPath)
-            s.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
-              Seq("variables" -> variablesToJObject(variables, default = Some(anyToJValue), file = Some(fileToJSON)))
+            v.section.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
+              Seq("variables" -> variablesToJObject(v.variables, default = Some(anyToJValue), file = Some(fileToJSON)))
           org.json4s.JObject(content.toList)
         .toList
       )

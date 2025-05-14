@@ -25,7 +25,7 @@ import org.openmole.plugin.sampling.lhs.LHS
 import org.openmole.plugin.sampling.quasirandom.SobolSampling
 import org.openmole.plugin.tool.pattern.MapReduce
 
-object SensitivitySaltelli {
+object SensitivitySaltelli:
 
   def methodName = MethodMetaData.name(SensitivitySaltelli)
 
@@ -77,7 +77,7 @@ object SensitivitySaltelli {
     DSLContainer(w, method = Method(p.inputs, p.outputs), validate = validate)
 
 
-  object SaltelliAggregation {
+  object SaltelliAggregation:
 
     val namespace = Namespace("saltelli")
 
@@ -133,7 +133,7 @@ object SensitivitySaltelli {
       modelInputs:  Seq[ScalableValue],
       modelOutputs: Seq[Val[Double]],
       firstOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("firstOrderSI"),
-      totalOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) = {
+      totalOrderSI: Val[Array[Array[Double]]]     = Val[Array[Array[Double]]]("totalOrderSI"))(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
 
       def saltelliOutputs(
         modelInputs:  Seq[ScalableValue],
@@ -200,12 +200,9 @@ object SensitivitySaltelli {
           (tOOutputs zip tosiv).map { case (to, v) => Variable.unsecure(to, v) }
 
       .set (
-        dsl.inputs ++= modelOutputs.map(_.array),
+        (dsl.inputs, dsl.outputs) ++= ScalableValue.prototypes(modelInputs).map(_.array) ++ modelOutputs.map(_.array),
         dsl.outputs ++= (fOOutputs, tOOutputs)
       )
-    }
-
-  }
 
 
   object SaltelliHook:
@@ -217,12 +214,17 @@ object SensitivitySaltelli {
 
         val inputs = ScalableValue.prototypes(method.inputs)
 
+        def values: Seq[Variable[?]] =
+          val v = ScalableValue.prototypes(method.inputs).map(_.name) ++ method.outputs.map(_.name)
+          v.map(v => context.variable[Any](v).get)
+
         import OutputFormat.*
 
         def sections =
           OutputContent(
-            "firstOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder(_, _)).from(context),
-            "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder(_, _)).from(context)
+            "firstOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder).from(context),
+            "totalOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.totalOrder).from(context),
+            "experiments" -> values
           )
 
         OMROutputFormat.write(executionContext, output, sections, MetaData(method)).from(context)
@@ -230,7 +232,7 @@ object SensitivitySaltelli {
         context
 
 
-  object SaltelliSampling {
+  object SaltelliSampling:
 
     val namespace = Namespace("saltelli")
     val matrixName = org.openmole.core.context.Val[String]("matrix", namespace = namespace)
@@ -239,7 +241,7 @@ object SensitivitySaltelli {
     def matrix = Seq(matrixName, matrixIndex)
 
     given IsSampling[SaltelliSampling] = saltelli =>
-      def apply = FromContext { p =>
+      def apply = FromContext: p =>
         import p._
 
         val s = saltelli.samples.from(context)
@@ -286,7 +288,6 @@ object SensitivitySaltelli {
 
         (aVariables ++ bVariables ++ cVariables).iterator
 
-      }
 
       Sampling(
         apply,
@@ -314,12 +315,8 @@ object SensitivitySaltelli {
           else a
 
 
-  }
-
   case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalableValue*)
 
-
-}
 
 
 /**
