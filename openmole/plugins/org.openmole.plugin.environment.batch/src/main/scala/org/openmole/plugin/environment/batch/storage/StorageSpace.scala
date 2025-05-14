@@ -108,7 +108,8 @@ object HierarchicalStorageSpace extends JavaLogger:
         else ignoreErrors(StorageService.rmFile(s, path, background))
 
   def createBasePath[S](s: S, root: String, isConnectionError: Throwable => Boolean)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
-    def baseDirName = "openmole-" + preference(Preference.uniqueID) + '/'
+    import org.openmole.tool.encoding.Base36
+    def baseDirName = "openmole-" + Base36.uuidToString(preference(Preference.uniqueID)) + '/'
 
     def mkRootDir: String = synchronized:
       val paths =

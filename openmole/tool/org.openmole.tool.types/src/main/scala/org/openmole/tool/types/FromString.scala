@@ -6,29 +6,24 @@ import squants.time.TimeConversions._
 import squants.information._
 import squants.information.InformationConversions._
 
-trait FromString[+T] {
-  def apply(s: String): T
-}
+object FromString:
 
-object FromString {
-
-  def apply[T](f: String => T): FromString[T] = new FromString[T] {
+  def apply[T](f: String => T): FromString[T] = new FromString[T]:
     override def apply(s: String) = f(s)
-  }
 
-  implicit def doubleFromString: FromString[Double] = FromString[Double](_.toDouble)
-  implicit def fileFromString: FromString[java.io.File] = FromString[java.io.File](s => new java.io.File(s))
-  implicit def intFromString: FromString[Int] = FromString[Int](_.toInt)
-  implicit def longFromString: FromString[Long] = FromString[Long](_.toLong)
-  implicit def floatFromString: FromString[Float] = FromString[Float](_.toFloat)
-  implicit def bigDecimalFromString: FromString[BigDecimal] = FromString[BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128))
-  implicit def bigIntFromString: FromString[BigInt] = FromString[BigInt](s => BigInt(s))
-  implicit def javaBigDecimalFromString: FromString[java.math.BigDecimal] = FromString[java.math.BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128).bigDecimal)
-  implicit def javaBigIntegerFromString: FromString[java.math.BigInteger] = FromString[java.math.BigInteger](s => BigInt(s).underlying)
-  implicit def stringFromString: FromString[String] = FromString[String](identity)
-  implicit def booleanFromString: FromString[Boolean] = FromString[Boolean](_.toBoolean)
-  implicit def timeFromString: FromString[Time] = FromString[Time](_.toTime.get)
-  implicit def memoryFromString: FromString[Information] = FromString[Information](_.toInformation.get)
+  given doubleFromString: FromString[Double] = FromString[Double](_.toDouble)
+  given fileFromString: FromString[java.io.File] = FromString[java.io.File](s => new java.io.File(s))
+  given intFromString: FromString[Int] = FromString[Int](_.toInt)
+  given longFromString: FromString[Long] = FromString[Long](_.toLong)
+  given floatFromString: FromString[Float] = FromString[Float](_.toFloat)
+  given bigDecimalFromString: FromString[BigDecimal] = FromString[BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128))
+  given bigIntFromString: FromString[BigInt] = FromString[BigInt](s => BigInt(s))
+  given javaBigDecimalFromString: FromString[java.math.BigDecimal] = FromString[java.math.BigDecimal](s => BigDecimal(s, MathContext.DECIMAL128).bigDecimal)
+  given javaBigIntegerFromString: FromString[java.math.BigInteger] = FromString[java.math.BigInteger](s => BigInt(s).underlying)
+  given stringFromString: FromString[String] = FromString[String](identity)
+  given booleanFromString: FromString[Boolean] = FromString[Boolean](_.toBoolean)
+  given timeFromString: FromString[Time] = FromString[Time](_.toTime.get)
+  given memoryFromString: FromString[Information] = FromString[Information](_.toInformation.get)
 
   /*implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
@@ -64,4 +59,5 @@ object FromString {
     def compare(x: JBigInteger, y: JBigInteger): Int = x compareTo y
   }*/
 
-}
+trait FromString[+T]:
+  def apply(s: String): T

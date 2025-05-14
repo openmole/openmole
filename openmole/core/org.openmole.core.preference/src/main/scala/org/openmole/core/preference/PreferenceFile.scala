@@ -71,6 +71,9 @@ object ConfigurationString:
     def toString(t: String): String = t
     def fromString(s: String) = implicitly[FromString[String]].apply(s)
 
+  given ConfigurationString[java.util.UUID] with
+    def toString(t: java.util.UUID): String = t.toString
+    def fromString(s: String) = java.util.UUID.fromString(s)
 
   given ConfigurationString[Boolean] with
     def toString(t: Boolean): String = t.toString

@@ -21,20 +21,19 @@ package org.openmole.core.preference
 object PreferenceLocation:
 
   //TODO Would be cleaner implemented using scala macro
-  def list(t: Any): Vector[PreferenceLocation[_]] = {
+  def list(t: Any): Vector[PreferenceLocation[?]] =
     import java.lang.reflect.Modifier
     val preferencesField =
       t.getClass.getDeclaredFields.
-        filter(f => classOf[PreferenceLocation[_]].isAssignableFrom(f.getType) && Modifier.isPublic(f.getModifiers)).
-        map(f => f.get(t).asInstanceOf[PreferenceLocation[_]])
+        filter(f => classOf[PreferenceLocation[?]].isAssignableFrom(f.getType) && Modifier.isPublic(f.getModifiers)).
+        map(f => f.get(t).asInstanceOf[PreferenceLocation[?]])
 
     val preferenceMethod =
       t.getClass.getDeclaredMethods.
-        filter(m => classOf[PreferenceLocation[_]].isAssignableFrom(m.getReturnType) && m.getParameterCount == 0 && Modifier.isPublic(m.getModifiers)).
-        map(m => m.invoke(t).asInstanceOf[PreferenceLocation[_]])
+        filter(m => classOf[PreferenceLocation[?]].isAssignableFrom(m.getReturnType) && m.getParameterCount == 0 && Modifier.isPublic(m.getModifiers)).
+        map(m => m.invoke(t).asInstanceOf[PreferenceLocation[?]])
 
     (preferencesField ++ preferenceMethod).sortBy(_.toString).toVector
-  }
 
   def apply[T](group: String, name: String, default: => Option[T]) = new ClearPreferenceLocation[T](group, name, default)
   def cyphered[T](group: String, name: String, default: => Option[T]) = new CypheredPreferenceLocation[T](group, name, default)

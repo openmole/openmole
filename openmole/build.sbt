@@ -104,6 +104,7 @@ def allTool = Seq(
   openmoleLogger,
   openmoleThread,
   openmoleHash,
+  openmoleEncoding,
   openmoleStream,
   openmoleCollection,
   openmoleCrypto,
@@ -126,7 +127,8 @@ lazy val openmoleFile = OsgiProject(toolDir, "org.openmole.tool.file", imports =
 lazy val openmoleLock = OsgiProject(toolDir, "org.openmole.tool.lock", imports = Seq("*")) dependsOn(openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.gears)
 lazy val openmoleLogger = OsgiProject(toolDir, "org.openmole.tool.logger", imports = Seq("*")) dependsOn (openmoleOutputRedirection) settings (toolSettings, libraryDependencies += Libraries.sourceCode)
 lazy val openmoleThread = OsgiProject(toolDir, "org.openmole.tool.thread", imports = Seq("*")) dependsOn(openmoleLogger, openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.squants)
-lazy val openmoleHash = OsgiProject(toolDir, "org.openmole.tool.hash", imports = Seq("*")) dependsOn(openmoleFile, openmoleStream) settings (toolSettings, libraryDependencies += Libraries.codec)
+lazy val openmoleHash = OsgiProject(toolDir, "org.openmole.tool.hash", imports = Seq("*")) dependsOn(openmoleFile, openmoleStream, openmoleEncoding) settings (toolSettings, libraryDependencies += Libraries.codec)
+lazy val openmoleEncoding = OsgiProject(toolDir, "org.openmole.tool.encoding", imports = Seq("*"))  settings (toolSettings, libraryDependencies += Libraries.codec)
 lazy val openmoleStream = OsgiProject(toolDir, "org.openmole.tool.stream", imports = Seq("*")) dependsOn (openmoleThread) settings(toolSettings, libraryDependencies += Libraries.collections, libraryDependencies += Libraries.squants)
 lazy val openmoleCollection = OsgiProject(toolDir, "org.openmole.tool.collection", imports = Seq("*")) settings (toolSettings *)
 lazy val openmoleCrypto = OsgiProject(toolDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (toolSettings *)

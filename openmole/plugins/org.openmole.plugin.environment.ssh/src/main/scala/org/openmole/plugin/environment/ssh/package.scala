@@ -100,7 +100,7 @@ object SSHStorage:
 def sshRoot[S](home: String, child: (String, String) => String, sharedDirectory: Option[String]) =
   sharedDirectory match
     case Some(p) => p
-    case None    => child(home, ".openmole/.tmp/ssh/")
+    case None    => child(home, ".openmole/tmp/ssh/")
 
 def localStorage(
   environment:     BatchEnvironment,

@@ -8,21 +8,21 @@ import org.openmole.core.exception._
 
 object Preference:
 
-  lazy val uniqueID = PreferenceLocation[String]("Global", "UniqueID", None)
+  lazy val uniqueID = PreferenceLocation[java.util.UUID]("Global", "UniqueID", None)
   def passwordTest = PreferenceLocation.cyphered[String]("Preference", "passwordTest", Some(passwordTestString))
   def passwordTestString = "test"
   def location = "preferences"
 
   def memory() =
     val pref = new MemoryPreference
-    pref setPreference (uniqueID, UUID.randomUUID.toString)
+    pref setPreference (uniqueID, UUID.randomUUID)
     pref
 
   def apply(file: File): Preference =
     val pref = FilePreference(ConfigurationFile(file))
     //if (!passwordIsCorrect(cypher, pref)) throw new UserBadDataError("Password is incorrect.")
     //setPasswordTest(pref, cypher)
-    if !pref.isSet(uniqueID) then pref.setPreference(uniqueID, UUID.randomUUID.toString)
+    if !pref.isSet(uniqueID) then pref.setPreference(uniqueID, UUID.randomUUID)
     pref
 
   def passwordIsCorrect(cypher: Cypher, preference: Preference) =
@@ -118,7 +118,10 @@ case class FilePreference(configurationFile: ConfigurationFile) extends Preferen
   def clear() =
     val uniqueId = getRawPreference(Preference.uniqueID)
     try configurationFile.clear()
-    finally uniqueId.foreach(prop => setPreference(Preference.uniqueID, prop))
+    finally
+      uniqueId.foreach: prop =>
+        setPreference(Preference.uniqueID, summon[ConfigurationString[java.util.UUID]].fromString(prop))
+
     //      _password = None
     //      setPreference(Workspace.uniqueIDLocation, uniqueId)
     //    }

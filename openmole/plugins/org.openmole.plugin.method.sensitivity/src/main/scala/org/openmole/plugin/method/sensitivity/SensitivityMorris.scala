@@ -62,9 +62,9 @@ object SensitivityMorris {
 
         def sections =
           OutputContent(
-            "mu" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu(_, _)).from(context),
-            "muStar" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar(_, _)).from(context),
-            "sigma" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma(_, _)).from(context),
+            "mu" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.mu).from(context),
+            "muStar" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.muStar).from(context),
+            "sigma" -> Sensitivity.variableResults(inputs, method.outputs, SensitivityMorris.sigma).from(context),
             "experiments" -> values
           )
 
