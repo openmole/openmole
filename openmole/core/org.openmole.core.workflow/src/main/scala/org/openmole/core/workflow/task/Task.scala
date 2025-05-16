@@ -209,7 +209,6 @@ object Task:
    * @return
    */
   def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
-  def definitionScope(t: Task) = t.info.definitionScope
 
   def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
@@ -219,6 +218,7 @@ object Task:
     def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
     def outputs: PrototypeSet = task.config.outputs
     def defaults: DefaultSet = task.config.defaults
+    def definitionScope = task.info.definitionScope
 
 
   object TaskExecution:

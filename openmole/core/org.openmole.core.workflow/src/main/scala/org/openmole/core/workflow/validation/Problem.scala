@@ -239,10 +239,13 @@ object Problem:
       case s: TransitionSlot => s"${definedElement(s.capsule._task)} (slot id $s)"
 
   private def defined(scope: DefinitionScope) =
-    (scope.line, scope.imported) match
-      case (Some(l), _) => s", defined on line $l"
-      case (_, Some(i)) => s", imported from file ${i.importedFrom.getName} by instruction \"import ${i.`import`}\""
-      case _ => ""
+    scope match
+      case internal: DefinitionScope.InternalScope => s", defined in ${internal.name}"
+      case _ =>
+        (scope.line, scope.imported) match
+          case (Some(l), _) => s", defined on line $l"
+          case (_, Some(i)) => s", imported from file ${i.importedFrom.getName} by instruction \"import ${i.`import`}\""
+          case _ => ""
 
 
 sealed trait Problem
