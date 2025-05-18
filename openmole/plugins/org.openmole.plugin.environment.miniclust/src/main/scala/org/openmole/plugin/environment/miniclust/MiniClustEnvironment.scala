@@ -167,8 +167,8 @@ class MiniClustEnvironment(
         InputFile(serializedJob.inputPath, MiniClustStorage.nodeInputPath(serializedJob.inputPath)),
         InputFile(runScriptPath, scriptName)
       ) ++ Seq(
-        InputFile(serializedJob.runtime.jvmLinuxX64.path, "jvm", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.jvmLinuxX64.hash}", extract = true))),
-        InputFile(serializedJob.runtime.runtime.path, "runtime", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.runtime.hash}", extract = true)))
+        InputFile(serializedJob.runtime.jvmLinuxX64.path, "jvm", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.jvmLinuxX64.hash}", extraction = Some(InputFile.Extraction.TarGZ)))),
+        InputFile(serializedJob.runtime.runtime.path, "runtime", Some(InputFile.Cache(s"blake3:${serializedJob.runtime.runtime.hash}", extraction = Some(InputFile.Extraction.TarGZ))))
       )
 
     val outputFiles =
