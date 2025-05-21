@@ -1428,15 +1428,14 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
   ),
   docker / dockerfile := new Dockerfile {
     from("debian:testing")
-    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     runRaw(
-      """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
-       apt-get update && \
+      """apt-get update && \
        apt-get install --no-install-recommends -y ca-certificates openjdk-21-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
-       apt-get install -y singularity-container && \
+       apt-get install --no-install-recommends -y curl cpio rpm2cpio && \
+       curl -s https://raw.githubusercontent.com/apptainer/apptainer/main/tools/install-unprivileged.sh | bash -s - /usr && \
+       singularity config global -s "sessiondir max size" 0 && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
-       mkdir -p /lib/modules && \
-       sed -i '/^sessiondir max size/c\sessiondir max size = 0' /etc/singularity/singularity.conf""")
+       mkdir -p /lib/modules""")
     runRaw(
       """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         |dpkg-reconfigure --frontend=noninteractive locales && \
