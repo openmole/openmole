@@ -1436,7 +1436,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
        apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
-       sed -i '/^sessiondir max size/c\sessiondir max size = 0' /etc/singularity/singularity.conf""")
+       singularity config global -s "sessiondir max size" 0""")
     runRaw(
       """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
         |dpkg-reconfigure --frontend=noninteractive locales && \
