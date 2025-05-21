@@ -33,7 +33,7 @@ object PythonTask:
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    version:                String                             = "3.13.1",
+    image:                  ContainerImage                     = "openmole/python:3.13.3",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
@@ -48,12 +48,15 @@ object PythonTask:
     
     ExternalTask.build("PythonTask"): buildParamters =>
       import buildParamters.*
+
       val major =
-        if version.startsWith("2") then 2 else 3
+        image match
+          case image: DockerImage if image.tag.startsWith("2") => 2
+          case _ => 3
         
-      val image = 
+      val containerImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, dockerImage(version), installCommands(install, libraries, major))
+        ContainerTask.install(containerSystem, image, installCommands(install, libraries, major))
 
       def workDirectory = "/_workdirectory_"
       
@@ -63,7 +66,7 @@ object PythonTask:
       
       val taskExecution =
         ContainerTask.execution(
-          image = image,
+          image = containerImage,
           command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
           workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,

@@ -35,11 +35,14 @@ object HostFile:
 case class HostFile(path: String, destination: String)
 
 object ContainerImage:
-  implicit def fileToContainerImage(f: java.io.File): ContainerImage =
+  given Conversion[String, ContainerImage] = fromString
+  given Conversion[File, ContainerImage] = fromFile
+
+  def fromFile(f: java.io.File): ContainerImage =
     def compressed = f.getName.endsWith(".tgz") || f.getName.endsWith(".gz")
     SavedDockerImage(f, compressed)
 
-  implicit def stringToContainerImage(s: String): ContainerImage =
+  def fromString(s: String): ContainerImage =
     if s.contains(":")
     then
       val Vector(image, tag) = s.split(":").toVector
