@@ -27,5 +27,5 @@ object GridScaleJobService:
       case JobState.Submitted => SUBMITTED
       case JobState.Running   => RUNNING
       case JobState.Done      => DONE
-      case JobState.Failed    => FAILED
+      case _: JobState.Failed    => FAILED
 
