@@ -30,11 +30,10 @@ FULL_TMPDIR=`realpath ${TMPDIR}`
 HOME_DIRECTORY=${FULL_TMPDIR}
 
 cleanup() {
-  rm -rf ${FULL_TMPDIR}
+  rm -rf "$FULL_TMPDIR"
   exit 1
 }
-
-trap cleanup SIGTERM
+trap cleanup TERM
 
 ARGS=""
 
