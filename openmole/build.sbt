@@ -1432,7 +1432,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates openjdk-21-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
+       apt-get install --no-install-recommends -y ca-certificates openjdk-24-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
        apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
