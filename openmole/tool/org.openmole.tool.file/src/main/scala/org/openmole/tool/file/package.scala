@@ -534,9 +534,9 @@ package file {
       else if (bytes < tB) (doubleBytes / gB).formatted("%.2f").toString + "GB"
       else (doubleBytes / tB).formatted("%.2f").toString + "TB"
 
-    def uniqName(prefix: String, sufix: String, separator: String = "_") =
+    def uniqName(prefix: String, suffix: String, separator: String = "-") =
       val ulid = UlidCreator.getUlid
-      prefix + separator + ulid.toString + sufix
+      prefix + separator + ulid.toLowerCase + suffix
 
     def acceptDirectory = new Filter[Path]:
       def accept(entry: Path): Boolean = Files.isDirectory(entry)
