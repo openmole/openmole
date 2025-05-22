@@ -126,7 +126,6 @@ class MiniClustEnvironment(
         import MiniClustStorage.nodeInputPath
         val runtime =
           Seq(
-            "ls -la",
             s"mkdir envplugins"
           )
 
@@ -158,7 +157,6 @@ class MiniClustEnvironment(
           Seq(serializedJob.remoteStorage)).toSeq
 
       // TODO make sure that files are hashed using blake 3
-
       import _root_.miniclust.message.InputFile
       fileMessages.map: r =>
         val nodePath = MiniClustStorage.nodeInputPath(r.path)
