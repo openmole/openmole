@@ -47,17 +47,36 @@ while [ "$#" -gt 0 ]; do
 done
 echo $ARGS
 
-FLAG=""
+FLAGS=""
+FLAGS="$FLAGS -XX:+UseCompressedOops"
+FLAGS="$FLAGS -XX:+UseCompressedClassPointers"
 
-JVMVERSION=`java -version 2>&1 | tail -1 -`
+JVMVERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 
 case "$JVMVERSION" in
-  *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+  1.*)
+    MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f2)
+    ;;
+  *)
+    MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f1)
+    ;;
 esac
 
-for a in $@
+if [ "$MAJOR_VERSION" -lt 21 ]; then
+  echo "Java version is too old ($JVMVERSION). Please use Java 21 or newer."
+  exit 1
+fi
+
+if [ "$MAJOR_VERSION" -ge 24 ]; then
+  FLAGS="$FLAGS -XX:+UnlockExperimentalVMOptions"
+  FLAGS="$FLAGS -XX:+UseCompactObjectHeaders"
+fi
+
+for a in "$@"
 do
-  if [ $a = "--debug" ]; then FLAG="$FLAG -XX:-OmitStackTraceInFastThrow"; fi
+  if [ "$a" = "--debug" ]; then
+    FLAGS="$FLAGS -XX:-OmitStackTraceInFastThrow"
+  fi
 done
 
 
@@ -90,7 +109,7 @@ fi
 ## Just to be sure
 export _JAVA_OPTIONS="-Duser.home=\"${HOME_DIRECTORY}\" -Djava.io.tmpdir=\"${FULL_TMPDIR}\""
 
-java -Djava.io.tmpdir="${FULL_TMPDIR}" -Duser.home="${HOME_DIRECTORY}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.configuration.area="${OSGI_CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true $FLAG -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
+java -Djava.io.tmpdir="${FULL_TMPDIR}" -Duser.home="${HOME_DIRECTORY}" -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Xss2M -Xms64m -Xmx${MEMORY} -Dosgi.configuration.area="${OSGI_CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true $FLAGS -XX:ReservedCodeCacheSize=128m -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=128m \
   -XX:+UseG1GC -XX:ParallelGCThreads=1 -XX:CICompilerCount=2 -XX:ConcGCThreads=1 -XX:G1ConcRefinementThreads=1 -XX:+UseStringDeduplication \
   --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.runtime.SimExplorer --osgi-directory "${OSGI_CONFIGDIR}" --osgi-locking-none -- --workspace "${OPENMOLE_WORKSPACE}" $ARGS
