@@ -52,18 +52,22 @@ then
   fi
 fi
 
-JAVAVERSION=$($JAVA -version 2>&1)
+FLAGS=()
+FLAGS+=("-XX:+UseCompressedOops")
+FLAGS+=("-XX:+UseCompressedClassPointers")
 
-JVMFLAVOR=$(echo "$JAVAVERSION" | tail -1)
-case "$JVMFLAVOR" in
-  *64-Bit*) FLAGS+=("-XX:+UseCompressedOops");;
-esac
+JVMVERSION=$($JAVA -version 2>&1 | awk -F '"' '/version/ {print $2}')
+if [[ "$JVMVERSION" == 1.* ]]; then
+  MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f2)
+else
+  MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f1)
+fi
 
-JVMVERSION=$(echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev)
-case "$JVMVERSION" in
-  *1\.6\.*) echo "Your java version is too old ($JAVAVERSION). You can use $JAVA_HOME to use a more recent Java."; exit 1;;
-  *1\.7\.*) FLAGS+=("-XX:MaxPermSize=128M");;
-esac
+
+if (( MAJOR_VERSION < 21 )); then
+  echo "Your Java version is too old ($JVMVERSION). Please use Java 21 or newer."
+  exit 1
+fi
 
 WORKSPACE="${HOME}/.openmole"
 
