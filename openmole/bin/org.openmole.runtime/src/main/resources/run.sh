@@ -46,13 +46,25 @@ while [ "$#" -gt 0 ]; do
 done
 echo $ARGS
 
-FLAG=""
+FLAGS=""
+FLAGS="$FLAGS -XX:+UseCompressedOops"
+FLAGS="$FLAGS -XX:+UseCompressedClassPointers"
 
-JVMVERSION=`java -version 2>&1 | tail -1 -`
+JVMVERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 
 case "$JVMVERSION" in
-  *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+  1.*)
+    MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f2)
+    ;;
+  *)
+    MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f1)
+    ;;
 esac
+
+if [ "$MAJOR_VERSION" -lt 21 ]; then
+  echo "Java version is too old ($JVMVERSION). Please use Java 21 or newer."
+  exit 1
+fi
 
 for a in $@
 do
