@@ -59,7 +59,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       option = OMROption()
     )
 
-    OMRFormat.variables(file).head._2 should equal(vs)
+    OMRFormat.variables(file).head.variables should equal(vs)
 
   "OMR indexes" should "work" in :
     val p = Val[Int]
@@ -109,4 +109,4 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       option = OMROption()
     )
 
-    OMRFormat.variables(file).head._2.head.value.asInstanceOf[File].content should equal(storedFile.content)
+    OMRFormat.variables(file).head.variables.head.value.asInstanceOf[File].content should equal(storedFile.content)

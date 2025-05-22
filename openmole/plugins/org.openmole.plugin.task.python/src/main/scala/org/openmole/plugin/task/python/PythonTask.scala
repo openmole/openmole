@@ -25,10 +25,16 @@ object PythonTask:
 
   def installCommands(install: Seq[String], libraries: Seq[String], major: Int): Vector[String] =
     // need to install pip2 in case of python 2
-    val effintsall = install ++
-      (if (major == 2) Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py") else Seq.empty)
+    val effintsall =
+      install ++ (
+        if major == 2
+        then Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py")
+        else Seq.empty
+      )
 
-    (effintsall ++ libraries.map { l => "pip"+major+" install " + l }).toVector
+    val pipValue = s"""pip$major install --prefer-binary"""
+
+    (effintsall ++ libraries.map(l => s"$pipValue $l")).toVector
 
   def apply(
     script:                 RunnableScript,
