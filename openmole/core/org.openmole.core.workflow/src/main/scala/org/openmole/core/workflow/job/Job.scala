@@ -84,7 +84,7 @@ import Job._
  */
 class Job(
   val task:          RuntimeTask,
-  private val compressedContext: CompactedContext,
+  val compressedContext: CompactedContext,
   val id:            JobId,
   val callBack:      CallBack):
 
