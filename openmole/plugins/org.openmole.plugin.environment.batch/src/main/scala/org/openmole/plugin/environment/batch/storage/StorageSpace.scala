@@ -21,8 +21,9 @@ object StorageSpace:
   def lastBegining(interval: Time) =
     val modulo = interval.toMillis
     val time = System.currentTimeMillis()
-    val sinceBeginingOfTheDay = time % modulo
-    (time - sinceBeginingOfTheDay).toString
+    val sinceStartOfInterval = time % modulo
+    val startTime = time - sinceStartOfInterval
+    UlidCreator.getHashUlid(startTime, "storage").toLowerCase
 
   def timedUniqName = UlidCreator.getUlid.toLowerCase
 
@@ -32,7 +33,7 @@ object StorageSpace:
     .toOption
 
 object HierarchicalStorageSpace extends JavaLogger:
-  val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(30 days))
+  val TmpDirRemoval = PreferenceLocation("StorageService", "TmpDirRemoval", Some(15 days))
   val TmpDirCreation = PreferenceLocation("StorageService", "TmpDirCreation", Some(1 hours))
 
   def create[S](s: S, root: String, isConnectionError: Throwable => Boolean)(using storageInterface: HierarchicalStorageInterface[S], preference: Preference, priority: AccessControl.Priority) =
@@ -66,7 +67,6 @@ object HierarchicalStorageSpace extends JavaLogger:
     services.replicaCatalog.clean(hierarchicalStorageInterface.id(s), StorageService.rmFile(s, _))
     cleanReplicaDirectory(s, storageSpace.replicaDirectory, hierarchicalStorageInterface.id(s), background)
     cleanTmpDirectory(s, storageSpace.tmpDirectory, background)
-
 
   def ignoreErrors[T](f: => T): Unit = Try(f)
 
