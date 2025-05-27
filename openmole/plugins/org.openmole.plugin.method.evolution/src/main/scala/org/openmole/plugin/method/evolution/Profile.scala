@@ -128,7 +128,7 @@ object Profile {
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
-            import p._
+            import p.*
 
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
             val res = NichedNSGA2Algorithm.result(population, niche, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
@@ -136,7 +136,10 @@ object Profile {
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
-            val outputValues = if (includeOutputs) DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
+            val outputValues =
+              if includeOutputs
+              then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype))
+              else Seq()
 
             genomes ++ fitness ++ Seq(generated) ++ outputValues
 
@@ -235,23 +238,21 @@ object Profile {
 
             genomes ++ fitness ++ Seq(samples, generated) ++ outputValues
 
-        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext { p =>
+        def initialGenomes(n: Int, rng: scala.util.Random) = FromContext: p =>
           import p._
           val continuous = om.genome.continuous
           val discrete = om.genome.discrete
           val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
           NoisyNichedNSGA2Algorithm.initialGenomes(n, continuous, discrete, rejectValue, rng)
-        }
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext { p =>
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext: p =>
           import p._
 
           val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
           NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
-        }
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
-          FromContext { p =>
+          FromContext: p =>
             import p._
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
@@ -264,7 +265,6 @@ object Profile {
               om.genome.continuous,
               om.genome.discrete) apply (s, population, candidates, rng)
 
-          }
 
         def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)

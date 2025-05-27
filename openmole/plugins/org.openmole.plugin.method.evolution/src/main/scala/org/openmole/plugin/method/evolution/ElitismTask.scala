@@ -72,7 +72,7 @@ object IslandElitismTask:
           .apply(newState)
 
       Context(
-        Variable(evolution.populationVal, newPopulation.toArray(evolution.individualVal.`type`.manifest)),
+        Variable(evolution.populationVal, newPopulation.toArray(using evolution.individualVal.`type`.manifest)),
         Variable(evolution.stateVal, incrementedState)
       )
     } set (
