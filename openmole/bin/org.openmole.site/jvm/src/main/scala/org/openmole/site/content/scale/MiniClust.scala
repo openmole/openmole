@@ -23,7 +23,7 @@ import org.openmole.site.content.scale.Environment.*
 object MiniClust extends PageContent(html"""
 ${aa("MiniClust", href := "https://github.com/openmole/miniclust")} is a lightweight and easy to deploy distributed execution environment that is well fitted for OpenMOLE.
 
-The ${code{"MiniClustEnvironment"}} makes it possible to delegate job a MiniClust cluster.
+The ${code{"MiniclustEnvironment"}} makes it possible to delegate job a MiniClust cluster.
 
 $br$br
 
@@ -36,7 +36,7 @@ $br$br
 
 ${hl.openmole("""
   val env =
-    MiniClustEnvironment(
+    MiniclustEnvironment(
       "login",
       "https://babar.openmole.org"
     )
@@ -48,9 +48,9 @@ $provideOptions:
 ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$runtimeSetting,"},
-  li{html"${apiEntryTitle{"core"}}, the number of cores use by each job"},
-  li{html"${apiEntryTitle{"time"}}, the maximum amount of time after which the job get killed, the default on MiniClust in 1 hour"},
-  li{html"${apiEntryTitle{"insecure"}}, the to true if the server provides an insecure https connection"}
+  li{html"${apiEntryTitle{"core"}}, the number of cores used by each job"},
+  li{html"${apiEntryTitle{"time"}}, the maximum amount of time after which the job gets killed, the default on MiniClust in 1 hour"},
+  li{html"${apiEntryTitle{"insecure"}}, true if the server provides an insecure https connection"}
 )}
 
 """)
