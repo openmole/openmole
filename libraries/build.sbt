@@ -7,9 +7,7 @@ def dir = file("bundles")
 
 def settings = Seq(
   resolvers += DefaultMavenRepository,
-  resolvers += Resolver.sonatypeRepo("snapshots"),
-  resolvers += Resolver.sonatypeRepo("releases"),
-  resolvers += Resolver.sonatypeRepo("staging"),
+  resolvers += "publishing" at "https://repo.maven.apache.org/maven2",
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
