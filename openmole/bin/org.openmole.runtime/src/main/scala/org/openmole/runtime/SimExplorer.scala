@@ -34,6 +34,7 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
+import org.osgi.framework.BundleException
 
 object SimExplorer extends JavaLogger {
 
@@ -97,7 +98,9 @@ object SimExplorer extends JavaLogger {
 
             try
               PluginManager.startAll.foreach { case (b, e) => logger.log(WARNING, s"Error starting bundle $b", e) }
-              PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach { case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e) }
+              PluginManager.tryLoad(new File(config.pluginPath.get).listFilesSafe).foreach:
+                case (f, e: BundleException) if e.getType == BundleException.DUPLICATE_BUNDLE_ERROR => logger.log(FINE, s"Duplicated bundle $f", e)
+                case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e)
 
               logger.fine("plugins: " + config.pluginPath.get + " " + new File(config.pluginPath.get).listFilesSafe.mkString(","))
 

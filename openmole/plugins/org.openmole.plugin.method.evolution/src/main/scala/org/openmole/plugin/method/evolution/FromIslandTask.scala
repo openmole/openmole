@@ -29,7 +29,7 @@ object FromIslandTask:
       val (population, islandState) = evolution.operations.migrateFromIsland(context(evolution.populationVal).toVector, initialState, state)
 
       Context(
-        evolution.offspringPopulationVal -> population.toArray(evolution.individualVal.`type`.manifest),
+        evolution.offspringPopulationVal -> population.toArray(using evolution.individualVal.`type`.manifest),
         islandStateVal -> islandState
       )
     .set (

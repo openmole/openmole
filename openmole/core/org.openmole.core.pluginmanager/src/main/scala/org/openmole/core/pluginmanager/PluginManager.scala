@@ -21,7 +21,6 @@ import java.io.File
 import java.util.concurrent.Semaphore
 import java.util.zip.ZipFile
 
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.tool.file._
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.hash.*
@@ -48,30 +47,22 @@ object PluginManager extends JavaLogger {
   private var bundlesInfo: Option[BundlesInfo] = None
   private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
 
-  private[pluginmanager] def clearCaches() = PluginManager.synchronized {
+  private[pluginmanager] def clearCaches() = PluginManager.synchronized:
     bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
-  }
 
-  def allPluginDependencies(b: Bundle) = PluginManager.synchronized {
+  def allPluginDependencies(b: Bundle) = PluginManager.synchronized:
     resolvedPluginDependenciesCache.
       getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
       filter(isPlugin).map(l => Activator.contextOrException.getBundle(l))
-  }
 
-  private def installBundle(f: File) = PluginManager.synchronized {
-    try {
-      val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
-      bundlesInfo = None
-      bundle
-    }
-    catch {
-      case t: Throwable => throw new InternalProcessingError(t, "Installing bundle " + f)
-    }
-  }
+  private def installBundle(f: File) = PluginManager.synchronized:
+    val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
+    bundlesInfo = None
+    bundle
 
-  private def infos: BundlesInfo = PluginManager.synchronized {
-    bundlesInfo match {
+  private def infos: BundlesInfo = PluginManager.synchronized:
+    bundlesInfo match
       case None =>
         val bs = bundles
         val providedDependencies = dependencies(bs.filter(b => b.isProvided)).map(_.getBundleId).toSet
@@ -80,8 +71,7 @@ object PluginManager extends JavaLogger {
         bundlesInfo = Some(info)
         info
       case Some(bundlesInfo) => bundlesInfo
-    }
-  }
+
 
   def updateBundles(bundles: Option[Seq[Bundle]] = None) = {
     val listener = new FrameworkListener {
@@ -162,21 +152,18 @@ object PluginManager extends JavaLogger {
     else if (path.isDirectory) path.listFilesSafe.filter(isBundle)
     else Nil
 
-  def tryLoad(files: Iterable[File]): Iterable[(File, Throwable)] = synchronized {
+  def tryLoad(files: Iterable[File]): Iterable[(File, Throwable)] = synchronized:
     val bundleFiles = files.flatMap { listBundles }
     val loaded = bundleFiles.map { b => b → Try(installBundle(b)) }
     def bundles = loaded.collect { case (f, Success(b)) => f → b }
     def loadError = loaded.collect { case (f, Failure(e)) => f → e }
-    loadError ++ bundles.flatMap {
+    loadError ++ bundles.flatMap:
       case (f, b) =>
-        Try(b.start) match {
+        Try(b.start) match
           case Success(_) => None
           case Failure(e) =>
             b.uninstall()
             Some(f → e)
-        }
-    }
-  }
 
   def load(files: Iterable[File]) = synchronized {
     val bundles = files.flatMap { listBundles }.map { installBundle }.toList
@@ -188,10 +175,9 @@ object PluginManager extends JavaLogger {
     bundles
   }
 
-  def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized {
+  def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized:
     val bundles = plugins.filterNot(f => infos.files.contains(f)).map(installBundle).toList
     bundles.foreach { _.start }
-  }
 
   def load(path: File): Unit = load(List(path))
 
