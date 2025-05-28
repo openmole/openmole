@@ -28,7 +28,6 @@ import org.openmole.core.json.*
 import org.openmole.core.context.{Val, ValType, Variable}
 import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.format.OutputFormat.SectionContent
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
@@ -104,10 +103,6 @@ object OMRFormat:
   def readDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) =
     dataFile(omrFile, name).withGzippedInputStream(f)
 
-//  def readAllDataStreams[T](omrFile: File)(f: (String, java.io.InputStream) => T): Seq[T] =
-//    dataFiles(omrFile).map: name =>
-//      readDataStream(omrFile, name)(is => f(name, is))
-
   def writeOMRContent(file: File, content: OMRContent) =
     file.withPrintStream(create = true, gz = true)(
       _.print(content.asJson.deepDropNullValues.noSpaces)
@@ -147,66 +142,67 @@ object OMRFormat:
 
     val directory = methodFile.getParentFile
 
-    directory.withLockInDirectory:
-      val existingContent =
-        if methodFile.exists()
+    val existingContent =
+      if methodFile.exists()
+      then
+        val contentExecutionId = readSingleJSONField(methodFile, "execution-id").get
+        if option.overwrite && contentExecutionId != executionId || option.replace
         then
-          val content = OMRFormat.omrContent(methodFile)
-          if option.overwrite && content.`execution-id` != executionId || option.replace
-          then
-            OMRFormat.delete(methodFile)
-            None
-          else Some(content)
-        else None
-
-      val existingData = existingContent.toSeq.flatMap(_.`data-file`)
-
-      val resultFileDirectoryName =
-        def name = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-$newUUID"
-        existingContent match
-          case Some(c) => c.`file-directory`.getOrElse(name)
-          case None => name
-
-      val storeFileDirectory = directory / resultFileDirectoryName
-
-      def storeFile(f: File) =
-        val destinationPath = s"${summon[FileService].hashNoCache(f)}/${f.getName}"
-        f.copy(storeFileDirectory / destinationPath)
-        org.json4s.JString(destinationPath)
-
-      def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
-
-      val fileName =
-        def executionPrefix = executionId.filter(_ != '-')
-        if !option.append
-        then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+          OMRFormat.delete(methodFile)
+          None
         else
-          existingData.headOption match
-            case Some(h) => h
-            case None => s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+          val content = OMRFormat.omrContent(methodFile)
+          Some(content)
+      else None
 
-      val dataFile = directory / fileName
+    val existingData = existingContent.toSeq.flatMap(_.`data-file`)
 
-      dataFile.withPrintStream(append = option.append, create = true, gz = true): ps =>
-        if option.append && existingData.nonEmpty then ps.print(",\n")
-        ps.print(compact(render(jsonContent)))
+    val resultFileDirectoryName =
+      def name = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-$newUUID"
+      existingContent match
+        case Some(c) => c.`file-directory`.getOrElse(name)
+        case None => name
 
-      def contentData =
-        OMRContent.DataContent:
-          data.section.map: s =>
-            def sectionIndex = if s.indexes.nonEmpty then Some(s.indexes) else None
-            OMRContent.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
+    val storeFileDirectory = directory / resultFileDirectoryName
 
-      // Is created by variablesToJValues if it found some files
-      def fileDirectoryValue =
-        if storeFileDirectory.exists()
-        then Some(resultFileDirectoryName)
-        else None
+    def storeFile(f: File) =
+      val destinationPath = s"${summon[FileService].hashNoCache(f)}/${f.getName}"
+      f.copy(storeFileDirectory / destinationPath)
+      org.json4s.JString(destinationPath)
 
-      writeOMRContent(
-        methodFile,
-        methodFormat(existingData, fileName, contentData, fileDirectoryValue)
-      )
+    def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
+
+    val fileName =
+      def executionPrefix = executionId.filter(_ != '-')
+      if !option.append
+      then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+      else
+        existingData.headOption match
+          case Some(h) => h
+          case None => s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+
+    val dataFile = directory / fileName
+
+    dataFile.withPrintStream(append = option.append, create = true, gz = true): ps =>
+      if option.append && existingData.nonEmpty then ps.print(",\n")
+      ps.print(compact(render(jsonContent)))
+
+    def contentData =
+      OMRContent.DataContent:
+        data.section.map: s =>
+          def sectionIndex = if s.indexes.nonEmpty then Some(s.indexes) else None
+          OMRContent.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
+
+    // Is created by variablesToJValues if it found some files
+    def fileDirectoryValue =
+      if storeFileDirectory.exists()
+      then Some(resultFileDirectoryName)
+      else None
+
+    writeOMRContent(
+      methodFile,
+      methodFormat(existingData, fileName, contentData, fileDirectoryValue)
+    )
 
 //  def resultFiles(file: File): Seq[(String, File)] =
 //    val directory = file.getParentFile
@@ -448,3 +444,22 @@ object OMRFormat:
       val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
       val writer = jackson.JsonMethods.mapper.writerWithDefaultPrettyPrinter()
       writer.writeValue(os, jackson.renderJValue(fullObject))
+
+  def readSingleJSONField(file: File, targetField: String): Option[String] =
+    import com.fasterxml.jackson.core.JsonFactory
+    import scala.util.boundary
+
+    val factory = JsonFactory()
+    file.withGzippedInputStream: st =>
+      val parser = factory.createParser(st)
+      try
+        boundary[Option[String]]:
+          while parser.nextToken() != null
+          do
+            if parser.currentName() == targetField
+            then
+              parser.nextToken()
+              boundary.break(Some(parser.getValueAsString))
+          None
+      finally
+        parser.close()
