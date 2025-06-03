@@ -41,30 +41,26 @@ object Validation {
 
   def allMoles(mole: Mole, sources: Sources, hooks: Hooks, in: Option[(MoleTask, MoleCapsule)] = None): List[(Mole, Option[(MoleTask, MoleCapsule)])] =
     (mole, in) ::
-      mole.capsules.flatMap(
-        c =>
-          c.task(mole, sources, hooks) match {
-            case mt: MoleTask => allMoles(mt.mole, sources, hooks, Some(mt -> c))
-            case _            => List.empty
-          }
-      ).toList
+      mole.capsules.flatMap: c =>
+        c.task(mole, sources, hooks) match
+          case mt: MoleTask => allMoles(mt.mole, sources, hooks, Some(mt -> c))
+          case _            => List.empty
+      .toList
 
-  private def paramsToMap(params: Iterable[Default[?]]) =
-    params.map {
-      p => p.prototype.name -> p.prototype
-    }.toMap[String, Val[?]]
 
-  private def prototypesToMap(prototypes: Iterable[Val[?]]) = prototypes.map { i => i.name -> i }.toMap[String, Val[?]]
+  private def prototypesToMap(prototypes: Iterable[Val[?]]) = prototypes.map(i => i.name -> i).toMap
 
-  private def separateDefaults(p: DefaultSet) = {
+  private def defaultMaps(p: DefaultSet) =
     val (po, pno) = p.partition(_.`override`)
-    (paramsToMap(po), paramsToMap(pno))
-  }
 
-  abstract class errorDetect(mole: Mole, implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks) {
+    (
+      prototypesToMap(po.map(_.prototype) ++ Task.openMOLEDefault),
+      prototypesToMap(pno.map(_.prototype))
+    )
+
+  abstract class errorDetect(mole: Mole, implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks):
     def checkPrototypeMatch(p: Val[?]): Problem
     val implicitMap = prototypesToMap(implicits)
-  }
 
   def taskTypeErrors(mole: Mole)(capsules: Iterable[MoleCapsule], implicits: Iterable[Val[?]], sources: Sources, hooks: Hooks) = {
 
@@ -76,7 +72,7 @@ object Validation {
       s <- mole.slots(c)
       computedTypes = TypeUtil.validTypes(mole, sources, hooks)(s)
       receivedInputs = TreeMap(computedTypes.map { p => p.name -> p }.toSeq *)
-      (defaultsOverride, defaultsNonOverride) = separateDefaults(Task.defaults(c.task(mole, sources, hooks)))
+      (defaultsOverride, defaultsNonOverride) = defaultMaps(Task.defaults(c.task(mole, sources, hooks)))
       input <- Task.inputs(c.task(mole, sources, hooks))
     } yield {
       def checkPrototypeMatch(p: Val[?]) =
@@ -123,7 +119,7 @@ object Validation {
       for {
         c <- mole.capsules
         (so: Source) <- sources.getOrElse(c, List.empty)
-        (defaultsOverride, defaultsNonOverride) = separateDefaults(so.defaults)
+        (defaultsOverride, defaultsNonOverride) = defaultMaps(so.defaults)
         sl <- mole.slots(c)
         receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p => p.name -> p }.toSeq *)
         i <- so.inputs
@@ -152,7 +148,7 @@ object Validation {
       for {
         c <- mole.capsules
         source <- sources.getOrElse(c, List.empty).collect { case s: ValidateSource => s }
-        (defaultsOverride, defaultsNonOverride) = separateDefaults(source.defaults)
+        (defaultsOverride, defaultsNonOverride) = defaultMaps(source.defaults)
         sl <- mole.slots(c)
         receivedInputs = TreeMap(TypeUtil.validTypes(mole, sources, hooks)(sl).map { p => p.name -> p }.toSeq *).mapValues(_.toVal)
       } yield {
@@ -275,7 +271,7 @@ object Validation {
         c <- m.capsules
         outputs = c.outputs(m, sources, Hooks.empty).toMap
         h <- hooks(c)
-        (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
+        (defaultsOverride, defaultsNonOverride) = defaultMaps(h.defaults)
         i <- h.inputs
       yield
         val inputName = i.name
@@ -305,7 +301,7 @@ object Validation {
         c <- m.capsules
         outputs = c.outputs(m, sources, Hooks.empty).toMap
         h <- hooks(c).collect { case v: ValidateHook => v }
-        (defaultsOverride, defaultsNonOverride) = separateDefaults(h.defaults)
+        (defaultsOverride, defaultsNonOverride) = defaultMaps(h.defaults)
       yield
         val inputs = (defaultsNonOverride ++ implicitMap ++ outputs ++ defaultsOverride).toSeq.map(_._2)
         h.validate(inputs).toList match

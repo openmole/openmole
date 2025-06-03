@@ -30,9 +30,8 @@ import org.openmole.tool.random.*
 
 import scala.util.*
 
-trait CompilationClosure[+T] { //extends ScalaCompilation.ContextClosure[T] {
+trait CompilationClosure[+T]: //extends ScalaCompilation.ContextClosure[T] {
   def apply(context: Context, rng: RandomProvider, newFile: TmpDirectory): T
-}
 
 /**
  * Methods for compiling scala code
@@ -61,10 +60,9 @@ object ScalaCompilation {
    * @param plugins
    * @return
    */
-  def priorityBundles(plugins: Seq[File]) = {
+  def priorityBundles(plugins: Seq[File]) =
     val pluginBundles = plugins.flatMap(PluginManager.bundle)
     pluginBundles ++ pluginBundles.flatMap(PluginManager.allPluginDependencies) ++ PluginManager.bundleForClass(this.getClass)
-  }
 
   /**
    * Compile scala code using a [[org.openmole.core.compiler.Interpreter]]
@@ -77,7 +75,7 @@ object ScalaCompilation {
    * @tparam RETURN
    * @return
    */
-  private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(implicit newFile: TmpDirectory, fileService: FileService) =
+  private def compile[RETURN](script: Script, plugins: Seq[File] = Seq.empty, libraries: Seq[File] = Seq.empty)(using newFile: TmpDirectory, fileService: FileService) =
     val osgiMode = org.openmole.core.compiler.Activator.osgi
     val interpreter =
       if osgiMode
@@ -113,12 +111,12 @@ object ScalaCompilation {
         util.Failure(userBadDataError)
       case util.Failure(e) => util.Failure(new InternalProcessingError(s"Error while compiling with interpreter $errorMsg", e))
 
-  def function[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def function[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[? <: RETURN])(using newFile: TmpDirectory, fileService: FileService) =
     val s = script(inputs, source, wrapping, returnType)
     compile[CompilationClosure[RETURN]](s, plugins, libraries)
-  }
 
-  def closure[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN])(implicit newFile: TmpDirectory, fileService: FileService) =
+
+  def closure[RETURN](inputs: Seq[Val[?]], source: String, plugins: Seq[File], libraries: Seq[File], wrapping: OutputWrapping[RETURN], returnType: ValType[? <: RETURN])(using newFile: TmpDirectory, fileService: FileService) =
     function[RETURN](inputs, source, plugins, libraries, wrapping, returnType)
 
   /**
@@ -151,8 +149,8 @@ object ScalaCompilation {
          |      ${inputs.toSeq.map(i => s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.toTypeString(i.`type`)}]""").mkString("; ")}
          |    }
          |    import ${inputObject}._
-         |    implicit def ${Val.name(Variable.openMOLENameSpace, "RNGProvider")}: ${manifest[RandomProvider].toString} = ${prefix}RNG
-         |    implicit def ${Val.name(Variable.openMOLENameSpace, "NewFile")}: ${manifest[TmpDirectory].toString} = ${prefix}NewFile
+         |    implicit def ${Val.name(Namespace.openmole, "RNGProvider")}: ${manifest[RandomProvider].toString} = ${prefix}RNG
+         |    implicit def ${Val.name(Namespace.openmole, "NewFile")}: ${manifest[TmpDirectory].toString} = ${prefix}NewFile
          |
          |    /* --- User Code --- */"""
 
@@ -185,10 +183,9 @@ object ScalaCompilation {
 
     val cache = Cache(collection.mutable.HashMap[Seq[Val[?]], Try[ContextClosure[R]]]())
 
-    def compiled(context: Context)(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] = {
+    def compiled(context: Context)(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
       val contextPrototypes = context.values.map { _.prototype }.toSeq
       compiled(contextPrototypes)
-    }
 
     def compiled(inputs: Seq[Val[?]])(implicit newFile: TmpDirectory, fileService: FileService): Try[ContextClosure[R]] =
       cache().synchronized:
@@ -216,13 +213,11 @@ object ScalaCompilation {
         case Success(_) => Seq()
         case Failure(e) => Seq(e)
 
-    def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext { p =>
+    def apply()(implicit newFile: TmpDirectory, fileService: FileService): FromContext[R] = FromContext: p =>
       val closure: ContextClosure[R] = compiled(p.context).get
       try closure.apply(p.context, p.random, p.tmpDirectory)
-      catch {
+      catch
         case t: Throwable => throw new UserBadDataError(t, s"Error in execution of compiled closure in context: ${p.context}")
-      }
-    }
   }
 
   def static[R](
@@ -231,7 +226,7 @@ object ScalaCompilation {
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
-  )(implicit m: Manifest[_ <: R], newFile: TmpDirectory, fileService: FileService) =
+  )(implicit m: Manifest[? <: R], newFile: TmpDirectory, fileService: FileService) =
     val (cl, i) = closure[R](inputs, code, plugins, libraries, wrapping, ValType(m)).get
     ContextClosure(cl.apply, i)
 
@@ -246,16 +241,14 @@ object ScalaCompilation {
 
   /**
    * Wraps a prototype set as compilable code (used to build the [[script]])
-   * @param outputs
    */
   case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]]:
     def wrapOutput =
       s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p => s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava"""
 
 
-  case class RawOutput[T]() extends OutputWrapping[T] { compilation =>
+  case class RawOutput[T]() extends OutputWrapping[T]:
     def wrapOutput = ""
-  }
 
 }
 

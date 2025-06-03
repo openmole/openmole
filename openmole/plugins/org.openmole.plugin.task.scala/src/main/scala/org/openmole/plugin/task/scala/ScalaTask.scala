@@ -68,11 +68,11 @@ case class ScalaTask(
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
   lazy val pluginsCache = CacheKey[Seq[File]]()
 
-  private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[ Mapped[?]]) =
-    ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name))
+  private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[Mapped[?]]) =
+    ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name).withNamespace(Namespace.empty))
 
   private def toMappedOutputVals(ps: PrototypeSet, mapped: Seq[ Mapped[?]]) =
-    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
+    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name).withNamespace(Namespace.empty))
 
   lazy val noFileInputs = Mapped.noFile(mapped.inputs)
   lazy val noFileOutputs = Mapped.noFile(mapped.outputs)

@@ -180,19 +180,28 @@ object MoleExecution:
       val jobId = nextJobId(subMoleExecutionState.moleExecution)
       MoleExecution.addJob(subMoleExecutionState, jobId, capsule)
 
+
       val sourced =
-        subMoleExecutionState.moleExecution.sources(capsule).foldLeft(Context.empty) {
-          case (a, s) =>
-            val ctx = try s.perform(subMoleExecutionState.moleExecution.implicits + context, subMoleExecutionState.moleExecution.executionContext)
-            catch
-              case t: Throwable =>
-                LoggerService.fine("Error in submole execution", t)
-                val event = MoleExecution.SourceExceptionRaised(s, capsule, t, Level.SEVERE)
-                eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
-                cancel(subMoleExecutionState.moleExecution, Some(event))
-                throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
-            a + ctx
-        } + Variable(Variable.openMOLESeed, seeder.newSeed)
+        lazy val sourceContext = subMoleExecutionState.moleExecution.implicits + Variable(Variable.openMOLEExperiment, ticket.content) + context
+
+        subMoleExecutionState.moleExecution.sources(capsule).foldLeft(Context.empty): (a, s) =>
+          val ctx = try s.perform(sourceContext, subMoleExecutionState.moleExecution.executionContext)
+          catch
+            case t: Throwable =>
+              LoggerService.fine("Error in submole execution", t)
+              val event = MoleExecution.SourceExceptionRaised(s, capsule, t, Level.SEVERE)
+              eventDispatcher.trigger(subMoleExecutionState.moleExecution, event)
+              cancel(subMoleExecutionState.moleExecution, Some(event))
+              throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
+          a + ctx
+
+      def taskContext =
+        def openmoleDefaults = Seq(
+          Variable(Variable.openMOLESeed, seeder.newSeed),
+          Variable(Variable.openMOLEExperiment, ticket.content)
+        )
+
+        subMoleExecutionState.moleExecution.implicits + openmoleDefaults + sourced + context
 
       capsule.master match
         case Some(master) =>
@@ -204,7 +213,7 @@ object MoleExecution:
               val savedContext = subMoleExecutionState.masterCapsuleRegistry.remove(capsule, ticket.parentOrException).map(CompactedContext.expand).getOrElse(Context.empty)
               val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
               def jobCallBack = Job.CallBack((_, _) => (), () => subMoleExecutionState.canceled)
-              val moleJob: Job = Job(runtimeTask, subMoleExecutionState.moleExecution.implicits + sourced + context + savedContext, jobId, jobCallBack)
+              val moleJob: Job = Job(runtimeTask, taskContext + savedContext, jobId, jobCallBack)
 
               eventDispatcher.trigger(subMoleExecutionState.moleExecution, MoleExecution.JobCreated(jobId, capsule))
 
@@ -243,7 +252,7 @@ object MoleExecution:
               MoleExecutionMessage.send(subMoleExecutionState.moleExecution):
                 MoleExecutionMessage.JobFinished(subMoleExecutionState.id)(job, result.swap.map(CompactedContext.compact).swap, capsule, ticket)
 
-          val newContext = subMoleExecutionState.moleExecution.implicits + sourced + context
+          val newContext = taskContext
           val runtimeTask = subMoleExecutionState.moleExecution.runtimeTask(capsule)
           val moleJob: Job = Job(runtimeTask, newContext, jobId, JobCallBackClosure(subMoleExecutionState, capsule, ticket))
 

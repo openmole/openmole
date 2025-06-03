@@ -54,11 +54,11 @@ object DefaultSet {
   def vals(defaults: DefaultSet): Seq[Val[?]] = defaults.defaults.map(_.prototype).toSeq
 
   def defaultVals(inputs: PrototypeSet, defaults: DefaultSet): Seq[Val[?]] =
-    defaults.flatMap {
-      parameter =>
-        if (parameter.`override` || !inputs.contains(parameter.prototype.name)) Some(parameter.prototype)
-        else None
-    }
+    defaults.flatMap: parameter =>
+      if parameter.`override` || !inputs.contains(parameter.prototype.name)
+      then Some(parameter.prototype)
+      else None
+
 
 }
 
