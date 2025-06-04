@@ -219,7 +219,7 @@ object Task:
     def defaults: DefaultSet = task.config.defaults
     def definitionScope = task.info.definitionScope
 
-  def openMOLEDefault = Seq(Variable.openMOLEExperiment, Variable.openMOLESeed)
+  def openMOLEDefault = Seq(Variable.openMOLESeed)
 
   object TaskExecution:
     import org.openmole.tool.random.*

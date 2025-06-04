@@ -197,8 +197,7 @@ object MoleExecution:
 
       def taskContext =
         def openmoleDefaults = Seq(
-          Variable(Variable.openMOLESeed, seeder.newSeed),
-          Variable(Variable.openMOLEExperiment, ticket.content)
+          Variable(Variable.openMOLESeed, seeder.newSeed)
         )
 
         subMoleExecutionState.moleExecution.implicits + openmoleDefaults + sourced + context
