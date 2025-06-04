@@ -85,7 +85,6 @@ object OMROutputFormat:
             Some(OMRContent.Script(scriptContent, imports))
           case _ => None
 
-
       OMRFormat.write(
         data = content,
         methodFile = methodFile,

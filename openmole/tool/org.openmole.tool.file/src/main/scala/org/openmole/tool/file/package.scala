@@ -33,7 +33,7 @@ import scala.io.Source
 import scala.util.{ Success, Failure, Try }
 import org.openmole.tool.stream._
 
-package file {
+package file:
 
   import com.github.f4b6a3.ulid.UlidCreator
 
@@ -377,20 +377,16 @@ package file {
           case _: FileSystemException           => unsupported
           case e: IOException                   => throw e
 
-
-      def createParentDirectory = wrapError {
+      def createParentDirectory = wrapError:
         file.getCanonicalFile.getParentFileSafe.mkdirs
-      }
 
       def withLock[T](f: OutputStream => T): T =
-        jvmLevelFileLock.withLock(file.getCanonicalPath):
-          withClosable(new FileOutputStream(file, true)) { fos =>
-            withClosable(new BufferedOutputStream(fos)) { bfos =>
+        jvmLevelFileLock.locked(file.getCanonicalPath):
+          withClosable(new FileOutputStream(file, true)): fos =>
+            withClosable(new BufferedOutputStream(fos)): bfos =>
               val lock = fos.getChannel.lock
               try f(bfos)
-              finally lock.release
-            }
-          }
+              finally lock.release()
 
       def withLockInDirectory[T](f: => T, lockName: String = ".lock"): T =
         file.mkdirs()
@@ -466,7 +462,7 @@ package file {
       ////// synchronized operations //////
       def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
 
-      def lockAndAppendFile(from: File): Unit = jvmLevelFileLock.withLock(file.getCanonicalPath) {
+      def lockAndAppendFile(from: File): Unit = jvmLevelFileLock.locked(file.getCanonicalPath) {
         val channelI = new FileInputStream(from).getChannel
         try {
           val channelO = new FileOutputStream(file, true).getChannel
@@ -575,8 +571,6 @@ package file {
         f.setWritable(true)
         f.setExecutable(true)
 
-
-}
 
 package object file extends FilePackage:
   val jvmLevelFileLock = new LockRepository[String]
