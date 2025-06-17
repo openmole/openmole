@@ -1,4 +1,4 @@
-package org.apache.fury
+package org.apache.fory
 
 /*
  * Copyright (C) 2024 Romain Reuillon
