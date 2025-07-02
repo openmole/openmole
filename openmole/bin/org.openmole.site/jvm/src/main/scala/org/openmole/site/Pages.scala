@@ -259,7 +259,7 @@ object DocumentationPages:
   lazy val spatialTask = DocumentationPage.fromContent(name = "Spatial Task", content = org.openmole.site.content.documentation.utilityTask.SpatialTask)
 
   // Advanced Concepts
-  def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, island, stochasticityManagement))
+  def advancedConceptsPages = pageNode(advancedConcepts, Vector(geneticAlgorithm, island, stochasticityManagement, suggestion))
 
   //lazy val resumableWorkflow = DocumentationPage.fromScalatex(name = "Resumable Workflow", content = scalatex.documentation.advancedConcepts.ResumableWorkflow)
 
@@ -267,6 +267,7 @@ object DocumentationPages:
   lazy val geneticAlgorithm = DocumentationPage.fromContent(name = "Genetic Algorithms", content = org.openmole.site.content.advancedConcepts.GA.GeneticAlgorithm)
   lazy val island = DocumentationPage.fromContent(name = "Island Distribution Scheme", content = org.openmole.site.content.advancedConcepts.GA.Island)
   lazy val stochasticityManagement = DocumentationPage.fromContent(name = "Stochasticity Management", content = org.openmole.site.content.advancedConcepts.GA.StochasticityManagement)
+  lazy val suggestion = DocumentationPage.fromContent(name = "Suggest Genomes", content = org.openmole.site.content.advancedConcepts.GA.Suggestion)
 
   // Developers
   def developersPages = pageNode(developers, Vector(console, pluginDevelopment, extensionAPI, restAPI, documentationGen))
