@@ -142,7 +142,7 @@ object EGIEnvironment extends JavaLogger {
             jobKey.find(j => executionJobsMap(j).isEmpty) match
               case Some(j) => j
               case None =>
-                jobKey.find(j => !executionJobsMap(j).exists(j => j.state != ExecutionState.SUBMITTED)) match
+                jobKey.find(j => !executionJobsMap(j).exists(j => BatchEnvironment.executionSate(environment, j) != ExecutionState.SUBMITTED)) match
                   case Some(j) => j
                   case None    => jobKey.head
 
