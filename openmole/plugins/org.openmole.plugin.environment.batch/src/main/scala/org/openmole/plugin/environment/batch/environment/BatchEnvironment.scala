@@ -288,11 +288,14 @@ object BatchEnvironment:
 
   def finishedExecutionJob(environment: BatchEnvironment, job: BatchExecutionJob) =
     ExecutionJobRegistry.finished(environment.registry, job, environment)
+    BatchEnvironmentState.clearState(environment.state, job.id)
     environment.finishedJob(job)
 
-  def executionSate(environment: BatchEnvironment, job: BatchExecutionJob): ExecutionState = job._state
 
-  def setExecutionSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState)(implicit eventDispatcher: EventDispatcher) = job.synchronized:
+  def executionSate(environment: BatchEnvironment, job: BatchExecutionJob): ExecutionState =
+    BatchEnvironmentState.getState(environment.state, job.id)
+
+  def setExecutionSate(environment: BatchEnvironment, job: BatchExecutionJob, newState: ExecutionState)(using eventDispatcher: EventDispatcher) = environment.state.synchronized:
     import ExecutionState._
 
     val state = BatchEnvironment.executionSate(environment, job)
@@ -307,12 +310,13 @@ object BatchEnvironment:
         case _ =>
 
       eventDispatcher.trigger(environment, Environment.JobStateChanged(job.id, job, newState, state))
-      job._state = newState
+      BatchEnvironmentState.putState(environment.state, job.id, newState)
 
   def submit(env: BatchEnvironment, job: JobGroup)(implicit services: BatchEnvironment.Services) =
     import services.*
     val id = env.state.jobId.getAndIncrement()
     val bej = BatchExecutionJob(id, job, env.jobStore)
+    BatchEnvironmentState.putState(env.state, id, ExecutionState.READY)
     ExecutionJobRegistry.register(env.registry, bej)
     JobManager ! Manage(bej, env)
     id
@@ -388,9 +392,10 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
   def errors: Seq[ExceptionEvent] = state._errors.elements
   def clearErrors: Seq[ExceptionEvent] = state._errors.clear()
 
-  def ready: Long = ExecutionJobRegistry.executionJobs(registry).count { j => BatchEnvironment.executionSate(this, j) == ExecutionState.READY }
-  def submitted: Long = ExecutionJobRegistry.executionJobs(registry).count { j => BatchEnvironment.executionSate(this, j) == ExecutionState.SUBMITTED }
-  def running: Long = ExecutionJobRegistry.executionJobs(registry).count { j => BatchEnvironment.executionSate(this, j) == ExecutionState.RUNNING }
+  def ready: Long = BatchEnvironmentState.count(state, _ == ExecutionState.READY)
+  def submitted: Long = BatchEnvironmentState.count(state, _ == ExecutionState.SUBMITTED)
+  def running: Long = BatchEnvironmentState.count(state, _ == ExecutionState.RUNNING)
+  
   def runningJobs = ExecutionJobRegistry.executionJobs(registry).filter(j => BatchEnvironment.executionSate(this, j) == ExecutionState.RUNNING)
 
   def done: Long = state._done.get()
@@ -409,6 +414,22 @@ object BatchEnvironmentState:
 
     new BatchEnvironmentState(_errors, jobStore)
 
+  def getState(s: BatchEnvironmentState, id: Long) =
+    s.jobState.synchronized:
+      s.jobState(id)
+
+  def putState(s: BatchEnvironmentState, id: Long, state: ExecutionState) =
+    s.jobState.synchronized:
+      s.jobState.put(id, state)
+
+  def clearState(s: BatchEnvironmentState, id: Long) =
+    s.jobState.synchronized:
+      s.jobState.remove(id)
+  
+  def count(s: BatchEnvironmentState, f: ExecutionState => Boolean) =
+    s.jobState.synchronized:
+      s.jobState.count(j => f(j._2))
+
 class BatchEnvironmentState(
   val _errors: RingBuffer[ExceptionEvent],
   val jobStore: JobStore):
@@ -418,3 +439,4 @@ class BatchEnvironmentState(
   val _done = new AtomicLong(0L)
   val _failed = new AtomicLong(0L)
 
+  val jobState = collection.mutable.LongMap[ExecutionState]()
