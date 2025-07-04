@@ -315,7 +315,7 @@ object BatchEnvironment:
   def submit(env: BatchEnvironment, job: JobGroup)(implicit services: BatchEnvironment.Services) =
     import services.*
     val id = env.state.jobId.getAndIncrement()
-    val bej = BatchExecutionJob(id, job, env.jobStore)
+    val bej = BatchExecutionJob(id, job, env.state.jobStore)
     BatchEnvironmentState.putState(env.state, id, ExecutionState.READY)
     ExecutionJobRegistry.register(env.registry, bej)
     JobManager ! Manage(bej, env)
@@ -371,8 +371,6 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
 
   def services: BatchEnvironment.Services
 
-  def jobStore = state.jobStore
-  
   def environmentPlugins: Iterable[File] = BatchEnvironment.environmentPlugins(this)
   def scriptPlugins: Iterable[File] = BatchEnvironment.scriptPlugins(services)
 
@@ -395,7 +393,7 @@ trait BatchEnvironment(val state: BatchEnvironmentState) extends SubmissionEnvir
   def ready: Long = BatchEnvironmentState.count(state, _ == ExecutionState.READY)
   def submitted: Long = BatchEnvironmentState.count(state, _ == ExecutionState.SUBMITTED)
   def running: Long = BatchEnvironmentState.count(state, _ == ExecutionState.RUNNING)
-  
+
   def runningJobs = ExecutionJobRegistry.executionJobs(registry).filter(j => BatchEnvironment.executionSate(this, j) == ExecutionState.RUNNING)
 
   def done: Long = state._done.get()
@@ -425,7 +423,7 @@ object BatchEnvironmentState:
   def clearState(s: BatchEnvironmentState, id: Long) =
     s.jobState.synchronized:
       s.jobState.remove(id)
-  
+
   def count(s: BatchEnvironmentState, f: ExecutionState => Boolean) =
     s.jobState.synchronized:
       s.jobState.count(j => f(j._2))
