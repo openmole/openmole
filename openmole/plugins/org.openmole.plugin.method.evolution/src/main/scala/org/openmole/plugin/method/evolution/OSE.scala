@@ -287,9 +287,9 @@ object OSE {
       val fg = fullGenome(origin, genome)
       def grid(continuous: IArray[Double], discrete: IArray[Int]): Vector[Int] =
         origin.toVector.flatMap:
-          case ScalarDoubleOriginAxe(p, scale)         => Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
-          case ContinuousIntOriginAxe(p, scale)         => Vector(mgo.tools.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
-          case ScalarIntOriginAxe(p, scale)           => Vector(mgo.tools.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
+          case ScalarDoubleOriginAxe(p, scale)         => Vector(mgo.evolution.niche.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
+          case ContinuousIntOriginAxe(p, scale)         => Vector(mgo.evolution.niche.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
+          case ScalarIntOriginAxe(p, scale)           => Vector(mgo.evolution.niche.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
           case SequenceOfDoubleOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous).toVector)
           case SequenceOfContinuousIntOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous).toVector)
           case SequenceOfIntOriginAxe(p, scale)   => mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete).toVector)

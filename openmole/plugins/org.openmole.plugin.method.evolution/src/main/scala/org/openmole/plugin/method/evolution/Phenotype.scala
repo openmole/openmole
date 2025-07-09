@@ -2,11 +2,11 @@ package org.openmole.plugin.method.evolution
 
 import org.openmole.core.dsl._
 import `extension`._
-import mgo.tools.CanBeNaN
+import mgo.tools.CanContainNaN
 
 object Phenotype:
 
-  implicit def phenotypeCanBeNaN: CanBeNaN[Phenotype] = (t: Phenotype) =>
+  given CanContainNaN[Phenotype] = (t: Phenotype) =>
     def anyIsNaN(t: Any): Boolean =
       t match
         case x: Double => x.isNaN
