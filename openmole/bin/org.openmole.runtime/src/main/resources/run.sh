@@ -91,19 +91,23 @@ ulimit -S -s unlimited
 # Constrain JVM memory
 export MALLOC_ARENA_MAX=1
 
-# Set UTF-8 local
-if [ `locale -a | grep C.UTF-8` ]; then OM_LOCAL="C.UTF-8"
-elif [ `locale -a | grep en_US.utf8` ]; then OM_LOCAL="en_US.utf8"
-elif [ `locale -a | grep utf8` ]; then OM_LOCAL=`locale -a |  grep utf8 | head -1`
+# Set UTF-8 locale
+if locale -a | grep -q '^C\.UTF-8$'; then
+  OM_LOCAL="C.UTF-8"
+elif locale -a | grep -q '^en_US\.utf8$'; then
+  OM_LOCAL="en_US.utf8"
+elif locale -a | grep -i 'utf8' > /dev/null; then
+  OM_LOCAL=$(locale -a | grep -i 'utf8' | head -1)
 else
-  echo "No UTF8 locale found among installed locales"
+  echo "No UTF-8 locale found among installed locales"
   locale -a
 fi
 
 if [ -n "$OM_LOCAL" ]; then
-  export LC_ALL=$OM_LOCAL
-  export LANG=$OM_LOCAL
+  export LC_ALL="$OM_LOCAL"
+  export LANG="$OM_LOCAL"
 fi
+
 
 ## Just to be sure
 export _JAVA_OPTIONS="-Duser.home=\"${HOME_DIRECTORY}\" -Djava.io.tmpdir=\"${FULL_TMPDIR}\""
