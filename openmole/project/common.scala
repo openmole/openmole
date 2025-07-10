@@ -12,7 +12,7 @@ object common {
   def scalajsVersion = "1.19.0"
 
   def scalaXMLVersion = "2.1.0"
-  def gridscaleVersion = "2.61"
+  def gridscaleVersion = "2.62"
   def mgoVersion = "3.66"
   def sshjVersion = "0.38.0"
   def containerVersion = "1.33"
