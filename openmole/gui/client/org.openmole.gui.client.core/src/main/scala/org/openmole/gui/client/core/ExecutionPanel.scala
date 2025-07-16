@@ -107,7 +107,6 @@ class ExecutionPanel:
   val showExpander: Var[Option[Expand]] = Var(None)
   val showControls = Var(false)
   val showGlobalControls = Var(false)
-  val showEvironmentControls = Var(false)
   val details: Var[Executions] = Var(Map())
 
   def toExecDetails(exec: ExecutionData, panels: Panels): ExecutionDetails =
@@ -328,17 +327,6 @@ class ExecutionPanel:
         case ErrorStateLevel.Error => "#c8102e"
         case _ => "#555"
 
-    def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) = div(cls := "execButtons",
-      child <-- showEvironmentControls.signal.map: c =>
-        if c
-        then
-          div(display.flex, flexDirection.column, alignItems.center,
-            button("Clear", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
-          )
-        else div()
-    )
-
-
     def environmentRow(executionId: ExecutionId, e: EnvironmentState) =
       val openEnvironmentErrors: Var[Boolean] = Var(false)
 
@@ -346,6 +334,17 @@ class ExecutionPanel:
         api.clearEnvironmentError(executionId, id).andThen: _ =>
           showExpander.set(None)
           showExpander.set(Some(Expand.Computing))
+
+      def environmentControls(id: EnvironmentId, clear: EnvironmentId => Unit) =
+        div(cls := "execButtons",
+          child <-- openEnvironmentErrors.signal.map: c =>
+            if c
+            then
+              div(display.flex, flexDirection.column, alignItems.center, marginLeft := "10px",
+                button("Clear Errors", onClick --> { _ => clear(id) }, btn_danger, cls := "controlButton")
+              )
+            else div()
+        )
 
       div(columnFlex,
         div(rowFlex, justifyContent.center,
@@ -357,9 +356,7 @@ class ExecutionPanel:
           contextBlock("Running", e.running.toString, true),
           contextBlock("Finished", e.done.toString, true),
           contextBlock("Failed", e.failed.toString, true),
-          contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(
-            onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
-          div(cls := "bi-three-dots-vertical execControls", onClick.mapToChecked --> showEvironmentControls),
+          contextBlock("Errors", e.numberOfErrors.toString, true, link = true).amend(onClick --> openEnvironmentErrors.update(!_), cursor.pointer),
           environmentControls(e.envId, id => cleanEnvironmentErrors(executionId, id)),
         ),
         child <-- openEnvironmentErrors.signal.map: opened =>
