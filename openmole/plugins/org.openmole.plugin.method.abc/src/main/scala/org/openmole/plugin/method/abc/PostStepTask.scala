@@ -16,7 +16,7 @@ object PostStepTask {
     nAlpha:               Int,
     stopSampleSizeFactor: Int,
     prior:                IndependentPriors,
-    observed:             Seq[ABC.Observed[_]],
+    observed:             Seq[ABC.Observed[?]],
     state:                Val[MonAPMC.MonState],
     stepState:            Val[MonAPMC.StepState],
     minAcceptedRatio:     Option[Double],

@@ -27,7 +27,7 @@ class Activator extends PluginRegistryActivator {
 
   override def start(context: BundleContext): Unit = {
     import org.openmole.core.highlight.HighLight._
-    val keyWords: Vector[HighLight] = Vector(DomainHighLight(classOf[SeqDomain[_]]))
+    val keyWords: Vector[HighLight] = Vector(DomainHighLight(classOf[SeqDomain[?]]))
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = keyWords)
   }
 }

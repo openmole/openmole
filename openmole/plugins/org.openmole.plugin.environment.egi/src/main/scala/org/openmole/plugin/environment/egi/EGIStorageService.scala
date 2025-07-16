@@ -241,4 +241,4 @@ object WebDavStorage:
 
       override def id(s: WebDavStorage): String = WebDavStorage.id(s)
 
-case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[_])
+case class WebDavStorage(url: String, accessControl: AccessControl, qualityControl: QualityControl, proxyCache: TimeCache[VOMS.VOMSCredential], environment: EGIEnvironment[?])

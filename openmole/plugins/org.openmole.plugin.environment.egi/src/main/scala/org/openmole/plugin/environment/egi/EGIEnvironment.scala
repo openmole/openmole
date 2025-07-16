@@ -106,7 +106,7 @@ object EGIEnvironment extends JavaLogger {
   def stdOutFileName = "output"
   def stdErrFileName = "error"
 
-  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference, serializerService: SerializerService) = {
+  def eagerSubmit(environment: EGIEnvironment[?])(implicit preference: Preference, serializerService: SerializerService) = {
     val jobs = environment.jobs
     val jobSize = jobs.size
 

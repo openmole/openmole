@@ -11,7 +11,7 @@ import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage 
 class PBSJobService[S](
   s:                 S,
   tmpDirectory:      String,
-  installation:      RuntimeInstallation[_],
+  installation:      RuntimeInstallation[?],
   parameters:        Parameters,
   headnode:          HeadNode,
   val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services):
