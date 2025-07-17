@@ -1,5 +1,6 @@
 package org.openmole.launcher;
 
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -31,7 +32,7 @@ public class Launcher {
 
     public static void main(String[] args) {
 
-        //FIXME: Use options when OpenMOLE will enforce java 8
+        //FIXME: Use options 
         File directory = null;
         String run = null;
         String osgiDirectory = null;
@@ -82,6 +83,8 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
+        osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_RESOLVER_THREAD_COUNT, "1");
+
         if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);
 
         StringBuffer versions = new StringBuffer();
