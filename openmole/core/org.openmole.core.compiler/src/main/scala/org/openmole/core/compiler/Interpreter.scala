@@ -32,7 +32,7 @@ import scala.annotation.tailrec
 //import scala.tools.nsc._
 //import scala.tools.nsc.reporters._
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
+//import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.tools.nsc.interpreter._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory
