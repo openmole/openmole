@@ -215,7 +215,9 @@ object GAMATask:
         s"gama-headless $memoryValue -hpc 1 $inputFilePath $outputDirectoryPath"
 
       def environmentVariablesValue =
-        def fewerThreadsEnvironmentVariable: EnvironmentVariable = ("_JAVA_OPTIONS", JavaConfiguration.fewerThreadsParameters.mkString(" "))
+        def fewerThreadsEnvironmentVariable: EnvironmentVariable =
+          val exquinoxSingleThread = Seq("-Dequinox.resolver.thread.count=1", "-Dequinox.start.level.thread.count=1", "-Dequinox.start.level.restrict.parallel=true")
+          ("_JAVA_OPTIONS", (JavaConfiguration.fewerThreadsParameters ++ exquinoxSingleThread).mkString(" "))
         environmentVariables ++
           (if fewerThreads then Seq(fewerThreadsEnvironmentVariable) else Seq())
 

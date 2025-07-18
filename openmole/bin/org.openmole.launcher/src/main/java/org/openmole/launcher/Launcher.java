@@ -1,5 +1,7 @@
 package org.openmole.launcher;
 
+import jdk.jfr.SettingDefinition;
+import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.osgi.framework.Bundle;
@@ -84,6 +86,8 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_RESOLVER_THREAD_COUNT, "1");
+        osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, "1");
+        osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL, "true");
 
         if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);
 
