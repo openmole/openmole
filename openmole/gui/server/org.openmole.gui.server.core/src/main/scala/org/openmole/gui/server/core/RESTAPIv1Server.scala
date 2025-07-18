@@ -19,6 +19,7 @@ package org.openmole.gui.server.core
 
 
 import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
@@ -32,7 +33,6 @@ import org.http4s.*
 import org.http4s.dsl.*
 import org.http4s.dsl.io.*
 import org.http4s.multipart.Multipart
-import cats.effect.unsafe.implicits.global
 
 object RESTAPIv1Server:
   implicit val circeDefault: _root_.io.circe.derivation.Configuration =
@@ -88,6 +88,7 @@ class RESTAPIv1Server(impl: ApiImpl):
   import impl.services.*
   import RESTAPIv1Server.*
   import org.openmole.gui.shared.data.ServerFileSystemContext.Project
+  given IORuntime = impl.services.threadProvider.ioRuntime
 
   val routes: HttpRoutes[IO] =
     HttpRoutes.of:
