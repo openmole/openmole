@@ -36,27 +36,22 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
     LazyList(owner) lazyAppendedAll dependencies lazyAppendedAll otherBundles
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
+    def update =
+      val c =
+        Option(findLoadedClass(name)).orElse:
+          orderedBundles.view.flatMap: b =>
+            tryOption(b.classLoader.loadClass(name))
+          .headOption
+        .getOrElse(throw ClassNotFoundException(name))
+
+      if resolve then resolveClass(c)
+      c
+
     val cache = PluginManager.infos.classes
-    val cached =
-      cache.synchronized:
-       cache.get((owner.getBundleId, name))
 
-    cached match
-      case Some(c) => c
-      case None =>
-        val c =
-          Option(findLoadedClass(name)).orElse:
-            orderedBundles.view.flatMap: b =>
-              tryOption(b.classLoader.loadClass(name))
-            .headOption
-          .getOrElse(throw ClassNotFoundException(name))
+    cache.synchronized:
+     cache.getOrElseUpdate((owner.getBundleId, name), update)
 
-        if resolve then resolveClass(c)
-
-        cache.synchronized:
-          cache.put((owner.getBundleId, name), c)
-
-        c
 
   override def findResource(name: String): URL =
     orderedBundles.view.flatMap: b =>
