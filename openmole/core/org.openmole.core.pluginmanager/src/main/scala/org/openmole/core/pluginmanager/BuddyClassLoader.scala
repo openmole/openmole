@@ -27,12 +27,13 @@ import scala.jdk.CollectionConverters.*
 
 class BuddyClassLoader(owner: Bundle) extends ClassLoader():
 
-  def dependencies = PluginManager.allDependencies(owner)
-  def otherBundles =
-    val deps = dependencies.map(_.getBundleId).toSet
-    PluginManager.bundles.filterNot(b => deps.contains(b.getBundleId))
+  def orderedBundles =
+    lazy val dependencies = PluginManager.allDependencies(owner)
+    def otherBundles =
+      val deps = dependencies.map(_.getBundleId).toSet
+      PluginManager.bundles.filterNot(b => deps.contains(b.getBundleId))
 
-  def orderedBundles = Seq(owner) ++ dependencies ++ otherBundles
+    LazyList(owner) lazyAppendedAll dependencies lazyAppendedAll otherBundles
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
     val c =
