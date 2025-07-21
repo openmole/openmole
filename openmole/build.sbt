@@ -307,7 +307,7 @@ lazy val pluginManager = OsgiProject(
   coreDir,
   "org.openmole.core.pluginmanager",
   imports = Seq("*")
-) settings (defaultActivator) dependsOn(exception, tools, location, openmoleOSGi) settings (coreSettings *)
+) settings (defaultActivator) dependsOn(exception, tools, openmoleTypes, location, openmoleOSGi) settings (coreSettings *)
 
 lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn(exception, highlight, namespace, preference) settings (coreSettings *)
 

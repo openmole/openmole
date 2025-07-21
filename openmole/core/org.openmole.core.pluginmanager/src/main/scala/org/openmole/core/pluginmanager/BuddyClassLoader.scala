@@ -18,12 +18,10 @@ package org.openmole.core.pluginmanager
  */
 
 
+import org.openmole.tool.types.TypeTool
 import org.osgi.framework.{Bundle, BundleContext}
-import org.osgi.framework.wiring.{BundleWiring, BundleWire}
 
 import java.net.URL
-import java.util
-import scala.jdk.CollectionConverters.*
 
 class BuddyClassLoader(owner: Bundle) extends ClassLoader():
 
@@ -37,21 +35,15 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
     def update =
-      val c =
-        Option(findLoadedClass(name)).orElse:
-          orderedBundles.view.flatMap: b =>
-            tryOption(b.classLoader.loadClass(name))
-          .headOption
-        .getOrElse(throw ClassNotFoundException(name))
+      Option(findLoadedClass(name)).orElse:
+        orderedBundles.view.flatMap: b =>
+          tryOption(b.classLoader.loadClass(name))
+        .headOption
 
-      if resolve then resolveClass(c)
-      c
-
-    val cache = PluginManager.infos.classes
-
-    cache.synchronized:
-     cache.getOrElseUpdate((owner.getBundleId, name), update)
-
+    TypeTool.primitiveType(name).getOrElse:
+      PluginManager.synchronized:
+        PluginManager.classes.getOrElseUpdate((owner.getBundleId, name), update)
+      .getOrElse(throw ClassNotFoundException(name))
 
   override def findResource(name: String): URL =
     orderedBundles.view.flatMap: b =>

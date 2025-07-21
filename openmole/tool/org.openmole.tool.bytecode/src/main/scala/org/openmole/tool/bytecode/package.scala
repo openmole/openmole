@@ -105,7 +105,8 @@ package object bytecode:
 
   def allMentionedClasses(allClassFiles: Seq[ClassFile], classLoader: ClassLoader): Seq[Class[?]] =
     for
-      f ← allClassFiles.toList
-      t ← listAllClasses(Files.readAllBytes(f.file))
-      c ← util.Try[Class[?]](Class.forName(t.getClassName, false, classLoader)).toOption.toSeq
+      f <- allClassFiles.toList
+      t <- listAllClasses(Files.readAllBytes(f.file))
+      name = t.getClassName
+      c <- util.Try[Class[?]](Class.forName(t.getClassName, false, classLoader)).toOption.toSeq
     yield c

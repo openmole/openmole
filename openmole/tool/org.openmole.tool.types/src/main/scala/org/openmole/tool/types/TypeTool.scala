@@ -90,7 +90,7 @@ object TypeTool {
       case null      => classOf[Null]
       case r: AnyRef => r.getClass
 
-  def classAssignable(from: Class[?], to: Class[?]) = 
+  def classAssignable(from: Class[?], to: Class[?]) =
     def unArrayify(c1: Class[?], c2: Class[?]): (Class[?], Class[?]) =
       if (!c1.isArray || !c2.isArray) (c1, c2) else unArrayify(c1.getComponentType, c2.getComponentType)
 
@@ -101,7 +101,7 @@ object TypeTool {
     eqTo.isAssignableFrom(eqFrom)
 
   def assignable(from: Manifest[?], to: Manifest[?]): Boolean =
-    unArrayify(from, to) match 
+    unArrayify(from, to) match
       case (c1, c2, _) =>
         val eqFrom = classEquivalence(from.runtimeClass).map(_.manifest).getOrElse(from)
         val eqTo = classEquivalence(to.runtimeClass).map(_.manifest).getOrElse(to)
@@ -230,6 +230,22 @@ object TypeTool {
 
     parseType(s)
   end toManifest
+
+  def primitiveType(typeName: String): Option[Class[?]] =
+    val primitives =
+      Seq(
+        classOf[Boolean],
+        classOf[Byte],
+        classOf[Char],
+        classOf[Short],
+        classOf[Int],
+        classOf[Long],
+        classOf[Float],
+        classOf[Double],
+        java.lang.Void.TYPE
+      )
+
+    primitives.find(_.getName == typeName)
 
 }
 

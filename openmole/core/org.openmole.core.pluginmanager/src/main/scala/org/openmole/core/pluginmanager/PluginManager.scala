@@ -35,8 +35,8 @@ import scala.util.{ Failure, Success, Try }
 
 case class BundlesInfo(
   files:                Map[File, (Long, Long)],
-  providedDependencies: Set[Long],
-  classes:              mutable.HashMap[(Long, String), Class[?]]
+  providedDependencies: Set[Long]
+
 ):
   lazy val hashes = files.keys.map(f => f -> Hash.file(f)).toMap
 
@@ -47,10 +47,12 @@ object PluginManager extends JavaLogger:
 
   private var bundlesInfo: Option[BundlesInfo] = None
   private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
+  private[pluginmanager] val classes = mutable.HashMap[(Long, String), Option[Class[?]]]()
 
   private[pluginmanager] def clearCaches() = PluginManager.synchronized:
     bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
+    classes.clear()
 
   def allPluginDependencies(b: Bundle) = allDependencies(b).filter(isPlugin)
 
@@ -62,7 +64,7 @@ object PluginManager extends JavaLogger:
 
   private def installBundle(f: File) = PluginManager.synchronized:
     val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
-    bundlesInfo = None
+    clearCaches()
     bundle
 
   private[pluginmanager] def infos: BundlesInfo = PluginManager.synchronized:
@@ -71,7 +73,7 @@ object PluginManager extends JavaLogger:
         val bs = bundles
         val providedDependencies = dependencies(bs.filter(b => b.isProvided)).map(_.getBundleId).toSet
         val files = bs.map(b => b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
-        val info = BundlesInfo(files, providedDependencies, mutable.HashMap())
+        val info = BundlesInfo(files, providedDependencies)
         bundlesInfo = Some(info)
         info
       case Some(bundlesInfo) => bundlesInfo
