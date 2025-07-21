@@ -108,8 +108,7 @@ lazy val fory = OsgiProject(
   dir,
   "org.apache.fory",
   imports = Seq("!javax.*", "scala.*", "*"),
-  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*"),
-  global = true) settings(
+  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*")) settings(
   settings,
   libraryDependencies ++= Seq("org.apache.fory" % "fory-core" % foryVersion),
   libraryDependencies ++= Seq("org.apache.fory" %% "fory-scala" % foryVersion),
@@ -120,7 +119,6 @@ lazy val fory = OsgiProject(
 lazy val scalaLang = OsgiProject(
   dir,
   "org.scala-lang.scala-library",
-  global = true,
   exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),
   imports = Seq("org.jline.*" /*"!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "!scala.*", "*"*/)) settings (

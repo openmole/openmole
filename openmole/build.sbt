@@ -132,7 +132,7 @@ lazy val openmoleCollection = OsgiProject(toolDir, "org.openmole.tool.collection
 lazy val openmoleCrypto = OsgiProject(toolDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (toolSettings *)
 lazy val openmoleStatistics = OsgiProject(toolDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn(openmoleLogger, openmoleTypes, openmoleDTW) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
 lazy val openmoleMath = OsgiProject(toolDir, "org.openmole.tool.math", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
-lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = Seq("*"), global = true) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
+lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = Seq("*")) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
 lazy val openmoleByteCode = OsgiProject(toolDir, "org.openmole.tool.bytecode", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.asm) settings (toolSettings *)
 lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.equinoxOSGi) settings (toolSettings *)
 lazy val openmoleRandom = OsgiProject(toolDir, "org.openmole.tool.random", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
@@ -242,7 +242,7 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   setter) settings (coreSettings *)
 
 
-lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
+lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
   //libraryDependencies += Libraries.fory,
   libraryDependencies += Libraries.equinoxOSGi
@@ -269,7 +269,7 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = Seq
   libraryDependencies += "com.volkhart.memory" % "measurer" % "0.1.1",
 ) dependsOn(context, json, timeService, openmoleArgument, openmoleBuildInfo)
 
-lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings (
+lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = Seq("*")) settings (
     coreSettings,
     libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi),
     Libraries.addScalaLang
@@ -340,7 +340,7 @@ lazy val logconfig = OsgiProject(
 
 lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager", imports = Seq("*")) dependsOn(openmoleStream, openmoleTypes) settings (coreSettings *) settings (defaultActivator)
 
-lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", global = true, imports = Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
+lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", imports = Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang,
   libraryDependencies ++= Libraries.monocle,

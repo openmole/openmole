@@ -25,8 +25,8 @@ import scala.util._
 
 object CompositeClassLoader {
 
-  def loop[T](classLoaders: Seq[ClassLoader])(f: ClassLoader => T, cl: List[ClassLoader] = classLoaders.toList): Option[T] = {
-    cl match {
+  def loop[T](classLoaders: Seq[ClassLoader])(f: ClassLoader => T, cl: List[ClassLoader] = classLoaders.toList): Option[T] =
+    cl match
       case Nil => None
       case h :: t =>
         Try(f(h)) match {
@@ -34,12 +34,10 @@ object CompositeClassLoader {
           case Failure(_)    => loop(classLoaders)(f, t)
           case Success(r)    => Some(r)
         }
-    }
-  }
 
 }
 
-class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
+class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader:
 
   override def loadClass(s: String, b: Boolean): Class[?] =
     CompositeClassLoader.loop(classLoaders)(_.loadClass(s)).getOrElse(throw new ClassNotFoundException)
@@ -47,16 +45,14 @@ class CompositeClassLoader(val classLoaders: ClassLoader*) extends ClassLoader {
   override def getResource(s: String): URL =
     CompositeClassLoader.loop(classLoaders)(_.getResource(s)).getOrElse(null)
 
-  override def getResources(s: String): util.Enumeration[URL] = {
+  override def getResources(s: String): util.Enumeration[URL] =
     val ret = new java.util.Vector[URL]
     for {
-      cl ← classLoaders
-      r ← cl.getResources(s).asScala
+      cl <- classLoaders
+      r <- cl.getResources(s).asScala
     } ret.add(r)
     ret.elements()
-  }
 
   override def getResourceAsStream(s: String): InputStream =
     CompositeClassLoader.loop(classLoaders)(_.getResourceAsStream(s)).getOrElse(null)
 
-}

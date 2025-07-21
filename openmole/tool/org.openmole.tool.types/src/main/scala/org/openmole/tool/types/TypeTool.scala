@@ -85,40 +85,12 @@ object TypeTool {
 
   //def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
-  def toClass(s: String) = classEquivalence(
-    s match {
-      case "Byte"       => classOf[Byte]
-      case "Short"      => classOf[Short]
-      case "Int"        => classOf[Int]
-      case "int"        => classOf[Int]
-      case "Long"       => classOf[Long]
-      case "long"       => classOf[Long]
-      case "Float"      => classOf[Float]
-      case "Double"     => classOf[Double]
-      case "double"     => classOf[Double]
-      case "Char"       => classOf[Char]
-      case "Boolean"    => classOf[Boolean]
-      case "String"     => classOf[String]
-      case "File"       => classOf[java.io.File]
-      case "BigInteger" => classOf[java.math.BigInteger]
-      case "BigDecimal" => classOf[java.math.BigDecimal]
-      case _ => try {
-        TypeTool.getClass.getClassLoader.loadClass(s)
-      }
-      catch {
-        case e: ClassNotFoundException => throw new ClassNotFoundException("The class " + s + " has not been found", e)
-      }
-    }
-  )
-
-  def clazzOf(v: Any) = {
-    v match {
+  def clazzOf(v: Any) =
+    v match
       case null      => classOf[Null]
       case r: AnyRef => r.getClass
-    }
-  }
 
-  def classAssignable(from: Class[?], to: Class[?]) = {
+  def classAssignable(from: Class[?], to: Class[?]) = 
     def unArrayify(c1: Class[?], c2: Class[?]): (Class[?], Class[?]) =
       if (!c1.isArray || !c2.isArray) (c1, c2) else unArrayify(c1.getComponentType, c2.getComponentType)
 
@@ -127,15 +99,13 @@ object TypeTool {
     val eqFrom = classEquivalence(ufrom).map(_.native).getOrElse(from)
 
     eqTo.isAssignableFrom(eqFrom)
-  }
 
   def assignable(from: Manifest[?], to: Manifest[?]): Boolean =
-    unArrayify(from, to) match {
+    unArrayify(from, to) match 
       case (c1, c2, _) =>
         val eqFrom = classEquivalence(from.runtimeClass).map(_.manifest).getOrElse(from)
         val eqTo = classEquivalence(to.runtimeClass).map(_.manifest).getOrElse(to)
         eqTo.runtimeClass.isAssignableFrom(eqFrom.runtimeClass)
-    }
 
   def callByName[U: ClassTag, T](o: AnyRef, name: String, args: Vector[Any]) = {
     val handle = implicitly[ClassTag[U]].runtimeClass.getDeclaredMethods.find(_.getName == name).get
@@ -185,8 +155,8 @@ object TypeTool {
     then tpe.drop(wildCard.size)
     else tpe
 
-  def toManifest(s: String): Manifest[?] =
-    def loadClass(c: String) = Class.forName(c, true, TypeTool.getClass.getClassLoader)
+  def toManifest(s: String, classLoader: ClassLoader): Manifest[?] =
+    def loadClass(c: String) = Class.forName(c, true, classLoader)
 
     def simpleType(st: String): Manifest[?] =
       st.trim match

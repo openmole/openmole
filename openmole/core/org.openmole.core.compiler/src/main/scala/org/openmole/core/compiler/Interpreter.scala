@@ -111,7 +111,7 @@ object Interpreter {
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-        List(classOf[Interpreter].getClassLoader) *
+        List(PluginManager.globalClassLoader(classOf[Interpreter])) *
     )
 
   def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {

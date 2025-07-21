@@ -41,10 +41,12 @@ import org.openmole.tool.stream
 import org.openmole.tool.archive.*
 import org.openmole.tool.lock.*
 import org.openmole.tool.cache.*
+
 import collection.mutable.ListBuffer
 import org.openmole.core.serializer.file.{FileInjection, FileSerialisation, FileWithGCConverter}
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.FileService.FileWithGC
+import org.openmole.core.pluginmanager.PluginManager
 import org.openmole.core.workspace
 
 import scala.util.NotGiven
@@ -63,7 +65,7 @@ object SerializerService:
       new XStream(
         null,
         driver,
-        new ClassLoaderReference(SerializerService.getClass.getClassLoader),
+        new ClassLoaderReference(PluginManager.globalClassLoader(SerializerService.getClass)),
         null: Mapper,
         lookup,
         new ConverterRegistry:
