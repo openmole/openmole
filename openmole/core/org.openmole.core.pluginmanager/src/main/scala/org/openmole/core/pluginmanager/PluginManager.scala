@@ -26,8 +26,6 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.hash.*
 import org.osgi.framework._
 import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
-
-import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
@@ -36,7 +34,6 @@ import scala.util.{ Failure, Success, Try }
 case class BundlesInfo(
   files:                Map[File, (Long, Long)],
   providedDependencies: Set[Long]
-
 ):
   lazy val hashes = files.keys.map(f => f -> Hash.file(f)).toMap
 
