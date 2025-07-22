@@ -88,10 +88,7 @@ class MiniClustEnvironment(
   lazy val storageSpace =
     import services.*
     AccessControl.defaultPrirority:
-      val s = HierarchicalStorageSpace.create(storage, "openmole", _ => false)
-      // Access minio classes to avoid an equinox lock bug when classes are accessed in parallel
-      summon[HierarchicalStorageInterface[MiniClustStorage]].list(storage, "openmole")
-      s
+      HierarchicalStorageSpace.create(storage, "openmole", _ => false)
 
   override def execute(batchExecutionJob: BatchExecutionJob)(using Priority): BatchJobControl = accessControl:
     import services.*
