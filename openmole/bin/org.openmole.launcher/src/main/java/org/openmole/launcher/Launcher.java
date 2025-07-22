@@ -1,9 +1,13 @@
 package org.openmole.launcher;
 
-import jdk.jfr.SettingDefinition;
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.eclipse.osgi.internal.location.LocationHelper;
+//import jdk.jfr.SettingDefinition;
+//import org.eclipse.osgi.container.Module;
+//import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+//import org.eclipse.osgi.internal.location.LocationHelper;
+
+
+import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -85,20 +89,28 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
+
+        osgiConfig.put(BundleCache.CACHE_LOCKING_PROP, "false");
+        osgiConfig.put(FelixConstants.RESOLVER_PARALLELISM, "1");
+        //osgiConfig.put(FelixConstants.BUNDLE_STARTLEVEL_PROP, "1");
+
+        /*
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_RESOLVER_THREAD_COUNT, "1");
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, "1");
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL, "true");
 
-        if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);
+        if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);*/
 
         StringBuffer versions = new StringBuffer();
         StringBuffer executionEnvironments = new StringBuffer();
         int maxVersion = 50;
         for(int version = 0; version <= maxVersion; version++) {
-            versions.append("1." + version);
-            versions.append("," + version);
+            versions.append("1." + version + ",");
+            versions.append("1." + version + ".0,");
+            versions.append(version);
             executionEnvironments.append("J2SE-1." + version + ",");
-            executionEnvironments.append("JavaSE-1." + version);
+            executionEnvironments.append("JavaSE-1." + version + ",");
+            executionEnvironments.append("JavaSE-1." + version + ".0");
 
             if(version != maxVersion) {
                 versions.append(",");
@@ -108,6 +120,7 @@ public class Launcher {
 
         osgiConfig.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "osgi.ee; osgi.ee=\"JavaSE\";version:List=\"" + versions.toString() + "\"");
         osgiConfig.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, executionEnvironments.toString() + "CDC-1.1/Foundation-1.1,CDC-1.0/Foundation-1.0,J2ME,OSGi/Minimum-1.1,OSGi/Minimum-1.0");
+
         if(osgiDirectory !=  null) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory);
 
         Framework framework = frameworkFactory.newFramework(osgiConfig);

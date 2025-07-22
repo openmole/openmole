@@ -119,9 +119,8 @@ object Libraries {
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk18on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.23.100"
+  lazy val felixOSGi = "org.apache.felix" % "org.apache.felix.framework" % "7.0.5" //"org.eclipse.platform" % "org.eclipse.osgi" % "3.23.100"
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "5.0.0"
-
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
   lazy val endpoints4s = "org.openmole.library" %% "org-endpoints4s" % endpoints4SVersion //cross CrossVersion.for2_13Use3
