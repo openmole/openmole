@@ -15,8 +15,15 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * Created by Romain Reuillon on 31/03/16.
@@ -43,7 +50,6 @@ public class Launcher {
         String run = null;
         String osgiDirectory = null;
         List<String> priority = new LinkedList<String>();
-        Boolean osgiLockingNone = false;
 
         String[] forwardAgs = new String[0];
 
@@ -68,10 +74,6 @@ public class Launcher {
                 i++;
                 priority.add(args[i]);
                 i++;
-                continue;
-            } else if(args[i].contentEquals("--osgi-locking-none")) {
-                i++;
-                osgiLockingNone = true;
                 continue;
             } else if(args[i].contentEquals("--")) {
                 i++;
@@ -128,7 +130,6 @@ public class Launcher {
 
         int ret = 127;
         try {
-            if(directory == null) throw new RuntimeException("Missing plugin directory argument");
             if(run == null) throw new RuntimeException("Missing run class argument");
             if(directory == null) throw new RuntimeException("Missing plugin directory argument");
             if(!directory.exists()) throw new RuntimeException("Plugin directory does not exist");
@@ -177,26 +178,34 @@ public class Launcher {
             framework.stop();
             framework.waitForStop(0);
         } catch(Throwable e) {
-            e.printStackTrace();
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, "Error in osgi launcher", e);
         } finally {
             if(osgiDirectory != null) {
-                deleteDir(new File(osgiDirectory));
+                try {
+                    deleteDir(new File(osgiDirectory).toPath());
+                } catch(IOException e) {
+                    Logger.getLogger(Launcher.class.getName()).log(Level.WARNING, "Error cleaning the osgi directory", e);
+                }
             }
         }
 
         System.exit(ret);
     }
 
-    static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                if (!java.nio.file.Files.isSymbolicLink(f.toPath())) {
-                    deleteDir(f);
-                }
+    static void deleteDir(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
             }
-        }
-        file.delete();
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
 }

@@ -113,5 +113,5 @@ CONFIGDIR=$(mktemp -d)
 exec $JAVA -Xss8M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area="${CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true "-Xmx${MEM}" "${FLAGS[@]}" \
    -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
    --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
-   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
+   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
    "${ARGS[@]}" "${SCRIPT_ARGS[@]}"
