@@ -68,11 +68,11 @@ case class ScalaTask(
   lazy val compilation = CacheKey[ScalaCompilation.ContextClosure[java.util.Map[String, Any]]]()
   lazy val pluginsCache = CacheKey[Seq[File]]()
 
-  private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[ Mapped[?]]) =
-    ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name))
+  private def toMappedInputVals(ps: PrototypeSet, mapped: Seq[Mapped[?]]) =
+    ps /*-- mapped.map(_.v)*/ ++ mapped.map(m => m.v.withName(m.name).withNamespace(Namespace.empty))
 
   private def toMappedOutputVals(ps: PrototypeSet, mapped: Seq[ Mapped[?]]) =
-    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name))
+    ps -- mapped.map(_.v) ++ mapped.map(m => m.v.withName(m.name).withNamespace(Namespace.empty))
 
   lazy val noFileInputs = Mapped.noFile(mapped.inputs)
   lazy val noFileOutputs = Mapped.noFile(mapped.outputs)
@@ -137,10 +137,10 @@ case class ScalaTask(
       import p.*
 
       def toMappedInputContext(context: Context, mapped: Seq[ Mapped[?]]) =
-        context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name)))
+        context /*-- mapped.map(_.v.name)*/ ++ mapped.map(m => context.variable(m.v).get.copy(prototype = m.v.withName(m.name).withNamespace(Namespace.empty)))
 
       def toMappedOutputContext(context: Context, mapped: Seq[ Mapped[?]]) =
-        context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name)).get.copy(prototype = m.v))
+        context -- mapped.map(_.v.name) ++ mapped.map(m => context.variable(m.v.withName(m.name).withNamespace(Namespace.empty)).get.copy(prototype = m.v))
 
       def processCode =
         FromContext: p =>

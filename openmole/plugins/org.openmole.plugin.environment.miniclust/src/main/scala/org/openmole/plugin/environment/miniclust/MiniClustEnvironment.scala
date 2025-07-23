@@ -85,7 +85,7 @@ class MiniClustEnvironment(
   given mc: _root_.gridscale.miniclust.Miniclust = MiniClustEnvironment.toMiniclust(authentication, insecure = insecure)
 
   val storage = MiniClustStorage(mc, accessControl)
-  val storageSpace =
+  lazy val storageSpace =
     import services.*
     AccessControl.defaultPrirority:
       HierarchicalStorageSpace.create(storage, "openmole", _ => false)
@@ -216,7 +216,11 @@ class MiniClustEnvironment(
       priority => clean
     )
 
-  override def start(): Unit = ()
+  override def start(): Unit =
+    storageSpace
+    AccessControl.defaultPrirority:
+      HierarchicalStorageSpace.clean(storage, storageSpace, true)
+
   override def stop(): Unit =
     AccessControl.defaultPrirority:
       HierarchicalStorageSpace.clean(storage, storageSpace, false)

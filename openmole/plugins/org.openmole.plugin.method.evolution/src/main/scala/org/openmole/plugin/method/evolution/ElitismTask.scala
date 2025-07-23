@@ -23,8 +23,8 @@ import org.openmole.core.dsl.extension._
 object ElitismTask:
 
   def apply[T](evolution: EvolutionWorkflow)(using sourcecode.Name, DefinitionScope) =
-    Task("ElitismTask") { p =>
-      import p._
+    Task("ElitismTask"): p =>
+      import p.*
 
       val (newState, newPopulation) =
         evolution.operations.elitism(
@@ -40,10 +40,10 @@ object ElitismTask:
         .apply(newState)
 
       Context(
-        Variable(evolution.populationVal, newPopulation.toArray(evolution.individualVal.`type`.manifest)),
+        Variable(evolution.populationVal, newPopulation.toArray(using evolution.individualVal.`type`.manifest)),
         Variable(evolution.stateVal, incrementedState)
       )
-    } set (
+    .set (
       inputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal),
       outputs += (evolution.populationVal, evolution.stateVal)
     )
@@ -51,8 +51,8 @@ object ElitismTask:
 object IslandElitismTask:
 
   def apply[T](evolution: EvolutionWorkflow, islandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
-    Task("IslandElitismTask") { p =>
-      import p._
+    Task("IslandElitismTask"): p =>
+      import p.*
 
       def state = context(evolution.stateVal)
       def islandState = context(islandStateVal)
@@ -75,7 +75,7 @@ object IslandElitismTask:
         Variable(evolution.populationVal, newPopulation.toArray(using evolution.individualVal.`type`.manifest)),
         Variable(evolution.stateVal, incrementedState)
       )
-    } set (
+    .set (
       inputs += (evolution.stateVal, islandStateVal, evolution.populationVal, evolution.offspringPopulationVal),
       outputs += (evolution.populationVal, evolution.stateVal)
     )

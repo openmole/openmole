@@ -9,11 +9,11 @@ import org.openmole.tool.cache.TimeCache
 
 object EGIJobService:
 
-  def apply(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_])(using preferences: Preference) =
+  def apply(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[?])(using preferences: Preference) =
     new EGIJobService(diracService, environment, AccessControl(preferences(EGIEnvironment.ConnectionsToDIRAC)))
 
 
-class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[_], accessControl: AccessControl):
+class EGIJobService(diracService: _root_.gridscale.dirac.DIRACServer, environment: EGIEnvironment[?], accessControl: AccessControl):
 
   import environment.{*, given}
 

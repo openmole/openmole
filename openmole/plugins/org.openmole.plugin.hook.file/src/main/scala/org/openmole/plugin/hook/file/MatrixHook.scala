@@ -49,7 +49,7 @@ object MatrixHook {
 
 case class MatrixHook(
   file:   FromContext[File],
-  matrix: MatrixHook.MatrixObject[_],
+  matrix: MatrixHook.MatrixObject[?],
   config: InputOutputConfig,
   info:   InfoConfig) extends Hook with ValidateHook {
 

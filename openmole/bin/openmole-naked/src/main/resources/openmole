@@ -36,7 +36,6 @@ MEM=${OPENMOLE_MEMORY:-"2G"}
 # enable through command line arguments --debug and --debug-port
 DEBUG_MODE=false
 DEBUG_PORT=5005
-FLAGS=()
 
 JAVA="java"
 if [ ! -z ${JAVA_HOME} ]
@@ -52,18 +51,27 @@ then
   fi
 fi
 
-JAVAVERSION=$($JAVA -version 2>&1)
+FLAGS=()
+FLAGS+=("-XX:+UseCompressedOops")
+FLAGS+=("-XX:+UseCompressedClassPointers")
 
-JVMFLAVOR=$(echo "$JAVAVERSION" | tail -1)
-case "$JVMFLAVOR" in
-  *64-Bit*) FLAGS+=("-XX:+UseCompressedOops");;
-esac
+JVMVERSION=$($JAVA -version 2>&1 | awk -F '"' '/version/ {print $2}')
+if [[ "$JVMVERSION" == 1.* ]]; then
+  MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f2)
+else
+  MAJOR_VERSION=$(echo "$JVMVERSION" | cut -d. -f1)
+fi
 
-JVMVERSION=$(echo "$JAVAVERSION" | grep version | rev | cut -d' ' -f1 | rev)
-case "$JVMVERSION" in
-  *1\.6\.*) echo "Your java version is too old ($JAVAVERSION). You can use $JAVA_HOME to use a more recent Java."; exit 1;;
-  *1\.7\.*) FLAGS+=("-XX:MaxPermSize=128M");;
-esac
+
+if (( MAJOR_VERSION < 21 )); then
+  echo "Your Java version is too old ($JVMVERSION). Please use Java 21 or newer."
+  exit 1
+fi
+
+if (( MAJOR_VERSION >= 24 )); then
+  FLAGS+=("-XX:+UnlockExperimentalVMOptions")
+  FLAGS+=("-XX:+UseCompactObjectHeaders")
+fi
 
 WORKSPACE="${HOME}/.openmole"
 
@@ -105,5 +113,5 @@ CONFIGDIR=$(mktemp -d)
 exec $JAVA -Xss8M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.country=US -Duser.language=en -Djava.security.egd=file:/dev/./urandom -Dopenmole.location="${LOCATION}" -Dosgi.classloader.singleThreadLoads=true -Dosgi.configuration.area="${CONFIGDIR}" -Djdk.util.zip.disableZip64ExtraFieldValidation=true "-Xmx${MEM}" "${FLAGS[@]}" \
    -XX:+UseG1GC -XX:CICompilerCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:G1ConcRefinementThreads=2 -XX:+UseStringDeduplication \
    --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.nio.file=ALL-UNNAMED \
-   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" --osgi-locking-none -- \
+   -cp "${LOCATION}/launcher/*" org.openmole.launcher.Launcher  --plugins "${LOCATION}/plugins/" --priority "logging" --run org.openmole.ui.Application --osgi-directory "${CONFIGDIR}" -- \
    "${ARGS[@]}" "${SCRIPT_ARGS[@]}"

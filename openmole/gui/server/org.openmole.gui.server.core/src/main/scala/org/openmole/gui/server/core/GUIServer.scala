@@ -29,6 +29,7 @@ import org.openmole.tool.crypto.{Cypher, KeyStore}
 import org.openmole.tool.file.*
 import org.openmole.tool.network.Network
 import cats.effect.*
+import cats.effect.unsafe.IORuntime
 import org.http4s.*
 import org.http4s.blaze.server.*
 import org.http4s.dsl.io.*
@@ -36,6 +37,7 @@ import org.http4s.implicits.*
 import org.http4s.server.Router
 import org.openmole.core.logconfig.LoggerConfig
 import org.openmole.core.networkservice.NetworkService
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.gui.server.core.{ApiImpl, GUIServer, GUIServerServices}
 import org.openmole.gui.server.ext.{GUIPluginRegistry, utils}
 import org.openmole.tool.crypto.Cypher
@@ -43,7 +45,6 @@ import org.openmole.tool.crypto.Cypher
 import java.io.File
 import java.util.concurrent.Semaphore
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
@@ -53,7 +54,7 @@ object GUIServer:
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
 
-  def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService) =
+  def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService, threadProvider: ThreadProvider) =
     val from = fromWebAppLocation
     val to = newFile.newDirectory("webapp")
 
@@ -136,7 +137,7 @@ object GUIServer:
     extraHeaders: String) =
 
     import services.*
-    implicit val runtime = cats.effect.unsafe.IORuntime.global
+    given IORuntime = threadProvider.ioRuntime
 
     val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
     val webappCache =
@@ -198,12 +199,15 @@ class GUIServer(
       )
 
     val serviceProvider = GUIServerServices.ServicesProvider(services)
+
+    given IORuntime = services.threadProvider.ioRuntime
+
     val apiImpl = new ApiImpl(serviceProvider, Some(applicationControl))
     apiImpl.activatePlugins
 
     import org.http4s.server.middleware.*
 
-    val apiServer = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
+    val apiServer = CoreAPIServer(apiImpl, utils.HTTP.stackError)
     val restServer = new RESTAPIv1Server(apiImpl)
     val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
@@ -226,8 +230,6 @@ class GUIServer(
         s"/" -> GZip(apiServer.endpointRoutes),
         s"/rest/v1" -> restServer.routes,
         s"/webdav" -> webdavServer.routes) ++ pluginsRoutes *).orNotFound
-
-    implicit val runtime = cats.effect.unsafe.IORuntime.global
 
     val shutdown =
       GUIServer.

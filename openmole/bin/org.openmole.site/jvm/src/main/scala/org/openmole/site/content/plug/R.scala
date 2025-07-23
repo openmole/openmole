@@ -400,7 +400,7 @@ ${h2{"Advanced RTask usage"}}
 ${h3{"Use a library within Docker"}}
 
 If you are starting OpenMOLE within docker, installing ${code{"R"}} packages in a ${code{"RTask"}} might require a specific parameter setting.
-The ${code{"install"}} field must be used with particular commands: we prefix install commands with ${code{"fakeroot"}} to get the permissions to use the Debian command ${code{"apt"}} for installation.
+The ${code{"install"}} field must be used with particular commands: we prefix install commands with ${code{"sudo"}} to get the permissions to use the Debian command ${code{"apt"}} for installation.
 
 $br$br
 
@@ -423,7 +423,7 @@ ${hl.openmole( s"""
         # require GeoRange
         area <- CHullArea(hull[, 1], hull[, 2])
         $tq,
-        install = Seq("fakeroot apt-get update", "fakeroot apt-get install -y libgdal-dev libproj-dev"),
+        install = Seq("sudo apt-get update", "sudo apt-get install -y libgdal-dev libproj-dev"),
         libraries = Seq("GeoRange")
     ) set(
         outputs += area.mapped

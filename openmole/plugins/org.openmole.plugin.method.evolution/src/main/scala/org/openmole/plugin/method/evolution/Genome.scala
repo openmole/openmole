@@ -262,7 +262,7 @@ object Genome:
           toVariables0(t, continuousValues, discreteValues.tail, v :: acc)
         case (h: GenomeBound.SequenceOfEnumeration[?]) :: t =>
           val value = (h.values zip discreteValues).take(h.values.size) map { case (vs, i) => vs(i) }
-          val v = Variable(h.v, value.toArray(h.v.fromArray.`type`.manifest))
+          val v = Variable(h.v, value.toArray(using h.v.fromArray.`type`.manifest))
           toVariables0(t, continuousValues, discreteValues.drop(h.values.size), v :: acc)
 
     toVariables0(genome.toList, continuousValues.toList, discreteValue.toList, List.empty)

@@ -112,7 +112,7 @@ object CondorEnvironment:
     storageSharedLocally: Boolean,
     modules:              Option[Seq[String]])
 
-  def submit[S: HierarchicalStorageInterface](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[_])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def submit[S: HierarchicalStorageInterface](environment: BatchEnvironment, runtimeSetting: Option[RuntimeSetting], batchExecutionJob: BatchExecutionJob, storage: S, space: StorageSpace, jobService: CondorJobService[?])(implicit services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     submitToCluster(
       environment,
       runtimeSetting,

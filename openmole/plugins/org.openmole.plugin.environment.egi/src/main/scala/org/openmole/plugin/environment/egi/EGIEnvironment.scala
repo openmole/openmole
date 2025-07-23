@@ -106,7 +106,7 @@ object EGIEnvironment extends JavaLogger {
   def stdOutFileName = "output"
   def stdErrFileName = "error"
 
-  def eagerSubmit(environment: EGIEnvironment[_])(implicit preference: Preference, serializerService: SerializerService) = {
+  def eagerSubmit(environment: EGIEnvironment[?])(implicit preference: Preference, serializerService: SerializerService) = {
     val jobs = environment.jobs
     val jobSize = jobs.size
 
@@ -142,7 +142,7 @@ object EGIEnvironment extends JavaLogger {
             jobKey.find(j => executionJobsMap(j).isEmpty) match
               case Some(j) => j
               case None =>
-                jobKey.find(j => !executionJobsMap(j).exists(j => j.state != ExecutionState.SUBMITTED)) match
+                jobKey.find(j => !executionJobsMap(j).exists(j => BatchEnvironment.executionSate(environment, j) != ExecutionState.SUBMITTED)) match
                   case Some(j) => j
                   case None    => jobKey.head
 

@@ -49,7 +49,7 @@ ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$runtimeSetting,"},
   li{html"${apiEntryTitle{"core"}}, the number of cores used by each job"},
-  li{html"${apiEntryTitle{"time"}}, the maximum amount of time after which the job gets killed, the default on MiniClust in 1 hour"},
+  li{html"${apiEntryTitle{"time"}}, the maximum amount of time after which the job gets killed, the default on MiniClust is 1 hour"},
   li{html"${apiEntryTitle{"insecure"}}, true if the server provides an insecure https connection"}
 )}
 

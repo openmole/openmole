@@ -1,7 +1,7 @@
 package org.openmole.plugin.environment.batch.environment
 
 import java.io.File
-import org.openmole.core.context.Context
+import org.openmole.core.context.*
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.workflow.job.Job.Canceled
 import org.openmole.core.workflow.job.{Job, JobGroup, RuntimeTask}
@@ -24,7 +24,7 @@ object JobStore:
 
   def store(jobStore: JobStore, moleJob: Job)(implicit serializer: SerializerService): StoredMoleJob =
     val f = jobStore.store.newFile("storedjob", ".bin")
-    f.withOutputStream { os => serializer.serialize(moleJob.context, os) }
+    f.withOutputStream { os => serializer.serialize(moleJob.compressedContext, os) }
     new StoredMoleJob(
       f,
       moleJob.task,
@@ -36,10 +36,10 @@ object JobStore:
     JobGroup(storedJob.moleExecution, moleJobs)
 
   def load(storedMoleJob: StoredMoleJob)(implicit serializerService: SerializerService): Job =
-    val context = storedMoleJob.context.withInputStream { is => serializerService.deserialize[Context](is) }
+    val context = storedMoleJob.context.withInputStream { is => serializerService.deserialize[CompactedContext](is) }
     Job(
       task = storedMoleJob.task,
-      context = context,
+      context = CompactedContext.expand(context),
       id = storedMoleJob.id,
       callBack = storedMoleJob.callBack
     )

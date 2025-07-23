@@ -9,7 +9,7 @@ import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage 
 class CondorJobService[S](
   s:                 S,
   tmpDirectory:      String,
-  installation:      RuntimeInstallation[_],
+  installation:      RuntimeInstallation[?],
   parameters:        CondorEnvironment.Parameters,
   headNode:          HeadNode,
   val accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services):

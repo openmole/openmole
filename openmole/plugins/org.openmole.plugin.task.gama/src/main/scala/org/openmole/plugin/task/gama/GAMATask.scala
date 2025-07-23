@@ -169,7 +169,7 @@ object GAMATask:
     frameRate:              OptionalArgument[Int]               = None,
     install:                Seq[String]                         = Seq.empty,
     containerImage:         ContainerImage                      = "gamaplatform/gama:1.9.2",
-    memory:                 OptionalArgument[Information]       = None,
+    memory:                 OptionalArgument[Information]       = 1.gigabyte,
     version:                OptionalArgument[String]            = None,
     errorOnReturnValue:     Boolean                             = true,
     returnValue:            OptionalArgument[Val[Int]]          = None,
@@ -206,13 +206,18 @@ object GAMATask:
 
       def outputDirectoryPath = s"${GAMATask.workspaceDirectory}/_output_"
 
-      def launchCommand =
+      def memoryValue =
         memory.option match
-          case None => s"gama-headless -hpc 1 $inputFilePath $outputDirectoryPath"
-          case Some(m) => s"gama-headless -m ${m.toMegabytes.toLong}m -hpc 1 $inputFilePath $outputDirectoryPath"
+          case None => ""
+          case Some(m) => s"-m ${m.toMegabytes.toLong}m"
+
+      def launchCommand =
+        s"gama-headless $memoryValue -hpc 1 $inputFilePath $outputDirectoryPath"
 
       def environmentVariablesValue =
-        def fewerThreadsEnvironmentVariable: EnvironmentVariable = ("_JAVA_OPTIONS", JavaConfiguration.fewerThreadsParameters.mkString(" "))
+        def fewerThreadsEnvironmentVariable: EnvironmentVariable =
+          val exquinoxSingleThread = Seq("-Dequinox.resolver.thread.count=1", "-Dequinox.start.level.thread.count=1", "-Dequinox.start.level.restrict.parallel=true")
+          ("_JAVA_OPTIONS", (JavaConfiguration.fewerThreadsParameters ++ exquinoxSingleThread).mkString(" "))
         environmentVariables ++
           (if fewerThreads then Seq(fewerThreadsEnvironmentVariable) else Seq())
 

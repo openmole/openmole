@@ -215,7 +215,8 @@ object Val:
   val caseArrayArrayString = TypeCase[Val[Array[Array[String]]]]
 
   def name(namespace: Namespace, simpleName: String) =
-    if (namespace.isEmpty) simpleName
+    if namespace.isEmpty
+    then simpleName
     else s"${namespace.toString}$$$simpleName"
 
   def parseName(name: String) =
@@ -233,20 +234,21 @@ object Val:
     def quotedString = s"\"${v}\""
 
 
-object Namespace {
+object Namespace:
+  given Conversion[Seq[String], Namespace] = s => Namespace(s *)
+
   def empty = Namespace()
+  lazy val openmole = Namespace("openmole")
 
-  implicit def fromSeqString(s: Seq[String]): Namespace = Namespace(s *)
-}
 
-case class Namespace(names: String*) {
+case class Namespace(names: String*):
   override def toString =
     if (names.isEmpty) ""
     else names.mkString("$")
   def isEmpty = names.isEmpty
   def prefix(s: String*) = Namespace(s ++ names *)
   def postfix(s: String*) = Namespace(names ++ s *)
-}
+
 
 /**
  *  A Val represents variables to which a value can be attributed.
@@ -307,7 +309,7 @@ class Val[T](val simpleName: String, val `type`: ValType[T], val namespace: Name
    * @param namespace
    * @return
    */
-  def withNamespace(namespace: Namespace) = Val[T](name, namespace = namespace)(`type`)
+  def withNamespace(namespace: Namespace) = Val[T](simpleName, namespace = namespace)(`type`)
 
   /**
    * Extract the value of a prototype from a given context

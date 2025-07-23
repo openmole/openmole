@@ -23,14 +23,6 @@ import org.openmole.core.dsl.extension._
 import cats._
 import cats.data._
 import cats.implicits._
-import mgo.evolution._
-import mgo.evolution.algorithm.NoisyPSE.PSEState
-import mgo.evolution.algorithm._
-import mgo.evolution.breeding._
-import mgo.evolution.elitism._
-import mgo.evolution.niche._
-import mgo.tools.CanBeNaN
-import monocle.macros.GenLens
 import org.openmole.core.context.{ Context, Val, Variable }
 import org.openmole.core.keyword.{ In, Under }
 import org.openmole.core.setter.{ DefinitionScope, ValueAssignment }

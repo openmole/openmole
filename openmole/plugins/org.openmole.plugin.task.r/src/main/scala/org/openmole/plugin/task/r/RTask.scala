@@ -55,7 +55,7 @@ object RTask:
     install:                    Seq[String]                        = Seq.empty,
     libraries:                  Seq[RLibrary]                      = Seq.empty,
     prepare:                    Seq[String]                        = Seq.empty,
-    image:                      String                             = "openmole/r2u:4.4.2",
+    image:                      String                             = "openmole/r2u:4.5.0",
     errorOnReturnValue:         Boolean                            = true,
     returnValue:                OptionalArgument[Val[Int]]         = None,
     stdOut:                     OptionalArgument[Val[String]]      = None,

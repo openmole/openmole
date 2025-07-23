@@ -17,25 +17,27 @@ package org.openmole.gui.server.jscompile
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.tool.stream._
-import org.scalajs.linker.interface._
+import org.openmole.tool.stream.*
+import org.scalajs.linker.interface.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import org.scalajs.linker._
+import org.scalajs.linker.*
 
 import java.io.File
-import org.openmole.tool.file._
-import org.openmole.core.workspace._
+import org.openmole.tool.file.*
+import org.openmole.core.workspace.*
 import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 import org.scalajs.logging.{NullLogger, ScalaConsoleLogger}
 import org.openmole.core.networkservice.*
+import org.openmole.core.threadprovider.ThreadProvider
 
 object JSPack:
 
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+ // implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(using newFile: TmpDirectory): Unit =
+  def link(inputDirectory: File, outputJSFile: File, optimizedJS: Boolean)(using newFile: TmpDirectory, threadProvider: ThreadProvider): Unit =
+    import threadProvider.executionContext
     newFile.withTmpFile("lib", ".jar") { jar =>
 
       JSPack.getClass.getClassLoader.getResourceAsStream("scalajs-library.jar") copy jar
@@ -61,8 +63,8 @@ object JSPack:
       Await.result(result, Duration.Inf)
     }
 
-  def webpack(entryJSFile: File, nodeModulesFile: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) = {
-    newFile.withTmpDir { targetDir =>
+  def webpack(entryJSFile: File, nodeModulesFile: File, webpackConfigTemplateLocation: File, webpackOutputFile: File, extraModules: Seq[ExtraModule])(using newFile: TmpDirectory, networkService: NetworkService) =
+    newFile.withTmpDir: targetDir =>
       org.openmole.tool.archive.Zip.unzip(nodeModulesFile, targetDir, overwrite = true)
 
       //3- build the js deps with webpack
@@ -73,5 +75,3 @@ object JSPack:
         webpackOutputFile,
         extraModules
       )
-    }
-  }

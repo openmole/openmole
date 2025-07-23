@@ -32,7 +32,6 @@ import scala.annotation.tailrec
 //import scala.tools.nsc._
 //import scala.tools.nsc.reporters._
 import scala.concurrent._
-import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.tools.nsc.interpreter._
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.workspace.TmpDirectory
@@ -112,7 +111,7 @@ object Interpreter {
     new CompositeClassLoader(
       priorityBundles.map(_.classLoader) ++
         List(new URLClassLoader(jars.toArray.map(_.toURI.toURL))) ++
-        List(classOf[Interpreter].getClassLoader) *
+        List(PluginManager.globalClassLoader(classOf[Interpreter])) *
     )
 
   def classPath(priorityBundles: Seq[Bundle], jars: Seq[File]) = {

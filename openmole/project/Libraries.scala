@@ -39,7 +39,7 @@ object Libraries {
   lazy val h2 = "org.openmole.library" %% "org-h2" % h2Version
   lazy val slf4j = "org.openmole.library" %% "org-slf4j" % slf4jVersion
   lazy val xstream = "org.openmole.library" %% "com-thoughtworks-xstream" % xstreamVersion
-  lazy val fury = "org.openmole.library" %% "org-apache-fury" % furyVersion
+  lazy val fory = "org.openmole.library" %% "org-apache-fory" % foryVersion
   lazy val jasypt = "org.openmole.library" %% "org-jasypt-encryption" % jasyptVersion
   lazy val opencsv = "org.openmole.library" %% "au-com-bytecode-opencsv" % "2.3"
   lazy val scopt = "org.openmole.library" %% "com-github-scopt" % scoptVersion
@@ -119,9 +119,8 @@ object Libraries {
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13
   lazy val bouncyCastle = "org.bouncycastle" % "bcpkix-jdk18on" % bouncyCastleVersion
-  lazy val equinoxOSGi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.18.100"
-  lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "4.3.1"
-
+  lazy val felixOSGi = "org.apache.felix" % "org.apache.felix.framework" % "7.0.5" //"org.eclipse.platform" % "org.eclipse.osgi" % "3.23.100"
+  lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "5.0.0"
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
   lazy val endpoints4s = "org.openmole.library" %% "org-endpoints4s" % endpoints4SVersion //cross CrossVersion.for2_13Use3

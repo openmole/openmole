@@ -22,7 +22,8 @@ assemble:
     - chmod 700 ~/.ssh
     - cat $SSH_PRIVATE_KEY >~/.ssh/identity
     - chmod 400 ~/.ssh/identity
-    - ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
+    #- ssh-keyscan -p 9000 docker.openmole.org > ~/.ssh/known_hosts
+    - ssh-keyscan -p 9000 docker.openmole.org >> ~/.ssh/known_hosts || { echo "ssh-keyscan failed"; exit 1; }
     - chmod 644 ~/.ssh/known_hosts
   #artifacts:
   #  paths:

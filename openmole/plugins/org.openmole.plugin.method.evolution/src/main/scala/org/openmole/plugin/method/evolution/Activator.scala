@@ -44,9 +44,11 @@ class Activator extends BundleActivator:
         PatternHighLight(objectName(NSGA3Evolution)),
         PatternHighLight(objectName(OSEEvolution)),
         PatternHighLight(objectName(PSEEvolution)),
+        PatternHighLight(objectName(PPSEEvolution)),
         PatternHighLight(objectName(HDOSEEvolution)),
         ObjectHighLight(objectName(Stochastic)),
-        ObjectHighLight(objectName(Island))
+        ObjectHighLight(objectName(Island)),
+        ObjectHighLight(objectName(Suggestion))
       )
 
     PluginRegistry.register(

@@ -94,10 +94,11 @@ object JobManager:
 
   def canceled(storedJob: StoredJob) = storedJob.storedMoleJobs.forall(JobStore.subMoleCanceled)
 
-  def killOr(batchJob: BatchExecutionJob, kill: Kill)(op: () => Any)(implicit services: BatchEnvironment.Services) =
-    if (batchJob.state == ExecutionState.KILLED) ()
-    else if (canceled(batchJob.storedJob)) self ! kill
-    else op()
+  def killOr(environment: BatchEnvironment, batchJob: BatchExecutionJob, kill: Kill)(op: () => Any)(implicit services: BatchEnvironment.Services) =
+    if BatchEnvironment.executionSate(environment, batchJob) == ExecutionState.KILLED
+    then ()
+      else if (canceled(batchJob.storedJob)) self ! kill
+      else op()
 
   def killOr(environment: BatchEnvironment, storedJob: StoredJob, kill: Kill)(op: () => Unit)(implicit services: BatchEnvironment.Services) =
     if environment.stopped || canceled(storedJob)
