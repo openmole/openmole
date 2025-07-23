@@ -23,8 +23,8 @@ import org.openmole.core.dsl.extension._
 object BreedTask:
 
   def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Genome.SuggestedValues)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
-    Task("BreedTask") { p =>
-      import p._
+    Task("BreedTask"): p =>
+      import p.*
 
       def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v => Variable.unsecureUntyped(v.value, v.equal.from(context))).toVector
       val suggestedGenomes = Genome.SuggestedValues.values(suggestion).map(ds => evolution.operations.buildGenome(defaultSetToVariables(ds)))
@@ -32,7 +32,7 @@ object BreedTask:
       val population = context(evolution.populationVal)
       val s = context(evolution.stateVal)
 
-      (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match {
+      (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match
         case (true, 0, false) =>
           val gs =
             size - suggestedGenomes.size match {
@@ -41,27 +41,26 @@ object BreedTask:
             }
 
           Context(
-            evolution.genomeVal.array -> random().shuffle(suggestedGenomes ++ gs).toArray(evolution.genomeVal.`type`.manifest)
+            evolution.genomeVal.array -> random().shuffle(suggestedGenomes ++ gs).toArray(using evolution.genomeVal.`type`.manifest)
           )
         case (true, _, _) =>
           val gs = evolution.operations.initialGenomes(size, random())(context)
 
           Context(
-            Variable(evolution.genomeVal.array, gs.toArray(evolution.genomeVal.`type`.manifest))
+            Variable(evolution.genomeVal.array, gs.toArray(using evolution.genomeVal.`type`.manifest))
           )
         case (false, _, _) =>
           val breeded = evolution.operations.breeding(population.toVector, size, s, random()).from(context)
 
           Context(
-            Variable(evolution.genomeVal.array, breeded.toArray(evolution.genomeVal.`type`.manifest))
+            Variable(evolution.genomeVal.array, breeded.toArray(using evolution.genomeVal.`type`.manifest))
           )
-      }
 
-    } set (
+    .set (
       inputs += (evolution.populationVal, evolution.stateVal),
       outputs += evolution.stateVal,
       exploredOutputs += evolution.genomeVal.array
-    ) withValidate (
+    ).withValidate (
       Validate:
         Genome.SuggestedValues.errors(suggestion)
     )

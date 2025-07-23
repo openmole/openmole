@@ -213,13 +213,13 @@ object Task:
   def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
-
   extension (task: Task)
     def inputs: PrototypeSet = task.config.inputs ++ DefaultSet.defaultVals(task.config.inputs, Task.defaults(task))
     def outputs: PrototypeSet = task.config.outputs
     def defaults: DefaultSet = task.config.defaults
     def definitionScope = task.info.definitionScope
 
+  def openMOLEDefault = Seq(Variable.openMOLESeed)
 
   object TaskExecution:
     import org.openmole.tool.random.*
@@ -255,7 +255,7 @@ object Task:
         executionInfo.outputs,
         executionInfo.defaults,
         process(executionContext)
-      )(executionContext.preference).from(context)(rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+      )(using executionContext.preference).from(context)(using rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
 
     def execute(taskExecution: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = taskExecution(executionContext)
 

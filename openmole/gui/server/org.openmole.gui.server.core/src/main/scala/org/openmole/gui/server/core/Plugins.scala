@@ -12,6 +12,7 @@ import org.openmole.core.workspace.*
 import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.services.Services
+import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils
 import org.openmole.gui.server.jscompile.Webpack.ExtraModule
@@ -70,7 +71,7 @@ object Plugins extends JavaLogger {
 
   def persistentWebUI(using workspace: Workspace) = workspace.persistentDir /> "webui"
 
-  def openmoleFile(optimizedJS: Boolean)(using workspace: Workspace, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService) = newFile.withTmpDir { jsPluginDirectory =>
+  def openmoleFile(optimizedJS: Boolean)(using workspace: Workspace, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService, threadProvider: ThreadProvider) = newFile.withTmpDir { jsPluginDirectory =>
     createJsPluginDirectory(jsPluginDirectory)
 
     val webui = persistentWebUI

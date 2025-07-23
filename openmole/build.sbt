@@ -132,9 +132,9 @@ lazy val openmoleCollection = OsgiProject(toolDir, "org.openmole.tool.collection
 lazy val openmoleCrypto = OsgiProject(toolDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (toolSettings *)
 lazy val openmoleStatistics = OsgiProject(toolDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn(openmoleLogger, openmoleTypes, openmoleDTW) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
 lazy val openmoleMath = OsgiProject(toolDir, "org.openmole.tool.math", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
-lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = Seq("*"), global = true) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
+lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = Seq("*")) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
 lazy val openmoleByteCode = OsgiProject(toolDir, "org.openmole.tool.bytecode", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.asm) settings (toolSettings *)
-lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.equinoxOSGi) settings (toolSettings *)
+lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.felixOSGi) settings (toolSettings *)
 lazy val openmoleRandom = OsgiProject(toolDir, "org.openmole.tool.random", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
 lazy val openmoleNetwork = OsgiProject(toolDir, "org.openmole.tool.network", imports = Seq("*")) settings (toolSettings *)
 lazy val openmoleSystem = OsgiProject(toolDir, "org.openmole.tool.system", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.exec)
@@ -154,7 +154,7 @@ def coreSettings =
     Seq(
       coreProvidedScope,
       libraryDependencies += Libraries.scalatest,
-      libraryDependencies += Libraries.equinoxOSGi
+      libraryDependencies += Libraries.felixOSGi
     )
 
 def allCore = Seq(
@@ -201,7 +201,7 @@ lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = S
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless),
-  libraryDependencies += Libraries.fury,
+  libraryDependencies += Libraries.fory,
   defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings *)
 
@@ -215,7 +215,7 @@ lazy val openmoleArgument = OsgiProject(coreDir, "org.openmole.core.argument", i
   ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, openmoleCompiler, script, exception) settings (coreSettings *)
 
 lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings(
-  libraryDependencies ++= Seq(Libraries.math, Libraries.cats, Libraries.equinoxOSGi),
+  libraryDependencies ++= Seq(Libraries.math, Libraries.cats, Libraries.felixOSGi),
   Libraries.addScalaLang,
   defaultActivator
 ) dependsOn(
@@ -242,10 +242,10 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   setter) settings (coreSettings *)
 
 
-lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", global = true, imports = Seq("*")) settings(
+lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", imports = Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
-  //libraryDependencies += Libraries.fury,
-  libraryDependencies += Libraries.equinoxOSGi
+  //libraryDependencies += Libraries.fory,
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(workspace, pluginManager, fileService, tools, openmoleArchive, openmoleCompiler, logconfig) settings (coreSettings)
 
 lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings *)
@@ -269,9 +269,9 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = Seq
   libraryDependencies += "com.volkhart.memory" % "measurer" % "0.1.1",
 ) dependsOn(context, json, timeService, openmoleArgument, openmoleBuildInfo)
 
-lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", global = true, imports = Seq("*")) settings (
+lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = Seq("*")) settings (
     coreSettings,
-    libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.equinoxOSGi),
+    libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.felixOSGi),
     Libraries.addScalaLang
   ) dependsOn(exception, openmoleException) dependsOn(allTool.map(p => p: sbt.ClasspathDep[sbt.ProjectReference]): _*)
 
@@ -307,7 +307,7 @@ lazy val pluginManager = OsgiProject(
   coreDir,
   "org.openmole.core.pluginmanager",
   imports = Seq("*")
-) settings (defaultActivator) dependsOn(exception, tools, location, openmoleOSGi) settings (coreSettings *)
+) settings (defaultActivator) dependsOn(exception, tools, openmoleTypes, location, openmoleOSGi) settings (coreSettings *)
 
 lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn(exception, highlight, namespace, preference) settings (coreSettings *)
 
@@ -340,7 +340,7 @@ lazy val logconfig = OsgiProject(
 
 lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager", imports = Seq("*")) dependsOn(openmoleStream, openmoleTypes) settings (coreSettings *) settings (defaultActivator)
 
-lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", global = true, imports = Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
+lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", imports = Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang,
   libraryDependencies ++= Libraries.monocle,
@@ -406,7 +406,7 @@ lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Acti
 def pluginSettings =
   scala3Settings ++ Seq(
     defaultActivator,
-    libraryDependencies += Libraries.equinoxOSGi,
+    libraryDependencies += Libraries.felixOSGi,
     libraryDependencies += Libraries.scalatest
   )
 
@@ -797,14 +797,14 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
   serverGit)
 
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(apiGUI, workspace, module, services, serverGit) settings(
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.jgit, Libraries.sshj),
   guiSettings,
   scalaJSSettings)
 
 
 lazy val serverGit = OsgiProject(guiServerDir, "org.openmole.gui.server.git") dependsOn(apiGUI) settings(
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   libraryDependencies ++= Seq(Libraries.jgit),
   guiSettings,
   scalaJSSettings)
@@ -931,7 +931,7 @@ def guiPlugins = Seq(
 lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   Libraries.bootstrapnative,
   excludeDependencies += ExclusionRule("org.scala-lang.modules", "scala-xml_3")
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
@@ -939,92 +939,92 @@ lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
 lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentMiniclustPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.miniclust", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, miniclust) enablePlugins (ScalaJSPlugin)
 
 lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 //lazy val nativeWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.native") settings(
 //  guiPluginSettings,
-//  libraryDependencies += Libraries.equinoxOSGi,
+//  libraryDependencies += Libraries.felixOSGi,
 //  libraryDependencies += Libraries.arm
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val gamaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.gama", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val juliaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.julia", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val pythonWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.python", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val scilabWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.scilab", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val javaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.java", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
 lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.container", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 //lazy val jarWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.jar") settings(
 //  guiPluginSettings,
-//  libraryDependencies += Libraries.equinoxOSGi,
+//  libraryDependencies += Libraries.felixOSGi,
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
 lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution", imports = guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   Libraries.plotlyJS
 ) dependsOn(serverExt, clientExt, serverExt, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
@@ -1384,7 +1384,7 @@ lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true,
 
 lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings(
   autoScalaLibrary := false,
-  libraryDependencies += Libraries.equinoxOSGi,
+  libraryDependencies += Libraries.felixOSGi,
   resourcesAssemble += {
     val bundle = (OsgiKeys.bundle).value
     bundle -> (assemblyPath.value / bundle.getName)
@@ -1430,7 +1430,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     runRaw(
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates openjdk-21-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
+       apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
        apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \

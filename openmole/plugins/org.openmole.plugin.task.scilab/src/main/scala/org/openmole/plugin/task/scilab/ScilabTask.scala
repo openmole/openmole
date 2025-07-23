@@ -115,7 +115,7 @@ object ScilabTask:
    */
   def multiArrayScilab(v: Any): String =
     // flatten the array after multidimensional transposition
-    def recTranspose(v: Any): Seq[_] =
+    def recTranspose(v: Any): Seq[?] =
       v match
         case v: Array[Array[Array[?]]] => v.map { a => recTranspose(a) }.toSeq.transpose.flatten
         case v: Array[Array[?]]        => v.map { _.toSeq }.toSeq.transpose.flatten

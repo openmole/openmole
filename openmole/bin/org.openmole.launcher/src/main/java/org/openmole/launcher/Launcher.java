@@ -1,9 +1,13 @@
 package org.openmole.launcher;
 
-import jdk.jfr.SettingDefinition;
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.eclipse.osgi.internal.location.LocationHelper;
+//import jdk.jfr.SettingDefinition;
+//import org.eclipse.osgi.container.Module;
+//import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+//import org.eclipse.osgi.internal.location.LocationHelper;
+
+
+import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -11,8 +15,15 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  * Created by Romain Reuillon on 31/03/16.
@@ -39,7 +50,6 @@ public class Launcher {
         String run = null;
         String osgiDirectory = null;
         List<String> priority = new LinkedList<String>();
-        Boolean osgiLockingNone = false;
 
         String[] forwardAgs = new String[0];
 
@@ -65,10 +75,6 @@ public class Launcher {
                 priority.add(args[i]);
                 i++;
                 continue;
-            } else if(args[i].contentEquals("--osgi-locking-none")) {
-                i++;
-                osgiLockingNone = true;
-                continue;
             } else if(args[i].contentEquals("--")) {
                 i++;
                 forwardAgs = Arrays.copyOfRange(args, i, args.length);
@@ -85,20 +91,28 @@ public class Launcher {
         osgiConfig.put(Constants.FRAMEWORK_STORAGE, "");
         osgiConfig.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         osgiConfig.put(Constants.FRAMEWORK_BOOTDELEGATION, "*");
+
+        osgiConfig.put(BundleCache.CACHE_LOCKING_PROP, "false");
+        osgiConfig.put(FelixConstants.RESOLVER_PARALLELISM, "1");
+        //osgiConfig.put(FelixConstants.BUNDLE_STARTLEVEL_PROP, "1");
+
+        /*
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_RESOLVER_THREAD_COUNT, "1");
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT, "1");
         osgiConfig.put(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL, "true");
 
-        if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);
+        if(osgiLockingNone) osgiConfig.put(LocationHelper.PROP_OSGI_LOCKING, LocationHelper.LOCKING_NONE);*/
 
         StringBuffer versions = new StringBuffer();
         StringBuffer executionEnvironments = new StringBuffer();
         int maxVersion = 50;
         for(int version = 0; version <= maxVersion; version++) {
-            versions.append("1." + version);
-            versions.append("," + version);
+            versions.append("1." + version + ",");
+            versions.append("1." + version + ".0,");
+            versions.append(version);
             executionEnvironments.append("J2SE-1." + version + ",");
-            executionEnvironments.append("JavaSE-1." + version);
+            executionEnvironments.append("JavaSE-1." + version + ",");
+            executionEnvironments.append("JavaSE-1." + version + ".0");
 
             if(version != maxVersion) {
                 versions.append(",");
@@ -108,6 +122,7 @@ public class Launcher {
 
         osgiConfig.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "osgi.ee; osgi.ee=\"JavaSE\";version:List=\"" + versions.toString() + "\"");
         osgiConfig.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, executionEnvironments.toString() + "CDC-1.1/Foundation-1.1,CDC-1.0/Foundation-1.0,J2ME,OSGi/Minimum-1.1,OSGi/Minimum-1.0");
+
         if(osgiDirectory !=  null) osgiConfig.put(Constants.FRAMEWORK_STORAGE, osgiDirectory);
 
         Framework framework = frameworkFactory.newFramework(osgiConfig);
@@ -115,7 +130,6 @@ public class Launcher {
 
         int ret = 127;
         try {
-            if(directory == null) throw new RuntimeException("Missing plugin directory argument");
             if(run == null) throw new RuntimeException("Missing run class argument");
             if(directory == null) throw new RuntimeException("Missing plugin directory argument");
             if(!directory.exists()) throw new RuntimeException("Plugin directory does not exist");
@@ -164,26 +178,34 @@ public class Launcher {
             framework.stop();
             framework.waitForStop(0);
         } catch(Throwable e) {
-            e.printStackTrace();
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, "Error in osgi launcher", e);
         } finally {
             if(osgiDirectory != null) {
-                deleteDir(new File(osgiDirectory));
+                try {
+                    deleteDir(new File(osgiDirectory).toPath());
+                } catch(IOException e) {
+                    Logger.getLogger(Launcher.class.getName()).log(Level.WARNING, "Error cleaning the osgi directory", e);
+                }
             }
         }
 
         System.exit(ret);
     }
 
-    static void deleteDir(File file) {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                if (!java.nio.file.Files.isSymbolicLink(f.toPath())) {
-                    deleteDir(f);
-                }
+    static void deleteDir(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
             }
-        }
-        file.delete();
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
 }

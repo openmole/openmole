@@ -104,23 +104,21 @@ lazy val xstream = OsgiProject(
   libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % xstreamVersion, "net.sf.kxml" % "kxml2" % "2.3.0", "org.codehaus.jettison" % "jettison" % "1.4.1"),
   version := xstreamVersion)
 
-lazy val fury = OsgiProject(
+lazy val fory = OsgiProject(
   dir,
-  "org.apache.fury",
+  "org.apache.fory",
   imports = Seq("!javax.*", "scala.*", "*"),
-  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*"),
-  global = true) settings(
+  privatePackages = Seq("!scala.*", "!com.google.*", "META-INF.services.*", "*")) settings(
   settings,
-  libraryDependencies ++= Seq("org.apache.fury" % "fury-core" % furyVersion),
-  libraryDependencies ++= Seq("org.apache.fury" %% "fury-scala" % furyVersion),
+  libraryDependencies ++= Seq("org.apache.fory" % "fory-core" % foryVersion),
+  libraryDependencies ++= Seq("org.apache.fory" %% "fory-scala" % foryVersion),
 
   libraryDependencies += "de.unkrig.jdisasm" % "jdisasm" % "1.0.6",
-  version := furyVersion) dependsOn(guava)
+  version := foryVersion) dependsOn(guava)
 
 lazy val scalaLang = OsgiProject(
   dir,
   "org.scala-lang.scala-library",
-  global = true,
   exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),
   imports = Seq("org.jline.*" /*"!org.apache.sshd.*", "!org.mozilla.*", "!org.apache.tools.ant.*", "!sun.misc.*", "!javax.annotation.*", "!scala.*", "*"*/)) settings (

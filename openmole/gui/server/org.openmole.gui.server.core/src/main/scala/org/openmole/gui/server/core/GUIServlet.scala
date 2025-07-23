@@ -18,7 +18,6 @@ package org.openmole.gui.server.core
 
 import java.nio.ByteBuffer
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._

@@ -26,8 +26,6 @@ import org.openmole.tool.logger.JavaLogger
 import org.openmole.tool.hash.*
 import org.osgi.framework._
 import org.osgi.framework.wiring.{ BundleWiring, FrameworkWiring }
-
-import scala.collection.immutable.{ HashMap, HashSet }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
@@ -40,58 +38,59 @@ case class BundlesInfo(
   lazy val hashes = files.keys.map(f => f -> Hash.file(f)).toMap
 
 
-object PluginManager extends JavaLogger {
+object PluginManager extends JavaLogger:
 
-  import Log._
+  import Log.*
 
   private var bundlesInfo: Option[BundlesInfo] = None
   private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
+  private[pluginmanager] val classes = mutable.HashMap[(Long, String), Option[Class[?]]]()
 
   private[pluginmanager] def clearCaches() = PluginManager.synchronized:
     bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
+    classes.clear()
 
-  def allPluginDependencies(b: Bundle) = PluginManager.synchronized:
-    resolvedPluginDependenciesCache.
-      getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
-      filter(isPlugin).map(l => Activator.contextOrException.getBundle(l))
+  def allPluginDependencies(b: Bundle) = allDependencies(b).filter(isPlugin)
+
+  def allDependencies(b: Bundle): Iterable[Bundle] =
+    PluginManager.synchronized:
+      resolvedPluginDependenciesCache.
+        getOrElseUpdate(b.getBundleId, dependencies(List(b)).map(_.getBundleId)).
+        map(l => Activator.contextOrException.getBundle(l))
 
   private def installBundle(f: File) = PluginManager.synchronized:
     val bundle = Activator.contextOrException.installBundle(f.toURI.toString)
-    bundlesInfo = None
+    clearCaches()
     bundle
 
-  private def infos: BundlesInfo = PluginManager.synchronized:
+  private[pluginmanager] def infos: BundlesInfo = PluginManager.synchronized:
     bundlesInfo match
       case None =>
         val bs = bundles
         val providedDependencies = dependencies(bs.filter(b => b.isProvided)).map(_.getBundleId).toSet
-        val files = bs.map(b => b.file.getCanonicalFile → ((b.getBundleId, b.file.lastModification))).toMap
+        val files = bs.map(b => b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModification))).toMap
         val info = BundlesInfo(files, providedDependencies)
         bundlesInfo = Some(info)
         info
       case Some(bundlesInfo) => bundlesInfo
 
 
-  def updateBundles(bundles: Option[Seq[Bundle]] = None) = {
-    val listener = new FrameworkListener {
+  def updateBundles(bundles: Option[Seq[Bundle]] = None) =
+    val listener = new FrameworkListener:
       val lock = new Semaphore(0)
 
-      override def frameworkEvent(event: FrameworkEvent): Unit = {
+      override def frameworkEvent(event: FrameworkEvent): Unit =
         if (event.getType == FrameworkEvent.PACKAGES_REFRESHED) lock.release()
-      }
-    }
 
     val wiring = Activator.contextOrException.getBundle(0).adapt(classOf[FrameworkWiring])
 
-    bundles match {
+    bundles match
       case Some(s) => wiring.refreshBundles(s.asJava, listener)
       case None    => wiring.refreshBundles(null, listener)
-    }
 
     // FIX: The listener is not called by the framework, enable at some point
     // listener.lock.acquire()
-  }
 
   def bundles = Activator.contextOrException.getBundles.filter(!_.isSystem).toSeq.sortBy(_.file.getName)
   def bundleFiles = infos.files.keys
@@ -110,21 +109,18 @@ object PluginManager extends JavaLogger {
   def bundleForClass(c: Class[?]): Option[Bundle] =
     Option(FrameworkUtil.getBundle(c))
 
-  def bundlesForClass(c: Class[?]): Iterable[Bundle] = {
+  def bundlesForClass(c: Class[?]): Iterable[Bundle] =
     val bundle = bundleForClass(c).toSeq
     bundle.flatMap(allDependencies)
-  }
 
-  def pluginsForClass(c: Class[?]): Iterable[File] = {
+  def pluginsForClass(c: Class[?]): Iterable[File] =
     val bundle = bundleForClass(c)
     bundle.toSeq.flatMap(allPluginDependencies).map(_.file)
-  }
 
   def allDepending(file: File, filter: Bundle => Boolean): Iterable[File] =
-    bundle(file) match {
+    bundle(file) match
       case Some(b) => allDependingBundles(b, filter).map { _.file }
       case None    => Iterable.empty
-    }
 
   def isBundle(file: File): Boolean =
     import scala.util.Using
@@ -186,12 +182,10 @@ object PluginManager extends JavaLogger {
 
   def bundle(file: File) = infos.files.get(file.getCanonicalFile).map { id => Activator.contextOrException.getBundle(id._1) }
 
-  private def allDependencies(b: Bundle) = dependencies(List(b))
-
   def isPlugin(b: Bundle): Boolean = isPlugin(b.getBundleId)
   def isPlugin(id: Long): Boolean = !infos.providedDependencies.contains(id)
 
-  def isOSGI(file: File) = {
+  def isOSGI(file: File) =
     Try {
       val zip = new ZipFile(file)
       val hasSymbolicName =
@@ -206,7 +200,6 @@ object PluginManager extends JavaLogger {
         finally zip.close
       hasSymbolicName
     }.getOrElse(false)
-  }
 
   def remove(b: Bundle) = synchronized {
     val additionalBundles = Seq(b) ++ allDependingBundles(b, b => !b.isProvided)
@@ -217,21 +210,21 @@ object PluginManager extends JavaLogger {
   private def getBundle(f: File) =
     Option(Activator.contextOrException.getBundle(f.toURI.toString))
 
-  private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] = {
+  private def dependencies(bundles: Iterable[Bundle]): Iterable[Bundle] =
     val seen = mutable.Set[Bundle]() ++ bundles
-    var toProceed = new ListBuffer[Bundle] ++ bundles
+    val toProceed = new ListBuffer[Bundle] ++ bundles
 
-    while (!toProceed.isEmpty) {
+    while toProceed.nonEmpty
+    do
       val current = toProceed.remove(0)
-      for {
-        b ← directDependencies(current)
-      } if (!seen(b)) {
-        seen += b
-        toProceed += b
-      }
-    }
+      for b <- directDependencies(current)
+      do
+        if !seen(b)
+        then
+          seen += b
+          toProceed += b
+
     seen.toList
-  }
 
   def allDependingBundles(b: Bundle, filter: Bundle => Boolean): Iterable[Bundle] = {
     val seen = mutable.Set[Bundle]()
@@ -285,11 +278,15 @@ object PluginManager extends JavaLogger {
 
   def bundleHashes = infos.hashes.values
 
+  def globalClassLoader(b: Bundle) = new BuddyClassLoader(b)
+  def globalClassLoader(c: Class[?]): ClassLoader =
+    bundleForClass(c) match
+      case Some(b) => new BuddyClassLoader(b)
+      case None => c.getClassLoader
+
   /* For debugging purposes */
   def printBundles = println(Activator.contextOrException.getBundles.mkString("\n"))
   def printDirectDepending(b: Long) = println(directDependingBundles(Activator.contextOrException.getBundle(b)).mkString("\n"))
   def printDirectDependencies(b: Long) = println(directDependencies(Activator.contextOrException.getBundle(b)).mkString("\n"))
   def printIsPlugin(b: Long) = println(isPlugin(b))
   def printPluginsForClass(c: Class[?]) = println(pluginsForClass(c).mkString("\n"))
-
-}

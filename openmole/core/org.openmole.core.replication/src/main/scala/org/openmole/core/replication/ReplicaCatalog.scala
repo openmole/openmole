@@ -125,12 +125,10 @@ class ReplicaCatalog(database: Database, preference: Preference) {
             }
           }
 
-          def uploadAndInsertIfNotInCatalog: Replica = {
+          def uploadAndInsertIfNotInCatalog: Replica =
             val replicas = database.selectSameSource(srcPath.getCanonicalPath, storageId, hash)
-              
-            import scala.concurrent.ExecutionContext.Implicits.global
 
-            replicas.lastOption match {
+            replicas.lastOption match
               case Some(r) => r
               case None =>
                 val newFile = upload
@@ -147,8 +145,6 @@ class ReplicaCatalog(database: Database, preference: Preference) {
                     replica
                   case Transactor.Inserted(replica) => replica
                 }
-            }
-          }
 
           cleanOldReplicas
           val replica = uploadAndInsertIfNotInCatalog

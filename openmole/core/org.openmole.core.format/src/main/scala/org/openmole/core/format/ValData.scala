@@ -20,6 +20,7 @@ package org.openmole.core.format
 import org.openmole.core.context.*
 import org.openmole.tool.types.TypeTool
 import io.circe.*
+import org.openmole.core.pluginmanager.PluginManager
 
 object ValData:
   def apply[T](v: Val[T]) = 
@@ -27,8 +28,7 @@ object ValData:
 
   def toVal(data: ValData) =
     val (ns, n) = Val.parseName(data.name)
-    new Val(n, ValType(using TypeTool.toManifest(data.`type`)), ns)
-
+    new Val(n, ValType(using TypeTool.toManifest(data.`type`, PluginManager.globalClassLoader(ValData.getClass))), ns)
 
 case class ValData(name: String, `type`: String) derives derivation.ConfiguredCodec
 

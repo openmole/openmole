@@ -56,11 +56,11 @@ package object pluginmanager {
 
       val decodedLocation = location //URLDecoder.decode(location, "UTF-8")
 
-      if (ref)
-        openMOLELocationOption match {
+      if ref
+      then
+        openMOLELocationOption match
           case Some(oMLoc) => new File(oMLoc, decodedLocation)
           case None        => new File(decodedLocation)
-        }
       else new File(decodedLocation)
     }
 

@@ -73,13 +73,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     api.restart()
 
     def checkAlive(): Unit =
-      api.isAlive().foreach { x =>
+      api.isAlive().foreach: x =>
         if x
         then CoreUtils.setRoute(s"/${connectionRoute}")
         else setTimeout(5000) {
           checkAlive()
         }
-      }
 
     setTimeout(5000) {
       checkAlive()

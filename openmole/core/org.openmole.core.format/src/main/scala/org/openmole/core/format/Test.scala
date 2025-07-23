@@ -18,9 +18,9 @@
 // */
 //
 //import com.volkhart.memory.ObjectGraphMeasurer
-//import org.apache.fury.*
-//import org.apache.fury.config.*
-//import org.apache.fury.serializer.scala.*
+//import org.apache.fory.*
+//import org.apache.fory.config.*
+//import org.apache.fory.serializer.scala.*
 //
 //import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 //import java.util.zip.{GZIPInputStream, GZIPOutputStream}
@@ -41,8 +41,8 @@
 ////  println(CompactedContext.decompress(CompactedContext.compressArray(array)))
 //
 //
-////  val fury =
-////    Fury.builder().withLanguage(Language.JAVA)
+////  val fory =
+////    Fory.builder().withLanguage(Language.JAVA)
 ////      .withScalaOptimizationEnabled(true)
 ////      .requireClassRegistration(false)
 ////      .withRefTracking(true)
@@ -51,7 +51,7 @@
 ////      .withNumberCompressed(true)
 ////      .build()
 ////
-////  ScalaSerializers.registerSerializers(fury)
+////  ScalaSerializers.registerSerializers(fory)
 ////
 ////
 //
@@ -79,4 +79,4 @@
 //
 ////
 ////  println(ObjectGraphMeasurer.measure(context))
-////  println(ObjectGraphMeasurer.measure(compress(fury.serialize(context))))
+////  println(ObjectGraphMeasurer.measure(compress(fory.serialize(context))))

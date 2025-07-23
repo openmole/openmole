@@ -26,25 +26,22 @@ import javax.swing.JToolBar.Separator
 import scala.reflect.ClassTag
 import scala.reflect.Manifest.{arrayType, classType, intersectionType, wildcardType}
 
-object TypeTool {
+object TypeTool:
 
-  implicit class ManifestDecoration[T](m: Manifest[T]) {
+  implicit class ManifestDecoration[T](m: Manifest[T]):
     def isArray = m.runtimeClass.isArray
     def toArray = m.arrayManifest
     def asArray = m.asInstanceOf[Manifest[Array[T]]]
     def toClassTag = ClassTag[T](m.runtimeClass)
-    def array(ts: T*): Array[T] = {
+    def array(ts: T*): Array[T] =
       val a = m.newArray(ts.size)
-      for { (t, i) <- ts.zipWithIndex } a(i) = t
+      for (t, i) <- ts.zipWithIndex do a(i) = t
       a
-    }
-  }
 
   def manifestFromArrayUnsecure(m: Manifest[Array[?]]) = m.typeArguments.head.asInstanceOf[Manifest[Any]]
 
-  implicit class ManifestArrayDecoration[T](m: Manifest[Array[T]]) {
+  extension [T](m: Manifest[Array[T]])
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
-  }
 
   /*   implicit class TypeDecoration(t: TypeRepr) {
     def isArray = t <:< definitions.ArrayClass.toType
@@ -52,14 +49,12 @@ object TypeTool {
     def toArray = appliedType(definitions.ArrayClass.toType, List(t))
   } */
 
-  implicit class ClassTagDecoration[T](c: ClassTag[T]) {
+  extension [T](c: ClassTag[T])
     def isArray = c.runtimeClass.isArray
     def toArray = c.wrap
-  }
 
-  implicit class ArrayClassTagDecorator[T](c: ClassTag[Array[T]]) {
+  extension [T](c: ClassTag[Array[T]])
     def fromArray: ClassTag[T] = ClassTag(c.runtimeClass.getComponentType)
-  }
 
   @tailrec private def unArrayify(m1: Manifest[?], m2: Manifest[?], level: Int = 0): (Manifest[?], Manifest[?], Int) = {
     if (!m1.isArray || !m2.isArray) (m1, m2, level)
@@ -85,40 +80,12 @@ object TypeTool {
 
   //def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
-  def toClass(s: String) = classEquivalence(
-    s match {
-      case "Byte"       => classOf[Byte]
-      case "Short"      => classOf[Short]
-      case "Int"        => classOf[Int]
-      case "int"        => classOf[Int]
-      case "Long"       => classOf[Long]
-      case "long"       => classOf[Long]
-      case "Float"      => classOf[Float]
-      case "Double"     => classOf[Double]
-      case "double"     => classOf[Double]
-      case "Char"       => classOf[Char]
-      case "Boolean"    => classOf[Boolean]
-      case "String"     => classOf[String]
-      case "File"       => classOf[java.io.File]
-      case "BigInteger" => classOf[java.math.BigInteger]
-      case "BigDecimal" => classOf[java.math.BigDecimal]
-      case _ => try {
-        TypeTool.getClass.getClassLoader.loadClass(s)
-      }
-      catch {
-        case e: ClassNotFoundException => throw new ClassNotFoundException("The class " + s + " has not been found", e)
-      }
-    }
-  )
-
-  def clazzOf(v: Any) = {
-    v match {
+  def clazzOf(v: Any) =
+    v match
       case null      => classOf[Null]
       case r: AnyRef => r.getClass
-    }
-  }
 
-  def classAssignable(from: Class[?], to: Class[?]) = {
+  def classAssignable(from: Class[?], to: Class[?]) =
     def unArrayify(c1: Class[?], c2: Class[?]): (Class[?], Class[?]) =
       if (!c1.isArray || !c2.isArray) (c1, c2) else unArrayify(c1.getComponentType, c2.getComponentType)
 
@@ -127,15 +94,13 @@ object TypeTool {
     val eqFrom = classEquivalence(ufrom).map(_.native).getOrElse(from)
 
     eqTo.isAssignableFrom(eqFrom)
-  }
 
   def assignable(from: Manifest[?], to: Manifest[?]): Boolean =
-    unArrayify(from, to) match {
+    unArrayify(from, to) match
       case (c1, c2, _) =>
         val eqFrom = classEquivalence(from.runtimeClass).map(_.manifest).getOrElse(from)
         val eqTo = classEquivalence(to.runtimeClass).map(_.manifest).getOrElse(to)
         eqTo.runtimeClass.isAssignableFrom(eqFrom.runtimeClass)
-    }
 
   def callByName[U: ClassTag, T](o: AnyRef, name: String, args: Vector[Any]) = {
     val handle = implicitly[ClassTag[U]].runtimeClass.getDeclaredMethods.find(_.getName == name).get
@@ -185,8 +150,8 @@ object TypeTool {
     then tpe.drop(wildCard.size)
     else tpe
 
-  def toManifest(s: String): Manifest[?] =
-    def loadClass(c: String) = Class.forName(c, true, TypeTool.getClass.getClassLoader)
+  def toManifest(s: String, classLoader: ClassLoader): Manifest[?] =
+    def loadClass(c: String) = Class.forName(c, true, classLoader)
 
     def simpleType(st: String): Manifest[?] =
       st.trim match
@@ -249,17 +214,29 @@ object TypeTool {
       then simpleType(t)
       else
         val parsedType = parseParametricType(t)
-        main.trim match {
+        main.trim match
           case "Array" =>
             assert(parsedType.parameter.length == 1, parsedType.toString)
             arrayType(parseType(parsedType.parameter.head))
           case _ =>
             val parameters = parsedType.parameter.map(parseType)
             parametricType(main, parameters)
-        }
 
     parseType(s)
   end toManifest
 
-}
+  private lazy val primitiveTypes =
+    Seq(
+      classOf[Boolean],
+      classOf[Byte],
+      classOf[Char],
+      classOf[Short],
+      classOf[Int],
+      classOf[Long],
+      classOf[Float],
+      classOf[Double],
+      java.lang.Void.TYPE
+    ).map(t => t.getName -> t).toMap
+
+  def primitiveType(typeName: String): Option[Class[?]] = primitiveTypes.get(typeName)
 

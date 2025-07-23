@@ -18,6 +18,7 @@ package org.openmole.gui.server.core
  */
 
 import cats.effect.*
+import cats.effect.unsafe.IORuntime
 import endpoints4s.http4s.server
 import org.http4s
 import org.http4s.*
@@ -113,6 +114,7 @@ object CoreAPIServer:
       case None => path.map(p => SafePath(p.split('/').toSeq, ServerFileSystemContext.Project))
 
 
+  def apply(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Response[IO]]) = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
 
 /** Defines a Play router (and reverse router) for the endpoints described
  * in the `CounterEndpoints` trait.
@@ -121,10 +123,12 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
   extends APIServer
     with api.CoreAPI:
 
+  given IORuntime = apiImpl.services.threadProvider.ioRuntime
+
   override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
 
   // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
-  type Eff = super.Effect
+  private type FixEffect = super.Effect
 
   val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
@@ -189,7 +193,6 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
     HttpRoutes.of:
       case req @ POST -> Root / org.openmole.gui.shared.api.`uploadFilesRoute` =>
         import apiImpl.services.*
-        import cats.effect.unsafe.implicits.global
         import org.http4s.multipart.*
         import org.openmole.gui.server.ext.utils
         import org.openmole.tool.stream.*

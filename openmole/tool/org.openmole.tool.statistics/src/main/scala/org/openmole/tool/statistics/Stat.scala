@@ -58,10 +58,16 @@ trait Stat:
   /* ------ Difference on series ----- */
 
   def absoluteDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) => Math.abs(v1v - v2v) }.sum
+    var distance = 0.0
+    for (v1v, v2v) <- v1 zip v2
+    do distance += Math.abs(v1v - v2v)
+    distance
 
   def squareDistance(v1: Seq[Double], v2: Seq[Double]): Double =
-    (v1 zip v2).map { case (v1v, v2v) => Math.pow(v1v - v2v, 2) }.sum
+    var distance = 0.0
+    for (v1v, v2v) <- v1 zip v2
+    do distance += Math.pow(v1v - v2v, 2)
+    distance
 
   def dynamicTimeWarpingDistance(v1: Seq[Double], v2: Seq[Double], fast: Boolean = true): Double =
     import org.openmole.tool.dtw.timeseries.TimeSeries

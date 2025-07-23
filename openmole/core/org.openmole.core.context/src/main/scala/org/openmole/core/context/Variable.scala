@@ -27,8 +27,6 @@ import scala.reflect.ClassTag
 import scala.util.Random
 
 object Variable:
-  val openMOLENameSpace = Namespace("openmole")
-
   /**
    * implicit conversion of a tuple (prototype,value) to a Variable
    * @param t
@@ -58,8 +56,8 @@ object Variable:
   /**
    * Seed for rng
    */
-  val openMOLESeed = Val[Long]("seed", namespace = openMOLENameSpace)
-  val openMOLEExperiment = Val[Long]("experiment", namespace = openMOLENameSpace)
+  val openMOLESeed = Val[Long]("seed", namespace = Namespace.openmole)
+  val openMOLEExperiment = Val[Long]("experiment", namespace = Namespace.openmole)
 
   def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 

@@ -57,6 +57,10 @@ package dsl:
       def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.resultFileDirectory(file).foreach(_.copy(destination))
       def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
 
+    object openmole:
+      def experiment: Val[Long] = org.openmole.core.context.Variable.openMOLEExperiment
+      def seed: Val[Long] = org.openmole.core.context.Variable.openMOLESeed
+
     def load(file: File)(implicit serialiserService: SerializerService) = serialiserService.deserialize[Object](file)
     def loadArchive(file: File)(implicit newFile: TmpDirectory, serialiserService: SerializerService, fileService: FileService) = serialiserService.deserializeAndExtractFiles[Object](file, deleteFilesOnGC = true, gz = true)
     def load(file: String)(implicit serialiserService: SerializerService): Object = load(new File(file))

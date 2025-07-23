@@ -43,11 +43,11 @@ object GetResultActor {
 
     val GetResult(job, environment, resultPath, batchJob) = msg
 
-    JobManager.killOr(job, Kill(job, environment, Some(batchJob))): () =>
+    JobManager.killOr(environment, job, Kill(job, environment, Some(batchJob))): () =>
       try getResult(environment, resultPath, job, batchJob)
       catch
         case e: Throwable =>
-          BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.FAILED)
+          BatchEnvironment.setExecutionSate(environment, job, ExecutionState.FAILED)
           def stdOutErr = BatchJobControl.tryStdOutErr(batchJob).toOption
 
           e match

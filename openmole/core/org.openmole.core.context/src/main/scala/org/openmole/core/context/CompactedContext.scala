@@ -3,7 +3,7 @@ package org.openmole.core.context
 import scala.collection.Iterable
 
 object CompactedContext:
-  org.apache.fury.logging.LoggerFactory.disableLogging()
+  org.apache.fory.logging.LoggerFactory.disableLogging()
 
   def empty: CompactedContext = IArray.empty[Any]
 
@@ -32,7 +32,7 @@ object CompactedContext:
       vals(i) = v.asInstanceOf[Variable[Any]].prototype
       values(i) = v.value
 
-    val serialized = fury.serialize(values)
+    val serialized = fory.serialize(values)
 
     if serialized.length <= minCompressionSize
     then compactRef(variables)
@@ -51,21 +51,21 @@ object CompactedContext:
 
     out.toByteArray
 
-  lazy val fury =
-    import org.apache.fury.*
-    import org.apache.fury.config.*
-    import org.apache.fury.serializer.scala.*
+  lazy val fory =
+    import org.apache.fory.*
+    import org.apache.fory.config.*
+    import org.apache.fory.serializer.scala.*
 
     val f =
-      Fury.builder().withLanguage(Language.JAVA)
-        .withClassLoader(classOf[Fury].getClassLoader)
+      Fory.builder().withLanguage(Language.JAVA)
+        .withClassLoader(classOf[Fory].getClassLoader)
         .withScalaOptimizationEnabled(true)
         .requireClassRegistration(false)
         .withRefTracking(true)
         .suppressClassRegistrationWarnings(true)
         .withStringCompressed(true)
         .withNumberCompressed(true)
-        .buildThreadSafeFury()
+        .buildThreadSafeFory()
 
     ScalaSerializers.registerSerializers(f)
 
@@ -99,7 +99,7 @@ object CompactedContext:
       val values =
         def rawArray = compacted(1).asInstanceOf[Array[Byte]]
         val values = decompress(rawArray)
-        fury.deserialize(values).asInstanceOf[Array[Any]]
+        fory.deserialize(values).asInstanceOf[Array[Any]]
 
       val vals = compacted(0).asInstanceOf[Array[Any]]
 
@@ -144,7 +144,7 @@ object CompactedArray:
   def isGzip(a: IArray[Byte]) = a.startsWith(gzipHeader)
 
   def compact(values: Seq[Any]): CompactedArray =
-    val serialized = fury.serialize(values)
+    val serialized = fory.serialize(values)
 
     if serialized.length <= minCompressionSize
     then IArray.unsafeFromArray(serialized)
@@ -152,7 +152,7 @@ object CompactedArray:
 
   def expand(compactedArray: CompactedArray) =
     if isGzip(compactedArray)
-    then fury.deserialize(decompress(IArray.wrapByteIArray(compactedArray).unsafeArray))
-    else fury.deserialize(IArray.wrapByteIArray(compactedArray).unsafeArray)
+    then fory.deserialize(decompress(IArray.wrapByteIArray(compactedArray).unsafeArray))
+    else fory.deserialize(IArray.wrapByteIArray(compactedArray).unsafeArray)
 
 opaque type CompactedArray = IArray[Byte]

@@ -80,7 +80,7 @@ package object abc {
   case class ABC(
     evaluation:           DSL,
     prior:                Seq[UnivariatePrior],
-    observed:             Seq[ABC.Observed[_]],
+    observed:             Seq[ABC.Observed[?]],
     sample:               Int,
     generated:            Int,
     minAcceptedRatio:     OptionalArgument[Double] = 0.01,
@@ -148,7 +148,7 @@ package object abc {
   case class IslandABC(
     evaluation:           DSL,
     prior:                Seq[UnivariatePrior],
-    observed:             Seq[ABC.Observed[_]],
+    observed:             Seq[ABC.Observed[?]],
     sample:               Int,
     generated:            Int,
     parallelism:          Int,

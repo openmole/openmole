@@ -9,7 +9,7 @@ import org.openmole.plugin.environment.ssh.{ RuntimeInstallation, SharedStorage 
 class OARJobService[S](
   s:             S,
   tmpDirectory:  String,
-  installation:  RuntimeInstallation[_],
+  installation:  RuntimeInstallation[?],
   parameters:    OAREnvironment.Parameters,
   headNode:      HeadNode,
   accessControl: AccessControl)(implicit storageInterface: StorageInterface[S], hierarchicalStorageInterface: HierarchicalStorageInterface[S], services: BatchEnvironment.Services) {

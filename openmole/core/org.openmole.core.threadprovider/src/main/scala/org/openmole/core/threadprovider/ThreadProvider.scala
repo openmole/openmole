@@ -5,7 +5,7 @@ import java.util.concurrent._
 
 import org.openmole.core.preference._
 import org.openmole.tool.collection._
-
+import cats.effect.unsafe.IORuntime
 import scala.concurrent.ExecutionContext
 
 object ThreadProvider:
@@ -44,6 +44,12 @@ class ThreadProvider:
   given executionContext: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.fromExecutor(virtualThreadPool)
 
   lazy val scheduler = Executors.newScheduledThreadPool(1, threadFactory)
+
+  given ioRuntime: IORuntime =
+    IORuntime.builder().
+      setCompute(executionContext, () => ()).
+      setBlocking(executionContext, () => ()).
+      build()
 
   var stopped = false
 

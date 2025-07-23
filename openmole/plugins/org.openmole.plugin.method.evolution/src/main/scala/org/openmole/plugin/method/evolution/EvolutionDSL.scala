@@ -86,7 +86,7 @@ object EvolutionWorkflow:
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -108,12 +108,12 @@ object EvolutionWorkflow:
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
 
 
-  def stochasticGA[AG](
+  def stochasticGA[AG, VA](
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(implicit algorithm: MGOAPI.Integration[AG, (IArray[Double], IArray[Int]), Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -132,9 +132,8 @@ object EvolutionWorkflow:
       def genomeToVariables(g: G): FromContext[Seq[Variable[?]]] =
         FromContext: p =>
           import p.*
-          val (continuous, discrete) = operations.genomeValues(g)
           val seeder = replication.seed
-          Genome.toVariables(genome, continuous, discrete, scale = true) ++ seeder(p.random())
+          operations.genomeToVariables(g).from(context) ++ seeder(p.random())
 
       def variablesToPhenotype(context: Context) = Phenotype.fromContext(context, phenotypeContent)
 
@@ -333,11 +332,11 @@ trait EvolutionWorkflow:
 
   def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]]
 
-  def genomeVal = Val[G]("genome", GAIntegration.namespace)(genomeType)
-  def individualVal = Val[I]("individual", GAIntegration.namespace)(individualType)
-  def populationVal = Val[Pop]("population", GAIntegration.namespace)(populationType)
-  def offspringPopulationVal = Val[Pop]("offspring", GAIntegration.namespace)(populationType)
-  def stateVal = Val[S]("state", GAIntegration.namespace)(stateType)
+  def genomeVal = Val[G]("genome", GAIntegration.namespace)(using genomeType)
+  def individualVal = Val[I]("individual", GAIntegration.namespace)(using individualType)
+  def populationVal = Val[Pop]("population", GAIntegration.namespace)(using populationType)
+  def offspringPopulationVal = Val[Pop]("offspring", GAIntegration.namespace)(using populationType)
+  def stateVal = Val[S]("state", GAIntegration.namespace)(using stateType)
   def generationVal = GAIntegration.generationVal
   def evaluatedVal = GAIntegration.evaluatedVal
   def terminatedVal = Val[Boolean]("terminated", GAIntegration.namespace)

@@ -27,7 +27,7 @@ object KillActor:
     import services._
     import msg._
 
-    BatchEnvironment.setExecutionJobSate(environment, job, ExecutionState.KILLED)
+    BatchEnvironment.setExecutionSate(environment, job, ExecutionState.KILLED)
 
     if !JobManager.canceled(job.storedJob) && !environment.stopped
     then

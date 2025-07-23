@@ -54,7 +54,7 @@ object Profile {
     implicit def toProfileElement[T: ToProfileElement](t: T): ProfileElement = implicitly[ToProfileElement[T]].apply(t)
   }
 
-  abstract trait ProfileElement
+  sealed trait ProfileElement
   case class IntervalDoubleProfileElement(v: Val[Double], n: Int) extends ProfileElement
   case class IntervalIntProfileElement(v: Val[Int]) extends ProfileElement
   case class FixDomainProfileElement(v: Val[Double], intervals: Vector[Double]) extends ProfileElement

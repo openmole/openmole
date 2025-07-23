@@ -90,5 +90,3 @@ class BatchExecutionJob(
   def runnableTasks(using SerializerService) = JobGroup.moleJobs(job).map(RunnableTask(_))
 
   private[environment] var _state: ExecutionState = ExecutionState.READY
-
-  def state = _state
