@@ -26,25 +26,22 @@ import javax.swing.JToolBar.Separator
 import scala.reflect.ClassTag
 import scala.reflect.Manifest.{arrayType, classType, intersectionType, wildcardType}
 
-object TypeTool {
+object TypeTool:
 
-  implicit class ManifestDecoration[T](m: Manifest[T]) {
+  implicit class ManifestDecoration[T](m: Manifest[T]):
     def isArray = m.runtimeClass.isArray
     def toArray = m.arrayManifest
     def asArray = m.asInstanceOf[Manifest[Array[T]]]
     def toClassTag = ClassTag[T](m.runtimeClass)
-    def array(ts: T*): Array[T] = {
+    def array(ts: T*): Array[T] =
       val a = m.newArray(ts.size)
-      for { (t, i) <- ts.zipWithIndex } a(i) = t
+      for (t, i) <- ts.zipWithIndex do a(i) = t
       a
-    }
-  }
 
   def manifestFromArrayUnsecure(m: Manifest[Array[?]]) = m.typeArguments.head.asInstanceOf[Manifest[Any]]
 
-  implicit class ManifestArrayDecoration[T](m: Manifest[Array[T]]) {
+  extension [T](m: Manifest[Array[T]])
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
-  }
 
   /*   implicit class TypeDecoration(t: TypeRepr) {
     def isArray = t <:< definitions.ArrayClass.toType
@@ -52,14 +49,12 @@ object TypeTool {
     def toArray = appliedType(definitions.ArrayClass.toType, List(t))
   } */
 
-  implicit class ClassTagDecoration[T](c: ClassTag[T]) {
+  extension [T](c: ClassTag[T])
     def isArray = c.runtimeClass.isArray
     def toArray = c.wrap
-  }
 
-  implicit class ArrayClassTagDecorator[T](c: ClassTag[Array[T]]) {
+  extension [T](c: ClassTag[Array[T]])
     def fromArray: ClassTag[T] = ClassTag(c.runtimeClass.getComponentType)
-  }
 
   @tailrec private def unArrayify(m1: Manifest[?], m2: Manifest[?], level: Int = 0): (Manifest[?], Manifest[?], Int) = {
     if (!m1.isArray || !m2.isArray) (m1, m2, level)
@@ -219,33 +214,29 @@ object TypeTool {
       then simpleType(t)
       else
         val parsedType = parseParametricType(t)
-        main.trim match {
+        main.trim match
           case "Array" =>
             assert(parsedType.parameter.length == 1, parsedType.toString)
             arrayType(parseType(parsedType.parameter.head))
           case _ =>
             val parameters = parsedType.parameter.map(parseType)
             parametricType(main, parameters)
-        }
 
     parseType(s)
   end toManifest
 
-  def primitiveType(typeName: String): Option[Class[?]] =
-    val primitives =
-      Seq(
-        classOf[Boolean],
-        classOf[Byte],
-        classOf[Char],
-        classOf[Short],
-        classOf[Int],
-        classOf[Long],
-        classOf[Float],
-        classOf[Double],
-        java.lang.Void.TYPE
-      )
+  private lazy val primitiveTypes =
+    Seq(
+      classOf[Boolean],
+      classOf[Byte],
+      classOf[Char],
+      classOf[Short],
+      classOf[Int],
+      classOf[Long],
+      classOf[Float],
+      classOf[Double],
+      java.lang.Void.TYPE
+    ).map(t => t.getName -> t).toMap
 
-    primitives.find(_.getName == typeName)
-
-}
+  def primitiveType(typeName: String): Option[Class[?]] = primitiveTypes.get(typeName)
 
