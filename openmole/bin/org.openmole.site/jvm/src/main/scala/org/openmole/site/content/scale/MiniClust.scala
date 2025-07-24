@@ -25,14 +25,14 @@ ${aa("MiniClust", href := "https://github.com/openmole/miniclust")} is a lightwe
 
 The ${code{"MiniclustEnvironment"}} makes it possible to delegate job a MiniClust cluster.
 
-$br$br
+$br
 
 You should first provide your ${aa("authentication", href := DocumentationPages.gui.file + "#Authentications")} information to OpenMOLE to be able to use your batch system.
 Then, all that is left is to define is the environment itself.
 
 Here is a use example:
 
-$br$br
+$br
 
 ${hl.openmole("""
   val env =
