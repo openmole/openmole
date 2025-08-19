@@ -1,7 +1,7 @@
-package org.openmole.gui.plugin.authentication
+package org.openmole.gui.client.ext
 
 /*
- * Copyright (C) 2022 Romain Reuillon
+ * Copyright (C) 2025 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,13 +18,18 @@ package org.openmole.gui.plugin.authentication
  */
 
 
-import org.openmole.gui.client.ext.*
+import sttp.tapir.client.sttp4.*
+import sttp.client4.*
+import sttp.tapir.PublicEndpoint
+import concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-package object egi {
+class STTPInterpreter:
 
- class APIClientImpl(val settings: ClientSettings)
-   extends EGIAuthenticationAPI with APIClient
+  lazy val sttpInterpreter = SttpClientInterpreter()
+  lazy val backend = DefaultFutureBackend()
 
- def PluginFetch = Fetch(new APIClientImpl(_))
-
-}
+  def toRequest[I, E, O](e: PublicEndpoint[I, E, O, Any])(using pb: BasePath)(i: I): Future[O] =
+    val uri = pb.map(u => sttp.model.Uri.pathRelative(u.split("/").toSeq))
+    sttpInterpreter.toRequestThrowErrors(e, uri)(i).send(backend).flatMap: r =>
+      Future.successful(r.body)

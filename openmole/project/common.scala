@@ -30,10 +30,10 @@ object common {
   def json4sVersion = "4.0.6"
   def jacksonVersion = "2.17.2"
   def circeVersion = "0.14.12"
-  def circeYamlVersion = "0.14.2"
+  def circeYamlVersion = "0.16.1"
   def catsVersion = "2.13.0"
   def catsEffectVersion = "3.6.2"
-  def catsParseVersion = "0.3.10"
+  def catsParseVersion = "1.1.0"
   def squantsVersion = "1.8.3"
   def xstreamVersion = "1.4.21"
   def scalaURIVersion = "1.1.1"
@@ -61,12 +61,9 @@ object common {
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
 
-  def http4sVersion = "0.23.12"
-
-  def endpoint4SHttp4SVersion = "11.0.1"
-  def endpoints4SVersion = "1.12.1"
-  def endpoint4SCirceSchemaVersion = "2.6.1"
-  def endpoint4SFetchClientCirceVersion = "4.0.1"
+  def http4sVersion = "0.23.17"
+  def tapirVersion = "1.11.42"
+  def tapirSTTPClientVersion = "1.11.29"
 
   def xzVersion = "1.10"
 

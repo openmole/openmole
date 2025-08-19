@@ -1,7 +1,7 @@
 package org.openmole.gui.shared.api
 
 /*
- * Copyright (C) 2022 Romain Reuillon
+ * Copyright (C) 2025 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,243 +17,385 @@ package org.openmole.gui.shared.api
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+import sttp.tapir.*
+import sttp.model.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import io.circe.generic.auto.*
 import org.openmole.core.market.{MarketIndex, MarketIndexEntry}
 import org.openmole.gui.shared.data.*
 
-trait CoreAPI extends RESTAPI:
-
+object CoreAPI:
   def prefix = "gui"
-  
-  // ----- Workspace -------
 
-//  val isPasswordCorrect: Endpoint[String, Boolean] =
-//    endpoint(post(path / "is-password-correct", jsonRequest[String]), ok(jsonResponse[Boolean]))
+  // --------- Files ----------------
 
-//  val resetPassword: Endpoint[Unit, Unit] =
-//    endpoint(get(path / "reset-password"), ok(jsonResponse[Unit]))
+  lazy val size: TapirEndpoint[SafePath, Long] =
+    endpoint.post
+      .in(prefix / "file" / "size")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Long])
+      .errorOut(jsonBody[ErrorData])
 
-  // ------ Files ------------
+  lazy val saveFile: TapirEndpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
+    endpoint.post
+      .in(prefix / "file" / "save")
+      .in(jsonBody[(SafePath, String, Option[String], Boolean)])
+      .out(jsonBody[(Boolean, String)])
+      .errorOut(jsonBody[ErrorData])
 
-  val size: ErrorEndpoint[SafePath, Long] =
-    errorEndpoint(post(path / prefix / "file" / "size", jsonRequest[SafePath]), ok(jsonResponse[Long]))
+  lazy val copyFiles: TapirEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    endpoint.post
+      .in(prefix / "file" / "copy")
+      .in(jsonBody[(Seq[(SafePath, SafePath)], Boolean)])
+      .out(jsonBody[Seq[SafePath]])
+      .errorOut(jsonBody[ErrorData])
 
-  //def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String)
-//  implicit lazy val saveFileRequestSchema: JsonSchema[(SafePath, String, Option[String], Boolean)] = genericJsonSchema
-  val saveFile: ErrorEndpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
-    errorEndpoint(post(path / prefix / "file"/ "save", jsonRequest[(SafePath, String, Option[String], Boolean)]), ok(jsonResponse[(Boolean, String)]))
+  lazy val createFile: TapirEndpoint[(SafePath, String, Boolean), Boolean] =
+    endpoint.post
+      .in(prefix / "file" / "create")
+      .in(jsonBody[(SafePath, String, Boolean)])
+      .out(jsonBody[Boolean])
+      .errorOut(jsonBody[ErrorData])
 
-  //def copyProjectFilesTo(safePaths: Seq[SafePath], to: SafePath, overwrite: Boolean) = {
-  val copyFiles: ErrorEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
-    errorEndpoint(post(path / prefix / "file" / "copy", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
+  lazy val extractArchive: TapirEndpoint[(SafePath, SafePath), Unit] =
+    endpoint.post
+      .in(prefix / "file" / "extract-archive")
+      .in(jsonBody[(SafePath, SafePath)])
+      .errorOut(jsonBody[ErrorData])
 
-  //def addFile(safePath: SafePath, fileName: String): Boolean
-  val createFile: ErrorEndpoint[(SafePath, String, Boolean), Boolean] =
-    errorEndpoint(post(path / prefix / "file" / "create", jsonRequest[(SafePath, String, Boolean)]), ok(jsonResponse[Boolean]))
+  lazy val listFiles: TapirEndpoint[(SafePath, FileSorting, Boolean), FileListData] =
+    endpoint.post
+      .in(prefix / "file" / "list")
+      .in(jsonBody[(SafePath, FileSorting, Boolean)])
+      .out(jsonBody[FileListData])
+      .errorOut(jsonBody[ErrorData])
 
-  //def extractTGZ(safePath: SafePath): ExtractResult
-  val extractArchive: ErrorEndpoint[(SafePath, SafePath), Unit] =
-    errorEndpoint(post(path / prefix / "file" / "extract-archive", jsonRequest[(SafePath, SafePath)]), ok(jsonResponse[Unit]))
+  lazy val listRecursive: TapirEndpoint[(SafePath, Option[String], Boolean), Seq[(SafePath, Boolean)]] =
+    endpoint.post
+      .in(prefix / "file" / "list-recursive")
+      .in(jsonBody[(SafePath, Option[String], Boolean)])
+      .out(jsonBody[Seq[(SafePath, Boolean)]])
+      .errorOut(jsonBody[ErrorData])
 
-  //def recursiveListFiles(path: SafePath, findString: String = ""): Seq[(SafePath, Boolean)]
-  val listFiles: ErrorEndpoint[(SafePath, FileSorting, Boolean), FileListData] =
-    errorEndpoint(post(path / prefix / "file" / "list", jsonRequest[(SafePath, FileSorting, Boolean)]), ok(jsonResponse[FileListData]))
+  lazy val move: TapirEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
+    endpoint.post
+      .in(prefix / "file" / "move")
+      .in(jsonBody[(Seq[(SafePath, SafePath)], Boolean)])
+      .out(jsonBody[Seq[SafePath]])
+      .errorOut(jsonBody[ErrorData])
 
-  val listRecursive: ErrorEndpoint[(SafePath, Option[String], Boolean), Seq[(SafePath, Boolean)]] =
-    errorEndpoint(post(path / prefix / "file" / "list-recursive", jsonRequest[(SafePath, Option[String], Boolean)]), ok(jsonResponse[Seq[(SafePath, Boolean)]]))
+  lazy val duplicate: TapirEndpoint[(SafePath, String), SafePath] =
+    endpoint.post
+      .in(prefix / "file" / "duplicate")
+      .in(jsonBody[(SafePath, String)])
+      .out(jsonBody[SafePath])
+      .errorOut(jsonBody[ErrorData])
 
-  //  def isEmpty(safePath: SafePath): Boolean
-  val move: ErrorEndpoint[(Seq[(SafePath, SafePath)], Boolean), Seq[SafePath]] =
-    errorEndpoint(post(path / prefix / "file" / "move", jsonRequest[(Seq[(SafePath, SafePath)], Boolean)]), ok(jsonResponse[Seq[SafePath]]))
+  lazy val deleteFiles: TapirEndpoint[Seq[SafePath], Unit] =
+    endpoint.post
+      .in(prefix / "file" / "delete")
+      .in(jsonBody[Seq[SafePath]])
+      .errorOut(jsonBody[ErrorData])
 
-  val duplicate: ErrorEndpoint[(SafePath, String), SafePath] =
-   errorEndpoint(post(path / prefix / "file" / "duplicate", jsonRequest[(SafePath, String)]), ok(jsonResponse[SafePath]))
+  lazy val exists: TapirEndpoint[SafePath, Boolean] =
+    endpoint.post
+      .in(prefix / "file" / "exists")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Boolean])
+      .errorOut(jsonBody[ErrorData])
 
-  val deleteFiles: ErrorEndpoint[Seq[SafePath], Unit] =
-    errorEndpoint(post(path / prefix / "file" / "delete", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+  lazy val isText: TapirEndpoint[SafePath, Boolean] =
+    endpoint.post
+      .in(prefix / "file" / "is-text")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Boolean])
+      .errorOut(jsonBody[ErrorData])
 
-  val exists: ErrorEndpoint[SafePath, Boolean] =
-    errorEndpoint(post(path / prefix / "file" / "exists", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
+  lazy val temporaryDirectory: TapirEndpoint[Unit, SafePath] =
+    endpoint.get
+      .in(prefix / "file" / "temporary-directory")
+      .out(jsonBody[SafePath])
+      .errorOut(jsonBody[ErrorData])
 
-  val isText: ErrorEndpoint[SafePath, Boolean] =
-    errorEndpoint(post(path / prefix / "file" / "is-text", jsonRequest[SafePath]), ok(jsonResponse[Boolean]))
+  lazy val omrMethod: TapirEndpoint[SafePath, Option[String]] =
+    endpoint.post
+      .in(prefix / "file" / "omr" / "method")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Option[String]])
+      .errorOut(jsonBody[ErrorData])
 
-  val temporaryDirectory: ErrorEndpoint[Unit, SafePath] =
-    errorEndpoint(get(path / prefix / "file" / "temporary-directory"), ok(jsonResponse[SafePath]))
+  lazy val omrContent: TapirEndpoint[(SafePath, Option[String]), GUIOMRContent] =
+    endpoint.post
+      .in(prefix / "file" / "omr" / "content")
+      .in(jsonBody[(SafePath, Option[String])])
+      .out(jsonBody[GUIOMRContent])
+      .errorOut(jsonBody[ErrorData])
 
-  val omrMethod: ErrorEndpoint[SafePath, Option[String]] =
-    errorEndpoint(post(path / prefix / "file" / "omr" / "method", jsonRequest[SafePath]), ok(jsonResponse[Option[String]]))
+  lazy val omrFiles: TapirEndpoint[SafePath, Option[SafePath]] =
+    endpoint.post
+      .in(prefix / "file" / "omr" / "files")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Option[SafePath]])
+      .errorOut(jsonBody[ErrorData])
 
-  val omrContent: ErrorEndpoint[(SafePath, Option[String]), GUIOMRContent] =
-    errorEndpoint(post(path / prefix / "file" / "omr" / "content", jsonRequest[(SafePath, Option[String])]), ok(jsonResponse[GUIOMRContent]))
+  lazy val omrDataIndex: TapirEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
+    endpoint.post
+      .in(prefix / "file" / "omr" / "index")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Seq[GUIOMRDataIndex]])
+      .errorOut(jsonBody[ErrorData])
 
-  val omrFiles: ErrorEndpoint[SafePath, Option[SafePath]] =
-    errorEndpoint(post(path / prefix / "file" / "omr" / "files", jsonRequest[SafePath]), ok(jsonResponse[Option[SafePath]]))
+  lazy val cloneRepository: TapirEndpoint[(String, SafePath, Boolean), Option[SafePath]] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "clone")
+      .in(jsonBody[(String, SafePath, Boolean)])
+      .out(jsonBody[Option[SafePath]])
+      .errorOut(jsonBody[ErrorData])
 
-  val omrDataIndex: ErrorEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
-    errorEndpoint(post(path / prefix / "file" / "omr" / "index", jsonRequest[SafePath]), ok(jsonResponse[Seq[GUIOMRDataIndex]]))
+  lazy val commit: TapirEndpoint[(Seq[SafePath], String), Unit] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "commit")
+      .in(jsonBody[(Seq[SafePath], String)])
+      .out(jsonBody[Unit])
+      .errorOut(jsonBody[ErrorData])
 
-  val cloneRepository: ErrorEndpoint[(String, SafePath, Boolean), Option[SafePath]] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "clone", jsonRequest[(String,SafePath, Boolean)]), ok(jsonResponse[Option[SafePath]]))
+  lazy val revert: TapirEndpoint[Seq[SafePath], Unit] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "revert")
+      .in(jsonBody[Seq[SafePath]])
+      .out(jsonBody[Unit])
+      .errorOut(jsonBody[ErrorData])
 
-  val commit: ErrorEndpoint[(Seq[SafePath], String), Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "commit", jsonRequest[(Seq[SafePath], String)]), ok(jsonResponse[Unit]))
-    
-  val revert: ErrorEndpoint[Seq[SafePath], Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "revert", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+  lazy val add: TapirEndpoint[Seq[SafePath], Unit] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "add")
+      .in(jsonBody[Seq[SafePath]])
+      .out(jsonBody[Unit])
+      .errorOut(jsonBody[ErrorData])
 
-  val add: ErrorEndpoint[Seq[SafePath], Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "add", jsonRequest[Seq[SafePath]]), ok(jsonResponse[Unit]))
+  lazy val pull: TapirEndpoint[SafePath, MergeStatus] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "pull")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[MergeStatus])
+      .errorOut(jsonBody[ErrorData])
 
-  val pull: ErrorEndpoint[SafePath, MergeStatus] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "pull", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))
-  
-  val push: ErrorEndpoint[SafePath, PushStatus] =
-    errorEndpoint(post(path / "git" / "push", jsonRequest[SafePath]), ok(jsonResponse[PushStatus]))
+  lazy val push: TapirEndpoint[SafePath, PushStatus] =
+    endpoint.post
+      .in(prefix / "git" / "push")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[PushStatus])
+      .errorOut(jsonBody[ErrorData])
 
-  val branchList: ErrorEndpoint[SafePath, Option[BranchData]] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "branch-list", jsonRequest[SafePath]), ok(jsonResponse[Option[BranchData]]))
-    
-  val checkout: ErrorEndpoint[(SafePath, String), Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "checkout", jsonRequest[(SafePath, String)]), ok(jsonResponse[Unit]))
-    
-  val stash: ErrorEndpoint[SafePath, Unit] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "stash", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
+  lazy val branchList: TapirEndpoint[SafePath, Option[BranchData]] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "branch-list")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Option[BranchData]])
+      .errorOut(jsonBody[ErrorData])
 
-  val stashPop: ErrorEndpoint[SafePath, MergeStatus] =
-    errorEndpoint(post(path / prefix / "file" / "git" / "stash-pop", jsonRequest[SafePath]), ok(jsonResponse[MergeStatus]))
+  lazy val checkout: TapirEndpoint[(SafePath, String), Unit] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "checkout")
+      .in(jsonBody[(SafePath, String)])
+      .errorOut(jsonBody[ErrorData])
 
-  val gitAuthentications: ErrorEndpoint[Unit, Seq[GitPrivateKeyAuthenticationData]] =
-    errorEndpoint(get(path /  "git" / "authentications"), ok(jsonResponse[Seq[GitPrivateKeyAuthenticationData]]))
+  lazy val stash: TapirEndpoint[SafePath, Unit] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "stash")
+      .in(jsonBody[SafePath])
+      .errorOut(jsonBody[ErrorData])
 
-  val addGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Unit] =
-    errorEndpoint(post(path / "git" / "add-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+  lazy val stashPop: TapirEndpoint[SafePath, MergeStatus] =
+    endpoint.post
+      .in(prefix / "file" / "git" / "stash-pop")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[MergeStatus])
+      .errorOut(jsonBody[ErrorData])
 
-  val removeGitAuthentication: ErrorEndpoint[(GitPrivateKeyAuthenticationData, Boolean), Unit] =
-    errorEndpoint(post(path / "git" / "remove-authentication", jsonRequest[(GitPrivateKeyAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
 
-  val testGitAuthentication: ErrorEndpoint[GitPrivateKeyAuthenticationData, Seq[Test]] =
-    errorEndpoint(post(path / "git" / "test-authentication", jsonRequest[GitPrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+  lazy val gitAuthentications: TapirEndpoint[Unit, Seq[GitPrivateKeyAuthenticationData]] =
+    endpoint.get
+      .in(prefix / "git" / "authentications")
+      .out(jsonBody[Seq[GitPrivateKeyAuthenticationData]])
+      .errorOut(jsonBody[ErrorData])
 
+  lazy val addGitAuthentication: TapirEndpoint[GitPrivateKeyAuthenticationData, Unit] =
+    endpoint.post
+      .in(prefix / "git" / "add-authentication")
+      .in(jsonBody[GitPrivateKeyAuthenticationData])
+      .errorOut(jsonBody[ErrorData])
+
+  lazy val removeGitAuthentication: TapirEndpoint[(GitPrivateKeyAuthenticationData, Boolean), Unit] =
+    endpoint.post
+      .in(prefix / "git" / "remove-authentication")
+      .in(jsonBody[(GitPrivateKeyAuthenticationData, Boolean)])
+      .errorOut(jsonBody[ErrorData])
+
+  lazy val testGitAuthentication: TapirEndpoint[GitPrivateKeyAuthenticationData, Seq[Test]] =
+    endpoint.post
+      .in(prefix / "git" / "test-authentication")
+      .in(jsonBody[GitPrivateKeyAuthenticationData])
+      .out(jsonBody[Seq[Test]])
+      .errorOut(jsonBody[ErrorData])
 
   // ---------- Executions --------------------
-  //def allStates(lines: Int): (Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])
-//  lazy val allStatesResponseSchema: JsonSchema[(Seq[(ExecutionId, ExecutionInfo)], Seq[OutputStreamData])] = genericJsonSchema
-  val executionState: ErrorEndpoint[Seq[ExecutionId], Seq[ExecutionData]] =
-    errorEndpoint(post(path / prefix / "execution" / "state", jsonRequest[Seq[ExecutionId]]), ok(jsonResponse[Seq[ExecutionData]]))
 
-  val executionOutput: ErrorEndpoint[(ExecutionId, Int), ExecutionOutput] =
-    errorEndpoint(post(path / prefix / "execution" / "output", jsonRequest[(ExecutionId, Int)]), ok(jsonResponse[ExecutionOutput]))
+  lazy val executionState: TapirEndpoint[Seq[ExecutionId], Seq[ExecutionData]] =
+    endpoint.post
+      .in(prefix / "execution" / "state")
+      .in(jsonBody[Seq[ExecutionId]])
+      .out(jsonBody[Seq[ExecutionData]])
+      .errorOut(jsonBody[ErrorData])
 
-  //  def staticInfos(): Seq[(ExecutionId, StaticExecutionInfo)]
-//  val staticInfos: SafeEndpoint[Unit, Seq[(ExecutionId, StaticExecutionInfo)]] =
-//    safeEndpoint(get(path / "execution" / "info"), ok(jsonResponse[Seq[(ExecutionId, StaticExecutionInfo)]]))
+  lazy val executionOutput: TapirEndpoint[(ExecutionId, Int), ExecutionOutput] =
+    endpoint.post
+      .in(prefix / "execution" / "output")
+      .in(jsonBody[(ExecutionId, Int)])
+      .out(jsonBody[ExecutionOutput])
+      .errorOut(jsonBody[ErrorData])
 
-//  def cancelExecution(id: ExecutionId): Unit
-  val cancelExecution: ErrorEndpoint[ExecutionId, Unit] =
-    errorEndpoint(post(path / prefix / "execution" / "cancel", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+  lazy val cancelExecution: TapirEndpoint[ExecutionId, Unit] =
+    endpoint.post
+      .in(prefix / "execution" / "cancel")
+      .in(jsonBody[ExecutionId])
+      .errorOut(jsonBody[ErrorData])
 
-//  def removeExecution(id: ExecutionId): Unit
-  val removeExecution: ErrorEndpoint[ExecutionId, Unit] =
-    errorEndpoint(post(path / prefix / "execution" / "remove", jsonRequest[ExecutionId]), ok(jsonResponse[Unit]))
+  lazy val removeExecution: TapirEndpoint[ExecutionId, Unit] =
+    endpoint.post
+      .in(prefix / "execution" / "remove")
+      .in(jsonBody[ExecutionId])
+      .errorOut(jsonBody[ErrorData])
 
-//  def compileScript(scriptData: ScriptData): Option[ErrorData]
-  val validateScript: ErrorEndpoint[SafePath, Option[ErrorData]] =
-    errorEndpoint(post(path / prefix / "execution" / "compile", jsonRequest[SafePath]), ok(jsonResponse[Option[ErrorData]]))
+  lazy val validateScript: TapirEndpoint[SafePath, Option[ErrorData]] =
+    endpoint.post
+      .in(prefix / "execution" / "compile")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Option[ErrorData]])
+      .errorOut(jsonBody[ErrorData])
 
-//  def runScript(scriptData: ScriptData, validateScript: Boolean): Unit
-  val launchScript: ErrorEndpoint[(SafePath, Boolean), ExecutionId] =
-    errorEndpoint(post(path / prefix / "execution" / "launch", jsonRequest[(SafePath, Boolean)]), ok(jsonResponse[ExecutionId]))
+  lazy val launchScript: TapirEndpoint[(SafePath, Boolean), ExecutionId] =
+    endpoint.post
+      .in(prefix / "execution" / "launch")
+      .in(jsonBody[(SafePath, Boolean)])
+      .out(jsonBody[ExecutionId])
+      .errorOut(jsonBody[ErrorData])
 
-//  def clearEnvironmentErrors(environmentId: EnvironmentId): Unit
-  val clearEnvironmentErrors: ErrorEndpoint[(ExecutionId, EnvironmentId), Unit] =
-    errorEndpoint(post(path / prefix / "execution" / "clear-environment-error", jsonRequest[(ExecutionId, EnvironmentId)]), ok(jsonResponse[Unit]))
+  lazy val clearEnvironmentErrors: TapirEndpoint[(ExecutionId, EnvironmentId), Unit] =
+    endpoint.post
+      .in(prefix / "execution" / "clear-environment-error")
+      .in(jsonBody[(ExecutionId, EnvironmentId)])
+      .errorOut(jsonBody[ErrorData])
 
-//  def runningErrorEnvironmentData(environmentId: EnvironmentId, lines: Int): EnvironmentErrorData
-  val listEnvironmentErrors: ErrorEndpoint[(ExecutionId, EnvironmentId, Int), Seq[EnvironmentError]] =
-    errorEndpoint(post(path / prefix / "execution" / "list-environment-error", jsonRequest[(ExecutionId, EnvironmentId, Int)]), ok(jsonResponse[Seq[EnvironmentError]]))
+  lazy val listEnvironmentErrors: TapirEndpoint[(ExecutionId, EnvironmentId, Int), Seq[EnvironmentError]] =
+    endpoint.post
+      .in(prefix / "execution" / "list-environment-error")
+      .in(jsonBody[(ExecutionId, EnvironmentId, Int)])
+      .out(jsonBody[Seq[EnvironmentError]])
+      .errorOut(jsonBody[ErrorData])
 
   // ---- Plugins -----
-  val listPlugins: ErrorEndpoint[Unit, Seq[Plugin]] =
-    errorEndpoint(get(path / prefix / "plugin" / "list"), ok(jsonResponse[Seq[Plugin]]))
+  lazy val listPlugins: TapirEndpoint[Unit, Seq[Plugin]] =
+    endpoint.get
+      .in(prefix / "plugin" / "list")
+      .out(jsonBody[Seq[Plugin]])
+      .errorOut(jsonBody[ErrorData])
 
-  val guiPlugins: ErrorEndpoint[Unit, PluginExtensionData] =
-    errorEndpoint(get(path / prefix / "plugin" / "gui"), ok(jsonResponse[PluginExtensionData]))
+  lazy val guiPlugins: TapirEndpoint[Unit, PluginExtensionData] =
+    endpoint.get
+      .in(prefix / "plugin" / "gui")
+      .out(jsonBody[PluginExtensionData])
+      .errorOut(jsonBody[ErrorData])
 
-  val addPlugin: ErrorEndpoint[SafePath, Seq[ErrorData]] =
-    errorEndpoint(post(path / prefix / "plugin" / "add", jsonRequest[SafePath]), ok(jsonResponse[Seq[ErrorData]]))
+  lazy val addPlugin: TapirEndpoint[SafePath, Seq[ErrorData]] =
+    endpoint.post
+      .in(prefix / "plugin" / "add")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[Seq[ErrorData]])
+      .errorOut(jsonBody[ErrorData])
 
-  val removePlugin: ErrorEndpoint[SafePath, Unit] =
-    errorEndpoint(post(path / prefix / "plugin" / "remove", jsonRequest[SafePath]), ok(jsonResponse[Unit]))
-
+  lazy val removePlugin: TapirEndpoint[SafePath, Unit] =
+    endpoint.post
+      .in(prefix / "plugin" / "remove")
+      .in(jsonBody[SafePath])
+      .errorOut(jsonBody[ErrorData])
 
   // ---- Model Wizards --------------
-  //def models(archivePath: SafePath): Seq[SafePath]
-//  val models: ErrorEndpoint[SafePath, Seq[SafePath]] =
-//    errorEndpoint(post(path / "wizard" / "models", jsonRequest[SafePath]), ok(jsonResponse[Seq[SafePath]]))
 
-  //def expandResources(resources: Resources): Resources
-//  val expandResources: ErrorEndpoint[Resources, Resources] =
-//    errorEndpoint(post(path / "wizard" / "expand-resources", jsonRequest[Resources]), ok(jsonResponse[Resources]))
-
-  //def downloadHTTP(url: String, path: SafePath, extract: Boolean): Either[Unit, ErrorData]
-  val downloadHTTP: ErrorEndpoint[(String, SafePath, Boolean, Boolean), Unit] =
-    errorEndpoint(post(path / prefix / "wizard" / "download-http", jsonRequest[(String, SafePath, Boolean, Boolean)]), ok(jsonResponse[Unit]))
+  lazy val downloadHTTP: TapirEndpoint[(String, SafePath, Boolean, Boolean), Unit] =
+    endpoint.post
+      .in(prefix / "wizard" / "download-http")
+      .in(jsonBody[(String, SafePath, Boolean, Boolean)])
+      .errorOut(jsonBody[ErrorData])
 
   // ---------- Market ----------
 
-  //def marketIndex(): MarketIndex
-  val marketIndex: ErrorEndpoint[Unit, MarketIndex] =
-    errorEndpoint(get(path / prefix / "market" / "index"), ok(jsonResponse[MarketIndex]))
+  lazy val marketIndex: TapirEndpoint[Unit, MarketIndex] =
+    endpoint.get
+      .in(prefix / "market" / "index")
+      .out(jsonBody[MarketIndex])
+      .errorOut(jsonBody[ErrorData])
 
-//    def getMarketEntry(entry: MarketIndexEntry, safePath: SafePath): Unit
-  val getMarketEntry: ErrorEndpoint[(MarketIndexEntry, SafePath), Unit] =
-    errorEndpoint(post(path / prefix / "market" / "get-entry", jsonRequest[(MarketIndexEntry, SafePath)]), ok(jsonResponse[Unit]))
+  lazy val getMarketEntry: TapirEndpoint[(MarketIndexEntry, SafePath), Unit] =
+    endpoint.post
+      .in(prefix / "market" / "get-entry")
+      .in(jsonBody[(MarketIndexEntry, SafePath)])
+      .errorOut(jsonBody[ErrorData])
 
+  // --------- Application ---------------
+  lazy val omSettings: TapirEndpoint[Unit, OMSettings] =
+    endpoint.get
+      .in(prefix / "application" / "settings")
+      .out(jsonBody[OMSettings])
+      .errorOut(jsonBody[ErrorData])
 
-  // ---------- Application ------------
+  lazy val shutdown: TapirEndpoint[Unit, Unit] =
+    endpoint.get
+      .in(prefix / prefix / "application" / "shutdown")
+      .errorOut(jsonBody[ErrorData])
 
-  val omSettings: ErrorEndpoint[Unit, OMSettings] =
-    errorEndpoint(get(path / prefix / "application" / "settings"), ok(jsonResponse[OMSettings]))
+  lazy val isAlive: TapirEndpoint[Unit, Boolean] =
+    endpoint.get
+      .in(prefix / "application" / "is-alive")
+      .out(jsonBody[Boolean])
+      .errorOut(jsonBody[ErrorData])
+  
+  lazy val jvmInfos: TapirEndpoint[Unit, JVMInfos] =
+    endpoint.get
+      .in(prefix / "application" / "jvm-infos")
+      .out(jsonBody[JVMInfos])
+      .errorOut(jsonBody[ErrorData])
 
-  // def shutdown(): Unit
-  val shutdown: ErrorEndpoint[Unit, Unit] =
-    errorEndpoint(get(path / prefix / "application" / "shutdown"), ok(jsonResponse[Unit]))
+  lazy val listNotification: TapirEndpoint[Unit, Seq[NotificationEvent]] =
+    endpoint.post
+      .in(prefix / "application" / "list-notification")
+      .out(jsonBody[Seq[NotificationEvent]])
+      .errorOut(jsonBody[ErrorData])
 
-  //  def restart(): Unit
-  val restart: ErrorEndpoint[Unit, Unit] =
-    errorEndpoint(get(path / prefix / "application" / "restart"), ok(jsonResponse[Unit]))
+  lazy val clearNotification: TapirEndpoint[Seq[Long], Unit] =
+    endpoint.post
+      .in(prefix / "application" / "clear-notification")
+      .in(jsonBody[Seq[Long]])
+      .errorOut(jsonBody[ErrorData])
 
-  //  def isAlive(): Boolean
-  val isAlive: Endpoint[Unit, Boolean] =
-    endpoint(get(path / prefix / "application" / "is-alive"), ok(jsonResponse[Boolean]))
+  lazy val removeContainerCache: TapirEndpoint[Unit, Unit] =
+    endpoint.post
+      .in(prefix / "application" / "remove-container-cache")
+      .errorOut(jsonBody[ErrorData])
 
-  //  def jvmInfos(): JVMInfos
-  val jvmInfos: ErrorEndpoint[Unit, JVMInfos] =
-    errorEndpoint(get(path / prefix / "application" / "jvm-infos"), ok(jsonResponse[JVMInfos]))
+  lazy val mdToHtml: TapirEndpoint[SafePath, String] =
+    endpoint.post
+      .in(prefix / "tool" / "md-to-html")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[String])
+      .errorOut(jsonBody[ErrorData])
 
-  val listNotification: ErrorEndpoint[Unit, Seq[NotificationEvent]] =
-    errorEndpoint(post(path / prefix / "application" / "list-notification", jsonRequest[Unit]), ok(jsonResponse[Seq[NotificationEvent]]))
-
-  val clearNotification: ErrorEndpoint[Seq[Long], Unit] =
-    errorEndpoint(post(path / prefix / "application" / "clear-notification", jsonRequest[Seq[Long]]), ok(jsonResponse[Unit]))
-
-  val removeContainerCache: ErrorEndpoint[Unit, Unit] =
-    errorEndpoint(post(path / prefix / "application" / "remove-container-cache", jsonRequest[Unit]), ok(jsonResponse[Unit]))
-
-
-  //def mdToHtml(safePath: SafePath): String
-  val mdToHtml: ErrorEndpoint[SafePath, String] =
-    errorEndpoint(post(path / prefix / "tool" / "md-to-html", jsonRequest[SafePath]), ok(jsonResponse[String]))
-
-  //def copyFromTmp(tmpSafePath: SafePath, filesToBeMoved: Seq[SafePath]): Unit
-
-  //def renameFile(safePath: SafePath, name: String): SafePath
-
-  //def sequence(safePath: SafePath, separator: Char = ','): SequenceData
-  val sequence: ErrorEndpoint[SafePath, SequenceData] =
-    errorEndpoint(post(path / prefix / "tool" / "sequence", jsonRequest[SafePath]), ok(jsonResponse[SequenceData]))
-
-
-//TODO ------------ refactor -------------------
-  // def appendToPluggedIfPlugin(safePath: SafePath): Unit =
-
+  // ------------ Tools --------------------
+  lazy val sequence: TapirEndpoint[SafePath, SequenceData] =
+    endpoint.post
+      .in(prefix / "tool" / "sequence")
+      .in(jsonBody[SafePath])
+      .out(jsonBody[SequenceData])
+      .errorOut(jsonBody[ErrorData])

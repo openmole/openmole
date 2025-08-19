@@ -3,17 +3,22 @@ package org.openmole.gui.plugin.authentication.sshkey
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.api.*
 
-trait PrivateKeyAuthenticationAPI extends RESTAPI:
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import io.circe.generic.auto.*
 
-  val privateKeyAuthentications: ErrorEndpoint[Unit, Seq[PrivateKeyAuthenticationData]] =
-    errorEndpoint(get(path / "ssh" / "privatekey-authentications"), ok(jsonResponse[Seq[PrivateKeyAuthenticationData]]))
+object PrivateKeyAuthenticationAPI:
 
-  val addAuthentication: ErrorEndpoint[PrivateKeyAuthenticationData, Unit] =
-    errorEndpoint(post(path / "ssh" / "add-privatekey-authentication", jsonRequest[PrivateKeyAuthenticationData]), ok(jsonResponse[Unit]))
+  lazy val privateKeyAuthentications: TapirEndpoint[Unit, Seq[PrivateKeyAuthenticationData]] =
+    endpoint.get.in("ssh" / "privatekey-authentications").out(jsonBody[Seq[PrivateKeyAuthenticationData]]).errorOut(jsonBody[ErrorData])
 
-  val removeAuthentication: ErrorEndpoint[(PrivateKeyAuthenticationData, Boolean), Unit] =
-    errorEndpoint(post(path / "ssh" / "remove-privatekey-authentication", jsonRequest[(PrivateKeyAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
+  lazy val addAuthentication: TapirEndpoint[PrivateKeyAuthenticationData, Unit] =
+    endpoint.post.in("ssh" / "add-privatekey-authentication").in(jsonBody[PrivateKeyAuthenticationData]).errorOut(jsonBody[ErrorData])
 
-  val testAuthentication: ErrorEndpoint[PrivateKeyAuthenticationData, Seq[Test]] =
-    errorEndpoint(post(path / "ssh" / "test-privatekey-authentication", jsonRequest[PrivateKeyAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+  lazy val removeAuthentication: TapirEndpoint[(PrivateKeyAuthenticationData, Boolean), Unit] =
+    endpoint.post.in("ssh" / "remove-privatekey-authentication").in(jsonBody[(PrivateKeyAuthenticationData, Boolean)]).errorOut(jsonBody[ErrorData])
+
+  lazy val testAuthentication: TapirEndpoint[PrivateKeyAuthenticationData, Seq[Test]] =
+    endpoint.post.in("ssh" / "test-privatekey-authentication").in(jsonBody[PrivateKeyAuthenticationData]).out(jsonBody[Seq[Test]]).errorOut(jsonBody[ErrorData])
 

@@ -207,7 +207,8 @@ class GUIServer(
 
     import org.http4s.server.middleware.*
 
-    val apiServer = CoreAPIServer(apiImpl, utils.HTTP.stackError)
+    val coreAPIServer = CoreAPIServer(apiImpl)
+    
     val restServer = new RESTAPIv1Server(apiImpl)
     val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
     val applicationServer = new ApplicationServer(webappCache, extraHeaders, password, serviceProvider)
@@ -226,8 +227,8 @@ class GUIServer(
     val httpApp = Router(
       Seq(
         s"/" -> GZip(applicationServer.routes),
-        s"/" -> GZip(apiServer.routes),
-        s"/" -> GZip(apiServer.endpointRoutes),
+        s"/" -> GZip(coreAPIServer.apiRoutes),
+        s"/" -> GZip(coreAPIServer.routes),
         s"/rest/v1" -> restServer.routes,
         s"/webdav" -> webdavServer.routes) ++ pluginsRoutes *).orNotFound
 

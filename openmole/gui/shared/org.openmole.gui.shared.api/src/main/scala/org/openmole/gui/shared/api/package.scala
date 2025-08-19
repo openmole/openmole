@@ -96,10 +96,6 @@ def convertOMR(sp: SafePath, format: GUIOMRContent.ExportFormat, history: Boolea
   def params = safePathToURLParams(sp) ++ Seq(s"$formatParam=${GUIOMRContent.ExportFormat.toString(format)}", s"$historyParam=$history")
   s"$convertOMRRoute?${params.mkString("&")}"
 
-trait RESTAPI extends endpoints4s.algebra.Endpoints with endpoints4s.algebra.circe.JsonEntitiesFromCodecs with endpoints4s.circe.JsonSchemas:
-   export io.circe.generic.auto.*
-   type ErrorEndpoint[I, O] = Endpoint[I, Either[ErrorData, O]]
-   def errorEndpoint[A, B](request: Request[A], r: Response[B], docs: EndpointDocs = EndpointDocs()) =
-     endpoint(request, response(InternalServerError, jsonResponse[ErrorData]).orElse(r), docs)
 
+type TapirEndpoint[I, O] = sttp.tapir.Endpoint[Unit, I, ErrorData, O, Any]
 
