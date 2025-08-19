@@ -37,7 +37,19 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
   api =>
 
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = sttp.toRequest(CoreAPI.copyFiles)(paths, overwrite)
-  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = sttp.toRequest(CoreAPI.saveFile)(safePath, content, hash, overwrite)
+
+  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] =
+    import scala.scalajs.js.timers.*
+
+    val f = sttp.toRequest(CoreAPI.saveFile)(safePath, content, hash, overwrite)
+
+    val timeoutHandle = setTimeout(60000):
+      notificationService.notify(NotificationLevel.Info, s"Saving the file ${safePath.name} takes too long, you may be offline.", ClientUtil.errorTextArea(s"File save too long"))
+
+    f.onComplete { _ => clearTimeout(timeoutHandle) }
+
+    f
+
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = sttp.toRequest(CoreAPI.createFile)(path, name, directory)
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.extractArchive)(path, to)
   override def listFiles(path: SafePath, filter: FileSorting, withHidden: Boolean)(using BasePath): Future[FileListData] = sttp.toRequest(CoreAPI.listFiles)(path, filter, withHidden)
