@@ -17,7 +17,6 @@ package org.openmole.gui.shared.data
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import endpoints4s.algebra
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto.*
 import org.openmole.core.exception.UserBadDataError
