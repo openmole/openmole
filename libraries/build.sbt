@@ -541,7 +541,7 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("!com.google
 
 lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "!sun.nio.ch.*", "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*", "org.typelevel.log4cats.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*", "org.objectweb.asm.*")) settings (
   settings,
-  libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sBlaseSeverVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   version := http4sVersion
@@ -565,6 +565,6 @@ lazy val tapir = OsgiProject(dir, "sttp.tapir", exports = Seq("sttp.*", "magnoli
   libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
   libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-json-circe") % tapirVersion,
-  libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-sttp-client4") % tapirSTTPClientVersion,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-sttp-client4") % tapirVersion,
   version := tapirVersion
 ) dependsOn(http4s)

@@ -21,7 +21,6 @@ object common {
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
-  def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.4.2"
   def scaladgetVersion = "1.11.0"
@@ -61,9 +60,9 @@ object common {
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
 
-  def http4sVersion = "0.23.17"
+  def http4sVersion = "0.23.30"
+  def http4sBlaseSeverVersion = "0.23.17"
   def tapirVersion = "1.11.42"
-  def tapirSTTPClientVersion = "1.11.29"
 
   def xzVersion = "1.10"
 

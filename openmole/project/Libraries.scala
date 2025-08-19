@@ -20,7 +20,7 @@ object Libraries {
   lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % plotlyVersion
-  lazy val tapirSTTPCLient = libraryDependencies += "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirSTTPClientVersion
+  lazy val tapirSTTPCLient = libraryDependencies += "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirVersion
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
