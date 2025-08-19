@@ -17,7 +17,6 @@ package org.openmole.gui.plugin.authentication.egi
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import endpoints4s.http4s.server
 import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.core.preference.PreferenceLocation

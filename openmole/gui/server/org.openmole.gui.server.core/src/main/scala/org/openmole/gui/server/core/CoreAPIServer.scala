@@ -19,7 +19,6 @@ package org.openmole.gui.server.core
 
 import cats.effect.*
 import cats.effect.unsafe.IORuntime
-import endpoints4s.http4s.server
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
