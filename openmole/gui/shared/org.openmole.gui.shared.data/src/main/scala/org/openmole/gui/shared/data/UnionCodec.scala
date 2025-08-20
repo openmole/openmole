@@ -27,28 +27,71 @@ object UnionCodec:
 
   def unionEncnoderImpl[X: Type](using Quotes): Expr[Encoder[X]] =
     import quotes.reflect.*
-    TypeRepr.of[X] match
+
+    def handleType(tpe: TypeRepr): Expr[Any => Json] = // Use function type instead
+      tpe.dealias.simplified match
+        case OrType(l, r) =>
+          // Recursively handle nested unions
+          val leftEncoder = handleType(l)
+          val rightEncoder = handleType(r)
+
+          (l.asType, r.asType) match
+            case ('[a], '[b]) =>
+              '{
+                (x: Any) =>
+                  x match
+                    case a: a => $leftEncoder(a)
+                    case b: b => $rightEncoder(b)
+              }
+
+        case simpleType =>
+          simpleType.asType match
+            case '[t] =>
+              Expr.summon[Encoder[t]] match
+                case Some(encoder) =>
+                  '{ (x: Any) => $encoder(x.asInstanceOf[t]) }
+                case None => report.errorAndAbort(s"No encoder found for type ${simpleType.show}")
+
+    TypeRepr.of[X].dealias match
       case OrType(l, r) =>
-        (l.asType, r.asType) match
-          case ('[a], '[b]) =>
-            (Expr.summon[Encoder[a]], Expr.summon[Encoder[b]]) match
-              case (Some(aInst), Some(bInst)) =>
-                '{
-                  Encoder.instance[X]:
-                    case a: a => $aInst(a)
-                    case b: b => $bInst(b)
-                }.asExprOf[Encoder[X]]
+        val encoderFunc = handleType(TypeRepr.of[X])
+        '{
+          Encoder.instance[X]: x =>
+            $encoderFunc(x)
+        }.asExprOf[Encoder[X]]
+
+      case other =>
+        report.errorAndAbort(s"Expected union type, got: ${other.show}")
+
 
   transparent inline given unionDecoder[X]: Decoder[X] = ${ unionDecoderImpl[X] }
 
   def unionDecoderImpl[X: Type](using Quotes): Expr[Decoder[X]] =
     import quotes.reflect.*
-    TypeRepr.of[X] match
+
+    def handleType(tpe: TypeRepr): Expr[Decoder[Any]] =
+      tpe.dealias.simplified match
+        case OrType(l, r) =>
+          // Recursively handle nested unions
+          val leftDecoder = handleType(l)
+          val rightDecoder = handleType(r)
+          '{
+            $leftDecoder.widen.or($rightDecoder.widen)
+          }
+        case simpleType =>
+          simpleType.asType match
+            case '[t] =>
+              Expr.summon[Decoder[t]] match
+                case Some(decoder) =>
+                  '{ $decoder.widen[Any] }
+                case None =>
+                  report.errorAndAbort(s"No decoder found for type ${simpleType.show}")
+
+    TypeRepr.of[X].dealias match
       case OrType(l, r) =>
-        (l.asType, r.asType) match
-          case ('[a], '[b]) =>
-            (Expr.summon[Decoder[a]], Expr.summon[Decoder[b]]) match
-              case (Some(aInst), Some(bInst)) =>
-                '{
-                  $aInst.widen.or($bInst.widen)
-                }.asExprOf[Decoder[X]]
+        val decoder = handleType(TypeRepr.of[X])
+        '{
+          $decoder.asInstanceOf[Decoder[X]]
+        }
+      case other =>
+        report.errorAndAbort(s"Expected union type, got: ${other.show}")
