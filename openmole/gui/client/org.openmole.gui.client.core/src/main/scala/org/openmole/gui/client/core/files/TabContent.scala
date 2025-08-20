@@ -1,10 +1,10 @@
 package org.openmole.gui.client.core.files
 
-import org.openmole.gui.client.core.{Panels}
+import org.openmole.gui.client.core.Panels
 import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import org.openmole.gui.client.core.NotificationManager.Alternative
+import org.openmole.gui.client.core.NotificationManager.{Alternative, toService}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 import scaladget.tools.Utils.uuID
@@ -120,17 +120,22 @@ class TabContent:
       panels: Panels,
       api: ServerAPI,
       basePath: BasePath
-  ): concurrent.Future[Boolean] = editorPanelUI.synchronized {
+  ): concurrent.Future[Boolean] = editorPanelUI.synchronized:
+    import util.*
     tabData.editorPanelUI match
       case Some(editorPanelUI)
           if editorPanelUI.hasBeenModified || saveUnmodified =>
         val (content, hash) = editorPanelUI.code
-        api.saveFile(tabData.safePath, content, Some(hash), overwrite).map {
-          case (saved, savedHash) =>
+
+        api.saveFile(tabData.safePath, content, Some(hash), overwrite).transform:
+          case Failure(e) =>
+            toService(panels.notifications).notifyError("Unable to save file", e, NotificationLevel.Info, None)
+            Failure(e)
+          case util.Success((saved, savedHash)) =>
             if saved
             then
               editorPanelUI.onSaved(savedHash)
-              true
+              Success(true)
             else
               panels.notifications.showAlternativeNotification(
                 NotificationLevel.Error,
@@ -152,10 +157,9 @@ class TabContent:
                           .foreach(_.setCode(content, hash.get))
                 )
               )
-              false
-        }
+              Success(false)
       case _ => concurrent.Future.successful(false)
-  }
+
 
   def closeNonExstingFiles(using api: ServerAPI, basePath: BasePath) =
     tabsUI.tabs
