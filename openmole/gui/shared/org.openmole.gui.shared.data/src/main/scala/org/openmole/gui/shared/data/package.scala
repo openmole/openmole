@@ -390,7 +390,7 @@ def randomId = scala.util.Random.alphanumeric.take(10).mkString
 
 object GUIVariable:
   import org.latestbit.circe.adt.codec.*
-
+  
   object ValueType:
     def unwrap(v: ValueType): Any =
       v match
@@ -414,7 +414,7 @@ object GUIVariable:
         case ValueArrayArrayString(x) => x
         case ValueArrayArrayBoolean(x) => x
         case ValueArrayArrayFile(x) => x
-
+  
   enum ValueType derives JsonTaggedAdt.Codec:
     case ValueInt(value: Int)
     case ValueLong(value: Long)
