@@ -20,7 +20,7 @@ object Libraries {
   lazy val highlightJS = libraryDependencies += "org.openmole.scaladget" %%% "highlightjs" % scaladgetVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % plotlyVersion
-
+  lazy val tapirSTTPCLient = libraryDependencies += "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client4" % tapirVersion
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
@@ -123,7 +123,7 @@ object Libraries {
   lazy val osgiCompendium = "org.osgi" % "org.osgi.compendium" % "5.0.0"
   lazy val shapeless = "org.openmole.library" %% "org-typelevel-shapeless" % shapelessVersion
 
-  lazy val endpoints4s = "org.openmole.library" %% "org-endpoints4s" % endpoints4SVersion //cross CrossVersion.for2_13Use3
+  lazy val tapir = "org.openmole.library" %% "sttp-tapir" % tapirVersion
   lazy val http4s = "org.openmole.library" %% "org-http4s" % http4sVersion
   //lazy val endpoint4SJsonSchemaGeneric = "org.openmole.library" %% "org-endpoints4s-json-schema-generic" % endpoints4SVersion //cross CrossVersion.for3Use2_13
 

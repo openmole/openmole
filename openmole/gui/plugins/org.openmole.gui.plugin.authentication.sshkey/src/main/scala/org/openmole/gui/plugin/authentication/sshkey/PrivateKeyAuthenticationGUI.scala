@@ -37,15 +37,20 @@ object TopLevelExports:
 
 class PrivateKeyAuthenticationFactory extends AuthenticationPluginFactory:
   type AuthType = PrivateKeyAuthenticationData
+
+  def sttp = STTPInterpreter()
+
   def buildEmpty = new PrivateKeyAuthenticationGUI(PrivateKeyAuthenticationData.empty)
   def build(data: AuthType): AuthenticationPlugin[AuthType] = new PrivateKeyAuthenticationGUI(data)
   def name = "Cluster SSH Private key"
-  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = PluginFetch.futureError(_.privateKeyAuthentications(()).future)
-  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.removeAuthentication(data, true).future)
-  def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = PluginFetch.futureError(_.testAuthentication(data).future)
+  def getData(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[AuthType]] = sttp.toRequest(PrivateKeyAuthenticationAPI.privateKeyAuthentications)(())
+  def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = sttp.toRequest(PrivateKeyAuthenticationAPI.removeAuthentication)(data, true)
+  def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService) = sttp.toRequest(PrivateKeyAuthenticationAPI.testAuthentication)(data)
 
 class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData) extends AuthenticationPlugin[PrivateKeyAuthenticationData] {
   type AuthType = PrivateKeyAuthenticationData
+
+  def sttp = STTPInterpreter()
 
   val passwordStyle: HESetters = Seq(
     width := "130",
@@ -74,14 +79,14 @@ class PrivateKeyAuthenticationGUI(data: PrivateKeyAuthenticationData) extends Au
   )
 
   def save(using basePath: BasePath, notificationAPI: NotificationService) =
-    PluginFetch.futureError(_.removeAuthentication(data, false).future).andThen: _=>
-      PluginFetch.futureError(_.addAuthentication(PrivateKeyAuthenticationData(
+    sttp.toRequest(PrivateKeyAuthenticationAPI.removeAuthentication)(data, false).andThen: _=>
+      sttp.toRequest(PrivateKeyAuthenticationAPI.addAuthentication)(PrivateKeyAuthenticationData(
         privateKey = privateKeyUploader.file.now(),
         login = loginInput.ref.value,
         password = passwordInput.ref.value,
         target = targetInput.ref.value,
         port = portInput.ref.value,
-        directory = privateKeyUploader.directory)).future)
+        directory = privateKeyUploader.directory))
 
 
 }

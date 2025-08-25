@@ -19,6 +19,7 @@ import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import scaladget.bootstrapnative.bsn.*
 
+
 import javax.swing.plaf.multi.MultiToolBarUI
 import scala.concurrent.Await
 import scala.concurrent.duration.*
@@ -59,40 +60,40 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     api.shutdown()
     render(dom.document.body, stoppedDiv)
 
+//
+//  def restarted(): Unit =
+//    given BasePath = basePath
+//
+//    val restartedDiv =
+//      div(
+//        cls := "screen-center",
+//        img(src := "img/openmole_light.png", width := "600px"),
+//        div("The OpenMOLE server is restarting, please wait.", marginTop := "30px")
+//      )
+//
+//    api.restart()
+//
+//    def checkAlive(): Unit =
+//      api.isAlive().foreach: x =>
+//        if x
+//        then CoreUtils.setRoute(s"/${connectionRoute}")
+//        else setTimeout(5000) {
+//          checkAlive()
+//        }
+//
+//    setTimeout(5000) {
+//      checkAlive()
+//    }
+//
+//    render(dom.document.body, restartedDiv)
 
-  def restarted(): Unit =
-    given BasePath = basePath
 
-    val restartedDiv =
-      div(
-        cls := "screen-center",
-        img(src := "img/openmole_light.png", width := "600px"),
-        div("The OpenMOLE server is restarting, please wait.", marginTop := "30px")
-      )
-
-    api.restart()
-
-    def checkAlive(): Unit =
-      api.isAlive().foreach: x =>
-        if x
-        then CoreUtils.setRoute(s"/${connectionRoute}")
-        else setTimeout(5000) {
-          checkAlive()
-        }
-
-    setTimeout(5000) {
-      checkAlive()
-    }
-
-    render(dom.document.body, restartedDiv)
-
-
-  def resetPassword(): Unit =
-    val resetPassword = new ResetPassword
-    render(
-      dom.document.body,
-      resetPassword.resetPassDiv
-    )
+//  def resetPassword(): Unit =
+//    val resetPassword = new ResetPassword
+//    render(
+//      dom.document.body,
+//      resetPassword.resetPassDiv
+//    )
 
   def run() =
     given BasePath = basePath
@@ -244,8 +245,8 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 @JSExportAll
 object App:
   lazy val panels = Panels()
-  lazy val fetch = CoreFetch(panels)
-  lazy val api = OpenMOLERESTServerAPI(fetch, toService(panels.notifications))
+  lazy val sttp = STTPInterpreter()
+  lazy val api = OpenMOLERESTServerAPI(sttp, toService(panels.notifications))
 
   lazy val pluginServices =
     PluginServices(

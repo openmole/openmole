@@ -25,14 +25,14 @@ ${aa("MiniClust", href := "https://github.com/openmole/miniclust")} is a lightwe
 
 The ${code{"MiniclustEnvironment"}} makes it possible to delegate job a MiniClust cluster.
 
-$br$br
+$br
 
 You should first provide your ${aa("authentication", href := DocumentationPages.gui.file + "#Authentications")} information to OpenMOLE to be able to use your batch system.
 Then, all that is left is to define is the environment itself.
 
 Here is a use example:
 
-$br$br
+$br
 
 ${hl.openmole("""
   val env =
@@ -48,9 +48,9 @@ $provideOptions:
 ${ul(
   li{html"$openMOLEMemory,"},
   li{html"$runtimeSetting,"},
-  li{html"${apiEntryTitle{"core"}}, the number of cores used by each job"},
-  li{html"${apiEntryTitle{"time"}}, the maximum amount of time after which the job gets killed, the default on MiniClust is 1 hour"},
-  li{html"${apiEntryTitle{"insecure"}}, true if the server provides an insecure https connection"}
+  li{html"${apiEntryTitle{"core"}} the number of cores reserved by each job"},
+  li{html"${apiEntryTitle{"time"}} the maximum amount of time after which the job gets killed, the default on MiniClust is 1 hour"},
+  li{html"${apiEntryTitle{"insecure"}} true if the server provides an insecure https connection"}
 )}
 
 """)

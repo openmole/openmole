@@ -697,7 +697,6 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   Libraries.nouiSlider,
   Libraries.scaladgetTools,
   Libraries.laminarJS,
-  //Libraries.endpoints4SJS,
   //Libraries.catsJS,
   // Libraries.sortable,
   Libraries.plotlyJS) dependsOn (clientExt)
@@ -709,7 +708,7 @@ lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") en
   Libraries.scalajsDomJS,
   Libraries.scaladgetTools,
   Libraries.bootstrapnative,
-  libraryDependencies += Libraries.endpoints4s,
+  Libraries.tapirSTTPCLient,
   guiSettings,
   scalaJSSettings)
 
@@ -771,7 +770,7 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
 def guiServerDir = guiDir / "server"
 
 lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", dynamicImports = Seq("org.eclipse.jetty.*")) settings(
-  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.scalaXML, Libraries.sshj),
+  libraryDependencies ++= Seq(Libraries.scalaTags, Libraries.http4s, Libraries.cats, Libraries.scalaXML, Libraries.sshj),
   guiSettings) dependsOn(
   apiGUI,
   dataGUI,
@@ -798,7 +797,7 @@ lazy val serverGUI = OsgiProject(guiServerDir, "org.openmole.gui.server.core", d
 
 lazy val serverExt = OsgiProject(guiServerDir, "org.openmole.gui.server.ext") dependsOn(apiGUI, workspace, module, services, serverGit) settings(
   libraryDependencies += Libraries.felixOSGi,
-  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s, Libraries.cats, Libraries.jgit, Libraries.sshj),
+  libraryDependencies ++= Seq(Libraries.http4s, Libraries.cats, Libraries.jgit, Libraries.sshj),
   guiSettings,
   scalaJSSettings)
 
@@ -835,7 +834,7 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
 
 lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "org.openmole.gui.server.stub") settings(
   guiSettings,
-  libraryDependencies ++= Seq(Libraries.endpoints4s, Libraries.http4s),
+  libraryDependencies ++= Seq(Libraries.http4s),
   Compile / run / fork := true,
   Compile / run / connectInput := true,
   Compile / run / outputStrategy := Some(StdoutOutput),
@@ -893,13 +892,12 @@ lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "or
 lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
-  libraryDependencies += Libraries.endpoints4s,
+  libraryDependencies += Libraries.tapir,
   guiSettings,
   scalaJSSettings) dependsOn (format)
 
 lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
-  //libraryDependencies += Libraries.endpoint4SJsonSchemaGeneric,
-  libraryDependencies += Libraries.endpoints4s,
+  libraryDependencies += Libraries.tapir,
   scalaJSSettings
 )
 

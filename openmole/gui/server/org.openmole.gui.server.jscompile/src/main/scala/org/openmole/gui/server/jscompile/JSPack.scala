@@ -47,17 +47,18 @@ object JSPack:
 
       val result =
         for
-          (containers, _) ← PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
-          sjsirFiles ← irCache.cached(containers)
+          (containers, _) <- PathIRContainer.fromClasspath(Seq(jar.toPath, inputDirectory.toPath))
+          sjsirFiles <- irCache.cached(containers)
           config = StandardConfig()
             .withSourceMap(true)
             .withOptimizer(optimizedJS)
-            .withClosureCompiler(optimizedJS)
+            .withMinify(true)
+            .withClosureCompiler(false)
             .withModuleKind(ModuleKind.CommonJSModule)
             .withParallel(true)
 
           linker = StandardImpl.linker(config)
-          _ ← linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
+          _ <- linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
         yield ()
 
       Await.result(result, Duration.Inf)

@@ -19,7 +19,6 @@ package org.openmole.gui.server.core
 
 import cats.effect.*
 import cats.effect.unsafe.IORuntime
-import endpoints4s.http4s.server
 import org.http4s
 import org.http4s.*
 import org.http4s.dsl.io.*
@@ -38,6 +37,14 @@ import org.openmole.gui.shared.api
 import org.openmole.gui.shared.data.*
 import org.openmole.tool.file.*
 import org.openmole.tool.archive.*
+
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
+import sttp.model.*
+import sttp.tapir.server.http4s.*
 
 object CoreAPIServer:
   def download(req: Request[IO], safePath: Seq[SafePath], name: Option[String] = None, topDirectory: Boolean = true)(using Workspace) =
@@ -114,80 +121,71 @@ object CoreAPIServer:
       case None => path.map(p => SafePath(p.split('/').toSeq, ServerFileSystemContext.Project))
 
 
-  def apply(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Response[IO]]) = new CoreAPIServer(apiImpl, utils.HTTP.stackError)
+  def apply(apiImpl: ApiImpl) = new CoreAPIServer(apiImpl)
 
-/** Defines a Play router (and reverse router) for the endpoints described
- * in the `CounterEndpoints` trait.
- */
-class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Response[IO]])
-  extends APIServer
-    with api.CoreAPI:
 
+class CoreAPIServer(apiImpl: ApiImpl):
   given IORuntime = apiImpl.services.threadProvider.ioRuntime
 
-  override def handleServerError(request: http4s.Request[IO], throwable: Throwable): IO[http4s.Response[IO]] = errorHandler(throwable)
+  val apiRoutes =
+    import api.CoreAPI.*
 
-  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
-  private type FixEffect = super.Effect
-
-  val endpointRoutes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
-      omSettings.errorImplementedBy(_ => apiImpl.settings),
-      listPlugins.errorImplementedBy(_ => apiImpl.listPlugins()),
-      guiPlugins.errorImplementedBy(_ => apiImpl.getGUIPlugins()),
-      listFiles.errorImplementedBy((path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden)),
-      size.errorImplementedBy(apiImpl.size),
-      saveFile.errorImplementedBy(apiImpl.saveFile),
-      createFile.errorImplementedBy(apiImpl.createFile),
-      extractArchive.errorImplementedBy(apiImpl.extractArchive),
-      deleteFiles.errorImplementedBy(apiImpl.deleteFiles),
-      exists.errorImplementedBy(apiImpl.exists),
-      isText.errorImplementedBy(apiImpl.isTextFile),
-      listRecursive.errorImplementedBy(apiImpl.recursiveListFiles),
-      copyFiles.errorImplementedBy(apiImpl.copyFiles),
-      move.errorImplementedBy(apiImpl.move),
-      mdToHtml.errorImplementedBy(apiImpl.mdToHtml),
-      sequence.errorImplementedBy(sp => apiImpl.sequence(sp)),
-      executionState.errorImplementedBy(apiImpl.executionData),
-      executionOutput.errorImplementedBy(apiImpl.executionOutput),
-      cancelExecution.errorImplementedBy(apiImpl.cancelExecution),
-      removeExecution.errorImplementedBy(apiImpl.removeExecution),
-      validateScript.errorImplementedBy(apiImpl.validateScript),
-      launchScript.errorImplementedBy(apiImpl.launchScript),
-      clearEnvironmentErrors.errorImplementedBy(apiImpl.clearEnvironmentErrors),
-      listEnvironmentErrors.errorImplementedBy(apiImpl.listEnvironmentErrors),
-      downloadHTTP.errorImplementedBy(apiImpl.downloadHTTP),
-      temporaryDirectory.errorImplementedBy(_ => apiImpl.temporaryDirectory()),
-      marketIndex.errorImplementedBy(_ => apiImpl.marketIndex()),
-      getMarketEntry.errorImplementedBy(apiImpl.getMarketEntry),
-      omrMethod.errorImplementedBy(apiImpl.omrMethodName),
-      omrContent.errorImplementedBy(apiImpl.omrContent),
-      omrFiles.errorImplementedBy(apiImpl.omrFiles),
-      omrDataIndex.errorImplementedBy(apiImpl.omrDataIndex),
-      addPlugin.errorImplementedBy(apiImpl.addPlugin),
-      removePlugin.errorImplementedBy(apiImpl.removePlugin),
-      listNotification.errorImplementedBy(_ => apiImpl.listNotification),
-      clearNotification.errorImplementedBy(apiImpl.clearNotification),
-      removeContainerCache.errorImplementedBy(_ => apiImpl.removeContainerCache()),
-      shutdown.errorImplementedBy(_ => apiImpl.shutdown()),
-      jvmInfos.errorImplementedBy(_ => apiImpl.jvmInfos()),
+      omSettings.implementedBy(_ => apiImpl.settings),
+      shutdown.implementedBy(_ => apiImpl.shutdown()),
       isAlive.implementedBy(_ => apiImpl.isAlive()),
-      cloneRepository.errorImplementedBy(apiImpl.cloneRepository),
-      commit.errorImplementedBy(apiImpl.commit),
-      revert.errorImplementedBy(apiImpl.revert),
-      add.errorImplementedBy(apiImpl.add),
-      pull.errorImplementedBy(apiImpl.pull),
-      branchList.errorImplementedBy(apiImpl.branchList),
-      checkout.errorImplementedBy(apiImpl.checkout),
-      stash.errorImplementedBy(apiImpl.stash),
-      stashPop.errorImplementedBy(apiImpl.stashPop),
-      gitAuthentications.errorImplementedBy(_ => apiImpl.gitAuthentications),
-      addGitAuthentication.errorImplementedBy(apiImpl.addGitAuthentication),
-      removeGitAuthentication.errorImplementedBy(apiImpl.removeGitAuthentication),
-      testGitAuthentication.errorImplementedBy(apiImpl.testGitAuthentication),
-      push.errorImplementedBy(apiImpl.push)
+      jvmInfos.implementedBy(_ => apiImpl.jvmInfos()),
+      listNotification.implementedBy(_ => apiImpl.listNotification),
+      clearNotification.implementedBy(apiImpl.clearNotification),
+      removeContainerCache.implementedBy(_ => apiImpl.removeContainerCache()),
+      mdToHtml.implementedBy(apiImpl.mdToHtml),
+      sequence.implementedBy(sp => apiImpl.sequence(sp)),
+      size.implementedBy(apiImpl.size),
+      saveFile.implementedBy(apiImpl.saveFile),
+      createFile.implementedBy(apiImpl.createFile),
+      extractArchive.implementedBy(apiImpl.extractArchive),
+      isText.implementedBy(apiImpl.isTextFile),
+      listRecursive.implementedBy(apiImpl.recursiveListFiles),
+      listFiles.implementedBy((path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden)),
+      deleteFiles.implementedBy(apiImpl.deleteFiles),
+      exists.implementedBy(apiImpl.exists),
+      copyFiles.implementedBy(apiImpl.copyFiles),
+      move.implementedBy(apiImpl.move),
+      temporaryDirectory.implementedBy(_ => apiImpl.temporaryDirectory()),
+      omrMethod.implementedBy(apiImpl.omrMethodName),
+      omrContent.implementedBy(apiImpl.omrContent),
+      omrFiles.implementedBy(apiImpl.omrFiles),
+      omrDataIndex.implementedBy(apiImpl.omrDataIndex),
+      cloneRepository.implementedBy(apiImpl.cloneRepository),
+      commit.implementedBy(apiImpl.commit),
+      revert.implementedBy(apiImpl.revert),
+      add.implementedBy(apiImpl.add),
+      pull.implementedBy(apiImpl.pull),
+      branchList.implementedBy(apiImpl.branchList),
+      checkout.implementedBy(apiImpl.checkout),
+      stash.implementedBy(apiImpl.stash),
+      stashPop.implementedBy(apiImpl.stashPop),
+      push.implementedBy(apiImpl.push),
+      listPlugins.implementedBy(_ => apiImpl.listPlugins()),
+      guiPlugins.implementedBy(_ => apiImpl.getGUIPlugins()),
+      executionState.implementedBy(apiImpl.executionData),
+      executionOutput.implementedBy(apiImpl.executionOutput),
+      cancelExecution.implementedBy(apiImpl.cancelExecution),
+      removeExecution.implementedBy(apiImpl.removeExecution),
+      validateScript.implementedBy(apiImpl.validateScript),
+      launchScript.implementedBy(apiImpl.launchScript),
+      clearEnvironmentErrors.implementedBy(apiImpl.clearEnvironmentErrors),
+      listEnvironmentErrors.implementedBy(apiImpl.listEnvironmentErrors),
+      downloadHTTP.implementedBy(apiImpl.downloadHTTP),
+      marketIndex.implementedBy(_ => apiImpl.marketIndex()),
+      getMarketEntry.implementedBy(apiImpl.getMarketEntry),
+      addPlugin.implementedBy(apiImpl.addPlugin),
+      removePlugin.implementedBy(apiImpl.removePlugin),
+      gitAuthentications.implementedBy(_ => apiImpl.gitAuthentications),
+      addGitAuthentication.implementedBy(apiImpl.addGitAuthentication),
+      removeGitAuthentication.implementedBy(apiImpl.removeGitAuthentication),
+      testGitAuthentication.implementedBy(apiImpl.testGitAuthentication)
     )
-  ) //.map(_.putHeaders(Header("Access-Control-Allow-Origin", "*")))
 
   val routes: HttpRoutes[IO]  =
     HttpRoutes.of:
@@ -239,7 +237,7 @@ class CoreAPIServer(apiImpl: ApiImpl, errorHandler: Throwable => IO[http4s.Respo
           def addHashHeader(r: org.http4s.Response[IO], f: File) =
             val hash = req.params.get(org.openmole.gui.shared.api.Download.hashParam).flatMap(_.toBooleanOption).getOrElse(false)
             if hash
-            then r.withHeaders(Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
+            then r.withHeaders(org.http4s.Header.Raw(CIString(org.openmole.gui.shared.api.hashHeader), apiImpl.services.fileService.hashNoCache(f).toString))
             else r
 
           r.map { r => addHashHeader(r, safePathToFile(safePath)) }

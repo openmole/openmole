@@ -8,7 +8,7 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.7.0"
+  def scala3VersionValue = "3.7.2"
   def scalajsVersion = "1.19.0"
 
   def scalaXMLVersion = "2.1.0"
@@ -21,7 +21,6 @@ object common {
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
-  def boopickleVersion = "1.3.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.4.2"
   def scaladgetVersion = "1.11.0"
@@ -29,11 +28,11 @@ object common {
   def sortableVersion = "0.7.2"
   def json4sVersion = "4.0.6"
   def jacksonVersion = "2.17.2"
-  def circeVersion = "0.14.12"
-  def circeYamlVersion = "0.14.2"
+  def circeVersion = "0.14.14"
+  def circeYamlVersion = "0.16.1"
   def catsVersion = "2.13.0"
   def catsEffectVersion = "3.6.2"
-  def catsParseVersion = "0.3.10"
+  def catsParseVersion = "1.1.0"
   def squantsVersion = "1.8.3"
   def xstreamVersion = "1.4.21"
   def scalaURIVersion = "1.1.1"
@@ -61,12 +60,9 @@ object common {
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
 
-  def http4sVersion = "0.23.12"
-
-  def endpoint4SHttp4SVersion = "11.0.1"
-  def endpoints4SVersion = "1.12.1"
-  def endpoint4SCirceSchemaVersion = "2.6.1"
-  def endpoint4SFetchClientCirceVersion = "4.0.1"
+  def http4sVersion = "0.23.30"
+  def http4sBlaseSeverVersion = "0.23.17"
+  def tapirVersion = "1.11.42"
 
   def xzVersion = "1.10"
 

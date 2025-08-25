@@ -21,39 +21,42 @@ package org.openmole.gui.plugin.authentication.miniclust
 import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.core.services.Services
+
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 import org.openmole.plugin.environment.miniclust.*
 
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import io.circe.generic.auto.*
+
 import scala.util.{Failure, Success, Try}
 
-trait MiniclustAuthenticationRESTAPI extends RESTAPI:
-  val loginAuthentications: ErrorEndpoint[Unit, Seq[MiniclustAuthenticationData]] =
-    errorEndpoint(get(path / "miniclust" / "login-authentications"), ok(jsonResponse[Seq[MiniclustAuthenticationData]]))
+object MiniclustAuthenticationRESTAPI:
+  lazy val loginAuthentications: TapirEndpoint[Unit, Seq[MiniclustAuthenticationData]] =
+    endpoint.get.in("miniclust" / "login-authentications").out(jsonBody[Seq[MiniclustAuthenticationData]]).errorOut(jsonBody[ErrorData])
 
-  val addAuthentication: ErrorEndpoint[MiniclustAuthenticationData, Unit] =
-    errorEndpoint(post(path / "miniclust" / "add-login-authentication", jsonRequest[MiniclustAuthenticationData]), ok(jsonResponse[Unit]))
+  lazy val addAuthentication: TapirEndpoint[MiniclustAuthenticationData, Unit] =
+    endpoint.post.in("miniclust" / "add-login-authentication").in(jsonBody[MiniclustAuthenticationData]).errorOut(jsonBody[ErrorData])
 
-  val removeAuthentication: ErrorEndpoint[MiniclustAuthenticationData, Unit] =
-    errorEndpoint(post(path / "miniclust" / "remove-login-authentication", jsonRequest[MiniclustAuthenticationData]), ok(jsonResponse[Unit]))
+  lazy val removeAuthentication: TapirEndpoint[MiniclustAuthenticationData, Unit] =
+    endpoint.post.in("miniclust" / "remove-login-authentication").in(jsonBody[MiniclustAuthenticationData]).errorOut(jsonBody[ErrorData])
 
-  val testAuthentication: ErrorEndpoint[MiniclustAuthenticationData, Seq[Test]] =
-    errorEndpoint(post(path / "miniclust" / "test-login-authentication", jsonRequest[MiniclustAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+  lazy val testAuthentication: TapirEndpoint[MiniclustAuthenticationData, Seq[Test]] =
+    endpoint.post.in("miniclust" / "test-login-authentication").in(jsonBody[MiniclustAuthenticationData]).out(jsonBody[Seq[Test]]).errorOut(jsonBody[ErrorData])
 
 
-class MiniclustAuthenticationServer(s: Services) extends APIServer with MiniclustAuthenticationRESTAPI:
-  
-  type EFfect = super.Effect
-  
-  val routes: HttpRoutes[IO] = HttpRoutes.of(
+class MiniclustAuthenticationServer(s: Services):
+
+  val routes: HttpRoutes[IO] =
     routesFromEndpoints(
-      loginAuthentications.errorImplementedBy(impl.loginAuthentications),
-      addAuthentication.errorImplementedBy(impl.addAuthentication),
-      removeAuthentication.errorImplementedBy(impl.removeAuthentication),
-      testAuthentication.errorImplementedBy(impl.testAuthentication)
+      MiniclustAuthenticationRESTAPI.loginAuthentications.implementedBy(impl.loginAuthentications),
+      MiniclustAuthenticationRESTAPI.addAuthentication.implementedBy(impl.addAuthentication),
+      MiniclustAuthenticationRESTAPI.removeAuthentication.implementedBy(impl.removeAuthentication),
+      MiniclustAuthenticationRESTAPI.testAuthentication.implementedBy(impl.testAuthentication)
     )
-  )
 
   object impl:
 

@@ -28,32 +28,36 @@ import org.openmole.gui.server.ext.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
 
-trait LoginAuthenticationRESTAPI extends RESTAPI:
-  val loginAuthentications: ErrorEndpoint[Unit, Seq[LoginAuthenticationData]] =
-    errorEndpoint(get(path / "ssh" / "login-authentications"), ok(jsonResponse[Seq[LoginAuthenticationData]]))
-
-  val addAuthentication: ErrorEndpoint[LoginAuthenticationData, Unit] =
-    errorEndpoint(post(path / "ssh" / "add-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
-
-  val removeAuthentication: ErrorEndpoint[LoginAuthenticationData, Unit] =
-    errorEndpoint(post(path / "ssh" / "remove-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Unit]))
-
-  val testAuthentication: ErrorEndpoint[LoginAuthenticationData, Seq[Test]] =
-    errorEndpoint(post(path / "ssh" / "test-login-authentication", jsonRequest[LoginAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import io.circe.generic.auto.*
 
 
-class LoginAuthenticationServer(s: Services) extends APIServer with LoginAuthenticationRESTAPI:
+object LoginAuthenticationRESTAPI:
+  val loginAuthentications: TapirEndpoint[Unit, Seq[LoginAuthenticationData]] =
+    endpoint.get.in("ssh" / "login-authentications").out(jsonBody[Seq[LoginAuthenticationData]]).errorOut(jsonBody[ErrorData])
+
+  val addAuthentication: TapirEndpoint[LoginAuthenticationData, Unit] =
+    endpoint.post.in("ssh" / "add-login-authentication").in(jsonBody[LoginAuthenticationData]).errorOut(jsonBody[ErrorData])
+
+  val removeAuthentication: TapirEndpoint[LoginAuthenticationData, Unit] =
+    endpoint.post.in("ssh" / "remove-login-authentication").in(jsonBody[LoginAuthenticationData]).errorOut(jsonBody[ErrorData])
+
+  val testAuthentication: TapirEndpoint[LoginAuthenticationData, Seq[Test]] =
+    endpoint.post.in("ssh" / "test-login-authentication").in(jsonBody[LoginAuthenticationData]).out(jsonBody[Seq[Test]]).errorOut(jsonBody[ErrorData])
+
+
+class LoginAuthenticationServer(s: Services):
   
-  type EFfect = super.Effect
-  
-  val routes: HttpRoutes[IO] = HttpRoutes.of(
+  val routes: HttpRoutes[IO] = 
+    import LoginAuthenticationRESTAPI.*
     routesFromEndpoints(
-      loginAuthentications.errorImplementedBy(impl.loginAuthentications),
-      addAuthentication.errorImplementedBy(impl.addAuthentication),
-      removeAuthentication.errorImplementedBy(impl.removeAuthentication),
-      testAuthentication.errorImplementedBy(impl.testAuthentication)
+      loginAuthentications.implementedBy(impl.loginAuthentications),
+      addAuthentication.implementedBy(impl.addAuthentication),
+      removeAuthentication.implementedBy(impl.removeAuthentication),
+      testAuthentication.implementedBy(impl.testAuthentication)
     )
-  )
 
   object impl:
 

@@ -12,19 +12,15 @@ trait LoginAuthenticationAPI:
   def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
   def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
 
-object LoginAuthenticationServerAPI:
-  class APIClientImpl(val settings: ClientSettings) extends LoginAuthenticationRESTAPI with APIClient
-  def PluginFetch = Fetch(new APIClientImpl(_))
-
 class LoginAuthenticationServerAPI extends LoginAuthenticationAPI:
-  import LoginAuthenticationServerAPI.PluginFetch
-  override def loginAuthentications()(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[LoginAuthenticationData]] = PluginFetch.futureError(_.loginAuthentications(()).future)
-  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.futureError(_.addAuthentication(data).future)
-  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = PluginFetch.futureError(_.removeAuthentication(data).future)
-  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = PluginFetch.futureError(_.testAuthentication(data).future)
+  def sttp = STTPInterpreter()
+  override def loginAuthentications()(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[LoginAuthenticationData]] = sttp.toRequest(LoginAuthenticationRESTAPI.loginAuthentications)(())
+  override def addAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = sttp.toRequest(LoginAuthenticationRESTAPI.addAuthentication)(data)
+  override def removeAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit] = sttp.toRequest(LoginAuthenticationRESTAPI.removeAuthentication)(data)
+  override def testAuthentication(data: LoginAuthenticationData)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]] = sttp.toRequest(LoginAuthenticationRESTAPI.testAuthentication)(data)
 
 class LoginAuthenticationStubAPI extends LoginAuthenticationAPI:
-  import LoginAuthenticationServerAPI.PluginFetch
+  
   override def loginAuthentications()(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[LoginAuthenticationData]] = Future.successful {
     Seq(
       LoginAuthenticationData(

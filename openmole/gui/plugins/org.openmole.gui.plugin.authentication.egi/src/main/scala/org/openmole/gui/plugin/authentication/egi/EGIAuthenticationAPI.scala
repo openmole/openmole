@@ -3,23 +3,28 @@ package org.openmole.gui.plugin.authentication.egi
 import org.openmole.gui.shared.data.{ErrorData, Test}
 import org.openmole.gui.shared.api.*
 
-trait EGIAuthenticationAPI extends RESTAPI:
+import sttp.tapir.*
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.circe.*
+import io.circe.generic.auto.*
 
-  val egiAuthentications =
-    errorEndpoint(get(path / "egi" / "authentications"), ok(jsonResponse[Seq[EGIAuthenticationData]]))
+object EGIAuthenticationAPI:
 
-  val addAuthentication =
-    errorEndpoint(post(path / "egi" / "add-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Unit]))
+  lazy val egiAuthentications =
+    endpoint.get.in("egi" / "authentications").out(jsonBody[Seq[EGIAuthenticationData]]).errorOut(jsonBody[ErrorData])
 
-  val removeAuthentications =
-    errorEndpoint(post(path / "egi" / "remove-authentications", jsonRequest[(EGIAuthenticationData, Boolean)]), ok(jsonResponse[Unit]))
+  lazy val addAuthentication =
+    endpoint.post.in("egi" / "add-authentication").in(jsonBody[EGIAuthenticationData]).errorOut(jsonBody[ErrorData])
+    
+  lazy val removeAuthentications =
+    endpoint.post.in("egi" / "remove-authentications").in(jsonBody[(EGIAuthenticationData, Boolean)]).errorOut(jsonBody[ErrorData])
+    
+  lazy val setVOTests =
+    endpoint.post.in("egi" / "set-vo-tests").in(jsonBody[Seq[String]]).errorOut(jsonBody[ErrorData])
+  
+  lazy val getVOTests =
+    endpoint.get.in("egi" / "get-vo-tests").out(jsonBody[Seq[String]]).errorOut(jsonBody[ErrorData])
 
-  val setVOTests =
-    errorEndpoint(post(path / "egi" / "set-vo-tests", jsonRequest[Seq[String]]), ok(jsonResponse[Unit]))
-
-  val getVOTests =
-    errorEndpoint(get(path / "egi" / "get-vo-tests"), ok(jsonResponse[Seq[String]]))
-
-  val testAuthentication =
-    errorEndpoint(post(path / "egi" / "test-authentication", jsonRequest[EGIAuthenticationData]), ok(jsonResponse[Seq[Test]]))
+  lazy val testAuthentication =
+    endpoint.post.in("egi" / "test-authentication").in(jsonBody[EGIAuthenticationData]).out(jsonBody[Seq[Test]]).errorOut(jsonBody[ErrorData])
 

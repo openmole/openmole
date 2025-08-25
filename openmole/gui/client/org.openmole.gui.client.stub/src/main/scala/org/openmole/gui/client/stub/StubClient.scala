@@ -2,7 +2,7 @@ package org.openmole.gui.client.stub
 
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.*
-import org.openmole.gui.client.ext.{NotificationLevel, PluginServices}
+import org.openmole.gui.client.ext.{NotificationLevel, PluginServices, STTPInterpreter}
 
 import scala.scalajs.js.annotation.*
 
@@ -26,8 +26,8 @@ import scala.scalajs.js.annotation.*
 @JSExportTopLevel(name = "openmole_stub_client") @JSExportAll
 object StubClient:
   lazy val panels = Panels()
-  lazy val fetch = CoreFetch(panels)
-  lazy val api = OpenMOLERESTServerAPI(fetch, NotificationManager.toService(panels.notifications))
+  lazy val sttp = STTPInterpreter()
+  lazy val api = OpenMOLERESTServerAPI(sttp, NotificationManager.toService(panels.notifications))
 
   lazy val pluginServices =
     PluginServices(
