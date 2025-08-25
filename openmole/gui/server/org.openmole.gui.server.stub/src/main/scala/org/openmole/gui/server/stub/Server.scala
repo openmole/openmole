@@ -58,7 +58,7 @@ import scala.concurrent.duration.Duration
     import org.http4s.headers.`Content-Type`
     InternalServerError { Left(ErrorData(t)).asJson.noSpaces }.map(_.withContentType(`Content-Type`(MediaType.application.json)))
 
-  val apiServer = new org.openmole.gui.server.core.CoreAPIServer(apiImpl, stackError)
+  val apiServer = new org.openmole.gui.server.core.CoreAPIServer(apiImpl)
   val webdavServer = new WebdavServer(org.openmole.gui.server.ext.utils.projectsDirectory(services.workspace), "webdav")
 
   def hello =
@@ -76,7 +76,7 @@ import scala.concurrent.duration.Duration
         StaticFile.fromFile(new File(webapp, s"fonts/${path.segments.mkString("/")}"), Some(request)).getOrElseF(NotFound())
       case request@GET -> Root => Ok(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
 
-    Router(Seq("/" -> routes, "/" -> apiServer.routes, "/" -> apiServer.endpointRoutes, "/webdav" -> webdavServer.routes)*).orNotFound
+    Router(Seq("/" -> routes, "/" -> apiServer.routes, "/" -> apiServer.apiRoutes, "/webdav" -> webdavServer.routes)*).orNotFound
 
   val shutdown =
     BlazeServerBuilder[IO].bindHttp(8080, "localhost").

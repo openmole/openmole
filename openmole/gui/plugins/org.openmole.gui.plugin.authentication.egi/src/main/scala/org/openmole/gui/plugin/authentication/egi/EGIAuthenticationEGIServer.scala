@@ -17,7 +17,6 @@ package org.openmole.gui.plugin.authentication.egi
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import endpoints4s.http4s.server
 import cats.effect.IO
 import org.http4s.HttpRoutes
 import org.openmole.core.preference.PreferenceLocation
@@ -35,26 +34,21 @@ import org.openmole.tool.file.*
 object EGIAuthenticationAPIServer:
   val voTest = PreferenceLocation[Seq[String]]("AuthenticationPanel", "voTest", Some(Seq[String]()))
 
-class EGIAuthenticationEGIServer(s: Services)
-  extends APIServer
-  with EGIAuthenticationAPI {
+class EGIAuthenticationEGIServer(s: Services):
 
+  import EGIAuthenticationAPI.*
   implicit val services: Services = s
   import services._
 
-  // NOTE: fixes compile that confuses Effect term an type in tasty from scala 3.6.4
-  type EFfect = super.Effect
-
-  val routes: HttpRoutes[IO] = HttpRoutes.of(
+  val routes: HttpRoutes[IO] =
     routesFromEndpoints(
-      egiAuthentications.errorImplementedBy(impl.egiAuthentications),
-      addAuthentication.errorImplementedBy(a => impl.addAuthentication(a)),
-      removeAuthentications.errorImplementedBy(impl.removeAuthentications),
-      setVOTests.errorImplementedBy(vo => impl.setVOTest(vo)),
-      getVOTests.errorImplementedBy(_ => impl.geVOTests()),
-      testAuthentication.errorImplementedBy(d => impl.testAuthentication(d))
+      egiAuthentications.implementedBy(impl.egiAuthentications),
+      addAuthentication.implementedBy(a => impl.addAuthentication(a)),
+      removeAuthentications.implementedBy(impl.removeAuthentications),
+      setVOTests.implementedBy(vo => impl.setVOTest(vo)),
+      getVOTests.implementedBy(_ => impl.geVOTests()),
+      testAuthentication.implementedBy(d => impl.testAuthentication(d))
     )
-  )
 
   object impl {
     private def coreObject(data: EGIAuthenticationData) =
@@ -124,4 +118,4 @@ class EGIAuthenticationEGIServer(s: Services)
       services.preference(EGIAuthenticationAPIServer.voTest)
 
   }
-}
+

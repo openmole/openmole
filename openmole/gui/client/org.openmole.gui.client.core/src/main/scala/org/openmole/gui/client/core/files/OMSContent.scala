@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 
-import org.openmole.gui.client.core.{CoreFetch, ExecutionPanel, Panels, Waiter}
+import org.openmole.gui.client.core.{ExecutionPanel, Panels, Waiter}
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.shared.data.*
 import com.raquo.laminar.api.L.*

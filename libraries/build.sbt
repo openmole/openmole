@@ -539,33 +539,9 @@ lazy val guava = OsgiProject(dir, "com.google.guava", imports = Seq("!com.google
   version := guavaVersion
 )
 
-//lazy val endpoint4SAPI = OsgiProject(dir, "org.endpoints4s.api", imports = Seq("!sun.security.*", "*"), exports = Seq("endpoint4s.algebra.*", "endpoint4s.circe.*"), privatePackages = Seq("!scala.*", "endpoint4s.*")) enablePlugins(ScalaJSPlugin) settings (
-//  libraryDependencies += "org.openmole.endpoints4s" %%% "json-schema-circe" % endpoint4SCirceSchemaVersion,
-//  libraryDependencies += "org.openmole.endpoints4s" %%% "algebra" % endpoints4SVersion,
-//  version := endpoints4SVersion
-//) settings(settings: _*) settings(settings: _*) dependsOn(circe)
-
-lazy val endpoint4s = OsgiProject(dir, "org.endpoints4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "*"), exports = Seq("endpoints4s.*"), privatePackages = Seq("ujson.*", "geny.*", "upickle.*", "org.objectweb.asm.*")) settings (
-  settings,
-  libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
-  libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
-  libraryDependencies += "org.endpoints4s" %% "http4s-server" % endpoint4SHttp4SVersion,
-
-  libraryDependencies += "org.endpoints4s" %% "json-schema-circe" % endpoint4SCirceSchemaVersion,
-  libraryDependencies += "org.endpoints4s" %% "algebra" % endpoints4SVersion,
-
-  libraryDependencies += "org.endpoints4s" %% sjs("json-schema-circe") % endpoint4SCirceSchemaVersion,
-  libraryDependencies += "org.endpoints4s" %% sjs("algebra") % endpoints4SVersion,
-  
-  libraryDependencies += "org.endpoints4s" %% sjs("fetch-client-circe") % endpoint4SFetchClientCirceVersion,
-
-  version := endpoints4SVersion
-) dependsOn(cats, circe, http4s)
-
-
 lazy val http4s = OsgiProject(dir, "org.http4s", imports = Seq("!sun.security.*", "!scalajs.*", "!org.scalajs.*", "!sun.nio.ch.*", "*"), exports = Seq("org.http4s.*", "fs2.*", "org.typelevel.ci.*", "org.typelevel.vault.*", "org.typelevel.log4cats.*"), privatePackages = Seq("com.comcast.ip4s.*", "com.twitter.hpack.*", "jnr.*", "com.kenai.*", "org.log4s.*", "org.typelevel.literally.*", "scodec.*", "org.objectweb.asm.*")) settings (
   settings,
-  libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+  libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sBlaseSeverVersion,
   libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion,
   libraryDependencies += "com.github.jnr" % "jnr-unixsocket" % "0.38.22",
   version := http4sVersion
@@ -583,3 +559,12 @@ lazy val uildCreator = OsgiProject(dir, "com.github.f4b6a3.ulid") settings (
   version := ulidCreatorVersion
 )
 
+lazy val tapir = OsgiProject(dir, "sttp.tapir", exports = Seq("sttp.*", "magnolia1.*")) settings (
+  settings,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-json-circe") % tapirVersion,
+  libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-sttp-client4") % tapirVersion,
+  version := tapirVersion
+) dependsOn(http4s)

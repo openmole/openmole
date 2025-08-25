@@ -33,10 +33,12 @@ object TopLevelExports:
 
 class EvolutionAnalysis extends MethodAnalysisPlugin:
 
+  def sttp = STTPInterpreter()
+
   override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement =
     val metadata: Var[Option[Convergence]] = Var(None)
 
-    PluginFetch.futureError(_.analyse(safePath).future).foreach: m =>
+    sttp.toRequest(EvolutionAnalysisAPI.analyse)(safePath).foreach: m =>
       metadata.set(Some(m))
 
     div(

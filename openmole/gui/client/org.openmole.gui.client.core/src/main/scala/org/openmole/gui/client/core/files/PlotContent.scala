@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scaladget.nouislider.NoUISliderImplicits.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
-import org.openmole.gui.client.core.{CoreFetch, Panels}
+import org.openmole.gui.client.core.{Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.CoreUtils

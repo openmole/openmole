@@ -4,7 +4,7 @@ import org.openmole.gui.shared.data.*
 import scaladget.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.files.PlotContent.ContentSection
-import org.openmole.gui.client.core.{CoreFetch, Panels}
+import org.openmole.gui.client.core.{Panels}
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*

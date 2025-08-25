@@ -1,9 +1,5 @@
 package org.openmole.gui.server.ext
 
-import cats.effect.IO
-import endpoints4s.http4s.server
-import org.openmole.gui.shared.data.*
-
 /*
  * Copyright (C) 2022 Romain Reuillon
  *
@@ -21,17 +17,21 @@ import org.openmole.gui.shared.data.*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.http4s
-import org.http4s.*
+import cats.effect.IO
+import org.openmole.gui.shared.data.*
+import sttp.capabilities.fs2.Fs2Streams
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.http4s.Http4sServerInterpreter
 
-abstract class APIServer extends server.Endpoints[IO] with server.JsonEntitiesFromCodecs:
-
-  implicit class EndpointDecorator[A, B](ep: Endpoint[A, Either[ErrorData, B]]):
-    def errorImplementedBy(f: A => B) =
-      ep.implementedBy: a =>
+extension [A, B](e: sttp.tapir.Endpoint[Unit, A, ErrorData, B, Any])
+  def implementedBy(f: A => B) =
+    e.serverLogic: a =>
+      IO.pure:
         try Right(f(a))
         catch
           case t: Throwable =>
             Left(ErrorData(t))
 
+def routesFromEndpoints(r: ServerEndpoint[Fs2Streams[IO], IO]*) = ServerInterpreter().toRoutes(r.toList)
+def ServerInterpreter() = Http4sServerInterpreter[IO]()
 

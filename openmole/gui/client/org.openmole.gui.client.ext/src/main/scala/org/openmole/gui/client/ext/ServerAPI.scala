@@ -73,8 +73,7 @@ trait ServerAPI:
 
   def omSettings()(using BasePath): Future[OMSettings]
   def shutdown()(using BasePath): Future[Unit]
-  def restart()(using BasePath): Future[Unit]
-  def isAlive()(using BasePath): Future[Boolean]
+  
   def jvmInfos()(using BasePath): Future[JVMInfos]
   def listNotification()(using BasePath): Future[Seq[NotificationEvent]]
   def clearNotification(ids: Seq[Long])(using BasePath): Future[Unit]
