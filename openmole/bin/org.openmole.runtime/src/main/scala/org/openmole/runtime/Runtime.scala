@@ -37,6 +37,7 @@ import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
 import org.openmole.tool.file.uniqName
 import org.openmole.tool.system.*
+
 import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
 import util.{Failure, Success}
@@ -47,6 +48,7 @@ import org.openmole.tool.exception.Retry
 import org.openmole.tool.lock.*
 import org.openmole.tool.outputredirection.OutputRedirection
 import org.openmole.tool.stream.MultiplexedOutputStream
+import org.osgi.framework.BundleException
 import squants.*
 
 object Runtime extends JavaLogger:
@@ -139,7 +141,9 @@ class Runtime:
 
         logger.fine("Downloaded plugins. " + plugins.unzip._2.mkString(", "))
 
-        PluginManager.tryLoad(plugins.unzip._2).foreach { case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e) }
+        PluginManager.tryLoad(plugins.unzip._2).foreach:
+          case (f, e: BundleException) if e.getType == BundleException.DUPLICATE_BUNDLE_ERROR => logger.log(FINE, s"Duplicated bundle $f", e)
+          case (f, e) => logger.log(WARNING, s"Error loading bundle $f", e)
 
         logger.fine("Loaded plugins: " + PluginManager.bundles.map(_.getSymbolicName).mkString(", "))
 
