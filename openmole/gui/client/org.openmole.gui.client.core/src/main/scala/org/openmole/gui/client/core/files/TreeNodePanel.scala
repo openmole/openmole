@@ -46,7 +46,7 @@ object TreeNodePanel:
   extension (p: TreeNodePanel)
     def refresh = p.refresh
 
-class TreeNodePanel {
+class TreeNodePanel:
   panel =>
 
   import TreeNodePanel.MultiTool
@@ -753,4 +753,4 @@ class TreeNodePanel {
             treeWarning.set(true),
           tree
         )
-}
+
