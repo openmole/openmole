@@ -22,3 +22,5 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject"      % "1.2.0")
 
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 
+//addSbtPlugin("com.github.sbt" % "sbt-osgi" % "0.10.0")
+
