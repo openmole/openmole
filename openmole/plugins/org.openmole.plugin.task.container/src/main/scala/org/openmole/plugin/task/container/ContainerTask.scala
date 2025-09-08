@@ -411,7 +411,8 @@ object ContainerTask:
       def retCodeVariable = "_PROCESS_RET_CODE_"
 
       val commandValue =
-        val value = command.value.map(_.from(context))
+        def dropEmptyLinesAtTheEnd(s: String) = s.split("\n").reverse.dropWhile(_.trim.isEmpty).reverse.mkString("\n")
+        val value = command.value.map(_.from(context)).map(dropEmptyLinesAtTheEnd)
         if ignoreRetCode
         then Seq(s"${value.mkString(" && ")} ; $retCodeVariable=$$? ; true")
         else value
