@@ -96,6 +96,7 @@ def TarArchiveOutputStream(os: OutputStream, blockSize: Option[Int] = None) =
       case None => new TarArchiveOutputStream(os)
       case Some(b) => new TarArchiveOutputStream(os, b)
   tos.setLongFileMode(org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU)
+  tos.setBigNumberMode(org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.BIGNUMBER_POSIX)
   tos
 
 def TarArchiveInputStream(os: InputStream) =
