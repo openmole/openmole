@@ -38,6 +38,7 @@ object PPSE:
     grid:             Seq[PatternAxe],
     dilation:         Double,
     reject:           Option[Condition],
+    density:          Option[FromContext[Double]],
     gmmIterations:    Int,
     gmmTolerance:     Double,
     warmupSampler:    Int,
@@ -118,6 +119,12 @@ object PPSE:
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
 
+          def densityValue =
+            om.density.map: density =>
+              (g: IArray[Double]) =>
+                val scaled = Genome.toVariables(om.genome, g, IArray.empty, scale = true)
+                density.from(scaled)
+
           val (s2, elited) = mgo.evolution.algorithm.PPSEOperation.elitism[S, I, Phenotype](
             _.genome,
             _.phenotype,
@@ -127,6 +134,7 @@ object PPSE:
             Focus[S](_.s.likelihoodRatioMap),
             Focus[S](_.s.hitmap),
             Focus[S](_.s.gmm),
+            density = densityValue,
             maxRareSample = om.maxRareSample,
             iterations = om.gmmIterations,
             tolerance = om.gmmTolerance,
@@ -179,6 +187,7 @@ object PPSE:
     minClusterSize:   Int,
     regularisationEpsilon: Double,
     reject:    Option[Condition],
+    density:   Option[FromContext[Double]],
     outputs:   Seq[Val[?]]     = Seq()) =
     val exactObjectives = Objectives.toExact(objective.map(_.p))
     val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
@@ -190,6 +199,7 @@ object PPSE:
         phenotypeContent,
         exactObjectives,
         reject = reject,
+        density = density,
         grid = objective,
         dilation = dilation,
         gmmIterations = gmmIterations,
@@ -238,7 +248,8 @@ object PPSEEvolution:
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
-      reject = p.reject
+      reject = p.reject,
+      density = p.density
     )
 
   given ExplorationMethod[PPSEEvolution, EvolutionWorkflow] = p =>
@@ -260,16 +271,31 @@ case class PPSEEvolution(
   objective:   Seq[PSE.PatternAxe],
   evaluation:  DSL,
   termination: OMTermination,
-  reject:      OptionalArgument[Condition]       = None,
-  stochastic:  OptionalArgument[Stochastic]      = None,
-  parallelism: Int                               = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                 = SteadyState(),
-  suggestion: Suggestion                         = Suggestion.empty,
-  dilation: Double                               = 4.0,
-  gmmIterations: Int                             = 100,
-  gmmTolerance: Double                           = 0.0001,
-  warmupSampler: Int                             = 10000,
-  maxRareSample: Int                             = 10,
-  minClusterSize: Int                            = 10,
-  regularisationEpsilon: Double                  = 10e-6,
-  scope:       DefinitionScope                   = "ppse")
+  reject:      OptionalArgument[Condition]            = None,
+  density:     OptionalArgument[FromContext[Double]]  = None,
+  stochastic:  OptionalArgument[Stochastic]           = None,
+  parallelism: Int                                    = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                      = SteadyState(),
+  suggestion: Suggestion                              = Suggestion.empty,
+  dilation: Double                                    = 4.0,
+  gmmIterations: Int                                  = 100,
+  gmmTolerance: Double                                = 0.0001,
+  warmupSampler: Int                                  = 10000,
+  maxRareSample: Int                                  = 10,
+  minClusterSize: Int                                 = 10,
+  regularisationEpsilon: Double                       = 10e-6,
+  scope:       DefinitionScope                        = "ppse")
+
+
+def GaussianDensity(variable: In[Val[Double], (Double, Double)]*): FromContext[Double] =
+  import org.apache.commons.math3.distribution.MultivariateNormalDistribution
+  val varianceValue = variable.map(_.domain._2).toArray
+  val meanValue = variable.map(_.domain._1).toArray
+  val cov =
+    Array.tabulate(varianceValue.length, varianceValue.length): (i, j) =>
+      if i == j then varianceValue(i) else 0.0
+  FromContext: p =>
+    import p.*
+    val mnd = new MultivariateNormalDistribution(meanValue, cov)
+    val point = variable.map(v => context(v.value)).toArray
+    mnd.density(point)
