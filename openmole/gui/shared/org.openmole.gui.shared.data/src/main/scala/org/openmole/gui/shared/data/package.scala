@@ -92,7 +92,7 @@ case class BranchData(list: Seq[String], current: String)
 
 case class TreeNodeData(
   name: String,
-  size: Long,
+  size: Option[Long],
   time: Long,
   directory: Option[TreeNodeData.Directory] = None,
   pluginState: PluginState = PluginState.empty,
@@ -264,42 +264,8 @@ enum FirstLast:
 enum ListSorting:
   case AlphaSorting, SizeSorting, TimeSorting
 
-object FileSorting:
-  def toOrdering(filter: FileSorting): Ordering[TreeNodeData] =
-    val fs = filter.fileSorting
-    def fileSizeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.size compare tnd2.size
 
-    def alphaOrdering = new Ordering[TreeNodeData]:
-      def isDirectory(tnd: TreeNodeData) =
-        tnd.directory match
-          case None => false
-          case _ => true
-
-      def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
-        if isDirectory(tn1)
-        then
-          if isDirectory(tn2)
-          then tn1.name compare tn2.name
-          else -1
-        else if isDirectory(tn2)
-        then 1
-        else tn1.name compare tn2.name
-
-
-    def timeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.time compare tnd2.time
-
-    def ordering =
-      fs match
-        case ListSorting.AlphaSorting => alphaOrdering
-        case ListSorting.SizeSorting => fileSizeOrdering
-        case ListSorting.TimeSorting => timeOrdering
-
-    filter.firstLast match
-      case FirstLast.First => ordering
-      case FirstLast.Last => ordering.reverse
-
-
-case class FileSorting(firstLast: FirstLast = FirstLast.First, fileSorting: ListSorting = ListSorting.AlphaSorting, size: Option[Int] = None)
+case class FileSorting(firstLast: FirstLast = FirstLast.First, listSorting: ListSorting = ListSorting.AlphaSorting, size: Option[Int] = None)
 
 
 object FileListData:

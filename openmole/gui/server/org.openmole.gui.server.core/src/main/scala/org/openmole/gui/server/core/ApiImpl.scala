@@ -202,9 +202,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     utils.copyFiles(paths, overwrite)
 
-  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting(), testPlugin: Boolean = true, withHidden: Boolean = true): FileListData =
+  def listFiles(sp: SafePath, fileFilter: data.FileSorting = data.FileSorting(), testPlugin: Boolean = true, withHidden: Boolean = true, directorySize: Boolean = false): FileListData =
     import services.*
-    utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin, withHidden = withHidden)
+    utils.listFiles(sp, fileFilter, listPlugins(), testPlugin = testPlugin, withHidden = withHidden, directorySize = directorySize)
 
   def recursiveListFiles(sp: SafePath, findString: Option[String], withHidden: Boolean): Seq[(SafePath, Boolean)] =
     import services._
@@ -578,7 +578,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       tmpDirectory.withTmpFile("result", ".csv"): csvFile =>
         OMRFormat.writeCSV(omrFile, csvFile, dataFile)
         csvFile.content
-    
+
     GUIOMRContent(
       section = content,
       openMoleVersion = omrContent.`openmole-version`,
@@ -589,7 +589,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       index = index,
       raw = raw
     )
-  
+
 
 
   def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =
@@ -820,4 +820,4 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         case None => Seq(PassedTest("Password is correct"))
         case Some(e) => Seq(FailedTest("Password is incorrect", ErrorData(e)))
     .getOrElse(Seq(FailedTest("Private key not set", ErrorData.empty)))
-    
+

@@ -82,23 +82,35 @@ object utils:
     }.contains(safePath)
 
 
-  def fileToTreeNodeData(f: File, pluggedList: Seq[Plugin], testPlugin: Boolean = true, gitStatus: Option[GitStatus] = None)(using workspace: Workspace): Option[TreeNodeData] =
+  def fileToTreeNodeData(
+    f: File,
+    pluggedList: Seq[Plugin],
+    testPlugin: Boolean = true,
+    directorySize: Boolean = false,
+    gitStatus: Option[GitStatus] = None)(using workspace: Workspace): Option[TreeNodeData] =
     import org.openmole.core.format.OMRFormat
     def isPlugin(file: File): Boolean = testPlugin && PluginManager.isBundle(file)
 
     if f.exists()
     then
-      val dirData = if (f.isDirectory) Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
+      val dirData = if f.isDirectory then Some(TreeNodeData.Directory(f.isDirectoryEmpty)) else None
       val time = java.nio.file.Files.readAttributes(f, classOf[BasicFileAttributes]).lastModifiedTime.toMillis
 
       def size =
-        if OMRFormat.isOMR(f)
-        then Try {
-          OMRFormat.diskUsage(f)
-        }.getOrElse(f.length())
-        else f.length()
+        if !f.isDirectory
+        then
+          Some:
+            if OMRFormat.isOMR(f)
+            then Try {OMRFormat.diskUsage(f)}.getOrElse(f.length())
+            else f.length()
+        else
+          if directorySize
+          then Some(f.size)
+          else None
 
-      Some(TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList)), gitStatus))
+      Some(
+        TreeNodeData(f.getName, size, time, directory = dirData, pluginState = PluginState(isPlugin(f), isPlugged(f, pluggedList)), gitStatus)
+      )
     else None
 
   //implicit def fileToOptionSafePath(f: File)(implicit context: ServerFileSystemContext, workspace: Workspace): Option[SafePath] = Some(fileToSafePath(f))
@@ -134,7 +146,7 @@ object utils:
     getParentsArray0(f, Seq()) :+ f.getName
 
 
-  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true, withHidden: Boolean = true)(implicit workspace: Workspace): FileListData =
+  def listFiles(path: SafePath, fileFilter: FileSorting, pluggedList: Seq[Plugin], testPlugin: Boolean = true, withHidden: Boolean = true, directorySize: Boolean = false)(implicit workspace: Workspace): FileListData =
     given ServerFileSystemContext = path.context
 
     def filterHidden(f: File) = withHidden || !f.getName.startsWith(".")
@@ -163,9 +175,50 @@ object utils:
                 GitService.withGit(f, currentFile): git =>
                   GitStatus.Root
               else None
-          fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus)
+          fileToTreeNodeData(f, pluggedList, testPlugin = testPlugin, gitStatus = gitStatus, directorySize = directorySize)
 
-      val sorted = treeNodesData.sorted(FileSorting.toOrdering(fileFilter))
+      def fileSortingToOrdering(filter: FileSorting): Ordering[TreeNodeData] =
+        val fs = filter.listSorting
+
+        def fileSizeOrdering: Ordering[TreeNodeData] =
+          (tnd1, tnd2) =>
+            (tnd1.size, tnd2.size) match
+              case (Some(x), Some(y)) => x compare y
+              case (Some(_), None)    => -1
+              case (None, Some(_))    => 1
+              case (None, None)       => 0
+
+        def alphaOrdering = new Ordering[TreeNodeData]:
+          def isDirectory(tnd: TreeNodeData) =
+            tnd.directory match
+              case None => false
+              case _ => true
+
+          def compare(tn1: TreeNodeData, tn2: TreeNodeData) =
+            if isDirectory(tn1)
+            then
+              if isDirectory(tn2)
+              then tn1.name compare tn2.name
+              else -1
+            else if isDirectory(tn2)
+            then 1
+            else tn1.name compare tn2.name
+
+
+        def timeOrdering: Ordering[TreeNodeData] = (tnd1, tnd2) => tnd1.time compare tnd2.time
+
+        def ordering =
+          fs match
+            case ListSorting.AlphaSorting => alphaOrdering
+            case ListSorting.SizeSorting => fileSizeOrdering
+            case ListSorting.TimeSorting => timeOrdering
+
+        filter.firstLast match
+          case FirstLast.First => ordering
+          case FirstLast.Last => ordering.reverse
+
+
+      val sorted = treeNodesData.sorted(fileSortingToOrdering(fileFilter))
       val sortedSize = sorted.size
 
       val branchData =

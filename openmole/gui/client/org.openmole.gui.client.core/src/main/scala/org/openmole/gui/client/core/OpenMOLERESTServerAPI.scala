@@ -40,7 +40,7 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
   override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = sttp.toRequest(CoreAPI.saveFile)(safePath, content, hash, overwrite)
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = sttp.toRequest(CoreAPI.createFile)(path, name, directory)
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.extractArchive)(path, to)
-  override def listFiles(path: SafePath, filter: FileSorting, withHidden: Boolean)(using BasePath): Future[FileListData] = sttp.toRequest(CoreAPI.listFiles)(path, filter, withHidden)
+  override def listFiles(path: SafePath, filter: FileSorting, withHidden: Boolean, directorySize: Boolean)(using BasePath): Future[FileListData] = sttp.toRequest(CoreAPI.listFiles)(path, filter, withHidden, directorySize)
   override def listRecursive(path: SafePath, findString: Option[String], withHidden: Boolean)(using BasePath): Future[Seq[(SafePath, Boolean)]] = sttp.toRequest(CoreAPI.listRecursive)(path, findString, withHidden)
   override def move(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = sttp.toRequest(CoreAPI.move)(paths, overwrite)
   override def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.deleteFiles)(path)

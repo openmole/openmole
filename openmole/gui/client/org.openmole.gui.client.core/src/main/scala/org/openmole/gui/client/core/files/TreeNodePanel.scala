@@ -496,15 +496,18 @@ class TreeNodePanel:
     lazy val tree: Div = div(
       cls := "file-scrollable-content",
       children <--
-        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileFilter, _, sizeValue) =>
-          EventStream.fromFuture(CoreUtils.listFiles(currentDir, fileFilter.copy(size = Some(sizeValue)), withHidden = false).map(Some(_)), true).toSignal(None).map {
+        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
+          def directorySize = fileSorting.listSorting == ListSorting.SizeSorting
+          EventStream.fromFuture(
+            api.listFiles(currentDir, fileSorting.copy(size = Some(sizeValue)), withHidden = false, directorySize = directorySize).map(Some(_)), true
+          ).toSignal(None).map {
             case None =>
               Seq(
                 i(cls := "bi bi-hourglass-split", marginLeft := "250", textAlign := "center")
               )
             case Some(nodes) =>
               val content =
-                if !foundFiles.isEmpty
+                if foundFiles.nonEmpty
                 then
                   foundFiles.map { (sp, isDir) =>
                     div(s"${sp.normalizedPathString}", cls := "findFile",
@@ -530,10 +533,10 @@ class TreeNodePanel:
                       )
                     else emptyNode
                   fileToolBar.gitBranchList.set(nodes.branchData)
-                  commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked) || x._2 == Some(Conflicting) || x._2 == Some(Modified)).map(_._1))
-                  addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2 == Some(Untracked)).map(_._1))
+                  commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2.contains(Untracked) || x._2.contains(Conflicting) || x._2.contains(Modified)).map(_._1))
+                  addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2.contains(Untracked)).map(_._1))
                   gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
-                  checked +: nodes.data.zipWithIndex.flatMap { case (tn, id) => Seq(drawNode(tn, id, tree).render) }
+                  checked +: nodes.data.zipWithIndex.flatMap { (tn, id) => Seq(drawNode(TreeNode.fromTreeNodeData(tn), id, tree).render)}
 
               def more =
                 if nodes.listed < nodes.total
@@ -609,10 +612,17 @@ class TreeNodePanel:
   val currentSafePath: Var[Option[SafePath]] = Var(None)
   val currentLine = Var(-1)
 
-  def timeOrSize(tn: TreeNode): String = treeNodeManager.fileSorting.now().fileSorting match {
-    case ListSorting.TimeSorting => CoreUtils.longTimeToString(tn.time)
-    case _ => CoreUtils.readableByteCountAsString(tn.size)
-  }
+  def timeOrSize(tn: TreeNode): HtmlElement =
+    treeNodeManager.fileSorting.now().listSorting match
+      case ListSorting.TimeSorting => div(CoreUtils.longTimeToString(tn.time))
+      case _ =>
+        tn match
+          case d: TreeNode.Directory =>
+            d.size match
+              case Some(s) => div(CoreUtils.readableByteCountAsString(s))
+              case None => i(cls := "bi bi-folder")
+          case f: TreeNode.File => div(CoreUtils.readableByteCountAsString(f.size))
+
 
   def fileClick(todo: () => Unit)(using api: ServerAPI, basePath: BasePath) =
     onClick --> { _ =>
@@ -664,12 +674,11 @@ class TreeNodePanel:
         showExecution,
         tn match
           case f: TreeNode.File => PluginState(f.pluginState.isPlugin, f.pluginState.isPlugged)
-          case _ => PluginState(false, false)
-        ,
-        isDirectory = tn.directory.isDefined
+          case _ => PluginState(false, false),
+        isDirectory = tn.isDirectory
       )
 
-    def gitDivStatus(tn: TreeNodeData) =
+    def gitDivStatus(tn: TreeNode) =
       tn.gitStatus match
         case Some(GitStatus.Modified) => "git-status-modified"
         case Some(GitStatus.Untracked) => "git-status-untracked"
@@ -688,7 +697,7 @@ class TreeNodePanel:
           onDrop --> { e =>
             e.dataTransfer
             e.preventDefault()
-            dropAction(treeNodeManager.directory.now() ++ tn.name, TreeNode.isDir(tn))
+            dropAction(treeNodeManager.directory.now() ++ tn.name, TreeNode.isDirectory(tn))
           },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,
@@ -700,14 +709,13 @@ class TreeNodePanel:
           i(timeOrSize(tn), cls := "file2"),
           child <--
             multiTool.signal.map:
-              _ match
-                case On | Git => emptyNode
-                case _ =>
-                  button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ =>
-                    currentSafePath.set(Some(tnSafePath))
-                    currentLine.update(cl => if cl == id then -1 else id)
-                    if(id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
-                  })
+              case On | Git => emptyNode
+              case _ =>
+                button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ =>
+                  currentSafePath.set(Some(tnSafePath))
+                  currentLine.update(cl => if cl == id then -1 else id)
+                  if(id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
+                })
         ),
         currentLine.signal.map { i => i == id }.expand(toolBox.contentRoot),
         treeNodeManager.directory.toObservable --> Observer { _ => currentLine.set(-1) }
@@ -749,7 +757,7 @@ class TreeNodePanel:
           dn,
           TreeNodeType.Folder,
           () =>
-            treeNodeManager switch (dn.name)
+            treeNodeManager.switch(dn.name)
             treeWarning.set(true),
           tree
         )

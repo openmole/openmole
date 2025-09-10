@@ -54,8 +54,6 @@ object CoreUtils {
   def trashNodes(treeNodePanel: TreeNodePanel, paths: Seq[SafePath])(using api: ServerAPI, path: BasePath): Future[Unit] =
     api.deleteFiles(paths).andThen { _ => treeNodePanel.refresh }
 
-  def listFiles(safePath: SafePath, fileFilter: FileSorting = FileSorting(), withHidden: Boolean = true)(using api: ServerAPI, path: BasePath): Future[FileListData] = api.listFiles(safePath, fileFilter, withHidden)
-  
   def findFilesContaining(safePath: SafePath, findString: Option[String])(using api: ServerAPI, path: BasePath): Future[Seq[(SafePath, Boolean)]] = api.listRecursive(safePath, findString)
   
   def addPlugin(safePath: SafePath)(using api: ServerAPI, path: BasePath) = api.addPlugin(safePath)

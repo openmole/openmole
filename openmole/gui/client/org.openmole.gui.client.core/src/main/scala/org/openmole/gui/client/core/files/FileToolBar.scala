@@ -71,20 +71,20 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
             case ListSorting.SizeSorting => OMTags.glyph_data
           ,
           cls <-- treeNodeManager.fileSorting.signal.map: s =>
-            if s.fileSorting == sorting
+            if s.listSorting == sorting
             then "sorting-files-item-selected"
             else "sorting-files-item"
         ),
         onClick --> { _ =>
           val currentSorting = treeNodeManager.fileSorting.now()
-          if currentSorting.fileSorting == sorting
+          if currentSorting.listSorting == sorting
           then
             val reverse =
               currentSorting.firstLast match
                 case FirstLast.First => FirstLast.Last
                 case FirstLast.Last => FirstLast.First
             treeNodeManager.fileSorting.set(currentSorting.copy(firstLast = reverse))
-          else treeNodeManager.fileSorting.set(FileSorting(fileSorting = sorting))
+          else treeNodeManager.fileSorting.set(FileSorting(listSorting = sorting))
         }
       )
 

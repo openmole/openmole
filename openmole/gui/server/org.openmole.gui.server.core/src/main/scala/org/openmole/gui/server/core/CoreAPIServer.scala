@@ -146,7 +146,7 @@ class CoreAPIServer(apiImpl: ApiImpl):
       extractArchive.implementedBy(apiImpl.extractArchive),
       isText.implementedBy(apiImpl.isTextFile),
       listRecursive.implementedBy(apiImpl.recursiveListFiles),
-      listFiles.implementedBy((path, filter, withHidden) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden)),
+      listFiles.implementedBy((path, filter, withHidden, directorySize) => apiImpl.listFiles(path, filter, testPlugin = true, withHidden = withHidden, directorySize = directorySize)),
       deleteFiles.implementedBy(apiImpl.deleteFiles),
       exists.implementedBy(apiImpl.exists),
       copyFiles.implementedBy(apiImpl.copyFiles),
