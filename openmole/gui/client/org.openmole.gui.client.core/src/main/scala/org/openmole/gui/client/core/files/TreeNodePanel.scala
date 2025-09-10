@@ -497,9 +497,8 @@ class TreeNodePanel:
       cls := "file-scrollable-content",
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
-          def directorySize = fileSorting.listSorting == ListSorting.SizeSorting
           EventStream.fromFuture(
-            api.listFiles(currentDir, fileSorting.copy(size = Some(sizeValue)), withHidden = false, directorySize = directorySize).map(Some(_)), true
+            api.listFiles(currentDir, fileSorting.copy(size = Some(sizeValue)), withHidden = false, directorySize = true).map(Some(_)), true
           ).toSignal(None).map {
             case None =>
               Seq(
