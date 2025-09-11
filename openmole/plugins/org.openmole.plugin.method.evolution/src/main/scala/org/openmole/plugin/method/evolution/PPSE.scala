@@ -239,6 +239,7 @@ object PPSEEvolution:
 
     case class IndependentJoint(density: Seq[Density]) extends Density
     case class GaussianDensity(v: Val[Double], mean: Double, sd: Double) extends Density
+    case class BetaDensity(v: Val[Double], alpha: Double, beta: Double) extends Density
 
     def density(d: Density): FromContext[Double] = FromContext: p =>
       import p.*
@@ -250,10 +251,14 @@ object PPSEEvolution:
         case d: GaussianDensity =>
           val dist = new NormalDistribution(d.mean, d.sd)
           dist.density(context(d.v))
+        case d: BetaDensity =>
+          val dist = new BetaDistribution(d.alpha, d.beta)
+          dist.density(context(d.v))
 
     //TODO implement validation
 
     given Conversion[Val[Double] In om.NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
+    given Conversion[Val[Double] In om.BetaDistribution, BetaDensity] = x => BetaDensity(x.value, x.domain.alpha, x.domain.beta)
 
   sealed trait Density
 

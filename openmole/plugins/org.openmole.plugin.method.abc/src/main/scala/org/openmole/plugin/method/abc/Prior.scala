@@ -1,7 +1,6 @@
 package org.openmole.plugin.method.abc
 
 import mgo.abc._
-import org.apache.commons.math3.distribution._
 import org.apache.commons.math3.random.RandomGenerator
 import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
@@ -34,7 +33,7 @@ object Prior {
 
 }
 
-case class IndependentPriors(priors: Seq[UnivariatePrior]) {
+case class IndependentPriors(priors: Seq[UnivariatePrior]):
   val v = priors.map { _.v }
 
   def density(p: FromContextTask.Parameters)(x: Array[Double]): Double =
@@ -42,7 +41,6 @@ case class IndependentPriors(priors: Seq[UnivariatePrior]) {
 
   def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] =
     priors.toArray.map { _.sample(p) }
-}
 
 //case class MultivariateNormalPrior(
 //  v:    Array[Val[Double]],
@@ -53,87 +51,65 @@ case class IndependentPriors(priors: Seq[UnivariatePrior]) {
 //  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Array[Double] = ???
 //}
 
-object UnivariatePrior {
-  object ToUnivariatePrior {
-    import org.openmole.core.workflow.domain._
-    import org.openmole.core.workflow.sampling._
+object UnivariatePrior:
 
-    def apply[T](f: T => UnivariatePrior) =
-      new ToUnivariatePrior[T] {
-        def apply(t: T) = f(t)
-      }
+  case class UniformPrior(
+    v: Val[Double],
+    low: FromContext[Double],
+    high: FromContext[Double]) extends UnivariatePrior:
 
-    implicit def factorIsPrior[D](implicit bounded: BoundedFromContextDomain[D, Double]): ToUnivariatePrior[Factor[D, Double]] =
-      ToUnivariatePrior[Factor[D, Double]] { f =>
-        val (min, max) = bounded(f.domain).domain
-        UniformPrior(f.value, min, max)
-      }
+    def density(p: FromContextTask.Parameters)(x: Double): Double =
+      import p._
+      val min: Double = low.from(context)
+      val max: Double = high.from(context)
+      if (x >= min && x <= max) 1.0 / math.abs(max - min) else 0.0
 
-  }
+    def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double =
+      import p._
+      val min: Double = low.from(context)
+      val max: Double = high.from(context)
+      rng.nextDouble.scale(min, max)
 
-  trait ToUnivariatePrior[T] {
-    def apply(t: T): UnivariatePrior
-  }
+  case class BetaPrior(
+    v: Val[Double],
+    alpha: FromContext[Double],
+    beta: FromContext[Double]) extends UnivariatePrior:
+    def density(p: FromContextTask.Parameters)(x: Double): Double =
+      import p._
+      new org.apache.commons.math3.distribution.BetaDistribution(alpha.from(context), beta.from(context)).density(x)
 
-  implicit def toPrior[T: ToUnivariatePrior](t: T): UnivariatePrior = implicitly[ToUnivariatePrior[T]].apply(t)
-}
+    def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double =
+      import p._
+      new org.apache.commons.math3.distribution.BetaDistribution(Prior.ScalaToApacheRng(rng), alpha.from(context), beta.from(context)).sample()
 
-sealed trait UnivariatePrior {
+
+  case class NormalPrior(
+    v: Val[Double],
+    mean: FromContext[Double],
+    sd: FromContext[Double]) extends UnivariatePrior:
+
+    def density(p: FromContextTask.Parameters)(x: Double): Double =
+      import p._
+      new org.apache.commons.math3.distribution.NormalDistribution(mean.from(context), sd.from(context)).density(x)
+
+    def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double =
+      import p._
+      new org.apache.commons.math3.distribution.NormalDistribution(Prior.ScalaToApacheRng(rng), mean.from(context), sd.from(context)).sample()
+
+  given [D](using bounded: BoundedFromContextDomain[D, Double]): Conversion[Val[Double] In D, UnivariatePrior] = d =>
+    val (min, max) = bounded(d.domain).domain
+    UniformPrior(d.value, min, max)
+
+  given uniform: Conversion[Val[Double] In UniformDistribution, UnivariatePrior] = d =>
+    UniformPrior(d.value, d.domain.low, d.domain.high)
+
+  given normal: Conversion[Val[Double] In NormalDistribution, UnivariatePrior] = d =>
+    NormalPrior(d.value, d.domain.mean, d.domain.std)
+
+  given beta: Conversion[Val[Double] In BetaDistribution, UnivariatePrior] = d =>
+    BetaPrior(d.value, d.domain.alpha, d.domain.beta)
+
+sealed trait UnivariatePrior:
   val v: Val[Double]
   def density(p: FromContextTask.Parameters)(x: Double): Double
   def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double
-}
-
-case class UniformPrior(
-  v:    Val[Double],
-  low:  FromContext[Double],
-  high: FromContext[Double])
-  extends UnivariatePrior {
-
-  def density(p: FromContextTask.Parameters)(x: Double): Double = {
-    import p._
-    val min: Double = low.from(context)
-    val max: Double = high.from(context)
-    if (x >= min && x <= max) 1.0 / math.abs(max - min) else 0.0
-  }
-
-  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double = {
-    import p._
-    val min: Double = low.from(context)
-    val max: Double = high.from(context)
-    rng.nextDouble.scale(min, max)
-  }
-}
-
-case class BetaPrior(
-  v:     Val[Double],
-  alpha: FromContext[Double],
-  beta:  FromContext[Double])
-  extends UnivariatePrior {
-  def density(p: FromContextTask.Parameters)(x: Double): Double = {
-    import p._
-    new BetaDistribution(alpha.from(context), beta.from(context)).density(x)
-  }
-
-  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double = {
-    import p._
-    new BetaDistribution(Prior.ScalaToApacheRng(rng), alpha.from(context), beta.from(context)).sample()
-  }
-}
-
-case class NormalPrior(
-  v:    Val[Double],
-  mean: FromContext[Double],
-  sd:   FromContext[Double])
-  extends UnivariatePrior {
-  def density(p: FromContextTask.Parameters)(x: Double): Double = {
-    import p._
-    new NormalDistribution(mean.from(context), sd.from(context)).density(x)
-  }
-
-  def sample(p: FromContextTask.Parameters)(implicit rng: util.Random): Double = {
-    import p._
-    new NormalDistribution(Prior.ScalaToApacheRng(rng), mean.from(context), sd.from(context)).sample()
-  }
-}
-

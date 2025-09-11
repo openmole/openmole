@@ -24,3 +24,5 @@ trait StatisticsPackage extends Stat:
   implicit def statisticArrayOfDoubleDecorator[T: ToDouble](s: Array[T]): StatisticIterableOfDoubleDecorator[T] = new StatisticIterableOfDoubleDecorator(s.toVector)
 
   case class NormalDistribution(mean: Double, std: Double)
+  case class BetaDistribution(alpha: Double, beta: Double)
+  case class UniformDistribution(low: Double, high: Double)
