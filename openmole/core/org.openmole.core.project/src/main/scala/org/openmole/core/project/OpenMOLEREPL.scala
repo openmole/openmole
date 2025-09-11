@@ -29,18 +29,6 @@ object OpenMOLEREPL:
   def autoImports: Seq[String] =
     PluginRegistry.pluginsInfo.flatMap(_.namespaces).flatMap(n => Seq(s"${n.value}.*", s"${n.value}.given"))
 
-  def keywordNamespace = "om"
-
-  def autoImportTraitsCode =
-    def withPart =
-      val namespaceTraits = PluginRegistry.pluginsInfo.flatMap(_.namespaceTraits)
-      if (namespaceTraits.isEmpty) ""
-      else s"""with ${namespaceTraits.map(_.value).mkString(" with ")}"""
-
-    s"""
-       |object $keywordNamespace extends ${classOf[DSLPackage].getCanonicalName} $withPart
-     """.stripMargin
-
   def dslImport = Seq(
     classOf[org.openmole.core.dsl.DSLPackage].getPackage.getName + ".*",
     classOf[org.openmole.core.setter.DefinitionScope].getName + ".user.*"
@@ -50,8 +38,7 @@ object OpenMOLEREPL:
 
   def initialisationCommands(imports: Seq[String]) =
     Seq(
-      imports.map("import " + _).mkString("; "),
-      autoImportTraitsCode
+      imports.map("import " + _).mkString("; ")
     )
 
   def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =

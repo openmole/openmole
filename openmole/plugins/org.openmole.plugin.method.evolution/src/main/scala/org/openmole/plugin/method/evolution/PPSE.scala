@@ -21,8 +21,8 @@ package org.openmole.plugin.method.evolution
 
 import monocle.Focus
 import monocle.syntax.all.*
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.method.evolution.PSE.PatternAxe
 import squants.time.Time
 
@@ -233,9 +233,38 @@ import EvolutionWorkflow._
 
 object PPSEEvolution:
 
+  object Density:
+
+    import org.apache.commons.math3.distribution.*
+
+    case class IndependentJoint(density: Seq[Density]) extends Density
+    case class GaussianDensity(v: Val[Double], mean: Double, sd: Double) extends Density
+
+    def density(d: Density): FromContext[Double] = FromContext: p =>
+      import p.*
+      d match
+        case d: IndependentJoint =>
+          if d.density.nonEmpty
+          then d.density.map(di => density(di).from(context)).reduceLeft(_ * _)
+          else 1.0
+        case d: GaussianDensity =>
+          val dist = new NormalDistribution(d.mean, d.sd)
+          dist.density(context(d.v))
+
+    //TODO implement validation
+
+    given Conversion[Val[Double] In om.NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
+
+  sealed trait Density
+
   import org.openmole.core.dsl.DSL
 
   given EvolutionMethod[PPSEEvolution] = p =>
+    def density =
+      if p.density.isEmpty
+      then None
+      else Some(Density.density(Density.IndependentJoint(p.density)))
+
     PPSE(
       genome = p.genome,
       objective = p.objective,
@@ -249,7 +278,7 @@ object PPSEEvolution:
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
       reject = p.reject,
-      density = p.density
+      density = density
     )
 
   given ExplorationMethod[PPSEEvolution, EvolutionWorkflow] = p =>
@@ -271,31 +300,18 @@ case class PPSEEvolution(
   objective:   Seq[PSE.PatternAxe],
   evaluation:  DSL,
   termination: OMTermination,
-  reject:      OptionalArgument[Condition]            = None,
-  density:     OptionalArgument[FromContext[Double]]  = None,
-  stochastic:  OptionalArgument[Stochastic]           = None,
-  parallelism: Int                                    = EvolutionWorkflow.parallelism,
-  distribution: EvolutionPattern                      = SteadyState(),
-  suggestion: Suggestion                              = Suggestion.empty,
-  dilation: Double                                    = 4.0,
-  gmmIterations: Int                                  = 100,
-  gmmTolerance: Double                                = 0.0001,
-  warmupSampler: Int                                  = 10000,
-  maxRareSample: Int                                  = 10,
-  minClusterSize: Int                                 = 10,
-  regularisationEpsilon: Double                       = 10e-6,
-  scope:       DefinitionScope                        = "ppse")
+  reject:      OptionalArgument[Condition]              = None,
+  density:     Seq[PPSEEvolution.Density]               = Seq(),
+  stochastic:  OptionalArgument[Stochastic]             = None,
+  parallelism: Int                                      = EvolutionWorkflow.parallelism,
+  distribution: EvolutionPattern                        = SteadyState(),
+  suggestion: Suggestion                                = Suggestion.empty,
+  dilation: Double                                      = 4.0,
+  gmmIterations: Int                                    = 100,
+  gmmTolerance: Double                                  = 0.0001,
+  warmupSampler: Int                                    = 10000,
+  maxRareSample: Int                                    = 10,
+  minClusterSize: Int                                   = 10,
+  regularisationEpsilon: Double                         = 10e-6,
+  scope:       DefinitionScope                          = "ppse")
 
-
-def GaussianDensity(variable: In[Val[Double], (Double, Double)]*): FromContext[Double] =
-  import org.apache.commons.math3.distribution.MultivariateNormalDistribution
-  val varianceValue = variable.map(_.domain._2).toArray
-  val meanValue = variable.map(_.domain._1).toArray
-  val cov =
-    Array.tabulate(varianceValue.length, varianceValue.length): (i, j) =>
-      if i == j then varianceValue(i) else 0.0
-  FromContext: p =>
-    import p.*
-    val mnd = new MultivariateNormalDistribution(meanValue, cov)
-    val point = variable.map(v => context(v.value)).toArray
-    mnd.density(point)

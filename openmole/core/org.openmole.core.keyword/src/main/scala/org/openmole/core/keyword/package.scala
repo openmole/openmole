@@ -5,7 +5,7 @@ package org.openmole.core
  */
 package keyword:
 
-  import monocle._
+  import monocle.*
 
   infix case class In[+A, +B](value: A, domain: B)
   infix case class Under[+A, +B](value: A, under: B)
