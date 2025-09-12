@@ -127,6 +127,4 @@ package dsl:
 
 package object dsl extends dsl.DSLPackage
   with workflow.ExportedPackage
-  with cats.instances.AllInstances:
-
-  lazy val om = this
+  with cats.instances.AllInstances

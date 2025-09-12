@@ -4,14 +4,13 @@ package org.openmole.plugin.method.directsampling
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.context.Variable
 import org.openmole.core.workflow.mole.MoleCapsule
 import org.openmole.core.workflow.test.TestHook
-import org.openmole.plugin.tool.pattern._
-import org.scalatest._
-import org.openmole.core.workflow.test._
+import org.openmole.plugin.tool.pattern.*
+import org.scalatest.*
+import org.openmole.core.workflow.test.*
 
 class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   import org.openmole.core.workflow.test.Stubs._
@@ -20,10 +19,10 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     val i = Val[Int]
 
     val model =
-      TestTask { context =>
+      TestTask: context =>
         context(i) should equal(1)
         context
-      } set (inputs += i)
+      .set (inputs += i)
 
     val mole =
       DirectSampling(
@@ -288,6 +287,33 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
 
     val r2 = serializeDeserialize(replication)
     r2.run()
+
+  it should "deterministically generate seeds" in :
+    val rng = TaskExecution.buildRNG(42)
+    val seeds = Iterator.continually(rng.nextLong).take(10).toSeq
+
+    val omSeeds = collection.mutable.ListBuffer[Long]()
+
+    val l = Val[Long]
+    val model =
+      TestTask: context =>
+        assert(context.contains(l))
+        omSeeds.synchronized:
+          omSeeds += context(l)
+        context
+      .set (inputs += l)
+
+    val replication: DSLContainer[?] =
+      Replication(
+        evaluation = model,
+        distributionSeed = 42,
+        seed = l,
+        sample = 10
+      )
+
+    replication.run()
+    assert(omSeeds.toSet == seeds.toSet)
+
 
   "SingleRun" should "support assignment syntax" in:
     val x = Val[Double]

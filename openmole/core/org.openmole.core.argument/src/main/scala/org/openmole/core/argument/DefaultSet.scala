@@ -43,13 +43,13 @@ object DefaultSet {
    * @param context  context to be extended
    * @return the new context
    */
-  def completeContext(defaults: DefaultSet, context: Context)(implicit randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
+  def completeContext(defaults: DefaultSet, context: Context)(using randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService): Context =
     context ++
-      defaults.flatMap {
-        parameter =>
-          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable.from(context))
-          else Option.empty[Variable[?]]
-      }
+      defaults.flatMap: default =>
+        if default.`override` || !context.contains(default.prototype.name)
+        then Some(default.toVariable.from(context))
+        else Option.empty[Variable[?]]
+
 
   def vals(defaults: DefaultSet): Seq[Val[?]] = defaults.defaults.map(_.prototype).toSeq
 

@@ -24,6 +24,7 @@ import monocle.syntax.all.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.method.evolution.PSE.PatternAxe
+import org.openmole.plugin.domain.distribution.*
 import squants.time.Time
 
 object PPSE:
@@ -234,14 +235,13 @@ import EvolutionWorkflow._
 object PPSEEvolution:
 
   object Density:
-
-    import org.apache.commons.math3.distribution.*
-
     case class IndependentJoint(density: Seq[Density]) extends Density
     case class GaussianDensity(v: Val[Double], mean: Double, sd: Double) extends Density
     case class BetaDensity(v: Val[Double], alpha: Double, beta: Double) extends Density
 
+
     def density(d: Density): FromContext[Double] = FromContext: p =>
+      import org.apache.commons.math3.distribution.*
       import p.*
       d match
         case d: IndependentJoint =>
@@ -257,8 +257,8 @@ object PPSEEvolution:
 
     //TODO implement validation
 
-    given Conversion[Val[Double] In om.NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
-    given Conversion[Val[Double] In om.BetaDistribution, BetaDensity] = x => BetaDensity(x.value, x.domain.alpha, x.domain.beta)
+    given Conversion[Val[Double] In NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
+    given Conversion[Val[Double] In BetaDistribution, BetaDensity] = x => BetaDensity(x.value, x.domain.alpha, x.domain.beta)
 
   sealed trait Density
 

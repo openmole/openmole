@@ -531,19 +531,23 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
-  openmoleDSL, toolsTask, pattern, scalaTask, collectionDomain % "test", boundsDomain % "test"
+  openmoleDSL, toolsTask, pattern, scalaTask, distributionDomain, collectionDomain % "test", boundsDomain % "test"
 ) settings(
+  pluginSettings,
   libraryDependencies += Libraries.mgo,
   libraryDependencies += Libraries.circe,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13")
-) settings (pluginSettings *)
+)
 
-lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, boundsDomain % "test") settings (
-  libraryDependencies += Libraries.mgo) settings (pluginSettings *)
+lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, distributionDomain, boundsDomain % "test") settings (
+  pluginSettings,
+  libraryDependencies += Libraries.mgo)
 
-lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scalaTask) settings (pluginSettings *)
+lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scalaTask) settings (
+  pluginSettings)
 
-lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (pluginSettings *)
+lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (
+  pluginSettings)
 
 
 /* Sampling */

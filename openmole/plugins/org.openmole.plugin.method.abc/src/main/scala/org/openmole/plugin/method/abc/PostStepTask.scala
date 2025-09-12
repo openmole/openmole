@@ -26,19 +26,27 @@ object PostStepTask {
     FromContextTask("postStepTask") { p =>
       import p._
 
-      def zipObserved(obs: Array[Array[Array[Double]]]) = {
+      def zipObserved(obs: Array[Array[Array[Double]]]) =
         def zip2(o1: Array[Array[Double]], o2: Array[Array[Double]]) =
-          for {
-            l1 ← o1
-            l2 ← o2
-          } yield l1 ++ l2
+          for
+            l1 <- o1
+            l2 <- o2
+          yield l1 ++ l2
 
         obs.reduceLeft { zip2 }
-      }
 
       val xs = zipObserved(observed.toArray.map(o => ABC.Observed.fromContext(o, context)))
 
-      val s = Try(MonAPMC.postStep(n, nAlpha, prior.density(p), observed.flatMap(o => ABC.Observed.value(o)).toArray, context(stepState), xs)(random()))
+      val s =
+        Try:
+          MonAPMC.postStep(
+            n,
+            nAlpha,
+            x => prior.density(x).from(context),
+            observed.flatMap(o => ABC.Observed.value(o)).toArray,
+            context(stepState),
+            xs
+          )(using random())
 
       s match {
         case Success(s) =>
@@ -50,10 +58,9 @@ object PostStepTask {
 
         case Failure(f: APMC.SingularCovarianceException) =>
           def copyState(s: Option[MonAPMC.MonState], ns: APMC.State) =
-            s match {
+            s match
               case Some(MonAPMC.Empty()) | None => MonAPMC.Empty()
               case Some(s: MonAPMC.State)       => s.copy(s = ns)
-            }
 
           context + Variable(state, context.getOrElse(state, MonAPMC.Empty())) + Variable(stop, true) + Variable(step, context(step) + 1)
         case Failure(f) => throw f

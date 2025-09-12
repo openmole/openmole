@@ -26,6 +26,7 @@ import org.openmole.plugin.domain.collection.{*, given}
 import org.scalatest.*
 import org.openmole.plugin.domain.bounds.{*, given}
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.domain.distribution.*
 
 object WorkflowSpec:
   enum En:
@@ -230,19 +231,16 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
 
-  "Steady state workflow" should "have no validation error" in {
+  "Steady state workflow" should "have no validation error" in:
     val mole: Mole = nsga2
 
-    Validation(mole).toList match {
+    Validation(mole).toList match
       case Nil =>
       case l   => sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
-    }
 
-    Validation(conflict).toList match {
+    Validation(conflict).toList match
       case Nil =>
       case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
 
 
   "NSGAEvolution" should "be valid" in:

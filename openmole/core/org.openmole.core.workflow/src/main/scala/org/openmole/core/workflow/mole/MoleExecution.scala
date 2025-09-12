@@ -180,7 +180,6 @@ object MoleExecution:
       val jobId = nextJobId(subMoleExecutionState.moleExecution)
       MoleExecution.addJob(subMoleExecutionState, jobId, capsule)
 
-
       val sourced =
         lazy val sourceContext = subMoleExecutionState.moleExecution.implicits + Variable(Variable.openMOLEExperiment, ticket.content) + context
 

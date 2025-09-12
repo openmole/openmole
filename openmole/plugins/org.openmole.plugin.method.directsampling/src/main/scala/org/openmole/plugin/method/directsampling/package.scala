@@ -74,7 +74,7 @@ object Replication:
         )
     )
 
-case class Replication[T: Distribution](
+case class Replication[T](
   evaluation:       DSL,
   seed:             Val[T],
   sample:           Int,
@@ -82,13 +82,12 @@ case class Replication[T: Distribution](
   distributionSeed: OptionalArgument[FromContext[Long]] = None,
   aggregation:      Seq[Aggregation]                    = Seq.empty,
   wrap:             Boolean                             = false,
-  scope:            DefinitionScope                     = "replication"
-):
+  scope:            DefinitionScope                     = "replication")(using DiscreteFromContextDomain[RandomSequence[T], T]):
   def exploration =
     implicit def s: DefinitionScope = scope
     index.option match
-      case None        => ExplorationTask(seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample))
-      case Some(index) => ExplorationTask((seed in TakeDomain(UniformDistribution[T](seed = distributionSeed), sample)) withIndex index)
+      case None        => ExplorationTask(seed in RandomSequence[T](size = sample)) set distributionSeed.map(openmole.seed := _).toSeq
+      case Some(index) => ExplorationTask(seed in RandomSequence[T](size = sample) withIndex index) set distributionSeed.map(openmole.seed := _).toSeq
 
 
 implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMethod[M, Replication.Method]) extends MethodHookDecorator[M, Replication.Method](t):

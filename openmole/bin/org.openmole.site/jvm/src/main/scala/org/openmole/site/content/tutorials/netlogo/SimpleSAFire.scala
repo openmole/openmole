@@ -79,7 +79,7 @@ ${hl.openmole("""
 val exploration =
   ExplorationTask(
     (density in (20.0 to 80.0 by 1.0)) x
-    (mySeed in (UniformDistribution[Int]() take 10))
+    (mySeed in RandomSequence[Int](size = 10))
   )
 """, header=variables)}
 
@@ -93,7 +93,7 @@ ${hl.openmole("""
     val exploration =
       ExplorationTask(
         (density in (50.0 to 75.0 by 0.1)) x
-        (mySeed in (UniformDistribution[Int]() take 10))
+        (mySeed in RandomSequence[Int](size = 10))
       )
       """, header=variables)}
 
@@ -114,7 +114,7 @@ ${hl.openmole("""
      val exploration =
        ExplorationTask(
          (density in (50.0 to 70.0 by 0.1)) x
-         (mySeed in (UniformDistribution[Int]() take 100))
+         (mySeed in RandomSequence[Int](size = 100))
 )""", header= variables)}
 
 We obtain the following results, displayed as boxplots every percent (but results are obtained for every 0.1% density) to emphasize the variations.

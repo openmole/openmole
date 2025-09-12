@@ -7,7 +7,9 @@ import org.openmole.core.dsl._
 
 import org.openmole.core.workflow.test._
 import org.scalatest._
-import org.openmole.plugin.domain.bounds._
+import org.openmole.plugin.domain.bounds.*
+import org.openmole.plugin.domain.distribution.*
+
 
 import scala.util.Random
 

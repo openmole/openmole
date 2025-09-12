@@ -24,7 +24,7 @@ object PreStepTask {
 
       val s = context(state)
       val (ns, matrix: Array[Array[Double]]) =
-        MonAPMC.preStep(n, nAlpha, prior.sample(p)(_), prior.density(p)(_), s)(random())
+        MonAPMC.preStep(n, nAlpha, x => prior.sample(x).from(context), x => prior.density(x).from(context), s)(using random())
 
       val rng = random()
       val samples =

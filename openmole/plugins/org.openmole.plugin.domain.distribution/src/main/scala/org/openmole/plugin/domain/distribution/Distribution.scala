@@ -17,37 +17,15 @@
 
 package org.openmole.plugin.domain.distribution
 
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
+import org.openmole.plugin.domain.modifier.*
 import scala.util.Random
 
 
-object Distribution:
-  given Distribution[Int] with
-    override def next(rng: Random): Int = rng.nextInt
-    override def next(rng: Random, max: Int): Int = rng.nextInt(max)
 
-
-  given Distribution[Long] with
-    override def next(rng: Random): Long = rng.nextLong
-    override def next(rng: Random, max: Long): Long =
-      if (max <= 0) throw new IllegalArgumentException("max must be positive")
-      var bits: Long = 0
-      var value: Long = 0
-      while
-        bits = (rng.nextLong() << 1) >>> 1
-        value = bits % max
-        (bits - value + (max - 1) < 0L)
-      do ()
-      value
-
-
-  given Distribution[Double] with
-    override def next(rng: Random): Double = rng.nextDouble
-    override def next(rng: Random, max: Double): Double = rng.nextDouble * max
-
-
-trait Distribution[T]:
-  def next(rng: Random): T
-  def next(rng: Random, max: T): T
-
+case class NormalDistribution(mean: Double, std: Double)
+case class BetaDistribution(alpha: Double, beta: Double)
+case class UniformDistribution(low: Double = 0.0, high: Double = 1.0)
 
 
