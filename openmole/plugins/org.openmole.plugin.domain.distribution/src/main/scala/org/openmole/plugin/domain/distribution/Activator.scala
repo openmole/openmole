@@ -25,7 +25,12 @@ class Activator extends BundleActivator {
 
   override def start(context: BundleContext): Unit = 
     import org.openmole.core.highlight.HighLight._
-    val highLights = Vector(DomainHighLight(objectName(UniformDistribution)))
+    val highLights =
+      Vector(
+        DomainHighLight(objectName(UniformDistribution)),
+        DomainHighLight(objectName(NormalDistribution)),
+        DomainHighLight(objectName(BetaDistribution))
+      )
     PluginRegistry.register(this, nameSpaces = Vector(this.getClass.getPackage), highLight = highLights)
   
 }

@@ -48,8 +48,7 @@ class Activator extends BundleActivator:
         PatternHighLight(objectName(HDOSEEvolution)),
         ObjectHighLight(objectName(Stochastic)),
         ObjectHighLight(objectName(Island)),
-        ObjectHighLight(objectName(Suggestion)),
-        ObjectHighLight("GaussianDensity")
+        ObjectHighLight(objectName(Suggestion))
       )
 
     PluginRegistry.register(
