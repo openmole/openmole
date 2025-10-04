@@ -237,6 +237,19 @@ lazy val netlogo6 = OsgiProject(
   version := netLogo6Version,
   crossPaths := false)
 
+lazy val netlogo7 = OsgiProject(
+  dir,
+  "ccl.northwestern.edu.netlogo7",
+  exports = Seq("org.nlogo.*"),
+  privatePackages = Seq("!scala.*", "**"),
+  imports = Seq("empty;resolution:=optional")) settings(settings) settings (
+  //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
+  resolvers += "Netlogo" at "https://mvnrepository.com/artifact/org.nlogo/netlogo",
+  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
+  libraryDependencies += "org.nlogo" % "netlogo" % netLogo7Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),
+  version := netLogo7Version,
+  crossPaths := false)
+
 /*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
 

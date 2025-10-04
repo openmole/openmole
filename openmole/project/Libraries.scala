@@ -67,9 +67,10 @@ object Libraries {
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
-  lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
 
+  lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version
   lazy val netlogo6 = "org.openmole.library" % "ccl-northwestern-edu-netlogo6" % netLogo6Version
+  lazy val netlogo7 = "org.openmole.library" % "ccl-northwestern-edu-netlogo7" % netLogo7Version
 
   lazy val sourceCode = "org.openmole.library" %% "sourcecode" % sourcecodeVersion
   lazy val txtmark = "org.openmole.library" %% "com-github-rjeschke-txtmark" % "0.13"

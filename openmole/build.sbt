@@ -399,7 +399,7 @@ def corePlugins =
     allDomain ++
     allTools
 
-def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, pattern)
+def allTools = Seq(netLogoAPI, netLogo5API, netLogo6API, netLogo7API, pattern)
 
 lazy val defaultActivator = OsgiKeys.bundleActivator := Some(name.value + ".Activator")
 
@@ -435,6 +435,14 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
   crossPaths := false,
   autoScalaLibrary := false,
   libraryDependencies += Libraries.netlogo6,
+  libraryDependencies -= Libraries.scalatest
+)
+
+lazy val netLogo7API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo7", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+  toolsSettings,
+  crossPaths := false,
+  autoScalaLibrary := false,
+  libraryDependencies += Libraries.netlogo7,
   libraryDependencies -= Libraries.scalatest
 )
 
@@ -580,7 +588,7 @@ lazy val httpURLSource = OsgiProject(pluginDir, "org.openmole.plugin.source.http
 
 /* Task */
 
-def allTask = Seq(toolsTask, externalTask, netLogoTask, netLogo5Task, netLogo6Task, javaTask, scalaTask, templateTask, systemexecTask, containerTask, rTask, scilabTask, pythonTask, juliaTask, gamaTask, cormasTask, spatialTask, timingTask)
+def allTask = Seq(toolsTask, externalTask, netLogoTask, netLogo5Task, netLogo6Task, netLogo7Task, javaTask, scalaTask, templateTask, systemexecTask, containerTask, rTask, scilabTask, pythonTask, juliaTask, gamaTask, cormasTask, spatialTask, timingTask)
 
 lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
@@ -601,6 +609,10 @@ lazy val netLogo5Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo
 lazy val netLogo6Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo6API) settings (pluginSettings *) settings(
   noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo6)
+
+lazy val netLogo7Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo7", imports = Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo7API) settings (pluginSettings *) settings(
+  //noNetLogoInClassPath,
+  libraryDependencies += Libraries.netlogo7)
 
 lazy val scalaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, openmoleCompiler) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.scalaXML
