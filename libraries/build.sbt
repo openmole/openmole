@@ -241,8 +241,8 @@ lazy val netlogo7 = OsgiProject(
   dir,
   "ccl.northwestern.edu.netlogo7",
   exports = Seq("org.nlogo.*"),
-  privatePackages = Seq("!scala.*", "**"),
-  imports = Seq("empty;resolution:=optional")) settings(settings) settings (
+  privatePackages = Seq("**"),
+  imports = Seq("scala.*", "empty;resolution:=optional")) settings(settings) settings (
   //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
   resolvers += "Netlogo" at "https://mvnrepository.com/artifact/org.nlogo/netlogo",
   resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
