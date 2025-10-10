@@ -269,7 +269,8 @@ object NSGA2Evolution:
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject
+        reject = p.reject,
+        genomeDiversity = p.genomeDiversity
       )
 
   given ExplorationMethod[NSGA2Evolution, EvolutionWorkflow] =
