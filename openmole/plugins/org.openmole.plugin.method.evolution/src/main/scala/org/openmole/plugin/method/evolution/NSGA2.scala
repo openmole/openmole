@@ -84,12 +84,12 @@ object NSGA2:
           FromContext: p =>
             import p._
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-            MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue)(s, individuals, rng)
+            MGONSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), rejectValue, genomeDiversity = om.genomeDiversity)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p =>
             import p._
-            MGONSGA2.elitism[S, Phenotype](om.mu, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context))(s, population, candidates, rng)
+            MGONSGA2.elitism[S, Phenotype](om.mu, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), genomeDiversity = om.genomeDiversity)(s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
@@ -103,7 +103,8 @@ object NSGA2:
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
     operatorExploration: Double,
-    reject:              Option[Condition])
+    reject:              Option[Condition],
+    genomeDiversity:     Boolean)
 
   object StochasticNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 => MGONoisyNSGA2, _ }
@@ -172,12 +173,12 @@ object NSGA2:
           FromContext: p =>
             import p._
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-            MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.cloneProbability, aggregate.from(context), om.genome.continuous, om.genome.discrete, rejectValue) apply (s, individuals, rng)
+            MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.cloneProbability, aggregate.from(context), om.genome.continuous, om.genome.discrete, rejectValue, genomeDiversity = om.genomeDiversity) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
           FromContext: p =>
             import p._
-            MGONoisyNSGA2.elitism[S, Phenotype](om.mu, om.historySize, aggregate.from(context), om.genome.continuous, om.genome.discrete) apply (s, population, candidates, rng)
+            MGONoisyNSGA2.elitism[S, Phenotype](om.mu, om.historySize, aggregate.from(context), om.genome.continuous, om.genome.discrete, genomeDiversity = om.genomeDiversity) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
@@ -194,16 +195,18 @@ object NSGA2:
     objectives:          Objectives,
     historySize:         Int,
     cloneProbability:    Double,
-    reject:              Option[Condition]
+    reject:              Option[Condition],
+    genomeDiversity:     Boolean
   )
 
   def apply(
-    genome:         Genome,
-    objective:      Objectives,
-    outputs:        Seq[Val[?]]                  = Seq(),
-    populationSize: Int                          = 200,
-    stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None
+    genome:           Genome,
+    objective:        Objectives,
+    outputs:          Seq[Val[?]]                  = Seq(),
+    populationSize:   Int                          = 200,
+    stochastic:       OptionalArgument[Stochastic] = None,
+    reject:           OptionalArgument[Condition]  = None,
+    genomeDiversity:  OptionalArgument[Boolean]    = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match
       case None =>
@@ -211,7 +214,15 @@ object NSGA2:
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGA(
-          DeterministicNSGA2(populationSize, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicNSGA2(
+            populationSize,
+            genome,
+            phenotypeContent,
+            exactObjectives,
+            EvolutionWorkflow.operatorExploration,
+            reject,
+            genomeDiversity.getOrElse(exactObjectives.size == 1)
+          ),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -225,7 +236,17 @@ object NSGA2:
           Objectives.validate(noisyObjectives, aOutputs)
 
         EvolutionWorkflow.stochasticGA(
-          StochasticNSGA2(populationSize, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticNSGA2(
+            populationSize,
+            EvolutionWorkflow.operatorExploration,
+            genome,
+            phenotypeContent,
+            noisyObjectives,
+            stochasticValue.sample,
+            stochasticValue.reevaluate,
+            reject.option,
+            genomeDiversity.getOrElse(noisyObjectives.size == 1)
+          ),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -267,14 +288,15 @@ object NSGA2Evolution:
 
 
 case class NSGA2Evolution(
-  genome:         Genome,
-  objective:      Objectives,
-  evaluation:     DSL,
-  termination:    OMTermination,
-  populationSize: Int                          = 200,
-  stochastic:     OptionalArgument[Stochastic] = None,
-  reject:         OptionalArgument[Condition]  = None,
-  parallelism:    Int                          = EvolutionWorkflow.parallelism,
-  distribution:   EvolutionPattern             = SteadyState(),
-  suggestion:     Suggestion                   = Suggestion.empty,
-  scope:          DefinitionScope              = "nsga2")
+  genome:             Genome,
+  objective:          Objectives,
+  evaluation:         DSL,
+  termination:        OMTermination,
+  populationSize:     Int                          = 200,
+  stochastic:         OptionalArgument[Stochastic] = None,
+  reject:             OptionalArgument[Condition]  = None,
+  genomeDiversity:    OptionalArgument[Boolean]    = None,
+  parallelism:        Int                          = EvolutionWorkflow.parallelism,
+  distribution:       EvolutionPattern             = SteadyState(),
+  suggestion:         Suggestion                   = Suggestion.empty,
+  scope:              DefinitionScope              = "nsga2")

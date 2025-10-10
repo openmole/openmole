@@ -8,6 +8,7 @@ def dir = file("bundles")
 def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += "publishing" at "https://repo.maven.apache.org/maven2",
+  resolvers += "jitpack" at "https://jitpack.io",
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
@@ -321,7 +322,8 @@ lazy val mgo = OsgiProject(
   imports = noReflectScala2 ++ Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   settings,
-  libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
+  libraryDependencies += "com.github.openmole" % "mgo" % mgoVersion,	
+  //libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13"),
   version := mgoVersion) dependsOn(monocle, cats, squants)
 

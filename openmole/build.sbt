@@ -40,6 +40,7 @@ def commonSettings =
     updateOptions := updateOptions.value.withCachedResolution(true),
     resolvers += DefaultMavenRepository,
     resolvers += "Publishing" at "https://repo.maven.apache.org/maven2",
+    resolvers += "jitpack" at "https://jitpack.io",
     javacOptions ++= Seq("-source", "21", "-target", "21"), //, "-J-Djdk.util.zip.disableZip64ExtraFieldValidation=true"),
     install / packageDoc / publishArtifact := false,
     install / packageSrc / publishArtifact := false,
