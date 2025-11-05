@@ -322,10 +322,10 @@ lazy val mgo = OsgiProject(
   imports = noReflectScala2 ++ Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   settings,
-  libraryDependencies += "com.github.openmole" % "mgo" % mgoVersion,	
+  libraryDependencies += "com.github.openmole" % "mgo" % mgoVersion.commit,	
   //libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13"),
-  version := mgoVersion) dependsOn(monocle, cats, squants)
+  version := mgoVersion.version) dependsOn(monocle, cats, squants)
 
 lazy val container = OsgiProject(
   dir,

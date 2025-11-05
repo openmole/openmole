@@ -63,7 +63,7 @@ object Libraries {
   lazy val scalajsLogging = "org.openmole.library" %% "scalajs-logging" % scalajsLoggingVersion
   lazy val scalaCompat = "org.openmole.library" %% "scala-collection-compat" % "2.1.4"
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
-  lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion
+  lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion.version
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
   lazy val container = "org.openmole.library" %% "container" % containerVersion
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
