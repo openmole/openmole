@@ -206,9 +206,8 @@ ${hl.openmole("""
 
 ${h2{"Random samplings"}}
 
-OpenMOLE can generate random samplings from an initial sampling using ${code{"shuffle"}}.
- It will create a new sampling which is a randomly shuffled version of the initial one.
-OpenMOLE can also generate a fresh new sampling made of random numbers using ${code{"UniformDistribution[T]"}}, with ${code{"T"}} the type of random numbers to be generated.
+OpenMOLE can generate random samplings from an initial sampling using ${code{"shuffle"}}. It will create a new sampling which is a randomly shuffled version of the initial one.
+OpenMOLE can also generate a fresh new sampling made of random numbers using ${code{"RandomSequence[T]"}}, with ${code{"T"}} the type of random numbers to be generated.
 
 $br
 
@@ -231,7 +230,7 @@ val s4 = (s1 x s2).sample(10)
 
 // Replicate 100 times the sampling s1 and provide seed for each experiment
 val seed = Val[Int]
-val s5 = s1 x (seed in (UniformDistribution[Int]() take 100))
+val s5 = s1 x (seed in RandomSequence[Int](size = 100))
 """, name = "random sampling")}
 
 ${h2{"Higher level samplings"}}

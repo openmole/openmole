@@ -65,10 +65,10 @@ object CoreAPI:
       .in(jsonBody[(SafePath, SafePath)])
       .errorOut(jsonBody[ErrorData])
 
-  lazy val listFiles: TapirEndpoint[(SafePath, FileSorting, Boolean), FileListData] =
+  lazy val listFiles: TapirEndpoint[(SafePath, FileSorting, Boolean, Boolean), FileListData] =
     endpoint.post
       .in(prefix / "file" / "list")
-      .in(jsonBody[(SafePath, FileSorting, Boolean)])
+      .in(jsonBody[(SafePath, FileSorting, Boolean, Boolean)])
       .out(jsonBody[FileListData])
       .errorOut(jsonBody[ErrorData])
 

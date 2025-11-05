@@ -44,7 +44,7 @@ object RESTAPIv1Server:
         case None =>
           FileEntry.File(
             name = t.name,
-            size = t.size,
+            size = t.size.getOrElse(0L),
             modified = t.time
           )
         case Some(_) =>

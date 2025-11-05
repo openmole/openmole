@@ -17,7 +17,8 @@
 
 package org.openmole.core.workflow.task
 
-import org.openmole.core.context.Val
+import org.openmole.core.argument.Default
+import org.openmole.core.context.{Val, Variable}
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.setter
 import org.openmole.core.setter.*
@@ -55,9 +56,20 @@ class TaskSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val d: ValueAssignment.Untyped = i := 10.0
 
     task set (d)
-    task set (Seq.fill(10)(d))
+    task set Seq.fill(10)(d)
 
   it should "contains the definition line number" in :
     import setter.DefinitionScope.*
     val (t1, t2) = ({given UserDefinitionScope = UserScriptDefinitionScope(0) ; EmptyTask()}, {given UserDefinitionScope = UserScriptDefinitionScope(-10) ; EmptyTask()})
     (definitionScope(t1).line.get - definitionScope(t2).line.get) should equal(10)
+
+  it should "be possible to set the seed" in:
+    val t1 =
+      Task("test"): p =>
+        assert(p.random().nextLong() == TaskExecution.buildRNG(42).nextLong())
+        p.context
+      .set(
+        Variable.openMOLESeed := 42
+      )
+
+    t1.run()

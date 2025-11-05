@@ -23,13 +23,9 @@ import monocle.Focus
 import org.openmole.core.context._
 
 trait TaskPackage:
-
-  def newRNG(context: Context) = Task.buildRNG(context)
-
+  //def newRNG(context: Context) = Task.buildRNG(context)
   object implicits:
     def +=(p: Val[?]) = Focus[MoleTask](_.implicits).modify(_ ++ Seq(p.name))
-
-
 
 import scala.quoted._
 inline def inspect[T](x: T): T = ${ inspectCode('x) }

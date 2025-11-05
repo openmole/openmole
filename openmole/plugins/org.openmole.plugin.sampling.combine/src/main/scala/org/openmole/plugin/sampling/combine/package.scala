@@ -28,30 +28,30 @@ import org.openmole.core.argument._
 
 
 implicit class SamplingCombineDecorator[T](s: T)(implicit isSampling: IsSampling[T]):
-  def shuffle = ShuffleSampling(s)
-  def filter(keep: Condition) = FilteredSampling(s, keep)
-  def take(n: FromContext[Int]) = TakeSampling(s, n)
-  def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
-  def drop(n: FromContext[Int]) = DropSampling(s, n)
+  infix def shuffle = ShuffleSampling(s)
+  infix def filter(keep: Condition) = FilteredSampling(s, keep)
+  infix def take(n: FromContext[Int]) = TakeSampling(s, n)
+  infix def subset(n: Int, size: FromContext[Int] = 100) = SubsetSampling(s, n, size = size)
+  infix def drop(n: FromContext[Int]) = DropSampling(s, n)
 
-  def x[S2: IsSampling](s2: S2) = XSampling(s, s2)
-  def ++[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
+  infix def x[S2: IsSampling](s2: S2) = XSampling(s, s2)
+  infix def ++[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
 
   @deprecated("Use ++", "13")
   def ::[S2: IsSampling](s2: S2) = ConcatenateSampling(s, s2)
 
-  def zip[S2: IsSampling](s2: S2) = ZipSampling(s, s2)
+  infix def zip[S2: IsSampling](s2: S2) = ZipSampling(s, s2)
 
   @deprecated("Use withIndex", "5")
-  def zipWithIndex(index: Val[Int]) = withIndex(index)
-  def withIndex(index: Val[Int]) = ZipWithIndexSampling(s, index)
-  def sample(n: FromContext[Int]) = SampleSampling(s, n)
-  def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
-  def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
+  infix def zipWithIndex(index: Val[Int]) = withIndex(index)
+  infix def withIndex(index: Val[Int]) = ZipWithIndexSampling(s, index)
+  infix def sample(n: FromContext[Int]) = SampleSampling(s, n)
+  infix def repeat(n: FromContext[Int]) = RepeatSampling(s, n)
+  infix def bootstrap(samples: FromContext[Int], number: FromContext[Int]) = s sample samples repeat number
 
 implicit class WithNameFactorDecorator[D, T: CanGetName](factor: Factor[D, T])(implicit discrete: DiscreteFromContextDomain[D, T]):
   @deprecated("Use withName", "5")
-  def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
-  def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
+  infix def zipWithName(name: Val[String]): ZipWithNameSampling[D, T] = withName(name)
+  infix def withName(name: Val[String]): ZipWithNameSampling[D, T] = new ZipWithNameSampling(factor, name)
 
 export TupledSampling.*

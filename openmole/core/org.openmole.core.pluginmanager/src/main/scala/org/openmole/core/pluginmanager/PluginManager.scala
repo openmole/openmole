@@ -155,21 +155,18 @@ object PluginManager extends JavaLogger:
     def loadError = loaded.collect { case (f, Failure(e)) => f → e }
     loadError ++ bundles.flatMap:
       case (f, b) =>
-        Try(b.start) match
+        Try(b.start()) match
           case Success(_) => None
           case Failure(e) =>
             b.uninstall()
-            Some(f → e)
+            Some(f -> e)
 
-  def load(files: Iterable[File]) = synchronized {
+  def load(files: Iterable[File]) = synchronized:
     val bundles = files.flatMap { listBundles }.map { installBundle }.toList
-    bundles.foreach {
-      b =>
-        logger.fine(s"Stating bundle ${b.getLocation}")
-        b.start
-    }
+    bundles.foreach : b =>
+      logger.fine(s"Stating bundle ${b.getLocation}")
+      b.start()
     bundles
-  }
 
   def loadIfNotAlreadyLoaded(plugins: Iterable[File]) = synchronized:
     val bundles = plugins.filterNot(f => infos.files.contains(f)).map(installBundle).toList

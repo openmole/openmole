@@ -36,42 +36,29 @@ case class TreeNodeComment(message: String, filesInError: Seq[SafePath], okactio
 sealed trait TreeNode:
   val id = randomId
   def name: String
-  val size: Long
   val time: Long
   val gitStatus: Option[GitStatus]
 
-def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.treeNodeDataToTreeNode)
+def ListFiles(lfd: FileListData): TreeNode.ListFiles = lfd.data.map(TreeNode.fromTreeNodeData)
 
 object TreeNode:
 
-  implicit def treeNodeDataToTreeNode(tnd: TreeNodeData): TreeNode = tnd.directory match {
-    case Some(dd: TreeNodeData.Directory) => Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty, tnd.gitStatus)
-    case _ => TreeNode.File(tnd.name, tnd.size, tnd.time, tnd.pluginState, tnd.gitStatus)
-  }
-
-  implicit def treeNodeToTreeNodeData(tn: TreeNode): TreeNodeData =
-    val (dOf, pluginState) = tn match {
-      case TreeNode.Directory(_, _, _, isEmpty,_) => (Some(TreeNodeData.Directory(isEmpty)), PluginState(false, false))
-      case f: TreeNode.File => (None, f.pluginState)
-    }
-
-    TreeNodeData(tn.name, tn.size, tn.time, pluginState = pluginState, directory = dOf, tn.gitStatus)
-
-  implicit def seqTreeNodeToSeqTreeNodeData(tns: Seq[TreeNode]): Seq[TreeNodeData] = tns.map { treeNodeToTreeNodeData }
-  implicit def futureSeqTreeNodeDataToFutureSeqTreeNode(ftnds: Future[Seq[TreeNodeData]]): Future[Seq[TreeNode]] = ftnds.map(seqTreeNodeDataToSeqTreeNode)
-  implicit def seqTreeNodeDataToSeqTreeNode(tnds: Seq[TreeNodeData]): Seq[TreeNode] = tnds.map(treeNodeDataToTreeNode(_))
+  def fromTreeNodeData(tnd: TreeNodeData): TreeNode =
+    tnd.directory match
+      case Some(dd: TreeNodeData.Directory) => Directory(tnd.name, tnd.size, tnd.time, dd.isEmpty, tnd.gitStatus)
+      case _ => TreeNode.File(tnd.name, tnd.size.getOrElse(0), tnd.time, tnd.pluginState, tnd.gitStatus)
 
   type ListFiles = Seq[TreeNode]
 
-
-  def isDir(node: TreeNode) =
-    node match
-      case _: Directory => true
-      case _ => false
+  extension (node: TreeNode)
+    def isDirectory =
+      node match
+        case _: Directory => true
+        case _ => false
 
   case class Directory(
     name: String,
-    size: Long,
+    size: Option[Long],
     time: Long,
     isEmpty: Boolean,
     gitStatus: Option[GitStatus]) extends TreeNode

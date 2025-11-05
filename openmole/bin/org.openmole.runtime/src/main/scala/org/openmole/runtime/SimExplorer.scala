@@ -36,11 +36,11 @@ import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.osgi.framework.BundleException
 
-object SimExplorer extends JavaLogger {
+object SimExplorer extends JavaLogger:
 
   import Log._
 
-  def run(args: Array[String]): Int = {
+  def run(args: Array[String]): Int =
     try {
       logger.finest("Running OpenMOLE runtime")
 
@@ -126,6 +126,3 @@ object SimExplorer extends JavaLogger {
     }
 
     0
-  }
-
-}

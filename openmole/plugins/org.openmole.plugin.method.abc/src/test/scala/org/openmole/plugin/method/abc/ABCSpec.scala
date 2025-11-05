@@ -7,7 +7,9 @@ import org.openmole.core.dsl._
 
 import org.openmole.core.workflow.test._
 import org.scalatest._
-import org.openmole.plugin.domain.bounds._
+import org.openmole.plugin.domain.bounds.*
+import org.openmole.plugin.domain.distribution.*
+
 
 import scala.util.Random
 
@@ -41,10 +43,11 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     dist.sample.toVector
   }
 
-  val priors = Prior(
-    UniformPrior(x1, -10, 10),
-    UniformPrior(x2, -10, 10)
-  )
+  val priors: Seq[UnivariatePrior] = 
+    Seq(
+      x1 in UniformDistribution(-10, 10),
+      x2 in UniformDistribution(-10, 10)
+    )
 
   val observed = Array(
     ABC.Observed(o1, 0.0),

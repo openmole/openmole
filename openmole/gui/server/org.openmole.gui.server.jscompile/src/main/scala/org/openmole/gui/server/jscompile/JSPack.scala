@@ -51,6 +51,7 @@ object JSPack:
           sjsirFiles <- irCache.cached(containers)
           config = StandardConfig()
             .withSourceMap(true)
+            .withBatchMode(true)
             .withOptimizer(optimizedJS)
             .withMinify(true)
             .withClosureCompiler(false)

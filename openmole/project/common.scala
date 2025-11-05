@@ -9,11 +9,11 @@ object common {
   def sjs(name: String) = name + "_sjs1"
 
   def scala3VersionValue = "3.7.2"
-  def scalajsVersion = "1.19.0"
+  def scalajsVersion = "1.20.1"
 
   def scalaXMLVersion = "2.1.0"
   def gridscaleVersion = "2.62"
-  def mgoVersion = "3.66"
+  def mgoVersion = "6521cf3681"
   def sshjVersion = "0.38.0"
   def containerVersion = "1.33"
   def bouncyCastleVersion = "1.78.1"
@@ -21,6 +21,7 @@ object common {
   def laminarVersion = "0.14.2"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
+  def netLogo7Version = "7.0.0"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.4.2"
   def scaladgetVersion = "1.11.0"

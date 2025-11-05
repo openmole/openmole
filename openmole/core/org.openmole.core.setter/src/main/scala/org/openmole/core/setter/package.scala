@@ -30,8 +30,7 @@ object Setter:
   implicit def setterToFunction[O, S](o: O)(implicit setter: Setter[O, S]): S => S = implicitly[Setter[O, S]].set(o)(_)
   implicit def seqOfSetterToFunction[O, S](o: Seq[O])(implicit setter: Setter[O, S]): S => S = Function.chain(o.map(o => implicitly[Setter[O, S]].set(o)(_)))
 
-
-  given equalToAssignDefaultFromContext[T, U: DefaultBuilder as builder]: Setter[:=[Val[T], (FromContext[T], Boolean)], U] =
+  given equalToAssignDefaultFromContext[T, U: DefaultBuilder as builder]: Setter[Val[T] := (FromContext[T], Boolean), U] =
     Setter: v =>
       builder.defaults.modify(_ + argument.Default[T](v.value, v.equal._1, v.equal._2))
 
@@ -43,16 +42,15 @@ object Setter:
     Setter: v =>
       builder.defaults.modify(_ + argument.Default(v.value, v.equal, false))
 
-  given equalToAssignDefaultValue[T, U: DefaultBuilder as builder]: Setter[:=[Val[T], (T, Boolean)], U] =
+  given equalToAssignDefaultValue[T, U: DefaultBuilder as builder]: Setter[Val[T] := (T, Boolean), U] =
     Setter: v =>
       builder.defaults.modify(_ + argument.Default[T](v.value, v.equal._1, v.equal._2))
 
-  given equalToAssignDefaultValue2[T, U: DefaultBuilder as builder]: Setter[:=[Val[T], T], U] =
+  given equalToAssignDefaultValue2[T, U: DefaultBuilder as builder]: Setter[Val[T] := T, U] =
     Setter: v =>
       builder.defaults.modify(_ + argument.Default[T](v.value, v.equal, false))
 
-
-  given equalToAssignDefaultSeqValue[T, U: DefaultBuilder]: Setter[:=[Iterable[Val[T]], (Iterable[T], Boolean)], U] =
+  given equalToAssignDefaultSeqValue[T, U: DefaultBuilder]: Setter[Iterable[Val[T]] := (Iterable[T], Boolean), U] =
     Setter: v =>
       def defaults(u: U) = (v.value zip v.equal._1).foldLeft(u):
         case (u, (p, lv)) =>

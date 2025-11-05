@@ -52,7 +52,7 @@ object ConsoleVariables:
     workDirectory: File,
     experiment:    ConsoleVariables.Experiment)(implicit services: Services) =
     import services._
-    new ConsoleVariables(args, workDirectory, experiment)(services, moleServices = MoleServices.create(services.tmpDirectory.directory))
+    new ConsoleVariables(args, workDirectory, experiment)(using services, moleServices = MoleServices.create(services.tmpDirectory.directory))
 
 
 
@@ -64,4 +64,5 @@ case class ConsoleVariables private (
 )(
   @transient implicit val services: Services,
   @transient implicit val moleServices: MoleServices
-)
+):
+  def script: ConsoleVariables.Experiment = experiment

@@ -73,7 +73,7 @@ trait Hook extends Name:
 
   def perform(context: Context, executionContext: HookExecutionContext): Context = 
     import executionContext.*
-    InputOutputCheck.perform(this.toString, inputs, outputs, defaults, process(executionContext))(preference).from(context)
+    InputOutputCheck.perform(this.toString, inputs, outputs, defaults, process(executionContext))(using preference).from(context)
 
   protected def process(executionContext: HookExecutionContext): FromContext[Context]
 

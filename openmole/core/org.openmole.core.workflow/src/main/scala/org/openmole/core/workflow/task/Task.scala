@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import java.io.File
 import org.openmole.core.context.*
 import org.openmole.core.argument.*
+import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
 import org.openmole.core.preference.Preference
@@ -202,14 +203,6 @@ case class TaskExecutionBuildContext(
 
 object Task:
 
-  /**
-   * Construct a Random Number Generator for the task. The rng is constructed by [[org.openmole.tool.random.Random]] with the seed provided from the context (seed being defined as an OpenMOLE variable)
-   *
-   * @param context
-   * @return
-   */
-  def buildRNG(context: Context): scala.util.Random = random.Random(context(Variable.openMOLESeed)).toScala
-
   def apply(className: String)(fromContext: FromContextTask.Parameters => Context)(implicit name: sourcecode.Name, definitionScope: DefinitionScope): FromContextTask =
     FromContextTask.apply(className)(fromContext)
 
@@ -227,6 +220,7 @@ object Task:
     def context(context: Context, executionContext: TaskExecutionContext)(using RandomProvider, TmpDirectory, FileService) =
       ProcessingContext(context, executionContext)
 
+    def buildRNG(seed: Long) = random.Random(seed).toScala
 
     object TaskExecutionInfo:
       def apply(task: Task) =
@@ -248,14 +242,21 @@ object Task:
      * @return
      */
     def perform(process: TaskExecution, executionInfo: TaskExecutionInfo, context: Context, executionContext: TaskExecutionContext): Context =
-      lazy val rng = Lazy(Task.buildRNG(context))
+      val tmpDirectory = TmpDirectory(executionContext.moleExecutionDirectory)
+      val seed =
+        executionInfo.defaults.get(Variable.openMOLESeed) match
+          case Some(s) => s.value.from(context)(using Lazy(throw InternalProcessingError("There is no RNG available at this stage")), tmpDirectory, executionContext.fileService).asInstanceOf[Long]
+          case None => context(Variable.openMOLESeed)
+
+      lazy val rng = Lazy(buildRNG(seed))
+
       InputOutputCheck.perform(
         executionInfo.task,
         executionInfo.inputs,
         executionInfo.outputs,
         executionInfo.defaults,
         process(executionContext)
-      )(using executionContext.preference).from(context)(using rng, TmpDirectory(executionContext.moleExecutionDirectory), executionContext.fileService)
+      )(using executionContext.preference).from(context)(using rng, tmpDirectory, executionContext.fileService)
 
     def execute(taskExecution: TaskExecution, executionContext: TaskExecutionContext): FromContext[Context] = taskExecution(executionContext)
 

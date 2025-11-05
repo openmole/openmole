@@ -218,8 +218,9 @@ object Project:
       compile(compileContent, scriptHeader)
 
   def completion(workDirectory: File, script: File, position: Int, newREPL: Option[REPL] = None)(implicit services: Services) = 
-    import services._
-    if(!script.exists()) Vector()
+    import services.*
+    if !script.exists()
+    then Vector()
     else
       val (compileContent, scriptHeader) = craftedScript(workDirectory, script, returnUnit = false)
       val loop = newREPL.getOrElse { Project.newREPL() }

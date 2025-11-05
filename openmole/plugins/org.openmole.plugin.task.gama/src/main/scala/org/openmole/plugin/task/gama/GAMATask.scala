@@ -30,11 +30,13 @@ object GAMATask:
     image:                  ContainerImage,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
+    def fixIni = Seq("""sed -i -E '/-XX:\+UseG1GC/ d; /-XX:G1[^ ]*/ d' /opt/gama-platform/Gama.ini""")
+
     val installedImage =
       ContainerTask.install(
         containerSystem,
         image,
-        install,
+        fixIni ++ install,
         Seq(),
         clearCache = clearCache)
 

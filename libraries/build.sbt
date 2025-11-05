@@ -8,6 +8,7 @@ def dir = file("bundles")
 def settings = Seq(
   resolvers += DefaultMavenRepository,
   resolvers += "publishing" at "https://repo.maven.apache.org/maven2",
+  resolvers += "jitpack" at "https://jitpack.io",
   publishLocal / packageDoc / publishArtifact := false,
   publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
@@ -237,6 +238,19 @@ lazy val netlogo6 = OsgiProject(
   version := netLogo6Version,
   crossPaths := false)
 
+lazy val netlogo7 = OsgiProject(
+  dir,
+  "ccl.northwestern.edu.netlogo7",
+  exports = Seq("org.nlogo.*"),
+  privatePackages = Seq("**"),
+  imports = Seq("scala.*", "empty;resolution:=optional")) settings(settings) settings (
+  //resolvers += Resolver.bintrayRepo("netlogo", "NetLogo-JVM"),
+  resolvers += "Netlogo" at "https://mvnrepository.com/artifact/org.nlogo/netlogo",
+  resolvers += "netlogo" at "https://dl.cloudsmith.io/public/netlogo/netlogo/maven/",
+  libraryDependencies += "org.nlogo" % "netlogo" % netLogo7Version % "provided" exclude("org.jogamp.jogl", "jogl-all") exclude("org.jogamp.gluegen", "gluegen-rt"),
+  version := netLogo7Version,
+  crossPaths := false)
+
 /*lazy val scalajsTools = OsgiProject(dir, "scalajs-tools", exports = Seq("scala.scalajs.*", "org.scalajs.core.tools.*", "org.scalajs.core.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   libraryDependencies += "org.scala-js" %% "scalajs-tools" % scalajsVersion, version := scalajsVersion) settings(settings: _*)*/
 
@@ -308,7 +322,8 @@ lazy val mgo = OsgiProject(
   imports = noReflectScala2 ++ Seq("!scala.collection.compat.*", "scala.*", "monocle.*", "cats.*", "squants.*", "!com.oracle.svm.*", "!*"), //Seq("!better.*", "!javax.xml.*", "!scala.meta.*", "!sun.misc.*", "*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "*") /*Seq("!scala.*", "!monocle.*", "!org.apache.commons.math3.*", "!cats.*", "!squants.*", "!scalaz.*", "*")*/) settings(
   settings,
-  libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
+  libraryDependencies += "com.github.openmole" % "mgo" % mgoVersion,	
+  //libraryDependencies += "org.openmole" %% "mgo" % mgoVersion,
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13"),
   version := mgoVersion) dependsOn(monocle, cats, squants)
 

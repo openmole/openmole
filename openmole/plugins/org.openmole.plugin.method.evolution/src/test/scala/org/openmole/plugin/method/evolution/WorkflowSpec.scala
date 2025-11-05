@@ -26,12 +26,13 @@ import org.openmole.plugin.domain.collection.{*, given}
 import org.scalatest.*
 import org.openmole.plugin.domain.bounds.{*, given}
 import org.openmole.plugin.method.evolution.Genome.GenomeBound
+import org.openmole.plugin.domain.distribution.*
 
 object WorkflowSpec:
   enum En:
     case E1, E2
 
-class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test._
 
@@ -230,19 +231,16 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
       case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
 
-  "Steady state workflow" should "have no validation error" in {
+  "Steady state workflow" should "have no validation error" in:
     val mole: Mole = nsga2
 
-    Validation(mole).toList match {
+    Validation(mole).toList match
       case Nil =>
       case l   => sys.error(s"Several validation errors have been found in ${mole}: " + l.mkString("\n"))
-    }
 
-    Validation(conflict).toList match {
+    Validation(conflict).toList match
       case Nil =>
       case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-    }
-  }
 
 
   "NSGAEvolution" should "be valid" in:
@@ -717,9 +715,40 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         stochastic = Stochastic(seed = mySeed)
       )
 
-
+    ose.run()
     serializeDeserialize(ose).run()
 
 
+  "PPSE" should "support density" in:
+    val x = Val[Double]
+    val y = Val[Double]
 
-}
+    val o1 = Val[Double]
+    val o2 = Val[Double]
+
+    val mySeed = Val[Long]
+
+    val model =
+      EmptyTask() set(
+        inputs += (x, y, mySeed),
+        outputs += (o1, o2),
+        o1 := 28,
+        o2 := 72
+      )
+
+    PPSEEvolution(
+      evaluation = model,
+      termination = 10,
+      genome = Seq(
+        x in (1.0 to 2.0),
+        y in (5.0 to 56.0)
+      ),
+      objective = Seq(
+        o1 in (1.0 to 100.0 by 2.0),
+        o2 in (1.0 to 100.0 by 2.0)
+      ),
+      density = Seq(y in NormalDistribution(28.0, 2.0)),
+      stochastic = Stochastic(seed = mySeed)
+    )
+
+

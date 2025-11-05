@@ -25,15 +25,14 @@ class DSLSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
   import org.openmole.core.workflow.test.Stubs._
 
-  "DSL" should "convert values as expected" in {
+  "DSL" should "convert values as expected" in:
     val x = Val[Long]
     val testFromContext: FromContext[Long] = x
     val testOptionalArgument: OptionalArgument[FromContext[Long]] = x
     val testOptionalFromContextLong: OptionalArgument[FromContext[Long]] = 42
     val testOptionalFromContextBoolean: OptionalArgument[Condition] = true
     val testoptionlaFromContextString: OptionalArgument[FromContext[String]] = "test"
-
-  }
+  
 
   "range of double" should "be of correct size" in {
     val r = (0.0 to 10.0 by 0.2)

@@ -21,10 +21,10 @@ import org.openmole.site.content.header.*
 
 object UniformSampling extends PageContent(html"""
 
-${h2{"Sample within a uniform distribution"}}
+${h2{"Random Sequence of Number"}}
 
-Samplings can be performed at random within a domain following a uniform ditribution, via the ${code{"UniformDistribution(maximum)"}} command.
-This task generates values uniformly distributed between zero and the maximum argument:
+Samplings can be performed at random within a domain following a uniform distribution, via the ${code{"RandomSequence(size, min, max)"}} command.
+This task generates values uniformly distributed values:
 
 $br
 
@@ -39,7 +39,7 @@ val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 val exploration =
   DirectSampling(
     evaluation = my_model hook display,
-    sampling= my_input in UniformDistribution[Double](max=20).take(100)
+    sampling= my_input in RandomSequence[Double](max = 20, size = 100)
   )
 
 exploration""", name = "uniform sampling example")}
@@ -61,7 +61,7 @@ val my_model = EmptyTask() set( (inputs, outputs) += my_input)
 val exploration =
   DirectSampling(
     evaluation = my_model hook display,
-    sampling= my_input in UniformDistribution[Double](max=20).take(100).map(x => x -10)
+    sampling= my_input in RandomSequence[Double](max = 20, size = 100).map(x => x -10)
   )
 
 exploration""", name = "uniform sampling custom example")}

@@ -28,7 +28,7 @@ object NetLogoTools:
   def exploration = """
     |val sampling =
     |  (density in (20.0 to 80.0 by 10.0)) x
-    |  (seed in (UniformDistribution[Int]() take 10))""".stripMargin
+    |  (seed in RandomSequence[Int](size = 10))""".stripMargin
 
   def netlogo = """
     |val cmds = List(

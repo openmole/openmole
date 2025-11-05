@@ -24,6 +24,7 @@ import org.openmole.core.argument.{DefaultSet, FromContext}
 import org.openmole.core.preference.Preference
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.random.*
+import org.openmole.tool.cache.Lazy
 
 /**
  * Methods for the validation of inputs/outputs

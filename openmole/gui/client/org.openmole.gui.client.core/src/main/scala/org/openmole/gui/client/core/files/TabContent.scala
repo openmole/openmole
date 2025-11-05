@@ -50,13 +50,21 @@ class TabContent:
     )
 
   def buildTab(
-      tabData: TabData,
-      content: HtmlElement,
-      copyAttributes: Option[Tab[TabData]] = None
-  )(using Panels, ServerAPI, BasePath) =
-    val header = buildHeader(tabData).amend(onClick --> { _ =>
-      current.set(Some(tabData))
-    })
+    tabData: TabData,
+    content: HtmlElement,
+    copyAttributes: Option[Tab[TabData]] = None
+  )(using panels: Panels, api: ServerAPI, bp: BasePath) =
+
+    val header =
+      def switchPath = panels.treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
+      buildHeader(tabData).amend(
+        onClick --> { e =>
+          if e.ctrlKey then switchPath
+          current.set(Some(tabData))
+        },
+        onDblClick --> {_ => switchPath }
+      )
+
     copyAttributes match
       case None => Tab(tabData, header, content)
       case Some(tab) =>

@@ -37,7 +37,7 @@ trait ServerAPI:
   def saveFile(safePath: SafePath, content: String, hash: Option[String] = None, overwrite: Boolean = false)(using BasePath): Future[(Boolean, String)]
   def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean]
   def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit]
-  def listFiles(path: SafePath, filter: FileSorting = FileSorting(), withHidden: Boolean = false)(using BasePath): Future[FileListData]
+  def listFiles(path: SafePath, filter: FileSorting = FileSorting(), withHidden: Boolean = false, directorySize: Boolean = false)(using BasePath): Future[FileListData]
   def listRecursive(path: SafePath, findString: Option[String], withHidden: Boolean = false)(using BasePath): Future[Seq[(SafePath, Boolean)]]
   def move(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath): Future[Seq[SafePath]]
   def deleteFiles(path: Seq[SafePath])(using BasePath): Future[Unit]
