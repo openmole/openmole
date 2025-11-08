@@ -1070,7 +1070,7 @@ def bundleFilter(m: ModuleID, artifact: Artifact) = {
 
   def include =
     (artifact.`type` == "bundle" && m.name != "osgi" && m.organization == "org.openmole.library") ||
-      (m.organization == "org.bouncycastle" && !m.name.contains("jdk15on")) ||
+      (m.organization == "org.bouncycastle" && !m.name.contains("jdk15on") && !m.name.contains("bcpg")) ||
       (m.name == "httpclient-osgi") ||
       (m.name == "httpcore-osgi") ||
       (m.organization == "org.osgi" && m.name != "osgi") ||
