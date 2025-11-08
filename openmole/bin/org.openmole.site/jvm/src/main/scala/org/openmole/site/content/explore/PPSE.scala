@@ -75,7 +75,7 @@ PPSEEvolution(
     output2 in (0.0 to 4000.0 by 50.0)),
   density = Seq(
     param1 in NormalDistribution(2.0, 0.1),
-    humanInformProbability in NormalDistribution(0.0, 1.0)
+    param2 in NormalDistribution(0.0, 1.0)
   )
 ) hook (workDirectory / "results", frequency = 100)
 """, name = "PPSE density", header = "val modelTask = EmptyTask()")}
