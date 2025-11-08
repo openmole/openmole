@@ -199,7 +199,7 @@ object DocumentationPages:
   lazy val container = DocumentationPage.fromContent(name = "Any Other Executable", content = org.openmole.site.content.plug.Container)
 
   // Explore
-  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, hdose, abc))
+  def explorePages = pageNode(explore, Vector(samplings, calibration, sensitivity, profile, pse, ose, hdose, abc, ppse))
 
   lazy val explore = DocumentationPage.fromContent(name = "Explore", content = org.openmole.site.content.explore.Explore, title = Some("Explore Your Model"))
 
@@ -223,6 +223,7 @@ object DocumentationPages:
   lazy val sensitivity = DocumentationPage.fromContent(name = "Sensitivity", content = org.openmole.site.content.explore.Sensitivity, title = Some("Stastistical Sensitivity Analysis"))
   lazy val profile = DocumentationPage.fromContent(name = "Profile", content = org.openmole.site.content.explore.Profile)
   lazy val pse = DocumentationPage.fromContent(name = "PSE", content = org.openmole.site.content.explore.PSE, title = Some("Pattern Space Exploration"))
+  lazy val ppse = DocumentationPage.fromContent(name = "PPSE", content = org.openmole.site.content.explore.PPSE, title = Some("Pattern Plausibility Space Exploration"))
   lazy val ose = DocumentationPage.fromContent(name = "OSE", content = org.openmole.site.content.explore.OSE, title = Some("Origin Space Exploration"))
   lazy val hdose = DocumentationPage.fromContent(name = "HDOSE", content = org.openmole.site.content.explore.HDOSE, title = Some("High dimension Origin Space Exploration"))
   lazy val abc = DocumentationPage.fromContent(name = "ABC", content = org.openmole.site.content.explore.ABC, title = Some("Approximate Bayesian computation"))

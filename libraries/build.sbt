@@ -444,26 +444,26 @@ lazy val sourceCode = OsgiProject(dir, "sourcecode") settings (
 
 lazy val gridscale = OsgiProject(dir, "gridscale", imports = Seq("*"), exports = Seq("gridscale.*", "enumeratum.*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "gridscale" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "gridscale" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 )
 
 lazy val gridscaleLocal = OsgiProject(dir, "gridscale.local", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "local" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "local" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale)
 
 lazy val gridscaleHTTP = OsgiProject(dir, "gridscale.http", imports = Seq("*"), privatePackages = Seq("org.htmlparser.*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "http" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "http" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, codec)
 
 lazy val gridscaleSSH = OsgiProject(dir, "gridscale.ssh", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "ssh" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "ssh" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(sshj) dependsOn(gridscale)
 
 lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("!sun.security.*", "*"), exports = Seq("com.hierynomus.*", "net.schmizz.*"), privatePackages = Seq("!scala.*", "!org.bouncycastle.*", "!org.slf4j.*", "**"), dynamicImports = Seq("org.bouncycastle.*")) settings (
@@ -474,59 +474,59 @@ lazy val sshj = OsgiProject(dir, "com.hierynomus.sshj", imports = Seq("!sun.secu
 
 lazy val gridscaleCluster = OsgiProject(dir, "gridscale.cluster", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "cluster" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "cluster" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscaleSSH)
 
 lazy val gridscaleOAR = OsgiProject(dir, "gridscale.oar", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "oar" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "oar" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscalePBS = OsgiProject(dir, "gridscale.pbs", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "pbs" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "pbs" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleSGE = OsgiProject(dir, "gridscale.sge", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "sge" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "sge" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleCondor = OsgiProject(dir, "gridscale.condor", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "condor" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "condor" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleSLURM = OsgiProject(dir, "gridscale.slurm", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "slurm" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "slurm" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleCluster)
 
 lazy val gridscaleEGI = OsgiProject(dir, "gridscale.egi", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "egi" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "egi" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleHTTP)
 
-lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
+lazy val gridscaleDIRAC = OsgiProject(dir, "gridscale.dirac", imports = Seq("!sun.nio.*", "*"), privatePackages = Seq("gridscale.dirac.*", "org.apache.commons.compress.*", "org.apache.commons.io.*", "org.apache.commons.lang3.*", "org.brotli.*", "org.tukaani.*", "com.github.luben.*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "dirac" % gridscaleVersion,
+  libraryDependencies += "com.github.openmole.gridscale" %% "dirac" % gridscaleVersion.commit,
   libraryDependencies += "org.brotli" % "dec" % "0.1.2",
   libraryDependencies += "org.tukaani" % "xz" % "1.9",
   libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.4-3",
-  version := gridscaleVersion
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleHTTP)
 
 lazy val gridscaleWebDAV = OsgiProject(dir, "gridscale.webdav", imports = Seq("*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "webdav" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "webdav" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, gridscaleHTTP)
 
 lazy val gridscaleMiniclust = OsgiProject(dir, "gridscale.miniclust",
@@ -537,8 +537,8 @@ lazy val gridscaleMiniclust = OsgiProject(dir, "gridscale.miniclust",
   privatePackages = Seq("org.apache.commons.codec.*","org.apache.http.*", "software.amazon.*", "io.netty.*", "org.reactivestreams.*"),
   dynamicImports = Seq("org.bouncycastle.*")) settings (
   settings,
-  libraryDependencies += "org.openmole.gridscale" %% "miniclust" % gridscaleVersion,
-  version := gridscaleVersion
+  libraryDependencies += "com.github.openmole.gridscale" %% "miniclust" % gridscaleVersion.commit,
+  version := gridscaleVersion.version
 ) dependsOn(gridscale, circe, squants, slf4j, logging)
 
 lazy val xzJava = OsgiProject(dir, "xzjava", imports = Seq("*"), exports = Seq("org.tukaani.*")) settings (

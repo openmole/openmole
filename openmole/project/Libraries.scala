@@ -94,28 +94,28 @@ object Libraries {
 
   lazy val toolxitBibtex = "org.openmole" %% "toolxit-bibtex" % "0.2"
 
-  lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion
+  lazy val gridscale = "org.openmole.library" %% "gridscale" % gridscaleVersion.version
   lazy val gridscaleSSH =
     Seq(
-      "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion,
+      "org.openmole.library" %% "gridscale-ssh" % gridscaleVersion.version,
       sshj
     )
 
-  lazy val gridscaleMiniclust = "org.openmole.library" %% "gridscale-miniclust" % gridscaleVersion
+  lazy val gridscaleMiniclust = "org.openmole.library" %% "gridscale-miniclust" % gridscaleVersion.version
 
-  lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion
-  lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion
-  lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion
-  lazy val gridscaleSLURM = "org.openmole.library" %% "gridscale-slurm" % gridscaleVersion
+  lazy val gridscalePBS = "org.openmole.library" %% "gridscale-pbs" % gridscaleVersion.version
+  lazy val gridscaleSGE = "org.openmole.library" %% "gridscale-sge" % gridscaleVersion.version
+  lazy val gridscaleCondor = "org.openmole.library" %% "gridscale-condor" % gridscaleVersion.version
+  lazy val gridscaleSLURM = "org.openmole.library" %% "gridscale-slurm" % gridscaleVersion.version
 
   lazy val gridscaleEGI = Seq(
-    "org.openmole.library" %% "gridscale-egi" % gridscaleVersion,
-    "org.openmole.library" %% "gridscale-webdav" % gridscaleVersion,
-    "org.openmole.library" %% "gridscale-dirac" % gridscaleVersion)
+    "org.openmole.library" %% "gridscale-egi" % gridscaleVersion.version,
+    "org.openmole.library" %% "gridscale-webdav" % gridscaleVersion.version,
+    "org.openmole.library" %% "gridscale-dirac" % gridscaleVersion.version)
 
-  lazy val gridscaleHTTP = httpClient ++ Seq("org.openmole.library" %% "gridscale-http" % gridscaleVersion)
-  lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion
-  lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion
+  lazy val gridscaleHTTP = httpClient ++ Seq("org.openmole.library" %% "gridscale-http" % gridscaleVersion.version)
+  lazy val gridscaleLocal = "org.openmole.library" %% "gridscale-local" % gridscaleVersion.version
+  lazy val gridscaleOAR = "org.openmole.library" %% "gridscale-oar" % gridscaleVersion.version
 
   lazy val scalaz = "org.scalaz" %% "scalaz-core" % scalazVersion
   lazy val spray = "io.spray" %% "spray-json" % "1.3.6" cross CrossVersion.for3Use2_13
