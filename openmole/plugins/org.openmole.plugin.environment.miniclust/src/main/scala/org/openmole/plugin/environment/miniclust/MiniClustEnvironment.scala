@@ -139,7 +139,7 @@ class MiniClustEnvironment(
           Seq(
             "export PATH=$PWD/jvm/jre/bin:$PATH",
             "export HOME=$PWD",
-            s"""/bin/sh runtime/run.sh ${memory}m $$PWD/${UUID.randomUUID} --home-directory $$PWD -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $${PWD}/${nodeInputPath(serializedJob.inputPath)} -o ${resultName}""" + (if debug then " -d 2>&1" else "")
+            s"""/bin/sh runtime/run.sh ${memory}m $$PWD/${UUID.randomUUID} --no-cleanup --home-directory $$PWD -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $${PWD}/${nodeInputPath(serializedJob.inputPath)} -o ${resultName}""" + (if debug then " -d 2>&1" else "")
           )
 
         script.content =
