@@ -226,8 +226,8 @@ object ScalaCompilation {
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
-  )(implicit m: Manifest[? <: R], newFile: TmpDirectory, fileService: FileService) =
-    val (cl, i) = closure[R](inputs, code, plugins, libraries, wrapping, ValType(m)).get
+  )(using m: Manifest[R], newFile: TmpDirectory, fileService: FileService) =
+    val (cl, i) = closure[R](inputs, code, plugins, libraries, wrapping, ValType(using m)).get
     ContextClosure(cl.apply, i)
 
   def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
