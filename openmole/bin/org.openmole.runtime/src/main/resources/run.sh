@@ -28,23 +28,27 @@ mkdir -p "${TMPDIR}"
 
 FULL_TMPDIR=`realpath ${TMPDIR}`
 HOME_DIRECTORY=${FULL_TMPDIR}
-
-cleanup() {
-  rm -rf "$FULL_TMPDIR"
-  exit 1
-}
-trap cleanup TERM
-
+NO_CLEANUP=0
 ARGS=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --home-directory ) HOME_DIRECTORY="$2" ; shift ;;
-    * ) ARGS="$ARGS $1";;
+    --no-cleanup ) NO_CLEANUP=1 ;;
+    * ) ARGS="$ARGS $1" ;;
   esac
   shift
 done
+
 echo $ARGS
+
+cleanup() {
+  if [ "$NO_CLEANUP" -eq 0 ]; then
+    rm -rf "$FULL_TMPDIR"
+  fi
+  exit 1
+}
+trap cleanup TERM
 
 FLAGS=""
 FLAGS="$FLAGS -XX:+UseCompressedOops"
@@ -119,7 +123,9 @@ java -Djava.io.tmpdir="${FULL_TMPDIR}" -Duser.home="${HOME_DIRECTORY}" -Dsun.jnu
 
 RETURNCODE=$?
 
-rm -rf "${TMPDIR}"
+if [ "$NO_CLEANUP" -eq 0 ]; then
+  rm -rf "${TMPDIR}"
+fi
 
 exit $RETURNCODE
 

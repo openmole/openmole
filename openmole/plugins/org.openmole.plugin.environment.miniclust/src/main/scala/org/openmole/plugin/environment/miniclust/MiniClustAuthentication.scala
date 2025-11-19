@@ -51,7 +51,7 @@ object MiniClustAuthentication:
   def test(a: MiniClustAuthentication) =
     import scala.util.*
     Try:
-      MiniClustEnvironment.toMiniclust(a, insecure = true)
+      MiniClustEnvironment.toMiniclust(a, 20 seconds, insecure = true)
     .map(_ => true)
 
 

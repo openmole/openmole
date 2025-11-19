@@ -31,7 +31,8 @@ import java.util.UUID
 
 object MiniClustEnvironment:
 
-  val maxConnections = PreferenceLocation("MiniclustEnvironment", "MaxConnections", Some(20))
+  val maxConnections = PreferenceLocation("MiniClustEnvironment", "MaxConnections", Some(20))
+  val timeout = PreferenceLocation("MiniClustEnvironment", "Timeout", Some(1 minutes))
 
   def apply(
     login: String,
@@ -40,6 +41,7 @@ object MiniClustEnvironment:
     openMOLEMemory: OptionalArgument[Information] = None,
     core: OptionalArgument[Int] = None,
     time: OptionalArgument[Time] = None,
+    timeout: OptionalArgument[Time] = None,
     runtimeSetting: OptionalArgument[RuntimeSetting] = None,
     debug: Boolean = false)(using varName: sourcecode.Name, store: AuthenticationStore, pref: Preference, cypher: Cypher, replicaCatalog: ReplicaCatalog) =
     EnvironmentBuilder: ms =>
@@ -49,6 +51,7 @@ object MiniClustEnvironment:
         openMOLEMemory = openMOLEMemory,
         core = core,
         time = time,
+        timeout = timeout,
         name = Some(varName.value),
         authentication = MiniClustAuthentication.find(login, url),
         runtimeSetting = runtimeSetting,
@@ -56,7 +59,7 @@ object MiniClustEnvironment:
         services = BatchEnvironment.Services(ms)
       )
 
-  def toMiniclust(authentication: MiniClustAuthentication, insecure: Boolean) =
+  def toMiniclust(authentication: MiniClustAuthentication, timeout: Time, insecure: Boolean) =
     val loginPassword =
       authentication match
         case a: MiniClustAuthentication.LoginPassword => a
@@ -64,7 +67,7 @@ object MiniClustEnvironment:
     val auth = _root_.gridscale.authentication.UserPassword(loginPassword.login, loginPassword.password)
 
     val server =
-      _root_.gridscale.miniclust.MiniclustServer(loginPassword.url, auth, insecure = insecure)
+      _root_.gridscale.miniclust.MiniclustServer(loginPassword.url, auth, timeout = timeout, insecure = insecure)
 
     _root_.gridscale.miniclust.Miniclust(server)
 
@@ -75,14 +78,15 @@ class MiniClustEnvironment(
   val openMOLEMemory: Option[Information],
   val core: Option[Int],
   val time: Option[Time],
+  val timeout: Option[Time],
   val runtimeSetting: Option[RuntimeSetting],
-  val name:              Option[String],
+  val name: Option[String],
   val authentication: MiniClustAuthentication,
   val debug: Boolean,
   implicit val services: BatchEnvironment.Services) extends BatchEnvironment(BatchEnvironmentState(services)):
 
   val accessControl = AccessControl(services.preference(MiniClustEnvironment.maxConnections))
-  given mc: _root_.gridscale.miniclust.Miniclust = MiniClustEnvironment.toMiniclust(authentication, insecure = insecure)
+  given mc: _root_.gridscale.miniclust.Miniclust = MiniClustEnvironment.toMiniclust(authentication, timeout.getOrElse(services.preference(MiniClustEnvironment.timeout)), insecure = insecure)
 
   val storage = MiniClustStorage(mc, accessControl)
   lazy val storageSpace =
@@ -139,7 +143,7 @@ class MiniClustEnvironment(
           Seq(
             "export PATH=$PWD/jvm/jre/bin:$PATH",
             "export HOME=$PWD",
-            s"""/bin/sh runtime/run.sh ${memory}m $$PWD/${UUID.randomUUID} --home-directory $$PWD -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $${PWD}/${nodeInputPath(serializedJob.inputPath)} -o ${resultName}""" + (if debug then " -d 2>&1" else "")
+            s"""/bin/sh runtime/run.sh ${memory}m $$PWD/${UUID.randomUUID} --no-cleanup --home-directory $$PWD -s $${PWD}/${nodeInputPath(serializedJob.remoteStorage.path)} -p $${PWD}/envplugins/ --input-file $${PWD}/${nodeInputPath(serializedJob.inputPath)} -o ${resultName}""" + (if debug then " -d 2>&1" else "")
           )
 
         script.content =
@@ -206,7 +210,7 @@ class MiniClustEnvironment(
       _root_.gridscale.miniclust.clean(job)
 
     BatchJobControl(
-      BatchEnvironment.defaultUpdateInterval(services.preference),
+      BatchEnvironment.defaultUpdateInterval(using services.preference),
       StorageService.id(storage),
       priority => state,
       priority => delete,
