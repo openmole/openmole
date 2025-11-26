@@ -97,7 +97,7 @@ case class ScalaTask(
 
   def compile(inputs: Seq[Val[?]])(implicit newFile: TmpDirectory, fileService: FileService) =
   //implicit def m: Manifest[java.util.Map[String, Any]] = manifest[java.util.Map[String, Any]]
-    ScalaCompilation.static(
+    ScalaCompilation.static[java.util.Map[String, Any]](
       sourceCode,
       mappedInputs.toSeq ++ Seq(JVMLanguageTask.workDirectory),
       ScalaCompilation.WrappedOutput(mappedOutputs),

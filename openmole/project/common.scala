@@ -8,11 +8,11 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.7.2"
+  def scala3VersionValue = "3.7.4"
   def scalajsVersion = "1.20.1"
 
   def scalaXMLVersion = "2.4.0"
-  def gridscaleVersion = CommitVersion("63aded122f", "2.63")
+  def gridscaleVersion = CommitVersion("001e0bfc30", "2.63")
   def mgoVersion = CommitVersion("6521cf3681b7aef7bc63583463bdce8b92d9b3d4", "3.68")
   def sshjVersion = "0.40.0"
   def containerVersion = "1.33"
