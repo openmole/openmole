@@ -127,6 +127,15 @@ object GUIServer:
   sealed trait ExitStatus
   case object Ok extends ExitStatus
 
+  def initialize(port: Int, localhost: Boolean, optimizedJS: Boolean, services: GUIServerServices) =
+    import services.*
+    given IORuntime = threadProvider.ioRuntime
+
+    val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
+
+    try GUIServer.webapp(optimizedJS)
+    finally waitingServerShutdown.unsafeRunSync()
+
 
   def apply(
     port: Int,
@@ -136,13 +145,7 @@ object GUIServer:
     optimizedJS: Boolean,
     extraHeaders: String) =
 
-    import services.*
-    given IORuntime = threadProvider.ioRuntime
-
-    val waitingServerShutdown = server(port, localhost).withoutBanner.withHttpApp(waitRouter.orNotFound).allocated.unsafeRunSync()._2
-    val webappCache =
-      try GUIServer.webapp(optimizedJS)
-      finally waitingServerShutdown.unsafeRunSync()
+    val webappCache = initialize(port, localhost, optimizedJS, services)
       
     new GUIServer(
       port,

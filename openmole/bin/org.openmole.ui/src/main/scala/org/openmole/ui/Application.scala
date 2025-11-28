@@ -52,6 +52,7 @@ object Application extends JavaLogger {
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
     object GUIMode extends LaunchMode
+    object GUIIintialize extends LaunchMode
     object HelpMode extends LaunchMode
     object RESTMode extends LaunchMode
     object VersionMode extends LaunchMode
@@ -139,7 +140,7 @@ object Application extends JavaLogger {
         case "--password" :: tail                    => parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "--password-file" :: tail               => parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
         case "--workspace" :: tail                   => parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
-        case "--rest" :: tail                        => parse(tail, c.copy(launchMode = RESTMode))
+        case "--rest" :: tail                        => parse(tail, c.copy(launchMode = RESTMode))x
         case "--load-workspace-plugins" :: tail      => parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-work-directory" :: tail      => parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--logger-level" :: tail                => parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
@@ -150,6 +151,7 @@ object Application extends JavaLogger {
         case "--unoptimized-js" :: tail              => parse(tail, c.copy(unoptimizedJS = true))
         case "--gui-extra-header" :: tail            => parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
         case "--gui-extra-header-file" :: tail       => parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
+        case "--gui-initialize" :: tail              => parse(tail, c.copy(launchMode = GUIIintialize))
         case "--reset" :: tail                       => parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--reset-password" :: tail              => parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                       => parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
@@ -182,7 +184,7 @@ object Application extends JavaLogger {
     def loadPlugins(implicit workspace: Workspace) =
       val (existingUserPlugins, notExistingUserPlugins) = config.userPlugins.span(new File(_).exists)
 
-      if (!notExistingUserPlugins.isEmpty) logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
+      if notExistingUserPlugins.nonEmpty then logger.warning(s"""Some plugins or plugin folders don't exist: ${notExistingUserPlugins.mkString(",")}""")
 
       val userPlugins =
         existingUserPlugins.flatMap { p => PluginManager.listBundles(new File(p)) } ++ module.allModules
@@ -234,6 +236,14 @@ object Application extends JavaLogger {
             val console = new Console(config.scriptFile)
             console.run(config.args, config.consoleWorkDirectory)
           }
+
+      case GUIIintialize =>
+        given preference: Preference = Services.preference(workspace)
+
+        GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel, config.password): services =>
+          val port = config.port.getOrElse(preference(GUIServer.port))
+          GUIServer.initialize(port, !config.remote, !config.unoptimizedJS, services)
+          0
 
       case GUIMode =>
         given preference: Preference = Services.preference(workspace)
