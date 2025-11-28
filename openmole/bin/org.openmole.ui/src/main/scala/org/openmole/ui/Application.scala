@@ -140,7 +140,7 @@ object Application extends JavaLogger {
         case "--password" :: tail                    => parse(dropArg(tail), c.copy(password = Some(takeArg(tail))))
         case "--password-file" :: tail               => parse(dropArg(tail), c.copy(passwordFile = Some(new File(takeArg(tail)))))
         case "--workspace" :: tail                   => parse(dropArg(tail), c.copy(workspace = Some(new File(takeArg(tail)))))
-        case "--rest" :: tail                        => parse(tail, c.copy(launchMode = RESTMode))x
+        case "--rest" :: tail                        => parse(tail, c.copy(launchMode = RESTMode))
         case "--load-workspace-plugins" :: tail      => parse(tail, c.copy(loadHomePlugins = Some(true)))
         case "--console-work-directory" :: tail      => parse(dropArg(tail), c.copy(consoleWorkDirectory = Some(new File(takeArg(tail)))))
         case "--logger-level" :: tail                => parse(tail.tail, c.copy(loggerLevel = Some(tail.head)))
