@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.csv
+package org.openmole.plugin.sampling.file
 
 import org.openmole.core.pluginregistry.PluginRegistry
 import org.osgi.framework.{ BundleActivator, BundleContext }

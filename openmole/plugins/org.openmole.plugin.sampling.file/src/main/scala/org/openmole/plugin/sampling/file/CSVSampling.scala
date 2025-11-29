@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.csv
+package org.openmole.plugin.sampling.file
 
 import java.io.File
 import monocle.{Focus, Lens}
