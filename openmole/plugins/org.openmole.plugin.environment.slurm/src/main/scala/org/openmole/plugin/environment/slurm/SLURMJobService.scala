@@ -49,6 +49,7 @@ class SLURMJobService[S](
       gres = parameters.gres.toList,
       constraints = parameters.constraints.toList,
       reservation = parameters.reservation,
+      account = parameters.account,
       wckey = parameters.wckey,
       exclusive = parameters.exclusive
     )
