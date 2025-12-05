@@ -52,7 +52,7 @@ val mySeed = Val[Long]
 val gama =
   GAMATask(project = workDirectory / "predator", gaml = "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
     inputs += (nbPreysInit mapped "nb_preys_init"),
-    outputs += (numberOfPreys mapped "Number of preys")
+    outputs += (numberOfPreys mapped "nb_preys")
   )
 
 // Explore and replicate the model
@@ -72,12 +72,12 @@ ${h3{"Task arguments"}}
 
 The GAMA task uses the following arguments:
 ${ul(
-    li(html"""${code{"project"}} the location of your GAMA project directory, $mandatory, for instance ${code{"project = workDirectory / \"gamaproject\""}}"""),
-    li(html"""${code{"gaml"}} the relative path of your ${i{".gaml"}} file in your work directory, $mandatory, for instance ${code{"gaml = \"model/model.gaml\""}}"""),
-    li(html"""${code{"experiment"}} the name of your experiment as implemented in the ${i{".gaml"}} file, $mandatory"""),
-    li(html"""${code{"finalStep"}} the last simulation step of you simulation, $mandatory"""),
-    li(html"""${code{"frameRate"}} the frame rate to sample you simulation dynamics, in this case the outputs should be arrays, $optional"""),
-    li(html"""${code{"seed"}} the OpenMOLE variable used to set the GAMA random number generator seed, $optional the seed is randomly drawn if not set"""),
+    li(html"""${code{"project"}} File, the location of your GAMA project directory, $mandatory, for instance ${code{"project = workDirectory / \"gamaproject\""}}"""),
+    li(html"""${code{"gaml"}} String, the relative path of your ${i{".gaml"}} file in your work directory, $mandatory, for instance ${code{"gaml = \"model/model.gaml\""}}"""),
+    li(html"""${code{"finalStep"}} Int, the last simulation step of you simulation, it must be set if no stopining condtion is set"""),
+    li(html"""${code{"stop"}} String, a stoping condition for your simulation in GAMA, for instance ${code("(cycle=10 or nb_preys<10)")}, it must be set if no finalStep is set, in case both are set only the stopping condition in taken into accoount"""),
+    li(html"""${code{"seed"}} Long, the OpenMOLE variable used to set the GAMA random number generator seed, $optional the seed is randomly drawn if not set"""),
+    li{html"${code{"version"}} String, $optional. The version of GAMA to run."},
     li(html"""${code{"containerImage"}} the label of a container image or a container file containing GAMA headless, $optional, the default value is "gamaplatform/gama:1.9.0""""),
     li(html"""${code{"memory"}} the memory allocated to the gama headless, $optional, for example ${code{"memory = 3000 megabytes"}}"""),
     li(html"""${code{"install"}} some command to run on the host system to initialise the container, for instance ${code("""Seq("apt update", "apt install mylib")""")}, $optional"""),
@@ -90,23 +90,51 @@ The integration of GAMA into OpenMOLE is achieved through a container. OpenMOLE 
 
 To get a clearer understanding, it's important to determine which of the two is causing the problem. Here, using the predator-prey model as a basis, we suggest testing your model within the virtual machine that will be used by OpenMole. This allows you to perform diagnostics in case of a failure.
 
-OpenMOLE communicates with Gama through XML injection. Therefore, to run GAMA in headless mode, you need to:
+OpenMOLE communicates with GAMA by defining an experiment and then running the batch mode of 'gama-headless.sh'. Therefore, to run GAMA in headless mode, you need to:
 ${ul(
-    li(html"generate an XML file,"),
-    li(html"launch the simulation from this XML file.")
+    li(html"write an experiment file, that import you model,"),
+    li(html"launch the simulation using this experiment.")
   )}
 
+In case of an error, OpenMOLE should display the experiment that was generated.
 
+Here is an example:
+${code(
+    """model openmoleexplorationmodel
+      |
+      |import 'mymodel.gaml'
+      |
+      |experiment _openMOLEExperiment_ {
+      |
+      |  float seed <- 42;
+      |  //Set some parameters
+      |  parameter var:nb_preys_init <- 100;
+      |
+      | reflex stop_reflex when:cycle=10 {
+      |
+      |   // Some outputs to save in the json file
+      |    map _outputs_ <- [
+      |    "nb_preys"::nb_preys
+      |   ];
+      |
+      | save to_json(_outputs_) to:"om_output.json" format:"txt";
+      |
+      | do die;
+      | }
+      |}
+      |""".stripMargin)}
+
+
+Modify it to match your model and save it as 'experiment.gaml'. Make sure the import path is coherent with the location of you model relative to the location of the experiment file.
 
 ${h3("Using a existing GAMA installation")}
 
 You can run:
 ${code("""
-./gama-headless.sh -xml <experiment_name> input.gaml output.xml
-./gama-headless.sh output.xml .
+./gama-headless.sh -batch _openMOLEExperiment_ experiment.gaml
 """)}
 
-Once the headless has run, you should find a file named ${i("simulation-outputsXX.xml")}. Check that it exists, is well formed and contains the simulation results. Otherwise you can report the bug to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
+Once the headless has run, you should find a file named ${i("om_output.json")}. Check that it exists, is well formed and contains the simulation results. Otherwise you can check you model or experiment for errors. If you find a bug in GAMA, you can report it to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
 
 ${h3("Using Docker")}
 
@@ -134,20 +162,11 @@ ${i("/tmp/gama model/")} is a folder on your computer. ${i("/work")} is the fold
 $br
 
 Once inside the Docker container, you're in the ${i("/opt/gama-platform/headless")} directory, and the model is in the folder ${i("/work")}.
-You can then run GAMA commands to generate XML files.
+You can then run GAMA commands to run your model.
 
 ${code(
     """
-      |./gama-headless.sh -xml prey_predatorExp /work/predatorPrey.gaml /work/predatorPrey.xml""".stripMargin)}
+      |./gama-headless.sh -batch _openMOLEExperiment_ /work/experiment.gaml""".stripMargin)}
 
-This command generates an XML file at the location you specify (it's the last part of the command line).
-
-Once the XML is created, it's the one that will be used by OpenMOLE to inject the values from the exploration plan you defined.
-You can launch the experiment from the XML like this :
-
-${code(
-    """
-      |./gama-headless.sh /work/predatorPrey.xml .""".stripMargin)}
-
-Once the headless has run, you should find a file named ${i("simulation-outputsXX.xml")}. Check that it exists, is well formed and contains the simulation results. Otherwise you can report the bug to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
+Once the headless has run, you should find a file named ${i("om_output.json")}. Check that it exists, is well formed and contains the simulation results. Otherwise, you can check your model for error. If you find a bug in GAMA, you can report it to the GAMA developers on ${aa("Github", href := "https://github.com/gama-platform/gama")}.
 """)
