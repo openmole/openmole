@@ -31,7 +31,9 @@ class Activator extends BundleActivator {
 
     val keyWords: Vector[HighLight] =
       Vector(
-        TaskHighLight(objectName(GAMATask)))
+        TaskHighLight(objectName(GAMATask)),
+        TaskHighLight(objectName(GAMALegacyTask)),
+      )
 
     PluginRegistry.register(this, Vector(this.getClass.getPackage), highLight = keyWords)
   }
