@@ -168,7 +168,7 @@ object GAMATask:
             |
             |import '$gaml'
             |
-            |experiment $omExperimentName /*parent:prey_predator  /* on peut mettre une experiment parent ou non avec cette facet */{
+            |experiment $omExperimentName {
             |
             |  float seed <- $seedValue;
             |${inputParameters.map("  " + _).mkString("\n")}
