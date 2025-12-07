@@ -37,17 +37,19 @@ object KillActor:
         then environment.submit(loadedJob)
     
     try BatchEnvironment.finishedExecutionJob(environment, job)
-    finally tryKillAndClean(job, environment, batchJob)
+    finally tryKillAndClean(job, environment, batchJob, msg.finished)
 
-  def tryKillAndClean(job: BatchExecutionJob, environment: BatchEnvironment, bj: Option[BatchJobControl])(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
+  def tryKillAndClean(job: BatchExecutionJob, environment: BatchEnvironment, bj: Option[BatchJobControl], finished: Boolean)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) =
     JobStore.clean(job.storedJob)
 
     def kill(bj: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) = retry(services.preference(BatchEnvironment.killJobRetry))(bj.delete(priority))
     def clean(bj: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority) = retry(services.preference(BatchEnvironment.cleanJobRetry))(bj.clean(priority))
 
-    try bj.foreach(kill)
-    catch
-      case e: Throwable => JobManager ! Error(job, environment, e, None, None)
+    if !finished
+    then
+      try bj.foreach(kill)
+      catch
+        case e: Throwable => JobManager ! Error(job, environment, e, None, None)
 
     try bj.foreach(clean)
     catch

@@ -43,7 +43,7 @@ object GetResultActor {
 
     val GetResult(job, environment, resultPath, batchJob) = msg
 
-    JobManager.killOr(environment, job, Kill(job, environment, Some(batchJob))): () =>
+    JobManager.killOr(environment, job, Kill(job, environment, Some(batchJob), finished = true)): () =>
       try getResult(environment, resultPath, job, batchJob)
       catch
         case e: Throwable =>
@@ -53,7 +53,7 @@ object GetResultActor {
           e match
             case e: JobRemoteExecutionException => JobManager ! Error(job, environment, e, stdOutErr, e.output)
             case _                              => JobManager ! Error(job, environment, e, stdOutErr, None)
-      finally JobManager ! Kill(job, environment, Some(batchJob))
+      finally JobManager ! Kill(job, environment, Some(batchJob), finished = true)
 
   def getResult(environment: BatchEnvironment, outputFilePath: String, batchJob: BatchExecutionJob, batchJobControl: BatchJobControl)(using services: BatchEnvironment.Services, priority: AccessControl.Priority): Unit =
 
