@@ -29,7 +29,7 @@ case class Submitted(job: BatchExecutionJob, environment: BatchEnvironment, batc
 case class Refresh(job: BatchExecutionJob, environment: BatchEnvironment, batchJob: BatchJobControl, delay: Time, consecutiveUpdateErrors: Int = 0) extends JobMessage with DispatchedMessage
 case class Delay(msg: JobMessage, delay: Time) extends JobMessage
 case class Error(job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable, stdOutErr: Option[(String, String)], output: Option[String]) extends JobMessage with DispatchedMessage
-case class Kill(job: BatchExecutionJob, environment: BatchEnvironment, batchJob: Option[BatchJobControl]) extends JobMessage with DispatchedMessage
+case class Kill(job: BatchExecutionJob, environment: BatchEnvironment, batchJob: Option[BatchJobControl], finished: Boolean) extends JobMessage with DispatchedMessage
 case class GetResult(job: BatchExecutionJob, environment: BatchEnvironment, outputFilePath: String, batchJob: BatchJobControl) extends JobMessage with DispatchedMessage
 case class Manage(job: BatchExecutionJob, environment: BatchEnvironment) extends JobMessage
 case class MoleJobError(moleJob: JobId, job: BatchExecutionJob, environment: BatchEnvironment, exception: Throwable, output: Option[String], host: String) extends JobMessage

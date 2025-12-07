@@ -30,7 +30,7 @@ object RefreshActor:
 
     val Refresh(job, environment, bj, delay, updateErrorsInARow) = refresh
 
-    JobManager.killOr(environment, job, Kill(job, environment, Some(bj))): () =>
+    JobManager.killOr(environment, job, Kill(job, environment, Some(bj), finished = false)): () =>
       try
         val oldState = BatchEnvironment.executionSate(environment, job)
         BatchEnvironment.setExecutionSate(environment, job, BatchJobControl.updateState(bj))
@@ -41,7 +41,7 @@ object RefreshActor:
             val exception = new InternalProcessingError(s"""Job status is FAILED""".stripMargin)
             val stdOutErr = BatchJobControl.tryStdOutErr(bj).toOption
             JobManager ! Error(job, environment, exception, stdOutErr, None)
-            JobManager ! Kill(job, environment, Some(bj))
+            JobManager ! Kill(job, environment, Some(bj), finished = true)
           case SUBMITTED | RUNNING =>
             val updateInterval = bj.updateInterval
             val newDelay =
@@ -57,7 +57,7 @@ object RefreshActor:
           if updateErrorsInARow >= preference(BatchEnvironment.MaxUpdateErrorsInARow)
           then
             JobManager ! Error(job, environment, e, BatchJobControl.tryStdOutErr(bj).toOption, None)
-            JobManager ! Kill(job, environment, Some(bj))
+            JobManager ! Kill(job, environment, Some(bj), finished = false)
           else
             Logger.fine(s"${updateErrorsInARow + 1} errors in a row during job refresh", e)
             JobManager ! Delay(Refresh(job, environment, bj, delay, updateErrorsInARow + 1), delay)
