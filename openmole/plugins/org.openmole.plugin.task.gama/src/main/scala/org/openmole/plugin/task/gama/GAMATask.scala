@@ -50,13 +50,14 @@ object GAMATask:
       case v: Boolean => if v then "true" else "false"
       case v: String => '"' + v + '"'
       case v: Array[?] => "[" + v.map(toGAMA).mkString(", ") + "]"
-      case _ => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to Scilab")
+      case _ => throw new UserBadDataError(s"Value $v of type ${v.getClass} is not convertible to GAMA")
 
   def apply(
     project:                File,
     gaml:                   String,
     finalStep:              OptionalArgument[FromContext[Int]]    = None,
-    stop:                   OptionalArgument[FromContext[String]] = None,
+    stopCondition:          OptionalArgument[FromContext[String]] = None,
+    parentExperiment:       OptionalArgument[String]              = None,
     seed:                   OptionalArgument[Val[Long]]           = None,
     install:                Seq[String]                           = Seq.empty,
     containerImage:         ContainerImage                        = "gamaplatform/gama:2025.06.4",
@@ -156,11 +157,16 @@ object GAMATask:
 
         val (_, volumes) = GAMALegacyTask.volumes(project, gaml)
 
-        def stopCondition =
-          (finalStep.option, stop.option) match
+        def stopConditionValue =
+          (finalStep.option, stopCondition.option) match
             case (_, Some(s)) => s"when:${s.from(context)}"
             case (Some(s), None) => s"when:cycle=${s.from(context)}"
             case (None, None) => throw InternalProcessingError("No stopping condition is defined")
+
+        def parentExperimentValue =
+          parentExperiment.option match
+            case Some(e) => s"parent:$e"
+            case None => ""
 
         def experimentFileContent  =
           s"""
@@ -168,12 +174,12 @@ object GAMATask:
             |
             |import '$gaml'
             |
-            |experiment $omExperimentName {
+            |experiment $omExperimentName $parentExperimentValue {
             |
             |  float seed <- $seedValue;
             |${inputParameters.map("  " + _).mkString("\n")}
             |
-            |	 reflex stop_reflex $stopCondition {
+            |	 reflex stop_reflex $stopConditionValue {
             |
             |    map<string, unknown> _outputs_ <- [
             |${outputMapping.map("    " + _).mkString(",\n")}
@@ -208,11 +214,11 @@ object GAMATask:
                    |GAMA was launched using the command: $launchCommand""", t)
     .withValidate: info =>
       def stopError: Seq[Throwable] =
-        if !finalStep.isDefined && !stop.isDefined then Seq(UserBadDataError("You should set either the finalStep or stop parameter")) else Seq()
+        if !finalStep.isDefined && !stopCondition.isDefined then Seq(UserBadDataError("You should set either the finalStep or stop parameter")) else Seq()
 
       ContainerTask.validateContainer(Vector(), environmentVariables, info.external) ++
         finalStep.map(_.validate).toSeq ++
-        stop.map(_.validate).toSeq ++
+        stopCondition.map(_.validate).toSeq ++
         stopError
     .set(
       inputs ++= seed.option.toSeq,
