@@ -47,10 +47,9 @@ val mySeed = Val[Long]
 // Gama task
 // The first argument is the project directory
 // The second argument is the relative path of the gaml file in the project directory
-// The second argument is the Gama experiment name
 // The third argument is the number of steps
 val gama =
-  GAMATask(project = workDirectory / "predator", gaml = "predatorPrey.gaml", experiment = "prey_predatorExp", finalStep = 100, seed = mySeed) set (
+  GAMATask(project = workDirectory / "predator", gaml = "predatorPrey.gaml", finalStep = 100, seed = mySeed) set (
     inputs += (nbPreysInit mapped "nb_preys_init"),
     outputs += (numberOfPreys mapped "nb_preys")
   )
