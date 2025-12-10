@@ -35,7 +35,7 @@ import org.openmole.core.script.{Imports, ScriptSourceData}
 
 object Project:
 
-  def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
+  def newREPL(quiet: Boolean = true, options: Seq[String] = Seq())(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet, options = options)
 
   def uniqueName(source: File) = s"_${Hash.string(source.getCanonicalPath)}"
 
@@ -45,7 +45,8 @@ object Project:
       tree.children.map(c => makePackage(c.name, c.tree)).mkString("\n")
 
     def makePackage(name: String, tree: Tree): String =
-      if (!tree.files.isEmpty) tree.files.distinct.map(f => makeVal(name, f)).mkString("\n")
+      if tree.files.nonEmpty
+      then tree.files.distinct.map(f => makeVal(name, f)).mkString("\n")
       else
         s"""
             |class ${name}Clazz {

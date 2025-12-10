@@ -123,8 +123,8 @@ object Interpreter {
       Activator.context.get.getBundles.filter(!_.isSystem).map(toPath)
   }.distinct
 
-  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean): (repl.REPLDriver, ClassLoader) =
-    def commonOptions = Seq("-language:postfixOps", "-language:implicitConversions", "-nowarn")
+  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean, options: Seq[String]): (repl.REPLDriver, ClassLoader) =
+    def commonOptions = Seq("-language:postfixOps", "-language:implicitConversions", "-nowarn") ++ options
 
     classDirectory.mkdirs()
 
@@ -161,9 +161,9 @@ object Interpreter {
   type Compiled = () => Any
   case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
 
-  def apply(priorityBundles: => Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = {
+  def apply(priorityBundles: => Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true, options: Seq[String] = Seq())(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(TmpDirectory.newDirectory("classDirectory"))
-    val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet)
+    val (drv, cl) = driver(classDirectory, priorityBundles, jars, quiet = quiet, options = options)
     //    val settings = OSGiScalaCompiler.createSettings(new Settings, priorityBundles, jars, classDirectory)
     //    new Interpreter(priorityBundles, jars, quiet, classDirectory, settings)
     new Interpreter(drv, classDirectory, cl)
