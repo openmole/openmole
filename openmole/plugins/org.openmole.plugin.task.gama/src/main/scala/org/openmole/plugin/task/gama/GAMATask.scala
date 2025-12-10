@@ -31,13 +31,17 @@ object GAMATask:
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     def fixIni =
-      Seq("""sed -i -E '/-XX:/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d; /-server[^ ]*/ d' /opt/gama-platform/Gama.ini""")
+      Seq("""sed -i -E '/-XX:/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d' /opt/gama-platform/Gama.ini""")
+
+    // skip -server JVM option
+    def fixHeadless =
+      Seq("""sed -i '/grep -n -- .*-server/ a \  start_line=$((start_line + 1))' /opt/gama-platform/headless/gama-headless.sh""")
 
     val installedImage =
       ContainerTask.install(
         containerSystem,
         image,
-        fixIni ++ install,
+        fixIni ++ fixHeadless ++ install,
         Seq(),
         clearCache = clearCache)
 
