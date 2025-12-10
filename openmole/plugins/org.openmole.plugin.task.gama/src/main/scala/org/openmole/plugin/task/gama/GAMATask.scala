@@ -31,7 +31,7 @@ object GAMATask:
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     def fixIni =
-      Seq("""sed -i -E '/-XX:\+UseG1GC/ d; /-XX:G1[^ ]*/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d' /opt/gama-platform/Gama.ini""")
+      Seq("""sed -i -E '/-XX:/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d; /-server[^ ]*/ d' /opt/gama-platform/Gama.ini""")
 
     val installedImage =
       ContainerTask.install(
@@ -106,11 +106,17 @@ object GAMATask:
         s"gama-headless $memoryValue -hpc 1 -batch $omExperimentName $inputFilePath"
 
       def environmentVariablesValue =
-        def fewerThreadsEnvironmentVariable: EnvironmentVariable =
-          val exquinoxSingleThread = Seq("-Dequinox.resolver.thread.count=1", "-Dequinox.start.level.thread.count=1", "-Dequinox.start.level.restrict.parallel=true")
-          ("_JAVA_OPTIONS", (JavaConfiguration.fewerThreadsParameters ++ exquinoxSingleThread).mkString(" "))
-        environmentVariables ++
-          (if fewerThreads then Seq(fewerThreadsEnvironmentVariable) else Seq())
+        def fewerThreadsEnvironmentVariable =
+          if fewerThreads
+          then
+            val equinoxSingleThread = Seq("-Dequinox.resolver.thread.count=1", "-Dequinox.start.level.thread.count=1", "-Dequinox.start.level.restrict.parallel=true")
+            (JavaConfiguration.fewerThreadsParameters ++ equinoxSingleThread)//.mkString(" "))
+          else Seq()
+
+        def javaOptions: EnvironmentVariable =
+          ("_JAVA_OPTIONS", fewerThreadsEnvironmentVariable.mkString(" "))
+
+        environmentVariables ++ Seq(javaOptions)
 
       val containerTaskExecution =
         ContainerTask.execution(
