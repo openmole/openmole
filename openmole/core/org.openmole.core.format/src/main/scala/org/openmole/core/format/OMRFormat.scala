@@ -108,7 +108,7 @@ object OMRFormat:
 
   def dataFileField(file: File): Seq[String] = omrContent(file).`data-file`
 
-  def storeFiles(omrFile: File): Seq[(String, File)] =
+  def dataFiles(omrFile: File): Seq[(String, File)] =
     dataFileField(omrFile).map: n =>
       (n, dataFile(omrFile, n))
 
@@ -275,21 +275,23 @@ object OMRFormat:
       val destinationDataDirectory = destination.getParentFile
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
-      storeFiles(omrFile).foreach((name, file) => file.move(destinationDataDirectory / name))
+      dataFiles(omrFile).foreach((name, file) => file.move(destinationDataDirectory / name))
       val omrDataDirectory = dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile move destination
 
   def delete(omrFile: File) =
-    storeFiles(omrFile).foreach((_, file) => file.delete())
-    fileDirectory(omrFile).foreach(_.recursiveDelete)
-    val omrDataDirectory = dataDirectory(omrFile)
-    if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
-    omrFile.delete()
+    try
+      dataFiles(omrFile).foreach((_, file) => file.delete())
+      fileDirectory(omrFile).foreach(_.recursiveDelete)
+      val omrDataDirectory = dataDirectory(omrFile)
+      if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
+    finally
+      omrFile.delete()
 
   def diskUsage(omrFile: File) =
     omrFile.size +
-      OMRFormat.storeFiles(omrFile).map((_, file) => file.size).sum +
+      OMRFormat.dataFiles(omrFile).map((_, file) => file.size).sum +
       OMRFormat.fileDirectory(omrFile).map(_.size).getOrElse(0L)
 
 //  def keepLastDataFile(omrFile: File) =
