@@ -82,6 +82,20 @@ def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
 object OMRFormat:
+  object omr:
+    def dataFileName(executionId: String, uuid: String) =
+      def executionPrefix = executionId.filter(_ != '-')
+      s"$dataDirectoryName/$executionPrefix-$uuid.omd"
+
+    def newUUID = UUID.randomUUID().toString.filter(_ != '-')
+
+    def writeOMRContent(file: File, content: OMRContent) =
+      file.withPrintStream(create = true, gz = true)(
+        _.print(content.asJson.deepDropNullValues.noSpaces)
+      )
+
+    def newReferencedFileDirectoryName(executionId: String) = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-${omr.newUUID}"
+
   def resultFileDirectory(file: File) =
     val index = omrContent(file)
     index.`file-directory`.map(d => file.getParentFile / d)
@@ -103,10 +117,6 @@ object OMRFormat:
   def readDataStream[T](omrFile: File, name: String)(f: java.io.InputStream => T) =
     dataFile(omrFile, name).withGzippedInputStream(f)
 
-  def writeOMRContent(file: File, content: OMRContent) =
-    file.withPrintStream(create = true, gz = true)(
-      _.print(content.asJson.deepDropNullValues.noSpaces)
-    )
 
   def write(
     data: OutputFormat.OutputContent,
@@ -118,7 +128,6 @@ object OMRFormat:
     timeStart: Long,
     openMOLEVersion: String,
     option: OMROption)(using TimeService, FileService, TmpDirectory) =
-    def newUUID = UUID.randomUUID().toString.filter(_ != '-')
 
     def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
       def mode =
@@ -158,7 +167,7 @@ object OMRFormat:
     val existingData = existingContent.toSeq.flatMap(_.`data-file`)
 
     val resultFileDirectoryName =
-      def name = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-$newUUID"
+      def name = omr.newReferencedFileDirectoryName(executionId)
       existingContent match
         case Some(c) => c.`file-directory`.getOrElse(name)
         case None => name
@@ -173,13 +182,12 @@ object OMRFormat:
     def jsonContent = JArray(data.section.map { s => JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList) }.toList)
 
     val fileName =
-      def executionPrefix = executionId.filter(_ != '-')
       if !option.append
-      then s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+      then s"$dataDirectoryName/${omr.dataFileName(executionId, omr.newUUID)}"
       else
         existingData.headOption match
           case Some(h) => h
-          case None => s"$dataDirectoryName/$executionPrefix-$newUUID.omd"
+          case None => s"$dataDirectoryName/${omr.dataFileName(executionId, omr.newUUID)}"
 
     val dataFile = directory / fileName
 
@@ -199,7 +207,7 @@ object OMRFormat:
       then Some(resultFileDirectoryName)
       else None
 
-    writeOMRContent(
+    omr.writeOMRContent(
       methodFile,
       methodFormat(existingData, fileName, contentData, fileDirectoryValue)
     )
@@ -217,16 +225,32 @@ object OMRFormat:
 //    files.toSeq
 
   def copy(omrFile: File, destination: File) =
-    val originDirectory = omrFile.getParentFile
-    val destinationDirectory = destination.getParentFile
-    val copyData = originDirectory != destinationDirectory
-    if copyData
+    if omrFile != destination
     then
-      storeFiles(omrFile).foreach((name, file) => file.copy(destinationDirectory / name))
-      val index = omrContent(omrFile)
-      index.`file-directory`.foreach(d => (originDirectory / d).copy(destinationDirectory / d))
+      val originDirectory = omrFile.getParentFile
+      val destinationDirectory = destination.getParentFile
 
-    omrFile copy destination
+      val index = omrContent(omrFile)
+
+      val copiedDataFiles =
+        index.`data-file`.map: f =>
+          val copiedName = omr.dataFileName(index.`execution-id`, omr.newUUID)
+          val copiedFile = destinationDirectory / copiedName
+
+          (originDirectory / f) copy copiedFile
+          copiedName
+
+      val copiedReferencedFileDirectory =
+        index.`file-directory`.map: d =>
+          val copiedDirectory = omr.newReferencedFileDirectoryName(index.`execution-id`)
+          (originDirectory / d) copy (destinationDirectory / copiedDirectory)
+          copiedDirectory
+
+      omr.writeOMRContent(
+        destination,
+        index.copy(`data-file` = copiedDataFiles, `file-directory` = copiedReferencedFileDirectory)
+      )
+
 
   def move(omrFile: File, destination: File) =
     val originDirectory = omrFile.getParentFile

@@ -27,7 +27,7 @@ object SubmitActor:
 
     val Submit(job, environment) = submit
 
-    JobManager.killOr(environment, job, Kill(job, environment, None)): () =>
+    JobManager.killOr(environment, job, Kill(job, environment, None, finished = false)): () =>
       try
         val bj = environment.execute(job)
         BatchEnvironment.setExecutionSate(environment, job, SUBMITTED)

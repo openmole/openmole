@@ -77,7 +77,7 @@ object Mapped:
       case m@Mapped(Val.caseFile(v), _) => Mapped[java.io.File](v, m.nameOption)
 
 
-  def noFile(mapped: Vector[ Mapped[?]]) =
+  def noFile(mapped: Vector[Mapped[?]]) =
     mapped.flatMap:
       case Mapped(Val.caseFile(v), _) => Seq[ Mapped[?]]()
       case m                          => Seq(m)
