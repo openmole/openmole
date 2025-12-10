@@ -267,11 +267,13 @@ object OMRFormat:
     omrFile move destination
 
   def delete(omrFile: File) =
-    storeFiles(omrFile).foreach((_, file) => file.delete())
-    resultFileDirectory(omrFile).foreach(_.recursiveDelete)
-    val omrDataDirectory = dataDirectory(omrFile)
-    if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
-    omrFile.delete()
+    try
+      storeFiles(omrFile).foreach((_, file) => file.delete())
+      resultFileDirectory(omrFile).foreach(_.recursiveDelete)
+      val omrDataDirectory = dataDirectory(omrFile)
+      if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
+    finally
+      omrFile.delete()
 
   def diskUsage(omrFile: File) =
     omrFile.size +
