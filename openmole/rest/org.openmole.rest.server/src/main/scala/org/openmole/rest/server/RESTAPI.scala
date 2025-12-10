@@ -207,7 +207,7 @@ class RESTAPI(services: Services):
           val file = ex.jobDirectory.workDirectory / path
 
           checkIsOMR(file):
-            OMRFormat.resultFileDirectory(file) match
+            OMRFormat.fileDirectory(file) match
               case Some(fileDirectory) =>
                 HTTP.sendFileStream(s"${file.baseName}-files.tgz"): out =>
                   val tos = TarArchiveOutputStream(out.toGZ, Some(64 * 1024))

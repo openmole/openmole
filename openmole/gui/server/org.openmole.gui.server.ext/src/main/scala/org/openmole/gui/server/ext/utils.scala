@@ -403,7 +403,7 @@ object utils:
       import org.openmole.tool.archive.*
       import org.openmole.tool.stream.*
 
-      val history = org.openmole.core.format.OMRFormat.dataFiles(omrFile)
+      val history = org.openmole.core.format.OMRFormat.dataFileField(omrFile)
 
       HTTP.sendFileStream(s"${omrFile.baseName}.tar.gz"): out =>
         val tos = TarArchiveOutputStream(out.toGZ, blockSize = Some(64 * 1024))

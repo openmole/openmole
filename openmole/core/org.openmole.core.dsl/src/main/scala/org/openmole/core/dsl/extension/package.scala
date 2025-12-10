@@ -98,7 +98,8 @@ package object extension:
       InputOutputBuilder,
       InfoBuilder,
       MappedInputOutputBuilder,
-      Setter
+      Setter,
+      MappedOutputBuilder
     }
 
   def Aggregate = org.openmole.core.keyword.Evaluate

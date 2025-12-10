@@ -344,14 +344,14 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory), fileServiceCache = FileServiceCache())
 
     try
-      Project.compile(script.getParentFileSafe, script)(runServices) match
+      Project.compile(script.getParentFileSafe, script)(using runServices) match
         case ScriptFileDoesNotExists() => ErrorData("Script file does not exist")
         case ErrorInCode(e) => scriptCompilationError(e)
         case ErrorInCompiler(e) => scriptCompilationError(e)
         case compiled: Compiled =>
           if Thread.interrupted() then throw new InterruptedIOException()
 
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(using runServices))) match
             case Failure(e) => scriptCompilationError(e)
             case Success(dsl) => (runServices, compiled, dsl)
     catch
@@ -547,7 +547,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def omrFiles(omr: SafePath): Option[SafePath] =
     import services.*
     val omrFile = safePathToFile(omr)
-    OMRFormat.resultFileDirectory(omrFile).map: rf =>
+    OMRFormat.fileDirectory(omrFile).map: rf =>
       fileToSafePath(rf)
 
   def omrContent(result: SafePath, dataFile: Option[String]): GUIOMRContent =
@@ -557,7 +557,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val omrFile = safePathToFile(result)
 
     def content =
-      OMRFormat.variables(omrFile, dataFile = dataFile).map: v =>
+      OMRFormat.variables(omrFile, dataFile = dataFile.map(d => OMRFormat.dataFile(omrFile, d))).map: v =>
         GUIOMRSectionContent(v.section.name, v.variables.map(toGUIVariable))
 
     val omrContent = OMRFormat.omrContent(omrFile)

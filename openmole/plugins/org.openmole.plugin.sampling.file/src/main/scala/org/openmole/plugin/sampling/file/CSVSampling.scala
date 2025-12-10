@@ -27,15 +27,14 @@ import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.format.CSVFormat
 
-object CSVSampling {
+object CSVSampling:
 
-  implicit def isIO: InputOutputBuilder[CSVSampling] = InputOutputBuilder(Focus[CSVSampling](_.config))
+  given isIO: InputOutputBuilder[CSVSampling] = InputOutputBuilder(Focus[CSVSampling](_.config))
 
-  implicit def isBuilder: MappedOutputBuilder[CSVSampling] = new MappedOutputBuilder[CSVSampling] {
-    override def mappedOutputs: Lens[CSVSampling, Vector[ Mapped[?]]] = Focus[CSVSampling](_.columns)
-  }
+  given isBuilder: MappedOutputBuilder[CSVSampling] with
+    override def mappedOutputs: Lens[CSVSampling, Vector[Mapped[?]]] = Focus[CSVSampling](_.columns)
 
-  implicit def isSampling: IsSampling[CSVSampling] = s =>
+  given isSampling: IsSampling[CSVSampling] = s =>
     Sampling(
       s.apply(),
       s.outputs,
@@ -54,27 +53,24 @@ object CSVSampling {
   def apply(file: File): CSVSampling = apply(file: FromContext[File])
   def apply(directory: File, name: FromContext[String]): CSVSampling = apply(FileFromContext(directory, name))
 
-}
 
 case class CSVSampling(
   file:      FromContext[File],
   config:    InputOutputConfig,
   columns:   Vector[ Mapped[?]],
-  separator: Option[Char]
-) {
+  separator: Option[Char]):
 
   def validate = file.validate
-
   def inputs = config.inputs
   def outputs = config.outputs
   
-  def apply() = FromContext { p =>
+  def apply() = FromContext: p =>
     import p._
 
     CSVFormat.csvToVariables(
       file.from(context),
       columns.map(_.toTuple.swap),
       separator)
-  }
 
-}
+
+
