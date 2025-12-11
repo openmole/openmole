@@ -42,6 +42,7 @@ object HDOSE:
     weightD:             Vector[Double],
     archiveSize:         Int,
     distance:            Double,
+    shuffle:             Boolean,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
     operatorExploration: Double,
@@ -135,7 +136,8 @@ object HDOSE:
               om.genome.continuous,
               om.genome.discrete,
               Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
-              om.distance) apply (s, population, candidates, rng)
+              om.distance,
+              shuffle = om.shuffle) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
           def genomeValue(i: I) = (i.genome.continuousValues, i.genome.discreteValues(om.genome.discrete))
@@ -169,6 +171,7 @@ object HDOSE:
     weightD: Vector[Double],
     archiveSize: Int,
     distance: Double,
+    shuffle: Boolean,
     phenotypeContent: PhenotypeContent,
     objectives: Objectives,
     historySize: Int,
@@ -277,7 +280,8 @@ object HDOSE:
               om.weightD,
               om.archiveSize,
               om.limit,
-              om.distance) apply(s, population, candidates, rng)
+              om.distance,
+              shuffle = om.shuffle) apply (s, population, candidates, rng)
 
 
         def mergeIslandState(state: S, islandState: S): S =
@@ -395,6 +399,7 @@ object HDOSE:
     objective: Seq[OSE.FitnessPattern],
     archiveSize: Int = 1000,
     distance: Double = 1.0,
+    shuffle: Boolean = true,
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
     stochastic: OptionalArgument[Stochastic] = None,
@@ -420,6 +425,7 @@ object HDOSE:
             weightD = weightD,
             archiveSize = archiveSize,
             distance = distance,
+            shuffle = shuffle,
             phenotypeContent = phenotypeContent,
             objectives = exactObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
@@ -445,6 +451,7 @@ object HDOSE:
             weightD = weightD,
             archiveSize = archiveSize,
             distance = distance,
+            shuffle = shuffle,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
@@ -470,6 +477,7 @@ object HDOSEEvolution:
         objective = p.objective,
         archiveSize = p.archiveSize,
         distance = p.distance,
+        shuffle = p.shuffle,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         populationSize = p.populationSize,
@@ -501,6 +509,7 @@ case class HDOSEEvolution(
   archiveSize:    Int                          = 500,
   populationSize: Int                          = 200,
   distance:       Double                       = 1.0,
+  shuffle:        Boolean                      = true,
   stochastic:     OptionalArgument[Stochastic] = None,
   reject:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
