@@ -17,7 +17,7 @@
 
 package org.openmole.core.context
 
-import org.openmole.core.exception.UserBadDataError
+import org.openmole.core.exception.*
 import org.openmole.core.workspace.Workspace
 import org.openmole.tool.logger.Prettifier
 import org.openmole.tool.random
@@ -164,22 +164,28 @@ object Variable:
       constructMultiDimensionalArray(collection, array, multiArrayType.runtimeClass.asInstanceOf[Class[?]], depth, toValue)
       array
 
-    def constructJaggedArray =
+    def constructJaggedArray: Any =
       val (multiArrayType, depth): (ValType[?], Int) = ValType.unArrayify(prototype.`type`)
       def constructMultiDimensionalArray(
         value: Any,
         valType: ValType[?],
-        toValue: (Any, Class[?]) => Any): Any =
+        toValue: (Any, Class[?]) => Any,
+        depth: Int): Any =
         import org.openmole.tool.types.TypeTool._
         import scala.jdk.CollectionConverters.*
         value match
           case v: CA =>
             val collection = construct.iterable(v).asScala
             val fromArrayValType = ValType.fromArrayUnsecure(valType.asInstanceOf[ValType[Array[?]]])
-            collection.map(e => constructMultiDimensionalArray(e, fromArrayValType, toValue)).toArray(using fromArrayValType.manifest)
-          case v => toValue(v, multiArrayType.runtimeClass.asInstanceOf[Class[?]])
+            collection.map: e =>
+              constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
+            .toArray(using fromArrayValType.manifest)
+          case v =>
+            if depth > 0
+            then throw UserBadDataError(s"The variable $prototype has an incorrect dimension to store the collection $collection")
+            else toValue(v, multiArrayType.runtimeClass.asInstanceOf[Class[?]])
 
-      constructMultiDimensionalArray(collection, prototype.`type`, toValue)
+      constructMultiDimensionalArray(collection, prototype.`type`, toValue, depth)
 
     val array =
       isRectangular match

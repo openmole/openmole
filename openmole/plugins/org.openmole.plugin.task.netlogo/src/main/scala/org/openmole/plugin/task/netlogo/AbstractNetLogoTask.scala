@@ -206,10 +206,14 @@ object AbstractNetLogoTask:
       if !runtimeClass.isArray
       then Variable.unsecureUntyped(mapped.v, AbstractNetLogoTask.cast(outputValue, runtimeClass))
       else
+        println("fetch array")
         val netLogoCollection: util.AbstractCollection[Any] =
-          if (classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass))
-          then outputValue.asInstanceOf[AbstractCollection[Any]]
+          if classOf[AbstractCollection[Any]].isAssignableFrom(outputValue.getClass)
+          then
+            println("cast array")
+            outputValue.asInstanceOf[AbstractCollection[Any]]
           else
+            println("not cast")
             val newArray = new util.LinkedList[Any]()
             newArray.add(outputValue)
             newArray
