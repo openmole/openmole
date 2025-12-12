@@ -31,7 +31,8 @@ import org.openmole.core.workflow.composition.DSL
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.hash.*
 import monocle.Focus
-import org.openmole.core.script.{Imports, ScriptSourceData}
+import org.openmole.core.format.ScriptSourceData
+import org.openmole.core.script.Imports
 
 object Project:
 

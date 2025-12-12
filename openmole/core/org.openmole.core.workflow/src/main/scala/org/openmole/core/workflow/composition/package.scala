@@ -39,7 +39,6 @@ import org.openmole.core.workflow.transition.*
 import org.openmole.core.workflow.validation.TypeUtil
 import org.openmole.core.format.*
 import org.openmole.core.format.WritableOutput.Display
-import org.openmole.core.script.ScriptSourceData
 import org.openmole.core.workflow.composition
 
 object Puzzle:

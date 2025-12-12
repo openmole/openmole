@@ -1,5 +1,8 @@
 package org.openmole.core.dsl
 
+import org.openmole.core.format
+import org.openmole.core.format.ScriptSourceData
+
 package object extension:
   export org.openmole.core.argument.{FromContext, ScalaCompilation, ToFromContext, OptionalArgument, DefaultSet}
   
@@ -147,7 +150,7 @@ package object extension:
   export org.openmole.tool.collection.DoubleRange
 
   export org.openmole.core.setter.DefaultBuilder
-  export org.openmole.core.script.ScriptSourceData
+  export format.ScriptSourceData
 
   export org.openmole.core.preference.PreferenceLocation
   export org.openmole.core.authentication.{Authentication, AuthenticationStore}
