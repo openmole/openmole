@@ -1,13 +1,17 @@
-package org.openmole.core.script
+package org.openmole.core.format
 
 import org.openmole.core.script.Imports.ImportedFile
+import org.openmole.core.script.*
 import org.openmole.tool.file.{File, *}
 
 object ScriptSourceData:
   //implicit def defaultData: ScriptSourceData = NoData
 
   case class ScriptData(workDirectory: File, script: File) extends ScriptSourceData:
-    val content = if (script.exists()) script.content else ""
+    val content = if script.exists() then script.content else ""
+    val imports =
+      val is = Imports.directImportedFiles(script).map(i => OMRContent.Import(ImportedFile.identifier(i), i.file.content))
+      if is.isEmpty then None else Some(is)
 
   case object NoData extends ScriptSourceData
 
@@ -19,6 +23,11 @@ object ScriptSourceData:
     scriptData match
       case NoData        => ""
       case s: ScriptData => s.content
+
+  def imports(scriptData: ScriptSourceData) =
+    scriptData match
+      case NoData => None
+      case s: ScriptData => s.imports
 
 
 sealed trait ScriptSourceData

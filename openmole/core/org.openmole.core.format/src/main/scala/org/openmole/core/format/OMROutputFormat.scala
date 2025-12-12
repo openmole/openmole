@@ -78,10 +78,7 @@ object OMROutputFormat:
         scriptData match
           case data: ScriptSourceData.ScriptData if option.script =>
             val scriptContent = ScriptSourceData.scriptContent(scriptData)
-            val imports =
-              val is = Imports.directImportedFiles(data.script).map(i => OMRContent.Import(ImportedFile.identifier(i), i.file.content))
-              if is.isEmpty then None else Some(is)
-
+            val imports = ScriptSourceData.imports(scriptData)
             Some(OMRContent.Script(scriptContent, imports))
           case _ => None
 

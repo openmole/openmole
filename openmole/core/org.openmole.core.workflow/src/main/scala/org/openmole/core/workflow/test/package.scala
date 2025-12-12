@@ -1,7 +1,6 @@
 package org.openmole.core.workflow.test
 
-import org.openmole.core.script.ScriptSourceData
-
+import org.openmole.core.format.ScriptSourceData
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import org.openmole.core.serializer.SerializerService
 

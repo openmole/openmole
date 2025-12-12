@@ -7,7 +7,6 @@ import org.openmole.core.setter.*
 import org.openmole.core.workflow.dsl.*
 import org.openmole.core.format.OutputFormat.*
 import org.openmole.core.format.*
-import org.openmole.core.script.ScriptSourceData
 
 object OMRFileHook:
 
