@@ -139,15 +139,34 @@ package object json:
           case _                                    => throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
 
 
-  private def objectMapper =
-    JsonMapper.builder()
+  private lazy val objectMapper =
+    import org.json4s.jackson.Json4sScalaModule
+    import com.fasterxml.jackson.core.*
+    import com.fasterxml.jackson.core.json.*
+    import com.fasterxml.jackson.databind.*
+    import com.fasterxml.jackson.module.scala.*
+
+    val m = JsonMapper.builder()
       .addModule(DefaultScalaModule)
+      .configure(JsonParser.Feature.USE_FAST_DOUBLE_PARSER, true)
+      .configure(JsonParser.Feature.USE_FAST_BIG_NUMBER_PARSER, true)
+      .configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true)
       .build()
 
+    m.registerModule(new Json4sScalaModule)
+    m
+
   def anyToJValue(a: Any): org.json4s.JValue =
-    import org.json4s.jackson.JsonMethods.*
-    parse(objectMapper.writeValueAsString(a))
+    jsonParser.parse(objectMapper.writeValueAsString(a))
 
   def jValueToAny(value: JValue, clazz: Class[?]): Any =
     import org.json4s.jackson.JsonMethods.*
     objectMapper.readValue(compact(render(value)), clazz)
+
+  lazy val jsonParser =
+    import com.fasterxml.jackson.databind.*
+
+    val jsonMethods = new org.json4s.jackson.JsonMethods:
+      override def mapper = objectMapper
+
+    jsonMethods

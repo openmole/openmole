@@ -350,8 +350,7 @@ object OMRFormat:
           (section, variables)
 
         def readContent(): JArray =
-          import org.json4s.jackson.JsonMethods.*
-          parse(is).asInstanceOf[JArray]
+          jsonParser.parse(is).asInstanceOf[JArray]
 
         val content = readContent()
 
@@ -376,8 +375,7 @@ object OMRFormat:
           val begin = new StringInputStream("[")
           val end = new StringInputStream("]")
           val s = inputStreamSequence(begin, is, end)
-          import org.json4s.jackson.JsonMethods.*
-          parse(s).asInstanceOf[JArray]
+          jsonParser.parse(s).asInstanceOf[JArray]
 
         val content = readContent()
         index.`data-content`.section.zipWithIndex.map: (s, i) =>
