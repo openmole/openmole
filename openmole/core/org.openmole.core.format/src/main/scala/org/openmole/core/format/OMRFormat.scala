@@ -449,6 +449,9 @@ object OMRFormat:
     file: File,
     destination: File,
     dataFile: Option[String] = None) =
+    import com.fasterxml.jackson.core.JsonFactory
+    import org.json4s.jackson.JsonMethods
+    import org.json4s.jackson
 
     val index = omrContent(file)
     def variablesValues = variables(file, relativePath = true, dataFile = dataFile.map(f => OMRFormat.dataFile(file, f)))
@@ -464,15 +467,13 @@ object OMRFormat:
     import OMRContent.given
 
     def jsonData =
-      org.json4s.JArray(
-        variablesValues.map: v =>
-          def content: Seq[(String, org.json4s.JValue)] =
-            def fileToJSON(f: File) = JString(f.getPath)
-            v.section.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
-              Seq("variables" -> variablesToJObject(v.variables, default = Some(anyToJValue), file = Some(fileToJSON)))
-          org.json4s.JObject(content.toList)
-        .toList
-      )
+      variablesValues.toIterator.map: v =>
+        def content: Seq[(String, org.json4s.JValue)] =
+          def fileToJSON(f: File) = JString(f.getPath)
+          v.section.name.map(n => "name" -> org.json4s.JString(n)).toSeq ++
+            Seq("variables" -> variablesToJObject(v.variables, default = Some(anyToJValue), file = Some(fileToJSON)))
+        org.json4s.JObject(content.toList)
+
 
     def jsonContent =
       JSONContent(
@@ -486,10 +487,27 @@ object OMRFormat:
 
     val renderedContent = org.json4s.jackson.parseJson(jsonContent.asJson.deepDropNullValues.noSpaces).asInstanceOf[org.json4s.JObject]
     destination.withOutputStream: os =>
-      import org.json4s.jackson
-      val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
-      val writer = jackson.JsonMethods.mapper.writerWithDefaultPrettyPrinter()
-      writer.writeValue(os, jackson.renderJValue(fullObject))
+      val gen = new JsonFactory().createGenerator(os)
+      gen.useDefaultPrettyPrinter()
+      gen.writeStartObject()
+
+      renderedContent.obj.foreach:
+        case (name, value) =>
+          gen.writeFieldName(name)
+          JsonMethods.mapper.writeValue(gen, jackson.renderJValue(value))
+
+      gen.writeFieldName("data")
+      gen.writeStartArray()
+
+      jsonData.foreach: obj =>
+        JsonMethods.mapper.writeValue(gen, jackson.renderJValue(obj))
+
+      gen.writeEndArray()
+      gen.writeEndObject()
+      gen.close()
+      //val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
+      //val writer = jackson.JsonMethods.mapper.writerWithDefaultPrettyPrinter()
+      //writer.writeValue(os, jackson.renderJValue(fullObject))
 
   def readSingleJSONField(file: File, targetField: String): Option[String] =
     import com.fasterxml.jackson.core.JsonFactory
