@@ -138,7 +138,7 @@ lazy val openmoleByteCode = OsgiProject(toolDir, "org.openmole.tool.bytecode", i
 lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.felixOSGi) settings (toolSettings *)
 lazy val openmoleRandom = OsgiProject(toolDir, "org.openmole.tool.random", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
 lazy val openmoleNetwork = OsgiProject(toolDir, "org.openmole.tool.network", imports = Seq("*")) settings (toolSettings *)
-lazy val openmoleSystem = OsgiProject(toolDir, "org.openmole.tool.system", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.exec)
+lazy val openmoleSystem = OsgiProject(toolDir, "org.openmole.tool.system", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.exec, libraryDependencies += Libraries.squants)
 lazy val openmoleException = OsgiProject(toolDir, "org.openmole.tool.exception", imports = Seq("*")) settings(toolSettings, libraryDependencies += Libraries.squants)
 lazy val openmoleOutputRedirection = OsgiProject(toolDir, "org.openmole.tool.outputredirection", imports = Seq("*")) settings (toolSettings *)
 
