@@ -22,12 +22,12 @@ object ThreadProvider:
       job.apply()
 
   def threadFactory(parentGroup: Option[ThreadGroup] = None): ThreadFactory = r =>
-      val t = parentGroup match
-        case Some(p) => new Thread(p, r)
-        case None    => new Thread(r)
+    val t = parentGroup match
+      case Some(p) => new Thread(p, r)
+      case None    => new Thread(r)
 
-      t.setDaemon(true)
-      t
+    t.setDaemon(true)
+    t
 
 
   def apply() = new ThreadProvider()

@@ -24,8 +24,7 @@ import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success, Try }
 
 package object thread {
-  object L extends JavaLogger
-  import L._
+  object Log extends JavaLogger
 
   implicit def future2Function[A](f: Future[A]): () => A = () => f.get
   implicit def function2Callable[F](f: => F): Callable[F] = new Callable[F] { def call = f }
@@ -43,7 +42,7 @@ package object thread {
   }
   catch {
     case e: RejectedExecutionException =>
-      Log.logger.log(Log.WARNING, "Execution rejected, operation executed in the caller thread with no timeout", e)
+      Log.Log.logger.log(Log.Log.WARNING, "Execution rejected, operation executed in the caller thread with no timeout", e)
       f
   }
 
