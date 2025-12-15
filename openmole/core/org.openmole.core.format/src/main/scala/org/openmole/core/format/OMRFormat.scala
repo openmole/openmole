@@ -505,9 +505,6 @@ object OMRFormat:
       gen.writeEndArray()
       gen.writeEndObject()
       gen.close()
-      //val fullObject = renderedContent.copy(obj = renderedContent.obj ++ Seq("data" -> jsonData))
-      //val writer = jackson.JsonMethods.mapper.writerWithDefaultPrettyPrinter()
-      //writer.writeValue(os, jackson.renderJValue(fullObject))
 
   def readSingleJSONField(file: File, targetField: String): Option[String] =
     import com.fasterxml.jackson.core.JsonFactory
