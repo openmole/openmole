@@ -30,6 +30,7 @@ object common {
   def json4sVersion = "4.0.7"
   def jacksonVersion = "2.20.1"
   def circeVersion = "0.14.14"
+  def jsoniterVersion = "0.9.19"
   def circeYamlVersion = "0.16.1"
   def catsVersion = "2.13.0"
   def catsEffectVersion = "3.6.2"

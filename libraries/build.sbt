@@ -43,8 +43,6 @@ lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq(
   version := shapelessVersion
 )
 
-
-
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "org.latestbit.*", "!cats.*", "!scala.*", "!shapeless3.*"),
   privatePackages = Seq("org.typelevel.jawn.*", "org.yaml.*"),

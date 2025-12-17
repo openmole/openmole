@@ -18,10 +18,11 @@ package org.openmole.core.format
  */
 
 
+import com.fasterxml.jackson.core.{JsonParser, JsonToken}
 import io.circe.*
 import io.circe.parser.*
 import io.circe.syntax.*
-import org.json4s.JArray
+import org.json4s.{JArray, JValue}
 import org.json4s.JsonAST.{JField, JString}
 import org.json4s.jackson.JsonMethods.{compact, render}
 import org.openmole.core.json.*
@@ -30,10 +31,12 @@ import org.openmole.core.exception.*
 import org.openmole.core.fileservice.FileService
 import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
-import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
+import org.openmole.tool.stream.{DefaultBufferSize, StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
 
+import java.util
 import java.util.UUID
+import scala.collection.mutable
 
 implicit val omrCirceDefault: io.circe.derivation.Configuration =
  io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(derivation.renaming.kebabCase)
@@ -197,11 +200,11 @@ object OMRFormat:
 
     val fileName =
       if !option.append
-      then s"$dataDirectoryName/${omr.dataFileName(executionId, omr.newUUID)}"
+      then s"${omr.dataFileName(executionId, omr.newUUID)}"
       else
         existingData.headOption match
           case Some(h) => h
-          case None => s"$dataDirectoryName/${omr.dataFileName(executionId, omr.newUUID)}"
+          case None => s"${omr.dataFileName(executionId, omr.newUUID)}"
 
     val dataFile = directory / fileName
 
@@ -337,6 +340,16 @@ object OMRFormat:
             case _ => File(jv.s)
         case _ => cannotConvertFromJSON[File](v)
 
+//    def loadFileJsonIter(v: jsoniter.JAny): File =
+//      import com.jsoniter.*
+//      v.valueType match
+//        case ValueType.STRING =>
+//          val s = v.toString
+//          fileDirectory match
+//            case Some(dir) => new File(dir, s)
+//            case None => new File(s)
+//        case _ => jsoniter.cannotConvertFromJSON[File](v)
+
     index.`data-mode` match
       case OMRContent.DataMode.Create =>
         def sectionToVariables(section: OMRContent.DataContent.SectionData, a: JArray) =
@@ -357,29 +370,43 @@ object OMRFormat:
         (index.`data-content`.section zip content.arr).map: (s, c) =>
           sectionToVariables(s, c.asInstanceOf[JArray])
       case OMRContent.DataMode.Append =>
-        def sectionToAggregatedVariables(section: OMRContent.DataContent.SectionData, sectionIndex: Int, content: JArray) =
-          val size = section.variables.size
-          val sectionContent = content.arr.map(a => a.asInstanceOf[JArray].arr(sectionIndex))
+        def sectionToAggregatedVariables(section: Seq[OMRContent.DataContent.SectionData], content: JsonParser) =
+          val sectionsContent =
+            section.toArray.map: s =>
+              val size = s.variables.size
+              Array.fill(size)(scala.collection.mutable.ArrayBuffer[JValue]())
 
-          def transposed = (0 until size).map { i => JArray(sectionContent.map(_.asInstanceOf[JArray](i))) }
+          content.nextToken()
+          while content.nextToken() != JsonToken.END_ARRAY
+          do
+            var sectionIndex = 0
+            while content.nextToken() != JsonToken.END_ARRAY
+            do
+              val values = objectMapper.readValues(content, classOf[JValue]).nextValue().asInstanceOf[JArray]
+              values.arr.zipWithIndex.foreach: (v, i) =>
+                sectionsContent(sectionIndex)(i) += v
 
-          lazy val isIndex = section.indexes.getOrElse(Seq()).toSet
-          def indexFilter(v: ValData) = if !indexOnly then true else isIndex.contains(v.name)
+            sectionIndex += 1
 
-          val variables =
-            (section.variables zip transposed).filter((v, _) => indexFilter(v)).map: (v, j) =>
-              jValueToVariable(j, ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
+          section.zipWithIndex.map: (s, i) =>
+            lazy val isIndex = s.indexes.getOrElse(Seq()).toSet
 
-          (section, variables)
-        def readContent(): JArray =
-          val begin = new StringInputStream("[")
-          val end = new StringInputStream("]")
-          val s = inputStreamSequence(begin, is, end)
-          jsonParser.parse(s).asInstanceOf[JArray]
+            def indexFilter(v: ValData) =
+              if !indexOnly then true else isIndex.contains(v.name)
 
-        val content = readContent()
-        index.`data-content`.section.zipWithIndex.map: (s, i) =>
-          sectionToAggregatedVariables(s, i, content)
+            val variables =
+              (s.variables zip sectionsContent(i)).filter((v, _) => indexFilter(v)).map: (v, a) =>
+                  jValueToVariable(JArray(a.toList), ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
+
+            (s, variables)
+
+        val begin = new StringInputStream("[")
+        val end = new StringInputStream("]")
+        val s = inputStreamSequence(begin, is, end)
+
+        val p = objectMapper.createParser(s)
+        try sectionToAggregatedVariables(index.`data-content`.section, p)
+        finally p.close()
 
 
   object IndexedData:

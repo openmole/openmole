@@ -1,13 +1,15 @@
 package org.openmole.core
 
-import com.fasterxml.jackson.core.json.JsonReadFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.json4s.JsonAST.{JObject, JValue}
 import org.openmole.core.context.*
 import org.openmole.core.exception.UserBadDataError
 
 package object json:
+
+  import com.fasterxml.jackson.core.json.JsonReadFeature
+  import com.fasterxml.jackson.databind.json.JsonMapper
+  import com.fasterxml.jackson.module.scala.DefaultScalaModule
+  import org.json4s.JsonAST.{JObject, JValue}
+
   // Allow NaN value for numbers in JSON files
   org.json4s.jackson.JsonMethods.mapper.enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature())
 
@@ -46,7 +48,8 @@ package object json:
   def cannotConvertFromJSON[T: Manifest](jValue: JValue) = throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${manifest[T]}")
 
   def jValueToVariable(
-    jValue: JValue, v: Val[?],
+    jValue: JValue,
+    v: Val[?],
     unwrapArrays: Boolean = false,
     default: Option[(JValue, Class[?]) => Any] = None,
     file: Option[JValue => java.io.File] = None): Variable[?] =
@@ -139,7 +142,7 @@ package object json:
           case _                                    => throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
 
 
-  private lazy val objectMapper =
+  lazy val objectMapper =
     import org.json4s.jackson.Json4sScalaModule
     import com.fasterxml.jackson.core.*
     import com.fasterxml.jackson.core.json.*
@@ -163,6 +166,7 @@ package object json:
     import org.json4s.jackson.JsonMethods.*
     objectMapper.readValue(compact(render(value)), clazz)
 
+
   lazy val jsonParser =
     import com.fasterxml.jackson.databind.*
 
@@ -170,3 +174,132 @@ package object json:
       override def mapper = objectMapper
 
     jsonMethods
+
+
+//  object jsoniter:
+//    import com.jsoniter.*
+//    export com.jsoniter.JsonIterator
+//    import com.jsoniter.spi.DecodingMode
+//
+//    com.jsoniter.JsonIterator.setMode(DecodingMode.STATIC_MODE)
+//
+//    def withJsonIterator[T](is: java.io.InputStream)(f: JsonIterator => T) =
+//      org.openmole.tool.thread.withThreadClassLoader(classOf[com.jsoniter.JsonIterator].getClassLoader):
+//        val it = JsonIterator.parse(is, org.openmole.tool.stream.DefaultBufferSize)
+//        try f(it)
+//        finally it.close()
+//
+//    type JAny = com.jsoniter.any.Any
+//
+//    def cannotConvertFromJSON[T: Manifest](value: JAny) = throw new UserBadDataError(s"Can not fetch value of type $value to type ${manifest[T]}")
+//
+//    def anyToAny(value: JAny, clazz: Class[?]): Any =
+//      clazz match
+//        case c if c == classOf[String] => value.toString
+//        case c if c == classOf[Int] => value.toInt
+//        case c if c == classOf[Long] => value.toLong
+//        case c if c == classOf[Double] => value.toDouble
+//        case c if c == classOf[Boolean] => value.toBoolean
+//        case c if c == classOf[java.io.File] => new java.io.File(value.toString)
+//        case _ => JsonIterator.deserialize(value.toString, clazz)
+//
+//    def anyToVariable(
+//      any: JAny,
+//      v: Val[?],
+//      unwrapArrays: Boolean = false,
+//      default: Option[(JAny, Class[?]) => Any] = None,
+//      file: Option[JAny => java.io.File] = None): Variable[?] =
+//
+//      def anyToInt(a: JAny): Int =
+//        a.valueType match
+//          case ValueType.NUMBER => a.toInt
+//          case ValueType.STRING => a.toString.toInt
+//          case _ => cannotConvertFromJSON[Int](a)
+//
+//      def anyToLong(a: JAny): Long =
+//        a.valueType match
+//          case ValueType.NUMBER => a.toLong
+//          case ValueType.STRING => a.toString.toLong
+//          case _ => cannotConvertFromJSON[Long](a)
+//
+//      def anyToDouble(a: JAny): Double =
+//        a.valueType match
+//          case ValueType.NUMBER => a.toDouble
+//          case ValueType.STRING => a.toString.toDouble
+//          case _ => cannotConvertFromJSON[Double](a)
+//
+//      def anyToString(a: JAny): String =
+//        a.valueType match
+//          case ValueType.STRING => a.toString
+//          case ValueType.NUMBER => a.toString
+//          case ValueType.BOOLEAN => a.toBoolean.toString
+//          case _ => cannotConvertFromJSON[String](a)
+//
+//      def anyToBoolean(a: JAny): Boolean =
+//        a.valueType match
+//          case ValueType.BOOLEAN => a.toBoolean
+//          case _ => cannotConvertFromJSON[Boolean](a)
+//
+//      def anyToFile(a: JAny): java.io.File =
+//        file.map(_(a)).getOrElse(new java.io.File(anyToString(a)))
+//
+//      (any, v) match
+//        // ---------- unwrap single-element arrays ----------
+//        case (a, Val.caseInt(v)) if unwrapArrays && a.valueType == ValueType.ARRAY =>
+//          Variable(v, anyToInt(a.iterator.next()))
+//
+//        case (a, Val.caseLong(v)) if unwrapArrays && a.valueType == ValueType.ARRAY =>
+//          Variable(v, anyToLong(a.iterator.next()))
+//
+//        case (a, Val.caseDouble(v)) if unwrapArrays && a.valueType == ValueType.ARRAY =>
+//          Variable(v, anyToDouble(a.iterator.next()))
+//
+//        case (a, Val.caseString(v)) if unwrapArrays && a.valueType == ValueType.ARRAY =>
+//          Variable(v, anyToString(a.iterator.next()))
+//
+//        case (a, Val.caseBoolean(v)) if unwrapArrays && a.valueType == ValueType.ARRAY =>
+//          Variable(v, anyToBoolean(a.iterator.next()))
+//
+//        // ---------- array case ----------
+//        case (a, v) if a.valueType == ValueType.ARRAY =>
+//
+//          def anyToValue(value: Any, arrayType: Class[?]): Any =
+//            (value, arrayType) match
+//              case (value: JAny, c) if c == classOf[Double] => anyToDouble(value)
+//              case (value: JAny, c) if c == classOf[Int] => anyToInt(value)
+//              case (value: JAny, c) if c == classOf[Long] => anyToLong(value)
+//              case (value: JAny, c) if c == classOf[Boolean] => anyToBoolean(value)
+//              case (value: JAny, c) if c == classOf[String] => anyToString(value)
+//              case (value: JAny, c) if c == classOf[java.io.File] => anyToFile(value)
+//              case _ =>
+//                (value, default) match
+//                  case (value: JAny, Some(serializer)) => serializer(value, arrayType)
+//                  case (value, _) =>
+//                    throw new UserBadDataError(s"Can not fetch value of type $value to type $arrayType")
+//
+//          given Variable.ConstructArray[JAny] =
+//            new Variable.ConstructArray[JAny]:
+//              def size(t: JAny): Int = t.size
+//
+//              def iterable(t: JAny): java.lang.Iterable[Any] =
+//                new java.lang.Iterable[Any]:
+//                  def iterator() = t.iterator().asInstanceOf[java.util.Iterator[Any]]
+//
+//          Variable.constructArray(v, a, anyToValue)
+//
+//        // ---------- scalar cases ----------
+//        case (a, Val.caseInt(v)) => Variable(v, anyToInt(a))
+//        case (a, Val.caseLong(v)) => Variable(v, anyToLong(a))
+//        case (a, Val.caseDouble(v)) => Variable(v, anyToDouble(a))
+//        case (a, Val.caseString(v)) => Variable(v, anyToString(a))
+//        case (a, Val.caseBoolean(v)) => Variable(v, anyToBoolean(a))
+//        case (a, Val.caseFile(v)) => Variable(v, anyToFile(a))
+//
+//        // ---------- fallback ----------
+//        case (a, v) =>
+//          default match
+//            case Some(serializer) =>
+//              Variable.unsecureUntyped(v, serializer(a, v.`type`.runtimeClass))
+//            case None =>
+//              throw new UserBadDataError(s"Can not fetch value of type $a to OpenMOLE variable $v")
+
