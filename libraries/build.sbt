@@ -134,7 +134,7 @@ lazy val scalaLang = OsgiProject(
     "org.scala-lang" %% "scala3-library" % scalaVersion.value,
     "org.scala-lang" %% "scala3-compiler" % scalaVersion.value,
     //"org.scala-lang.modules" %% "scala-collection-compat" % "2.8.0",
-    "org.scalameta" %% "scalameta" % scalaMetaVersion cross(CrossVersion.for3Use2_13) excludeAll(
+    "org.scalameta" %% "scalameta" % scalaMetaVersion excludeAll(
       ExclusionRule(organization = "com.lihaoyi"),
       ExclusionRule(organization = "org.scala-lang.modules"),
       ExclusionRule(organization = "org.scala-lang")
