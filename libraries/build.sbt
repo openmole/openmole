@@ -254,7 +254,7 @@ lazy val netlogo7 = OsgiProject(
 
 lazy val scalajsLinker = OsgiProject(dir, "scalajs-linker", exports = Seq("org.scalajs.linker.*", "org.scalajs.ir.*", "com.google.javascript.*", "com.google.common.*", "rhino_ast.java.com.google.javascript.rhino.*", "com.google.gson.*", "com.google.debugging.sourcemap.*", "org.json.*", "java7compat.nio.charset.*", "com.google.protobuf.*")) settings(
   settings,
-  libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalajsVersion,
+  libraryDependencies += "org.scala-js" %% "scalajs-linker" % scalajsVersion cross CrossVersion.for3Use2_13,
 ////  libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsVersion,
 //    //"org.scala-js" %% "scalajs-linker-interface" % scalajsVersion),
     version := scalajsVersion)
