@@ -442,16 +442,21 @@ object MoleExecution:
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
 
   def submitAll(moleExecution: MoleExecution) =
+    val unsubmitted = mutable.Map[MoleCapsule, ArrayBuffer[Job]]()
     for
       (capsule, jobs) <- moleExecution.waitingJobs
     do
-      val size = moleExecution.grouping.getOrElse(capsule, 1)
+      val grouping = moleExecution.grouping.getOrElse(capsule, Grouping(1))
       val shuffled = moleExecution.executionContext.services.defaultRandom().shuffle(jobs.toSeq)
       for
-       group <- shuffled.grouped(size)
-      do submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
+        group <- shuffled.grouped(grouping.by)
+      do
+        if !grouping.async || group.size == grouping.by
+        then submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
+        else unsubmitted.getOrElseUpdate(capsule, ArrayBuffer()) ++= group
 
     moleExecution.waitingJobs.clear
+    moleExecution.waitingJobs ++= unsubmitted.toSeq
 
   def removeSubMole(subMoleExecutionState: SubMoleExecutionState) =
     subMoleExecutionState.parent.foreach(s => s.children.remove(subMoleExecutionState.id))

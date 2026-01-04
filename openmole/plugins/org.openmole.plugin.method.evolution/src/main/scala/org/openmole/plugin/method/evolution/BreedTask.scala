@@ -35,10 +35,9 @@ object BreedTask:
       (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match
         case (true, 0, false) =>
           val gs =
-            size - suggestedGenomes.size match {
+            size - suggestedGenomes.size match
               case x if x > 0 => evolution.operations.initialGenomes(x, random())(context)
               case x          => Vector.empty
-            }
 
           Context(
             evolution.genomeVal.array -> random().shuffle(suggestedGenomes ++ gs).toArray(using evolution.genomeVal.`type`.manifest)

@@ -426,29 +426,28 @@ class EndExplorationTransition(val start: MoleCapsule, val end: TransitionSlot, 
   override def toString = s"$start >| $end"
 }
 
-class SlaveTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val slaves: Option[Int] = None) extends Transition with ValidateTransition {
+class SlaveTransition(val start: MoleCapsule, val end: TransitionSlot, val condition: Condition = Condition.True, val filter: BlockList = BlockList.empty, val slaves: Option[Int] = None) extends Transition with ValidateTransition:
 
   override def validate = condition.validate
 
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    MoleExecutionMessage.PerformTransition(subMole) { subMoleState =>
-      import executionContext.services._
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, executionContext: MoleExecutionContext) =
+    MoleExecutionMessage.send(moleExecution):
+      MoleExecutionMessage.PerformTransition(subMole): subMoleState =>
+        import executionContext.services._
 
-      if (condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)) {
-        val samples = ExplorationTransition.exploredSamples(start, context, moleExecution)
+        if condition.from(context) && slaves.map(subMoleState.jobs.size < _).getOrElse(true)
+        then
+          val samples = ExplorationTransition.exploredSamples(start, context, moleExecution)
 
-        ExplorationTransition.submitIn(
-          this,
-          condition,
-          filtered(context),
-          ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")),
-          samples,
-          subMoleState,
-          executionContext)
-      }
-    }
-  }
+          ExplorationTransition.submitIn(
+            this,
+            condition,
+            filtered(context),
+            ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place within an exploration.")),
+            samples,
+            subMoleState,
+            executionContext)
+
   override def toString = s"$start -<- $end"
 
-}
 

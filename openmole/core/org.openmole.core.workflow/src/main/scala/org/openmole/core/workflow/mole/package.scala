@@ -25,7 +25,7 @@ trait MolePackage:
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
 
 type SubMoleExecution = Long
-type Grouping = Int
+case class Grouping(by: Int, async: Boolean = false)
 
 def Source = FromContextSource
 

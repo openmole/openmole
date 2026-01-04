@@ -522,6 +522,7 @@ object DSLContainer:
 
   object ExplorationMethod:
     given [T]: ExplorationMethod[DSLContainer[T], T] = t => t
+    given byInt[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Int], C] = t => toDSLContainer(t.value).copy(grouping = Some(Grouping(t.by)))
     given byGrouping[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[By[T, Grouping], C] = t => toDSLContainer(t.value).copy(grouping = Some(t.by))
     given on[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[On[T, EnvironmentBuilder], C] = t => toDSLContainer(t.value).copy(environment = Some(t.on))
     given hooked[T, C](using toDSLContainer: ExplorationMethod[T, C]): ExplorationMethod[Hooked[T], C] = t =>
