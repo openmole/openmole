@@ -51,7 +51,8 @@ assemble:
     #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     #- echo "put -r ./openmole/site/* next" >./tonext     
     #- sftp -i ~/.ssh/identity -b ./tonext -P 9000 user@docker.openmole.org
-    - '(cd ./openmole && sbt "project docker" dockerBuildAndPush "project tests" assemble)'  
+    #- '(cd ./openmole && sbt "project docker" dockerBuildAndPush "project tests" assemble)'  
+    - '(cd ./openmole && "project tests" assemble)'  
     - '(cd ./openmole && ./bin/openmole/target/assemble/openmole --test-compile ./bin/tests/target/assemble/tests/)'
 
 unit-tests:
