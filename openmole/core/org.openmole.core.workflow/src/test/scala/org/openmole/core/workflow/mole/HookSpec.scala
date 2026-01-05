@@ -18,24 +18,24 @@
 package org.openmole.core.workflow.hook
 
 import java.util.concurrent.atomic.AtomicInteger
-
 import org.openmole.core.context.Val
-import org.openmole.core.workflow.mole._
-import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.job._
-import org.openmole.core.workflow.mole._
-import org.openmole.core.setter._
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.task.*
+import org.openmole.core.workflow.job.*
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.composition.DSL.ToDSL
 import org.openmole.core.workflow.hook.*
 import org.openmole.core.workflow.composition.TaskNode
-import org.openmole.core.workflow.dsl._
-import org.openmole.core.workflow.test.{ TestHook, TestTask }
-import org.scalatest._
+import org.openmole.core.workflow.dsl.*
+import org.openmole.core.workflow.test.{TestHook, TestTask}
+import org.scalatest.*
 
-class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.*
   
-  "A hook" should "intercept the execution of a task" in {
+  "A hook" should "intercept the execution of a task" in:
     val executed = new AtomicInteger(0)
     val p = Val[String]
 
@@ -56,9 +56,9 @@ class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ex.run
 
     executed.get should equal(1)
-  }
 
-  it should "intercept the execution of a master capsule" in {
+
+  it should "intercept the execution of a master capsule" in:
     @transient var executed = false
 
     val p = Val[String]("p")
@@ -79,12 +79,13 @@ class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     ex.run
 
     executed should equal(true)
-  }
 
-  "Display hook" should "be accepted" in {
+  it should "be ok to set a hook after a by" in :
+    val t1 = EmptyTask()
+    t1 by 10 hook display
+
+  "Display hook" should "be accepted" in:
     val t1 = EmptyTask()
     val ex = t1 hook display
     (ex: DSL)
-  }
 
-}

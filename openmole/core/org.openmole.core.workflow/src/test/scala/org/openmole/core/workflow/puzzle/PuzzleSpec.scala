@@ -27,7 +27,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     puzzle.environments.values should contain(testEnv)
     puzzle.environments.keys.map(_._task) should contain(t)
     puzzle.grouping.keys.map(_._task) should contain(t)
-    puzzle.grouping.values should contain(10)
+    puzzle.grouping.values.map(_.by) should contain(10)
 
     val ex = dsl.run()
     ex.environments.head.done should equal(1)
@@ -44,14 +44,14 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     puzzle.environments.values should contain(testEnv)
     puzzle.environments.keys.map(_._task) should contain(t2)
     puzzle.grouping.keys.map(_._task) should contain(t2)
-    puzzle.grouping.values should contain(10)
+    puzzle.grouping.values.map(_.by) should contain(10)
 
     val dsl2 = DSLContainer(t1 -- t2, method = ())
     val puzzle2 = DSL.toPuzzle(dsl2 on testEnv by 10)
     puzzle2.environments.toSeq.find(_._1._task == t1).map(_._2) should contain(testEnv)
     puzzle2.environments.toSeq.find(_._1._task == t2).map(_._2) should contain(testEnv)
-    puzzle2.grouping.toSeq.find(_._1._task == t1).map(_._2) should contain(10)
-    puzzle2.grouping.toSeq.find(_._1._task == t2).map(_._2) should contain(10)
+    puzzle2.grouping.toSeq.find(_._1._task == t1).map(_._2.by) should contain(10)
+    puzzle2.grouping.toSeq.find(_._1._task == t2).map(_._2.by) should contain(10)
 
     val ex2: MoleExecution = (dsl2 on testEnv).run()
     ex2.environments.head.done should equal(2)
@@ -61,7 +61,7 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val puzzle3 = DSL.toPuzzle(dsl3 on testEnv by 10)
     puzzle3.environments.toSeq.find(_._1._task == t1).map(_._2) should contain(testEnv)
     puzzle3.environments.toSeq.find(_._1._task == t2) shouldBe None
-    puzzle3.grouping.toSeq.find(_._1._task == t1).map(_._2) should contain(10)
+    puzzle3.grouping.toSeq.find(_._1._task == t1).map(_._2.by) should contain(10)
     puzzle3.grouping.toSeq.find(_._1._task == t2) shouldBe None
     (dsl3 on testEnv).run().environments.head.done should equal(1)
 
@@ -69,15 +69,15 @@ class PuzzleSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     val puzzle4 = DSL.toPuzzle(dsl4 on testEnv by 10)
     puzzle4.environments.toSeq.find(_._1._task == t1).map(_._2) should contain(testEnv)
     puzzle4.environments.toSeq.find(_._1._task == t2).map(_._2) should contain(testEnv)
-    puzzle4.grouping.toSeq.find(_._1._task == t1).map(_._2) should contain(10)
-    puzzle4.grouping.toSeq.find(_._1._task == t2).map(_._2) should contain(10)
+    puzzle4.grouping.toSeq.find(_._1._task == t1).map(_._2.by) should contain(10)
+    puzzle4.grouping.toSeq.find(_._1._task == t2).map(_._2.by) should contain(10)
     (dsl4 on testEnv).run().environments.head.done should equal(2)
 
     val dsl5 = DSLContainer(dsl3, method = ())
     val puzzle5 = DSL.toPuzzle(dsl5 on testEnv by 10)
     puzzle5.environments.toSeq.find(_._1._task == t1).map(_._2) should contain(testEnv)
     puzzle5.environments.toSeq.find(_._1._task == t2) shouldBe None
-    puzzle5.grouping.toSeq.find(_._1._task == t1).map(_._2) should contain(10)
+    puzzle5.grouping.toSeq.find(_._1._task == t1).map(_._2.by) should contain(10)
     puzzle5.grouping.toSeq.find(_._1._task == t2) shouldBe None
     (dsl5 on testEnv).run().environments.head.done should equal(1)
 
