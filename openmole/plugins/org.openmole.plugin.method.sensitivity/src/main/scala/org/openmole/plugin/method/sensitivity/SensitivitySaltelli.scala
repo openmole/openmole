@@ -169,7 +169,7 @@ object SensitivitySaltelli:
         val fA: Array[Array[Double]] = reindex("a")
         val fB: Array[Array[Double]] = reindex("b")
         val fC: Array[Array[Array[Double]]] =
-          modelInputs.map(i => reindex("c$" ++ i.prototype.name)).toArray.transpose
+          modelInputs.map(i => reindex("c$" ++ i.prototype.name)).toArray[Array[Array[Double]]].transpose
 
         // ftoi(o)._1(i) contains first order index for input i on output o.
         // ftoi(o)._2(i) contains total order index for input i on output o.
@@ -177,11 +177,11 @@ object SensitivitySaltelli:
 
         // first order indices
         // fosi(o)(i) contains first order index for input i on output o.
-        val fosi = ftoi.map { _.first.toArray }.toArray
+        val fosi = ftoi.map { _.first.toArray }.toArray[Array[Double]]
 
         // total order indices
         // tosi(o)(i) contains total order index for input i on output o.
-        val tosi = ftoi.map { _.total.toArray }.toArray
+        val tosi = ftoi.map { _.total.toArray }.toArray[Array[Double]]
 
         val fosiv =
           for
@@ -251,7 +251,7 @@ object SensitivitySaltelli:
         val (a, b) =
           if isSobol
           then
-            val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray).toArray
+            val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray[Double]).toArray[Array[Double]]
             (ab.transpose.take(vectorSize).transpose, ab.transpose.takeRight(vectorSize).transpose)
           else (LHS.lhsValues(vectorSize, s, random()), LHS.lhsValues(vectorSize, s, random()))
 

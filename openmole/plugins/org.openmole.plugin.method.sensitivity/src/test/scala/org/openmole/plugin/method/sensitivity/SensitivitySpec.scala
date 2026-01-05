@@ -79,7 +79,7 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     val c =
       (0 until 3).map: i =>
         SensitivitySaltelli.SaltelliSampling.buildC(i, a, b)
-      .toArray
+      .toArray[Array[Array[Double]]]
 
     val ra = a.map(IshigamiFunction)
     val rb = b.map(IshigamiFunction)
