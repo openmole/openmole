@@ -69,10 +69,10 @@ case class CSVSource(
       } yield {
         val p = v.head.prototype
         val content =
-          if (v.isEmpty) Array()(ClassTag(p.`type`.runtimeClass))
-          else v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass))
+          if (v.isEmpty) Array()(using ClassTag(p.`type`.runtimeClass))
+          else v.map(_.value).toArray(using ClassTag(p.`type`.runtimeClass))
 
-        Variable.unsecure(p.toArray, v.map(_.value).toArray(ClassTag(p.`type`.runtimeClass)))
+        Variable.unsecure(p.toArray, v.map(_.value).toArray(using ClassTag(p.`type`.runtimeClass)))
       }
 
     context ++ variables

@@ -5,10 +5,11 @@ import sbt.Keys._
 import sbt._
 
 object common {
+  def defaultImports = Seq("!java.lang.*")
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.7.4"
+  def scala3VersionValue = "3.8.0-RC5"
   def scalajsVersion = "1.20.1"
 
   def scalaXMLVersion = "2.4.0"

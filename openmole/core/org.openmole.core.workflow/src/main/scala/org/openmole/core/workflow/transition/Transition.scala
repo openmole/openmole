@@ -25,8 +25,8 @@ import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegi
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
 import org.openmole.core.workflow.mole.*
 import org.openmole.core.workflow.task._
-import org.openmole.core.workflow.validation.TypeUtil._
-import org.openmole.core.workflow.validation._
+import org.openmole.core.workflow.validation.TypeUtil.*
+import org.openmole.core.workflow.validation.*
 
 import scala.collection.mutable
 import scala.collection.mutable.{ ArrayBuffer, HashSet, ListBuffer }
@@ -88,7 +88,7 @@ object Transition {
  * The trait representing a transition between a start point which is a [[org.openmole.core.workflow.mole.MoleCapsule]]
  * and an endpoint which is a [[org.openmole.core.workflow.transition.TransitionSlot]]
  */
-sealed trait Transition {
+sealed trait Transition:
 
   /**
    *
@@ -141,8 +141,6 @@ sealed trait Transition {
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 
-}
-
 /**
  * Transition between a mole and a slot
  *
@@ -159,15 +157,13 @@ class DirectTransition(
 
   override def validate = condition.validate
 
-  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution) {
-    PerformTransition(subMole) { subMoleState =>
-      import moleExecutionContext.services._
-      if (condition.from(context)) Transition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
-    }
-  }
+  override def perform(context: Context, ticket: Ticket, moleExecution: MoleExecution, subMole: SubMoleExecution, moleExecutionContext: MoleExecutionContext) = MoleExecutionMessage.send(moleExecution):
+    PerformTransition(subMole): subMoleState =>
+      import moleExecutionContext.services.*
+      if condition.from(context)
+      then Transition.submitNextJobsIfReady(this)(filtered(context).values, ticket, subMoleState)
 
   override def toString = s"$start -- $end"
-
 
 object ExplorationTransition {
 

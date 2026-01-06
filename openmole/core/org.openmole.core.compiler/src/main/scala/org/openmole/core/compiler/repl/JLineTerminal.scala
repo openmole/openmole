@@ -1,13 +1,15 @@
 package org.openmole.core.compiler.repl
 
+import dotty.tools.dotc // OM
+
 import scala.language.unsafeNulls
 
-import dotty.tools.dotc.core.Contexts.*
-import dotty.tools.dotc.parsing.Scanners.Scanner
-import dotty.tools.dotc.parsing.Tokens.*
-import dotty.tools.dotc.printing.SyntaxHighlighting
-import dotty.tools.dotc.reporting.Reporter
-import dotty.tools.dotc.util.SourceFile
+import dotc.core.Contexts.*
+import dotc.parsing.Scanners.Scanner
+import dotc.parsing.Tokens.*
+import dotc.printing.SyntaxHighlighting
+import dotc.reporting.Reporter
+import dotc.util.SourceFile
 import org.jline.reader
 import org.jline.reader.Parser.ParseContext
 import org.jline.reader.*
@@ -34,7 +36,7 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
     else str
   protected def promptStr = "OpenMOLE" // OM
   private def prompt(using Context)        = blue(s"\n$promptStr> ")
-  private def newLinePrompt(using Context) = blue("     | ")
+  private def newLinePrompt(using Context) = "       "
 
   /** Blockingly read line from `System.in`
    *
@@ -50,8 +52,8 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
    *  @throws EndOfFileException This exception is thrown when the user types Ctrl-D.
    */
   def readLine(
-                completer: Completer // provide auto-completions
-              )(using Context): String = {
+    completer: Completer // provide auto-completions
+  )(using Context): String = {
     import LineReader.Option.*
     import LineReader.*
     val userHome = System.getProperty("user.home")
@@ -64,7 +66,7 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
       .parser(new Parser)
       .variable(HISTORY_FILE, s"$userHome/.openmole_history") // Save history to file  // OM
       .variable(SECONDARY_PROMPT_PATTERN, "%M") // A short word explaining what is "missing",
-      // this is supplied from the EOFError.getMissing() method
+                                                // this is supplied from the EOFError.getMissing() method
       .variable(LIST_MAX, 400)                  // Ask user when number of completions exceed this limit (default is 100).
       .variable(BLINK_MATCHING_PAREN, 0L)       // Don't blink the opening paren after typing a closing paren.
       .variable(WORDCHARS,
@@ -78,6 +80,10 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
   }
 
   def close(): Unit = terminal.close()
+
+  /** Register a signal handler and return the previous handler */
+  def handle(signal: org.jline.terminal.Terminal.Signal, handler: org.jline.terminal.Terminal.SignalHandler): org.jline.terminal.Terminal.SignalHandler =
+    terminal.handle(signal, handler)
 
   /** Provide syntax highlighting */
   private class Highlighter(using Context) extends reader.Highlighter {
@@ -99,11 +105,11 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
      * @param wordCursor The cursor position within the current word
      */
     private class ParsedLine(
-                              val cursor: Int, val line: String, val word: String, val wordCursor: Int
-                            ) extends reader.ParsedLine {
+      val cursor: Int, val line: String, val word: String, val wordCursor: Int
+    ) extends reader.ParsedLine {
       // Using dummy values, not sure what they are used for
       def wordIndex = -1
-      def words = java.util.Collections.emptyList[String]
+      def words: java.util.List[String] = java.util.Collections.emptyList[String]
     }
 
     def parse(input: String, cursor: Int, context: ParseContext): reader.ParsedLine = {
@@ -159,9 +165,9 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
         // complete we need to ensure that the :<partial-word> isn't split into
         // 2 tokens, but rather the entire thing is treated as the "word", in
         //   order to insure the : is replaced in the completion.
-        case ParseContext.COMPLETE if
-          classOf[ParseResult].getMethod("commands").invoke(ParseResult).asInstanceOf[List[(String, String => ParseResult)]].exists(command => command._1.startsWith(input))=>
-          parsedLine(input, cursor)
+//        case ParseContext.COMPLETE if                                               // OM
+//          ParseResult.commands.exists(command => command._1.startsWith(input)) =>   // OM
+//            parsedLine(input, cursor)                                               // OM
 
         case ParseContext.COMPLETE =>
           // Parse to find completions (typically after a Tab).

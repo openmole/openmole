@@ -18,16 +18,14 @@ package object abc {
 
     object Observed {
 
-      object Observable {
+      object Observable:
         given Observable[Int] = i => Array(i.toDouble)
-        given Observable[Double] = d => Array(d)
-        given arrayDouble: Observable[Array[Double]] = identity
+        given Observable[Double] = d => Array[Double](d)
+        given arrayDouble: Observable[Array[Double]] = a => a
         given arrayInt: Observable[Array[Int]] = i => i.map(_.toDouble)
-      }
 
-      @FunctionalInterface trait Observable[T] {
+      trait Observable[T]:
         def apply(t: T): Array[Double]
-      }
 
       implicit def tupleIntToObserved(t: (Val[Int], Int)): Observed[Int] = Observed(t._1, t._2)
       implicit def tupleDoubleToObserved(t: (Val[Double], Double)): Observed[Double] = Observed(t._1, t._2)
@@ -37,7 +35,7 @@ package object abc {
       implicit def tupleIterableArrayDoubleToObserved(t: (Val[Array[Double]], Array[Double])): Observed[Array[Double]] = Observed(t._1, t._2)
       //implicit def tupleToObserved[T: Observable](t: (Val[T], T)) = Observed(t._1, t._2)
 
-      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v => observed.obs(v))
+      def fromContext[T](observed: Observed[T], context: Context) = context(observed.v.array).map(v => observed.obs(v).map(_.toDouble))
       def value[T](observed: Observed[T]) = observed.obs(observed.observed)
     }
 

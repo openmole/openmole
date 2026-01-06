@@ -2,22 +2,24 @@ package org.openmole.core.compiler.repl
 
 import dotty.tools.repl.* // OM
 import dotty.tools.dotc.* // OM
+import dotty.tools.io // OM
 import reporting.* // OM
 
 import scala.language.unsafeNulls
 
 import java.lang.System.{lineSeparator => EOL}
 
-import core.Contexts._
-import core.Decorators._
+import core.Contexts.*
+import core.Decorators.*
+import io.AbstractFile
 import printing.Highlighting.{Blue, Red, Yellow}
 import printing.SyntaxHighlighting
-import Diagnostic._
-import util.{ SourcePosition, NoSourcePosition }
+import Diagnostic.*
+import util.{SourcePosition, NoSourcePosition}
 import util.Chars.{ LF, CR, FF, SU }
 import scala.annotation.switch
 
-import scala.collection.mutable
+import scala.collection.mutable.StringBuilder
 
 trait MessageRendering {
   import Highlight.*
@@ -64,7 +66,7 @@ trait MessageRendering {
     }
 
     val syntax =
-      if (ctx.settings.color.value != "never")
+      if (ctx.settings.color.value != "never" && !ctx.isJava)
         SyntaxHighlighting.highlight(new String(pos.linesSlice)).toCharArray
       else pos.linesSlice
     val lines = linesFrom(syntax)
@@ -160,9 +162,12 @@ trait MessageRendering {
       .mkString(EOL)
   }
 
+  // file.path or munge it to normalize for testing
+  protected def renderPath(file: AbstractFile): String = file.path
+
   /** The source file path, line and column numbers from the given SourcePosition */
   protected def posFileStr(pos: SourcePosition): String =
-    val path = pos.source.file.path
+    val path = renderPath(pos.source.file)
     if pos.exists then s"$path:${pos.line + 1}:${pos.column}" else path
 
   /** The separator between errors containing the source file and error type
@@ -211,26 +216,33 @@ trait MessageRendering {
     sb.toString
   }
 
-  private def appendFilterHelp(dia: Diagnostic, sb: mutable.StringBuilder): Unit =
-    import dia._
+  private def appendFilterHelp(dia: Diagnostic, sb: StringBuilder)(using Context, Level, Offset): Unit =
+    extension (sb: StringBuilder) def nl: sb.type = sb.append(EOL).append(offsetBox)
+    import dia.msg
     val hasId = msg.errorId.errorNumber >= 0
-    val category = dia match {
-      case _: UncheckedWarning => "unchecked"
-      case _: DeprecationWarning => "deprecation"
-      case _: FeatureWarning => "feature"
-      case _ => ""
-    }
-    if (hasId || category.nonEmpty)
-      sb.append(EOL).append("Matching filters for @nowarn or -Wconf:")
-      if (hasId)
-        sb.append(EOL).append("  - id=E").append(msg.errorId.errorNumber)
-        sb.append(EOL).append("  - name=").append(msg.errorId.productPrefix.stripSuffix("ID"))
-      if (category.nonEmpty)
-        sb.append(EOL).append("  - cat=").append(category)
+    val (category, origin) = dia match
+      case _: UncheckedWarning   => ("unchecked", "")
+      case w: DeprecationWarning => ("deprecation", w.origin)
+      case _: FeatureWarning     => ("feature", "")
+      case _: ConfigurationWarning => ("configuration", "")
+      case _                     => ("", "")
+    var entitled = false
+    def addHelp(what: String)(value: String): Unit =
+      if !entitled then
+        sb.nl.append("Matching filters for @nowarn or -Wconf:")
+        entitled = true
+      sb.nl.append("  - ").append(what).append(value)
+    if hasId then
+      addHelp("id=E")(msg.errorId.errorNumber.toString)
+      addHelp("name=")(msg.errorId.productPrefix.stripSuffix("ID"))
+    if category.nonEmpty then
+      addHelp("cat=")(category)
+    if origin.nonEmpty then
+      addHelp("origin=")(origin)
 
   /** The whole message rendered from `msg` */
-  protected[repl] def messageAndPos(dia: Diagnostic)(using Context): String = { // OM
-    import dia._
+  def messageAndPos(dia: Diagnostic)(using Context): String = {
+    import dia.*
     val pos1 = pos.nonInlined
     val inlineStack = inlinePosStack(pos).filter(_ != pos1)
     val maxLineNumber =
@@ -238,15 +250,29 @@ trait MessageRendering {
       else 0
     given Level = Level(level)
     given Offset = Offset(maxLineNumber.toString.length + 2)
-    val sb = mutable.StringBuilder()
-    val posString = posStr(pos, msg, diagnosticLevel(dia))
+    val sb = StringBuilder()
+    def adjust(pos: SourcePosition): SourcePosition =
+      if pos.span.isSynthetic
+      && pos.span.isZeroExtent
+      && pos.span.exists
+      && pos.span.start == pos.source.length
+      && pos.source(pos.span.start - 1) == '\n'
+      then
+        pos.withSpan(pos.span.shift(-1))
+      else
+        pos
+    val adjusted = adjust(pos)
+    val posString = posStr(adjusted, msg, diagnosticLevel(dia))
     if (posString.nonEmpty) sb.append(posString).append(EOL)
     if (pos.exists) {
       val pos1 = pos.nonInlined
       if (pos1.exists && pos1.source.file.exists) {
-        val (srcBefore, srcAfter, offset) = sourceLines(pos1)
-        val marker = positionMarker(pos1)
-        val err = errorMsg(pos1, msg.message)
+        val readjusted =
+          if pos1 == pos then adjusted
+          else adjust(pos1)
+        val (srcBefore, srcAfter, offset) = sourceLines(readjusted)
+        val marker = positionMarker(readjusted)
+        val err = errorMsg(readjusted, msg.message)
         sb.append((srcBefore ::: marker :: err :: srcAfter).mkString(EOL))
 
         if inlineStack.nonEmpty then
@@ -282,7 +308,7 @@ trait MessageRendering {
     sb.toString
   }
 
-  def hl(str: String)(using Context, Level): String =
+  private  def hl(str: String)(using Context, Level): String =
     summon[Level].value match
       case interfaces.Diagnostic.ERROR   => Red(str).show
       case interfaces.Diagnostic.WARNING => Yellow(str).show
@@ -302,7 +328,7 @@ trait MessageRendering {
 
 }
 
-private[repl] object Highlight {
+private object Highlight {
   opaque type Level = Int
   extension (level: Level) def value: Int = level
   object Level:
@@ -318,7 +344,7 @@ private[repl] object Highlight {
  *  ^^^ // size of this offset
  *  ```
  */
-private[repl] object Offsets {
+private object Offsets {
   opaque type Offset = Int
   def offset(using o: Offset): Int = o
   object Offset:

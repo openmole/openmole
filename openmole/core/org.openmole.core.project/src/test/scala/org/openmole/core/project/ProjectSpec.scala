@@ -29,7 +29,6 @@ class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val workDirectory = tmpDirectory.newDirectory("project")
     val script = workDirectory / "script.oms"
 
-
     Services.withServices(workDirectory) { implicit services =>
       val begin =
         """
@@ -42,15 +41,22 @@ class ProjectSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
       script.content =
         s"""$begin
-          |$f1
-          |$f2
-          |val l = 2 * 2""".stripMargin
+           |$f1
+           |$f2
+           |val l = 2 * 2""".stripMargin
 
       Project.completion(workDirectory, script, begin.size).exists(_.label == "theFunction") should equal(true)
       Project.completion(workDirectory, script, begin.size + f1.size + 1).exists(_.label == "cos") should equal(true)
       Project.completion(workDirectory, script, begin.size + f1.size + f2.size + 2).exists(_.label == "EmptyTask") should equal(true)
     }
 
+  it should "return the correct type" in:
+    val workDirectory = tmpDirectory.newDirectory("project")
+    val script = workDirectory / "script.oms"
 
+    Services.withServices(workDirectory) { implicit services =>
+      script.content =
+        s"""EmptyTask()""".stripMargin
 
-
+      Project.compile(workDirectory, script) shouldBe an[Compiled]
+    }

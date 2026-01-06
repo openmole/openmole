@@ -202,7 +202,7 @@ object Validation {
     for
       end <- mole.capsules
       slot <- mole.slots(end)
-      (_, transitions) <- mole.inputTransitions(slot).toList.map { t => t.start -> t }.groupBy { case (c, _) => c }
+      (_, transitions) <- mole.inputTransitions(slot).toList.map { t => t.start -> t }.groupBy((c, _) => c).toSeq
       if (transitions.size > 1)
     yield
       DuplicatedTransition(transitions.unzip._2)

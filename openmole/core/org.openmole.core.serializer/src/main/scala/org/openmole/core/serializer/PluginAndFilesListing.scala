@@ -41,7 +41,7 @@ class FilesListing(xStream: XStream):
   def fileUsed(file: File) = listedFiles += file
 
   def list(obj: Any) = synchronized:
-    listedFiles = TreeSet[File]()(fileOrdering)
+    listedFiles = TreeSet[File]()(using fileOrdering)
     xStream.toXML(obj, new NullOutputStream())
     val retFile = listedFiles
     listedFiles = null
@@ -77,8 +77,8 @@ class PluginAndFilesListing(xStream: XStream):
   def fileUsed(file: File) = listedFiles += file
 
   def list(obj: Any) = synchronized:
-    plugins = TreeSet[File]()(fileOrdering)
-    listedFiles = TreeSet[File]()(fileOrdering)
+    plugins = TreeSet[File]()(using fileOrdering)
+    listedFiles = TreeSet[File]()(using fileOrdering)
     seenClasses = HashSet()
     replClasses = HashSet()
     xStream.toXML(obj, new NullOutputStream())

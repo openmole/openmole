@@ -190,7 +190,7 @@ object Project:
     else 
       def compile(content: String, scriptHeader: String): CompileResult = 
         val loop = repl.getOrElse { Project.newREPL() }
-        try 
+        try
           Option(loop.compile(content)) match 
             case Some(compiled) => Compiled(compiled, loop, CompilationContext(loop.classDirectory, loop.classLoader), workDirectory = workDirectory, script = script)
             case None           => throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
@@ -250,9 +250,9 @@ case class Compiled(result: Interpreter.RawCompiled, repl: REPL, compilationCont
 
         p.run(consoleVariables) match 
           case p: DSL => p
-          case e => throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+          case e: Any => throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         
-      case e => throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
+      case e: Any => throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     
 
 
