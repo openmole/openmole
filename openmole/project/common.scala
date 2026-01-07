@@ -5,7 +5,7 @@ import sbt.Keys._
 import sbt._
 
 object common {
-  def defaultImports = Seq("!java.lang.*")
+  def defaultImports = Seq("!java.lang.*", "!scala.scalajs.*")
 
   def sjs(name: String) = name + "_sjs1"
 

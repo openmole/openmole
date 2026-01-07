@@ -47,7 +47,7 @@ lazy val shapeless =  OsgiProject(dir, "org.typelevel.shapeless", exports = Seq(
 lazy val circe = OsgiProject(dir, "io.circe",
   exports = Seq("io.circe.*", "org.latestbit.*", "!cats.*", "!scala.*", "!shapeless3.*"),
   privatePackages = Seq("org.typelevel.jawn.*", "org.yaml.*"),
-  imports = defaultImports ++ Seq("scala.*", "cats.*", "shapeless3.*"))  settings (
+  imports = defaultImports ++ Seq("!scala.scalajs.*", "scala.*", "cats.*", "shapeless3.*"))  settings (
   settings,
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
