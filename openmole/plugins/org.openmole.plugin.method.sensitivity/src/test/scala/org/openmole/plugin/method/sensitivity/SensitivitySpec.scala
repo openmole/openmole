@@ -57,8 +57,41 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
   )
 
 
+  def abc(k: Int, n: Int) =
+    val a = Array.fill(n, k)(rng.nextDouble())
+    val b = Array.fill(n, k)(rng.nextDouble())
+    val c =
+      (0 until k).map: i =>
+        SensitivitySaltelli.SaltelliSampling.buildC(i, a, b)
+      .toArray[Array[Array[Double]]]
+
+    (a, b, c)
+
+
   "Saltelli" should "run" in:
     saltelli.run()
+
+  it should "produce correct indices for an additive model" in:
+    // Linear additive model Y = X1 + X2 + X3
+    // Theoretical: S1 = S2 = S3 = 1/3, ST1 = ST2 = ST3 = 1/3
+    val N = 100000
+    val k = 3
+
+    val rng = scala.util.Random(42)
+
+    val (a, b, c) = abc(k, N)
+
+    def model(x: Array[Double]): Double = x.sum
+
+    val fA = a.map(model)
+    val fB = b.map(model)
+    val fC = c.map(_.map(model))
+
+    val indices = SensitivitySaltelli.SaltelliAggregation.sobolIndices(fA, fB, fC)
+
+    indices.first.foreach(x => x should (be >= 0.30 and be <= 0.36))
+    indices.total.foreach(x => x should (be >= 0.30 and be <= 0.36))
+    indices.first.sum should (be >= 0.95 and be <= 1.05)
 
   it should "produce correct indices for the test function" in:
     import scala.math.*
@@ -74,8 +107,8 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
 
     val rng = scala.util.Random(42)
 
-    val a = Array.fill(1000, 3)(rng.nextDouble() * 2 * Pi - Pi)
-    val b = Array.fill(1000, 3)(rng.nextDouble() * 2 * Pi - Pi)
+    val a = Array.fill(10000, 3)(rng.nextDouble() * 2 * Pi - Pi)
+    val b = Array.fill(10000, 3)(rng.nextDouble() * 2 * Pi - Pi)
     val c =
       (0 until 3).map: i =>
         SensitivitySaltelli.SaltelliSampling.buildC(i, a, b)
@@ -88,19 +121,13 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     val indices = SensitivitySaltelli.SaltelliAggregation.sobolIndices(ra, rb, rc)
 
     // Use intervals of https://openturns.github.io/openturns/latest/auto_reliability_sensitivity/sensitivity_analysis/plot_sensitivity_sobol.html
-    indices.first(0) should be >= 0.2
-    indices.first(0) should be <= 0.45
-    indices.first(1) should be >= 0.3
-    indices.first(1) should be <= 0.6
-    indices.first(2) should be >= -0.1
-    indices.first(2) should be <= 0.1
+    indices.first(0) should (be >= 0.2 and be <= 0.45)
+    indices.first(1) should (be >= 0.3 and be <= 0.6)
+    indices.first(2) should (be >= -0.1 and be <= 0.1)
 
-    indices.total(0) should be >= 0.4
-    indices.total(0) should be <= 0.7
-    indices.total(1) should be >= 0.3
-    indices.total(1) should be <= 0.7
-    indices.total(2) should be >= 0.15
-    indices.total(2) should be <= 0.4
+    indices.total(0) should (be >= 0.4 and be <= 0.7)
+    indices.total(1) should (be >= 0.3 and be <= 0.7)
+    indices.total(2) should (be >= 0.15 and be <= 0.4)
 
 
 
