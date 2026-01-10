@@ -286,13 +286,6 @@ object Application extends JavaLogger {
                   s"Server listening on port $port."
               )
 
-              // warmup the scala compiler
-              def warmup() =
-                import services.*
-                org.openmole.core.project.OpenMOLEREPL.warmup()
-
-              warmup()
-
               s.join() match
                 case GUIServer.Ok      => Console.ExitCodes.ok
 
