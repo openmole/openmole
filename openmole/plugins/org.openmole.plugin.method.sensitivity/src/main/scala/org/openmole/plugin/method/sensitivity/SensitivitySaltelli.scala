@@ -94,35 +94,36 @@ object SensitivitySaltelli:
       fA: Array[Double],
       fB: Array[Double],
       fC: Array[Array[Double]]): (first: Array[Double], total: Array[Double]) =
+      def variance(xs: Array[Double]): Double =
+        val mean = xs.sum / xs.size
+        xs.map(x => math.pow(x - mean, 2)).sum / xs.size
 
-      val NB = fB.length
-      val k = fC.length //Number of parameters
-      val f02 = math.pow(fB.sum / NB.toDouble, 2)
+      val n = fA.length
+      val d = fC.length
 
-      val f0 = fB.sum / NB.toDouble
-      val varY = fB.map(fBj => math.pow(fBj - f0, 2)).sum / NB.toDouble
+      require(fB.length == n, "fB must have same length as fA")
+      require(fC.forall(_.length == n), "Each fC(i) must have length N")
 
-      val firstOrderEffects =
-        (0 until k).map: i =>
-          val sumTerms =
-            (fA lazyZip fB lazyZip fC(i)).map: (fAj, fBj, fCij) =>
-              fBj * (fCij - fAj)
+      val varY = variance(fA)
 
-          val N = sumTerms.size
-          (sumTerms.sum / N) / varY
-        .toArray
+      require(varY > 0.0, "Variance of output is zero")
 
-      val totalOrderEffects =
-        (1 to k).map: i =>
-          val squaredDiff =
-            (fA zip fC(i - 1)).map: (fAj, fCij) =>
-              math.pow(fAj - fCij, 2)
+      val firstOrder =
+        fC.map: fCi =>
+          val num = (fB lazyZip fCi lazyZip fA).map((fb, fci, fa) => fb * (fci - fa)).sum
+          num / (n * varY)
 
-          val N = squaredDiff.size
-          (squaredDiff.sum / (2.0 * N)) / varY
-        .toArray
+      val totalOrder =
+        fC.map: fCi =>
+          val num =
+            (fA zip fCi).map: (fa, fci) =>
+              val d = fa - fci
+              d * d
+            .sum
 
-      (firstOrderEffects, totalOrderEffects)
+          num / (2.0 * n * varY)
+
+      (firstOrder, totalOrder)
 
     def apply(
       modelInputs:  Seq[ScalableValue],

@@ -93,6 +93,27 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     indices.total.foreach(x => x should (be >= 0.30 and be <= 0.36))
     indices.first.sum should (be >= 0.95 and be <= 1.05)
 
+  it should "produce correct indices for a multiplicative model" in :
+      // Linear additive model Y = X1 + X2 + X3
+      // Theoretical: S1 = S2 = S3 = 1/3, ST1 = ST2 = ST3 = 1/3
+      val N = 100000
+      val k = 2
+
+      val rng = scala.util.Random(42)
+
+      val (a, b, c) = abc(k, N)
+
+      def model(x: Array[Double]): Double = x(0) * x(1)
+
+      val fA = a.map(model)
+      val fB = b.map(model)
+      val fC = c.map(_.map(model))
+
+      val indices = SensitivitySaltelli.SaltelliAggregation.sobolIndices(fA, fB, fC)
+
+      (indices.first zip indices.total).foreach: (f, t) =>
+        f should be < t
+  
   it should "produce correct indices for the test function" in:
     import scala.math.*
 
