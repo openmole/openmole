@@ -21,13 +21,13 @@ import java.nio.ByteBuffer
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scalatags.Text.all._
-import scalatags.Text.{ all => tags }
+import scalatags.Text.{all => tags}
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 
 import org.openmole.core.authentication.AuthenticationStore
 import org.openmole.core.event.EventDispatcher
-import org.openmole.core.fileservice.{ FileService, FileServiceCache }
+import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.preference.Preference
 import org.openmole.core.replication.ReplicaCatalog
 import org.openmole.core.serializer.SerializerService
@@ -35,7 +35,7 @@ import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.networkservice._
 import org.openmole.core.timeservice.TimeService
-import org.openmole.core.workspace.{ TmpDirectory, Workspace }
+import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.server.ext.{OMRouter, utils}
 import org.openmole.tool.crypto.Cypher
@@ -43,11 +43,11 @@ import org.openmole.tool.file.*
 import org.openmole.tool.lock.LockRepository
 import org.openmole.tool.logger.LoggerService
 import org.openmole.tool.outputredirection.OutputRedirection
-import org.openmole.tool.random.{ RandomProvider, Seeder }
+import org.openmole.tool.random.{RandomProvider, Seeder}
 import org.openmole.tool.stream._
 import org.openmole.tool.archive._
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object GUIServerServices {
 
@@ -88,49 +88,60 @@ object GUIServerServices {
 }
 
 class GUIServerServices(implicit
-  val workspace:           Workspace,
-  val preference:          Preference,
-  val threadProvider:      ThreadProvider,
-  val seeder:              Seeder,
-  val replicaCatalog:      ReplicaCatalog,
-  val tmpDirectory:        TmpDirectory,
-  val authenticationStore: AuthenticationStore,
-  val serializerService:   SerializerService,
-  val fileService:         FileService,
-  val fileServiceCache:    FileServiceCache,
-  val randomProvider:      RandomProvider,
-  val eventDispatcher:     EventDispatcher,
-  val outputRedirection:   OutputRedirection,
-  val networkService:      NetworkService,
-  val loggerService:       LoggerService,
-  val timeService:         TimeService,
-  val cypher:              Cypher
-)
+                        val workspace: Workspace,
+                        val preference: Preference,
+                        val threadProvider: ThreadProvider,
+                        val seeder: Seeder,
+                        val replicaCatalog: ReplicaCatalog,
+                        val tmpDirectory: TmpDirectory,
+                        val authenticationStore: AuthenticationStore,
+                        val serializerService: SerializerService,
+                        val fileService: FileService,
+                        val fileServiceCache: FileServiceCache,
+                        val randomProvider: RandomProvider,
+                        val eventDispatcher: EventDispatcher,
+                        val outputRedirection: OutputRedirection,
+                        val networkService: NetworkService,
+                        val loggerService: LoggerService,
+                        val timeService: TimeService,
+                        val cypher: Cypher
+                       )
 
 object GUIServlet:
 
-  def html(javascriptMethod: String, cssFiles: Seq[String], extraHeader: String) = tags.html(
-    tags.head(
-      tags.link(tags.rel := "icon", tags.href := "img/favicon.svg", tags.`type` := "img/svg+xml"),
-      tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
-      cssFiles.map { f => tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/plotly.min.js"),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/ace.js"),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/nouislider.min.js"),
-      tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-webpacked.js"),
-      //tags.script(tags.`type` := "text/javascript", tags.src := "js/" + utils.githubTheme),
-      tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/bootstrap-icons.min.css"),
-      RawFrag(extraHeader)
-    ),
-    tags.body(
-      tags.div(id := "openmole-content"),
-      tags.script(javascriptMethod)
+  def html(javascriptMethod: String, cssFiles: Seq[String], extraHeader: String) =
+    val jsMethSeq = javascriptMethod.split('.')
+    val methodNameSpace = jsMethSeq.dropRight(1).mkString(".")
+    val methodCall = jsMethSeq.last
+
+    def moduleCall(methodCall: String) =
+      s"""
+          import('./js/openmole-esbuilded.js').then(openmole => {
+          openmole.default.openmole_library.$methodCall
+        });
+      """
+
+    tags.html(
+      tags.head(
+        tags.link(tags.rel := "icon", tags.href := "img/favicon.svg", tags.`type` := "img/svg+xml"),
+        tags.meta(tags.httpEquiv := "content-type", tags.content := "text/html; charset=UTF-8"),
+        cssFiles.map { f => tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
+        tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-esbuilded.js"),
+        tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/bootstrap-icons.min.css"),
+        RawFrag(extraHeader)
+      ),
+      tags.body(
+        tags.div(id := "openmole-content"),
+        tags.script(
+          `type` := "module",
+          RawFrag(moduleCall(methodCall))
+        )
+      )
     )
-  )
 
   // Get all the css files in the workspace (it is not working with js because of the order)
   def cssFiles(webapp: File) = (webapp / "css").listFilesSafe.map { f => s"css/${f.getName}" }.sorted.toSeq
 
-  val webpackLibrary = "openmole_library.openmole_library"
+  val webpackLibrary = "openmole_library"
 
 

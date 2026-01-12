@@ -692,13 +692,7 @@ val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
-  //lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") dependsOn (apiGUI, clientToolGUI, market, dataGUI, clientExt) settings (
   libraryDependencies += Libraries.sourceCode,
-  webpackBundlingMode := BundlingMode.LibraryAndApplication(),
-  webpackNodeArgs := Seq("--openssl-legacy-provider"),
-  webpack / version := Libraries.wepackVersion,
-  // Compile / npmDeps += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
-  // Compile / npmDeps += Dep("sortablejs", "1.10.2", List("Sortable.min.js"))
   guiSettings,
   test := false
 ) dependsOn(apiGUI, clientToolGUI, market, dataGUI, clientExt)
@@ -1142,14 +1136,7 @@ lazy val openmoleNaked =
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "webapp") → (assemblyPath.value / "webapp"),
     resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "webpack") → (assemblyPath.value / "webpack"),
-    //  IO.copyFile(crossTarget.value / s"${name.value}-jsdeps.js", (Compile / resourceManaged).value / "deps.js"),
-
-    //FIXME
-    //resourcesAssemble += ((clientGUI / crossTarget).value / s"${name.value}-jsdeps.js") -> (assemblyPath.value / "webapp" / "deps.js"),
-
-
-    //   resourcesAssemble += (clientGUI / Compile / dependencyFile).value -> (assemblyPath.value / "webapp/js/deps.js"),
-    // resourcesAssemble += (clientGUI / Compile / cssFile).value -> (assemblyPath.value / "webapp/css/"),
+    resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "esbuild") → (assemblyPath.value / "esbuild"),
     resourcesAssemble += {
       val tarFile = (openmoleRuntime / tar).value
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
@@ -1160,7 +1147,7 @@ lazy val openmoleNaked =
       IO.withTemporaryDirectory { modules =>
         import sys.process._
 
-        val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
+        val packageJson = (serverGUI / Compile / resourceDirectory).value / "esbuild/package.json"
         val cacheFile = target.value / "node_modules-hash"
         val zip = target.value / "node_modules.zip"
         val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
@@ -1182,7 +1169,7 @@ lazy val openmoleNaked =
           IO.write(cacheFile, packageJsonHash)
         }
 
-        zip -> (assemblyPath.value / "webpack" / "node_modules.zip")
+        zip -> (assemblyPath.value / "esbuild" / "node_modules.zip")
       }
     },
 

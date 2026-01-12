@@ -285,6 +285,7 @@ object utils:
 
   val openmoleFileName = "main.js"
   val webpakedOpenmoleFileName = "openmole-webpacked.js"
+  val esBuildedOpenmoleFileName = "openmole-esbuilded.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
   val aceModuleSource = "ace-builds/src-noconflict"
@@ -292,6 +293,7 @@ object utils:
   val githubTheme = "theme-github.js"
   val webpackConfigTemplateName = "template.webpack.config.js"
   val webpackJsonPackage = "package.json"
+  val esBuildJsonPackage = "package.json"
   val nodeModulesFileName = "node_modules.zip"
 
   def updateIfChanged(file: File, hashFile: Option[File] = None)(update: File => Unit)(implicit fileService: FileService, newFile: TmpDirectory) =

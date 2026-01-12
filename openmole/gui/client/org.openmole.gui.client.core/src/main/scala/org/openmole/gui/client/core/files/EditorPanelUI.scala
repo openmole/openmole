@@ -68,6 +68,10 @@ object EditorPanelUI:
   @js.native
   @JSImport("ace-builds/src-noconflict/mode-openmole.js", JSImport.Namespace)
   object openmolemode extends js.Object
+  
+  @js.native
+  @JSImport("ace-builds/src-noconflict/theme-github.js", JSImport.Namespace)
+  object openmoletheme extends js.Object
 
 class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: Panels):
 

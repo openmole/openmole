@@ -15,7 +15,6 @@ import org.openmole.core.services.Services
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils
-import org.openmole.gui.server.jscompile.Webpack.ExtraModule
 
 import scala.jdk.CollectionConverters.*
 
@@ -86,25 +85,17 @@ object Plugins extends JavaLogger {
 
       JSPack.link(jsPluginDirectory, jsFile, optimizedJS)
 
-      Log.logger.info("Webpacking ...")
-      val webpackConfigTemplateLocation = GUIServer.webpackLocation / utils.webpackConfigTemplateName
-      val nodeModulesFile = GUIServer.webpackLocation / utils.nodeModulesFileName
-      val webpackOutput = webui / utils.webpakedOpenmoleFileName
+      val nodeModulesFile = GUIServer.esbuildLocation / utils.nodeModulesFileName
+      val esbuildOutput = webui / utils.esBuildedOpenmoleFileName
 
       val modeOpenMOLE = Plugins.expandDepsFile(GUIServer.fromWebAppLocation /> "js" / utils.openmoleGrammarName, webui / utils.openmoleGrammarMode)
-
-      JSPack.webpack(
-        jsFile,
-        nodeModulesFile,
-        webpackConfigTemplateLocation,
-        webpackOutput,
-        Seq(
-          ExtraModule(modeOpenMOLE, utils.aceModuleSource)
-        )
-      )
+      
+      Log.logger.info("Start Esbuild ...")
+      JSPack.esBuild(jsFile, nodeModulesFile, esbuildOutput)
+      Log.logger.info("Esbuild completed")
 
     // Include these info in plugin hash
-    (GUIServer.webpackLocation / utils.webpackJsonPackage) copy (jsPluginDirectory / utils.webpackJsonPackage)
+    (GUIServer.esbuildLocation / utils.esBuildJsonPackage) copy (jsPluginDirectory / utils.esBuildJsonPackage)
     (jsPluginDirectory / "optimized_mode").content = optimizedJS.toString
 
     if !jsFile.exists
@@ -113,7 +104,7 @@ object Plugins extends JavaLogger {
       utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { identity } // Make sure hash file is created
     else utils.updateIfChanged(jsPluginDirectory, Some(jsPluginHash)) { _ => update }
 
-    webui / utils.webpakedOpenmoleFileName
+    webui / utils.esBuildedOpenmoleFileName
   }
 
   def expandDepsFile(template: File, to: File) =
@@ -130,10 +121,5 @@ object Plugins extends JavaLogger {
         .replace(
           "##OMClasses##",
           s""" "${rules._2.map { _.name }.mkString("|")}" """)
-
-
-//  def addPluginRoutes(route: OMRouter => Unit, services: Services) = {
-//    Log.logger.info(s"Loading GUI plugins")
-//    GUIPluginRegistry.routers.foreach { r => route(r(services)) }
-//  }
+  
 }
