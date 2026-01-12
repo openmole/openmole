@@ -95,9 +95,14 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
         ctx.settings.outputDir.value,
         parent,
         AbstractFileClassLoader.InterruptInstrumentation.fromString(ctx.settings.XreplInterruptInstrumentation.value)
-      ):                                                                                                                // OM
-        override def loadClass(name: String): Class[?] =                                                                // OM
-          parentClassLoader.flatMap(cl => scala.util.Try(cl.loadClass(name)).toOption).getOrElse(super.loadClass(name)) // OM
+      ):                                                                                              // OM
+        override def findClass(name: String): Class[?] =                                              // OM
+          val loaded = parentClassLoader.map(cl => scala.util.Try[Class[?]](cl.loadClass(name)))      // OM
+          loaded match                                                                                // OM
+            case Some(scala.util.Success(c)) => c                                                     // OM
+            case Some(scala.util.Failure(e)) => super.findClass(name)                                 // OM
+            case None => super.findClass(name)                                                        // OM
+
 
       myClassLoader
     }
