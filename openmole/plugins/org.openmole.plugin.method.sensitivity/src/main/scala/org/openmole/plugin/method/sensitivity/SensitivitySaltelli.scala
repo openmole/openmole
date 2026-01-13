@@ -101,10 +101,10 @@ object SensitivitySaltelli:
       val n = fA.length
       val d = fC.length
 
-      require(fB.length == n, "fB must have same length as fA")
-      require(fC.forall(_.length == n), "Each fC(i) must have length N")
+      require(fB.size == n, "fB must have same length as fA")
+      require(fC.forall(_.size == n), s"Each fC(i) must have length n (=$n), but sizes are ${fC.map(_.size).mkString(",")}")
 
-      val varY = variance(fA)
+      val varY = variance(fA ++ fB)
 
       require(varY > 0.0, "Variance of output is zero")
 
@@ -306,9 +306,7 @@ object SensitivitySaltelli:
     def buildLineOfC(i: Int, lineOfA: Array[Double], lineOfB: Array[Double]) =
       (lineOfA zip lineOfB zipWithIndex) map:
         case ((a, b), index) =>
-          if index == i
-          then b
-          else a
+          if index == i then b else a
 
 
   case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalableValue*)

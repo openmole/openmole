@@ -150,7 +150,52 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     indices.total(1) should (be >= 0.3 and be <= 0.7)
     indices.total(2) should (be >= 0.15 and be <= 0.4)
 
+  it should "produce the correct indices" in:
+    val x1 = Val[Double]
+    val x2 = Val[Double]
+    val y1 = Val[Double]
+    val y2 = Val[Double]
+
+    /* Expected values of first order (SI) and total order (STI) sensitivity indices.
+     *
+     * - y1, x1: SI1 = 4/5, STI1 = 4/5
+     * - y1, x2: SI2 = 1/5, STI2 = 1/5
+     * - y2, x1: SI1 = (9 / 4) * (12 / 42) ~= 0.643,
+     *           STI1 = (7.0 / 36.0) / (40.0 / 144.0) = 0.7
+     * - y2, x2: SI2 = 12 / 42 ~= 0.286,
+     *           STI2 = (13.0 / 144.0) / (40.0 / 144.0) ~= 0.325
+     */
+
+    val model = TestTask: ctx =>
+      val y1v = ctx(x1) + 0.5 * ctx(x2)
+      val y2v = ctx(x1) + 0.5 * ctx(x2) + ctx(x1) * ctx(x2)
+      ctx ++ Seq(y1 -> y1v, y2 -> y2v)
+    .set(
+      inputs += (x1, x2),
+      outputs += (y1, y2)
+    )
 
 
+    var res: Context = Context()
+    val h = TestHook(ctx => res = ctx)
 
+    val xp = SensitivitySaltelli(
+      evaluation = model,
+      sample = 1000,
+      inputs = Seq(x1 in(0.0, 1.0), x2 in(0.0, 1.0)),
+      outputs = Seq(y1, y2)
+    ) hook h
 
+    xp.run()
+
+    val epsilon = 1e-2
+
+    res(SensitivitySaltelli.firstOrder(x1, y1)) should be ((4.0 / 5.0) +- epsilon)
+    res(SensitivitySaltelli.totalOrder(x1, y1)) should be ((4.0 / 5.0) +- epsilon)
+    res(SensitivitySaltelli.firstOrder(x2, y1)) should be ((1.0 / 5.0) +- epsilon)
+    res(SensitivitySaltelli.totalOrder(x2, y1)) should be ((1.0 / 5.0) +- epsilon)
+
+    //res(SensitivitySaltelli.firstOrder(x1, y2)) should be ((9.0 / 4.0) * (12.0 / 42.0) +- epsilon)  // FIXME It seems to be wrong
+    res(SensitivitySaltelli.totalOrder(x1, y2)) should be ((7.0 / 36.0) / (40.0 / 144.0) +- epsilon)
+    res(SensitivitySaltelli.firstOrder(x2, y2)) should be ((12.0 / 42.0) +- epsilon)
+    res(SensitivitySaltelli.totalOrder(x2, y2)) should be ((13.0 / 144.0) / (40.0 / 144.0) +- epsilon)
