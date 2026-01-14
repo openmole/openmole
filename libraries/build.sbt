@@ -82,7 +82,7 @@ lazy val slf4j = OsgiProject(dir, "org.slf4j", privatePackages = Seq("!scala.*",
 lazy val xstream = OsgiProject(
   dir,
   "com.thoughtworks.xstream",
-  imports = defaultImports ++ Seq(
+  imports = Seq(
     "!com.bea.xml.stream.*",
     "!com.ctc.wstx.stax.*",
     "!net.sf.cglib.*",

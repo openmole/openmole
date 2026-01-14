@@ -65,7 +65,7 @@ object SerializerService:
       new XStream(
         null,
         driver,
-        new ClassLoaderReference(PluginManager.globalClassLoader(SerializerService.getClass)),
+        new ClassLoaderReference(PluginManager.globalClassLoader(SerializerService.getClass, includePrivate = true)),
         null: Mapper,
         lookup,
         new ConverterRegistry:

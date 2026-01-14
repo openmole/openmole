@@ -43,7 +43,7 @@ object BuddyClassLoader:
           cap.getAttributes.get(BundleRevision.PACKAGE_NAMESPACE) == pkg
 
 
-class BuddyClassLoader(owner: Bundle) extends ClassLoader():
+class BuddyClassLoader(owner: Bundle, includePrivate: Boolean = false) extends ClassLoader():
 
   def orderedBundles =
     lazy val dependencies = PluginManager.allDependencies(owner)
@@ -54,18 +54,19 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
     LazyList(owner) lazyAppendedAll dependencies lazyAppendedAll otherBundles
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
-    def update =
+    def lookForClass(includePrivate: Boolean) =
       Option(findLoadedClass(name)).orElse:
         orderedBundles.view.flatMap: b =>
-          if BuddyClassLoader.isClassExported(b, name)
+          if includePrivate || BuddyClassLoader.isClassExported(b, name)
           then tryOption(b.loadClass(name))
           else None
         .headOption
 
-    TypeTool.primitiveType(name).getOrElse:
-      PluginManager.synchronized:
-        PluginManager.classes.getOrElseUpdate((owner.getBundleId, name), update)
-      .getOrElse(throw ClassNotFoundException(name))
+    TypeTool.primitiveType(name).orElse:
+      if includePrivate
+      then lookForClass(true)
+      else lookForClass(false)
+    .getOrElse(throw ClassNotFoundException(name))
 
   override def findResource(name: String): URL =
     orderedBundles.view.flatMap: b =>
