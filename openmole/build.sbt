@@ -433,7 +433,7 @@ lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5
 )
 
 
-lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = defaultImports ++ Seq("!scala.*", "*")) dependsOn (netLogoAPI) settings(
+lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = defaultImports ++ Seq("*")) dependsOn (netLogoAPI) settings(
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,

@@ -18,17 +18,16 @@
 package org.openmole.plugin.task.netlogo6
 
 import java.io.File
-
 import monocle.Focus
 import org.openmole.core.context.Val
-import org.openmole.core.setter._
+import org.openmole.core.setter.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
-import org.openmole.plugin.task.external._
+import org.openmole.plugin.task.external.*
 import org.openmole.plugin.task.netlogo.AbstractNetLogoTask.Workspace
-import org.openmole.plugin.task.netlogo._
-import org.openmole.plugin.tool.netlogo6._
-import org.openmole.core.argument._
+import org.openmole.plugin.task.netlogo.*
+import org.openmole.core.argument.*
+import org.openmole.plugin.tool.netlogo6.NetLogo6
 
 object NetLogo6Task {
 

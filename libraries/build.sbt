@@ -211,7 +211,7 @@ lazy val jasypt = OsgiProject(dir, "org.jasypt.encryption", exports = Seq("org.j
 
 
 lazy val netlogo5 = OsgiProject(
-  dir,
+  file("source"),
   "ccl.northwestern.edu.netlogo5",
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),
@@ -226,7 +226,7 @@ lazy val netlogo5 = OsgiProject(
   crossPaths := false)
 
 lazy val netlogo6 = OsgiProject(
-  dir,
+  file("source"),
   "ccl.northwestern.edu.netlogo6",
   exports = Seq("org.nlogo.*"),
   privatePackages = Seq("**"),

@@ -103,6 +103,13 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
             case Some(scala.util.Failure(e)) => super.findClass(name)                                 // OM
             case None => super.findClass(name)                                                        // OM
 
+        override def loadClass(name: String): Class[?] = // OM
+          val loaded = parentClassLoader.map(cl => scala.util.Try[Class[?]](cl.loadClass(name))) // OM
+          loaded match // OM
+            case Some(scala.util.Success(c)) => c // OM
+            case Some(scala.util.Failure(e)) => super.loadClass(name) // OM
+            case None => super.loadClass(name) // OM
+
 
       myClassLoader
     }
