@@ -203,7 +203,7 @@ object DocumentationPages:
 
   lazy val explore = DocumentationPage.fromContent(name = "Explore", content = org.openmole.site.content.explore.Explore, title = Some("Explore Your Model"))
 
-  def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, advancedSampling, aggregationSampling))
+  def samplingPages = pageNode(samplings, Vector(elementarySamplings, highDimensionSamplings, uniformSampling, fileSampling, customSampling, omrSampling, advancedSampling, aggregationSampling))
 
   lazy val samplings = DocumentationPage.fromContent(name = "Samplings", content = org.openmole.site.content.explore.sampling.Samplings)
 
@@ -215,6 +215,7 @@ object DocumentationPages:
   //  lazy val lhsSampling = DocumentationPage.fromScalatex(name = "LHS Sampling", content = scalatex.documentation.explore.sampling.LHSSampling)
   //  lazy val sobolSampling = DocumentationPage.fromScalatex(name = "Sobol Sampling", content = scalatex.documentation.explore.sampling.SobolSampling)
   lazy val customSampling = DocumentationPage.fromContent(name = "Custom Sampling", content = org.openmole.site.content.explore.sampling.CustomSampling)
+  lazy val omrSampling = DocumentationPage.fromContent(name = "OMR Sampling", content = org.openmole.site.content.explore.sampling.OMRSampling)
   lazy val fileSampling = DocumentationPage.fromContent(name = "Sampling Over Files", content = org.openmole.site.content.explore.sampling.FileSampling)
   lazy val advancedSampling = DocumentationPage.fromContent(name = "Operations on Samplings", content = org.openmole.site.content.explore.sampling.AdvancedSampling, title = Some("Advanced Operations on Samplings"))
   lazy val aggregationSampling = DocumentationPage.fromContent(name = "Aggregate Sampling Results", content = org.openmole.site.content.explore.sampling.Aggregation)
