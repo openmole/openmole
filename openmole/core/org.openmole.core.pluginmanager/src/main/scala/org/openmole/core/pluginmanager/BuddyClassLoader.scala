@@ -23,6 +23,26 @@ import org.osgi.framework.{Bundle, BundleContext}
 
 import java.net.URL
 
+object BuddyClassLoader:
+  import org.osgi.framework.Bundle
+  import org.osgi.framework.wiring.{BundleRevision, BundleWiring}
+  import scala.jdk.CollectionConverters.*
+
+  def isClassExported(bundle: Bundle, className: String): Boolean =
+    val idx = className.lastIndexOf('.')
+    if idx < 0
+    then false
+    else
+      val pkg = className.substring(0, idx)
+
+      bundle
+        .adapt(classOf[BundleWiring])
+        .getCapabilities(BundleRevision.PACKAGE_NAMESPACE)
+        .asScala
+        .exists: cap =>
+          cap.getAttributes.get(BundleRevision.PACKAGE_NAMESPACE) == pkg
+
+
 class BuddyClassLoader(owner: Bundle) extends ClassLoader():
 
   def orderedBundles =
@@ -37,7 +57,9 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
     def update =
       Option(findLoadedClass(name)).orElse:
         orderedBundles.view.flatMap: b =>
-          tryOption(b.loadClass(name))
+          if BuddyClassLoader.isClassExported(b, name)
+          then tryOption(b.loadClass(name))
+          else None
         .headOption
 
     TypeTool.primitiveType(name).getOrElse:
