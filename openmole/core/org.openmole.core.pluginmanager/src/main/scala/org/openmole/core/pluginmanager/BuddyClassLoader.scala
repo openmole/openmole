@@ -37,7 +37,7 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
     def update =
       Option(findLoadedClass(name)).orElse:
         orderedBundles.view.flatMap: b =>
-          tryOption(b.classLoader.loadClass(name))
+          tryOption(b.loadClass(name))
         .headOption
 
     TypeTool.primitiveType(name).getOrElse:
