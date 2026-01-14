@@ -64,7 +64,7 @@ class BuddyClassLoader(owner: Bundle, includePrivate: Boolean = false) extends C
 
     TypeTool.primitiveType(name).orElse:
       if includePrivate
-      then lookForClass(true)
+      then lookForClass(false) orElse lookForClass(true)
       else lookForClass(false)
     .getOrElse(throw ClassNotFoundException(name))
 
