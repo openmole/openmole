@@ -13,7 +13,8 @@ def settings = Seq(
   publishLocal / packageSrc / publishArtifact := false,
   organization := "org.openmole.library",
   isSnapshot := true,
-  scalaVersion := scala3VersionValue
+  scalaVersion := scala3VersionValue,
+  javacOptions ++= Seq("-source", "21", "-target", "21")
 )
 
 
