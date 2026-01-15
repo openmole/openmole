@@ -19,8 +19,8 @@ package org.openmole.site.content.explore.sampling
 
 import org.openmole.site.content.header.*
 
-object CustomSampling extends PageContent(html"""
-${h2{"Write your own sampling"}}
+object SamplingFromFile extends PageContent(html"""
+${h2{"Load a sampling from a CSV file"}}
 
 You can define a custom sampling in a CSV file and inject it in OpenMOLE.
 The provided CSV file must be formatted according to the following template:
@@ -34,10 +34,8 @@ colD, i
 0.8,  19
 """, "plain")}
 
-${h2{"Use your custom sampling in OpenMOLE"}}
-
-The ${code{"CSVSampling"}} task is used to import your custom sampling into OpenMOLE.
-Here is an example of how to use this task in a simple workflow:
+The ${code{"CSVSampling"}} is used to import your custom sampling into OpenMOLE.
+Here is an example of how to use this sampling in a simple workflow:
 
 $br$br
 
@@ -77,5 +75,35 @@ $br
 
 As a sampling, the ${code{"CSVSampling"}} task can directly be injected in a ${code{"DirectSampling"}} task under the ${code{"sampling"}} parameter.
 It will generate a different task for each entry in the file.
+
+${h2{"Load a sampling from an OMR file"}}
+
+You can reload some result data and use them as a sampling using the ${code("OMRSampling")}:
+
+${
+  hl.openmole("""
+    val i = Val[Int]
+    val d = Val[Double]
+
+    val o = Val[Int]
+
+    // Define the sampling by specifying the OMR File and the array variables you want to load
+    val mySampling = OMRSampling(workDirectory / "file.omr", Seq(i, d)))
+
+    // Define the model, here it just takes i as input
+    val myModel =
+      ScalaTask("val o = i * d") set(
+        inputs += (i, d),
+        outputs += (i, d, o)
+      )
+
+    // Define the exploration of myModel for various i values sampled in the file
+    DirectSampling(
+      evaluation = myModel,
+      sampling = mySampling
+    ) hook display
+s""")}
+
+The OMR file must contain the variable i and d, and they must respectively ${code("Array[Int]")} and ${code("Array[Double]")}.
 
 """)

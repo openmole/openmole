@@ -52,7 +52,7 @@ For higher dimension input space, specific statistics techniques ensuring low di
 
 $br
 
-You can also use your own DoE in OpenMOLE, by providing a ${a("CSV file", href := DocumentationPages.customSampling.file)} containing your samples to OpenMOLE.
+You can also use your own DoE in OpenMOLE, by providing a ${a("CSV file", href := DocumentationPages.samplingFromFile.file)} containing your samples to OpenMOLE.
 
 ${h2{"The DirectSampling method"}}
 
