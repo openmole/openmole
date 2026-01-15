@@ -333,13 +333,30 @@ class REPLDriver(settings: Array[String],
       label
 
   /** Extract possible completions at the index of `cursor` in `expr` */
-  final def completions(cursor: Int, expr: String, state0: State): List[Completion] = // OM
-  // OM: Disable command parsing since commands is private
-  //  if expr.startsWith(":") then
-  //    ParseResult.commands.collect {
-  //      case command if command._1.startsWith(expr) => Completion(command._1, "", List())
-  //    }
-  //  else
+  final def completions(cursor: Int, expr: String, state0: State): List[Completion] =   // OM
+    // OM: duplicate ommand list since commands is private in ParseResult
+    val commands: List[(String, String => ParseResult)] = List(                         // OM
+      Quit.command -> (_ => Quit),                                                      // OM
+      Quit.alias -> (_ => Quit),                                                        // OM
+      Help.command -> (_  => Help),                                                     // OM
+      Reset.command -> (arg  => Reset(arg)),                                            // OM
+      Imports.command -> (_  => Imports),                                               // OM
+      JarCmd.command -> (arg => JarCmd(arg)),                                           // OM
+      KindOf.command -> (arg => KindOf(arg)),                                           // OM
+      Load.command -> (arg => Load(arg)),                                               // OM
+      Require.command -> (arg => Require(arg)),                                         // OM
+      TypeOf.command -> (arg => TypeOf(arg)),                                           // OM
+      DocOf.command -> (arg => DocOf(arg)),                                             // OM
+      Settings.command -> (arg => Settings(arg)),                                       // OM
+      Sh.command -> (arg => Sh(arg)),                                                   // OM
+      Silent.command -> (_ => Silent),                                                  // OM
+    )
+
+    if expr.startsWith(":") then
+      commands.collect {                                                                // OM
+        case command if command._1.startsWith(expr) => Completion(command._1, "", List())
+      }
+    else
       given state: State = newRun(state0)
       compiler
         .typeCheck(expr, errorsAllowed = true)
