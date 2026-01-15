@@ -54,6 +54,12 @@ class BuddyClassLoader(owner: Bundle, includePrivate: Boolean = false) extends C
     LazyList(owner) lazyAppendedAll dependencies lazyAppendedAll otherBundles
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
+    def lookForJavaClass =
+      if name.startsWith("java.")
+      then Some(super.loadClass(name, resolve))
+      else None
+
+
     def lookForClass(includePrivate: Boolean) =
       Option(findLoadedClass(name)).orElse:
         orderedBundles.view.flatMap: b =>
@@ -62,7 +68,7 @@ class BuddyClassLoader(owner: Bundle, includePrivate: Boolean = false) extends C
           else None
         .headOption
 
-    TypeTool.primitiveType(name).orElse:
+    (TypeTool.primitiveType(name) orElse lookForJavaClass).orElse:
       if includePrivate
       then lookForClass(false) orElse lookForClass(true)
       else lookForClass(false)
