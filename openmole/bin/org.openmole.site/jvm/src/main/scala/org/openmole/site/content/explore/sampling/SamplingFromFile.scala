@@ -20,7 +20,7 @@ package org.openmole.site.content.explore.sampling
 import org.openmole.site.content.header.*
 
 object SamplingFromFile extends PageContent(html"""
-${h2{"Load a sampling from a CSV file"}}
+${h2{"Read a sampling from a CSV file"}}
 
 You can define a custom sampling in a CSV file and inject it in OpenMOLE.
 The provided CSV file must be formatted according to the following template:
@@ -76,7 +76,7 @@ $br
 As a sampling, the ${code{"CSVSampling"}} task can directly be injected in a ${code{"DirectSampling"}} task under the ${code{"sampling"}} parameter.
 It will generate a different task for each entry in the file.
 
-${h2{"Load a sampling from an OMR file"}}
+${h2{"Read a sampling from an OMR file"}}
 
 You can reload some result data and use them as a sampling using the ${code("OMRSampling")}:
 
