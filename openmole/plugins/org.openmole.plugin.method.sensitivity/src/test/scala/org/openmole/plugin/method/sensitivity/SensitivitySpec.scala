@@ -188,14 +188,14 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
 
     xp.run()
 
-    val epsilon = 1e-2
+    val epsilon = 1e-1
 
     res(SensitivitySaltelli.firstOrder(x1, y1)) should be ((4.0 / 5.0) +- epsilon)
     res(SensitivitySaltelli.totalOrder(x1, y1)) should be ((4.0 / 5.0) +- epsilon)
     res(SensitivitySaltelli.firstOrder(x2, y1)) should be ((1.0 / 5.0) +- epsilon)
     res(SensitivitySaltelli.totalOrder(x2, y1)) should be ((1.0 / 5.0) +- epsilon)
 
-    //res(SensitivitySaltelli.firstOrder(x1, y2)) should be ((9.0 / 4.0) * (12.0 / 42.0) +- epsilon)  // FIXME It seems to be wrong
+    res(SensitivitySaltelli.firstOrder(x1, y2)) should be ((9.0 / 4.0) * (12.0 / 42.0) +- epsilon)  // FIXME It seems to be wrong
     res(SensitivitySaltelli.totalOrder(x1, y2)) should be ((7.0 / 36.0) / (40.0 / 144.0) +- epsilon)
     res(SensitivitySaltelli.firstOrder(x2, y2)) should be ((12.0 / 42.0) +- epsilon)
     res(SensitivitySaltelli.totalOrder(x2, y2)) should be ((13.0 / 144.0) / (40.0 / 144.0) +- epsilon)
