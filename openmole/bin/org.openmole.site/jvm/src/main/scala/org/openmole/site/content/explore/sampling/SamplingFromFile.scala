@@ -88,7 +88,7 @@ ${
     val o = Val[Int]
 
     // Define the sampling by specifying the OMR File and the array variables you want to load
-    val mySampling = OMRSampling(workDirectory / "file.omr", Seq(i, d)))
+    val mySampling = OMRSampling(workDirectory / "file.omr", Seq(i, d))
 
     // Define the model, here it just takes i as input
     val myModel =
