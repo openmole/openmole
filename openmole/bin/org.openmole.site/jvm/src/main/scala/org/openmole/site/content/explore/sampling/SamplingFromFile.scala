@@ -102,7 +102,7 @@ ${
       evaluation = myModel,
       sampling = mySampling
     ) hook display
-s""")}
+""")}
 
 The OMR file must contain the variable i and d, and they must respectively ${code("Array[Int]")} and ${code("Array[Double]")}.
 
