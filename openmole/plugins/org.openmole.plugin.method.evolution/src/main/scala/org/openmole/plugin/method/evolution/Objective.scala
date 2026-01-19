@@ -19,27 +19,27 @@ object Objective:
     given asIsToExact[T](using exact: ToObjective[T]): ToObjective[As[T, String]] = t => exact.apply(t.value).copy(as = Some(t.as))
     given asValIsToExact[T, P](using exact: ToObjective[T]): ToObjective[As[T, Val[P]]] = t => exact.apply(t.value).copy(as = Some(t.as.name))
 
-    def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double]) =
+    def buildAggregateCodeObjective[T: ClassTag](o: Val[T], fromContext: FromContext[Double], negative: Boolean = false) =
       def value(noisy: Boolean) =
         if !noisy
         then
-          def aggregate = FromContext { p =>
-            import p._
-            (v: T) => fromContext.from(Context(o -> v))
-          }
+          def aggregate =
+            FromContext: p =>
+              import p.*
+              (v: T) => fromContext.from(Context(o -> v))
 
           ComputeValue(o, aggregate, aggregateString = true)
         else
-          def aggregate = FromContext { p =>
-            import p._
-            (v: Array[T]) => fromContext.from(Context(o.toArray -> v))
-          }
+          def aggregate =
+            FromContext: p =>
+              import p.*
+              (v: Array[T]) => fromContext.from(Context(o.toArray -> v))
 
           ComputeValue(o.array, aggregate, aggregateString = true)
 
       Objective(
         value,
-        negative = false,
+        negative = negative,
         delta = None,
         as = None,
         validate = fromContext.validate
@@ -57,6 +57,21 @@ object Objective:
 
     implicit def evaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Seq[T] => Double]] = a => Objective(_ => ComputeValue(a.value.array, (v: Array[T]) => a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
     implicit def evaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Val[T], Vector[T] => Double]] = a => Objective(_ => ComputeValue(a.value.array, (v: Array[T]) => a.evaluate(v.toVector)), negative = false, delta = None, as = None, noisy = true)
+
+    implicit def negativeEvaluateScalaCodeIsObjective[T: ClassTag]: ToObjective[Evaluate[Negative[Val[T]], ScalaCode | String]] = t =>
+      val fromContext: FromContext[Double] = ScalaCode.fromContext(t.evaluate)
+      buildAggregateCodeObjective(t.value.value, fromContext, negative = true)
+
+    implicit def negativeEvaluateIsToObjective[T: ClassTag]: ToObjective[Evaluate[Negative[Val[T]], T => Double]] = a =>
+      Objective(_ => ComputeValue(a.value.value, a.evaluate), negative = true, delta = None, as = None)
+
+    implicit def negativeEvaluateArrayIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Negative[Val[T]], Array[T] => Double]] = a =>
+      Objective(_ => ComputeValue(a.value.value.array, a.evaluate), negative = true, delta = None, as = None, noisy = true)
+
+    implicit def negativeEvaluateSeqIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Negative[Val[T]], Seq[T] => Double]] = a => Objective(_ => ComputeValue(a.value.value.array, (v: Array[T]) => a.evaluate(v.toVector)), negative = true, delta = None, as = None, noisy = true)
+
+    implicit def negativeEvaluateVectorIsToNoisy[T: ClassTag]: ToObjective[Evaluate[Negative[Val[T]], Vector[T] => Double]] = a => Objective(_ => ComputeValue(a.value.value.array, (v: Array[T]) => a.evaluate(v.toVector)), negative = true, delta = None, as = None, noisy = true)
+
 
   trait ToObjective[T]:
     def apply(t: T): Objective

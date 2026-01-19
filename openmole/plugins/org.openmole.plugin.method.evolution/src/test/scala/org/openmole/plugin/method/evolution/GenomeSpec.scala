@@ -110,12 +110,12 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     originAxe(bao in Vector.fill(10)(TrueFalse weight 10.0)) should matchPattern:
       case s: HDOSE.SequenceOfEnumerationOriginAxe if s.p.values.size == 10 =>
 
-
   "OSE fitness pattern" should "support the following cases" in:
     def pattern(p: OSE.FitnessPattern) = p
 
     val o = Val[Double]
     pattern(o evaluate "o.map(x => math.abs(x - 28.0)).max" under 1)
+    pattern(-o evaluate "o.map(x => x)" under -1.0).objective.negative shouldBe true
 
   "Code objective" should "validate code" in:
     val d = Val[Double]
