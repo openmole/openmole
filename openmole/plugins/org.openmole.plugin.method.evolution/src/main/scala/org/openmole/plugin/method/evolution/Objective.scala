@@ -76,7 +76,8 @@ object Objective:
   trait ToObjective[T]:
     def apply(t: T): Objective
 
-  implicit def toObjective[T: ToObjective](t: T): Objective = implicitly[ToObjective[T]].apply(t)
+  given [T: ToObjective]: Conversion[T, Objective] =
+    t => implicitly[ToObjective[T]].apply(t)
 
   def toExact(o: Objective) =
     o.noisy match
