@@ -63,9 +63,9 @@ object common {
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
 
-  def http4sVersion = "0.23.30"
+  def http4sVersion = "0.23.32"
   def http4sBlaseSeverVersion = "0.23.17"
-  def tapirVersion = "1.11.42"
+  def tapirVersion = "1.13.5"
 
   def xzVersion = "1.10"
 
