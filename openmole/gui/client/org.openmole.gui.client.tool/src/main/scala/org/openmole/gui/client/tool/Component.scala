@@ -4,7 +4,7 @@ import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveElement.isActive
 import com.raquo.laminar.api.features.unitArrows
-import scaladget.bootstrapnative.bsn.{btn_secondary_string, btn_success_string}
+import org.openmole.gui.client.tool.bootstrapnative.bsn.{btn_secondary_string, btn_success_string}
 
 object Component:
 
@@ -37,11 +37,11 @@ object Component:
 
   case class ExclusiveButtons(buttons: Seq[String], activeStateClass: String, unactiveStateClass: String, selected: Var[Int]):
 
-    import scaladget.bootstrapnative.*
+    import bootstrapnative.*
 
     lazy val element =
       div(
-        bsnsheet.btnGroup, bsnsheet.btnGroupToggle, dataAttr("toggle") := "buttons",
+        bootstrapnative.bsnsheet.btnGroup, bootstrapnative.bsnsheet.btnGroupToggle, dataAttr("toggle") := "buttons",
         children <--
           selected.signal.distinct.map: s =>
             buttons.zipWithIndex.map: (rb, index) =>

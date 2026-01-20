@@ -1,6 +1,5 @@
 package org.openmole.gui.client.core
 
-import scaladget.tools._
 import org.openmole.gui.shared.data.*
 import org.scalajs.dom.raw.HTMLElement
 import com.raquo.laminar.api.L._

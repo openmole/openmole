@@ -5,7 +5,7 @@ import org.openmole.gui.client.tool.TagBadge
 import org.openmole.gui.client.tool.OMTags.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import Waiter.*
 import org.openmole.gui.client.core.git.GitClonePanel

@@ -1,7 +1,5 @@
 package org.openmole.site
 
-import scaladget.highlightjs.HighlightJS
-
 import scala.scalajs.js
 import js.Dynamic.{ literal => lit }
 

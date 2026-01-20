@@ -5,9 +5,8 @@ import org.openmole.plugin.method.evolution.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
-import scaladget.tools.*
 import org.scalajs.dom.raw.HTMLElement
 
 import scala.concurrent.Future

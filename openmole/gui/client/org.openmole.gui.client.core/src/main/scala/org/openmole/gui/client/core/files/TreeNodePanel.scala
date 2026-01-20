@@ -4,7 +4,7 @@ import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.core.Waiter.*
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.scalajs.dom.raw.*
 import org.openmole.gui.client.core.*
 import org.openmole.gui.client.ext.*

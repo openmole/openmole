@@ -352,7 +352,7 @@ object NotificationEvent:
 
 sealed trait NotificationEvent
 
-def randomId = scala.util.Random.alphanumeric.take(10).mkString
+def randomId = scala.util.Random().alphanumeric.take(10).mkString
 
 object GUIVariable:
   import org.latestbit.circe.adt.codec.*

@@ -24,8 +24,7 @@ import org.openmole.gui.shared.data.ErrorData.stackTrace
 import org.scalajs.dom.HTMLDivElement
 
 import concurrent.duration.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.concurrent.Future
 

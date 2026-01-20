@@ -17,8 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.ext.*
 
 import scala.concurrent.Future
@@ -28,8 +27,8 @@ import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.shared.api.*
-import scaladget.bootstrapnative.Selector.Options
-import scaladget.bootstrapnative.bsn
+import org.openmole.gui.client.tool.bootstrapnative.Selector.Options
+import org.openmole.gui.client.tool.bootstrapnative.bsn
 
 object AuthenticationPanel:
 

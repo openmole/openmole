@@ -8,10 +8,10 @@ import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.plot.Plotter
 import org.openmole.gui.shared.api.*
-import scaladget.bootstrapnative.bsn
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveElement
+import org.openmole.gui.client.tool.bootstrapnative.bsn
 import org.scalajs.dom.HTMLDivElement
 
 import scala.concurrent.Future

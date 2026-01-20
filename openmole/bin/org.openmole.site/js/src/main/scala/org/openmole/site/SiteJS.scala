@@ -1,7 +1,6 @@
 package org.openmole.site
 
 import scala.scalajs.js.annotation._
-import scaladget.lunr.{IIndexSearchResult, Importedjs, Index}
 import scala.scalajs.js.Dynamic.{literal => lit}
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel

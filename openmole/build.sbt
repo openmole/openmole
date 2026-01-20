@@ -684,11 +684,11 @@ def guiSharedDir = guiDir / "shared"
 def guiSettings = scala3Settings
 //def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
 
-def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!scaladget.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
+def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
 
 /* -------------------- GUI Client ----------------------*/
 
-val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
@@ -702,25 +702,15 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   guiSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.scalajs,
-  //  Libraries.autowireJS,
-  //  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
-  Libraries.ace,
-  Libraries.bootstrapnative,
-  Libraries.nouiSlider,
-  Libraries.scaladgetTools,
   Libraries.laminarJS,
-  //Libraries.catsJS,
-  // Libraries.sortable,
-  Libraries.plotlyJS) dependsOn (clientExt)
+  Libraries.plotlyJS) dependsOn(dataGUI, apiGUI)
 
-lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, apiGUI) settings(
+lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, apiGUI, clientToolGUI) settings(
   //  Libraries.boopickleJS,
   //  Libraries.autowireJS,
   Libraries.laminarJS,
   Libraries.scalajsDomJS,
-  Libraries.scaladgetTools,
-  Libraries.bootstrapnative,
   Libraries.tapirSTTPCLient,
   guiSettings,
   scalaJSSettings)
@@ -740,14 +730,6 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   //webpackExtraArgs := Seq("--profile", "--progress", "true"),
   webpackEmitSourceMaps := false,
   test := false,
-  /*libraryDependencies ++= Seq(
-    "com.raquo" %%% "laminar" % laminarVersion,
-    "org.openmole.scaladget" %%% "tools" % scaladgetVersion,
-    "org.openmole.scaladget" %%% "svg" % scaladgetVersion,
-    "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion,
-    "org.scala-js" %%% "scalajs-dom" % scalajsDomVersion,
-    "org.openmole.endpoints4s" %%% "xhr-client" % "5.1.0+n"
-  )*/
   guiSettings,
   scalaJSSettings,
   build := {
@@ -943,7 +925,6 @@ lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative,
   excludeDependencies += ExclusionRule("org.scala-lang.modules", "scala-xml_3")
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
 
@@ -951,21 +932,18 @@ lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gu
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
 lazy val guiEnvironmentMiniclustPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.miniclust", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, miniclust) enablePlugins (ScalaJSPlugin)
 
 lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = defaultImports ++ guiStrictImports) settings(
@@ -1230,15 +1208,14 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
   scalaJSLinkerConfig := scalaJSLinkerConfig.value.withSourceMap(true),
   webpackNodeArgs := Seq("--openssl-legacy-provider"),
   webpack / version := Libraries.wepackVersion,
+  Compile / npmDependencies += "lunr" -> "2.1.5",
+  Compile / npmDependencies += "highlight.js" -> "10.4.1",
   scala3Settings,
   test := {},
   Libraries.laminarJS,
-  Libraries.bootstrapnative,
-  Libraries.lunr,
-  Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
-  Libraries.highlightJS,
   libraryDependencies += Libraries.scalaTags,
+  libraryDependencies += "org.querki" %%% "querki-jsext" % "0.10" cross (CrossVersion.for3Use2_13)
 )
 
 lazy val siteJVM = site.jvm dependsOn(tools, openmoleProject, serializer, openmoleBuildInfo, marketIndex) settings(

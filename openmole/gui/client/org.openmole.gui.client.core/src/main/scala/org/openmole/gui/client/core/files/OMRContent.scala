@@ -1,7 +1,7 @@
 package org.openmole.gui.client.core.files
 
 import org.openmole.gui.shared.data.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.DomApi
 import org.openmole.gui.client.core.files.PlotContent.*

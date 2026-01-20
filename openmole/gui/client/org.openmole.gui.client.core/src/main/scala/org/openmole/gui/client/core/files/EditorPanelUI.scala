@@ -4,26 +4,25 @@ import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.FileExtension.*
 
 import scala.scalajs.js
-import scaladget.ace.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.scalajs.js.JSConverters.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.OMTags
 import org.scalajs.dom.raw.Event
-import scaladget.bootstrapnative.Popup
-import scaladget.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
+import org.openmole.gui.client.tool.bootstrapnative.Popup.{ClickPopup, HoverPopup, Manual, PopupPosition}
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveElement
 import org.openmole.gui.client.tool.Component
 import org.openmole.gui.shared.data
 import org.scalajs.dom.MouseEvent
-import scaladget.bootstrapnative.Tools.MyPopoverBuilder
+import org.openmole.gui.client.tool.bootstrapnative.Tools.MyPopoverBuilder
 
 import scala.scalajs.js.timers.*
 import scala.scalajs.js.annotation.JSImport
 import org.openmole.gui.client.core.Panels
+import org.openmole.gui.client.tool
+import org.openmole.gui.client.tool.bootstrapnative.Popup
 
 /*
  * Copyright (C) 07/04/15 // mathieu.leclaire@openmole.org
@@ -83,20 +82,20 @@ class EditorPanelUI(val safePath: SafePath)(using plugins: GUIPlugins, panels: P
 
   val edDiv = div(idAttr := "editor", fontFamily := "monospace")
   val editor = {
-    val ed = ace.edit(edDiv.ref)
+    val ed = tool.ace.ace.edit(edDiv.ref)
     val session = ed.getSession()
 
     js.Dynamic.global.ace.config.set("basePath", "js")
     js.Dynamic.global.ace.config.set("modePath", "js")
     js.Dynamic.global.ace.config.set("themePath", "js")
 
-    scalamode
-    pythonmode
+    tool.ace.scalamode
+    tool.ace.pythonmode
 
     //EditorPanelUI.openmolemode
 
-    githubtheme
-    extLanguageTools
+    tool.ace.githubtheme
+    tool.ace.extLanguageTools
 
     ed.setTheme("ace/theme/github")
 

@@ -4,6 +4,7 @@ import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.*
 import org.openmole.gui.shared.data.{GUIOMRSectionContent, GUIVariable, SafePath}
 import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.tool.bootstrapnative.Table
 
 import scala.annotation.tailrec
 
@@ -12,7 +13,7 @@ object RowData:
     given Conversion[String, Content] = s => Content(s)
 
   case class Content(value: String, html: Option[HtmlElement] = None)
-  def toDataContent(c: Content) = scaladget.bootstrapnative.Table.DataContent(c.value, c.html)
+  def toDataContent(c: Content) = Table.DataContent(c.value, c.html)
 
 case class RowData(headers: Seq[String] = Seq(), content: Seq[Seq[RowData.Content]] = Seq(), dimensions: Seq[Int])
 

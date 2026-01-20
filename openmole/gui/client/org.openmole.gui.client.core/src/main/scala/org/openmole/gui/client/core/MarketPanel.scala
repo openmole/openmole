@@ -22,7 +22,7 @@ import org.openmole.gui.shared.data.{ProcessState, Processing}
 import org.openmole.gui.client.ext.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.core.CoreUtils.*
 import org.openmole.gui.shared.data.*
 import Waiter.*

@@ -2,7 +2,7 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.tool.plot.Plot.*
 import org.openmole.plotlyjs.PlotlyImplicits.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.tool.plot.{ParallelPlot, PlotSettings, Plotter, ScatterPlot, SplomPlot, Tools, XYPlot}
 import org.openmole.gui.shared.data.SequenceData

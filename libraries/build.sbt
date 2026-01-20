@@ -269,7 +269,7 @@ lazy val scalajsLogging = OsgiProject(dir, "scalajs-logging", exports = Seq("org
   libraryDependencies += "org.scala-js" %% "scalajs-logging" % scalajsLoggingVersion cross CrossVersion.for3Use2_13,
   version := scalajsLoggingVersion)
   
-lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = defaultImports ++ Seq("*"), privatePackages = Seq("org.scalajs.*")) settings (
+lazy val scalaJS = OsgiProject(dir, "scalajs", exports = Seq("scala.scalajs.*"), imports = defaultImports ++ Seq("*"), privatePackages = Seq("org.scalajs.*", "java.*")) settings (
   settings,
   libraryDependencies += "org.scala-js" %% "scalajs-library" % scalajsVersion cross CrossVersion.for3Use2_13,
   libraryDependencies += "org.scala-lang" %% sjs("scala3-library") % scala3VersionValue,

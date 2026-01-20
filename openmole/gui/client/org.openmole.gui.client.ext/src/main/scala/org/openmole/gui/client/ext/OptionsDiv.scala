@@ -1,4 +1,4 @@
-package org.openmole.gui.client.tool
+package org.openmole.gui.client.ext
 
 /*
  * Copyright (C) 14/01/16 // mathieu.leclaire@openmole.org
@@ -17,10 +17,9 @@ package org.openmole.gui.client.tool
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.omsheet
-import com.raquo.laminar.api.L._
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 object OptionsDiv {
 
@@ -34,7 +33,7 @@ object CheckBox {
     new CheckBox(option, default, classKey, onchecked)
 }
 
-import OptionsDiv._
+import org.openmole.gui.client.ext.OptionsDiv.*
 
 class OptionsDiv[T](options: Seq[T], naming: T => String) {
 

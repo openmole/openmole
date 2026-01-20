@@ -1,7 +1,7 @@
 package org.openmole.gui.client.tool
 
 import org.scalajs.dom.raw._
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.client.tool.bootstrapnative.bsn._
 import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
 import com.raquo.laminar.codecs.*

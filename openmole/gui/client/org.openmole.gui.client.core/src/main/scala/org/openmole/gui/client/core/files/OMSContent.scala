@@ -8,13 +8,13 @@ import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.tool.ace.Editor
 import org.openmole.gui.client.tool.{Component, OMTags}
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.ace.Editor
 
 object OMSContent:
 
