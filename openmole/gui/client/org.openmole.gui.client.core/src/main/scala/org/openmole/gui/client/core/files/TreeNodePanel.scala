@@ -496,7 +496,7 @@ class TreeNodePanel:
     lazy val tree: Div = div(
       cls := "file-scrollable-content",
       children <--
-        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMap { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
+        (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMapSwitch { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
           EventStream.fromFuture(
             api.listFiles(currentDir, fileSorting.copy(size = Some(sizeValue)), withHidden = false, directorySize = true).map(Some(_)), true
           ).toSignal(None).map {
@@ -569,7 +569,7 @@ class TreeNodePanel:
   def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
 
     def scriptErrorSignal(using panels: Panels): Signal[Option[String]] =
-      panels.tabContent.current.signal.flatMap:
+      panels.tabContent.current.signal.flatMapSwitch:
         case None => Signal.fromValue(None)
         case Some(current) =>
           panels.tabContent.editorPanelUI(current.safePath) match

@@ -632,7 +632,7 @@ trait BootstrapTags {
       width := "20"
     )
 
-    case class TabRender(tabHeader: Li, tabContent: Div)
+    case class TabRender(tabHeader: LI, tabContent: Div)
 
     def renderTab(tabID: TabID, initialTab: Tab[T], tabStream: Signal[Tab[T]]): TabRender = {
 

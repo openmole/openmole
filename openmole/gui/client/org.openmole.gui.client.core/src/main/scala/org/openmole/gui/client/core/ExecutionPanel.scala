@@ -396,7 +396,7 @@ class ExecutionPanel:
 
             div(
               child <--
-                size.signal.flatMap: sizeValue =>
+                size.signal.flatMapSwitch: sizeValue =>
                   Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
                     case Some(output) =>
                       val Convert = scalajs.js.Dynamic.global.require("./node_modules/ansi-to-html/lib/ansi_to_html.js")
