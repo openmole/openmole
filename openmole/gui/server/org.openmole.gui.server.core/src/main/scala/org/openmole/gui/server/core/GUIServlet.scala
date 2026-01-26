@@ -117,6 +117,7 @@ object GUIServlet:
     def moduleCall(methodCall: String) =
       s"""
           import('./js/openmole-esbuilded.js').then(openmole => {
+          globalThis.openmole = openmole.default;
           openmole.default.openmole_library.$methodCall
         });
       """
