@@ -39,6 +39,8 @@ object EsBuild extends JavaLogger:
     val cmd = Seq(
       entry.getAbsolutePath,
       "--bundle",
+      "--minify",
+      "--sourcemap",
       "--format=esm",
       s"--outfile=${depsOutput.getAbsolutePath}"
     )
