@@ -27,9 +27,13 @@ import org.openmole.core.context.ValType
 
 object JavaTask:
 
-  def scalaCLI(jvmVersion: String, javaOptions: Seq[String], fewerThreads: Boolean, server: Boolean = false, offline: Boolean = false) =
+  def scalaCLI(jvmVersion: String, javaOptions: Seq[String], scalaVersion: Option[String], fewerThreads: Boolean, server: Boolean = false, offline: Boolean = false) =
     def threadsOptions = if fewerThreads then JavaConfiguration.fewerThreadsParameters else Seq()
-    def allOptions = (threadsOptions ++ javaOptions).map("--java-opt " + _).mkString(" ")
+    def scalaOption = scalaVersion match
+      case Some(v) => Seq("--scala", v)
+      case None => Seq()
+    def javaOpt = (threadsOptions ++ javaOptions).map("--java-opt " + _)
+    def allOptions = (scalaOption ++ javaOpt).mkString(" ")
     def offlineOption = if offline then "--suppress-experimental-warning --power --offline" else ""
     s"scala-cli run $offlineOption --server=$server -j $jvmVersion $allOptions"
 
@@ -52,6 +56,7 @@ object JavaTask:
     fewerThreads: Boolean = true,
     version: String = "21.2",
     jvmVersion: String = "21",
+    scalaVersion: OptionalArgument[String] = None,
     containerSystem: OptionalArgument[ContainerSystem] = None)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("JavaTask"): buildContext =>
@@ -59,7 +64,7 @@ object JavaTask:
 
       def cacheLibraries =
         val deps = libraries.map(l => s"--dep $l").mkString(" ")
-        Seq("cd /tmp", "touch _empty.sc", scalaCLI(jvmVersion, jvmOptions, fewerThreads) + s" $deps  _empty.sc", "rm _empty.sc")
+        Seq("cd /tmp", "touch _empty.sc", scalaCLI(jvmVersion, jvmOptions, scalaVersion, fewerThreads) + s" $deps  _empty.sc", "rm _empty.sc")
 
       val image =
         import taskExecutionBuildContext.given
@@ -77,7 +82,7 @@ object JavaTask:
 
       val taskExecution = ContainerTask.execution(
         image = image,
-        command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
+        command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, scalaVersion, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
         workDirectory = Some(workspaceName),
         errorOnReturnValue = errorOnReturnValue,
         returnValue = returnValue,
