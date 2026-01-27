@@ -148,7 +148,7 @@ case class MoleTask(
           implicit val ev = parentExecution.executionContext.services.eventDispatcher
           parentExecution listen:
             case (_, ev: MoleExecution.Finished) =>
-              MoleExecution.cancel(execution, Some(MoleExecution.MoleExecutionError(new InterruptedException("Parent execution has been canceled"))))
+              MoleExecutionMessage.send(execution)(MoleExecutionMessage.CancelMoleExecution())
 
       try execution.run(Some(context), validate = false)
       finally
