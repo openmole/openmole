@@ -185,7 +185,7 @@ object ContainerTask:
       repository,
       timeout = preference(RegistryTimeout),
       retry = Some(preference(RegistryRetryOnError)),
-      executor = ImageDownloader.Executor.parallel(threadProvider.virtualThreadPool),
+      executor = ImageDownloader.Executor.parallel(using threadProvider.virtualThreadPool),
       proxy = networkService.httpProxy.map(p => ImageDownloader.HttpProxy(p.hostURI))
     )
 
@@ -352,16 +352,16 @@ object ContainerTask:
 
       case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-      def workDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage) =
+      def workDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String]) =
         workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
 
-      def relativeWorkDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
+      def relativeWorkDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String]) = relativePathRoot.getOrElse(workDirectoryValue(image, workDirectory))
 
-      def containerPathResolver(image: InstalledSingularityImage.InstalledSIFImage, path: String): File =
+      def containerPathResolver(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String], path: String): File =
         val rootDirectory = File("/")
         if File(path).isAbsolute
         then rootDirectory / path
-        else rootDirectory / relativeWorkDirectoryValue(image) / path
+        else rootDirectory / relativeWorkDirectoryValue(image, workDirectory) / path
 
       val outBuilder = new StringOutputStream
       val errBuilder = new StringOutputStream
@@ -400,7 +400,7 @@ object ContainerTask:
       val volumes =
         prepareVolumes(
           preparedFilesInfo,
-          containerPathResolver(image, _),
+          containerPathResolver(image, workDirectory, _),
           hostFiles
         ).toVector
 
@@ -425,7 +425,7 @@ object ContainerTask:
         external.outputFiles.map: f =>
           val origin = f.origin.from(context)
           val directory = UUID.randomUUID.toString
-          val resolved = containerPathResolver(image, origin)
+          val resolved = containerPathResolver(image, workDirectory, origin)
           OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
 
       val copyCommand: Seq[String] =
@@ -444,7 +444,7 @@ object ContainerTask:
               image = image.image,
               tmpFS = true,
               commands = commandValue ++ copyCommand ++ exitCommand,
-              workDirectory = Some(workDirectoryValue(image)),
+              workDirectory = Some(workDirectoryValue(image, workDirectory)),
               output = out,
               error = err,
               volumes = volumes ++ Seq(copyVolume),
@@ -473,7 +473,7 @@ object ContainerTask:
                 image = image.image,
                 overlay = Some(overlay),
                 commands = commandValue ++ copyCommand ++ exitCommand,
-                workDirectory = Some(workDirectoryValue(image)),
+                workDirectory = Some(workDirectoryValue(image, workDirectory)),
                 output = out,
                 error = err,
                 volumes = volumes ++ Seq(copyVolume),
@@ -486,7 +486,7 @@ object ContainerTask:
               image = image.image,
               tmpFS = true,
               commands = commandValue ++ copyCommand ++ exitCommand,
-              workDirectory = Some(workDirectoryValue(image)),
+              workDirectory = Some(workDirectoryValue(image, workDirectory)),
               output = out,
               error = err,
               volumes = volumes ++ Seq(copyVolume),
