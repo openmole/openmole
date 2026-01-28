@@ -60,12 +60,20 @@ object ContainerTask:
     returnValue:            OptionalArgument[Val[Int]]                         = None,
     stdOut:                 OptionalArgument[Val[String]]                      = None,
     stdErr:                 OptionalArgument[Val[String]]                      = None,
+    embedResources:         Boolean                                            = false,
     clearCache:             Boolean                                            = false)(using sourcecode.Name, DefinitionScope) =
     ExternalTask.build("ContainerTask"): buildParameters =>
       import buildParameters.*
       val installedImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, install, volumes = installFiles.map(f => f -> f.getName), clearCache = clearCache)
+
+        ContainerTask.install(
+          containerSystem,
+          image,
+          install,
+          volumes = installFiles.map(f => f -> f.getName),
+          clearCache = clearCache)
+
       val containerExecution =
         ContainerTask.execution(
           image = installedImage,
@@ -118,7 +126,10 @@ object ContainerTask:
 
     val volumeCacheKey = volumes.map((f, _) => fileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
 
-    val cacheKey: String = Hash.string((cacheId(image) ++ install ++ volumeCacheKey++ Seq("sif")).mkString("\n")).toString
+    val cacheKey: String =
+      Hash.string:
+        (cacheId(image) ++ install ++ volumeCacheKey ++ Seq("sif")).mkString("\n")
+      .toString
 
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedSingularityImage = cacheDirectory / "singularityImage.bin"
@@ -139,6 +150,11 @@ object ContainerTask:
           else
             val img = localImage(image, containerDirectory, clearCache = clearCache)
             val installedImage = executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+
+//            embed(installedImage.workDirectory).foreach: (f, d) =>
+//              case f: File => _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d)
+//              caes
+
             val singularityImage = _root_.container.Singularity.buildSIF(installedImage, singularityImageFile, logger = outputRedirection.output)
             serializerService.serialize(singularityImage, serializedSingularityImage)
             singularityImage
@@ -154,7 +170,7 @@ object ContainerTask:
         InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory)
 
 
-  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(implicit tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
+  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if install.isEmpty
     then image
     else
@@ -190,6 +206,17 @@ object ContainerTask:
     )
 
   def repositoryDirectory(workspace: Workspace): File = workspace.persistentDir /> "container" /> "repos"
+
+  def workDirectoryValue(imageWorkDirectory: Option[String], workDirectory: Option[String]) =
+    workDirectory.orElse(imageWorkDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
+
+  def pathResolver(imageWorkDirectory: Option[String], relativePathRoot: Option[String], workDirectory: Option[String], path: String): File =
+    def relativeWorkDirectoryValue = relativePathRoot.getOrElse(workDirectoryValue(imageWorkDirectory, workDirectory))
+
+    val rootDirectory = File("/")
+    if File(path).isAbsolute
+    then rootDirectory / path
+    else rootDirectory / relativeWorkDirectoryValue / path
 
   def runCommandInContainer(
     image: InstalledSingularityImage,
@@ -352,17 +379,6 @@ object ContainerTask:
 
       case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-      def workDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String]) =
-        workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
-
-      def relativeWorkDirectoryValue(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String]) = relativePathRoot.getOrElse(workDirectoryValue(image, workDirectory))
-
-      def containerPathResolver(image: InstalledSingularityImage.InstalledSIFImage, workDirectory: Option[String], path: String): File =
-        val rootDirectory = File("/")
-        if File(path).isAbsolute
-        then rootDirectory / path
-        else rootDirectory / relativeWorkDirectoryValue(image, workDirectory) / path
-
       val outBuilder = new StringOutputStream
       val errBuilder = new StringOutputStream
 
@@ -400,7 +416,7 @@ object ContainerTask:
       val volumes =
         prepareVolumes(
           preparedFilesInfo,
-          containerPathResolver(image, workDirectory, _),
+          pathResolver(image.workDirectory, relativePathRoot, workDirectory, _),
           hostFiles
         ).toVector
 
@@ -425,7 +441,7 @@ object ContainerTask:
         external.outputFiles.map: f =>
           val origin = f.origin.from(context)
           val directory = UUID.randomUUID.toString
-          val resolved = containerPathResolver(image, workDirectory, origin)
+          val resolved = pathResolver(image.workDirectory, relativePathRoot, workDirectory, origin)
           OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
 
       val copyCommand: Seq[String] =
@@ -444,7 +460,7 @@ object ContainerTask:
               image = image.image,
               tmpFS = true,
               commands = commandValue ++ copyCommand ++ exitCommand,
-              workDirectory = Some(workDirectoryValue(image, workDirectory)),
+              workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
               output = out,
               error = err,
               volumes = volumes ++ Seq(copyVolume),
@@ -473,7 +489,7 @@ object ContainerTask:
                 image = image.image,
                 overlay = Some(overlay),
                 commands = commandValue ++ copyCommand ++ exitCommand,
-                workDirectory = Some(workDirectoryValue(image, workDirectory)),
+                workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
                 output = out,
                 error = err,
                 volumes = volumes ++ Seq(copyVolume),
@@ -486,7 +502,7 @@ object ContainerTask:
               image = image.image,
               tmpFS = true,
               commands = commandValue ++ copyCommand ++ exitCommand,
-              workDirectory = Some(workDirectoryValue(image, workDirectory)),
+              workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
               output = out,
               error = err,
               volumes = volumes ++ Seq(copyVolume),

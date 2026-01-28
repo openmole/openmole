@@ -58,7 +58,7 @@ object Libraries {
   lazy val scalajs = "org.openmole.library" %% "scalajs" % scalajsVersion
   lazy val mgo = "org.openmole.library" %% "mgo" % mgoVersion.version
   lazy val monocle = Seq("org.openmole.library" %% "monocle" % monocleVersion, scalaz)
-  lazy val container = "org.openmole.library" %% "container" % containerVersion
+  lazy val container = "org.openmole.library" %% "container" % containerVersion.version
   lazy val scalaTags = "org.openmole.library" %% "com-scalatags" % scalaTagsVersion
 
   lazy val netlogo5 = "org.openmole.library" % "ccl-northwestern-edu-netlogo5" % netLogo5Version

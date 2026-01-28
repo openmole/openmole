@@ -336,9 +336,9 @@ lazy val container = OsgiProject(
   imports = defaultImports ++ noReflectScala2 ++ Seq( "scala.*", "squants.*", "monocle.*", "cats.*", "io.circe.*", "!com.oracle.svm.*", "!org.graalvm.*", "!*"),
   privatePackages = Seq("!scala.*", "!monocle.*", "!squants.*", "!cats.*", "!io.circe.*" ,"*")) settings(
   settings,
-  libraryDependencies += "org.openmole" %% "container" % containerVersion,
-  //libraryDependencies += "com.github.luben" % "zstd-jni" % "1.4.3-1",
-  version := containerVersion) dependsOn(cats, squants, monocle, circe)
+  libraryDependencies += "com.github.openmole" % "container" % containerVersion.commit,
+  //libraryDependencies += "org.openmole" %% "container" % containerVersion,
+  version := containerVersion.version) dependsOn(cats, squants, monocle, circe)
 
 lazy val spatialdata = OsgiProject(dir, "org.openmole.spatialsampling",
   exports = Seq("org.openmole.spatialsampling.*"),
