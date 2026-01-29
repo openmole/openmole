@@ -41,7 +41,12 @@ object ScilabTask:
 
       val image =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, scilabImage(version), install)
+        ContainerTask.install(
+          containerSystem,
+          scilabImage(version),
+          install,
+          resources = external.resources
+        )
 
       def workDirectory = "/_workdirectory_"
 

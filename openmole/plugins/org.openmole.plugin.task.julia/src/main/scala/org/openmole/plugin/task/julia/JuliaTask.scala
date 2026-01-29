@@ -79,7 +79,13 @@ object JuliaTask:
 
     val image =
       import taskExecutionBuildContext.given
-      ContainerTask.install(containerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache)
+      ContainerTask.install(
+        containerSystem,
+        DockerImage("julia", version),
+        install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
+        volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
+        resources = external.resources,
+        clearCache = clearCache)
 
     def workDirectory = "/_workdirectory_"
     def scriptName = s"$workDirectory/_generatescript_.jl"

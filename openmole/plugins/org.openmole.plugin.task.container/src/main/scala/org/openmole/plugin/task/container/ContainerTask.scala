@@ -18,6 +18,7 @@ package org.openmole.plugin.task.container
  */
 
 import monocle.Focus
+import monocle.syntax.all.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.plugin.task.external.*
@@ -60,19 +61,20 @@ object ContainerTask:
     returnValue:            OptionalArgument[Val[Int]]                         = None,
     stdOut:                 OptionalArgument[Val[String]]                      = None,
     stdErr:                 OptionalArgument[Val[String]]                      = None,
-    embedResources:         Boolean                                            = false,
     clearCache:             Boolean                                            = false)(using sourcecode.Name, DefinitionScope) =
     ExternalTask.build("ContainerTask"): buildParameters =>
       import buildParameters.*
+
       val installedImage =
         import taskExecutionBuildContext.given
-
         ContainerTask.install(
           containerSystem,
           image,
           install,
+          resources = external.resources,
           volumes = installFiles.map(f => f -> f.getName),
-          clearCache = clearCache)
+          clearCache = clearCache
+        )
 
       val containerExecution =
         ContainerTask.execution(
@@ -98,15 +100,26 @@ object ContainerTask:
     .withValidate: info =>
       validateContainer(command.value, environmentVariables, info.external)
 
+  def embeddedResources(resources: Seq[External.Resource], embed: Boolean)(using FileService, TmpDirectory): Seq[(File, InstalledSingularityImage.EmbeddedResource)] =
+    if embed
+    then
+      def resourcesPath = "/_openmole_data_"
+      resources.collect:
+        case r: External.FileResource =>
+          val hash = FileService.hashNoCache(r.file).toString
+          (r.file, InstalledSingularityImage.EmbeddedResource(s"$resourcesPath/$hash", r.destination, hash))
+    else Seq()
+
   def install(
     containerSystem: Option[ContainerSystem],
     image: ContainerImage,
     install: Seq[String],
+    resources: Seq[External.Resource],
     volumes: Seq[(File, String)] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
-      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, errorDetail, clearCache)
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, resources, errorDetail, clearCache)
       case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
 
   def installSIF(
@@ -114,8 +127,9 @@ object ContainerTask:
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
+    resources: Seq[External.Resource] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
-    clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
+    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService) =
 
     import org.openmole.tool.hash.*
 
@@ -124,19 +138,30 @@ object ContainerTask:
         case image: DockerImage      => Seq(image.image, image.tag, image.registry)
         case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
-    val volumeCacheKey = volumes.map((f, _) => fileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
+    val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
+
+
+    val embeddedResourcesValue =
+      val embed =
+        containerSystem match
+          case s: SingularityOverlay => s.embedResources
+          case s: SingularityMemory => s.embedResources
+
+      embeddedResources(resources, embed)
+
+    val embedCacheKey = embeddedResourcesValue.map((_, e) => e.hash)
 
     val cacheKey: String =
       Hash.string:
-        (cacheId(image) ++ install ++ volumeCacheKey ++ Seq("sif")).mkString("\n")
+        (cacheId(image) ++ install ++ volumeCacheKey ++ embedCacheKey ++ Seq("sif")).mkString("\n")
       .toString
 
-    val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
+    val cacheDirectory = summon[Workspace].tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedSingularityImage = cacheDirectory / "singularityImage.bin"
 
     val installedImage =
       cacheDirectory.withLockInDirectory:
-        tmpDirectory.withTmpDir: tmpDirectory =>
+        TmpDirectory.withTmpDir: tmpDirectory =>
           val containerDirectory = tmpDirectory / "fs"
           val singularityImageFile = cacheDirectory / "image.sif"
 
@@ -146,28 +171,27 @@ object ContainerTask:
             containerDirectory.recursiveDelete
 
           if serializedSingularityImage.exists
-          then serializerService.deserialize[_root_.container.Singularity.SingularityImageFile](serializedSingularityImage)
+          then summon[SerializerService].deserialize[_root_.container.Singularity.SingularityImageFile](serializedSingularityImage)
           else
             val img = localImage(image, containerDirectory, clearCache = clearCache)
             val installedImage = executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
 
-//            embed(installedImage.workDirectory).foreach: (f, d) =>
-//              case f: File => _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d)
-//              caes
+            embeddedResourcesValue.foreach: (f, d) =>
+              _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
 
-            val singularityImage = _root_.container.Singularity.buildSIF(installedImage, singularityImageFile, logger = outputRedirection.output)
-            serializerService.serialize(singularityImage, serializedSingularityImage)
+            val singularityImage = _root_.container.Singularity.buildSIF(installedImage, singularityImageFile, logger = summon[OutputRedirection].output)
+            summon[SerializerService].serialize(singularityImage, serializedSingularityImage)
             singularityImage
 
     containerSystem match
       case overlay : SingularityOverlay if overlay.copy =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
-        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, Some(initializedOverlay))
+        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, embeddedResourcesValue.map(_._2), Some(initializedOverlay))
       case overlay: SingularityOverlay =>
-        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, None)
+        InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, embeddedResourcesValue.map(_._2), None)
       case memory: SingularityMemory =>
-        InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory)
+        InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory, embeddedResourcesValue.map(_._2))
 
 
   def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
@@ -340,6 +364,15 @@ object ContainerTask:
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
     config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
+
+    val embedExternal: External =
+      if image.embedResources
+      then
+        external.focus(_.resources).modify: resources =>
+          resources.collect:
+            case r: External.EmptyDirectoryResource => r
+      else external
+
     ContainerTaskExecution(
       image = image,
       command = command,
@@ -352,7 +385,7 @@ object ContainerTask:
       stdOut = stdOut,
       stdErr = stdErr,
       config = config,
-      external = external,
+      external = embedExternal,
       info = info
     ).set(
       outputs ++= Seq(returnValue, stdOut, stdErr).flatten
@@ -426,6 +459,11 @@ object ContainerTask:
       def ignoreRetCode = !errorOnReturnValue || returnValue.isDefined
       def retCodeVariable = "_PROCESS_RET_CODE_"
 
+      val linkCommand: Seq[String] =
+        image.embeddedResources.flatMap: e =>
+          val destination = ContainerTask.pathResolver(image.workDirectory, relativePathRoot, workDirectory, e.destination.from(context))
+          Seq(s"mkdir -p \"$$(dirname \"$destination\")\"", s"ln -s \"${e.path}\" \"$destination\"")
+
       val commandValue =
         def dropEmptyLinesAtTheEnd(s: String) = s.split("\n").reverse.dropWhile(_.trim.isEmpty).reverse.mkString("\n")
         val value = command.value.map(_.from(context)).map(dropEmptyLinesAtTheEnd)
@@ -459,7 +497,7 @@ object ContainerTask:
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
-              commands = commandValue ++ copyCommand ++ exitCommand,
+              commands = linkCommand ++ commandValue ++ copyCommand ++ exitCommand,
               workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
               output = out,
               error = err,
@@ -488,7 +526,7 @@ object ContainerTask:
               runCommandInSIFContainer(
                 image = image.image,
                 overlay = Some(overlay),
-                commands = commandValue ++ copyCommand ++ exitCommand,
+                commands = linkCommand ++ commandValue ++ copyCommand ++ exitCommand,
                 workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
                 output = out,
                 error = err,
@@ -501,7 +539,7 @@ object ContainerTask:
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
-              commands = commandValue ++ copyCommand ++ exitCommand,
+              commands = linkCommand ++ commandValue ++ copyCommand ++ exitCommand,
               workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
               output = out,
               error = err,

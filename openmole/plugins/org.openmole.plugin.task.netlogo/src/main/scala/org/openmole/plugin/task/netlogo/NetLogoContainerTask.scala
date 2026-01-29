@@ -61,7 +61,13 @@ object NetLogoContainerTask:
       val volumesValue = volumes(script, embedWorkspace)
       val preparedImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) => lv -> cv }, clearCache = clearContainerCache)
+        ContainerTask.install(
+          containerSystem,
+          image,
+          install,
+          resources = external.resources,
+          volumes = volumesValue.map { (lv, cv) => lv -> cv },
+          clearCache = clearContainerCache)
 
       import NetLogoContainerTask.{workspace, netLogoWorkspace}
 

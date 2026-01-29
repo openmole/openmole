@@ -54,7 +54,7 @@ object JavaTask:
     clearContainerCache: Boolean = false,
     jvmOptions: Seq[String] = Seq.empty,
     fewerThreads: Boolean = true,
-    version: String = "21.2",
+    version: String = "21.3",
     jvmVersion: String = "21",
     scalaVersion: OptionalArgument[String] = None,
     containerSystem: OptionalArgument[ContainerSystem] = None)(using sourcecode.Name, DefinitionScope) =
@@ -68,7 +68,12 @@ object JavaTask:
 
       val image =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, dockerImage(version), cacheLibraries ++ install, clearCache = clearContainerCache)
+        ContainerTask.install(
+          containerSystem,
+          dockerImage(version),
+          cacheLibraries ++ install,
+          resources = external.resources,
+          clearCache = clearContainerCache)
 
       def workspaceName = "/_workspace_"
       def scriptName = "_generatedscript_.sc"

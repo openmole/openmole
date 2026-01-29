@@ -28,6 +28,7 @@ object GAMATask:
     install:                Seq[String],
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
+    external:               External,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     def fixIni =
@@ -42,7 +43,7 @@ object GAMATask:
         containerSystem,
         image,
         fixIni ++ fixHeadless ++ install,
-        Seq(),
+        resources = external.resources,
         clearCache = clearCache)
 
     installedImage
@@ -93,7 +94,7 @@ object GAMATask:
 
       val preparedImage =
         import taskExecutionBuildContext.given
-        prepare(project, gaml, install, containerSystem, gamaContainerImage, clearCache = clearContainerCache)
+        prepare(project, gaml, install, containerSystem, gamaContainerImage, external, clearCache = clearContainerCache)
 
       val inputFilePath = s"${GAMALegacyTask.gamaWorkspaceDirectory}/__om_experiment__.gaml"
 

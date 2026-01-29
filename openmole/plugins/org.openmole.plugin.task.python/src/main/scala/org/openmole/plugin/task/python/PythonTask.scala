@@ -62,7 +62,12 @@ object PythonTask:
         
       val containerImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, installCommands(install, libraries, major))
+        ContainerTask.install(
+          containerSystem,
+          image,
+          installCommands(install, libraries, major),
+          resources = external.resources
+        )
 
       def workDirectory = "/_workdirectory_"
       

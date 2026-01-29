@@ -39,7 +39,13 @@ import org.openmole.tool.stream.*
 
 object FlatContainerTask:
 
-  def install(containerSystem: SingularityFlatImage, image: ContainerImage, install: Seq[String], volumes: Seq[(File, String)] = Seq.empty, errorDetail: Int => Option[String] = _ => None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
+  def install(
+    containerSystem: SingularityFlatImage,
+    image: ContainerImage,
+    install: Seq[String],
+    volumes: Seq[(File, String)] = Seq.empty,
+    errorDetail: Int => Option[String] = _ => None,
+    clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =

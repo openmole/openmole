@@ -100,17 +100,33 @@ object InstalledSingularityImage:
   type OverlayKey = CacheKey[WithInstance[_root_.container.Singularity.OverlayImage]]
   type FlatImageKey = CacheKey[WithInstance[FlatContainerTask.Cached]]
 
+  case class EmbeddedResource(path: String, destination: FromContext[String], hash: String)
+
   extension (img: InstalledSingularityImage)
-    def workDirectory =
+    def workDirectory: Option[String] =
       img match
         case i: InstalledSIFOverlayImage => i.image.workDirectory
         case i: InstalledSIFMemoryImage => i.image.workDirectory
         case i: InstalledFlatImage => i.image.workDirectory
 
-  case class InstalledSIFMemoryImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityMemory) extends InstalledSingularityImage:
+    def embedResources: Boolean =
+      img match
+        case i: InstalledSIFOverlayImage => i.containerSystem.embedResources
+        case i: InstalledSIFMemoryImage => i.containerSystem.embedResources
+        case i: InstalledFlatImage => false
+
+
+  extension (img: InstalledSIFImage)
+    def embeddedResources =
+      img match
+        case i: InstalledSIFOverlayImage => i.embeddedResources
+        case i: InstalledSIFMemoryImage => i.embeddedResources
+
+
+  case class InstalledSIFMemoryImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityMemory, embeddedResources: Seq[EmbeddedResource]) extends InstalledSingularityImage:
     lazy val cacheKey: OverlayKey = CacheKey()
 
-  case class InstalledSIFOverlayImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityOverlay, overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends InstalledSingularityImage:
+  case class InstalledSIFOverlayImage(image: _root_.container.Singularity.SingularityImageFile, containerSystem: SingularityOverlay, embeddedResources: Seq[EmbeddedResource],overlay: Option[_root_.container.Singularity.OverlayImage] = None) extends InstalledSingularityImage:
     lazy val cacheKey: OverlayKey = CacheKey()
 
   case class InstalledFlatImage(image: _root_.container.FlatImage, containerSystem: SingularityFlatImage) extends InstalledSingularityImage:
