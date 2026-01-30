@@ -19,8 +19,7 @@ object GAMATask:
   def volumes(
     workspace: File,
     model:     String) =
-    val content = workspace.listFiles.map { f => f -> s"$gamaWorkspaceDirectory/${f.getName}"}.toSeq
-    (model, content)
+    workspace.listFiles.map { f => f -> s"$gamaWorkspaceDirectory/${f.getName}"}.toSeq
 
   def prepare(
     workspace:              File,
@@ -96,9 +95,9 @@ object GAMATask:
         import taskExecutionBuildContext.given
         prepare(project, gaml, install, containerSystem, gamaContainerImage, external, clearCache = clearContainerCache)
 
-      val inputFilePath = s"${GAMALegacyTask.gamaWorkspaceDirectory}/__om_experiment__.gaml"
+      val inputFilePath = s"${GAMATask.gamaWorkspaceDirectory}/__om_experiment__.gaml"
 
-      def outputDirectoryPath = s"${GAMALegacyTask.workspaceDirectory}/_output_"
+      def outputDirectoryPath = s"${GAMATask.workspaceDirectory}/_output_"
 
       def memoryValue =
         memory.option match
@@ -127,8 +126,8 @@ object GAMATask:
         ContainerTask.execution(
           image = preparedImage,
           command = launchCommand,
-          workDirectory = Some(GAMALegacyTask.workspaceDirectory),
-          relativePathRoot = Some(GAMALegacyTask.gamaWorkspaceDirectory),
+          workDirectory = Some(GAMATask.workspaceDirectory),
+          relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
           errorOnReturnValue = errorOnReturnValue,
           returnValue = returnValue,
           hostFiles = hostFiles,
@@ -137,7 +136,9 @@ object GAMATask:
           stdErr = stdErr,
           config = config,
           external = external,
-          info = info)
+          info = info) set (
+          GAMATask.volumes(project, gaml).map((lv, cv) => resources += (lv, cv, true))
+        )
 
       ExternalTask.execution: executionParameters =>
         import executionParameters.*
@@ -165,10 +166,7 @@ object GAMATask:
           def outputValues = parse(file.content)
           val outputMap: Map[String, JValue] = outputValues.asInstanceOf[JObject].obj.toMap
           Mapped.noFile(mapped.outputs).map { m => jValueToVariable(outputMap(m.name), m.v, unwrapArrays = true) }
-
-
-        val (_, volumes) = GAMALegacyTask.volumes(project, gaml)
-
+        
         def stopConditionValue =
           (finalStep.option, stopCondition.option) match
             case (_, Some(s)) => s"when:${s.from(context)}"
@@ -210,7 +208,6 @@ object GAMATask:
           containerTaskExecution.set(
             resources += (inputFile, inputFilePath, true),
             resources += (outputDirectory, outputDirectoryPath, true),
-            volumes.map((lv, cv) => resources += (lv, cv, true)),
             Mapped.files(mapped.inputs).map { m => inputFiles += (m.v, m.name, true) },
             Mapped.files(mapped.outputs).map { m => outputFiles += (m.name, m.v) }
           )
