@@ -52,7 +52,7 @@ object Command:
     import runServices._
     val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compilationContext))
 
-    val ex = MoleExecution(dsl)(moleServices)
+    val ex = MoleExecution(dsl)(using moleServices)
     ex.start(true)
   end start
 

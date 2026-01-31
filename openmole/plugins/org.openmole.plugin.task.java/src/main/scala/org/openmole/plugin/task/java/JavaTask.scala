@@ -72,7 +72,7 @@ object JavaTask:
           containerSystem,
           dockerImage(version),
           cacheLibraries ++ install,
-          resources = external.resources,
+          buildParameters = buildContext,
           clearCache = clearContainerCache)
 
       def workspaceName = "/_workspace_"

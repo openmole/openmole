@@ -273,7 +273,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     safePathToFile(safePath).length
 
-  def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
+  def sequence(safePath: SafePath, separator: Char = ','): SequenceData =
     import services._
     val content = safePath.toFile.content.split("\n")
     val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?|true|false""".r
@@ -284,7 +284,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         content.tail.map { row => regex.findAllIn(row).toSeq }.toSeq
       )
     }.getOrElse(SequenceData())
-  }
 
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = serverState.cancel(id)
@@ -330,7 +329,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     def message(message: String) = MessageErrorData(message, None)
 
     val script: File =
-      import services._
+      import services.*
       safePathToFile(scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
@@ -340,8 +339,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       TmpDirectory.newDirectory("execution")
 
     val runServices =
-      import services._
-      Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory), fileServiceCache = FileServiceCache())
+      import services.*
+      Services.copy(services)(
+        outputRedirection = executionOutputRedirection,
+        newFile = TmpDirectory(executionTmpDirectory),
+        fileServiceCache = FileServiceCache())
 
     try
       Project.compile(script.getParentFileSafe, script)(using runServices) match
@@ -374,7 +376,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               outputRedirection = Some(runServices.outputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          Try(MoleExecution(dsl)(executionServices)) match
+          Try(MoleExecution(dsl)(using executionServices)) match
             case Success(ex) => ex
             case Failure(e) =>
               MoleServices.clean(executionServices)

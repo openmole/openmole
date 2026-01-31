@@ -71,7 +71,7 @@ object ContainerTask:
           containerSystem,
           image,
           install,
-          resources = external.resources,
+          buildParameters = buildParameters,
           volumes = installFiles.map(f => f -> f.getName),
           clearCache = clearCache
         )
@@ -92,6 +92,7 @@ object ContainerTask:
           external = external,
           info = info
         )
+        
       ExternalTask.execution: p =>
         import p.*
         containerExecution(p.executionContext).from(context)
@@ -114,12 +115,12 @@ object ContainerTask:
     containerSystem: Option[ContainerSystem],
     image: ContainerImage,
     install: Seq[String],
-    resources: Seq[External.Resource],
+    buildParameters: ExternalTask.BuildParameters,
     volumes: Seq[(File, String)] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
-      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, resources, errorDetail, clearCache)
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters.external.resources, errorDetail, clearCache)
       case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
 
   def installSIF(

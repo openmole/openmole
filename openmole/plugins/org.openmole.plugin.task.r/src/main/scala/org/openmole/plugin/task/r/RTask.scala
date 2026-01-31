@@ -83,7 +83,7 @@ object RTask:
             containerSystem,
             image,
             installCommands,
-            resources = external.resources,
+            buildParameters = buildParameters,
             clearCache = clearContainerCache),
           command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
           workDirectory = Some(workDirectory),

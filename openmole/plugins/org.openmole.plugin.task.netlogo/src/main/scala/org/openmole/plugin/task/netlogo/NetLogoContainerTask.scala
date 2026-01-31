@@ -65,7 +65,7 @@ object NetLogoContainerTask:
           containerSystem,
           image,
           install,
-          resources = external.resources,
+          buildParameters = buildParameters,
           volumes = volumesValue.map { (lv, cv) => lv -> cv },
           clearCache = clearContainerCache)
 

@@ -28,7 +28,7 @@ object GAMALegacyTask:
     install:                Seq[String],
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
-    external:               External,
+    buildParameters:        ExternalTask.BuildParameters,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     def fixIni = Seq("""sed -i -E '/-XX:\+UseG1GC/ d; /-XX:G1[^ ]*/ d' /opt/gama-platform/Gama.ini""")
@@ -38,7 +38,7 @@ object GAMALegacyTask:
         containerSystem,
         image,
         fixIni ++ install,
-        resources = external.resources,
+        buildParameters = buildParameters,
         clearCache = clearCache)
 
     val (modelName, volumesValue) = volumes(workspace, model)
@@ -202,7 +202,7 @@ object GAMALegacyTask:
 
       val (preparedImage, inputXML) =
         import taskExecutionBuildContext.given
-        prepare(project, gaml, experiment, install, containerSystem, gamaContainerImage, external, clearCache = clearContainerCache)
+        prepare(project, gaml, experiment, install, containerSystem, gamaContainerImage, buildParameters = buildParameters, clearCache = clearContainerCache)
 
       checkXML(inputXML, experiment, frameRate.option, mapped) match
         case errors if errors.nonEmpty => throw MultipleException(errors)

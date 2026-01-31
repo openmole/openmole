@@ -126,7 +126,7 @@ class RESTAPI(services: Services):
                           compilationContext = Some(compiled.compilationContext)
                         )
                       Try:
-                        MoleExecution(res)(moleServices)
+                        MoleExecution(res)(using moleServices)
                       match
                         case Success(ex) => start(ex)
                         case Failure(e) =>

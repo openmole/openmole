@@ -44,11 +44,9 @@ class EventDispatcher:
     listenerMap.get(key.obj).foreach(_ -= key.listner)
   }
 
-  def trigger[T](obj: T, event: Event[T]) = {
-    val listeners = listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
-    for {
-      l ← listeners
-    } l.asInstanceOf[Listner[T]].lift(obj, event)
-  }
+  def trigger[T](obj: T, event: Event[T]) =
+    val listeners = listenerMap.synchronized { listenerMap.getOrElse(obj, List.empty) }
+    for l <- listeners
+    do l.asInstanceOf[Listner[T]].lift(obj, event)
 
 

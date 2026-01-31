@@ -76,10 +76,12 @@ object MoleExecution:
   case class SourceExceptionRaised(source: Source, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class HookExceptionRaised(hook: Hook, capsule: MoleCapsule, moleJob: JobId, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
+  
+  class BuildEventHandler
 
   private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) }
 
-  def apply(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
+  def apply(dsl: DSL)(using moleServices: MoleServices): MoleExecution =
     val p = DSL.toPuzzle(dsl)
     MoleExecution(Puzzle.toMole(p), p.sources, p.hooks, p.environments, p.grouping)
 
@@ -95,12 +97,13 @@ object MoleExecution:
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
     lockRepository:              LockRepository[LockKey]                    = LockRepository(),
-    runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None
+    runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None,
+    buildEventHandler:           MoleExecution.BuildEventHandler            = MoleExecution.BuildEventHandler()
   )(using moleServices: MoleServices): MoleExecution =
     
     def executionBuildContext(capsule: MoleCapsule) =
       import moleServices.*
-      TaskExecutionBuildContext(taskCache)
+      TaskExecutionBuildContext(taskCache, buildEventHandler)
 
     val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices)
     val builtEnvironments = EnvironmentBuilder.build(environments.values.toVector, executionContext.services)
@@ -660,7 +663,6 @@ object MoleExecutionMessage:
     do
       val msg = moleExecution.messageQueue.dequeue()
       dispatch(moleExecution, msg)
-
 
 
 class MoleExecution(

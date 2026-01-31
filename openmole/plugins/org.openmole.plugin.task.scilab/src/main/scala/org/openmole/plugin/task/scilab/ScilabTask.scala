@@ -45,7 +45,7 @@ object ScilabTask:
           containerSystem,
           scilabImage(version),
           install,
-          resources = external.resources
+          buildParameters = buildParameters
         )
 
       def workDirectory = "/_workdirectory_"

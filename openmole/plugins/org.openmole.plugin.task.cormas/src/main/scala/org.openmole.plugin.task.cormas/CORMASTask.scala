@@ -35,7 +35,7 @@ object CORMASTask:
         ContainerTask.install(
           containerSystem,
           cormasImage("elcep/cormas", version),
-          resources = external.resources,
+          buildParameters = buildParameters,
           install = install,
           clearCache = clearContainerCache)
 

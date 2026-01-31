@@ -190,7 +190,8 @@ case class TaskExecutionContext(
 
 
 case class TaskExecutionBuildContext(
-  cache: KeyValueCache)(
+  cache: KeyValueCache,
+  buildEventHandler: MoleExecution.BuildEventHandler)(
   using
   val tmpDirectory: TmpDirectory,
   val fileService: FileService,

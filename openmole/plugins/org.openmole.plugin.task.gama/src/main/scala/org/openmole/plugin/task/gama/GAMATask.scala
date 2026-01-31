@@ -27,7 +27,7 @@ object GAMATask:
     install:                Seq[String],
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
-    external:               External,
+    buildParameters:        ExternalTask.BuildParameters,
     clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
 
     def fixIni =
@@ -42,7 +42,7 @@ object GAMATask:
         containerSystem,
         image,
         fixIni ++ fixHeadless ++ install,
-        resources = external.resources,
+        buildParameters = buildParameters,
         clearCache = clearCache)
 
     installedImage
@@ -93,7 +93,7 @@ object GAMATask:
 
       val preparedImage =
         import taskExecutionBuildContext.given
-        prepare(project, gaml, install, containerSystem, gamaContainerImage, external, clearCache = clearContainerCache)
+        prepare(project, gaml, install, containerSystem, gamaContainerImage, buildParameters = buildParameters, clearCache = clearContainerCache)
 
       val inputFilePath = s"${GAMATask.gamaWorkspaceDirectory}/__om_experiment__.gaml"
 
@@ -166,7 +166,7 @@ object GAMATask:
           def outputValues = parse(file.content)
           val outputMap: Map[String, JValue] = outputValues.asInstanceOf[JObject].obj.toMap
           Mapped.noFile(mapped.outputs).map { m => jValueToVariable(outputMap(m.name), m.v, unwrapArrays = true) }
-        
+
         def stopConditionValue =
           (finalStep.option, stopCondition.option) match
             case (_, Some(s)) => s"when:${s.from(context)}"

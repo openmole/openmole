@@ -52,8 +52,8 @@ object PythonTask:
     containerSystem:        OptionalArgument[ContainerSystem]  = None)(using sourcecode.Name, DefinitionScope) =
 
     
-    ExternalTask.build("PythonTask"): buildParamters =>
-      import buildParamters.*
+    ExternalTask.build("PythonTask"): buildParameters =>
+      import buildParameters.*
 
       val major =
         image match
@@ -66,7 +66,7 @@ object PythonTask:
           containerSystem,
           image,
           installCommands(install, libraries, major),
-          resources = external.resources
+          buildParameters = buildParameters
         )
 
       def workDirectory = "/_workdirectory_"

@@ -84,7 +84,7 @@ object JuliaTask:
         DockerImage("julia", version),
         install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
         volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
-        resources = external.resources,
+        buildParameters = buildParameters,
         clearCache = clearCache)
 
     def workDirectory = "/_workdirectory_"
