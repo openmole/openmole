@@ -92,7 +92,7 @@ object ContainerTask:
           external = external,
           info = info
         )
-        
+
       ExternalTask.execution: p =>
         import p.*
         containerExecution(p.executionContext).from(context)
@@ -118,9 +118,9 @@ object ContainerTask:
     buildParameters: ExternalTask.BuildParameters,
     volumes: Seq[(File, String)] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
-    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService): InstalledSingularityImage =
+    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
-      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters.external.resources, errorDetail, clearCache)
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
       case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
 
   def installSIF(
@@ -128,9 +128,9 @@ object ContainerTask:
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
-    resources: Seq[External.Resource] = Seq.empty,
+    buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
-    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService) =
+    clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
 
     import org.openmole.tool.hash.*
 
@@ -148,7 +148,7 @@ object ContainerTask:
           case s: SingularityOverlay => s.embedResources
           case s: SingularityMemory => s.embedResources
 
-      embeddedResources(resources, embed)
+      embeddedResources(buildParameters.external.resources, embed)
 
     val embedCacheKey = embeddedResourcesValue.map((_, e) => e.hash)
 
@@ -174,20 +174,29 @@ object ContainerTask:
           if serializedSingularityImage.exists
           then summon[SerializerService].deserialize[_root_.container.Singularity.SingularityImageFile](serializedSingularityImage)
           else
-            val img = localImage(image, containerDirectory, clearCache = clearCache)
-            val installedImage = executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+            val img =
+              buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Downloading", s"Downloading docker image ${image}"):
+                localImage(image, containerDirectory, clearCache = clearCache)
+            val installedImage =
+              buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Installing", s"Executing install commands"):
+                executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
 
             embeddedResourcesValue.foreach: (f, d) =>
               _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
 
-            val singularityImage = _root_.container.Singularity.buildSIF(installedImage, singularityImageFile, logger = summon[OutputRedirection].output)
+            val singularityImage =
+              buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Building", s"Building singularity image"):
+                _root_.container.Singularity.buildSIF(installedImage, singularityImageFile, logger = summon[OutputRedirection].output)
+
             summon[SerializerService].serialize(singularityImage, serializedSingularityImage)
             singularityImage
 
     containerSystem match
       case overlay : SingularityOverlay if overlay.copy =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
-        val initializedOverlay = _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
+        val initializedOverlay =
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Building", s"Building overlay image"):
+            _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
         InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, embeddedResourcesValue.map(_._2), Some(initializedOverlay))
       case overlay: SingularityOverlay =>
         InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, embeddedResourcesValue.map(_._2), None)

@@ -28,7 +28,7 @@ object GAMATask:
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
     buildParameters:        ExternalTask.BuildParameters,
-    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
+    clearCache:             Boolean)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
 
     def fixIni =
       Seq("""sed -i -E '/-XX:/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d' /opt/gama-platform/Gama.ini""")

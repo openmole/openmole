@@ -76,7 +76,23 @@ object MoleExecution:
   case class SourceExceptionRaised(source: Source, capsule: MoleCapsule, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class HookExceptionRaised(hook: Hook, capsule: MoleCapsule, moleJob: JobId, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
-  
+
+  object BuildEventHandler:
+    case class BuildEvent(id: Long, action: String, text: String) extends Event[BuildEventHandler]
+    case class BuildEventEnd(id: Long) extends Event[BuildEventHandler]
+
+    extension (b: BuildEventHandler)
+      def stage[T](action: String, text: String)(f: => T)(using EventDispatcher) =
+        val dispatcher = summon[EventDispatcher]
+        val buildEvent = BuildEvent(dispatcher.eventId, action, text)
+        dispatcher.trigger(b, buildEvent)
+        val t =
+          try f: T
+          finally dispatcher.trigger(b, BuildEventEnd(buildEvent.id))
+
+        t
+
+
   class BuildEventHandler
 
   private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) }
@@ -105,13 +121,13 @@ object MoleExecution:
       import moleServices.*
       TaskExecutionBuildContext(taskCache, buildEventHandler)
 
-    val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices)
+    val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(using moleServices)
     val builtEnvironments = EnvironmentBuilder.build(environments.values.toVector, executionContext.services)
     val environmentForCapsule: Map[MoleCapsule, Environment] = environments.toVector.map((k, v) => k -> builtEnvironments(v)).toMap
 
 
     val builtDefaultEnvironment =
-      def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
+      def defaultDefaultEnvironment = LocalEnvironment()(using varName = sourcecode.Name("local"))
       EnvironmentBuilder.buildLocal(defaultEnvironment.getOrElse(defaultDefaultEnvironment), executionContext.services)
 
     val runtimeTaskValue = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext))

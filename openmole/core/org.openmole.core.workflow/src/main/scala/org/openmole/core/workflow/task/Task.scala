@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import java.io.File
 import org.openmole.core.context.*
 import org.openmole.core.argument.*
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
@@ -200,7 +201,8 @@ case class TaskExecutionBuildContext(
   val threadProvider: ThreadProvider,
   val outputRedirection: OutputRedirection,
   val networkService: NetworkService,
-  val serializerService: SerializerService)
+  val serializerService: SerializerService,
+  val eventDispatcher: EventDispatcher)
 
 object Task:
 

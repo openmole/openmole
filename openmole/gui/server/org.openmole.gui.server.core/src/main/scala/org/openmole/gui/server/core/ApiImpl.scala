@@ -361,7 +361,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def compileToMoleExecution(
     scriptPath: SafePath,
-    outputStream: StringPrintStream): ErrorData | MoleExecution =
+    outputStream: StringPrintStream,
+    buildEventHandler: Option[MoleExecution.BuildEventHandler] = None): ErrorData | MoleExecution =
 
     try
       compileToDSL(scriptPath, outputStream) match
@@ -376,7 +377,12 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               outputRedirection = Some(runServices.outputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          Try(MoleExecution(dsl)(using executionServices)) match
+          Try {
+            val p = DSL.toPuzzle(dsl)
+            buildEventHandler match
+              case None => MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping)(using executionServices)
+              case Some(beh) => MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping, buildEventHandler = beh)(using executionServices)
+          } match
             case Success(ex) => ex
             case Failure(e) =>
               MoleServices.clean(executionServices)

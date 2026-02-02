@@ -139,6 +139,7 @@ package object extension:
   export org.openmole.tool.outputredirection.OutputRedirection
   export org.openmole.core.networkservice.NetworkService
   export org.openmole.core.serializer.SerializerService
+  export org.openmole.core.event.EventDispatcher
 
   export org.openmole.core.highlight.HighLight
   export org.openmole.core.pluginregistry.PluginRegistry

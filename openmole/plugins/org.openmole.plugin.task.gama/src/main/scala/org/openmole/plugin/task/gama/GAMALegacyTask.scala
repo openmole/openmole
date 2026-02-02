@@ -29,7 +29,7 @@ object GAMALegacyTask:
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
     buildParameters:        ExternalTask.BuildParameters,
-    clearCache:             Boolean)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, _workspace: Workspace, fileService: FileService) =
+    clearCache:             Boolean)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
 
     def fixIni = Seq("""sed -i -E '/-XX:\+UseG1GC/ d; /-XX:G1[^ ]*/ d' /opt/gama-platform/Gama.ini""")
 
@@ -55,8 +55,8 @@ object GAMALegacyTask:
             installedImage,
             volumes = volumesValue.map((lv, cv) => lv.getAbsolutePath -> cv) ++ Seq(outputDirectory.getAbsolutePath -> outputDirectoryPath),
             commands = inputFileCommands,
-            output = outputRedirection.output,
-            error = outputRedirection.error
+            output = summon[OutputRedirection].output,
+            error = summon[OutputRedirection].error
           )
 
         ret match

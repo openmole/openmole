@@ -131,7 +131,8 @@ object Puzzle:
       validate = p.validate ++ validate
     )
 
-  def toMole(p: Puzzle) = new Mole(p.firstSlot.capsule, p.transitions, p.dataChannels, validate = p.validate)
+  extension(p: Puzzle)
+    def toMole = new Mole(p.firstSlot.capsule, p.transitions, p.dataChannels, validate = p.validate)
 
 
 /**
