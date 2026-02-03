@@ -421,17 +421,20 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           val inserted = serverState.modifyState(execId)(_ => ex)
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
-    def compileAndRun =
-      compileToMoleExecution(script, outputStream) match
+    def compileAndRun(beh: MoleExecution.BuildEventHandler) =
+      compileToMoleExecution(script, outputStream, Some(beh)) match
         case e: MoleExecution =>
           if Thread.interrupted() then throw new InterruptedIOException()
           processRun(execId, e, validateScript)
         case ed: ErrorData => serverState.modifyState(execId)(_ => Failed(Vector.empty, ed, Seq.empty))
 
+    // FIXME event may be lost here if exection is not added before they arises
+    val beh = MoleExecution.BuildEventHandler()
+    beh.listen(serverState.buildEventListener(execId))
 
     val future =
       threadProvider.newSingleThreadExecutor.submit:
-        () => compileAndRun
+        () => compileAndRun(beh)
 
     serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, future, Map.empty))
 

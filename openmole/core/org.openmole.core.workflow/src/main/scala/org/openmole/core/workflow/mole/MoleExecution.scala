@@ -88,7 +88,8 @@ object MoleExecution:
         dispatcher.trigger(b, buildEvent)
         val t =
           try f: T
-          finally dispatcher.trigger(b, BuildEventEnd(buildEvent.id))
+          finally
+            dispatcher.trigger(b, BuildEventEnd(buildEvent.id))
 
         t
 

@@ -193,7 +193,7 @@ object ContainerTask:
       case overlay : SingularityOverlay if overlay.copy =>
         val overlayImageFile = TmpDirectory.newFile("overlay", ".img")
         val initializedOverlay =
-          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Building", s"Building overlay image"):
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Building", s"Building overlay"):
             _root_.container.Singularity.createOverlay(overlayImageFile, overlay.size, output = summon[OutputRedirection].output, error = summon[OutputRedirection].error)
         InstalledSingularityImage.InstalledSIFOverlayImage(installedImage, overlay, embeddedResourcesValue.map(_._2), Some(initializedOverlay))
       case overlay: SingularityOverlay =>
@@ -215,13 +215,13 @@ object ContainerTask:
       case image: DockerImage =>
         if clearCache then _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(summon[Workspace]), DockerImage.toRegistryImage(image)).recursiveDelete
         val savedImage =
-          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Downloading", s"Downloading docker image ${image}"):
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Downloading", s"Downloading docker image ${image.image}:${image.tag}"):
             downloadImage(image, repositoryDirectory(summon[Workspace]))
-        buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image ${image}"):
+        buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image ${image.image}:${image.tag}"):
           _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
       case image: SavedDockerImage =>
         TmpDirectory.withTmpDir: imageDirectory =>
-          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image ${image}"):
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image"):
             val savedImage = extractImage(image, imageDirectory)
             _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
 
