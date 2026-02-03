@@ -39,7 +39,7 @@ object OMSContent:
                 panels.tabContent.save(tabData, saveUnmodified = true).foreach: saved =>
                   if saved
                   then
-                    api.launchScript(safePath, true).foreach: execID =>
+                    api.launchScript(safePath).foreach: execID =>
                       panels.executionPanel.currentOpenSimulation.set(Some(execID))
                     ExecutionPanel.open
               }),

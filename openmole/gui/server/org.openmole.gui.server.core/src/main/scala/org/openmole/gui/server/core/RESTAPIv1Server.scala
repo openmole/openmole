@@ -127,7 +127,7 @@ class RESTAPIv1Server(impl: ApiImpl):
         // curl "localhost:46857/rest/v1/executions?path=/test/Pi%20Computation/Pi.oms&run"
         import _root_.io.circe.generic.auto.*
         val sp = fileToSafePath(path.getOrElse(""))
-        Ok(impl.launchScript(sp, validateScript = true).toJson)
+        Ok(impl.launchScript(sp).toJson)
 
       case req@GET -> root / "executions" =>
         // curl "localhost:46857/rest/v1/executions"

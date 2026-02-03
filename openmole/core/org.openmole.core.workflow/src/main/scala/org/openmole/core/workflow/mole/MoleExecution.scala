@@ -125,8 +125,7 @@ object MoleExecution:
     val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(using moleServices)
     val builtEnvironments = EnvironmentBuilder.build(environments.values.toVector, executionContext.services)
     val environmentForCapsule: Map[MoleCapsule, Environment] = environments.toVector.map((k, v) => k -> builtEnvironments(v)).toMap
-
-
+    
     val builtDefaultEnvironment =
       def defaultDefaultEnvironment = LocalEnvironment()(using varName = sourcecode.Name("local"))
       EnvironmentBuilder.buildLocal(defaultEnvironment.getOrElse(defaultDefaultEnvironment), executionContext.services)
@@ -788,7 +787,7 @@ class MoleExecution(
 
   def run: Unit = run(None)
 
-  def validate =
+  def validate() =
     val validationErrors = MoleExecution.validationErrors(this)
     if validationErrors.nonEmpty
     then throw new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
@@ -796,7 +795,7 @@ class MoleExecution(
   def run(context: Option[Context] = None, validate: Boolean = true) =
     if !_started
     then
-      if (validate) this.validate
+      if (validate) this.validate()
       MoleExecutionMessage.send(this)(MoleExecutionMessage.StartMoleExecution(context))
       MoleExecutionMessage.dispatcher(this)
       _exception.foreach(e => throw e.exception)
@@ -805,7 +804,7 @@ class MoleExecution(
 
   def start(doValidation: Boolean) =
     import executionContext.services._
-    if doValidation then validate
+    if doValidation then validate()
     threadProvider.virtual { () => run(None, validate = doValidation) }
     this
 

@@ -52,7 +52,7 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
   override def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.cancelExecution)(id)
   override def removeExecution(id: ExecutionId)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.removeExecution)(id)
   override def validateScript(script: SafePath)(using BasePath): Future[Option[ErrorData]] = sttp.toRequest(CoreAPI.validateScript)(script) //.future, timeout = Some(600 seconds), warningTimeout = None)
-  override def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId] = sttp.toRequest(CoreAPI.launchScript)(script, validate) //.future, timeout = Some(600 seconds), warningTimeout = Some(300 seconds))
+  override def launchScript(script: SafePath)(using BasePath): Future[ExecutionId] = sttp.toRequest(CoreAPI.launchScript)(script) //.future, timeout = Some(600 seconds), warningTimeout = Some(300 seconds))
   override def clearEnvironmentError(executionId: ExecutionId, environment: EnvironmentId)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.clearEnvironmentErrors)(executionId, environment)
   override def listEnvironmentError(executionId: ExecutionId, environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]] = sttp.toRequest(CoreAPI.listEnvironmentErrors)(executionId, environment, lines)
   override def listPlugins()(using BasePath): Future[Seq[Plugin]] = sttp.toRequest(CoreAPI.listPlugins)(())
