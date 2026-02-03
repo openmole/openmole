@@ -121,7 +121,7 @@ object ContainerTask:
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
       case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
-      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, errorDetail, clearCache)
+      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
 
   def installSIF(
     containerSystem: SingularitySIF,
@@ -174,9 +174,7 @@ object ContainerTask:
           if serializedSingularityImage.exists
           then summon[SerializerService].deserialize[_root_.container.Singularity.SingularityImageFile](serializedSingularityImage)
           else
-            val img =
-              buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Downloading", s"Downloading docker image ${image}"):
-                localImage(image, containerDirectory, clearCache = clearCache)
+            val img = localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
             val installedImage =
               buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Installing", s"Executing install commands"):
                 executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
@@ -212,16 +210,20 @@ object ContainerTask:
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m => s": $m").getOrElse(""))
       image
 
-  def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean)(using networkService: NetworkService, workspace: Workspace, threadProvider: ThreadProvider, preference: Preference, tmpDirectory: TmpDirectory) =
+  def localImage(image: ContainerImage, containerDirectory: File, clearCache: Boolean, buildParameters: ExternalTask.BuildParameters)(using NetworkService, Workspace, ThreadProvider, Preference, TmpDirectory, EventDispatcher) =
     image match
       case image: DockerImage =>
-        if clearCache then _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(workspace), DockerImage.toRegistryImage(image)).recursiveDelete
-        val savedImage = downloadImage(image, repositoryDirectory(workspace))
-        _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
-      case image: SavedDockerImage =>
-        tmpDirectory.withTmpDir: imageDirectory =>
-          val savedImage = extractImage(image, imageDirectory)
+        if clearCache then _root_.container.ImageDownloader.imageDirectory(repositoryDirectory(summon[Workspace]), DockerImage.toRegistryImage(image)).recursiveDelete
+        val savedImage =
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Downloading", s"Downloading docker image ${image}"):
+            downloadImage(image, repositoryDirectory(summon[Workspace]))
+        buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image ${image}"):
           _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
+      case image: SavedDockerImage =>
+        TmpDirectory.withTmpDir: imageDirectory =>
+          buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Extracting", s"Extracting docker image ${image}"):
+            val savedImage = extractImage(image, imageDirectory)
+            _root_.container.ImageBuilder.flattenImage(savedImage, containerDirectory)
 
   def extractImage(image: SavedDockerImage, directory: File): _root_.container.SavedImage =
     import _root_.container.*

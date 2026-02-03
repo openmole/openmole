@@ -44,8 +44,9 @@ object FlatContainerTask:
     image: ContainerImage,
     install: Seq[String],
     volumes: Seq[(File, String)] = Seq.empty,
+    buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
-    clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
+    clearCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
@@ -70,8 +71,8 @@ object FlatContainerTask:
         if serializedFlatImage.exists
         then serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
         else
-          val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache)
-          val installedImage = ContainerTask.executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+          val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
+          val installedImage = ContainerTask.executeInstall(img, install, volumes, errorDetail = errorDetail)
           serializerService.serialize(installedImage, serializedFlatImage)
           installedImage
 
