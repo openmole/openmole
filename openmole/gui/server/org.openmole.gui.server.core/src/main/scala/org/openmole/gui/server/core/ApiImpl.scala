@@ -362,16 +362,13 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def compileToMoleExecution(
     scriptPath: SafePath,
     outputStream: StringPrintStream,
-    buildEventHandler: Option[MoleExecution.BuildEventHandler] = None): ErrorData | MoleExecution =
+    buildEventHandler: MoleExecution.BuildEventHandler): ErrorData | MoleExecution =
 
     try
       val compiled =
-        buildEventHandler match
-          case Some(beh) =>
-            import services.eventDispatcher
-            beh.stage("Compiling", "Compiling user script"):
-              compileToDSL(scriptPath, outputStream)
-          case None => compileToDSL(scriptPath, outputStream)
+        import services.*
+        buildEventHandler.stage("Compiling", "Compiling user script"):
+          compileToDSL(scriptPath, outputStream)
 
       compiled match
         case e: ErrorData => e
@@ -387,9 +384,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
           Try {
             val p = DSL.toPuzzle(dsl)
-            buildEventHandler match
-              case None => MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping)(using executionServices)
-              case Some(beh) => MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping, buildEventHandler = beh)(using executionServices)
+            MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping, buildEventHandler = buildEventHandler)(using executionServices)
           } match
             case Success(ex) => ex
             case Failure(e) =>
@@ -434,7 +429,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
     def compileAndRun(beh: MoleExecution.BuildEventHandler) =
-        val compiled = compileToMoleExecution(script, outputStream, Some(beh))
+        val compiled = compileToMoleExecution(script, outputStream, beh)
 
         compiled match
           case e: MoleExecution =>
