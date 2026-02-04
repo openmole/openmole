@@ -82,8 +82,8 @@ Let's take an experiment that save the results in a OMR file:
 ${
   hl.openmole(s"""
     val a = Val[Int]
-    val i = Val[Int]
 
+    val i = Val[Int]
     val d = Val[Double]
 
     val myModel =
@@ -101,8 +101,6 @@ ${
     ) hook (workDirectory / "file.omr")
   """)
 }
-
-
 
 You can reload some result data and use them as a sampling using the ${code("OMRSampling")}:
 
