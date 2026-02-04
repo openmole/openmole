@@ -22,6 +22,6 @@ import org.openmole.site.content.scale.Environment
 object header:
   export scalatags.Text.all.{h2 => _, h3 => _, br => _, code => _, img => _, footer => _, SeqFrag => _, _}
   export org.openmole.site.{DocumentationPages, PageContent, Resource, shared, Papers}
-  export org.openmole.site.tools._
-  export org.openmole.site.stylesheet._
+  export org.openmole.site.tools.*
+  export org.openmole.site.stylesheet.*
   export org.openmole.site.content.Native
