@@ -51,6 +51,7 @@ ${
     - Resources embedding in SIF container files to avoid archive extraction
     - Display of staging in GUI during the Preparing phase
     - Better isolate containers from the host system
+    - Update Scala version to 3.8.1
     - Fix bugs
   """)
 }
