@@ -38,7 +38,7 @@ object ToArrayTask:
     Task("ToArrayTask"): p =>
       import p.*
       prototypes.map: p =>
-        Variable.unsecure(p.toArray, Array(context(p))(ClassTag(p.`type`.runtimeClass)))
+        Variable.unsecure(p.toArray, Array(context(p))(using ClassTag(p.`type`.runtimeClass)))
     .set (
       inputs ++= prototypes,
       outputs ++= prototypes.map(_.array)

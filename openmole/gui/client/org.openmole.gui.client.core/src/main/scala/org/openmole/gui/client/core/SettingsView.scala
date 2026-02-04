@@ -4,8 +4,7 @@ package org.openmole.gui.client.core
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalajs.dom
 import org.openmole.gui.client.ext.ClientUtil.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.files.{FileDisplayer, FileToolBox}
 import com.raquo.laminar.api.L.*

@@ -40,8 +40,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

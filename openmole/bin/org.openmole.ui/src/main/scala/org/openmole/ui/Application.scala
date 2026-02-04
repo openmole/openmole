@@ -148,7 +148,6 @@ object Application extends JavaLogger {
         case "--remote" :: tail                      => parse(tail, c.copy(remote = true))
         case "--no-browser" :: tail                  => parse(tail, c.copy(browse = false))
         case "--unoptimizedJS" :: tail               => parse(tail, c.copy(unoptimizedJS = true))
-        case "--unoptimized-js" :: tail              => parse(tail, c.copy(unoptimizedJS = true))
         case "--gui-extra-header" :: tail            => parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
         case "--gui-extra-header-file" :: tail       => parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
         case "--gui-initialize" :: tail              => parse(tail, c.copy(launchMode = GUIIintialize))
@@ -286,13 +285,6 @@ object Application extends JavaLogger {
                 "\n" + org.openmole.core.buildinfo.consoleSplash + "\n" +
                   s"Server listening on port $port."
               )
-
-              // warmup the scala compiler
-              def warmup() =
-                import services.*
-                org.openmole.core.project.OpenMOLEREPL.warmup()
-
-              warmup()
 
               s.join() match
                 case GUIServer.Ok      => Console.ExitCodes.ok

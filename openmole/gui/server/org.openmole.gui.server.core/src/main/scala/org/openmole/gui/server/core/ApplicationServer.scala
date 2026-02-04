@@ -45,12 +45,12 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
   def passwordIsCorrect = Preference.passwordIsCorrect(services.cypher, services.preference)
 
   def connectionContent =
-    val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.connection();", GUIServlet.cssFiles(webapp), extraHeader)
+    val ht = GUIServlet.html("connection();", GUIServlet.cssFiles(webapp), extraHeader)
     Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
 
   val routes: HttpRoutes[IO] = HttpRoutes.of:
     case GET -> Root / shared.api.appRoute =>
-      def application = GUIServlet.html(s"${GUIServlet.webpackLibrary}.run();", GUIServlet.cssFiles(webapp), extraHeader)
+      def application = GUIServlet.html("run();", GUIServlet.cssFiles(webapp), extraHeader)
        Ok.apply(application.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case GET -> Root / shared.api.connectionRoute =>
       if (passwordIsChosen && passwordIsCorrect) ApplicationServer.redirect(shared.api.appRoute)
@@ -68,13 +68,13 @@ class ApplicationServer(webapp: File, extraHeader: String, password: Option[Stri
     case GET -> Root / shared.api.resetPasswordRoute =>
       import services._
       org.openmole.core.services.Services.resetPassword
-      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.resetPassword();", GUIServlet.cssFiles(webapp), extraHeader)
+      val ht = GUIServlet.html("resetPassword();", GUIServlet.cssFiles(webapp), extraHeader)
       Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case GET -> Root / shared.api.restartRoute =>
-      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.restarted();", GUIServlet.cssFiles(webapp), extraHeader)
+      val ht = GUIServlet.html("restarted();", GUIServlet.cssFiles(webapp), extraHeader)
       Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case GET -> Root / shared.api.shutdownRoute =>
-      val ht = GUIServlet.html(s"${GUIServlet.webpackLibrary}.stopped();", GUIServlet.cssFiles(webapp), extraHeader)
+      val ht = GUIServlet.html("stopped();", GUIServlet.cssFiles(webapp), extraHeader)
       Ok.apply(ht.render).map(_.withContentType(`Content-Type`(MediaType.text.html)))
     case req @ POST -> Root / shared.api.connectionRoute => ApplicationServer.redirect(shared.api.appRoute)
     case request@GET -> Root / "js" / "snippets" / path =>

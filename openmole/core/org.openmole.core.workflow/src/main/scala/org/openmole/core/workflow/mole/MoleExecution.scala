@@ -77,9 +77,28 @@ object MoleExecution:
   case class HookExceptionRaised(hook: Hook, capsule: MoleCapsule, moleJob: JobId, exception: Throwable, level: Level) extends Event[MoleExecution] with MoleExecutionFailed
   case class MoleExecutionError(exception: Throwable) extends MoleExecutionFailed
 
+  object BuildEventHandler:
+    case class BuildEvent(id: Long, action: String, text: String) extends Event[BuildEventHandler]
+    case class BuildEventEnd(id: Long) extends Event[BuildEventHandler]
+
+    extension (b: BuildEventHandler)
+      def stage[T](action: String, text: String)(f: => T)(using EventDispatcher) =
+        val dispatcher = summon[EventDispatcher]
+        val buildEvent = BuildEvent(dispatcher.eventId, action, text)
+        dispatcher.trigger(b, buildEvent)
+        val t =
+          try f: T
+          finally
+            dispatcher.trigger(b, BuildEventEnd(buildEvent.id))
+
+        t
+
+
+  class BuildEventHandler
+
   private def listOfTupleToMap[K, V](l: Iterable[(K, V)]): Map[K, Iterable[V]] = l.groupBy(_._1).map { case (k, v) => k -> v.map(_._2) }
 
-  def apply(dsl: DSL)(implicit moleServices: MoleServices): MoleExecution =
+  def apply(dsl: DSL)(using moleServices: MoleServices): MoleExecution =
     val p = DSL.toPuzzle(dsl)
     MoleExecution(Puzzle.toMole(p), p.sources, p.hooks, p.environments, p.grouping)
 
@@ -95,20 +114,20 @@ object MoleExecution:
     startStopDefaultEnvironment: Boolean                                    = true,
     taskCache:                   KeyValueCache                              = KeyValueCache(),
     lockRepository:              LockRepository[LockKey]                    = LockRepository(),
-    runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None
+    runtimeTask:                 Option[Map[MoleCapsule, RuntimeTask]]      = None,
+    buildEventHandler:           MoleExecution.BuildEventHandler            = MoleExecution.BuildEventHandler()
   )(using moleServices: MoleServices): MoleExecution =
     
     def executionBuildContext(capsule: MoleCapsule) =
       import moleServices.*
-      TaskExecutionBuildContext(taskCache)
+      TaskExecutionBuildContext(taskCache, buildEventHandler)
 
-    val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(moleServices)
+    val executionContext = MoleExecutionContext(moleLaunchTime = moleServices.timeService.currentTime)(using moleServices)
     val builtEnvironments = EnvironmentBuilder.build(environments.values.toVector, executionContext.services)
     val environmentForCapsule: Map[MoleCapsule, Environment] = environments.toVector.map((k, v) => k -> builtEnvironments(v)).toMap
-
-
+    
     val builtDefaultEnvironment =
-      def defaultDefaultEnvironment = LocalEnvironment()(varName = sourcecode.Name("local"))
+      def defaultDefaultEnvironment = LocalEnvironment()(using varName = sourcecode.Name("local"))
       EnvironmentBuilder.buildLocal(defaultEnvironment.getOrElse(defaultDefaultEnvironment), executionContext.services)
 
     val runtimeTaskValue = runtimeTask.getOrElse(MoleExecution.runtimeTasks(mole, sources, hooks, executionBuildContext))
@@ -442,16 +461,21 @@ object MoleExecution:
     moleExecution.executionContext.services.eventDispatcher.trigger(moleExecution, MoleExecution.JobSubmitted(job, capsule, env))
 
   def submitAll(moleExecution: MoleExecution) =
+    val unsubmitted = mutable.Map[MoleCapsule, ArrayBuffer[Job]]()
     for
       (capsule, jobs) <- moleExecution.waitingJobs
     do
-      val size = moleExecution.grouping.getOrElse(capsule, 1)
+      val grouping = moleExecution.grouping.getOrElse(capsule, Grouping(1))
       val shuffled = moleExecution.executionContext.services.defaultRandom().shuffle(jobs.toSeq)
       for
-       group <- shuffled.grouped(size)
-      do submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
+        group <- shuffled.grouped(grouping.by)
+      do
+        if !grouping.async || group.size == grouping.by
+        then submit(moleExecution, JobGroup(moleExecution, IArray.unsafeFromArray(group.toArray)), capsule)
+        else unsubmitted.getOrElseUpdate(capsule, ArrayBuffer()) ++= group
 
     moleExecution.waitingJobs.clear
+    moleExecution.waitingJobs ++= unsubmitted.toSeq
 
   def removeSubMole(subMoleExecutionState: SubMoleExecutionState) =
     subMoleExecutionState.parent.foreach(s => s.children.remove(subMoleExecutionState.id))
@@ -657,7 +681,6 @@ object MoleExecutionMessage:
       dispatch(moleExecution, msg)
 
 
-
 class MoleExecution(
   val mole:                        Mole,
   val sources:                     Sources,
@@ -764,7 +787,7 @@ class MoleExecution(
 
   def run: Unit = run(None)
 
-  def validate =
+  def validate() =
     val validationErrors = MoleExecution.validationErrors(this)
     if validationErrors.nonEmpty
     then throw new UserBadDataError(s"Formal validation has failed, ${validationErrors.size} error(s) has(ve) been found.\n" + validationErrors.mkString("\n") + s"\nIn mole: $mole")
@@ -772,7 +795,7 @@ class MoleExecution(
   def run(context: Option[Context] = None, validate: Boolean = true) =
     if !_started
     then
-      if (validate) this.validate
+      if (validate) this.validate()
       MoleExecutionMessage.send(this)(MoleExecutionMessage.StartMoleExecution(context))
       MoleExecutionMessage.dispatcher(this)
       _exception.foreach(e => throw e.exception)
@@ -781,7 +804,7 @@ class MoleExecution(
 
   def start(doValidation: Boolean) =
     import executionContext.services._
-    if doValidation then validate
+    if doValidation then validate()
     threadProvider.virtual { () => run(None, validate = doValidation) }
     this
 

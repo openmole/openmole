@@ -33,8 +33,47 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
   var myClassLoader: AbstractFileClassLoader = uninitialized
 
-  /** (value, maxElements, maxCharacters) => String */
-  var myReplStringOf: (Object, Int, Int) => String = uninitialized
+  private def pprintRender(value: Any, width: Int, height: Int, initialOffset: Int)(using Context): String = {
+    def fallback() =
+      // might as well be `println` in this case, but JDK classes e.g. `Float` are correctly handled.
+      pprint.PPrinter.BlackWhite
+        .apply(value, width = width, height = height, initialOffset = initialOffset)
+        .plainText
+
+    try
+      // normally, if we used vanilla JDK and layered classloaders, we wouldnt need reflection.
+      // however PPrint works by runtime type testing to deconstruct values. This is
+      // sensitive to which classloader instantiates the object under test, i.e.
+      // `value` is constructed inside the repl classloader. Testing for
+      // `value.isInstanceOf[scala.Product]` in this classloader fails (JDK AppClassLoader),
+      // because repl classloader has two layers where it can redefine `scala.Product`:
+      // - `new URLClassLoader` constructed with contents of the `-classpath` setting
+      // - `AbstractFileClassLoader` also might instrument the library code to support interrupt.
+      // Due the possible interruption instrumentation, it is unlikely that we can get
+      // rid of reflection here.
+      val cl = classLoader()
+      val pprintCls = Class.forName("pprint.PPrinter$BlackWhite$", false, cl)
+      val fansiStrCls = Class.forName("fansi.Str", false, cl)
+      val BlackWhite = pprintCls.getField("MODULE$").get(null)
+      val BlackWhite_apply = pprintCls.getMethod("apply",
+        classOf[Any],     // value
+        classOf[Int],     // width
+        classOf[Int],     // height
+        classOf[Int],     // indentation
+        classOf[Int],     // initialOffset
+        classOf[Boolean], // escape Unicode
+        classOf[Boolean], // show field names
+      )
+      val FansiStr_plainText = fansiStrCls.getMethod("plainText")
+      val fansiStr = BlackWhite_apply.invoke(
+        BlackWhite, value, width, height, 2, initialOffset, false, true
+      )
+      FansiStr_plainText.invoke(fansiStr).asInstanceOf[String]
+    catch
+      case ex: ClassNotFoundException => fallback()
+      case ex: NoSuchMethodException  => fallback()
+  }
+
 
   /** Class loader used to load compiled code */
   def classLoader()(using Context) = // OM
@@ -52,46 +91,26 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
         new java.net.URLClassLoader(compilerClasspath.toArray, baseClassLoader)
       }
 
-      myClassLoader = new AbstractFileClassLoader(ctx.settings.outputDir.value, parent)
-      myReplStringOf = {
-        // We need to use the ScalaRunTime class coming from the scala-library
-        // on the user classpath, and not the one available in the current
-        // classloader, so we use reflection instead of simply calling
-        // `ScalaRunTime.stringOf`. Also probe for new stringOf that does string quoting, etc.
-        val scalaRuntime = Class.forName("scala.runtime.ScalaRunTime", true, myClassLoader)
-        val renderer = "stringOf"
-        val stringOfInvoker: (Object, Int) => String =
-          def richStringOf: (Object, Int) => String =
-            val method = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int], classOf[Boolean])
-            val richly = java.lang.Boolean.TRUE // add a repl option for enriched output
-            (value, maxElements) => method.invoke(null, value, maxElements, richly).asInstanceOf[String]
-          def poorStringOf: (Object, Int) => String =
-            try
-              val method = scalaRuntime.getMethod(renderer, classOf[Object], classOf[Int])
-              (value, maxElements) => method.invoke(null, value, maxElements).asInstanceOf[String]
-            catch case _: NoSuchMethodException => (value, maxElements) => String.valueOf(value).take(maxElements)
-          try richStringOf
-          catch case _: NoSuchMethodException => poorStringOf
-        def stringOfMaybeTruncated(value: Object, maxElements: Int): String = stringOfInvoker(value, maxElements)
+      myClassLoader = new AbstractFileClassLoader(
+        ctx.settings.outputDir.value,
+        parent,
+        AbstractFileClassLoader.InterruptInstrumentation.fromString(ctx.settings.XreplInterruptInstrumentation.value)
+      ):                                                                                              // OM
+        override def findClass(name: String): Class[?] =                                              // OM
+          val loaded = parentClassLoader.map(cl => scala.util.Try[Class[?]](cl.loadClass(name)))      // OM
+          loaded match                                                                                // OM
+            case Some(scala.util.Success(c)) => c                                                     // OM
+            case Some(scala.util.Failure(e)) => super.findClass(name)                                 // OM
+            case None => super.findClass(name)                                                        // OM
 
-        // require value != null
-        // `ScalaRuntime.stringOf` returns null iff value.toString == null, let caller handle that.
-        // `ScalaRuntime.stringOf` may truncate the output, in which case we want to indicate that fact to the user
-        // In order to figure out if it did get truncated, we invoke it twice - once with the `maxElements` that we
-        // want to print, and once without a limit. If the first is shorter, truncation did occur.
-        // Note that `stringOf` has new API in flight to handle truncation, see stringOfMaybeTruncated.
-        (value: Object, maxElements: Int, maxCharacters: Int) =>
-          stringOfMaybeTruncated(value, Int.MaxValue) match
-            case null => null
-            case notTruncated =>
-              val maybeTruncated =
-                val maybeTruncatedByElementCount = stringOfMaybeTruncated(value, maxElements)
-                truncate(maybeTruncatedByElementCount, maxCharacters)
-              // our string representation may have been truncated by element and/or character count
-              // if so, append an info string - but only once
-              if notTruncated.length == maybeTruncated.length then maybeTruncated
-              else s"$maybeTruncated ... large output truncated, print value to show all"
-      }
+        override def loadClass(name: String): Class[?] = // OM
+          val loaded = parentClassLoader.map(cl => scala.util.Try[Class[?]](cl.loadClass(name))) // OM
+          loaded match // OM
+            case Some(scala.util.Success(c)) => c // OM
+            case Some(scala.util.Failure(e)) => super.loadClass(name) // OM
+            case None => super.loadClass(name) // OM
+
+
       myClassLoader
     }
 
@@ -101,32 +120,30 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     else str.substring(0, str.offsetByCodePoints(0, maxPrintCharacters - 1))
 
   /** Return a String representation of a value we got from `classLoader()`. */
-  private def replStringOf(sym: Symbol, value: Object)(using Context): String = // OM
-    assert(myReplStringOf != null,
-      "replStringOf should only be called on values creating using `classLoader()`, but `classLoader()` has not been called so far")
-    val maxPrintElements = ctx.settings.VreplMaxPrintElements.valueIn(ctx.settingsState)
-    val maxPrintCharacters = ctx.settings.VreplMaxPrintCharacters.valueIn(ctx.settingsState)
-    // stringOf returns null if value.toString returns null. Show some text as a fallback.
-    def fallback = s"""null // result of "${sym.name}.toString" is null"""
-    if value == null then "null" else
-      myReplStringOf(value, maxPrintElements, maxPrintCharacters) match
-        case null => fallback
-        case res  => res
-    end if
+  private[repl] def replStringOf(value: Object, prefixLength: Int)(using Context): String = {
+    // pretty-print things with 100 cols 50 rows by default,
+    pprintRender(
+      value,
+      width = 100,
+      height = 50,
+      initialOffset = prefixLength
+    )
+  }
 
   /** Load the value of the symbol using reflection.
    *
    *  Calling this method evaluates the expression using reflection
    */
-  private def valueOf(sym: Symbol)(using Context): Option[String] =
+  private def valueOf(sym: Symbol, prefixLength: Int)(using Context): Option[String] =
     val objectName = sym.owner.fullName.encode.toString.stripSuffix("$")
     val resObj: Class[?] = Class.forName(objectName, true, classLoader())
     val symValue = resObj
-      .getDeclaredMethods.find(_.getName == sym.name.encode.toString)
+      .getDeclaredMethods
+      .find(method => method.getName == sym.name.encode.toString && method.getParameterCount == 0)
       .flatMap(result => rewrapValueClass(sym.info.classSymbol, result.invoke(null)))
     symValue
       .filter(_ => sym.is(Flags.Method) || sym.info != defn.UnitType)
-      .map(value => stripReplPrefix(replStringOf(sym, value)))
+      .map(value => stripReplPrefix(replStringOf(value, prefixLength)))
 
   private def stripReplPrefix(s: String): String =
     if (s.startsWith(REPL_WRAPPER_NAME_PREFIX))
@@ -163,7 +180,13 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     try
       Right(
         if d.symbol.is(Flags.Lazy) then Some(msg(dcl))
-        else valueOf(d.symbol).map(value => msg(s"$dcl = $value"))
+        else {
+          val prefix = s"$dcl = "
+          // Prefix can have multiple lines, only consider the last one
+          // when determining the initial column offset for pretty-printing
+          val prefixLength = prefix.linesIterator.toSeq.lastOption.getOrElse("").length
+          valueOf(d.symbol, prefixLength).map(value => msg(s"$prefix$value"))
+        }
       )
     catch case e: ReflectiveOperationException => Left(e)
   end renderVal

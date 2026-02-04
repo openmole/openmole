@@ -54,12 +54,12 @@ object OpenMOLEREPL:
       autoImportTraitsCode
     )
 
-  def newREPL(quiet: Boolean = false)(implicit newFile: TmpDirectory, fileService: FileService) =
+  def newREPL(quiet: Boolean = false, options: Seq[String] = Seq())(implicit newFile: TmpDirectory, fileService: FileService) =
     def initialise(repl: REPL) =
       repl.eval(imports)
       repl
 
-    initialise(REPL(quiet = quiet))
+    initialise(REPL(quiet = quiet, options = options))
 
 
   def warmup()(using TmpDirectory, FileService) =

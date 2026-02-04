@@ -94,40 +94,36 @@ object SensitivitySaltelli:
       fA: Array[Double],
       fB: Array[Double],
       fC: Array[Array[Double]]): (first: Array[Double], total: Array[Double]) =
+      def variance(xs: Array[Double]): Double =
+        val mean = xs.sum / xs.size
+        xs.map(x => math.pow(x - mean, 2)).sum / xs.size
 
-      val NB = fB.length
-      val k = fC.length //Number of parameters
-      val f02 = math.pow(fB.sum / NB.toDouble, 2)
-      // val varY = fB.map(fBj => math.pow(fBj, 2)).sum / NB.toDouble - f02
+      val n = fA.length
+      val d = fC.length
 
-      val f0 = fB.sum / NB.toDouble
-      val varY = fB.map(fBj => math.pow(fBj - f0, 2)).sum / NB.toDouble
+      require(fB.size == n, "fB must have same length as fA")
+      require(fC.forall(_.size == n), s"Each fC(i) must have length n (=$n), but sizes are ${fC.map(_.size).mkString(",")}")
 
-      def avgProduct(u: Array[Double], v: Array[Double]): Double =
-        val prods = (u zip v).map((uj, vj) => uj * vj)
-        prods.sum / prods.size.toDouble
+      val varY = variance(fA ++ fB)
 
-      val firstOrderEffects =
-        (0 until k).map: i =>
-          val sumTerms =
-            (fA lazyZip fB lazyZip fC(i)).map: (fAj, fBj, fCij) =>
-              fBj * (fCij - fAj)
+      require(varY > 0.0, "Variance of output is zero")
 
-          val N = sumTerms.size
-          (sumTerms.sum / N) / varY
-        .toArray
+      val firstOrder =
+        fC.map: fCi =>
+          val num = (fB lazyZip fCi lazyZip fA).map((fb, fci, fa) => fb * (fci - fa)).sum
+          num / (n * varY)
 
-      val totalOrderEffects =
-        (1 to k).map: i =>
-          val squaredDiff =
-            (fA zip fC(i - 1)).map: (fAj, fCij) =>
-              math.pow(fAj - fCij, 2)
+      val totalOrder =
+        fC.map: fCi =>
+          val num =
+            (fA zip fCi).map: (fa, fci) =>
+              val d = fa - fci
+              d * d
+            .sum
 
-          val N = squaredDiff.size
-          (squaredDiff.sum / (2.0 * N)) / varY
-        .toArray
+          num / (2.0 * n * varY)
 
-      (firstOrderEffects, totalOrderEffects)
+      (firstOrder, totalOrder)
 
     def apply(
       modelInputs:  Seq[ScalableValue],
@@ -169,7 +165,7 @@ object SensitivitySaltelli:
         val fA: Array[Array[Double]] = reindex("a")
         val fB: Array[Array[Double]] = reindex("b")
         val fC: Array[Array[Array[Double]]] =
-          modelInputs.map(i => reindex("c$" ++ i.prototype.name)).toArray.transpose
+          modelInputs.map(i => reindex("c$" ++ i.prototype.name)).toArray[Array[Array[Double]]].transpose
 
         // ftoi(o)._1(i) contains first order index for input i on output o.
         // ftoi(o)._2(i) contains total order index for input i on output o.
@@ -177,11 +173,11 @@ object SensitivitySaltelli:
 
         // first order indices
         // fosi(o)(i) contains first order index for input i on output o.
-        val fosi = ftoi.map { _.first.toArray }.toArray
+        val fosi = ftoi.map { _.first.toArray }.toArray[Array[Double]]
 
         // total order indices
         // tosi(o)(i) contains total order index for input i on output o.
-        val tosi = ftoi.map { _.total.toArray }.toArray
+        val tosi = ftoi.map { _.total.toArray }.toArray[Array[Double]]
 
         val fosiv =
           for
@@ -251,7 +247,7 @@ object SensitivitySaltelli:
         val (a, b) =
           if isSobol
           then
-            val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray).toArray
+            val ab = SobolSampling.sobolValues(2 * vectorSize, s).map(_.toArray[Double]).toArray[Array[Double]]
             (ab.transpose.take(vectorSize).transpose, ab.transpose.takeRight(vectorSize).transpose)
           else (LHS.lhsValues(vectorSize, s, random()), LHS.lhsValues(vectorSize, s, random()))
 
@@ -310,9 +306,7 @@ object SensitivitySaltelli:
     def buildLineOfC(i: Int, lineOfA: Array[Double], lineOfB: Array[Double]) =
       (lineOfA zip lineOfB zipWithIndex) map:
         case ((a, b), index) =>
-          if index == i
-          then b
-          else a
+          if index == i then b else a
 
 
   case class SaltelliSampling(samples: FromContext[Int], sobolSampling: FromContext[Boolean], factors: ScalableValue*)

@@ -18,14 +18,12 @@ package org.openmole.site
  */
 
 import org.scalajs.dom.KeyboardEvent
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
-import scaladget.lunr.IIndexSearchResult
 import org.scalajs.dom
 import com.raquo.laminar.api.L._
 
 object Search {
 
+  def inputTag(content: String = "") = input(cls("form-control"), value := content)
 
   def build = {
 
@@ -122,7 +120,19 @@ object Search {
         searchInput.ref.focus()
     })
 
-    render(searchDiv, searchOpen.signal.expand(resultDiv))
+
+    def expand(r: Signal[Boolean], inner: HtmlElement) =
+      div(overflow.hidden,
+        transition := "height 300ms",
+        height <-- r.map { rr =>
+          if rr
+          then inner.ref.style.height
+          else "0px"
+        },
+        inner
+      )
+
+    render(searchDiv, expand(searchOpen.signal, resultDiv))
 
 
   }

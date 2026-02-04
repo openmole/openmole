@@ -47,15 +47,10 @@ object External:
           case r: EmptyDirectoryResource => r.destination
           case r: FileResource  => r.destination
 
-      def os =
-        r match
-          case r: EmptyDirectoryResource => r.os
-          case r: FileResource => r.os
-
   sealed trait Resource
 
-  case class EmptyDirectoryResource(destination: FromContext[String], os: OS) extends Resource
-  case class FileResource(file: File, destination: FromContext[String], link: Boolean, os: OS) extends Resource
+  case class EmptyDirectoryResource(destination: FromContext[String]) extends Resource
+  case class FileResource(file: File, destination: FromContext[String], link: Boolean) extends Resource
 
   enum DeployedFileType:
     case InputFile, Resource
@@ -74,24 +69,15 @@ object External:
 
     external.inputFiles.flatMap(_.destination.validate) ++
       external.outputFiles.flatMap(_.origin.validate) ++
-      external.resources.flatMap(_.destination.validate) ++
       external.resources.flatMap(resourceExists)
 
-  protected def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
+  def listInputFiles(inputFiles: Vector[InputFile], context: Context)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): Vector[(Val[File], DeployedFile)] =
     inputFiles.map:
       case InputFile(prototype, name, link) =>
         prototype -> DeployedFile(context(prototype), name.from(context), link, deployedFileType = DeployedFileType.InputFile)
 
-  protected def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(using RandomProvider, TmpDirectory, FileService): Iterable[DeployedFile] =
-    val byLocation =
-      resources.zipWithIndex.groupBy: (resource, _) =>
-        resolver(resource.destination.from(context)).getCanonicalPath
-
-    val selectedOS =
-      byLocation.toList flatMap: (_, values) =>
-        values.find(_._1.os.compatible)
-
-    selectedOS.sortBy(_._2).map(_._1).map:
+  def listResources(resources: Vector[External.Resource], context: Context, resolver: PathResolver)(using RandomProvider, TmpDirectory, FileService): Iterable[DeployedFile] =
+    resources.map:
       case resource: FileResource => DeployedFile(resource.file, resource.destination.from(context), resource.link, deployedFileType = DeployedFileType.Resource)
       case resource: EmptyDirectoryResource => DeployedFile(TmpDirectory.newDirectory("empty", create = true), resource.destination.from(context), true, deployedFileType = DeployedFileType.Resource)
 
@@ -107,12 +93,13 @@ object External:
 
   private def destination(resolver: PathResolver, f: DeployedFile) = resolver(f.expandedUserPath)
 
-  def deployResources(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    for f ← listResources(external.resources, context, resolver)
+  def deployResources(external: External, context: Context, resolver: PathResolver)(using RandomProvider, TmpDirectory, FileService) =
+    for
+      f <- listResources(external.resources, context, resolver)
     yield
       val d = destination(resolver, f)
       copyFile(f, d)
-      f → d
+      (f, d)
 
   def deployInputFiles(external: External, context: Context, resolver: PathResolver)(implicit rng: RandomProvider, newFile: TmpDirectory, fileService: FileService): (Context, Iterable[(External.DeployedFile, File)]) =
     val (copiedFilesVariable, copiedFilesInfo) =

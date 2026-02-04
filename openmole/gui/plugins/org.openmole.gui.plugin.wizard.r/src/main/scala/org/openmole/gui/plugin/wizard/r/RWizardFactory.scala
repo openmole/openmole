@@ -18,8 +18,7 @@
 package org.openmole.gui.plugin.wizard.r
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext
 import org.scalajs.dom.raw.HTMLElement

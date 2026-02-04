@@ -96,7 +96,7 @@ object SSHEnvironment extends JavaLogger:
   case object Failed extends SSHRunState
 
   class SSHJobStateRegistry:
-    val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(Ordering.by(_.id))
+    val jobsStates = collection.mutable.TreeMap[SSHEnvironment.SSHJob, SSHEnvironment.SSHRunState]()(using Ordering.by(_.id))
     val queuesLock = new ReentrantLock()
     val jobId = new AtomicLong()
 

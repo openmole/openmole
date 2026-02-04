@@ -35,7 +35,7 @@ class InputFilesKeyword:
   /**
    * Copy a file or directory from the dataflow to the task workspace
    */
-  def +=(p: Val[File], name: FromContext[String], link: Boolean = false) = InputFilesKeyword.InputFilesSetter(p, name, link = link)
+  infix def +=(p: Val[File], name: FromContext[String], link: Boolean = false) = InputFilesKeyword.InputFilesSetter(p, name, link = link)
 
 lazy val inputFiles = new InputFilesKeyword
 
@@ -51,7 +51,7 @@ class OutputFilesKeyword:
    * Get a file generate by the task and inject it in the dataflow
    *
    */
-  def +=(name: FromContext[String], p: Val[File]) = OutputFilesKeyword.OutputFilesSetter(name, p)
+  infix def +=(name: FromContext[String], p: Val[File]) = OutputFilesKeyword.OutputFilesSetter(name, p)
 
 lazy val outputFiles = new OutputFilesKeyword
 
@@ -59,15 +59,15 @@ object ResourcesKeyword:
   object ResourceSetter:
     given [T: ExternalBuilder as eb]: Setter[ResourceSetter, T] =
       case setter: FileResourceSetter =>
-        def resource = External.FileResource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link, os = setter.os)
+        def resource = External.FileResource(setter.file, setter.name.getOrElse(setter.file.getName), link = setter.link)
         eb.resources.add(resource, head = setter.head)
       case setter: EmptyDirectoryResourceSetter =>
-        def resource = External.EmptyDirectoryResource(setter.name, os = setter.os)
+        def resource = External.EmptyDirectoryResource(setter.name)
         eb.resources.add(resource, head = setter.head)
 
   trait ResourceSetter
-  case class FileResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, os: OS, head: Boolean) extends ResourceSetter
-  case class EmptyDirectoryResourceSetter(name: FromContext[String], os: OS, head: Boolean) extends ResourceSetter
+  case class FileResourceSetter(file: File, name: OptionalArgument[FromContext[String]] = None, link: Boolean, head: Boolean) extends ResourceSetter
+  case class EmptyDirectoryResourceSetter(name: FromContext[String], head: Boolean) extends ResourceSetter
 
   case class EmptyDirectory(name: FromContext[String])
 
@@ -75,12 +75,12 @@ class ResourcesKeyword:
   /**
    * Copy a file from your computer in the workspace of the task
    */
-  def +=(file: File | ResourcesKeyword.EmptyDirectory, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) =
+  infix def +=(file: File | ResourcesKeyword.EmptyDirectory, name: OptionalArgument[FromContext[String]] = None, link: Boolean = false, os: OS = OS(), head: Boolean = false) =
     file match
-      case file: File => ResourcesKeyword.FileResourceSetter(file, name, link = link, os = os, head = head)
+      case file: File => ResourcesKeyword.FileResourceSetter(file, name, link = link, head = head)
       case e: ResourcesKeyword.EmptyDirectory =>
         val nameValue = name.getOrElse(e.name)
-        ResourcesKeyword.EmptyDirectoryResourceSetter(nameValue, os, head)
+        ResourcesKeyword.EmptyDirectoryResourceSetter(nameValue, head)
 
 
 lazy val resources = new ResourcesKeyword

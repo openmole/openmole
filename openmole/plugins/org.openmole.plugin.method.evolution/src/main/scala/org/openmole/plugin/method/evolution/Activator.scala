@@ -48,6 +48,7 @@ class Activator extends BundleActivator:
         PatternHighLight(objectName(HDOSEEvolution)),
         ObjectHighLight(objectName(Stochastic)),
         ObjectHighLight(objectName(Island)),
+        ObjectHighLight(objectName(SteadyState)),
         ObjectHighLight(objectName(Suggestion))
       )
 

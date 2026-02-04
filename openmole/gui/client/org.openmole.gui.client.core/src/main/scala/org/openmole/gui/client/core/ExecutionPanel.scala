@@ -12,7 +12,7 @@ import org.openmole.gui.shared.data.ErrorData
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.core.files.{OMSContent, TabContent}
 import org.openmole.gui.client.tool.{Component, OMTags}
-import org.openmole.gui.shared.data.ExecutionState.{CapsuleExecution, Failed}
+import org.openmole.gui.shared.data.ExecutionState.{BuildStage, CapsuleExecution, Failed}
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.api.features.unitArrows
 import com.raquo.laminar.api.Laminar
@@ -23,9 +23,8 @@ import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ErrorData.stackTrace
 import org.scalajs.dom.HTMLDivElement
 
-import concurrent.duration.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.*
 
 import scala.concurrent.Future
 
@@ -82,7 +81,8 @@ object ExecutionPanel:
     ratio: String,
     running: Long,
     error: Option[ErrorData] = None,
-    envStates: Seq[EnvironmentState] = Seq())
+    envStates: Seq[EnvironmentState] = Seq(),
+    buildStages: Seq[BuildStage] = Seq())
 
   //  type Statics = Map[ExecutionId, StaticExecutionInfo]
   type Executions = Map[ExecutionId, ExecutionDetails]
@@ -91,7 +91,7 @@ object ExecutionPanel:
     panels.expandTo(panels.executionPanel.render, 4)
 
   enum Expand:
-    case Console, Script, ErrorLog, Computing
+    case Console, Script, ErrorLog, Computing, Build
 
 
 class ExecutionPanel:
@@ -126,7 +126,7 @@ class ExecutionPanel:
         val (ready, running, completed) = userCapsuleState(r.capsules)
         ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, ratio(completed, running, ready), running, envStates = r.environmentStates)
       case c: ExecutionState.Canceled => ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = c.environmentStates)
-      case r: ExecutionState.Preparing => ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates)
+      case r: ExecutionState.Preparing => ExecutionDetails(exec.path, exec.script, State(exec.state), exec.startDate, exec.duration, exec.executionTime, "0", 0, envStates = r.environmentStates, buildStages = r.stages)
 
 
   //def updateScriptError(path: SafePath, details: ExecutionDetails)(using panels: Panels) = OMSContent.setError(path, details.error)
@@ -147,7 +147,8 @@ class ExecutionPanel:
     div(columnFlex, div(cls := blockCls, div(info, cls := "info"), contentDiv, backgroundOpacityCls))
 
   def timeToString(simpleTime: Long) =
-    val duration: Duration = (simpleTime milliseconds)
+    import scala.concurrent.duration.*
+    val duration = (simpleTime milliseconds)
     val h = (duration).toHours
     val m = ((duration) - (h hours)).toMinutes
     val s = (duration - (h hours) - (m minutes)).toSeconds
@@ -202,7 +203,7 @@ class ExecutionPanel:
         div(
           ExecutionDetails.State.toString(state).capitalize,
           cls := (state match
-            case ExecutionDetails.State.failed(_) => "infoContentLink"
+            case ExecutionDetails.State.failed(_) | ExecutionDetails.State.preparing => "infoContentLink"
             case _ => "infoContent")
         ),
         state match
@@ -211,10 +212,15 @@ class ExecutionPanel:
               showExpander.update:
                 case Some(Expand.ErrorLog) => None
                 case _ => Some(Expand.ErrorLog)
+          case ExecutionDetails.State.preparing =>
+            onClick -->
+              showExpander.update:
+                case Some(Expand.Build) => None
+                case _ => Some(Expand.Build)
           case _ => emptyMod
         ,
         state match
-          case ExecutionDetails.State.failed(_) => cursor.pointer
+          case ExecutionDetails.State.failed(_) | ExecutionDetails.State.preparing => cursor.pointer
           case _ => emptyMod
       )
     )
@@ -397,7 +403,7 @@ class ExecutionPanel:
 
             div(
               child <--
-                size.signal.flatMap: sizeValue =>
+                size.signal.flatMapSwitch: sizeValue =>
                   Signal.fromFuture(api.executionOutput(id, sizeValue)).map:
                     case Some(output) =>
                       val Convert = scalajs.js.Dynamic.global.require("./node_modules/ansi-to-html/lib/ansi_to_html.js")
@@ -464,6 +470,30 @@ class ExecutionPanel:
             )
           case Some(Expand.ErrorLog) => div(execTextArea(details.error.map(ErrorData.stackTrace).getOrElse("")))
           case Some(Expand.Computing) => jobs(id, details.envStates)
+          case Some(Expand.Build) =>
+            div(
+              cls := "execTextArea",
+              table(
+                cls := "table table-striped table-sm mb-0",
+                overflow.auto,
+
+                tbody(
+                  details.buildStages.map: row =>
+                    tr(
+                      height := "38px",
+                      td(verticalAlign := "middle", row.text),
+                      td(verticalAlign := "middle",s"${row.duration / 1000} s"),
+                      td(
+                        cls := "text-center",
+                        verticalAlign := "middle",
+                        if row.finished
+                        then span(cls := "text-success fw-bold", "✔")
+                        else span(cls := "text-muted", "–")
+                      )
+                    )
+                )
+              )
+            )
           case None => div()
       )
 

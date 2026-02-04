@@ -58,6 +58,8 @@ def scala3Settings =
       excludeTransitiveScala2
     )
 
+def defaultImports = Seq("!java.lang.*")
+
 def excludeTransitiveScala2 =
   excludeDependencies ++= Seq(
     ExclusionRule("org.typelevel", "cats-free_2.13"),
@@ -119,30 +121,30 @@ def allTool = Seq(
   openmoleOutputRedirection,
   txtmark)
 
-lazy val openmoleCache = OsgiProject(toolDir, "org.openmole.tool.cache", imports = Seq("*")) dependsOn (openmoleLogger, openmoleLock) settings (toolSettings, libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
-lazy val openmoleArchive = OsgiProject(toolDir, "org.openmole.tool.archive", imports = Seq("*")) dependsOn (openmoleFile) settings (toolSettings, libraryDependencies += Libraries.xzJava, libraryDependencies += Libraries.compress)
-lazy val openmoleDTW = OsgiProject(toolDir, "org.openmole.tool.dtw", imports = Seq("*")) settings (toolSettings)
-lazy val openmoleFile = OsgiProject(toolDir, "org.openmole.tool.file", imports = Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (toolSettings, libraryDependencies += Libraries.ulid)
-lazy val openmoleLock = OsgiProject(toolDir, "org.openmole.tool.lock", imports = Seq("*")) dependsOn(openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.gears)
-lazy val openmoleLogger = OsgiProject(toolDir, "org.openmole.tool.logger", imports = Seq("*")) dependsOn (openmoleOutputRedirection) settings (toolSettings, libraryDependencies += Libraries.sourceCode)
-lazy val openmoleThread = OsgiProject(toolDir, "org.openmole.tool.thread", imports = Seq("*")) dependsOn(openmoleLogger, openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.squants)
-lazy val openmoleHash = OsgiProject(toolDir, "org.openmole.tool.hash", imports = Seq("*")) dependsOn(openmoleFile, openmoleStream, openmoleEncoding) settings (toolSettings, libraryDependencies += Libraries.codec)
-lazy val openmoleEncoding = OsgiProject(toolDir, "org.openmole.tool.encoding", imports = Seq("*"))  settings (toolSettings, libraryDependencies += Libraries.codec)
-lazy val openmoleStream = OsgiProject(toolDir, "org.openmole.tool.stream", imports = Seq("*")) dependsOn (openmoleThread) settings(toolSettings, libraryDependencies += Libraries.collections, libraryDependencies += Libraries.squants)
-lazy val openmoleCollection = OsgiProject(toolDir, "org.openmole.tool.collection", imports = Seq("*")) settings (toolSettings *)
-lazy val openmoleCrypto = OsgiProject(toolDir, "org.openmole.tool.crypto", imports = Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (toolSettings *)
-lazy val openmoleStatistics = OsgiProject(toolDir, "org.openmole.tool.statistics", imports = Seq("*")) dependsOn(openmoleLogger, openmoleTypes, openmoleDTW) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
-lazy val openmoleMath = OsgiProject(toolDir, "org.openmole.tool.math", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
-lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = Seq("*")) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
-lazy val openmoleByteCode = OsgiProject(toolDir, "org.openmole.tool.bytecode", imports = Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.asm) settings (toolSettings *)
-lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.felixOSGi) settings (toolSettings *)
-lazy val openmoleRandom = OsgiProject(toolDir, "org.openmole.tool.random", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
-lazy val openmoleNetwork = OsgiProject(toolDir, "org.openmole.tool.network", imports = Seq("*")) settings (toolSettings *)
-lazy val openmoleSystem = OsgiProject(toolDir, "org.openmole.tool.system", imports = Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.exec)
-lazy val openmoleException = OsgiProject(toolDir, "org.openmole.tool.exception", imports = Seq("*")) settings(toolSettings, libraryDependencies += Libraries.squants)
-lazy val openmoleOutputRedirection = OsgiProject(toolDir, "org.openmole.tool.outputredirection", imports = Seq("*")) settings (toolSettings *)
+lazy val openmoleCache = OsgiProject(toolDir, "org.openmole.tool.cache", imports = defaultImports ++ Seq("*")) dependsOn (openmoleLogger, openmoleLock) settings (toolSettings, libraryDependencies += Libraries.squants, libraryDependencies += Libraries.cats)
+lazy val openmoleArchive = OsgiProject(toolDir, "org.openmole.tool.archive", imports = defaultImports ++ Seq("*")) dependsOn (openmoleFile) settings (toolSettings, libraryDependencies += Libraries.xzJava, libraryDependencies += Libraries.compress)
+lazy val openmoleDTW = OsgiProject(toolDir, "org.openmole.tool.dtw", imports = defaultImports ++ Seq("*")) settings (toolSettings)
+lazy val openmoleFile = OsgiProject(toolDir, "org.openmole.tool.file", imports = defaultImports ++ Seq("*")) dependsOn(openmoleLock, openmoleStream, openmoleLogger) settings (toolSettings, libraryDependencies += Libraries.ulid)
+lazy val openmoleLock = OsgiProject(toolDir, "org.openmole.tool.lock", imports = defaultImports ++ Seq("*")) dependsOn(openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.gears)
+lazy val openmoleLogger = OsgiProject(toolDir, "org.openmole.tool.logger", imports = defaultImports ++ Seq("*")) dependsOn (openmoleOutputRedirection) settings (toolSettings, libraryDependencies += Libraries.sourceCode)
+lazy val openmoleThread = OsgiProject(toolDir, "org.openmole.tool.thread", imports = defaultImports ++ Seq("*")) dependsOn(openmoleLogger, openmoleCollection) settings (toolSettings, libraryDependencies += Libraries.squants)
+lazy val openmoleHash = OsgiProject(toolDir, "org.openmole.tool.hash", imports = defaultImports ++ Seq("*")) dependsOn(openmoleFile, openmoleStream, openmoleEncoding) settings (toolSettings, libraryDependencies += Libraries.codec)
+lazy val openmoleEncoding = OsgiProject(toolDir, "org.openmole.tool.encoding", imports = defaultImports ++ Seq("*"))  settings (toolSettings, libraryDependencies += Libraries.codec)
+lazy val openmoleStream = OsgiProject(toolDir, "org.openmole.tool.stream", imports = defaultImports ++ Seq("*")) dependsOn (openmoleThread) settings(toolSettings, libraryDependencies += Libraries.collections, libraryDependencies += Libraries.squants)
+lazy val openmoleCollection = OsgiProject(toolDir, "org.openmole.tool.collection", imports = defaultImports ++ Seq("*")) settings (toolSettings *)
+lazy val openmoleCrypto = OsgiProject(toolDir, "org.openmole.tool.crypto", imports = defaultImports ++ Seq("*")) settings(libraryDependencies += Libraries.bouncyCastle, libraryDependencies += Libraries.jasypt) settings (toolSettings *)
+lazy val openmoleStatistics = OsgiProject(toolDir, "org.openmole.tool.statistics", imports = defaultImports ++ Seq("*")) dependsOn(openmoleLogger, openmoleTypes, openmoleDTW) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
+lazy val openmoleMath = OsgiProject(toolDir, "org.openmole.tool.math", imports = defaultImports ++ Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math)
+lazy val openmoleTypes = OsgiProject(toolDir, "org.openmole.tool.types", imports = defaultImports ++ Seq("*")) settings(libraryDependencies += Libraries.squants, Libraries.addScalaLang) settings (toolSettings *)
+lazy val openmoleByteCode = OsgiProject(toolDir, "org.openmole.tool.bytecode", imports = defaultImports ++ Seq("*")) dependsOn (openmoleFile) settings (libraryDependencies += Libraries.asm) settings (toolSettings *)
+lazy val openmoleOSGi = OsgiProject(toolDir, "org.openmole.tool.osgi", imports = defaultImports ++ Seq("*")) dependsOn(openmoleFile, openmoleByteCode) settings (libraryDependencies += Libraries.felixOSGi) settings (toolSettings *)
+lazy val openmoleRandom = OsgiProject(toolDir, "org.openmole.tool.random", imports = defaultImports ++ Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.math) dependsOn (openmoleCache)
+lazy val openmoleNetwork = OsgiProject(toolDir, "org.openmole.tool.network", imports = defaultImports ++ Seq("*")) settings (toolSettings *)
+lazy val openmoleSystem = OsgiProject(toolDir, "org.openmole.tool.system", imports = defaultImports ++ Seq("*")) settings (toolSettings *) settings (libraryDependencies += Libraries.exec, libraryDependencies += Libraries.squants)
+lazy val openmoleException = OsgiProject(toolDir, "org.openmole.tool.exception", imports = defaultImports ++ Seq("*")) settings(toolSettings, libraryDependencies += Libraries.squants)
+lazy val openmoleOutputRedirection = OsgiProject(toolDir, "org.openmole.tool.outputredirection", imports = defaultImports ++ Seq("*")) settings (toolSettings *)
 
-lazy val txtmark = OsgiProject(toolDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = Seq("*")) settings (toolSettings *)
+lazy val txtmark = OsgiProject(toolDir, "com.quandora.txtmark", exports = Seq("com.github.rjeschke.txtmark.*"), imports = defaultImports ++ Seq("*")) settings (toolSettings *)
 
 
 /* ------------- Core ----------- */
@@ -196,26 +198,26 @@ def allCore = Seq(
   pluginRegistry,
   setter)
 
-lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = Seq("*")) settings (coreSettings *) settings(
+lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = defaultImports ++ Seq("*")) settings (coreSettings *) settings(
   defaultActivator,
   libraryDependencies ++= Libraries.monocle) dependsOn (pluginRegistry)
 
-lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = Seq("*")) settings(
+lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless),
   libraryDependencies += Libraries.fory,
   defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings *)
 
-lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = Seq("*")) dependsOn(context, openmoleArgument, keyword) settings (
+lazy val setter = OsgiProject(coreDir, "org.openmole.core.setter", imports = defaultImports ++ Seq("*")) dependsOn(context, openmoleArgument, keyword) settings (
   coreSettings,
   defaultActivator
 )
 
-lazy val openmoleArgument = OsgiProject(coreDir, "org.openmole.core.argument", imports = Seq("*")) settings (
+lazy val openmoleArgument = OsgiProject(coreDir, "org.openmole.core.argument", imports = defaultImports ++ Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.cats)
   ) dependsOn(context, tools, openmoleRandom, openmoleFile, pluginManager, openmoleCompiler, script, exception) settings (coreSettings *)
 
-lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = Seq("*")) settings(
+lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.math, Libraries.cats, Libraries.felixOSGi),
   Libraries.addScalaLang,
   defaultActivator
@@ -243,26 +245,26 @@ lazy val workflow = OsgiProject(coreDir, "org.openmole.core.workflow", imports =
   setter) settings (coreSettings *)
 
 
-lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", imports = Seq("*")) settings(
+lazy val serializer = OsgiProject(coreDir, "org.openmole.core.serializer", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies += Libraries.xstream,
   //libraryDependencies += Libraries.fory,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(workspace, pluginManager, fileService, tools, openmoleArchive, openmoleCompiler, logconfig) settings (coreSettings)
 
-lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = Seq("*")) dependsOn(workflow, workspace) settings (coreSettings *)
+lazy val communication = OsgiProject(coreDir, "org.openmole.core.communication", imports = defaultImports ++ Seq("*")) dependsOn(workflow, workspace) settings (coreSettings *)
 
-lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = Seq("*")) settings (
+lazy val openmoleDSL = OsgiProject(coreDir, "org.openmole.core.dsl", imports = defaultImports ++ Seq("*")) settings (
   libraryDependencies += Libraries.squants) dependsOn(workflow, logconfig, pluginRegistry, services) settings (coreSettings *) settings (defaultActivator)
 
-lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = Seq("*")) settings (coreSettings *)
+lazy val exception = OsgiProject(coreDir, "org.openmole.core.exception", imports = defaultImports ++ Seq("*")) settings (coreSettings *)
 
-lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = Seq("*")) dependsOn(exception, context) settings (toolsSettings *) settings(
+lazy val json = OsgiProject(coreDir, "org.openmole.core.json", imports = defaultImports ++ Seq("*")) dependsOn(exception, context) settings (toolsSettings *) settings(
   libraryDependencies += Libraries.json4s,
   libraryDependencies += Libraries.jackson,
   libraryDependencies += Libraries.circe
 )
 
-lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = Seq("*")) settings(
+lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = defaultImports ++ Seq("*")) settings(
   coreSettings,
   OsgiKeys.bundleActivator := None,
   libraryDependencies += Libraries.circe,
@@ -270,64 +272,64 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = Seq
   libraryDependencies += "com.volkhart.memory" % "measurer" % "0.1.1",
 ) dependsOn(context, json, timeService, openmoleArgument, openmoleBuildInfo)
 
-lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = Seq("*")) settings (
+lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = defaultImports ++ Seq("*")) settings (
     coreSettings,
     libraryDependencies ++= Seq(Libraries.xstream, Libraries.exec, Libraries.math, Libraries.scalatest, Libraries.felixOSGi),
     Libraries.addScalaLang
   ) dependsOn(exception, openmoleException) dependsOn(allTool.map(p => p: sbt.ClasspathDep[sbt.ProjectReference]): _*)
 
-lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = Seq("*")) dependsOn (tools) settings (coreSettings *)
+lazy val event = OsgiProject(coreDir, "org.openmole.core.event", imports = defaultImports ++ Seq("*")) dependsOn (tools) settings (coreSettings *)
 
-lazy val script = OsgiProject(coreDir, "org.openmole.core.script", imports = Seq("*")) dependsOn(tools, workspace) settings (coreSettings *)
+lazy val script = OsgiProject(coreDir, "org.openmole.core.script", imports = defaultImports ++ Seq("*")) dependsOn(tools, workspace) settings (coreSettings *)
 
-lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imports = Seq("*")) settings (
+lazy val replication = OsgiProject(coreDir, "org.openmole.core.replication", imports = defaultImports ++ Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.xstream, Libraries.guava)) settings (coreSettings *) dependsOn(db, preference, workspace, openmoleCache)
 
-lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = Seq("*")) settings (
+lazy val db = OsgiProject(coreDir, "org.openmole.core.db", imports = defaultImports ++ Seq("*")) settings (
   libraryDependencies ++= Seq(Libraries.xstream, Libraries.h2, Libraries.scopt)) settings (coreSettings *) dependsOn(openmoleNetwork, exception, openmoleCrypto, openmoleFile, openmoleLogger)
 
-lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = Seq("*")) settings(
+lazy val preference = OsgiProject(coreDir, "org.openmole.core.preference", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies ++= Seq(Libraries.configuration, Libraries.squants, Libraries.opencsv), Libraries.addScalaLang) settings (coreSettings *) dependsOn(openmoleNetwork, openmoleCrypto, openmoleFile, openmoleThread, openmoleTypes, openmoleLock, exception)
 
-lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = Seq("*")) dependsOn
+lazy val workspace = OsgiProject(coreDir, "org.openmole.core.workspace", imports = defaultImports ++ Seq("*")) dependsOn
   (exception, event, tools, openmoleCrypto) settings (coreSettings *)
 
-lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = Seq("*")) dependsOn (workspace) settings (coreSettings) settings (
+lazy val authentication = OsgiProject(coreDir, "org.openmole.core.authentication", imports = defaultImports ++ Seq("*")) dependsOn (workspace) settings (coreSettings) settings (
   libraryDependencies += Libraries.circe
   )
 
-lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, openmoleOutputRedirection, timeService) settings (coreSettings *)
+lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports = defaultImports ++ Seq("*")) dependsOn(workspace, serializer, preference, fileService, networkService, threadProvider, replication, authentication, openmoleOutputRedirection, timeService) settings (coreSettings *)
 
-lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = Seq("*")) dependsOn (exception) settings (coreSettings *)
+lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
 
-lazy val highlight = OsgiProject(coreDir, "org.openmole.core.highlight", imports = Seq("*")) dependsOn (exception) settings (coreSettings *)
+lazy val highlight = OsgiProject(coreDir, "org.openmole.core.highlight", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
 
-lazy val namespace = OsgiProject(coreDir, "org.openmole.core.namespace", imports = Seq("*")) dependsOn (exception) settings (coreSettings *)
+lazy val namespace = OsgiProject(coreDir, "org.openmole.core.namespace", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
 
 lazy val pluginManager = OsgiProject(
   coreDir,
   "org.openmole.core.pluginmanager",
-  imports = Seq("*")
+  imports = defaultImports ++ Seq("*")
 ) settings (defaultActivator) dependsOn(exception, tools, openmoleTypes, location, openmoleOSGi) settings (coreSettings *)
 
-lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = Seq("*")) dependsOn(exception, highlight, namespace, preference) settings (coreSettings *)
+lazy val pluginRegistry = OsgiProject(coreDir, "org.openmole.core.pluginregistry", imports = defaultImports ++ Seq("*")) dependsOn(exception, highlight, namespace, preference) settings (coreSettings *)
 
 
-lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = Seq("*")) dependsOn(tools, workspace, openmoleArchive, preference, threadProvider, pluginRegistry) settings (coreSettings *) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
+lazy val fileService = OsgiProject(coreDir, "org.openmole.core.fileservice", imports = defaultImports ++ Seq("*")) dependsOn(tools, workspace, openmoleArchive, preference, threadProvider, pluginRegistry) settings (coreSettings *) settings (defaultActivator) settings (libraryDependencies += Libraries.guava)
 
-lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings(coreSettings, libraryDependencies ++= Libraries.httpClient) settings (defaultActivator)
+lazy val networkService = OsgiProject(coreDir, "org.openmole.core.networkservice", imports = defaultImports ++ Seq("*")) dependsOn(tools, workspace, preference, pluginRegistry) settings(coreSettings, libraryDependencies ++= Libraries.httpClient) settings (defaultActivator)
 
-lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imports = Seq("*")) settings (coreSettings *)
+lazy val timeService = OsgiProject(coreDir, "org.openmole.core.timeservice", imports = defaultImports ++ Seq("*")) settings (coreSettings *)
 
-lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = Seq("*")) dependsOn(tools, preference, pluginRegistry) settings (coreSettings *) settings (defaultActivator)
+lazy val threadProvider = OsgiProject(coreDir, "org.openmole.core.threadprovider", imports = defaultImports ++ Seq("*")) dependsOn(tools, preference, pluginRegistry) settings (coreSettings *) settings (defaultActivator)
 
-lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = Seq("*")) dependsOn(openmoleBuildInfo, openmoleArgument, openmoleHash, openmoleFile, pluginManager) settings(
+lazy val module = OsgiProject(coreDir, "org.openmole.core.module", imports = defaultImports ++ Seq("*")) dependsOn(openmoleBuildInfo, openmoleArgument, openmoleHash, openmoleFile, pluginManager) settings(
   coreSettings,
   libraryDependencies ++= Libraries.gridscaleHTTP,
   libraryDependencies += Libraries.json4s,
   defaultActivator)
 
-lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, openmoleArgument, openmoleHash, openmoleFile, pluginManager, networkService) settings(
+lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = defaultImports ++ Seq("*")) enablePlugins (ScalaJSPlugin) dependsOn(openmoleBuildInfo, openmoleArgument, openmoleHash, openmoleFile, pluginManager, networkService) settings(
   coreSettings,
   libraryDependencies ++= Seq(Libraries.json4s, Libraries.circe),
   defaultActivator,
@@ -336,22 +338,22 @@ lazy val market = OsgiProject(coreDir, "org.openmole.core.market", imports = Seq
 lazy val logconfig = OsgiProject(
   coreDir,
   "org.openmole.core.logconfig",
-  imports = Seq("*")
+  imports = defaultImports ++ Seq("*")
 ) settings(libraryDependencies ++= Seq(Libraries.log4j, Libraries.logback, Libraries.slf4j), defaultActivator) dependsOn (tools, openmoleOSGi) settings (coreSettings *)
 
-lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager", imports = Seq("*")) dependsOn(openmoleStream, openmoleTypes) settings (coreSettings *) settings (defaultActivator)
+lazy val outputManager = OsgiProject(coreDir, "org.openmole.core.outputmanager", imports = defaultImports ++ Seq("*")) dependsOn(openmoleStream, openmoleTypes) settings (coreSettings *) settings (defaultActivator)
 
-lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", imports = Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
+lazy val openmoleCompiler = OsgiProject(coreDir, "org.openmole.core.compiler", imports = defaultImports ++ Seq("*"), exports = Seq("org.openmole.core.compiler.*", "$line5.*")) dependsOn (pluginManager) settings(
   OsgiKeys.importPackage := Seq("*"),
   Libraries.addScalaLang,
   libraryDependencies ++= Libraries.monocle,
   defaultActivator,
 ) dependsOn(openmoleOSGi, workspace, fileService, openmoleTypes) settings (coreSettings *)
 
-lazy val openmoleProject = OsgiProject(coreDir, "org.openmole.core.project", imports = Seq("*")) dependsOn(namespace, openmoleCompiler, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings *) settings (
+lazy val openmoleProject = OsgiProject(coreDir, "org.openmole.core.project", imports = defaultImports ++ Seq("*")) dependsOn(namespace, openmoleCompiler, openmoleDSL, services) settings (OsgiKeys.importPackage := Seq("*")) settings (coreSettings *) settings (
   Libraries.addScalaLang)
 
-lazy val openmoleBuildInfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = Seq("*")) enablePlugins (BuildInfoPlugin) settings(
+lazy val openmoleBuildInfo = OsgiProject(coreDir, "org.openmole.core.buildinfo", imports = defaultImports ++ Seq("*")) enablePlugins (BuildInfoPlugin) settings(
   //sourceGenerators in Compile += buildInfo.taskValue,
   (Compile / sourceGenerators) := Seq(
     Def.taskDyn {
@@ -416,13 +418,13 @@ def pluginSettings =
 
 def toolsSettings = scala3Settings ++ Seq(OsgiKeys.bundleActivator := None, libraryDependencies += Libraries.scalatest)
 
-lazy val netLogoAPI = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo", imports = Seq("*")) settings(
+lazy val netLogoAPI = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo", imports = defaultImports ++ Seq("*")) settings(
   autoScalaLibrary := false,
   crossPaths := false
 ) settings (toolsSettings *)
 
 
-lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5", imports = defaultImports ++ Seq("*")) dependsOn (netLogoAPI) settings(
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
@@ -431,7 +433,7 @@ lazy val netLogo5API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo5
 )
 
 
-lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6", imports = defaultImports ++ Seq("*")) dependsOn (netLogoAPI) settings(
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
@@ -439,7 +441,7 @@ lazy val netLogo6API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo6
   libraryDependencies -= Libraries.scalatest
 )
 
-lazy val netLogo7API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo7", imports = Seq("*")) dependsOn (netLogoAPI) settings(
+lazy val netLogo7API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo7", imports = defaultImports ++ Seq("*")) dependsOn (netLogoAPI) settings(
   toolsSettings,
   crossPaths := false,
   autoScalaLibrary := false,
@@ -447,7 +449,7 @@ lazy val netLogo7API = OsgiProject(pluginDir, "org.openmole.plugin.tool.netlogo7
   libraryDependencies -= Libraries.scalatest
 )
 
-lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings *) settings (defaultActivator)
+lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", imports = defaultImports ++ Seq("*")) dependsOn(exception, openmoleDSL) settings (toolsSettings *) settings (defaultActivator)
 
 
 
@@ -455,26 +457,26 @@ lazy val pattern = OsgiProject(pluginDir, "org.openmole.plugin.tool.pattern", im
 
 def allDomain = Seq(collectionDomain, distributionDomain, fileDomain, modifierDomain, rangeDomain, boundsDomain)
 
-lazy val collectionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.collection", imports = Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
+lazy val collectionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.collection", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
 
-lazy val distributionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.distribution", imports = Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings
+lazy val distributionDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.distribution", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings
   (libraryDependencies ++= Seq(Libraries.math)) settings (pluginSettings *)
 
-lazy val fileDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.file", imports = Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
+lazy val fileDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.file", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
 
-lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.modifier", imports = Seq("*")) dependsOn(openmoleDSL) settings (
+lazy val modifierDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.modifier", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
-lazy val rangeDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.range", imports = Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
+lazy val rangeDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.range", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL, modifierDomain) settings (pluginSettings *)
 
-lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bounds", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
+lazy val boundsDomain = OsgiProject(pluginDir, "org.openmole.plugin.domain.bounds", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
 
 /* Environment */
 
 def allEnvironment = Seq(batch, gridscale, ssh, egi, pbs, oar, sge, condor, slurm, dispatch, miniclust)
 
-lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = Seq("*")) dependsOn(
+lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch", imports = defaultImports ++ Seq("*")) dependsOn(
   workflow, workspace, tools, event, replication, exception,
   serializer, fileService, pluginManager, openmoleArchive, communication, authentication, location, services,
   openmoleByteCode, openmoleDSL
@@ -488,50 +490,50 @@ lazy val batch = OsgiProject(pluginDir, "org.openmole.plugin.environment.batch",
 )
 
 
-//lazy val cluster = OsgiProject(pluginDir, "org.openmole.plugin.environment.cluster", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings (pluginSettings *)
+//lazy val cluster = OsgiProject(pluginDir, "org.openmole.plugin.environment.cluster", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh) settings (pluginSettings *)
 
 
 
 lazy val egi = OsgiProject(pluginDir, "org.openmole.plugin.environment.egi") dependsOn(openmoleDSL, batch, workspace, fileService, gridscale, json) settings(
   libraryDependencies ++= Libraries.gridscaleEGI, Libraries.addScalaLang) settings (pluginSettings *)
 
-lazy val gridscale = OsgiProject(pluginDir, "org.openmole.plugin.environment.gridscale", imports = Seq("*")) settings (
+lazy val gridscale = OsgiProject(pluginDir, "org.openmole.plugin.environment.gridscale", imports = defaultImports ++ Seq("*")) settings (
   libraryDependencies += Libraries.gridscaleLocal) dependsOn(openmoleDSL, tools, batch, exception) settings (pluginSettings *)
 
-lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
+lazy val oar = OsgiProject(pluginDir, "org.openmole.plugin.environment.oar", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
   (libraryDependencies += Libraries.gridscaleOAR) settings (pluginSettings *)
 
-lazy val pbs = OsgiProject(pluginDir, "org.openmole.plugin.environment.pbs", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
+lazy val pbs = OsgiProject(pluginDir, "org.openmole.plugin.environment.pbs", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
   (libraryDependencies += Libraries.gridscalePBS) settings (pluginSettings *)
 
-lazy val sge = OsgiProject(pluginDir, "org.openmole.plugin.environment.sge", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
+lazy val sge = OsgiProject(pluginDir, "org.openmole.plugin.environment.sge", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
   (libraryDependencies += Libraries.gridscaleSGE) settings (pluginSettings *)
 
-lazy val condor = OsgiProject(pluginDir, "org.openmole.plugin.environment.condor", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
+lazy val condor = OsgiProject(pluginDir, "org.openmole.plugin.environment.condor", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
   (libraryDependencies += Libraries.gridscaleCondor) settings (pluginSettings *)
 
-lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm", imports = Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
+lazy val slurm = OsgiProject(pluginDir, "org.openmole.plugin.environment.slurm", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, batch, gridscale, ssh, dispatch) settings
   (libraryDependencies += Libraries.gridscaleSLURM) settings (pluginSettings *)
 
-lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale, json, dispatch) settings
+lazy val ssh = OsgiProject(pluginDir, "org.openmole.plugin.environment.ssh", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale, json, dispatch) settings
   (libraryDependencies ++= Libraries.gridscaleSSH) settings (pluginSettings *)
 
-lazy val miniclust = OsgiProject(pluginDir, "org.openmole.plugin.environment.miniclust", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
+lazy val miniclust = OsgiProject(pluginDir, "org.openmole.plugin.environment.miniclust", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings
   (libraryDependencies += Libraries.gridscaleMiniclust, pluginSettings)
 
 
-lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.dispatch", imports = Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings (pluginSettings *)
+lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.dispatch", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, event, batch, gridscale) settings (pluginSettings *)
 
 /* Hook */
 
 def allHook = Seq(displayHook, fileHook, modifierHook)
 
-lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
+lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
-lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
+lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
-lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = Seq("*")) dependsOn (openmoleDSL) settings (
+lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
 
@@ -539,7 +541,7 @@ lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifie
 
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
-lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
+lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = defaultImports ++ Seq("*"), excludeSubPackage = Seq("data")) dependsOn(
   openmoleDSL, toolsTask, pattern, scalaTask, distributionDomain, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   pluginSettings,
@@ -548,32 +550,32 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
   excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13")
 )
 
-lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, distributionDomain, boundsDomain % "test") settings (
+lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, distributionDomain, boundsDomain % "test") settings (
   pluginSettings,
   libraryDependencies += Libraries.mgo)
 
-lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scalaTask) settings (
+lazy val directSampling = OsgiProject(pluginDir, "org.openmole.plugin.method.directsampling", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, distributionDomain, pattern, modifierDomain, fileHook, combineSampling, scalaTask) settings (
   pluginSettings)
 
-lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (
+lazy val sensitivity = OsgiProject(pluginDir, "org.openmole.plugin.method.sensitivity", imports = defaultImports ++ Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL, lhsSampling, quasirandomSampling, directSampling, collectionDomain % "test", boundsDomain % "test") settings (
   pluginSettings)
 
 
 /* Sampling */
 
-def allSampling = Seq(combineSampling, csvSampling, oneFactorSampling, lhsSampling, quasirandomSampling)
+def allSampling = Seq(combineSampling, fileSampling, oneFactorSampling, lhsSampling, quasirandomSampling)
 
-lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings *)
+lazy val combineSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.combine", imports = defaultImports ++ Seq("*")) dependsOn(exception, modifierDomain, collectionDomain, workflow) settings (pluginSettings *)
 
-lazy val csvSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.csv", imports = Seq("*")) dependsOn(exception, workflow, openmoleDSL) settings (
+lazy val fileSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.file", imports = defaultImports ++ Seq("*")) dependsOn(exception, workflow, openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest
   ) settings (pluginSettings)
 
-lazy val oneFactorSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.onefactor", imports = Seq("*")) dependsOn(exception, workflow, openmoleDSL, combineSampling, collectionDomain) settings (pluginSettings *)
+lazy val oneFactorSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.onefactor", imports = defaultImports ++ Seq("*")) dependsOn(exception, workflow, openmoleDSL, combineSampling, collectionDomain) settings (pluginSettings *)
 
-lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings *)
+lazy val lhsSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.lhs", imports = defaultImports ++ Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (pluginSettings *)
 
-lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (
+lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampling.quasirandom", imports = defaultImports ++ Seq("*")) dependsOn(exception, workflow, workspace, openmoleDSL) settings (
   libraryDependencies += Libraries.math
   ) settings (pluginSettings *)
 
@@ -582,24 +584,24 @@ lazy val quasirandomSampling = OsgiProject(pluginDir, "org.openmole.plugin.sampl
 
 def allSource = Seq(fileSource, httpURLSource)
 
-lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", imports = Seq("*")) dependsOn(openmoleDSL, serializer, exception) settings (pluginSettings *)
+lazy val fileSource = OsgiProject(pluginDir, "org.openmole.plugin.source.file", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, serializer, exception) settings (pluginSettings *)
 
-lazy val httpURLSource = OsgiProject(pluginDir, "org.openmole.plugin.source.httpurl", imports = Seq("*")) dependsOn(openmoleDSL, exception, networkService) settings (pluginSettings *)
+lazy val httpURLSource = OsgiProject(pluginDir, "org.openmole.plugin.source.httpurl", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, exception, networkService) settings (pluginSettings *)
 
 
 /* Task */
 
 def allTask = Seq(toolsTask, externalTask, netLogoTask, netLogo5Task, netLogo6Task, netLogo7Task, javaTask, scalaTask, templateTask, systemexecTask, containerTask, rTask, scilabTask, pythonTask, juliaTask, gamaTask, cormasTask, spatialTask, timingTask)
 
-lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
+lazy val toolsTask = OsgiProject(pluginDir, "org.openmole.plugin.task.tools", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
-lazy val externalTask = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings *)
+lazy val externalTask = OsgiProject(pluginDir, "org.openmole.plugin.task.external", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, workspace) settings (pluginSettings *)
 
 // Because NetLogo bundle contains scala classes
 def noNetLogoInClassPath =
   Compile / dependencyClasspath := (Compile / dependencyClasspath).value.filter(!_.data.name.contains("ccl-northwestern-edu-netlogo"))
 
-lazy val netLogoTask = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, netLogoAPI, containerTask) settings(
+lazy val netLogoTask = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, externalTask, netLogoAPI, containerTask) settings(
   pluginSettings,
   libraryDependencies += Libraries.scalaXML)
 
@@ -607,49 +609,49 @@ lazy val netLogo5Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo
   noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo5)
 
-lazy val netLogo6Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo6API) settings (pluginSettings *) settings(
+lazy val netLogo6Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo6", imports = defaultImports ++ Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo6API) settings (pluginSettings *) settings(
   noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo6)
 
-lazy val netLogo7Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo7", imports = Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo7API) settings (pluginSettings *) settings(
+lazy val netLogo7Task = OsgiProject(pluginDir, "org.openmole.plugin.task.netlogo7", imports = defaultImports ++ Seq("*")) dependsOn(netLogoTask, openmoleDSL, externalTask, netLogo7API) settings (pluginSettings *) settings(
   //noNetLogoInClassPath,
   libraryDependencies += Libraries.netlogo7)
 
-lazy val scalaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, openmoleCompiler) settings (pluginSettings *) settings (
+lazy val scalaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scala", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, externalTask, openmoleCompiler) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.scalaXML
   )
 
-lazy val templateTask = OsgiProject(pluginDir, "org.openmole.plugin.task.template", imports = Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
+lazy val templateTask = OsgiProject(pluginDir, "org.openmole.plugin.task.template", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
-lazy val systemexecTask = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = Seq("*")) dependsOn(openmoleDSL, externalTask, workspace) settings (
+lazy val systemexecTask = OsgiProject(pluginDir, "org.openmole.plugin.task.systemexec", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, externalTask, workspace) settings (
   libraryDependencies += Libraries.exec) settings (pluginSettings *)
 
-lazy val containerTask = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = Seq("*")) dependsOn(openmoleFile, pluginManager, externalTask, openmoleArgument, exception) settings (pluginSettings *) settings (
+lazy val containerTask = OsgiProject(pluginDir, "org.openmole.plugin.task.container", imports = defaultImports ++ Seq("*")) dependsOn(openmoleFile, pluginManager, externalTask, openmoleArgument, exception) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.container)
 
-lazy val rTask = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = Seq("*")) dependsOn(tools, containerTask, json) settings (
+lazy val rTask = OsgiProject(pluginDir, "org.openmole.plugin.task.r", imports = defaultImports ++ Seq("*")) dependsOn(tools, containerTask, json) settings (
   libraryDependencies ++= Libraries.httpClient
   ) settings (pluginSettings *)
 
-lazy val javaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.java", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
+lazy val javaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.java", imports = defaultImports ++ Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val scilabTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = Seq("*")) dependsOn (containerTask) settings (pluginSettings *)
+lazy val scilabTask = OsgiProject(pluginDir, "org.openmole.plugin.task.scilab", imports = defaultImports ++ Seq("*")) dependsOn (containerTask) settings (pluginSettings *)
 
-lazy val pythonTask = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
+lazy val pythonTask = OsgiProject(pluginDir, "org.openmole.plugin.task.python", imports = defaultImports ++ Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val juliaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.julia", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
+lazy val juliaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.julia", imports = defaultImports ++ Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *)
 
-lazy val gamaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.gama", imports = Seq("*")) dependsOn (containerTask) settings (pluginSettings *) settings (
+lazy val gamaTask = OsgiProject(pluginDir, "org.openmole.plugin.task.gama", imports = defaultImports ++ Seq("*")) dependsOn (containerTask) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.scalaXML
   )
 
-lazy val cormasTask = OsgiProject(pluginDir, "org.openmole.plugin.task.cormas", imports = Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *) settings (
+lazy val cormasTask = OsgiProject(pluginDir, "org.openmole.plugin.task.cormas", imports = defaultImports ++ Seq("*")) dependsOn(containerTask, json) settings (pluginSettings *) settings (
   libraryDependencies += Libraries.json4s)
 
-lazy val timingTask = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
+lazy val timingTask = OsgiProject(pluginDir, "org.openmole.plugin.task.timing", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
-lazy val spatialTask = OsgiProject(pluginDir, "org.openmole.plugin.task.spatial", imports = Seq("*")) dependsOn (openmoleDSL) settings(
+lazy val spatialTask = OsgiProject(pluginDir, "org.openmole.plugin.task.spatial", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings(
   libraryDependencies += Libraries.math,
   libraryDependencies += Libraries.spatialsampling
 ) settings (pluginSettings *)
@@ -666,7 +668,7 @@ lazy val message = OsgiProject(restDir, "org.openmole.rest.message") settings(
 lazy val server = OsgiProject(
   restDir,
   "org.openmole.rest.server",
-  imports = Seq("org.h2", "!com.sun.*", "*")
+  imports = defaultImports ++ Seq("org.h2", "!com.sun.*", "*")
 ) dependsOn(workflow, openmoleArchive, openmoleCollection, openmoleProject, message, openmoleCrypto, services, module, serverExt) settings(
   scala3Settings,
   libraryDependencies ++= Seq(Libraries.logback, Libraries.codec, Libraries.http4s, Libraries.cats),
@@ -682,21 +684,15 @@ def guiSharedDir = guiDir / "shared"
 def guiSettings = scala3Settings
 //def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
 
-def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!scaladget.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
+def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
 
 /* -------------------- GUI Client ----------------------*/
 
-val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "scaladget.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
-  //lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") dependsOn (apiGUI, clientToolGUI, market, dataGUI, clientExt) settings (
   libraryDependencies += Libraries.sourceCode,
-  webpackBundlingMode := BundlingMode.LibraryAndApplication(),
-  webpackNodeArgs := Seq("--openssl-legacy-provider"),
-  webpack / version := Libraries.wepackVersion,
-  // Compile / npmDeps += Dep("ace-builds/src-min", "1.4.3", List("mode-scala.js", "theme-github.js", "ext-language_tools.js"), true),
-  // Compile / npmDeps += Dep("sortablejs", "1.10.2", List("Sortable.min.js"))
   guiSettings,
   test := false
 ) dependsOn(apiGUI, clientToolGUI, market, dataGUI, clientExt)
@@ -706,25 +702,15 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   guiSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.scalajs,
-  //  Libraries.autowireJS,
-  //  Libraries.boopickleJS,
   Libraries.scalajsDomJS,
-  Libraries.ace,
-  Libraries.bootstrapnative,
-  Libraries.nouiSlider,
-  Libraries.scaladgetTools,
   Libraries.laminarJS,
-  //Libraries.catsJS,
-  // Libraries.sortable,
-  Libraries.plotlyJS) dependsOn (clientExt)
+  Libraries.plotlyJS) dependsOn(dataGUI, apiGUI)
 
-lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, apiGUI) settings(
+lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") enablePlugins (ScalaJSPlugin) dependsOn(dataGUI, apiGUI, clientToolGUI) settings(
   //  Libraries.boopickleJS,
   //  Libraries.autowireJS,
   Libraries.laminarJS,
   Libraries.scalajsDomJS,
-  Libraries.scaladgetTools,
-  Libraries.bootstrapnative,
   Libraries.tapirSTTPCLient,
   guiSettings,
   scalaJSSettings)
@@ -744,14 +730,6 @@ lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "or
   //webpackExtraArgs := Seq("--profile", "--progress", "true"),
   webpackEmitSourceMaps := false,
   test := false,
-  /*libraryDependencies ++= Seq(
-    "com.raquo" %%% "laminar" % laminarVersion,
-    "org.openmole.scaladget" %%% "tools" % scaladgetVersion,
-    "org.openmole.scaladget" %%% "svg" % scaladgetVersion,
-    "org.openmole.scaladget" %%% "bootstrapnative" % scaladgetVersion,
-    "org.scala-js" %%% "scalajs-dom" % scalajsDomVersion,
-    "org.openmole.endpoints4s" %%% "xhr-client" % "5.1.0+n"
-  )*/
   guiSettings,
   scalaJSSettings,
   build := {
@@ -826,7 +804,7 @@ lazy val serverGit = OsgiProject(guiServerDir, "org.openmole.gui.server.git") de
   scalaJSSettings)
 
 
-lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = Seq("*")) dependsOn(pluginManager, fileService, workspace, networkService, dataGUI) settings(
+lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompile", imports = defaultImports ++ Seq("*")) dependsOn(pluginManager, fileService, workspace, networkService, dataGUI) settings(
   guiSettings,
   libraryDependencies += "org.scala-js" %%% "scalajs-library" % scalajsVersion % "provided" intransitive() cross CrossVersion.for3Use2_13,
   //libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.4" % "provided" intransitive(),
@@ -906,14 +884,14 @@ lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "or
 
 /* -------------------- GUI Shared ----------------------*/
 
-lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
+lazy val dataGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.data", imports = defaultImports ++ guiStrictImports) enablePlugins (ScalaJSPlugin) settings(
   Libraries.scalajsDomJS,
   Libraries.laminarJS,
   libraryDependencies += Libraries.tapir,
   guiSettings,
   scalaJSSettings) dependsOn (format)
 
-lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
+lazy val apiGUI = OsgiProject(guiSharedDir, "org.openmole.gui.shared.api", imports = defaultImports ++ guiStrictImports /*dynamicImports = Seq("shapeless.*", "endpoints4s.generic.*", "endpoints4s.algebra.*")*/) dependsOn(dataGUI, market) enablePlugins (ScalaJSPlugin) settings (guiSettings) settings(
   libraryDependencies += Libraries.tapir,
   scalaJSSettings
 )
@@ -943,36 +921,32 @@ def guiPlugins = Seq(
   // jarWizardPlugin,
 ) //, guiEnvironmentDesktopGridPlugin)
 
-lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi", imports = guiStrictImports) settings(
+lazy val guiEnvironmentEGIPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.egi", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative,
   excludeDependencies += ExclusionRule("org.scala-lang.modules", "scala-xml_3")
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, egi) enablePlugins (ScalaJSPlugin)
 
-lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey", imports = guiStrictImports) settings(
+lazy val guiEnvironmentSSHKeyPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshkey", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
-lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin", imports = guiStrictImports) settings(
+lazy val guiEnvironmentSSHLoginPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.sshlogin", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
-  libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
+  libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, ssh) enablePlugins (ScalaJSPlugin)
 
-lazy val guiEnvironmentMiniclustPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.miniclust", imports = guiStrictImports) settings(
+lazy val guiEnvironmentMiniclustPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.authentication.miniclust", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.bootstrapnative
 ) dependsOn(serverExt, clientExt, apiGUI, workspace, miniclust) enablePlugins (ScalaJSPlugin)
 
-lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = guiStrictImports) settings(
+lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.netlogo", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
@@ -984,48 +958,48 @@ lazy val netlogoWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugi
 //  libraryDependencies += Libraries.arm
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
-lazy val gamaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.gama", imports = guiStrictImports) settings(
+lazy val gamaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.gama", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
-lazy val juliaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.julia", imports = guiStrictImports) settings(
-  guiPluginSettings,
-  scalaJSSettings,
-  libraryDependencies += Libraries.felixOSGi
-) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
-
-
-lazy val pythonWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.python", imports = guiStrictImports) settings(
+lazy val juliaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.julia", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
-lazy val scilabWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.scilab", imports = guiStrictImports) settings(
+lazy val pythonWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.python", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
-lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r", imports = guiStrictImports) settings(
+lazy val scilabWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.scilab", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
-lazy val javaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.java", imports = guiStrictImports) settings(
+lazy val rWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.r", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
 ) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
 
 
-lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.container", imports = guiStrictImports) settings(
+lazy val javaWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.java", imports = defaultImports ++ guiStrictImports) settings(
+  guiPluginSettings,
+  scalaJSSettings,
+  libraryDependencies += Libraries.felixOSGi
+) dependsOn(serverExt, clientExt, serverExt, workspace) enablePlugins (ScalaJSPlugin)
+
+
+lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.wizard.container", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi
@@ -1036,7 +1010,7 @@ lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plu
 //  libraryDependencies += Libraries.felixOSGi,
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
-lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution", imports = guiStrictImports) settings(
+lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
@@ -1097,7 +1071,7 @@ def rename(m: ModuleID): String = {
 import Assembly._
 
 
-lazy val openmoleUI = OsgiProject(binDir, "org.openmole.ui", singleton = true, imports = Seq("*")) settings (
+lazy val openmoleUI = OsgiProject(binDir, "org.openmole.ui", singleton = true, imports = defaultImports ++ Seq("*")) settings (
   organization := "org.openmole.ui"
   ) dependsOn(
   openmoleCompiler,
@@ -1140,14 +1114,7 @@ lazy val openmoleNaked =
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "webapp") → (assemblyPath.value / "webapp"),
     resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "webpack") → (assemblyPath.value / "webpack"),
-    //  IO.copyFile(crossTarget.value / s"${name.value}-jsdeps.js", (Compile / resourceManaged).value / "deps.js"),
-
-    //FIXME
-    //resourcesAssemble += ((clientGUI / crossTarget).value / s"${name.value}-jsdeps.js") -> (assemblyPath.value / "webapp" / "deps.js"),
-
-
-    //   resourcesAssemble += (clientGUI / Compile / dependencyFile).value -> (assemblyPath.value / "webapp/js/deps.js"),
-    // resourcesAssemble += (clientGUI / Compile / cssFile).value -> (assemblyPath.value / "webapp/css/"),
+    resourcesAssemble += ((serverGUI / Compile / resourceDirectory).value / "esbuild") → (assemblyPath.value / "esbuild"),
     resourcesAssemble += {
       val tarFile = (openmoleRuntime / tar).value
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
@@ -1158,7 +1125,7 @@ lazy val openmoleNaked =
       IO.withTemporaryDirectory { modules =>
         import sys.process._
 
-        val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
+        val packageJson = (serverGUI / Compile / resourceDirectory).value / "esbuild/package.json"
         val cacheFile = target.value / "node_modules-hash"
         val zip = target.value / "node_modules.zip"
         val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
@@ -1180,7 +1147,7 @@ lazy val openmoleNaked =
           IO.write(cacheFile, packageJsonHash)
         }
 
-        zip -> (assemblyPath.value / "webpack" / "node_modules.zip")
+        zip -> (assemblyPath.value / "esbuild" / "node_modules.zip")
       }
     },
 
@@ -1212,7 +1179,7 @@ lazy val openmole =
   ) dependsOn (toDependencies(openmoleDependencies) *) settings (excludeTransitiveScala2)
 
 lazy val openmoleRuntime =
-  OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = Seq("*")) enablePlugins (TarPlugin) settings (assemblySettings *) dependsOn(workflow, communication, serializer, logconfig, event, exception) settings(
+  OsgiProject(binDir, "org.openmole.runtime", singleton = true, imports = defaultImports ++ Seq("*")) enablePlugins (TarPlugin) settings (assemblySettings *) dependsOn(workflow, communication, serializer, logconfig, event, exception) settings(
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
@@ -1241,15 +1208,14 @@ lazy val siteJS = site.js enablePlugins (ScalaJSBundlerPlugin) settings(
   scalaJSLinkerConfig := scalaJSLinkerConfig.value.withSourceMap(true),
   webpackNodeArgs := Seq("--openssl-legacy-provider"),
   webpack / version := Libraries.wepackVersion,
+  Compile / npmDependencies += "lunr" -> "2.1.5",
+  Compile / npmDependencies += "highlight.js" -> "10.4.1",
   scala3Settings,
   test := {},
   Libraries.laminarJS,
-  Libraries.bootstrapnative,
-  Libraries.lunr,
-  Libraries.scaladgetTools,
   Libraries.scalajsDomJS,
-  Libraries.highlightJS,
   libraryDependencies += Libraries.scalaTags,
+  libraryDependencies += "org.querki" %%% "querki-jsext" % "0.10" cross (CrossVersion.for3Use2_13)
 )
 
 lazy val siteJVM = site.jvm dependsOn(tools, openmoleProject, serializer, openmoleBuildInfo, marketIndex) settings(
@@ -1376,7 +1342,7 @@ testSite := {
 }
 
 
-lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true, imports = Seq("*")) settings(
+lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true, imports = defaultImports ++ Seq("*")) settings(
   assemblySettings,
   scala3Settings,
   assemblyDependenciesPath := assemblyPath.value / "plugins",
@@ -1397,7 +1363,7 @@ lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true,
 ) dependsOn(openmoleBuildInfo, openmoleFile, module) dependsOn (toDependencies(openmoleDependencies) *)
 
 
-lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("*"), settings = assemblySettings) settings(
+lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = defaultImports ++ Seq("*"), settings = assemblySettings) settings(
   autoScalaLibrary := false,
   libraryDependencies += Libraries.felixOSGi,
   resourcesAssemble += {
@@ -1408,7 +1374,7 @@ lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = Seq("
 )
 
 
-lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = Seq("*")) settings(
+lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies += Libraries.jline,
   scala3Settings
 ) dependsOn(

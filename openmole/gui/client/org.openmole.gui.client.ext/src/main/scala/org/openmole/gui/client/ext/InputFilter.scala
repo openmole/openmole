@@ -18,7 +18,7 @@ package org.openmole.gui.client.ext
  */
 
 import org.scalajs.dom.Event
-import scaladget.bootstrapnative.bsn._
+import org.openmole.gui.client.tool.bootstrapnative.bsn._
 import com.raquo.laminar.api.L._
 
 object InputFilter {

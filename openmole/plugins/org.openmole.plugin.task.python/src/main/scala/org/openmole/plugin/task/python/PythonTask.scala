@@ -39,7 +39,7 @@ object PythonTask:
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    image:                  ContainerImage                     = "openmole/python:3.13.3",
+    image:                  ContainerImage                     = "openmole/python:3.14.2",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
@@ -52,8 +52,8 @@ object PythonTask:
     containerSystem:        OptionalArgument[ContainerSystem]  = None)(using sourcecode.Name, DefinitionScope) =
 
     
-    ExternalTask.build("PythonTask"): buildParamters =>
-      import buildParamters.*
+    ExternalTask.build("PythonTask"): buildParameters =>
+      import buildParameters.*
 
       val major =
         image match
@@ -62,7 +62,12 @@ object PythonTask:
         
       val containerImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, installCommands(install, libraries, major))
+        ContainerTask.install(
+          containerSystem,
+          image,
+          installCommands(install, libraries, major),
+          buildParameters = buildParameters
+        )
 
       def workDirectory = "/_workdirectory_"
       

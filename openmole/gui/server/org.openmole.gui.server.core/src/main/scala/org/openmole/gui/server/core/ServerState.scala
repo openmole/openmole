@@ -23,6 +23,7 @@ import org.openmole.core.setter.DefinitionScope
 import org.openmole.core.workflow.execution.{Environment, SubmissionEnvironment}
 import org.openmole.core.workflow.mole.MoleExecution
 import org.openmole.core.workflow.task.MoleTask
+import org.openmole.gui.server.core
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.server.ext.utils
 import org.openmole.plugin.environment.batch.environment.BatchEnvironment.*
@@ -41,15 +42,17 @@ case class RunningEnvironment(
 
 object ServerState:
   object MoleExecutionState:
-    given Conversion[ExecutionState.Failed | ExecutionState.Canceled | java.util.concurrent.Future[_] | MoleExecution, MoleExecutionState] =
+    given Conversion[ExecutionState.Failed | ExecutionState.Canceled | java.util.concurrent.Future[?] | MoleExecution, MoleExecutionState] =
       case s: ExecutionState.Failed => ServerState.Terminated(s)
       case s: ExecutionState.Canceled => ServerState.Terminated(s)
-      case f: java.util.concurrent.Future[_] => ServerState.Preparing(f)
+      case f: java.util.concurrent.Future[_] => ServerState.Preparing(f, Seq())
       case m: MoleExecution => ServerState.Active(m)
+
+    case class BuildStage(id: Long, action: String, text: String, start: Long, end: Option[Long])
 
   sealed trait MoleExecutionState
   case class Terminated(state:  ExecutionState.Failed | ExecutionState.Canceled) extends MoleExecutionState
-  case class Preparing(future: java.util.concurrent.Future[_]) extends MoleExecutionState
+  case class Preparing(future: java.util.concurrent.Future[?], buildStages: Seq[MoleExecutionState.BuildStage] = Seq()) extends MoleExecutionState
   case class Active(moleExecution: MoleExecution) extends MoleExecutionState
 
   case class ExecutionInfo(
@@ -78,6 +81,23 @@ class ServerState:
         val newEnvironment = update(environment)
         val newInfo = info.copy(environments = info.environments.updated(envId, newEnvironment))
         executionInfo(executionId) = newInfo
+
+  def buildEventListener(execId: ExecutionId): EventDispatcher.Listner[MoleExecution.BuildEventHandler] =
+    case (_, b: MoleExecution.BuildEventHandler.BuildEvent) =>
+      modifyState(execId):
+        case p: core.ServerState.Preparing =>
+          val s = ServerState.MoleExecutionState.BuildStage(b.id, b.action, b.text, b.creationTime, None)
+          p.copy(buildStages = p.buildStages ++ Seq(s))
+        case s => s
+    case (_, b: MoleExecution.BuildEventHandler.BuildEventEnd) =>
+      modifyState(execId):
+        case p: core.ServerState.Preparing =>
+          val newStages =
+            p.buildStages.map:
+              case s if s.id == b.id => s.copy(end = Some(b.creationTime))
+              case x => x
+          p.copy(buildStages = newStages)
+        case s => s
 
   def moleExecutionListener(execId: ExecutionId, script: SafePath): EventDispatcher.Listner[MoleExecution] =
     case (ex: MoleExecution, f: MoleExecution.Finished) =>
@@ -159,9 +179,10 @@ class ServerState:
 
   def modifyState(key: ExecutionId)(state: ServerState.MoleExecutionState => ServerState.MoleExecutionState) =
     synchronized:
-      executionInfo.updateWith(key) {
-        _.map(e => e.copy(moleExecution = state(e.moleExecution)))
-      }.isDefined
+      executionInfo.updateWith(key):
+        _.map: e =>
+          e.copy(moleExecution = state(e.moleExecution))
+      .isDefined
 
 
   def cancel(key: ExecutionId) =
@@ -174,7 +195,7 @@ class ServerState:
         moleExecution
 
     moleExecution match
-      case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
+      case Some(ServerState.Preparing(f: java.util.concurrent.Future[?], _)) => f.cancel(true)
       case Some(ServerState.Active(e: MoleExecution)) => e.cancel
       case _ =>
 
@@ -185,7 +206,7 @@ class ServerState:
         executionInfo.remove(key)
 
     moleExecution.map(_.moleExecution) match
-      case Some(ServerState.Preparing(f: java.util.concurrent.Future[_])) => f.cancel(true)
+      case Some(ServerState.Preparing(f: java.util.concurrent.Future[?], _)) => f.cancel(true)
       case Some(ServerState.Active(e: MoleExecution)) => e.cancel
       case _ | None =>
 
@@ -246,7 +267,12 @@ class ServerState:
 //      instantiation.get(key).map { i => if (!i.compiled) Compiling() else Preparing() }.getOrElse(Compiling())
 
     info.moleExecution match
-      case ServerState.Preparing(_) => Preparing()
+      case p: ServerState.Preparing =>
+        def stageData(s: ServerState.MoleExecutionState.BuildStage) =
+          val end = s.end.getOrElse(System.currentTimeMillis())
+          BuildStage(s.action, s.text, end - s.start, s.end.isDefined)
+
+        Preparing(p.buildStages.sortBy(_.id).map(stageData))
       case ServerState.Terminated(s) => s
       case ServerState.Active(moleExecution) =>
         def convertStatuses(s: MoleExecution.JobStatuses) = ExecutionState.JobStatuses(s.ready, s.running, s.completed)
@@ -306,7 +332,7 @@ class ServerState:
                 duration = moleExecution.duration.getOrElse(0L),
                 environmentStates = environmentState(info.environments)
               )
-            else Preparing()
+            else Preparing(Seq())
   
 
 

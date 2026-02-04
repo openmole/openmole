@@ -49,6 +49,7 @@ object EvolutionWorkflow:
           method = method,
           evaluation = evaluation,
           parallelism = parallelism,
+          by = s.by,
           termination = termination,
           wrap = s.wrap,
           suggestion = suggestion,
@@ -156,7 +157,7 @@ object EvolutionWorkflow:
   sealed trait OMTermination
 
   sealed trait EvolutionPattern
-  case class SteadyState(wrap: Boolean = false) extends EvolutionPattern
+  case class SteadyState(by: Int = 1, wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
   def SteadyStateEvolution[M](
@@ -164,6 +165,7 @@ object EvolutionWorkflow:
     evaluation:  DSL,
     termination: OMTermination,
     parallelism: Int                          = 1,
+    by:          Int                          = 1,
     suggestion:  Genome.SuggestedValues       = Genome.SuggestedValues.empty,
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) =
@@ -226,8 +228,8 @@ object EvolutionWorkflow:
       output = Some(masterTask),
       method = evolution,
       validate = evolution.validate,
-      delegate = Vector(slave)
-    )
+      delegate = Vector(wrapped)
+    ) by Grouping(by, async = true)
 
   def IslandEvolution(
     island:      DSLContainer[EvolutionWorkflow],

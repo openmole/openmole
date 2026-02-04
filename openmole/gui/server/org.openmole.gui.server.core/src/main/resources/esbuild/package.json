@@ -1,0 +1,20 @@
+{
+  "name": "openmole",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "dependencies": {
+    "ace-builds": "1.39.0",
+    "bootstrap.native": "3.0.14-f",
+    "highlight.js": "11.11.1",
+    "plotly.js": "2.35.3",
+    "bootstrap-icons": "1.11.1",
+    "ansi-to-html": "0.7.2",
+    "nouislider": "15.5.0"
+  },
+  "devDependencies": {
+    "concat-with-sourcemaps": "1.1.0",
+    "source-map-loader": "4.0.1",
+    "esbuild": "0.27.2"
+  }
+}

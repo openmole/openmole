@@ -22,16 +22,15 @@ import org.openmole.gui.shared.data.*
 import org.scalajs.dom.html.TextArea
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.client.ext.*
+import org.openmole.gui.client.ext.{OptionsDiv, *}
 import com.raquo.laminar.api.L.*
 import Waiter.*
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.ext.wizard.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
-import org.openmole.gui.client.tool.{Component, OMTags, OptionsDiv, TagBadge}
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.{Component, OMTags, TagBadge}
 import org.openmole.gui.shared.api.*
-import scaladget.bootstrapnative.Selector.Options
+import org.openmole.gui.client.tool.bootstrapnative.Selector.Options
 
 import scala.concurrent.Future
 

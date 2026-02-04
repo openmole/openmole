@@ -3,9 +3,9 @@ package org.openmole.gui.client.tool.plot
 import org.openmole.gui.shared.data.{ SequenceData, SequenceHeader }
 import Plot._
 import org.openmole.gui.client.tool.plot
-import scaladget.bootstrapnative.bsn._
-import scaladget.bootstrapnative.{ Table }
+import org.openmole.gui.client.tool.bootstrapnative.bsn._
 import com.raquo.laminar.api.L._
+import org.openmole.gui.client.tool.bootstrapnative.Table
 
 case class IndexedAxis(title: String, fullSequenceIndex: Int)
 
@@ -38,7 +38,7 @@ object Plotter {
     None
   )
 
-  def filterColumn(dataRows: Seq[scaladget.bootstrapnative.Table.DataRow], plotter: Plotter, nbLines: Int): Seq[Int] = {
+  def filterColumn(dataRows: Seq[Table.DataRow], plotter: Plotter, nbLines: Int): Seq[Int] = {
 
     val closureFilter = plotter.closureFilter.getOrElse(ClosureFilter.empty)
 

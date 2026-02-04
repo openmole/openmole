@@ -44,12 +44,10 @@ object PluginManager extends JavaLogger:
 
   private var bundlesInfo: Option[BundlesInfo] = None
   private val resolvedPluginDependenciesCache = mutable.Map[Long, Iterable[Long]]()
-  private[pluginmanager] val classes = mutable.HashMap[(Long, String), Option[Class[?]]]()
 
   private[pluginmanager] def clearCaches() = PluginManager.synchronized:
     bundlesInfo = None
     resolvedPluginDependenciesCache.clear()
-    classes.clear()
 
   def allPluginDependencies(b: Bundle) = allDependencies(b).filter(isPlugin)
 
@@ -265,20 +263,18 @@ object PluginManager extends JavaLogger:
 
   def startAll: Seq[(Bundle, Throwable)] =
     Activator.contextOrException.getBundles.filter {
-      _.getState match {
+      _.getState match
         case Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING => true
         case _ => false
-      }
     }.map {
-      b => b → Try(b.start)
-    }.collect { case (b: Bundle, Failure(e)) => b → e }
+      b => b -> Try(b.start)
+    }.collect { case (b: Bundle, Failure(e)) => b -> e }
 
   def bundleHashes = infos.hashes.values
 
-  def globalClassLoader(b: Bundle) = new BuddyClassLoader(b)
-  def globalClassLoader(c: Class[?]): ClassLoader =
+  def globalClassLoader(c: Class[?], includePrivate: Boolean = false): ClassLoader =
     bundleForClass(c) match
-      case Some(b) => new BuddyClassLoader(b)
+      case Some(b) => new BuddyClassLoader(b, includePrivate)
       case None => c.getClassLoader
 
   /* For debugging purposes */

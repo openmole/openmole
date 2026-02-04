@@ -19,7 +19,7 @@ package org.openmole.gui.plugin.authentication.egi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*
@@ -27,7 +27,6 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.ServerFileSystemContext.Authentication
 import org.openmole.gui.shared.data.{SafePath, ServerFileSystemContext}
-import scaladget.bootstrapnative.bsn
 
 import scala.concurrent.duration.*
 import scala.scalajs.js
@@ -60,7 +59,6 @@ class EGIAuthenticationGUI(data: EGIAuthenticationData = EGIAuthenticationData()
   def name = "egi.p12"
 
   def panel(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
-    import scaladget.tools.*
 
     div(
       flexColumn, width := "400px", height := "220",

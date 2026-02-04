@@ -1,7 +1,6 @@
 package org.openmole.gui.client.core
 
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.ext.*
 
 import scala.concurrent.Future
@@ -11,9 +10,9 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.{Alternative, notificationContent}
 import org.openmole.gui.shared.api.*
 import org.openmole.gui.shared.data.NotificationEvent.id
-import scaladget.bootstrapnative.Selector.Options
-import scaladget.bootstrapnative.bsn
+import org.openmole.gui.client.tool.bootstrapnative.Selector.Options
 import com.raquo.laminar.api.features.unitArrows
+import org.openmole.gui.client.tool.bootstrapnative.bsn
 import java.text.SimpleDateFormat
 
 object NotificationManager:

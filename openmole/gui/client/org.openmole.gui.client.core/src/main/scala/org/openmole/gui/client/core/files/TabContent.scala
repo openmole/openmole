@@ -2,12 +2,11 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Panels
 import org.openmole.gui.shared.data.*
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.{Alternative, toService}
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.shared.api.*
-import scaladget.tools.Utils.uuID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}

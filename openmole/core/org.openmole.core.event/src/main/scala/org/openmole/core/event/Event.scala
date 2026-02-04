@@ -17,6 +17,5 @@ package org.openmole.core.event
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Event[-T] {
+trait Event[-T]:
   val creationTime = System.currentTimeMillis()
-}

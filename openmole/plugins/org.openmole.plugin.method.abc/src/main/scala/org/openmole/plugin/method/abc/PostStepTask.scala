@@ -24,18 +24,27 @@ object PostStepTask {
     stop:                 Val[Boolean],
     step:                 Val[Int])(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     FromContextTask("postStepTask") { p =>
-      import p._
+      import p.*
 
-      def zipObserved(obs: Array[Array[Array[Double]]]) =
-        def zip2(o1: Array[Array[Double]], o2: Array[Array[Double]]) =
-          for
-            l1 <- o1
-            l2 <- o2
-          yield l1 ++ l2
+      val observedValue = observed.map(o => ABC.Observed.fromContext(o, context)).toArray[Array[Array[Double]]]
 
-        obs.reduceLeft { zip2 }
+      val xs =
+        def zipObserved(obs: Array[Array[Array[Double]]]): Array[Array[Double]] =
+          def combine(a: Array[Array[Double]], b: Array[Array[Double]]): Array[Array[Double]] =
+            val result = scala.collection.mutable.ArrayBuffer[Array[Double]]()
 
-      val xs = zipObserved(observed.toArray.map(o => ABC.Observed.fromContext(o, context)))
+            for
+              rowA <- a
+              rowB <- b
+            do
+              result += (rowA ++ rowB)
+
+            result.toArray
+
+          obs.reduceLeft(combine)
+
+        zipObserved(observedValue)
+
 
       val s =
         Try:

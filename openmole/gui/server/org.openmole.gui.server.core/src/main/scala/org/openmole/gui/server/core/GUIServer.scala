@@ -24,7 +24,7 @@ import org.openmole.core.fileservice.FileService
 import org.openmole.core.location.*
 import org.openmole.core.preference.{Preference, PreferenceLocation}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
-import org.openmole.gui.server.jscompile.{JSPack, Webpack}
+import org.openmole.gui.server.jscompile.JSPack
 import org.openmole.tool.crypto.{Cypher, KeyStore}
 import org.openmole.tool.file.*
 import org.openmole.tool.network.Network
@@ -53,6 +53,7 @@ import java.util.logging.{Level, Logger}
 object GUIServer:
   def fromWebAppLocation = openMOLELocation / "webapp"
   def webpackLocation = openMOLELocation / "webpack"
+  def esbuildLocation = openMOLELocation / "esbuild"
 
   def webapp(optimizedJS: Boolean)(using newFile: TmpDirectory, workspace: Workspace, fileService: FileService, networkService: NetworkService, threadProvider: ThreadProvider) =
     val from = fromWebAppLocation
@@ -63,17 +64,14 @@ object GUIServer:
     from / "fonts" copy to / "fonts"
     from / "img" copy to / "img"
 
-    val webpacked = Plugins.openmoleFile(optimizedJS)
+    val esbuilded = Plugins.openmoleFile(optimizedJS)
 
     val jsTarget = to /> "js"
 
-    webpacked copy (jsTarget / utils.webpakedOpenmoleFileName)
-    new File(webpacked.getAbsolutePath + ".map") copy (to /> "js" / (webpacked.getName + ".map"))
+    esbuilded copy (jsTarget / utils.esBuildedOpenmoleFileName)
+   // new File(esbuilded.getAbsolutePath + ".map") copy (to /> "js" / (esbuilded.getName + ".map"))
 
     Plugins.persistentWebUI / utils.openmoleGrammarMode copy jsTarget / utils.openmoleGrammarMode
-    Plugins.persistentWebUI / "node_modules/plotly.js/dist/plotly.min.js" copy jsTarget / "plotly.min.js"
-    Plugins.persistentWebUI / "node_modules/ace-builds/src-min-noconflict/ace.js" copy jsTarget / "ace.js"
-    Plugins.persistentWebUI / "node_modules/nouislider/dist/nouislider.min.js" copy jsTarget / "nouislider.min.js"
     Plugins.persistentWebUI / "node_modules/bootstrap-icons/font/" copy cssTarget / "bootstrap-icons"
 
     to

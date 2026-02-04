@@ -19,6 +19,7 @@ package org.openmole.plugin.method.evolution
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 import org.openmole.core.workflow.composition.DSL.tasks
+import org.openmole.core.workflow.dsl.toMoleExecution
 import org.openmole.core.workflow.mole.Mole
 import org.openmole.core.workflow.task.FromContextTask
 import org.openmole.core.workflow.validation.*
@@ -242,6 +243,26 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       case Nil =>
       case l   => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
+
+  "Evolution method" should "should accept grouping the mole jobs" in :
+    import org.openmole.core.event.*
+
+    val env = LocalEnvironment(1)
+
+    val ex =
+      toMoleExecution:
+        nsga2.copy(termination = 100, parallelism = 20) by SteadyState(10) on env
+
+    var nbJobs = 0
+
+    ex.environments.head.listen:
+      case (_, j: Environment.JobSubmitted) =>
+        nbJobs += 1
+        assert(j.job.moleJobIds.size == 10)
+
+    ex.run
+
+    assert(nbJobs >= 10)
 
   "NSGAEvolution" should "be valid" in:
     val a = Val[Double]

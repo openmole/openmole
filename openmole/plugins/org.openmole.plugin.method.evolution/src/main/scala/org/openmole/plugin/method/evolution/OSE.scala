@@ -61,7 +61,7 @@ object OSE {
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = (Archive.empty, Array.empty))
+        def initialState = EvolutionState(s = (Archive.empty[I], Array.empty))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
@@ -163,7 +163,7 @@ object OSE {
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = (Archive.empty, Array.empty))
+        def initialState = EvolutionState(s = (Archive.empty[I], Array.empty))
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>

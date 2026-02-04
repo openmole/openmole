@@ -37,7 +37,7 @@ object NetLogoTools:
     |  "while [any? turtles] [go]")
     |
     |val fireTask =
-    |  NetLogo6Task(workDirectory / "Fire.nlogo", cmds) set (
+    |  NetLogo7Task(workDirectory / "Fire.nlogo", cmds) set (
     |    inputs += seed,
     |    inputs += density mapped "density",
     |    outputs += (density, seed),
@@ -64,7 +64,7 @@ ${ul(
   li{html"the list of NetLogo commands to be run by OpenMOLE."}
 )}
 
-The task comes in two versions : ${code{"NetLogo5Task"}} and ${code{"NetLogo6Task"}}, be sure to select the right version of the task according to the version of NetLogo you are using (5 or 6).
+The task comes in 3 versions : ${code{"NetLogo5Task"}}, ${code{"NetLogo6Task"}} and ${code{"NetLogo7Task"}}, be sure to select the right version of the task according to the version of NetLogo you are using (5, 6 or 7).
 Here is an example on how to write the NetLogo task for the model ${code{"Fire.nlogo"}}:
 
 $br$br
@@ -303,7 +303,7 @@ ${img(src := Resource.img.example.fireGlobals.file, width := "50%")}
 
 $br$br
 
-We propose here a simple method to better organise your code in order to make it manipulable by OpenMOLE:
+We propose here a simple method to better organize your code in order to make it manipulable by OpenMOLE:
 ${ul(
     li(html"""
         First we do not use the implicit globals, so we create an ${b{"explicit global variable"}}, ${code{"myDensity"}}, corresponding to the implicit one (${code{"density"}}) :

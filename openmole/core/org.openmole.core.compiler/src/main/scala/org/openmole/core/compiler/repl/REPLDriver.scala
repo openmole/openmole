@@ -1,41 +1,45 @@
 package org.openmole.core.compiler.repl
 
+import dotty.tools.dotc // OM
+
 import dotty.tools.repl.{JLineTerminal => _, *} // OM
 
 import java.io.{File => JFile, PrintStream}
 import java.nio.charset.StandardCharsets
 
-import dotty.tools.dotc.ast.Trees.*
-import dotty.tools.dotc.ast.{tpd, untpd}
-import dotty.tools.dotc.classpath.ClassPathFactory
-import dotty.tools.dotc.config.CommandLineParser.tokenize
-import dotty.tools.dotc.config.Properties.{javaVersion, javaVmName, simpleVersionString}
-import dotty.tools.dotc.core.Contexts.*
-import dotty.tools.dotc.core.Decorators.*
-import dotty.tools.dotc.core.Phases.{unfusedPhases, typerPhase}
-import dotty.tools.dotc.core.Denotations.Denotation
-import dotty.tools.dotc.core.Flags.*
-import dotty.tools.dotc.core.Mode
-import dotty.tools.dotc.core.NameKinds.SimpleNameKind
-import dotty.tools.dotc.core.NameKinds.DefaultGetterName
-import dotty.tools.dotc.core.NameOps.*
-import dotty.tools.dotc.core.Names.Name
-import dotty.tools.dotc.core.StdNames.*
-import dotty.tools.dotc.core.Symbols.{Symbol, defn}
-import dotty.tools.dotc.core.SymbolLoaders
-import dotty.tools.dotc.interfaces
-import dotty.tools.dotc.interactive.Completion
-import dotty.tools.dotc.printing.SyntaxHighlighting
-import dotty.tools.dotc.reporting.{MessageRendering, ConsoleReporter, StoreReporter} // OM
-import dotty.tools.dotc.reporting.Diagnostic
-import dotty.tools.dotc.util.Spans.Span
-import dotty.tools.dotc.util.{SourceFile, SourcePosition}
-import dotty.tools.dotc.{CompilationUnit, Driver}
-import dotty.tools.dotc.config.CompilerCommand
-import dotty.tools.io.*
-import dotty.tools.repl.Rendering.showUser
+import dotc.ast.Trees.*
+import dotc.ast.{tpd, untpd}
+import dotc.classpath.ClassPathFactory
+import dotc.config.CommandLineParser.tokenize
+import dotc.config.Properties.{javaVersion, javaVmName, simpleVersionString}
+import dotc.core.Contexts.*
+import dotc.core.Decorators.*
+import dotc.core.Phases.{unfusedPhases, typerPhase}
+import dotc.core.Denotations.Denotation
+import dotc.core.Flags.*
+import dotc.core.Mode
+import dotc.core.NameKinds.SimpleNameKind
+import dotc.core.NameKinds.DefaultGetterName
+import dotc.core.NameOps.*
+import dotc.core.Names.Name
+import dotc.core.StdNames.*
+import dotc.core.Symbols.{Symbol, defn}
+import dotc.core.SymbolLoaders
+import dotc.interfaces
+import dotc.interactive.Completion
+import dotc.printing.SyntaxHighlighting
+import dotc.reporting.{ConsoleReporter, StoreReporter}
+import dotc.reporting.Diagnostic
+import dotc.util.Spans.Span
+import dotc.util.{SourceFile, SourcePosition}
+import dotc.{CompilationUnit, Driver}
+import dotc.config.CompilerCommand
+import dotty.tools.io.{AbstractFileClassLoader => _, *}
 import dotty.tools.runner.ScalaClassLoader.*
+
 import org.jline.reader.*
+
+import Rendering.showUser
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -91,7 +95,8 @@ def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
 /** Main REPL instance, orchestrating input, compilation and presentation */
 class REPLDriver(settings: Array[String],
                  out: PrintStream = Console.out,
-                 classLoader: Option[ClassLoader] = None) extends Driver:
+                 classLoader: Option[ClassLoader] = None,
+                 extraPredef: String = "") extends Driver:
 
   /** Overridden to `false` in order to not have to give sources on the
    *  commandline
@@ -136,9 +141,10 @@ class REPLDriver(settings: Array[String],
   final def initialState: State =
     val emptyState = State(0, 0, Map.empty, Set.empty, false, rootCtx)
     val initScript = rootCtx.settings.replInitScript.value(using rootCtx)
-    initScript.trim() match
-      case "" => emptyState
-      case script => run(script)(using emptyState)
+    val combinedScript = initScript.trim() match
+      case "" => extraPredef
+      case script => s"$extraPredef\n$script"
+    run(combinedScript)(using emptyState)
 
   /** Reset state of repl to the initial state
    *
@@ -225,16 +231,51 @@ class REPLDriver(settings: Array[String],
         val line = terminal.readLine(completer)
         ParseResult(line)
       } catch {
-        case _: EndOfFileException |
-            _: UserInterruptException => // Ctrl+D or Ctrl+C
+        case _: EndOfFileException => // Ctrl+D
           Quit
+        case _: UserInterruptException => // Ctrl+C at prompt - clear and continue
+          SigKill
       }
     }
 
     @tailrec def loop(using state: State)(): State = {
+
       val res = readLine()
       if (res == Quit) state
-      else loop(using interpret(res))()
+      // Ctrl-C pressed at prompt - just continue with same state (line is cleared by JLine)
+      else if (res == SigKill) loop(using state)()
+      else {
+        // Set up interrupt handler for command execution
+        var firstCtrlCEntered = false
+        val thread = Thread.currentThread()
+
+        // Clear the stop flag before executing new code
+        ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), false)
+
+        val previousSignalHandler = terminal.handle(
+          org.jline.terminal.Terminal.Signal.INT,
+          (sig: org.jline.terminal.Terminal.Signal) => {
+            if (!firstCtrlCEntered) {
+              firstCtrlCEntered = true
+              // Set the stop flag to trigger throwIfReplStopped() in instrumented code
+              ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), true)
+              // Also interrupt the thread as a fallback for non-instrumented code
+              thread.interrupt()
+              out.println("\nAttempting to interrupt running thread with `Thread.interrupt`")
+            } else {
+              out.println("\nTerminating REPL Process...")
+              System.exit(130)  // Standard exit code for SIGINT
+            }
+          }
+        )
+
+        val newState =
+          try interpret(res)
+          // Restore previous handler
+          finally terminal.handle(org.jline.terminal.Terminal.Signal.INT, previousSignalHandler)
+
+        loop(using newState)()
+      }
     }
 
     try runBody { loop() }
@@ -292,13 +333,30 @@ class REPLDriver(settings: Array[String],
       label
 
   /** Extract possible completions at the index of `cursor` in `expr` */
-  final def completions(cursor: Int, expr: String, state0: State): List[Completion] = // OM
-  // OM: Disable command parsing since commands is private
-  //  if expr.startsWith(":") then
-  //    ParseResult.commands.collect {
-  //      case command if command._1.startsWith(expr) => Completion(command._1, "", List())
-  //    }
-  //  else
+  final def completions(cursor: Int, expr: String, state0: State): List[Completion] =   // OM
+    // OM: duplicate ommand list since commands is private in ParseResult
+    val commands: List[(String, String => ParseResult)] = List(                         // OM
+      Quit.command -> (_ => Quit),                                                      // OM
+      Quit.alias -> (_ => Quit),                                                        // OM
+      Help.command -> (_  => Help),                                                     // OM
+      Reset.command -> (arg  => Reset(arg)),                                            // OM
+      Imports.command -> (_  => Imports),                                               // OM
+      JarCmd.command -> (arg => JarCmd(arg)),                                           // OM
+      KindOf.command -> (arg => KindOf(arg)),                                           // OM
+      Load.command -> (arg => Load(arg)),                                               // OM
+      Require.command -> (arg => Require(arg)),                                         // OM
+      TypeOf.command -> (arg => TypeOf(arg)),                                           // OM
+      DocOf.command -> (arg => DocOf(arg)),                                             // OM
+      Settings.command -> (arg => Settings(arg)),                                       // OM
+      Sh.command -> (arg => Sh(arg)),                                                   // OM
+      Silent.command -> (_ => Silent),                                                  // OM
+    )
+
+    if expr.startsWith(":") then
+      commands.collect {                                                                // OM
+        case command if command._1.startsWith(expr) => Completion(command._1, "", List())
+      }
+    else
       given state: State = newRun(state0)
       compiler
         .typeCheck(expr, errorsAllowed = true)
@@ -653,7 +711,10 @@ class REPLDriver(settings: Array[String],
             val jarClassLoader = fromURLsParallelCapable(
               jarClassPath.asURLs, prevClassLoader)
             rendering.myClassLoader = new AbstractFileClassLoader(
-              prevOutputDir, jarClassLoader)
+              prevOutputDir,
+              jarClassLoader,
+              AbstractFileClassLoader.InterruptInstrumentation.fromString(ctx.settings.XreplInterruptInstrumentation.value)
+            )
 
             out.println(s"Added '$path' to classpath.")
         } catch {

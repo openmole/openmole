@@ -20,6 +20,7 @@ package org.openmole.core.workflow.task
 import java.io.File
 import org.openmole.core.context.*
 import org.openmole.core.argument.*
+import org.openmole.core.event.EventDispatcher
 import org.openmole.core.exception.InternalProcessingError
 import org.openmole.core.fileservice.{FileService, FileServiceCache}
 import org.openmole.core.networkservice.NetworkService
@@ -190,7 +191,8 @@ case class TaskExecutionContext(
 
 
 case class TaskExecutionBuildContext(
-  cache: KeyValueCache)(
+  cache: KeyValueCache,
+  buildEventHandler: MoleExecution.BuildEventHandler)(
   using
   val tmpDirectory: TmpDirectory,
   val fileService: FileService,
@@ -199,7 +201,8 @@ case class TaskExecutionBuildContext(
   val threadProvider: ThreadProvider,
   val outputRedirection: OutputRedirection,
   val networkService: NetworkService,
-  val serializerService: SerializerService)
+  val serializerService: SerializerService,
+  val eventDispatcher: EventDispatcher)
 
 object Task:
 
@@ -308,7 +311,7 @@ trait Task extends Name with Id:
 
   /**
    * Make sure tasks with the same content are not equal in the java sense:
-   * as Task inherits of the trait Id, hashconsing is done through this id, and creating a unique object here will ensure unicity of tasks
+   * as Task inherits of the trait Id, hashing is done through this id, and creating a unique object here will ensure unicity of tasks
    * (this trick allows to still benefit of the power of case classes while staying in a standard object oriented scheme)
    */
   lazy val id = new Object {}

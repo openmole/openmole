@@ -36,7 +36,7 @@ object RepeatSampling {
           vs ← samplingValue
         } yield {
           val p = vs.head.prototype
-          Variable.unsecure(p.toArray, vs.map(_.value).toArray(p.`type`.manifest.asInstanceOf[Manifest[Any]]))
+          Variable.unsecure(p.toArray, vs.map(_.value).toArray(using p.`type`.manifest.asInstanceOf[Manifest[Any]]))
         }
 
       Iterator.continually(sampled).take(s.times.from(context))

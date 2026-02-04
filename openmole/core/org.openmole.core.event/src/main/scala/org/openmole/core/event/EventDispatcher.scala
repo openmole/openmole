@@ -28,6 +28,9 @@ object EventDispatcher:
   case class EventListnerKey[T](obj: Any, listner: Listner[T])
 
 
+//  extension (e: EventDispatcher)
+//    def withEndingEvent[T](obj: T, event: Event[T])[U](f: => U): U
+
 class EventDispatcher:
 
   private val _eventId = new AtomicLong
@@ -35,20 +38,16 @@ class EventDispatcher:
 
   def eventId = _eventId.getAndIncrement()
 
-  def listen[T](obj: T)(listener: EventDispatcher.Listner[T]) = listenerMap.synchronized {
-    listenerMap.getOrElseUpdate(obj, collection.mutable.Set()) += listener.asInstanceOf[Listner[Any]]
-    EventDispatcher.EventListnerKey(obj, listener)
-  }
+  def listen[T](obj: T)(listener: EventDispatcher.Listner[T]) =
+    listenerMap.synchronized:
+      listenerMap.getOrElseUpdate(obj, collection.mutable.Set()) += listener.asInstanceOf[Listner[Any]]
+      EventDispatcher.EventListnerKey(obj, listener)
 
-  def unregister[T](key: EventDispatcher.EventListnerKey[T]) = listenerMap.synchronized {
+  def unregister[T](key: EventDispatcher.EventListnerKey[T]) = listenerMap.synchronized:
     listenerMap.get(key.obj).foreach(_ -= key.listner)
-  }
 
-  def trigger[T](obj: T, event: Event[T]) = {
-    val listeners = listenerMap.synchronized { listenerMap.get(obj).getOrElse(List.empty) }
-    for {
-      l ← listeners
-    } l.asInstanceOf[Listner[T]].lift(obj, event)
-  }
-
+  def trigger[T](obj: T, event: Event[T]) =
+    val listeners = listenerMap.synchronized { listenerMap.getOrElse(obj, List.empty) }
+    for l <- listeners
+    do l.asInstanceOf[Listner[T]].lift(obj, event)
 

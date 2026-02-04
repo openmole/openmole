@@ -127,7 +127,7 @@ case class ScalaTask(
       libraryErrors ++ pluginsErrors ++ compilationError
 
 
-  override def apply(taskBuildContext:  TaskExecutionBuildContext) =
+  override def apply(taskBuildContext: TaskExecutionBuildContext) =
     val pluginsValue =
       import taskBuildContext.given
       given KeyValueCache = taskBuildContext.cache

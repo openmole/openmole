@@ -3,8 +3,7 @@ package org.openmole.gui.client.core
 import org.openmole.gui.client.ext.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.core.files.{TreeNodeManager, TreeNodePanel}
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.core.CoreUtils.*
 import org.openmole.gui.shared.data.*
 import Waiter.*

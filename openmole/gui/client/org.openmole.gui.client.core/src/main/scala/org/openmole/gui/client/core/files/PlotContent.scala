@@ -2,11 +2,11 @@ package org.openmole.gui.client.core.files
 
 
 import org.openmole.gui.shared.data.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.nouislider.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.nouislider
+import org.openmole.gui.client.tool.nouislider.NoUISliderImplicits.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.nouislider.NoUISliderImplicits.*
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
 import org.openmole.gui.client.core.{Panels}
@@ -149,16 +149,16 @@ object PlotContent:
                         sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
 
                         val element = div(width := "500", marginRight := "50", marginTop := "20")
-                        noUiSlider.create(
-                          element.ref, Options
-                            .range(Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
+                        nouislider.noUiSlider.create(
+                          element.ref, nouislider.Options
+                            .range(nouislider.Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
                             .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
                             .step(1.0)
-                            .connect(Options.Lower)
+                            .connect(nouislider.Options.Lower)
                             .tooltips(false)
                         )
 
-                        element.noUiSlider.on(event.ChangeEvent, (value, handle) =>
+                        element.noUiSlider.on(nouislider.event.ChangeEvent, (value, handle) =>
                           sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
                         )
 

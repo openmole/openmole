@@ -32,7 +32,12 @@ object CORMASTask:
 
       val preparedImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, cormasImage("elcep/cormas", version), install = install, clearCache = clearContainerCache)
+        ContainerTask.install(
+          containerSystem,
+          cormasImage("elcep/cormas", version),
+          buildParameters = buildParameters,
+          install = install,
+          clearCache = clearContainerCache)
 
       def scriptName = "_script_.st"
 

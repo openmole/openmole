@@ -180,10 +180,10 @@ class Console(script: Option[String] = None) { console =>
             Left(ExitCodes.compilationError)
 
 
-  def withREPL[T](args: ConsoleVariables)(f: REPL => T)(using TmpDirectory, FileService, Terminal) =
+  def withREPL[T](args: ConsoleVariables, options: Seq[String] = Seq())(f: REPL => T)(using TmpDirectory, FileService, Terminal) =
     args.workDirectory.mkdirs()
 
-    val loop = OpenMOLEREPL.newREPL(quiet = false)
+    val loop = OpenMOLEREPL.newREPL(quiet = false, options = options)
 
     ConsoleVariables.bindVariables(loop, args)
     loop.bind(commandsName, new Command(loop, args, summon[Terminal]))

@@ -273,7 +273,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     safePathToFile(safePath).length
 
-  def sequence(safePath: SafePath, separator: Char = ','): SequenceData = {
+  def sequence(safePath: SafePath, separator: Char = ','): SequenceData =
     import services._
     val content = safePath.toFile.content.split("\n")
     val regex = """\[[^\]]+\]|[+-]?[0-9][0-9]*\.?[0-9]*([Ee][+-]?[0-9]+)?|true|false""".r
@@ -284,7 +284,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
         content.tail.map { row => regex.findAllIn(row).toSeq }.toSeq
       )
     }.getOrElse(SequenceData())
-  }
 
   // EXECUTIONS
   def cancelExecution(id: ExecutionId): Unit = serverState.cancel(id)
@@ -330,7 +329,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     def message(message: String) = MessageErrorData(message, None)
 
     val script: File =
-      import services._
+      import services.*
       safePathToFile(scriptPath)
 
     val executionOutputRedirection = OutputRedirection(outputStream)
@@ -340,18 +339,21 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       TmpDirectory.newDirectory("execution")
 
     val runServices =
-      import services._
-      Services.copy(services)(outputRedirection = executionOutputRedirection, newFile = TmpDirectory(executionTmpDirectory), fileServiceCache = FileServiceCache())
+      import services.*
+      Services.copy(services)(
+        outputRedirection = executionOutputRedirection,
+        newFile = TmpDirectory(executionTmpDirectory),
+        fileServiceCache = FileServiceCache())
 
     try
-      Project.compile(script.getParentFileSafe, script)(runServices) match
+      Project.compile(script.getParentFileSafe, script)(using runServices) match
         case ScriptFileDoesNotExists() => ErrorData("Script file does not exist")
         case ErrorInCode(e) => scriptCompilationError(e)
         case ErrorInCompiler(e) => scriptCompilationError(e)
         case compiled: Compiled =>
           if Thread.interrupted() then throw new InterruptedIOException()
 
-          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(runServices))) match
+          catchAll(OutputManager.withStreamOutputs(outputStream, outputStream)(compiled.eval(Seq.empty)(using runServices))) match
             case Failure(e) => scriptCompilationError(e)
             case Success(dsl) => (runServices, compiled, dsl)
     catch
@@ -359,10 +361,16 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
   def compileToMoleExecution(
     scriptPath: SafePath,
-    outputStream: StringPrintStream): ErrorData | MoleExecution =
+    outputStream: StringPrintStream,
+    buildEventHandler: MoleExecution.BuildEventHandler): ErrorData | MoleExecution =
 
     try
-      compileToDSL(scriptPath, outputStream) match
+      val compiled =
+        import services.*
+        buildEventHandler.stage("Compiling", "Compiling user script"):
+          compileToDSL(scriptPath, outputStream)
+
+      compiled match
         case e: ErrorData => e
         case (runServices: ServicesContainer, compiled, dsl: DSL) =>
           import runServices.*
@@ -374,7 +382,10 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
               outputRedirection = Some(runServices.outputRedirection),
               compilationContext = Some(compiled.compilationContext))
 
-          Try(MoleExecution(dsl)(executionServices)) match
+          Try {
+            val p = DSL.toPuzzle(dsl)
+            MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping, buildEventHandler = buildEventHandler)(using executionServices)
+          } match
             case Success(ex) => ex
             case Failure(e) =>
               MoleServices.clean(executionServices)
@@ -383,7 +394,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       case t: Throwable => scriptCompilationError(t)
 
 
-  def launchScript(script: SafePath, validateScript: Boolean) =
+  def launchScript(script: SafePath) =
     import services.*
 
     val execId = ExecutionId()
@@ -392,11 +403,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val content = safePathToFile(script).content
 
     import scala.util.control.Breaks
-    def processRun(execId: ExecutionId, ex: MoleExecution, validateScript: Boolean): Unit = Breaks.breakable:
+    def processRun(execId: ExecutionId, ex: MoleExecution, beh: MoleExecution.BuildEventHandler): Unit = Breaks.breakable:
       import services._
 
       val envIds =
-        try ex.allEnvironments.map { env => EnvironmentId(randomId) → env }
+        try ex.allEnvironments.map { env => EnvironmentId(randomId) -> env }
         catch
           case e: Throwable =>
             serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
@@ -406,26 +417,39 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       ex.listen(serverState.moleExecutionListener(execId, script))
       envIds.foreach { (envId, env) => env.listen(serverState.environmentListener(execId, envId)) }
 
-      catchAll(ex.start(validateScript)) match
+      catchAll { 
+        beh.stage("Validating", "Validating workflow consistency"):
+          ex.validate()
+        ex.start(false)
+      } match
         case Failure(e) =>
           serverState.modifyState(execId)(_ => Failed(Vector.empty, ErrorData(e), Seq.empty))
         case Success(_) =>
           val inserted = serverState.modifyState(execId)(_ => ex)
           if !inserted || Thread.currentThread().isInterrupted then ex.cancel
 
-    def compileAndRun =
-      compileToMoleExecution(script, outputStream) match
-        case e: MoleExecution =>
-          if Thread.interrupted() then throw new InterruptedIOException()
-          processRun(execId, e, validateScript)
-        case ed: ErrorData => serverState.modifyState(execId)(_ => Failed(Vector.empty, ed, Seq.empty))
+    def compileAndRun(beh: MoleExecution.BuildEventHandler) =
+        val compiled = compileToMoleExecution(script, outputStream, beh)
 
+        compiled match
+          case e: MoleExecution =>
+            if Thread.interrupted() then throw new InterruptedIOException()
+            processRun(execId, e, beh)
+          case ed: ErrorData => serverState.modifyState(execId)(_ => Failed(Vector.empty, ed, Seq.empty))
+
+    val beh = MoleExecution.BuildEventHandler()
+    beh.listen(serverState.buildEventListener(execId))
+
+    val semaphore = java.util.concurrent.Semaphore(0)
 
     val future =
       threadProvider.newSingleThreadExecutor.submit:
-        () => compileAndRun
+        () =>
+          semaphore.acquire()
+          compileAndRun(beh)
 
     serverState.addExecutionInfo(execId, ServerState.ExecutionInfo(script, content, System.currentTimeMillis(), outputStream, future, Map.empty))
+    semaphore.release()
 
     execId
 
@@ -547,7 +571,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
   def omrFiles(omr: SafePath): Option[SafePath] =
     import services.*
     val omrFile = safePathToFile(omr)
-    OMRFormat.resultFileDirectory(omrFile).map: rf =>
+    OMRFormat.fileDirectory(omrFile).map: rf =>
       fileToSafePath(rf)
 
   def omrContent(result: SafePath, dataFile: Option[String]): GUIOMRContent =
@@ -557,7 +581,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     val omrFile = safePathToFile(result)
 
     def content =
-      OMRFormat.variables(omrFile, dataFile = dataFile).map: v =>
+      OMRFormat.variables(omrFile, dataFile = dataFile.map(d => OMRFormat.dataFile(omrFile, d))).map: v =>
         GUIOMRSectionContent(v.section.name, v.variables.map(toGUIVariable))
 
     val omrContent = OMRFormat.omrContent(omrFile)

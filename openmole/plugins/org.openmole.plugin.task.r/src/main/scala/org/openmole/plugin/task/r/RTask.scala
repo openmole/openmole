@@ -79,7 +79,12 @@ object RTask:
       val containerTaskExecution =
         import taskExecutionBuildContext.given
         ContainerTask.execution(
-          image = ContainerTask.install(containerSystem, image, installCommands, clearCache = clearContainerCache),
+          image = ContainerTask.install(
+            containerSystem,
+            image,
+            installCommands,
+            buildParameters = buildParameters,
+            clearCache = clearContainerCache),
           command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
           workDirectory = Some(workDirectory),
           errorOnReturnValue = errorOnReturnValue,

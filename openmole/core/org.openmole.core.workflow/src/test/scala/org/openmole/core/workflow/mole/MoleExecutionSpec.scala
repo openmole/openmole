@@ -84,7 +84,9 @@ class MoleExecutionSpec extends flatspec.AnyFlatSpec with matchers.should.Matche
     var nbJobs = 0
 
     ex.environments.head.listen:
-      case (_, j: Environment.JobSubmitted) => nbJobs += 1
+      case (_, j: Environment.JobSubmitted) =>
+        nbJobs += 1
+        assert(j.job.moleJobIds.size == 10)
 
     ex.run
 

@@ -93,7 +93,7 @@ val launch = List(
 )
 
 // NetLogo task
-val antsTask = NetLogo6Task(
+val antsTask = NetLogo7Task(
     workDirectory / "ants.nlogo", // netlogo file
     launch,                       // launching commands
     seed = mySeed                 // set the random seed

@@ -19,8 +19,7 @@ package org.openmole.gui.plugin.authentication.sshkey
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.openmole.gui.client.ext.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 import scala.concurrent.Future
 import scala.scalajs.js.annotation.*

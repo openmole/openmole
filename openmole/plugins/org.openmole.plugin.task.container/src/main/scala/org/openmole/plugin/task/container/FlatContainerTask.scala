@@ -39,7 +39,14 @@ import org.openmole.tool.stream.*
 
 object FlatContainerTask:
 
-  def install(containerSystem: SingularityFlatImage, image: ContainerImage, install: Seq[String], volumes: Seq[(File, String)] = Seq.empty, errorDetail: Int => Option[String] = _ => None, clearCache: Boolean = false)(implicit tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService) =
+  def install(
+    containerSystem: SingularityFlatImage,
+    image: ContainerImage,
+    install: Seq[String],
+    volumes: Seq[(File, String)] = Seq.empty,
+    buildParameters: ExternalTask.BuildParameters,
+    errorDetail: Int => Option[String] = _ => None,
+    clearCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
@@ -64,8 +71,8 @@ object FlatContainerTask:
         if serializedFlatImage.exists
         then serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
         else
-          val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache)
-          val installedImage = ContainerTask.executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+          val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
+          val installedImage = ContainerTask.executeInstall(img, install, volumes, errorDetail = errorDetail)
           serializerService.serialize(installedImage, serializedFlatImage)
           installedImage
 
@@ -101,15 +108,7 @@ object FlatContainerTask:
 
       case class OutputMapping(origin: String, resolved: File, directory: String, file: File)
 
-      def workDirectoryValue(image: FlatImage) = workDirectory.orElse(image.workDirectory.filter(_.trim.nonEmpty)).getOrElse("/")
-      def relativeWorkDirectoryValue(image: FlatImage) = relativePathRoot.getOrElse(workDirectoryValue(image))
       def rootDirectory(image: FlatImage) = image.file / _root_.container.FlatImage.rootfsName
-
-      def containerPathResolver(image: FlatImage, path: String): File =
-        val rootDirectory = File("/")
-        if File(path).isAbsolute
-        then rootDirectory / path
-        else rootDirectory / relativeWorkDirectoryValue(image) / path
 
       val isolatedDirectories = image.containerSystem.isolatedDirectories ++ workDirectory
 
@@ -128,7 +127,7 @@ object FlatContainerTask:
             val isolatedDirectoryMapping =
               isolatedDirectories.map: d =>
                 val isolatedDirectory = executionContext.moleExecutionDirectory.newDirectory("isolated")
-                val containerPathValue = containerPathResolver(image.image, d).getPath
+                val containerPathValue = ContainerTask.pathResolver(image.image.workDirectory, relativePathRoot, workDirectory, d).getPath
                 val containerPath = rootDirectory(image.image) / containerPathValue
 
                 if containerPath.exists()
@@ -179,7 +178,7 @@ object FlatContainerTask:
         val volumes =
           prepareVolumes(
             preparedFilesInfo,
-            containerPathResolver(container.image, _),
+            ContainerTask.pathResolver(image.image.workDirectory, relativePathRoot, workDirectory, _),
             hostFiles,
             container.isolatedDirectories
           ).toVector
@@ -204,7 +203,7 @@ object FlatContainerTask:
           external.outputFiles.map: f =>
             val origin = f.origin.from(context)
             val directory = java.util.UUID.randomUUID.toString
-            val resolved = containerPathResolver(image.image, origin)
+            val resolved = ContainerTask.pathResolver(image.image.workDirectory, relativePathRoot, workDirectory, origin)
             OutputMapping(origin, resolved, directory, resultDirectory / directory / resolved.getName)
 
         val copyCommand: Seq[String] =
@@ -221,7 +220,7 @@ object FlatContainerTask:
           ContainerTask.runCommandInFlatImageContainer(
             image = container.image,
             commands = commandValue ++ copyCommand ++ exitCommand,
-            workDirectory = Some(workDirectoryValue(container.image)),
+            workDirectory = Some(ContainerTask.workDirectoryValue(container.image.workDirectory, workDirectory)),
             output = out,
             error = err,
             volumes = volumes ++ Seq(copyVolume),

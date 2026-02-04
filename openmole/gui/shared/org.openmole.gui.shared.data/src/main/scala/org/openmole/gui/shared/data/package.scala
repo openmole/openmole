@@ -189,6 +189,7 @@ sealed trait ExecutionState(val state: String):
 object ExecutionState:
   case class CapsuleExecution(name: String, scope: String, statuses: ExecutionState.JobStatuses, user: Boolean, userCardinality: Int)
   case class JobStatuses(ready: Long, running: Long, completed: Long)
+  case class BuildStage(action: String, text: String, duration: Long, finished: Boolean)
 
   case class Failed(
     capsules: Seq[ExecutionState.CapsuleExecution],
@@ -219,7 +220,7 @@ object ExecutionState:
 //      def capsules = Vector.empty
 //      def environmentStates: Seq[EnvironmentState] = Seq()
 
-  case class Preparing() extends ExecutionState("preparing"):
+  case class Preparing(stages: Seq[BuildStage]) extends ExecutionState("preparing"):
     def duration: Long = 0L
     def capsules = Vector.empty
     def environmentStates: Seq[EnvironmentState] = Seq()
@@ -352,7 +353,7 @@ object NotificationEvent:
 
 sealed trait NotificationEvent
 
-def randomId = scala.util.Random.alphanumeric.take(10).mkString
+def randomId = scala.util.Random().alphanumeric.take(10).mkString
 
 object GUIVariable:
   import org.latestbit.circe.adt.codec.*

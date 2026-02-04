@@ -20,7 +20,9 @@ package org.openmole.core.workflow.transition
 import org.openmole.core.context.Val
 
 object BlockList:
-  def empty: BlockList = _ => false
+  object empty extends BlockList:
+    override def apply(t: Val[?]) = false
+
   given Conversion[Seq[Val[?]], Keep] = s => Keep(s *)
 
 trait BlockList extends (Val[?] => Boolean)

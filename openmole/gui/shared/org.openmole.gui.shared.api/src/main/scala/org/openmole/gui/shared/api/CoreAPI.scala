@@ -276,10 +276,10 @@ object CoreAPI:
       .out(jsonBody[Option[ErrorData]])
       .errorOut(jsonBody[ErrorData])
 
-  lazy val launchScript: TapirEndpoint[(SafePath, Boolean), ExecutionId] =
+  lazy val launchScript: TapirEndpoint[(SafePath), ExecutionId] =
     endpoint.post
       .in(prefix / "execution" / "launch")
-      .in(jsonBody[(SafePath, Boolean)])
+      .in(jsonBody[(SafePath)])
       .out(jsonBody[ExecutionId])
       .errorOut(jsonBody[ErrorData])
 

@@ -61,7 +61,13 @@ object NetLogoContainerTask:
       val volumesValue = volumes(script, embedWorkspace)
       val preparedImage =
         import taskExecutionBuildContext.given
-        ContainerTask.install(containerSystem, image, install, volumesValue.map { (lv, cv) => lv -> cv }, clearCache = clearContainerCache)
+        ContainerTask.install(
+          containerSystem,
+          image,
+          install,
+          buildParameters = buildParameters,
+          volumes = volumesValue.map { (lv, cv) => lv -> cv },
+          clearCache = clearContainerCache)
 
       import NetLogoContainerTask.{workspace, netLogoWorkspace}
 
@@ -86,7 +92,9 @@ object NetLogoContainerTask:
           stdErr = stdErr,
           config = config,
           external = external,
-          info = info)
+          info = info).set (
+            volumesValue.map((lv, cv) => resources += (lv, cv, true))
+          )
 
       ExternalTask.execution: p =>
         import p.*
@@ -118,12 +126,9 @@ object NetLogoContainerTask:
 
         createInputFile(inputFile)
 
-        val volumes = NetLogoContainerTask.volumes(script, embedWorkspace)
-
         def containerTask =
           taskExecution.set (
             resources += (inputFile, inputFileName, true),
-            volumes.map((lv, cv) => resources += (lv, cv, true)),
             outputFiles += (outputFileName, outputFileVal),
             Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
             Mapped.files(mapped.outputs).map(m => outputFiles += (m.name, m.v))

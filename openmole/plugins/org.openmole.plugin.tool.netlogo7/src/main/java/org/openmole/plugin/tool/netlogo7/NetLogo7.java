@@ -16,126 +16,59 @@
  */
 package org.openmole.plugin.tool.netlogo7;
 
-import org.nlogo.agent.Observer;
-import org.nlogo.agent.World;
-import org.nlogo.api.LogoException;
-import org.nlogo.api.LogoListBuilder;
-import org.nlogo.core.LogoList;
-import org.nlogo.headless.HeadlessWorkspace;
-import org.nlogo.nvm.Procedure;
+import org.nlogo.OpenMOLEAdapter;
 import org.openmole.plugin.tool.netlogo.NetLogo;
-import scala.collection.JavaConverters;
-
-import java.util.AbstractCollection;
-import java.util.LinkedList;
 
 /**
  * @author Romain Reuillon
  */
 public class NetLogo7 implements NetLogo {
 
-    protected HeadlessWorkspace workspace = null;
+    final private OpenMOLEAdapter adapter = new OpenMOLEAdapter();
 
-    private HeadlessWorkspace getWorkspace() {
-        if(workspace == null) {
-            // If enabled NetLogo create an http connection that sometime hangs forever, see LibraryInfoDownloader
-            System.setProperty("netlogo.libraries.disabled", "true");
-            workspace = HeadlessWorkspace.newInstance();
-        }
-        return workspace;
+    @Override
+    public void open(String s, boolean b) throws Exception {
+        adapter.open(s, b);
     }
 
     @Override
-    public void open(String script, boolean switch3d) throws Exception {
-        // FIXME this is only a temporary fix - running simultaneously 3d and 2d models will fail anyway
-        if (switch3d && script.endsWith("3d")) System.setProperty("org.nlogo.is3d", "true");
-        else System.setProperty("org.nlogo.is3d", "false");
-        getWorkspace().open(script, false);
+    public void command(String s) throws Exception {
+        adapter.command(s);
     }
 
     @Override
-    public void command(String cmd) throws Exception {
-        getWorkspace().command(cmd);
+    public boolean isNetLogoException(Throwable throwable) {
+        return adapter.isNetLogoException(throwable);
     }
 
     @Override
-    public boolean isNetLogoException(Throwable e) {
-        return LogoException.class.isAssignableFrom(e.getClass());
+    public Object report(String s) throws Exception {
+        return adapter.report(s);
     }
 
     @Override
-    public Object report(String variable) throws Exception {
-        Object result = getWorkspace().report(variable);
-        if(result instanceof LogoList){
-            return listToCollection((LogoList) result);
-        }else {
-            return result;
-        }
-    }
-
-    @Override
-    public void setGlobal(String variable, Object value) throws Exception {
-        if(value instanceof Object[]){
-            workspace.world().setObserverVariableByName(variable,arrayToList((Object[]) value));
-        }
-        else{
-            workspace.world().setObserverVariableByName(variable,value);
-        }
+    public void setGlobal(String s, Object o) throws Exception {
+        adapter.setGlobal(s, o);
     }
 
     @Override
     public void dispose() throws Exception {
-        getWorkspace().dispose();
+        adapter.dispose();
     }
 
     @Override
     public String[] globals() {
-        World world = getWorkspace().world();
-        Observer observer = world.observer();
-        String nlGlobalList[] = new String[world.getVariablesArraySize(observer)];
-        for (int i = 0; i < nlGlobalList.length; i++) {
-            nlGlobalList[i] = world.observerOwnsNameAt(i);
-        }
-        return nlGlobalList;
+        return adapter.globals();
     }
 
+    @Override
     public String[] reporters() {
-        LinkedList<String> reporters = new LinkedList<String>();
-        for (scala.Tuple2<String, Procedure> e : JavaConverters.asJavaCollectionConverter(getWorkspace().procedures()).asJavaCollection()) {
-            if (e._2().isReporter()) reporters.add(e._1());
-        }
-        return reporters.toArray(new String[0]);
+        return adapter.reporters();
     }
 
     @Override
     public ClassLoader getNetLogoClassLoader() {
-        return HeadlessWorkspace.class.getClassLoader();
+        return adapter.getNetLogoClassLoader();
     }
-
-    /**
-     * Converts an iterable to a LogoList
-     * @param array
-     * @return
-     */
-    private static LogoList arrayToList(Object[] array){
-        LogoListBuilder list = new LogoListBuilder();
-        for(Object o:array){
-            if(o instanceof Object[]){list.add(arrayToList((Object[]) o));}
-            else{list.add(o);}
-        }
-        return(list.toLogoList());
-    }
-
-
-    private static AbstractCollection listToCollection(LogoList list){
-        AbstractCollection collection = new LinkedList();
-        for(Object o:list.toJava()){
-            if(o instanceof LogoList){collection.add(listToCollection((LogoList) o));}
-            else{collection.add(o);}
-        }
-        return(collection);
-    }
-
-
 
 }

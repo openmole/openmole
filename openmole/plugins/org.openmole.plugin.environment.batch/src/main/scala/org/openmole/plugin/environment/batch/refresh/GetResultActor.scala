@@ -84,7 +84,7 @@ object GetResultActor {
               executionResult match
                 case Success(context) => JobStore.finish(moleJob, Left(context))
                 case Failure(e) =>
-                  val error = JobRemoteExecutionException("A workflow job execution failed during the a job execution on the execution node", e, stringOutput)
+                  val error = JobRemoteExecutionException(s"A workflow job execution failed during the a job execution on the execution node (${runtimeResult.info.hostName})", e, stringOutput)
                   JobManager ! MoleJobError(moleJob.id, batchJob, environment, error, output = stringOutput, host = runtimeResult.info.hostName)
 
     finally

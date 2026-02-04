@@ -2,12 +2,10 @@ package org.openmole.gui.client.core
 
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
 import org.scalajs.dom.{KeyboardEvent, document}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.Selector.Options
+import org.openmole.gui.client.tool.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.files.{FileDisplayer, TabContent, TreeNodeManager, TreeNodePanel}
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
@@ -17,7 +15,7 @@ import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
 
 import javax.swing.plaf.multi.MultiToolBarUI

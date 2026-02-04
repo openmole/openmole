@@ -5,31 +5,33 @@ import sbt.Keys._
 import sbt._
 
 object common {
+  def defaultImports = Seq("!java.lang.*", "!scala.scalajs.*")
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.7.4"
+  def scala3VersionValue = "3.8.1"
   def scalajsVersion = "1.20.1"
 
   def scalaXMLVersion = "2.4.0"
   def gridscaleVersion = CommitVersion("62942ee68b", "2.63")
-  def mgoVersion = CommitVersion("6521cf3681b7aef7bc63583463bdce8b92d9b3d4", "3.68")
+  def mgoVersion = CommitVersion("07365bc21f", "3.68")
   def sshjVersion = "0.40.0"
-  def containerVersion = "1.33"
+  def containerVersion = CommitVersion("4027b98822", "1.33")
   def bouncyCastleVersion = "1.82"
   def scalaTagsVersion = "0.13.1"
-  def laminarVersion = "0.14.2"
+  def laminarVersion = "17.2.1"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
-  def netLogo7Version = "7.0.2"
+  def netLogo7Version = "7.0.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.4.2"
   def scaladgetVersion = "1.11.0"
   def plotlyVersion = "1.8.1"
   def sortableVersion = "0.7.2"
-  def json4sVersion = "4.0.6"
-  def jacksonVersion = "2.17.2"
+  def json4sVersion = "4.0.7"
+  def jacksonVersion = "2.20.1"
   def circeVersion = "0.14.14"
+  def jsoniterVersion = "0.9.19"
   def circeYamlVersion = "0.16.1"
   def catsVersion = "2.13.0"
   def catsEffectVersion = "3.6.2"
@@ -51,7 +53,7 @@ object common {
   def execVersion = "1.4.0"
   def asmVersion = "9.4"
   def guavaVersion = "31.1-jre"
-  def scalaMetaVersion = "4.13.2"
+  def scalaMetaVersion = "4.14.2"
   def scalaSTMVersion = "0.11.1"
   def jlineVersion = "3.25.1"
   def txtmarkVersion = "0.13"
@@ -61,9 +63,9 @@ object common {
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
 
-  def http4sVersion = "0.23.30"
+  def http4sVersion = "0.23.32"
   def http4sBlaseSeverVersion = "0.23.17"
-  def tapirVersion = "1.11.42"
+  def tapirVersion = "1.13.5"
 
   def xzVersion = "1.10"
 

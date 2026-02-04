@@ -36,7 +36,7 @@ import org.openmole.core.script.Imports
 
 object Project:
 
-  def newREPL(quiet: Boolean = true)(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet)
+  def newREPL(quiet: Boolean = true, options: Seq[String] = Seq())(implicit newFile: TmpDirectory, fileService: FileService) = OpenMOLEREPL.newREPL(quiet = quiet, options = options)
 
   def uniqueName(source: File) = s"_${Hash.string(source.getCanonicalPath)}"
 
@@ -46,7 +46,8 @@ object Project:
       tree.children.map(c => makePackage(c.name, c.tree)).mkString("\n")
 
     def makePackage(name: String, tree: Tree): String =
-      if (!tree.files.isEmpty) tree.files.distinct.map(f => makeVal(name, f)).mkString("\n")
+      if tree.files.nonEmpty
+      then tree.files.distinct.map(f => makeVal(name, f)).mkString("\n")
       else
         s"""
             |class ${name}Clazz {
@@ -189,7 +190,7 @@ object Project:
     else 
       def compile(content: String, scriptHeader: String): CompileResult = 
         val loop = repl.getOrElse { Project.newREPL() }
-        try 
+        try
           Option(loop.compile(content)) match 
             case Some(compiled) => Compiled(compiled, loop, CompilationContext(loop.classDirectory, loop.classLoader), workDirectory = workDirectory, script = script)
             case None           => throw new InternalProcessingError("The compiler returned null instead of a compiled script, it may append if your script contains an unclosed comment block ('/*' without '*/').")
@@ -249,9 +250,9 @@ case class Compiled(result: Interpreter.RawCompiled, repl: REPL, compilationCont
 
         p.run(consoleVariables) match 
           case p: DSL => p
-          case e => throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
+          case e: Any => throw new UserBadDataError(s"Script should end with a workflow (it ends with ${if (e == null) null else e.getClass}).")
         
-      case e => throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
+      case e: Any => throw new InternalProcessingError(s"Script should produce an OMScript (found ${if (e == null) null else e.getClass}).")
     
 
 

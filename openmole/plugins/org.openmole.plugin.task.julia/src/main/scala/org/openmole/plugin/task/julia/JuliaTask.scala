@@ -64,7 +64,7 @@ object JuliaTask:
     install:                Seq[String]                        = Seq.empty,
     installFiles:           Seq[File]                          = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
-    version:                String                             = "1.10.8",
+    version:                String                             = "1.12.4",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -79,7 +79,13 @@ object JuliaTask:
 
     val image =
       import taskExecutionBuildContext.given
-      ContainerTask.install(containerSystem, DockerImage("julia", version), install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries), volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries), clearCache = clearCache)
+      ContainerTask.install(
+        containerSystem,
+        DockerImage("julia", version),
+        install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
+        volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
+        buildParameters = buildParameters,
+        clearCache = clearCache)
 
     def workDirectory = "/_workdirectory_"
     def scriptName = s"$workDirectory/_generatescript_.jl"

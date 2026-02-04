@@ -3,7 +3,7 @@ package org.openmole.gui.client.core.files
 import org.openmole.gui.client.core.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scaladget.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import org.openmole.gui.client.tool.OMTags
 import org.openmole.gui.shared.data.*
 import org.openmole.gui.client.ext.*
@@ -99,7 +99,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () => Unit, pluginState
   def execute(using panels: Panels, api: ServerAPI, path: BasePath) =
     import scala.concurrent.duration._
     withSafePath { sp =>
-      api.launchScript(sp, true).foreach { _ => showExecution() }
+      api.launchScript(sp).foreach { _ => showExecution() }
       closeToolBox
     }
 

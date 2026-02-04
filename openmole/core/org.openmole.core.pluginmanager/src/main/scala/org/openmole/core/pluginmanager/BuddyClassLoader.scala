@@ -23,7 +23,27 @@ import org.osgi.framework.{Bundle, BundleContext}
 
 import java.net.URL
 
-class BuddyClassLoader(owner: Bundle) extends ClassLoader():
+object BuddyClassLoader:
+  import org.osgi.framework.Bundle
+  import org.osgi.framework.wiring.{BundleRevision, BundleWiring}
+  import scala.jdk.CollectionConverters.*
+
+  def isClassExported(bundle: Bundle, className: String): Boolean =
+    val idx = className.lastIndexOf('.')
+    if idx < 0
+    then false
+    else
+      val pkg = className.substring(0, idx)
+
+      bundle
+        .adapt(classOf[BundleWiring])
+        .getCapabilities(BundleRevision.PACKAGE_NAMESPACE)
+        .asScala
+        .exists: cap =>
+          cap.getAttributes.get(BundleRevision.PACKAGE_NAMESPACE) == pkg
+
+
+class BuddyClassLoader(owner: Bundle, includePrivate: Boolean = false) extends ClassLoader():
 
   def orderedBundles =
     lazy val dependencies = PluginManager.allDependencies(owner)
@@ -34,16 +54,25 @@ class BuddyClassLoader(owner: Bundle) extends ClassLoader():
     LazyList(owner) lazyAppendedAll dependencies lazyAppendedAll otherBundles
 
   override def loadClass(name: String, resolve: Boolean): Class[?] =
-    def update =
+    def lookForJavaClass =
+      if name.startsWith("java.")
+      then Some(super.loadClass(name, resolve))
+      else None
+
+
+    def lookForClass(includePrivate: Boolean) =
       Option(findLoadedClass(name)).orElse:
         orderedBundles.view.flatMap: b =>
-          tryOption(b.classLoader.loadClass(name))
+          if includePrivate || BuddyClassLoader.isClassExported(b, name)
+          then tryOption(b.loadClass(name))
+          else None
         .headOption
 
-    TypeTool.primitiveType(name).getOrElse:
-      PluginManager.synchronized:
-        PluginManager.classes.getOrElseUpdate((owner.getBundleId, name), update)
-      .getOrElse(throw ClassNotFoundException(name))
+    (TypeTool.primitiveType(name) orElse lookForJavaClass).orElse:
+      if includePrivate
+      then lookForClass(false) orElse lookForClass(true)
+      else lookForClass(false)
+    .getOrElse(throw ClassNotFoundException(name))
 
   override def findResource(name: String): URL =
     orderedBundles.view.flatMap: b =>

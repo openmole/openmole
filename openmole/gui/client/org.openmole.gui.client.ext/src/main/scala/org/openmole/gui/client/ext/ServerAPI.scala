@@ -51,7 +51,7 @@ trait ServerAPI:
   def cancelExecution(id: ExecutionId)(using BasePath): Future[Unit]
   def removeExecution(id: ExecutionId)(using BasePath): Future[Unit]
   def validateScript(script: SafePath)(using BasePath): Future[Option[ErrorData]]
-  def launchScript(script: SafePath, validate: Boolean)(using BasePath): Future[ExecutionId]
+  def launchScript(script: SafePath)(using BasePath): Future[ExecutionId]
   def clearEnvironmentError(id: ExecutionId, environment: EnvironmentId)(using BasePath): Future[Unit]
   def listEnvironmentError(id: ExecutionId, environment: EnvironmentId, lines: Int)(using BasePath): Future[Seq[EnvironmentError]]
 

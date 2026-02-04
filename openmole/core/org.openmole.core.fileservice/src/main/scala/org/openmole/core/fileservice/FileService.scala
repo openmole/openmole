@@ -58,6 +58,8 @@ object FileService:
 
   def stub() = apply()(using Preference.stub(), ThreadProvider.stub())
 
+  def hashNoCache(file: File, hashType: HashType = HashType.default)(using TmpDirectory, FileService) =
+    summon[FileService].hashNoCache(file, hashType)
 
 object FileServiceCache:
   def apply()(implicit preference: Preference) = new FileServiceCache()

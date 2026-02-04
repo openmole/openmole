@@ -17,8 +17,7 @@ package org.openmole.gui.client.core
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import scaladget.bootstrapnative.bsn._
-import scaladget.tools._
+import org.openmole.gui.client.tool.bootstrapnative.bsn._
 
 import org.scalajs.dom.raw.HTMLFormElement
 import org.openmole.gui.client.ext._

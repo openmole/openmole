@@ -4,9 +4,8 @@ import org.openmole.gui.shared.data.*
 
 import scala.util.*
 import com.raquo.laminar.api.L.*
-import scaladget.bootstrapnative.bsn.*
-import scaladget.tools.*
-import scaladget.bootstrapnative.Selector.Options
+import org.openmole.gui.client.tool.bootstrapnative.bsn.*
+import org.openmole.gui.client.tool.bootstrapnative.Selector.Options
 import org.openmole.gui.client.core.CoreUtils
 import org.openmole.gui.client.ext.*
 

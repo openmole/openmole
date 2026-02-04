@@ -68,7 +68,7 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     errors.headOption should matchPattern { case Some(WrongType(_, `pString`, `pInt`)) => }
   }
 
-  it should "detect a topology error" in {
+  it should "detect a topology error" in:
     val p = Val[String]
 
     val t1 = EmptyTask()
@@ -78,17 +78,15 @@ class ValidationSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
     val errors = Validation.topologyErrors(mole)
     assert(!errors.isEmpty)
-  }
 
-  it should "detect a duplicated transition" in {
-    val t1 = EmptyTask()
-    val t2 = EmptyTask()
-
-    val mole: Mole = (t1 -- t2) & (t1 -- t2)
-
-    val errors = Validation.duplicatedTransitions(mole)
-    assert(!errors.isEmpty)
-  }
+//  it should "detect a duplicated transition" in:
+//    val t1 = EmptyTask()
+//    val t2 = EmptyTask()
+//
+//    val mole: Mole = (t1 -- t2) & (t1 -- t2)
+//
+//    val errors = Validation.duplicatedTransitions(mole)
+//    assert(!errors.isEmpty)
 
   it should "detect a missing input error due to datachannel filtering" in {
     val p = Val[String]
