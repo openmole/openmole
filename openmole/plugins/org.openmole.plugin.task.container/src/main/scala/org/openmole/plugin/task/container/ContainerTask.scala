@@ -139,9 +139,6 @@ object ContainerTask:
         case image: DockerImage      => Seq(image.image, image.tag, image.registry)
         case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
-    val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
-
-
     val embeddedResourcesValue =
       val embed =
         containerSystem match
@@ -150,12 +147,13 @@ object ContainerTask:
 
       embeddedResources(buildParameters.external.resources, embed)
 
-    val embedCacheKey = embeddedResourcesValue.map((_, e) => e.hash)
-
     val cacheKey: String =
-      Hash.string:
-        (cacheId(image) ++ install ++ volumeCacheKey ++ embedCacheKey ++ Seq("sif")).mkString("\n")
-      .toString
+      buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Hashing", s"Computing container cache key"):
+        Hash.string:
+          val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
+          val embedCacheKey = embeddedResourcesValue.map((_, e) => e.hash)
+          (cacheId(image) ++ install ++ volumeCacheKey ++ embedCacheKey ++ Seq("sif")).mkString("\n")
+        .toString
 
     val cacheDirectory = summon[Workspace].tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedSingularityImage = cacheDirectory / "singularityImage.bin"
