@@ -103,7 +103,8 @@ public class OpenMOLEAdapter {
 
     public String[] reporters() {
         LinkedList<String> reporters = new LinkedList<String>();
-        for (scala.Tuple2<java.lang.String,org.nlogo.nvm.Procedure> e : JavaConverters.asJavaCollectionConverter(getWorkspace().procedures()).asJavaCollection()) {
+        for (Object o : JavaConverters.asJavaCollectionConverter(getWorkspace().procedures()).asJavaCollection()) {
+            var e = (scala.Tuple2<java.lang.String,org.nlogo.nvm.Procedure>) o;
             if (e._2().isReporter()) reporters.add(e._1());
         }
         return reporters.toArray(new String[0]);
