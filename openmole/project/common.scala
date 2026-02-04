@@ -22,7 +22,7 @@ object common {
   def laminarVersion = "17.2.1"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
-  def netLogo7Version = "7.0.2"
+  def netLogo7Version = "7.0.3"
   def scalaAutowireVersion = "0.3.3"
   def sourcecodeVersion = "0.4.2"
   def scaladgetVersion = "1.11.0"
