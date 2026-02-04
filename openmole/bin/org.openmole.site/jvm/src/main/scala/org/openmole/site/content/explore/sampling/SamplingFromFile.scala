@@ -80,27 +80,26 @@ ${h2{"Read a sampling from an OMR file"}}
 
 Let's take an experiment that save the results in a OMR file:
 ${
-    hl.openmole("""
+  hl.openmole(s"""
     val a = Val[Int]
     val i = Val[Int]
+
     val d = Val[Double]
 
-    // Define the model, here it just takes i as input
     val myModel =
       ScalaTask($tq
         val i = a * 2
         val d = x / 2.0
       $tq) set(
-        inputs += (i, d),
-        outputs += (i, d, o)
+        inputs += a,
+        outputs += (i, d)
       )
 
-    // Define the exploration of myModel for various i values sampled in the file
     DirectSampling(
       evaluation = myModel,
       sampling = a in (5 to 50 by 5)
     ) hook (workDirectory / "file.omr")
-    """)
+  """)
 }
 
 
