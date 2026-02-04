@@ -25,10 +25,19 @@ import collection.mutable.ListBuffer
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-object tools {
+object tools:
 
   import scalatags.Text.{all => tags}
   import scalatags.Text.all._
+
+  def notes(n: String) =
+    ul(
+      n.split("\n").flatMap: l =>
+        val content = l.trim.dropWhile(_ == '-').trim
+        if content.nonEmpty
+        then Some(li(content))
+        else None
+    )
 
   def listItem(content: Frag*): Frag = li(content)
   def htmlList(items: Frag*): Frag = ul(items)
@@ -275,4 +284,3 @@ object tools {
 
       buf.toSeq
 
-}
