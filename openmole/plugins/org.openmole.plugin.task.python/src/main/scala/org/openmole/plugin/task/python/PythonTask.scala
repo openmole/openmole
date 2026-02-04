@@ -39,7 +39,7 @@ object PythonTask:
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    image:                  ContainerImage                     = "openmole/python:3.13.3",
+    image:                  ContainerImage                     = "openmole/python:3.14.2",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
