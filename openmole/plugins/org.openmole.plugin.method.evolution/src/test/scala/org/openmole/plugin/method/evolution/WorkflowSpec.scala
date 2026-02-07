@@ -251,7 +251,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     val ex =
       toMoleExecution:
-        nsga2.copy(termination = 100, parallelism = 20) by SteadyState(10) on env
+        nsga2.copy(termination = 100, parallelism = 20) by 10 on env
 
     var nbJobs = 0
 

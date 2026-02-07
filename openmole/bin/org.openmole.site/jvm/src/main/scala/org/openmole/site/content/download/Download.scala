@@ -43,9 +43,9 @@ $br
 
 ${i("NB")}: If you have docker installed on your computer, the most convenient way to run OpenMOLE might be ${a("to run OpenMOLE in docker", href := "#RuninDocker")}.
 
-$br
+${h3("Hosted Service")}
 
-${i("NB")}: For users working in public institutions, we also propose an ${aa("hosted OpenMOLE service", href := "https://my.openmole.org")} on which you can ask for an account.
+For users working in public institutions, we propose an ${aa("hosted OpenMOLE service", href := "https://my.openmole.org")} on which you can ask for an account.
 
 ${h3("Download")}
 

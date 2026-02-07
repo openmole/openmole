@@ -30,7 +30,8 @@ type Objectives = Seq[Objective] | Objective
 type Genome = Seq[Genome.GenomeBound]
 type GenomeDouble = Seq[Genome.GenomeBound.ScalarDouble]
 
-implicit def byEvolutionPattern[T](implicit patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v => method(patternContainer(v.value, v.by))
+implicit def byEvolutionPattern[T](using patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, EvolutionWorkflow.EvolutionPattern], EvolutionWorkflow] = v => method(patternContainer(v.value, v.by))
+implicit def byIntEvolutionPattern[T](using patternContainer: ExplorationMethodSetter[T, EvolutionWorkflow.EvolutionPattern], method: ExplorationMethod[T, EvolutionWorkflow]): ExplorationMethod[By[T, Int], EvolutionWorkflow] = v => method(patternContainer(v.value, SteadyState(v.by)))
 
 implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMethod[T, EvolutionWorkflow]):
   val decorator = new MethodHookDecorator(t)(using method)
