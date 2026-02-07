@@ -104,7 +104,7 @@ ${hl.openmole("""
       evaluation = model,
       termination = 100000,
       parallelism = 1000
-    ) by SteadyState(10) hook (workDirectory / "evolution")
+    ) by 10 hook (workDirectory / "evolution")
 
   evolution on LocalEnvironment(4)
 """, header = model)}
