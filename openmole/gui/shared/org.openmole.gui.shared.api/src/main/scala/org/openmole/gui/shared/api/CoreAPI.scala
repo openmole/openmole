@@ -38,10 +38,10 @@ object CoreAPI:
       .out(jsonBody[Long])
       .errorOut(jsonBody[ErrorData])
 
-  lazy val saveFile: TapirEndpoint[(SafePath, String, Option[String], Boolean), (Boolean, String)] =
+  lazy val saveFile: TapirEndpoint[(SafePath, String, Option[String]), (Boolean, String)] =
     endpoint.post
       .in(prefix / "file" / "save")
-      .in(jsonBody[(SafePath, String, Option[String], Boolean)])
+      .in(jsonBody[(SafePath, String, Option[String])])
       .out(jsonBody[(Boolean, String)])
       .errorOut(jsonBody[ErrorData])
 

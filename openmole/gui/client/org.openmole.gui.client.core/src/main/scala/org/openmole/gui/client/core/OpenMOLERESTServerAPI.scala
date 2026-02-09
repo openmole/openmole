@@ -37,7 +37,7 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
   api =>
 
   override def copyFiles(paths: Seq[(SafePath, SafePath)], overwrite: Boolean)(using BasePath) = sttp.toRequest(CoreAPI.copyFiles)(paths, overwrite)
-  override def saveFile(safePath: SafePath, content: String, hash: Option[String], overwrite: Boolean)(using BasePath): Future[(Boolean, String)] = sttp.toRequest(CoreAPI.saveFile)(safePath, content, hash, overwrite)
+  override def saveFile(safePath: SafePath, content: String, hash: Option[String])(using BasePath): Future[(Boolean, String)] = sttp.toRequest(CoreAPI.saveFile)(safePath, content, hash)
   override def createFile(path: SafePath, name: String, directory: Boolean)(using BasePath): Future[Boolean] = sttp.toRequest(CoreAPI.createFile)(path, name, directory)
   override def extractArchive(path: SafePath, to: SafePath)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.extractArchive)(path, to)
   override def listFiles(path: SafePath, filter: FileSorting, withHidden: Boolean, directorySize: Boolean)(using BasePath): Future[FileListData] = sttp.toRequest(CoreAPI.listFiles)(path, filter, withHidden, directorySize)

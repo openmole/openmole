@@ -120,9 +120,9 @@ class TabContent:
     }
 
   def save(
-      tabData: TabData,
-      overwrite: Boolean = false,
-      saveUnmodified: Boolean = false
+    tabData: TabData,
+    overwrite: Boolean = false,
+    saveUnmodified: Boolean = false
   )(using
       panels: Panels,
       api: ServerAPI,
@@ -133,8 +133,8 @@ class TabContent:
       case Some(editorPanelUI)
           if editorPanelUI.hasBeenModified || saveUnmodified =>
         val (content, hash) = editorPanelUI.code
-
-        api.saveFile(tabData.safePath, content, Some(hash), overwrite).transform:
+        
+        api.saveFile(tabData.safePath, content, if overwrite then None else Some(hash)).transform:
           case Failure(e) =>
             toService(panels.notifications).notifyError("Unable to save file", e, NotificationLevel.Info, None)
             Failure(e)
