@@ -241,33 +241,32 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     MarkDownProcessor(safePathToFile(safePath).content)
 
-  def saveFile(path: SafePath, fileContent: String, hash: Option[String], overwrite: Boolean): (Boolean, String) =
+  def saveFile(path: SafePath, fileContent: String, hash: Option[String]): (Boolean, String) =
     import services._
 
     val file = safePathToFile(path)
-    if !file.exists() then file.content = ""
 
-    file.withLock { _ =>
+    file.withLock: _ =>
       def save() =
         val tmpFile = Files.createTempFile(file.getParentFile, s".${file.getName}", ".tmp").toFile
-        tmpFile.mode = file
         try
           tmpFile.content = fileContent
+          tmpFile.mode = file.mode
           tmpFile move file
-        finally tmpFile.delete()
+        finally
+          if tmpFile.exists() then tmpFile.delete()
 
         def newHash = services.fileService.hashNoCache(file).toString
 
         (true, newHash)
 
-      if (overwrite) save()
-      else hash match {
-        case Some(expectedHash: String) =>
+      hash match
+        case Some(expectedHash) =>
           val hashOnDisk = services.fileService.hashNoCache(file).toString
-          if (hashOnDisk == expectedHash) save() else (false, hashOnDisk)
+          if hashOnDisk == expectedHash
+          then save()
+          else (false, hashOnDisk)
         case _ => save()
-      }
-    }
 
   def size(safePath: SafePath): Long =
     import services._

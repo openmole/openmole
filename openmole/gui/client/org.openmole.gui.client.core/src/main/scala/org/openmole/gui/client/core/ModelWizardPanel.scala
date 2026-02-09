@@ -177,7 +177,7 @@ object ModelWizardPanel:
               case Some(d) => directory / d
             _ <- api.move(listed.data.map(f => (tmpDirectory / f.name) -> (destination / f.name)), overwrite = true)
             modelName = content.name.getOrElse("Model.oms")
-            _ <- api.saveFile(directory ++ modelName, content.content, overwrite = true)
+            _ <- api.saveFile(directory ++ modelName, content.content)
           yield
             panels.treeNodePanel.refresh
             panels.treeNodePanel.displayNode(directory / modelName, refresh = true)
