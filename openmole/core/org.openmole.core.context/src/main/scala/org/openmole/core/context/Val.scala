@@ -174,7 +174,8 @@ object Val:
 
   def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: ValType[T]): Val[T] = {
     assert(t != null)
-    new Val[T](name, t, namespace)
+    val (parsedNamespace, parsedName) = parseName(name)
+    new Val[T](parsedName, t, namespace.postfix(parsedNamespace.names*))
   }
 
   def apply[T](implicit t: ValType[T], name: sourcecode.Name): Val[T] = apply[T](name.value)
