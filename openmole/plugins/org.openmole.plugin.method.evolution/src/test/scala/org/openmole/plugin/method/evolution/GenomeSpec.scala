@@ -121,3 +121,8 @@ class GenomeSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val d = Val[Double]
     val o: Objective = d evaluate ScalaCode("d.error")
     o.validate.apply(Seq(d)) should not be empty
+
+  "Delta objective namespace" should "be postfixed by delta" in:
+    val d = Val[Double]
+    val o: Objective = d delta 8.0
+    Objective.resultPrototype(o) shouldBe Val[Double]("d", Namespace("objective", "delta"))

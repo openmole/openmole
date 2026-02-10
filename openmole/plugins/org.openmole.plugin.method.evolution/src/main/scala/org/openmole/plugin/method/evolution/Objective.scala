@@ -122,12 +122,13 @@ object Objective:
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray
 
   def resultPrototype(o: Objective) =
-    def objectiveNamespace(p: Val[?]) = p.withNamespace(p.namespace.prefix("objective"))
+    def objectiveNamespace(v: Val[?]) = v.withNamespace(v.namespace.prefix("objective"))
 
-    def p = (o.delta, o.as) match
-      case (_, Some(s))    => Objective.prototype(o).withName(s)
-      case (Some(_), None) => Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.postfix("delta"))
-      case _               => Objective.prototype(o)
+    def p = 
+      (o.delta, o.as) match
+        case (_, Some(s))    => Objective.prototype(o).withName(s)
+        case (Some(_), None) => Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.postfix("delta"))
+        case _               => Objective.prototype(o)
 
     objectiveNamespace(p)
 

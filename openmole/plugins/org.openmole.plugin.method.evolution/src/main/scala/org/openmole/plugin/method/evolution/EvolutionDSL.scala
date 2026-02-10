@@ -370,10 +370,15 @@ object GAIntegration:
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
-    scale:  Boolean): Vector[Variable[?]] =
+    scale:  Boolean,
+    genomeNamespace: Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
-    genome.zipWithIndex.map { (g, i) => Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+    def variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
+    def arrayVariables = genome.zipWithIndex.map { (g, i) => Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+
+    if genomeNamespace
+    then arrayVariables.map(v => v.copy(prototype = v.prototype.withNamespace(v.prototype.namespace.prefix("genome"))))
+    else arrayVariables
 
   def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) =>

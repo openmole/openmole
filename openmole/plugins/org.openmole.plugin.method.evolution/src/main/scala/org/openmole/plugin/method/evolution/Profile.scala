@@ -132,7 +132,7 @@ object Profile {
 
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
             val res = NichedNSGA2Algorithm.result(population, niche, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, genomeNamespace = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
@@ -229,7 +229,7 @@ object Profile {
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
             val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), niche, om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, genomeNamespace = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
