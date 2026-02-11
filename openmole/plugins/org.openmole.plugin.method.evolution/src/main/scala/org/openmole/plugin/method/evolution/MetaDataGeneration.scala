@@ -19,14 +19,14 @@ object MetadataGeneration:
     import EvolutionMetadata._
 
     b match
-      case b: GenomeBound.ScalarDouble             => GenomeBoundData.DoubleBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
-      case b: GenomeBound.ScalarInt                => GenomeBoundData.IntBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
-      case b: GenomeBound.ContinuousInt            => GenomeBoundData.IntBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
-      case b: GenomeBound.SequenceOfDouble         => GenomeBoundData.DoubleSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
-      case b: GenomeBound.SequenceOfContinuousInt  => GenomeBoundData.IntSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
-      case b: GenomeBound.SequenceOfInt            => GenomeBoundData.IntSequenceBound(ValData(b.v), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
-      case b: GenomeBound.Enumeration[?]           => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
-      case b: GenomeBound.SequenceOfEnumeration[?] => GenomeBoundData.Enumeration(ValData(b.v), b.values.map(Prettifier.prettify(_)))
+      case b: GenomeBound.ScalarDouble             => GenomeBoundData.DoubleBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
+      case b: GenomeBound.ScalarInt                => GenomeBoundData.IntBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
+      case b: GenomeBound.ContinuousInt            => GenomeBoundData.IntBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
+      case b: GenomeBound.SequenceOfDouble         => GenomeBoundData.DoubleSequenceBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
+      case b: GenomeBound.SequenceOfContinuousInt  => GenomeBoundData.IntSequenceBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
+      case b: GenomeBound.SequenceOfInt            => GenomeBoundData.IntSequenceBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Discrete)
+      case b: GenomeBound.Enumeration[?]           => GenomeBoundData.Enumeration(ValData(Genome.resultVariable(b.v)), b.values.map(Prettifier.prettify(_)))
+      case b: GenomeBound.SequenceOfEnumeration[?] => GenomeBoundData.Enumeration(ValData(Genome.resultVariable(b.v)), b.values.map(Prettifier.prettify(_)))
 
   def objectivesData(o: Objectives) =
     Objectives.toSeq(o).map(objectiveData)

@@ -93,7 +93,7 @@ object PSE {
 
             val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
             val res = MGOPSE.result[Phenotype](population, om.genome.continuous, om.genome.discrete, toFitness andThen om.pattern)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, genomeNamespace = true)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
@@ -206,7 +206,7 @@ object PSE {
 
           val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
           val res = MGONoisyPSE.result(population, aggregate, om.pattern, om.genome.continuous, om.genome.discrete)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false, genomeNamespace = true)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(r => aggregate(r.individual.phenotypeHistory.toVector)))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)

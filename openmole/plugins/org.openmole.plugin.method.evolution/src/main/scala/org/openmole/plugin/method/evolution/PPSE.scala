@@ -89,7 +89,7 @@ object PPSE:
           import p._
           val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
           val res = mgo.evolution.algorithm.PPSE.result[Phenotype](population, state, om.genome.continuous, toFitness andThen om.pattern)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_ => Vector.empty), scale = false, genomeNamespace = true)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_ => Vector.empty), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
           val densities = Seq(Variable(likelihoodVal.array, res.map(_.density).toArray))
