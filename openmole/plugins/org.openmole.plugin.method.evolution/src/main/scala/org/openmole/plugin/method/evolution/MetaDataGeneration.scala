@@ -16,7 +16,7 @@ object MetadataGeneration:
   def genomeData(g: Genome) = g.map(boundData)
 
   def boundData(b: GenomeBound) =
-    import EvolutionMetadata._
+    import EvolutionMetadata.*
 
     b match
       case b: GenomeBound.ScalarDouble             => GenomeBoundData.DoubleBound(ValData(Genome.resultVariable(b.v)), low = b.low, high = b.high, intervalType = GenomeBoundData.Continuous)
@@ -42,3 +42,9 @@ object MetadataGeneration:
   def grid(p: Seq[PSE.PatternAxe]) =
     (Objectives.resultPrototypes(p.map(_.p)) zip p) map { case (p, pa) => EvolutionMetadata.PSE.GridAxe(p.name, pa.scale) }
 
+
+  def density(d: PPSE.Density): EvolutionMetadata.PPSE.Density =
+    d match
+      case x: PPSE.Density.IndependentJoint => EvolutionMetadata.PPSE.Density.IndependentJoint(x.density.map(density))
+      case x: PPSE.Density.GaussianDensity => EvolutionMetadata.PPSE.Density.GaussianDensity(ValData(x.v), mean = x.mean, sd = x.sd)
+      case x: PPSE.Density.BetaDensity => EvolutionMetadata.PPSE.Density.BetaDensity(ValData(x.v), alpha = x.alpha, beta = x.beta)

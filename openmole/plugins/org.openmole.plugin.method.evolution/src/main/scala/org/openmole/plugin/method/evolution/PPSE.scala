@@ -39,7 +39,7 @@ object PPSE:
     grid:             Seq[PatternAxe],
     dilation:         Double,
     reject:           Option[Condition],
-    density:          Option[FromContext[Double]],
+    density:          Option[Density],
     gmmIterations:    Int,
     gmmTolerance:     Double,
     warmupSampler:    Int,
@@ -61,6 +61,16 @@ object PPSE:
       def sManifest = implicitly
 
       def operations(om: DeterministicParams) = new Ops:
+        override def metadata(state: S, saveOption: SaveOption) =
+          EvolutionMetadata.PPSE(
+            genome = MetadataGeneration.genomeData(om.genome),
+            objective = MetadataGeneration.objectivesData(om.objectives),
+            density = om.density.map(MetadataGeneration.density),
+            grid = MetadataGeneration.grid(om.grid),
+            generation = generationLens.get(state),
+            saveOption = saveOption
+          )
+
         def startTimeLens = Focus[S](_.startTime)
         def generationLens = Focus[S](_.generation)
         def evaluatedLens = Focus[S](_.evaluated)
@@ -120,11 +130,25 @@ object PPSE:
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
 
+          def density(d: Density): FromContext[Double] = FromContext: p =>
+            import org.apache.commons.math3.distribution.*
+            import p.*
+            d match
+              case d: Density.IndependentJoint =>
+                if d.density.nonEmpty then d.density.map(di => density(di).from(context)).reduceLeft(_ * _) else 1.0
+              case d: Density.GaussianDensity =>
+                val dist = new NormalDistribution(d.mean, d.sd)
+                dist.density(context(d.v))
+              case d: Density.BetaDensity =>
+                val dist = new BetaDistribution(d.alpha, d.beta)
+                dist.density(context(d.v))
+
           def densityValue =
-            om.density.map: density =>
+            om.density.map: d =>
+              val densityValue = density(d)
               (g: IArray[Double]) =>
                 val scaled = Genome.toVariables(om.genome, g, IArray.empty, scale = true)
-                density.from(scaled)
+                densityValue.from(scaled)
 
           val (s2, elited) = mgo.evolution.algorithm.PPSEOperation.elitism[S, I, Phenotype](
             _.genome,
@@ -175,6 +199,17 @@ object PPSE:
 
           (migratedPopulation, migratedState)
 
+  object Density:
+    case class IndependentJoint(density: Seq[Density]) extends Density
+    case class GaussianDensity(v: Val[Double], mean: Double, sd: Double) extends Density
+    case class BetaDensity(v: Val[Double], alpha: Double, beta: Double) extends Density
+
+    //TODO implement validation
+
+    given Conversion[Val[Double] In NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
+    given Conversion[Val[Double] In BetaDistribution, BetaDensity] = x => BetaDensity(x.value, x.domain.alpha, x.domain.beta)
+
+  sealed trait Density
 
   def apply(
     genome:    GenomeDouble,
@@ -188,7 +223,7 @@ object PPSE:
     minClusterSize:   Int,
     regularisationEpsilon: Double,
     reject:    Option[Condition],
-    density:   Option[FromContext[Double]],
+    density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
     val exactObjectives = Objectives.toExact(objective.map(_.p))
     val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
@@ -234,41 +269,11 @@ import EvolutionWorkflow._
 
 object PPSEEvolution:
 
-  object Density:
-    case class IndependentJoint(density: Seq[Density]) extends Density
-    case class GaussianDensity(v: Val[Double], mean: Double, sd: Double) extends Density
-    case class BetaDensity(v: Val[Double], alpha: Double, beta: Double) extends Density
-
-
-    def density(d: Density): FromContext[Double] = FromContext: p =>
-      import org.apache.commons.math3.distribution.*
-      import p.*
-      d match
-        case d: IndependentJoint =>
-          if d.density.nonEmpty
-          then d.density.map(di => density(di).from(context)).reduceLeft(_ * _)
-          else 1.0
-        case d: GaussianDensity =>
-          val dist = new NormalDistribution(d.mean, d.sd)
-          dist.density(context(d.v))
-        case d: BetaDensity =>
-          val dist = new BetaDistribution(d.alpha, d.beta)
-          dist.density(context(d.v))
-
-    //TODO implement validation
-
-    given Conversion[Val[Double] In NormalDistribution, GaussianDensity] = x => GaussianDensity(x.value, x.domain.mean, x.domain.std)
-    given Conversion[Val[Double] In BetaDistribution, BetaDensity] = x => BetaDensity(x.value, x.domain.alpha, x.domain.beta)
-
-  sealed trait Density
 
   import org.openmole.core.dsl.DSL
 
   given EvolutionMethod[PPSEEvolution] = p =>
-    def density =
-      if p.density.isEmpty
-      then None
-      else Some(Density.density(Density.IndependentJoint(p.density)))
+    def density = if p.density.isEmpty then None else Some(PPSE.Density.IndependentJoint(p.density))
 
     PPSE(
       genome = p.genome,
@@ -306,7 +311,7 @@ case class PPSEEvolution(
   evaluation:  DSL,
   termination: OMTermination,
   reject:      OptionalArgument[Condition]              = None,
-  density:     Seq[PPSEEvolution.Density]               = Seq(),
+  density:     Seq[PPSE.Density]                        = Seq(),
   stochastic:  OptionalArgument[Stochastic]             = None,
   parallelism: Int                                      = EvolutionWorkflow.parallelism,
   distribution: EvolutionPattern                        = SteadyState(),
