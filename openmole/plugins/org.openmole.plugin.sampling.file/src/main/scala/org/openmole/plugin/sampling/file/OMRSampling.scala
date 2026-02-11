@@ -44,12 +44,16 @@ object OMRSampling:
       variable = variable
     )
 
-  def readVariables(omrFile: File, dataFile: File, fileDirectory: Option[File], variable: Seq[Val[?]]) =
+  def readVariables(omrFile: File, dataFile: File, fileDirectory: Option[File], variable: Seq[Val[?]]): Seq[Variable[Array[?]]] =
     val ctx = Context(OMRFormat.variables(omrFile, dataFile = Some(dataFile), fileDirectory = fileDirectory).head.variables *)
     variable.map: v =>
-      ctx.variable(v.array).getOrElse:
-        throw new UserBadDataError(s"Variable $v not found in omr file $omrFile")
-
+      ctx.variable[Array[?]](v.name) match
+        case Some(v) => v
+        case None =>
+          ctx.bySimpleName[Array[?]](v.simpleName) match
+            case s if s.isEmpty => throw new UserBadDataError(s"Variable $v not found in omr file $omrFile")
+            case s if s.size > 1 => throw new UserBadDataError(s"Variable $v not found in omr file $omrFile using its fully qualified name and ambiguous when using its simple name: ${s.map(_.prototype).mkString(",")}")
+            case s => s.head
 
 case class OMRSampling(
   omrFile:       File,
@@ -83,7 +87,7 @@ case class OMRSampling(
 
     def values =
       for line <- variableValues.map(_.value).transpose
-      yield (variable zip line).map((v, va) => Variable.unsecureUntyped(v, va)).toIterable
+      yield (variable zip line).map((v, va) => Variable.unsecureUntyped(v, va))
 
     values.toIterator
 
