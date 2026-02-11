@@ -35,7 +35,7 @@ import ReleaseNotesValue.*
 
 object ReleaseNotes extends PageContent(html"""
 
-${h2{"V22 | C C"}}
+${h2{"V22 | Cranky Crocodile"}}
 
 ${
   notes("""
