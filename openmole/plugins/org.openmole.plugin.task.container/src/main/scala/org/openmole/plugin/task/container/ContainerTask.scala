@@ -139,7 +139,7 @@ object ContainerTask:
         case image: DockerImage      => Seq(image.image, image.tag, image.registry)
         case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
-    val embeddedResourcesValue =
+    lazy val embeddedResourcesValue =
       val embed =
         containerSystem match
           case s: SingularityOverlay => s.embedResources
