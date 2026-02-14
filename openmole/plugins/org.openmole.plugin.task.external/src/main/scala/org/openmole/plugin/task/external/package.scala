@@ -87,6 +87,8 @@ lazy val resources = new ResourcesKeyword
 export ResourcesKeyword.EmptyDirectory
 
 object EnvironmentVariable:
+  def apply(e: (String, String)): EnvironmentVariable = e
+  
   implicit def fromTuple[N, V](tuple: (N, V))(implicit toFromContextN: ToFromContext[N, String], toFromContextV: ToFromContext[V, String]): EnvironmentVariable =
     EnvironmentVariable(toFromContextN.convert(tuple._1), toFromContextV.convert(tuple._2))
 
