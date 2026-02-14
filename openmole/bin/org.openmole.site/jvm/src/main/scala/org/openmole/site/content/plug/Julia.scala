@@ -41,7 +41,8 @@ ${ul(
    li{html"${code{"install"}} Sequence of strings, $optional (default = empty). The commands to be executed prior to any Julia packages installation and script execution (to install libraries on the system)."},
    li{html"${code{"libraries"}} Sequence of strings, $optional (default = empty). The name of Julia libraries that need to be installed before the script execution (note: as detailed below, installations are only achieved during the first execution of the script, and then stored in a docker image in cache. To force an update, use the ${i{"forceUpdate"}} argument)."},
    li{html"${code{"forceUpdate"}} Boolean, $optional (default = false). Should the libraries installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed."},
-   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Julia on the execution node."}
+   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Julia on the execution node."},
+   li{html"${code{"precompileCPUTarget"}} String, $optional (default = \"core2\"). The cpu target for Julia libraries precompilation (i.e. JULIA_CPU_TARGET)."},
 )}
 
 ${h2{"Embedding a Julia script"}}
