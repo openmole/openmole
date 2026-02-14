@@ -51,8 +51,7 @@ object PythonTask:
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        OptionalArgument[ContainerSystem]  = None)(using sourcecode.Name, DefinitionScope) =
 
-    
-    ExternalTask.build("PythonTask"): buildParameters =>
+    ContainerTask.build("PythonTask"): buildParameters =>
       import buildParameters.*
 
       val major =
@@ -74,23 +73,20 @@ object PythonTask:
       def scriptPath = s"$workDirectory/_generatescript_.py"
       
       val argumentsValue = arguments.map(" " + _).getOrElse("")
-      
-      val taskExecution =
-        ContainerTask.execution(
-          image = containerImage,
-          command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          environmentVariables = environmentVariables,
-          hostFiles = hostFiles,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          external = external,
-          config = config,
-          info = info)
 
-      ExternalTask.execution: p =>
+      ContainerTask.execution(
+        image = containerImage,
+        command = prepare ++ Seq(s"python${major.toString} $scriptPath" + argumentsValue),
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        environmentVariables = environmentVariables,
+        hostFiles = hostFiles,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        external = external,
+        config = config,
+        info = info): p =>
         import org.json4s.jackson.JsonMethods._
         import p._
         import Mapped.noFile
@@ -149,7 +145,7 @@ object PythonTask:
           val outputFile = Val[File]("outputFile", Namespace("PythonTask"))
       
           def containerTask =
-            taskExecution.set(
+            p.containerTask.set(
               resources += (scriptFile, scriptPath, true),
               resources += (jsonInputFile, inputJSONPath, true),
               outputFiles += (outputJSONPath, outputFile),

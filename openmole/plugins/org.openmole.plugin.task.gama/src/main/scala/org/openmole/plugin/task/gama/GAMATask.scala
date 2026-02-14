@@ -79,7 +79,7 @@ object GAMATask:
     clearContainerCache:    Boolean                               = false,
     containerSystem:        OptionalArgument[ContainerSystem]     = None)(using sourcecode.Name, DefinitionScope) =
 
-    ExternalTask.build("GAMATask"): buildParameters =>
+    ContainerTask.build("GAMATask"): buildParameters =>
       import buildParameters.*
 
       if !project.exists() then throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
@@ -122,25 +122,20 @@ object GAMATask:
 
         environmentVariables ++ Seq(javaOptions)
 
-      val containerTaskExecution =
-        ContainerTask.execution(
-          image = preparedImage,
-          command = launchCommand,
-          workDirectory = Some(GAMATask.workspaceDirectory),
-          relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariablesValue,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info) set (
-          GAMATask.volumes(project, gaml).map((lv, cv) => resources += (lv, cv, true))
-        )
-
-      ExternalTask.execution: executionParameters =>
+      ContainerTask.execution(
+        image = preparedImage,
+        command = launchCommand,
+        workDirectory = Some(GAMATask.workspaceDirectory),
+        relativePathRoot = Some(GAMATask.gamaWorkspaceDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariablesValue,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info): executionParameters =>
         import executionParameters.*
 
         val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".gaml")
@@ -205,7 +200,7 @@ object GAMATask:
         inputFile.content = experimentFileContent
 
         def containerTask =
-          containerTaskExecution.set(
+          executionParameters.containerTask.set(
             resources += (inputFile, inputFilePath, true),
             resources += (outputDirectory, outputDirectoryPath, true),
             Mapped.files(mapped.inputs).map { m => inputFiles += (m.v, m.name, true) },
@@ -231,7 +226,8 @@ object GAMATask:
         stopError
     .set(
       inputs ++= seed.option.toSeq,
-      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
+      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten,
+      GAMATask.volumes(project, gaml).map((lv, cv) => resources += (lv, cv, true))
     )
 
 

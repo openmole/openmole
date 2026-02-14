@@ -65,7 +65,7 @@ object RTask:
     clearContainerCache:        Boolean                            = false,
     containerSystem:            OptionalArgument[ContainerSystem]  = None
   )(using sourcecode.Name, DefinitionScope) =
-    ExternalTask.build("RTask"): buildParameters =>
+    ContainerTask.build("RTask"): buildParameters =>
       import buildParameters.*
 
       def workDirectory = "/_workdirectory_"
@@ -76,28 +76,28 @@ object RTask:
 
       def installCommands = install ++ RTask.RLibrary.installCommands(libraries.toVector)
 
-      val containerTaskExecution =
+      def containerInstall =
         import taskExecutionBuildContext.given
-        ContainerTask.execution(
-          image = ContainerTask.install(
-            containerSystem,
-            image,
-            installCommands,
-            buildParameters = buildParameters,
-            clearCache = clearContainerCache),
-          command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info)
+        ContainerTask.install(
+          containerSystem,
+          image,
+          installCommands,
+          buildParameters = buildParameters,
+          clearCache = clearContainerCache)
 
-      ExternalTask.execution: executionParameters =>
+      ContainerTask.execution(
+        image = containerInstall,
+        command = prepare ++ Seq(s"R --slave -f $rScriptPath"),
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info): executionParameters =>
         import executionParameters.*
         import Mapped.noFile
         import org.json4s.jackson.JsonMethods.*
@@ -141,7 +141,7 @@ object RTask:
         val outputFile = Val[File]("outputFile", Namespace("RTask"))
 
         def containerTask =
-          containerTaskExecution.set(
+          executionParameters.containerTask.set(
             resources += (scriptFile, rScriptPath),
             resources += (jsonInputs, inputJSONPath),
             outputFiles += (outputJSONPath, outputFile),

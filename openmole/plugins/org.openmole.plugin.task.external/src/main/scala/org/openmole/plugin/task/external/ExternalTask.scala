@@ -49,6 +49,19 @@ object ExternalTask:
    export taskInfo.*
    export executionContext.*
 
+  type BuildFunction = BuildParameters => ExecutionFunction
+  type ExecutionFunction = (Parameters => Context, Option[External])
+
+  // --- For XStream along with inline
+  trait ExecutionFunctionTrait:
+    def external: Option[External]
+    def apply(p: Parameters): Context
+
+  trait BuildFunctionTrait:
+    def apply(p: BuildParameters): ExecutionFunctionTrait
+  // ---
+
+
   /**
    * Construct from a [[FromContext.Parameters]] => [[Context]] function
    * @param className
@@ -57,36 +70,28 @@ object ExternalTask:
    */
   inline def apply(className: String)(inline fromContext: Parameters => Context)(using sourcecode.Name, DefinitionScope): ExternalTask =
     build(className): bp =>
-      fromContext
+      (fromContext, None)
 
-  inline def build(className: String)(inline fromContext: BuildParameters => Parameters => Context)(using sourcecode.Name, DefinitionScope): ExternalTask =
+  inline def build(className: String)(inline fromContext: BuildFunction)(using sourcecode.Name, DefinitionScope): ExternalTask =
     val buildFunction =
-      new BuildFunction:
-        override def apply(p: BuildParameters): ExecuteFunction =
-          val executeFunction = fromContext(p)
-          new ExecuteFunction:
+      new BuildFunctionTrait:
+        override def apply(p: BuildParameters): ExecutionFunctionTrait =
+          val (executeFunction, executionExternal) = fromContext(p)
+          new ExecutionFunctionTrait:
+            override def external: Option[External] = executionExternal
             override def apply(p: Parameters): Context = executeFunction(p)
 
     new ExternalTask(
-        buildFunction,
-        className = className,
-        config = InputOutputConfig(),
-        mapped = MappedInputOutputConfig(),
-        info = InfoConfig(),
-        external = External(),
-        v = _ => Validate.success
-      )
+      buildFunction,
+      className = className,
+      config = InputOutputConfig(),
+      mapped = MappedInputOutputConfig(),
+      info = InfoConfig(),
+      external = External(),
+      v = _ => Validate.success
+    )
 
-  inline def execution(inline f: Parameters => Context): Parameters => Context = f
-
-  // --- For XStream along with inline
-  trait ExecuteFunction:
-    def apply(p: Parameters): Context
-
-  trait BuildFunction:
-    def apply(p: BuildParameters): ExecuteFunction
-  // ---
-
+  inline def execution(inline f: Parameters => Context): ExecutionFunction = (f, None)
 
 /**
  * A task wrapping a function from a [[TaskExecutionContext]] to a [[FromContext]]
@@ -98,7 +103,7 @@ object ExternalTask:
  * @param info
  */
 case class ExternalTask(
-  fromContext: ExternalTask.BuildFunction,
+  fromContext: ExternalTask.BuildFunctionTrait,
   v: ExternalTask.TaskInfo => Validate,
   override val className: String,
   config: InputOutputConfig,
@@ -113,8 +118,9 @@ case class ExternalTask(
   override def apply(taskExecutionBuildContext: TaskExecutionBuildContext) =
     val taskInfo = ExternalTask.TaskInfo(config, mapped, info, external)
     val execution = fromContext(ExternalTask.BuildParameters(taskExecutionBuildContext, taskInfo))
+    val executionTaskInfo = taskInfo.copy(external = execution.external.getOrElse(taskInfo.external))
     TaskExecution: p =>
-      val tp = ExternalTask.Parameters(p.context, p.executionContext, taskInfo)(p.random, p.tmpDirectory)
+      val tp = ExternalTask.Parameters(p.context, p.executionContext, executionTaskInfo)(using p.random, p.tmpDirectory)
       execution(tp)
 
   def withValidate(validate: Validate): ExternalTask = copy(v = info => v(info) ++ validate)

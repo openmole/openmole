@@ -53,12 +53,12 @@ object NetLogoContainerTask:
     //    workDirectory:          OptionalArgument[String]       = None,
     clearContainerCache:    Boolean                             = false,
     containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
+    val volumesValue = volumes(script, embedWorkspace)
 
     ExternalTask.build("NetLogoContainerTask"): buildParameters =>
       import buildParameters.*
       val image: ContainerImage = s"openmole/netlogo:${version}"
 
-      val volumesValue = volumes(script, embedWorkspace)
       val preparedImage =
         import taskExecutionBuildContext.given
         ContainerTask.install(
@@ -78,25 +78,20 @@ object NetLogoContainerTask:
       def paramNetLogo = "-Dnetlogo.libraries.disabled=true"
       def paramJVM = JavaConfiguration.fewerThreadsParameters.mkString(" ") + s" -Xmx${memory.toMegabytes.toInt}m $param3D $paramNetLogo"
 
-      val taskExecution =
-        ContainerTask.execution(
-          image = preparedImage,
-          command = launchCommand,
-          workDirectory = Some(workspace),
-          relativePathRoot = Some(netLogoWorkspace),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info).set (
-            volumesValue.map((lv, cv) => resources += (lv, cv, true))
-          )
-
-      ExternalTask.execution: p =>
+      ContainerTask.execution(
+        image = preparedImage,
+        command = launchCommand,
+        workDirectory = Some(workspace),
+        relativePathRoot = Some(netLogoWorkspace),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables ++ Seq(EnvironmentVariable("JAVA_OPT", paramJVM)),
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info): p =>
         import p.*
 
         val inputFile = executionContext.taskExecutionDirectory.newFile("inputs", ".bin")
@@ -127,7 +122,7 @@ object NetLogoContainerTask:
         createInputFile(inputFile)
 
         def containerTask =
-          taskExecution.set (
+          p.containerTask.set (
             resources += (inputFile, inputFileName, true),
             outputFiles += (outputFileName, outputFileVal),
             Mapped.files(mapped.inputs).map(m => inputFiles += (m.v, m.name, true)),
@@ -147,9 +142,10 @@ object NetLogoContainerTask:
           External.validate(info.external)(allInputs) ++
           AbstractNetLogoTask.validateNetLogoInputTypes(info.mapped.inputs.map(_.v))
     .withValidate: info =>
-          ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
+      ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
     .set (
       inputs ++= seed.option.toSeq,
-      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten
+      outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten,
+      volumesValue.map((lv, cv) => resources += (lv, cv, true))
     )
 

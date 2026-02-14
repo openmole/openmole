@@ -74,7 +74,7 @@ object JuliaTask:
     containerSystem:        OptionalArgument[ContainerSystem]  = None,
     clearCache:             Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
-  ExternalTask.build("JuliaTask"): buildParameters =>
+  ContainerTask.build("JuliaTask"): buildParameters =>
     import buildParameters.*
 
     val image =
@@ -82,7 +82,7 @@ object JuliaTask:
       ContainerTask.install(
         containerSystem,
         DockerImage("julia", version),
-        install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
+        install = install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
         volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
         buildParameters = buildParameters,
         clearCache = clearCache)
@@ -92,24 +92,22 @@ object JuliaTask:
 
     val argumentsValue = arguments.map(" " + _).getOrElse("")
 
-    val taskExecution =
-      ContainerTask.execution(
-        image = image,
-        command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
-        workDirectory = Some(workDirectory),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = InputOutputConfig(),
-        external = external,
-        info = info)
+    ContainerTask.execution(
+      image = image,
+      command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
+      workDirectory = Some(workDirectory),
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = InputOutputConfig(),
+      external = external,
+      info = info): p =>
 
-    ExternalTask.execution: p =>
-      import org.json4s.jackson.JsonMethods._
-      import p._
+      import org.json4s.jackson.JsonMethods.*
+      import p.*
       import Mapped.noFile
 
       def writeInputsJSON(file: File): Unit =
@@ -158,7 +156,7 @@ object JuliaTask:
         val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
 
         def containerTask =
-          taskExecution.set(
+          p.containerTask.set(
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
