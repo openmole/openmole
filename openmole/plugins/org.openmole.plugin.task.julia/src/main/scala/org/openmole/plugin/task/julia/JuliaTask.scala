@@ -53,6 +53,8 @@ object JuliaTask:
             s"""TERM=dumb julia -e 'using Pkg; Pkg.add(url = "$url"$revString)'"""
 
       libraries.map(command).toVector
+    
+    def variables(cpuTarget: String) = Seq("JULIA_CPU_TARGET" -> cpuTarget)
 
   sealed trait Library
 
@@ -65,6 +67,7 @@ object JuliaTask:
     installFiles:           Seq[File]                          = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
     version:                String                             = "1.12.4",
+    precompileCPUTarget:    String                             = "core2",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -84,6 +87,7 @@ object JuliaTask:
         DockerImage("julia", version),
         install = install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
         volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
+        environmentVariables = Library.variables(precompileCPUTarget),
         buildParameters = buildParameters,
         clearCache = clearCache)
 
@@ -165,7 +169,7 @@ object JuliaTask:
           )
 
         val resultContext =
-          try containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+          try containerTask(executionContext).from(p.context)(using p.random, p.tmpDirectory, p.fileService)
           catch
             case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
 

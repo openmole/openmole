@@ -127,17 +127,19 @@ object ContainerTask:
     install: Seq[String],
     buildParameters: ExternalTask.BuildParameters,
     volumes: Seq[(File, String)] = Seq.empty,
+    environmentVariables: Seq[(String, String)] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
-      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
-      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, environmentVariables, buildParameters, errorDetail, clearCache)
+      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, environmentVariables,buildParameters, errorDetail, clearCache)
 
   def installSIF(
     containerSystem: SingularitySIF,
     image: ContainerImage,
     install: Seq[String],
-    volumes: Seq[(File, String)] = Seq.empty,
+    volumes: Seq[(File, String)],
+    environmentVariables: Seq[(String, String)],
     buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
@@ -185,7 +187,7 @@ object ContainerTask:
             val img = localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
             val installedImage =
               buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Installing", s"Executing install commands"):
-                executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+                executeInstall(img, install, volumes = volumes, environmentVariables = environmentVariables, errorDetail = errorDetail)
 
             embeddedResourcesValue.foreach: (f, d) =>
               _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
@@ -210,11 +212,11 @@ object ContainerTask:
         InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory, embeddedResourcesValue.map(_._2))
 
 
-  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
+  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], environmentVariables: Seq[(String, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if install.isEmpty
     then image
     else
-      val retCode = runCommandInFlatImageContainer(image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n))
+      val retCode = runCommandInFlatImageContainer(image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n), environmentVariables = environmentVariables)
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m => s": $m").getOrElse(""))
       image
 
