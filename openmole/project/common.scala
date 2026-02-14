@@ -45,7 +45,7 @@ object common {
   def h2Version = "2.1.214"
   def shapelessVersion = "3.4.1"
   def jasyptVersion = "1.9.3"
-  def monocleVersion = "3.2.0"
+  def monocleVersion = "3.3.0"
   def configuration2Version = "2.8.0"
   def compressVersion = "1.27.1"
   def scalazVersion = "7.3.7"

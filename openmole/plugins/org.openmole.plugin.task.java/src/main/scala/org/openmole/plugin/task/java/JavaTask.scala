@@ -85,7 +85,7 @@ object JavaTask:
         then jarResources.map(j => s"""--jar \"${j._2}\"""").mkString(" ")
         else ""
 
-      val taskExecution = ContainerTask.execution(
+      ContainerTask.execution(
         image = image,
         command = prepare ++ Seq(JavaTask.scalaCLI(jvmVersion, jvmOptions, scalaVersion, fewerThreads = fewerThreads, offline = true) + s""" $jarParameter $scriptName"""),
         workDirectory = Some(workspaceName),
@@ -97,9 +97,7 @@ object JavaTask:
         stdErr = stdErr,
         config = InputOutputConfig(),
         external = external,
-        info = info)
-
-      ExternalTask.execution: p =>
+        info = info): p =>
         import org.json4s.jackson.JsonMethods.*
         import p.*
         import Mapped.noFile
@@ -164,7 +162,7 @@ object JavaTask:
           val outputFile = Val[File]("outputFile", Namespace("JavaTask"))
 
           def containerTask =
-            taskExecution.set(
+            p.containerTask.set(
               resources += (scriptFile, scriptName, true),
               resources += (inputData, inputDataName, true),
               jarResources.map((j, n) => resources += (j, n, true)),
