@@ -187,7 +187,7 @@ object GAMALegacyTask:
     clearContainerCache:    Boolean                             = false,
     containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
 
-    ExternalTask.build("GAMATask"): buildParameters =>
+    ContainerTask.build("GAMATask"): buildParameters =>
       import buildParameters.*
 
       if !project.exists() then throw new UserBadDataError(s"The project directory you specify does not exist: ${project}")
@@ -227,23 +227,20 @@ object GAMALegacyTask:
         environmentVariables ++
           (if fewerThreads then Seq(fewerThreadsEnvironmentVariable) else Seq())
 
-      val containerTaskExecution =
-        ContainerTask.execution(
-          image = preparedImage,
-          command = launchCommand,
-          workDirectory = Some(GAMALegacyTask.workspaceDirectory),
-          relativePathRoot = Some(GAMALegacyTask.gamaWorkspaceDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariablesValue,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info)
-
-      ExternalTask.execution: executionParameters =>
+      ContainerTask.execution(
+        image = preparedImage,
+        command = launchCommand,
+        workDirectory = Some(GAMALegacyTask.workspaceDirectory),
+        relativePathRoot = Some(GAMALegacyTask.gamaWorkspaceDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariablesValue,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info): executionParameters =>
         import executionParameters.*
 
         val inputFile = executionContext.taskExecutionDirectory.newFile("input", ".xml")
@@ -263,7 +260,7 @@ object GAMALegacyTask:
         val (_, volumes) = GAMALegacyTask.volumes(project, gaml)
 
         def containerTask =
-          containerTaskExecution.set(
+          executionParameters.containerTask.set(
             resources += (inputFile, inputFilePath, true),
             resources += (outputDirectory, outputDirectoryPath, true),
             volumes.map((lv, cv) => resources += (lv, cv, true)),

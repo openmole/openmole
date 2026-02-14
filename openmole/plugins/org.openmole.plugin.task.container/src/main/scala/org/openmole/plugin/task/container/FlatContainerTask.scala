@@ -43,7 +43,8 @@ object FlatContainerTask:
     containerSystem: SingularityFlatImage,
     image: ContainerImage,
     install: Seq[String],
-    volumes: Seq[(File, String)] = Seq.empty,
+    volumes: Seq[(File, String)],
+    environmentVariables: Seq[(String, String)],
     buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
@@ -72,7 +73,7 @@ object FlatContainerTask:
         then serializerService.deserialize[_root_.container.FlatImage](serializedFlatImage)
         else
           val img = ContainerTask.localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
-          val installedImage = ContainerTask.executeInstall(img, install, volumes, errorDetail = errorDetail)
+          val installedImage = ContainerTask.executeInstall(img, install, volumes, environmentVariables, errorDetail = errorDetail)
           serializerService.serialize(installedImage, serializedFlatImage)
           installedImage
 

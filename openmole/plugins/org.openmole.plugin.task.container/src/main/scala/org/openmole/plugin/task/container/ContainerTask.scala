@@ -17,7 +17,7 @@ package org.openmole.plugin.task.container
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import monocle.Focus
+import monocle.*
 import monocle.syntax.all.*
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
@@ -46,6 +46,17 @@ object ContainerTask:
     implicit def seqOfFromContext(f: Seq[FromContext[String]]): Commands = Commands(f.toVector)
 
   type SingularitySIF = SingularityOverlay | SingularityMemory
+
+  case class Parameters(
+    context:                   Context,
+    executionContext:          TaskExecutionContext,
+    taskInfo:                  ExternalTask.TaskInfo,
+    containerTask:             ContainerTaskExecution)(
+    implicit
+    val random:      RandomProvider,
+    val tmpDirectory: TmpDirectory):
+    export taskInfo.*
+    export executionContext.*
 
   def apply(
     image:                  ContainerImage,
@@ -76,30 +87,29 @@ object ContainerTask:
           clearCache = clearCache
         )
 
-      val containerExecution =
-        ContainerTask.execution(
-          image = installedImage,
-          command = command,
-          workDirectory = workDirectory,
-          relativePathRoot = relativePathRoot,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info
-        )
-
-      ExternalTask.execution: p =>
+      ContainerTask.execution(
+        image = installedImage,
+        command = command,
+        workDirectory = workDirectory,
+        relativePathRoot = relativePathRoot,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info
+      ): p =>
         import p.*
-        containerExecution(p.executionContext).from(context)
+        p.containerTask(p.executionContext).from(context)
 
     .set (outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
     .withValidate: info =>
       validateContainer(command.value, environmentVariables, info.external)
+
+  inline def build(className: String)(inline fromContext: ExternalTask.BuildFunction)(using sourcecode.Name, DefinitionScope): ExternalTask = ExternalTask.build(className)(fromContext)
 
   def embeddedResources(resources: Seq[External.Resource], embed: Boolean)(using FileService, TmpDirectory): Seq[(File, InstalledSingularityImage.EmbeddedResource)] =
     if embed
@@ -117,17 +127,19 @@ object ContainerTask:
     install: Seq[String],
     buildParameters: ExternalTask.BuildParameters,
     volumes: Seq[(File, String)] = Seq.empty,
+    environmentVariables: Seq[(String, String)] = Seq.empty,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher): InstalledSingularityImage =
     containerSystem.getOrElse(SingularityOverlay()) match
-      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
-      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, buildParameters, errorDetail, clearCache)
+      case containerSystem: SingularitySIF => installSIF(containerSystem, image, install, volumes, environmentVariables, buildParameters, errorDetail, clearCache)
+      case containerSystem: SingularityFlatImage => FlatContainerTask.install(containerSystem, image, install, volumes, environmentVariables,buildParameters, errorDetail, clearCache)
 
   def installSIF(
     containerSystem: SingularitySIF,
     image: ContainerImage,
     install: Seq[String],
-    volumes: Seq[(File, String)] = Seq.empty,
+    volumes: Seq[(File, String)],
+    environmentVariables: Seq[(String, String)],
     buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
     clearCache: Boolean = false)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
@@ -175,7 +187,7 @@ object ContainerTask:
             val img = localImage(image, containerDirectory, clearCache = clearCache, buildParameters = buildParameters)
             val installedImage =
               buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Installing", s"Executing install commands"):
-                executeInstall(img, install, volumes = volumes, errorDetail = errorDetail)
+                executeInstall(img, install, volumes = volumes, environmentVariables = environmentVariables, errorDetail = errorDetail)
 
             embeddedResourcesValue.foreach: (f, d) =>
               _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
@@ -200,11 +212,11 @@ object ContainerTask:
         InstalledSingularityImage.InstalledSIFMemoryImage(installedImage, memory, embeddedResourcesValue.map(_._2))
 
 
-  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
+  def executeInstall(image: _root_.container.FlatImage, install: Seq[String], volumes: Seq[(File, String)], environmentVariables: Seq[(String, String)], errorDetail: Int => Option[String])(using tmpDirectory: TmpDirectory, outputRedirection: OutputRedirection, networkService: NetworkService) =
     if install.isEmpty
     then image
     else
-      val retCode = runCommandInFlatImageContainer(image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n))
+      val retCode = runCommandInFlatImageContainer(image, install, output = outputRedirection.output, error = outputRedirection.error, volumes = volumes.map((f, n) => f.getAbsolutePath -> n), environmentVariables = environmentVariables)
       if (retCode != 0) throw new UserBadDataError(s"Process exited a non 0 return code ($retCode)" + errorDetail(retCode).map(m => s": $m").getOrElse(""))
       image
 
@@ -373,7 +385,7 @@ object ContainerTask:
     hostFiles: Seq[HostFile] = Seq(),
     workDirectory: Option[String] = None,
     relativePathRoot: Option[String] = None,
-    config: InputOutputConfig = InputOutputConfig()): ContainerTaskExecution =
+    config: InputOutputConfig = InputOutputConfig())(f: Parameters => Context): ExternalTask.ExecutionFunction =
 
     val embedExternal: External =
       if image.embedResources
@@ -383,24 +395,31 @@ object ContainerTask:
             case r: External.EmptyDirectoryResource => r
       else external
 
-    ContainerTaskExecution(
-      image = image,
-      command = command,
-      workDirectory = workDirectory,
-      relativePathRoot = relativePathRoot,
-      hostFiles = hostFiles,
-      environmentVariables = environmentVariables,
-      errorOnReturnValue = errorOnReturnValue,
-      returnValue = returnValue,
-      stdOut = stdOut,
-      stdErr = stdErr,
-      config = config,
-      external = embedExternal,
-      info = info
-    ).set(
-      outputs ++= Seq(returnValue, stdOut, stdErr).flatten
-    )
+    val taskExecution =
+      ContainerTaskExecution(
+        image = image,
+        command = command,
+        workDirectory = workDirectory,
+        relativePathRoot = relativePathRoot,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = embedExternal,
+        info = info
+      ).set(
+        outputs ++= Seq(returnValue, stdOut, stdErr).flatten
+      )
 
+    def externalExecution(p: ExternalTask.Parameters) =
+      import p.*
+      val parameters = Parameters(context, executionContext, taskInfo, taskExecution)
+      f(parameters)
+
+    (externalExecution, Some(embedExternal))
 
   def process(
     image:                  InstalledSingularityImage.InstalledSIFImage,
@@ -472,7 +491,7 @@ object ContainerTask:
       val linkCommand: Seq[String] =
         image.embeddedResources.flatMap: e =>
           val destination = ContainerTask.pathResolver(image.workDirectory, relativePathRoot, workDirectory, e.destination.from(context))
-          Seq(s"mkdir -p \"$$(dirname \"$destination\")\"", s"ln -s \"${e.path}\" \"$destination\"")
+          Seq(s"mkdir -p \"$$(dirname \"$destination\")\"", s"ln -sf \"${e.path}\" \"$destination\"")
 
       val commandValue =
         def dropEmptyLinesAtTheEnd(s: String) = s.split("\n").reverse.dropWhile(_.trim.isEmpty).reverse.mkString("\n")
@@ -497,6 +516,11 @@ object ContainerTask:
           val destinationDirectory = s"$resultDirectoryBind/${m.directory}/"
           Seq(s"""mkdir -p \"$destinationDirectory\"""", s"""cp -ra \"${m.resolved}\" \"$destinationDirectory\"""")
 
+      val cleanLinkCommand: Seq[String] =
+        image.embeddedResources.flatMap: e =>
+          val destination = ContainerTask.pathResolver(image.workDirectory, relativePathRoot, workDirectory, e.destination.from(context))
+          Seq(s"rm -f \"$destination\"")
+
       val exitCommand = if ignoreRetCode then Seq(s"exit $$$retCodeVariable") else Seq()
 
       val copyVolume = resultDirectory.getAbsolutePath -> resultDirectoryBind
@@ -507,7 +531,7 @@ object ContainerTask:
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
-              commands = linkCommand ++ commandValue ++ copyCommand ++ exitCommand,
+              commands = linkCommand ++ commandValue ++ copyCommand ++ cleanLinkCommand ++ exitCommand,
               workDirectory = Some(workDirectoryValue(image.workDirectory, workDirectory)),
               output = out,
               error = err,

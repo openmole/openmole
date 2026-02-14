@@ -53,6 +53,8 @@ object JuliaTask:
             s"""TERM=dumb julia -e 'using Pkg; Pkg.add(url = "$url"$revString)'"""
 
       libraries.map(command).toVector
+    
+    def variables(cpuTarget: String) = Seq("JULIA_CPU_TARGET" -> cpuTarget)
 
   sealed trait Library
 
@@ -65,6 +67,7 @@ object JuliaTask:
     installFiles:           Seq[File]                          = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
     version:                String                             = "1.12.4",
+    precompileCPUTarget:    String                             = "core2",
     hostFiles:              Seq[HostFile]                      = Vector.empty,
     environmentVariables:   Seq[EnvironmentVariable]           = Vector.empty,
     errorOnReturnValue:     Boolean                            = true,
@@ -74,7 +77,7 @@ object JuliaTask:
     containerSystem:        OptionalArgument[ContainerSystem]  = None,
     clearCache:             Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
-  ExternalTask.build("JuliaTask"): buildParameters =>
+  ContainerTask.build("JuliaTask"): buildParameters =>
     import buildParameters.*
 
     val image =
@@ -82,8 +85,9 @@ object JuliaTask:
       ContainerTask.install(
         containerSystem,
         DockerImage("julia", version),
-        install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
+        install = install ++ Library.installCommands(Seq[Library]("JSON") ++ libraries),
         volumes = installFiles.map(f => f -> f.getName) ++ Library.volumes(libraries),
+        environmentVariables = Library.variables(precompileCPUTarget),
         buildParameters = buildParameters,
         clearCache = clearCache)
 
@@ -92,24 +96,22 @@ object JuliaTask:
 
     val argumentsValue = arguments.map(" " + _).getOrElse("")
 
-    val taskExecution =
-      ContainerTask.execution(
-        image = image,
-        command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
-        workDirectory = Some(workDirectory),
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = InputOutputConfig(),
-        external = external,
-        info = info)
+    ContainerTask.execution(
+      image = image,
+      command = prepare ++ Seq(s"julia $scriptName $argumentsValue"),
+      workDirectory = Some(workDirectory),
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = InputOutputConfig(),
+      external = external,
+      info = info): p =>
 
-    ExternalTask.execution: p =>
-      import org.json4s.jackson.JsonMethods._
-      import p._
+      import org.json4s.jackson.JsonMethods.*
+      import p.*
       import Mapped.noFile
 
       def writeInputsJSON(file: File): Unit =
@@ -158,7 +160,7 @@ object JuliaTask:
         val outputFile = Val[File]("outputFile", Namespace("JuliaTask"))
 
         def containerTask =
-          taskExecution.set(
+          p.containerTask.set(
             resources += (scriptFile, scriptName, true),
             resources += (jsonInputs, inputJSONName, true),
             outputFiles += (outputJSONName, outputFile),
@@ -167,7 +169,7 @@ object JuliaTask:
           )
 
         val resultContext =
-          try containerTask(executionContext).from(p.context)(p.random, p.tmpDirectory, p.fileService)
+          try containerTask(executionContext).from(p.context)(using p.random, p.tmpDirectory, p.fileService)
           catch
             case e: Throwable => throw InternalProcessingError(s"Script content was: $scriptContent", e)
 

@@ -59,22 +59,19 @@ object ScilabTask:
         then s"""scilab-cli -nwni -nb -quit -f $scriptName"""
         else s"""scilab-cli -nb -f $scriptName"""
 
-      val taskExecution =
-        ContainerTask.execution(
-          image = image,
-          command = prepare ++ Seq(launchCommand),
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = config,
-          external = external,
-          info = info)
-
-      ExternalTask.execution: p =>
+      ContainerTask.execution(
+        image = image,
+        command = prepare ++ Seq(launchCommand),
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = config,
+        external = external,
+        info = info): p =>
 
         import p.*
 
@@ -100,7 +97,7 @@ object ScilabTask:
             """.stripMargin
 
         def containerTask =
-          taskExecution.set(
+          p.containerTask.set(
             resources += (scriptFile, scriptName, true),
             mapped.outputs.map(m => outputFiles += (outputFileName(m.v), outputValName(m.v)))
           )

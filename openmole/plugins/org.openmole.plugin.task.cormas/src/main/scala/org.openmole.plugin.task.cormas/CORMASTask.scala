@@ -27,7 +27,7 @@ object CORMASTask:
     version:                String                              = "latest",
     containerSystem:        OptionalArgument[ContainerSystem]   = None)(using sourcecode.Name, DefinitionScope) =
 
-    ExternalTask.build("CORMASTask"): buildParameters =>
+    ContainerTask.build("CORMASTask"): buildParameters =>
       import buildParameters.*
 
       val preparedImage =
@@ -43,22 +43,19 @@ object CORMASTask:
 
       def workDirectory = "/_workdirectory_"
 
-      val taskExecution =
-        ContainerTask.execution(
-          image = preparedImage,
-          command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
-          workDirectory = Some(workDirectory),
-          errorOnReturnValue = errorOnReturnValue,
-          returnValue = returnValue,
-          hostFiles = hostFiles,
-          environmentVariables = environmentVariables,
-          stdOut = stdOut,
-          stdErr = stdErr,
-          config = InputOutputConfig(),
-          external = external,
-          info = info)
-
-      ExternalTask.execution: p =>
+      ContainerTask.execution(
+        image = preparedImage,
+        command = s"""/pharo --headless /Pharo.image eval ./$scriptName""",
+        workDirectory = Some(workDirectory),
+        errorOnReturnValue = errorOnReturnValue,
+        returnValue = returnValue,
+        hostFiles = hostFiles,
+        environmentVariables = environmentVariables,
+        stdOut = stdOut,
+        stdErr = stdErr,
+        config = InputOutputConfig(),
+        external = external,
+        info = info): p =>
         import p.*
         import Mapped.noFile
 
@@ -92,7 +89,7 @@ object CORMASTask:
         scriptFile.content = RunnableScript.content(script)
 
         def containerTask =
-          taskExecution.set(
+          p.containerTask.set(
             resources += (jsonInputs, inputJSONName, true),
             resources += (scriptFile, scriptName, true),
             outputFiles += (outputJSONName, outputFile),
