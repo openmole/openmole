@@ -1376,6 +1376,7 @@ lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = defau
 
 lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies += Libraries.jline,
+  libraryDependencies += Libraries.layoutz,
   scala3Settings
 ) dependsOn(
   workflow,

@@ -44,7 +44,7 @@ import org.jline.terminal.Terminal
 import org.openmole.tool.logger.Prettifier
 
 object Command:
-  def start(dsl: DSL, compilationContext: CompilationContext)(implicit services: Services): MoleExecution =
+  def start(dsl: DSL, compilationContext: CompilationContext, buildEventHandler: MoleExecution.BuildEventHandler = MoleExecution.BuildEventHandler())(implicit services: Services): MoleExecution =
     val runServices =
       import services._
       Services.copy(services)(fileServiceCache = FileServiceCache())
@@ -52,7 +52,9 @@ object Command:
     import runServices._
     val moleServices = MoleServices.create(applicationExecutionDirectory = services.workspace.tmpDirectory, compilationContext = Some(compilationContext))
 
-    val ex = MoleExecution(dsl)(using moleServices)
+    val ex =
+      val p = DSL.toPuzzle(dsl)
+      MoleExecution(p.toMole, p.sources, p.hooks, p.environments, p.grouping, buildEventHandler = buildEventHandler)(using moleServices)
     ex.start(true)
   end start
 
@@ -96,70 +98,80 @@ class Command(val console: REPL, val variables: ConsoleVariables, val terminal: 
       mole.dataChannels.foreach(println)
 
     def print(moleExecution: MoleExecution, debug: Boolean = false): Unit =
-      def environmentErrors(environment: Environment, level: Level) =
+      import layoutz.*
+
+      def environmentErrors(environment: Environment, level: Level): Seq[Element] =
         def filtered =
           Environment.clearErrors(environment).filter: e =>
             e.level.intValue() >= level.intValue()
 
         for
-          error ← filtered
-        do
+          error <- filtered
+        yield
           def detail =
             error.detail match
               case None    => ""
               case Some(m) => s"\n$m\n"
 
-          println(
-            s"""${error.level.toString}: ${error.exception.getMessage}$detail
-               |${exceptionToString(error.exception)}""".stripMargin
-          )
+          s"""${error.level.toString}: ${error.exception.getMessage}$detail
+             |${exceptionToString(error.exception)}""".stripMargin
 
-      def printEnvironment(environment: Environment, debug: Boolean): Unit =
-        println(environment.simpleName + ":")
-        for
-          (label, number) ← List(
-            "Submitted" → environment.submitted,
-            "Running" → environment.running,
-            "Done" → environment.done,
-            "Failed" → environment.failed
-          )
-        do println(s"  $label: $number")
+      def printEnvironment(environment: Environment, debug: Boolean) =
         val errors = Environment.errors(environment)
         def low = errors.count(_.level.intValue() <= Level.INFO.intValue())
         def warning = errors.count(_.level.intValue() == Level.WARNING.intValue())
         def severe = errors.count(_.level.intValue() == Level.SEVERE.intValue())
-        println(s"$severe critical errors, $warning warning and $low low-importance errors. Use the errors() function to display them.")
-        environmentErrors(environment, (if(debug) Level.FINE else Level.INFO))
 
-      println("\n--- Execution ---\n")
+        Seq[Element](
+          environment.simpleName.style(Style.Bold ++ Style.Italic ++ Style.Underline),
+          table(
+            headers = Seq("Status", "Jobs"),
+            rows = Seq(
+                Seq("Submitted", environment.submitted.toString),
+                Seq("Running", environment.running.toString),
+                Seq("Done", environment.done.toString),
+                Seq("Failed", environment.failed.toString)
+              )
+          ),
+          s"$severe critical errors, $warning warning and $low low-importance errors.",
+        ) ++ environmentErrors(environment, if debug then Level.FINE else Level.INFO)
+
 
       val statuses = moleExecution.capsuleStatuses
 
-      val msg =
-        for (capsule, stat) ← statuses
-        yield s"${capsule}: ${stat.ready} ready, ${stat.running} running, ${stat.completed} completed"
-
-      println(msg.mkString("\n"))
-
-      println("\n--- Errors ---\n")
+      println:
+        section("Execution")(
+          table(
+            headers = Seq("Capsule", "Ready", "Running", "Completed"),
+            rows =
+              for (capsule, stat) <- statuses.toSeq
+              yield Seq(s"${capsule}", s"${stat.ready}", s"${stat.running}", s"${stat.completed}")
+          )
+        ).render
 
       moleExecution.exception match
         case Some(e) =>
-          MoleExecution.MoleExecutionFailed.capsule(e) match
-            case Some(c) => System.out.println(s"Mole execution failed while executing ${c}:")
-            case None    => System.out.println(s"Mole execution failed:")
+          println:
+            val head =
+              MoleExecution.MoleExecutionFailed.capsule(e) match
+                case Some(c) => s"Mole execution failed while executing ${c}:"
+                case None    => s"Mole execution failed:"
 
-          System.out.println(exceptionToString(e.exception))
+            section("Error")(
+              layout(
+                head,
+                exceptionToString(e.exception)
+              )
+            ).render
         case None =>
 
 
-      println("\n--- Environments ---\n")
-
-      for
-        env <- moleExecution.allEnvironments
-      do
-        printEnvironment(env, debug = debug)
-        println()
+      println:
+        section("Environments")(
+          Layout:
+            moleExecution.allEnvironments.flatMap: env =>
+              printEnvironment(env, debug = debug)
+        ).render
 
     def load(file: File, args: Seq[String] = Seq.empty)(implicit services: Services): Console.CompiledDSL =
       Command.load(variables, file, args)

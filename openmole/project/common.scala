@@ -55,7 +55,7 @@ object common {
   def guavaVersion = "31.1-jre"
   def scalaMetaVersion = "4.14.2"
   def scalaSTMVersion = "0.11.1"
-  def jlineVersion = "3.25.1"
+  def jlineVersion = "3.30.6"
   def txtmarkVersion = "0.13"
   def slf4jVersion = "2.0.9"
   def foryVersion = "0.11.0"
@@ -75,6 +75,8 @@ object common {
 
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.8.0"
+
+  def layouzVersion = "0.6.0"
  
   case class CommitVersion(commit: String, version: String)
 }
