@@ -35,7 +35,7 @@ import dotc.util.{SourceFile, SourcePosition}
 import dotc.{CompilationUnit, Driver}
 import dotc.config.CompilerCommand
 import dotty.tools.io.{AbstractFileClassLoader => _, *}
-import dotty.tools.runner.ScalaClassLoader.*
+import dotty.tools.runner.ScalaClassLoader.* // OM
 
 import org.jline.reader.*
 
@@ -83,6 +83,26 @@ import scala.util.Using
 object REPLDriver {
   type Compiled = (dotty.tools.repl.results.Result[(CompilationUnit, State)], State)
   type CompilerState = dotty.tools.repl.State
+
+  // OM: duplicate ommand list since commands is private in ParseResult
+  val commands: List[(String, String => ParseResult)] = List( // OM
+    Quit.command -> (_ => Quit), // OM
+    Quit.alias -> (_ => Quit), // OM
+    Help.command -> (_ => Help), // OM
+    Reset.command -> (arg => Reset(arg)), // OM
+    Imports.command -> (_ => Imports), // OM
+    JarCmd.command -> (arg => JarCmd(arg)), // OM
+    KindOf.command -> (arg => KindOf(arg)), // OM
+    Load.command -> (arg => Load(arg)), // OM
+    Require.command -> (arg => Require(arg)), // OM
+    TypeOf.command -> (arg => TypeOf(arg)), // OM
+    DocOf.command -> (arg => DocOf(arg)), // OM
+    Settings.command -> (arg => Settings(arg)), // OM
+    Sh.command -> (arg => Sh(arg)), // OM
+    Silent.command -> (_ => Silent), // OM
+  )
+
+
 }
 
 // OM
@@ -252,27 +272,22 @@ class REPLDriver(settings: Array[String],
         // Clear the stop flag before executing new code
         ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), false)
 
-        val previousSignalHandler = terminal.handle(
-          org.jline.terminal.Terminal.Signal.INT,
-          (sig: org.jline.terminal.Terminal.Signal) => {
+        val newState = terminal.withMonitoringCtrlC(
+          handler = () =>
             if (!firstCtrlCEntered) {
               firstCtrlCEntered = true
               // Set the stop flag to trigger throwIfReplStopped() in instrumented code
               ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), true)
-              // Also interrupt the thread as a fallback for non-instrumented code
+              // Also interrupt the thread as a fallback for non-instrumented code, e.g. IO/sleeps
               thread.interrupt()
-              out.println("\nAttempting to interrupt running thread with `Thread.interrupt`")
+              out.println("\nAttempting to interrupt running REPL command")
             } else {
               out.println("\nTerminating REPL Process...")
               System.exit(130)  // Standard exit code for SIGINT
             }
-          }
-        )
-
-        val newState =
-          try interpret(res)
-          // Restore previous handler
-          finally terminal.handle(org.jline.terminal.Terminal.Signal.INT, previousSignalHandler)
+        ) {
+          interpret(res)
+        }
 
         loop(using newState)()
       }
@@ -334,26 +349,8 @@ class REPLDriver(settings: Array[String],
 
   /** Extract possible completions at the index of `cursor` in `expr` */
   final def completions(cursor: Int, expr: String, state0: State): List[Completion] =   // OM
-    // OM: duplicate ommand list since commands is private in ParseResult
-    val commands: List[(String, String => ParseResult)] = List(                         // OM
-      Quit.command -> (_ => Quit),                                                      // OM
-      Quit.alias -> (_ => Quit),                                                        // OM
-      Help.command -> (_  => Help),                                                     // OM
-      Reset.command -> (arg  => Reset(arg)),                                            // OM
-      Imports.command -> (_  => Imports),                                               // OM
-      JarCmd.command -> (arg => JarCmd(arg)),                                           // OM
-      KindOf.command -> (arg => KindOf(arg)),                                           // OM
-      Load.command -> (arg => Load(arg)),                                               // OM
-      Require.command -> (arg => Require(arg)),                                         // OM
-      TypeOf.command -> (arg => TypeOf(arg)),                                           // OM
-      DocOf.command -> (arg => DocOf(arg)),                                             // OM
-      Settings.command -> (arg => Settings(arg)),                                       // OM
-      Sh.command -> (arg => Sh(arg)),                                                   // OM
-      Silent.command -> (_ => Silent),                                                  // OM
-    )
-
     if expr.startsWith(":") then
-      commands.collect {                                                                // OM
+      REPLDriver.commands.collect {                                                                // OM
         case command if command._1.startsWith(expr) => Completion(command._1, "", List())
       }
     else
@@ -374,8 +371,13 @@ class REPLDriver(settings: Array[String],
 
   protected def interpret(res: ParseResult)(using state: State): State = {
     res match {
+      case parsed: Parsed if parsed.source.content().mkString.startsWith("//>") =>
+        // Check for magic comments specifying dependencies
+        println("Please use `:dep com.example::artifact:version` to add dependencies in the REPL")
+        state
+
       case parsed: Parsed if parsed.trees.nonEmpty =>
-        compile(parsed, state)
+          compile(parsed, state)
 
       case SyntaxErrors(_, errs, _) =>
         displayErrors(errs)
@@ -608,9 +610,7 @@ class REPLDriver(settings: Array[String],
           val formattedTypeDefs =  // don't render type defs if wrapper initialization failed
             if newState.invalidObjectIndexes.contains(state.objectIndex) then Seq.empty
             else typeDefs(wrapperModule.symbol)
-          val highlighted = (formattedTypeDefs ++ formattedMembers)
-            .map(d => new Diagnostic(d.msg.mapMsg(SyntaxHighlighting.highlight), d.pos, d.level))
-          (newState, highlighted)
+          (newState, formattedTypeDefs ++ formattedMembers)
         }
         .getOrElse {
           // user defined a trait/class/object, so no module needed
@@ -763,7 +763,6 @@ class REPLDriver(settings: Array[String],
         state.copy(context = rootCtx)
 
     case Silent => state.copy(quiet = !state.quiet)
-
     case Quit =>
       // end of the world!
       state
