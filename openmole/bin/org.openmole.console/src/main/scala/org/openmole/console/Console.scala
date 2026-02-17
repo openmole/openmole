@@ -41,7 +41,9 @@ object Console extends JavaLogger:
   lazy val consoleUsage = "(Type :q to quit)"
 
   def withTerminal[T](f: Terminal ?=> T): T =
-    val term = TerminalBuilder.builder().build()
+    val term =
+      org.openmole.tool.thread.withThreadClassLoader(classOf[Terminal].getClassLoader):
+        TerminalBuilder.builder().build()
     try f(using term)
     finally term.close()
 
