@@ -140,8 +140,8 @@ class JLineTerminal(term: Option[org.jline.terminal.Terminal] = None) extends ja
       val highlighted = SyntaxHighlighting.highlight(buffer)
       AttributedString.fromAnsi(highlighted)
     }
-    def setErrorPattern(errorPattern: java.util.regex.Pattern): Unit = {}
-    def setErrorIndex(errorIndex: Int): Unit = {}
+    override def setErrorPattern(errorPattern: java.util.regex.Pattern): Unit = {}
+    override def setErrorIndex(errorIndex: Int): Unit = {}
   }
 
   /** Provide multi-line editing support */
