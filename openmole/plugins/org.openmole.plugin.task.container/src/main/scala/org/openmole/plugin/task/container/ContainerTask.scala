@@ -679,7 +679,7 @@ object ContainerTaskExecution:
       (externalExecution, Some(containerTask.external))
 
 
-case class ContainerTaskExecution(
+case class ContainerTaskExecution private(
   image: InstalledSingularityImage,
   command: ContainerTask.Commands,
   workDirectory: Option[String],
