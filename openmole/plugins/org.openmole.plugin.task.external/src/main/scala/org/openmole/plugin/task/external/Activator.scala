@@ -31,9 +31,9 @@ class Activator extends BundleActivator:
 
     val keyWords: Vector[HighLight] =
       Vector(
-        WordHighLight(objectName(inputFiles)),
-        WordHighLight(objectName(outputFiles)),
-        WordHighLight(objectName(resources)),
+        WordHighLight(variableName(inputFiles)),
+        WordHighLight(variableName(outputFiles)),
+        WordHighLight(variableName(resources)),
         ObjectHighLight(objectName(EmptyDirectory))
       )
 
