@@ -189,8 +189,11 @@ object ContainerTask:
               buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Installing", s"Executing install commands"):
                 executeInstall(img, install, volumes = volumes, environmentVariables = environmentVariables, errorDetail = errorDetail)
 
-            embeddedResourcesValue.foreach: (f, d) =>
-              _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
+            if embeddedResourcesValue.nonEmpty
+            then
+              buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Embedding", s"Embedding the resources into the container"):
+                embeddedResourcesValue.foreach: (f, d) =>
+                  _root_.container.ImageBuilder.copyIntoFlatImage(f, installedImage, d.path)
 
             val singularityImage =
               buildParameters.taskExecutionBuildContext.buildEventHandler.stage("Building", s"Building singularity image"):
