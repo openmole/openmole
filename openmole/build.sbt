@@ -302,7 +302,10 @@ lazy val services = OsgiProject(coreDir, "org.openmole.core.services", imports =
 
 lazy val location = OsgiProject(coreDir, "org.openmole.core.location", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
 
-lazy val highlight = OsgiProject(coreDir, "org.openmole.core.highlight", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
+lazy val highlight = OsgiProject(coreDir, "org.openmole.core.highlight", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (
+  coreSettings,
+  libraryDependencies += Libraries.sourceCode
+)
 
 lazy val namespace = OsgiProject(coreDir, "org.openmole.core.namespace", imports = defaultImports ++ Seq("*")) dependsOn (exception) settings (coreSettings *)
 

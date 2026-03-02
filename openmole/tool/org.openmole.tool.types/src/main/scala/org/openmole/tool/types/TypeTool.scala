@@ -239,4 +239,3 @@ object TypeTool:
     ).map(t => t.getName -> t).toMap
 
   def primitiveType(typeName: String): Option[Class[?]] = primitiveTypes.get(typeName)
-
