@@ -178,7 +178,5 @@ object JavaTask:
 
   .set(outputs ++= Seq(returnValue.option, stdOut.option, stdErr.option).flatten)
   .withValidate: info =>
-    def inputFileError = Mapped.files(info.mapped.inputs).map(f => UserBadDataError(s"Input file mapping is not supported: ${f.name}"))
-    def outputFileError = Mapped.files(info.mapped.outputs).map(f => UserBadDataError(s"Output file mapping is not supported: ${f.name}"))
-    ContainerTask.validateContainer(Vector(), environmentVariables, info.external) ++ inputFileError ++ outputFileError
+    ContainerTask.validateContainer(Vector(), environmentVariables, info.external)
 

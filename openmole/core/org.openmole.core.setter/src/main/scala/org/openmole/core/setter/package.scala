@@ -21,6 +21,10 @@ import org.openmole.core.context.*
 import org.openmole.core.argument
 import org.openmole.core.argument.*
 import org.openmole.core.keyword.:=
+import org.openmole.tool.file.File
+
+import scala.util.NotGiven
+import scala.annotation.implicitNotFound
 
 /**
  * Part of the dsl for task properties (inputs, outputs, assignements)
@@ -82,6 +86,11 @@ object Mapped:
       case Mapped(Val.caseFile(v), _) => Seq[ Mapped[?]]()
       case m                          => Seq(m)
 
+  @implicitNotFound("To map on a Val of type File, you must provide a file name or path: v mapped \"file.txt\"")
+  trait NotFile[T]
+
+  object NotFile:
+    given [T](using NotGiven[T =:= java.io.File]): NotFile[T] with {}
 /**
  * Prototype mapped to a variable name
  * @param v
@@ -172,7 +181,7 @@ trait BuilderPackage:
      * mapped to its own simple name
      * @return
      */
-    def mapped: Mapped[T] = mapped(p.simpleName)
+    def mapped(using Mapped.NotFile[T]): Mapped[T] = mapped(p.simpleName)
 
     /**
      * mapped to the given variable name

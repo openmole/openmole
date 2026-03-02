@@ -1,17 +1,17 @@
 package org.openmole.core.highlight
 
-import org.openmole.core.highlight.HighLight.ObjectType.Other
-
-sealed trait HighLight {
+sealed trait HighLight:
   def name: String
-}
 
 object HighLight:
   
   implicit def fromString(s: String): WordHighLight = WordHighLight(s)
   implicit def classToString(c: Class[?]): String = c.getSimpleName
 
-  def objectName(o: Any) = o.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse
+  def objectName(o: Any) =
+    o.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse
+
+  def variableName[V](value: sourcecode.Text[V]) = value.source
 
   enum ObjectType:
     case Task, Hook, Source, Environment, Pattern, Sampling, Domain, Other
