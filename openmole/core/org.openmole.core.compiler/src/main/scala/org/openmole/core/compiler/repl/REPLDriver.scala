@@ -35,7 +35,7 @@ import dotc.util.{SourceFile, SourcePosition}
 import dotc.{CompilationUnit, Driver}
 import dotc.config.CompilerCommand
 import dotty.tools.io.{AbstractFileClassLoader => _, *}
-import dotty.tools.runner.ScalaClassLoader.* // OM
+import dotty.tools.repl.ScalaClassLoader.* // OM
 
 import org.jline.reader.*
 
@@ -763,6 +763,28 @@ class REPLDriver(settings: Array[String],
         state.copy(context = rootCtx)
 
     case Silent => state.copy(quiet = !state.quiet)
+    case Dep(dep) =>
+      val depStrings = List(dep)
+      if depStrings.nonEmpty then
+        val deps = depStrings.flatMap(DependencyResolver.parseDependency)
+        if deps.nonEmpty then
+          DependencyResolver.resolveDependencies(deps) match
+            case Right(files) =>
+              if files.nonEmpty then
+                inContext(state.context):
+                  // Update both compiler classpath and classloader
+                  val prevOutputDir = ctx.settings.outputDir.value
+                  val prevClassLoader = rendering.classLoader()
+                  rendering.myClassLoader = DependencyResolver.addToCompilerClasspath(
+                    files,
+                    prevClassLoader,
+                    prevOutputDir
+                  )
+                  out.println(s"Resolved ${deps.size} dependencies (${files.size} JARs)")
+            case Left(error) =>
+              out.println(s"Error resolving dependencies: $error")
+      state
+
     case Quit =>
       // end of the world!
       state

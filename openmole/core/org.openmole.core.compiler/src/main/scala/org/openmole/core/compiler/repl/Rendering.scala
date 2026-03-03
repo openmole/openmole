@@ -7,8 +7,9 @@ import repl.{AbstractFileClassLoader, State}    // OM
 import dotc.*, core.*
 import Contexts.*, Denotations.*, Flags.*, NameOps.*, StdNames.*, Symbols.*
 import printing.ReplPrinter
+import printing.SyntaxHighlighting
 import reporting.Diagnostic
-import util.StackTraceOps.*
+import dotty.tools.repl.StackTraceOps.*         // OM
 
 import scala.compiletime.uninitialized
 import scala.util.control.NonFatal
@@ -35,11 +36,9 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
   private def pprintRender(value: Any, width: Int, height: Int, initialOffset: Int)(using Context): String = {
     def fallback() =
-      // might as well be `println` in this case, but JDK classes e.g. `Float` are correctly handled.
-      pprint.PPrinter.BlackWhite
+      pprint.PPrinter.Color
         .apply(value, width = width, height = height, initialOffset = initialOffset)
         .plainText
-
     try
       // normally, if we used vanilla JDK and layered classloaders, we wouldnt need reflection.
       // however PPrint works by runtime type testing to deconstruct values. This is
@@ -52,10 +51,10 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
       // Due the possible interruption instrumentation, it is unlikely that we can get
       // rid of reflection here.
       val cl = classLoader()
-      val pprintCls = Class.forName("pprint.PPrinter$BlackWhite$", false, cl)
+      val pprintCls = Class.forName("pprint.PPrinter$Color$", false, cl)
       val fansiStrCls = Class.forName("fansi.Str", false, cl)
-      val BlackWhite = pprintCls.getField("MODULE$").get(null)
-      val BlackWhite_apply = pprintCls.getMethod("apply",
+      val Color = pprintCls.getField("MODULE$").get(null)
+      val Color_apply = pprintCls.getMethod("apply",
         classOf[Any],     // value
         classOf[Int],     // width
         classOf[Int],     // height
@@ -64,11 +63,11 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
         classOf[Boolean], // escape Unicode
         classOf[Boolean], // show field names
       )
-      val FansiStr_plainText = fansiStrCls.getMethod("plainText")
-      val fansiStr = BlackWhite_apply.invoke(
-        BlackWhite, value, width, height, 2, initialOffset, false, true
+      val FansiStr_render = fansiStrCls.getMethod("render")
+      val fansiStr = Color_apply.invoke(
+        Color, value, width, height, 2, initialOffset, false, true
       )
-      FansiStr_plainText.invoke(fansiStr).asInstanceOf[String]
+      FansiStr_render.invoke(fansiStr).asInstanceOf[String]
     catch
       case ex: ClassNotFoundException => fallback()
       case ex: NoSuchMethodException  => fallback()
@@ -119,22 +118,23 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     if ncp <= maxPrintCharacters then str
     else str.substring(0, str.offsetByCodePoints(0, maxPrintCharacters - 1))
 
-  /** Return a String representation of a value we got from `classLoader()`. */
-  private[repl] def replStringOf(value: Object, prefixLength: Int)(using Context): String = {
+  /** Return a colored fansi.Str representation of a value we got from `classLoader()`. */
+  private[repl] def replStringOf(value: Object, prefixLength: Int)(using Context): fansi.Str = {
     // pretty-print things with 100 cols 50 rows by default,
-    pprintRender(
+    val res = pprintRender(
       value,
       width = 100,
       height = 50,
       initialOffset = prefixLength
     )
+    if (ctx.settings.color.value == "never") fansi.Str(res).plainText else res
   }
 
   /** Load the value of the symbol using reflection.
    *
    *  Calling this method evaluates the expression using reflection
    */
-  private def valueOf(sym: Symbol, prefixLength: Int)(using Context): Option[String] =
+  private def valueOf(sym: Symbol, prefixLength: Int)(using Context): Option[fansi.Str] =
     val objectName = sym.owner.fullName.encode.toString.stripSuffix("$")
     val resObj: Class[?] = Class.forName(objectName, true, classLoader())
     val symValue = resObj
@@ -143,11 +143,14 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
       .flatMap(result => rewrapValueClass(sym.info.classSymbol, result.invoke(null)))
     symValue
       .filter(_ => sym.is(Flags.Method) || sym.info != defn.UnitType)
-      .map(value => stripReplPrefix(replStringOf(value, prefixLength)))
+      .map(value => stripReplPrefixFansi(replStringOf(value, prefixLength)))
 
-  private def stripReplPrefix(s: String): String =
-    if (s.startsWith(REPL_WRAPPER_NAME_PREFIX))
-      s.drop(REPL_WRAPPER_NAME_PREFIX.length).dropWhile(c => c.isDigit || c == '$')
+  private def stripReplPrefixFansi(s: fansi.Str): fansi.Str =
+    val plain = s.plainText
+    if (plain.startsWith(REPL_WRAPPER_NAME_PREFIX))
+      val prefixLen = REPL_WRAPPER_NAME_PREFIX.length
+      val dropLen = prefixLen + plain.drop(prefixLen).takeWhile(c => c.isDigit || c == '$').length
+      s.substring(dropLen)
     else
       s
 
@@ -175,17 +178,17 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
   /** Render value definition result */
   def renderVal(d: Denotation)(using Context): Either[ReflectiveOperationException, Option[Diagnostic]] =
-    val dcl = d.symbol.showUser
-    def msg(s: String) = infoDiagnostic(s, d)
+    val dcl = fansi.Str(SyntaxHighlighting.highlight(d.symbol.showUser))
+    def msg(s: fansi.Str) = infoDiagnostic(s, d)
     try
       Right(
         if d.symbol.is(Flags.Lazy) then Some(msg(dcl))
         else {
-          val prefix = s"$dcl = "
+          val prefix = dcl ++ " = "
           // Prefix can have multiple lines, only consider the last one
           // when determining the initial column offset for pretty-printing
-          val prefixLength = prefix.linesIterator.toSeq.lastOption.getOrElse("").length
-          valueOf(d.symbol, prefixLength).map(value => msg(s"$prefix$value"))
+          val prefixLength = prefix.plainText.linesIterator.toSeq.lastOption.getOrElse("").length
+          valueOf(d.symbol, prefixLength).map(value => msg(prefix ++ value))
         }
       )
     catch case e: ReflectiveOperationException => Left(e)
@@ -212,11 +215,17 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
       ste.getClassName.startsWith(REPL_WRAPPER_NAME_PREFIX)  // d.symbol.owner.name.show is simple name
       && (ste.getMethodName == nme.STATIC_CONSTRUCTOR.show || ste.getMethodName == nme.CONSTRUCTOR.show)
 
-    infoDiagnostic(cause.formatStackTracePrefix(!isWrapperInitialization(_)), d)
+    val formatted0 = cause.formatStackTracePrefix(!isWrapperInitialization(_))
+    val formatted: fansi.Str = if (ctx.settings.color.value == "never") formatted0.plainText else formatted0
+    infoDiagnostic(formatted, d)
   end renderError
 
+  private def infoDiagnostic(msg: fansi.Str, d: Denotation)(using Context): Diagnostic = {
+    new Diagnostic.Info(msg.render, d.symbol.sourcePos)
+  }
+
   private def infoDiagnostic(msg: String, d: Denotation)(using Context): Diagnostic =
-    new Diagnostic.Info(msg, d.symbol.sourcePos)
+    new Diagnostic.Info(SyntaxHighlighting.highlight(msg), d.symbol.sourcePos)
 
   /** OM */
   def formatError(dia: Diagnostic)(using state: State): Diagnostic =
@@ -232,7 +241,7 @@ object Rendering:
     def showUser(using Context): String = {
       val printer = new ReplPrinter(ctx)
       val text = printer.dclText(s)
-      text.mkString(ctx.settings.pageWidth.value, ctx.settings.printLines.value)
+      text.mkString(ctx.settings.pageWidth.value)
     }
 
   def rootCause(x: Throwable): Throwable = x match
