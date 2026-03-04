@@ -86,7 +86,7 @@ The ${code{"ProfileEvolution"}} constructor takes the following arguments:
 ${ul(
   li{html"${hl.code("evaluation")}: the model task, that has to be previously declared in your script,"},
   li{html"${hl.code("objective")}: the fitness, a sequence of output variable defined in the OpenMOLE script that is used to evaluate the model dynamics, to be minimized (for this method it is advised to use a single objective), "},
-  li{html"${hl.code("profile")}: the sequence of parameter to profile, use in key word to set the number of intervals (${i{"i.e.g"}} Seq(myParam) or Seq(myParam in 100) or Seq(myParam in (1.0 to 5.0 by 0.5))),"},
+  li{html"${hl.code("profile")}: the sequence of parameter to profile, use in key word to set the number of intervals (${i{"e.g."}} Seq(myParam) or Seq(myParam in 100) or Seq(myParam in (1.0 to 5.0 by 0.5))),"},
   li{html"${hl.code("genome")}: a list of the model input parameters with their values interval declared with the ${hl.code("in")} operator,"},
   li{html"${hl.code("termination")}: a \"quantity\" of model evaluation allocated to the profile task. Can be given in number of evaluations (${i{"e.g."}} 20000) or in computation time units (${i{"e.g."}} 230 minutes, 2 days...),"},
   li{html"${hl.code("parallelism")}: $optional number of parallel calibrations performed within ${b{"i"}} subinterval, defaults to 1,"},
@@ -98,7 +98,7 @@ ${ul(
 ${h3{"Hook"}}
 
 The output of the genetic algorithm must be captured with a hook which saves the current optimal population.
-The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/directory\""}} to save the results as CSV files in a specific directory, or ${code{"hook display"}} to display the results in the standard output.
+The generic way to use it is to write either ${code{"hook(workDirectory / \"path/of/a/directory\")"}} to save the results as CSV files in a specific directory, or ${code{"hook display"}} to display the results in the standard output.
 
 $br
 
