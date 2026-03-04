@@ -76,7 +76,7 @@ object common {
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.8.0"
 
-  def layouzVersion = "0.6.0"
+  def layouzVersion = "0.7.0"
  
   case class CommitVersion(commit: String, version: String)
 }
