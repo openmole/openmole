@@ -85,7 +85,9 @@ object PSE {
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState[HitMapState](s = Map())
+        def initialState = 
+          import mgo.tools.PatternMap
+          EvolutionState[HitMapState](s = PatternMap.empty)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
@@ -138,18 +140,16 @@ object PSE {
             MGOPSE.elitism[Phenotype](pattern(_).from(context)) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
-          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
-          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
-          state.copy(s = newMap.toMap)
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.add(state.s, islandState.s, _ + _, 0)
+          state.copy(s = newMap)
 
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState(initialState: S, islandState: S): S =
-            def allKeys = islandState.s.keys
-            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
-            islandState.copy(s = newMap.toMap)
 
-          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.addToLeft(state.s, initialState.s, _ - _, 0)
+          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state.copy(s = newMap))
 
     }
 
@@ -199,7 +199,9 @@ object PSE {
           Genome.toVariables(om.genome, cs, is, scale = true)
 
         def buildIndividual(genome: G, phenotype: Phenotype, state: S) = MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
-        def initialState = EvolutionState[HitMapState](s = Map())
+        def initialState =
+          import mgo.tools.PatternMap
+          EvolutionState[HitMapState](s = PatternMap.empty)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext: p =>
           import p._
@@ -256,18 +258,16 @@ object PSE {
 
 
         def mergeIslandState(state: S, islandState: S): S =
-          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
-          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
-          state.copy(s = newMap.toMap)
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.add(state.s, islandState.s, _ + _, 0)
+          state.copy(s = newMap)
 
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState(initialState: S, islandState: S): S =
-            def allKeys = islandState.s.keys
-            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
-            islandState.copy(s = newMap.toMap)
 
-          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.addToLeft(state.s, initialState.s, _ - _, 0)
+          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state.copy(s = newMap))
 
     }
 

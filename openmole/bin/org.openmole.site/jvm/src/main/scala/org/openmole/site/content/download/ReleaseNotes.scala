@@ -35,6 +35,16 @@ import ReleaseNotesValue.*
 
 object ReleaseNotes extends PageContent(html"""
 
+
+${h2{"V23 | D D"}}
+
+${
+  notes("""
+    - Reduce PSE an PPSE memory footprint
+  """)
+}
+
+
 ${h2{"V22 | Cranky Crocodile"}}
 
 ${

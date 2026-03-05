@@ -171,31 +171,22 @@ object PPSE:
           (s2, elited)
 
         def mergeIslandState(state: S, islandState: S): S =
-          def sumMap[K, V](m1: Map[K, V], m2: Map[K, V], sum: (V, V) => V, zero: V): Map[K, V] =
-            def allKeys = m1.keys ++ m2.keys
-            def newMap = allKeys.map: k =>
-              k -> sum(m1.getOrElse(k, zero), m2.getOrElse(k, zero))
-            newMap.toMap
-
+          import mgo.tools.PatternMap
           state.
-            focus(_.s.likelihoodRatioMap).modify(m => sumMap(initialState.s.likelihoodRatioMap, m, _ + _, 0)).
-            focus(_.s.hitmap).modify(m => sumMap(initialState.s.hitmap, m, _ + _, 0))
-
+            focus(_.s.likelihoodRatioMap).modify(m => PatternMap.add(initialState.s.likelihoodRatioMap, m, _ + _, 0)).
+            focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0))
 
         def migrateToIsland(population: Vector[I], state: S) =  (population.map(_.copy(initial = true)), state)
 
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffMap[K, V](m1: Map[K, V], m2: Map[K, V], diff: (V, V) => V, zero: V): Map[K, V] =
-            def allKeys = m2.keys
-            def newMap = allKeys.map: k =>
-              k -> diff(m2(k), m1.getOrElse(k, zero))
-            newMap.toMap
+          import mgo.tools.PatternMap
 
           val migratedPopulation = population.filter(!_.initial).map(_.copy(generation = initialState.generation))
+          
           val migratedState =
             state.
-              focus(_.s.likelihoodRatioMap).modify(m => diffMap(initialState.s.likelihoodRatioMap, m, _ - _, 0)).
-              focus(_.s.hitmap).modify(m => diffMap(initialState.s.hitmap, m, _ - _, 0))
+              focus(_.s.likelihoodRatioMap).modify(m => PatternMap.addToLeft(m, initialState.s.likelihoodRatioMap, _ - _, 0)).
+              focus(_.s.hitmap).modify(m => PatternMap.addToLeft(m, initialState.s.hitmap, _ - _, 0))
 
           (migratedPopulation, migratedState)
 
