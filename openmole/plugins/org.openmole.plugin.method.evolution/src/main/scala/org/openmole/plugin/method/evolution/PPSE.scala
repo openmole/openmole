@@ -143,8 +143,7 @@ object PPSE:
             minClusterSize = om.minClusterSize,
             regularisationEpsilon = om.regularisationEpsilon) apply (s, population, candidates, rng)
 
-          val s3 = Focus[S](_.generation).modify(_ + 1)(s2)
-          (s3, elited)
+          (s2, elited)
 
         def mergeIslandState(state: S, islandState: S): S =
           def sumMap[K, V](m1: Map[K, V], m2: Map[K, V], sum: (V, V) => V, zero: V): Map[K, V] =
