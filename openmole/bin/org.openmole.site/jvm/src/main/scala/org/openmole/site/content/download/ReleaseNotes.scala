@@ -41,6 +41,7 @@ ${h2{"V23 | D D"}}
 ${
   notes("""
     - Reduce PSE an PPSE memory footprint
+    - Implement wizard for the nlogox file format
   """)
 }
 

@@ -71,10 +71,16 @@ object WizardUtils:
       //val resourcesString = if (!resources.isEmpty) s"""  resources += (${resources.map { r => s"workDirectory / $r" }.mkString(",")})\n""" else ""
 
       val defaultValues =
-        (inputs.map { p => (p.name, p.default) } ++
-          ifilemappings.map { p => (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }).filterNot {
-          _._2.isEmpty
-        }.map { p => default(p._1, p._2) }
+        (
+          inputs.map: p =>
+            val default =
+              if p.`type` == PrototypeData.String
+              then s"""\"\"\"${p.default}\"\"\""""
+              else p.default
+
+            (p.name, default)
+          ++ ifilemappings.map { p => (p.name, " workDirectory / \"" + p.mapping.getOrElse("") + "\"") }
+        ).filterNot {_._2.isEmpty}.map { p => default(p._1, p._2) }
 
       ioString(ins, "inputs") ++
         ioString(ous, "outputs") ++
@@ -135,7 +141,10 @@ object WizardUtils:
 
   def toVariableName(s: String) =
     val capital: String = s.split('-').flatMap(_.split(' ')).reduce(_ + _.capitalize)
-    capital.replace("?", "").replace("%", "percent")
+    val res = capital.replace("?", "").replace("%", "percent")
+    if res.isEmpty
+    then res
+    else res.substring(0, 1).toLowerCase + res.tail
 
   def unknownError(acceptedModel: AcceptedModel, name: String) = Future.failed(new UnknownError(s"Unable to handle ${acceptedModel} in wizard $name"))
 
