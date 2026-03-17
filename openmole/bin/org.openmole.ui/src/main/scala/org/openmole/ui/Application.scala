@@ -52,7 +52,7 @@ object Application extends JavaLogger {
     sealed trait LaunchMode
     object ConsoleMode extends LaunchMode
     object GUIMode extends LaunchMode
-    object GUIIintialize extends LaunchMode
+    object GUIInitialize extends LaunchMode
     object HelpMode extends LaunchMode
     object RESTMode extends LaunchMode
     object VersionMode extends LaunchMode
@@ -150,7 +150,7 @@ object Application extends JavaLogger {
         case "--unoptimizedJS" :: tail               => parse(tail, c.copy(unoptimizedJS = true))
         case "--gui-extra-header" :: tail            => parse(dropArg(tail), c.copy(guiExtraHeader = Some(takeArg(tail))))
         case "--gui-extra-header-file" :: tail       => parse(dropArg(tail), c.copy(guiExtraHeaderFile = Some(new File(takeArg(tail)))))
-        case "--gui-initialize" :: tail              => parse(tail, c.copy(launchMode = GUIIintialize))
+        case "--gui-initialize" :: tail              => parse(tail, c.copy(launchMode = GUIInitialize))
         case "--reset" :: tail                       => parse(tail, c.copy(launchMode = Reset(initialisePassword = false)))
         case "--reset-password" :: tail              => parse(tail, c.copy(launchMode = Reset(initialisePassword = true)))
         case "--proxy" :: tail                       => parse(tail.tail, c.copy(proxyURI = Some(tail.head)))
@@ -236,7 +236,7 @@ object Application extends JavaLogger {
             console.run(config.args, config.consoleWorkDirectory)
           }
 
-      case GUIIintialize =>
+      case GUIInitialize =>
         given preference: Preference = Services.preference(workspace)
 
         GUIServerServices.withServices(workspace, config.proxyURI, logLevel, logFileLevel, config.password): services =>
