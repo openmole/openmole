@@ -75,8 +75,8 @@ object PPSE:
         def generationLens = Focus[S](_.generation)
         def evaluatedLens = Focus[S](_.evaluated)
 
-        def genomeValues(genome: G) = genome._1
-        def buildGenome(vs: Vector[Variable[?]]) = (Genome.fromVariables(vs, om.genome)._1, Double.PositiveInfinity)
+        def genomeValues(genome: G) = mgo.evolution.algorithm.PPSE.Genome.values(genome)
+        def buildGenome(vs: Vector[Variable[?]]) = mgo.evolution.algorithm.PPSE.Genome(Genome.fromVariables(vs, om.genome)._1, None)
 
         def rejectValue = FromContext: p =>
           import p.*
@@ -121,7 +121,7 @@ object PPSE:
 
           mgo.evolution.algorithm.PPSEOperation.breeding[S, I, G](
             om.genome.continuous,
-            identity,
+            mgo.evolution.algorithm.PPSE.Genome.apply,
             n,
             rejectValue.from(context),
             _.s.gmm,
@@ -152,7 +152,7 @@ object PPSE:
                 densityValue.from(scaled)
 
           val (s2, elited) = mgo.evolution.algorithm.PPSEOperation.elitism[S, I, Phenotype](
-            _.genome,
+            i => mgo.evolution.algorithm.PPSE.Genome.toTuple(i.genome),
             _.phenotype,
             pattern(_).from(context),
             om.genome.continuous,
