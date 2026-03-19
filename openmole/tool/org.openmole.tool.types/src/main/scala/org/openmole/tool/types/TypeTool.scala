@@ -43,6 +43,12 @@ object TypeTool:
   extension [T](m: Manifest[Array[T]])
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
 
+  given iArrayManifest[T: Manifest]: Manifest[IArray[T]] =
+    new scala.reflect.Manifest[IArray[T]]:
+      override def runtimeClass: Class[?] = classOf[Array[T]]
+      override def typeArguments: List[Manifest[?]] = List(manifest[T])
+      override def toString = s"IArray[${manifest[T]}]"
+
   /*   implicit class TypeDecoration(t: TypeRepr) {
     def isArray = t <:< definitions.ArrayClass.toType
     def fromArray = t.typeArgs.head
