@@ -40,6 +40,7 @@ object MiniClustEnvironment:
     insecure: Boolean = false,
     openMOLEMemory: OptionalArgument[Information] = None,
     core: OptionalArgument[Int] = None,
+    memory: OptionalArgument[Information] = None,
     time: OptionalArgument[Time] = None,
     timeout: OptionalArgument[Time] = None,
     runtimeSetting: OptionalArgument[RuntimeSetting] = None,
@@ -50,6 +51,7 @@ object MiniClustEnvironment:
         insecure = insecure,
         openMOLEMemory = openMOLEMemory,
         core = core,
+        memory = memory,
         time = time,
         timeout = timeout,
         name = Some(varName.value),
@@ -77,6 +79,7 @@ class MiniClustEnvironment(
   val insecure: Boolean,
   val openMOLEMemory: Option[Information],
   val core: Option[Int],
+  val memory: Option[Information],
   val time: Option[Time],
   val timeout: Option[Time],
   val runtimeSetting: Option[RuntimeSetting],
@@ -188,7 +191,8 @@ class MiniClustEnvironment(
           stdErr = Some(stderr),
           resource =
             core.toSeq.map(c => _root_.gridscale.miniclust.Resource.Core(c)) ++
-              time.toSeq.map(t => _root_.gridscale.miniclust.Resource.MaxTime(t.toSeconds.toInt))
+              time.toSeq.map(t => _root_.gridscale.miniclust.Resource.MaxTime(t.toSeconds.toInt)) ++
+              memory.toSeq.map(m => _root_.gridscale.miniclust.Resource.Memory(m.toMegabytes.toInt))
         )
       )
 

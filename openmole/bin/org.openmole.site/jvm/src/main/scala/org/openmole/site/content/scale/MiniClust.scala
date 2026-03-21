@@ -50,6 +50,7 @@ ${ul(
   li{html"$runtimeSetting,"},
   li{html"${apiEntryTitle{"core"}} the number of cores reserved by each job"},
   li{html"${apiEntryTitle{"time"}} the maximum amount of time after which the job gets killed, the default on MiniClust is 1 hour"},
+  li{html"${apiEntryTitle{"memory"}} the amount of memory allocated for the job on the execution node,"},
   li{html"${apiEntryTitle{"insecure"}} true if the server provides an insecure https connection"}
 )}
 
