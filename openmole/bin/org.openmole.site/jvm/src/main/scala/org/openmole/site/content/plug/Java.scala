@@ -33,13 +33,13 @@ ${h3{"Arguments of the JavaTask"}}
 It takes the following arguments:
 
 ${ul(
-   li{html"${code{"script"}} String or file, $mandatory. The Scilab script to be executed."},
+   li{html"${code{"script"}} String or file, $mandatory. The Java script to be executed."},
    li{html"${code{"install"}} Sequence of strings, $optional (default = empty). The commands to be executed prior to the script execution (to install libraries on the system)."},
-   li{html"${code{"jars"}} Sequence of File, $optional. The some jars to add in the classpath of JVM."},
-   li{html"${code{"libraries"}} Sequence of String, $optional. The some libraries to use, the format in the one of scala-cli, for instance \"com.github.pathikrit::better-files:3.9.2\"."},
-   li{html"${code{"jvmOptions"}} Sequence of String, $optional. The some options to pass to the JVM, for instance \"-Xmx1G\"."},
+   li{html"${code{"jars"}} Sequence of File, $optional. Some jars to add to the JVM classpath."},
+   li{html"${code{"libraries"}} Sequence of String, $optional. Some libraries to use, in the scala-cli format, for instance \"com.github.pathikrit::better-files:3.9.2\"."},
+   li{html"${code{"jvmOptions"}} Sequence of String, $optional. Options to pass to the JVM, for instance \"-Xmx1G\"."},
    li{html"${code{"version"}} String, $optional. The version of JVM to run."},
-   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Java on the execution node."},
+   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before the execution of Java on the execution node."},
 )}
 
 ${h3{"Simple JavaTask"}}
