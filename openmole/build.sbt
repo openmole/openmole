@@ -1416,7 +1416,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
        apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
-       apt-get install -y apptainer && \
+       apt-get install -y singularity-container && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
        singularity config global -s "sessiondir max size" 0""")
