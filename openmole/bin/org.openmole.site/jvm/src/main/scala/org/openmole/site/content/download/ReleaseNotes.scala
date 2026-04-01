@@ -42,6 +42,7 @@ ${
   notes("""
     - Reduce PSE an PPSE memory footprint
     - Implement wizard for the nlogox file format
+    - Speed up container building
   """)
 }
 
