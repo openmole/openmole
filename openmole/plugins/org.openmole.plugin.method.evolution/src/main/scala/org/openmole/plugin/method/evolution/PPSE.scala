@@ -160,6 +160,7 @@ object PPSE:
             Focus[S](_.s.likelihoodRatioMap),
             Focus[S](_.s.hitmap),
             Focus[S](_.s.gmm),
+            Focus[I](_.generation),
             density = densityValue,
             maxRareSample = om.maxRareSample,
             iterations = om.gmmIterations,
