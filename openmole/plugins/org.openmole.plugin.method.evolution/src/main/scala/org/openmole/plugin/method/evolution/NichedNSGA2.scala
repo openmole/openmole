@@ -69,7 +69,8 @@ object NichedNSGA2Algorithm {
     NSGA2Operations.adaptiveBreeding[S, Individual[P], Genome](
       i => fitness(i.phenotype),
       Focus[Individual[P]](_.genome).get,
-      _.genome.values(continuous, discrete),
+      continuousValues(continuous).get,
+      discreteValues(discrete).get,
       continuousOperator.get,
       discreteOperator.get,
       continuous,
@@ -86,7 +87,8 @@ object NichedNSGA2Algorithm {
   def elitism[S, N, P](niche: Niche[Individual[P], N], mu: Int, continuous: Vector[C], discrete: Vector[D], fitness: P => Vector[Double]) =
     ProfileOperations.elitism[S, Individual[P], N](
       i => fitness(i.phenotype),
-      i => scaledValues(continuous, discrete)(i.genome),
+      _.genome.continuousValues,
+      _.genome.discreteValues(discrete),
       niche,
       mu)
 
@@ -150,7 +152,8 @@ object NoisyNichedNSGA2Algorithm {
     NoisyNSGA2Operations.adaptiveBreeding[S, Individual[P], Genome, P](
       aggregatedFitness(aggregation),
       Focus[Individual[P]](_.genome).get,
-      _.genome.values(continuous, discrete),
+      continuousValues(continuous).get,
+      discreteValues(discrete).get,
       continuousOperator.get,
       discreteOperator.get,
       continuous,

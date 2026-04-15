@@ -43,6 +43,7 @@ ${
     - Reduce PSE an PPSE memory footprint
     - Implement wizard for the nlogox file format
     - Speed up container building
+    - Fix possible NaN inputs in evolution algorithms
   """)
 }
 
