@@ -416,7 +416,7 @@ object NichedNSGA2 {
     nicheSize:  Int,
     outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
+    accept:     OptionalArgument[Condition]  = None): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match
       case None =>
         val exactObjectives = Objectives.toExact(objective)
@@ -435,7 +435,7 @@ object NichedNSGA2 {
             niche = DeterministicNichedNSGA2.niche(phenotypeContent, niche.map(NichedElement.toExact)),
             operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome = genome,
           phenotypeContent = phenotypeContent,
           validate = validation
@@ -461,7 +461,7 @@ object NichedNSGA2 {
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -486,7 +486,7 @@ object NichedNSGA2Evolution {
         nicheSize = p.nicheSize,
         objective = p.objective,
         stochastic = p.stochastic,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[NichedNSGA2Evolution, EvolutionWorkflow] =
@@ -514,7 +514,7 @@ case class NichedNSGA2Evolution(
   nicheSize:    Int,
   stochastic:   OptionalArgument[Stochastic] = None,
   parallelism:  Int                          = EvolutionWorkflow.parallelism,
-  reject:       OptionalArgument[Condition]  = None,
+  accept:       OptionalArgument[Condition]  = None,
   distribution: EvolutionPattern             = SteadyState(),
   suggestion:   Suggestion                   = Suggestion.empty,
   scope:        DefinitionScope              = "niched nsga2")

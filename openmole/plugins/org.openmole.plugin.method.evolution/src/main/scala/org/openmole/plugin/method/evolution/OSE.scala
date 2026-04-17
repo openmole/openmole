@@ -329,7 +329,7 @@ object OSE {
     genome:         Genome                       = Seq(),
     populationSize: Int                          = 200,
     stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None): EvolutionWorkflow =
+    accept:         OptionalArgument[Condition]  = None): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective.map(_.objective), stochastic.option) match
       case None =>
         val exactObjectives = Objectives.toExact(FitnessPattern.toObjectives(objective))
@@ -345,7 +345,7 @@ object OSE {
             objectives = exactObjectives,
             limit = FitnessPattern.toLimit(objective),
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           fg,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -370,7 +370,7 @@ object OSE {
             operatorExploration = EvolutionWorkflow.operatorExploration,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           fg,
           phenotypeContent,
           stochasticValue,
@@ -395,7 +395,7 @@ object OSEEvolution:
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         populationSize = p.populationSize,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[OSEEvolution, EvolutionWorkflow] =
@@ -424,7 +424,7 @@ case class OSEEvolution(
   populationSize: Int                          = 200,
   genome:         Genome                       = Seq(),
   stochastic:     OptionalArgument[Stochastic] = None,
-  reject:         OptionalArgument[Condition]  = None,
+  accept:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
   distribution:   EvolutionPattern             = SteadyState(),
   suggestion:     Suggestion                   = Suggestion.empty,

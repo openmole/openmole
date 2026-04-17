@@ -293,7 +293,7 @@ object PSE {
     objective:  Seq[PatternAxe],
     outputs:    Seq[Val[?]],
     stochastic: OptionalArgument[Stochastic],
-    reject:     OptionalArgument[Condition] ,
+    accept:     OptionalArgument[Condition] ,
     maxRareSample: Int
   ) =
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -308,7 +308,7 @@ object PSE {
             phenotypeContent,
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
-            reject = reject.option,
+            reject = accept.option.map(!_),
             grid = objective,
             maxRareSample = maxRareSample),
           genome,
@@ -332,7 +332,7 @@ object PSE {
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option,
+            reject = accept.option.map(!_),
             grid = objective,
             maxRareSample = maxRareSample),
           genome,
@@ -358,7 +358,7 @@ object PSEEvolution:
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject,
+        accept = p.accept,
         maxRareSample = p.maxRareSample
       )
 
@@ -384,7 +384,7 @@ case class PSEEvolution(
   termination:   OMTermination,
   maxRareSample: Int                          = 10,
   stochastic:    OptionalArgument[Stochastic] = None,
-  reject:        OptionalArgument[Condition]  = None,
+  accept:        OptionalArgument[Condition]  = None,
   parallelism:   Int                          = EvolutionWorkflow.parallelism,
   distribution:  EvolutionPattern             = SteadyState(),
   suggestion:    Suggestion                   = Suggestion.empty,

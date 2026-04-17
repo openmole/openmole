@@ -403,7 +403,7 @@ object HDOSE:
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
     stochastic: OptionalArgument[Stochastic] = None,
-    reject: OptionalArgument[Condition] = None): EvolutionWorkflow =
+    accept: OptionalArgument[Condition] = None): EvolutionWorkflow =
 
     val genomeValue = OriginAxe.toGenome(origin)
     val weightC = OriginAxe.weightC(origin)
@@ -430,7 +430,7 @@ object HDOSE:
             objectives = exactObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genomeValue,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -458,7 +458,7 @@ object HDOSE:
             operatorExploration = EvolutionWorkflow.operatorExploration,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genomeValue,
           phenotypeContent,
           stochasticValue,
@@ -481,7 +481,7 @@ object HDOSEEvolution:
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         populationSize = p.populationSize,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[HDOSEEvolution, EvolutionWorkflow] =
@@ -511,7 +511,7 @@ case class HDOSEEvolution(
   distance:       Double                       = 1.0,
   shuffle:        Boolean                      = true,
   stochastic:     OptionalArgument[Stochastic] = None,
-  reject:         OptionalArgument[Condition]  = None,
+  accept:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
   distribution:   EvolutionPattern             = EvolutionWorkflow.SteadyState(),
   suggestion:     Suggestion                   = Suggestion.empty,

@@ -205,7 +205,7 @@ object NSGA2:
     outputs:          Seq[Val[?]]                  = Seq(),
     populationSize:   Int                          = 200,
     stochastic:       OptionalArgument[Stochastic] = None,
-    reject:           OptionalArgument[Condition]  = None,
+    accept:           OptionalArgument[Condition]  = None,
     genomeDiversity:  OptionalArgument[Boolean]    = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match
@@ -220,7 +220,7 @@ object NSGA2:
             phenotypeContent,
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
-            reject,
+            accept.map(!_),
             genomeDiversity.getOrElse(exactObjectives.size == 1)
           ),
           genome,
@@ -244,7 +244,7 @@ object NSGA2:
             noisyObjectives,
             stochasticValue.sample,
             stochasticValue.reevaluate,
-            reject.option,
+            accept.option.map(!_),
             genomeDiversity.getOrElse(noisyObjectives.size == 1)
           ),
           genome,
@@ -269,7 +269,7 @@ object NSGA2Evolution:
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject,
+        accept = p.accept,
         genomeDiversity = p.genomeDiversity
       )
 
@@ -295,7 +295,7 @@ case class NSGA2Evolution(
   termination:        OMTermination,
   populationSize:     Int                          = 200,
   stochastic:         OptionalArgument[Stochastic] = None,
-  reject:             OptionalArgument[Condition]  = None,
+  accept:             OptionalArgument[Condition]  = None,
   genomeDiversity:    OptionalArgument[Boolean]    = None,
   parallelism:        Int                          = EvolutionWorkflow.parallelism,
   distribution:       EvolutionPattern             = SteadyState(),

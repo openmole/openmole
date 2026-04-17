@@ -290,7 +290,7 @@ object Profile {
     nicheSize:  Int,
     outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
+    accept:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None =>
@@ -310,7 +310,7 @@ object Profile {
             niche = niche,
             operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome,
           phenotypeContent,
           validate = validation
@@ -335,7 +335,7 @@ object Profile {
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -363,7 +363,7 @@ object ProfileEvolution {
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         nicheSize = p.nicheSize,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
@@ -392,7 +392,7 @@ case class ProfileEvolution(
   termination:  OMTermination,
   nicheSize:    Int                          = 10,
   stochastic:   OptionalArgument[Stochastic] = None,
-  reject:       OptionalArgument[Condition]  = None,
+  accept:       OptionalArgument[Condition]  = None,
   parallelism:  Int                          = EvolutionWorkflow.parallelism,
   distribution: EvolutionPattern             = SteadyState(),
   suggestion:   Suggestion                   = Suggestion.empty,

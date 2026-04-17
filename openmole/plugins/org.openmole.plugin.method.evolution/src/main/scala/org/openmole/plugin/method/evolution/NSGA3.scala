@@ -193,7 +193,7 @@ object NSGA3 {
     outputs:        Seq[Val[?]]                  = Seq(),
     populationSize: Int                          = 200,
     stochastic:     OptionalArgument[Stochastic] = None,
-    reject:         OptionalArgument[Condition]  = None
+    accept:         OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None =>
@@ -201,7 +201,7 @@ object NSGA3 {
         val phenotypeContent = PhenotypeContent(Objectives.prototypes(exactObjectives), outputs)
 
         EvolutionWorkflow.deterministicGA(
-          DeterministicNSGA3(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, reject),
+          DeterministicNSGA3(populationSize, references, genome, phenotypeContent, exactObjectives, EvolutionWorkflow.operatorExploration, accept.map(!_)),
           genome,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -216,7 +216,7 @@ object NSGA3 {
         }
 
         EvolutionWorkflow.stochasticGA(
-          StochasticNSGA3(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, reject.option),
+          StochasticNSGA3(populationSize, references, EvolutionWorkflow.operatorExploration, genome, phenotypeContent, noisyObjectives, stochasticValue.sample, stochasticValue.reevaluate, accept.option.map(!_)),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -248,7 +248,7 @@ object NSGA3Evolution {
         outputs = p.evaluation.outputs,
         objective = p.objective,
         stochastic = p.stochastic,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[NSGA3Evolution, EvolutionWorkflow] =
@@ -276,7 +276,7 @@ case class NSGA3Evolution(
   populationSize: Int                          = 200,
   references:     NSGA3.References             = NSGA3.References.None,
   stochastic:     OptionalArgument[Stochastic] = None,
-  reject:         OptionalArgument[Condition]  = None,
+  accept:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
   distribution:   EvolutionPattern             = SteadyState(),
   suggestion:     Suggestion                   = Suggestion.empty,

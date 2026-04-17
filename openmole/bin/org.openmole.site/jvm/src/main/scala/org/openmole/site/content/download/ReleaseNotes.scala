@@ -41,9 +41,10 @@ ${h2{"V23 | D D"}}
 ${
   notes("""
     - Reduce PSE an PPSE memory footprint
-    - Implement wizard for the nlogox file format
-    - Speed up container building
+    - Use acceptance rather than a rejcetion condition in evolution methods
     - Fix possible NaN inputs in evolution algorithms
+    - Speed up container building
+    - Implement wizard for the nlogox file format
   """)
 }
 

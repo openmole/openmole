@@ -214,7 +214,7 @@ object PPSE:
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
-    reject:    Option[Condition],
+    accept:    Option[Condition],
     density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
     val exactObjectives = Objectives.toExact(objective.map(_.p))
@@ -226,7 +226,7 @@ object PPSE:
         genome,
         phenotypeContent,
         exactObjectives,
-        reject = reject,
+        reject = accept.map(!_),
         density = density,
         grid = objective,
         dilation = dilation,
@@ -279,7 +279,7 @@ object PPSEEvolution:
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
-      reject = p.reject,
+      accept = p.accept,
       density = density
     )
 
@@ -302,7 +302,7 @@ case class PPSEEvolution(
   objective:   Seq[PSE.PatternAxe],
   evaluation:  DSL,
   termination: OMTermination,
-  reject:      OptionalArgument[Condition]              = None,
+  accept:      OptionalArgument[Condition]              = None,
   density:     Seq[PPSE.Density]                        = Seq(),
   stochastic:  OptionalArgument[Stochastic]             = None,
   parallelism: Int                                      = EvolutionWorkflow.parallelism,
