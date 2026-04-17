@@ -27,3 +27,5 @@ object Evolution:
     li{html"${code{"frequency"}}: $optional, Long, the frequency in generations where the result should be saved, it is generally set to avoid using too much disk space,"},
     li{html"${code{"keepAll"}}: $optional, Boolean, save all the individuals of the population not only the optimal ones."},
   )
+
+  def accept = li{html"${code{"accept"}}: ($optional) a predicate which must be true for genomes that can be accepted by the genome sampler (for instance \"i1 > 50\")."}

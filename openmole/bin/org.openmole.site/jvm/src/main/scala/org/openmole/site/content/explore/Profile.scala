@@ -92,7 +92,7 @@ ${ul(
   li{html"${hl.code("parallelism")}: $optional number of parallel calibrations performed within ${b{"i"}} subinterval, defaults to 1,"},
   li{html"${hl.code("stochastic")}: $optional the seed provider, mandatory if your model contains randomness,"},
   li{html"${hl.code("distribution")}: $optional computation distribution strategy, default is \"SteadyState\"."},
-  li{html"${code{"reject"}}: $optional a predicate which is true for genomes that must be rejected by the genome sampler (for instance \"i1 > 50\")."}
+  Evolution.accept
 )}
 
 ${h3{"Hook"}}

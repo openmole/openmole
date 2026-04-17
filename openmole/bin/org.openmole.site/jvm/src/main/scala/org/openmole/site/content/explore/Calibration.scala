@@ -124,7 +124,7 @@ ${ul(
   li{html"${code{"populationSize"}}: $optional, the population size, defaults to 200,"},
   li{html"${code{"stochastic"}}: $optional, the seed provider, mandatory if your model contains randomness,"},
   li{html"${code{"distribution"}}: $optional, computation distribution strategy, default is \"SteadyState\"."},
-  li{html"${code{"reject"}}: $optional, a predicate which is true for genomes that must be rejected by the genome sampler (for instance \"i1 > 50\")."}
+  Evolution.accept
 )}
 
 Where ${code{"param1"}}, ${code{"param2"}}, ${code{"param3"}} and ${code{"param4"}} are inputs of the ${code{"modelTask"}}, and ${code{"distance1"}} and ${code{"distance2"}} are its outputs.
