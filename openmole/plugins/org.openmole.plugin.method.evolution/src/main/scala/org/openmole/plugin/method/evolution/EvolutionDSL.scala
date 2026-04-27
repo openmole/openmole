@@ -87,7 +87,7 @@ object EvolutionWorkflow:
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -97,8 +97,7 @@ object EvolutionWorkflow:
 
       def validate = _validate
 
-      def buildIndividual(g: G, context: Context, state: S): I =
-        operations.buildIndividual(g, variablesToPhenotype(context), state)
+      def buildIndividual(g: G, context: Context, state: S): I = operations.buildIndividual(g, context, state)
 
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -114,7 +113,7 @@ object EvolutionWorkflow:
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -123,9 +122,6 @@ object EvolutionWorkflow:
       def operations = integration.operations(ag)
 
       def validate = _validate
-
-      def buildIndividual(genome: G, context: Context, state: S): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), state)
 
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -309,7 +305,7 @@ object EvolutionWorkflow:
 end EvolutionWorkflow
 
 trait EvolutionWorkflow:
-  type Integration <: MGOAPI.Integration[?, ?, ?]
+  type Integration <: MGOAPI.Integration[?, ?]
 
   val integration: Integration
 
@@ -326,8 +322,6 @@ trait EvolutionWorkflow:
   def stateType = ValType[S]
   def individualType = ValType[I]
   def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
-
-  def buildIndividual(genome: G, context: Context, state: S): I
 
   def inputVals: Seq[Val[?]]
   def outputVals: Seq[Val[?]]
@@ -428,7 +422,7 @@ object MGOAPI:
     def generationLens = Focus[S](_.generation)
     def evaluatedLens = Focus[S](_.evaluated)
 
-  trait Integration[A, V, P]:
+  trait Integration[A, V]:
     type I
     type G
     type S
@@ -450,7 +444,7 @@ object MGOAPI:
       def genomeToVariables(genome: G): FromContext[Vector[Variable[?]]]
 
       def buildGenome(context: Vector[Variable[?]]): G
-      def buildIndividual(genome: G, phenotype: P, state: S): I
+      def buildIndividual(genome: G, context: Context, state: S): I
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]

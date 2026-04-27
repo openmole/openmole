@@ -97,7 +97,7 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
 
@@ -123,7 +123,10 @@ object Profile {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
@@ -202,7 +205,7 @@ object Profile {
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
 
-    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
@@ -220,7 +223,10 @@ object Profile {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =

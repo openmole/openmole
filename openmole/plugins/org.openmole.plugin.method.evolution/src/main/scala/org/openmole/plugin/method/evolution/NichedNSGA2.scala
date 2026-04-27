@@ -247,7 +247,7 @@ object NichedNSGA2 {
 
     import CDGenome.DeterministicIndividual
 
-    given MGOAPI.Integration[DeterministicNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[DeterministicNichedNSGA2, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
 
@@ -266,7 +266,10 @@ object NichedNSGA2 {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
@@ -332,7 +335,7 @@ object NichedNSGA2 {
 
     }
 
-    given MGOAPI.Integration[StochasticNichedNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[StochasticNichedNSGA2, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
@@ -350,7 +353,10 @@ object NichedNSGA2 {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =

@@ -34,7 +34,7 @@ object OSE {
     import mgo.evolution.algorithm.OSE._
     import mgo.evolution.algorithm.{ OSE => MGOOSE, _ }
 
-    given MGOAPI.Integration[DeterministicOSE, (IArray[Double], IArray[Int]), Phenotype]:
+    given MGOAPI.Integration[DeterministicOSE, (IArray[Double], IArray[Int])]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -59,7 +59,9 @@ object OSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState(s = (Archive.empty[I], Array.empty))
 
@@ -135,7 +137,7 @@ object OSE {
     import mgo.evolution.algorithm.NoisyOSE._
     import mgo.evolution.algorithm.{ NoisyOSE => MGONoisyOSE, _ }
 
-    given MGOAPI.Integration[StochasticOSE, (IArray[Double], IArray[Int]), Phenotype]:
+    given MGOAPI.Integration[StochasticOSE, (IArray[Double], IArray[Int])]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
@@ -161,7 +163,9 @@ object OSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState(s = (Archive.empty[I], Array.empty))
 

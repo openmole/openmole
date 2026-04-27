@@ -31,7 +31,7 @@ object NSGA3 {
   object DeterministicNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NSGA3 => MGONSGA3, _ }
 
-    given MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
@@ -50,7 +50,9 @@ object NSGA3 {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState[Unit](s = ())
 
@@ -107,7 +109,7 @@ object NSGA3 {
   object StochasticNSGA3 {
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA3 => MGONoisyNSGA3, _ }
 
-    given MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[StochasticNSGA3, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
@@ -126,7 +128,10 @@ object NSGA3 {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)

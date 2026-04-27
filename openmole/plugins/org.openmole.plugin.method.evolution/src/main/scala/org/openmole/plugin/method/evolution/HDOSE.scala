@@ -54,7 +54,7 @@ object HDOSE:
     import mgo.evolution.algorithm.HDOSE.*
     import mgo.evolution.algorithm.{ HDOSE => MGOHDOSE, * }
 
-    given MGOAPI.Integration[DeterministicHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[DeterministicHDOSE, (IArray[Double], IArray[Int])] with
       api =>
 
       type G = CDGenome.Genome
@@ -80,7 +80,9 @@ object HDOSE:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState: S = MGOHDOSE.initialState(om.distance)
 
@@ -184,7 +186,7 @@ object HDOSE:
     import mgo.evolution.algorithm.NoisyHDOSE.*
     import mgo.evolution.algorithm.{NoisyHDOSE => MGONoisyHDOSE, *}
 
-    given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int])] with
       api =>
 
       type G = CDGenome.Genome
@@ -213,7 +215,9 @@ object HDOSE:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = MGONoisyHDOSE.initialState(om.distance)
 

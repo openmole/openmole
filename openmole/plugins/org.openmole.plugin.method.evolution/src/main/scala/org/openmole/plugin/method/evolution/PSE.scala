@@ -55,7 +55,7 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, PSE => MGOPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
+    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
@@ -83,7 +83,9 @@ object PSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = 
           import mgo.tools.PatternMap
@@ -170,7 +172,7 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, NoisyPSE => MGONoisyPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
+    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
@@ -198,7 +200,10 @@ object PSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState =
           import mgo.tools.PatternMap
           EvolutionState[HitMapState](s = PatternMap.empty)

@@ -29,7 +29,7 @@ object ToOffspringTask:
 
     Task("ToOffspringTask"): p =>
       import p.*
-      val i = evolution.buildIndividual(context(evolution.genomeVal), context, context(evolution.stateVal))
+      val i = evolution.operations.buildIndividual(context(evolution.genomeVal), context, context(evolution.stateVal))
       Context(Variable(evolution.offspringPopulationVal, Array(i)))
     .set (
       inputs ++= evolution.outputVals,

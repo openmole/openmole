@@ -51,7 +51,7 @@ object PPSE:
 
     import mgo.evolution.algorithm.*
 
-    given MGOAPI.Integration[DeterministicParams, IArray[Double], Phenotype] with MGOAPI.MGOState[mgo.evolution.algorithm.PPSE.PPSEState]:
+    given MGOAPI.Integration[DeterministicParams, IArray[Double]] with MGOAPI.MGOState[mgo.evolution.algorithm.PPSE.PPSEState]:
       api =>
       type G = mgo.evolution.algorithm.PPSE.Genome
       type I = mgo.evolution.algorithm.PPSE.Individual[Phenotype]
@@ -86,7 +86,8 @@ object PPSE:
           val cs = genomeValues(g)
           Genome.toVariables(om.genome, cs, IArray.empty, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S)  =
+        def buildIndividual(genome: G, context: Context, state: S)  =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
           mgo.evolution.algorithm.PPSE.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState(s = mgo.evolution.algorithm.PPSE.PPSEState())
