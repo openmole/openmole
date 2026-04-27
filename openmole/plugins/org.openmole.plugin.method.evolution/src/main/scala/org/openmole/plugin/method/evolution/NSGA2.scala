@@ -147,13 +147,13 @@ object NSGA2:
 
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
+        def aggregate(filter: Boolean) = Objective.aggregate(om.phenotypeContent, om.objectives, filter)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
             import p._
 
-            val res = MGONoisyNSGA2.result(population, aggregate.from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
+            val res = MGONoisyNSGA2.result(population, aggregate(filter = false).from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -182,7 +182,7 @@ object NSGA2:
               n,
               om.operatorExploration,
               om.cloneProbability,
-              aggregate.from(context),
+              aggregate(filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete,
               rejectValue,
@@ -194,7 +194,7 @@ object NSGA2:
             MGONoisyNSGA2.elitism[S, Phenotype](
               om.mu,
               om.historySize,
-              aggregate.from(context),
+              aggregate(filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete,
               genomeDiversity = om.genomeDiversity) apply (s, population, candidates, rng)

@@ -134,13 +134,13 @@ object NSGA3 {
 
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
+        def aggregate(filter: Boolean) = Objective.aggregate(om.phenotypeContent, om.objectives, filter = filter)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
             import p._
 
-            val res = MGONoisyNSGA3.result(population, aggregate.from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
+            val res = MGONoisyNSGA3.result(population, aggregate(filter = false).from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
 
@@ -165,12 +165,12 @@ object NSGA3 {
             import p._
 
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-            MGONoisyNSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.cloneProbability, om.genome.continuous, om.genome.discrete, aggregate.from(context), rejectValue, lambda = n) apply (s, individuals, rng)
+            MGONoisyNSGA3.adaptiveBreeding[S, Phenotype](om.operatorExploration, om.cloneProbability, om.genome.continuous, om.genome.discrete, aggregate(filter = true).from(context), rejectValue, lambda = n) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
           FromContext: p =>
             import p._
-            MGONoisyNSGA3.elitism(om.mu, om.references, om.historySize, aggregate.from(context), om.genome.continuous, om.genome.discrete) apply (s, population, candidates, rng)
+            MGONoisyNSGA3.elitism(om.mu, om.references, om.historySize, aggregate(filter = true).from(context), om.genome.continuous, om.genome.discrete) apply (s, population, candidates, rng)
 
         def diffIslandState(initialState: S, state: S) = state
         def mergeIslandState(state: S, islandState: S): S = state

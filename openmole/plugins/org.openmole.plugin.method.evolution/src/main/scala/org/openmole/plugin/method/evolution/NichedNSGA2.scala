@@ -363,7 +363,7 @@ object NichedNSGA2 {
           FromContext: p =>
             import p._
 
-            val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.niche.from(context), om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
+            val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), om.niche.from(context), om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -385,7 +385,7 @@ object NichedNSGA2 {
           FromContext: p =>
             import p._
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-            NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
+            NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p =>
@@ -394,7 +394,7 @@ object NichedNSGA2 {
               om.niche.from(context),
               om.nicheSize,
               om.historySize,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete) apply (s, population, candidates, rng)
 

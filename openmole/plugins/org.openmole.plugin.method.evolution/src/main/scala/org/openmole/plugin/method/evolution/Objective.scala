@@ -110,16 +110,17 @@ object Objective:
         val context = Phenotype.toContext(phenotypeContent, phenotype)
         Objectives.values(objectives).from(context).toVector
 
-  def aggregate(phenotypeContent: PhenotypeContent, objectives: Objectives) =
+  def aggregate(phenotypeContent: PhenotypeContent, objectives: Objectives, filter: Boolean) =
     val objectiveNames = Objectives.toSeq(objectives).map(prototype).map(_.name).toSet
     FromContext: p =>
       import p.*
 
       (v: Vector[Phenotype]) =>
-        def objectiveContext(p: Phenotype) =
-          Phenotype.toContext(phenotypeContent, p).filter(v => objectiveNames.contains(v.name))
+        def filteredContext(p: Phenotype) =
+          val variables = Phenotype.toContext(phenotypeContent, p)
+          if filter then variables.filter(v => objectiveNames.contains(v.name)) else variables
 
-        val aggregatedContext = context ++ ContextAggregator.aggregateSimilar(v.map(objectiveContext)).values
+        val aggregatedContext = context ++ ContextAggregator.aggregateSimilar(v.map(filteredContext)).values
         Objectives.values(objectives).from(aggregatedContext).toVector
 
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray

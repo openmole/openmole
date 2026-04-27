@@ -173,7 +173,7 @@ object OSE {
           FromContext: p =>
             import p.*
 
-            val res = MGONoisyOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
+            val res = MGONoisyOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
@@ -206,7 +206,7 @@ object OSE {
               n,
               om.operatorExploration,
               om.cloneProbability,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete,
               om.origin,
@@ -220,7 +220,7 @@ object OSE {
             MGONoisyOSE.elitism(
               om.mu,
               om.historySize,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete,
               om.origin,

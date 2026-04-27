@@ -211,7 +211,7 @@ object PSE {
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext: p =>
           import p._
 
-          val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
+          val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context)
           val res = MGONoisyPSE.result(population, aggregate, om.pattern, om.genome.continuous, om.genome.discrete)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(r => aggregate(r.individual.phenotypeHistory.toVector)))
@@ -243,7 +243,7 @@ object PSE {
               n,
               om.operatorExploration,
               om.cloneProbability,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               continuous,
               discrete,
               om.pattern,
@@ -256,7 +256,7 @@ object PSE {
 
             MGONoisyPSE.elitism[Phenotype](
               om.pattern,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.historySize,
               om.genome.continuous,
               om.genome.discrete) apply (s, population, candidates, rng)
