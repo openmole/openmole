@@ -96,8 +96,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   }
 
   import org.openmole.core.workflow.test.Stubs._
-
-  "Evolution" should "run" in {
+  
+  "Evolution" should "run" in:
     @volatile var executed = 0
 
     val a = Val[Double]
@@ -122,8 +122,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     nsga run
 
     executed should be >= 100
-  }
-
+  
   it should "support single objective" in {
     val a = Val[Double]
 

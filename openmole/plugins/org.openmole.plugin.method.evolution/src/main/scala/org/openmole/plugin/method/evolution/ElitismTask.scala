@@ -33,7 +33,7 @@ object ElitismTask:
           context(evolution.stateVal),
           random()
         ).from(context)
-
+      
       val incrementedState =
         evolution.generationLens.modify(_ + 1)
         .andThen(evolution.evaluatedLens.modify(_ + 1))
