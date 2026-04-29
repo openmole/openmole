@@ -45,7 +45,7 @@ object TypeTool:
 
   given iArrayManifest[T: Manifest]: Manifest[IArray[T]] =
     new scala.reflect.Manifest[IArray[T]]:
-      override def runtimeClass: Class[?] = classOf[Array[T]]
+      override def runtimeClass: Class[?] = manifest[T].arrayManifest.runtimeClass
       override def typeArguments: List[Manifest[?]] = List(manifest[T])
       override def toString = s"IArray[${manifest[T]}]"
 
