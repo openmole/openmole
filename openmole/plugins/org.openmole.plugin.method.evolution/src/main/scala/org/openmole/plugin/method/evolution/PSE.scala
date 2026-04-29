@@ -40,7 +40,7 @@ import monocle.syntax.all._
 object PSE {
 
   case class DeterministicPSE(
-    pattern:             Vector[Double] => Vector[Int],
+    pattern:             IArray[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
@@ -156,7 +156,7 @@ object PSE {
     }
 
   case class StochasticPSE(
-    pattern:             Vector[Double] => Vector[Int],
+    pattern:             IArray[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
@@ -308,7 +308,7 @@ object PSE {
 
         EvolutionWorkflow.deterministicGA(
           DeterministicPSE(
-            mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
+            mgo.evolution.niche.irregularGrid(objective.toVector  .map(_.scale)),
             genome,
             phenotypeContent,
             exactObjectives,
@@ -330,7 +330,7 @@ object PSE {
 
         EvolutionWorkflow.stochasticGA(
           StochasticPSE(
-            pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
+            pattern = mgo.evolution.niche.irregularGrid(objective.toVector.map(_.scale)),
             genome = genome,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,

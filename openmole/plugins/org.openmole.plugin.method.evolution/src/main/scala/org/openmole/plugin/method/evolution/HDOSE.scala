@@ -93,7 +93,7 @@ object HDOSE:
             import p.*
             val res = MGOHDOSE.result[Phenotype](state, population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGOHDOSE.distanceLens.get(state))
             val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
@@ -229,7 +229,7 @@ object HDOSE:
 
             val res = MGONoisyHDOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGONoisyHDOSE.distanceLens.get(state))

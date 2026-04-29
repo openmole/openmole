@@ -70,7 +70,7 @@ object OSE {
             import p._
             val res = MGOOSE.result[Phenotype](state, population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
 
@@ -175,7 +175,7 @@ object OSE {
 
             val res = MGONoisyOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
@@ -294,9 +294,9 @@ object OSE {
           case ScalarDoubleOriginAxe(p, scale)         => Vector(mgo.evolution.niche.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
           case ContinuousIntOriginAxe(p, scale)         => Vector(mgo.evolution.niche.findInterval(scale, Genome.continuousValue(fg, p.v, continuous)))
           case ScalarIntOriginAxe(p, scale)           => Vector(mgo.evolution.niche.findInterval(scale, Genome.discreteValue(fg, p.v, discrete)))
-          case SequenceOfDoubleOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous).toVector)
-          case SequenceOfContinuousIntOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous).toVector)
-          case SequenceOfIntOriginAxe(p, scale)   => mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete).toVector)
+          case SequenceOfDoubleOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
+          case SequenceOfContinuousIntOriginAxe(p, scale) => mgo.evolution.niche.irregularGrid[Double](scale)(Genome.continuousSequenceValue(fg, p.v, p.size, continuous))
+          case SequenceOfIntOriginAxe(p, scale)   => mgo.evolution.niche.irregularGrid[Int](scale)(Genome.discreteSequenceValue(fg, p.v, p.size, discrete))
           case EnumerationOriginAxe(p) => Vector(Genome.discreteValue(fg, p.v, discrete))
 
       grid

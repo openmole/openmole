@@ -26,7 +26,6 @@ import org.openmole.plugin.tool.pattern
 import org.openmole.plugin.tool.pattern.MasterSlave
 import squants.time.Time
 
-type Objectives = Seq[Objective] | Objective
 type Genome = Seq[Genome.GenomeBound]
 type GenomeDouble = Seq[Genome.GenomeBound.ScalarDouble]
 

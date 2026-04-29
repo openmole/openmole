@@ -61,7 +61,7 @@ object NSGA3 {
             import p._
             val res = MGONSGA3.result[Phenotype](population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
             val outputsValues =
@@ -142,7 +142,7 @@ object NSGA3 {
 
             val res = MGONoisyNSGA3.result(population, aggregate(filter = false).from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
 
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)

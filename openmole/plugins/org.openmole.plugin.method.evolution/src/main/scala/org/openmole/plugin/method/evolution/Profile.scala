@@ -86,7 +86,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteVectorValues(discrete) get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous), x, intervals)
 
       val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
         case (c: IntervalDoubleProfileElement, index) => continuousProfile(genome.continuous, index, c.n)
@@ -136,7 +136,7 @@ object Profile {
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
             val res = NichedNSGA2Algorithm.result(population, niche, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
             val outputValues =
@@ -195,7 +195,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteVectorValues(discrete)).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous), x, intervals)
 
       val niches =
         (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
@@ -236,7 +236,7 @@ object Profile {
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
             val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), niche, om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
             val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 

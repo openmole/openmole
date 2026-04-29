@@ -32,7 +32,7 @@ object PPSE:
   def likelihoodVal = Val[Double]("likelihood", GAIntegration.namespace)
 
   case class DeterministicParams(
-    pattern:          Vector[Double] => Vector[Int],
+    pattern:          IArray[Double] => Vector[Int],
     genome:           GenomeDouble,
     phenotypeContent: PhenotypeContent,
     objectives:       Seq[Objective],

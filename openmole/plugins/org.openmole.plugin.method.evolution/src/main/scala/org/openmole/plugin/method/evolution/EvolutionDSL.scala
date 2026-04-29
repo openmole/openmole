@@ -374,7 +374,7 @@ object GAIntegration:
 
     arrayVariables.toVector
 
-  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
+  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[IArray[Double]]): Vector[Variable[?]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) =>
       Variable(
         objective.withType[Array[Double]],
