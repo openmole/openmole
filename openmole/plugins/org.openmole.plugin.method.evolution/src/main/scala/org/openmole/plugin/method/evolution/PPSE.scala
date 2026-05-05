@@ -45,8 +45,7 @@ object PPSE:
     warmupSampler:    Int,
     maxRareSample:    Int,
     minClusterSize:   Int,
-    regularisationEpsilon: Double,
-    densitySample:    Option[Int])
+    regularisationEpsilon: Double)
 
   object DeterministicParams:
 
@@ -128,8 +127,7 @@ object PPSE:
             rejectValue.from(context),
             _.s.gmm,
             om.warmupSampler,
-            regularisationEpsilon = om.regularisationEpsilon,
-            averageEstimation = om.densitySample)(s, individuals, rng)
+            regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -217,7 +215,6 @@ object PPSE:
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
-    densitySample: Option[Int],
     accept:    Option[Condition],
     density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
@@ -239,8 +236,7 @@ object PPSE:
         warmupSampler = warmupSampler,
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
-        regularisationEpsilon = regularisationEpsilon,
-        densitySample = densitySample)
+        regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
       case None =>
@@ -284,7 +280,6 @@ object PPSEEvolution:
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
-      densitySample = p.densitySample,
       accept = p.accept,
       density = density
     )
@@ -321,6 +316,5 @@ case class PPSEEvolution(
   maxRareSample: Int                                    = 10,
   minClusterSize: Int                                   = 10,
   regularisationEpsilon: Double                         = 10e-6,
-  densitySample: OptionalArgument[Int]                  = 1000,
   scope:       DefinitionScope                          = "ppse")
 
