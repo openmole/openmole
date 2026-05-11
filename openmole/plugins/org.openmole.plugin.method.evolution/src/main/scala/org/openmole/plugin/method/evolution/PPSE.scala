@@ -32,19 +32,21 @@ object PPSE:
   def likelihoodVal = Val[Double]("likelihood", GAIntegration.namespace)
 
   case class DeterministicParams(
-    pattern:          IArray[Double] => Vector[Int],
-    genome:           GenomeDouble,
-    phenotypeContent: PhenotypeContent,
-    objectives:       Seq[Objective],
-    grid:             Seq[PatternAxe],
-    dilation:         Double,
-    reject:           Option[Condition],
-    density:          Option[Density],
-    gmmIterations:    Int,
-    gmmTolerance:     Double,
-    warmupSampler:    Int,
-    maxRareSample:    Int,
-    minClusterSize:   Int,
+    pattern:               IArray[Double] => Vector[Int],
+    genome:                GenomeDouble,
+    phenotypeContent:      PhenotypeContent,
+    objectives:            Seq[Objective],
+    grid:                  Seq[PatternAxe],
+    dilation:              Double,
+    reject:                Option[Condition],
+    density:               Option[Density],
+    gmmIterations:         Int,
+    gmmTolerance:          Double,
+    warmupSampler:         Int,
+    minDensityQuantile:    Double,
+    densitySample:         Int,
+    maxRareSample:         Int,
+    minClusterSize:        Int,
     regularisationEpsilon: Double)
 
   object DeterministicParams:
@@ -127,6 +129,8 @@ object PPSE:
             rejectValue.from(context),
             _.s.gmm,
             om.warmupSampler,
+            om.minDensityQuantile,
+            om.densitySample,
             regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
@@ -212,6 +216,8 @@ object PPSE:
     gmmIterations:    Int,
     gmmTolerance:     Double,
     warmupSampler:    Int,
+    minDensityQuantile: Double,
+    densitySample: Int,
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
@@ -234,6 +240,8 @@ object PPSE:
         gmmIterations = gmmIterations,
         gmmTolerance = gmmTolerance,
         warmupSampler = warmupSampler,
+        minDensityQuantile = minDensityQuantile,
+        densitySample = densitySample,
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
         regularisationEpsilon = regularisationEpsilon)
@@ -277,6 +285,8 @@ object PPSEEvolution:
       gmmIterations = p.gmmIterations,
       gmmTolerance = p.gmmTolerance,
       warmupSampler = p.warmupSampler,
+      minDensityQuantile = p.minDensityQuantile,
+      densitySample = p.densitySample,
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
@@ -313,6 +323,8 @@ case class PPSEEvolution(
   gmmIterations: Int                                    = 100,
   gmmTolerance: Double                                  = 0.0001,
   warmupSampler: Int                                    = 10000,
+  minDensityQuantile: Double                            = 0.05,
+  densitySample: Int                                    = 1000,
   maxRareSample: Int                                    = 10,
   minClusterSize: Int                                   = 10,
   regularisationEpsilon: Double                         = 10e-6,
