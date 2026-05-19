@@ -128,9 +128,9 @@ object PPSE:
             n,
             rejectValue.from(context),
             _.s.gmm,
-            om.warmupSampler,
-            om.minDensityQuantile,
-            om.densitySample,
+            warmupSampler = om.warmupSampler,
+            minDensityQuantile = om.minDensityQuantile,
+            densitySample = om.densitySample,
             regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
