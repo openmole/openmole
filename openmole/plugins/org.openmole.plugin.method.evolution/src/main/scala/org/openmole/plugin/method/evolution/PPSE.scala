@@ -322,11 +322,11 @@ case class PPSEEvolution(
   dilation: Double                                      = 4.0,
   gmmIterations: Int                                    = 100,
   gmmTolerance: Double                                  = 0.0001,
-  warmupSampler: Int                                    = 10000,
+  warmupSampler: Int                                    = 1000,
   minDensityQuantile: Double                            = 0.05,
   densitySample: Int                                    = 1000,
-  maxRareSample: Int                                    = 10,
-  minClusterSize: Int                                   = 10,
+  maxRareSample: Int                                    = 5,
+  minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
   scope:       DefinitionScope                          = "ppse")
 
