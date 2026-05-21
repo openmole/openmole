@@ -30,6 +30,7 @@ import squants.time.Time
 object PPSE:
 
   def likelihoodVal = Val[Double]("likelihood", GAIntegration.namespace)
+  def hitVal = Val[Int]("hit", GAIntegration.namespace)
 
   case class DeterministicParams(
     pattern:               IArray[Double] => Vector[Int],
@@ -105,7 +106,7 @@ object PPSE:
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_ => Vector.empty), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
-          val densities = Seq(Variable(likelihoodVal.array, res.map(_.density).toArray))
+          val densities = Seq(Variable(likelihoodVal.array, res.map(_.density).toArray), Variable(hitVal.array, res.map(_.hit).toArray))
           val outputValues = if includeOutputs then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
           genomes ++ fitness ++ Seq(generated) ++ densities ++ outputValues
