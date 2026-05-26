@@ -48,6 +48,7 @@ object PPSE:
     densitySample:         Int,
     maxRareSample:         Int,
     minClusterSize:        Int,
+    bootstrapGeneration:   Int,
     regularisationEpsilon: Double)
 
   object DeterministicParams:
@@ -166,6 +167,7 @@ object PPSE:
             Focus[S](_.s.likelihoodRatioMap),
             Focus[S](_.s.hitmap),
             Focus[S](_.s.gmm),
+            _.generation,
             Focus[I](_.generation),
             density = densityValue,
             maxRareSample = om.maxRareSample,
@@ -173,6 +175,7 @@ object PPSE:
             tolerance = om.gmmTolerance,
             dilation = om.dilation,
             minClusterSize = om.minClusterSize,
+            bootstrapGeneration = om.bootstrapGeneration,
             regularisationEpsilon = om.regularisationEpsilon) apply (s, population, candidates, rng)
 
           (s2, elited)
@@ -222,6 +225,7 @@ object PPSE:
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
+    bootstrapGeneration: Int,
     accept:    Option[Condition],
     density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
@@ -245,6 +249,7 @@ object PPSE:
         densitySample = densitySample,
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
+        bootstrapGeneration = bootstrapGeneration,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -291,6 +296,7 @@ object PPSEEvolution:
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
+      bootstrapGeneration = p.bootstrapGeneration,
       accept = p.accept,
       density = density
     )
@@ -322,12 +328,13 @@ case class PPSEEvolution(
   suggestion: Suggestion                                = Suggestion.empty,
   dilation: Double                                      = 1.5,
   gmmIterations: Int                                    = 100,
-  gmmTolerance: Double                                  = 0.0001,
+  gmmTolerance: Double                                  = 0.001,
   warmupSampler: Int                                    = 1000,
   minDensityQuantile: Double                            = 0.2,
   densitySample: Int                                    = 1000,
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
+  bootstrapGeneration: Int                              = 1000,
   scope:       DefinitionScope                          = "ppse")
 
