@@ -1160,8 +1160,11 @@ lazy val openmoleNaked =
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     tarName := "openmole-naked.tar.gz",
     tarInnerFolder := "openmole",
-    cleanFiles ++= (launcher / cleanFiles).value,
-    cleanFiles ++= (openmoleRuntime / cleanFiles).value,
+    clean := {
+      (launcher / clean).value
+      (openmoleRuntime / clean).value
+      clean.value
+    },
     scala3Settings,
     excludeTransitiveScala2,
     test := false
@@ -1178,7 +1181,10 @@ lazy val openmole =
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
     resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    cleanFiles ++= (openmoleNaked / cleanFiles).value
+    clean := {
+      (openmoleNaked / clean).value
+      clean.value
+    }
   ) dependsOn (toDependencies(openmoleDependencies) *) settings (excludeTransitiveScala2)
 
 lazy val openmoleRuntime =
