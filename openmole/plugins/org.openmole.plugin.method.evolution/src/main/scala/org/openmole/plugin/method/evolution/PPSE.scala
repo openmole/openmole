@@ -124,20 +124,6 @@ object PPSE:
         def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
 
-          mgo.evolution.algorithm.PPSEOperation.breeding[S, I, G](
-            om.genome.continuous,
-            mgo.evolution.algorithm.PPSE.Genome.apply,
-            n,
-            rejectValue.from(context),
-            _.s.gmm,
-            warmupSampler = om.warmupSampler,
-            minDensityQuantile = om.minDensityQuantile,
-            densitySample = om.densitySample,
-            regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
-
-        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
-          import p.*
-
           def density(d: Density): FromContext[Double] = FromContext: p =>
             import org.apache.commons.math3.distribution.*
             import p.*
@@ -158,6 +144,21 @@ object PPSE:
                 val scaled = Genome.toVariables(om.genome, g, IArray.empty, scale = true)
                 densityValue.from(scaled)
 
+          mgo.evolution.algorithm.PPSEOperation.breeding[S, I, G](
+            om.genome.continuous,
+            mgo.evolution.algorithm.PPSE.Genome.apply,
+            n,
+            rejectValue.from(context),
+            _.s.gmm,
+            density = densityValue,
+            warmupSampler = om.warmupSampler,
+            minDensityQuantile = om.minDensityQuantile,
+            densitySample = om.densitySample,
+            regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
+
+        def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
+          import p.*
+
           val (s2, elited) = mgo.evolution.algorithm.PPSEOperation.elitism[S, I, Phenotype](
             i => mgo.evolution.algorithm.PPSE.Genome.toTuple(i.genome),
             _.phenotype,
@@ -169,7 +170,6 @@ object PPSE:
             Focus[S](_.s.gmm),
             _.generation,
             Focus[I](_.generation),
-            density = densityValue,
             maxRareSample = om.maxRareSample,
             iterations = om.gmmIterations,
             tolerance = om.gmmTolerance,
@@ -326,7 +326,7 @@ case class PPSEEvolution(
   parallelism: Int                                      = EvolutionWorkflow.parallelism,
   distribution: EvolutionPattern                        = SteadyState(),
   suggestion: Suggestion                                = Suggestion.empty,
-  dilation: Double                                      = 1.5,
+  dilation: Double                                      = 2.0,
   gmmIterations: Int                                    = 100,
   gmmTolerance: Double                                  = 0.001,
   warmupSampler: Int                                    = 1000,
