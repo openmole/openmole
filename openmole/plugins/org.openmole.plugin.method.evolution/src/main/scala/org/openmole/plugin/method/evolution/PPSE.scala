@@ -49,6 +49,7 @@ object PPSE:
     maxRareSample:         Int,
     minClusterSize:        Int,
     bootstrapGeneration:   Int,
+    defensiveDistributionWeight: Double,
     regularisationEpsilon: Double)
 
   object DeterministicParams:
@@ -154,7 +155,8 @@ object PPSE:
             warmupSampler = om.warmupSampler,
             minDensityQuantile = om.minDensityQuantile,
             densitySample = om.densitySample,
-            regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
+            regularisationEpsilon = om.regularisationEpsilon,
+            defensiveDistributionWeight = om.defensiveDistributionWeight)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -226,6 +228,7 @@ object PPSE:
     minClusterSize:   Int,
     regularisationEpsilon: Double,
     bootstrapGeneration: Int,
+    defensiveDistributionWeight: Double,
     accept:    Option[Condition],
     density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
@@ -250,6 +253,7 @@ object PPSE:
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
         bootstrapGeneration = bootstrapGeneration,
+        defensiveDistributionWeight = defensiveDistributionWeight,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -297,6 +301,7 @@ object PPSEEvolution:
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
       bootstrapGeneration = p.bootstrapGeneration,
+      defensiveDistributionWeight = p.defensiveDistributionWeight,
       accept = p.accept,
       density = density
     )
@@ -335,6 +340,7 @@ case class PPSEEvolution(
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
+  defensiveDistributionWeight: Double                   = 0.05,
   bootstrapGeneration: Int                              = 1000,
   scope:       DefinitionScope                          = "ppse")
 
