@@ -45,6 +45,7 @@ ${
     - Fix possible NaN inputs in evolution algorithms
     - Speed up container building
     - Implement wizard for the nlogox file format
+    - Implement memory requirement for MiniClust
   """)
 }
 
