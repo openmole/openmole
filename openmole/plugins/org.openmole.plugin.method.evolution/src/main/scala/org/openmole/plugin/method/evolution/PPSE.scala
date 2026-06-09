@@ -188,7 +188,7 @@ object PPSE:
             focus(_.s.likelihoodRatioMap).modify(m => PatternMap.add(initialState.s.likelihoodRatioMap, m, _ + _, 0)).
             focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0))
 
-        def migrateToIsland(population: Vector[I], state: S) =  (population.map(_.copy(initial = true)), state)
+        def migrateToIsland(population: Vector[I], state: S) = (population.map(_.copy(initial = true)), state)
 
         def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
           import mgo.tools.PatternMap

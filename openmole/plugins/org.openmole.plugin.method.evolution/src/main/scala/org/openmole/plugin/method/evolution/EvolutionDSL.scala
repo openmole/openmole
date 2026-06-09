@@ -301,7 +301,7 @@ object EvolutionWorkflow:
       output = Some(masterTask),
       delegate = Vector(islandTask),
       method = t)
-
+  
 end EvolutionWorkflow
 
 trait EvolutionWorkflow:
