@@ -187,8 +187,8 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
 
       compiled match 
         case c: repl.REPLDriver.Compiled =>
-          c._1 match 
-            case Left(diagnostics) => 
+          c match
+            case Left((diagnostics, _)) =>
               throw Interpreter.errorMessagesToException(diagnostics.map(Interpreter.diagnosticToErrorMessage), code)
             case Right(_) => Interpreter.RawCompiled(c, classDirectory)
         case errors: dotty.tools.repl.SyntaxErrors =>
@@ -200,10 +200,15 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
 
     def getResult(state: dotty.tools.repl.State): Any =
       //(1 to (state.valIndex + 4)).map(i => scala.util.Try(resultClass(state, Some(i)).getDeclaredMethods.toList)).map(println)
-      if(state.valIndex > c.compiled._2.valIndex)
-        val m = resultClass(state).getDeclaredMethods.head //(s"res${state.valIndex - 1}")
-        m.invoke(null)
-      else ()
+      val compiledState =
+        c.compiled match
+          case Left((_, state)) => state
+          case Right((_, state)) => state
+
+      val resultClassValue = resultClass(state)
+      resultClassValue.getDeclaredMethods.headOption match
+        case Some(m) => m.invoke(null)
+        case None => ()
 
     (getResult(runResult), runResult)
 
