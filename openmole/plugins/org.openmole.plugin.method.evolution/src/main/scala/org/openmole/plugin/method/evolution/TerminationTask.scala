@@ -21,11 +21,12 @@ import org.openmole.core.dsl._
 import org.openmole.core.dsl.extension._
 
 object TerminationTask {
-  import EvolutionWorkflow._
+  import EvolutionWorkflow.*
 
   def apply[T](evolution: EvolutionWorkflow, termination: OMTermination)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("TerminationTask") { p =>
-      import p._
+      import p.*
+
       val term = OMTermination.toTermination(termination, evolution)
 
       val state = context(evolution.stateVal)

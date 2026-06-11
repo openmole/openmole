@@ -105,7 +105,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     val testTask =
       FromContextTask("test") { p =>
-        import p._
+        import p.*
         executed += 1
         assert(context(ba).size == 10)
         context
@@ -122,7 +122,33 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     nsga run
 
     executed should be >= 100
-  
+
+  it should "run with elitsmBy" in :
+    @volatile var executed = 0
+
+    val a = Val[Double]
+    val ba = Val[Array[Boolean]]
+
+    val testTask =
+      FromContextTask("test") { p =>
+        import p.*
+        executed += 1
+        assert(context(ba).size == 10)
+        context
+      } set ((inputs, outputs) += (a, ba))
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objective = Seq(a),
+      genome = Seq(a in(0.0, 1.0), ba in Seq.fill(10)(TrueFalse)),
+      termination = 100,
+      parallelism = 10
+    ) by SteadyState(elitismBy = 5)
+
+    nsga run
+
+    executed should be >= 100
+
   it should "support single objective" in {
     val a = Val[Double]
 

@@ -639,7 +639,12 @@ trait CompositionPackage {
   implicit class DSLDecorator(t1: DSL):
     infix def &(t2: DSL) = new &(t1, t2)
     infix def and(t2: DSL) = new &(t1, t2)
-  
+
+    def inputs: Seq[Val[?]] =
+      val p = DSL.toPuzzle(t1)
+      val mole = Puzzle.toMole(p)
+      p.first.inputs(mole, p.sources, p.hooks).toSeq
+
     def outputs: Seq[Val[?]] = outputs(false)
     def outputs(explore: Boolean): Seq[Val[?]] =
       given DefinitionScope.InternalScope("outputs")
@@ -647,7 +652,7 @@ trait CompositionPackage {
       val p = if !explore then DSL.toPuzzle(t1 -- last) else DSL.toPuzzle(t1 -< last)
       val mole = Puzzle.toMole(p)
       val slot = p.slots.toSeq.find(_.capsule._task == last).head
-      TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot) toSeq
+      TypeUtil.receivedTypes(mole, p.sources, p.hooks)(slot).toSeq
  
   /* ----------------- Patterns ------------------- */
  

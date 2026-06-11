@@ -93,7 +93,7 @@ object PSE {
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
-            import p._
+            import p.*
 
             val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
             val res = MGOPSE.result[Phenotype](population, om.genome.continuous, om.genome.discrete, toFitness andThen om.pattern)

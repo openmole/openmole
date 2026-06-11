@@ -84,31 +84,28 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     lastExecuted should equal(true)
   }
 
-  "Switch" should "execute all branches where condition it true" in {
+  "Switch" should "execute all branches where condition it true" in:
     @volatile var testExecuted = 0
     @volatile var lastExecuted = 0
 
-    val test = FromContextTask("test") { p =>
-      import p._
+    val test = FromContextTask("test"): p =>
+      import p.*
       testExecuted += 1
       context
-    }
 
-    val last = FromContextTask("last") { p =>
-      import p._
+    val last = FromContextTask("last"): p =>
+      import p.*
       lastExecuted += 1
       context
-    }
 
     Switch(
-      Case(true, test),
-      Case(true, test),
-      Case(false, test)
+      Switch.Case(true, Slot(test)),
+      Switch.Case(true, Slot(test)),
+      Switch.Case(false, Slot(test))
     ) -- last run
 
     testExecuted should equal(2)
     lastExecuted should equal(2)
-  }
 
   "While" should "execute the task multiple times" in {
     @volatile var testExecuted = 0

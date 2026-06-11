@@ -20,24 +20,19 @@ import org.openmole.core.argument.Condition
 import org.openmole.core.dsl._
 import org.openmole.core.setter.DefinitionScope
 
-object Case {
-  def apply(dsl: DSL): Case = Case(Condition.True, dsl)
-}
+object Switch:
+  object Case:
+    def apply(dsl: DSL): Case = Case(Condition.True, dsl)
 
-case class Case(condition: Condition, dsl: DSL)
+  case class Case(condition: Condition, dsl: DSL)
 
-object Switch {
-
-  def apply(cases: Case*)(implicit definitionScope: DefinitionScope = DefinitionScope.InternalScope("switch")) = {
-
-    val first = Strain(EmptyTask())
-    val last = Strain(EmptyTask())
+  def apply(cases: Case*)(using scope: DefinitionScope = DefinitionScope.InternalScope("switch")) =
+    val first = Strain(EmptyTask()) //set ((inputs, outputs) ++= c.dsl.inputs))
+    val last = Strain(EmptyTask()) //set ((inputs, outputs) ++= c.dsl.outputs))
 
     cases.map {
       case Case(condition, dsl) =>
-        first -- Slot(dsl) when condition
-    }.reduce[DSL](_ & _) -- Slot(last)
+        (first -- dsl when condition) -- Slot(last)
+    }.reduce[DSL](_ & _)
 
-  }
 
-}

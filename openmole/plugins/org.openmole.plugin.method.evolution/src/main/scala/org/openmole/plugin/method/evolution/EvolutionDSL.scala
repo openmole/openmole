@@ -50,6 +50,7 @@ object EvolutionWorkflow:
           evaluation = evaluation,
           parallelism = parallelism,
           by = s.by,
+          elitismBy = s.elitismBy,
           termination = termination,
           wrap = s.wrap,
           suggestion = suggestion,
@@ -153,7 +154,7 @@ object EvolutionWorkflow:
   sealed trait OMTermination
 
   sealed trait EvolutionPattern
-  case class SteadyState(by: Int = 1, wrap: Boolean = false) extends EvolutionPattern
+  case class SteadyState(by: Int = 1, elitismBy: Int = 1, wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
   def SteadyStateEvolution[M](
@@ -162,24 +163,29 @@ object EvolutionWorkflow:
     termination: OMTermination,
     parallelism: Int                          = 1,
     by:          Int                          = 1,
+    elitismBy:   Int                          = 1,
     suggestion:  Genome.SuggestedValues       = Genome.SuggestedValues.empty,
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) =
-    implicit def defScope: DefinitionScope = scope
+    given DefinitionScope = scope
     val evolution = evolutionMethod(method)
+    val elitismByValue = math.min(parallelism, elitismBy)
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
-    val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationVal)
+    val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += (evolution.populationVal, evolution.offspringPopulationVal))
 
     val scaleGenome = ScalingGenomeTask(evolution)
     val toOffspring = ToOffspringTask(evolution)
     val elitism = ElitismTask(evolution)
     val terminationTask = TerminationTask(evolution, termination)
-    val breed = BreedTask(evolution, 1, Genome.SuggestedValues.empty)
+    val breed = BreedTask(evolution, elitismByValue, Genome.SuggestedValues.empty) set (
+      outputs += (evolution.populationVal, evolution.offspringPopulationVal),
+      (inputs, outputs) += evolution.terminatedVal,
+      evolution.offspringPopulationVal := Array.empty[evolution.I])
 
     val masterFirst =
       EmptyTask() set (
-        (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal),
+        (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal, evolution.offspringPopulationVal),
         (inputs, outputs) ++= evolution.outputVals
       )
 
@@ -189,15 +195,35 @@ object EvolutionWorkflow:
           evolution.populationVal,
           evolution.stateVal,
           evolution.genomeVal.toArray,
-          evolution.terminatedVal)
+          evolution.terminatedVal,
+          evolution.offspringPopulationVal)
+      )
+
+    val byPassTask =
+      EmptyTask().set (
+        (inputs, outputs) += (
+          evolution.populationVal,
+          evolution.stateVal,
+          evolution.genomeVal.array,
+          evolution.terminatedVal,
+          evolution.offspringPopulationVal),
+        evolution.terminatedVal := false,
+        evolution.genomeVal.array := Array.empty[evolution.G]
+      )
+
+    val elitismSwitch =
+      Switch(
+        Switch.Case(s"${evolution.offspringPopulationVal.name}.size >= $elitismByValue", elitism -- terminationTask -- breed),
+        Switch.Case(s"${evolution.offspringPopulationVal.name}.size < $elitismByValue", byPassTask)
       )
 
     val master =
-      ((masterFirst -- toOffspring keepAll (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals)) -- elitism -- terminationTask -- breed -- masterLast) &
+      (
+        (masterFirst -- toOffspring keepAll Seq(evolution.stateVal, evolution.genomeVal, evolution.offspringPopulationVal) ++ evolution.outputVals) -- elitismSwitch -- masterLast &
         (masterFirst -- elitism keep evolution.populationVal) &
-        (elitism -- breed keep evolution.populationVal) &
-        (elitism -- masterLast keep evolution.populationVal) &
-        (terminationTask -- masterLast keep (evolution.terminatedVal, evolution.generationVal))
+        (masterFirst -- byPassTask keep evolution.populationVal) &
+        (elitism -- breed keep evolution.populationVal)
+      )
 
     val masterTask = MoleTask(master) set (exploredOutputs += evolution.genomeVal.toArray)
 
@@ -208,7 +234,7 @@ object EvolutionWorkflow:
         randomGenomes,
         master = masterTask,
         slave = slave,
-        state = Seq(evolution.populationVal, evolution.stateVal),
+        state = Seq(evolution.populationVal, evolution.stateVal, evolution.offspringPopulationVal),
         slaves = parallelism,
         stop = evolution.terminatedVal
       )
@@ -301,7 +327,7 @@ object EvolutionWorkflow:
       output = Some(masterTask),
       delegate = Vector(islandTask),
       method = t)
-  
+
 end EvolutionWorkflow
 
 trait EvolutionWorkflow:
@@ -329,6 +355,7 @@ trait EvolutionWorkflow:
   def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]]
 
   def genomeVal = Val[G]("genome", GAIntegration.namespace)(using genomeType)
+  def genomeBufferVal = Val[G]("genomebuffer", GAIntegration.namespace)(using genomeType)
   def individualVal = Val[I]("individual", GAIntegration.namespace)(using individualType)
   def populationVal = Val[Pop]("population", GAIntegration.namespace)(using populationType)
   def offspringPopulationVal = Val[Pop]("offspring", GAIntegration.namespace)(using populationType)

@@ -28,7 +28,7 @@ object InitialStateTask:
 
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
     Task("InitialStateTask"): p =>
-      import p._
+      import p.*
       def initialisedState =
         evolution.startTimeLens.set(System.currentTimeMillis) andThen
           evolution.generationLens.set(0L) andThen
@@ -36,9 +36,10 @@ object InitialStateTask:
 
       Context(Variable(evolution.stateVal, initialisedState))
     .set (
-      inputs += (evolution.stateVal, evolution.populationVal),
-      outputs += (evolution.stateVal, evolution.populationVal),
+      inputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal),
+      outputs += (evolution.stateVal, evolution.populationVal, evolution.offspringPopulationVal),
       evolution.stateVal := FromContext(p => evolution.operations.initialState),
-      evolution.populationVal := Array.empty[evolution.I]
+      evolution.populationVal := Array.empty[evolution.I],
+      evolution.offspringPopulationVal := Array.empty[evolution.I]
     )
 

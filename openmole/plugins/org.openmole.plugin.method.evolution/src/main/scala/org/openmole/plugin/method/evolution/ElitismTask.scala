@@ -26,17 +26,19 @@ object ElitismTask:
     Task("ElitismTask"): p =>
       import p.*
 
+      val offspringPopulation = context(evolution.offspringPopulationVal)
+
       val (newState, newPopulation) =
         evolution.operations.elitism(
           context(evolution.populationVal).toVector,
-          context(evolution.offspringPopulationVal).toVector,
+          offspringPopulation.toVector,
           context(evolution.stateVal),
           random()
         ).from(context)
       
       val incrementedState =
         evolution.generationLens.modify(_ + 1)
-        .andThen(evolution.evaluatedLens.modify(_ + 1))
+        .andThen(evolution.evaluatedLens.modify(_ + offspringPopulation.length))
         .apply(newState)
 
       Context(
