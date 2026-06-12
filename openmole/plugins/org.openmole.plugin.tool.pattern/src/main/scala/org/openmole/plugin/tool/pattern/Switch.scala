@@ -27,8 +27,8 @@ object Switch:
   case class Case(condition: Condition, dsl: DSL)
 
   def apply(cases: Case*)(using scope: DefinitionScope = DefinitionScope.InternalScope("switch")) =
-    val first = Strain(EmptyTask()) //set ((inputs, outputs) ++= c.dsl.inputs))
-    val last = Strain(EmptyTask()) //set ((inputs, outputs) ++= c.dsl.outputs))
+    val first = Strain(EmptyTask())
+    val last = Strain(EmptyTask())
 
     cases.map {
       case Case(condition, dsl) =>
