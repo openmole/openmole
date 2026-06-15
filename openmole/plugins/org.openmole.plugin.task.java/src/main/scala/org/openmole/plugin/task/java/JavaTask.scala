@@ -112,7 +112,7 @@ object JavaTask:
           (outputValues zip noFile(mapped.outputs).map(_.v)).map { case (value, v) => Variable.unsecureUntyped(v, value) }
 
         def inputMapping(dicoName: String): String =
-          noFile(mapped.inputs).zipWithIndex.map { case (m, i) => s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.toTypeString(m.v.`type`)}]" }.mkString("\n")
+          noFile(mapped.inputs).zipWithIndex.map { case (m, i) => s"val ${m.name} = $dicoName($i).asInstanceOf[${ValType.compileTypeString(m.v.`type`)}]" }.mkString("\n")
 
         def outputMapping: String =
           s"""Array[Any](${noFile(mapped.outputs).map { m => m.name }.mkString(",")})"""

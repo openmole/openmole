@@ -203,7 +203,7 @@ lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = d
   libraryDependencies ++= Libraries.monocle) dependsOn (pluginRegistry)
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = defaultImports ++ Seq("*")) settings(
-  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless),
+  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless, Libraries.izumiReflect),
   libraryDependencies += Libraries.fory,
   defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings *)

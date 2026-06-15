@@ -75,7 +75,8 @@ object Libraries {
   lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
   lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
-  lazy val  ulid = "org.openmole.library" %% "com-github-f4b6a3-ulid" % ulidCreatorVersion
+  lazy val ulid = "org.openmole.library" %% "com-github-f4b6a3-ulid" % ulidCreatorVersion
+  lazy val izumiReflect = "org.openmole.library" %% "izumi-reflect" % izumiReflectVersion
   
   def httpClientVersion = "4.5.3"
   lazy val httpClient =

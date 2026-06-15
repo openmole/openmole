@@ -25,10 +25,10 @@ object ScalaCode:
   given DefaultBuilder[ScalaCode] with
     def defaults = Focus[ScalaCode](_.defaults)
 
-  given [T: Manifest]: DiscreteFromContextDomain[ScalaCode | String, T] =
+  given [T: ValTag]: DiscreteFromContextDomain[ScalaCode | String, T] =
     code => implicitly[DiscreteFromContextDomain[FromContext[Iterable[T]], T]].apply(ScalaCode.fromContext[Iterable[T]](code))
 
-  def fromContext[T: Manifest](code: ScalaCode | String) =
+  def fromContext[T: ValTag](code: ScalaCode | String) =
     code match
       case code: ScalaCode => FromContext.codeToFromContext[T](code.source).copy(defaults = code.defaults)
       case code: String => FromContext.codeToFromContext[T](code)

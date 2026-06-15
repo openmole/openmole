@@ -23,13 +23,17 @@ import io.circe.*
 import org.openmole.core.pluginmanager.PluginManager
 
 object ValData:
-  def apply[T](v: Val[T]) = 
-    new ValData(v.name, ValType.toTypeString(v.`type`, rootPrefix = false, replaceObject$ = false))
+  def apply[T](v: Val[T]) =
+    val runtimeType = ValType.runtimeTypeString(v.`type`, rootPrefix = false, replaceObject$ = false)
+    val compileType = ValType.compileTypeString(v.`type`, rootPrefix = false)
+    new ValData(v.name, runtimeType, Some(compileType))
 
   def toVal(data: ValData) =
     val (ns, n) = Val.parseName(data.name)
-    new Val(n, ValType(using TypeTool.toManifest(data.`type`, PluginManager.globalClassLoader(ValData.getClass))), ns)
+    val compileType = ValType.TypeName.parse(data.compileType.getOrElse(data.`type`))
+    val runtimeManifest = TypeTool.toManifest(data.`type`, PluginManager.globalClassLoader(ValData.getClass))
+    new Val(n, ValType(runtimeManifest, compileType), ns)
 
-case class ValData(name: String, `type`: String) derives derivation.ConfiguredCodec
+case class ValData(name: String, `type`: String, compileType: Option[String]) derives derivation.ConfiguredCodec
 
 

@@ -31,9 +31,9 @@ object NSGA2:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicNSGA2) = new Ops:
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
@@ -115,9 +115,9 @@ object NSGA2:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticNSGA2) = new Ops:
 

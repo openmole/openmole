@@ -61,9 +61,9 @@ object PPSE:
       type G = mgo.evolution.algorithm.PPSE.Genome
       type I = mgo.evolution.algorithm.PPSE.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicParams) = new Ops:
         override def metadata(state: S, saveOption: SaveOption) =

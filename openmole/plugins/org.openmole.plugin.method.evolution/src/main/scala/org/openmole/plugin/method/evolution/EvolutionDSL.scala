@@ -168,7 +168,11 @@ object EvolutionWorkflow:
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) =
     given DefinitionScope = scope
+
     val evolution = evolutionMethod(method)
+    given Manifest[evolution.I] = evolution.integration.iTag
+    given Manifest[evolution.G] = evolution.integration.gTag
+
     val elitismByValue = math.min(parallelism, elitismBy)
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
@@ -347,7 +351,7 @@ trait EvolutionWorkflow:
   def genomeType = ValType[G]
   def stateType = ValType[S]
   def individualType = ValType[I]
-  def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
+  def populationType: ValType[Pop] = ValType[Pop] //using Manifest.arrayType[I](manifest[I]))
 
   def inputVals: Seq[Val[?]]
   def outputVals: Seq[Val[?]]
@@ -454,9 +458,9 @@ object MGOAPI:
     type G
     type S
 
-    implicit def iManifest: Manifest[I]
-    implicit def gManifest: Manifest[G]
-    implicit def sManifest: Manifest[S]
+    implicit def iTag: ValTag[I]
+    implicit def gTag: ValTag[G]
+    implicit def sTag: ValTag[S]
 
     def startTimeLens: monocle.Lens[S, Long]
     def generationLens: monocle.Lens[S, Long]

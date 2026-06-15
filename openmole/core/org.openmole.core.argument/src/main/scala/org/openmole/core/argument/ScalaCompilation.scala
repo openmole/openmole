@@ -143,10 +143,10 @@ object ScalaCompilation {
    */
   def script[RETURN](inputs: Seq[Val[?]], source: String, wrapping: OutputWrapping[RETURN], returnType: ValType[_ <: RETURN]) = {
     val header =
-      s"""new ${classOf[CompilationClosure[_]].getName}[${ValType.toTypeString(returnType)}] {
-         |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}): ${ValType.toTypeString(returnType)} = {
+      s"""new ${classOf[CompilationClosure[_]].getName}[${ValType.compileTypeString(returnType)}] {
+         |  def apply(${prefix}context: ${manifest[Context].toString}, ${prefix}RNG: ${manifest[RandomProvider].toString}, ${prefix}NewFile: ${manifest[TmpDirectory].toString}): ${ValType.compileTypeString(returnType)} = {
          |    object $inputObject {
-         |      ${inputs.toSeq.map(i => s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.toTypeString(i.`type`)}]""").mkString("; ")}
+         |      ${inputs.toSeq.map(i => s"""var ${i.name} = ${prefix}context("${i.name}").asInstanceOf[${ValType.compileTypeString(i.`type`)}]""").mkString("; ")}
          |    }
          |    import ${inputObject}._
          |    implicit def ${Val.name(Namespace.openmole, "RNGProvider")}: ${manifest[RandomProvider].toString} = ${prefix}RNG
@@ -178,7 +178,7 @@ object ScalaCompilation {
 
   case class Script(code: String, originalCode: String, headerLines: Int)
 
-  class ScalaWrappedCompilation[R: Manifest](code: String, wrapping: OutputWrapping[R]) {
+  class ScalaWrappedCompilation[R: ValTag](code: String, wrapping: OutputWrapping[R]) {
     def returnType = ValType.apply[R]
 
     val cache = Cache(collection.mutable.HashMap[Seq[Val[?]], Try[ContextClosure[R]]]())
@@ -226,11 +226,11 @@ object ScalaCompilation {
     wrapping:  OutputWrapping[R] = RawOutput(),
     libraries: Seq[File]         = Seq.empty,
     plugins:   Seq[File]         = Seq.empty
-  )(using m: Manifest[R], newFile: TmpDirectory, fileService: FileService) =
+  )(using m: ValTag[R], newFile: TmpDirectory, fileService: FileService) =
     val (cl, i) = closure[R](inputs, code, plugins, libraries, wrapping, ValType(using m)).get
     ContextClosure(cl.apply, i)
 
-  def dynamic[R: Manifest](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
+  def dynamic[R: ValTag](code: String, wrapping: OutputWrapping[R] = RawOutput[R]()) =
     new ScalaWrappedCompilation[R](code, wrapping)
 
   case class ContextClosure[+R](f: (Context, RandomProvider, TmpDirectory) => R, interpreter: Interpreter):
@@ -244,7 +244,7 @@ object ScalaCompilation {
    */
   case class WrappedOutput(outputs: PrototypeSet) extends OutputWrapping[java.util.Map[String, Any]]:
     def wrapOutput =
-      s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p => s""" "${p.name}" -> (${p.name}: ${ValType.toTypeString(p.`type`)})""").mkString(",")} )).asJava"""
+      s"""scala.jdk.CollectionConverters.MapHasAsJava(Map[String, Any]( ${outputs.toSeq.map(p => s""" "${p.name}" -> (${p.name}: ${ValType.compileTypeString(p.`type`)})""").mkString(",")} )).asJava"""
 
 
   case class RawOutput[T]() extends OutputWrapping[T]:

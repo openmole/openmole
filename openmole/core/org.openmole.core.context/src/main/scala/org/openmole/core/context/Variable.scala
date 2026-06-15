@@ -41,7 +41,7 @@ object Variable:
    * @tparam T
    * @return
    */
-  implicit def tupleToVariable[@specialized T: Manifest](t: (String, T)): Variable[T] = apply(Val[T](t._1), t._2)
+  implicit def tupleToVariable[@specialized T: Manifest: izumi.reflect.Tag](t: (String, T)): Variable[T] = apply(Val[T](t._1), t._2)
 
   /**
    * Unsecure constructor, trying to cast the provided value to the type of the prototype

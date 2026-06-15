@@ -25,13 +25,13 @@ import org.openmole.core.workflow.task._
 object ToOffspringTask:
 
   def apply(evolution: EvolutionWorkflow)(using sourcecode.Name, DefinitionScope) =
-    import evolution.integration.iManifest
+    given Manifest[evolution.integration.I] = evolution.integration.iTag
 
     Task("ToOffspringTask"): p =>
       import p.*
       val i = evolution.operations.buildIndividual(context(evolution.genomeVal), context, context(evolution.stateVal))
-      val offspring = context(evolution.offspringPopulationVal)
-      Context(Variable(evolution.offspringPopulationVal, offspring ++ Seq(i)))
+      val offspring = context(evolution.offspringPopulationVal) ++ Seq(i)
+      Context(Variable(evolution.offspringPopulationVal, offspring))
     .set (
       inputs ++= evolution.outputVals,
       inputs += (evolution.genomeVal, evolution.stateVal, evolution.offspringPopulationVal),

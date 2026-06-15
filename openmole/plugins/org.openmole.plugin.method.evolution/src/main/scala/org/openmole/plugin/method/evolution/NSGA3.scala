@@ -34,11 +34,11 @@ object NSGA3 {
     given MGOAPI.Integration[DeterministicNSGA3, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
-
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
-
+      
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
+      
       def operations(om: DeterministicNSGA3) = new Ops:
 
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
@@ -113,9 +113,9 @@ object NSGA3 {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly[Manifest[I]]
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticNSGA3) = new Ops:
 

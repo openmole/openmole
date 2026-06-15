@@ -27,13 +27,14 @@ object GenerateIslandTask:
 
   def apply(evolution: EvolutionWorkflow, sample: Option[Int], size: Int, untypedOutputPopulation: Val[?])(using sourcecode.Name, DefinitionScope) =
     val outputPopulation = untypedOutputPopulation.asInstanceOf[Val[evolution.Pop]]
+    given Manifest[evolution.integration.I] = evolution.integration.iTag
 
     Task("GenerateIslandTask"): param =>
       import param.*
 
       val p = context(evolution.populationVal)
 
-      import evolution.integration.iManifest
+      import evolution.integration.iTag
 
       def samples =
         if (p.isEmpty) Vector.empty

@@ -591,3 +591,9 @@ lazy val layoutz = OsgiProject(dir, "layoutz", imports = defaultImports ++ Seq("
   libraryDependencies += "xyz.matthieucourt" %% "layoutz" % layouzVersion,
   version := layouzVersion
 )
+
+lazy val izumiReflect = OsgiProject(dir, "izumi.reflect") settings (
+  settings,
+  libraryDependencies += "dev.zio" %% "izumi-reflect" % izumiReflectVersion,
+  version := izumiReflectVersion
+)

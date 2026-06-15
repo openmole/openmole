@@ -27,6 +27,8 @@ import org.openmole.core.workflow.task._
 object InitialStateTask:
 
   def apply(evolution: EvolutionWorkflow)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    given Manifest[evolution.integration.I] = evolution.integration.iTag
+
     Task("InitialStateTask"): p =>
       import p.*
       def initialisedState =

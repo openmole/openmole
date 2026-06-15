@@ -23,6 +23,8 @@ import org.openmole.core.dsl.extension.*
 object ToIslandTask:
 
   def apply[T](evolution: EvolutionWorkflow, islandPopulation: Val[evolution.Pop], initialIslandStateVal: Val[evolution.S])(using sourcecode.Name, DefinitionScope) =
+    given Manifest[evolution.integration.I] = evolution.integration.iTag
+
     Task("ToIslandTask") { p =>
       import p._
       val (population, state) = evolution.operations.migrateToIsland(context(islandPopulation).toVector, context(evolution.stateVal))

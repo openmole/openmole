@@ -101,9 +101,9 @@ object Profile {
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicProfile) = new Ops:
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
@@ -209,9 +209,9 @@ object Profile {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticProfile) = new Ops:
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)

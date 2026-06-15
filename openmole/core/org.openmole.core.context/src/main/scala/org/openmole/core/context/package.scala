@@ -17,5 +17,7 @@
  */
 package org.openmole.core.context
 
+export izumi.reflect.Tag
+
 def Vec[T](v: Val[T], dimension: Int = 1) = v.array(dimension)
 

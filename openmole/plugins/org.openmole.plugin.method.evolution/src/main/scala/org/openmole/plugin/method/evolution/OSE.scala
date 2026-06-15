@@ -39,9 +39,9 @@ object OSE {
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def startTimeLens = Focus[S](_.startTime)
       def generationLens = Focus[S](_.generation)
@@ -142,9 +142,9 @@ object OSE {
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = OSEState[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def startTimeLens = Focus[S](_.startTime)
       def generationLens = Focus[S](_.generation)

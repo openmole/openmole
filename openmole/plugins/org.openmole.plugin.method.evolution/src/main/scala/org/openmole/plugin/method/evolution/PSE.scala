@@ -59,9 +59,9 @@ object PSE {
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicPSE) = new Ops:
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
@@ -176,9 +176,9 @@ object PSE {
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticPSE) = new Ops:
         override def metadata(state: S, saveOption: SaveOption) =

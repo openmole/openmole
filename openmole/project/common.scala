@@ -62,6 +62,7 @@ object common {
   def jgitVersion = "7.0.0.202409031743-r"
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
+  def izumiReflectVersion = "3.0.9"
 
   def http4sVersion = "0.23.32"
   def http4sBlaseSeverVersion = "0.23.17"
