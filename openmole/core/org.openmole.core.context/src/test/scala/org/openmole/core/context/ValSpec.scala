@@ -18,20 +18,21 @@ class ValSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
 
   it should "build the following" in:
-//    val vt = ValType[Array[Int]]
-//
-//    vt.compileName.arrayLevel shouldEqual 1
-//    vt.compileName.name() shouldEqual "Array[Int]"
-//
-//    def f[A: ValTag as a, B: ValTag as b] =
-//      import org.openmole.tool.types.*
-//      import a.*
-//      import b.*
-//      ValTag[A => B]()
+    val vt = ValType[Array[Int]]
+
+    vt.compileName.arrayLevel shouldEqual 1
+    vt.compileName.name() shouldEqual "Array[Int]"
+
+    def f[A: ValTag as a, B: ValTag as b]: ValTag[A => B] = implicitly
 
     type I = ValSpec.C[Int]
-    inline def s[T](using inline t: T) = t
-    def iTag: ValTag[I] = s //implicitly[ValTag[ValSpec.C[Int]]]
     val valTag: ValTag[I] = ValTag[I]
-    println(valTag.m)
-    iTag.m shouldEqual manifest[ValSpec.C[I]]
+    valTag shouldEqual ValTag[ValSpec.C[Int]]
+
+  it should "produce the correct manifest" in:
+    import org.openmole.tool.types.TypeTool
+    val runtimeManifest = TypeTool.toManifest("scala.collection.immutable.Map[Int, Array[Double]]", this.getClass.getClassLoader)
+
+    val vt = ValType[Map[Int, Array[Double]]]
+    vt.manifest shouldEqual manifest[Map[Int, Array[Double]]]
+

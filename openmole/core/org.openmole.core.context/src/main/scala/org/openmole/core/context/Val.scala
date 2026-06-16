@@ -27,23 +27,26 @@ import scala.reflect.*
 import izumi.reflect.{TagK}
 import izumi.reflect.macrortti.LightTypeTag
 
-object ValTag:
+trait LowPriorityValTag:
+  import org.openmole.tool.types.*
+  given [A: ValTag as tag, T[_]](using Tag[T]): ValTag[T[A]] =
+    given Manifest[A] = tag.m
+    given Tag[A] = tag.tag
+    ValTag.apply[T[A]]
+
+object ValTag extends LowPriorityValTag:
   import org.openmole.tool.types.*
   given [T](using m: Manifest[T], t: Tag[T]): ValTag[T] = new ValTag(m, t)
   given [T]: Conversion[ValTag[T], Manifest[T]] = _.m
 
   given [T]: Conversion[ValTag[T], Tag[T]] = _.tag
-  given [A: ValTag as tag, T[_]](using Tag[T]): ValTag[T[A]] =
-    given Manifest[A] = tag.m
-    given Tag[A] = tag.tag
-    apply[T[A]]
 
-  given [A: ValTag as taga, B: ValTag as tagb, T[_, _]](using Tag[T]): ValTag[T[A, B]] =
+  given [A: ValTag as taga, B: ValTag as tagb]: ValTag[A => B] =
     given Manifest[A] = taga.m
     given Manifest[B] = tagb.m
     given Tag[A] = taga.tag
     given Tag[B] = tagb.tag
-    apply[T[A, B]]
+    apply[A => B]
 
   def apply[T](using m: Manifest[T], t: Tag[T]): ValTag[T] = new ValTag(m, t)
 
@@ -57,7 +60,7 @@ object ValType:
 
   extension (t: TypeName)
     def array = t.copy(arrayLevel = t.arrayLevel + 1)
-    def fromArray = t.copy(arrayLevel = t.arrayLevel )
+    def fromArray = t.copy(arrayLevel = t.arrayLevel - 1)
     def name(rootPrefix: Boolean = false): String =
       def shortName = !t.fullName.contains(".")
       if rootPrefix && !shortName
@@ -88,12 +91,15 @@ object ValType:
 
       def fullyQualifiedName =
         val shortTypes =
-          Set("Any", "AnyRef", "AnyVal", "Boolean", "Byte", "Char", "Double", "Float", "Int", "Long", "Nothing", "Null", "Object", "Short", "Unit", "String", "Array", "IArray")
+          Set(
+            "Any", "AnyRef", "AnyVal", "Boolean", "Byte", "Char",
+            "Double", "Float", "Int", "Long", "Nothing", "Null",
+            "Object", "Short", "Unit", "String", "Array", "IArray")
 
         if shortTypes.contains(tag.shortName)
         then tag.shortName
         else tag.withoutArgs.scalaStyledRepr
-        
+
 //          if tag.scalaStyledRepr.startsWith("java") | tag.scalaStyledRepr.startsWith("javax")
 //          then tag.shortName
 //          else tag.withoutArgs.scalaStyledRepr
