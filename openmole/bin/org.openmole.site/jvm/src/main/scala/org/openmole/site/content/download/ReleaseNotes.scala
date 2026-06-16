@@ -46,6 +46,8 @@ ${
     - Speed up container building
     - Implement wizard for the nlogox file format
     - Implement memory requirement for MiniClust
+    - Implement elitism batching
+    - Capture a compile time type in ValType alongs with the manifest
   """)
 }
 
