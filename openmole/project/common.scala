@@ -42,7 +42,7 @@ object common {
   def scoptVersion = "4.1.0"
   def spatialsamplingVersion = "0.3"
   def logbackVersion = "1.2.3"
-  def h2Version = "2.1.214"
+  def h2Version = "2.4.240"
   def shapelessVersion = "3.4.1"
   def jasyptVersion = "1.9.3"
   def monocleVersion = "3.3.0"
