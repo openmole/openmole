@@ -246,7 +246,7 @@ package object db extends JavaLogger {
     finally src.close
   }
 
-  def jdbcH2Options = "FILE_LOCK=FILE;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
+  def jdbcH2Options = "AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
 
   def insert(transactor: Transactor, source: String, storage: String, path: String, hash: String, lastCheckExists: Long) = 
     transactor.insert(source, storage, path, hash, lastCheckExists)
