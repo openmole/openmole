@@ -44,7 +44,6 @@ object AggregateTask {
       AggregateVal.applyFromContext(aggregate, v.value)
 
     implicit def fromAsScalaCode[A, B: ValTag](v: As[Evaluate[Val[A], ScalaCode | String], Val[B]]): AggregateVal[A, B] = 
-      implicit val bManifest: Manifest[B] = v.as.`type`.manifest
       val fromContext =
         v.value.evaluate match 
           case s: ScalaCode => ScalaCode.fromContext[B](s)

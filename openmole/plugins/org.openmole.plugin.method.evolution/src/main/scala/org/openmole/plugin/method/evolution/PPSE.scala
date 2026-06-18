@@ -48,7 +48,7 @@ object PPSE:
     densitySample:         Int,
     maxRareSample:         Int,
     minClusterSize:        Int,
-    bootstrapGeneration:   Int,
+    bootstrap:             Int,
     regularisationEpsilon: Double)
 
   object DeterministicParams:
