@@ -1435,9 +1435,9 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
        apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget e2fsprogs && \
-       wget https://github.com/apptainer/apptainer/releases/download/v1.5.0/apptainer_1.5.0-trixie+_amd64.deb && \
-       wget https://github.com/apptainer/apptainer/releases/download/v1.5.0/apptainer-suid_1.5.0-trixie+_amd64.deb && \
-       apt install -y ./apptainer_1.5.0-trixie+_amd64.deb ./apptainer-suid_1.5.0-trixie+_amd64.deb && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.1/apptainer_1.5.1-trixie+_amd64.deb && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.1/apptainer-suid_1.5.1-trixie+_amd64.deb && \
+       apt install -y ./apptainer_1.5.1-trixie+_amd64.deb ./apptainer-suid_1.5.1-trixie+_amd64.deb && \
        rm *.deb && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
