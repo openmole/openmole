@@ -1415,14 +1415,30 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     //platforms = List("linux/arm64/v8"),
     //additionalArguments = Seq("--add-host", "127.0.0.1:12345", "--compress")
   ),
+
+//
+//      from("ubuntu:noble")
+//    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>")
+//    runRaw(
+//      """apt-get update && \
+//       apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget && \
+//       wget https://github.com/sylabs/singularity/releases/download/v4.4.2/singularity-ce_4.4.2-noble_amd64.deb && \
+//       sudo apt install ./singularity-ce_4.4.2-noble_amd64.deb && \
+//       rm *.deb && \
+//       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
+//       mkdir -p /lib/modules && \
+//       singularity config global -s "sessiondir max size" 0""")
+//
   docker / dockerfile := new Dockerfile {
     from("debian:testing")
-    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     runRaw(
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
-       apt-get install -y singularity-container && \
+       apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.0/apptainer_1.5.0-trixie+_amd64.deb && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.0/apptainer-suid_1.5.0-trixie+_amd64.deb && \
+       apt install -y ./apptainer_1.5.0-trixie+_amd64.deb ./apptainer-suid_1.5.0-trixie+_amd64.deb && \
+       rm *.deb && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
        singularity config global -s "sessiondir max size" 0""")
