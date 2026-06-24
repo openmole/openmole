@@ -44,6 +44,7 @@ ${
     - Use acceptance rather than a rejcetion condition in evolution methods
     - Fix possible NaN inputs in evolution algorithms
     - Speed up container building
+    - Migrate docker container from Singularity to Apptainer
     - Implement wizard for the nlogox file format
     - Implement memory requirement for MiniClust
     - Implement elitism batching
