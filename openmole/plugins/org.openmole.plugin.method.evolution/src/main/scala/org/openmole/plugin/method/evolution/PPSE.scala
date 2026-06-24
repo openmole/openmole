@@ -48,7 +48,6 @@ object PPSE:
     densitySample:         Int,
     maxRareSample:         Int,
     minClusterSize:        Int,
-    bootstrap:             Int,
     regularisationEpsilon: Double)
 
   object DeterministicParams:
@@ -180,7 +179,6 @@ object PPSE:
             tolerance = om.gmmTolerance,
             dilation = om.dilation,
             minClusterSize = om.minClusterSize,
-            bootstrap = om.bootstrap,
             regularisationEpsilon = om.regularisationEpsilon) apply (s, population, candidates, rng)
 
           (s2, elited)
@@ -231,7 +229,6 @@ object PPSE:
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
-    bootstrap: Int,
     accept:    Option[Condition],
     density:   Option[Density],
     outputs:   Seq[Val[?]]     = Seq()) =
@@ -255,7 +252,6 @@ object PPSE:
         densitySample = densitySample,
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
-        bootstrap = bootstrap,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -302,7 +298,6 @@ object PPSEEvolution:
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
-      bootstrap = p.bootstrap,
       accept = p.accept,
       density = density
     )
@@ -341,6 +336,5 @@ case class PPSEEvolution(
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
-  bootstrap: Int                                        = 1000,
   scope:       DefinitionScope                          = "ppse")
 
