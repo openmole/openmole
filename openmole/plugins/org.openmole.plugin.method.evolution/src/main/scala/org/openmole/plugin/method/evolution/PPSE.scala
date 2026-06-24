@@ -94,7 +94,7 @@ object PPSE:
           val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
           mgo.evolution.algorithm.PPSE.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = mgo.evolution.algorithm.PPSE.PPSEState())
+        def initialState = EvolutionState(s = mgo.evolution.algorithm.PPSE.PPSEState.empty(om.densitySample))
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
@@ -121,12 +121,11 @@ object PPSE:
           import p.*
           om.pattern(Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context).apply(phenotype))
 
-        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext: p =>
-          import p.*
 
+        def densityValue(using RandomProvider, TmpDirectory, FileService) =
           def density(d: Density): FromContext[Double] = FromContext: p =>
-            import org.apache.commons.math3.distribution.*
             import p.*
+            import org.apache.commons.math3.distribution.*
             d match
               case d: Density.IndependentJoint =>
                 if d.density.nonEmpty then d.density.map(di => density(di).from(context)).reduceLeft(_ * _) else 1.0
@@ -137,39 +136,45 @@ object PPSE:
                 val dist = new BetaDistribution(d.alpha, d.beta)
                 dist.density(context(d.v))
 
-          def densityValue =
-            om.density.map: d =>
-              val densityValue = density(d)
-              (g: IArray[Double]) =>
-                val scaled = Genome.toVariables(om.genome, g, IArray.empty, scale = true)
-                densityValue.from(scaled)
+          om.density.map: d =>
+            val densityValue = density(d)
+            (g: IArray[Double]) =>
+              val scaled = Genome.toVariables(om.genome, g, IArray.empty, scale = true)
+              densityValue.from(scaled)
+
+
+        def breeding(individuals: Vector[I], n: Int, s: S, rng: scala.util.Random) = FromContext: p =>
+          import p.*
 
           mgo.evolution.algorithm.PPSEOperation.breeding[S, I, G](
             om.genome.continuous,
             mgo.evolution.algorithm.PPSE.Genome.apply,
             n,
             rejectValue.from(context),
-            _.s.gmm,
-            density = densityValue,
+            gmm = _.s.gmm,
+            inverseDensitySamples = _.s.inverseDensitySamples,
             warmupSampler = om.warmupSampler,
-            minDensityQuantile = om.minDensityQuantile,
-            densitySample = om.densitySample,
-            regularisationEpsilon = om.regularisationEpsilon)(s, individuals, rng)
+            densityQuantile = om.minDensityQuantile,
+            regularisationEpsilon = om.regularisationEpsilon,
+            density = densityValue)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
 
           val (s2, elited) = mgo.evolution.algorithm.PPSEOperation.elitism[S, I, Phenotype](
-            i => mgo.evolution.algorithm.PPSE.Genome.toTuple(i.genome),
-            _.phenotype,
-            pattern(_).from(context),
-            om.genome.continuous,
-            rejectValue.from(context),
-            Focus[S](_.s.likelihoodRatioMap),
-            Focus[S](_.s.hitmap),
-            Focus[S](_.s.gmm),
+            values = i => mgo.evolution.algorithm.PPSE.Genome.toTuple(i.genome),
+            phenotype = _.phenotype,
+            pattern = pattern(_).from(context),
+            continuous = om.genome.continuous,
+            reject = rejectValue.from(context),
+            density = densityValue,
+            inverseDensitySamples = Focus[S](_.s.inverseDensitySamples),
+            warmupSampler = om.warmupSampler,
+            likelihoodRatioMap = Focus[S](_.s.likelihoodRatioMap),
+            hitmap = Focus[S](_.s.hitmap),
+            gmm = Focus[S](_.s.gmm),
             evaluated = _.evaluated,
-            Focus[I](_.generation),
+            individualGeneration = Focus[I](_.generation),
             maxRareSample = om.maxRareSample,
             iterations = om.gmmIterations,
             tolerance = om.gmmTolerance,
@@ -184,7 +189,8 @@ object PPSE:
           import mgo.tools.PatternMap
           state.
             focus(_.s.likelihoodRatioMap).modify(m => PatternMap.add(initialState.s.likelihoodRatioMap, m, _ + _, 0)).
-            focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0))
+            focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0)).
+            focus(_.s.inverseDensitySamples).modify(m => m.merge(islandState.s.inverseDensitySamples))
 
         def migrateToIsland(population: Vector[I], state: S) = (population.map(_.copy(initial = true)), state)
 
