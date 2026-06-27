@@ -44,6 +44,8 @@ object PPSE:
     gmmIterations:         Int,
     gmmTolerance:          Double,
     warmupSampler:         Int,
+    bootstrap:             Int,
+    ceilAfterHit:          Int,
     minDensityQuantile:    Double,
     densitySample:         Int,
     maxRareSample:         Int,
@@ -151,11 +153,14 @@ object PPSE:
             n,
             rejectValue.from(context),
             gmm = _.s.gmm,
-            inverseDensitySamples = _.s.inverseDensitySamples,
+            likelihoodRatioMap = _.s.likelihoodRatioMap,
+            hitmap = _.s.hitmap,
             warmupSampler = om.warmupSampler,
             densityQuantile = om.minDensityQuantile,
+            densitySample = om.densitySample,
             regularisationEpsilon = om.regularisationEpsilon,
-            density = densityValue)(s, individuals, rng)
+            density = densityValue,
+            ceilAfterHit = om.ceilAfterHit)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -166,8 +171,7 @@ object PPSE:
             pattern = pattern(_).from(context),
             continuous = om.genome.continuous,
             reject = rejectValue.from(context),
-            density = densityValue,
-            inverseDensitySamples = Focus[S](_.s.inverseDensitySamples),
+            bootstrap = om.bootstrap,
             warmupSampler = om.warmupSampler,
             likelihoodRatioMap = Focus[S](_.s.likelihoodRatioMap),
             hitmap = Focus[S](_.s.hitmap),
@@ -226,6 +230,8 @@ object PPSE:
     warmupSampler:    Int,
     minDensityQuantile: Double,
     densitySample: Int,
+    bootstrap: Int,
+    ceilAfterHit: Int,
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
@@ -252,6 +258,8 @@ object PPSE:
         densitySample = densitySample,
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
+        bootstrap = bootstrap,
+        ceilAfterHit = ceilAfterHit,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -295,6 +303,8 @@ object PPSEEvolution:
       warmupSampler = p.warmupSampler,
       minDensityQuantile = p.minDensityQuantile,
       densitySample = p.densitySample,
+      bootstrap = p.bootstrap,
+      ceilAfterHit = p.ceilAfterHit,
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
@@ -333,6 +343,8 @@ case class PPSEEvolution(
   warmupSampler: Int                                    = 1000,
   minDensityQuantile: Double                            = 0.2,
   densitySample: Int                                    = 1000,
+  bootstrap: Int                                        = 1000,
+  ceilAfterHit: Int                                     = 5000,
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
