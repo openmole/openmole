@@ -46,6 +46,7 @@ object PPSE:
     warmupSampler:         Int,
     bootstrap:             Int,
     ceilAfterHit:          Int,
+    ceilQuantile:          Double,
     minDensityQuantile:    Double,
     densitySample:         Int,
     maxRareSample:         Int,
@@ -160,7 +161,8 @@ object PPSE:
             densitySample = om.densitySample,
             regularisationEpsilon = om.regularisationEpsilon,
             density = densityValue,
-            ceilAfterHit = om.ceilAfterHit)(s, individuals, rng)
+            ceilAfterHit = om.ceilAfterHit,
+            ceilQuantile = om.ceilQuantile)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -232,6 +234,7 @@ object PPSE:
     densitySample: Int,
     bootstrap: Int,
     ceilAfterHit: Int,
+    ceilQuantile: Double,
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
@@ -260,6 +263,7 @@ object PPSE:
         minClusterSize = minClusterSize,
         bootstrap = bootstrap,
         ceilAfterHit = ceilAfterHit,
+        ceilQuantile = ceilQuantile,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -305,6 +309,7 @@ object PPSEEvolution:
       densitySample = p.densitySample,
       bootstrap = p.bootstrap,
       ceilAfterHit = p.ceilAfterHit,
+      ceilQuantile = p.ceilQuantile,
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
@@ -345,6 +350,7 @@ case class PPSEEvolution(
   densitySample: Int                                    = 1000,
   bootstrap: Int                                        = 1000,
   ceilAfterHit: Int                                     = 5000,
+  ceilQuantile: Double                                  = 0.1,
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
