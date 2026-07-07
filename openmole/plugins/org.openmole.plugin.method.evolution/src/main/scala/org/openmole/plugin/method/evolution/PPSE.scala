@@ -45,8 +45,6 @@ object PPSE:
     gmmTolerance:          Double,
     warmupSampler:         Int,
     bootstrap:             Int,
-    ceilAfterHit:          Int,
-    ceilQuantile:          Double,
     minDensityQuantile:    Double,
     densitySample:         Int,
     maxRareSample:         Int,
@@ -96,7 +94,7 @@ object PPSE:
           val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
           mgo.evolution.algorithm.PPSE.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState(s = mgo.evolution.algorithm.PPSE.PPSEState.empty(om.densitySample))
+        def initialState = EvolutionState(s = mgo.evolution.algorithm.PPSE.PPSEState.empty())
 
         def afterEvaluated(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterEvaluated[S, I](g, Focus[S](_.evaluated))(s, population)
         def afterGeneration(g: Long, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterGeneration[S, I](g, Focus[S](_.generation))(s, population)
@@ -160,9 +158,7 @@ object PPSE:
             densityQuantile = om.minDensityQuantile,
             densitySample = om.densitySample,
             regularisationEpsilon = om.regularisationEpsilon,
-            density = densityValue,
-            ceilAfterHit = om.ceilAfterHit,
-            ceilQuantile = om.ceilQuantile)(s, individuals, rng)
+            density = densityValue)(s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -193,8 +189,7 @@ object PPSE:
           import mgo.tools.PatternMap
           state.
             focus(_.s.likelihoodRatioMap).modify(m => PatternMap.add(initialState.s.likelihoodRatioMap, m, _ + _, 0)).
-            focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0)).
-            focus(_.s.inverseDensitySamples).modify(m => m.merge(islandState.s.inverseDensitySamples))
+            focus(_.s.hitmap).modify(m => PatternMap.add(initialState.s.hitmap, m, _ + _, 0))
 
         def migrateToIsland(population: Vector[I], state: S) = (population.map(_.copy(initial = true)), state)
 
@@ -233,8 +228,6 @@ object PPSE:
     minDensityQuantile: Double,
     densitySample: Int,
     bootstrap: Int,
-    ceilAfterHit: Int,
-    ceilQuantile: Double,
     maxRareSample:    Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
@@ -262,8 +255,6 @@ object PPSE:
         maxRareSample = maxRareSample,
         minClusterSize = minClusterSize,
         bootstrap = bootstrap,
-        ceilAfterHit = ceilAfterHit,
-        ceilQuantile = ceilQuantile,
         regularisationEpsilon = regularisationEpsilon)
 
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -308,8 +299,6 @@ object PPSEEvolution:
       minDensityQuantile = p.minDensityQuantile,
       densitySample = p.densitySample,
       bootstrap = p.bootstrap,
-      ceilAfterHit = p.ceilAfterHit,
-      ceilQuantile = p.ceilQuantile,
       maxRareSample = p.maxRareSample,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
@@ -349,8 +338,6 @@ case class PPSEEvolution(
   minDensityQuantile: Double                            = 0.2,
   densitySample: Int                                    = 1000,
   bootstrap: Int                                        = 1000,
-  ceilAfterHit: Int                                     = 5000,
-  ceilQuantile: Double                                  = 0.1,
   maxRareSample: Int                                    = 100,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
