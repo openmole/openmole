@@ -375,6 +375,7 @@ object ContainerTask:
   type MountPoint = (String, String)
   type ContainerId = String
 
+
   def execution(
     image: InstalledSingularityImage,
     command: Commands,
@@ -390,39 +391,21 @@ object ContainerTask:
     relativePathRoot: Option[String] = None,
     config: InputOutputConfig = InputOutputConfig())(f: Parameters => Context): ExternalTask.ExecutionFunction =
 
-    val embedExternal: External =
-      if image.embedResources
-      then
-        external.focus(_.resources).modify: resources =>
-          resources.collect:
-            case r: External.EmptyDirectoryResource => r
-      else external
-
-    val taskExecution =
-      ContainerTaskExecution(
-        image = image,
-        command = command,
-        workDirectory = workDirectory,
-        relativePathRoot = relativePathRoot,
-        hostFiles = hostFiles,
-        environmentVariables = environmentVariables,
-        errorOnReturnValue = errorOnReturnValue,
-        returnValue = returnValue,
-        stdOut = stdOut,
-        stdErr = stdErr,
-        config = config,
-        external = embedExternal,
-        info = info
-      ).set(
-        outputs ++= Seq(returnValue, stdOut, stdErr).flatten
-      )
-
-    def externalExecution(p: ExternalTask.Parameters) =
-      import p.*
-      val parameters = Parameters(context, executionContext, taskInfo, taskExecution)
-      f(parameters)
-
-    (externalExecution, Some(embedExternal))
+    ContainerTaskExecution(
+      image = image,
+      command = command,
+      environmentVariables = environmentVariables,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      external = external,
+      info = info,
+      hostFiles = hostFiles,
+      workDirectory = workDirectory,
+      relativePathRoot = relativePathRoot,
+      config = config
+    ).build(f)
 
   def process(
     image:                  InstalledSingularityImage.InstalledSIFImage,
@@ -649,7 +632,57 @@ object ContainerTaskExecution:
   given InputOutputBuilder[ContainerTaskExecution] = InputOutputBuilder(Focus[ContainerTaskExecution](_.config))
   given ExternalBuilder[ContainerTaskExecution] = ExternalBuilder(Focus[ContainerTaskExecution](_.external))
 
-case class ContainerTaskExecution(
+  def apply(
+    image: InstalledSingularityImage,
+    command: Commands,
+    environmentVariables: Seq[EnvironmentVariable],
+    errorOnReturnValue: Boolean,
+    returnValue: Option[Val[Int]],
+    stdOut: Option[Val[String]],
+    stdErr: Option[Val[String]],
+    external: External,
+    info: InfoConfig,
+    hostFiles: Seq[HostFile] = Seq(),
+    workDirectory: Option[String] = None,
+    relativePathRoot: Option[String] = None,
+    config: InputOutputConfig = InputOutputConfig()) =
+    val embedExternal: External =
+      if image.embedResources
+      then
+        external.focus(_.resources).modify: resources =>
+          resources.collect:
+            case r: External.EmptyDirectoryResource => r
+      else external
+
+    new ContainerTaskExecution(
+      image = image,
+      command = command,
+      workDirectory = workDirectory,
+      relativePathRoot = relativePathRoot,
+      hostFiles = hostFiles,
+      environmentVariables = environmentVariables,
+      errorOnReturnValue = errorOnReturnValue,
+      returnValue = returnValue,
+      stdOut = stdOut,
+      stdErr = stdErr,
+      config = config,
+      external = embedExternal,
+      info = info
+    ).set(
+      outputs ++= Seq(returnValue, stdOut, stdErr).flatten
+    )
+
+  extension(containerTask: ContainerTaskExecution)
+    def build(f: Parameters => Context): ExternalTask.ExecutionFunction =
+      def externalExecution(p: ExternalTask.Parameters) =
+        import p.*
+        val parameters = Parameters(context, executionContext, taskInfo, containerTask)
+        f(parameters)
+
+      (externalExecution, Some(containerTask.external))
+
+
+case class ContainerTaskExecution private(
   image: InstalledSingularityImage,
   command: ContainerTask.Commands,
   workDirectory: Option[String],

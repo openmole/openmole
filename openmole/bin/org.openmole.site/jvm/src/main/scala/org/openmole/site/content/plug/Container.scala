@@ -23,12 +23,12 @@ object Container extends PageContent(html"""
 To call a native executable in an OpenMOLE task, you can either use:
 ${ul(
    li{html"the ${code{"ContainerTask"}} that runs your executable in a portable container,"},
-   li{html"or the ${code{"SystemExecTask"}} that executes a local command line as if you where in a terminal."}
+   li{html"or the ${code{"SystemExecTask"}} that executes a local command line as if you were in a terminal."}
   )}
 
-${h2{"Execute Your Code In a Containers"}}
+${h2{"Execute Your Code In a Container"}}
 
-The ${code{"ContainerTask"}} runs ${a(href := "https://www.docker.com/resources/what-container", "docker containers")} in OpenMOLE. When your model is written in a language for which a specific OpenMOLE task doesn't exist, or if it uses an assembly of tools, libraries, binaries, etc. you might want to use a container task to make it portable, so that you can send it to any machine (with potentially varying OS installations).
+The ${code{"ContainerTask"}} runs ${a(href := "https://www.docker.com/resources/what-container", "docker containers")} in OpenMOLE. When your model is written in a language without a dedicated OpenMOLE task, or if it depends on a specific assembly of tools, libraries, and binaries, using a container task ensures portability across different execution environments with varying OS configurations.
 
 ${h3{"Preliminary remarks"}}
 
@@ -49,12 +49,11 @@ ${hl.openmole(s"""
 
 $br
 
-You can run this task.
-At launch time, it downloads the Python image from the docker hub in order to be able to run it afterwards.
+You can run this task directly. At launch time, OpenMOLE will download the Python image from Docker Hub and use it to execute your command.
 
 $br$br
 
-Let's imagine a slightly more complete example: we will use the following Python script, which uses the ${i{"numpy"}} library to multiply a matrix (stored in a csv file) by a scalar number.
+Let's explore a more complete example: we'll use a Python script that leverages the ${i{"numpy"}} library to multiply a matrix (stored in a CSV file) by a scalar value.
 
 $br$br
 
@@ -99,8 +98,8 @@ col1,col2,col3
 
 $br
 
-For this example, we consider that we have a ${i{"data"}} directory, containing a set of csv files in the ${code{"workDirectory"}}.
-We want to compute the Python script for each of this csv file and for a set of values for the second argument of the Python script.
+For this example, we consider having a ${i{"data"}} directory containing a set of CSV files in the ${code{"workDirectory"}}.
+We want to execute the Python script for each CSV file with a set of values for the second argument.
 The OpenMOLE workflow would then look like this:
 
 $br$br
@@ -137,7 +136,7 @@ ${hl.openmole(s"""
 
 $br
 
-The ${code{"install"}} parameter contains a set of command used to install some components in the container once and for all, when the task is instantiated.
+The ${code{"install"}} parameter contains a list of commands to install dependencies in the container once during task instantiation.
 
 ${h3{"Containers and archive"}}
 
@@ -145,7 +144,7 @@ You can also craft your own docker image on your machine, export it and then run
 
 $br
 
-For instance lets consider the following ${i{"DockerFile"}}:
+For instance, let's consider the following ${i{"Dockerfile"}}:
 ${code("""FROM debian:testing-slim
 RUN apt update && apt install -y fortune && apt clean""")}
 
@@ -174,7 +173,7 @@ Successfully tagged mycontainer:latest""")}
 
 $br
 
-Then save you container in an archive:
+Then save your container in an archive:
 ${plain("""docker save mycontainer -o /tmp/container.tar""")}
 
 $br
@@ -294,8 +293,8 @@ ${hl.openmole(s"""
     )
 """)}
 
-${h6{"WorkDirectory"}}
-You may set the directory within the container where to start the execution from.
+${h6{"Work Directory"}}
+You can set the directory within the container where execution should start.
 
 $br$br
 
@@ -315,7 +314,7 @@ The ${code{"ContainerTask"}} was designed to be portable from one machine to ano
 However, some use-cases require executing specific commands installed on a given cluster.
 To achieve that you should use another task called ${code{"SystemExecTask"}}.
 This task is made to launch native commands on the execution host.
-There is two modes for using this task:
+There are two modes for using this task:
 
 ${ul(
   li(html"Calling a command that is assumed to be available on any execution node of the environment. The command will be looked for in the system as it would from a traditional command line: searching in the default ${i{"PATH"}} or an absolute location."),
@@ -330,7 +329,7 @@ In other words, it is not possible to split the execution of multiple commands g
 
 $br$br
 
-The following example first copies and runs a bash script on the remote host, before calling the remote's host ${code{"/bin/hostname"}}.
+The following example first copies and runs a bash script on the remote host, before calling the execution host's ${code{"/bin/hostname"}}.
 Both commands' standard and error outputs are gathered and concatenated to a single OpenMOLE variable, respectively ${code{"stdOut"}} and ${code{"stdErr"}}:
 
 $br$br
@@ -361,7 +360,7 @@ Therefore this task cannot be considered as portable.
 $br
 
 Note that each execution is isolated in a separate folder on the execution host and that the task execution is considered as failed if the script returns a value different from 0.
-If you need another behaviour you can use the same advanced options as the ${code{"ContainerTask"}} regarding the return code.
+If you need different behavior, you can use the same advanced options as the ${code{"ContainerTask"}} regarding the return code.
 
 ${h3{"File management"}}
 
@@ -371,7 +370,7 @@ See the ${a("documentation on file management", href := DocumentationPages.fileM
 
 ${h2{"Generate Complex Parameter Files"}}
 
-To generate complex input file for you model from OpenMOLE variable, you might want to use the ${a("TemplateFileTask", href := DocumentationPages.templateTask.file)}.
+To generate complex input files for your model from OpenMOLE variables, you might want to use the ${a("TemplateFileTask", href := DocumentationPages.templateTask.file)}.
 
 """)
 

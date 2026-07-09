@@ -267,28 +267,33 @@ object Genome:
 
     toVariables0(genome.toList, continuousValues.toList, discreteValue.toList, List.empty)
 
-  def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any]) = genomeBound match
-    case b: GenomeBound.ScalarDouble =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Double]).toArray[Double])
-    case b: GenomeBound.ContinuousInt =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Int]).toArray[Int])
-    case b: GenomeBound.ScalarInt =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Int]).toArray[Int])
-    case b: GenomeBound.SequenceOfDouble =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
-    case b: GenomeBound.SequenceOfContinuousInt =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
-    case b: GenomeBound.SequenceOfInt =>
-      Variable(b.v.toArray, value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
-    case b: GenomeBound.Enumeration[?] =>
-      val array = b.v.`type`.manifest.newArray(value.size)
-      value.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(array, i, v) }
-      Variable.unsecure(b.v.toArray, array)
-    case b: GenomeBound.SequenceOfEnumeration[?] =>
-      val array = b.v.`type`.manifest.newArray(value.size)
-      value.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(array, i, v) }
-      Variable.unsecure(b.v.toArray, array)
+  def toArrayVariable(genomeBound: GenomeBound, value: Seq[Any], result: Boolean) =
+    def resultVal[T](v: Val[T]) = if result then resultVariable(v) else v
 
+    genomeBound match
+      case b: GenomeBound.ScalarDouble =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Double]).toArray[Double])
+      case b: GenomeBound.ContinuousInt =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Int]).toArray[Int])
+      case b: GenomeBound.ScalarInt =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Int]).toArray[Int])
+      case b: GenomeBound.SequenceOfDouble =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Array[Double]]).toArray[Array[Double]])
+      case b: GenomeBound.SequenceOfContinuousInt =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
+      case b: GenomeBound.SequenceOfInt =>
+        Variable(resultVal(b.v.toArray), value.map(_.asInstanceOf[Array[Int]]).toArray[Array[Int]])
+      case b: GenomeBound.Enumeration[?] =>
+        val array = b.v.`type`.manifest.newArray(value.size)
+        value.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(array, i, v) }
+        Variable.unsecure(resultVal(b.v.toArray), array)
+      case b: GenomeBound.SequenceOfEnumeration[?] =>
+        val array = b.v.`type`.manifest.newArray(value.size)
+        value.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(array, i, v) }
+        Variable.unsecure(resultVal(b.v.toArray), array)
+
+  def resultVariable[T](v: Val[T]) =
+    v.withNamespace(v.namespace.prefix("genome"))
 
   object ToSuggestion:
 

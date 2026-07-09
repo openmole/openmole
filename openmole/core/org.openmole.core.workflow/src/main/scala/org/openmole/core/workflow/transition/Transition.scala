@@ -17,20 +17,20 @@
 
 package org.openmole.core.workflow.transition
 
-import cats.implicits._
+import cats.implicits.*
 import org.openmole.core.context.*
-import org.openmole.core.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.core.argument.Condition
-import org.openmole.core.workflow.mole.MoleExecution.{ AggregationTransitionRegistryRecord, SubMoleExecutionState }
+import org.openmole.core.exception.{InternalProcessingError, UserBadDataError}
+import org.openmole.core.argument.{Condition, Validate}
+import org.openmole.core.workflow.mole.MoleExecution.{AggregationTransitionRegistryRecord, SubMoleExecutionState}
 import org.openmole.core.workflow.mole.MoleExecutionMessage.PerformTransition
 import org.openmole.core.workflow.mole.*
-import org.openmole.core.workflow.task._
+import org.openmole.core.workflow.task.*
 import org.openmole.core.workflow.validation.TypeUtil.*
 import org.openmole.core.workflow.validation.*
 
 import scala.collection.mutable
-import scala.collection.mutable.{ ArrayBuffer, HashSet, ListBuffer }
-import scala.util.{ Failure, Success, Try }
+import scala.collection.mutable.{ArrayBuffer, HashSet, ListBuffer}
+import scala.util.{Failure, Success, Try}
 
 object Transition {
 

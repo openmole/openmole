@@ -26,7 +26,7 @@ import org.scalatest._
 
 import scala.collection.mutable.ListBuffer
 
-class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
+class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
   import org.openmole.core.workflow.test.Stubs._
 
@@ -68,7 +68,7 @@ class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     res.toVector.sorted should equal(data.toVector)
   }
 
-  "When keyword in exploration transition" should "should filter some values in the sampling" in {
+  "When keyword in exploration transition" should "should filter some values in the sampling" in:
     val i = Val[Int]("i")
     val data = (1 to 100)
 
@@ -87,5 +87,4 @@ class ExplorationTransitionSpec extends flatspec.AnyFlatSpec with matchers.shoul
     val ex = (sampling -< t when "i % 2 != 0")
     ex.run()
     res.toVector.sorted should equal(data.toVector.filter(_ % 2 != 0))
-  }
-}
+

@@ -30,7 +30,7 @@ package keyword:
   object On:
     def value[A, B] = Focus[On[A, B]](_.value)
 
-  case class On[+A, +B](value: A, on: B)
+  infix case class On[+A, +B](value: A, on: B)
 
   trait KeyWordPackage:
     implicit class InDecorator[A](a: A):

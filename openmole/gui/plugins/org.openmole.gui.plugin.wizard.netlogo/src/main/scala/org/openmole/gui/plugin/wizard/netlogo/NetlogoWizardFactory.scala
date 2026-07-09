@@ -40,6 +40,79 @@ object TopLevelExports:
 
 class NetlogoWizardFactory extends WizardPluginFactory:
 
+  def parseXMLContent(content: String): ModelMetadata =
+    import org.scalajs.dom
+    val parser = new dom.DOMParser()
+    val doc = parser.parseFromString(content, dom.MIMEType.`text/xml`)
+
+    val sliders = doc.querySelectorAll("slider")
+    val switches = doc.querySelectorAll("switch")
+    val inputBoxes = doc.querySelectorAll("inputBox")
+    val choosers = doc.querySelectorAll("chooser")
+    val monitors = doc.querySelectorAll("monitor")
+
+    val sliderInputs =
+      (0 until sliders.length).flatMap: i =>
+        val el = sliders.item(i)
+        val name = el.getAttribute("variable")
+        val default = el.getAttribute("default")
+        if name != null && default != null
+        then Some(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, default, Some(name)))
+        else None
+
+    val switchInputs =
+      (0 until switches.length).flatMap: i =>
+        val el = switches.item(i)
+        val name = el.getAttribute("variable")
+        val on = el.getAttribute("on")
+        val default = if on == "true" then "true" else "false"
+        if name != null
+        then Some(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Boolean, default, Some(name)))
+        else None
+
+    val inputBoxInputs =
+      (0 until inputBoxes.length).flatMap: i =>
+        val el = inputBoxes.item(i)
+        val name = el.getAttribute("variable")
+        val value = el.getAttribute("value")
+        if name != null && value != null
+        then Some(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, value, Some(name)))
+        else None
+
+    val chooserInputs =
+      (0 until choosers.length).flatMap: i =>
+        val el = choosers.item(i)
+        val name = el.getAttribute("variable")
+        val currentIndex = el.getAttribute("current").toIntOption.getOrElse(0)
+        val choices = el.querySelectorAll("choice")
+        val selectedChoice = if currentIndex < choices.length then choices.item(currentIndex).getAttribute("value") else null
+        if name != null && selectedChoice != null
+        then Some(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.String, selectedChoice, Some(name)))
+        else None
+
+    val monitorOutputs =
+      (0 until monitors.length).flatMap: i =>
+        val el = monitors.item(i)
+        val name = el.getAttribute("display")
+        val source = el.textContent
+        if name != null && source != null && source.trim.nonEmpty
+        then Some(PrototypeData(WizardUtils.toVariableName(name), PrototypeData.Double, mapping = Some(source.trim)))
+        else None
+
+    val inputs = sliderInputs ++ switchInputs ++ inputBoxInputs ++ chooserInputs
+    val outputs = monitorOutputs
+
+    val seed = PrototypeData("mySeed", PrototypeData.Int, "42", None)
+    val allInputs = seed +: inputs
+
+    ModelMetadata(
+      allInputs,
+      outputs,
+      command = Some(
+        """setup
+          |go""".stripMargin)
+    )
+
   def parseContent(content: String): ModelMetadata =
     val lines: Array[String] = content.linesIterator.toArray
 
@@ -82,7 +155,7 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
     val (inputs, outputs) = parse0(lines.toSeq.zipWithIndex, Seq(), Seq())
 
-    ModelMetadata(
+      ModelMetadata(
       inputs,
       outputs,
       command = Some(
@@ -92,7 +165,8 @@ class NetlogoWizardFactory extends WizardPluginFactory:
 
   override def editable: Seq[FileContentType] =
     val NetLogo = ReadableFileType(Seq("nlogo", "nlogo3d", "nls"), text = true, highlight = Some("netlogo"))
-    Seq(NetLogo)
+    val NetLogoX = ReadableFileType(Seq("nlogox"), text = true, highlight = Some("xml"))
+    Seq(NetLogo, NetLogoX)
 
   def accept(uploaded: Seq[(RelativePath, SafePath)])(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     Future.successful:
@@ -100,18 +174,22 @@ class NetlogoWizardFactory extends WizardPluginFactory:
         uploaded,
         "nlogo" -> FindLevel.SingleFile,
         "nlogo" -> FindLevel.Directory,
-        "nlogo" -> FindLevel.MultipleFile
+        "nlogo" -> FindLevel.MultipleFile,
+        "nlogox" -> FindLevel.SingleFile,
+        "nlogox" -> FindLevel.Directory,
+        "nlogox" -> FindLevel.MultipleFile
       )
 
   def parse(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService): Future[ModelMetadata] =
     accepted match
       case AcceptedModel("nlogo", _, f :: _) => api.download(f._2).map { (content, _) => parseContent(content) }
+      case AcceptedModel("nlogox", _, f :: _) => api.download(f._2).map { (content, _) => parseXMLContent(content) }
       case _ => WizardUtils.unknownError(accepted, name)
 
 
   def content(uploaded: Seq[(RelativePath, SafePath)], accepted: AcceptedModel, modelMetadata: ModelMetadata)(using api: ServerAPI, basePath: BasePath, notificationAPI: NotificationService) =
     accepted match
-      case AcceptedModel("nlogo", level, (nlogo, _) :: _) =>
+      case AcceptedModel("nlogo" | "nlogox", level, (nlogo, _) :: _) =>
         val task = WizardUtils.toTaskName(nlogo)
         val (directory, file) =
           level match
@@ -136,7 +214,7 @@ class NetlogoWizardFactory extends WizardPluginFactory:
             |
             |${WizardUtils.mkVals(modelMetadata)}
             |
-            |val $task = NetLogo6Task(
+            |val $task = NetLogo7Task(
             |  $params) ${WizardUtils.mkSet(modelMetadata)}
             |
             |$task

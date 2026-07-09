@@ -23,7 +23,7 @@ object HDOSE extends PageContent(html"""
 
 ${h2{"HDOSE description"}}
 
-The High Dimension Origin Space Exploration (HDOSE) method is used to ${b{"explore the multiple antecedents of a pattern"}} when the input space is of high dimension (i.e. > 6). It generates input parameter values that produce a pattern described by a set of constraints on the objectives (i.e. objectives should be under given thresholds or close to given values). HDOSE optimize the fitness and keeps and archives the solutions that are good enough. New solutions are added to the archive when their input values are distant of at least a distance ${i("d = 1.0")} of all existing solution in the archive (the distance L1 is used). When the archive size reaches 500 a new value for ${i("d")} is computed to shrink the archive size under 500 given that all the solutions present in the archive are distant of at least ${i("d")}.
+The High Dimension Origin Space Exploration (HDOSE) method is used to ${b{"explore the multiple antecedents of a pattern"}} when the input space has high dimensionality (i.e., > 6 dimensions). It generates input parameter values that produce a pattern described by a set of constraints on the objectives (i.e., objectives should be either below given thresholds or close to specified target values). HDOSE optimizes the fitness and archives the solutions that are good enough. New solutions are added to the archive when their input values are at least distance ${i("d = 1.0")} apart from all existing solutions in the archive (using L1 distance). When the archive size reaches 500, a new value for ${i("d")} is computed to reduce the archive size to below 500, ensuring that all solutions in the archive remain at least distance ${i("d")} apart.
 
 
 The hook arguments for the ${code{"HDOSEEvolution"}} are:
@@ -64,10 +64,10 @@ HDOSEEvolution(
 """, name = "HDOSE", header = "val modelTask = EmptyTask()")}
 
 
-${i{"origin"}} describes the genome of the optimisation. To compute the distance, each part of the genome are normalised. To give more weight to a given part of the genome in the distance computation, use the `weight` keyword.
+${i{"origin"}} describes the genome of the optimisation. To compute the distance, each part of the genome is normalised. To give more weight to a given part of the genome in the distance computation, use the `weight` keyword.
 
 $br
 
-${i{"objective"}} use inequalities to define the pattern to reach. The pattern is reached when all the objectives are under their threshold value. In this example, HDOSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold value.
+${i{"objective"}} uses inequalities to define the pattern to reach. The pattern is reached when all objectives are below their threshold value. In this example, HDOSE finds the maximum diversity of inputs for which all outputs are below their respective thresholds.
 
 """)

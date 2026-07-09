@@ -54,7 +54,7 @@ ${figure(img(src := Resource.img.method.calibrationMono.file, width := "70%"))}
 
 $br
 
-Single criterion calibration answers the following question: for a given target value of the output ${b{"o1"}}, what is(are) the parameter set(s) ${b{"(i, j , k)"}} producing the output value(s) closest to the target?
+Single criterion calibration answers the following question: for a given target value of the output ${b{"o1"}}, what is(are) the parameter set(s) ${b{"(i, j, k)"}} producing the output value(s) closest to the target?
 
 
 
@@ -124,7 +124,7 @@ ${ul(
   li{html"${code{"populationSize"}}: $optional, the population size, defaults to 200,"},
   li{html"${code{"stochastic"}}: $optional, the seed provider, mandatory if your model contains randomness,"},
   li{html"${code{"distribution"}}: $optional, computation distribution strategy, default is \"SteadyState\"."},
-  li{html"${code{"reject"}}: $optional, a predicate which is true for genomes that must be rejected by the genome sampler (for instance \"i1 > 50\")."}
+  Evolution.accept
 )}
 
 Where ${code{"param1"}}, ${code{"param2"}}, ${code{"param3"}} and ${code{"param4"}} are inputs of the ${code{"modelTask"}}, and ${code{"distance1"}} and ${code{"distance2"}} are its outputs.
@@ -141,7 +141,7 @@ The generic way to use it is to write either ${code{"hook(workDirectory / \"path
 
 $br
 
-The hook arguments fore the ${code{"NSGA2Evolution"}} are:
+The hook arguments for the ${code{"NSGA2Evolution"}} are:
 ${Evolution.hookOptions}
 
 For more details about hooks, check the corresponding ${aa("Language", href := DocumentationPages.hook.file)} page.
@@ -178,7 +178,7 @@ NSGA2Evolution(
 
 ${h3{"Calibrating a high number of inputs"}}
 
-If you want to calibrate an important number of parameters you can use arrays directly in the genome. For that you must provide an array of boundaries. In this example, the an array of 100 inputs varying between 0 an 100 an a single double value varying from 1 to 10.
+If you want to calibrate an important number of parameters you can use arrays directly in the genome. For that you must provide an array of boundaries. In this example, an array of 100 inputs varying between 0 and 100 and a single double value varying from 1 to 10.
 
 ${hl.openmole("""
 val param1 = Val[Array[Double]]

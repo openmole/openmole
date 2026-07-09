@@ -27,13 +27,13 @@ object NSGA2:
   object DeterministicNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NSGA2 => MGONSGA2, _ }
     
-    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[DeterministicNSGA2, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicNSGA2) = new Ops:
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
@@ -46,7 +46,9 @@ object NSGA2:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = EvolutionState[Unit](s = ())
 
@@ -63,8 +65,8 @@ object NSGA2:
           FromContext: p =>
             import p._
             val res = MGONSGA2.result[Phenotype](population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
             val outputsValues = if includeOutputs then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
@@ -109,13 +111,13 @@ object NSGA2:
   object StochasticNSGA2:
     import mgo.evolution.algorithm.{ CDGenome, NoisyNSGA2 => MGONoisyNSGA2, _ }
 
-    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[StochasticNSGA2, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticNSGA2) = new Ops:
 
@@ -139,18 +141,21 @@ object NSGA2:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
-        def aggregate = Objective.aggregate(om.phenotypeContent, om.objectives)
+        def aggregate(filter: Boolean) = Objective.aggregate(om.phenotypeContent, om.objectives, filter)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
             import p._
 
-            val res = MGONoisyNSGA2.result(population, aggregate.from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val res = MGONoisyNSGA2.result(population, aggregate(filter = false).from(context), om.genome.continuous, om.genome.discrete, keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
@@ -173,12 +178,26 @@ object NSGA2:
           FromContext: p =>
             import p._
             val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-            MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](n, om.operatorExploration, om.cloneProbability, aggregate.from(context), om.genome.continuous, om.genome.discrete, rejectValue, genomeDiversity = om.genomeDiversity) apply (s, individuals, rng)
+            MGONoisyNSGA2.adaptiveBreeding[S, Phenotype](
+              n,
+              om.operatorExploration,
+              om.cloneProbability,
+              aggregate(filter = true).from(context),
+              om.genome.continuous,
+              om.genome.discrete,
+              rejectValue,
+              genomeDiversity = om.genomeDiversity) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: util.Random) =
           FromContext: p =>
             import p._
-            MGONoisyNSGA2.elitism[S, Phenotype](om.mu, om.historySize, aggregate.from(context), om.genome.continuous, om.genome.discrete, genomeDiversity = om.genomeDiversity) apply (s, population, candidates, rng)
+            MGONoisyNSGA2.elitism[S, Phenotype](
+              om.mu,
+              om.historySize,
+              aggregate(filter = true).from(context),
+              om.genome.continuous,
+              om.genome.discrete,
+              genomeDiversity = om.genomeDiversity) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S = state
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
@@ -205,7 +224,7 @@ object NSGA2:
     outputs:          Seq[Val[?]]                  = Seq(),
     populationSize:   Int                          = 200,
     stochastic:       OptionalArgument[Stochastic] = None,
-    reject:           OptionalArgument[Condition]  = None,
+    accept:           OptionalArgument[Condition]  = None,
     genomeDiversity:  OptionalArgument[Boolean]    = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match
@@ -220,7 +239,7 @@ object NSGA2:
             phenotypeContent,
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
-            reject,
+            accept.map(!_),
             genomeDiversity.getOrElse(exactObjectives.size == 1)
           ),
           genome,
@@ -244,7 +263,7 @@ object NSGA2:
             noisyObjectives,
             stochasticValue.sample,
             stochasticValue.reevaluate,
-            reject.option,
+            accept.option.map(!_),
             genomeDiversity.getOrElse(noisyObjectives.size == 1)
           ),
           genome,
@@ -269,7 +288,7 @@ object NSGA2Evolution:
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject,
+        accept = p.accept,
         genomeDiversity = p.genomeDiversity
       )
 
@@ -295,7 +314,7 @@ case class NSGA2Evolution(
   termination:        OMTermination,
   populationSize:     Int                          = 200,
   stochastic:         OptionalArgument[Stochastic] = None,
-  reject:             OptionalArgument[Condition]  = None,
+  accept:             OptionalArgument[Condition]  = None,
   genomeDiversity:    OptionalArgument[Boolean]    = None,
   parallelism:        Int                          = EvolutionWorkflow.parallelism,
   distribution:       EvolutionPattern             = SteadyState(),

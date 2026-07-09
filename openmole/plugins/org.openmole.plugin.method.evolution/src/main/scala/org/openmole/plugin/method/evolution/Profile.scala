@@ -86,7 +86,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile(Focus[Individual[Phenotype]](_.genome) andThen CDGenome.discreteVectorValues(discrete) get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous), x, intervals)
 
       val niches = (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
         case (c: IntervalDoubleProfileElement, index) => continuousProfile(genome.continuous, index, c.n)
@@ -97,13 +97,13 @@ object Profile {
 
     import CDGenome.DeterministicIndividual
 
-    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[DeterministicProfile, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicProfile) = new Ops:
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
@@ -123,7 +123,10 @@ object Profile {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
@@ -132,8 +135,8 @@ object Profile {
 
             val niche = DeterministicProfile.niche(om.genome, om.niche).from(context)
             val res = NichedNSGA2Algorithm.result(population, niche, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
             val outputValues =
@@ -192,7 +195,7 @@ object Profile {
         mgo.evolution.niche.discreteProfile((Focus[Individual[Phenotype]](_.genome) composeLens CDGenome.discreteVectorValues(discrete)).get, x)
 
       def gridContinuousProfile(continuous: Vector[C], x: Int, intervals: Vector[Double]): Niche[Individual[Phenotype], Int] =
-        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous).toVector, x, intervals)
+        mgo.evolution.niche.gridContinuousProfile(i => scaleContinuousValues(CDGenome.continuousValues(continuous).get(i.genome), continuous), x, intervals)
 
       val niches =
         (profiled.toVector zip indexesOfProfiled(profiled, genome)).map:
@@ -202,13 +205,13 @@ object Profile {
 
       FromContext.value(mgo.evolution.niche.sequenceNiches[CDGenome.NoisyIndividual.Individual[Phenotype], Int](niches))
 
-    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[Unit]:
+    given MGOAPI.Integration[StochasticProfile, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[Unit]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticProfile) = new Ops:
         def genomeValues(genome: G) = MGOAPI.paired(CDGenome.continuousValues(om.genome.continuous).get, CDGenome.discreteValues(om.genome.discrete).get)(genome)
@@ -220,7 +223,10 @@ object Profile {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+
         def initialState = EvolutionState[Unit](s = ())
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
@@ -228,9 +234,9 @@ object Profile {
             import p._
 
             val niche = StochasticProfile.niche(om.genome, om.niche).from(context)
-            val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), niche, om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val res = NoisyNichedNSGA2Algorithm.result(population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), niche, om.genome.continuous, om.genome.discrete, onlyOldest = true, keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
@@ -249,7 +255,7 @@ object Profile {
           import p._
 
           val rejectValue = om.reject.map(f => GAIntegration.rejectValue[G](f, om.genome, _.continuousValues, CDGenome.discreteValues(om.genome.discrete).get).from(context))
-          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
+          NoisyNichedNSGA2Algorithm.adaptiveBreeding[S, Phenotype](n, rejectValue, om.operatorExploration, om.cloneProbability, Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context), om.genome.continuous, om.genome.discrete) apply (s, individuals, rng)
 
         def elitism(population: Vector[I], candidates: Vector[I], s: S, rng: scala.util.Random) =
           FromContext: p =>
@@ -261,7 +267,7 @@ object Profile {
               niche,
               om.nicheSize,
               om.historySize,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete) apply (s, population, candidates, rng)
 
@@ -290,7 +296,7 @@ object Profile {
     nicheSize:  Int,
     outputs:    Seq[Val[?]]                  = Seq(),
     stochastic: OptionalArgument[Stochastic] = None,
-    reject:     OptionalArgument[Condition]  = None
+    accept:     OptionalArgument[Condition]  = None
   ): EvolutionWorkflow =
     EvolutionWorkflow.stochasticity(objective, stochastic.option) match {
       case None =>
@@ -310,7 +316,7 @@ object Profile {
             niche = niche,
             operatorExploration = EvolutionWorkflow.operatorExploration,
             nicheSize = nicheSize,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome,
           phenotypeContent,
           validate = validation
@@ -335,7 +341,7 @@ object Profile {
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genome,
           phenotypeContent,
           stochasticValue,
@@ -363,7 +369,7 @@ object ProfileEvolution {
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         nicheSize = p.nicheSize,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[ProfileEvolution, EvolutionWorkflow] =
@@ -392,7 +398,7 @@ case class ProfileEvolution(
   termination:  OMTermination,
   nicheSize:    Int                          = 10,
   stochastic:   OptionalArgument[Stochastic] = None,
-  reject:       OptionalArgument[Condition]  = None,
+  accept:       OptionalArgument[Condition]  = None,
   parallelism:  Int                          = EvolutionWorkflow.parallelism,
   distribution: EvolutionPattern             = SteadyState(),
   suggestion:   Suggestion                   = Suggestion.empty,

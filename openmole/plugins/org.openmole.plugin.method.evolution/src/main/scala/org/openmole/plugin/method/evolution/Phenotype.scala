@@ -34,9 +34,7 @@ object Phenotype:
 case class Phenotype(values: IArray[Any]) extends AnyVal
 
 object PhenotypeContent:
-  def toVals(p: PhenotypeContent) =
-    (p.objectives ++ p.outputs).distinct
+  def toVals(p: PhenotypeContent) = p.vals
 
-
-
-case class PhenotypeContent(objectives: Seq[Val[?]], outputs: Seq[Val[?]] = Seq())
+case class PhenotypeContent(objectives: Seq[Val[?]], outputs: Seq[Val[?]] = Seq()):
+  lazy val vals = (objectives ++ outputs).distinct

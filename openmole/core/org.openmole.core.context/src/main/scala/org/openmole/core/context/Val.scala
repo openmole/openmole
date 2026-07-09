@@ -23,12 +23,125 @@ import org.openmole.tool.types.{ TypeTool, Id }
 import shapeless3.typeable.{ TypeCase, Typeable }
 
 import scala.annotation.tailrec
-import scala.reflect._
+import scala.reflect.*
+import izumi.reflect.{TagK}
+import izumi.reflect.macrortti.LightTypeTag
+
+trait LowPriorityValTag:
+  import org.openmole.tool.types.*
+  given [A: ValTag as tag, T[_]](using Tag[T]): ValTag[T[A]] =
+    given Manifest[A] = tag.m
+    given Tag[A] = tag.tag
+    ValTag.apply[T[A]]
+
+object ValTag extends LowPriorityValTag:
+  import org.openmole.tool.types.*
+  given [T](using m: Manifest[T], t: Tag[T]): ValTag[T] = new ValTag(m, t)
+  given [T]: Conversion[ValTag[T], Manifest[T]] = _.m
+
+  given [T]: Conversion[ValTag[T], Tag[T]] = _.tag
+
+  given [A: ValTag as taga, B: ValTag as tagb]: ValTag[A => B] =
+    given Manifest[A] = taga.m
+    given Manifest[B] = tagb.m
+    given Tag[A] = taga.tag
+    given Tag[B] = tagb.tag
+    apply[A => B]
+
+  def apply[T](using m: Manifest[T], t: Tag[T]): ValTag[T] = new ValTag(m, t)
+
+case class ValTag[T](m: Manifest[T], val tag: Tag[T])
+
 
 /**
  * Methods to deal with ValType
  */
 object ValType:
+
+  extension (t: TypeName)
+    def array = t.copy(arrayLevel = t.arrayLevel + 1)
+    def fromArray = t.copy(arrayLevel = t.arrayLevel - 1)
+    def name(rootPrefix: Boolean = false): String =
+      def shortName = !t.fullName.contains(".")
+      if rootPrefix && !shortName
+      then s"_root_.${t.fullName}"
+      else t.fullName
+
+      def arrayWrap(t: TypeName, tpe: String): String =
+        if t.arrayLevel == 0
+        then tpe
+        else s"Array[${arrayWrap(t.copy(arrayLevel = t.arrayLevel - 1), tpe)}]"
+
+      val tpe =
+        if t.typeArgs.isEmpty
+        then t.fullName
+        else s"${t.fullName}[${t.typeArgs.map(_.name(rootPrefix)).mkString(", ")}]"
+
+      arrayWrap(t, tpe)
+
+  case class TypeName(fullName: String, typeArgs: Seq[TypeName], arrayLevel: Int):
+    override def toString() = this.name(false)
+
+  object TypeName:
+    def fromLigthTypeTag(tag: LightTypeTag): TypeName =
+      val args =
+        if tag.typeArgs.isEmpty
+        then Seq()
+        else tag.typeArgs.map(fromLigthTypeTag)
+
+      def fullyQualifiedName =
+        val shortTypes =
+          Set(
+            "Any", "AnyRef", "AnyVal", "Boolean", "Byte", "Char",
+            "Double", "Float", "Int", "Long", "Nothing", "Null",
+            "Object", "Short", "Unit", "String", "Array", "IArray")
+
+        if shortTypes.contains(tag.shortName)
+        then tag.shortName
+        else tag.withoutArgs.scalaStyledRepr
+
+//          if tag.scalaStyledRepr.startsWith("java") | tag.scalaStyledRepr.startsWith("javax")
+//          then tag.shortName
+//          else tag.withoutArgs.scalaStyledRepr
+
+      def lowerType(typeName: TypeName): TypeName =
+        if typeName.fullName == "Array"
+        then lowerType(typeName.typeArgs.head.copy(arrayLevel = typeName.arrayLevel + 1))
+        else typeName
+
+      lowerType(
+        TypeName(fullyQualifiedName, args, 0)
+      )
+
+
+    def parse(typeString: String): TypeName =
+      import scala.meta.*
+
+      def fromScalaMeta(tpe: Type): TypeName =
+
+        def isArray(tpe: Type): Boolean =
+          tpe match
+            case Type.Name("Array") => true
+            case Type.Select(_, Type.Name("Array")) => true
+            case _ => false
+
+        tpe match
+          case Type.Name(name) => TypeName(name, Seq(), 0)
+          case _: Type.Select => TypeName(tpe.syntax, Seq(), 0)
+          case Type.Apply(arrayType, Seq(inner)) if isArray(arrayType) =>
+            val parsed = fromScalaMeta(inner)
+            parsed.copy(arrayLevel = parsed.arrayLevel + 1)
+          case Type.Apply(base, args) =>
+            val parsedBase = fromScalaMeta(base)
+            parsedBase.copy(typeArgs = args.map(fromScalaMeta))
+          case unsupported =>
+            throw IllegalArgumentException(s"Unsupported type syntax: ${unsupported.syntax}")
+
+      typeString.parse[Type] match
+          case Parsed.Success(tpe) => fromScalaMeta(tpe)
+          case Parsed.Error(pos, message, _) => throw IllegalArgumentException(s"Invalid type at ${pos.start}: $message")
+
+
 
   /**
    * Extract the atomic ValType of a (potentially multidimensional) Array
@@ -56,7 +169,8 @@ object ValType:
      * convert to array
      * @return
      */
-    def toArray = ValType[Array[T]](p.manifest.toArray)
+    def toArray =
+      ValType[Array[T]](p.manifest.toArray, p.compileName.array)
 
     /**
      * alias of [[toArray]]
@@ -77,7 +191,7 @@ object ValType:
     def asArray = p.asInstanceOf[ValType[Array[T]]]
 
 
-  def fromArrayUnsecure(t: ValType[Array[?]]) = ValType[Any](manifestFromArrayUnsecure(t.manifest))
+  def fromArrayUnsecure(t: ValType[Array[?]]) = apply[Any](manifestFromArrayUnsecure(t.manifest), t.compileName.fromArray)
 
   /**
    * Decorate for conversion from array type
@@ -85,9 +199,9 @@ object ValType:
    * @tparam T
    */
   implicit class ValTypeArrayDecorator[T](t: ValType[Array[T]]):
-    def fromArray = ValType[T](t.manifest.fromArray)
+    def fromArray = apply[T](TypeTool.fromArray(t.manifest), t.compileName.fromArray)
 
-  implicit def buildValType[T: Manifest]: ValType[T] = ValType[T]
+  implicit def buildValType[T: ValTag]: ValType[T] = ValType[T]
 
   /**
    * Construct a ValType from an implicit manifest
@@ -95,30 +209,39 @@ object ValType:
    * @tparam T
    * @return
    */
-  def apply[T](implicit m: Manifest[T]): ValType[T] =
+  def apply[T](using m: ValTag[T]): ValType[T] = apply(m.m, TypeName.fromLigthTypeTag(m.tag.tag))
+
+  def apply[T](m: Manifest[T], n: TypeName): ValType[T] =
     new ValType[T]:
       val manifest = m
+      val compileName = n
 
   /**
    * Force conversion
    * @param c
    * @return
    */
-  def unsecure(c: Manifest[?]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
+//  def unsecure(c: Manifest[?]): ValType[Any] = apply(c.asInstanceOf[Manifest[Any]])
 
-  def toNativeType(t: ValType[?]): ValType[?] =
+  def toNativeType(t: Manifest[?]): Manifest[?] =
+    @tailrec def unArrayify(c: Manifest[?], level: Int = 0): (Manifest[?], Int) =
+      if (!c.isArray)
+      then (c, level)
+      else unArrayify(TypeTool.fromArray(c.asArray), level + 1)
+
     def native =
-      val (contentType, level) = ValType.unArrayify(t)
-      for 
-        m ← classEquivalence(contentType.runtimeClass).map(_.manifest)
-      yield 
-        (0 until level).foldLeft(ValType.unsecure(m)) {
-          (c, _) => c.toArray.asInstanceOf[ValType[Any]]
-        }
+      val (contentType, level) = unArrayify(t)
+      for
+        m <- classEquivalence(contentType.runtimeClass).map(_.manifest)
+      yield
+        (0 until level).foldLeft(m):
+          (c, _) => c.toArray
+
     native getOrElse t
 
-  def toTypeString(t: ValType[?], rootPrefix: Boolean = true, replaceObject$: Boolean = true): String =
-    TypeTool.toString(rootPrefix = rootPrefix, replaceObject$ = replaceObject$)(toNativeType(t).manifest)
+  def compileTypeString(t: ValType[?], rootPrefix: Boolean = true): String = t.compileName.name(rootPrefix = rootPrefix)
+  def runtimeTypeString(t: ValType[?], rootPrefix: Boolean = true, replaceObject$: Boolean = true): String =
+    TypeTool.toString(rootPrefix = rootPrefix, replaceObject$ = replaceObject$)(toNativeType(t.manifest))
 
 /**
  * Trait storing the type of prototypes, wrapping a [[scala.reflect.Manifest]]
@@ -127,7 +250,9 @@ object ValType:
  */
 trait ValType[T] extends Id:
   def manifest: Manifest[T]
-  override def toString = manifest.toString
+  def compileName: ValType.TypeName
+
+  override def toString = compileName.name(false)
   def id = manifest
   def runtimeClass = manifest.runtimeClass
 
@@ -139,7 +264,7 @@ object Val:
    * @param prototype
    * @tparam T
    */
-  implicit class ValToArrayDecorator[T](prototype: Val[T]) {
+  implicit class ValToArrayDecorator[T](prototype: Val[T]):
     def toArray(level: Int): Val[?] =
       def toArrayRecursive[A](prototype: Val[A], level: Int): Val[?] =
         if (level <= 0)
@@ -158,25 +283,21 @@ object Val:
 
     def unsecureFromArray = fromArray(prototype.asInstanceOf[Val[Array[T]]])
     def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
-  }
 
   def fromArray[T](v: Val[Array[T]]) = copyWithType(v, `type` = v.`type`.fromArray)
 
-  implicit class ValFromArrayDecorator[T](v: Val[Array[T]]) {
+  implicit class ValFromArrayDecorator[T](v: Val[Array[T]]):
     def fromArray: Val[T] = Val.fromArray(v)
-  }
 
-  implicit class valDecorator[T](v: Val[T]) {
+  implicit class valDecorator[T](v: Val[T]):
     def withName(name: String) = Val[T](name)(v.`type`)
-  }
 
   implicit def valToArrayConverter[T](p: Val[T]): Val[Array[T]] = p.toArray
 
-  def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: ValType[T]): Val[T] = {
+  def apply[T](name: String, namespace: Namespace = Namespace.empty)(implicit t: ValType[T]): Val[T] =
     assert(t != null)
     val (parsedNamespace, parsedName) = parseName(name)
     new Val[T](parsedName, t, namespace.postfix(parsedNamespace.names*))
-  }
 
   def apply[T](implicit t: ValType[T], name: sourcecode.Name): Val[T] = apply[T](name.value)
 
@@ -186,15 +307,15 @@ object Val:
   }
 
   implicit def isTypeable[T: Manifest]: Typeable[Val[T]] =
-    new Typeable[Val[T]] {
+    new Typeable[Val[T]]:
       override def cast(t: Any): Option[Val[T]] =
-        t match {
+        t match
           case v: Val[?] if v.`type`.manifest == manifest[T] => Some(v.asInstanceOf[Val[T]])
           case _ => None
-        }
+
       override def castable(t: Any): Boolean = cast(t).isDefined
       override def describe = s"Val[${manifest[T].toString}]"
-    }
+
 
   val caseBoolean = TypeCase[Val[Boolean]]
   val caseInt = TypeCase[Val[Int]]

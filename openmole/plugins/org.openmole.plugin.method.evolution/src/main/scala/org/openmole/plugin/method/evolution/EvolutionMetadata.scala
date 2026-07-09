@@ -63,6 +63,21 @@ object EvolutionMetadata:
     generation: Long,
     saveOption: SaveOption) extends EvolutionMetadata
 
+  object PPSE:
+    object Density:
+      case class IndependentJoint(density: Seq[Density]) extends Density
+      case class GaussianDensity(v: ValData, mean: Double, sd: Double) extends Density
+      case class BetaDensity(v: ValData, alpha: Double, beta: Double) extends Density
+    sealed trait Density derives derivation.ConfiguredCodec
+
+  case class PPSE(
+    genome: Seq[GenomeBoundData],
+    objective: Seq[Objective],
+    grid: PSE.Grid,
+    density: Option[PPSE.Density],
+    generation: Long,
+    saveOption: SaveOption) extends EvolutionMetadata
+
   object Profile
 
   case class Profile(

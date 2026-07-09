@@ -17,44 +17,39 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 object BreedTask:
+  def breed(evolution: EvolutionWorkflow, size: Int, suggestion: Genome.SuggestedValues)(p: FromContextTask.Parameters) =
+    import p.*
 
-  def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Genome.SuggestedValues)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+    def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v => Variable.unsecureUntyped(v.value, v.equal.from(context))).toVector
+
+    val suggestedGenomes = Genome.SuggestedValues.values(suggestion).map(ds => evolution.operations.buildGenome(defaultSetToVariables(ds)))
+
+    val population = context(evolution.populationVal)
+    val s = context(evolution.stateVal)
+
+    (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match
+      case (true, 0, false) =>
+        val gs =
+          size - suggestedGenomes.size match
+            case x if x > 0 => evolution.operations.initialGenomes(x, random())(context)
+            case x => Vector.empty
+
+        random().shuffle(suggestedGenomes ++ gs).toArray(using evolution.genomeVal.`type`.manifest)
+      case (true, _, _) =>
+        val gs = evolution.operations.initialGenomes(size, random())(context)
+        gs.toArray(using evolution.genomeVal.`type`.manifest)
+      case (false, _, _) =>
+        val breeded = evolution.operations.breeding(population.toVector, size, s, random()).from(context)
+        breeded.toArray(using evolution.genomeVal.`type`.manifest)
+
+  def apply(evolution: EvolutionWorkflow, size: Int, suggestion: Genome.SuggestedValues)(using sourcecode.Name, DefinitionScope) =
     Task("BreedTask"): p =>
-      import p.*
-
-      def defaultSetToVariables(ds: Seq[ValueAssignment.Untyped]) = ds.map(v => Variable.unsecureUntyped(v.value, v.equal.from(context))).toVector
-      val suggestedGenomes = Genome.SuggestedValues.values(suggestion).map(ds => evolution.operations.buildGenome(defaultSetToVariables(ds)))
-
-      val population = context(evolution.populationVal)
-      val s = context(evolution.stateVal)
-
-      (population.isEmpty, evolution.generationLens.get(s), suggestedGenomes.isEmpty) match
-        case (true, 0, false) =>
-          val gs =
-            size - suggestedGenomes.size match
-              case x if x > 0 => evolution.operations.initialGenomes(x, random())(context)
-              case x          => Vector.empty
-
-          Context(
-            evolution.genomeVal.array -> random().shuffle(suggestedGenomes ++ gs).toArray(using evolution.genomeVal.`type`.manifest)
-          )
-        case (true, _, _) =>
-          val gs = evolution.operations.initialGenomes(size, random())(context)
-
-          Context(
-            Variable(evolution.genomeVal.array, gs.toArray(using evolution.genomeVal.`type`.manifest))
-          )
-        case (false, _, _) =>
-          val breeded = evolution.operations.breeding(population.toVector, size, s, random()).from(context)
-
-          Context(
-            Variable(evolution.genomeVal.array, breeded.toArray(using evolution.genomeVal.`type`.manifest))
-          )
-
+      val breedValue = breed(evolution, size, suggestion)(p)
+      Context(evolution.genomeVal.array -> breedValue)
     .set (
       inputs += (evolution.populationVal, evolution.stateVal),
       outputs += evolution.stateVal,

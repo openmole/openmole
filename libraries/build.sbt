@@ -585,3 +585,15 @@ lazy val tapir = OsgiProject(dir, "sttp.tapir", exports = Seq("sttp.*", "magnoli
   libraryDependencies += "com.softwaremill.sttp.tapir" %% sjs("tapir-sttp-client4") % tapirVersion,
   version := tapirVersion
 ) dependsOn(http4s)
+
+lazy val layoutz = OsgiProject(dir, "layoutz", imports = defaultImports ++ Seq("*")) settings (
+  settings,
+  libraryDependencies += "xyz.matthieucourt" %% "layoutz" % layouzVersion,
+  version := layouzVersion
+)
+
+lazy val izumiReflect = OsgiProject(dir, "izumi.reflect") settings (
+  settings,
+  libraryDependencies += "dev.zio" %% "izumi-reflect" % izumiReflectVersion,
+  version := izumiReflectVersion
+)

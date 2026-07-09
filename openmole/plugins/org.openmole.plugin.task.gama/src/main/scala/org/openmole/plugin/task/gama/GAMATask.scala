@@ -107,7 +107,7 @@ object GAMATask:
       def omExperimentName = "_openMOLEExperiment_"
 
       def launchCommand =
-        s"gama-headless $memoryValue -hpc 1 -batch $omExperimentName $inputFilePath"
+        s"gama-headless -consoleLog -data /tmp/data $memoryValue -hpc 1 -batch $omExperimentName $inputFilePath"
 
       def environmentVariablesValue =
         def fewerThreadsEnvironmentVariable =

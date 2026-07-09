@@ -124,7 +124,7 @@ object FromContext extends LowPriorityFromContext:
    * @tparam T
    * @return
    */
-  def codeToFromContext[T: Manifest](code: String) =
+  def codeToFromContext[T: ValTag](code: String) =
     val proxy = Cache(ScalaCompilation.dynamic[T](code))
 
     FromContext[T] { p =>
@@ -263,7 +263,6 @@ object Expandable:
   def apply[S, T](f: S => FromContext[T]) =
     new Expandable[S, T]:
       override def expand(s: S): FromContext[T] = f(s)
-
 
   given Expandable[String, String] = Expandable[String, String](s => s: FromContext[String])
   given Expandable[String, File] = Expandable[String, File](s => s: FromContext[File])

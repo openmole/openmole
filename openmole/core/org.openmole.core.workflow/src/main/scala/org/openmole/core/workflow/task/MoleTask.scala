@@ -155,6 +155,6 @@ case class MoleTask(
         fileService.deleteWhenEmpty(executionNewFile.directory)
         (executionContext.moleExecution zip listenerKey).foreach { case (moleExecution, key) => moleExecution.executionContext.services.eventDispatcher.unregister(key) }
 
-      lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
+      lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + s" has never been executed, in the workflow $mole"))
 
 

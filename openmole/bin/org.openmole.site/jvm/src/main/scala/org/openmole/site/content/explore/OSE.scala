@@ -23,7 +23,7 @@ object OSE extends PageContent(html"""
 
 ${h2{"OSE description"}}
 
-The Origin Space Exploration (OSE) method is used to ${b{"explore the multiples antecedents of a pattern"}}. It produces input parameter values that produce a given pattern described by a set of constraints on the objectives (i.e. objectives should be under given thresholds). OSE optimizes the fitness and when it finds solutions that are good enough it keep them and blacklist the part of the inputs space containing these solution. The optimization process keep going in order to find multiple solutions producing the pattern, in all parts of the input space.
+The Origin Space Exploration (OSE) method is used to ${b{"explore the multiple antecedents of a pattern"}}. It generates input parameter values that match a given pattern described by a set of constraints on the objectives (i.e., objectives should be below given thresholds). OSE optimizes the fitness and, when it finds solutions that are good enough, keeps them and blacklists the region of the input space containing these solutions. The optimization process continues in order to find other solutions producing the pattern in the remaining of the input space.
 
 The hook arguments for the ${code{"OSEEvolution"}} are:
 ${Evolution.hookOptions}
@@ -57,6 +57,6 @@ OSEEvolution(
 """, name = "OSE", header = "val modelTask = EmptyTask()")}
 
 
-${i{"origin"}} describes the discrete space of possible origins. Each cell is considered a potential origin. ${i{"objective"}} describe the pattern to reach with inequalities. The patten is considered as reached when all the objective are under their threshold value. In this example OSE computes a maximal diversity of inputs for which all the outputs are under their respective threshold values.
+${i{"origin"}} describes the discrete space of possible origins. Each cell is considered a potential origin. ${i{"objective"}} describes the pattern to reach with inequalities. The pattern is considered as reached when all objectives are below their threshold values. In this example, OSE finds the maximum diversity of inputs for which all outputs are below their respective threshold values.
 
 """)

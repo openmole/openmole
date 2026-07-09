@@ -40,7 +40,7 @@ import monocle.syntax.all._
 object PSE {
 
   case class DeterministicPSE(
-    pattern:             Vector[Double] => Vector[Int],
+    pattern:             IArray[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
@@ -55,13 +55,13 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, PSE => MGOPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
+    given MGOAPI.Integration[DeterministicPSE, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: DeterministicPSE) = new Ops:
         override def metadata(state: S, saveOption: SaveOption): EvolutionMetadata =
@@ -83,17 +83,21 @@ object PSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = EvolutionState[HitMapState](s = Map())
+        def initialState = 
+          import mgo.tools.PatternMap
+          EvolutionState[HitMapState](s = PatternMap.empty)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) =
           FromContext: p =>
-            import p._
+            import p.*
 
             val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
             val res = MGOPSE.result[Phenotype](population, om.genome.continuous, om.genome.discrete, toFitness andThen om.pattern)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
             val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
 
@@ -138,23 +142,21 @@ object PSE {
             MGOPSE.elitism[Phenotype](pattern(_).from(context)) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
-          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
-          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
-          state.copy(s = newMap.toMap)
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.add(state.s, islandState.s, _ + _, 0)
+          state.copy(s = newMap)
 
         def migrateToIsland(population: Vector[I], state: S) = (DeterministicGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState(initialState: S, islandState: S): S =
-            def allKeys = islandState.s.keys
-            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
-            islandState.copy(s = newMap.toMap)
 
-          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.addToLeft(state.s, initialState.s, _ - _, 0)
+          (DeterministicGAIntegration.migrateFromIsland(population, initialState.generation), state.copy(s = newMap))
 
     }
 
   case class StochasticPSE(
-    pattern:             Vector[Double] => Vector[Int],
+    pattern:             IArray[Double] => Vector[Int],
     genome:              Genome,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
@@ -170,13 +172,13 @@ object PSE {
     import mgo.evolution.algorithm.{ CDGenome, NoisyPSE => MGONoisyPSE, _ }
     import cats.data._
 
-    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int]), Phenotype] with MGOAPI.MGOState[HitMapState]:
+    given MGOAPI.Integration[StochasticPSE, (IArray[Double], IArray[Int])] with MGOAPI.MGOState[HitMapState]:
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def operations(om: StochasticPSE) = new Ops:
         override def metadata(state: S, saveOption: SaveOption) =
@@ -198,15 +200,20 @@ object PSE {
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
-        def initialState = EvolutionState[HitMapState](s = Map())
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          MGONoisyPSE.buildIndividual(genome, phenotype, state.generation, false)
+
+        def initialState =
+          import mgo.tools.PatternMap
+          EvolutionState[HitMapState](s = PatternMap.empty)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext: p =>
           import p._
 
-          val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives).from(context)
+          val aggregate = Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context)
           val res = MGONoisyPSE.result(population, aggregate, om.pattern, om.genome.continuous, om.genome.discrete)
-          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false)
+          val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous.toVector) zip res.map(_.discrete.toVector), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(r => aggregate(r.individual.phenotypeHistory.toVector)))
           val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
@@ -236,7 +243,7 @@ object PSE {
               n,
               om.operatorExploration,
               om.cloneProbability,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               continuous,
               discrete,
               om.pattern,
@@ -249,25 +256,23 @@ object PSE {
 
             MGONoisyPSE.elitism[Phenotype](
               om.pattern,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.historySize,
               om.genome.continuous,
               om.genome.discrete) apply (s, population, candidates, rng)
 
 
         def mergeIslandState(state: S, islandState: S): S =
-          def allKeys = (state.s.keys ++ islandState.s.keys).iterator.distinct
-          def newMap = allKeys.map(k => (k, state.s.getOrElse(k, 0) + islandState.s.getOrElse(k, 0)))
-          state.copy(s = newMap.toMap)
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.add(state.s, islandState.s, _ + _, 0)
+          state.copy(s = newMap)
 
         def migrateToIsland(population: Vector[I], state: S) = (StochasticGAIntegration.migrateToIsland(population), state)
-        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
-          def diffIslandState(initialState: S, islandState: S): S =
-            def allKeys = islandState.s.keys
-            def newMap = allKeys.map(k => (k, islandState.s(k) - initialState.s.getOrElse(k, 0)))
-            islandState.copy(s = newMap.toMap)
 
-          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), diffIslandState(initialState, state))
+        def migrateFromIsland(population: Vector[I], initialState: S, state: S) =
+          import mgo.tools.PatternMap
+          def newMap = PatternMap.addToLeft(state.s, initialState.s, _ - _, 0)
+          (StochasticGAIntegration.migrateFromIsland(population, initialState.generation), state.copy(s = newMap))
 
     }
 
@@ -293,7 +298,7 @@ object PSE {
     objective:  Seq[PatternAxe],
     outputs:    Seq[Val[?]],
     stochastic: OptionalArgument[Stochastic],
-    reject:     OptionalArgument[Condition] ,
+    accept:     OptionalArgument[Condition] ,
     maxRareSample: Int
   ) =
     EvolutionWorkflow.stochasticity(objective.map(_.p), stochastic.option) match
@@ -303,12 +308,12 @@ object PSE {
 
         EvolutionWorkflow.deterministicGA(
           DeterministicPSE(
-            mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
+            mgo.evolution.niche.irregularGrid(objective.toVector  .map(_.scale)),
             genome,
             phenotypeContent,
             exactObjectives,
             EvolutionWorkflow.operatorExploration,
-            reject = reject.option,
+            reject = accept.option.map(!_),
             grid = objective,
             maxRareSample = maxRareSample),
           genome,
@@ -325,14 +330,14 @@ object PSE {
 
         EvolutionWorkflow.stochasticGA(
           StochasticPSE(
-            pattern = mgo.evolution.niche.irregularGrid(objective.map(_.scale).toVector),
+            pattern = mgo.evolution.niche.irregularGrid(objective.toVector.map(_.scale)),
             genome = genome,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option,
+            reject = accept.option.map(!_),
             grid = objective,
             maxRareSample = maxRareSample),
           genome,
@@ -358,7 +363,7 @@ object PSEEvolution:
         objective = p.objective,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
-        reject = p.reject,
+        accept = p.accept,
         maxRareSample = p.maxRareSample
       )
 
@@ -384,7 +389,7 @@ case class PSEEvolution(
   termination:   OMTermination,
   maxRareSample: Int                          = 10,
   stochastic:    OptionalArgument[Stochastic] = None,
-  reject:        OptionalArgument[Condition]  = None,
+  accept:        OptionalArgument[Condition]  = None,
   parallelism:   Int                          = EvolutionWorkflow.parallelism,
   distribution:  EvolutionPattern             = SteadyState(),
   suggestion:    Suggestion                   = Suggestion.empty,

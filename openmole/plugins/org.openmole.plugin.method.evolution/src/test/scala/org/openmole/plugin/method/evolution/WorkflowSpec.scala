@@ -96,8 +96,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   }
 
   import org.openmole.core.workflow.test.Stubs._
-
-  "Evolution" should "run" in {
+  
+  "Evolution" should "run" in:
     @volatile var executed = 0
 
     val a = Val[Double]
@@ -105,7 +105,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     val testTask =
       FromContextTask("test") { p =>
-        import p._
+        import p.*
         executed += 1
         assert(context(ba).size == 10)
         context
@@ -122,7 +122,32 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     nsga run
 
     executed should be >= 100
-  }
+
+  it should "run with elitsmBy" in :
+    @volatile var executed = 0
+
+    val a = Val[Double]
+    val ba = Val[Array[Boolean]]
+
+    val testTask =
+      FromContextTask("test") { p =>
+        import p.*
+        executed += 1
+        assert(context(ba).size == 10)
+        context
+      } set ((inputs, outputs) += (a, ba))
+
+    val nsga = NSGA2Evolution(
+      evaluation = testTask,
+      objective = Seq(a),
+      genome = Seq(a in(0.0, 1.0), ba in Seq.fill(10)(TrueFalse)),
+      termination = 100,
+      parallelism = 10
+    ) by SteadyState(elitismBy = 5)
+
+    nsga run
+
+    executed should be >= 100
 
   it should "support single objective" in {
     val a = Val[Double]
@@ -165,7 +190,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
 
 
-  "Island evolution" should "run" in {
+  "Island evolution" should "run" in:
     @volatile var executed = 0
 
     val a = Val[Double]
@@ -187,9 +212,8 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     nsga run
 
     executed should be >= 100
-  }
 
-  it should "serialize and run" in {
+  it should "serialize and run" in:
     val a = Val[Double]
 
     val testTask =
@@ -218,8 +242,7 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     ) by Island(5)
 
     serializeDeserialize(nsga2) run
-  }
-
+  
   it should "have no validation error" in:
     import EvolutionWorkflow._
 
@@ -230,7 +253,6 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     Validation(conflict by Island(10)).toList match
       case Nil =>
       case l => sys.error("Several validation errors have been found: " + l.mkString("\n"))
-
 
   "Steady state workflow" should "have no validation error" in:
     val mole: Mole = nsga2
@@ -772,4 +794,11 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
       stochastic = Stochastic(seed = mySeed)
     )
 
+  "manifest of state" should "be correct" in:
+    val m = manifest[mgo.evolution.algorithm.PSE.PSEState]
 
+    println(m)
+    import scala.compiletime.summonInline
+    import scala.deriving.*
+
+    println(summonInline[scala.reflect.ClassTag[mgo.evolution.algorithm.PSE.PSEState]])

@@ -75,7 +75,8 @@ object Libraries {
   lazy val sshj = "org.openmole.library" %% "com-hierynomus-sshj" % sshjVersion
   lazy val jgit = "org.openmole.library" %% "org-eclipse-jgit" % jgitVersion
   lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
-  lazy val  ulid = "org.openmole.library" %% "com-github-f4b6a3-ulid" % ulidCreatorVersion
+  lazy val ulid = "org.openmole.library" %% "com-github-f4b6a3-ulid" % ulidCreatorVersion
+  lazy val izumiReflect = "org.openmole.library" %% "izumi-reflect" % izumiReflectVersion
   
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
@@ -120,6 +121,8 @@ object Libraries {
   lazy val tapir = "org.openmole.library" %% "sttp-tapir" % tapirVersion
   lazy val http4s = "org.openmole.library" %% "org-http4s" % http4sVersion
   //lazy val endpoint4SJsonSchemaGeneric = "org.openmole.library" %% "org-endpoints4s-json-schema-generic" % endpoints4SVersion //cross CrossVersion.for3Use2_13
+
+  lazy val layoutz = "org.openmole.library" %% "layoutz" % layouzVersion
 
   lazy val wepackVersion = "5.89.0"
 }

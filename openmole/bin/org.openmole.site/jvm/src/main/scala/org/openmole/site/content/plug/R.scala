@@ -26,7 +26,7 @@ ${h2{"RTask"}}
 ${aa("R", href := shared.link.rcran)} is a scripted language initially designed for statistics, but whose application range is much broader today (for example GIS, operational research, linear algebra, web applications, etc.), thanks to its large community and the variety of packages.
 It may be convenient to use specific R libraries within a workflow, and therefore OpenMOLE provides a specific ${code{"RTask"}}.
 
-${h3{"Preliminary remarks"}}
+${h3{"Preliminary Remarks"}}
 
 ${Native.preliminary("RTask")}
 
@@ -39,7 +39,7 @@ It takes the following arguments :
 
 ${ul(
    li{html"${code{"script"}} String,$mandatory. The R script to be executed, either R code directly or a R script file."},
-   li{html"${code{"libraries"}} Sequence of strings or tuple, $optional (default = empty). The name of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image). Dependencies for R libraries can be automatically resolved and installed, for that you can write (\"ggrah\", true) instead of \"ggraph\"."},
+   li{html"${code{"libraries"}} Sequence of strings or tuple, $optional (default = empty). The names of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image). Dependencies for R libraries can be automatically resolved and installed, for that you can write (\"ggrah\", true) instead of \"ggraph\"."},
    li{html"${code{"clearContainerCache"}} Boolean, $optional (default = ${code{"false"}}). Should the R image and libraries be cleared and reinstalled (to ensure an update for example)? If ${code{"true"}}, the task will perform the installation (and thus the update) even if the library was already installed."}
 )}
 
@@ -60,10 +60,10 @@ The following arguments are optional arguments for an advanced usage
 ${ul(
    li{html"${code{"install"}} Sequence of strings, $optional (default = empty). System commands to be executed prior to any R packages installation and R script execution. This can be used to install system packages using apt."},
    li{html"${code{"image"}} String, $optional (default = \"openmole/r2u:4.3.0\"). Changes the docker image used by the RTask. OpenMOLE uses ${a("r2u", href := "https://eddelbuettel.github.io/r2u/")}"},
-   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of R on the execution node."},
+   li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before the execution of R on the execution node."},
 )}
 
-Other advanced container options are also available to build the RTask (see ContainerTask): ${code{"errorOnReturnValue"}}, ${code{"returnValue"}}, ${code{"stdOut"}}, ${code{"stdErr"}}, ${code{"hostFiles"}}, ${code{"workDirectory"}}, ${code{"environmentVariables"}}, ${code{"containerSystem"}}, ${code{"installContainerSystem"}}.
+Other advanced container options are also available to build the ${code{"RTask"}} (see ${code{"ContainerTask"}}): ${code{"errorOnReturnValue"}}, ${code{"returnValue"}}, ${code{"stdOut"}}, ${code{"stdErr"}}, ${code{"hostFiles"}}, ${code{"workDirectory"}}, ${code{"environmentVariables"}}, ${code{"containerSystem"}}, ${code{"installContainerSystem"}}.
 
 $br
 
@@ -90,7 +90,7 @@ $br
 
 This script creates a function ${code{"f"}} that takes a parameter (a number) and adds 1 to it.
 It then applies the function to the number 2.
-We save this to a file named ${i{"myRScript.R"}} in our OpenMOLE workspace.
+We save this to a file named ${i{"myRScript.R"}} in your OpenMOLE workspace.
 
 
 ${h3{"Write R code in the RTask"}}
@@ -162,8 +162,8 @@ We will need to write R code and thus use the syntax from the first example, whi
 
 $br
 
-In order to use the R script, we need to use the ${code{"resources"}} field with the precise location of the file in our work directory.
-It will then be imported in the @code{RTask} by the R primitive ${code{"source(\"myRScript.R\")"}}).
+In order to use the R script, we need to use the ${code{"resources"}} field with the precise location of the file in your work directory.
+It will then be imported in the ${code{"RTask"}} by the R primitive ${code{"source(\"myRScript.R\")"}}.
 
 $br$br
 
@@ -189,7 +189,7 @@ ${hl.openmole( s"""
 
 $br
 
-This time, we modify the output of the R script (by adding 2 to the result) before returning a value to OpenMOLE.
+In this example, we extend the output of the R script by adding 2 to the result before returning the value to OpenMOLE.
 
 
 ${h2{"Provide input values"}}
@@ -239,9 +239,9 @@ $br$br
 If your OpenMOLE variable and R variable have the same name (say ${code{"my-variable"}} for instance), you can use the following shortcut syntax: ${code{"my-variable.mapped"}}.
 
 
-${h3{"Combine mapped and classic inputs/outputs"}}
+${h3{"Combining mapped and standard inputs/outputs"}}
 
-If you have several outputs, you can combine mapped outputs with classic outputs that are not part of the ${code{"RTask"}}:
+If you have several outputs, you can combine mapped outputs with standard outputs that are not part of the ${code{"RTask"}}:
 
 $br$br
 
@@ -293,7 +293,7 @@ ${code{"inputFiles"}} is used to provide OpenMOLE variables of type ${code{"File
 
 $br$br
 
-In this example workflow, we first have a ${code{"ScalaTask"}} writing numbers in a file.
+In this example workflow, we first have a ${code{"ScalaTask"}} that creates a file containing numbers.
 The file is created through the OpenMOLE variable ${code{"myFile"}} of type ${i{"java.io.File"}}.
 In order to have access to this file in the ${code{"RTask"}}, we add ${code{"myFile"}} as an output of the ${code{"ScalaTask"}} and an input of the ${code{"RTask"}}.
 
@@ -333,7 +333,7 @@ ${hl.openmole(s"""
 
 $br
 
-The R script in the ${code{"RTask"}} reads a file named ${i{"fileForR.txt"}} (in the R script presented here, it is supposed to have numeric values, separated by a simple space), and creates a R variable ${code{"myVector"}}, which is a vector containing the values of the file ${i{"fileForR.txt"}}.
+The R script in the ${code{"RTask"}} reads a file named ${i{"fileForR.txt"}} (which should contain numeric values separated by a simple space), and creates an R variable ${code{"myVector"}} containing the file values as a vector.
 We then apply the function ${code{"f"}} to that vector.
 
 $br
@@ -341,7 +341,7 @@ $br
 The ${i{"fileForR.txt"}} file is set as an input file of the ${code{"RTask"}} following the syntax: ${code{"inputFiles += (om-fileVariable, \"filename-in-R-code\")"}}.
 For more information about file management in OpenMOLE, see ${aa("this page", href := DocumentationPages.fileManagement.file + "#ExternalTasks")}.
 $br
-The end of the workflow simply tells OpenMOLE to chain the two tasks and to display the outputs of the last task (here the OpenMOLE variable ${code{"resR"}}) in the standard output.
+The workflow definition chains the two tasks and displays the outputs of the last task (the OpenMOLE variable ${code{"resR"}}) in the standard output.
 
 
 
@@ -449,7 +449,7 @@ In some cases, you might be willing to use alternative repositories.
 
 $br$br
 
-A first reason might be sleep: download and installation of packages might require hundreds of megabytes of download, leading to an important consumption of data and a slower construction of the container (only at the first execution, as the container is reused for further executions).
+A first reason might be speed: download and installation of packages might require hundreds of megabytes of download, leading to important data consumption and slower container construction (only at the first execution, as the container is reused for further executions).
 If your institution is running a local Debian repository, you would save data and time by using this repository.
 You might also need packages which are not part of the default Debian repositories.
 
@@ -478,7 +478,7 @@ ${hl.openmole( s"""
            "fakeroot cat /etc/apt/sources.list",
            // update the list of available packages (here I disable HTTP proxy as this repository is in my network)
            "fakeroot apt-get -o Acquire::http::proxy=false update ",
-           // install required R packages in their binary version (quicker, much stable!)
+           // install required R packages in their binary version (quicker, much more stable!)
            "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-ggplot2",
            "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-gganimate",
            "DEBIAN_FRONTEND=noninteractive fakeroot apt-get -o Acquire::http::proxy=false install -y r-cran-plotly",

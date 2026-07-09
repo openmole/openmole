@@ -22,13 +22,12 @@ package object extension:
   type FromContextSource = org.openmole.core.workflow.mole.FromContextSource
   def Source = org.openmole.core.workflow.mole.Source
 
-  type FromContextTask = org.openmole.core.workflow.task.FromContextTask
   export org.openmole.core.workflow.task.Task
-
   export org.openmole.core.workflow.task.TaskExecutionInfo
   export org.openmole.core.workflow.task.TaskExecution
   export org.openmole.core.workflow.task.TaskExecutionContext
   export org.openmole.core.workflow.task.TaskExecutionBuildContext
+  export org.openmole.core.workflow.task.FromContextTask
 
   type Sampling = org.openmole.core.workflow.sampling.Sampling
   type FromContextSampling = org.openmole.core.workflow.sampling.FromContextSampling
@@ -69,7 +68,7 @@ package object extension:
   export org.openmole.core.context.Context
   export org.openmole.core.context.CompactedContext
   export org.openmole.core.context.CompactedArray
-
+  export org.openmole.core.context.ValTag
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}

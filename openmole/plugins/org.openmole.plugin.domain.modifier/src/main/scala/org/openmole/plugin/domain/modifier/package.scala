@@ -19,8 +19,8 @@ package org.openmole.plugin.domain
 
 import java.io.File
 import java.nio.file.Path
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 package object modifier:
 
@@ -42,7 +42,7 @@ package object modifier:
     def sliding(n: FromContext[Int], s: FromContext[Int] = 1)(using Manifest[T]) = SlidingDomain(domain, n, s)
 
     def map[O](f: T => O) = MapDomain[D, T, O](domain, f)
-    def map[O: Manifest](s: String)(using Manifest[T]) = MapDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](s))
+    def map[O: ValTag](s: String)(using ValTag[T]) = MapDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](s))
 
     def filter(f: T => Boolean) = FilteredDomain(domain, f)
     def zipWithIndex = ZipWithIndexDomain[D, T](domain)
@@ -52,11 +52,11 @@ package object modifier:
     def takeWhile(predicate: T => Boolean) = TakeWhileDomain(domain, predicate)
 
     def zipWith[O](f: T => O) = ZipWithDomain[D, T, O](domain, f)
-    def zipWith[O: Manifest](f: String)(using Manifest[T]) = ZipWithDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](f))
+    def zipWith[O: ValTag](f: String)(using ValTag[T]) = ZipWithDomain[D, T, O](domain, FromContext.codeToFromContext[T => O](f))
     def zipWithName(using cgn: CanGetName[T]) = zipWith(cgn.apply)
 
-    def sortBy[S: {Ordering, Manifest}](s: String)(using Manifest[T]) = SortedByDomain(domain, FromContext.codeToFromContext[T => S](s))
-    def takeWhile(predicate: String)(using Manifest[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T => Boolean](predicate))
+    def sortBy[S: {Ordering, ValTag}](s: String)(using ValTag[T]) = SortedByDomain(domain, FromContext.codeToFromContext[T => S](s))
+    def takeWhile(predicate: String)(using ValTag[T]) = TakeWhileDomain(domain, FromContext.codeToFromContext[T => Boolean](predicate))
     def shuffle = ShuffleDomain(domain)
     def ++[D2](d2: D2)(using DiscreteFromContextDomain[D2, T]) = AppendDomain(domain, d2)
 

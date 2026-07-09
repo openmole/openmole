@@ -20,10 +20,17 @@ package org.openmole.core.format
 import io.circe.*
 
 object MethodMetaData:
+  def toKebabCase(name: String): String =
+    name
+      .replaceAll("([a-z])([A-Z])", "$1-$2")
+      .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
+      .toLowerCase
+
   def name(o: Any) =
     val n = o.getClass.getSimpleName
-    if n.endsWith("$") then n.dropRight(1) else n
+    val pruned = if n.endsWith("$") then n.dropRight(1) else n
+    toKebabCase(pruned)
 
-  given MethodMetaData[None.type] = MethodMetaData("No method")
+  given MethodMetaData[None.type] = MethodMetaData(name("NoMethod"))
 
 case class MethodMetaData[D](name: String)(using val encoder: Encoder[D])

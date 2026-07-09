@@ -43,6 +43,12 @@ object TypeTool:
   extension [T](m: Manifest[Array[T]])
     def fromArray: Manifest[T] = m.typeArguments.head.asInstanceOf[Manifest[T]]
 
+  given iArrayManifest[T: Manifest]: Manifest[IArray[T]] =
+    new scala.reflect.Manifest[IArray[T]]:
+      override def runtimeClass: Class[?] = manifest[T].arrayManifest.runtimeClass
+      override def typeArguments: List[Manifest[?]] = List(manifest[T])
+      override def toString = s"IArray[${manifest[T]}]"
+
   /*   implicit class TypeDecoration(t: TypeRepr) {
     def isArray = t <:< definitions.ArrayClass.toType
     def fromArray = t.typeArgs.head
@@ -74,9 +80,8 @@ object TypeTool:
     NativeType(java.lang.Boolean.TYPE, classOf[java.lang.Boolean], classOf[Boolean])
   )
 
-  def classEquivalence(c: Class[?]) =
-    classEquivalences.find(_.java == c) orElse
-      classEquivalences.find(_.scala == c)
+  def classEquivalence(c: Class[?]): Option[NativeType[?]] =
+    classEquivalences.find(_.java == c) orElse classEquivalences.find(_.scala == c)
 
   //def typeEquivalence(t: Type) = classEquivalences.find(_.typeTag.tpe == t)
 
@@ -119,6 +124,15 @@ object TypeTool:
     s.zipWithIndex.foreach { case (v, i) => java.lang.reflect.Array.set(values, i, v) }
     values
 
+//  def tagToSimpleName(t: LightTypeTag): String =
+//    val name = t.shortName
+//
+//    if t.typeArgs.isEmpty
+//    then name
+//    else
+//      val args = t.typeArgs.map(simpleName).mkString(", ")
+//      s"$name[$args]"
+  
   def toString[T](replaceObject$: Boolean = true, rootPrefix: Boolean = true)(implicit manifest: Manifest[T]) =
 
     def manifestToString(m: Manifest[?]): String =

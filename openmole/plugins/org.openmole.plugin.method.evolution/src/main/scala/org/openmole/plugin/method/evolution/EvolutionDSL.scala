@@ -50,6 +50,7 @@ object EvolutionWorkflow:
           evaluation = evaluation,
           parallelism = parallelism,
           by = s.by,
+          elitismBy = s.elitismBy,
           termination = termination,
           wrap = s.wrap,
           suggestion = suggestion,
@@ -87,7 +88,7 @@ object EvolutionWorkflow:
     ag:               AG,
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
-    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -97,8 +98,7 @@ object EvolutionWorkflow:
 
       def validate = _validate
 
-      def buildIndividual(g: G, context: Context, state: S): I =
-        operations.buildIndividual(g, variablesToPhenotype(context), state)
+      def buildIndividual(g: G, context: Context, state: S): I = operations.buildIndividual(g, context, state)
 
       def inputVals = Genome.toVals(genome)
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -114,7 +114,7 @@ object EvolutionWorkflow:
     genome:           Genome,
     phenotypeContent: PhenotypeContent,
     replication:      Stochastic,
-    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA, Phenotype]): EvolutionWorkflow =
+    validate:         Validate         = Validate.success)(using algorithm: MGOAPI.Integration[AG, VA]): EvolutionWorkflow =
     val _validate = validate
     new EvolutionWorkflow:
       type Integration = algorithm.type
@@ -123,9 +123,6 @@ object EvolutionWorkflow:
       def operations = integration.operations(ag)
 
       def validate = _validate
-
-      def buildIndividual(genome: G, context: Context, state: S): I =
-        operations.buildIndividual(genome, variablesToPhenotype(context), state)
 
       def inputVals = Genome.toVals(genome) ++ replication.seed.prototype
       def outputVals = PhenotypeContent.toVals(phenotypeContent)
@@ -157,7 +154,7 @@ object EvolutionWorkflow:
   sealed trait OMTermination
 
   sealed trait EvolutionPattern
-  case class SteadyState(by: Int = 1, wrap: Boolean = false) extends EvolutionPattern
+  case class SteadyState(by: Int = 1, elitismBy: Int = 1, wrap: Boolean = false) extends EvolutionPattern
   case class Island(termination: OMTermination, sample: OptionalArgument[Int] = None, parallelism: Int = 1) extends EvolutionPattern
 
   def SteadyStateEvolution[M](
@@ -166,24 +163,33 @@ object EvolutionWorkflow:
     termination: OMTermination,
     parallelism: Int                          = 1,
     by:          Int                          = 1,
+    elitismBy:   Int                          = 1,
     suggestion:  Genome.SuggestedValues       = Genome.SuggestedValues.empty,
     wrap:        Boolean                      = false,
     scope:       DefinitionScope              = "steady state evolution")(using evolutionMethod: EvolutionMethod[M]) =
-    implicit def defScope: DefinitionScope = scope
+    given DefinitionScope = scope
+
     val evolution = evolutionMethod(method)
+    given Manifest[evolution.I] = evolution.integration.iTag
+    given Manifest[evolution.G] = evolution.integration.gTag
+
+    val elitismByValue = math.min(parallelism, elitismBy)
 
     val wrapped = pattern.wrap(evaluation, evolution.inputVals, evolution.outputVals, wrap)
-    val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += evolution.populationVal)
+    val randomGenomes = BreedTask(evolution, parallelism, suggestion) set ((inputs, outputs) += (evolution.populationVal, evolution.offspringPopulationVal))
 
     val scaleGenome = ScalingGenomeTask(evolution)
     val toOffspring = ToOffspringTask(evolution)
     val elitism = ElitismTask(evolution)
     val terminationTask = TerminationTask(evolution, termination)
-    val breed = BreedTask(evolution, 1, Genome.SuggestedValues.empty)
+    val breed = BreedTask(evolution, elitismByValue, Genome.SuggestedValues.empty) set (
+      outputs += (evolution.populationVal, evolution.offspringPopulationVal),
+      (inputs, outputs) += evolution.terminatedVal,
+      evolution.offspringPopulationVal := Array.empty[evolution.I])
 
     val masterFirst =
       EmptyTask() set (
-        (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal),
+        (inputs, outputs) += (evolution.populationVal, evolution.genomeVal, evolution.stateVal, evolution.offspringPopulationVal),
         (inputs, outputs) ++= evolution.outputVals
       )
 
@@ -193,15 +199,35 @@ object EvolutionWorkflow:
           evolution.populationVal,
           evolution.stateVal,
           evolution.genomeVal.toArray,
-          evolution.terminatedVal)
+          evolution.terminatedVal,
+          evolution.offspringPopulationVal)
+      )
+
+    val byPassTask =
+      EmptyTask().set (
+        (inputs, outputs) += (
+          evolution.populationVal,
+          evolution.stateVal,
+          evolution.genomeVal.array,
+          evolution.terminatedVal,
+          evolution.offspringPopulationVal),
+        evolution.terminatedVal := false,
+        evolution.genomeVal.array := Array.empty[evolution.G]
+      )
+
+    val elitismSwitch =
+      Switch(
+        Switch.Case(s"${evolution.offspringPopulationVal.name}.size >= $elitismByValue", elitism -- terminationTask -- breed),
+        Switch.Case(s"${evolution.offspringPopulationVal.name}.size < $elitismByValue", byPassTask)
       )
 
     val master =
-      ((masterFirst -- toOffspring keepAll (Seq(evolution.stateVal, evolution.genomeVal) ++ evolution.outputVals)) -- elitism -- terminationTask -- breed -- masterLast) &
+      (
+        (masterFirst -- toOffspring keepAll Seq(evolution.stateVal, evolution.genomeVal, evolution.offspringPopulationVal) ++ evolution.outputVals) -- elitismSwitch -- masterLast &
         (masterFirst -- elitism keep evolution.populationVal) &
-        (elitism -- breed keep evolution.populationVal) &
-        (elitism -- masterLast keep evolution.populationVal) &
-        (terminationTask -- masterLast keep (evolution.terminatedVal, evolution.generationVal))
+        (masterFirst -- byPassTask keep evolution.populationVal) &
+        (elitism -- breed keep evolution.populationVal)
+      )
 
     val masterTask = MoleTask(master) set (exploredOutputs += evolution.genomeVal.toArray)
 
@@ -212,7 +238,7 @@ object EvolutionWorkflow:
         randomGenomes,
         master = masterTask,
         slave = slave,
-        state = Seq(evolution.populationVal, evolution.stateVal),
+        state = Seq(evolution.populationVal, evolution.stateVal, evolution.offspringPopulationVal),
         slaves = parallelism,
         stop = evolution.terminatedVal
       )
@@ -309,7 +335,7 @@ object EvolutionWorkflow:
 end EvolutionWorkflow
 
 trait EvolutionWorkflow:
-  type Integration <: MGOAPI.Integration[?, ?, ?]
+  type Integration <: MGOAPI.Integration[?, ?]
 
   val integration: Integration
 
@@ -325,9 +351,7 @@ trait EvolutionWorkflow:
   def genomeType = ValType[G]
   def stateType = ValType[S]
   def individualType = ValType[I]
-  def populationType: ValType[Pop] = ValType[Pop](using Manifest.arrayType[I](manifest[I]))
-
-  def buildIndividual(genome: G, context: Context, state: S): I
+  def populationType: ValType[Pop] = ValType[Pop] //using Manifest.arrayType[I](manifest[I]))
 
   def inputVals: Seq[Val[?]]
   def outputVals: Seq[Val[?]]
@@ -335,6 +359,7 @@ trait EvolutionWorkflow:
   def genomeToVariables(genome: G): FromContext[Seq[Variable[?]]]
 
   def genomeVal = Val[G]("genome", GAIntegration.namespace)(using genomeType)
+  def genomeBufferVal = Val[G]("genomebuffer", GAIntegration.namespace)(using genomeType)
   def individualVal = Val[I]("individual", GAIntegration.namespace)(using individualType)
   def populationVal = Val[Pop]("population", GAIntegration.namespace)(using populationType)
   def offspringPopulationVal = Val[Pop]("offspring", GAIntegration.namespace)(using populationType)
@@ -370,12 +395,17 @@ object GAIntegration:
   def genomesOfPopulationToVariables[I](
     genome: Genome,
     values: Vector[(Vector[Double], Vector[Int])],
-    scale:  Boolean): Vector[Variable[?]] =
+    scale:  Boolean,
+    result: Boolean): Vector[Variable[?]] =
 
-    val variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
-    genome.zipWithIndex.map { (g, i) => Genome.toArrayVariable(g, variables.map(_(i).value)) }.toVector
+    def variables = values.map { (continuous, discrete) => Genome.toVariables(genome, IArray.from(continuous), IArray.from(discrete), scale) }
+    def arrayVariables =
+      genome.zipWithIndex.map: (g, i) =>
+        Genome.toArrayVariable(g, variables.map(_(i).value), result = result)
 
-  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[Vector[Double]]): Vector[Variable[?]] =
+    arrayVariables.toVector
+
+  def objectivesOfPopulationToVariables[I](objectives: Objectives, phenotypeValues: Vector[IArray[Double]]): Vector[Variable[?]] =
     Objectives.resultPrototypes(objectives).toVector.zipWithIndex.map: (objective, i) =>
       Variable(
         objective.withType[Array[Double]],
@@ -423,14 +453,14 @@ object MGOAPI:
     def generationLens = Focus[S](_.generation)
     def evaluatedLens = Focus[S](_.evaluated)
 
-  trait Integration[A, V, P]:
+  trait Integration[A, V]:
     type I
     type G
     type S
 
-    implicit def iManifest: Manifest[I]
-    implicit def gManifest: Manifest[G]
-    implicit def sManifest: Manifest[S]
+    implicit def iTag: ValTag[I]
+    implicit def gTag: ValTag[G]
+    implicit def sTag: ValTag[S]
 
     def startTimeLens: monocle.Lens[S, Long]
     def generationLens: monocle.Lens[S, Long]
@@ -445,7 +475,7 @@ object MGOAPI:
       def genomeToVariables(genome: G): FromContext[Vector[Variable[?]]]
 
       def buildGenome(context: Vector[Variable[?]]): G
-      def buildIndividual(genome: G, phenotype: P, state: S): I
+      def buildIndividual(genome: G, context: Context, state: S): I
 
       def initialState: S
       def initialGenomes(n: Int, rng: scala.util.Random): FromContext[Vector[G]]

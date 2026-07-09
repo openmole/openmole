@@ -9,14 +9,14 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.8.1"
-  def scalajsVersion = "1.20.1"
+  def scala3VersionValue = "3.8.4"
+  def scalajsVersion = "1.21.0"
 
   def scalaXMLVersion = "2.4.0"
-  def gridscaleVersion = CommitVersion("62942ee68b", "2.63")
-  def mgoVersion = CommitVersion("07365bc21f", "3.68")
+  def gridscaleVersion = CommitVersion("f6bcbcf097", "2.63")
+  def mgoVersion = CommitVersion("2e7925aa72", "3.68")
   def sshjVersion = "0.40.0"
-  def containerVersion = CommitVersion("0c33be67ac", "1.33")
+  def containerVersion = CommitVersion("5286a2d5ec", "1.33")
   def bouncyCastleVersion = "1.82"
   def scalaTagsVersion = "0.13.1"
   def laminarVersion = "17.2.1"
@@ -42,7 +42,7 @@ object common {
   def scoptVersion = "4.1.0"
   def spatialsamplingVersion = "0.3"
   def logbackVersion = "1.2.3"
-  def h2Version = "2.1.214"
+  def h2Version = "2.4.240"
   def shapelessVersion = "3.4.1"
   def jasyptVersion = "1.9.3"
   def monocleVersion = "3.3.0"
@@ -55,13 +55,14 @@ object common {
   def guavaVersion = "31.1-jre"
   def scalaMetaVersion = "4.14.2"
   def scalaSTMVersion = "0.11.1"
-  def jlineVersion = "3.25.1"
+  def jlineVersion = "3.30.6"
   def txtmarkVersion = "0.13"
   def slf4jVersion = "2.0.9"
   def foryVersion = "0.11.0"
   def jgitVersion = "7.0.0.202409031743-r"
   def gearsVersion = "0.2.0"
   def ulidCreatorVersion = "5.2.3"
+  def izumiReflectVersion = "3.0.9"
 
   def http4sVersion = "0.23.32"
   def http4sBlaseSeverVersion = "0.23.17"
@@ -75,6 +76,8 @@ object common {
 
   def scalajsLoggingVersion = "1.1.1"
   def scalaJSDomVersion = "2.8.0"
+
+  def layouzVersion = "0.7.0"
  
   case class CommitVersion(commit: String, version: String)
 }

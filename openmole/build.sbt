@@ -203,7 +203,7 @@ lazy val keyword = OsgiProject(coreDir, "org.openmole.core.keyword", imports = d
   libraryDependencies ++= Libraries.monocle) dependsOn (pluginRegistry)
 
 lazy val context = OsgiProject(coreDir, "org.openmole.core.context", imports = defaultImports ++ Seq("*")) settings(
-  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless),
+  libraryDependencies ++= Seq(Libraries.cats, Libraries.sourceCode, Libraries.shapeless, Libraries.izumiReflect),
   libraryDependencies += Libraries.fory,
   defaultActivator
 ) dependsOn(tools, workspace, preference, pluginRegistry) settings (coreSettings *)
@@ -1160,8 +1160,11 @@ lazy val openmoleNaked =
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     tarName := "openmole-naked.tar.gz",
     tarInnerFolder := "openmole",
-    cleanFiles ++= (launcher / cleanFiles).value,
-    cleanFiles ++= (openmoleRuntime / cleanFiles).value,
+    clean := {
+      (launcher / clean).value
+      (openmoleRuntime / clean).value
+      clean.value
+    },
     scala3Settings,
     excludeTransitiveScala2,
     test := false
@@ -1178,7 +1181,10 @@ lazy val openmole =
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
     resourcesAssemble ++= (Compile / Osgi.bundleDependencies).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
-    cleanFiles ++= (openmoleNaked / cleanFiles).value
+    clean := {
+      (openmoleNaked / clean).value
+      clean.value
+    }
   ) dependsOn (toDependencies(openmoleDependencies) *) settings (excludeTransitiveScala2)
 
 lazy val openmoleRuntime =
@@ -1379,6 +1385,7 @@ lazy val launcher = OsgiProject(binDir, "org.openmole.launcher", imports = defau
 
 lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = defaultImports ++ Seq("*")) settings(
   libraryDependencies += Libraries.jline,
+  libraryDependencies += Libraries.layoutz,
   scala3Settings
 ) dependsOn(
   workflow,
@@ -1408,14 +1415,30 @@ lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdock
     //platforms = List("linux/arm64/v8"),
     //additionalArguments = Seq("--add-host", "127.0.0.1:12345", "--compress")
   ),
+
+//
+//      from("ubuntu:noble")
+//    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>")
+//    runRaw(
+//      """apt-get update && \
+//       apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget && \
+//       wget https://github.com/sylabs/singularity/releases/download/v4.4.2/singularity-ce_4.4.2-noble_amd64.deb && \
+//       sudo apt install ./singularity-ce_4.4.2-noble_amd64.deb && \
+//       rm *.deb && \
+//       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
+//       mkdir -p /lib/modules && \
+//       singularity config global -s "sessiondir max size" 0""")
+//
   docker / dockerfile := new Dockerfile {
     from("debian:testing")
-    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>, Jonathan Passerat-Palmbach <j.passerat-palmbach@imperial.ac.uk>")
     runRaw(
       """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
        apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm && \
-       apt-get install -y singularity-container && \
+       apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget e2fsprogs && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer_1.5.2-trixie+_amd64.deb && \
+       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer-suid_1.5.2-trixie+_amd64.deb && \
+       apt install -y ./apptainer_1.5.2-trixie+_amd64.deb ./apptainer-suid_1.5.2-trixie+_amd64.deb && \
+       rm *.deb && \
        apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
        mkdir -p /lib/modules && \
        singularity config global -s "sessiondir max size" 0""")

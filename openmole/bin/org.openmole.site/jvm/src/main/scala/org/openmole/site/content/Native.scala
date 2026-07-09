@@ -6,7 +6,7 @@ import org.openmole.site.{DocumentationPages, Pages, Resource, shared}
 
 import scalatags.Text.all.{br, _}
 
-object Native {
+object Native:
   def introPackagingForRPythonCplusplus = paragraph(
     div("Most of the time, model code is not designed to be portable. OpenMOLE handles natively Java, Scala, NetLogo and R via specific Tasks. However, if no specific task has yet been designed for the language/platform you can still plug you code into OpenMOLE using:", marginTop := 30),
       ul(
@@ -64,4 +64,4 @@ object Native {
       s"The ", org.openmole.site.tools.code(taskName), " supports files and directories, in and out. Get some help on how to handle it ", a("by reading this page", href := org.openmole.site.DocumentationPages.fileManagement.file), "."
     )
 
-}
+

@@ -223,7 +223,7 @@ package object db extends JavaLogger {
 
   }
 
-  def dbVersion = 3
+  def dbVersion = 4
   def dbName = s"replica-$dbVersion"
   def dbInfoName = s"$dbName.info"
 

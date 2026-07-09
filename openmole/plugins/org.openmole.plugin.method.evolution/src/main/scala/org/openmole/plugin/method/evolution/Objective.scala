@@ -108,26 +108,31 @@ object Objective:
       import p.*
       (phenotype: Phenotype) =>
         val context = Phenotype.toContext(phenotypeContent, phenotype)
-        Objectives.values(objectives).from(context).toVector
+        IArray.from(Objectives.values(objectives).from(context))
 
-  def aggregate(phenotypeContent: PhenotypeContent, objectives: Objectives) =
+  def aggregate(phenotypeContent: PhenotypeContent, objectives: Objectives, filter: Boolean) =
+    val objectiveNames = Objectives.toSeq(objectives).map(prototype).map(_.name).toSet
     FromContext: p =>
       import p.*
 
       (v: Vector[Phenotype]) =>
-        val aggregatedContext =
-          context ++ ContextAggregator.aggregateSimilar(v.map(p => Phenotype.toContext(phenotypeContent, p))).values
-        Objectives.values(objectives).from(aggregatedContext).toVector
+        def filteredContext(p: Phenotype) =
+          val variables = Phenotype.toContext(phenotypeContent, p)
+          if filter then variables.filter(v => objectiveNames.contains(v.name)) else variables
+
+        val aggregatedContext = context ++ ContextAggregator.aggregateSimilar(v.map(filteredContext)).values
+        IArray.from(Objectives.values(objectives).from(aggregatedContext))
 
   def prototype(o: Objective) = if (!o.noisy) o.prototype else o.prototype.unsecureFromArray
 
   def resultPrototype(o: Objective) =
-    def objectiveNamespace(p: Val[?]) = p.withNamespace(p.namespace.prefix("objective"))
+    def objectiveNamespace(v: Val[?]) = v.withNamespace(v.namespace.prefix("objective"))
 
-    def p = (o.delta, o.as) match
-      case (_, Some(s))    => Objective.prototype(o).withName(s)
-      case (Some(_), None) => Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.postfix("delta"))
-      case _               => Objective.prototype(o)
+    def p = 
+      (o.delta, o.as) match
+        case (_, Some(s))    => Objective.prototype(o).withName(s)
+        case (Some(_), None) => Objective.prototype(o).withNamespace(Objective.prototype(o).namespace.postfix("delta"))
+        case _               => Objective.prototype(o)
 
     objectiveNamespace(p)
 
@@ -187,3 +192,5 @@ object Objectives:
       toSeq(o) flatMap { o => o.validate(inputs ++ outputs) }
 
   def prototypes(o: Objectives) = toSeq(o).map(Objective.prototype)
+
+type Objectives = Seq[Objective] | Objective

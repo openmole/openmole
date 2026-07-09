@@ -92,7 +92,7 @@ object Console extends JavaLogger:
         val cypher = Cypher(password)
         Preference.setPasswordTest(preference, cypher)
         password
-
+  
   object ExitCodes:
     def ok = 0
     def scriptDoesNotExist = 2
@@ -148,10 +148,19 @@ class Console(script: Option[String] = None) { console =>
           0
 
       case Some(script) =>
+        import services.*
+
+        val beh = MoleExecution.BuildEventHandler()
+        case class Event()
+
         val scriptFile = new File(script)
-        load(scriptFile, args, workDirectory) match
+        val loaded =
+          beh.stage("Loading", "Loading user script"):
+            load(scriptFile, args, workDirectory)
+
+        loaded match
           case Right(dsl) =>
-            Try(Command.start(dsl.dsl, dsl.compilationContext).hangOn()) match
+            Try(Command.start(dsl.dsl, dsl.compilationContext, buildEventHandler = beh).hangOn()) match
               case Failure(e) =>
                 println(Prettifier.stackString(e))
                 ExitCodes.executionError
@@ -164,7 +173,7 @@ class Console(script: Option[String] = None) { console =>
       import services._
       Services.copy(services)(fileServiceCache = FileServiceCache())
 
-    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(runServices) match
+    Project.compile(workDirectory.getOrElse(script.getParentFileSafe), script)(using runServices) match
       case ScriptFileDoesNotExists() =>
         println("File " + script + " doesn't exist.")
         Left(ExitCodes.scriptDoesNotExist)

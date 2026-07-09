@@ -39,6 +39,11 @@ object Context:
 
   val empty = apply()
 
+  extension (ctx: Context)
+    def bySimpleName[T](name: String): Seq[Variable[T]] =
+      ctx.variables.toSeq.filter(_._2.prototype.simpleName == name).map(_._2).asInstanceOf[Seq[Variable[T]]]
+
+
 /**
  * Context represents a set of variables used by the task executions.
  * A task execution can remove variables from context, change the values of

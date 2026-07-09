@@ -20,11 +20,12 @@
 package org.openmole.plugin.tool.pattern
 
 import org.openmole.core.context.Val
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.workflow.composition.DSL.toPuzzle
 import org.openmole.core.workflow.sampling.ExplicitSampling
 import org.openmole.core.workflow.task.FromContextTask
-import org.scalatest._
-import org.openmole.core.workflow.test._
+import org.scalatest.*
+import org.openmole.core.workflow.test.*
 
 class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
 
@@ -84,31 +85,31 @@ class PatternSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     lastExecuted should equal(true)
   }
 
-  "Switch" should "execute all branches where condition it true" in {
+  "Switch" should "execute all branches where condition it true" in:
     @volatile var testExecuted = 0
     @volatile var lastExecuted = 0
 
-    val test = FromContextTask("test") { p =>
-      import p._
+    val test = FromContextTask("test"): p =>
+      import p.*
       testExecuted += 1
       context
-    }
 
-    val last = FromContextTask("last") { p =>
-      import p._
+    val lastTest = FromContextTask("last"): p =>
+      import p.*
       lastExecuted += 1
       context
-    }
 
-    Switch(
-      Case(true, test),
-      Case(true, test),
-      Case(false, test)
-    ) -- last run
+    val sw =
+      Switch(
+        Switch.Case(true, Capsule(test)),
+        Switch.Case(true, Capsule(test)),
+        Switch.Case(false, Capsule(test))
+      ) -- lastTest
+
+    sw.run
 
     testExecuted should equal(2)
     lastExecuted should equal(2)
-  }
 
   "While" should "execute the task multiple times" in {
     @volatile var testExecuted = 0

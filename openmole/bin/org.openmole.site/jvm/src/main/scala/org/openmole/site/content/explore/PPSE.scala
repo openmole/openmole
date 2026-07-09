@@ -21,54 +21,55 @@ import org.openmole.site.content.header.*
 
 object PPSE extends PageContent(html"""
 
+${h2{"PPSE"}}
+
+The PPSE method is a variant of PSE that computes the likelihood of a pattern given probability distributions over the input space. PPSE efficiently discovers the diversity of patterns produced by a simulation model and estimates the marginal likelihood of all the discovered patterns.
+
+$br$br
+
 ${h2{"Example"}}
 
-Here is a use example of the PPSE method in an OpenMOLE script:
+Here is an example of using the PPSE method in an OpenMOLE script:
 
 $br$br
 
 ${hl.openmole("""
-// Seed declaration for random number generation
-val myseed = Val[Int]
-
 val param1 = Val[Double]
 val param2 = Val[Double]
 val output1 = Val[Double]
 val output2 = Val[Double]
 
-// PSE method
+// PPSE method
 PPSEEvolution(
   evaluation = modelTask,
   parallelism = 10,
   termination = 100,
   genome = Seq(
-    param1  in (0.0 to 1.0),
+    param1 in (0.0 to 1.0),
     param2 in (-10.0 to 10.0)),
   objective = Seq(
     output1 in (0.0 to 40.0 by 5.0),
     output2 in (0.0 to 4000.0 by 50.0))
 ) hook (workDirectory / "results", frequency = 100)
 """, name = "PPSE", header = "val modelTask = EmptyTask()")}
-Optionally you can define density distribution on you inputs:
+
+Optionally, you can define density distributions on your inputs:
 
 $br$br
 
 ${hl.openmole("""
-// Seed declaration for random number generation
-val myseed = Val[Int]
-
 val param1 = Val[Double]
 val param2 = Val[Double]
 val output1 = Val[Double]
 val output2 = Val[Double]
 
-// PSE method
+// PPSE method with density distributions
 PPSEEvolution(
   evaluation = modelTask,
   parallelism = 10,
   termination = 100,
   genome = Seq(
-    param1  in (0.0 to 1.0),
+    param1 in (0.0 to 1.0),
     param2 in (-10.0 to 10.0)),
   objective = Seq(
     output1 in (0.0 to 40.0 by 5.0),
@@ -81,3 +82,6 @@ PPSEEvolution(
 """, name = "PPSE density", header = "val modelTask = EmptyTask()")}
 
 """)
+
+
+

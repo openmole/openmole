@@ -54,16 +54,16 @@ object HDOSE:
     import mgo.evolution.algorithm.HDOSE.*
     import mgo.evolution.algorithm.{ HDOSE => MGOHDOSE, * }
 
-    given MGOAPI.Integration[DeterministicHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[DeterministicHDOSE, (IArray[Double], IArray[Int])] with
       api =>
 
       type G = CDGenome.Genome
       type I = CDGenome.DeterministicIndividual.Individual[Phenotype]
       type S = HDOSEState[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def startTimeLens = Focus[S](_.startTime)
       def generationLens = Focus[S](_.generation)
@@ -80,7 +80,9 @@ object HDOSE:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState: S = MGOHDOSE.initialState(om.distance)
 
@@ -90,8 +92,8 @@ object HDOSE:
           FromContext: p =>
             import p.*
             val res = MGOHDOSE.result[Phenotype](state, population, om.genome.continuous, om.genome.discrete, Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context), keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGOHDOSE.distanceLens.get(state))
             val archive = Variable(GAIntegration.archiveVal.array, res.map(_.archive).toArray)
@@ -184,16 +186,16 @@ object HDOSE:
     import mgo.evolution.algorithm.NoisyHDOSE.*
     import mgo.evolution.algorithm.{NoisyHDOSE => MGONoisyHDOSE, *}
 
-    given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int]), Phenotype] with
+    given MGOAPI.Integration[StochasticHDOSE, (IArray[Double], IArray[Int])] with
       api =>
 
       type G = CDGenome.Genome
       type I = CDGenome.NoisyIndividual.Individual[Phenotype]
       type S = HDOSEState[Phenotype]
 
-      def iManifest = implicitly
-      def gManifest = implicitly
-      def sManifest = implicitly
+      def iTag = ValTag[I]
+      def gTag = ValTag[G]
+      def sTag = ValTag[S]
 
       def startTimeLens = Focus[S](_.startTime)
       def generationLens = Focus[S](_.generation)
@@ -213,7 +215,9 @@ object HDOSE:
           val (cs, is) = genomeValues(g)
           Genome.toVariables(om.genome, cs, is, scale = true)
 
-        def buildIndividual(genome: G, phenotype: Phenotype, state: S) = CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
+        def buildIndividual(genome: G, context: Context, state: S) =
+          val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
+          CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
         def initialState = MGONoisyHDOSE.initialState(om.distance)
 
@@ -223,9 +227,9 @@ object HDOSE:
           FromContext: p =>
             import p.*
 
-            val res = MGONoisyHDOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
-            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false)
-            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness))
+            val res = MGONoisyHDOSE.result(state, population, Objective.aggregate(om.phenotypeContent, om.objectives, filter = false).from(context), om.genome.continuous, om.genome.discrete, om.limit, keepAll = keepAll)
+            val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_.discrete), scale = false, result = true)
+            val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.fitness).map(IArray.from))
             val samples = Variable(GAIntegration.samplesVal.array, res.map(_.replications).toArray)
             val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
             val distance = Variable(distanceVal, MGONoisyHDOSE.distanceLens.get(state))
@@ -258,7 +262,7 @@ object HDOSE:
               n,
               om.operatorExploration,
               om.cloneProbability,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               continuous,
               discrete,
               om.weightC,
@@ -273,7 +277,7 @@ object HDOSE:
             MGONoisyHDOSE.elitism(
               om.mu,
               om.historySize,
-              Objective.aggregate(om.phenotypeContent, om.objectives).from(context),
+              Objective.aggregate(om.phenotypeContent, om.objectives, filter = true).from(context),
               om.genome.continuous,
               om.genome.discrete,
               om.weightC,
@@ -403,7 +407,7 @@ object HDOSE:
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
     stochastic: OptionalArgument[Stochastic] = None,
-    reject: OptionalArgument[Condition] = None): EvolutionWorkflow =
+    accept: OptionalArgument[Condition] = None): EvolutionWorkflow =
 
     val genomeValue = OriginAxe.toGenome(origin)
     val weightC = OriginAxe.weightC(origin)
@@ -430,7 +434,7 @@ object HDOSE:
             objectives = exactObjectives,
             limit = OSE.FitnessPattern.toLimit(objective),
             operatorExploration = EvolutionWorkflow.operatorExploration,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genomeValue,
           phenotypeContent,
           validate = Objectives.validate(exactObjectives, outputs)
@@ -458,7 +462,7 @@ object HDOSE:
             operatorExploration = EvolutionWorkflow.operatorExploration,
             historySize = stochasticValue.sample,
             cloneProbability = stochasticValue.reevaluate,
-            reject = reject.option),
+            reject = accept.option.map(!_)),
           genomeValue,
           phenotypeContent,
           stochasticValue,
@@ -481,7 +485,7 @@ object HDOSEEvolution:
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
         populationSize = p.populationSize,
-        reject = p.reject
+        accept = p.accept
       )
 
   given ExplorationMethod[HDOSEEvolution, EvolutionWorkflow] =
@@ -511,7 +515,7 @@ case class HDOSEEvolution(
   distance:       Double                       = 1.0,
   shuffle:        Boolean                      = true,
   stochastic:     OptionalArgument[Stochastic] = None,
-  reject:         OptionalArgument[Condition]  = None,
+  accept:         OptionalArgument[Condition]  = None,
   parallelism:    Int                          = EvolutionWorkflow.parallelism,
   distribution:   EvolutionPattern             = EvolutionWorkflow.SteadyState(),
   suggestion:     Suggestion                   = Suggestion.empty,

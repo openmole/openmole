@@ -35,6 +35,24 @@ import ReleaseNotesValue.*
 
 object ReleaseNotes extends PageContent(html"""
 
+
+${h2{"V23 | D D"}}
+
+${
+  notes("""
+    - Reduce PSE an PPSE memory footprint
+    - Use acceptance rather than a rejcetion condition in evolution methods
+    - Fix possible NaN inputs in evolution algorithms
+    - Speed up container building
+    - Migrate docker container from Singularity to Apptainer
+    - Implement wizard for the nlogox file format
+    - Implement memory requirement for MiniClust
+    - Implement elitism batching
+    - Capture a compile time type in ValType alongs with the manifest
+  """)
+}
+
+
 ${h2{"V22 | Cranky Crocodile"}}
 
 ${

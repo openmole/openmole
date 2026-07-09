@@ -14,7 +14,7 @@ import dotc.config.CommandLineParser.tokenize
 import dotc.config.Properties.{javaVersion, javaVmName, simpleVersionString}
 import dotc.core.Contexts.*
 import dotc.core.Decorators.*
-import dotc.core.Phases.{unfusedPhases, typerPhase}
+import dotc.core.Phases.{unfusedPhases, typerPhase, checkCapturesPhase}
 import dotc.core.Denotations.Denotation
 import dotc.core.Flags.*
 import dotc.core.Mode
@@ -33,9 +33,9 @@ import dotc.reporting.Diagnostic
 import dotc.util.Spans.Span
 import dotc.util.{SourceFile, SourcePosition}
 import dotc.{CompilationUnit, Driver}
-import dotc.config.CompilerCommand
+import dotc.config.{CompilerCommand, Feature}
 import dotty.tools.io.{AbstractFileClassLoader => _, *}
-import dotty.tools.runner.ScalaClassLoader.*
+import dotty.tools.repl.ScalaClassLoader.* // OM
 
 import org.jline.reader.*
 
@@ -81,8 +81,28 @@ import scala.util.Using
 
 // OM
 object REPLDriver {
-  type Compiled = (dotty.tools.repl.results.Result[(CompilationUnit, State)], State)
+  type Compiled = Either[(List[Diagnostic], State), (CompilationUnit, State)]
   type CompilerState = dotty.tools.repl.State
+
+  // OM: duplicate ommand list since commands is private in ParseResult
+  val commands: List[(String, String => ParseResult)] = List( // OM
+    Quit.command -> (_ => Quit), // OM
+    Quit.alias -> (_ => Quit), // OM
+    Help.command -> (_ => Help), // OM
+    Reset.command -> (arg => Reset(arg)), // OM
+    Imports.command -> (_ => Imports), // OM
+    JarCmd.command -> (arg => JarCmd(arg)), // OM
+    KindOf.command -> (arg => KindOf(arg)), // OM
+    Load.command -> (arg => Load(arg)), // OM
+    Require.command -> (arg => Require(arg)), // OM
+    TypeOf.command -> (arg => TypeOf(arg)), // OM
+    DocOf.command -> (arg => DocOf(arg)), // OM
+    Settings.command -> (arg => Settings(arg)), // OM
+    Sh.command -> (arg => Sh(arg)), // OM
+    Silent.command -> (_ => Silent), // OM
+  )
+
+
 }
 
 // OM
@@ -94,7 +114,7 @@ def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
 
 /** Main REPL instance, orchestrating input, compilation and presentation */
 class REPLDriver(settings: Array[String],
-                 out: PrintStream = Console.out,
+                 out: PrintStream = System.out,
                  classLoader: Option[ClassLoader] = None,
                  extraPredef: String = "") extends Driver:
 
@@ -189,7 +209,7 @@ class REPLDriver(settings: Array[String],
    *  `protected final` to facilitate testing.
    */
   def runUntilQuit(using initialState: State = initialState)(term: Option[org.jline.terminal.Terminal] = None): State = { // OM
-    val terminal = new JLineTerminal(term)                                                        // OM
+    val terminal = new JLineTerminal(term.orNull)                                                        // OM
 
 // OM    out.println(
 // OM     s"""Welcome to OpenMOLE $simpleVersionString ($javaVersion, Java $javaVmName).
@@ -252,27 +272,30 @@ class REPLDriver(settings: Array[String],
         // Clear the stop flag before executing new code
         ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), false)
 
-        val previousSignalHandler = terminal.handle(
-          org.jline.terminal.Terminal.Signal.INT,
-          (sig: org.jline.terminal.Terminal.Signal) => {
+        val newState = terminal.withMonitoringCtrlC(
+          handler = () =>
             if (!firstCtrlCEntered) {
               firstCtrlCEntered = true
               // Set the stop flag to trigger throwIfReplStopped() in instrumented code
               ReplBytecodeInstrumentation.setStopFlag(rendering.classLoader()(using state.context), true)
-              // Also interrupt the thread as a fallback for non-instrumented code
+              // Also interrupt the thread as a fallback for non-instrumented code, e.g. IO/sleeps
               thread.interrupt()
-              out.println("\nAttempting to interrupt running thread with `Thread.interrupt`")
+              out.println("\nAttempting to interrupt running REPL command")
             } else {
               out.println("\nTerminating REPL Process...")
               System.exit(130)  // Standard exit code for SIGINT
             }
-          }
-        )
-
-        val newState =
-          try interpret(res)
-          // Restore previous handler
-          finally terminal.handle(org.jline.terminal.Terminal.Signal.INT, previousSignalHandler)
+        ) {
+          val savedIn = System.in
+          val replIn = terminal.userInputStream
+          try
+            System.setIn(replIn)
+            scala.Console.withIn(replIn) {
+              interpret(res)
+            }
+          finally
+            System.setIn(savedIn)
+        }
 
         loop(using newState)()
       }
@@ -326,6 +349,25 @@ class REPLDriver(settings: Array[String],
     state.copy(context = run.runContext)
   }
 
+  /** Add a language feature to rootCtx so subsequent parses and compilations see it. */
+  private def enableLanguageFeature(feature: String): Unit =
+    val summary = rootCtx.settings.processArguments(List(s"-language:$feature"), true, rootCtx.settingsState)
+    rootCtx = rootCtx.fresh.setSettings(summary.sstate)
+
+  /** Detect global language imports in parsed trees and enable them in rootCtx
+   *  so subsequent parses and compilations see them (i16250).
+   */
+  private def propagateLanguageImports(trees: List[untpd.Tree]): Unit =
+    import dotc.core.NameKinds.QualifiedName
+    for case untpd.Import(expr, selectors) <- trees do
+      untpd.languageImport(expr) match
+        case Some(prefix) =>
+          for case untpd.ImportSelector(untpd.Ident(imported), untpd.EmptyTree, _) <- selectors do
+            val qual = QualifiedName(prefix, imported.asTermName)
+            if Feature.globalLanguageImports.contains(qual) then
+              enableLanguageFeature(qual.toString)
+        case _ =>
+
   private def stripBackTicks(label: String) =
     if label.startsWith("`") && label.endsWith("`") then
       label.drop(1).dropRight(1)
@@ -334,26 +376,8 @@ class REPLDriver(settings: Array[String],
 
   /** Extract possible completions at the index of `cursor` in `expr` */
   final def completions(cursor: Int, expr: String, state0: State): List[Completion] =   // OM
-    // OM: duplicate ommand list since commands is private in ParseResult
-    val commands: List[(String, String => ParseResult)] = List(                         // OM
-      Quit.command -> (_ => Quit),                                                      // OM
-      Quit.alias -> (_ => Quit),                                                        // OM
-      Help.command -> (_  => Help),                                                     // OM
-      Reset.command -> (arg  => Reset(arg)),                                            // OM
-      Imports.command -> (_  => Imports),                                               // OM
-      JarCmd.command -> (arg => JarCmd(arg)),                                           // OM
-      KindOf.command -> (arg => KindOf(arg)),                                           // OM
-      Load.command -> (arg => Load(arg)),                                               // OM
-      Require.command -> (arg => Require(arg)),                                         // OM
-      TypeOf.command -> (arg => TypeOf(arg)),                                           // OM
-      DocOf.command -> (arg => DocOf(arg)),                                             // OM
-      Settings.command -> (arg => Settings(arg)),                                       // OM
-      Sh.command -> (arg => Sh(arg)),                                                   // OM
-      Silent.command -> (_ => Silent),                                                  // OM
-    )
-
     if expr.startsWith(":") then
-      commands.collect {                                                                // OM
+      REPLDriver.commands.collect {                                                                // OM
         case command if command._1.startsWith(expr) => Completion(command._1, "", List())
       }
     else
@@ -374,12 +398,17 @@ class REPLDriver(settings: Array[String],
 
   protected def interpret(res: ParseResult)(using state: State): State = {
     res match {
+      case parsed: Parsed if parsed.source.content().mkString.startsWith("//>") =>
+        // Check for magic comments specifying dependencies
+        println("Please use `:dep com.example::artifact:version` to add dependencies in the REPL")
+        state
+
       case parsed: Parsed if parsed.trees.nonEmpty =>
+        propagateLanguageImports(parsed.trees)
         compile(parsed, state)
 
       case SyntaxErrors(_, errs, _) =>
-        displayErrors(errs)
-        state
+        displayErrors(errs, state)
 
       case cmd: Command =>
         interpretCommand(cmd)
@@ -395,36 +424,32 @@ class REPLDriver(settings: Array[String],
 
 
   /** OM Compile `parsed` trees and evolve `state` in accordance */
-  def justCompile(input: String, istate: State): REPLDriver.Compiled | SyntaxErrors  = {
-    ParseResult(input)(using istate) match {
+  def justCompile(input: String, istate: State): REPLDriver.Compiled | SyntaxErrors  =
+    ParseResult(input)(using istate) match
       case parsed: Parsed =>
-        implicit val state = {
+        implicit val state =
           val state0 = newRun(istate, parsed.reporter)
           state0.copy(context = state0.context.withSource(parsed.source))
-        }
 
-        (compiler.compile(parsed), state)
+        compiler.compile(parsed)
       case x: SyntaxErrors => x
       case s => throw new RuntimeException(s"Unexpected return from parser $s")
-    }
-  }
 
   /** OM */
   def justRun(compiled: REPLDriver.Compiled): State = {
-    implicit val s = compiled._2
+    //implicit val s = compiled._2
 
-    def extractNewestWrapper(tree: untpd.Tree): Name = tree match {
+    def extractNewestWrapper(tree: untpd.Tree): Name = tree match
       case PackageDef(_, (obj: untpd.ModuleDef) :: Nil) => obj.name.moduleClassName
       case _ => nme.NO_NAME
-    }
 
     def extractTopLevelImports(ctx: Context): List[tpd.Import] =
       unfusedPhases(using ctx).collectFirst { case phase: CollectTopLevelImports => phase.imports }.get
 
-    compiled._1.fold(
+    compiled.fold(
       displayErrors,
       {
-        case (unit: CompilationUnit, newState: State) =>
+        (unit: CompilationUnit, newState: State) =>
           //println(unit.untpdTree.asInstanceOf[PackageDef[_]].stats.head.asInstanceOf[dotty.tools.dotc.ast.untpd.ModuleDef].impl)
           //println(unit.untpdTree.asInstanceOf[PackageDef[_]].stats.head.asInstanceOf[TypeDef[_]])
 
@@ -437,7 +462,7 @@ class REPLDriver(settings: Array[String],
 
           val warnings = newState.context.reporter
             .removeBufferedMessages(using newState.context)
-            .map(rendering.formatError)
+            .map(d => rendering.formatError(d)(using newState))
 
           inContext(newState.context) {
             val (updatedState, definitions) =
@@ -531,7 +556,7 @@ class REPLDriver(settings: Array[String],
   private def renderDefinitions(tree: tpd.Tree, newestWrapper: Name)(using state: State): (State, Seq[Diagnostic]) = {
     given Context = state.context
 
-    def resAndUnit(denot: Denotation) = {
+    def resAndUnit(denot: Denotation)(using Context) = {
       import scala.util.{Success, Try}
       val sym = denot.symbol
       val name = sym.name.show
@@ -542,7 +567,7 @@ class REPLDriver(settings: Array[String],
       name.startsWith(str.REPL_RES_PREFIX) && hasValidNumber && sym.info == defn.UnitType
     }
 
-    def extractAndFormatMembers(symbol: Symbol): (State, Seq[Diagnostic]) = if (tree.symbol.info.exists) {
+    def extractAndFormatMembers(symbol: Symbol)(using Context): (State, Seq[Diagnostic]) = if (tree.symbol.info.exists) {
       val info = symbol.info
       val defs =
         info.bounds.hi.finalResultType
@@ -593,13 +618,17 @@ class REPLDriver(settings: Array[String],
     def isSyntheticCompanion(sym: Symbol) =
       sym.is(Module) && sym.is(Synthetic)
 
-    def typeDefs(sym: Symbol): Seq[Diagnostic] = sym.info.memberClasses
+    def typeDefs(sym: Symbol)(using Context): Seq[Diagnostic] = sym.info.memberClasses
       .collect {
         case x if !isSyntheticCompanion(x.symbol) && !x.symbol.name.isReplWrapperName =>
           rendering.renderTypeDef(x)
       }
 
-    atPhase(typerPhase.next) {
+    val renderPhase =
+      if Feature.ccEnabledSomewhere && checkCapturesPhase.exists
+      then checkCapturesPhase
+      else typerPhase.next
+    atPhase(renderPhase) {
       // Display members of wrapped module:
       tree.symbol.info.memberClasses
         .find(_.symbol.name == newestWrapper.moduleClassName)
@@ -608,9 +637,7 @@ class REPLDriver(settings: Array[String],
           val formattedTypeDefs =  // don't render type defs if wrapper initialization failed
             if newState.invalidObjectIndexes.contains(state.objectIndex) then Seq.empty
             else typeDefs(wrapperModule.symbol)
-          val highlighted = (formattedTypeDefs ++ formattedMembers)
-            .map(d => new Diagnostic(d.msg.mapMsg(SyntaxHighlighting.highlight), d.pos, d.level))
-          (newState, highlighted)
+          (newState, formattedTypeDefs ++ formattedMembers)
         }
         .getOrElse {
           // user defined a trait/class/object, so no module needed
@@ -731,7 +758,7 @@ class REPLDriver(settings: Array[String],
         case "" => out.println(s":type <expression>")
         case _  =>
           compiler.typeOf(expr)(using newRun(state)).fold(
-            displayErrors,
+            errs => displayErrors(errs, state),
             res => out.println(res)  // result has some highlights
           )
       }
@@ -742,7 +769,7 @@ class REPLDriver(settings: Array[String],
         case "" => out.println(s":doc <expression>")
         case _  =>
           compiler.docOf(expr)(using newRun(state)).fold(
-            displayErrors,
+            errs => displayErrors(errs, state),
             res => out.println(res)
           )
       }
@@ -763,6 +790,27 @@ class REPLDriver(settings: Array[String],
         state.copy(context = rootCtx)
 
     case Silent => state.copy(quiet = !state.quiet)
+    case Dep(dep) =>
+      val depStrings = List(dep)
+      if depStrings.nonEmpty then
+        val deps = depStrings.flatMap(DependencyResolver.parseDependency)
+        if deps.nonEmpty then
+          DependencyResolver.resolveDependencies(deps) match
+            case Right(files) =>
+              if files.nonEmpty then
+                inContext(state.context):
+                  // Update both compiler classpath and classloader
+                  val prevOutputDir = ctx.settings.outputDir.value
+                  val prevClassLoader = rendering.classLoader()
+                  rendering.myClassLoader = DependencyResolver.addToCompilerClasspath(
+                    files,
+                    prevClassLoader,
+                    prevOutputDir
+                  )
+                  out.println(s"Resolved ${deps.size} dependencies (${files.size} JARs)")
+            case Left(error) =>
+              out.println(s"Error resolving dependencies: $error")
+      state
 
     case Quit =>
       // end of the world!
@@ -770,8 +818,8 @@ class REPLDriver(settings: Array[String],
   }
 
   /** shows all errors nicely formatted */
-  private def displayErrors(errs: Seq[Diagnostic])(using state: State): State = {
-    errs.map(rendering.formatError).map(_.msg).foreach(out.println) // OM
+  private def displayErrors(errs: Seq[Diagnostic], state: State): State = {
+    errs.map(e => rendering.formatError(e)(using state)).map(_.msg).foreach(out.println) // OM
     state
   }
 

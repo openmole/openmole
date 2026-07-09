@@ -64,7 +64,7 @@ object OMRContent:
  object DataContent:
    case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
 
- case class DataContent(section: Seq[DataContent.SectionData])derives derivation.ConfiguredCodec
+ case class DataContent(section: Seq[DataContent.SectionData]) derives derivation.ConfiguredCodec
 
 case class OMRContent(
   `format-version`: String,
