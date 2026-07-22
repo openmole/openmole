@@ -9,7 +9,7 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.8.4"
+  def scala3VersionValue = "3.9.0-RC3"
   def scalajsVersion = "1.22.0"
 
   def scalaXMLVersion = "2.4.0"
