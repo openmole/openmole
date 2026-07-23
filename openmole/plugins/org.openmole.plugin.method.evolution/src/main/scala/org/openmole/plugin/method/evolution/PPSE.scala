@@ -335,7 +335,7 @@ case class PPSEEvolution(
   gmmIterations: Int                                    = 100,
   gmmTolerance: Double                                  = 0.001,
   warmupSampler: Int                                    = 1000,
-  minDensityQuantile: Double                            = 0.05,
+  minDensityQuantile: Double                            = 0.2,
   densitySample: Int                                    = 1000,
   bootstrap: Int                                        = 1000,
   maxRareSample: Int                                    = 100,
