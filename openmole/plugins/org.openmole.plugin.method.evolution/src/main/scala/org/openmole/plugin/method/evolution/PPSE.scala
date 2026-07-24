@@ -331,7 +331,7 @@ case class PPSEEvolution(
   parallelism: Int                                      = EvolutionWorkflow.parallelism,
   distribution: EvolutionPattern                        = SteadyState(),
   suggestion: Suggestion                                = Suggestion.empty,
-  dilation: Double                                      = 4.0,
+  dilation: Double                                      = 2.0,
   gmmIterations: Int                                    = 100,
   gmmTolerance: Double                                  = 0.001,
   warmupSampler: Int                                    = 1000,
