@@ -14,7 +14,7 @@ object common {
 
   def scalaXMLVersion = "2.4.0"
   def gridscaleVersion = CommitVersion("f6bcbcf097", "2.63")
-  def mgoVersion = CommitVersion("2e7925aa72", "3.68")
+  def mgoVersion = CommitVersion("185a7589d8", "3.68")
   def sshjVersion = "0.40.0"
   def containerVersion = CommitVersion("5286a2d5ec", "1.33")
   def bouncyCastleVersion = "1.82"
