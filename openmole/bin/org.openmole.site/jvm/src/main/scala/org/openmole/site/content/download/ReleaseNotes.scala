@@ -36,6 +36,16 @@ import ReleaseNotesValue.*
 object ReleaseNotes extends PageContent(html"""
 
 
+${h2{"V24 | E E"}}
+
+${
+  notes("""
+    - Updgrade Scala Version
+    - Fix deterministic HDOSE
+    - Use initial distance of 0.0 for HDOSE
+  """)
+}
+
 ${h2{"V23 | D D"}}
 
 ${
