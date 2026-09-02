@@ -43,6 +43,7 @@ ${
     - Updgrade Scala Version
     - Fix deterministic HDOSE
     - Use initial distance of 0.0 for HDOSE
+    - Make it possible to specify when to condition the execution of method hooks
   """)
 }
 
