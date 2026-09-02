@@ -18,8 +18,9 @@
 package org.openmole.plugin.hook.modifier
 
 import org.openmole.core.highlight.HighLight
-import org.openmole.core.pluginregistry.{ PluginInfo, PluginRegistry }
-import org.osgi.framework.{ BundleActivator, BundleContext }
+import org.openmole.core.pluginregistry.{PluginInfo, PluginRegistry}
+import org.openmole.core.workflow.hook.ConditionHook
+import org.osgi.framework.{BundleActivator, BundleContext}
 
 class Activator extends BundleActivator {
   override def stop(context: BundleContext): Unit =

@@ -529,14 +529,11 @@ lazy val dispatch = OsgiProject(pluginDir, "org.openmole.plugin.environment.disp
 
 /* Hook */
 
-def allHook = Seq(displayHook, fileHook, modifierHook)
+def allHook = Seq(displayHook, fileHook)
 
 lazy val displayHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.display", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (pluginSettings *)
 
 lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, replication % "test") settings (
-  libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
-
-lazy val modifierHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.modifier", imports = defaultImports ++ Seq("*")) dependsOn (openmoleDSL) settings (
   libraryDependencies += Libraries.scalatest) settings (pluginSettings *)
 
 

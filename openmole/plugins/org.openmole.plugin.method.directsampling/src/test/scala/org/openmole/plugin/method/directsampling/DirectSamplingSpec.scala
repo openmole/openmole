@@ -274,6 +274,25 @@ class DirectSamplingSpec extends flatspec.AnyFlatSpec with matchers.should.Match
     (ds hook display): DSL
     (ds hook display hook "/tmp/test.csv"): DSL
 
+
+  it should "accept condition on the hook" in :
+    @transient var executed = 0
+
+    val i = Val[Int]
+
+    val d = DirectSampling(
+      EmptyTask(),
+      ExplicitSampling(i, 1 to 10)
+    )
+
+    val h = TestHook: c =>
+      executed += 1
+      c
+
+    val dsl: DSL = d hook h when "i % 2 == 0"
+    dsl.run()
+    executed should equal(5)
+
   "Replication" should "be serializable" in:
     val l = Val[Long]
     val model = EmptyTask() set (inputs += l)

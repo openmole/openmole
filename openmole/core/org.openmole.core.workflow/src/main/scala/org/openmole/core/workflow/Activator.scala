@@ -7,6 +7,7 @@ import org.openmole.core.argument.*
 import org.openmole.core.workflow.composition.*
 import org.openmole.core.workflow.execution.RuntimeSetting
 import org.openmole.core.workflow.task.*
+import org.openmole.core.workflow.hook.ConditionHook
 import org.osgi.framework.{BundleActivator, BundleContext}
 
 class Activator extends BundleActivator:
@@ -56,7 +57,10 @@ class Activator extends BundleActivator:
         TaskHighLight(objectName(MoleTask)),
         TaskHighLight(objectName(TryTask)),
         TaskHighLight(objectName(RetryTask)),
-        TaskHighLight(objectName(EmptyTask))
+        TaskHighLight(objectName(EmptyTask)),
+        HookHighLight(classOf[ConditionHook]),
+        WordHighLight("when"),
+        WordHighLight("condition")
       )
 
     PluginRegistry.register(this, highLight = highLight, preferenceLocation = PreferenceLocation.list(org.openmole.core.workflow.execution.Environment) ++ PreferenceLocation.list(org.openmole.core.workflow.execution.LocalEnvironment))

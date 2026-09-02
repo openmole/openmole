@@ -84,6 +84,12 @@ class HookSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val t1 = EmptyTask()
     t1 by 10 hook display
 
+  it should "be ok to set a condition" in :
+    val t1 = EmptyTask()
+    val h = TestHook()
+
+    t1 by 10 hook (h when "true")
+
   "Display hook" should "be accepted" in:
     val t1 = EmptyTask()
     val ex = t1 hook display
