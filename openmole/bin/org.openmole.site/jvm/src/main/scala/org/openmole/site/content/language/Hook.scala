@@ -201,8 +201,11 @@ ${hl.openmole("""
   val display = DisplayHook("The value of i is ${i}.") when "i > 0"
   """, name = "condition hook")}
 
-Decorators exist for a simpler syntax: ${code{"ConditionHook(myHook,myCondition)"}} is equivalent to ${code{"myHook when myCondition"}} and ${code{"myHook condition myCondition"}} (where the condition can be given as a condition or a string).
+Decorators exist for a simpler syntax:
 
+${hl.openmole("""
+  <any exploraiton method> when "i > 0"
+  """, name = "condition hook shortcut")}
 
 ${h2{"Variable restriction"}}
 You may want to restrict the hooked variables to a subset, like a variable filter.
