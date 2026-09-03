@@ -204,8 +204,8 @@ ${hl.openmole("""
 Decorators exist for a simpler syntax:
 
 ${hl.openmole("""
-  <any exploraiton method> when "i > 0"
-  """, name = "condition hook shortcut")}
+  explorationMethod hook (workDirectory / "result") when "i > 0"
+  """, name = "condition hook shortcut", header = "val explorationMethod = SingleRun(EmptyTask(), input = Seq())")}
 
 ${h2{"Variable restriction"}}
 You may want to restrict the hooked variables to a subset, like a variable filter.

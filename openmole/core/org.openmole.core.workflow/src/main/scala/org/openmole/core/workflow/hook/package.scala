@@ -5,6 +5,8 @@ trait HookPackage:
   val FromContextHook = org.openmole.core.workflow.hook.FromContextHook
   type FromContextHook = org.openmole.core.workflow.hook.FromContextHook
 
+  export org.openmole.core.workflow.hook.HookDecorator
+
 def Hook = FromContextHook
 def display(implicit outputRedirection: org.openmole.tool.outputredirection.OutputRedirection): org.openmole.core.format.WritableOutput.Display = org.openmole.core.format.WritableOutput.Display(outputRedirection.output)
 
