@@ -44,6 +44,7 @@ ${
     - Fix deterministic HDOSE
     - Use initial distance of 0.0 for HDOSE
     - Make it possible to specify when to condition the execution of method hooks
+    - Reduce memory footprint of OMR export in append mode
   """)
 }
 
