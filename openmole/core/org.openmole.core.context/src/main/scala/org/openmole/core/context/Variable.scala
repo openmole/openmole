@@ -23,6 +23,7 @@ import org.openmole.tool.logger.Prettifier
 import org.openmole.tool.random
 import shapeless3.typeable.Typeable
 
+import java.util
 import scala.reflect.ClassTag
 import scala.util.Random
 
@@ -62,6 +63,10 @@ object Variable:
   def copy[@specialized T](v: Variable[T])(prototype: Val[T] = v.prototype, value: T = v.value): Variable[T] = apply(prototype, value)
 
   object ConstructArray:
+    given [T]: ConstructArray[Array[T]] = new ConstructArray[Array[T]]:
+      def size(c: Array[T]) = c.length
+      def iterable(c: Array[T]) = java.util.Arrays.asList(c)
+
     given ConstructArray[java.util.AbstractCollection[Any]] = new ConstructArray[java.util.AbstractCollection[Any]]:
       def size(c: java.util.AbstractCollection[Any]) = c.size()
       def iterable(c: java.util.AbstractCollection[Any]) = c
@@ -79,7 +84,7 @@ object Variable:
   def constructArray[CA: Manifest](
     prototype:  Val[?],
     collection: CA,
-    toValue:    (Any, Class[?]) => Any)(implicit construct: ConstructArray[CA]) =
+    toValue:    (Any, Class[?]) => Any)(using construct: ConstructArray[CA]) =
     import scala.jdk.CollectionConverters.*
 
     val (multiArrayType, depth): (ValType[?], Int) = ValType.unArrayify(prototype.`type`)
@@ -95,18 +100,19 @@ object Variable:
           case Some(d) if d != size => false
           case _ => true
 
-      def isRectangular0(c: CA, currentDepth: Int): Boolean =
-        if !testDimension(currentDepth, construct.size(c)) then return false
+      def isRectangular0[CA2](c: CA2, currentDepth: Int)(using construct2: ConstructArray[CA2]): Boolean =
+        if !testDimension(currentDepth, construct2.size(c)) then return false
 
         if currentDepth >= depth - 1
         then true
         else
-          val iterable = construct.iterable(c).asScala
+          val iterable = construct2.iterable(c).asScala
           if iterable.isEmpty
           then testDimension(currentDepth + 1, size = 0)
           else
-            construct.iterable(c).asScala.forall:
+            construct2.iterable(c).asScala.forall:
               case e: CA => isRectangular0(e, currentDepth + 1)
+              case a: Array[?] => isRectangular0(a, currentDepth + 1)
               case e => false
 
       if isRectangular0(collection, 0)
@@ -117,7 +123,7 @@ object Variable:
     def constructRectangularArray(dimensions: Seq[Int]) =
       // recurse in the multi array
       def constructMultiDimensionalArray(
-        collection:   CA,
+        iterable:   Iterable[Any],
         currentArray: AnyRef,
         arrayType:    Class[?],
         maxDepth:     Int,
@@ -125,16 +131,17 @@ object Variable:
         assert(maxDepth >= 1)
 
         def fillArray =
-          construct.iterable(collection).iterator().asScala.zipWithIndex.foreach: (v, i) =>
+          iterable.iterator.zipWithIndex.foreach: (v, i) =>
             try java.lang.reflect.Array.set(currentArray, i, toValue(v, arrayType))
             catch
               case e: Throwable => throw new UserBadDataError(e, s"Error when adding a variable of type ${v.getClass} in an array of type ${arrayType}")
 
         def recurse =
-          construct.iterable(collection).iterator().asScala.zipWithIndex.foreach: (v, i) =>
+          iterable.iterator.zipWithIndex.foreach: (v, i) =>
             v match
-              case v: CA => constructMultiDimensionalArray(v, java.lang.reflect.Array.get(currentArray, i), arrayType, maxDepth - 1, toValue(_, _))
-              case _ => throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v} is not an instance of class ${implicitly[Manifest[CA]]}")
+              case v: Iterable[Any] => constructMultiDimensionalArray(v, java.lang.reflect.Array.get(currentArray, i), arrayType, maxDepth - 1, toValue(_, _))
+              case v: Array[?] => constructMultiDimensionalArray(v.toIterable, java.lang.reflect.Array.get(currentArray, i), arrayType, maxDepth - 1, toValue(_, _))
+              case _ => throw new UserBadDataError(s"Error when recursing at depth ${maxDepth} in a multi array of type ${multiArrayType}, value ${v}") // is not an instance of class ${implicitly[Manifest[CA2]]}")
 
         if maxDepth == 1 then fillArray else recurse
 
@@ -161,23 +168,29 @@ object Variable:
 //      val dimensions = extractDimensions(collection, depth)
       val array = java.lang.reflect.Array.newInstance(multiArrayType.runtimeClass.asInstanceOf[Class[?]], dimensions *)
 
-      constructMultiDimensionalArray(collection, array, multiArrayType.runtimeClass.asInstanceOf[Class[?]], depth, toValue)
+      constructMultiDimensionalArray(construct.iterable(collection).asScala, array, multiArrayType.runtimeClass.asInstanceOf[Class[?]], depth, toValue)
       array
 
     def constructJaggedArray: Any =
       val (multiArrayType, depth): (ValType[?], Int) = ValType.unArrayify(prototype.`type`)
+
       def constructMultiDimensionalArray(
         value: Any,
         valType: ValType[?],
         toValue: (Any, Class[?]) => Any,
         depth: Int): Any =
+
         import org.openmole.tool.types.TypeTool._
         import scala.jdk.CollectionConverters.*
         value match
-          case v: CA =>
-            val collection = construct.iterable(v).asScala
+          case collection: Iterable[Any] =>
             val fromArrayValType = ValType.fromArrayUnsecure(valType.asInstanceOf[ValType[Array[?]]])
             collection.map: e =>
+              constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
+            .toArray(using fromArrayValType.manifest)
+          case v: Array[?] if depth > 0 =>
+            val fromArrayValType = ValType.fromArrayUnsecure(valType.asInstanceOf[ValType[Array[?]]])
+            v.map: e =>
               constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
             .toArray(using fromArrayValType.manifest)
           case v =>
@@ -185,7 +198,7 @@ object Variable:
             then throw UserBadDataError(s"The variable $prototype has an incorrect dimension to store the collection $collection")
             else toValue(v, multiArrayType.runtimeClass.asInstanceOf[Class[?]])
 
-      constructMultiDimensionalArray(collection, prototype.`type`, toValue, depth)
+      constructMultiDimensionalArray(construct.iterable(collection).asScala, prototype.`type`, toValue, depth)
 
     val array =
       isRectangular match

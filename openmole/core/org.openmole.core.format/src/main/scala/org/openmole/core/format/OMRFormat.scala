@@ -371,10 +371,15 @@ object OMRFormat:
           sectionToVariables(s, c.asInstanceOf[JArray])
       case OMRContent.DataMode.Append =>
         def sectionToAggregatedVariables(section: Seq[OMRContent.DataContent.SectionData], content: JsonParser) =
+          val sectionVals =
+            section.map: s =>
+              s.variables.toArray.map(ValData.toVal)
+            .toArray
+
           val sectionsContent =
             section.toArray.map: s =>
               val size = s.variables.size
-              Array.fill(size)(scala.collection.mutable.ArrayBuffer[JValue]())
+              Array.fill(size)(scala.collection.mutable.ArrayBuffer[Any]())
 
           content.nextToken()
           while content.nextToken() != JsonToken.END_ARRAY
@@ -384,7 +389,8 @@ object OMRFormat:
             do
               val values = objectMapper.readValues(content, classOf[JValue]).nextValue().asInstanceOf[JArray]
               values.arr.zipWithIndex.foreach: (v, i) =>
-                sectionsContent(sectionIndex)(i) += v
+                val vv = sectionVals(sectionIndex)(i)
+                sectionsContent(sectionIndex)(i) += jValueToVariable(v, vv, file = Some(loadFile), default = Some(jValueToAny)).value
 
             sectionIndex += 1
 
@@ -396,7 +402,8 @@ object OMRFormat:
 
             val variables =
               (s.variables zip sectionsContent(i)).filter((v, _) => indexFilter(v)).map: (v, a) =>
-                  jValueToVariable(JArray(a.toList), ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
+                Variable.constructArray(ValData.toVal(v).array, a.toSeq, (v, _) => v)
+                //jValueToVariable(JArray(a.toList), ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
 
             (s, variables)
 
