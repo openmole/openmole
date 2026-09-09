@@ -1394,7 +1394,7 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = defa
 )
 
 lazy val docker = taskKey[Unit]("Package application and build Docker images")
-lazy val dockerBuildAndPublish = taskKey[Unit]("Publish build Docker images")
+lazy val dockerBuildAndPush = taskKey[Unit]("Push docker images")
 lazy val dockerTagNames = settingKey[Seq[String]]("Tags of the docker image to produce")
 
 lazy val dockerBin = Project("docker", binDir / "docker") settings(
@@ -1466,7 +1466,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
 
     log.info(s"Docker image(s) ${dockerTagNames.value.mkString(", ")} successfully built")
   },
-  dockerBuildAndPublish := {
+  dockerBuildAndPush := {
     import scala.sys.process._
     val log = streams.value.log
     val exitCode =
