@@ -1393,82 +1393,90 @@ lazy val consoleBin = OsgiProject(binDir, "org.openmole.console", imports = defa
   module
 )
 
-val generateDocker = taskKey[Unit]("Prepare the docker build")
+lazy val docker = taskKey[Unit]("Package application and build Docker images")
+lazy val dockerBuildAndPublish = taskKey[Unit]("Publish build Docker images")
+lazy val dockerTagNames = settingKey[Seq[String]]("Tags of the docker image to produce")
 
-lazy val dockerBin = Project("docker", binDir / "docker") enablePlugins (sbtdocker.DockerPlugin) settings(
-  docker / imageNames := Seq(
-    ImageName("openmole/openmole:latest"),
-
-    ImageName(
-      namespace = Some("openmole"),
-      repository = "openmole",
-      tag = Some(version.value)
-    )
-  ),
-  docker / buildOptions := BuildOptions(
-    //cache = false,
-    //removeIntermediateContainers = BuildOptions.Remove.Always,
-    pullBaseImage = BuildOptions.Pull.Always
-    //platforms = List("linux/arm64/v8"),
-    //additionalArguments = Seq("--add-host", "127.0.0.1:12345", "--compress")
-  ),
-
-//
-//      from("ubuntu:noble")
-//    maintainer("Romain Reuillon <romain.reuillon@iscpif.fr>")
-//    runRaw(
-//      """apt-get update && \
-//       apt-get install --no-install-recommends -y ca-certificates openjdk-25-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget && \
-//       wget https://github.com/sylabs/singularity/releases/download/v4.4.2/singularity-ce_4.4.2-noble_amd64.deb && \
-//       sudo apt install ./singularity-ce_4.4.2-noble_amd64.deb && \
-//       rm *.deb && \
-//       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
-//       mkdir -p /lib/modules && \
-//       singularity config global -s "sessiondir max size" 0""")
-//
-  docker / dockerfile := new Dockerfile {
-    from("debian:testing")
-    runRaw(
-      """echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \
-       apt-get update && \
-       apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget e2fsprogs && \
-       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer_1.5.2-trixie+_amd64.deb && \
-       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer-suid_1.5.2-trixie+_amd64.deb && \
-       apt install -y ./apptainer_1.5.2-trixie+_amd64.deb ./apptainer-suid_1.5.2-trixie+_amd64.deb && \
-       rm *.deb && \
-       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \
-       mkdir -p /lib/modules && \
-       singularity config global -s "sessiondir max size" 0""")
-    runRaw(
-      """sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-        |dpkg-reconfigure --frontend=noninteractive locales && \
-        |update-locale LANG=en_US.UTF-8""".stripMargin
-    )
-    env("LC_ALL", "en_US.UTF-8")
-    env("LANG", "en_US.UTF-8")
-    env("LANGUAGE", "en_US.UTF-8")
-    runRaw(
-      """groupadd -r openmole && \
-         useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \
-         chown openmole:openmole -R /var/openmole""")
-    copy((openmole / assemble).value, s"/openmole")
-    runRaw(
-      """chmod +x /openmole/openmole && \
-        |ln -s /openmole/openmole /usr/bin/openmole""".stripMargin)
-    copy((Compile / resourceDirectory).value / "openmole-docker", "/usr/bin/openmole-docker")
-    runRaw("""chmod +x-w /usr/bin/openmole-docker""".stripMargin)
-    volume("/var/openmole")
-    expose(8443)
-    cmdShell("openmole-docker")
-  },
-  generateDocker := {
+lazy val dockerBin = Project("docker", binDir / "docker") settings(
+  dockerTagNames := Seq("openmole/openmole:latest", s"openmole/openmole:${version.value}"),
+  docker := {
+    import scala.sys.process._
+    val log = streams.value.log
     val dockerDir = target.value / "docker"
-    val dockerFile = (docker / dockerfile).value.asInstanceOf[Dockerfile]
-    val stagedDockerfile = sbtdocker.staging.DefaultDockerfileProcessor(dockerFile, dockerDir)
-    IO.write(dockerDir / "Dockerfile", stagedDockerfile.instructionsString)
-    stagedDockerfile.stageFiles.foreach {
-      case (source, destination) => source.stage(destination)
-    }
+    val jar = (Compile / packageBin).value
+
+    // Clean/create Docker context
+    IO.delete(dockerDir)
+    IO.createDirectory(dockerDir)
+
+    val imageFrom = "debian:testing"
+
+    // Generate Dockerfile
+    val dockerfile =
+      s"""FROM $imageFrom
+        |
+        |RUN echo "deb http://deb.debian.org/debian unstable main non-free contrib" >> /etc/apt/sources.list && \\
+        |       apt-get update && \\
+        |       apt-get install --no-install-recommends -y ca-certificates openjdk-26-jre-headless ca-certificates-java bash tar gzip sudo locales npm wget e2fsprogs && \\
+        |       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer_1.5.2-trixie+_amd64.deb && \\
+        |       wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer-suid_1.5.2-trixie+_amd64.deb && \\
+        |       apt install -y ./apptainer_1.5.2-trixie+_amd64.deb ./apptainer-suid_1.5.2-trixie+_amd64.deb && \\
+        |       rm *.deb && \\
+        |       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \\
+        |       mkdir -p /lib/modules && \\
+        |       singularity config global -s "sessiondir max size" 0
+        |
+        |RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \\
+        |       dpkg-reconfigure --frontend=noninteractive locales && \\
+        |       update-locale LANG=en_US.UTF-8
+        |
+        |ENV LC_ALL=en_US.UTF-8
+        |ENV LANG=en_US.UTF-8
+        |ENV LANGUAGE=en_US.UTF-8
+        |
+        |RUN groupadd -r openmole && \\
+        |       useradd -r -g openmole openmole --home-dir /var/openmole/ --create-home && \\
+        |       chown openmole:openmole -R /var/openmole
+        |
+        |COPY ./assemble /openmole
+        |
+        |RUN chmod +x /openmole/openmole && \\
+        |       ln -s /openmole/openmole /usr/bin/openmole
+        |
+        |VOLUME /var/openmole
+        |
+        |EXPOSE 8443
+        |
+        |CMD openmole-docker
+        |""".stripMargin
+
+    IO.write(dockerDir / "Dockerfile", dockerfile)
+
+    val exitCode =
+      (Seq("docker", "pull", imageFrom) #&&
+        Seq("cp", "-r", (openmole / assemble).value.getAbsolutePath, s"${dockerDir}/assemble") #&&
+        (
+          Seq("docker", "build") ++
+            dockerTagNames.value.flatMap(i => Seq("-t", i)) ++
+          Seq(dockerDir.getAbsolutePath)
+        )
+      ).!
+
+    if (exitCode != 0) sys.error(s"docker build failed with exit code $exitCode")
+
+    log.info(s"Docker image(s) ${dockerTagNames.value.mkString(", ")} successfully built")
+  },
+  dockerBuildAndPublish := {
+    import scala.sys.process._
+    val log = streams.value.log
+    val exitCode =
+      dockerTagNames.value
+        .map(t => Process(Seq("docker", "push", t)))
+        .reduceLeft((a, b) => a #&& b)
+        .!
+
+    if (exitCode != 0) sys.error(s"docker push failed with exit code $exitCode")
+    log.info(s"Docker image(s) ${dockerTagNames.value.mkString(", ")} successfully pushed")
   }
 )
 

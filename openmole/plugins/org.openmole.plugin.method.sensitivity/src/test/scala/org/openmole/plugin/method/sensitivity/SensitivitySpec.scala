@@ -88,7 +88,7 @@ class SensitivitySpec extends flatspec.AnyFlatSpec with matchers.should.Matchers
     val fC = c.map(_.map(model))
 
     val indices = SensitivitySaltelli.SaltelliAggregation.sobolIndices(fA, fB, fC)
-    
+
     indices.first.foreach(x => x should (be >= 0.30 and be <= 0.36))
     indices.total.foreach(x => x should (be >= 0.30 and be <= 0.36))
     indices.first.sum should (be >= 0.95 and be <= 1.05)
