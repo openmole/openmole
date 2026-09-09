@@ -403,7 +403,6 @@ object OMRFormat:
             val variables =
               (s.variables zip sectionsContent(i)).filter((v, _) => indexFilter(v)).map: (v, a) =>
                 Variable.constructArray(ValData.toVal(v).array, a.toSeq, (v, _) => v)
-                //jValueToVariable(JArray(a.toList), ValData.toVal(v).toArray, file = Some(loadFile), default = Some(jValueToAny))
 
             (s, variables)
 
