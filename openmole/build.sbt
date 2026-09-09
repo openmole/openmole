@@ -1439,9 +1439,11 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
         |       chown openmole:openmole -R /var/openmole
         |
         |COPY ./assemble /openmole
-        |
         |RUN chmod +x /openmole/openmole && \\
         |       ln -s /openmole/openmole /usr/bin/openmole
+        |
+        |COPY openmole-docker /usr/bin/openmole-docker
+        |RUN chmod +x-w /usr/bin/openmole-docker
         |
         |VOLUME /var/openmole
         |
@@ -1455,6 +1457,7 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
     val exitCode =
       (Seq("docker", "pull", imageFrom) #&&
         Seq("cp", "-r", (openmole / assemble).value.getAbsolutePath, s"${dockerDir}/assemble") #&&
+        Seq("cp", "-r", s"${(Compile / resourceDirectory).value}/openmole-docker", s"${dockerDir}/openmole-docker") #&&
         (
           Seq("docker", "build") ++
             dockerTagNames.value.flatMap(i => Seq("-t", i)) ++
@@ -1467,7 +1470,9 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
     log.info(s"Docker image(s) ${dockerTagNames.value.mkString(", ")} successfully built")
   },
   dockerBuildAndPush := {
-    import scala.sys.process._
+    docker.value
+
+    import scala.sys.process.*
     val log = streams.value.log
     val exitCode =
       dockerTagNames.value
