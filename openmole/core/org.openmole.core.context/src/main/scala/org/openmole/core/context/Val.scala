@@ -150,14 +150,15 @@ object ValType:
    */
   def unArrayify(t: ValType[?]): (ValType[?], Int) =
     @tailrec def rec(c: ValType[?], level: Int = 0): (ValType[?], Int) =
-      if (!c.isArray) (c, level)
+      if !c.isArray
+      then (c, level)
       else rec(c.asArray.fromArray, level + 1)
     rec(t)
 
   def unsecureFromArray(t: ValType[?]): ValType[?] =
-    val (res, level) = unArrayify(t)
-    if (level == 0) throw new UserBadDataError(s"ValType $t is no an array type")
-    res
+    if t.isArray
+    then t.asArray.fromArray
+    else throw new UserBadDataError(s"ValType $t is no an array type")
 
   /**
    * Decorate ValType for implicit conversions to array type
