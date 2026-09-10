@@ -691,7 +691,7 @@ def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*",
 val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
 def guiClientDir = guiDir / "client"
-lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
+lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins(ScalaJSPlugin) settings(
   libraryDependencies += Libraries.sourceCode,
   guiSettings,
   test := false
@@ -719,45 +719,45 @@ lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") en
 val build = taskKey[Unit]("build")
 
 
-lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "org.openmole.gui.client.stub") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
-  //version := ope,
-  //scalaVersion := ScalaVersion,
-  //crossScalaVersions := supportedVersion,
-  name := "org-openmole-gui-client-stub",
-  scalaJSUseMainModuleInitializer := false,
-  webpackBundlingMode := BundlingMode.LibraryAndApplication(),
-  webpackNodeArgs := Seq("--openssl-legacy-provider"),
-  //webpackExtraArgs := Seq("--profile", "--progress", "true"),
-  webpackEmitSourceMaps := false,
-  test := false,
-  guiSettings,
-  scalaJSSettings,
-  build := {
-
-    val demoResource = (Compile / resourceDirectory).value
-    val demoTarget = target.value
-    val bundlerTarget = demoTarget / ("scala-" + scalaVersion.value) / "scalajs-bundler"
-
-    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-noconflict" / "mode-openmole.js")
-
-    val jsBuilt = (Compile / fastOptJS / webpack).value
-    val jsBuild = jsBuilt.head.data
-
-    //jsBuilt.last.data.name
-
-    //val sourceMap = scalaJSSourceMap.value
-
-    IO.copyDirectory(demoResource, demoTarget)
-    IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole-webpacked.js")
-    //IO.copyFile(scalaJSSourceMap., demoTarget / "webapp/js/openmole-webpacked.js.map")
-
-    IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", demoTarget / "webapp" / "js" / "ace.js")
-    IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", demoTarget / "webapp" / "js" / "plotly.min.js")
-    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", demoTarget / "webapp" / "js" / "mode-openmole.js")
-
-    (Compile / compile).value
-  }
-) dependsOn(clientGUI, guiEnvironmentSSHLoginPlugin)
+//lazy val clientStub = Project("org-openmole-gui-client-stub", guiClientDir / "org.openmole.gui.client.stub") enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin) settings(
+//  //version := ope,
+//  //scalaVersion := ScalaVersion,
+//  //crossScalaVersions := supportedVersion,
+//  name := "org-openmole-gui-client-stub",
+//  scalaJSUseMainModuleInitializer := false,
+//  webpackBundlingMode := BundlingMode.LibraryAndApplication(),
+//  webpackNodeArgs := Seq("--openssl-legacy-provider"),
+//  //webpackExtraArgs := Seq("--profile", "--progress", "true"),
+//  webpackEmitSourceMaps := false,
+//  test := false,
+//  guiSettings,
+//  scalaJSSettings,
+//  build := {
+//
+//    val demoResource = (Compile / resourceDirectory).value
+//    val demoTarget = target.value
+//    val bundlerTarget = demoTarget / ("scala-" + scalaVersion.value) / "scalajs-bundler"
+//
+//    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-noconflict" / "mode-openmole.js")
+//
+//    val jsBuilt = (Compile / fastOptJS / webpack).value
+//    val jsBuild = jsBuilt.head.data
+//
+//    //jsBuilt.last.data.name
+//
+//    //val sourceMap = scalaJSSourceMap.value
+//
+//    IO.copyDirectory(demoResource, demoTarget)
+//    IO.copyFile(jsBuild, demoTarget / "webapp/js/openmole-webpacked.js")
+//    //IO.copyFile(scalaJSSourceMap., demoTarget / "webapp/js/openmole-webpacked.js.map")
+//
+//    IO.copyFile(bundlerTarget / "main" / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", demoTarget / "webapp" / "js" / "ace.js")
+//    IO.copyFile(bundlerTarget / "main" / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", demoTarget / "webapp" / "js" / "plotly.min.js")
+//    IO.copyFile(demoResource / "webapp/js/openmole_grammar_stub.js", demoTarget / "webapp" / "js" / "mode-openmole.js")
+//
+//    (Compile / compile).value
+//  }
+//) dependsOn(clientGUI, guiEnvironmentSSHLoginPlugin)
 
 
 /* -------------------------- GUI Server ----------------------- */
@@ -827,59 +827,59 @@ lazy val jsCompile = OsgiProject(guiServerDir, "org.openmole.gui.server.jscompil
   }
 )
 
-lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "org.openmole.gui.server.stub") settings(
-  guiSettings,
-  libraryDependencies ++= Seq(Libraries.http4s),
-  Compile / run / fork := true,
-  Compile / run / connectInput := true,
-  Compile / run / outputStrategy := Some(StdoutOutput),
-
-  test := false,
-
-  Compile / compile := {
-    val targetModules = target.value / "node_modules"
-
-    IO.withTemporaryDirectory { modules =>
-      import sys.process._
-
-      val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
-      val cacheFile = target.value / "node_modules-hash"
-      val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
-
-      if (!cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
-        IO.copyFile(packageJson, modules / "package.json")
-        Process("npm install", Some(modules)).!!
-        IO.copyDirectory(modules, targetModules)
-        IO.delete(modules)
-        IO.write(cacheFile, packageJsonHash)
-      }
-    }
-
-    //val jsBuild = (clientGUI / Compile / fastOptJS / webpack).value.head.data
-
-    //    val bundlerTarget = (clientStub / target).value / ("scala-" + scalaVersion.value) / "scalajs-bundler"
-    //
-
-    IO.copyDirectory((clientStub / Compile / resourceDirectory).value / "webapp", target.value / "webapp")
-    val jsBuild = (clientStub / Compile / fastOptJS / webpack).value.head.data
-    IO.copyFile(jsBuild, target.value / "webapp/js/openmole-webpacked.js")
-    //    //IO.copyFile(new File(jsBuild.toString + ".map"), target.value / ("webapp/js/" + jsBuild.getName + ".map"))
-    //
-    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", target.value / "webapp" / "js" / "ace.js")
-    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "snippets/text.js", target.value / "webapp" / "js" / "text.js")
-    IO.copyFile(targetModules / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", target.value / "webapp" / "js" / "plotly.min.js")
-    IO.copyFile(targetModules / "node_modules" / "nouislider" / "dist" / "nouislider.min.js", target.value / "webapp" / "js" / "nouislider.min.js")
-    IO.copyDirectory(targetModules / "node_modules" / "bootstrap-icons" / "font", target.value / "webapp" / "css" / "bootstrap-icons")
-
-    IO.copyFile((clientStub / Compile / resourceDirectory).value / "webapp/js/openmole_grammar_stub.js", target.value / "webapp" / "js" / "mode-openmole.js")
-
-    (Compile / compile).value
-  },
-  run := Def.taskDyn {
-    (Compile / run).toTask(" " + (Compile / target).value + "/webapp")
-  }.value,
-
-) dependsOn(apiGUI, serverGUI)
+//lazy val serverStub = Project("org-openmole-gui-server-stub", guiServerDir / "org.openmole.gui.server.stub") settings(
+//  guiSettings,
+//  libraryDependencies ++= Seq(Libraries.http4s),
+//  Compile / run / fork := true,
+//  Compile / run / connectInput := true,
+//  Compile / run / outputStrategy := Some(StdoutOutput),
+//
+//  test := false,
+//
+//  Compile / compile := {
+//    val targetModules = target.value / "node_modules"
+//
+//    IO.withTemporaryDirectory { modules =>
+//      import sys.process._
+//
+//      val packageJson = (serverGUI / Compile / resourceDirectory).value / "webpack/package.json"
+//      val cacheFile = target.value / "node_modules-hash"
+//      val packageJsonHash = Hash.toHex(FileInfo.hash(packageJson).hash.toArray)
+//
+//      if (!cacheFile.exists || IO.read(cacheFile) != packageJsonHash) {
+//        IO.copyFile(packageJson, modules / "package.json")
+//        Process("npm install", Some(modules)).!!
+//        IO.copyDirectory(modules, targetModules)
+//        IO.delete(modules)
+//        IO.write(cacheFile, packageJsonHash)
+//      }
+//    }
+//
+//    //val jsBuild = (clientGUI / Compile / fastOptJS / webpack).value.head.data
+//
+//    //    val bundlerTarget = (clientStub / target).value / ("scala-" + scalaVersion.value) / "scalajs-bundler"
+//    //
+//
+//    IO.copyDirectory((clientStub / Compile / resourceDirectory).value / "webapp", target.value / "webapp")
+//    val jsBuild = (clientStub / Compile / fastOptJS / webpack).value.head.data
+//    IO.copyFile(jsBuild, target.value / "webapp/js/openmole-webpacked.js")
+//    //    //IO.copyFile(new File(jsBuild.toString + ".map"), target.value / ("webapp/js/" + jsBuild.getName + ".map"))
+//    //
+//    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "ace.js", target.value / "webapp" / "js" / "ace.js")
+//    IO.copyFile(targetModules / "node_modules" / "ace-builds" / "src-min-noconflict" / "snippets/text.js", target.value / "webapp" / "js" / "text.js")
+//    IO.copyFile(targetModules / "node_modules" / "plotly.js" / "dist" / "plotly.min.js", target.value / "webapp" / "js" / "plotly.min.js")
+//    IO.copyFile(targetModules / "node_modules" / "nouislider" / "dist" / "nouislider.min.js", target.value / "webapp" / "js" / "nouislider.min.js")
+//    IO.copyDirectory(targetModules / "node_modules" / "bootstrap-icons" / "font", target.value / "webapp" / "css" / "bootstrap-icons")
+//
+//    IO.copyFile((clientStub / Compile / resourceDirectory).value / "webapp/js/openmole_grammar_stub.js", target.value / "webapp" / "js" / "mode-openmole.js")
+//
+//    (Compile / compile).value
+//  },
+//  run := Def.taskDyn {
+//    (Compile / run).toTask(" " + (Compile / target).value + "/webapp")
+//  }.value,
+//
+//) dependsOn(apiGUI, serverGUI)
 
 
 /* -------------------- GUI Shared ----------------------*/
