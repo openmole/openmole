@@ -159,7 +159,7 @@ object Variable:
         valType: ValType[?],
         toValue: (Any, Class[?]) => Any,
         depth: Int): Any =
-
+        
         import org.openmole.tool.types.TypeTool._
         import scala.jdk.CollectionConverters.*
 
@@ -171,14 +171,18 @@ object Variable:
             value match
               case collection: Iterable[Any] =>
                 val fromArrayValType = ValType.fromArrayUnsecure(valType.asInstanceOf[ValType[Array[?]]])
-                collection.map: e =>
-                  constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
-                .toArray(using fromArrayValType.manifest)
-              case v: Array[?] =>
+                val array = java.lang.reflect.Array.newInstance(fromArrayValType.runtimeClass.asInstanceOf[Class[?]], collection.size)
+                collection.iterator.zipWithIndex.foreach: (e, i) =>
+                  val ae = constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
+                  java.lang.reflect.Array.set(array, i, ae)
+                array
+              case collection: Array[?] =>
                 val fromArrayValType = ValType.fromArrayUnsecure(valType.asInstanceOf[ValType[Array[?]]])
-                v.map: e =>
-                  constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
-                .toArray(using fromArrayValType.manifest)
+                val array = java.lang.reflect.Array.newInstance(fromArrayValType.runtimeClass.asInstanceOf[Class[?]], collection.size)
+                collection.iterator.zipWithIndex.foreach: (e, i) =>
+                  val ae = constructMultiDimensionalArray(e, fromArrayValType, toValue, depth - 1)
+                  java.lang.reflect.Array.set(array, i, ae)
+                array
               case v => throw UserBadDataError(s"The variable $prototype has dimension with is to low high to store the collection $collection")
           else throw UserBadDataError(s"The variable $prototype has dimension with is to low to store the collection $collection")
         else toValue(value, multiArrayType.runtimeClass.asInstanceOf[Class[?]])
