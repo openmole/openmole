@@ -40,11 +40,13 @@ ${h2{"V24 | E E"}}
 
 ${
   notes("""
-    - Updgrade Scala Version
-    - Fix deterministic HDOSE
-    - Use initial distance of 0.0 for HDOSE
-    - Make it possible to specify when to condition the execution of method hooks
-    - Reduce memory footprint of OMR export in append mode
+    - Server: Upgrade Scala Version
+    - Server: Reduce memory footprint of OMR export in append mode
+    - Method: Fix deterministic HDOSE
+    - Method: Use initial distance of 0.0 for HDOSE
+    - DSL: Make it possible to specify when to condition the execution of method hooks
+    - GUI: Remove CSV view of results
+    - GUI: Add size info in the result table
   """)
 }
 
