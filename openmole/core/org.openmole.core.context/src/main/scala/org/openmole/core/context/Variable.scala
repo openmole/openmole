@@ -159,7 +159,7 @@ object Variable:
         valType: ValType[?],
         toValue: (Any, Class[?]) => Any,
         depth: Int): Any =
-        
+
         import org.openmole.tool.types.TypeTool._
         import scala.jdk.CollectionConverters.*
 

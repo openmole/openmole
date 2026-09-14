@@ -283,7 +283,8 @@ object PlotContent:
               s =>
                 div(
                   s"${contentSections(s).rowData.content.size} x ${contentSections(s).rowData.content.headOption.map(_.size).getOrElse(0)}",
-                  position.absolute
+                  position.absolute,
+                  right := "20"
                 )
             ,
             sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v => switchSection(contentSections(v).section) }
