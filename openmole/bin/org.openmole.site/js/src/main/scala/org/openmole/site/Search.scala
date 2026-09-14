@@ -60,7 +60,7 @@ object Search {
             item.set(curItem.copy(index = curItem.index - 1, ref = result.now()(curItem.index - 1).ref))
           }
           else if (k.keyCode == 13) { // Enter
-            window.location.href = curItem.ref
+            dom.window.location.assign(curItem.ref)
           }
           else if (k.keyCode == 27) { // Esc
             searchInput.ref.value = ""
@@ -96,18 +96,12 @@ object Search {
         child <-- searchOpen.signal.map { so =>
           if (so) {
             div(
-              form(
-                results,
-                onKeyUp --> {
-                  (k: KeyboardEvent) =>
-                    if (k.keyCode != 38 && k.keyCode != 40)
-                      search()
-                },
-                //                onSubmit.preventDefault --> { _ =>
-                //                  if (item.now().ref != "")
-                //                    org.scalajs.dom.window.location.href = item.now().ref
-                //                }
-              )
+              results,
+              onKeyUp --> {
+                (k: KeyboardEvent) =>
+                  if (k.keyCode != 38 && k.keyCode != 40)
+                    search()
+              }
             )
           }
           else emptyNode
