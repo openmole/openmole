@@ -13,4 +13,4 @@ object CSVContent:
 
   def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins) =
     val rowData: RowData = ResultData.fromCSV(initialContent)
-    PlotContent.buildTab(safePath, FileContentType.CSV, Seq(ContentSection("CSV", initialContent, rowData, initialHash)), "CSV")
+    PlotContent.buildTab(safePath, FileContentType.CSV, Seq(ContentSection("CSV", rowData, initialHash)), "CSV")

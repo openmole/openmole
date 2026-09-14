@@ -22,7 +22,7 @@ object OMRContent:
 
     val pcSections = guiOMRContent.section.map: s =>
       val rowData = ResultData.fromOMR(s)
-      ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
+      ContentSection(s.name.getOrElse("section"), rowData, "initialHash")
 
     val scriptText =
       guiOMRContent.script match
@@ -51,8 +51,6 @@ object OMRContent:
     def replaceWithHTML(s: String): HtmlElement =
       val html = s"<div>${s.replace(" ", "&nbsp;").replace("\n", "<br/>")}</div>"
       foreignHtmlElement(DomApi.unsafeParseHtmlString(html))
-
-
 
     PlotContent.buildTab(
       safePath,

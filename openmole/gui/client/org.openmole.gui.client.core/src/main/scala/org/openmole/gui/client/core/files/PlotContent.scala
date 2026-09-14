@@ -27,14 +27,14 @@ import org.checkerframework.checker.units.qual.m
 object PlotContent:
 
   enum ResultView:
-    case Raw, Table, Plot, Metadata
+    case Table, Plot, Metadata
   
   import ResultView._  
   trait ContentState
 
   case class TableState(scrollDown: Boolean = false, resultView: ResultView = Table) extends ContentState
-  case class RawState(scrollDown: Boolean = false, resultView: ResultView = Raw) extends ContentState
   case class MetadataState(resultView: ResultView = Metadata) extends ContentState
+
   case class PlotState(
     numberOfColumToBePlotted: NumberOfColumToBePlotted = NumberOfColumToBePlotted.One, 
     initialHeaders: Seq[String] = Seq()
@@ -42,14 +42,12 @@ object PlotContent:
 
   case class ContentStates(
     table: TableState = TableState(),
-    raw: RawState = RawState(),
     plot: PlotState = PlotState()
   )
   object ContentState:
     def fromResultView(resultView: ResultView, contentStates: ContentStates) =  
       resultView match
         case Table=> contentStates.table
-        case Raw => contentStates.raw
         case Plot => contentStates.plot
         case Metadata => MetadataState()
 
@@ -57,17 +55,12 @@ object PlotContent:
     def update(contentState: ContentState) = 
       contentState match
         case s: TableState => cs.copy(table = s)
-        case r: RawState => cs.copy(raw = r)
         case p: PlotState => cs.copy(plot = p)
         case _=> cs
 
-  case class ContentSection(section: String, rawContent: String, rowData: RowData, initialHash: String, historyView: Option[ResultView] = None)
+  case class ContentSection(section: String, rowData: RowData, initialHash: String, historyView: Option[ResultView] = None)
 
   case class Section(name: String)
-
-  //case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, resultPlot: ResultPlot, metadata: HtmlElement)
-
-  //case class StateAndSection(contentState: ContentState, contentSection: ContentSection, historyView: Option[ResultView])
 
   case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
 
@@ -92,10 +85,6 @@ object PlotContent:
       contentSections.find(_.section == sectionName) match
         case Some(cs: ContentSection) =>
           currentState match
-            case RawState(scrollDown, resultView) => 
-              val editor = EditorPanelUI(safePath, cs.rawContent, "initialHash")
-              editor.setReadOnly(true)
-              EditorView(editor.view, editor)
             case TableState(scrollDown, resultView) => 
                val headerStyle = Seq(position := "sticky",
                   top := "0",
@@ -225,7 +214,6 @@ object PlotContent:
     def updatedContentState =
       currentState match
         case _: TableState => TableState()
-        case _: RawState => RawState()
         case _: PlotState =>
             sectionView match
               case PlotView(view, resultPlot) => 
@@ -248,7 +236,6 @@ object PlotContent:
       val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
-    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ => switchFromResultView(Raw))
     val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ => switchFromResultView(Table))
     val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ => switchFromResultView(Plot))
     val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ => switchFromResultView(Metadata))
@@ -257,10 +244,9 @@ object PlotContent:
       state match
         case TableState(_,_) => 0
         case PlotState(_,_) => 1
-        case RawState(_,_) => 2
-        case _=> 3 
+        case _=> 2
 
-    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
+    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
     val refreshing: Var[Boolean] = Var(false)             
 
     val refreshButton =
@@ -287,15 +273,20 @@ object PlotContent:
                 case true => Waiter.waiter("#794985")
             ),
             currentState match
-              case _: RawState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _: TableState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _ => div(),
             switchButton.element.amend(margin := "10", width := "150px", marginLeft := "25"),
             contentSections.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px", marginLeft := "90"),
-            sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v =>
-              switchSection(contentSections(v).section) }
+            child <-- sectionSwitchButton.selected.signal.map:
+              s =>
+                div(
+                  s"${contentSections(s).rowData.content.size} x ${contentSections(s).rowData.content.headOption.map(_.size).getOrElse(0)}",
+                  position.absolute
+                )
+            ,
+            sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v => switchSection(contentSections(v).section) }
           ),
           sectionView.view
         )

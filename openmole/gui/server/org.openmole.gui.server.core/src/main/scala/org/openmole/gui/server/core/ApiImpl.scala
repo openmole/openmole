@@ -597,11 +597,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       then None
       else Some(GUIOMRContent.Index(size, names))
 
-    def raw =
-      tmpDirectory.withTmpFile("result", ".csv"): csvFile =>
-        OMRFormat.writeCSV(omrFile, csvFile, dataFile)
-        csvFile.content
-
     GUIOMRContent(
       section = content,
       openMoleVersion = omrContent.`openmole-version`,
@@ -609,8 +604,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       script = script,
       timeStart = omrContent.`time-start`,
       timeSave = omrContent.`time-save`,
-      index = index,
-      raw = raw
+      index = index
     )
 
 

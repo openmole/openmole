@@ -218,7 +218,7 @@ class TabContent:
   val fontSizeControl =
     div(
       position.absolute,
-      right := "20",
+      right := "10",
       top := "62",
       cls := "file-content",
       display.flex,
