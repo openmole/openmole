@@ -17,9 +17,9 @@ package org.openmole.site
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.{KeyboardEvent, window}
 import org.scalajs.dom
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
 object Search {
 
@@ -54,10 +54,19 @@ object Search {
         onKeyDown --> { (k: KeyboardEvent) =>
           val curItem = item.now()
           if (k.keyCode == 40 && curItem.index < result.now().size - 1) {
-            item.set(curItem.copy(index = curItem.index + 1))
+            item.set(curItem.copy(index = curItem.index + 1, ref = result.now()(curItem.index + 1).ref))
           }
           else if (k.keyCode == 38 && curItem.index > 0) {
-            item.set(curItem.copy(index = curItem.index - 1))
+            item.set(curItem.copy(index = curItem.index - 1, ref = result.now()(curItem.index - 1).ref))
+          }
+          else if (k.keyCode == 13) { // Enter
+            window.location.href = curItem.ref
+          }
+          else if (k.keyCode == 27) { // Esc
+            searchInput.ref.value = ""
+            result.set(Seq())
+            item.set(Item())
+            searchOpen.set(false)
           }
         },
         searchInput,
@@ -67,8 +76,9 @@ object Search {
             for {
               r ← rr
             } yield {
+              val hrefTarget = r._1.ref
               div(paddingTop := "5", fontSize := "18px",
-                a(cursor.pointer, href := r._1.ref, SiteJS.entries.get(r._1.ref), color := "white", {
+                a(cursor.pointer, href := hrefTarget, SiteJS.entries.get(r._1.ref), color := "white", {
                   if (r._2 == it.index) {
                     //item.set(it.copy(ref = r._1.ref, maxSize = rr.size))
                     backgroundColor := "rgb(164,60,60)"
@@ -93,10 +103,10 @@ object Search {
                     if (k.keyCode != 38 && k.keyCode != 40)
                       search()
                 },
-                onSubmit.preventDefault --> { _ =>
-                  if (item.now().ref != "")
-                    org.scalajs.dom.window.location.href = item.now().ref
-                }
+                //                onSubmit.preventDefault --> { _ =>
+                //                  if (item.now().ref != "")
+                //                    org.scalajs.dom.window.location.href = item.now().ref
+                //                }
               )
             )
           }
