@@ -103,12 +103,7 @@ object Site {
             //  link(rel := "stylesheet", href := Resource.css.file),
             link(rel := "stylesheet", href := Resource.css.github.file),
             link(rel := "stylesheet", href := Resource.css.docStyle.file),
-
             script(src := Resource.js.highlight.file),
-            script("hljs.initHighlightingOnLoad();"),
-
-            // script(`type` := "text/javascript", src := Resource.js.depsJS.file),
-
             script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
             piwik,
@@ -141,23 +136,8 @@ object Site {
               case s: IntegratedPage => Seq(s.leftMenu) ++ s.rightMenu.toSeq
               case _ => div()
             },
-            Footer.build,
-            //onload := "SiteJS.toto();",
-            //onload := "SiteJS.SiteJS.toto();",
-            onload := onLoadString(pageTree)
+            Footer.build
           )
-
-        private def onLoadString(sitepage: org.openmole.site.PageTree) =
-          def siteJS = "openmole_site"
-
-          def commonJS = s"$siteJS.loadIndex(index);"
-
-          sitepage.page match
-            case DocumentationPages.profile      => s"$siteJS.profileAnimation();" + commonJS
-            case DocumentationPages.pse          => s"$siteJS.pseAnimation();" + commonJS
-            case DocumentationPages.simpleSAFire => s"$siteJS.sensitivityAnimation();" + commonJS
-            case _                               => commonJS
-
 
         def generateHtml(outputRoot: File) =
           import scalatags.Text.all._

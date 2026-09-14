@@ -1,0 +1,15 @@
+{
+  "name": "openmole",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "dependencies": {
+    "highlight.js": "11.11.1",
+    "lunr": "2.1.5"
+  },
+  "devDependencies": {
+    "concat-with-sourcemaps": "1.1.0",
+    "source-map-loader": "4.0.2",
+    "esbuild": "0.27.4"
+  }
+}

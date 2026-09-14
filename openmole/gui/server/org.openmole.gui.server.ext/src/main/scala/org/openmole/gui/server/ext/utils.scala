@@ -284,15 +284,12 @@ object utils:
       if f.isDirectory && f.listFileSafeIterator.isEmpty then f.delete()
 
   val openmoleFileName = "main.js"
-  val webpakedOpenmoleFileName = "openmole-webpacked.js"
   val esBuildedOpenmoleFileName = "openmole-esbuilded.js"
   val depsFileName = "deps.js"
   val openmoleGrammarName = "openmole_grammar_template.js"
   val aceModuleSource = "ace-builds/src-noconflict"
   val openmoleGrammarMode = "mode-openmole.js"
   val githubTheme = "theme-github.js"
-  val webpackConfigTemplateName = "template.webpack.config.js"
-  val webpackJsonPackage = "package.json"
   val esBuildJsonPackage = "package.json"
   val nodeModulesFileName = "node_modules.zip"
 

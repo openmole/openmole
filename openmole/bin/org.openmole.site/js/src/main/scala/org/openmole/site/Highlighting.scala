@@ -20,9 +20,12 @@ import js.Dynamic.{ literal => lit }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@js.native
+trait HighlightLanguage extends js.Object
+
 object Highlighting {
 
-  var METHOD = lit(
+  val METHOD = lit(
     "className" → js.RegExp("function"),
     "beginKeywords" → js.RegExp("def"),
     "end" → js.RegExp("""/[:={\[(\n;]/"""),
@@ -30,32 +33,27 @@ object Highlighting {
     "contains" → js.Array("NAME")
   )
 
-  def openmoleGrammar() = lit(
-    "keywords" → lit(
-      "literal" → js.RegExp("true false null"),
-      "keyword" → js.RegExp("type yield lazy override def with val var sealed abstract private trait object if forSome for while throw finally protected extends import final return else break new catch super class case package default try this match continue throws implicit")
-    ),
-    "contains" → js.Array(METHOD) /*,
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.C_BLOCK_COMMENT_MODE,
-      STRING,
-      SYMBOL,
-      TYPE,
-      METHOD,
-      CLASS,
-      hljs.C_NUMBER_MODE,
-      ANNOTATION
-    ]*/
-  )
+  def openmoleGrammar(hljs: js.Dynamic): js.Dynamic =
+    lit(
+      "keywords" → lit(
+        "literal" → js.RegExp("true false null"),
+        "keyword" → js.RegExp(
+          "type yield lazy override def with val var sealed abstract private " +
+            "trait object if forSome for while throw finally protected extends " +
+            "import final return else break new catch super class case package " +
+            "default try this match continue throws implicit"
+        )
+      ),
+      "contains" → js.Array(METHOD)
+    )
 
-  //  println("RE " + HighlightJSConstants.BACKSLASH_ESCAPE)
-  //  HighlightJS.registerLanguage("openmole", openmoleGrammar(new HighlightJS))
-  //  println("opopo " + HighlightJS.getLanguage("openmole"))
-  //  println(HighlightJS.listLanguages)
-  //  println("grammar " + openmoleGrammar)
+  def init(): Unit = {
+    HighlightJS.registerLanguage(
+      "openmole",
+      ((hljs: js.Dynamic) => openmoleGrammar(hljs)): js.Function
+    )
 
-  def init = {
-    HighlightJS.initHighlighting()
+    HighlightJS.highlightAll()
   }
+
 }

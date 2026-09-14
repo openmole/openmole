@@ -14,11 +14,11 @@ import scala.scalajs.js.annotation._
 
 
 @js.native
-@JSImport("highlight.js", JSImport.Namespace)
+@JSImport("highlight.js", JSImport.Default)
 object HighlightJS extends HighlightStatic
 
 @js.native
-@JSImport("highlight.js/lib/languages/scala.js", JSImport.Namespace)
+@JSImport("highlight.js/lib/languages/scala.js", JSImport.Default)
 object scalamode extends js.Object
 
 @js.native
@@ -32,7 +32,9 @@ trait HighlightStatic extends js.Object {
     *         value: HTML string with highlighting markup
     *         top: top of the current mode stack
     */
-  def highlight(name: String, value: String, ignoreIllegals: js.UndefOr[Boolean] = js.native, continuation: js.UndefOr[js.Object] = js.native): HighlightJSResult = js.native
+  def highlightAll(): HighlightJSResult = js.native
+
+  def highlightElement(el: Element): Unit = js.native
 
   /**
     * Highlighting with language detection. Accepts a string with the code to highlight and an optional array of language names and aliases restricting detection to only those languages. The subset can also be set with configure, but the local parameter overrides the option if set.
