@@ -103,7 +103,6 @@ object Site {
             //  link(rel := "stylesheet", href := Resource.css.file),
             link(rel := "stylesheet", href := Resource.css.github.file),
             link(rel := "stylesheet", href := Resource.css.docStyle.file),
-            script(src := Resource.js.highlight.file),
             script(src := Resource.js.index.file),
             meta(charset := "UTF-8"),
             piwik,
