@@ -40,8 +40,8 @@ ${h2{"V24 | E E"}}
 
 ${
   notes("""
-    - Server: Upgrade Scala Version
-    - Server: Reduce memory footprint of OMR export in append mode
+    - Engine: Upgrade Scala Version
+    - Engine: Reduce memory footprint of OMR export in append mode
     - Method: Fix deterministic HDOSE
     - Method: Use initial distance of 0.0 for HDOSE
     - DSL: Make it possible to specify when to condition the execution of method hooks
@@ -54,15 +54,16 @@ ${h2{"V23 | D D"}}
 
 ${
   notes("""
-    - Reduce PSE an PPSE memory footprint
-    - Use acceptance rather than a rejcetion condition in evolution methods
-    - Fix possible NaN inputs in evolution algorithms
-    - Speed up container building
-    - Migrate docker container from Singularity to Apptainer
-    - Implement wizard for the nlogox file format
-    - Implement memory requirement for MiniClust
-    - Implement elitism batching
-    - Capture a compile time type in ValType alongs with the manifest
+    - Engine: Speed up container building
+    - Engine: docker container from Singularity to Apptainer
+    - Engine: Capture a compile time type in ValType alongs with the manifest
+    - Method: Reduce PSE an PPSE memory footprint
+    - Method: Use acceptance rather than a rejcetion condition in evolution methods
+    - Method: Fix possible NaN inputs in evolution algorithms
+    - Method: Implement elitism batching
+    - Compute: Implement memory requirement for MiniClust
+    - GUI: Implement wizard for the nlogox file format
+    - GUI: fix dimension switch in 2D plot
   """)
 }
 
