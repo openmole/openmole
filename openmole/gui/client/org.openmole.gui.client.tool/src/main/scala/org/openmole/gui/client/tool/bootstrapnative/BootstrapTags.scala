@@ -202,7 +202,7 @@ trait BootstrapTags {
             rb.text,
             onClick --> { _ =>
               selected.update(as => {
-                val li = (as :+ rb).distinct
+                val li = (as :+ rb).reverse.distinct.reverse
                 selectionSize match {
                   case SelectionSize.DefaultLength => if (li.size == defaultToggles.size) li else li.drop(1)
                   case SelectionSize.Infinite => if (as.contains(rb)) as.filterNot(_ == rb) else li
