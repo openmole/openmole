@@ -41,7 +41,7 @@ object HDOSE:
     weightC:             Vector[Double],
     weightD:             Vector[Double],
     archiveSize:         Int,
-    distance:            Double,
+    precision:            Double,
     shuffle:             Boolean,
     phenotypeContent:    PhenotypeContent,
     objectives:          Objectives,
@@ -84,7 +84,7 @@ object HDOSE:
           val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
           CDGenome.DeterministicIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState: S = MGOHDOSE.initialState(om.distance)
+        def initialState: S = MGOHDOSE.initialState()
 
         def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = MGOHDOSE.tooCloseByComponent(om.weightC, om.weightD, om.genome.discrete)
 
@@ -138,7 +138,7 @@ object HDOSE:
               om.genome.continuous,
               om.genome.discrete,
               Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context),
-              om.distance,
+              om.precision,
               shuffle = om.shuffle) apply (s, population, candidates, rng)
 
         def mergeIslandState(state: S, islandState: S): S =
@@ -172,7 +172,7 @@ object HDOSE:
     weightC: Vector[Double],
     weightD: Vector[Double],
     archiveSize: Int,
-    distance: Double,
+    precision: Double,
     shuffle: Boolean,
     phenotypeContent: PhenotypeContent,
     objectives: Objectives,
@@ -219,7 +219,7 @@ object HDOSE:
           val phenotype = Phenotype.fromContext(context, om.phenotypeContent)
           CDGenome.NoisyIndividual.buildIndividual(genome, phenotype, state.generation, false)
 
-        def initialState = MGONoisyHDOSE.initialState(om.distance)
+        def initialState = MGONoisyHDOSE.initialState()
 
         def distance: mgo.evolution.algorithm.HDOSEOperation.TooClose = mgo.evolution.algorithm.HDOSE.tooCloseByComponent(om.weightC, om.weightD, om.genome.discrete)
 
@@ -284,7 +284,7 @@ object HDOSE:
               om.weightD,
               om.archiveSize,
               om.limit,
-              om.distance,
+              om.precision,
               shuffle = om.shuffle) apply (s, population, candidates, rng)
 
 
@@ -402,7 +402,7 @@ object HDOSE:
     origin: Seq[OriginAxe],
     objective: Seq[OSE.FitnessPattern],
     archiveSize: Int = 1000,
-    distance: Double = 1.0,
+    precision: Double = 0.1,
     shuffle: Boolean = true,
     outputs: Seq[Val[?]] = Seq(),
     populationSize: Int = 200,
@@ -428,7 +428,7 @@ object HDOSE:
             weightC = weightC,
             weightD = weightD,
             archiveSize = archiveSize,
-            distance = distance,
+            precision = precision,
             shuffle = shuffle,
             phenotypeContent = phenotypeContent,
             objectives = exactObjectives,
@@ -454,7 +454,7 @@ object HDOSE:
             weightC = weightC,
             weightD = weightD,
             archiveSize = archiveSize,
-            distance = distance,
+            precision = precision,
             shuffle = shuffle,
             phenotypeContent = phenotypeContent,
             objectives = noisyObjectives,
@@ -480,7 +480,7 @@ object HDOSEEvolution:
         origin = p.origin,
         objective = p.objective,
         archiveSize = p.archiveSize,
-        distance = p.distance,
+        precision = p.precision,
         shuffle = p.shuffle,
         outputs = p.evaluation.outputs,
         stochastic = p.stochastic,
@@ -512,7 +512,7 @@ case class HDOSEEvolution(
   termination:    OMTermination,
   archiveSize:    Int                          = 500,
   populationSize: Int                          = 200,
-  distance:       Double                       = 1.0,
+  precision:       Double                       = 0.1,
   shuffle:        Boolean                      = true,
   stochastic:     OptionalArgument[Stochastic] = None,
   accept:         OptionalArgument[Condition]  = None,

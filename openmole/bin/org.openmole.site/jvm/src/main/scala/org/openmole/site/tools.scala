@@ -203,8 +203,10 @@ object tools:
 
 
   def modificationLink(source: String) =
-    if(org.openmole.core.buildinfo.version.isDevelopment) s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
-    else s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
+    if org.openmole.core.buildinfo.version.isDevelopment
+    then s"https://github.com/openmole/openmole/edit/dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
+    else s"https://github.com/openmole/openmole/edit/master/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
+    //else s"https://github.com/openmole/openmole/edit/${org.openmole.core.buildinfo.version.major}-dev/openmole/bin/org.openmole.site/jvm/src/main/scala/$source"
 
   def rightGlyphButton(title: String, page: Page, glyph: String, openInOtherTab: Boolean = false, buttonStyle: Seq[Modifier] = Seq(classIs(btn, btn_default))) =
     to(page)(if (openInOtherTab) targetBlank else "")(
