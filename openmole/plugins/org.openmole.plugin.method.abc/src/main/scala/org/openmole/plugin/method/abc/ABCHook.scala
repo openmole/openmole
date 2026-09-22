@@ -1,55 +1,58 @@
 package org.openmole.plugin.method.abc
 
 import mgo.abc.MonAPMC
-import org.openmole.core.dsl._
-import org.openmole.core.dsl.extension._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 object ABCHook {
 
-  def apply(method: ABC.ABCParameters, dir: FromContext[File], frequency: Long = 1)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(method: ABC.ABCParameters, file: WritableOutput, frequency: Option[Long] = None, keepHistory: Boolean = false)(using sourcecode.Name, DefinitionScope, ScriptSourceData) =
     Hook("ABCHook") { p =>
-      import p._
+      import p.*
+      
+      val stepValue = context(method.step)
 
-      if (context(method.step) % frequency == 0) {
+      if (stepValue % frequency.getOrElse(1L) == 0) {
         context(method.state) match {
           case MonAPMC.Empty() => ()
           case MonAPMC.State(_, s) =>
-            val step = context(method.step)
-
-            val filePath = dir / s"step${step}.csv"
-            val file = filePath.from(context)
 
             val size = s.thetas.size
             val dim = s.thetas(0).size
 
             val paramNames = method.prior.v.map { _.name }
 
-            val header =
-              (Vector("epsilon,pAcc,t,ts,rhos,weight") ++
-                paramNames).mkString(",")
+            val epsilon = Val[Double]("epsilon", ABC.abcNamespace)
+            val pAcc = Val[Double]("pAcc", ABC.abcNamespace)
+            val t = Val[Int]("t", ABC.abcNamespace)
+            val step = Val[Int]("step", ABC.abcNamespace)
+            val ts = Val[Array[Int]]("ts", ABC.abcNamespace)
+            val rhos = Val[Array[Double]]("rhos", ABC.abcNamespace)
+            val weight = Val[Array[Double]]("weight", ABC.abcNamespace)
+            val thetas = Val[Array[Array[Double]]]("thetas", ABC.abcNamespace)
 
-            val data =
-              (Vector.fill(size)(s.epsilon) zip
-                Vector.fill(size)(s.pAcc) zip
-                Vector.fill(size)(s.t) zip
-                s.ts zip
-                s.rhos zip
-                s.weights zip
-                s.thetas).map {
-                  case ((((((epsilon, pAcc), t), ti), rhoi), wi), thetai) =>
-                    epsilon.formatted("%.12f") ++ "," ++
-                      pAcc.formatted("%.12f") ++ "," ++
-                      t.formatted("%d") ++ "," ++
-                      ti.formatted("%d") ++ "," ++
-                      rhoi.formatted("%.12f") ++ "," ++
-                      wi.formatted("%.12f") ++ "," ++
-                      thetai.map { _.formatted("%.12f") }.mkString(",")
-                }.mkString("\n")
+            val variables =
+              Seq[Variable[?]](
+                step -> stepValue,
+                epsilon -> s.epsilon,
+                pAcc -> s.pAcc,
+                t -> s.t,
+                ts -> s.ts.toArray,
+                rhos -> s.rhos,
+                weight -> s.weights,
+                thetas -> s.thetas
+              )
 
-            file.createParentDirectory
 
-            file.content = header ++ "\n" ++ data
+            val content =
+              OutputContent(
+                SectionContent(
+                  Some("parameters"),
+                  variables
+                )
+              )
 
+            OMROutputFormat.write(executionContext, file, content, None, OMROption(replace = !keepHistory)).from(context)
         }
       }
 

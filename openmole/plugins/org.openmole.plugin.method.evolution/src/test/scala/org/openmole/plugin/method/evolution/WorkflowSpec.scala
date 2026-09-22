@@ -797,8 +797,5 @@ class WorkflowSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
   "manifest of state" should "be correct" in:
     val m = manifest[mgo.evolution.algorithm.PSE.PSEState]
 
-    println(m)
     import scala.compiletime.summonInline
     import scala.deriving.*
-
-    println(summonInline[scala.reflect.ClassTag[mgo.evolution.algorithm.PSE.PSEState]])

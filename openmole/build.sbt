@@ -1012,7 +1012,8 @@ lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.p
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
-  Libraries.plotlyJS
+  Libraries.plotlyJS,
+  Test / test := false
 ) dependsOn(serverExt, clientExt, serverExt, workspace, evolution) enablePlugins (ScalaJSPlugin)
 
 
