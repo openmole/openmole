@@ -60,7 +60,7 @@ object common {
   def slf4jVersion = "2.0.9"
   def foryVersion = "0.11.0"
   def jgitVersion = "7.0.0.202409031743-r"
-  def gearsVersion = "0.2.0"
+  def gearsVersion = "0.3.1"
   def ulidCreatorVersion = "5.2.3"
   def izumiReflectVersion = "3.0.9"
 
