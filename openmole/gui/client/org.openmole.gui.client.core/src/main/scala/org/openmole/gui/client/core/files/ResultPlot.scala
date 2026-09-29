@@ -111,7 +111,7 @@ class ResultPlot(plotData: ColumnData, plotState: PlotState):
   val oneTwoNRadio =
     val plotModeStates =
       allPlots.map: (name, pm) =>
-        ToggleState(name, "btn " + btn_danger_string, () => axisCheckBoxes(pm))
+        ToggleState(name, "btn " + btn_danger_string, () => axisRadios.set(axisCheckBoxes(pm)))
 
     exclusiveRadio(plotModeStates, btn_secondary_string, allPlots.map(_._2).indexOf(plotState._1))
 
