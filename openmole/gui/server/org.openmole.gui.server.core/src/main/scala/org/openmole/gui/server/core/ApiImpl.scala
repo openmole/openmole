@@ -555,7 +555,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     PluginExtensionData(
       GUIPluginRegistry.authentications,
       GUIPluginRegistry.wizards,
-      GUIPluginRegistry.analysis)
+      GUIPluginRegistry.visualizations)
 
   def isOSGI(safePath: SafePath): Boolean =
     import services._

@@ -199,5 +199,5 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
           Seq(new GitPrivateKeyAuthenticationFactory(api))
 
       val wizardFactories = p.wizards.flatMap { gp => successOrNotify(Plugins.buildJSObject[WizardPluginFactory](gp)) }
-      val analysisFactories = p.analysis.flatMap { (method, gp) => successOrNotify(Plugins.buildJSObject[MethodAnalysisPlugin](gp)).map(p => (method, p)) }.toMap
-      f(GUIPlugins(authFact, wizardFactories, analysisFactories))
+      val visualizationFactories = p.visualizations.flatMap { (method, gp) => successOrNotify(Plugins.buildJSObject[VisualizationPlugin](gp)).map(p => (method, p)) }.toMap
+      f(GUIPlugins(authFact, wizardFactories, visualizationFactories))

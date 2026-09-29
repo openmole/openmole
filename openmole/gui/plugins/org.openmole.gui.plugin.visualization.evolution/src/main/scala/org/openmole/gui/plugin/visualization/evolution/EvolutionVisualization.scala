@@ -1,43 +1,39 @@
-package org.openmole.gui.plugin.analysis.evolution
+package org.openmole.gui.plugin.visualization.evolution
 
-import org.openmole.plugin.method.evolution.*
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import org.openmole.gui.shared.data.*
+import com.raquo.laminar.api.L.*
+import org.openmole.gui.client.ext
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.tool.bootstrapnative.bsn.*
-import com.raquo.laminar.api.L.*
-import org.scalajs.dom.raw.HTMLElement
-
-import scala.concurrent.Future
-import scala.scalajs.js.annotation.*
-import org.openmole.gui.client.ext
-import AnalysisData.Convergence
-
-import scala.scalajs.js
-import org.openmole.plotlyjs.PlotlyImplicits.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
 import org.openmole.plotlyjs.*
+import org.openmole.plotlyjs.PlotlyImplicits.*
 import org.openmole.plotlyjs.all.*
 import org.openmole.plotlyjs.plotlyConts.*
+import org.openmole.plugin.method.evolution.*
+import org.openmole.plugin.method.evolution.AnalysisData.Convergence
+import org.scalajs.dom.raw.HTMLElement
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
-import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.api.*
+import scala.scalajs.js.annotation.*
 
 object TopLevelExports:
-  @JSExportTopLevel("analysis_evolution")
+  @JSExportTopLevel("visualization_evolution")
   val egi = js.Object:
-    new org.openmole.gui.plugin.analysis.evolution.EvolutionAnalysis
+    new org.openmole.gui.plugin.visualization.evolution.EvolutionVisualization
 
 
-class EvolutionAnalysis extends MethodAnalysisPlugin:
+class EvolutionVisualization extends VisualizationPlugin:
 
   def sttp = STTPInterpreter()
 
   override def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement =
     val metadata: Var[Option[Convergence]] = Var(None)
 
-    sttp.toRequest(EvolutionAnalysisAPI.analyse)(safePath).foreach: m =>
+    sttp.toRequest(EvolutionVisualizationAPI.analyse)(safePath).foreach: m =>
       metadata.set(Some(m))
 
     div(

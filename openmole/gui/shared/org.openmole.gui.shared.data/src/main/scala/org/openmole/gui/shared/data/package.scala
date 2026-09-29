@@ -288,7 +288,7 @@ object PluginExtensionData:
 case class PluginExtensionData(
   authentications: Seq[GUIPluginAsJS],
   wizards: Seq[GUIPluginAsJS],
-  analysis: Seq[(String, GUIPluginAsJS)])
+  visualizations: Seq[(String, GUIPluginAsJS)])
 
 type GUIPluginAsJS = String
 

@@ -913,7 +913,7 @@ def guiPlugins = Seq(
   pythonWizardPlugin,
   scilabWizardPlugin,
   containerWizardPlugin,
-  evolutionAnalysisPlugin
+  evolutionVisualizationPlugin
   // Obsolete
   //nativeWizardPlugin,
   // jarWizardPlugin,
@@ -1008,7 +1008,7 @@ lazy val containerWizardPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plu
 //  libraryDependencies += Libraries.felixOSGi,
 //) dependsOn(extServer, clientExt, extServer, workspace) enablePlugins (ScalaJSPlugin)
 
-lazy val evolutionAnalysisPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.analysis.evolution", imports = defaultImports ++ guiStrictImports) settings(
+lazy val evolutionVisualizationPlugin = OsgiProject(guiPluginDir, "org.openmole.gui.plugin.visualization.evolution", imports = defaultImports ++ guiStrictImports) settings(
   guiPluginSettings,
   scalaJSSettings,
   libraryDependencies += Libraries.felixOSGi,
