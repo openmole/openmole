@@ -86,8 +86,8 @@ class TreeNodePanel:
 
   lazy val directoryToggle =
     object FileType
-    val folder = ToggleState(FileType, "Folder", "btn purple-button", _ => {})
-    val file = ToggleState(FileType, "File", "btn purple-button", _ => {})
+    val folder = ToggleState("Folder", "btn purple-button", () => {})
+    val file = ToggleState("File", "btn purple-button", () => {})
     toggle(folder, false, file, () => {})
 
   def createNewNode(newFile: String)(using api: ServerAPI, basePath: BasePath, panels: Panels) =

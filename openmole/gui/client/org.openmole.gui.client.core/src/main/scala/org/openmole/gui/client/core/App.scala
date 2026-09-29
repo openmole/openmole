@@ -17,8 +17,6 @@ import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
-
-import javax.swing.plaf.multi.MultiToolBarUI
 import scala.concurrent.Await
 import scala.concurrent.duration.*
 import scala.scalajs.js.timers.*

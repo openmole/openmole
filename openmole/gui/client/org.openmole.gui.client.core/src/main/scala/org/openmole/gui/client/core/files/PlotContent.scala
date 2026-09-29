@@ -37,8 +37,7 @@ object PlotContent:
 
   case class PlotState(
     numberOfColumToBePlotted: NumberOfColumToBePlotted = NumberOfColumToBePlotted.One, 
-    initialHeaders: Seq[String] = Seq()
-    ) extends ContentState
+    initialHeaders: Seq[String] = Seq()) extends ContentState
 
   case class ContentStates(
     table: TableState = TableState(),
@@ -111,7 +110,7 @@ object PlotContent:
                     case _ => None
                 )
               val resPlot = new ResultPlot(plotData, ps)
-              val fcd = resPlot.fromColumnData 
+              val fcd = resPlot.fromColumnData
 
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
@@ -217,9 +216,9 @@ object PlotContent:
         case _: PlotState =>
             sectionView match
               case PlotView(view, resultPlot) => 
-                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.t)
-                val numberOfColumToBePlotted = resultPlot.oneTwoNRadio.selected.now().map(x=> x.t).head
-                PlotState(numberOfColumToBePlotted, selectedAxis)
+                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.text)
+                val plotSelected = resultPlot.allPlots.toMap.apply(resultPlot.oneTwoNRadio.selected.now().map(x => x.text).head)
+                PlotState(plotSelected, selectedAxis)
               case _ => PlotState(NumberOfColumToBePlotted.One, Seq())
         case _: MetadataState => MetadataState()
 
@@ -236,9 +235,9 @@ object PlotContent:
       val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata)
       panels.tabContent.updateTab(safePath, content)
 
-    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ => switchFromResultView(Table))
-    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ => switchFromResultView(Plot))
-    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ => switchFromResultView(Metadata))
+    val tableToggleState = ToggleState("Table", btn_primary_string, () => switchFromResultView(Table))
+    val plotToggleState = ToggleState("Plot", btn_primary_string, () => switchFromResultView(Plot))
+    val metadataToggleState = ToggleState("More", btn_primary_string, () => switchFromResultView(Metadata))
 
     def viewIndex(state: ContentState) =
       state match
