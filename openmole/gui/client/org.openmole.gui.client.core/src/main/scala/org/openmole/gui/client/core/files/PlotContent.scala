@@ -19,10 +19,6 @@ import org.openmole.gui.client.tool.OMTags.btn_purple
 import org.openmole.gui.client.core.Waiter
 import org.openmole.gui.client.tool.plot.Plot.NumberOfColumToBePlotted
 import org.openmole.gui.client.tool.Component
-import scala.scalajs.js.timers
-import scalaz.Alpha.C
-import org.checkerframework.checker.units.qual.m
-
 
 object PlotContent:
 
@@ -77,8 +73,13 @@ object PlotContent:
     states: ContentStates = ContentStates(),
     currentState: ContentState = TableState(),
     omrMetadata: Option[OMRMetadata] = None,
-    currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+    currentIndex: Option[Int] = None,
+    methodName: Option[String] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement) =
     import ResultView.*
+
+    def defaultVisualization =
+      methodName.map: method =>
+        guiPlugins.visualizationPlugins(method).panel(safePath, pluginServices)
 
     def buildSectionView(sectionName: String) =
       contentSections.find(_.section == sectionName) match
@@ -96,12 +97,15 @@ object PlotContent:
                     idAttr := "editor",
                     dataTable(cs.rowData.content.map(_.map(RowData.toDataContent)))
                     .addHeaders(cs.rowData.headers *)
-                      .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
+                      .style(
+                        tableStyle = Seq(bordered_table),
+                        headerStyle = headerStyle
+                      )
                       .sortable
                       .render.render.amend(borderCollapse.collapse)
                   )
                 )
-            case ps: PlotState=>
+            case ps: PlotState =>
               val columns = cs.rowData.content.transpose
               val plotData = ColumnData(
                   cs.rowData.headers.zip(columns).zip(cs.rowData.dimensions).flatMap:

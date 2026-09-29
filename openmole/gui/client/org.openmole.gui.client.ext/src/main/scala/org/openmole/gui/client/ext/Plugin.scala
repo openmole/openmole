@@ -52,4 +52,4 @@ trait ErrorManager:
 case class GUIPlugins(
   authenticationFactories: Seq[AuthenticationPluginFactory],
   wizardFactories: Seq[wizard.WizardPluginFactory],
-  analysisPlugins: Map[String, VisualizationPlugin])
+  visualizationPlugins: Map[String, VisualizationPlugin])

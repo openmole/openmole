@@ -26,7 +26,7 @@ object ProjectPanel:
     )
   }
 
-  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
 
     // 1- Empty project
     def emptyProject =

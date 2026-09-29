@@ -597,6 +597,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       then None
       else Some(GUIOMRContent.Index(size, names))
 
+    def methodName = OMRFormat.methodName(omrContent)
+
     GUIOMRContent(
       section = content,
       openMoleVersion = omrContent.`openmole-version`,
@@ -604,7 +606,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       script = script,
       timeStart = omrContent.`time-start`,
       timeSave = omrContent.`time-save`,
-      index = index
+      index = index,
+      methodName = methodName
     )
 
 

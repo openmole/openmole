@@ -180,7 +180,7 @@ class TabContent:
   def rename(
       sp: SafePath,
       newSafePath: SafePath
-  )(using Panels, ServerAPI, GUIPlugins, BasePath) =
+  )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) =
     tabIndex(sp).foreach: (ot, i) =>
       save(ot.t).foreach: _ =>
         FileDisplayer

@@ -442,7 +442,9 @@ object OMRFormat:
     variables(file, dataFile = Some(dataFile(file, index)))
 
   def methodName(file: File): Option[String] =
-    val content = omrContent(file)
+    methodName(omrContent(file))
+
+  def methodName(content: OMRContent): Option[String] =
     content.method.flatMap: j =>
       j.hcursor.downField(methodNameField).as[String].toOption
 

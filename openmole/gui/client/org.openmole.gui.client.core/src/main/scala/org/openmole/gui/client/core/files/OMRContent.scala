@@ -18,7 +18,7 @@ object OMRContent:
     contentStates: ContentStates = ContentStates(),
     currentState: ContentState = TableState(false),
     currentIndex: Option[Int] = None
-    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement) =
 
     val pcSections = guiOMRContent.section.map: s =>
       val rowData = ResultData.fromOMR(s)
@@ -60,5 +60,6 @@ object OMRContent:
       contentStates,
       currentState,
       omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
-      currentIndex = currentIndex
+      currentIndex = currentIndex,
+      methodName = guiOMRContent.methodName
     )

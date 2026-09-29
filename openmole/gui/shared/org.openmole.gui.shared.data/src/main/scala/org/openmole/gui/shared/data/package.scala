@@ -427,7 +427,8 @@ case class GUIOMRContent(
   script: Option[GUIOMRScript],
   timeStart: Long,
   timeSave: Long,
-  index: Option[GUIOMRContent.Index])
+  index: Option[GUIOMRContent.Index],
+  methodName: Option[String])
 
 case class GUIOMRDataIndex(sectionIndex: Int, variableName: String, values: Seq[data.GUIVariable.ValueType], fileIndex: Seq[String])
 
