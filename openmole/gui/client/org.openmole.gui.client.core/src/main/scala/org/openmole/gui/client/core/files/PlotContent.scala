@@ -9,7 +9,7 @@ import org.openmole.gui.client.tool.nouislider.NoUISliderImplicits.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
-import org.openmole.gui.client.core.{Panels}
+import org.openmole.gui.client.core.Panels
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.CoreUtils
@@ -17,7 +17,7 @@ import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.unwrap
 import org.openmole.gui.client.tool.OMTags.btn_purple
 import org.openmole.gui.client.core.Waiter
-import org.openmole.gui.client.tool.plot.Plot.NumberOfColumToBePlotted
+import org.openmole.gui.client.tool.plot.Plot.SelectedPlot
 import org.openmole.gui.client.tool.Component
 
 object PlotContent:
@@ -32,8 +32,8 @@ object PlotContent:
   case class MetadataState(resultView: ResultView = Metadata) extends ContentState
 
   case class PlotState(
-    numberOfColumToBePlotted: NumberOfColumToBePlotted = NumberOfColumToBePlotted.One, 
-    initialHeaders: Seq[String] = Seq()) extends ContentState
+                        selectedPlot: SelectedPlot = SelectedPlot.One,
+                        initialHeaders: Seq[String] = Seq()) extends ContentState
 
   case class ContentStates(
     table: TableState = TableState(),
@@ -223,7 +223,7 @@ object PlotContent:
                 val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.text)
                 val plotSelected = resultPlot.allPlots.toMap.apply(resultPlot.oneTwoNRadio.selected.now().map(x => x.text).head)
                 PlotState(plotSelected, selectedAxis)
-              case _ => PlotState(NumberOfColumToBePlotted.One, Seq())
+              case _ => PlotState(SelectedPlot.One, Seq())
         case _: MetadataState => MetadataState()
 
     def switchFromState(state: ContentState, states: ContentStates): Unit = 
