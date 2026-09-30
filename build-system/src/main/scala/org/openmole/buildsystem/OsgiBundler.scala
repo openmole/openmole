@@ -7,6 +7,9 @@ import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
 
 object OsgiProject {
 
+  def bundleDependencies =
+    OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject)))
+
   protected val bundleMap = Map("Bundle-ActivationPolicy" → "lazy")
 
   protected def osgiSettings = SbtOsgi.autoImport.osgiSettings ++ Seq(
@@ -14,8 +17,6 @@ object OsgiProject {
     autoAPIMappings := true,
     OsgiKeys.packageWithJVMJar := true,
     OsgiKeys.cacheStrategy := Some(OsgiKeys.CacheStrategy.Hash),
-
-    Compile / Osgi.bundleDependencies := OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject))).value,
 
     Osgi.openMOLEScope := Seq.empty,
     OsgiKeys.bundleVersion := version.value,
@@ -26,8 +27,7 @@ object OsgiProject {
     Compile / installRemote := (Compile / publish).value,
     bundleType := Set("default"))
 
-  def apply(
-    directory: File,
+  def settings(
     artifactId: String,
     exports: Seq[String] = Seq(),
     privatePackages: Seq[String] = Seq(),
@@ -37,14 +37,16 @@ object OsgiProject {
     bundleActivator: Option[String] = None,
     dynamicImports: Seq[String] = Seq(),
     imports: Seq[String] = Seq("*;resolution:=optional"),
-    global: Boolean = false) = {
+    global: Boolean = false): Seq[Setting[_]] = {
 
-    val base = directory / artifactId
+    //val base = directory / artifactId
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
     val privatePackageValue = excludeSubPackage.map(p => s"!$artifactId.$p.*") ++ privatePackages
 
-    Project(artifactId.replace('.', '-'), base).settings(settings: _*).enablePlugins(SbtOsgi).settings(osgiSettings: _*).settings(
+    settings ++ SbtOsgi.defaultGlobalSettings ++ SbtOsgi.defaultOsgiSettings ++ osgiSettings ++ Seq(
+
+      //baseDirectory := base,
       name := artifactId,
       Osgi.singleton := singleton,
       OsgiKeys.exportPackage := exportedPackages,
@@ -62,6 +64,35 @@ object OsgiProject {
       OsgiKeys.dynamicImportPackage := dynamicImports,
       OsgiKeys.importPackage := imports,
       OsgiKeys.bundleActivator := (OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }).value)
+  }
+
+  def apply(
+    directory: File,
+    artifactId: String,
+    exports: Seq[String] = Seq(),
+    privatePackages: Seq[String] = Seq(),
+    excludeSubPackage: Seq[String] = Seq(),
+    singleton: Boolean = false,
+    settings: Seq[Setting[_]] = Nil,
+    bundleActivator: Option[String] = None,
+    dynamicImports: Seq[String] = Seq(),
+    imports: Seq[String] = Seq("*;resolution:=optional"),
+    global: Boolean = false) = {
+
+    val base = directory / artifactId
+
+    Project(artifactId.replace('.', '-'), base).settings(
+      OsgiProject.settings(
+        artifactId = artifactId,
+        exports = exports,
+        privatePackages = privatePackages,
+        excludeSubPackage = excludeSubPackage,
+        singleton = singleton,
+        settings = settings,
+        bundleActivator = bundleActivator,
+        dynamicImports = dynamicImports,
+        imports = imports,
+        global = global))
   }
 }
 
