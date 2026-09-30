@@ -273,8 +273,9 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = def
 
 
 lazy val formatJS = Project("org-openmole-core-format_js", coreDir / "org.openmole.core.format_js") enablePlugins (ScalaJSPlugin) settings(
-  scala3Settings
-)
+  scala3Settings,
+  libraryDependencies += Libraries.circe,
+) dependsOn(context, pluginManager)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = defaultImports ++ Seq("*")) settings(
   coreSettings,

@@ -38,9 +38,6 @@ import java.util
 import java.util.UUID
 import scala.collection.mutable
 
-implicit val omrCirceDefault: io.circe.derivation.Configuration =
- io.circe.derivation.Configuration.default.withKebabCaseMemberNames.withDefaults.withDiscriminator("type").withTransformConstructorNames(derivation.renaming.kebabCase)
-
 object OMRContent:
  case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
  case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
