@@ -269,12 +269,12 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = def
   libraryDependencies += Libraries.circe,
   libraryDependencies += Libraries.opencsv,
   libraryDependencies += "com.volkhart.memory" % "measurer" % "0.1.1"
-) dependsOn(context, json, timeService, openmoleArgument, openmoleBuildInfo)
+) dependsOn(formatJS, context, json, timeService, openmoleArgument, openmoleBuildInfo)
 
 
-//lazy val formatJS = Project("org-openmole-core-format_js", coreDir / "org.openmole.core.format_js") enablePlugins (ScalaJSPlugin) settings(
-//  scala3Settings
-//)
+lazy val formatJS = Project("org-openmole-core-format_js", coreDir / "org.openmole.core.format_js") enablePlugins (ScalaJSPlugin) settings(
+  scala3Settings
+)
 
 lazy val tools = OsgiProject(coreDir, "org.openmole.core.tools", imports = defaultImports ++ Seq("*")) settings(
   coreSettings,
@@ -1111,6 +1111,8 @@ def openmoleDependencies = openmoleNakedDependencies ++ corePlugins ++ guiPlugin
 
 def requieredRuntimeLibraries = Seq(Libraries.osgiCompendium, Libraries.logging)
 
+def nonOSGiProjects = Seq[ProjectReference](formatJS)
+
 lazy val openmoleNaked =
   Project("openmole-naked", binDir / "openmole-naked") settings (assemblySettings) enablePlugins (ScalaJSPlugin) settings(
     setExecutable ++= Seq("openmole", "openmole.bat"),
@@ -1123,7 +1125,7 @@ lazy val openmoleNaked =
       tarFile -> (assemblyPath.value / "runtime" / tarFile.getName)
     },
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
-    resourcesAssemble ++= OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= OsgiProject.bundleDependencies(exclude = nonOSGiProjects, includeRoot = false).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     resourcesAssemble += {
       IO.withTemporaryDirectory { modules =>
         import sys.process._
@@ -1178,7 +1180,7 @@ lazy val openmole =
     dependencyFilter := bundleFilter,
     dependencyName := rename,
     resourcesAssemble += (openmoleNaked / assemble).value -> assemblyPath.value,
-    resourcesAssemble ++= OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject, includeRoot = false))).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= OsgiProject.bundleDependencies(exclude = nonOSGiProjects, includeRoot = false).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     clean := {
       (openmoleNaked / clean).value
@@ -1191,7 +1193,7 @@ lazy val openmoleRuntime =
     assemblyDependenciesPath := assemblyPath.value / "plugins",
     resourcesAssemble += (Compile / resourceDirectory).value -> assemblyPath.value,
     resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
-    resourcesAssemble ++= (OsgiProject.bundleDependencies.value).map(b => b → (assemblyPath.value / "plugins" / b.getName)),
+    resourcesAssemble ++= OsgiProject.bundleDependencies(exclude = nonOSGiProjects).value.map(b => b → (assemblyPath.value / "plugins" / b.getName)),
     setExecutable ++= Seq("run.sh"),
     tarName := "runtime.tar.gz",
     libraryDependencies ++= requieredRuntimeLibraries,
@@ -1358,7 +1360,7 @@ lazy val modules = OsgiProject(binDir, "org.openmole.modules", singleton = true,
     val bundle = OsgiKeys.bundle.value
     bundle -> (assemblyPath.value / "plugins" / bundle.getName)
   },
-  resourcesAssemble ++= (OsgiProject.bundleDependencies.value).map(b => b → (assemblyPath.value / "plugins" / b.getName)),
+  resourcesAssemble ++= (OsgiProject.bundleDependencies(exclude = nonOSGiProjects).value).map(b => b → (assemblyPath.value / "plugins" / b.getName)),
   resourcesAssemble += ((Compile / resourceDirectory).value / "modules") -> (assemblyPath.value / "modules"),
   resourcesAssemble += (launcher / assemble).value -> (assemblyPath.value / "launcher"),
   libraryDependencies ++= requieredRuntimeLibraries,

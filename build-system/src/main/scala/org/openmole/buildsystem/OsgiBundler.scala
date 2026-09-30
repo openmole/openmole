@@ -7,8 +7,11 @@ import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
 
 object OsgiProject {
 
-  def bundleDependencies =
-    OsgiKeys.bundle.all(ScopeFilter(inDependencies(ThisProject)))
+  def bundleDependencies(
+    exclude: Seq[ProjectReference] = Seq(),
+    includeRoot: Boolean = true) =
+    OsgiKeys.bundle.all(
+      ScopeFilter(inDependencies(ThisProject, includeRoot = includeRoot)) -- ScopeFilter(inProjects(exclude*)))
 
   protected val bundleMap = Map("Bundle-ActivationPolicy" → "lazy")
 
