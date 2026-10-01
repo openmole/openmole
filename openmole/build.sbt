@@ -273,6 +273,7 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = def
 
 
 lazy val formatJS = Project("org-openmole-core-format_js", coreDir / "org.openmole.core.format_js") enablePlugins (ScalaJSPlugin) settings(
+  name := "format_js",
   scala3Settings,
   libraryDependencies += Libraries.circe,
 ) dependsOn(context, pluginManager)
@@ -546,13 +547,20 @@ lazy val fileHook = OsgiProject(pluginDir, "org.openmole.plugin.hook.file", impo
 def allMethod = Seq(evolution, directSampling, sensitivity, abc)
 
 lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolution", imports = defaultImports ++ Seq("*")) dependsOn(
-  openmoleDSL, toolsTask, pattern, scalaTask, distributionDomain, collectionDomain % "test", boundsDomain % "test"
+  evolutionJS, openmoleDSL, toolsTask, pattern, scalaTask, distributionDomain, collectionDomain % "test", boundsDomain % "test"
 ) settings(
   pluginSettings,
   libraryDependencies += Libraries.mgo,
-  libraryDependencies += Libraries.circe,
-  excludeDependencies += ExclusionRule(organization = "org.typelevel", name = "cats-kernel_2.13")
+  libraryDependencies += Libraries.circe
 )
+
+
+lazy val evolutionJS = Project("org-openmole-plugin-method-evolution_js", pluginDir / "org.openmole.plugin.method.evolution_js") enablePlugins (ScalaJSPlugin) settings(
+  name := "evolution_js",
+  scala3Settings,
+  libraryDependencies += Libraries.circe,
+) dependsOn(formatJS, openmoleDSL)
+
 
 lazy val abc = OsgiProject(pluginDir, "org.openmole.plugin.method.abc", imports = defaultImports ++ Seq("*")) dependsOn(openmoleDSL, toolsTask, pattern, distributionDomain, boundsDomain % "test") settings(
   pluginSettings,
