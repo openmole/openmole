@@ -29,9 +29,9 @@ name := "openmole-root"
 //    case _             => false
 //  }
 
-Global / concurrentRestrictions := Seq(
+/*Global / concurrentRestrictions := Seq(
   Tags.limitAll(6)
-)
+)*/
 
 def commonSettings =
   Seq(
