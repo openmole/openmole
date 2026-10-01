@@ -10,8 +10,9 @@ object OsgiProject {
   def bundleDependencies(
     exclude: Seq[ProjectReference] = Seq(),
     includeRoot: Boolean = true) =
-    OsgiKeys.bundle.all(
-      ScopeFilter(inDependencies(ThisProject, includeRoot = includeRoot)) -- ScopeFilter(inProjects(exclude*)))
+    OsgiKeys.bundle.?.all(
+      ScopeFilter(
+        inDependencies(ThisProject, includeRoot = includeRoot)) -- ScopeFilter(inProjects(exclude*))).map(_.flatten)
 
   protected val bundleMap = Map("Bundle-ActivationPolicy" → "lazy")
 
