@@ -275,6 +275,7 @@ lazy val format = OsgiProject(coreDir, "org.openmole.core.format", imports = def
 lazy val formatJS = Project("org-openmole-core-format_js", coreDir / "org.openmole.core.format_js") enablePlugins (ScalaJSPlugin) settings(
   name := "format_js",
   scala3Settings,
+  scalaJSSettings,
   libraryDependencies += Libraries.circe,
 ) dependsOn(context, pluginManager)
 
@@ -558,6 +559,7 @@ lazy val evolution = OsgiProject(pluginDir, "org.openmole.plugin.method.evolutio
 lazy val evolutionJS = Project("org-openmole-plugin-method-evolution_js", pluginDir / "org.openmole.plugin.method.evolution_js") enablePlugins (ScalaJSPlugin) settings(
   name := "evolution_js",
   scala3Settings,
+  scalaJSSettings,
   libraryDependencies += Libraries.circe,
 ) dependsOn(formatJS, openmoleDSL)
 
