@@ -26,7 +26,7 @@ import ResultPlot.*
 
 class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plotState: Var[ResultPlotState]):
 
-  lazy val plotSelection =
+  def plotSelection =
     val plotModeStates =
       Seq(
         ToggleState("1", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.One())),
@@ -47,11 +47,8 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
         case _: ResultPlotState.Method => 4
 
     exclusiveRadio(plotModeStates, btn_secondary_string, selected)
-
-
+  
   def headers = plotData.columns.map { _.header }
-
-  val plot: Var[HtmlElement] = Var(div())
 
   def getPlot(state: ResultPlotState) =
     div(display.flex,
@@ -77,16 +74,7 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
             methodPanel.getOrElse(div("No method visualization available"))
     )
 
-// Axis selection
-  // 1- only one selection ( 1 column button is set)
-  //    - case array: plot n times indexes x selection values in XY mode
-  //    - case scalar: plot indexes x selection values in XY mode
-  // 2- 2 selections ( 2 column button is set)
-  //    - arrays are not proposed
-  //    - scalars: selection value 1 x selection value 2 in Scatter mode
-  // 3- 'N column' selection
-  //    - arrays are not proposed -> Splom for all selection values
-  lazy val axisCheckBoxes: Signal[Option[ExclusiveRadioButtons]] =
+  def axisCheckBoxes: Signal[Option[ExclusiveRadioButtons]] =
 
     def partitionColumns = plotData.columns.partition:
       _.content match
@@ -132,5 +120,4 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
             child <-- plotState.signal.map(getPlot)
           )
         case None => emptyNode
-
     )
