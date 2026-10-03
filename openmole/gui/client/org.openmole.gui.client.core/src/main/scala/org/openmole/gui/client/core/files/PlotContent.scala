@@ -20,6 +20,8 @@ import org.openmole.gui.client.core.Waiter
 import org.openmole.gui.client.tool.plot.Plot.SelectedPlot
 import org.openmole.gui.client.tool.Component
 
+import ResultPlot.*
+
 object PlotContent:
 
   enum ResultView:
@@ -31,14 +33,12 @@ object PlotContent:
   case class TableState(scrollDown: Boolean = false, resultView: ResultView = Table) extends ContentState
   case class MetadataState(resultView: ResultView = Metadata) extends ContentState
 
-  case class PlotState(
-                        selectedPlot: SelectedPlot = SelectedPlot.One,
-                        initialHeaders: Seq[String] = Seq()) extends ContentState
 
   case class ContentStates(
     table: TableState = TableState(),
-    plot: PlotState = PlotState()
+    plot: ResultPlotState = ResultPlotState.One()
   )
+
   object ContentState:
     def fromResultView(resultView: ResultView, contentStates: ContentStates) =  
       resultView match
@@ -50,7 +50,7 @@ object PlotContent:
     def update(contentState: ContentState) = 
       contentState match
         case s: TableState => cs.copy(table = s)
-        case p: PlotState => cs.copy(plot = p)
+        case p: ResultPlotState => cs.copy(plot = p)
         case _=> cs
 
   case class ContentSection(section: String, rowData: RowData, initialHash: String, historyView: Option[ResultView] = None)
@@ -74,12 +74,8 @@ object PlotContent:
     currentState: ContentState = TableState(),
     omrMetadata: Option[OMRMetadata] = None,
     currentIndex: Option[Int] = None,
-    methodName: Option[String] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement) =
+    methodPanel: Option[HtmlElement] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement) =
     import ResultView.*
-
-    def defaultVisualization =
-      methodName.map: method =>
-        guiPlugins.visualizationPlugins(method).panel(safePath, pluginServices)
 
     def buildSectionView(sectionName: String) =
       contentSections.find(_.section == sectionName) match
@@ -105,7 +101,7 @@ object PlotContent:
                       .render.render.amend(borderCollapse.collapse)
                   )
                 )
-            case ps: PlotState =>
+            case ps: ResultPlotState =>
               val columns = cs.rowData.content.transpose
               val plotData = ColumnData(
                   cs.rowData.headers.zip(columns).zip(cs.rowData.dimensions).flatMap:
@@ -113,7 +109,7 @@ object PlotContent:
                     case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(_.value).map(ResultData.fromStringToArray))))
                     case _ => None
                 )
-              val resPlot = new ResultPlot(plotData, ps)
+              val resPlot = new ResultPlot(plotData, methodPanel, Var(ps))
               val fcd = resPlot.fromColumnData
 
               //We only keep data of dimension 0 or 1  
@@ -217,13 +213,10 @@ object PlotContent:
     def updatedContentState =
       currentState match
         case _: TableState => TableState()
-        case _: PlotState =>
+        case _: ResultPlotState =>
             sectionView match
-              case PlotView(view, resultPlot) => 
-                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.text)
-                val plotSelected = resultPlot.allPlots.toMap.apply(resultPlot.oneTwoNRadio.selected.now().map(x => x.text).head)
-                PlotState(plotSelected, selectedAxis)
-              case _ => PlotState(SelectedPlot.One, Seq())
+              case PlotView(view, resultPlot) => resultPlot.plotState.now()
+              case _ => ResultPlotState.One()
         case _: MetadataState => MetadataState()
 
     def switchFromState(state: ContentState, states: ContentStates): Unit = 
@@ -246,7 +239,7 @@ object PlotContent:
     def viewIndex(state: ContentState) =
       state match
         case TableState(_,_) => 0
-        case PlotState(_,_) => 1
+        case _: ResultPlotState => 1
         case _=> 2
 
     val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))

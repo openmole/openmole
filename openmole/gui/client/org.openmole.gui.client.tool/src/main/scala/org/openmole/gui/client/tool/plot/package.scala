@@ -60,7 +60,7 @@ object Plot {
   }
 
   enum SelectedPlot:
-    case One, Two, N, Parallel
+    case One, Two, N, Parallel, Method
   
   def baseDiv:Div = div()
 

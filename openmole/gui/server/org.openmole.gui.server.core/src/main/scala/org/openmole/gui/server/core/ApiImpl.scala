@@ -607,7 +607,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       timeStart = omrContent.`time-start`,
       timeSave = omrContent.`time-save`,
       index = index,
-      methodName = methodName
+      methodName = methodName,
+      method = omrContent.method
     )
 
 

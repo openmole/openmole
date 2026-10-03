@@ -52,6 +52,12 @@ object OMRContent:
       val html = s"<div>${s.replace(" ", "&nbsp;").replace("\n", "<br/>")}</div>"
       foreignHtmlElement(DomApi.unsafeParseHtmlString(html))
 
+
+    def methodPanel =
+      guiOMRContent.methodName.map: method =>
+        guiPlugins.visualizationPlugins(method).panel(safePath, pluginServices)
+
+
     PlotContent.buildTab(
       safePath,
       FileContentType.OpenMOLEResult,
@@ -61,5 +67,5 @@ object OMRContent:
       currentState,
       omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
       currentIndex = currentIndex,
-      methodName = guiOMRContent.methodName
+      methodPanel = methodPanel
     )

@@ -9,53 +9,74 @@ import org.openmole.gui.shared.data.SequenceData
 import org.openmole.plotlyjs.*
 
 import scala.scalajs.js.timers
-import org.openmole.gui.client.core.files.PlotContent.PlotState
+import org.openmole.gui.client.tool.plot.Plot.SelectedPlot.{Method, N}
 
-class ResultPlot(plotData: ColumnData, plotState: PlotState):
+object ResultPlot:
+  object ResultPlotState:
+    case class One(indexes: Seq[Int] = Seq(0)) extends ResultPlotState
+    case class Two(indexes: Seq[Int] = Seq(0, 1)) extends ResultPlotState
+    case class N(indexes: Seq[Int] = Seq(0)) extends ResultPlotState
+    case class Parallel(indexes: Seq[Int] = Seq(0)) extends ResultPlotState
+    case class Method() extends ResultPlotState
 
-  def allPlots: Seq[(String, SelectedPlot)] =
-    Seq(
-      "1" -> SelectedPlot.One,
-      "2" -> SelectedPlot.Two,
-      "N" -> SelectedPlot.N,
-      "//" -> SelectedPlot.Parallel
-    )
+  sealed trait ResultPlotState extends PlotContent.ContentState
 
-  lazy val axisRadios: Var[ExclusiveRadioButtons] = Var(axisCheckBoxes(plotState.selectedPlot))
-    //Var(exclusiveRadios(Seq(), "", Seq()))
 
-  val headers = plotData.columns.map { _.header }
+import ResultPlot.*
+
+class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plotState: Var[ResultPlotState]):
+
+  lazy val plotSelection =
+    val plotModeStates =
+      Seq(
+        ToggleState("1", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.One())),
+        ToggleState("2", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Two())),
+        ToggleState("N", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.N())),
+        ToggleState("//", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Parallel()))
+      ) ++ (
+        if methodPanel.isDefined
+        then Seq(ToggleState("Method", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Method())))
+        else Seq())
+
+    val selected =
+      plotState.now() match
+        case _: ResultPlotState.One => 0
+        case _: ResultPlotState.Two => 1
+        case _: ResultPlotState.N => 2
+        case _: ResultPlotState.Parallel => 3
+        case _: ResultPlotState.Method => 4
+
+    exclusiveRadio(plotModeStates, btn_secondary_string, selected)
+
+
+  def headers = plotData.columns.map { _.header }
 
   val plot: Var[HtmlElement] = Var(div())
 
-  def getPlot(
-    plotSelected: String,
-    axisSelected: Seq[String]) =
+  def getPlot(state: ResultPlotState) =
     div(display.flex,
-      allPlots.toMap.apply(plotSelected) match
-          case SelectedPlot.One =>
-            val axis = axisSelected.headOption.getOrElse(headers.head)
-            val hIndex = headers.indexOf(axis)
+      state match
+          case s: ResultPlotState.One =>
+            val hIndex = s.indexes.head
             val header = plotData.columns(hIndex).header
             val columnContents = Column.contentToSeqOfSeq(plotData.columns(hIndex).content)
-            XYPlot(columnContents, ("Records", header), PlotSettings()) // case Array)
-          case SelectedPlot.Two =>
-            val contents = axisSelected.map: sh =>
-              Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
-            ScatterPlot(contents.head, contents.last, (axisSelected.head, axisSelected.last), PlotSettings())
-          case SelectedPlot.N =>
-            val contents = axisSelected.map: sh =>
-              Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
-            SplomPlot(contents, axisSelected, PlotSettings())
-          case SelectedPlot.Parallel=>
-            val contents = axisSelected.map: sh=>
-              Column.contentToSeqOfSeq(plotData.columns(headers.indexOf(sh)).content).head
-            ParallelPlot(contents, axisSelected, PlotSettings())
+            XYPlot(columnContents, ("Records", header), PlotSettings())
+          case s: ResultPlotState.Two =>
+            val contents = s.indexes.map: sh =>
+              Column.contentToSeqOfSeq(plotData.columns(sh).content).head
+            ScatterPlot(contents.head, contents.last, (headers(s.indexes.head), headers(s.indexes.last)), PlotSettings())
+          case s: ResultPlotState.N =>
+            val contents = s.indexes.map: sh =>
+              Column.contentToSeqOfSeq(plotData.columns(sh).content).head
+            SplomPlot(contents, s.indexes.map(headers.apply), PlotSettings())
+          case s: ResultPlotState.Parallel=>
+            val contents = s.indexes.map: sh =>
+              Column.contentToSeqOfSeq(plotData.columns(sh).content).head
+            ParallelPlot(contents, s.indexes.map(headers.apply), PlotSettings())
+          case _: ResultPlotState.Method =>
+            methodPanel.getOrElse(div("No method visualization available"))
     )
 
-  val allHeaders = plotData.columns.map { _.header }
-
-  val initIndexes = plotState.initialHeaders.map(ih=> allHeaders.indexOf(ih)).filter(_ >= 0)
 // Axis selection
   // 1- only one selection ( 1 column button is set)
   //    - case array: plot n times indexes x selection values in XY mode
@@ -65,72 +86,51 @@ class ResultPlot(plotData: ColumnData, plotState: PlotState):
   //    - scalars: selection value 1 x selection value 2 in Scatter mode
   // 3- 'N column' selection
   //    - arrays are not proposed -> Splom for all selection values
-  def axisCheckBoxes(selectedPlot: SelectedPlot) =
+  lazy val axisCheckBoxes: Signal[Option[ExclusiveRadioButtons]] =
 
     def partitionColumns = plotData.columns.partition:
       _.content match
         case ArrayColumn(_) => true
         case _ => false
 
-    val (availableHeaders, initialIndexes) = selectedPlot match
-      case SelectedPlot.One =>
-        val indexes =
-          if initIndexes.length > 0
-          then Seq(initIndexes.head)
-          else Seq(0)
-
-        (allHeaders, indexes)
-      case SelectedPlot.Two  =>
-        val indexes =
-          if initIndexes.length > 1
-          then initIndexes.take(2)
-          else Seq(0,1)
-
-
+    plotState.signal.map:
+      case s: ResultPlotState.One =>
+        val axisToggleStates = headers.map(ah => ToggleState(ah, s"btn ${btn_danger_string}"))
+        Some(exclusiveRadios(axisToggleStates, btn_secondary_string, s.indexes, SelectionSize.DefaultLength, todo = sel => plotState.set(s.copy(sel))))
+      case s: ResultPlotState.Two  =>
         val (arrayColumn, scalarColumn) = partitionColumns
-        (scalarColumn.map { _.header }, indexes)
-      case SelectedPlot.N | SelectedPlot.Parallel =>
-        val indexes =
-          if initIndexes.length > 1
-          then initIndexes
-          else Seq(0)
+        val axisToggleStates =
+          scalarColumn.map { _.header }.map: ah =>
+            ToggleState(ah, s"btn ${btn_danger_string}")
 
+        Some(exclusiveRadios(axisToggleStates, btn_secondary_string, s.indexes, SelectionSize.DefaultLength, todo = sel => plotState.set(s.copy(sel))))
+      case s: ResultPlotState.Parallel =>
         val (arrayColumn, scalarColumn) = partitionColumns
-        (scalarColumn.map { _.header }, indexes)
+        val axisToggleStates = scalarColumn.map { _.header }.map: ah =>
+          ToggleState(ah, s"btn ${btn_danger_string}")
 
+        Some(exclusiveRadios(axisToggleStates, btn_secondary_string, s.indexes, SelectionSize.Infinite, todo = sel => plotState.set(s.copy(sel))))
+      case s: ResultPlotState.N =>
+        val (arrayColumn, scalarColumn) = partitionColumns
+        val axisToggleStates = scalarColumn.map {_.header}.map: ah =>
+          ToggleState(ah, s"btn ${btn_danger_string}")
 
-    lazy val axisToggleStates = availableHeaders.map { ah => ToggleState(ah, s"btn ${btn_danger_string}") }
-
-    val selectionMode = selectedPlot match
-      case SelectedPlot.N | SelectedPlot.Parallel => SelectionSize.Infinite
-      case _ => SelectionSize.DefaultLength
-
-    exclusiveRadios(axisToggleStates, btn_secondary_string, initialIndexes, selectionMode)
-
-
-  val oneTwoNRadio =
-    val plotModeStates =
-      allPlots.map: (name, pm) =>
-        ToggleState(name, "btn " + btn_danger_string, () => axisRadios.set(axisCheckBoxes(pm)))
-
-    exclusiveRadio(plotModeStates, btn_secondary_string, allPlots.map(_._2).indexOf(plotState._1))
-
+        Some(exclusiveRadios(axisToggleStates, btn_secondary_string, s.indexes, SelectionSize.Infinite, todo = sel => plotState.set(s.copy(sel))))
+      case s: ResultPlotState.Method => None
 
   def fromColumnData =
     div(
-      child <-- axisRadios.signal.map { aRadio =>
-        div(
-          display.flex, flexDirection.column,
+      child <-- axisCheckBoxes.map:
+        case Some(aRadio) =>
           div(
-            display.flex, flexDirection.row,
-            oneTwoNRadio.element.amend(margin := "10", height := "38"),
-            aRadio.element.amend(display.block, margin := "10")
-          ),
-          child <--
-            (aRadio.selected.signal.map(_.map(_.text).reverse) combineWith oneTwoNRadio.selected.signal.map(_.map(_.text).headOption)).map: (axis, otto) =>
-              otto.map: ott =>
-                getPlot(ott, axis)
-              .getOrElse(div())
-        )
-      }
+            display.flex, flexDirection.column,
+            div(
+              display.flex, flexDirection.row,
+              plotSelection.element.amend(margin := "10", height := "38"),
+              aRadio.element.amend(display.block, margin := "10")
+            ),
+            child <-- plotState.signal.map(getPlot)
+          )
+        case None => emptyNode
+
     )
