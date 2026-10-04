@@ -18,7 +18,7 @@ object OMRContent:
     contentStates: ContentStates = ContentStates(),
     currentState: ContentState = TableState(false),
     currentIndex: Option[Int] = None
-    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement) =
+    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement) =
 
     val pcSections = guiOMRContent.section.map: s =>
       val rowData = ResultData.fromOMR(s)
@@ -54,9 +54,8 @@ object OMRContent:
 
 
     def methodPanel =
-      guiOMRContent.methodName.map: method =>
-        guiPlugins.visualizationPlugins(method).panel(safePath, pluginServices)
-
+      guiOMRContent.methodName.flatMap: method =>
+        guiPlugins.visualizationPlugins.get(method).map(_.panel(safePath, guiOMRContent, pluginServices))
 
     PlotContent.buildTab(
       safePath,

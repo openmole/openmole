@@ -35,7 +35,7 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
         ToggleState("//", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Parallel()))
       ) ++ (
         if methodPanel.isDefined
-        then Seq(ToggleState("Method", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Method())))
+        then Seq(ToggleState("M", "btn " + btn_danger_string, () => plotState.set(ResultPlotState.Method())))
         else Seq())
 
     val selected =
@@ -47,7 +47,7 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
         case _: ResultPlotState.Method => 4
 
     exclusiveRadio(plotModeStates, btn_secondary_string, selected)
-  
+
   def headers = plotData.columns.map { _.header }
 
   def getPlot(state: ResultPlotState) =
@@ -108,16 +108,13 @@ class ResultPlot(plotData: ColumnData, methodPanel: Option[HtmlElement], val plo
 
   def fromColumnData =
     div(
-      child <-- axisCheckBoxes.map:
-        case Some(aRadio) =>
-          div(
-            display.flex, flexDirection.column,
-            div(
-              display.flex, flexDirection.row,
-              plotSelection.element.amend(margin := "10", height := "38"),
-              aRadio.element.amend(display.block, margin := "10")
-            ),
-            child <-- plotState.signal.map(getPlot)
-          )
-        case None => emptyNode
+      display.flex, flexDirection.column,
+      div(
+        display.flex, flexDirection.row,
+        plotSelection.element.amend(margin := "10", height := "38"),
+        child <-- axisCheckBoxes.signal.map:
+          case Some(a) => a.element.amend(display.block, margin := "10")
+          case None => emptyNode
+      ),
+      child <-- plotState.signal.map(getPlot)
     )

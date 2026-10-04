@@ -42,7 +42,7 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
 
 trait VisualizationPlugin extends GUIPlugin:
-  def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
+  def panel(safePath: SafePath, guiOMRContent: GUIOMRContent, services: PluginServices)(using basePath: BasePath): HtmlElement
 
 case class PluginServices(errorManager: ErrorManager)
 
