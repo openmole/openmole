@@ -38,52 +38,13 @@ import java.util
 import java.util.UUID
 import scala.collection.mutable
 
-object OMRContent:
-  case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
-  case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
-
-  object DataMode:
-    given Encoder[DataMode] = Encoder.instance:
-      case DataMode.Append => Encoder.encodeString("append")
-      case DataMode.Create => Encoder.encodeString("create")
-
-  given Decoder[DataMode] =
-    Decoder.decodeString.map:
-      case "append" => DataMode.Append
-      case "create" => DataMode.Create
-
-  enum DataMode:
-    case Append, Create
-
-  enum DataStore derives derivation.ConfiguredCodec:
-    case GZipFile
-
-  object DataContent:
-    case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
-
-  case class DataContent(section: Seq[DataContent.SectionData]) derives derivation.ConfiguredCodec
-
-case class OMRContent(
-  `format-version`: String,
-  `openmole-version`: String,
-  `execution-id`: String,
-  `data-file`: Seq[String],
-  `data-mode`: OMRContent.DataMode,
-  `data-content`: OMRContent.DataContent,
-  `data-store`: Option[OMRContent.DataStore] = None,
-  `file-directory`: Option[String],
-  script: Option[OMRContent.Script],
-  `time-start`: Long,
-  `time-save`: Long,
-  method: Option[Json]) derives derivation.ConfiguredCodec
-
 def methodNameField = "method-name"
 def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
 object OMRFormat:
   object SectionData:
-    def apply(section: OMRContent.DataContent.SectionData) = new OMRFormat.SectionData(section.name, section.variables, section.indexes)
+    def apply(section: OMRContent.V1.DataContent.SectionData) = new OMRFormat.SectionData(section.name, section.variables, section.indexes)
 
   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
 
@@ -94,7 +55,7 @@ object OMRFormat:
 
     def newUUID = UUID.randomUUID().toString.filter(_ != '-')
 
-    def writeOMRContent(file: File, content: OMRContent) =
+    def writeOMRContent(file: File, content: OMRContent.V1) =
       file.withPrintStream(create = true, gz = true)(
         _.print(content.asJson.deepDropNullValues.noSpaces)
       )
@@ -107,9 +68,9 @@ object OMRFormat:
 
   def isOMR(file: File) = file.getName.endsWith(".omr")
 
-  def omrContent(file: File): OMRContent =
+  def omrContent(file: File): OMRContent.V1 =
     val content = file.content(gz = true)
-    decode[OMRContent](content).toTry.get
+    decode[OMRContent.V1](content).toTry.get
 
   def dataFileNames(omrFile: File): Seq[String] =
     omrContent(omrFile).`data-file`
@@ -118,11 +79,11 @@ object OMRFormat:
     dataFileNames(omrFile).map: n =>
       (n, dataFile(omrFile, n))
 
-  def dataFile(omrFile: File, index: OMRContent): File = omrFile.getParentFile / index.`data-file`.last
+  def dataFile(omrFile: File, index: OMRContent.V1): File = omrFile.getParentFile / index.`data-file`.last
   def dataFile(omrFile: File): File = dataFile(omrFile, omrContent(omrFile))
   def dataFile(omrFile: File, name: String): File = omrFile.getParentFile / name
 
-  def fileDirectory(omrFile: File, index: OMRContent): Option[File] = index.`file-directory`.map(d => omrFile.getParentFile / d)
+  def fileDirectory(omrFile: File, index: OMRContent.V1): Option[File] = index.`file-directory`.map(d => omrFile.getParentFile / d)
   def fileDirectory(file: File): Option[File] =
     val index = omrContent(file)
     fileDirectory(file, index)
@@ -149,13 +110,13 @@ object OMRFormat:
     openMOLEVersion: String,
     option: OMROption)(using TimeService, FileService, TmpDirectory) =
 
-    def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.DataContent, fileDirectory: Option[String]) =
+    def methodFormat(existingData: Seq[String], fileName: String, dataContent: OMRContent.V1.DataContent, fileDirectory: Option[String]) =
       def mode =
         if option.append
-        then OMRContent.DataMode.Append
-        else OMRContent.DataMode.Create
+        then OMRContent.V1.DataMode.Append
+        else OMRContent.V1.DataMode.Create
 
-      OMRContent(
+      OMRContent.V1(
         `format-version` = omrVersion,
         `openmole-version` = openMOLEVersion,
         `execution-id` = executionId,
@@ -216,10 +177,10 @@ object OMRFormat:
       ps.print(compact(render(jsonContent)))
 
     def contentData =
-      OMRContent.DataContent:
+      OMRContent.V1.DataContent:
         data.section.map: s =>
           def sectionIndex = if s.indexes.nonEmpty then Some(s.indexes) else None
-          OMRContent.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
+          OMRContent.V1.DataContent.SectionData(s.name, s.variables.map(v => ValData(v.prototype)), sectionIndex)
 
     // Is created by variablesToJValues if it found some files
     def fileDirectoryValue =
@@ -354,7 +315,7 @@ object OMRFormat:
 //        case _ => jsoniter.cannotConvertFromJSON[File](v)
 
     index.`data-mode` match
-      case OMRContent.DataMode.Create =>
+      case OMRContent.V1.DataMode.Create =>
         def sectionToVariables(section: SectionData, a: JArray) =
           lazy val isIndex = section.indexes.getOrElse(Seq()).toSet
           def indexFilter(v: ValData) = if !indexOnly then true else isIndex.contains(v.name)
@@ -372,7 +333,7 @@ object OMRFormat:
 
         (index.`data-content`.section zip content.arr).map: (s, c) =>
           sectionToVariables(SectionData(s), c.asInstanceOf[JArray])
-      case OMRContent.DataMode.Append =>
+      case OMRContent.V1.DataMode.Append =>
         def sectionToAggregatedVariables(section: Seq[SectionData], content: JsonParser) =
           val sectionVals =
             section.map: s =>
@@ -447,11 +408,11 @@ object OMRFormat:
   def methodName(file: File): Option[String] =
     methodName(omrContent(file))
 
-  def methodName(content: OMRContent): Option[String] =
+  def methodName(content: OMRContent.V1): Option[String] =
     content.method.flatMap: j =>
       j.hcursor.downField(methodNameField).as[String].toOption
 
-  def writeCSV(
+  def exportToCSV(
     file: File,
     destination: File,
     dataFile: Option[String] = None,
@@ -483,7 +444,7 @@ object OMRFormat:
           append = true
         )
 
-  def writeJSON(
+  def exportToJSON(
     file: File,
     destination: File,
     dataFile: Option[String] = None) =
@@ -502,7 +463,7 @@ object OMRFormat:
       `time-save`: Long,
       method: Option[Json]) derives derivation.ConfiguredCodec
 
-    import OMRContent.given
+    import OMRContent.V1.given
 
     def jsonData =
       variablesValues.toIterator.map: v =>
@@ -543,22 +504,3 @@ object OMRFormat:
       gen.writeEndArray()
       gen.writeEndObject()
       gen.close()
-
-  def readSingleJSONField(file: File, targetField: String): Option[String] =
-    import com.fasterxml.jackson.core.JsonFactory
-    import scala.util.boundary
-
-    val factory = JsonFactory()
-    file.withGzippedInputStream: st =>
-      val parser = factory.createParser(st)
-      try
-        boundary[Option[String]]:
-          while parser.nextToken() != null
-          do
-            if parser.currentName() == targetField
-            then
-              parser.nextToken()
-              boundary.break(Some(parser.getValueAsString))
-          None
-      finally
-        parser.close()

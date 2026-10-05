@@ -1,6 +1,7 @@
 package org.openmole.core
 
 import org.openmole.core.context.*
+import org.openmole.tool.file.*
 import org.openmole.core.exception.UserBadDataError
 
 package object json:
@@ -174,6 +175,25 @@ package object json:
       override def mapper = objectMapper
 
     jsonMethods
+
+  def readSingleJSONField(file: File, targetField: String): Option[String] =
+    import com.fasterxml.jackson.core.JsonFactory
+    import scala.util.boundary
+
+    val factory = JsonFactory()
+    file.withGzippedInputStream: st =>
+      val parser = factory.createParser(st)
+      try
+        boundary[Option[String]]:
+          while parser.nextToken() != null
+          do
+            if parser.currentName() == targetField
+            then
+              parser.nextToken()
+              boundary.break(Some(parser.getValueAsString))
+          None
+      finally
+        parser.close()
 
 
 //  object jsoniter:

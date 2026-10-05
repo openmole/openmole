@@ -412,10 +412,10 @@ object utils:
             try
               format match
                 case GUIOMRContent.ExportFormat.JSON =>
-                  org.openmole.core.format.OMRFormat.writeJSON(omrFile, f, dataFile = Some(h))
+                  org.openmole.core.format.OMRFormat.exportToJSON(omrFile, f, dataFile = Some(h))
                   tos.addFile(f, s"$i.json")
                 case GUIOMRContent.ExportFormat.CSV =>
-                  org.openmole.core.format.OMRFormat.writeCSV(omrFile, f, dataFile = Some(h))
+                  org.openmole.core.format.OMRFormat.exportToCSV(omrFile, f, dataFile = Some(h))
                   tos.addFile(f, s"$i.csv")
             finally f.delete()
         finally tos.close()
@@ -428,11 +428,11 @@ object utils:
           format match
             case GUIOMRContent.ExportFormat.JSON =>
               val f = tmpDirectory.newFile(fileBaseName, ".json")
-              org.openmole.core.format.OMRFormat.writeJSON(omrFile, f)
+              org.openmole.core.format.OMRFormat.exportToJSON(omrFile, f)
               (f, s"$fileBaseName.json")
             case GUIOMRContent.ExportFormat.CSV =>
               val f = tmpDirectory.newFile(fileBaseName, ".csv")
-              org.openmole.core.format.OMRFormat.writeCSV(omrFile, f)
+              org.openmole.core.format.OMRFormat.exportToCSV(omrFile, f)
               (f, s"$fileBaseName.csv")
 
         def deleteExportFile = IO[Unit]:
