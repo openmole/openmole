@@ -39,29 +39,29 @@ import java.util.UUID
 import scala.collection.mutable
 
 object OMRContent:
- case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
- case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
+  case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
+  case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
 
- object DataMode:
-  given Encoder[DataMode] = Encoder.instance:
-   case DataMode.Append => Encoder.encodeString("append")
-   case DataMode.Create => Encoder.encodeString("create")
+  object DataMode:
+    given Encoder[DataMode] = Encoder.instance:
+      case DataMode.Append => Encoder.encodeString("append")
+      case DataMode.Create => Encoder.encodeString("create")
 
   given Decoder[DataMode] =
     Decoder.decodeString.map:
       case "append" => DataMode.Append
       case "create" => DataMode.Create
 
- enum DataMode:
-  case Append, Create
+  enum DataMode:
+    case Append, Create
 
- enum DataStore derives derivation.ConfiguredCodec:
-  case GZipFile
+  enum DataStore derives derivation.ConfiguredCodec:
+    case GZipFile
 
- object DataContent:
-   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
+  object DataContent:
+    case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
 
- case class DataContent(section: Seq[DataContent.SectionData]) derives derivation.ConfiguredCodec
+  case class DataContent(section: Seq[DataContent.SectionData]) derives derivation.ConfiguredCodec
 
 case class OMRContent(
   `format-version`: String,
@@ -82,6 +82,11 @@ def omrVersion = "1.0"
 def dataDirectoryName = ".omr-data"
 
 object OMRFormat:
+  object SectionData:
+    def apply(section: OMRContent.DataContent.SectionData) = new OMRFormat.SectionData(section.name, section.variables, section.indexes)
+
+  case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
+
   object omr:
     def dataFileName(executionId: String, uuid: String) =
       def executionPrefix = executionId.filter(_ != '-')
@@ -106,10 +111,11 @@ object OMRFormat:
     val content = file.content(gz = true)
     decode[OMRContent](content).toTry.get
 
-  def dataFileField(file: File): Seq[String] = omrContent(file).`data-file`
+  def dataFileNames(omrFile: File): Seq[String] =
+    omrContent(omrFile).`data-file`
 
   def dataFiles(omrFile: File): Seq[(String, File)] =
-    dataFileField(omrFile).map: n =>
+    dataFileNames(omrFile).map: n =>
       (n, dataFile(omrFile, n))
 
   def dataFile(omrFile: File, index: OMRContent): File = omrFile.getParentFile / index.`data-file`.last
@@ -307,7 +313,7 @@ object OMRFormat:
     relativePath: Boolean = false,
     dataFile: Option[File] = None,
     fileDirectory: Option[File] = None,
-    indexOnly: Boolean = false): Seq[(section: OMRContent.DataContent.SectionData, variables: Seq[Variable[?]])] =
+    indexOnly: Boolean = false): Seq[(section: SectionData, variables: Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     
     def dataFileValue = dataFile getOrElse OMRFormat.dataFile(omrFile, index)
@@ -325,7 +331,7 @@ object OMRFormat:
     omrFile: File,
     is: java.io.InputStream,
     fileDirectory: Option[File],
-    indexOnly: Boolean = false): Seq[(section: OMRContent.DataContent.SectionData, variables: Seq[Variable[?]])] =
+    indexOnly: Boolean = false): Seq[(section: SectionData, variables: Seq[Variable[?]])] =
     val index = omrContent(omrFile)
 
     def loadFile(v: org.json4s.JValue) =
@@ -349,7 +355,7 @@ object OMRFormat:
 
     index.`data-mode` match
       case OMRContent.DataMode.Create =>
-        def sectionToVariables(section: OMRContent.DataContent.SectionData, a: JArray) =
+        def sectionToVariables(section: SectionData, a: JArray) =
           lazy val isIndex = section.indexes.getOrElse(Seq()).toSet
           def indexFilter(v: ValData) = if !indexOnly then true else isIndex.contains(v.name)
 
@@ -365,9 +371,9 @@ object OMRFormat:
         val content = readContent()
 
         (index.`data-content`.section zip content.arr).map: (s, c) =>
-          sectionToVariables(s, c.asInstanceOf[JArray])
+          sectionToVariables(SectionData(s), c.asInstanceOf[JArray])
       case OMRContent.DataMode.Append =>
-        def sectionToAggregatedVariables(section: Seq[OMRContent.DataContent.SectionData], content: JsonParser) =
+        def sectionToAggregatedVariables(section: Seq[SectionData], content: JsonParser) =
           val sectionVals =
             section.map: s =>
               s.variables.toArray.map(ValData.toVal)
@@ -408,7 +414,7 @@ object OMRFormat:
         val s = inputStreamSequence(begin, is, end)
 
         val p = objectMapper.createParser(s)
-        try sectionToAggregatedVariables(index.`data-content`.section, p)
+        try sectionToAggregatedVariables(index.`data-content`.section.map(SectionData.apply), p)
         finally p.close()
 
 
@@ -424,7 +430,7 @@ object OMRFormat:
     val indexedValues = indexes.map(i => i -> new collection.mutable.ArrayBuffer[(IndexedData.FileIndex, Any)](content.`data-file`.size)).toMap
 
     for
-      fileName <- dataFileField(file)
+      fileName <- dataFileNames(file)
       sectionIndexes = variables(file, dataFile = Some(dataFile(file, fileName)), indexOnly = true)
       ((section, variables), i) <- sectionIndexes.zipWithIndex
       v <- variables
