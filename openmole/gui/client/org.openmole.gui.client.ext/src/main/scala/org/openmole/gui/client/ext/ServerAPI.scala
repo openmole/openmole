@@ -59,7 +59,6 @@ trait ServerAPI:
   def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]]
   def removePlugin(path: SafePath)(using BasePath): Future[Unit]
 
-  def omrMethod(path: SafePath)(using BasePath): Future[Option[String]]
   def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent]
   def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]]
 

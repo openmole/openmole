@@ -560,12 +560,6 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     import services._
     PluginManager.isOSGI(safePathToFile(safePath))
 
-  // Analysis plugins
-  def omrMethodName(result: SafePath): Option[String] =
-    import services.*
-    val omrFile = safePathToFile(result)
-    OMRFormat.methodName(omrFile)
-
   def omrFiles(omr: SafePath): Option[SafePath] =
     import services.*
     val omrFile = safePathToFile(omr)

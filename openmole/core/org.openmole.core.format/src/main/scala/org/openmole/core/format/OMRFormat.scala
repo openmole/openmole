@@ -374,9 +374,6 @@ object OMRFormat:
     omr.readDataStream(dataFileValue): is =>
       omr.variablesFromStream(omrFile, is, fileValue)
 
-  def methodName(file: File): Option[String] =
-    methodName(omrContent(file))
-
   def methodName(content: V1): Option[String] =
     content.method.flatMap: j =>
       j.hcursor.downField(methodNameField).as[String].toOption

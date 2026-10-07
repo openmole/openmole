@@ -152,7 +152,6 @@ class CoreAPIServer(apiImpl: ApiImpl):
       copyFiles.implementedBy(apiImpl.copyFiles),
       move.implementedBy(apiImpl.move),
       temporaryDirectory.implementedBy(_ => apiImpl.temporaryDirectory()),
-      omrMethod.implementedBy(apiImpl.omrMethodName),
       omrContent.implementedBy(apiImpl.omrContent),
       omrFiles.implementedBy(apiImpl.omrFiles),
       cloneRepository.implementedBy(apiImpl.cloneRepository),
