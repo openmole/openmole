@@ -427,11 +427,8 @@ case class GUIOMRContent(
   script: Option[GUIOMRScript],
   timeStart: Long,
   timeSave: Long,
-  index: Option[GUIOMRContent.Index],
   methodName: Option[String],
   method: Option[io.circe.Json])
-
-case class GUIOMRDataIndex(sectionIndex: Int, variableName: String, values: Seq[data.GUIVariable.ValueType], fileIndex: Seq[String])
 
 case class GUIOMRImport(`import`: String, content: String)
 case class GUIOMRScript(content: String, `import`: Seq[GUIOMRImport])

@@ -3,7 +3,6 @@ package org.openmole.gui.server.core
 import org.eclipse.jgit.api.Git
 
 import java.io.File
-import java.text.SimpleDateFormat
 import org.openmole.core.buildinfo
 import org.openmole.core.event.*
 import org.openmole.core.pluginmanager.*
@@ -573,29 +572,21 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     OMRFormat.fileDirectory(omrFile).map: rf =>
       fileToSafePath(rf)
 
-  def omrContent(result: SafePath, dataFile: Option[String]): GUIOMRContent =
+  def omrContent(result: SafePath): GUIOMRContent =
     import services.*
     import GUIVariable.ValueType
     import GUIVariable.ValueType.*
     val omrFile = safePathToFile(result)
 
     def content =
-      OMRFormat.variables(omrFile, dataFile = dataFile.map(d => OMRFormat.dataFile(omrFile, d))).map: v =>
+      OMRFormat.variables(omrFile).map: v =>
         GUIOMRSectionContent(v.section.name, v.variables.map(toGUIVariable))
 
     val omrContent = OMRFormat.omrContent(omrFile)
 
     def script =
-      def convertImport(i: OMRContent.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
-
+      def convertImport(i: OMRFormat.Import) = GUIOMRImport(`import` = i.`import`, content = i.content)
       omrContent.script.map(s => GUIOMRScript(content = s.content, `import` = s.`import`.getOrElse(Seq()).map(convertImport)))
-
-    def index =
-      val names = omrContent.`data-content`.section.flatMap(_.indexes)
-      val size = omrContent.`data-file`.size
-      if names.flatten.isEmpty || size <= 1
-      then None
-      else Some(GUIOMRContent.Index(size, names))
 
     def methodName = OMRFormat.methodName(omrContent)
 
@@ -606,24 +597,9 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       script = script,
       timeStart = omrContent.`time-start`,
       timeSave = omrContent.`time-save`,
-      index = index,
       methodName = methodName,
       method = omrContent.method
     )
-
-
-
-  def omrDataIndex(result: SafePath): Seq[GUIOMRDataIndex] =
-    import services.*
-    import GUIVariable.ValueType
-    import GUIVariable.ValueType.*
-    val omrFile = safePathToFile(result)
-
-    def indexes =
-      OMRFormat.indexes(omrFile).map: id =>
-        GUIOMRDataIndex(id.sectionIndex, id.variableName, id.values.flatMap(toValueTypeFromAny), id.fileIndex.toSeq)
-
-    indexes
 
   def toValueTypeFromAny(x: Any): Option[GUIVariable.ValueType] =
     import services.*

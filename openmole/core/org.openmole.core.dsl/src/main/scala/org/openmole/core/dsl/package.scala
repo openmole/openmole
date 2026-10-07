@@ -55,7 +55,10 @@ package dsl:
     object omr:
       def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.exportToCSV(file, destination)
       def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.exportToJSON(file, destination)
-      def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.fileDirectory(file).foreach(_.copy(destination))
+      def copy(file: File, destination: File) = org.openmole.core.format.OMRFormat.copy(file, destination)
+      def move(file: File, destination: File) = org.openmole.core.format.OMRFormat.move(file, destination)
+      def delete(file: File) = org.openmole.core.format.OMRFormat.delete(file)
+      def diskUsage(file: File) = org.openmole.core.format.OMRFormat.diskUsage(file)
       def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
 
     object openmole:

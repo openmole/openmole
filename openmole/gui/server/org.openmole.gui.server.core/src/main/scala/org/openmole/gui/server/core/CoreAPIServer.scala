@@ -58,9 +58,9 @@ object CoreAPIServer:
 
     def addOMR(tos: TarArchiveOutputStream, f: File) =
       import org.openmole.core.format.*
-      val dataFiles = OMRFormat.dataFileNames(f)
+      val dataFiles = OMRFormat.dataFiles(f)
       tos.addFile(f, f.getName)
-      dataFiles.foreach(n => tos.addFile(OMRFormat.dataFile(f, n), n))
+      dataFiles.foreach((n, df) => tos.addFile(df, n))
 
     def addFile(tos: TarArchiveOutputStream, f: File) =
       if f.isDirectory
@@ -155,7 +155,6 @@ class CoreAPIServer(apiImpl: ApiImpl):
       omrMethod.implementedBy(apiImpl.omrMethodName),
       omrContent.implementedBy(apiImpl.omrContent),
       omrFiles.implementedBy(apiImpl.omrFiles),
-      omrDataIndex.implementedBy(apiImpl.omrDataIndex),
       cloneRepository.implementedBy(apiImpl.cloneRepository),
       commit.implementedBy(apiImpl.commit),
       revert.implementedBy(apiImpl.revert),
@@ -248,9 +247,9 @@ class CoreAPIServer(apiImpl: ApiImpl):
         import apiImpl.services.*
         val omrFile = safePathToFile(CoreAPIServer.getSafePath(req).head)
         val format = req.params.getOrElse(org.openmole.gui.shared.api.formatParam, throw new UserBadDataError(s"Parameter ${org.openmole.gui.shared.api.formatParam} is required"))
-        val history = req.params.get(org.openmole.gui.shared.api.historyParam).map(_.toBoolean).getOrElse(false)
+        //val history = req.params.get(org.openmole.gui.shared.api.historyParam).map(_.toBoolean).getOrElse(false)
 
-        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format), history)
+        HTTP.convertOMR(req, omrFile, GUIOMRContent.ExportFormat.fromString(format))
 
 
 

@@ -10,7 +10,7 @@ object ScriptSourceData:
   case class ScriptData(workDirectory: File, script: File) extends ScriptSourceData:
     val content = if script.exists() then script.content else ""
     val imports =
-      val is = Imports.directImportedFiles(script).map(i => OMRContent.Import(ImportedFile.identifier(i), i.file.content))
+      val is = Imports.directImportedFiles(script).map(i => OMRFormat.Import(ImportedFile.identifier(i), i.file.content))
       if is.isEmpty then None else Some(is)
 
   case object NoData extends ScriptSourceData
