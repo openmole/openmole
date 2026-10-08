@@ -74,7 +74,7 @@ object ModelWizardPanel:
         onoff.signal.map(oo => expandAction(oo, id)).expand(panel)
       )
 
-  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins) =
+  def render(using api: ServerAPI, basePath: BasePath, panels: Panels, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
     given NotificationService = NotificationManager.toService(panels.notifications)
     val exclusiveMenu = new ExclusiveMenu
 

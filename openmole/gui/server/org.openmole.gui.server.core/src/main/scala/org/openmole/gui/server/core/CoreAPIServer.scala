@@ -58,7 +58,7 @@ object CoreAPIServer:
 
     def addOMR(tos: TarArchiveOutputStream, f: File) =
       import org.openmole.core.format.*
-      val dataFiles = OMRFormat.dataFileField(f)
+      val dataFiles = OMRFormat.dataFileNames(f)
       tos.addFile(f, f.getName)
       dataFiles.foreach(n => tos.addFile(OMRFormat.dataFile(f, n), n))
 

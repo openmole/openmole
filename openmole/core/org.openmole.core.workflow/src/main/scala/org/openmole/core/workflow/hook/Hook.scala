@@ -25,7 +25,8 @@ import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
 import org.openmole.core.timeservice.TimeService
-import org.openmole.core.setter.{InfoConfig, InputOutputConfig}
+import org.openmole.core.setter.{DefinitionScope, InfoConfig, InputOutputConfig}
+import org.openmole.core.workflow.dsl.Condition
 import org.openmole.core.workflow.mole.{MoleExecution, Ticket}
 import org.openmole.core.workspace.{TmpDirectory, Workspace}
 import org.openmole.tool.cache.KeyValueCache

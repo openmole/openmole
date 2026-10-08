@@ -59,8 +59,8 @@ object Plot {
     def name = "Heat map"
   }
 
-  enum NumberOfColumToBePlotted:
-    case One, Two, N, Parallel
+  enum SelectedPlot:
+    case One, Two, N, Parallel, Method
   
   def baseDiv:Div = div()
 

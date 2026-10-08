@@ -17,8 +17,6 @@ import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 
-
-import javax.swing.plaf.multi.MultiToolBarUI
 import scala.concurrent.Await
 import scala.concurrent.duration.*
 import scala.scalajs.js.timers.*
@@ -95,6 +93,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
 
   def run() =
     given BasePath = basePath
+    given NotificationService = NotificationManager.toService(panels.notifications)
 
     val containerNode = dom.document.querySelector("#openmole-content")
     //import scala.concurrent.ExecutionContext.Implicits.global

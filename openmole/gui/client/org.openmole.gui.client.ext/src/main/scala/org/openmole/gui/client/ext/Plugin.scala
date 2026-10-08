@@ -41,8 +41,8 @@ trait AuthenticationPluginFactory extends GUIPluginFactory:
   def test(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Seq[Test]]
   def remove(data: AuthType)(using basePath: BasePath, notificationAPI: NotificationService): Future[Unit]
 
-trait MethodAnalysisPlugin extends GUIPlugin:
-  def panel(safePath: SafePath, services: PluginServices)(using basePath: BasePath, notificationAPI: NotificationService): HtmlElement
+trait VisualizationPlugin extends GUIPlugin:
+  def panel(safePath: SafePath, guiOMRContent: GUIOMRContent, services: PluginServices)(using basePath: BasePath): HtmlElement
 
 case class PluginServices(errorManager: ErrorManager)
 
@@ -52,4 +52,4 @@ trait ErrorManager:
 case class GUIPlugins(
   authenticationFactories: Seq[AuthenticationPluginFactory],
   wizardFactories: Seq[wizard.WizardPluginFactory],
-  analysisPlugins: Map[String, MethodAnalysisPlugin])
+  visualizationPlugins: Map[String, VisualizationPlugin])

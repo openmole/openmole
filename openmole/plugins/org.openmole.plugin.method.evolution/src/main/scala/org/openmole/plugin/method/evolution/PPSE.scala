@@ -31,6 +31,7 @@ object PPSE:
 
   def likelihoodVal = Val[Double]("likelihood", GAIntegration.namespace)
   def hitVal = Val[Int]("hit", GAIntegration.namespace)
+  def patternVal(i: Int) = Val[Int](s"pattern$i", GAIntegration.namespace)
 
   case class DeterministicParams(
     pattern:               IArray[Double] => Vector[Int],
@@ -48,6 +49,7 @@ object PPSE:
     minDensityQuantile:    Double,
     densitySample:         Int,
     maxRareSample:         Int,
+    nicheSize:             Int,
     minClusterSize:        Int,
     regularisationEpsilon: Double)
 
@@ -101,16 +103,23 @@ object PPSE:
         def afterDuration(d: Time, s: S, population: Vector[I]): Boolean = mgo.evolution.stop.afterDuration[S, I](d, Focus[S](_.startTime))(s, population)
 
         def result(population: Vector[I], state: S, keepAll: Boolean, includeOutputs: Boolean) = FromContext: p =>
-          import p._
+          import p.*
+
+
           val toFitness = Objective.toFitnessFunction(om.phenotypeContent, om.objectives).from(context)
           val res = mgo.evolution.algorithm.PPSE.result[Phenotype](population, state, om.genome.continuous, toFitness andThen om.pattern)
           val genomes = GAIntegration.genomesOfPopulationToVariables(om.genome, res.map(_.continuous) zip res.map(_ => Vector.empty), scale = false, result = true)
           val fitness = GAIntegration.objectivesOfPopulationToVariables(om.objectives, res.map(_.phenotype).map(toFitness))
           val generated = Variable(GAIntegration.generatedVal.array, res.map(_.individual.generation).toArray)
           val densities = Seq(Variable(likelihoodVal.array, res.map(_.density).toArray), Variable(hitVal.array, res.map(_.hit).toArray))
+          val patterns =
+            def patternValue(p: Phenotype): Vector[Int] = pattern(p).from(context)
+            res.toArray.map(v => patternValue(v.phenotype).toArray).transpose.zipWithIndex.map: (p, i) =>
+              Variable(patternVal(i).array, p)
+
           val outputValues = if includeOutputs then DeterministicGAIntegration.outputValues(om.phenotypeContent, res.map(_.individual.phenotype)) else Seq()
 
-          genomes ++ fitness ++ Seq(generated) ++ densities ++ outputValues
+          genomes ++ fitness ++ patterns ++ Seq(generated) ++ densities ++ outputValues
 
         def initialGenomes(n: Int, rng: scala.util.Random) = FromContext: p =>
           import p.*
@@ -181,6 +190,7 @@ object PPSE:
             tolerance = om.gmmTolerance,
             dilation = om.dilation,
             minClusterSize = om.minClusterSize,
+            nicheSize = om.nicheSize,
             regularisationEpsilon = om.regularisationEpsilon) apply (s, population, candidates, rng)
 
           (s2, elited)
@@ -229,6 +239,7 @@ object PPSE:
     densitySample: Int,
     bootstrap: Int,
     maxRareSample:    Int,
+    nicheSize: Int,
     minClusterSize:   Int,
     regularisationEpsilon: Double,
     accept:    Option[Condition],
@@ -253,6 +264,7 @@ object PPSE:
         minDensityQuantile = minDensityQuantile,
         densitySample = densitySample,
         maxRareSample = maxRareSample,
+        nicheSize = nicheSize,
         minClusterSize = minClusterSize,
         bootstrap = bootstrap,
         regularisationEpsilon = regularisationEpsilon)
@@ -300,6 +312,7 @@ object PPSEEvolution:
       densitySample = p.densitySample,
       bootstrap = p.bootstrap,
       maxRareSample = p.maxRareSample,
+      nicheSize = p.nicheSize,
       minClusterSize = p.minClusterSize,
       regularisationEpsilon = p.regularisationEpsilon,
       accept = p.accept,
@@ -339,6 +352,7 @@ case class PPSEEvolution(
   densitySample: Int                                    = 1000,
   bootstrap: Int                                        = 1000,
   maxRareSample: Int                                    = 100,
+  nicheSize: Int                                        = 1,
   minClusterSize: Int                                   = 5,
   regularisationEpsilon: Double                         = 10e-6,
   scope:       DefinitionScope                          = "ppse")

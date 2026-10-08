@@ -9,7 +9,7 @@ import org.openmole.gui.client.tool.nouislider.NoUISliderImplicits.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.raquo.laminar.api.L.*
 import com.raquo.laminar.api.features.unitArrows
-import org.openmole.gui.client.core.{Panels}
+import org.openmole.gui.client.core.Panels
 import org.openmole.gui.client.core.files.TabContent.TabData
 import org.openmole.gui.client.ext.*
 import org.openmole.gui.client.core.CoreUtils
@@ -17,39 +17,32 @@ import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.unwrap
 import org.openmole.gui.client.tool.OMTags.btn_purple
 import org.openmole.gui.client.core.Waiter
-import org.openmole.gui.client.tool.plot.Plot.NumberOfColumToBePlotted
+import org.openmole.gui.client.tool.plot.Plot.SelectedPlot
 import org.openmole.gui.client.tool.Component
-import scala.scalajs.js.timers
-import scalaz.Alpha.C
-import org.checkerframework.checker.units.qual.m
 
+import ResultPlot.*
 
 object PlotContent:
 
   enum ResultView:
-    case Raw, Table, Plot, Metadata
+    case Table, Plot, Metadata
   
   import ResultView._  
   trait ContentState
 
   case class TableState(scrollDown: Boolean = false, resultView: ResultView = Table) extends ContentState
-  case class RawState(scrollDown: Boolean = false, resultView: ResultView = Raw) extends ContentState
   case class MetadataState(resultView: ResultView = Metadata) extends ContentState
-  case class PlotState(
-    numberOfColumToBePlotted: NumberOfColumToBePlotted = NumberOfColumToBePlotted.One, 
-    initialHeaders: Seq[String] = Seq()
-    ) extends ContentState
+
 
   case class ContentStates(
     table: TableState = TableState(),
-    raw: RawState = RawState(),
-    plot: PlotState = PlotState()
+    plot: ResultPlotState = ResultPlotState.One()
   )
+
   object ContentState:
     def fromResultView(resultView: ResultView, contentStates: ContentStates) =  
       resultView match
         case Table=> contentStates.table
-        case Raw => contentStates.raw
         case Plot => contentStates.plot
         case Metadata => MetadataState()
 
@@ -57,17 +50,12 @@ object PlotContent:
     def update(contentState: ContentState) = 
       contentState match
         case s: TableState => cs.copy(table = s)
-        case r: RawState => cs.copy(raw = r)
-        case p: PlotState => cs.copy(plot = p)
+        case p: ResultPlotState => cs.copy(plot = p)
         case _=> cs
 
-  case class ContentSection(section: String, rawContent: String, rowData: RowData, initialHash: String, historyView: Option[ResultView] = None)
+  case class ContentSection(section: String, rowData: RowData, initialHash: String, historyView: Option[ResultView] = None)
 
   case class Section(name: String)
-
-  //case class RawTablePlot(editor: EditorPanelUI, table: HtmlElement, plot: HtmlElement, resultPlot: ResultPlot, metadata: HtmlElement)
-
-  //case class StateAndSection(contentState: ContentState, contentSection: ContentSection, historyView: Option[ResultView])
 
   case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
 
@@ -85,17 +73,14 @@ object PlotContent:
     states: ContentStates = ContentStates(),
     currentState: ContentState = TableState(),
     omrMetadata: Option[OMRMetadata] = None,
-    currentIndex: Option[Int] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+    currentIndex: Option[Int] = None,
+    methodPanel: Option[HtmlElement] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement) =
     import ResultView.*
 
     def buildSectionView(sectionName: String) =
       contentSections.find(_.section == sectionName) match
         case Some(cs: ContentSection) =>
           currentState match
-            case RawState(scrollDown, resultView) => 
-              val editor = EditorPanelUI(safePath, cs.rawContent, "initialHash")
-              editor.setReadOnly(true)
-              EditorView(editor.view, editor)
             case TableState(scrollDown, resultView) => 
                val headerStyle = Seq(position := "sticky",
                   top := "0",
@@ -108,12 +93,15 @@ object PlotContent:
                     idAttr := "editor",
                     dataTable(cs.rowData.content.map(_.map(RowData.toDataContent)))
                     .addHeaders(cs.rowData.headers *)
-                      .style(tableStyle = Seq(bordered_table), headerStyle = headerStyle)
+                      .style(
+                        tableStyle = Seq(bordered_table),
+                        headerStyle = headerStyle
+                      )
                       .sortable
                       .render.render.amend(borderCollapse.collapse)
                   )
                 )
-            case ps: PlotState=>
+            case ps: ResultPlotState =>
               val columns = cs.rowData.content.transpose
               val plotData = ColumnData(
                   cs.rowData.headers.zip(columns).zip(cs.rowData.dimensions).flatMap:
@@ -121,8 +109,8 @@ object PlotContent:
                     case ((h, c), d) if d == 1 => Some(Column(h, ArrayColumn(c.map(_.value).map(ResultData.fromStringToArray))))
                     case _ => None
                 )
-              val resPlot = new ResultPlot(plotData, ps)
-              val fcd = resPlot.fromColumnData 
+              val resPlot = new ResultPlot(plotData, methodPanel, Var(ps))
+              val fcd = resPlot.fromColumnData
 
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
@@ -225,18 +213,14 @@ object PlotContent:
     def updatedContentState =
       currentState match
         case _: TableState => TableState()
-        case _: RawState => RawState()
-        case _: PlotState =>
+        case _: ResultPlotState =>
             sectionView match
-              case PlotView(view, resultPlot) => 
-                val selectedAxis = resultPlot.axisRadios.now().selected.now().map(_.t)
-                val numberOfColumToBePlotted = resultPlot.oneTwoNRadio.selected.now().map(x=> x.t).head
-                PlotState(numberOfColumToBePlotted, selectedAxis)
-              case _ => PlotState(NumberOfColumToBePlotted.One, Seq())
+              case PlotView(view, resultPlot) => resultPlot.plotState.now()
+              case _ => ResultPlotState.One()
         case _: MetadataState => MetadataState()
 
     def switchFromState(state: ContentState, states: ContentStates): Unit = 
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata, methodPanel = methodPanel)
       panels.tabContent.updateTab(safePath, content)
 
     def switchFromResultView(resultView: ResultView): Unit = 
@@ -245,22 +229,20 @@ object PlotContent:
       switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
 
     def switchSection(section: String): Unit =
-      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata, methodPanel = methodPanel)
       panels.tabContent.updateTab(safePath, content)
 
-    val rawToggleState = ToggleState(ResultView, "CSV", btn_primary_string, _ => switchFromResultView(Raw))
-    val tableToggleState = ToggleState(ResultView, "Table", btn_primary_string, _ => switchFromResultView(Table))
-    val plotToggleState = ToggleState(ResultView, "Plot", btn_primary_string, _ => switchFromResultView(Plot))
-    val metadataToggleState = ToggleState(ResultView, "More", btn_primary_string, _ => switchFromResultView(Metadata))
+    val tableToggleState = ToggleState("Table", btn_primary_string, () => switchFromResultView(Table))
+    val plotToggleState = ToggleState("Plot", btn_primary_string, () => switchFromResultView(Plot))
+    val metadataToggleState = ToggleState("More", btn_primary_string, () => switchFromResultView(Metadata))
 
     def viewIndex(state: ContentState) =
       state match
         case TableState(_,_) => 0
-        case PlotState(_,_) => 1
-        case RawState(_,_) => 2
-        case _=> 3 
+        case _: ResultPlotState => 1
+        case _=> 2
 
-    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, rawToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
+    val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
     val refreshing: Var[Boolean] = Var(false)             
 
     val refreshButton =
@@ -287,15 +269,21 @@ object PlotContent:
                 case true => Waiter.waiter("#794985")
             ),
             currentState match
-              case _: RawState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _: TableState => i(btn_purple, marginLeft := "20", cls :="btn bi-arrow-down", onClick --> setScrollToBottom )
               case _ => div(),
             switchButton.element.amend(margin := "10", width := "150px", marginLeft := "25"),
             contentSections.size match
               case 1 => div()
               case _ => sectionSwitchButton.element.amend(margin := "10", width := "150px", marginLeft := "90"),
-            sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v =>
-              switchSection(contentSections(v).section) }
+            child <-- sectionSwitchButton.selected.signal.map:
+              s =>
+                div(
+                  s"${contentSections(s).rowData.content.size} x ${contentSections(s).rowData.content.headOption.map(_.size).getOrElse(0)}",
+                  position.absolute,
+                  right := "20"
+                )
+            ,
+            sectionSwitchButton.selected.signal.changes.toObservable --> Observer[Int]{ v => switchSection(contentSections(v).section) }
           ),
           sectionView.view
         )

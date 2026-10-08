@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openmole.gui.plugin.analysis.evolution
+package org.openmole.gui.plugin.visualization.evolution
 
 import org.openmole.gui.server.ext.*
 import org.openmole.plugin.method.evolution.EvolutionMetadata
@@ -26,8 +26,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Activator extends BundleActivator:
 
   def info = GUIPluginInfo(
-    analysis = Some(EvolutionMetadata.method -> classOf[EvolutionAnalysis]),
-    router = Some(s => OMRouter(new EvolutionAnalysisServer(s).routes))
+    visualization = Some(EvolutionMetadata.method -> classOf[EvolutionVisualization]),
+    router = Some(s => OMRouter(new EvolutionVisualizationServer(s).routes))
   )
 
   override def start(context: BundleContext): Unit = GUIPluginRegistry.register(this, info)

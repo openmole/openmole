@@ -179,7 +179,13 @@ object AbstractNetLogoTask:
    * @return
    */
   def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Val[?]) =
-    Variable.constructArray[java.util.AbstractCollection[Any]](prototype, netlogoCollection, cast(_, _))
+    import scala.jdk.CollectionConverters.*
+    def toIterable(ar: AbstractCollection[?]): Seq[?] =
+      ar.iterator().asScala.toSeq.map:
+        case v: AbstractCollection[?] => toIterable(v)
+        case v => v
+  
+    Variable.constructArray(prototype, toIterable(netlogoCollection), cast(_, _))
 
   /**
    * Check if provided inputs are compatible with NetLogo

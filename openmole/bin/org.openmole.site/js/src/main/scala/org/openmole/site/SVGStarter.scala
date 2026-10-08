@@ -1,6 +1,6 @@
 package org.openmole.site
 
-import org.scalajs.dom.raw._
+import org.scalajs.dom.*
 
 import scalajs.js
 
@@ -48,7 +48,7 @@ object SVGStarter {
     button.addEventListener("click", {
       (e: MouseEvent) =>
         animation.beginElement()
-        button.setAttribute("style", "opacity:0;ponter:unset;" + svgString)
+        button.setAttribute("style", "opacity:0;pointer:unset;" + svgString)
         org.scalajs.dom.window.setTimeout(() => button.setAttribute("style", "opacity:1;" + svgString), timeOut)
     })
 

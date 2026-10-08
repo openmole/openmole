@@ -180,7 +180,7 @@ class TabContent:
   def rename(
       sp: SafePath,
       newSafePath: SafePath
-  )(using Panels, ServerAPI, GUIPlugins, BasePath) =
+  )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) =
     tabIndex(sp).foreach: (ot, i) =>
       save(ot.t).foreach: _ =>
         FileDisplayer
@@ -218,7 +218,7 @@ class TabContent:
   val fontSizeControl =
     div(
       position.absolute,
-      right := "20",
+      right := "10",
       top := "62",
       cls := "file-content",
       display.flex,

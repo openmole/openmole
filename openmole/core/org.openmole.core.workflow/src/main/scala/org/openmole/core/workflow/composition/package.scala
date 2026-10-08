@@ -564,6 +564,14 @@ object ExplorationMethodSetter:
 trait ExplorationMethodSetter[T, P]:
   def apply(t: T, h: P): T
 
+object Hooked:
+  import org.openmole.core.workflow.hook.*
+  
+  extension [T](h: Hooked[T])
+    def when(c: Condition) =
+      given DefinitionScope = h.h.info.definitionScope
+      h.copy(h = h.h when c)
+
 case class Hooked[+T](value: T, h: Hook)
 
 trait CompositionPackage {

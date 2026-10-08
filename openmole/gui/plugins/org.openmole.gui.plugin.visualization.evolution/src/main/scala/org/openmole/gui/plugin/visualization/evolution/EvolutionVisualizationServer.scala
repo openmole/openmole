@@ -1,4 +1,4 @@
-package org.openmole.gui.plugin.analysis.evolution
+package org.openmole.gui.plugin.visualization.evolution
 
 
 /*
@@ -19,21 +19,19 @@ package org.openmole.gui.plugin.analysis.evolution
  */
 
 
-import org.openmole.core.services.Services
-import org.openmole.gui.shared.data.*
-import org.openmole.plugin.method.evolution._
-import org.openmole.core.services.Services
 import cats.effect.IO
 import org.http4s.HttpRoutes
-import org.openmole.gui.shared.data.*
-import org.openmole.gui.shared.api.*
+import org.openmole.core.services.Services
 import org.openmole.gui.server.ext.*
 import org.openmole.gui.server.ext.utils.*
+import org.openmole.gui.shared.api.*
+import org.openmole.gui.shared.data.*
+import org.openmole.plugin.method.evolution.*
 
-class EvolutionAnalysisServer(services: Services):
+class EvolutionVisualizationServer(services: Services):
   val routes: HttpRoutes[IO] =
     routesFromEndpoints(
-      EvolutionAnalysisAPI.analyse.implementedBy(impl.analyse)
+      EvolutionVisualizationAPI.analyse.implementedBy(impl.analyse)
     )
 
   object impl:

@@ -9,14 +9,14 @@ object common {
 
   def sjs(name: String) = name + "_sjs1"
 
-  def scala3VersionValue = "3.8.4"
-  def scalajsVersion = "1.21.0"
+  def scala3VersionValue = "3.9.0"
+  def scalajsVersion = "1.22.0"
 
   def scalaXMLVersion = "2.4.0"
   def gridscaleVersion = CommitVersion("75f3702516", "2.63")
-  def mgoVersion = CommitVersion("84a094801d", "3.68")
+  def mgoVersion = CommitVersion("b16d255912", "3.68")
   def sshjVersion = "0.40.0"
-  def containerVersion = CommitVersion("5286a2d5ec", "1.33")
+  def containerVersion = CommitVersion("274d710d51", "1.33")
   def bouncyCastleVersion = "1.82"
   def scalaTagsVersion = "0.13.1"
   def laminarVersion = "17.2.1"
@@ -60,7 +60,7 @@ object common {
   def slf4jVersion = "2.0.9"
   def foryVersion = "0.11.0"
   def jgitVersion = "7.0.0.202409031743-r"
-  def gearsVersion = "0.2.0"
+  def gearsVersion = "0.3.1"
   def ulidCreatorVersion = "5.2.3"
   def izumiReflectVersion = "3.0.9"
 

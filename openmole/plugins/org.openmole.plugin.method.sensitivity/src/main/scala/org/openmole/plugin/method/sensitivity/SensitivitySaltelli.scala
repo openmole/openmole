@@ -96,7 +96,12 @@ object SensitivitySaltelli:
       fC: Array[Array[Double]]): (first: Array[Double], total: Array[Double]) =
       def variance(xs: Array[Double]): Double =
         val mean = xs.sum / xs.size
-        xs.map(x => math.pow(x - mean, 2)).sum / xs.size
+        var sum = 0.0
+
+        for i <- 0 until xs.size
+        do sum += Math.pow(xs(i) - mean, 2)
+
+        sum / xs.size
 
       val n = fA.length
       val d = fC.length
@@ -109,17 +114,23 @@ object SensitivitySaltelli:
       require(varY > 0.0, "Variance of output is zero")
 
       val firstOrder =
+
         fC.map: fCi =>
-          val num = (fB lazyZip fCi lazyZip fA).map((fb, fci, fa) => fb * (fci - fa)).sum
+          var num = 0.0
+
+          for i <- 0 until fB.length
+          do num += fB(i) * (fCi(i) - fA(i))
+
           num / (n * varY)
 
       val totalOrder =
         fC.map: fCi =>
-          val num =
-            (fA zip fCi).map: (fa, fci) =>
-              val d = fa - fci
-              d * d
-            .sum
+          var num = 0.0
+
+          for i <- 0 until fA.length
+          do
+            val d = fA(i) - fCi(i)
+            num += d * d
 
           num / (2.0 * n * varY)
 

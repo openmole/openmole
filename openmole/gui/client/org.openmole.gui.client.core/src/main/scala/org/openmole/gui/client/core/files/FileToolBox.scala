@@ -136,7 +136,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () => Unit, pluginState
     closeToolBox
   }
 
-  def revert(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+  def revert(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
     withSafePath: sp =>
       api.revertFiles(Seq(sp)).foreach: _ =>
         panels.treeNodePanel.refresh
@@ -146,7 +146,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () => Unit, pluginState
           FileDisplayer.display(sp)
         closeToolBox
 
-  def rename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+  def rename(safePath: SafePath, to: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
     val newNode = safePath.parent ++ to
 
     def afterRename =
@@ -232,7 +232,7 @@ class FileToolBox(initSafePath: SafePath, showExecution: () => Unit, pluginState
       })
     )
 
-  def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins) =
+  def contentRoot(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
     div(
       height := "80px",
       child <-- actionConfirmation.signal.combineWith(actionEdit.signal).map:

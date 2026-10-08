@@ -263,12 +263,10 @@ trait StopWordFilter extends js.Object {
   def stopWords: SortedSet[String] = js.native
 }
 
-
 object Importedjs {
 
   @js.native
-  @JSImport("lunr", JSImport.Namespace)
+  @JSImport("lunr", JSImport.Default)
   def lunr(config: js.Function): Index = js.native
 
-  // def version: String = js.native
 }

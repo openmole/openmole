@@ -86,8 +86,8 @@ class TreeNodePanel:
 
   lazy val directoryToggle =
     object FileType
-    val folder = ToggleState(FileType, "Folder", "btn purple-button", _ => {})
-    val file = ToggleState(FileType, "File", "btn purple-button", _ => {})
+    val folder = ToggleState("Folder", "btn purple-button", () => {})
+    val file = ToggleState("File", "btn purple-button", () => {})
     toggle(folder, false, file, () => {})
 
   def createNewNode(newFile: String)(using api: ServerAPI, basePath: BasePath, panels: Panels) =
@@ -491,7 +491,7 @@ class TreeNodePanel:
     treeNodeManager.resetFileFinder
     fileToolBar.findInput.ref.value = ""
 
-  private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
+  private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, notificationAPI: NotificationService): Div =
     val size = Var(100)
     lazy val tree: Div = div(
       cls := "file-scrollable-content",
@@ -566,7 +566,7 @@ class TreeNodePanel:
       editor <- panels.tabContent.editorPanelUI(path)
     do editor.unsetErrors
 
-  def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Div =
+  def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, notificationAPI: NotificationService): Div =
 
     def scriptErrorSignal(using panels: Panels): Signal[Option[String]] =
       panels.tabContent.current.signal.flatMapSwitch:
@@ -597,11 +597,11 @@ class TreeNodePanel:
           case _ => treeView
     )
 
-  def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
+  def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Unit =
     if refresh then panels.tabContent.removeTab(safePath)
     files.FileDisplayer.display(safePath)
 
-  def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): Unit =
+  def displayNode(tn: TreeNode)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Unit =
     tn match
       case tn: TreeNode.File =>
         val tnSafePath = treeNodeManager.directory.now() ++ tn.name
@@ -684,7 +684,7 @@ class TreeNodePanel:
         case Some(GitStatus.Conflicting) => "git-status-conflicting"
         case _ => ""
 
-    def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins): HtmlElement =
+    def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): HtmlElement =
       div(display.flex, flexDirection.column,
         div(display.flex, alignItems.center, lineHeight := "27px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s => if (isSelected(s)) toolBoxColor else "" },
@@ -746,7 +746,7 @@ class TreeNodePanel:
       then moveFiles(Seq(dragged), to)
     draggedNode.set(None)
 
-  def drawNode(node: TreeNode, i: Int, tree: Div)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath) =
+  def drawNode(node: TreeNode, i: Int, tree: Div)(using panels: Panels, plugins: GUIPlugins, api: ServerAPI, basePath: BasePath, pluginServices: PluginServices, notificationAPI: NotificationService) =
     node match
       case fn: TreeNode.File =>
         ReactiveLine(i, fn, TreeNodeType.File, () => displayNode(fn), tree)

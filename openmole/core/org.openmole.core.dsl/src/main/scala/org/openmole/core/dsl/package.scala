@@ -53,8 +53,8 @@ package dsl:
     def dependencies(file: File) = PluginManager.dependencies(file)
 
     object omr:
-      def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeCSV(file, destination)
-      def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.writeJSON(file, destination)
+      def toCSV(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.exportToCSV(file, destination)
+      def toJSON(file: File, destination: File)(using SerializerService) = org.openmole.core.format.OMRFormat.exportToJSON(file, destination)
       def copyFiles(file: File, destination: File) = org.openmole.core.format.OMRFormat.fileDirectory(file).foreach(_.copy(destination))
       def variables(file: File)(using SerializerService) = org.openmole.core.format.OMRFormat.variables(file)
 

@@ -158,15 +158,17 @@ package object abc {
     scope:                DefinitionScope       = "abc island"
   )
 
-  implicit class ABCContainer[M](m: M)(implicit method: ExplorationMethod[M, ABC.ABCParameters]) {
+  implicit class ABCContainer[M](m: M)(implicit method: ExplorationMethod[M, ABC.ABCParameters]):
     val decorator = new MethodHookDecorator(m)(using method)
     export decorator.*
     
-    def hook(directory: FromContext[File], frequency: Long = 1): Hooked[M] = {
+    def hook(
+      output:         WritableOutput,
+      frequency:      OptionalArgument[Long] = None,
+      keepHistory:    Boolean                = false)(using scriptSourceData: ScriptSourceData): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
-      Hooked(m, ABCHook(dsl.method, directory, frequency))
-    }
-  }
+      Hooked(m, ABCHook(dsl.method, output, frequency, keepHistory))
+
 
 }

@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.hook
 
-import org.openmole.core.workflow.mole._
-import org.openmole.core.argument._
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.argument.*
 import org.openmole.core.setter.DefinitionScope
-import org.openmole.core.workflow.hook.Hook
+import org.openmole.core.workflow.hook.{ConditionHook, Hook}
 
 package object modifier {
 

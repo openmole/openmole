@@ -15,22 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.modifier
+package org.openmole.core.workflow.hook
 
 import monocle.Focus
-import org.openmole.core.context._
-import org.openmole.core.argument._
-import org.openmole.core.dsl._
-import org.openmole.core.setter._
-import org.openmole.core.workflow.hook.{ Hook, HookExecutionContext }
-import org.openmole.core.workflow.mole._
+import org.openmole.core.argument.*
+import org.openmole.core.context.*
+import org.openmole.core.setter.*
+import org.openmole.core.workflow.hook.{Hook, HookExecutionContext}
+import org.openmole.core.workflow.mole.*
+import org.openmole.core.workflow.dsl.*
 
-object ConditionHook {
+object ConditionHook:
 
-  implicit def isIO: InputOutputBuilder[ConditionHook] = InputOutputBuilder(Focus[ConditionHook](_.config))
-  implicit def isInfo: InfoBuilder[ConditionHook] = InfoBuilder(Focus[ConditionHook](_.info))
+  given isIO: InputOutputBuilder[ConditionHook] = InputOutputBuilder(Focus[ConditionHook](_.config))
+  given isInfo: InfoBuilder[ConditionHook] = InfoBuilder(Focus[ConditionHook](_.info))
 
-  def apply(hook: Hook, condition: Condition)(implicit name: sourcecode.Name, definitionScope: DefinitionScope) =
+  def apply(hook: Hook, condition: Condition)(using sourcecode.Name, DefinitionScope) =
     new ConditionHook(
       hook,
       condition,
@@ -41,18 +41,18 @@ object ConditionHook {
       outputs ++= hook.outputs.toSeq
     )
 
-}
 
 case class ConditionHook(
   hook:      Hook,
   condition: Condition,
   config:    InputOutputConfig,
   info:      InfoConfig
-) extends Hook {
+) extends Hook:
 
-  override protected def process(executionContext: HookExecutionContext) = FromContext { parameters =>
-    import parameters._
-    if (condition.from(context)) hook.perform(context, executionContext) else context
-  }
+  override protected def process(executionContext: HookExecutionContext) =
+    FromContext: parameters =>
+      import parameters.*
+      if condition.from(context)
+      then hook.perform(context, executionContext)
+      else context
 
-}

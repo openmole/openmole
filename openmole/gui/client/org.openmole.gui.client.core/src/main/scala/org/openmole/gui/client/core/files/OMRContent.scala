@@ -18,11 +18,11 @@ object OMRContent:
     contentStates: ContentStates = ContentStates(),
     currentState: ContentState = TableState(false),
     currentIndex: Option[Int] = None
-    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins): (TabData, HtmlElement) =
+    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement) =
 
     val pcSections = guiOMRContent.section.map: s =>
       val rowData = ResultData.fromOMR(s)
-      ContentSection(s.name.getOrElse("section"), guiOMRContent.raw, rowData, "initialHash")
+      ContentSection(s.name.getOrElse("section"), rowData, "initialHash")
 
     val scriptText =
       guiOMRContent.script match
@@ -53,6 +53,9 @@ object OMRContent:
       foreignHtmlElement(DomApi.unsafeParseHtmlString(html))
 
 
+    def methodPanel =
+      guiOMRContent.methodName.flatMap: method =>
+        guiPlugins.visualizationPlugins.get(method).map(_.panel(safePath, guiOMRContent, pluginServices))
 
     PlotContent.buildTab(
       safePath,
@@ -62,5 +65,6 @@ object OMRContent:
       contentStates,
       currentState,
       omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
-      currentIndex = currentIndex
+      currentIndex = currentIndex,
+      methodPanel = None
     )

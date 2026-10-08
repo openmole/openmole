@@ -555,7 +555,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
     PluginExtensionData(
       GUIPluginRegistry.authentications,
       GUIPluginRegistry.wizards,
-      GUIPluginRegistry.analysis)
+      GUIPluginRegistry.visualizations)
 
   def isOSGI(safePath: SafePath): Boolean =
     import services._
@@ -597,10 +597,7 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       then None
       else Some(GUIOMRContent.Index(size, names))
 
-    def raw =
-      tmpDirectory.withTmpFile("result", ".csv"): csvFile =>
-        OMRFormat.writeCSV(omrFile, csvFile, dataFile)
-        csvFile.content
+    def methodName = OMRFormat.methodName(omrContent)
 
     GUIOMRContent(
       section = content,
@@ -610,7 +607,8 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
       timeStart = omrContent.`time-start`,
       timeSave = omrContent.`time-save`,
       index = index,
-      raw = raw
+      methodName = methodName,
+      method = omrContent.method
     )
 
 

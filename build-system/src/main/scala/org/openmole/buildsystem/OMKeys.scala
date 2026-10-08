@@ -44,7 +44,6 @@ object OMKeys {
   object Osgi {
     val singleton = SettingKey[Boolean]("osgi-singleton")
     val openMOLEScope = SettingKey[Seq[String]]("openmole-scope")
-    val bundleDependencies = TaskKey[Seq[File]]("bundle-dependencies")
   }
 
 }

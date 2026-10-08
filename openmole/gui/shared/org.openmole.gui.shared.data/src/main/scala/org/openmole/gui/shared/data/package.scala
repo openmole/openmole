@@ -288,7 +288,7 @@ object PluginExtensionData:
 case class PluginExtensionData(
   authentications: Seq[GUIPluginAsJS],
   wizards: Seq[GUIPluginAsJS],
-  analysis: Seq[(String, GUIPluginAsJS)])
+  visualizations: Seq[(String, GUIPluginAsJS)])
 
 type GUIPluginAsJS = String
 
@@ -428,7 +428,8 @@ case class GUIOMRContent(
   timeStart: Long,
   timeSave: Long,
   index: Option[GUIOMRContent.Index],
-  raw: String)
+  methodName: Option[String],
+  method: Option[io.circe.Json])
 
 case class GUIOMRDataIndex(sectionIndex: Int, variableName: String, values: Seq[data.GUIVariable.ValueType], fileIndex: Seq[String])
 

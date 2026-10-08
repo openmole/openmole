@@ -1,6 +1,7 @@
 package org.openmole.core
 
 import org.openmole.core.context.*
+import org.openmole.tool.file.*
 import org.openmole.core.exception.UserBadDataError
 
 package object json:
@@ -121,14 +122,14 @@ package object json:
             case (jValue, c) =>
               (jValue, default) match
                 case (value: JValue, Some(serializer)) => serializer(value, arrayType)
-                case _ => throw new UserBadDataError(s"Can not fetch value of type $jValue to type ${c}")
+                case _ => throw new UserBadDataError(s"Can not fetch value $value of type ${value.getClass} to type ${arrayType}")
 
-        given Variable.ConstructArray[JArray] =
-          new Variable.ConstructArray[JArray]:
-            def size(t: JArray) = t.arr.size
-            def iterable(t: JArray) = t.arr.asJava.asInstanceOf[java.lang.Iterable[Any]]
+        def toIterable(ar: JArray): Seq[?] =
+          ar.arr.map:
+            case v: JArray => toIterable(v)
+            case v => v
 
-        Variable.constructArray(v, value, jValueToValue)
+        Variable.constructArray(v, toIterable(value), jValueToValue)
 
       case (value: JValue, Val.caseInt(v))     => Variable(v, jValueToInt(value))
       case (value: JValue, Val.caseLong(v))    => Variable(v, jValueToLong(value))
@@ -139,7 +140,7 @@ package object json:
       case (value, v) =>
         (value, v, default) match
           case (value: JValue, v, Some(serializer)) => Variable.unsecureUntyped(v, serializer(value, v.`type`.runtimeClass))
-          case _                                    => throw new UserBadDataError(s"Can not fetch value of type $jValue to OpenMOLE variable ${v}")
+          case _                                    => throw new UserBadDataError(s"Can not fetch value $jValue to OpenMOLE variable ${v}")
 
 
   lazy val objectMapper =
@@ -174,6 +175,25 @@ package object json:
       override def mapper = objectMapper
 
     jsonMethods
+
+  def readSingleJSONField(file: File, targetField: String): Option[String] =
+    import com.fasterxml.jackson.core.JsonFactory
+    import scala.util.boundary
+
+    val factory = JsonFactory()
+    file.withGzippedInputStream: st =>
+      val parser = factory.createParser(st)
+      try
+        boundary[Option[String]]:
+          while parser.nextToken() != null
+          do
+            if parser.currentName() == targetField
+            then
+              parser.nextToken()
+              boundary.break(Some(parser.getValueAsString))
+          None
+      finally
+        parser.close()
 
 
 //  object jsoniter:

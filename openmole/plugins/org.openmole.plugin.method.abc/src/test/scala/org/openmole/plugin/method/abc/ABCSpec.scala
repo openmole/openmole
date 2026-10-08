@@ -3,7 +3,8 @@ package org.openmole.plugin.method.abc
 import org.apache.commons.math3.distribution.MixtureMultivariateNormalDistribution
 import org.apache.commons.math3.linear.{ LUDecomposition, MatrixUtils }
 
-import org.openmole.core.dsl._
+import org.openmole.core.dsl.*
+import org.openmole.core.dsl.extension.*
 
 import org.openmole.core.workflow.test._
 import org.scalatest._
@@ -157,7 +158,7 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
     (testTask -- abc).run()
   }
 
-  "abc" should "be hookable" in {
+  it should "be hookable" in:
     val abc =
       ABC(
         evaluation = testTaskSeed,
@@ -168,7 +169,7 @@ class ABCSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers {
         seed = seed
       )
 
-    (abc hook "/tmp/test").run()
-  }
+    withTmpFile: f =>
+      (abc hook f.getAbsolutePath).run()
 
 }

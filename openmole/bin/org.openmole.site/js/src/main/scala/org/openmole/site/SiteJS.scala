@@ -26,12 +26,8 @@ import org.scalajs.dom.document
  */
 
 
-//@JSExportAll
-@JSExportTopLevel(name = "openmole_site")
-@JSExportAll
 object SiteJS {
-
-
+  
   @js.native
   trait IndexEntry extends js.Object {
     val title: String = js.native
@@ -44,10 +40,28 @@ object SiteJS {
   val lunrIndex: Var[Option[Index]] = Var(None)
   var entries: Entries = collection.mutable.Map.empty
 
+  @JSExport
   def loadIndex(array: js.Array[js.Any]): Unit = {
     indexArray.set(array)
     Search.build
   }
+
+  def init(): Unit =
+    val index = js.Dynamic.global.index.asInstanceOf[js.Array[js.Any]]
+    loadIndex(index)
+    HighlightJS.highlightAll()
+    document.title match
+      case "Profile" => profileAnimation()
+      case "Pattern Space Exploration" => pseAnimation()
+      case "Simple Sensitivity Analysis of the Fire NetLogo Model" => sensitivityAnimation()
+      case _=>
+
+
+  def main(args: Array[String]): Unit =
+    document.addEventListener(
+      "DOMContentLoaded",
+      (_: dom.Event) => init()
+    )
 
   def doIndex(indexArray: js.Array[js.Any]) = {
     val index = Importedjs.lunr((i: Index) => {
@@ -79,6 +93,7 @@ object SiteJS {
       case i: Option[Index] => i
     }
 
+  @JSExport
   def search(content: String): Seq[IIndexSearchResult] = {
     getIndex.map {
       ind => ind.search(content).toSeq
