@@ -47,10 +47,11 @@ ${
     - DSL: Make it possible to specify when to condition the execution of method hooks
     - GUI: Remove CSV view of results
     - GUI: Add size info in the result table
+    - GUI: Improve display delay of plot panel
   """)
 }
 
-${h2{"V23 | D D"}}
+${h2{"V23 | Deliberate Drift"}}
 
 ${
   notes("""
