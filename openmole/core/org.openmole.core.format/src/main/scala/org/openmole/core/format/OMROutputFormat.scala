@@ -72,14 +72,14 @@ object OMROutputFormat:
           case f => f.getParentFile / s"${f.getName}.omr"
 
       def methodJson =
-        method.asJson.mapObject(_.add(methodNameField, Json.fromString(methodData.name)))
+        method.asJson.mapObject(_.add(OMRFormat.methodNameField, Json.fromString(methodData.name)))
 
       def script =
         scriptData match
           case data: ScriptSourceData.ScriptData if option.script =>
             val scriptContent = ScriptSourceData.scriptContent(scriptData)
             val imports = ScriptSourceData.imports(scriptData)
-            Some(OMRContent.Script(scriptContent, imports))
+            Some(OMRFormat.Script(scriptContent, imports))
           case _ => None
 
       OMRFormat.write(

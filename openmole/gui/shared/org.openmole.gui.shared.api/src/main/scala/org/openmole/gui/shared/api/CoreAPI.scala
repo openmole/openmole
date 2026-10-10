@@ -126,10 +126,10 @@ object CoreAPI:
       .out(jsonBody[Option[String]])
       .errorOut(jsonBody[ErrorData])
 
-  lazy val omrContent: TapirEndpoint[(SafePath, Option[String]), GUIOMRContent] =
+  lazy val omrContent: TapirEndpoint[SafePath, GUIOMRContent] =
     endpoint.post
       .in(prefix / "file" / "omr" / "content")
-      .in(jsonBody[(SafePath, Option[String])])
+      .in(jsonBody[SafePath])
       .out(jsonBody[GUIOMRContent])
       .errorOut(jsonBody[ErrorData])
 
@@ -140,12 +140,12 @@ object CoreAPI:
       .out(jsonBody[Option[SafePath]])
       .errorOut(jsonBody[ErrorData])
 
-  lazy val omrDataIndex: TapirEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
-    endpoint.post
-      .in(prefix / "file" / "omr" / "index")
-      .in(jsonBody[SafePath])
-      .out(jsonBody[Seq[GUIOMRDataIndex]])
-      .errorOut(jsonBody[ErrorData])
+//  lazy val omrDataIndex: TapirEndpoint[SafePath, Seq[GUIOMRDataIndex]] =
+//    endpoint.post
+//      .in(prefix / "file" / "omr" / "index")
+//      .in(jsonBody[SafePath])
+//      .out(jsonBody[Seq[GUIOMRDataIndex]])
+//      .errorOut(jsonBody[ErrorData])
 
   lazy val cloneRepository: TapirEndpoint[(String, SafePath, Boolean), Option[SafePath]] =
     endpoint.post

@@ -64,7 +64,7 @@ object OMRContent:
       pcSections.map(_.section).head,
       contentStates,
       currentState,
-      omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart, guiOMRContent.index.isDefined)),
+      omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart)),
       currentIndex = currentIndex,
       methodPanel = None
     )

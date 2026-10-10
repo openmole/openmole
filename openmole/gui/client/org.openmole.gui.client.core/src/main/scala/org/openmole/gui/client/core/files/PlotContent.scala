@@ -57,7 +57,7 @@ object PlotContent:
 
   case class Section(name: String)
 
-  case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long, history: Boolean)
+  case class OMRMetadata(script: HtmlElement, openmoleVersion: String, timeStart: Long)
 
   trait SectionView:
     def view: HtmlElement
@@ -115,67 +115,67 @@ object PlotContent:
               //We only keep data of dimension 0 or 1  
               PlotView(fcd, resPlot)
             case ms: MetadataState =>
-              val metadataHistory =
-                div(
-                  child <--
-                    Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
-                      def valueTypeToInt(vt: ValueType): Int = unwrap(vt).toString.toInt
-                      def sliderValueToInt(s: Any) = s.toString.toDouble.toInt
-
-                      val dIndexValues = dataIndex.map(d => d.head.values).getOrElse(Seq())
-
-                      if dIndexValues.size > 1
-                      then
-                        val sliderValueText = Var("")
-
-                        val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
-
-                        val first2 = dIndexValues.slice(0, 2)
-
-                        val sortedKeys = indexMap.keys.toSeq.sorted
-                        val maxIndex = sortedKeys.last
-                        sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
-
-                        val element = div(width := "500", marginRight := "50", marginTop := "20")
-                        nouislider.noUiSlider.create(
-                          element.ref, nouislider.Options
-                            .range(nouislider.Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
-                            .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
-                            .step(1.0)
-                            .connect(nouislider.Options.Lower)
-                            .tooltips(false)
-                        )
-
-                        element.noUiSlider.on(nouislider.event.ChangeEvent, (value, handle) =>
-                          sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
-                        )
-
-                        val sliderValueDiv = div(
-                          child <--
-                            sliderValueText.signal.map(t=>
-                              div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
-                            )
-                        )
-
-                        val loadDataButton =
-                          button(
-                            btn_primary, "Load data",
-                            onClick --> { _ =>
-                              val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
-
-                              val dataFile =
-                                dataIndex flatMap: dis=>
-                                  (dis.map : di=>
-                                    di.fileIndex(newCurrentIndex)).headOption
-
-                              api.omrContent(safePath, dataFile).map: guiContent =>
-                                panels.tabContent.removeTab(safePath)
-                                val (tabData, content) = OMRContent.buildTab(safePath, guiContent, currentIndex = Some(newCurrentIndex.toInt))
-                                panels.tabContent.addTab(tabData, content)
-                            })
-                        div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
-                      else div()
-                )
+//              val metadataHistory =
+//                div(
+//                  child <--
+//                    Signal.fromFuture(api.omrDataIndex(safePath)).map: dataIndex =>
+//                      def valueTypeToInt(vt: ValueType): Int = unwrap(vt).toString.toInt
+//                      def sliderValueToInt(s: Any) = s.toString.toDouble.toInt
+//
+//                      val dIndexValues = dataIndex.map(d => d.head.values).getOrElse(Seq())
+//
+//                      if dIndexValues.size > 1
+//                      then
+//                        val sliderValueText = Var("")
+//
+//                        val indexMap = dIndexValues.zipWithIndex.map(x => x._2 -> valueTypeToInt(x._1)).toMap
+//
+//                        val first2 = dIndexValues.slice(0, 2)
+//
+//                        val sortedKeys = indexMap.keys.toSeq.sorted
+//                        val maxIndex = sortedKeys.last
+//                        sliderValueText.set(indexMap(currentIndex.map(_.toDouble).getOrElse(maxIndex).toString.toInt).toString)
+//
+//                        val element = div(width := "500", marginRight := "50", marginTop := "20")
+//                        nouislider.noUiSlider.create(
+//                          element.ref, nouislider.Options
+//                            .range(nouislider.Range.min(sortedKeys.head.toDouble).max(maxIndex.toDouble))
+//                            .start(currentIndex.map(_.toDouble).getOrElse(maxIndex.toDouble))
+//                            .step(1.0)
+//                            .connect(nouislider.Options.Lower)
+//                            .tooltips(false)
+//                        )
+//
+//                        element.noUiSlider.on(nouislider.event.ChangeEvent, (value, handle) =>
+//                          sliderValueText.set(indexMap(sliderValueToInt(value)).toString)
+//                        )
+//
+//                        val sliderValueDiv = div(
+//                          child <--
+//                            sliderValueText.signal.map(t=>
+//                              div(t, marginRight := "20", fontSize := "18", color := "#3086b5", fontWeight.bold)
+//                            )
+//                        )
+//
+//                        val loadDataButton =
+//                          button(
+//                            btn_primary, "Load data",
+//                            onClick --> { _ =>
+//                              val newCurrentIndex = sliderValueToInt(element.ref.noUiSlider.get())
+//
+//                              val dataFile =
+//                                dataIndex flatMap: dis=>
+//                                  (dis.map : di=>
+//                                    di.fileIndex(newCurrentIndex)).headOption
+//
+//                              api.omrContent(safePath, dataFile).map: guiContent =>
+//                                panels.tabContent.removeTab(safePath)
+//                                val (tabData, content) = OMRContent.buildTab(safePath, guiContent, currentIndex = Some(newCurrentIndex.toInt))
+//                                panels.tabContent.addTab(tabData, content)
+//                            })
+//                        div(flexRow, alignItems.end,sliderValueDiv, element, loadDataButton)
+//                      else div()
+//                )
 
               BasicView(
                 omrMetadata match
@@ -184,16 +184,16 @@ object PlotContent:
                       cls := "metadata",
                       div(display.flex, flexDirection.row, span("OpenMOLE Version:", nbsp, fontWeight.bold), md.openmoleVersion),
                       div(display.flex, flexDirection.row, marginTop := "20", span("Launched:", nbsp, fontWeight.bold), CoreUtils.longTimeToString(md.timeStart)),
-                      div(display.flex, flexDirection.column, marginTop := "20", span("Exploration history:", nbsp, fontWeight.bold), metadataHistory),
+                      //div(display.flex, flexDirection.column, marginTop := "20", span("Exploration history:", nbsp, fontWeight.bold), metadataHistory),
                       div("Script: ", fontWeight.bold, marginTop := "20", marginBottom := "10"),
                       div(fontFamily := "monospace", fontSize := "medium", cls := "execTextArea", overflow := "scroll", margin := "10px", md.script),
-                      if md.history
-                      then div(
-                        fileActions, backgroundColor := "white", width := "800px",
-                        a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "JSON History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.JSON, true)),
-                        a(div(fileActionItems, marginLeft := "20px", FileToolBox.glyphItemize(glyph_download), "CSV History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.CSV, true))
-                      )
-                      else div()
+//                      if md.history
+//                      then div(
+//                        fileActions, backgroundColor := "white", width := "800px",
+//                        a(div(fileActionItems, FileToolBox.glyphItemize(glyph_download), "JSON History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.JSON, true)),
+//                        a(div(fileActionItems, marginLeft := "20px", FileToolBox.glyphItemize(glyph_download), "CSV History"), href := org.openmole.gui.shared.api.convertOMR(safePath, GUIOMRContent.ExportFormat.CSV, true))
+//                      )
+//                      else div()
                       //textArea(md.script, idAttr := "execTextArea", fontFamily := "monospace", fontSize := "medium", height := "400", width := "100%", readOnly := true)
                     )
                   case _ => div("Unavailable metadata")

@@ -59,10 +59,8 @@ class OpenMOLERESTServerAPI(sttp: STTPInterpreter, notificationService: Notifica
   override def addPlugin(path: SafePath)(using BasePath): Future[Seq[ErrorData]] = sttp.toRequest(CoreAPI.addPlugin)(path)
   override def removePlugin(path: SafePath)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.removePlugin)(path)
 
-  override def omrMethod(path: SafePath)(using BasePath): Future[Option[String]] = sttp.toRequest(CoreAPI.omrMethod)(path)
-  override def omrContent(path: SafePath, data: Option[String] = None)(using BasePath): Future[GUIOMRContent] = sttp.toRequest(CoreAPI.omrContent)((path, data))
+  override def omrContent(path: SafePath)(using BasePath): Future[GUIOMRContent] = sttp.toRequest(CoreAPI.omrContent)(path)
   override def omrFiles(path: SafePath)(using BasePath): Future[Option[SafePath]] = sttp.toRequest(CoreAPI.omrFiles)(path)
-  override def omrDataIndex(path: SafePath)(using BasePath): Future[Seq[GUIOMRDataIndex]] = sttp.toRequest(CoreAPI.omrDataIndex)(path)
 
   override def downloadHTTP(url: String, path: SafePath, extract: Boolean, overwrite: Boolean)(using BasePath): Future[Unit] = sttp.toRequest(CoreAPI.downloadHTTP)(url, path, extract, overwrite) //.future, timeout = Some(600 seconds), warningTimeout = None)
   override def marketIndex()(using BasePath): Future[MarketIndex] = sttp.toRequest(CoreAPI.marketIndex)(())

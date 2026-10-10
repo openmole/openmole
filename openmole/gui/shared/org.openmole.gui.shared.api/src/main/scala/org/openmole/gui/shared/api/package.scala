@@ -35,7 +35,7 @@ val convertOMRRoute = "file/omr/csv"
 val fileTypeParam = "fileType"
 val pathParam = "path"
 val formatParam = "format"
-val historyParam = "history"
+//val historyParam = "history"
 
 object Download:
   val hashParam = "hash"
@@ -92,8 +92,9 @@ def downloadFile(sp: SafePath, hash: Boolean = false, name: Option[String] = Non
   val params = safePathToURLParams(sp) ++ includeTopDirectoryInArchive.map(d => s"$topDirectoryParam=$d") ++ name.map(n => s"$fileNameParam=$n") ++ Seq(s"$hashParam=$hash")
   s"$downloadFileRoute?${params.mkString("&")}"
 
-def convertOMR(sp: SafePath, format: GUIOMRContent.ExportFormat, history: Boolean = false) =
-  def params = safePathToURLParams(sp) ++ Seq(s"$formatParam=${GUIOMRContent.ExportFormat.toString(format)}", s"$historyParam=$history")
+def convertOMR(sp: SafePath, format: GUIOMRContent.ExportFormat) =
+  //def params = safePathToURLParams(sp) ++ Seq(s"$formatParam=${GUIOMRContent.ExportFormat.toString(format)}", s"$historyParam=$history")
+  def params = safePathToURLParams(sp) ++ Seq(s"$formatParam=${GUIOMRContent.ExportFormat.toString(format)}")
   s"$convertOMRRoute?${params.mkString("&")}"
 
 
