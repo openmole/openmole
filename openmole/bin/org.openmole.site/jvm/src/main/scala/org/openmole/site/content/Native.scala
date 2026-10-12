@@ -43,7 +43,7 @@ object Native:
 //    p, "These two aspects make it really ", b("easy to embed native applications"), " in OpenMOLE. You can also read more about packaging your native models for OpenMOLE in ", a("the dedicated section", href := DocumentationPages.container.file), "."
 //  )
 
-  def singularity = a("the Singularity container system", href := org.openmole.site.shared.link.singularity)
+  def singularity = a("the Apptainer/Singularity container system", href := org.openmole.site.shared.link.apptainer)
 
   def preliminary(taskName: String) =
     paragraph(
@@ -56,7 +56,7 @@ object Native:
     paragraph(
       "The ",
       org.openmole.site.tools.code(taskName),
-      s" uses ", singularity, ". You should install Singularity on your system otherwise you won't be able to use it."
+      s" uses ", singularity, ". Apptainer/Singularity must be installed on the system running OpenMOLE, otherwise you won't be able to use it."
     )
 
   def supportsFiles(taskName: String) =
