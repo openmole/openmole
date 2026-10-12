@@ -54,7 +54,7 @@ object JavaTask:
     clearContainerCache: Boolean = false,
     jvmOptions: Seq[String] = Seq.empty,
     fewerThreads: Boolean = true,
-    version: String = "21.3",
+    version: String = "21.4",
     jvmVersion: String = "21",
     scalaVersion: OptionalArgument[String] = None,
     containerSystem: OptionalArgument[ContainerSystem] = None)(using sourcecode.Name, DefinitionScope) =
