@@ -86,7 +86,7 @@ object shared {
     lazy val CAREsite = "https://proot-me.github.io/"
     lazy val CAREmailing = "https://groups.google.com/forum/?fromgroups#!forum/reproducible"
     lazy val egi = "http://www.egi.eu/"
-    lazy val singularity = "https://sylabs.io/"
+    lazy val apptainer = "https://apptainer.org"
     lazy val rcran = "https://cran.r-project.org/"
     lazy val nodejs = "https://nodejs.org"
 

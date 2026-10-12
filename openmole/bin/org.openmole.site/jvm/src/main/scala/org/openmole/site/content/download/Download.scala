@@ -35,7 +35,7 @@ ${
     li(html"${i("A Linux System")}: OpenMOLE runs on Linux, in order to run it on other systems please consider using the ${a("docker package", href := "#RuninDocker")}"),
     li(html"${i("Java >= 21")}: to run on your own computer, OpenMOLE requires Java version 21 or above. Check our ${aa("FAQ", href := DocumentationPages.faq.file)} to access your Java version information"),
     li(html"${i("Node.js")}: to run on your own computer, OpenMOLE GUI requires ${aa("Node.js", href := shared.link.nodejs)}"),
-    li(html"${i("Singularity")}: most of OpenMOLE tasks require ${org.openmole.site.content.Native.singularity}")
+    li(html"${i("Singularity")}: most of OpenMOLE tasks require ${org.openmole.site.content.Native.apptainer}")
   )
 }
 

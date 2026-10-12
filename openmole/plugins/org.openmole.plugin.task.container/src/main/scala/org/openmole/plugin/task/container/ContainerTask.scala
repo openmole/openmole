@@ -274,6 +274,7 @@ object ContainerTask:
     environmentVariables: Seq[(String, String)] = Seq.empty,
     workDirectory: Option[String] = None,
     verbose: Boolean = false,
+    userNamespace: Boolean = true,
     output: PrintStream,
     error: PrintStream)(using TmpDirectory, NetworkService) =
     image match
@@ -285,6 +286,7 @@ object ContainerTask:
           environmentVariables = environmentVariables,
           workDirectory = workDirectory,
           verbose = verbose,
+          userNamespace = userNamespace,
           output = output,
           error = error,
           overlay = None,
@@ -300,6 +302,7 @@ object ContainerTask:
             environmentVariables = environmentVariables,
             workDirectory = workDirectory,
             verbose = verbose,
+            userNamespace = userNamespace,
             output = output,
             error = error,
             overlay = Some(_root_.container.Singularity.createOverlay(overlayFile, image.containerSystem.size, output = output, error = error)),
@@ -351,6 +354,7 @@ object ContainerTask:
     environmentVariables: Seq[(String, String)] = Seq.empty,
     workDirectory: Option[String] = None,
     verbose: Boolean = false,
+    userNamespace: Boolean = true,
     output: PrintStream,
     error: PrintStream)(using tmpDirectory: TmpDirectory, networkService: NetworkService) =
     tmpDirectory.withTmpDir: directory =>
@@ -363,6 +367,7 @@ object ContainerTask:
         output = output,
         error = error,
         bind = volumes,
+        userNamespace = userNamespace,
         environmentVariables = NetworkService.proxyVariables ++ environmentVariables,
         workDirectory = workDirectory,
         singularityWorkdir = Some(directory /> "singularitytmp"),
@@ -511,9 +516,11 @@ object ContainerTask:
 
       val copyVolume = resultDirectory.getAbsolutePath -> resultDirectoryBind
 
+      import executionContext.localEnvironment.runtimeSetting
+
       val retCode =
         image match
-          case image: InstalledSingularityImage.InstalledSIFOverlayImage if executionContext.localEnvironment.runtimeSetting.memoryOverlay =>
+          case image: InstalledSingularityImage.InstalledSIFOverlayImage if runtimeSetting.memoryOverlay =>
             runCommandInSIFContainer(
               image = image.image,
               tmpFS = true,
@@ -523,7 +530,8 @@ object ContainerTask:
               error = err,
               volumes = volumes ++ Seq(copyVolume),
               environmentVariables = containerEnvironmentVariables,
-              verbose = image.containerSystem.verbose
+              verbose = image.containerSystem.verbose,
+              userNamespace = runtimeSetting.userNamespace
             )
           case image: InstalledSingularityImage.InstalledSIFOverlayImage =>
             def createOverlayPool =
@@ -552,7 +560,8 @@ object ContainerTask:
                 error = err,
                 volumes = volumes ++ Seq(copyVolume),
                 environmentVariables = containerEnvironmentVariables,
-                verbose = image.containerSystem.verbose
+                verbose = image.containerSystem.verbose,
+                userNamespace = runtimeSetting.userNamespace
               )
 
           case image: InstalledSingularityImage.InstalledSIFMemoryImage =>
@@ -565,7 +574,8 @@ object ContainerTask:
               error = err,
               volumes = volumes ++ Seq(copyVolume),
               environmentVariables = containerEnvironmentVariables,
-              verbose = image.containerSystem.verbose
+              verbose = image.containerSystem.verbose,
+              userNamespace = runtimeSetting.userNamespace
             )
 
       if errorOnReturnValue && !returnValue.isDefined && retCode != 0

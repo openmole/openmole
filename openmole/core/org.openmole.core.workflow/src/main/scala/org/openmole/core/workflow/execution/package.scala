@@ -54,10 +54,14 @@ object RuntimeLog:
 case class RuntimeLog(beginTime: Long, executionBeginTime: Long, executionEndTime: Long, endTime: Long)
 
 object RuntimeSetting:
-  def apply(memoryOverlay: Boolean = false, threads: OptionalArgument[Int] = None) =
-    new RuntimeSetting(memoryOverlay, threads)
+  def apply(memoryOverlay: Boolean = false, threads: OptionalArgument[Int] = None, userNamespace: Boolean = true) =
+    new RuntimeSetting(
+      memoryOverlay = memoryOverlay,
+      threads = threads,
+      userNamespace = userNamespace)
 
 class RuntimeSetting(
   val memoryOverlay: Boolean,
-  val threads: Option[Int])
+  val threads: Option[Int],
+  val userNamespace: Boolean)
 

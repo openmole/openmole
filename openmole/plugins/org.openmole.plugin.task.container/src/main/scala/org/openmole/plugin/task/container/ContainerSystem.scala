@@ -20,7 +20,14 @@ package org.openmole.plugin.task.container
 import org.openmole.core.dsl.*
 import org.openmole.core.dsl.extension.*
 
+object ContainerSystem:
+  enum SingularityVariant:
+    case Singularity, Apptainer
+
+
 sealed trait ContainerSystem
 case class SingularityOverlay(reuse: Boolean = true, size: Information = 2.gigabyte, verbose: Boolean = false, copy: Boolean = false, embedResources: Boolean = true) extends ContainerSystem
 case class SingularityMemory(verbose: Boolean = false, embedResources: Boolean = true) extends ContainerSystem
 case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem
+
+export ContainerSystem.SingularityVariant.*
