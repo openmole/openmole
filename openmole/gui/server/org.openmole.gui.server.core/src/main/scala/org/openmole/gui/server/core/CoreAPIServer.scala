@@ -56,15 +56,11 @@ object CoreAPIServer:
         try f(tos)
         finally tos.close()
 
-    def addOMR(tos: TarArchiveOutputStream, f: File) =
-      import org.openmole.core.format.*
-      val dataFiles = OMRFormat.dataFiles(f)
-      tos.addFile(f, f.getName)
-      dataFiles.foreach((n, df) => tos.addFile(df, n))
+    def addOMR(tos: TarArchiveOutputStream, f: File) = OMRFormat.archive(tos, f)
 
     def addFile(tos: TarArchiveOutputStream, f: File) =
       if f.isDirectory
-      then tos.archive(f, includeTopDirectoryName = topDirectory)
+      then tos.addDirectory(f, prefix = f.getName)
       else
         import org.openmole.core.format.*
         if !OMRFormat.isOMR(f)

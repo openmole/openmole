@@ -147,7 +147,7 @@ class RESTAPI(services: Services):
             then
               HTTP.sendFileStream(s"${file.getName}.tgz"): out =>
                 val tos = TarArchiveOutputStream(out.toGZ, Some(64 * 1024))
-                try tos.archive(file)
+                try tos.addDirectory(file)
                 finally tos.close()
             else
               HTTP.sendFile(req, file)
@@ -211,7 +211,7 @@ class RESTAPI(services: Services):
               case Some(fileDirectory) =>
                 HTTP.sendFileStream(s"${file.baseName}-files.tgz"): out =>
                   val tos = TarArchiveOutputStream(out.toGZ, Some(64 * 1024))
-                  try tos.archive(fileDirectory, includeTopDirectoryName = false)
+                  try tos.addDirectory(fileDirectory._2)
                   finally tos.close()
               case None =>
                 ExpectationFailed(Error(s"The OMR file does not contain files").toJson)

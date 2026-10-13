@@ -420,8 +420,8 @@ package file:
       def withOutputStream[T] = withClosable[OutputStream, T](bufferedOutputStream())(_)
 
       def withPrintStream[T](append: Boolean = false, create: Boolean = false, gz: Boolean = false) =
-        if (create) file.createParentDirectory
-        withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append, gz = gz))) _
+        if create then file.createParentDirectory
+        withClosable[PrintStream, T](new PrintStream(file.bufferedOutputStream(append = append, gz = gz)))
 
       def atomicWithPrintStream[T](f: PrintStream => T) =
         file.createParentDirectory
@@ -437,6 +437,7 @@ package file:
       def withFileInputStream[T] = withClosable[FileInputStream, T](fileInputStream)(_)
 
       def withInputStream[T] = withClosable[InputStream, T](bufferedInputStream())(_)
+      def usingInputStream[T](gz: Boolean = false) = if !gz then withInputStream[T] else withGzippedInputStream[T]
 
       def withReader[T] = withClosable[Reader, T](Files.newBufferedReader(file.toPath))(_)
 

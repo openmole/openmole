@@ -176,12 +176,12 @@ package object json:
 
     jsonMethods
 
-  def readSingleJSONField(file: File, targetField: String): Option[String] =
+  def readSingleJSONField(file: File, targetField: String, gz: Boolean = false): Option[String] =
     import com.fasterxml.jackson.core.JsonFactory
     import scala.util.boundary
 
     val factory = JsonFactory()
-    file.withGzippedInputStream: st =>
+    file.usingInputStream(gz): st =>
       val parser = factory.createParser(st)
       try
         boundary[Option[String]]:

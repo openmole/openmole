@@ -33,6 +33,7 @@ import org.openmole.core.timeservice.TimeService
 import org.openmole.core.workspace.TmpDirectory
 import org.openmole.tool.stream.{DefaultBufferSize, StringInputStream, inputStreamSequence}
 import org.openmole.tool.file.*
+import org.openmole.tool.archive.*
 
 import java.util
 import java.util.UUID
@@ -41,7 +42,11 @@ import scala.collection.mutable
 object OMRFormat:
   def methodNameField = "method-name"
   def dataDirectoryName = ".omr-data"
+  def formatVersionField = "format-version"
   def omrVersion = "1.0"
+
+  enum Version:
+    case V1
 
   case class Import(`import`: String, content: String) derives derivation.ConfiguredCodec
   case class Script(content: String, `import`: Option[Seq[Import]]) derives derivation.ConfiguredCodec
@@ -50,6 +55,12 @@ object OMRFormat:
     def apply(section: V1.DataContent.SectionData) = new OMRFormat.SectionData(section.name, section.variables, section.indexes)
 
   case class SectionData(name: Option[String], variables: Seq[ValData], indexes: Option[Seq[String]] = None) derives derivation.ConfiguredCodec
+
+  def version(omrFile: File): Version =
+    readSingleJSONField(omrFile, formatVersionField, gz = true) match
+      case Some("1.0") => Version.V1
+      case Some(v) => throw UserBadDataError(s"Unsupported format version: $v")
+      case None => throw UserBadDataError(s"Format version field not found in $omrFile")
 
   object V1:
 
@@ -76,41 +87,17 @@ object OMRFormat:
 
     case class EmbedableContent(omrFile: File, sectionFile: File, fileDirectory: Option[File])
 
-
-  case class V1(
-    `format-version`: String,
-    `openmole-version`: String,
-    `execution-id`: String,
-    `data-file`: Seq[String],
-    `data-mode`: V1.DataMode,
-    `data-content`: V1.DataContent,
-    `data-store`: Option[V1.DataStore] = None,
-    `file-directory`: Option[String],
-    script: Option[Script],
-    `time-start`: Long,
-    `time-save`: Long,
-    method: Option[Json]) derives derivation.ConfiguredCodec
-
-  object omr:
-    def dataFileName(executionId: String, uuid: String) =
-      def executionPrefix = executionId.filter(_ != '-')
-      s"$dataDirectoryName/$executionPrefix-$uuid.omd"
-
-    def newUUID = UUID.randomUUID().toString.filter(_ != '-')
-
-    def writeOMRContent(file: File, content: V1) =
-      file.withPrintStream(create = true, gz = true)(
-        _.print(content.asJson.deepDropNullValues.noSpaces)
-      )
-
-    def newReferencedFileDirectoryName(executionId: String) = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-${omr.newUUID}"
+    def dataFiles(omrFile: File): Seq[(String, File)] =
+      V1.dataFileNames(omrFile).map: n =>
+        (n, V1.dataFile(omrFile, n))
 
     def dataFile(omrFile: File, index: V1): File = omrFile.getParentFile / index.`data-file`.last
     def dataFile(omrFile: File, name: String): File = omrFile.getParentFile / name
-    def dataFile(omrFile: File): File = omr.dataFile(omrFile, omrContent(omrFile))
+    def dataFile(omrFile: File): File = V1.dataFile(omrFile, omrContent(omrFile))
     def dataFileNames(omrFile: File): Seq[String] = omrContent(omrFile).`data-file`
     def dataDirectory(file: File) = file.getParentFile / dataDirectoryName
-    def fileDirectory(omrFile: File, index: V1): Option[File] = index.`file-directory`.map(d => omrFile.getParentFile / d)
+    def fileDirectory(omrFile: File, index: V1): Option[(String, File)] = index.`file-directory`.map(d => (d, omrFile.getParentFile / d))
+
     def readDataStream[T](dataFile: File)(f: java.io.InputStream => T) = dataFile.withGzippedInputStream(f)
 
     def variablesFromStream(
@@ -187,19 +174,49 @@ object OMRFormat:
           try sectionToAggregatedVariables(index.`data-content`.section.map(SectionData.apply), p)
           finally p.close()
 
+    def writeOMRContent(file: File, content: V1) =
+      val jsonContent = content.asJson.mapObject(_.add(OMRFormat.formatVersionField, Json.fromString(omrVersion))).deepDropNullValues
+
+      file.withPrintStream(create = true, gz = true)(
+        _.print(jsonContent.noSpaces)
+      )
+
+
+  case class V1(
+    `openmole-version`: String,
+    `execution-id`: String,
+    `data-file`: Seq[String],
+    `data-mode`: V1.DataMode,
+    `data-content`: V1.DataContent,
+    `data-store`: Option[V1.DataStore] = None,
+    `file-directory`: Option[String],
+    script: Option[Script],
+    `time-start`: Long,
+    `time-save`: Long,
+    method: Option[Json]) extends OMRFormat derives derivation.ConfiguredCodec
+
+  object omr:
+    def dataFileName(executionId: String, uuid: String) =
+      def executionPrefix = executionId.filter(_ != '-')
+      s"$dataDirectoryName/$executionPrefix-$uuid.omd"
+
+    def newUUID = UUID.randomUUID().toString.filter(_ != '-')
+
+    def newReferencedFileDirectoryName(executionId: String) = s"$dataDirectoryName/files-${executionId.filter(_ != '-')}-${omr.newUUID}"
+
+
   def isOMR(file: File) = file.getName.endsWith(".omr")
 
   def omrContent(file: File): V1 =
     val content = file.content(gz = true)
     decode[V1](content).toTry.get
 
-  def dataFiles(omrFile: File): Seq[(String, File)] =
-    omr.dataFileNames(omrFile).map: n =>
-      (n, omr.dataFile(omrFile, n))
-
-  def fileDirectory(file: File): Option[File] =
+  def fileDirectory(file: File): Option[(String, File)] =
     val index = omrContent(file)
-    omr.fileDirectory(file, index)
+    V1.fileDirectory(file, index)
+//  def omrContent(file: File): OMRFormat =
+//    version(file) match
+//      case Version.V1 => V1.omrContent(file)
 
   def write(
     data: OutputFormat.OutputContent,
@@ -219,7 +236,6 @@ object OMRFormat:
         else V1.DataMode.Create
 
       V1(
-        `format-version` = omrVersion,
         `openmole-version` = openMOLEVersion,
         `execution-id` = executionId,
         `data-file` = (existingData ++ Seq(fileName)).distinct,
@@ -237,7 +253,7 @@ object OMRFormat:
     val existingContent =
       if methodFile.exists()
       then
-        val contentExecutionId = readSingleJSONField(methodFile, "execution-id").get
+        val contentExecutionId = readSingleJSONField(methodFile, "execution-id", gz = true).get
         if option.overwrite && contentExecutionId != executionId || option.replace
         then
           OMRFormat.delete(methodFile)
@@ -290,7 +306,7 @@ object OMRFormat:
       then Some(resultFileDirectoryName)
       else None
 
-    omr.writeOMRContent(
+    V1.writeOMRContent(
       methodFile,
       methodFormat(existingData, fileName, contentData, fileDirectoryValue)
     )
@@ -317,7 +333,7 @@ object OMRFormat:
           (originDirectory / d) copy (destinationDirectory / copiedDirectory)
           copiedDirectory
 
-      omr.writeOMRContent(
+      V1.writeOMRContent(
         destination,
         index.copy(`data-file` = copiedDataFiles, `file-directory` = copiedReferencedFileDirectory)
       )
@@ -331,31 +347,31 @@ object OMRFormat:
       val destinationDataDirectory = destination.getParentFile
       val index = omrContent(omrFile)
       index.`file-directory`.foreach(d => (originDirectory / d).move(destinationDirectory / d))
-      dataFiles(omrFile).foreach((name, file) => file.move(destinationDataDirectory / name))
-      val omrDataDirectory = omr.dataDirectory(omrFile)
+      V1.dataFiles(omrFile).foreach((name, file) => file.move(destinationDataDirectory / name))
+      val omrDataDirectory = V1.dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     omrFile move destination
 
   def delete(omrFile: File) =
     try
-      dataFiles(omrFile).foreach((_, file) => file.delete())
-      fileDirectory(omrFile).foreach(_.recursiveDelete)
-      val omrDataDirectory = omr.dataDirectory(omrFile)
+      V1.dataFiles(omrFile).foreach((_, file) => file.delete())
+      fileDirectory(omrFile).foreach(_._2.recursiveDelete)
+      val omrDataDirectory = V1.dataDirectory(omrFile)
       if omrDataDirectory.isEmpty then omrDataDirectory.recursiveDelete
     finally
       omrFile.delete()
 
   def diskUsage(omrFile: File) =
     omrFile.size +
-      OMRFormat.dataFiles(omrFile).map((_, file) => file.size).sum +
-      OMRFormat.fileDirectory(omrFile).map(_.size).getOrElse(0L)
+      V1.dataFiles(omrFile).map((_, file) => file.size).sum +
+      fileDirectory(omrFile).map(_._2.size).getOrElse(0L)
 
   def embedable(omrFile: File) =
-    V1.EmbedableContent(omrFile, omr.dataFile(omrFile), fileDirectory(omrFile))
+    V1.EmbedableContent(omrFile, V1.dataFile(omrFile), fileDirectory(omrFile).map(_._2))
 
   def variables(embedableContent: V1.EmbedableContent) =
-    omr.readDataStream(embedableContent.sectionFile): is =>
-      omr.variablesFromStream(embedableContent.omrFile, is, embedableContent.fileDirectory)
+    V1.readDataStream(embedableContent.sectionFile): is =>
+      V1.variablesFromStream(embedableContent.omrFile, is, embedableContent.fileDirectory)
 
   def variables(
     omrFile: File,
@@ -363,16 +379,16 @@ object OMRFormat:
     fileDirectory: Option[File] = None): Seq[(section: SectionData, variables: Seq[Variable[?]])] =
     val index = omrContent(omrFile)
     
-    def dataFileValue = omr.dataFile(omrFile, index)
+    def dataFileValue = V1.dataFile(omrFile, index)
 
     def fileValue =
       fileDirectory orElse:
         if !relativePath
-        then omr.fileDirectory(omrFile, index)
+        then V1.fileDirectory(omrFile, index).map(_._2)
         else None
 
-    omr.readDataStream(dataFileValue): is =>
-      omr.variablesFromStream(omrFile, is, fileValue)
+    V1.readDataStream(dataFileValue): is =>
+      V1.variablesFromStream(omrFile, is, fileValue)
 
   def methodName(content: V1): Option[String] =
     content.method.flatMap: j =>
@@ -468,3 +484,10 @@ object OMRFormat:
       gen.writeEndArray()
       gen.writeEndObject()
       gen.close()
+
+  def archive(tos: TarArchiveOutputStream, f: File) =
+    tos.addFile(f, f.getName)
+    V1.dataFiles(f).foreach((n, df) => tos.addFile(df, n))
+    fileDirectory(f).foreach((n, f) => tos.addDirectory(f, prefix = n))
+
+sealed trait OMRFormat

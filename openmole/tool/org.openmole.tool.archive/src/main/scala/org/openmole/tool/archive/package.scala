@@ -117,8 +117,8 @@ extension(file: File)
 
   def archive(dest: File, time: Boolean = true, archive: ArchiveType.TarGZ.type | ArchiveType.Tar.type = ArchiveType.Tar) =
     archive match
-      case ArchiveType.Tar => withClosable(TarArchiveOutputStream(dest.bufferedOutputStream())) { _.archive(file, time) }
-      case ArchiveType.TarGZ => withClosable(TarArchiveOutputStream(dest.gzippedBufferedOutputStream)) { _.archive(file, time) }
+      case ArchiveType.Tar => withClosable(TarArchiveOutputStream(dest.bufferedOutputStream())) { _.addDirectory(file, time) }
+      case ArchiveType.TarGZ => withClosable(TarArchiveOutputStream(dest.gzippedBufferedOutputStream)) { _.addDirectory(file, time) }
 
   def extract(dest: File, overwrite: Boolean = false, archive: ArchiveType) =
     def extractTAR(dest: File, overwrite: Boolean = false) = withClosable(TarArchiveInputStream(file.bufferedInputStream())) { _.extract(dest, overwrite) }
@@ -142,6 +142,14 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
     f.withInputStream: is =>
       addStream(is, name, Files.size(f), f.mode)
 
+  def addDirectory(directory: File, time: Boolean = true, prefix: String = "") =
+    createDirArchiveWithRelativePathWithAdditionalCommand(
+      tos,
+      directory,
+      if time then identity else _.setModTime(0),
+      prefix
+    )
+
   def addStream(is: InputStream, name: String, size: Long, mode: Int) =
     val entry = new TarArchiveEntry(name)
     entry.setSize(size)
@@ -150,22 +158,25 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
     try is.copy(tos)
     finally tos.closeArchiveEntry()
 
-  def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
-    createDirArchiveWithRelativePathWithAdditionalCommand(
-      tos,
-      directory,
-      if time then identity else _.setModTime(0),
-      includeTopDirectoryName)
+//  def archive(directory: File, time: Boolean = true, includeTopDirectoryName: Boolean = false) =
+//    createDirArchiveWithRelativePathWithAdditionalCommand(
+//      tos,
+//      directory,
+//      if time then identity else _.setModTime(0),
+//      if includeTopDirectoryName then directory.getName else "")
 
   // TODO detect hard links and tar them as so not as separated files
-  private def createDirArchiveWithRelativePathWithAdditionalCommand(tos: TarArchiveOutputStream, directory: File, additionalCommand: TarArchiveEntry => Unit, includeDirectoryName: Boolean) =
+  private def createDirArchiveWithRelativePathWithAdditionalCommand(
+    tos: TarArchiveOutputStream,
+    directory: File,
+    additionalCommand: TarArchiveEntry => Unit,
+    prefix: String) =
 
     if (!Files.isDirectory(directory)) throw new IOException(directory.toString + " is not a directory.")
 
     val toArchive = new Stack[(File, String)]
     //val inodes = new mutable.HashMap[Long, String]()
-
-    if (!includeDirectoryName) toArchive.push(directory -> "") else toArchive.push(directory -> directory.getName)
+    toArchive.push(directory -> prefix)
 
     while toArchive.nonEmpty
     do
@@ -186,7 +197,7 @@ implicit class TarOutputStreamDecorator(tos: TarArchiveOutputStream):
       def archiveDirectory =
         // walk the directory tree to add all its entries to stack
         source.withDirectoryStream(): stream =>
-          for f ← stream.asScala
+          for f <- stream.asScala
           do
             val newSource = source.resolve(f.getFileName)
             val newEntryName = entryName + '/' + f.getFileName
