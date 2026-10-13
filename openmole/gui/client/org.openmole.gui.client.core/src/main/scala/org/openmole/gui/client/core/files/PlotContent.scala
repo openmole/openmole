@@ -17,7 +17,6 @@ import org.openmole.gui.shared.data.GUIVariable.ValueType
 import org.openmole.gui.shared.data.GUIVariable.ValueType.unwrap
 import org.openmole.gui.client.tool.OMTags.btn_purple
 import org.openmole.gui.client.core.Waiter
-import org.openmole.gui.client.tool.plot.Plot.SelectedPlot
 import org.openmole.gui.client.tool.Component
 
 import ResultPlot.*
@@ -26,8 +25,8 @@ object PlotContent:
 
   enum ResultView:
     case Table, Plot, Metadata
-  
-  import ResultView._  
+
+  import ResultView._
   trait ContentState
 
   case class TableState(scrollDown: Boolean = false, resultView: ResultView = Table) extends ContentState
@@ -40,14 +39,14 @@ object PlotContent:
   )
 
   object ContentState:
-    def fromResultView(resultView: ResultView, contentStates: ContentStates) =  
+    def fromResultView(resultView: ResultView, contentStates: ContentStates) =
       resultView match
         case Table=> contentStates.table
         case Plot => contentStates.plot
         case Metadata => MetadataState()
 
   implicit class ContentStatesW(cs: ContentStates):
-    def update(contentState: ContentState) = 
+    def update(contentState: ContentState) =
       contentState match
         case s: TableState => cs.copy(table = s)
         case p: ResultPlotState => cs.copy(plot = p)
@@ -81,7 +80,7 @@ object PlotContent:
       contentSections.find(_.section == sectionName) match
         case Some(cs: ContentSection) =>
           currentState match
-            case TableState(scrollDown, resultView) => 
+            case TableState(scrollDown, resultView) =>
                val headerStyle = Seq(position := "sticky",
                   top := "0",
                   background := "#dbdbdb",
@@ -112,7 +111,7 @@ object PlotContent:
               val resPlot = new ResultPlot(plotData, methodPanel, Var(ps))
               val fcd = resPlot.fromColumnData
 
-              //We only keep data of dimension 0 or 1  
+              //We only keep data of dimension 0 or 1
               PlotView(fcd, resPlot)
             case ms: MetadataState =>
 //              val metadataHistory =
@@ -202,7 +201,7 @@ object PlotContent:
 
     val sectionView = buildSectionView(currentSection)
 
-    val tabData = TabData(safePath, None)    
+    val tabData = TabData(safePath, None)
 
     def setScrollToBottom: Unit =
       sectionView match
@@ -219,11 +218,11 @@ object PlotContent:
               case _ => ResultPlotState.One()
         case _: MetadataState => MetadataState()
 
-    def switchFromState(state: ContentState, states: ContentStates): Unit = 
+    def switchFromState(state: ContentState, states: ContentStates): Unit =
       val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata, methodPanel = methodPanel)
       panels.tabContent.updateTab(safePath, content)
 
-    def switchFromResultView(resultView: ResultView): Unit = 
+    def switchFromResultView(resultView: ResultView): Unit =
       val newState = updatedContentState
       val updatedStates = states.update(newState)
       switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
@@ -243,10 +242,10 @@ object PlotContent:
         case _=> 2
 
     val switchButton = exclusiveRadio(Seq(tableToggleState, plotToggleState, metadataToggleState), btn_secondary_string, viewIndex(currentState))
-    val refreshing: Var[Boolean] = Var(false)             
+    val refreshing: Var[Boolean] = Var(false)
 
     val refreshButton =
-      button(btn_purple, cls := "refreshOMR", glyph_refresh, marginLeft := "10px", onClick --> {_ => 
+      button(btn_purple, cls := "refreshOMR", glyph_refresh, marginLeft := "10px", onClick --> {_ =>
         refreshing.set(true)
         val plotContentState = updatedContentState
 
@@ -290,6 +289,3 @@ object PlotContent:
       )
 
     (tabData, content)
-
-
-
