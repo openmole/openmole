@@ -9,7 +9,6 @@ import org.openmole.gui.shared.data.SequenceData
 import org.openmole.plotlyjs.*
 
 import scala.scalajs.js.timers
-import org.openmole.gui.client.tool.plot.Plot.SelectedPlot.{Method, N}
 
 object ResultPlot:
   object ResultPlotState:
