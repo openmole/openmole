@@ -586,11 +586,11 @@ class ApiImpl(val services: Services, applicationControl: Option[ApplicationCont
 
     GUIOMRContent(
       section = content,
-      openMoleVersion = omrContent.`openmole-version`,
-      executionId = omrContent.`execution-id`,
+      openMoleVersion = omrContent.openMOLEVersion,
+      executionId = omrContent.executionID,
       script = script,
-      timeStart = omrContent.`time-start`,
-      timeSave = omrContent.`time-save`,
+      timeStart = omrContent.timeStart,
+      timeSave = omrContent.timeSave,
       methodName = methodName,
       method = omrContent.method
     )

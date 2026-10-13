@@ -39,7 +39,7 @@ object OMRSampling:
       variable = variable
     )
 
-  def readVariables(omr: OMRFormat.V1.EmbedableContent, variable: Seq[Val[?]]): Seq[Variable[Array[?]]] =
+  def readVariables(omr: OMRFormat.Embedable, variable: Seq[Val[?]]): Seq[Variable[Array[?]]] =
     val ctx = Context(OMRFormat.variables(omr).head.variables *)
     variable.map: v =>
       ctx.variable[Array[?]](v.name) match
@@ -51,7 +51,7 @@ object OMRSampling:
             case s => s.head
 
 case class OMRSampling(
-  omr:           OMRFormat.V1.EmbedableContent,
+  omr:           OMRFormat.Embedable,
   variable:      Seq[Val[?]]):
 
   def validate =

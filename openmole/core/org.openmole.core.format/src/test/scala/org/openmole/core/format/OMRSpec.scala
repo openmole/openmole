@@ -47,7 +47,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val vs = Seq[Variable[?]](p -> "test", t -> OMRSpec.Test.T1)
     val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
 
-    OMRFormat.write(
+    OMRFormatV1.write(
       data = data,
       methodFile = file,
       executionId = "test",
@@ -61,32 +61,6 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
 
     OMRFormat.variables(file).head.variables should equal(vs)
 
-  "OMR indexes" should "work" in :
-    val p = Val[Int]
-    val file = tmpDirectory.newFile("test", ".omr")
-
-    def writeData(v: Int) =
-      val vs = Seq[Variable[?]](p -> v)
-      val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs, indexes = Seq(p.name)))
-
-      OMRFormat.write(
-        data = data,
-        methodFile = file,
-        executionId = "test",
-        jobId = 0,
-        methodJson = Json.Null,
-        script = None,
-        timeStart = 1000,
-        openMOLEVersion = "test",
-        option = OMROption()
-      )
-
-    writeData(0)
-    writeData(1)
-
-    assert(OMRFormat.indexes(file).head.values.toSeq == Seq(0, 1))
-
-
   "OMR" should "store file" in:
     val p = Val[File]
     val file = tmpDirectory.newFile("test", ".omr")
@@ -97,7 +71,7 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     val vs = Seq[Variable[?]](p -> storedFile)
     val data = OutputFormat.OutputContent(OutputFormat.SectionContent(Some("test"), vs))
 
-    OMRFormat.write(
+    OMRFormatV1.write(
       data = data,
       methodFile = file,
       executionId = "test",
