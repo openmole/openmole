@@ -609,16 +609,14 @@ object OMRFormatV2:
     given Encoder[DataMode] = Encoder.instance:
       case DataMode.Append => Encoder.encodeString("append")
       case DataMode.Update => Encoder.encodeString("update")
-      case DataMode.History => Encoder.encodeString("history")
 
   given Decoder[DataMode] =
     Decoder.decodeString.map:
       case "append" => DataMode.Append
       case "update" => DataMode.Update
-      case "history" => DataMode.History
 
   enum DataMode:
-    case Append, Update, History
+    case Append, Update
 
   enum DataStore derives derivation.ConfiguredCodec:
     case GZipFile
@@ -724,36 +722,6 @@ object OMRFormatV2:
         try sectionToAggregatedVariables(toAPISectionData(section), p)
         finally p.close()
 
-      case DataMode.History =>
-        def sectionToAggregatedVariables(section: API.SectionData, content: JsonParser) =
-          val sectionVals = section.variables.toArray.map(ValData.toVal)
-          val sectionContent =
-            val size = section.variables.size
-            Array.fill(size)(scala.collection.mutable.ArrayBuffer[Any]())
-
-          content.nextToken()
-
-          while content.nextToken() != JsonToken.END_ARRAY
-          do
-            val values = objectMapper.readValues(content, classOf[JValue]).nextValue().asInstanceOf[JArray]
-            values.arr.zipWithIndex.foreach: (v, i) =>
-              val vv = sectionVals(i)
-              sectionContent(i) += jValueToVariable(v, vv, file = Some(loadFile), default = Some(jValueToAny)).value
-
-          val variables =
-            (section.variables zip sectionContent).map: (v, a) =>
-              Variable.unsecure(ValData.toVal(v).array, a)
-
-          (section, variables)
-
-        val begin = new StringInputStream("[")
-        val end = new StringInputStream("]")
-        val s = inputStreamSequence(begin, is, end)
-
-        val p = objectMapper.createParser(s)
-        try sectionToAggregatedVariables(toAPISectionData(section), p)
-        finally p.close()
-
   def writeOMRContent(file: File, content: OMRFormatV2) =
     val jsonContent =
       val versionFieldValue = (OMRFormat.formatVersionField, Json.fromString(omrVersion))
@@ -823,7 +791,7 @@ object OMRFormatV2:
     do
       val dataFile = directory / fileName(index, existingContent.map(_.`data-content`.section(index)))
       def jsonContent = JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList)
-      def append = s.mode == DataMode.Append || s.mode == DataMode.History
+      def append = s.mode == DataMode.Append
       val dataFileEmpty = dataFile.isEmpty
 
       dataFile.withPrintStream(append = append, create = true, gz = true): ps =>
