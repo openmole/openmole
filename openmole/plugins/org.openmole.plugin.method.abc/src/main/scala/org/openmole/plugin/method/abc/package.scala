@@ -164,11 +164,10 @@ package object abc {
     
     def hook(
       output:         WritableOutput,
-      frequency:      OptionalArgument[Long] = None,
-      keepHistory:    Boolean                = false)(using scriptSourceData: ScriptSourceData): Hooked[M] =
+      frequency:      OptionalArgument[Long] = None)(using scriptSourceData: ScriptSourceData): Hooked[M] =
       val dsl = method(m)
       implicit val defScope = dsl.scope
-      Hooked(m, ABCHook(dsl.method, output, frequency, keepHistory))
+      Hooked(m, ABCHook(dsl.method, output, frequency))
 
 
 }

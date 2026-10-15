@@ -46,7 +46,6 @@ package dsl:
     export org.openmole.core.workflow.task.RetryTask
 
     export org.openmole.core.workflow.hook.display
-    export org.openmole.core.format.{OMROutputFormat, OMROption}
     export org.openmole.core.workflow.mole.Grouping
 
     def bundles = PluginManager.bundleFiles

@@ -11,22 +11,22 @@ import org.openmole.core.script.*
 import org.openmole.core.json.*
 import org.openmole.core.exception.*
 import org.openmole.core.argument.*
-import org.openmole.core.format.OutputFormat.*
 import org.openmole.core.timeservice.TimeService
+import org.openmole.core.workspace.*
 import org.openmole.tool.stream.{StringInputStream, inputStreamSequence}
 
 import java.io.{PrintStream, SequenceInputStream}
 
-case class OMROption(script: Boolean = true, overwrite: Boolean = true, append: Boolean = false, replace: Boolean = false)
 
 object OMROutputFormat:
 
+  case class OMRContext(moleLaunchTime: Long, jobId: Long, moleExecutionId: String)(implicit val tmpDirectory: TmpDirectory, val timeService: TimeService)
+
   def write[M](
-    executionContext: FormatExecutionContext,
+    executionContext: OMRContext,
     output: WritableOutput,
     content: OutputContent,
-    method: M,
-    option: OMROption = OMROption())(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
+    method: M)(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
     FromContext: p =>
       import p.*
       output match
@@ -43,19 +43,18 @@ object OMROutputFormat:
                 val header = Some(headerLine(variables))
                 CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), margin = "  ")
 
-          for {(section, i) ← content.section.zipWithIndex}
+          for {(section, i) <- content.section.zipWithIndex}
             val sectionName = if content.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
             writeStream(ps, sectionName, section.variables)
         case WritableOutput.Store(file) =>
-          OMROutputFormat.writeFile(executionContext, file.from(p.context), content, method, option = option).from(context)
+          OMROutputFormat.writeFile(executionContext, file.from(p.context), content, method).from(context)
 
 
   def writeFile[M](
-    executionContext: FormatExecutionContext,
+    executionContext: OMRContext,
     omrFile: File,
     content: OutputContent,
-    method: M,
-    option: OMROption)(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
+    method: M)(using methodData: MethodMetaData[M], scriptData: ScriptSourceData): FromContext[Unit] =
     FromContext: p =>
       import p.*
       import org.json4s.*
@@ -69,29 +68,28 @@ object OMROutputFormat:
       def methodFile =
         omrFile match
           case f if f.getName.endsWith(".omr") => f
-          case f => f.getParentFile / s"${f.getName}.omr"
+          case f => File(s"${f.getPath}.omr")
 
       def methodJson =
         method.asJson.mapObject(_.add(OMRFormat.methodNameField, Json.fromString(methodData.name)))
 
       def script =
         scriptData match
-          case data: ScriptSourceData.ScriptData if option.script =>
+          case data: ScriptSourceData.ScriptData =>
             val scriptContent = ScriptSourceData.scriptContent(scriptData)
             val imports = ScriptSourceData.imports(scriptData)
             Some(OMRFormat.Script(scriptContent, imports))
           case _ => None
 
-      OMRFormatV1.write(
+      OMRFormatV2.write(
         data = content,
-        methodFile = methodFile,
+        omrFile = methodFile,
         executionId = executionId,
         jobId = executionContext.jobId,
         methodJson = methodJson,
         script = script,
         timeStart = executionContext.moleLaunchTime,
-        openMOLEVersion = org.openmole.core.buildinfo.version.value,
-        option = option
+        openMOLEVersion = org.openmole.core.buildinfo.version.value
       )
 
 

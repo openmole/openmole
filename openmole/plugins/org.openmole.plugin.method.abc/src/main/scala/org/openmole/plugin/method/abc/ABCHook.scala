@@ -6,7 +6,7 @@ import org.openmole.core.dsl.extension.*
 
 object ABCHook {
 
-  def apply(method: ABC.ABCParameters, file: WritableOutput, frequency: Option[Long] = None, keepHistory: Boolean = false)(using sourcecode.Name, DefinitionScope, ScriptSourceData) =
+  def apply(method: ABC.ABCParameters, file: WritableOutput, frequency: Option[Long] = None)(using sourcecode.Name, DefinitionScope, ScriptSourceData) =
     Hook("ABCHook") { p =>
       import p.*
       
@@ -52,7 +52,7 @@ object ABCHook {
                 )
               )
 
-            OMROutputFormat.write(executionContext, file, content, None, OMROption(replace = !keepHistory)).from(context)
+            OMROutputFormat.write(executionContext, file, content, None).from(context)
         }
       }
 

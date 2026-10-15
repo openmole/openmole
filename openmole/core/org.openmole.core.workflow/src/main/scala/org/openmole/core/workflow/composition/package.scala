@@ -171,7 +171,8 @@ case class TaskNode(task: Task, strain: Boolean = false, funnel: Boolean = false
   infix def hook(hooks: Hook*) = copy(hooks = this.hooks ++ hooks)
   infix def hook(
     output: WritableOutput,
-    values: Seq[Val[?]]    = Vector.empty)(using DefinitionScope, ScriptSourceData): TaskNode = hook(OMRFileHook(output = output, values = values, option = OMROption(append = true), metadata = None))
+    values: Seq[Val[?]]    = Vector.empty)(using DefinitionScope, ScriptSourceData): TaskNode =
+    hook(OMRFileHook(output = output, values = values, append = true, metadata = None))
   infix def source(sources: Source*) = copy(sources = this.sources ++ sources)
 
 

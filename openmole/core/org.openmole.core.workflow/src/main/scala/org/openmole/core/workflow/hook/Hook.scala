@@ -20,7 +20,7 @@ package org.openmole.core.workflow.hook
 import org.openmole.core.context.Context
 import org.openmole.core.argument.{DefaultSet, FromContext}
 import org.openmole.core.fileservice.FileService
-import org.openmole.core.format.OutputFormat.FormatExecutionContext
+import org.openmole.core.format.OMROutputFormat.OMRContext
 import org.openmole.core.preference.Preference
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.threadprovider.ThreadProvider
@@ -37,9 +37,9 @@ import org.openmole.core.workflow.job.JobId
 import org.openmole.core.workflow.task.{InputOutputCheck, Name}
 
 object HookExecutionContext:
-  given Conversion[HookExecutionContext, FormatExecutionContext] = executionContext =>
+  given Conversion[HookExecutionContext, OMRContext] = executionContext =>
     import executionContext.*
-    FormatExecutionContext(
+    OMRContext(
       moleExecutionId = executionContext.moleExecutionId,
       jobId = executionContext.jobId,
       moleLaunchTime = executionContext.moleLaunchTime

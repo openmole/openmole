@@ -47,7 +47,7 @@ object SensitivityMorris {
 
   object MorrisHook:
 
-    def apply(method: Method, output: WritableOutput)(implicit name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) =
+    def apply(method: Method, output: WritableOutput)(using name: sourcecode.Name, definitionScope: DefinitionScope, scriptSourceData: ScriptSourceData) =
       Hook("MorrisHook"): p =>
         import p._
         import WritableOutput._
@@ -57,8 +57,6 @@ object SensitivityMorris {
         def values: Seq[Variable[?]] =
           val v = ScalableValue.prototypes(method.inputs).map(_.name) ++ method.outputs.map(_.name)
           v.map(v => context.variable[Any](v).get)
-
-        import OutputFormat.*
 
         def sections =
           OutputContent(

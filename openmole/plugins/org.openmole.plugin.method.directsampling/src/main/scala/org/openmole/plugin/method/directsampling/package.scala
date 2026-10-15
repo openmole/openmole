@@ -98,7 +98,7 @@ implicit class ReplicationHookDecorator[M](t: M)(implicit method: ExplorationMet
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
     val exclude = if (!includeSeed) Seq(dsl.method.seed) else Seq()
-    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, metadata = Replication.MetaData(dsl.method), option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, exclude = exclude, metadata = Replication.MetaData(dsl.method), append = true))
 
 
 object DirectSampling:
@@ -165,7 +165,7 @@ implicit class DirectSamplingHookDecorator[M](t: M)(implicit method: Exploration
     values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = DirectSampling.MetaData(dsl.method), append = true))
 
 
 object SingleRun:
@@ -208,7 +208,7 @@ implicit class SingleRunHookDecorator[M](t: M)(implicit method: ExplorationMetho
     values: Seq[Val[?]]    = Vector.empty)(using ScriptSourceData): Hooked[M] =
     val dsl = method(t)
     implicit val defScope: DefinitionScope = dsl.scope
-    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), option = OMROption(append = true)))
+    Hooked(t, FormattedFileHook(output = output, values = values, metadata = SingleRun.MetaData(dsl.method), append = true))
 
 
 

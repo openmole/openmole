@@ -39,7 +39,6 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
   def hook(
     output:         WritableOutput,
     frequency:      OptionalArgument[Long] = None,
-    keepHistory:    Boolean                = false,
     keepAll:        Boolean                = false,
     includeOutputs: Boolean                = true,
     filter:         Seq[Val[?]]            = Vector.empty)(using scriptSourceData: ScriptSourceData): Hooked[T] =
@@ -52,7 +51,6 @@ implicit class EvolutionHookDecorator[T](t: T)(implicit method: ExplorationMetho
         evolution = m.method,
         output = output,
         frequency = frequency,
-        keepHistory = keepHistory,
         keepAll = keepAll,
         includeOutputs = includeOutputs,
         filter = filter)

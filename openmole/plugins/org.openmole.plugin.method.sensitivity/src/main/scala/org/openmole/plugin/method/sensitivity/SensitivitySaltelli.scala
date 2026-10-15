@@ -225,8 +225,6 @@ object SensitivitySaltelli:
           val v = ScalableValue.prototypes(method.inputs).map(_.name) ++ method.outputs.map(_.name)
           v.map(v => context.variable[Any](v).get)
 
-        import OutputFormat.*
-
         def sections =
           OutputContent(
             "firstOrderIndices" -> Sensitivity.variableResults(inputs, method.outputs, SensitivitySaltelli.firstOrder).from(context),

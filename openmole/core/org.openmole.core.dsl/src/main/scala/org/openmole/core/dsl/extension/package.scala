@@ -72,8 +72,7 @@ package object extension:
   export org.openmole.core.format.WritableOutput
   export org.openmole.core.format.WritableOutput.Display
   export org.openmole.core.format.{MethodMetaData, ValData, omrCirceDefault}
-  export org.openmole.core.format.OutputFormat.{OutputContent, SectionContent}
-  export org.openmole.core.format.OutputFormat
+  export org.openmole.core.format.{OutputContent, SectionContent, SectionDataMode, OMRFormat, OMROutputFormat}
 
   type HookExecutionContext = org.openmole.core.workflow.hook.HookExecutionContext
 
