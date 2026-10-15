@@ -35,6 +35,14 @@ import ReleaseNotesValue.*
 
 object ReleaseNotes extends PageContent(html"""
 
+${h2{"V25 | F F"}}
+
+
+${
+  notes("""
+    - Engine: Implement OMR format version 2
+  """)
+}
 
 ${h2{"V24 | E E"}}
 
