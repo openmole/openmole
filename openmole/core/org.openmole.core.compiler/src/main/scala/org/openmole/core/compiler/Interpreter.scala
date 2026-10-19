@@ -47,6 +47,7 @@ import scala.reflect.ClassTag
 import monocle.macros._
 import org.openmole.tool.outputredirection.OutputRedirection
 import dotty.tools.dotc.semanticdb.Diagnostic.Severity
+import dotty.tools.repl.OpenMOLEReplDriver
 
 object Interpreter {
   import java.io.File
@@ -123,7 +124,7 @@ object Interpreter {
       Activator.context.get.getBundles.filter(!_.isSystem).map(toPath)
   }.distinct
 
-  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean, options: Seq[String]): (repl.REPLDriver, ClassLoader) =
+  def driver(classDirectory: File, priorityBundles: Seq[Bundle], jars: Seq[File], quiet: Boolean, options: Seq[String]): (OpenMOLEReplDriver, ClassLoader) =
     def commonOptions = Seq("-language:postfixOps", "-language:implicitConversions", "-nowarn") ++ options
 
     classDirectory.mkdirs()
@@ -133,7 +134,7 @@ object Interpreter {
     val driver =
       Activator.context match
         case Some(_) =>
-          new repl.REPLDriver(
+          new OpenMOLEReplDriver(
             Array(
               "-classpath", classPath(priorityBundles, jars).mkString(":"),
               //"-usejavacp",
@@ -144,7 +145,7 @@ object Interpreter {
             Some(classLoaderValue)
           )
         case None =>
-          new repl.REPLDriver(
+          new OpenMOLEReplDriver(
             Array(
               "-classpath", System.getProperty("java.class.path"),
               //"-usejavacp",
@@ -159,7 +160,7 @@ object Interpreter {
     (driver, classLoaderValue)
 
   type Compiled = () => Any
-  case class RawCompiled(compiled: repl.REPLDriver.Compiled, classDirectory: java.io.File)
+  case class RawCompiled(compiled: OpenMOLEReplDriver.Compiled, classDirectory: java.io.File)
 
   def apply(priorityBundles: => Seq[Bundle] = Nil, jars: Seq[JFile] = Seq.empty, quiet: Boolean = true, options: Seq[String] = Seq())(implicit newFile: TmpDirectory, fileService: FileService) = {
     val classDirectory = fileService.wrapRemoveOnGC(TmpDirectory.newDirectory("classDirectory"))
@@ -170,7 +171,7 @@ object Interpreter {
   }
 }
 
-class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File, val classLoaderValue: ClassLoader) {
+class Interpreter(val driver: OpenMOLEReplDriver, val classDirectory: java.io.File, val classLoaderValue: ClassLoader) {
 
   def initialState = driver.initialState
 
@@ -179,14 +180,14 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
     val compiled = dottyCompile(code)
     () => run(compiled)._1
 
-  def dottyCompile(code: String, state: repl.REPLDriver.CompilerState = initialState) =
+  def dottyCompile(code: String, state: OpenMOLEReplDriver.CompilerState = initialState) =
      synchronized {
       import dotty.tools.dotc.reporting.Diagnostic._
 
       val compiled = driver.justCompile(code, state)
 
       compiled match 
-        case c: repl.REPLDriver.Compiled =>
+        case c: OpenMOLEReplDriver.Compiled =>
           c match
             case Left((diagnostics, _)) =>
               throw Interpreter.errorMessagesToException(diagnostics.map(Interpreter.diagnosticToErrorMessage), code)
@@ -212,7 +213,7 @@ class Interpreter(val driver: repl.REPLDriver, val classDirectory: java.io.File,
 
     (getResult(runResult), runResult)
 
-  def completion(code: String, position: Int, state: repl.REPLDriver.CompilerState) = synchronized {
+  def completion(code: String, position: Int, state: OpenMOLEReplDriver.CompilerState) = synchronized {
     driver.completions(position, code, state).map(c => Interpreter.CompletionCandidate(c.label, c.symbols, c.description)).toVector
   }
 
