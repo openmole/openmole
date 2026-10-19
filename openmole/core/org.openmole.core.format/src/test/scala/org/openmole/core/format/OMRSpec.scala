@@ -141,3 +141,31 @@ class OMRSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers:
     )
 
     OMRFormat.variables(file).head.variables.head.value.asInstanceOf[File].content should equal(storedFile.content)
+
+  it should "be able to append variables to a section" in :
+    import OMRFormatV2.*
+    import APIV2.*
+
+    val p = Val[String]
+    val t = Val[OMRSpec.Test]
+    val file = tmpDirectory.newFile("test", ".omr")
+
+    val vs = Seq[Variable[?]](p -> "test", t -> OMRSpec.Test.T1)
+    val data = OutputContent(SectionContent(Some("test"), vs, mode = DataMode.Append))
+
+    for
+      i <- 0 until 10
+    do
+      OMRFormatV2.write(
+        data = data,
+        omrFile = file,
+        executionId = "test",
+        jobId = 0,
+        methodJson = Json.Null,
+        script = None,
+        timeStart = 1000,
+        openMOLEVersion = "test"
+      )
+
+    val context = Context(OMRFormat.variables(file).head.variables*)
+    context(p.array).size should equal(10)
