@@ -285,7 +285,7 @@ class EGIEnvironment[A: EGIAuthenticationInterface](
         def fileSize(file: File) = (if (file.isDirectory) fileService.archiveForDir(file) else file).size
 
         val usedFiles = BatchEnvironment.jobFiles(batchExecutionJob, env)
-        val usedFilesInfo = usedFiles.map { f => f → FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
+        val usedFilesInfo = usedFiles.map { f => f -> FileInfo(fileSize(f), fileService.hash(f).toString) }.toMap
         val totalFileSize = usedFilesInfo.values.toSeq.map(_.size).sum
 
         val onStorage: Map[String, Seq[Replica]] = replicaCatalog.forHashes(usedFilesInfo.values.toVector.map(_.hash), sss.map(_._2).map(WebDavStorage.id)).groupBy(_.storage)

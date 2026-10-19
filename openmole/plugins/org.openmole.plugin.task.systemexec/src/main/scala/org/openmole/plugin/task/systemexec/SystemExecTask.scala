@@ -117,7 +117,7 @@ case class SystemExecTask private (
             case None => tmpDir
             case Some(d) => new File(tmpDir, d)
 
-        val context = p.context + (External.PWD → workDir.getAbsolutePath)
+        val context = p.context + (External.PWD -> workDir.getAbsolutePath)
 
         val osCommandLines =
           command.find { _.os.compatible }
@@ -133,7 +133,7 @@ case class SystemExecTask private (
         val executionResult =
           executeAll(
             workDir,
-            environmentVariables.map { v => v.name.from(context) → v.value.from(preparedContext) },
+            environmentVariables.map { v => v.name.from(context) -> v.value.from(preparedContext) },
             shellCommands.toList,
             errorOnReturnValue && !returnValue.isDefined,
             stdOut.isDefined,

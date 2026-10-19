@@ -292,7 +292,7 @@ trait AbstractNetLogoTask extends Task with ValidateTask:
     pool: instance =>
 
       val resolver = External.relativeResolver(instance.workspaceDirectory)(_)
-      val context = parameters.context + (External.PWD → instance.workspaceDirectory.getAbsolutePath)
+      val context = parameters.context + (External.PWD -> instance.workspaceDirectory.getAbsolutePath)
       val preparedContext = External.deployInputFilesAndResources(external, context, resolver)
 
       AbstractNetLogoTask.executeNetLogo(instance.netLogo, "clear-all")

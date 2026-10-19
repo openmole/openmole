@@ -125,7 +125,7 @@ class Context(val variables: TreeMap[String, Variable[?]]):
    * @param value the value of the variable
    * @return the new context
    */
-  def +[T](p: Val[T], value: T) = Context.fromMap(variables + (p.name → Variable[T](p, value)))
+  def +[T](p: Val[T], value: T) = Context.fromMap(variables + (p.name -> Variable[T](p, value)))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -159,7 +159,7 @@ class Context(val variables: TreeMap[String, Variable[?]]):
    * @param vs the variables to add
    * @return the new context
    */
-  def ++(vs: Iterable[Variable[?]]): Context = Context.fromMap(variables ++ (vs.map { v => v.prototype.name → v }))
+  def ++(vs: Iterable[Variable[?]]): Context = Context.fromMap(variables ++ (vs.map { v => v.prototype.name -> v }))
 
   /**
    * Build a new context containing the variables of the current context minus the

@@ -117,7 +117,7 @@ object ProcessObserver:
         |# Second snapshot
         |pids=($(collect_pids $pid))
         |if [ ${#pids[@]} -eq 0 ]; then
-        |  j1=$j0   # process tree gone → assume no more CPU
+        |  j1=$j0   # process tree gone -> assume no more CPU
         |else
         |  j1=$(sum_jiffies "${pids[@]}")
         |fi

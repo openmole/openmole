@@ -35,7 +35,7 @@ object ZipWithDomain {
 case class ZipWithDomain[D, I, O](domain: D, f: FromContext[I => O])(implicit discrete: DiscreteFromContextDomain[D, I]) {
   def iterator = FromContext { p =>
     import p._
-    discrete(domain).domain.from(context).map { e => e → f.from(context).apply(e) }
+    discrete(domain).domain.from(context).map { e => e -> f.from(context).apply(e) }
   }
 
   def inputs = discrete(domain).inputs ++ f.inputs

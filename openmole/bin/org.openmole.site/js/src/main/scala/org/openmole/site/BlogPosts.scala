@@ -61,7 +61,7 @@
 //    if (blogPosts == null) {
 //      val future = ext.Ajax.get(
 //        headers = Map(
-//          "Accept" → "*/*"
+//          "Accept" -> "*/*"
 //        ),
 //        url = s"${shared.link.blog}/rss/",
 //        timeout = 10000

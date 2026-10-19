@@ -12,7 +12,7 @@ object PluginRegistry {
 
   private val plugins = new ConcurrentHashMap[AnyRef, PluginInfo]().asScala
 
-  def addPlugin(c: AnyRef, info: PluginInfo) = plugins += c → info
+  def addPlugin(c: AnyRef, info: PluginInfo) = plugins += c -> info
   def removePlugin(c: AnyRef) = plugins -= c
   def pluginsInfo = plugins.values.toSeq.sortBy(_.idClassName)
 

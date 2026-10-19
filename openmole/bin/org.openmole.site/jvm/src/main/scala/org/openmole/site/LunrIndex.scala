@@ -33,12 +33,12 @@ object LunrIndex {
     val h2 = (xml \\ "h2").text
     val h3 = (xml \\ "h2").text
     JsObject(
-      "url" → JsString(url),
-      "title" → JsString(name),
-      "h2" → JsString(h2),
-      "h3" → JsString(h3),
-      "body" → JsString(body),
-      "pre" → JsString(code)
+      "url" -> JsString(url),
+      "title" -> JsString(name),
+      "h2" -> JsString(h2),
+      "h3" -> JsString(h3),
+      "body" -> JsString(body),
+      "pre" -> JsString(code)
     )
   }
 }

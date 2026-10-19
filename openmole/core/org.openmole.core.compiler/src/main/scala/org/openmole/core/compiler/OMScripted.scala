@@ -73,7 +73,7 @@
 //    if (!dynRes) throw new ScriptException("Failed to compile dynamicBindings")
 //    intp beQuietDuring {
 //      intp interpret s"val $ctx: _root_.scala.tools.nsc.interpreter.dynamicBindings.type = _root_.scala.tools.nsc.interpreter.dynamicBindings"
-//      intp bind ("$engine" → (this: ScriptEngine with Compilable))
+//      intp bind ("$engine" -> (this: ScriptEngine with Compilable))
 //    }
 //  }
 //

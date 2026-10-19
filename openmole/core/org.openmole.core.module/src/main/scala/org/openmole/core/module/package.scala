@@ -34,7 +34,7 @@ import org.openmole.tool.random.RandomProvider
 package object module:
 
   def indexes(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" → buildinfo.version)))
+    preference(ModuleIndex.moduleIndexes).map(ExpandedString(_).from(Context("version" -> buildinfo.version)))
 
   def pluginDirectory(implicit workspace: Workspace) = workspace.location /> "plugins"
   def moduleDirectory(implicit workspace: Workspace) = workspace.persistentDir /> "modules" /> buildinfo.version.major
