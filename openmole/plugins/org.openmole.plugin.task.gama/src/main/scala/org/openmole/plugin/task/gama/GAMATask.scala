@@ -117,8 +117,10 @@ object GAMATask:
             (JavaConfiguration.fewerThreadsParameters ++ equinoxSingleThread)//.mkString(" "))
           else Seq()
 
+        def otherVariables = Seq("-Djava.security.egd=file:/dev/./urandom")
+
         def javaOptions: EnvironmentVariable =
-          ("_JAVA_OPTIONS", fewerThreadsEnvironmentVariable.mkString(" "))
+          ("_JAVA_OPTIONS", (fewerThreadsEnvironmentVariable ++ otherVariables).mkString(" "))
 
         environmentVariables ++ Seq(javaOptions)
 
