@@ -1,4 +1,4 @@
-git lfs fetch
+#git lfs fetch
 
 (cd build-system && sbt publishLocal) && \
 (cd libraries && sbt publishLocal) && \

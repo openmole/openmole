@@ -6,6 +6,7 @@ import org.openmole.tool.file.*
 import org.openmole.tool.logger.JavaLogger
 import org.openmole.core.networkservice.*
 
+
 import java.nio.file.Files
 
 object EsBuild extends JavaLogger:

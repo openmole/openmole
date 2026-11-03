@@ -698,11 +698,11 @@ def guiSharedDir = guiDir / "shared"
 def guiSettings = scala3Settings
 //def guiSettings3 = defaultSettings ++ excludeTransitiveScala2
 
-def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!org.openmole.plotlyjs.*", "!org.querki.*", "*")
+def guiStrictImports = Seq("!org.scalajs.*", "!com.raquo.*", "!scala.scalajs.*", "!org.openmole.plotlyjs.*", "!io.github.nguyenyou.webawesome.laminar.*", "!org.querki.*", "*")
 
 /* -------------------- GUI Client ----------------------*/
 
-val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
+val clientPrivatePackages = Seq("com.raquo.*", "org.scalajs.dom.*", "net.scalapro.sortable.*", "org.openmole.plotlyjs.*", "io.github.nguyenyou.webawesome.laminar.*", "org.querki.jsext.*", "app.tulz.tuplez.*")
 
 def guiClientDir = guiDir / "client"
 lazy val clientGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.core") enablePlugins (ScalaJSPlugin) settings(
@@ -717,6 +717,7 @@ lazy val clientToolGUI = OsgiProject(guiClientDir, "org.openmole.gui.client.tool
   scalaJSSettings,
   libraryDependencies += Libraries.scalajs,
   Libraries.scalajsDomJS,
+  Libraries.webAwsomeLaminarJS,
   Libraries.laminarJS,
   Libraries.plotlyJS) dependsOn(dataGUI, apiGUI)
 
@@ -724,6 +725,7 @@ lazy val clientExt = OsgiProject(guiClientDir, "org.openmole.gui.client.ext") en
   //  Libraries.boopickleJS,
   //  Libraries.autowireJS,
   Libraries.laminarJS,
+  Libraries.webAwsomeLaminarJS,
   Libraries.scalajsDomJS,
   Libraries.tapirSTTPCLient,
   guiSettings,
@@ -1494,9 +1496,3 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
     log.info(s"Docker image(s) ${dockerTagNames.value.mkString(", ")} successfully pushed")
   }
 )
-
-
-
-
-
-

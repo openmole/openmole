@@ -30,13 +30,13 @@ a {
     font-weight: bold;
 }
 
-.table.envError>tbody>tr>td {
+.table.envError > tbody > tr > td {
     border-top: none;
     vertical-align: middle;
     text-align: center;
 }
 
-.executionTable>tbody>tr {
+.executionTable > tbody > tr {
     text-align: center
 }
 
@@ -46,7 +46,7 @@ a {
     border-radius: 3px;
 }
 
-.table-inverse>tbody>tr>td {
+.table-inverse > tbody > tr > td {
     padding: 20px;
     text-align: center;
 }
@@ -80,13 +80,13 @@ ul {
 
 /* TREENODE PANEL */
 .treePathItems {
-    ffont-size: 18px;
+    font-size: 20px;
     color: white;
     cursor: pointer;
     font-weight: bold;
     line-height: 25px;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
 }
 
 .treePathItems:hover {
@@ -153,7 +153,7 @@ ul {
     cursor: pointer;
 }
 
-.table tbody>tr>td.vert-align {
+.table tbody > tr > td.vert-align {
     padding-top: 20px;
     vertical-align: middle;
     text-align: center;
@@ -170,10 +170,9 @@ tr {
     min-width: 20px;
 }
 
-.table tbody>tr>td.vert-align {
+.table tbody > tr > td.vert-align {
     padding-top: 10px;
 }
-
 
 
 /* ALERT LOADING*/
@@ -289,7 +288,8 @@ li.selectElement {
 }
 
 /* File management*/
-.inputFileStyle {}
+.inputFileStyle {
+}
 
 .inputFileStyle input[type="file"] {
     display: none;
@@ -322,7 +322,7 @@ li.selectElement {
     flex-direction: row;
 }
 
-.spinner-wave>div {
+.spinner-wave > div {
     animation: 1.2s ease-in-out 0s normal none infinite running wave;
     display: inline-block;
     height: 100%;
@@ -479,7 +479,7 @@ li.selectElement {
 .closeRunOptions {
     opacity: 1;
     color: white;
-    !important
+!important
 }
 
 .popover {
@@ -520,7 +520,7 @@ li.selectElement {
 
 .file2 {
     flex: 0 0 100px;
-    font-size: 11px;
+    font-size: 12px;
     justify-content: flex-end;
     display: flex;
     margin-right: 10px;
@@ -545,16 +545,13 @@ li.selectElement {
 
 .nav-container {
     background-color: #3f3d56;
-    height: 70px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 15px;
+    padding: 10px;
 }
 
 .main-container {
-    display: flex;
-    flex-direction: row;
     width: 100%;
     height: 100%;
 }
@@ -568,8 +565,12 @@ li.selectElement {
 
     /* for Firefox */
     min-height: 0;
-    max-width: 500px;
-    min-width: 500px;
+    max-width: 700px;
+    min-width: 700px;
+    position: absolute;
+    right: 0px;
+    background: #3f3d56;
+    z-index: 20;
 }
 
 .file-section.closed {
@@ -580,14 +581,12 @@ li.selectElement {
 }
 
 .tab-section {
-    flex-grow: 1;
     background-color: white;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
     width: 100%;
     margin-left: 10px;
-    overflow: hidden;
+    z-index: 10;
+    position: absolute;
+    height: 100%;
 }
 
 .file-content {
@@ -600,7 +599,9 @@ li.selectElement {
     min-height: 0;
     background-color: #3f3d56;
     color: white;
-    height: 72vh;
+    height: 81vh;
+    padding-bottom: 20px;
+    margin-top: 30px;
 }
 
 /* EDITOR */
@@ -744,7 +745,8 @@ li.selectElement {
     border-right: 2px solid #fff4;
 }
 
-.file-item-text {}
+.file-item-text {
+}
 
 .navbar-item {
     padding: 10;
@@ -752,13 +754,14 @@ li.selectElement {
     color: white;
     cursor: pointer;
     font-size: 20px;
+    display: flex;
 }
 
 .sorting-files {
-    justify-content: right;
     padding: 10 50 14 10;
     background-color: #3f3d56;
-    margin-right: -390px;
+    position: absolute;
+    right: 0px;
 }
 
 .sorting-files-item,
@@ -807,11 +810,8 @@ li.selectElement {
 
 .toolBlock {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
     background-color: #3f3d56;
-    margin-right: -20px;
 }
 
 .open-transition {
@@ -835,7 +835,7 @@ li.selectElement {
     align-items: center;
     font-size: 20px;
     color: #795c85;
-    margin-left: 10px;
+    margin-left: auto;
 }
 
 .plus-button.selected {
@@ -859,8 +859,7 @@ li.selectElement {
 .white-button {
     width: 80px;
     padding: 5px;
-    color: #6c757d;
-    ;
+    color: #6c757d;;
     background-color: white;
     border-color: white;
     height: 38px;
@@ -888,11 +887,6 @@ li.selectElement {
     width: 20px;
     height: 20px;
     margin-left: 0px;
-}
-
-.file-refresh {
-    margin-right: 10px;
-    font-size: 20px;
 }
 
 .cursor-pointer {
@@ -945,23 +939,6 @@ li.selectElement {
     background: #d35f5f;
 }
 
-
-.specific-file.git::before {
-    transform: rotate(-45deg);
-    color: white;
-    content: "g";
-    font-weight: bold;
-    color: #795c85;
-    padding-bottom: 6px;
-}
-
-.specific-file.git {
-    transform: rotate(45deg);
-    background-color: white;
-    width: 16px;
-    height: 16px;
-}
-
 .git-status-conflicting {
     color: #d25757;
 }
@@ -984,7 +961,7 @@ li.selectElement {
     fontStyle: italic;
     cursor: pointer;
     margin-left: 20px;
-    line-height: 27px;
+    line-height: 35px;
 }
 
 .omsControlButton {
@@ -1002,6 +979,8 @@ li.selectElement {
     font-weight: bold;
     cursor: pointer;
 }
+
+.ace_scrollbar.ace_scrollbar-v { left: 0 }
 
 .mypopover {
     position: absolute;
@@ -1332,15 +1311,15 @@ li.selectElement {
     transition: .4s;
 }
 
-input:checked+.slider {
+input:checked + .slider {
     background-color: #3086b5;
 }
 
-input:focus+.slider {
+input:focus + .slider {
     box-shadow: 0 0 1px #3086b5;
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
@@ -1443,7 +1422,7 @@ input:checked+.slider:before {
 }
 
 .nav-pills .nav-link.active,
-.nav-pills .show>.nav-link {
+.nav-pills .show > .nav-link {
     color: #fff;
     background-color: #3086b5;
     height: 40px;
@@ -1673,10 +1652,14 @@ div.noUi-connect {
 }
 
 .refreshOMR {
-  color: white;
-  width: 40px;
-  border-radius: 200px;
-  height: 40px;
-  font-size: 20;
-  padding: 5px;
+    color: white;
+    width: 40px;
+    border-radius: 200px;
+    height: 40px;
+    font-size: 20;
+    padding: 5px;
+}
+
+.selectCaret::part(expand-icon) {
+    color: white;
 }

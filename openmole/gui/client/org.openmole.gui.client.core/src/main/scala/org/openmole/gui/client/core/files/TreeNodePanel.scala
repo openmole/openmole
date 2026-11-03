@@ -21,6 +21,8 @@ import org.openmole.gui.shared.data.GitStatus.{Conflicting, Modified, Untracked}
 
 import scala.collection.immutable.ArraySeq
 import org.openmole.gui.client.core.files.TabContent.TabData
+import io.github.nguyenyou.webawesome.laminar.*
+import org.scalajs.dom.html
 
 /*
  * Copyright (C) 16/04/15 // mathieu.leclaire@openmole.org
@@ -71,18 +73,34 @@ class TreeNodePanel:
     onMountFocus
   )
 
-  val plusFile = Var(false)
-  
   // New file tool
-  val newNodeInput =
-    inputTag().amend(
-      placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New directory" else "New file" },
-      width := "270px",
-      marginLeft := "12px",
-      inContext { thisNode =>
-          plusFile.signal.toObservable --> Observer[Boolean] { e => if e then thisNode.ref.focus()}
-     }
-    )
+  val plusFile = Var(false)
+  val focused = Var(false)
+  val newNode = Var("")
+
+  def newNodeInput(using api: ServerAPI, basePath: BasePath, panels: Panels) =
+    Input(
+      _.width <-- focused.signal.map {
+        case true => "200px"
+        case false => "120px"
+      },
+      _.value <-- newNode.signal.changes,
+      _.focus <-- focused.signal.changes,
+      _.transition := "width 0.2s ease",
+      _.onFocus.mapTo(true) --> focused,
+      _.onBlur.mapTo(false) --> focused,
+      _.placeholder <-- directoryToggle.toggled.signal.map { d => if d then "New folder" else "New file" },
+      _.onInput.mapToValue --> newNode,
+      _.onKeyDown
+        .filter(_.key == "Enter")
+        .preventDefault --> { _ =>
+        if (newNode.now() != "")
+          createNewNode(newNode.now())
+          newNode.set("")
+          plusFile.set(false)
+      },
+      _.marginLeft := "20px"
+    )()
 
   lazy val directoryToggle =
     object FileType
@@ -102,11 +120,17 @@ class TreeNodePanel:
   def fInputMultiple(todo: Input => Unit) =
     inputTag().amend(cls := "upload", `type` := "file", multiple := true, OMTags.webkitdirectory <-- directoryToggle.toggled.signal, inContext { thisNode => onChange --> { _ => todo(thisNode) } })
 
-  def upldoadButton(todo: Input => Unit): HtmlElement =
-    span(aria.hidden := true, cls <-- directoryToggle.toggled.signal.map { d => if !d then "bi-cloud-upload" else "bi-cloud-upload-fill" }, cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo)).
-      tooltip("eranu").amend(dataAttr("original-title") <-- directoryToggle.toggled.signal.map { d => if !d then "Upload files" else "Upload directories" })
+  def uploadButton(todo: Input => Unit): HtmlElement =
+    span(
+      idAttr := "uploadButton",
+      aria.hidden := true,
+      cls <-- directoryToggle.toggled.signal.map { d =>
+        if !d then "bi-cloud-upload" else "bi-cloud-upload-fill"
+      },
+      cls := "fileUpload glyphmenu", margin := "10 0 10 12", fInputMultiple(todo)
+    )
 
-  private def upButton(using api: ServerAPI, basePath: BasePath) = upldoadButton((fileInput: Input) =>
+  private def upButton(using api: ServerAPI, basePath: BasePath) = uploadButton((fileInput: Input) =>
     val current = treeNodeManager.directory.now()
     api.upload(
       fileInput.ref.files.toSeq.map(f => f -> current / f.path),
@@ -118,19 +142,15 @@ class TreeNodePanel:
   )
 
   def createFileTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
-    form(flexRow, alignItems.center, height := "70px", color.white, margin := "0 10 0 10",
+    div(flexRow, alignItems.center, height := "70px", color.white,
       directoryToggle.element,
-      newNodeInput.amend(marginLeft := "10px"),
+      newNodeInput,
       upButton.amend(justifyContent.flexEnd),
       transferring.withTransferWaiter("white") {
         _ =>
           div()
-      }.amend(marginLeft := "10px"),
-      onSubmit.preventDefault --> { _ =>
-        createNewNode(newNodeInput.ref.value)
-        newNodeInput.ref.value = ""
-        plusFile.set(false)
-      })
+      }
+    )
 
   val confirmationDiv: Var[Option[Div]] = Var(None)
 
@@ -207,6 +227,7 @@ class TreeNodePanel:
     confirmationDiv.set:
       Some:
         val selectedFiles = treeNodeManager.selected.now()
+
         def toTarget(target: SafePath)(p: SafePath) = p -> (target ++ p.name)
 
         confirmation(s"${selectedFiles.size} files copied. Browse to the target folder and press Paste", "Paste", () =>
@@ -219,28 +240,28 @@ class TreeNodePanel:
 
   def copyOrTrashTool(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     div(
-      height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
+      paddingTop := "20px", height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween,
       children <-- (commitable.signal combineWith addable.signal combineWith gitFolder.signal combineWith multiTool.signal).map: (co, ad, gf, mt) =>
         val selected = treeNodeManager.selected
-        val isSelectionEmpty = selected.signal.map { _.isEmpty }
+        val isSelectionEmpty = selected.signal.map {
+          _.isEmpty
+        }
 
         def disableIfEmptyCls = cls <-- isSelectionEmpty.map: se =>
           if se then "disable" else ""
 
 
         def commit =
-          
           val processing: Var[Boolean] = Var(false)
-                   
-          def doCommit = 
 
+          def doCommit =
             val messageInput = inputTag().amend(
               placeholder := "Commit message", marginRight := "10",
-              inContext{ctx =>
+              inContext { ctx =>
                 if mt == MultiTool.Git then ctx.ref.focus()
                 emptyMod
-                }   
-              )
+              }
+            )
             confirmationDiv.set(
               Some(
                 confirmationWithMessage(messageInput, "Commit",
@@ -259,62 +280,59 @@ class TreeNodePanel:
             )
 
           div(
-            child <-- processing.signal.map: p=>
+            child <-- processing.signal.map: p =>
               p match
-                case true=> Waiter.waiter("white")
-                case false=>
+                case true => Waiter.waiter("white")
+                case false =>
                   div(OMTags.glyph_commit, "commit", fileActionItems, verticalLine, cls := "glyphitem popover-item", onClick --> { _ => doCommit })
           )
 
-        def push = 
-
+        def push =
           val processing: Var[Boolean] = Var(false)
-                      
           div(fileActionItems, verticalLine, cls := "glyphitem popover-item",
-            child <-- processing.signal.map: p=>
+            child <-- processing.signal.map: p =>
               p match
-                case true=> Waiter.waiter("white")
-                case false=> 
+                case true => Waiter.waiter("white")
+                case false =>
                   div(OMTags.glyph_push, "push", flexColumn, alignItems.center, onClick --> { _ =>
                     processing.set(true)
                     api.push(treeNodeManager.directory.now()).foreach:
-                      case PushStatus.Ok => 
+                      case PushStatus.Ok =>
                         processing.set(false)
                         confirmationDiv.set(Some(info("Push successful")))
-                      case PushStatus.AuthenticationRequired => 
+                      case PushStatus.AuthenticationRequired =>
                         processing.set(false)
                         confirmationDiv.set(Some(info("Push failed, an authentication is required")))
-                      case PushStatus.Failed => 
+                      case PushStatus.Failed =>
                         processing.set(false)
                         confirmationDiv.set(Some(info("Push failed")))
-              })
+                  })
           )
 
         def pull =
-
           val processing: Var[Boolean] = Var(false)
 
-          div( paddingBottom := "20", fileActionItems, verticalLine, cls := "glyphitem popover-item",
-            child <-- processing.signal.map: p=>
+          div(fileActionItems, verticalLine, cls := "glyphitem popover-item",
+            child <-- processing.signal.map: p =>
               p match
-                case true=> Waiter.waiter("white")
-                case false=> 
-                  div(OMTags.glyph_pull, "pull",flexColumn, alignItems.center,
-                      onClick --> { _ =>
-                        processing.set(true)
-                        api.pull(treeNodeManager.directory.now()).foreach:
-                          case MergeStatus.ChangeToBeResolved =>
-                            processing.set(false)
-                            confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
-                          case MergeStatus.ConnectionFailed => 
-                            processing.set(false)
-                            confirmationDiv.set(Some(info("Connection to server impossible.")))
-                          case _ => 
-                            processing.set(false)
-                            closeMultiTool
-                      }
-                  )        
-          )  
+                case true => Waiter.waiter("white")
+                case false =>
+                  div(OMTags.glyph_pull, "pull", flexColumn, alignItems.center,
+                    onClick --> { _ =>
+                      processing.set(true)
+                      api.pull(treeNodeManager.directory.now()).foreach:
+                        case MergeStatus.ChangeToBeResolved =>
+                          processing.set(false)
+                          confirmationDiv.set(Some(info("Merge impossible, first revert or commit your changes.")))
+                        case MergeStatus.ConnectionFailed =>
+                          processing.set(false)
+                          confirmationDiv.set(Some(info("Connection to server impossible.")))
+                        case _ =>
+                          processing.set(false)
+                          closeMultiTool
+                    }
+                  )
+          )
 
         if (mt == MultiTool.On)
           Seq(
@@ -386,9 +404,9 @@ class TreeNodePanel:
     )
 
   def closeMultiTool =
+    treeNodeManager.clearSelection
     multiTool.set(MultiTool.Off)
     confirmationDiv.set(None)
-    treeNodeManager.clearSelection
 
   val multiTool: Var[MultiTool] = Var(MultiTool.Off)
 
@@ -410,53 +428,67 @@ class TreeNodePanel:
       child <-- treeNodeManager.directory.signal.map { curr =>
         val parent = curr.parent
         div(
-          cls := "tree-path",
-          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, padding := "0 10 5 0"),
+          cls := "tree-path navbar-item",
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, cls := "treePathItems", fontSize := "20", marginLeft := "-10px"),
           Seq(parent.parent, parent, curr).filterNot { sp =>
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp =>
-            goToDirButton(sp, s"${sp.name} / ")
+            goToDirButton(sp, s"${sp.name} / ").amend(marginLeft := "10")
           },
           div(glyph_plus, cls <-- plusFile.signal.map { pf =>
             "plus-button" + {
               if (pf) " selected" else ""
             }
-          }, onClick --> { _ => plusFile.update(!_) }),
+          }, onClick --> { _ =>
+            plusFile.update(pf =>
+              if !pf
+              then {
+                newNode.set("")
+                focused.set(true)
+              }
+              !pf
+            )
+          }),
         )
       },
       div(
-        display.flex, justifyContent.flexEnd, marginTop := "10",
-        div(flexRow, justifyContent.right,
-          div(
-            cls <-- fileToolBar.filterToolOpen.signal.map { o =>
-              if (o) "open-transition" else "close-transition"
-            },
-            fileToolBar.filterTool
-          )),
-        div(cls := "toolBlock",
-          child <--
-            gitFolder.signal.map: gf =>
-              if gf
-              then
-                div(cls := "specific-file git gitInfo", color := "white", cursor.pointer, marginRight := "18px",
-                  onClick --> { _ =>
-                    initMultiTool(MultiTool.Git)
-                  })
-              else emptyNode
-          ,
-          div(OMTags.glyph_search,
-            cls := "filtering-files-item-selected",
-            onClick --> { _ => fileToolBar.filterToolOpen.update(!_) }),
-          div(glyph_refresh, cls := "treePathItems file-refresh", onClick --> { _ => refresh }),
-          div(cls := "bi-three-dots-vertical treePathItems", fontSize := "20px", paddingRight := "15px", onClick --> { _ =>
+        marginTop := "50", flexRow, alignItems.center,
+        opacity <-- plusFile.signal.map { pf => if pf then 0.5 else 1 },
+        child <--
+          gitFolder.signal.map: gf =>
+            if gf
+            then {
+              Icon(
+                _.name := "square-git",
+                _.family := "brands",
+                _.onClick --> { _ =>
+                  initMultiTool(MultiTool.Git)
+                }
+              )(
+                color.white,
+                cursor.pointer,
+                fontSize := "30"
+              )
+            } else emptyNode
+        ,
+        Icon(
+          _.name := "ellipsis-vertical",
+          _.onClick --> { _ =>
             initMultiTool(MultiTool.On)
-          })
-        )
+          })(
+          color.white,
+          cursor.pointer,
+          marginLeft := "10px",
+          marginRight := "20px"),
+        div(glyph_refresh, color.white, cursor.pointer, onClick --> { _ => refresh }),
+        fileToolBar.filterTool,
+        fileToolBar.gitTools,
+        fileToolBar.sortingGroup
       ),
       plusFile.signal.expand(createFileTool),
       child <--
         confirmationDiv.signal.map:
-          case Some(d) => div(height := "70px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween, d)
+          case Some(d) => div(paddingTop := "30px",flexRow, alignItems.center, color.white, justifyContent.spaceBetween, d)
           case None => multiTool.signal.map(_ != MultiTool.Off).expand(copyOrTrashTool),
       plusFile.toObservable --> Observer[Boolean]: v =>
         if !v then directoryToggle.toggled.set(false)
@@ -472,8 +504,8 @@ class TreeNodePanel:
     )
 
 
-  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement =
-    div(cls := "treePathItems", paddingLeft := "4px", name,
+  def goToDirButton(safePath: SafePath, name: String = "")(using panels: Panels, api: ServerAPI, basePath: BasePath): HtmlElement = {
+    div(cls := "treePathItems", marginLeft := "5px", fontSize := "16", name,
       onClick --> { _ =>
         clearErrorView(Some(safePath))
         treeNodeManager.switch(safePath)
@@ -485,11 +517,12 @@ class TreeNodePanel:
         dropAction(safePath, true)
       }
     )
+  }
 
-  def clearFileFinder = 
-    fileToolBar.filterToolOpen.set(false)
+  def clearFileFinder =
     treeNodeManager.resetFileFinder
-    fileToolBar.findInput.ref.value = ""
+    fileToolBar.searchValue.set("")
+    fileToolBar.focused.set(false)
 
   private def treeView(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, notificationAPI: NotificationService): Div =
     val size = Var(100)
@@ -507,7 +540,7 @@ class TreeNodePanel:
             case Some(nodes) =>
               val content =
                 if foundFiles.nonEmpty
-                then
+                then {
                   foundFiles.map { (sp, isDir) =>
                     div(s"${sp.normalizedPathString}", cls := "findFile",
                       onClick --> { _ =>
@@ -518,7 +551,7 @@ class TreeNodePanel:
                       }
                     )
                   }
-                else if currentDir == treeNodeManager.root && nodes.data.isEmpty
+                } else if currentDir == treeNodeManager.root && nodes.data.isEmpty
                 then Seq(div("Create a first OpenMOLE script (.oms)", cls := "message"))
                 else
                   val checked =
@@ -535,7 +568,7 @@ class TreeNodePanel:
                   commitable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2.contains(Untracked) || x._2.contains(Conflicting) || x._2.contains(Modified)).map(_._1))
                   addable.set(nodes.data.map(d => d.name -> d.gitStatus).filter(x => x._2.contains(Untracked)).map(_._1))
                   gitFolder.set(nodes.data.headOption.map(tn => tn.gitStatus.isDefined && tn.gitStatus != Some(GitStatus.Root)).getOrElse(false))
-                  checked +: nodes.data.zipWithIndex.flatMap { (tn, id) => Seq(drawNode(TreeNode.fromTreeNodeData(tn), id, tree).render)}
+                  checked +: nodes.data.zipWithIndex.flatMap { (tn, id) => Seq(drawNode(TreeNode.fromTreeNodeData(tn), id, tree).render) }
 
               def more =
                 if nodes.listed < nodes.total
@@ -550,7 +583,8 @@ class TreeNodePanel:
                   )
                 else Seq()
 
-              content ++ more
+              val upper = goToDirButton(currentDir.parent).amend("..", marginLeft := "13px", fontSize := "25px", paddingBottom := "10px")
+              upper +: (content ++ more)
           }
         },
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
@@ -559,7 +593,7 @@ class TreeNodePanel:
 
   def clearCurrentErrorView(using panels: Panels) =
     clearErrorView(panels.tabContent.current.now().map(_.safePath))
-    
+
   def clearErrorView(safePath: Option[SafePath])(using panels: Panels) =
     for
       path <- safePath
@@ -585,8 +619,8 @@ class TreeNodePanel:
         ),
         span(
           flexDirection.row, alignItems.center,
-          cls := "close-button close-button-tab bi-x", color := "white", marginLeft := "5px",
-          onClick --> { e => panels.treeNodePanel.clearCurrentErrorView}
+          cls := "close-button close-button-tab bi-x", color.white, marginLeft := "5px",
+          onClick --> { e => panels.treeNodePanel.clearCurrentErrorView }
         )
       )
 
@@ -628,7 +662,6 @@ class TreeNodePanel:
       plusFile.set(false)
       val currentMultiTool = multiTool.signal.now()
       if (currentMultiTool == MultiTool.Off || currentMultiTool == MultiTool.PendingOperation) todo()
-      fileToolBar.filterToolOpen.set(false)
       //treeNodeManager.computeCurrentSons
     }
 
@@ -647,7 +680,7 @@ class TreeNodePanel:
             tn match
               case _: TreeNode.Directory =>
                 tn.gitStatus match
-                  case Some(GitStatus.Root) => div(cls := "specific-file git", cursor.pointer)
+                  case Some(GitStatus.Root) => Icon(_.name := "square-git", _.family := "brands")(marginLeft := "-5px", fontSize := "25px") //div(cls := "specific-file git", cursor.pointer)
                   case _ => div(cls := "dir plus bi-plus", cursor.pointer)
               case f: TreeNode.File =>
                 if (f.pluginState.isPlugin)
@@ -686,7 +719,7 @@ class TreeNodePanel:
 
     def render(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): HtmlElement =
       div(display.flex, flexDirection.column,
-        div(display.flex, alignItems.center, lineHeight := "27px",
+        div(display.flex, alignItems.center, lineHeight := "30px",
           backgroundColor <-- treeNodeManager.selected.signal.map { s => if (isSelected(s)) toolBoxColor else "" },
           dropPairs,
           onDragStart --> { e =>
@@ -700,7 +733,7 @@ class TreeNodePanel:
           },
           dirBox(tn).amend(cls := "file0", fileClick(todo), draggable := true),
           div(tn.name,
-            cls.toggle("cursor-pointer") <-- multiTool.signal.map { mt =>
+            cls("cursor-pointer") <-- multiTool.signal.map { mt =>
               mt == MultiTool.Off || mt == MultiTool.PendingOperation
             },
             cls := s"file1 ${gitDivStatus(tn)}", fileClick(todo), draggable := true
@@ -710,11 +743,17 @@ class TreeNodePanel:
             multiTool.signal.map:
               case On | Git => emptyNode
               case _ =>
-                button(cls := "bi-three-dots transparent-button", cursor.pointer, opacity := "0.5", onClick --> { _ =>
-                  currentSafePath.set(Some(tnSafePath))
-                  currentLine.update(cl => if cl == id then -1 else id)
-                  if(id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
-                })
+                Icon(
+                  _.name := "ellipsis-vertical",
+                  _.onClick --> { _ =>
+                    currentSafePath.set(Some(tnSafePath))
+                    currentLine.update(cl => if cl == id then -1 else id)
+                    if (id > 19) tree.ref.scrollTop = tree.ref.scrollHeight - 80
+                  })(
+                  fontSize.px(20),
+                  color := "#fff",
+                  marginLeft := "5px",
+                  cursor.pointer)
         ),
         currentLine.signal.map { i => i == id }.expand(toolBox.contentRoot),
         treeNodeManager.directory.toObservable --> Observer { _ => currentLine.set(-1) }

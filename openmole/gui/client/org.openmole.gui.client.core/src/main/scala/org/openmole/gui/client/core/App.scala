@@ -1,5 +1,6 @@
 package org.openmole.gui.client.core
 
+import scala.scalajs.js
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import org.scalajs.dom.{KeyboardEvent, document}
@@ -16,6 +17,7 @@ import org.openmole.gui.client.core.NotificationManager.toService
 import org.openmole.gui.client.core.files.TreeNodePanel.MultiTool
 import org.openmole.gui.client.ext.FileManager
 import org.openmole.gui.client.tool.bootstrapnative.bsn.*
+import io.github.nguyenyou.webawesome.laminar.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.*
@@ -56,43 +58,44 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
     api.shutdown()
     render(dom.document.body, stoppedDiv)
 
-//
-//  def restarted(): Unit =
-//    given BasePath = basePath
-//
-//    val restartedDiv =
-//      div(
-//        cls := "screen-center",
-//        img(src := "img/openmole_light.png", width := "600px"),
-//        div("The OpenMOLE server is restarting, please wait.", marginTop := "30px")
-//      )
-//
-//    api.restart()
-//
-//    def checkAlive(): Unit =
-//      api.isAlive().foreach: x =>
-//        if x
-//        then CoreUtils.setRoute(s"/${connectionRoute}")
-//        else setTimeout(5000) {
-//          checkAlive()
-//        }
-//
-//    setTimeout(5000) {
-//      checkAlive()
-//    }
-//
-//    render(dom.document.body, restartedDiv)
+  //
+  //  def restarted(): Unit =
+  //    given BasePath = basePath
+  //
+  //    val restartedDiv =
+  //      div(
+  //        cls := "screen-center",
+  //        img(src := "img/openmole_light.png", width := "600px"),
+  //        div("The OpenMOLE server is restarting, please wait.", marginTop := "30px")
+  //      )
+  //
+  //    api.restart()
+  //
+  //    def checkAlive(): Unit =
+  //      api.isAlive().foreach: x =>
+  //        if x
+  //        then CoreUtils.setRoute(s"/${connectionRoute}")
+  //        else setTimeout(5000) {
+  //          checkAlive()
+  //        }
+  //
+  //    setTimeout(5000) {
+  //      checkAlive()
+  //    }
+  //
+  //    render(dom.document.body, restartedDiv)
 
 
-//  def resetPassword(): Unit =
-//    val resetPassword = new ResetPassword
-//    render(
-//      dom.document.body,
-//      resetPassword.resetPassDiv
-//    )
+  //  def resetPassword(): Unit =
+  //    val resetPassword = new ResetPassword
+  //    render(
+  //      dom.document.body,
+  //      resetPassword.resetPassDiv
+  //    )
 
   def run() =
     given BasePath = basePath
+
     given NotificationService = NotificationManager.toService(panels.notifications)
 
     val containerNode = dom.document.querySelector("#openmole-content")
@@ -105,7 +108,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       val settingsView = SettingsView.render
 
       val openFileTree = Var(true)
-      
+
       def undo =
         panels.treeNodePanel.multiTool.set(MultiTool.Off)
         panels.treeNodePanel.currentLine.set(-1)
@@ -113,68 +116,88 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         panels.treeNodePanel.clearFileFinder
         panels.treeNodePanel.plusFile.set(false)
         panels.treeNodePanel.clearCurrentErrorView
+        panels.treeNodePanel.treeNodeManager.resetFileFinder
+        panels.treeNodePanel.fileToolBar.searchValue.set("")
 
       dom.window.onkeydown = (k: KeyboardEvent) => {
         if k.keyCode == 83 && k.ctrlKey then k.preventDefault()
         else if k.keyCode == 27
         then undo
-        }
+      }
 
       //START BUTTON
       lazy val theNavBar = div(
         cls := "nav-container",
-        child <-- openFileTree.signal.map { oft =>
-          div(
-            navBarItem,
-            if (oft) div(glyph_chevron_left) else div(glyph_chevron_right),
-            onClick --> { _ =>
-              openFileTree.update(!_)
-            }
-          )
-        },
-        div(row, justifyContent.flexStart, marginLeft := "20px",
-          button(btn_danger, "New project",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
-              _.map { _.id }.contains(3)
-            ,
-            onClick --> { _ =>
+        Icon(
+          _.name := "folder",
+          _.canvas.fixed,
+          _.cls := "navbar-item",
+          _.onClick --> { _ =>
+            openFileTree.update(!_)
+          })(
+          fontSize.px(22),
+          color := "#fff",
+          cursor.pointer,
+          position.absolute,
+          right := "720px",
+          color := "#dc3146"),
+        div(img(src := "img/openmole_dark.png", height := "50px", onClick --> { _ =>
+          undo
+          panels.treeNodePanel.treeNodeManager.goToHome
+        })),
+        div(flexRow, justifyContent.flexStart, marginLeft := "20px",
+          Button(
+            _.variant.danger,
+            _.onClick --> { _ =>
               panels.expandTo(newProjectPanel, 3)
-            }),
+            })("New project"),
           div(OMTags.glyph_flash, navBarItem, marginLeft := "40px",
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
-              _.map { _.id }.contains(4)
+            cls("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map {
+                _.id
+              }.contains(4)
             ,
             onClick --> { _ =>
               ExecutionPanel.open
             }).tooltip("Executions"),
           div(glyph_lock, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
-              _.map { _.id }.contains(2)
+            cls("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map {
+                _.id
+              }.contains(2)
             ,
             onClick --> { _ =>
               panels.expandTo(authenticationPanel, 2)
             }).tooltip("Authentications"),
           div(OMTags.glyph_plug, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
-              _.map { _.id }.contains(1)
+            cls("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map {
+                _.id
+              }.contains(1)
             ,
             onClick --> { _ =>
               panels.pluginPanel.getPlugins
               panels.expandTo(panels.pluginPanel.render, 1)
             }).tooltip("Plugins"),
           div(OMTags.glyph_gear, navBarItem,
-            cls.toggle("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
-              _.map { _.id }.contains(5)
+            cls("mainMenuCurrentGlyph") <-- panels.expandablePanel.signal.map:
+              _.map {
+                _.id
+              }.contains(5)
             ,
             onClick --> { _ =>
               panels.expandTo(settingsView, 5)
             }).tooltip("Settings"),
           a(OMTags.glyph_info, cursor.pointer, navBarItem, target := "_blank", href <-- Signal.fromFuture(api.omSettings().map { sets =>
             s"https://${if (sets.isDevelopment) "next." else ""}openmole.org/Documentation.html"
-          }).map { _.getOrElse("") }
+          }).map {
+            _.getOrElse("")
+          }
           ).tooltip("Documentation"),
-          div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName")
-        ),
+          div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName"),
+          panels.tabContent.fontSizeControl
+        )
+        ,
         panels.notifications.render
       )
 
@@ -194,26 +217,19 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           EventStream.periodic(10000).toObservable --> Observer { _ => saveAllTabs },
           EventStream.periodic(10000).toObservable --> Observer { _ => getServerNotifications },
           cls := "app-container",
+          theNavBar,
           div(
-            cls := "main-container",
-            div(
-              cls <-- openFileTree.signal.map { oft =>
-                "file-section" + {
-                  if (oft) "" else " closed"
-                }
-              },
-              div(img(src := "img/openmole_dark.png", height := "70px", onClick --> {_=>
-                 undo
-                 panels.treeNodePanel.treeNodeManager.goToHome
-                },
-                 cursor.pointer), cls := "nav-container"),
-              panels.treeNodePanel.fileControler,
-              panels.treeNodePanel.fileToolBar.sortingGroup,
-              panels.treeNodePanel.treeViewOrErrors
-            ),
+            cls <-- openFileTree.signal.map { oft =>
+              "file-section" + {
+                if (oft) "" else " closed"
+              }
+            },
+            panels.treeNodePanel.fileControler,
+            panels.treeNodePanel.treeViewOrErrors
+          ),
+          div(
             div(
               cls := "tab-section",
-              theNavBar,
               panels.tabContent.render
             )
           ),
@@ -228,7 +244,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
                 },
               div(cls := "splitter"),
               child <-- panels.expandablePanel.signal.map: p =>
-                p.map { _.element }.getOrElse(div(top := "1000px", color.white))
+                p.map {
+                  _.element
+                }.getOrElse(div(top := "1000px", color.white))
             )
           )
         )

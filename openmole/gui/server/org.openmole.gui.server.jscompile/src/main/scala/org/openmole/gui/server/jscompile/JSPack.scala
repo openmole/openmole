@@ -51,10 +51,8 @@ object JSPack:
             .withBatchMode(true)
             .withOptimizer(optimizedJS)
             .withMinify(true)
-            .withClosureCompiler(false)
             .withModuleKind(ModuleKind.CommonJSModule)
             .withParallel(true)
-
           linker = StandardImpl.linker(config)
           _ <- linker.link(sjsirFiles, Nil, PathOutputDirectory(outputJSFile.getParentFile), new ScalaConsoleLogger)
         yield ()

@@ -35,7 +35,7 @@ class EvolutionVisualization extends VisualizationPlugin:
 
     def metaData = guiOMRContent.method.map(io.circe.Decoder[EvolutionMetadata].decodeJson).flatMap(_.right.toOption)
 
-    div()
+    div("viz")
 
 //    div(
 //      child <-- metadata.signal.map:
@@ -73,4 +73,3 @@ class EvolutionVisualization extends VisualizationPlugin:
 //  //                plotDiv
 //            case _ => p(value.toString)
 //    )
-

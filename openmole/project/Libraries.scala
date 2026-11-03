@@ -7,9 +7,10 @@ import sbt._
 import openmole.common._
 
 object Libraries {
-  
+
   lazy val scalajsDomJS = libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
   lazy val laminarJS = libraryDependencies += "com.raquo" %%% "laminar" % laminarVersion
+  lazy val webAwsomeLaminarJS = libraryDependencies += "io.github.nguyenyou" %%% "webawesome-laminar" % webAwsomeLaminarVersion
   lazy val sourcecodeJS = libraryDependencies += "com.lihaoyi" %%% "sourcecode" % sourcecodeVersion
   lazy val htmlparser2 = libraryDependencies += "com.definitelyscala" %%% "scala-js-htmlparser2" % "1.0.2"
   lazy val plotlyJS =  libraryDependencies += "org.openmole" %%% "scala-js-plotlyjs" % plotlyVersion
@@ -77,7 +78,7 @@ object Libraries {
   lazy val gears = "org.openmole.library" %% "gears" % gearsVersion
   lazy val ulid = "org.openmole.library" %% "com-github-f4b6a3-ulid" % ulidCreatorVersion
   lazy val izumiReflect = "org.openmole.library" %% "izumi-reflect" % izumiReflectVersion
-  
+
   def httpClientVersion = "4.5.3"
   lazy val httpClient =
     Seq(

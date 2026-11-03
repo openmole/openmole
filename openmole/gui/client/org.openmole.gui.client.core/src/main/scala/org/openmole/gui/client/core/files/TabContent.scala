@@ -24,12 +24,12 @@ class TabContent:
   def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     div(
       tabsUI.render.amend(margin := "10px"),
-      fontSizeControl
+      //fontSizeControl
     )
 
   private def buildHeader(
-      tabData: TabData
-  )(using panels: Panels, api: ServerAPI, basePath: BasePath) =
+                           tabData: TabData
+                         )(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     span(
       display.flex,
       flexDirection.row,
@@ -49,19 +49,20 @@ class TabContent:
     )
 
   def buildTab(
-    tabData: TabData,
-    content: HtmlElement,
-    copyAttributes: Option[Tab[TabData]] = None
-  )(using panels: Panels, api: ServerAPI, bp: BasePath) =
+                tabData: TabData,
+                content: HtmlElement,
+                copyAttributes: Option[Tab[TabData]] = None
+              )(using panels: Panels, api: ServerAPI, bp: BasePath) =
 
     val header =
       def switchPath = panels.treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
+
       buildHeader(tabData).amend(
         onClick --> { e =>
           if e.ctrlKey then switchPath
           current.set(Some(tabData))
         },
-        onDblClick --> {_ => switchPath }
+        onDblClick --> { _ => switchPath }
       )
 
     copyAttributes match
@@ -77,24 +78,24 @@ class TabContent:
         )
 
   def addTab(tabData: TabData, content: HtmlElement)(using
-      panels: Panels,
-      api: ServerAPI,
-      basePath: BasePath
+                                                     panels: Panels,
+                                                     api: ServerAPI,
+                                                     basePath: BasePath
   ) =
     tabsUI.add(buildTab(tabData, content))
     current.set(Some(tabData))
 
   def updateTab(safePath: SafePath, content: HtmlElement)(using
-      panels: Panels,
-      api: ServerAPI,
-      basePath: BasePath
+                                                          panels: Panels,
+                                                          api: ServerAPI,
+                                                          basePath: BasePath
   ) =
-    tabIndex(safePath).foreach: t=>
+    tabIndex(safePath).foreach: t =>
       val ind = tabsUI.tabs.now().indexOf(t._1)
       if (ind > -1)
       then
         val newTab = t._1.copy(content = content)
-        tabsUI.tabs.update(tabs=>
+        tabsUI.tabs.update(tabs =>
           tabs.updated(ind, newTab)
         )
 
@@ -120,20 +121,20 @@ class TabContent:
     }
 
   def save(
-    tabData: TabData,
-    overwrite: Boolean = false,
-    saveUnmodified: Boolean = false
-  )(using
-      panels: Panels,
-      api: ServerAPI,
-      basePath: BasePath
-  ): concurrent.Future[Boolean] = editorPanelUI.synchronized:
+            tabData: TabData,
+            overwrite: Boolean = false,
+            saveUnmodified: Boolean = false
+          )(using
+            panels: Panels,
+            api: ServerAPI,
+            basePath: BasePath
+          ): concurrent.Future[Boolean] = editorPanelUI.synchronized:
     import util.*
     tabData.editorPanelUI match
       case Some(editorPanelUI)
-          if editorPanelUI.hasBeenModified || saveUnmodified =>
+        if editorPanelUI.hasBeenModified || saveUnmodified =>
         val (content, hash) = editorPanelUI.code
-        
+
         api.saveFile(tabData.safePath, content, if overwrite then None else Some(hash)).transform:
           case Failure(e) =>
             toService(panels.notifications).notifyError("Unable to save file", e, NotificationLevel.Info, None)
@@ -178,9 +179,9 @@ class TabContent:
             if !e then removeTab(tab.t.safePath)
 
   def rename(
-      sp: SafePath,
-      newSafePath: SafePath
-  )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) =
+              sp: SafePath,
+              newSafePath: SafePath
+            )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) =
     tabIndex(sp).foreach: (ot, i) =>
       save(ot.t).foreach: _ =>
         FileDisplayer
@@ -192,12 +193,12 @@ class TabContent:
             case None =>
 
   def fontSizeLink(size: Int) =
-    
-    val selection = 
-      tabsUI.tabs.now().headOption.flatMap: tab=>
-        tab.t.editorPanelUI.map: ePUI=>
-          ePUI.lineHeight.signal.map: lineHeight=>
-            if(lineHeight == size) "fontSizeSelected"
+
+    val selection =
+      tabsUI.tabs.now().headOption.flatMap: tab =>
+        tab.t.editorPanelUI.map: ePUI =>
+          ePUI.lineHeight.signal.map: lineHeight =>
+            if (lineHeight == size) "fontSizeSelected"
             else ""
 
     div(
@@ -217,15 +218,14 @@ class TabContent:
 
   val fontSizeControl =
     div(
-      position.absolute,
-      right := "10",
-      top := "62",
-      cls := "file-content",
       display.flex,
-      flexDirection.row,
       alignItems.baseline,
+      position.absolute,
+      top := "10",
+      right := "800",
+      color.white,
       children <-- tabsUI.tabs.signal.map(_.isEmpty match
-        case true  => Seq(emptyNode)
+        case true => Seq(emptyNode)
         case false => Seq(fontSizeLink(17), fontSizeLink(25), fontSizeLink(35))
       )
     )

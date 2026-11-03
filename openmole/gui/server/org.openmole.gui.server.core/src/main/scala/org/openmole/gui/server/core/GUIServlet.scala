@@ -129,6 +129,7 @@ object GUIServlet:
         cssFiles.map { f => tags.link(tags.rel := "stylesheet", tags.`type` := "text/css", href := f) },
         tags.script(tags.`type` := "text/javascript", tags.src := "js/openmole-esbuilded.js"),
         tags.link(tags.rel := "stylesheet", href := "css/bootstrap-icons/bootstrap-icons.min.css"),
+        tags.link(tags.rel := "stylesheet", href := "https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3/dist-cdn/styles/webawesome.css"),
         RawFrag(extraHeader)
       ),
       tags.body(

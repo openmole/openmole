@@ -20,6 +20,7 @@ object common {
   def bouncyCastleVersion = "1.82"
   def scalaTagsVersion = "0.13.1"
   def laminarVersion = "17.2.1"
+  def webAwsomeLaminarVersion = "3.14.1"
   def netLogo5Version = "5.3.1"
   def netLogo6Version = "6.4.0-d2e6005"
   def netLogo7Version = "7.0.3"
@@ -75,10 +76,9 @@ object common {
   def codecVersion = "1.18.0"
 
   def scalajsLoggingVersion = "1.1.1"
-  def scalaJSDomVersion = "2.8.0"
+  def scalaJSDomVersion = "2.8.1"
 
   def layouzVersion = "0.7.0"
- 
+
   case class CommitVersion(commit: String, version: String)
 }
-

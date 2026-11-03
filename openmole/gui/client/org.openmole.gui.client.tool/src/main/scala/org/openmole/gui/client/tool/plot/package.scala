@@ -1,4 +1,4 @@
-package org.openmole.gui.client.tool.plot
+  package org.openmole.gui.client.tool.plot
 
 import org.openmole.plotlyjs._
 import org.openmole.plotlyjs.PlotlyImplicits._
@@ -59,9 +59,9 @@ object Plot {
     def name = "Heat map"
   }
 
-  enum SelectedPlot:
-    case One, Two, N, Parallel, Method
-  
+  enum NumberOfColumToBePlotted:
+    case Onee, Two, N, Parallel, AllParallelPlot
+
   def baseDiv:Div = div()
 
   val baseConfig = Config

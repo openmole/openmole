@@ -66,5 +66,5 @@ object OMRContent:
       currentState,
       omrMetadata = Some(OMRMetadata(replaceWithHTML(scriptText), guiOMRContent.openMoleVersion, guiOMRContent.timeStart)),
       currentIndex = currentIndex,
-      methodPanel = None
+      methodPanel = methodPanel
     )
