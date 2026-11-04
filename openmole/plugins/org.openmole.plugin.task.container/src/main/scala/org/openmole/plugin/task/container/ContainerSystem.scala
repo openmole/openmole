@@ -26,8 +26,9 @@ object ContainerSystem:
 
 
 sealed trait ContainerSystem
-case class SingularityOverlay(reuse: Boolean = true, size: Information = 2.gigabyte, verbose: Boolean = false, copy: Boolean = false, embedResources: Boolean = true) extends ContainerSystem
-case class SingularityMemory(verbose: Boolean = false, embedResources: Boolean = true) extends ContainerSystem
-case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq()) extends ContainerSystem
+case class SingularityDirectoryOverlay(verbose: Boolean = false, embedResources: Boolean = true, debug: Boolean = false, userNamespace: OptionalArgument[Boolean] = None) extends ContainerSystem
+case class SingularityOverlay(reuse: Boolean = true, size: Information = 2.gigabyte, verbose: Boolean = false, copy: Boolean = false, embedResources: Boolean = true, debug: Boolean = false, userNamespace: OptionalArgument[Boolean] = None) extends ContainerSystem
+case class SingularityMemory(verbose: Boolean = false, embedResources: Boolean = true, debug: Boolean = false, userNamespace: OptionalArgument[Boolean] = None) extends ContainerSystem
+case class SingularityFlatImage(duplicateImage: Boolean = true, reuseContainer: Boolean = true, verbose: Boolean = false, isolatedDirectories:  Seq[String] = Seq(), userNamespace: OptionalArgument[Boolean] = None) extends ContainerSystem
 
 export ContainerSystem.SingularityVariant.*

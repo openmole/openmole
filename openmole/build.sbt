@@ -1434,7 +1434,9 @@ lazy val dockerBin = Project("docker", binDir / "docker") settings(
          |       rm *.deb && \\
          |       apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/ /var/lib/apt/lists/* && \\
          |       mkdir -p /lib/modules && \\
-         |       singularity config global -s "sessiondir max size" 0
+         |       apptainer config global -s "sessiondir max size" 0 && \\
+         |       # apptainer config global -s "allow setuid-mount squashfs" "yes" && \\
+         |       apptainer config global -s "enable underlay" "no"
          |
          |RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \\
          |       dpkg-reconfigure --frontend=noninteractive locales && \\
