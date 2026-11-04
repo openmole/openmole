@@ -42,6 +42,7 @@ ${
   notes("""
     - Engine: Upgrade Scala Version
     - Engine: Reduce memory footprint of OMR export in append mode
+    - Task: Use faster directory overlay instead of ext3 for container based tasks
     - Method: Fix deterministic HDOSE
     - Method: Use initial distance of 0.0 for HDOSE
     - DSL: Make it possible to specify when to condition the execution of method hooks
