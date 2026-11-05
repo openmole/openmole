@@ -1,13 +1,12 @@
-package org.openmole.core.compiler.repl
+package dotty.tools
+package repl
 
-import dotty.tools.*                                                  // OM
-import repl.{AbstractFileClassLoader, State, ReplBytecodeAnalysis}    // OM
 import dotc.*, core.*
 import Contexts.*, Decorators.*, Denotations.*, Flags.*, NameOps.*, StdNames.*, Symbols.*
 import printing.ReplPrinter
 import printing.SyntaxHighlighting
 import reporting.Diagnostic
-import dotty.tools.repl.StackTraceOps.*                               // OM
+import StackTraceOps.*
 
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
@@ -27,12 +26,12 @@ import dotty.vendored.fansi
  *       `ReplDriver#resetToInitial` is called, the accompanying instance of
  *       `Rendering` is no longer valid.
  */
-class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
+class OpenMOLERendering(parentClassLoader: Option[ClassLoader] = None): // OM
 
-  import Rendering.*
+  import OpenMOLERendering.*
 
   /** OM A `MessageRenderer` for the REPL without file positions */
-  private[repl] val messageRenderer = new MessageRendering {
+  private[repl] val messageRenderer = new dotty.tools.dotc.reporting.MessageRendering {
 //    override def posStr(pos: dotc.util.SourcePosition, message: dotc.reporting.Message,  diagnosticString: String)(using Context, Highlight.Level, Offsets.Offset): String =
 //      hl(s"-- $diagnosticLevel:")
   }
@@ -380,7 +379,7 @@ class Rendering(parentClassLoader: Option[ClassLoader] = None): // OM
     new Diagnostic(NoExplanation(messageRenderer.messageAndPos(dia)), dia.pos, dia.level)
 
 
-object Rendering:
+object OpenMOLERendering:
   final val REPL_WRAPPER_NAME_PREFIX = str.REPL_SESSION_LINE
 
   extension (s: Symbol)

@@ -80,7 +80,7 @@ object FileSerialisation:
             else dest.delete
             dest
 
-        originalPath → (if !deleteOnGC then fileContent else fileService.wrapRemoveOnGC(fileContent))
+        originalPath -> (if !deleteOnGC then fileContent else fileService.wrapRemoveOnGC(fileContent))
 
 
 

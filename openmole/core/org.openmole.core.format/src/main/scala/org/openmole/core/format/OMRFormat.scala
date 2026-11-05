@@ -767,11 +767,6 @@ object OMRFormatV2:
           Some(omrContent(omrFile))
       else None
 
-    def fileName(sectionIndex: Int, exitingContent: Option[DataContent.Section]) =
-      exitingContent match
-        case Some(content) => content.`data-file`
-        case None => s"${dataFileName(executionId, omr.newUUID, sectionIndex)}"
-
     val resultFileDirectoryName =
       def name = omr.newReferencedFileDirectoryName(executionId)
 
@@ -786,25 +781,33 @@ object OMRFormatV2:
       f.copy(storeFileDirectory / destinationPath)
       org.json4s.JString(destinationPath)
 
-    for
-      (s, index) <- data.section.zipWithIndex
-    do
-      val dataFile = directory / fileName(index, existingContent.map(_.`data-content`.section(index)))
-      def jsonContent = JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList)
-      def append = s.mode == DataMode.Append
-      val dataFileEmpty = dataFile.isEmpty
+    val dataFiles =
+      for
+        (s, index) <- data.section.zipWithIndex
+      yield
+        val fileName =
+          existingContent.map(_.`data-content`.section(index)) match
+            case Some(content) => content.`data-file`
+            case None => s"${dataFileName(executionId, omr.newUUID, index)}"
 
-      dataFile.withPrintStream(append = append, create = true, gz = true): ps =>
-        if append && !dataFileEmpty
-        then ps.print(",\n")
-        ps.print(compact(render(jsonContent)))
+        val dataFile = directory / fileName
+        def jsonContent = JArray(variablesToJValues(s.variables, default = Some(anyToJValue), file = Some(storeFile)).toList)
+        def append = s.mode == DataMode.Append
+        val dataFileEmpty = dataFile.isEmpty
+
+        dataFile.withPrintStream(append = append, create = true, gz = true): ps =>
+          if append && !dataFileEmpty
+          then ps.print(",\n")
+          ps.print(compact(render(jsonContent)))
+
+        fileName
 
     def contentData =
       OMRFormatV2.DataContent:
-        data.section.zipWithIndex.map: (s, index) =>
-          val dataFileName = fileName(index, existingContent.map(_.`data-content`.section(index)))
-          def variables = s.variables.map(v => ValData(v.prototype))
-          DataContent.Section(s.name, variables, dataFileName, s.mode)
+        (data.section zip dataFiles zipWithIndex).map:
+          case ((s, dataFileName), index) =>
+            def variables = s.variables.map(v => ValData(v.prototype))
+            DataContent.Section(s.name, variables, dataFileName, s.mode)
 
     // Is created by variablesToJValues if it found some files
     def fileDirectoryValue =

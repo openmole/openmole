@@ -106,7 +106,7 @@ object External:
       listInputFiles(external.inputFiles, context).map { case (p, f) =>
         val d = destination(resolver, f)
         copyFile(f, d)
-        (Variable(p, d), f → d)
+        (Variable(p, d), f -> d)
       }.unzip
 
     (context ++ copiedFilesVariable, copiedFilesInfo)

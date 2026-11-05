@@ -37,7 +37,7 @@ object GUIPluginRegistry:
   def all = plugins.values
 
   def unregister(key: AnyRef) = GUIPluginRegistry.plugins -= key
-  def register(key: AnyRef, info: GUIPluginInfo) = GUIPluginRegistry.plugins += key → info
+  def register(key: AnyRef, info: GUIPluginInfo) = GUIPluginRegistry.plugins += key -> info
 
 case class GUIPluginInfo(
   router:         Option[Services => OMRouter]    = None,

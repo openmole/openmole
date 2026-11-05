@@ -65,11 +65,11 @@ object SiteJS {
 
   def doIndex(indexArray: js.Array[js.Any]) = {
     val index = Importedjs.lunr((i: Index) => {
-      i.field("title", lit("boost" → 15).value)
+      i.field("title", lit("boost" -> 15).value)
       i.field("h2", lit("boost" -> 10).value)
       i.field("h3", lit("boost" -> 8).value)
       i.field("pre", lit("boost" -> 5).value) // for code tags
-      i.field("body", lit("boost" → 1).value)
+      i.field("body", lit("boost" -> 1).value)
       i.ref("url")
       indexArray.foreach(p => {
         i.add(p)

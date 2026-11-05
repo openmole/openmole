@@ -26,25 +26,25 @@ trait HighlightLanguage extends js.Object
 object Highlighting {
 
   val METHOD = lit(
-    "className" → js.RegExp("function"),
-    "beginKeywords" → js.RegExp("def"),
-    "end" → js.RegExp("""/[:={\[(\n;]/"""),
-    "excludeEnd" → "true",
-    "contains" → js.Array("NAME")
+    "className" -> js.RegExp("function"),
+    "beginKeywords" -> js.RegExp("def"),
+    "end" -> js.RegExp("""/[:={\[(\n;]/"""),
+    "excludeEnd" -> "true",
+    "contains" -> js.Array("NAME")
   )
 
   def openmoleGrammar(hljs: js.Dynamic): js.Dynamic =
     lit(
-      "keywords" → lit(
-        "literal" → js.RegExp("true false null"),
-        "keyword" → js.RegExp(
+      "keywords" -> lit(
+        "literal" -> js.RegExp("true false null"),
+        "keyword" -> js.RegExp(
           "type yield lazy override def with val var sealed abstract private " +
             "trait object if forSome for while throw finally protected extends " +
             "import final return else break new catch super class case package " +
             "default try this match continue throws implicit"
         )
       ),
-      "contains" → js.Array(METHOD)
+      "contains" -> js.Array(METHOD)
     )
 
   def init(): Unit = {

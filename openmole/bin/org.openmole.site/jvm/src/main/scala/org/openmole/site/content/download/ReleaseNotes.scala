@@ -25,10 +25,10 @@ object ReleaseNotesValue:
     "10" -> "https://github.com/openmole/openmole/milestone/8",
     "9" -> "https://github.com/openmole/openmole/milestone/7?closed=1",
     "8" -> "https://github.com/openmole/openmole/milestone/4?closed=1",
-    "7" → "https://github.com/openmole/openmole/milestone/3?closed=1",
-    "6.2" → "",
-    "6.1" → "https://github.com/openmole/openmole/milestone/6?closed=1",
-    "6.0" → "https://github.com/openmole/openmole/milestone/2?closed=1"
+    "7" -> "https://github.com/openmole/openmole/milestone/3?closed=1",
+    "6.2" -> "",
+    "6.1" -> "https://github.com/openmole/openmole/milestone/6?closed=1",
+    "6.0" -> "https://github.com/openmole/openmole/milestone/2?closed=1"
   )
 
 import ReleaseNotesValue.*
@@ -50,6 +50,7 @@ ${
   notes("""
     - Engine: Upgrade Scala Version
     - Engine: Reduce memory footprint of OMR export in append mode
+    - Task: Use faster directory overlay instead of ext3 for container based tasks
     - Method: Fix deterministic HDOSE
     - Method: Use initial distance of 0.0 for HDOSE
     - DSL: Make it possible to specify when to condition the execution of method hooks

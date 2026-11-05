@@ -41,7 +41,7 @@ package object market:
   implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
   def indexURL(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService) =
-    ExpandedString(preference(marketIndexLocation)).from(Context("version" → buildinfo.version))
+    ExpandedString(preference(marketIndexLocation)).from(Context("version" -> buildinfo.version))
 
   def marketIndex(implicit preference: Preference, randomProvider: RandomProvider, newFile: TmpDirectory, fileService: FileService, networkService: NetworkService) =
     Serialization.read[MarketIndex](NetworkService.get(indexURL))

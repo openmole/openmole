@@ -162,9 +162,9 @@ object Site {
           _.content
         } /*.toVector.traverseU { p => Pages.decorate(p).map(PageFrag(p, _)) }.run(new java.io.File("") /*parameters.resources.get*/)*/
 
-        def content = Pages.all.map { p => p.file → (site.headFrags(p), p.content) }.toMap
+        def content = Pages.all.map { p => p.file -> (site.headFrags(p), p.content) }.toMap
 
-        // def content = //pagesFrag.map { case PageFrag(p, f) => p.file → (site.headFrags(p), f) }.toMap
+        // def content = //pagesFrag.map { case PageFrag(p, f) => p.file -> (site.headFrags(p), f) }.toMap
 
       }
 

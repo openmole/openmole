@@ -148,9 +148,9 @@ object PluginManager extends JavaLogger:
 
   def tryLoad(files: Iterable[File]): Iterable[(File, Throwable)] = synchronized:
     val bundleFiles = files.flatMap { listBundles }
-    val loaded = bundleFiles.map { b => b → Try(installBundle(b)) }
-    def bundles = loaded.collect { case (f, Success(b)) => f → b }
-    def loadError = loaded.collect { case (f, Failure(e)) => f → e }
+    val loaded = bundleFiles.map { b => b -> Try(installBundle(b)) }
+    def bundles = loaded.collect { case (f, Success(b)) => f -> b }
+    def loadError = loaded.collect { case (f, Failure(e)) => f -> e }
     loadError ++ bundles.flatMap:
       case (f, b) =>
         Try(b.start()) match

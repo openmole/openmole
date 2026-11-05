@@ -118,7 +118,7 @@ lazy val fory = OsgiProject(
   version := foryVersion) dependsOn(guava)
 
 lazy val scalaLang = OsgiProject(
-  dir,
+  file("source"),
   "org.scala-lang.scala-library",
   exports = Seq("com.typesafe.*", "scala.*", "dotty.*", "scalax.*", "fansi.*", "pprint.*" /*"jline.*"*/),
   privatePackages = Seq("!org.jline.*", "**", "META-INF.native.**"),

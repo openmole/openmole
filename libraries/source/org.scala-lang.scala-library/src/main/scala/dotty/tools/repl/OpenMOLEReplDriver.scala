@@ -1,8 +1,8 @@
-package org.openmole.core.compiler.repl
+package dotty.tools
+package repl
 
-import dotty.tools.dotc // OM
-
-import dotty.tools.repl.{JLineTerminal => _, *} // OM
+import scala.language.unsafeNulls
+import scala.util.control.NonFatal
 
 import java.io.{File => JFile, PrintStream}
 import java.nio.charset.StandardCharsets
@@ -35,18 +35,17 @@ import dotc.util.{SourceFile, SourcePosition}
 import dotc.{CompilationUnit, Driver}
 import dotc.config.{CompilerCommand, Feature}
 import dotty.tools.io.{AbstractFileClassLoader => _, *}
-import dotty.tools.repl.ScalaClassLoader.* // OM
+import dotty.tools.repl.ScalaClassLoader.*
 
 import org.jline.reader.*
 
-import Rendering.showUser
+import OpenMOLERendering.showUser
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.compiletime.uninitialized
 import scala.jdk.CollectionConverters.*
 import scala.tools.asm.ClassReader
-import scala.util.control.NonFatal
 import scala.util.Using
 
 /** The state of the REPL contains necessary bindings instead of having to have
@@ -79,31 +78,6 @@ import scala.util.Using
 //                 context: Context):
 //  def validObjectIndexes = (1 to objectIndex).filterNot(invalidObjectIndexes.contains(_))
 
-// OM
-object REPLDriver {
-  type Compiled = Either[(List[Diagnostic], State), (CompilationUnit, State)]
-  type CompilerState = dotty.tools.repl.State
-
-  // OM: duplicate ommand list since commands is private in ParseResult
-  val commands: List[(String, String => ParseResult)] = List( // OM
-    Quit.command -> (_ => Quit), // OM
-    Quit.alias -> (_ => Quit), // OM
-    Help.command -> (_ => Help), // OM
-    Reset.command -> (arg => Reset(arg)), // OM
-    Imports.command -> (_ => Imports), // OM
-    JarCmd.command -> (arg => JarCmd(arg)), // OM
-    KindOf.command -> (arg => KindOf(arg)), // OM
-    Load.command -> (arg => Load(arg)), // OM
-    Require.command -> (arg => Require(arg)), // OM
-    TypeOf.command -> (arg => TypeOf(arg)), // OM
-    DocOf.command -> (arg => DocOf(arg)), // OM
-    Settings.command -> (arg => Settings(arg)), // OM
-    Sh.command -> (arg => Sh(arg)), // OM
-    Silent.command -> (_ => Silent), // OM
-  )
-
-
-}
 
 // OM
 def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
@@ -113,10 +87,10 @@ def newStoreReporter: dotty.tools.dotc.reporting.StoreReporter = {
 }
 
 /** Main REPL instance, orchestrating input, compilation and presentation */
-class REPLDriver(settings: Array[String],
-                 out: PrintStream = System.out,
-                 classLoader: Option[ClassLoader] = None,
-                 extraPredef: String = "") extends Driver:
+class OpenMOLEReplDriver(settings: Array[String],
+                         out: PrintStream = System.out,
+                         classLoader: Option[ClassLoader] = None,
+                         extraPredef: String = "") extends Driver:
 
   /** Overridden to `false` in order to not have to give sources on the
    *  commandline
@@ -178,13 +152,13 @@ class REPLDriver(settings: Array[String],
       rootCtx = rootCtx.fresh
         .setSetting(rootCtx.settings.outputDir, new VirtualDirectory("<REPL compilation output>"))
     compiler = new ReplCompiler
-    rendering = new Rendering(classLoader)
+    rendering = new OpenMOLERendering(classLoader)
   }
 
   private var rootCtx: Context = uninitialized
   private var shouldStart: Boolean = uninitialized
   private var compiler: ReplCompiler = uninitialized
-  protected var rendering: Rendering = uninitialized
+  protected var rendering: OpenMOLERendering = uninitialized
 
   def rederingValue = rendering  // OM
 
@@ -377,7 +351,7 @@ class REPLDriver(settings: Array[String],
   /** Extract possible completions at the index of `cursor` in `expr` */
   final def completions(cursor: Int, expr: String, state0: State): List[Completion] =   // OM
     if expr.startsWith(":") then
-      REPLDriver.commands.collect {                                                                // OM
+      ParseResult.commands.collect {
         case command if command._1.startsWith(expr) => Completion(command._1, "", List())
       }
     else
@@ -391,7 +365,10 @@ class REPLDriver(settings: Array[String],
           unit.tpdTree = tpdTree
           given Context = state.context.fresh.setCompilationUnit(unit)
           val srcPos = SourcePosition(file, Span(cursor))
-          try Completion.completions(srcPos)._2 catch case NonFatal(_) => Nil
+          try
+            Completion.completions(srcPos)._2
+          catch case NonFatal(_) =>
+            List(Completion("<Error while fetching completions. Please report it to the Scala 3 maintainers at https://github.com/scala/scala3/issues>", "", Nil))
         }
         .getOrElse(Nil)
   end completions
@@ -424,7 +401,7 @@ class REPLDriver(settings: Array[String],
 
 
   /** OM Compile `parsed` trees and evolve `state` in accordance */
-  def justCompile(input: String, istate: State): REPLDriver.Compiled | SyntaxErrors  =
+  def justCompile(input: String, istate: State): OpenMOLEReplDriver.Compiled | SyntaxErrors  =
     ParseResult(input)(using istate) match
       case parsed: Parsed =>
         implicit val state =
@@ -436,7 +413,7 @@ class REPLDriver(settings: Array[String],
       case s => throw new RuntimeException(s"Unexpected return from parser $s")
 
   /** OM */
-  def justRun(compiled: REPLDriver.Compiled): State = {
+  def justRun(compiled: OpenMOLEReplDriver.Compiled): State = {
     //implicit val s = compiled._2
 
     def extractNewestWrapper(tree: untpd.Tree): Name = tree match
@@ -544,8 +521,7 @@ class REPLDriver(settings: Array[String],
 
               (if istate.quiet then warnings else definitions ++ warnings)
                 .sorted
-                .map(_.msg)  // OM
-                .foreach(out.println) // OM
+                .foreach(printDiagnostic)
 
               updatedState
             }
@@ -757,10 +733,13 @@ class REPLDriver(settings: Array[String],
       expr match {
         case "" => out.println(s":type <expression>")
         case _  =>
-          compiler.typeOf(expr)(using newRun(state)).fold(
-            errs => displayErrors(errs, state),
-            res => out.println(res)  // result has some highlights
-          )
+          try
+            compiler.typeOf(expr)(using newRun(state)).fold(
+              errs => displayErrors(errs, state),
+              res => out.println(res)  // result has some highlights
+            )
+          catch case NonFatal(ex) =>
+            out.println(s"Error: ${ex.getMessage}")
       }
       state
 
@@ -768,10 +747,13 @@ class REPLDriver(settings: Array[String],
       expr match {
         case "" => out.println(s":doc <expression>")
         case _  =>
-          compiler.docOf(expr)(using newRun(state)).fold(
-            errs => displayErrors(errs, state),
-            res => out.println(res)
-          )
+          try
+            compiler.docOf(expr)(using newRun(state)).fold(
+              errs => displayErrors(errs, state),
+              res => out.println(res)
+            )
+          catch case NonFatal(ex) =>
+            out.println(s"Error: ${ex.getMessage}")
       }
       state
 
@@ -819,7 +801,7 @@ class REPLDriver(settings: Array[String],
 
   /** shows all errors nicely formatted */
   private def displayErrors(errs: Seq[Diagnostic], state: State): State = {
-    errs.map(e => rendering.formatError(e)(using state)).map(_.msg).foreach(out.println) // OM
+    errs.foreach(printDiagnostic(_)(using state))
     state
   }
 
@@ -837,4 +819,9 @@ class REPLDriver(settings: Array[String],
     case interfaces.Diagnostic.INFO => out.println(dia.msg) // print REPL's special info diagnostics directly to out
     case _                          => ReplConsoleReporter.doReport(dia)(using state.context)
 
-end REPLDriver
+end OpenMOLEReplDriver
+object OpenMOLEReplDriver:
+  type Compiled = Either[(List[Diagnostic], State), (CompilationUnit, State)]
+  type CompilerState = dotty.tools.repl.State
+
+  def pprintImport = "import dotty.vendored.pprint.pprintln\n"
