@@ -41,7 +41,7 @@ $br$br
 Before being able to use a batch system, you should first provide your ${aa("authentication", href := DocumentationPages.gui.file)} information to OpenMOLE.
 
 
-${h3{"Singularity"}}
+${h3{"Singularity/Apptainer"}}
 
 To make sure that OpenMOLE tasks runs on your cluster you might want to ensure that Singularity or Apptainer is properly working on the cluster nodes.
 $br
