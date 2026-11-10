@@ -37,11 +37,11 @@ object OMROutputFormat:
             section match
               case None =>
                 val header = Some(headerLine(variables))
-                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value))
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), unrollArray = true)
               case Some(section) =>
                 ps.println(section + ":")
                 val header = Some(headerLine(variables))
-                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), margin = "  ")
+                CSVFormat.appendVariablesToCSV(ps, header, variables.map(_.value), margin = "  ", unrollArray = true)
 
           for {(section, i) ← content.section.zipWithIndex}
             val sectionName = if content.section.size > 1 then Some(section.name.getOrElse(s"$i")) else None
