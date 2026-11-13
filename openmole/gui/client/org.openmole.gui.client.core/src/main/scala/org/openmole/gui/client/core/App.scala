@@ -140,14 +140,14 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           cursor.pointer,
           position.absolute,
           right := "720px",
-          color := "#dc3146"),
-        div(img(src := "img/openmole_dark.png", height := "50px", onClick --> { _ =>
+          color := "#795c85"),
+        div(img(src := "img/openmole_dark.png", height := "50px", cursor.pointer, onClick --> { _ =>
           undo
           panels.treeNodePanel.treeNodeManager.goToHome
         })),
         div(flexRow, justifyContent.flexStart, marginLeft := "20px",
           Button(
-            _.variant.danger,
+            _.cls := "purple",
             _.onClick --> { _ =>
               panels.expandTo(newProjectPanel, 3)
             })("New project"),
@@ -195,13 +195,14 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           }
           ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName"),
+          child <-- panels.tabContent.controlElement,
           panels.tabContent.fontSizeControl
         )
         ,
         panels.notifications.render
       )
 
-      def saveAllTabs = panels.tabContent.tabsUI.tabs.now().foreach { t => panels.tabContent.save(t.t) }
+      def saveAllTabs = panels.tabContent.tabs.now().foreach { t => panels.tabContent.save(t) }
 
       def getServerNotifications =
         if !panels.notifications.isOpened
@@ -230,7 +231,12 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           div(
             div(
               cls := "tab-section",
-              panels.tabContent.render
+              paddingRight <-- openFileTree.signal.map: ft=>
+                if ft
+                then "715px"
+                else "15px"
+              ,
+              panels.tabContent.tabGroup
             )
           ),
           panels.notifications.notificationList,

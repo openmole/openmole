@@ -45,8 +45,8 @@ object TreeNodePanel:
   enum MultiTool:
     case On, PendingOperation, Off, Git
 
-  extension (p: TreeNodePanel)
-    def refresh = p.refresh
+//  extension (p: TreeNodePanel)
+//    def refresh = p.refresh
 
 class TreeNodePanel:
   panel =>
@@ -65,13 +65,6 @@ class TreeNodePanel:
   def refresh = update.update(_ + 1)
 
   val fileToolBar = new FileToolBar(this, treeNodeManager)
-
-  val editNodeInput = inputTag("").amend(
-    placeholder := "Name",
-    width := "240px",
-    height := "24px",
-    onMountFocus
-  )
 
   // New file tool
   val plusFile = Var(false)
@@ -112,7 +105,7 @@ class TreeNodePanel:
     val currentDirNode = treeNodeManager.directory
     directoryToggle.toggled.now() match
       case true => CoreUtils.createFile(currentDirNode.now(), newFile, directory = true).map(_ => refresh)
-      case false => CoreUtils.createFile(currentDirNode.now(), newFile).map(_ => refresh)
+      case false => CoreUtils.createFile(currentDirNode.now(), newFile)//.map(_ => refresh)
 
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
@@ -488,8 +481,9 @@ class TreeNodePanel:
       plusFile.signal.expand(createFileTool),
       child <--
         confirmationDiv.signal.map:
-          case Some(d) => div(paddingTop := "30px",flexRow, alignItems.center, color.white, justifyContent.spaceBetween, d)
-          case None => multiTool.signal.map(_ != MultiTool.Off).expand(copyOrTrashTool),
+          case Some(d) => div(paddingTop := "30px", flexRow, alignItems.center, color.white, justifyContent.spaceBetween, d)
+          case None => multiTool.signal.map(_ != MultiTool.Off).expand(copyOrTrashTool)
+      ,
       plusFile.toObservable --> Observer[Boolean]: v =>
         if !v then directoryToggle.toggled.set(false)
     )
@@ -544,7 +538,6 @@ class TreeNodePanel:
                   foundFiles.map { (sp, isDir) =>
                     div(s"${sp.normalizedPathString}", cls := "findFile",
                       onClick --> { _ =>
-                        clearFileFinder
                         val switchTarget = if isDir then sp else sp.parent
                         treeNodeManager.switch(switchTarget)
                         displayNode(sp)
@@ -592,7 +585,7 @@ class TreeNodePanel:
     tree
 
   def clearCurrentErrorView(using panels: Panels) =
-    clearErrorView(panels.tabContent.current.now().map(_.safePath))
+    clearErrorView(panels.tabContent.activeTab.now().map(_.safePath))
 
   def clearErrorView(safePath: Option[SafePath])(using panels: Panels) =
     for
@@ -603,7 +596,7 @@ class TreeNodePanel:
   def treeViewOrErrors(using panels: Panels, pluginServices: PluginServices, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, notificationAPI: NotificationService): Div =
 
     def scriptErrorSignal(using panels: Panels): Signal[Option[String]] =
-      panels.tabContent.current.signal.flatMapSwitch:
+      panels.tabContent.activeTab.signal.flatMapSwitch:
         case None => Signal.fromValue(None)
         case Some(current) =>
           panels.tabContent.editorPanelUI(current.safePath) match

@@ -11,6 +11,6 @@ import org.openmole.gui.shared.api.*
 
 object CSVContent:
 
-  def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
+  def buildTab(safePath: SafePath, initialContent: String, initialHash: String)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): (TabData, HtmlElement, HtmlElement) =
     val rowData: RowData = ResultData.fromCSV(initialContent)
     PlotContent.buildTab(safePath, FileContentType.CSV, Seq(ContentSection("CSV", rowData, initialHash)), "CSV")
