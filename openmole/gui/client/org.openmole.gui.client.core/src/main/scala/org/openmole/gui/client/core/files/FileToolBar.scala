@@ -65,7 +65,15 @@ class FileToolBar(treeNodePanel: TreeNodePanel, treeNodeManager: TreeNodeManager
         treeNodeManager.find(searchValue.now())
       },
       _.onInput.mapToValue --> searchValue,
-      _.marginLeft := "30px"
+      _.marginLeft := "30px",
+      _.slots.end(
+        child <-- searchValue.signal.map: sv =>
+          if sv.nonEmpty
+          then Icon(_.name := "xmark", _.onClick --> { _ =>
+            treeNodePanel.clearFileFinder
+          })(cursor.pointer)
+          else emptyNode
+      )
     )()
 
   def gitTools(using api: ServerAPI, basePath: BasePath) =

@@ -2,7 +2,6 @@ package org.openmole.gui.client.core.files
 
 import org.openmole.gui.client.core.Panels
 import org.openmole.gui.shared.data.*
-import org.openmole.gui.client.tool.bootstrapnative.bsn.*
 import com.raquo.laminar.api.L.*
 import org.openmole.gui.client.core.NotificationManager.{Alternative, toService}
 import org.openmole.gui.client.ext.*
@@ -10,6 +9,7 @@ import org.openmole.gui.shared.api.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
+import io.github.nguyenyou.webawesome.laminar.*
 
 object TabContent:
   case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
@@ -18,107 +18,128 @@ class TabContent:
 
   import TabContent.*
 
-  val tabsUI = Tabs.tabs[TabData](Seq()).build
-  val current: Var[Option[TabData]] = Var(None)
+  val tabs: Var[Seq[TabData]] = Var(Seq())
+  val activeTab: Var[Option[TabData]] = Var(None)
 
-  def render(using panels: Panels, api: ServerAPI, basePath: BasePath) =
-    div(
-      tabsUI.render.amend(margin := "10px"),
-      //fontSizeControl
-    )
+  case class NavEntry(tabData: TabData, isClose: Boolean)
 
-  private def buildHeader(
-                           tabData: TabData
-                         )(using panels: Panels, api: ServerAPI, basePath: BasePath) =
-    span(
-      display.flex,
-      flexDirection.row,
-      alignItems.center,
-      span(tabData.safePath.name),
-      span(
-        cls := "close-button close-button-tab bi-x",
-        marginLeft := "5px",
-        onClick --> { e =>
-          save(tabData)
-          removeTab(tabData.safePath)
-          panels.treeNodePanel.clearErrorView(Some(tabData.safePath))
-          panels.treeNodePanel.refresh
-          e.stopPropagation()
+  def navEntries(ts: Seq[TabData]): Seq[NavEntry] =
+    ts.flatMap(td => Seq(
+      NavEntry(td, isClose = false),
+      NavEntry(td, isClose = true)
+    ))
+
+  def closeButton(tabData: TabData) =
+    Button(
+      _.slot := "nav",
+      _.tabIndex := -1,
+      _.appearance.plain,
+      _.size := "s",
+      _.onClick --> { _ =>
+        val newTabs =
+          tabs.now().filterNot(_.safePath == tabData.safePath)
+
+        tabs.set(newTabs)
+
+        activeTab.update {
+          case Some(active) if active.safePath == tabData.safePath => newTabs.lastOption
+          case None => newTabs.lastOption
+          case Some(active) => Some(active)
         }
-      )
+      }
+    )(
+      Icon(
+        _.name := "xmark",
+        _.label := "Close this tab"
+      )()
     )
 
-  def buildTab(
-                tabData: TabData,
-                content: HtmlElement,
-                copyAttributes: Option[Tab[TabData]] = None
-              )(using panels: Panels, api: ServerAPI, bp: BasePath) =
+  lazy val tabGroup =
 
-    val header =
-      def switchPath = panels.treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
+    def switchPath(tabData: TabData) = Panels().treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
 
-      buildHeader(tabData).amend(
-        onClick --> { e =>
-          if e.ctrlKey then switchPath
-          current.set(Some(tabData))
+    def build(tabData: TabData) = {
+      Tab(
+        _.panel := tabData.safePath.name,
+        _.onClick --> { e =>
+          if e.ctrlKey then switchPath(tabData)
+          activeTab.set(Some(tabData))
         },
-        onDblClick --> { _ => switchPath }
+        _.onDblClick --> { _ =>
+          switchPath(tabData)
+        }
+      )(tabData.safePath.name)
+    }
+
+
+    TabGroup(
+      _.activation.auto,
+      _.cls := "tabs-closable",
+      _.slots.nav(
+        children <-- tabs.signal
+          .map(navEntries)
+          .split(entry => (entry.tabData.safePath, entry.isClose)) {
+            (_, entry, _) =>
+              if entry.isClose then closeButton(entry.tabData)
+              else build(entry.tabData)
+          }
+      ),
+      _.active <-- activeTab.signal.map(x =>
+        x.map(_.safePath.name).getOrElse("")
       )
-
-    copyAttributes match
-      case None => Tab(tabData, header, content)
-      case Some(tab) =>
-        Tab(
-          tabData,
-          header,
-          content,
-          tabID = tab.tabID,
-          refID = tab.refID,
-          active = tab.active
+    )(
+      children <-- tabs.signal.split(_.safePath) { (_, tabData, _) =>
+        TabPanel(
+          _.name := tabData.safePath.name
+        )(
+          tabData.editorPanelUI
+            .map(_.view)
+            .getOrElse(div())
         )
+      }
+    )
 
-  def addTab(tabData: TabData, content: HtmlElement)(using
-                                                     panels: Panels,
-                                                     api: ServerAPI,
-                                                     basePath: BasePath
-  ) =
-    tabsUI.add(buildTab(tabData, content))
-    current.set(Some(tabData))
+
+  val current: Var[Option[TabData]] = Var(None)
+  val controlElement: Var[HtmlElement] = Var(div())
+
+  def setActive(tabData: TabData) =
+    activeTab.set(Some(tabData))
+
+  def buildTab(tabData: TabData) = tabData
+
+
+  def addTab(tabData: TabData) =
+    tabs.update(_ :+ tabData)
+    activeTab.set(Some(tabData))
 
   def updateTab(safePath: SafePath, content: HtmlElement)(using
                                                           panels: Panels,
                                                           api: ServerAPI,
-                                                          basePath: BasePath
-  ) =
-    tabIndex(safePath).foreach: t =>
-      val ind = tabsUI.tabs.now().indexOf(t._1)
-      if (ind > -1)
-      then
-        val newTab = t._1.copy(content = content)
-        tabsUI.tabs.update(tabs =>
-          tabs.updated(ind, newTab)
-        )
+                                                          basePath: BasePath) =
+    println("FIXME")
+  //    tabIndex(safePath).foreach: ind =>
+  //      tabs.update(ts =>
+  //        ts.updated(ind, ts(ind).editorPanelUI.map(epu=> EditorPanelUI(safePath, content, epu.contentHash)))
+  //      )
 
   def tab(safePath: SafePath) =
-    tabsUI.tabs.now().find { tab => tab.t.safePath == safePath }
+    tabs.now().find { tab => tab.safePath == safePath }
 
   def tabIndex(safePath: SafePath) =
-    tabsUI.tabs.now().zipWithIndex.find { (tab, _) =>
-      tab.t.safePath == safePath
-    }
-
-  def tabData(safePath: SafePath) = tab(safePath).map(_.t)
+    val ind = tabs.now().indexWhere(t => t.safePath == safePath)
+    if ind > -1
+    then Some(ind)
+    else None
 
   def editorPanelUI(safePath: SafePath) =
-    tabData(safePath).flatMap(_.editorPanelUI)
+    tab(safePath).flatMap(_.editorPanelUI)
 
-  def removeTab(safePath: SafePath) =
-    tab(safePath).foreach { t => tabsUI.remove(t.tabID) }
+  def removeTab(safePath: SafePath) = //{
+    tabs.now().filterNot(_.safePath == safePath)
 
   def alreadyDisplayed(safePath: SafePath) =
-    tabsUI.tabs.now().find { t => t.t.safePath.path == safePath.path }.map {
-      _.tabID
-    }
+    tabs.now().find(_.safePath == safePath)
 
   def save(
             tabData: TabData,
@@ -170,33 +191,25 @@ class TabContent:
 
 
   def closeNonExstingFiles(using api: ServerAPI, basePath: BasePath) =
-    tabsUI.tabs
-      .now()
-      .foreach: tab =>
-        api
-          .exists(tab.t.safePath)
-          .foreach: e =>
-            if !e then removeTab(tab.t.safePath)
+    tabs.now().foreach: tab =>
+      api.exists(tab.safePath).foreach: e =>
+        if !e then removeTab(tab.safePath)
 
   def rename(
               sp: SafePath,
               newSafePath: SafePath
-            )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) =
-    tabIndex(sp).foreach: (ot, i) =>
-      save(ot.t).foreach: _ =>
-        FileDisplayer
-          .buildTab(newSafePath)
-          .foreach:
-            case Some((nt, c)) =>
-              tabsUI.tabs.update: tabs =>
-                tabs.patch(i, Seq(buildTab(nt, c, Some(ot))), 1)
-            case None =>
+            )(using Panels, ServerAPI, GUIPlugins, BasePath, PluginServices, NotificationService) = {
+    tabIndex(sp).foreach: ind =>
+      tabs.update: ts =>
+        ts.updated(ind, ts(ind).copy(safePath = newSafePath))
+      activeTab.set(tab(sp))
+  }
 
   def fontSizeLink(size: Int) =
 
     val selection =
-      tabsUI.tabs.now().headOption.flatMap: tab =>
-        tab.t.editorPanelUI.map: ePUI =>
+      tabs.now().headOption.flatMap: tab =>
+        tab.editorPanelUI.map: ePUI =>
           ePUI.lineHeight.signal.map: lineHeight =>
             if (lineHeight == size) "fontSizeSelected"
             else ""
@@ -209,9 +222,9 @@ class TabContent:
       cls <-- selection.getOrElse(Var("")),
       onClick --> { _ =>
         for {
-          ts ← tabsUI.tabs.now()
+          ts ← tabs.now()
         } yield {
-          ts.t.editorPanelUI.foreach(_.updateFont(size))
+          ts.editorPanelUI.foreach(_.updateFont(size))
         }
       }
     )
@@ -224,7 +237,7 @@ class TabContent:
       top := "10",
       right := "800",
       color.white,
-      children <-- tabsUI.tabs.signal.map(_.isEmpty match
+      children <-- tabs.signal.map(_.isEmpty match
         case true => Seq(emptyNode)
         case false => Seq(fontSizeLink(17), fontSizeLink(25), fontSizeLink(35))
       )

@@ -35,7 +35,7 @@ import scala.concurrent.Future
 
 object FileDisplayer:
 
-  def buildTab(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Future[Option[(TabData, HtmlElement)]] =
+  def buildTab(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Future[Option[(TabData, HtmlElement, HtmlElement)]] =
     FileContentType(safePath) match
       case FileContentType.OpenMOLEScript =>
         api.download(safePath, hash = true).map: (content, hash) =>
@@ -69,17 +69,18 @@ object FileDisplayer:
 
   def display(safePath: SafePath)(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
     panels.tabContent.alreadyDisplayed(safePath) match
-      case Some(tabID: bsn.TabID) => panels.tabContent.tabsUI.setActive(tabID)
+      case Some(tabData: TabData) => panels.tabContent.setActive(tabData)
       case _ =>
         val tab = buildTab(safePath)
         tab.foreach:
-          case Some((tabData, content)) => 
-            panels.tabContent.addTab(tabData, content)
+          case Some((tabData, content, controlElement)) =>
+            panels.tabContent.addTab(tabData)
+            panels.tabContent.controlElement.set(controlElement)
           case _ => 
 
-  def update(safePath: SafePath, onUpdated: ()=> Unit = () => {})(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
-    buildTab(safePath).foreach:
-      case Some((td, content))=> 
-        panels.tabContent.updateTab(safePath, content)
-        onUpdated()
-      case _=>
+//  def update(safePath: SafePath, onUpdated: ()=> Unit = () => {})(using panels: Panels, api: ServerAPI, path: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService) =
+//    buildTab(safePath).foreach:
+//      case Some((td, content, _))=>
+//        panels.tabContent.updateTab(safePath, content)
+//        onUpdated()
+//      case _=>

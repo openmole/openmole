@@ -583,10 +583,11 @@ li.selectElement {
 .tab-section {
     background-color: white;
     width: 100%;
-    margin-left: 10px;
     z-index: 10;
     position: absolute;
     height: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
 }
 
 .file-content {
@@ -618,14 +619,12 @@ li.selectElement {
 }
 
 #editor {
-    top: 0;
+    top: -20px;
     right: 0;
     bottom: 0;
-    left: 0;
-    height: 77vh;
+    left: -10px;
+    height: 84vh;
     overflow: auto;
-    border: 3px solid #b6b6bb66;
-    border-radius: 3px;
 }
 
 .top-menu {
@@ -1662,4 +1661,19 @@ div.noUi-connect {
 
 .selectCaret::part(expand-icon) {
     color: white;
+}
+
+wa-button.purple::part(base) {
+    color: white;
+    background: #795c85;
+}
+
+wa-button.buttonWhite::part(base) {
+    color: white;
+}
+
+.tabs-closable wa-button {
+    position: relative;
+    left: -1.5em;
+    top: 0.675em;
 }

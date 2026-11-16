@@ -19,6 +19,6 @@ object AnyTextContent:
     val tabData = TabData(safePath, Some(editor))
     val controlElement = div(display.flex, flexDirection.row, height := "5vh", alignItems.center, panels.tabContent.fontSizeControl, marginLeft.auto)
     val content = div(display.flex, flexDirection.column, controlElement, editor.view)
-    (tabData, content)
+    (tabData, content, div())
 
 

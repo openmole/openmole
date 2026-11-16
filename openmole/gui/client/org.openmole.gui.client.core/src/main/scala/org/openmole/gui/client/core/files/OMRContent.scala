@@ -18,7 +18,7 @@ object OMRContent:
     contentStates: ContentStates = ContentStates(),
     currentState: ContentState = TableState(false),
     currentIndex: Option[Int] = None
-    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement) =
+    )(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement, HtmlElement) =
 
     val pcSections = guiOMRContent.section.map: s =>
       val rowData = ResultData.fromOMR(s)
