@@ -91,4 +91,4 @@ object OMSContent:
 
     val content = div(display.flex, flexDirection.column, editor.view)
 
-    (tabData, content, controlElement)
+    (tabData.copy(controlElement = Some(controlElement)), content)

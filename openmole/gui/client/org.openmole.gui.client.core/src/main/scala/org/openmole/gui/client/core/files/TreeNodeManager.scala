@@ -36,8 +36,6 @@ class TreeNodeManager:
 
   val obs: Observer[SafePath] = directory.toObserver
 
-  val dirDebug = directory.signal.toObservable.debugLogEvents().changes.map(_.path)
-
   //val sons: Var[Map[SafePath, ListFiles]] = Var(Map())
 
   val selected: Var[Seq[SafePath]] = Var(Seq())

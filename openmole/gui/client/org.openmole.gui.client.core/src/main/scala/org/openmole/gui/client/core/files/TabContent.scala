@@ -12,7 +12,7 @@ import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 import io.github.nguyenyou.webawesome.laminar.*
 
 object TabContent:
-  case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI])
+  case class TabData(safePath: SafePath, editorPanelUI: Option[EditorPanelUI], controlElement: Option[HtmlElement] = None)
 
 class TabContent:
 
@@ -120,7 +120,7 @@ class TabContent:
     println("FIXME")
   //    tabIndex(safePath).foreach: ind =>
   //      tabs.update(ts =>
-  //        ts.updated(ind, ts(ind).editorPanelUI.map(epu=> EditorPanelUI(safePath, content, epu.contentHash)))
+  //        ts.updated(ind, ts(ind).editorPanelUI.map(epu => EditorPanelUI(safePath, content, epu.contentHash)))
   //      )
 
   def tab(safePath: SafePath) =

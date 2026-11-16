@@ -73,7 +73,7 @@ object PlotContent:
     currentState: ContentState = TableState(),
     omrMetadata: Option[OMRMetadata] = None,
     currentIndex: Option[Int] = None,
-    methodPanel: Option[HtmlElement] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement, HtmlElement) =
+    methodPanel: Option[HtmlElement] = None)(using panels: Panels, api: ServerAPI, basePath: BasePath, guiPlugins: GUIPlugins, pluginServices: PluginServices): (TabData, HtmlElement) =
     import ResultView.*
 
     def buildSectionView(sectionName: String) =
@@ -219,7 +219,7 @@ object PlotContent:
         case _: MetadataState => MetadataState()
 
     def switchFromState(state: ContentState, states: ContentStates): Unit =
-      val (_, content, _) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata, methodPanel = methodPanel)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = currentSection, states = states, currentState = state, omrMetadata = omrMetadata, methodPanel = methodPanel)
       panels.tabContent.updateTab(safePath, content)
 
     def switchFromResultView(resultView: ResultView): Unit =
@@ -228,7 +228,7 @@ object PlotContent:
       switchFromState(ContentState.fromResultView(resultView, updatedStates), updatedStates)
 
     def switchSection(section: String): Unit =
-      val (_, content, _) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata, methodPanel = methodPanel)
+      val (_, content) = buildTab(safePath, extension, contentSections, currentSection = section, omrMetadata = omrMetadata, methodPanel = methodPanel)
       panels.tabContent.updateTab(safePath, content)
 
     val tableToggleState = ToggleState("Table", btn_primary_string, () => switchFromResultView(Table))
@@ -250,7 +250,7 @@ object PlotContent:
         val plotContentState = updatedContentState
 
         api.omrContent(safePath).map: guiContent =>
-          val (_, content, _) = OMRContent.buildTab(safePath, guiContent, contentStates = states.update(plotContentState), currentState = plotContentState)
+          val (_, content) = OMRContent.buildTab(safePath, guiContent, contentStates = states.update(plotContentState), currentState = plotContentState)
           panels.tabContent.updateTab(safePath, content)
         .andThen: _ =>
           refreshing.set(false)
@@ -288,4 +288,4 @@ object PlotContent:
         )
       )
 
-    (tabData, content, div())
+    (tabData, content)

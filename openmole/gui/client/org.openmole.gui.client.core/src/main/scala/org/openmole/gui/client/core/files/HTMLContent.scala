@@ -16,4 +16,4 @@ object HTMLContent:
 
   def buildTab(safePath: SafePath, content: HtmlElement)(using panels: Panels, api: ServerAPI, basePath: BasePath) =
     val tabData = TabData(safePath, None)
-    (tabData, content.amend(cls := "fullOverflow"), div())
+    (tabData, content.amend(cls := "fullOverflow"))

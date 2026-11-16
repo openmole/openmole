@@ -195,10 +195,15 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           }
           ).tooltip("Documentation"),
           div(child <-- panels.expandablePanel.signal.map(_.map(ep => Panels.ExpandablePanel.toString(ep.id)).getOrElse("")), cls := "mainMenuCurrentName"),
-          child <-- panels.tabContent.controlElement,
-          panels.tabContent.fontSizeControl
-        )
-        ,
+          child <--
+            panels.tabContent.activeTab.signal.combineWith(panels.expandablePanel.signal).map: (at, ep) =>
+              ep match {
+                case Some(_) => div()
+                case _ => at.map(_.controlElement.getOrElse(div())).getOrElse(div())
+              }
+          ,
+          child <-- panels.expandablePanel.signal.map(_.map(_ => div()).getOrElse(panels.tabContent.fontSizeControl))
+        ),
         panels.notifications.render
       )
 
@@ -209,7 +214,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         then api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
 
       val treeView = panels.treeNodePanel.treeViewOrErrors
-      val fileControler = panels.treeNodePanel.treeViewOrErrors
+      val fileControler = panels.treeNodePanel.fileControler
 
       render(
         containerNode,
@@ -224,7 +229,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           theNavBar,
           div(
             cls <-- openFileTree.signal.map { oft =>
-              "file-section" + ( if oft then "" else " closed" )
+              "file-section" + (if oft then "" else " closed")
             },
             fileControler,
             treeView
@@ -232,7 +237,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           div(
             div(
               cls := "tab-section",
-              paddingRight <-- openFileTree.signal.map: ft=>
+              paddingRight <-- openFileTree.signal.map: ft =>
                 if ft
                 then "715px"
                 else "15px"
