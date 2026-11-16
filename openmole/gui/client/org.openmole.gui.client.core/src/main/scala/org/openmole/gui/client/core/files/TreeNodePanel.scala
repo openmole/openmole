@@ -105,7 +105,7 @@ class TreeNodePanel:
     val currentDirNode = treeNodeManager.directory
     directoryToggle.toggled.now() match
       case true => CoreUtils.createFile(currentDirNode.now(), newFile, directory = true).map(_ => refresh)
-      case false => CoreUtils.createFile(currentDirNode.now(), newFile)//.map(_ => refresh)
+      case false => CoreUtils.createFile(currentDirNode.now(), newFile).map(_ => refresh)
 
   //Upload tool
   val transferring: Var[ProcessState] = Var(Processed())
@@ -621,7 +621,8 @@ class TreeNodePanel:
       child <--
         scriptErrorSignal.map:
           case Some(m) => errorView(m)
-          case _ => treeView
+          case _ => div()
+      ,treeView
     )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Unit =

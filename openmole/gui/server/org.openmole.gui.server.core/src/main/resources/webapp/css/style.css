@@ -1596,16 +1596,19 @@ input:checked + .slider:before {
 
 .scriptError {
     overflow: scroll;
-    background-color: rgba(255, 95, 95, 0.5);
+    background-color: rgba(175, 75, 75);
     padding: 10px;
     font-family: monospace;
     font-size: medium;
     border: 2px solid rgb(255, 95, 95);
     border-radius: 4px;
     margin-bottom: 10px;
-    margin-left: 15;
-    height: 69vh;
+    margin-left: 5;
+    height: 83vh;
+    width: 690px;
     margin-right: 5px;
+    position:absolute;
+    z-index: 200;
 }
 
 .errorTextArea {
