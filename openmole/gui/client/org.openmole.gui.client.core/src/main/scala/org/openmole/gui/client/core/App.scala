@@ -107,8 +107,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       val newProjectPanel = ProjectPanel.render
       val settingsView = SettingsView.render
 
-      val openFileTree = Var(true)
-
       def undo =
         panels.treeNodePanel.multiTool.set(MultiTool.Off)
         panels.treeNodePanel.currentLine.set(-1)
@@ -128,19 +126,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
       //START BUTTON
       lazy val theNavBar = div(
         cls := "nav-container",
-        Icon(
-          _.name := "folder",
-          _.canvas.fixed,
-          _.cls := "navbar-item",
-          _.onClick --> { _ =>
-            openFileTree.update(!_)
-          })(
-          fontSize.px(22),
-          color := "#fff",
-          cursor.pointer,
-          position.absolute,
-          right := "720px",
-          color := "#795c85"),
         div(img(src := "img/openmole_dark.png", height := "50px", cursor.pointer, onClick --> { _ =>
           undo
           panels.treeNodePanel.treeNodeManager.goToHome
@@ -213,6 +198,23 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         if !panels.notifications.isOpened
         then api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
 
+      val openCloseIcon =
+        Icon(
+          _.name <-- panels.treeNodePanel.openFileTree.signal.map { oft =>
+            if oft
+            then "chevron-right"
+            else "chevron-left"
+          },
+          _.onClick --> { _ =>
+            panels.treeNodePanel.openFileTree.update(!_)
+          })(
+          fontSize.px(18),
+          color := "#fff",
+          cursor.pointer,
+          position.absolute,
+          marginTop := "50vh"
+        )
+
       render(
         containerNode,
         div(
@@ -225,16 +227,17 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           cls := "app-container",
           theNavBar,
           div(
-            cls <-- openFileTree.signal.map { oft =>
+            cls <-- panels.treeNodePanel.openFileTree.signal.map { oft =>
               "file-section" + (if oft then "" else " closed")
             },
+            openCloseIcon,
             panels.treeNodePanel.fileControler,
             panels.treeNodePanel.treeViewOrErrors
           ),
           div(
             div(
               cls := "tab-section",
-              paddingRight <-- openFileTree.signal.map: ft =>
+              paddingRight <-- panels.treeNodePanel.openFileTree.signal.map: ft =>
                 if ft
                 then "715px"
                 else "15px"
@@ -260,7 +263,7 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           )
         )
       )
-    }
+  }
 
     panels.treeNodePanel.refresh
 

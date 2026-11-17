@@ -509,7 +509,7 @@ li.selectElement {
 .file0 {
     flex: 0 0 20px;
     margin-right: 5px;
-    margin-left: 10px;
+    margin-left: 30px;
 }
 
 .file1 {
@@ -571,12 +571,13 @@ li.selectElement {
     right: 0px;
     background: #3f3d56;
     z-index: 20;
+    height: 100%;
 }
 
 .file-section.closed {
     margin: 0px;
     transition: all 0.2s ease-out 0s;
-    width: 0px;
+    width: 20px;
     min-width: 0px;
 }
 
@@ -602,7 +603,7 @@ li.selectElement {
     color: white;
     height: 81vh;
     padding-bottom: 20px;
-    margin-top: 30px;
+    margin-top: 25px;
 }
 
 /* EDITOR */

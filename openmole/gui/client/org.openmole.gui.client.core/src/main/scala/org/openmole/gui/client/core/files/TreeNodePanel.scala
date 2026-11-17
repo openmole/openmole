@@ -70,6 +70,7 @@ class TreeNodePanel:
   val plusFile = Var(false)
   val focused = Var(false)
   val newNode = Var("")
+  val openFileTree = Var(true)
 
   def newNodeInput(using api: ServerAPI, basePath: BasePath, panels: Panels) =
     Input(
@@ -422,7 +423,7 @@ class TreeNodePanel:
         val parent = curr.parent
         div(
           cls := "tree-path navbar-item",
-          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, cls := "treePathItems", fontSize := "20", marginLeft := "-10px"),
+          goToDirButton(treeNodeManager.root).amend(OMTags.glyph_house, cls := "treePathItems", fontSize := "20", marginLeft := "10px"),
           Seq(parent.parent, parent, curr).filterNot { sp =>
             sp.isEmpty || sp == treeNodeManager.root
           }.map { sp =>
@@ -522,6 +523,7 @@ class TreeNodePanel:
     val size = Var(100)
     lazy val tree: Div = div(
       cls := "file-scrollable-content",
+      overflow <-- openFileTree.signal.map(oft =>  if (oft) "auto" else "hidden"),
       children <--
         (treeNodeManager.directory.signal combineWith treeNodeManager.findFilesContaining.signal combineWith multiTool.signal combineWith treeNodeManager.fileSorting.signal combineWith update.signal combineWith size.signal).flatMapSwitch { (currentDir, findString, foundFiles, multiTool, fileSorting, _, sizeValue) =>
           EventStream.fromFuture(
@@ -576,10 +578,12 @@ class TreeNodePanel:
                   )
                 else Seq()
 
-              val upper = goToDirButton(currentDir.parent).amend("..", marginLeft := "13px", fontSize := "25px", paddingBottom := "10px")
+              val upper = goToDirButton(currentDir.parent).amend("..", marginLeft := "33px", fontSize := "25px", paddingBottom := "10px")
               upper +: (content ++ more)
           }
-        },
+        }
+
+      ,
       treeNodeManager.directory.toObservable --> Observer { _ => size.set(100) }
     )
     tree
@@ -622,7 +626,7 @@ class TreeNodePanel:
         scriptErrorSignal.map:
           case Some(m) => errorView(m)
           case _ => div()
-      ,treeView
+      , treeView
     )
 
   def displayNode(safePath: SafePath, refresh: Boolean = false)(using panels: Panels, api: ServerAPI, basePath: BasePath, plugins: GUIPlugins, pluginServices: PluginServices, notificationAPI: NotificationService): Unit =
@@ -746,7 +750,7 @@ class TreeNodePanel:
                   })(
                   fontSize.px(20),
                   color := "#fff",
-                  marginLeft := "5px",
+                  marginLeft := "20px",
                   cursor.pointer)
         ),
         currentLine.signal.map { i => i == id }.expand(toolBox.contentRoot),
