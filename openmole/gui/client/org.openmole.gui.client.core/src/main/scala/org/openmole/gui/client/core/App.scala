@@ -213,9 +213,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
         if !panels.notifications.isOpened
         then api.listNotification().foreach { n => panels.notifications.addServerNotifications(n) }
 
-      val treeView = panels.treeNodePanel.treeViewOrErrors
-      val fileControler = panels.treeNodePanel.fileControler
-
       render(
         containerNode,
         div(
@@ -231,8 +228,8 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             cls <-- openFileTree.signal.map { oft =>
               "file-section" + (if oft then "" else " closed")
             },
-            fileControler,
-            treeView
+            panels.treeNodePanel.fileControler,
+            panels.treeNodePanel.treeViewOrErrors
           ),
           div(
             div(

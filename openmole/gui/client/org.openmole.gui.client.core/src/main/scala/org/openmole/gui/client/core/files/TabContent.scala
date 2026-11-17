@@ -54,9 +54,9 @@ class TabContent:
       )()
     )
 
-  lazy val tabGroup =
+  def tabGroup(using panels: Panels) =
 
-    def switchPath(tabData: TabData) = Panels().treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
+    def switchPath(tabData: TabData) = panels.treeNodePanel.treeNodeManager.switch(tabData.safePath.parent)
 
     def build(tabData: TabData) = {
       Tab(
@@ -65,9 +65,7 @@ class TabContent:
           if e.ctrlKey then switchPath(tabData)
           activeTab.set(Some(tabData))
         },
-        _.onDblClick --> { _ =>
-          switchPath(tabData)
-        }
+        _.onDblClick --> { _ => switchPath(tabData) }
       )(tabData.safePath.name)
     }
 
@@ -98,10 +96,6 @@ class TabContent:
         )
       }
     )
-
-
-  val current: Var[Option[TabData]] = Var(None)
-  val controlElement: Var[HtmlElement] = Var(div())
 
   def setActive(tabData: TabData) =
     activeTab.set(Some(tabData))
