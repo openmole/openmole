@@ -572,7 +572,6 @@ li.selectElement {
     background: #3f3d56;
     z-index: 20;
     height: 100%;
-    cursor:pointer;
 }
 
 .file-section.closed {

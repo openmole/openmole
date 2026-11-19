@@ -227,10 +227,16 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             cls <-- panels.treeNodePanel.openFileTree.signal.map { oft =>
               "file-section" + (if oft then "" else " closed")
             },
-            onClick --> { _ =>
-              panels.treeNodePanel.openFileTree.update(!_)
-            },
-            openCloseIcon,
+            div(
+              openCloseIcon,
+              height := "100%",
+              width := "22px",
+              cursor.pointer,
+              position.absolute,
+              onClick --> { _ =>
+                panels.treeNodePanel.openFileTree.update(!_)
+              }
+            ),
             panels.treeNodePanel.fileControler,
             panels.treeNodePanel.treeViewOrErrors
           ),
