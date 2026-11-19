@@ -204,9 +204,6 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
             if oft
             then "chevron-right"
             else "chevron-left"
-          },
-          _.onClick --> { _ =>
-            panels.treeNodePanel.openFileTree.update(!_)
           })(
           fontSize.px(18),
           color := "#fff",
@@ -229,6 +226,9 @@ class OpenMOLEGUI(using panels: Panels, pluginServices: PluginServices, api: Ser
           div(
             cls <-- panels.treeNodePanel.openFileTree.signal.map { oft =>
               "file-section" + (if oft then "" else " closed")
+            },
+            onClick --> { _ =>
+              panels.treeNodePanel.openFileTree.update(!_)
             },
             openCloseIcon,
             panels.treeNodePanel.fileControler,
