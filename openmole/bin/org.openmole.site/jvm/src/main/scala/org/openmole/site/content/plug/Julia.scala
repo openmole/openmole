@@ -43,8 +43,7 @@ ${ul(
    li{html"${code{"forceUpdate"}} Boolean, $optional (default = false). Should the libraries installation be forced (to ensure an update for example). If true, the task will perform the installation (and thus the update) even if the library was already installed."},
    li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Julia on the execution node."},
    li{html"${code{"precompileCPUTarget"}} String, $optional (default = \"core2\"). The cpu target for Julia libraries precompilation (i.e. JULIA_CPU_TARGET)."},
-   Native.containerCache,
-   Native.looseInstallCache
+   Native.containerCache
 )}
 
 ${h2{"Embedding a Julia script"}}

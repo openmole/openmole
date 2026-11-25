@@ -42,8 +42,7 @@ ${ul(
    li{html"${code{"install"}} Sequence of strings, $optional (default = empty). The commands to be executed prior to the script execution (to install libraries on the system)."},
    li{html"${code{"version"}} String, $optional. The version of Scilab to run."},
    li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before to the execution of Scilab on the execution node."},
-   Native.containerCache,
-   Native.looseInstallCache
+   Native.containerCache
 )}
 
 ${h3{"Simple ScilabTask"}}

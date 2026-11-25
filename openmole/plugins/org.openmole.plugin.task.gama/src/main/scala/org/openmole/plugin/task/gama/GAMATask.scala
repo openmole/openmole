@@ -28,8 +28,7 @@ object GAMATask:
     containerSystem:        Option[ContainerSystem],
     image:                  ContainerImage,
     buildParameters:        ExternalTask.BuildParameters,
-    clearContainerCache:    Boolean,
-    looseInstallCache:      Boolean)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
+    clearContainerCache:    Boolean)(using TmpDirectory, SerializerService, OutputRedirection, NetworkService, ThreadProvider, Preference, Workspace, FileService, EventDispatcher) =
 
     def fixIni =
       Seq("""sed -i -E '/-XX:/ d; /-Xms[^ ]*/ d; /-Xmx[^ ]*/ d; /-Xss[^ ]*/ d' /opt/gama-platform/Gama.ini""")
@@ -44,8 +43,7 @@ object GAMATask:
         image,
         fixIni ++ fixHeadless ++ install,
         buildParameters = buildParameters,
-        clearContainerCache = clearContainerCache,
-        looseInstallCache = looseInstallCache)
+        clearContainerCache = clearContainerCache)
 
     installedImage
 
@@ -77,9 +75,7 @@ object GAMATask:
     environmentVariables:   Seq[EnvironmentVariable]              = Vector.empty,
     hostFiles:              Seq[HostFile]                         = Vector.empty,
     fewerThreads:           Boolean                               = true,
-    //    workDirectory:          OptionalArgument[String]        = None,
     clearContainerCache:    Boolean                               = false,
-    looseInstallCache:      Boolean                               = false,
     containerSystem:        OptionalArgument[ContainerSystem]     = None)(using sourcecode.Name, DefinitionScope) =
 
     ContainerTask.build("GAMATask"): buildParameters =>
@@ -96,7 +92,7 @@ object GAMATask:
 
       val preparedImage =
         import taskExecutionBuildContext.given
-        prepare(project, gaml, install, containerSystem, gamaContainerImage, buildParameters = buildParameters, clearContainerCache = clearContainerCache, looseInstallCache = looseInstallCache)
+        prepare(project, gaml, install, containerSystem, gamaContainerImage, buildParameters = buildParameters, clearContainerCache = clearContainerCache)
 
       val inputFilePath = s"${GAMATask.gamaWorkspaceDirectory}/__om_experiment__.gaml"
 

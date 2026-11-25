@@ -41,7 +41,7 @@ ${h2{"V25 | F F"}}
 ${
   notes("""
     - Engine: Implement OMR format version 2
-    - Container: add an option to by pass some container rebuild operations while fixing errors
+    - Plugin: Use UV instead of PIP to install package in the python task
   """)
 }
 

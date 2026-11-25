@@ -63,8 +63,7 @@ object RTask:
     hostFiles:                  Seq[HostFile]                      = Vector.empty,
     environmentVariables:       Seq[EnvironmentVariable]           = Vector.empty,
     containerSystem:            OptionalArgument[ContainerSystem]  = None,
-    clearContainerCache:                 Boolean                            = false,
-    looseInstallCache:          Boolean                            = false
+    clearContainerCache:                 Boolean                   = false
   )(using sourcecode.Name, DefinitionScope) =
     ContainerTask.build("RTask"): buildParameters =>
       import buildParameters.*
@@ -84,8 +83,7 @@ object RTask:
           image,
           installCommands,
           buildParameters = buildParameters,
-          clearContainerCache = clearContainerCache,
-          looseInstallCache = looseInstallCache)
+          clearContainerCache = clearContainerCache)
 
       ContainerTask.execution(
         image = containerInstall,

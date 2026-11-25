@@ -57,8 +57,7 @@ object JavaTask:
     jvmVersion: String = "21",
     scalaVersion: OptionalArgument[String] = None,
     containerSystem: OptionalArgument[ContainerSystem] = None,
-    clearContainerCache:    Boolean                            = false,
-    looseInstallCache:      Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
+    clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ExternalTask.build("JavaTask"): buildContext =>
       import buildContext.*
@@ -74,8 +73,7 @@ object JavaTask:
           dockerImage(version),
           cacheLibraries ++ install,
           buildParameters = buildContext,
-          clearContainerCache = clearContainerCache,
-          looseInstallCache = looseInstallCache)
+          clearContainerCache = clearContainerCache)
 
       def workspaceName = "/_workspace_"
       def scriptName = "_generatedscript_.sc"

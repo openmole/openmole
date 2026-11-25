@@ -10,7 +10,7 @@ class Activator extends BundleActivator {
     PluginRegistry.unregister(this)
 
   override def start(context: BundleContext): Unit = {
-    import org.openmole.core.highlight.HighLight._
+    import org.openmole.core.highlight.HighLight.*
 
     val keyWords: Vector[HighLight] =
       Vector(

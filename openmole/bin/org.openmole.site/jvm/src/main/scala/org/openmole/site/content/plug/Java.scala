@@ -40,8 +40,7 @@ ${ul(
    li{html"${code{"jvmOptions"}} Sequence of String, $optional. Options to pass to the JVM, for instance \"-Xmx1G\"."},
    li{html"${code{"version"}} String, $optional. The version of JVM to run."},
    li{html"${code{"prepare"}} Sequence of strings, $optional (default = empty). System commands to be executed just before the execution of Java on the execution node."},
-   Native.containerCache,
-   Native.looseInstallCache
+   Native.containerCache
 )}
 
 ${h3{"Simple JavaTask"}}

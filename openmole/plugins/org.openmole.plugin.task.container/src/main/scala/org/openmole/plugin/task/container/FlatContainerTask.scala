@@ -47,8 +47,7 @@ object FlatContainerTask:
     environmentVariables: Seq[(String, String)],
     buildParameters: ExternalTask.BuildParameters,
     errorDetail: Int => Option[String] = _ => None,
-    clearContainerCache: Boolean = false,
-    looseInstallCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
+    clearContainerCache: Boolean = false)(using tmpDirectory: TmpDirectory, serializerService: SerializerService, outputRedirection: OutputRedirection, networkService: NetworkService, threadProvider: ThreadProvider, preference: Preference, workspace: Workspace, fileService: FileService, eventDispatcher: EventDispatcher) =
     import org.openmole.tool.hash._
 
     def cacheId(image: ContainerImage): Seq[String] =
@@ -57,13 +56,8 @@ object FlatContainerTask:
         case image: SavedDockerImage => Seq(Hash.file(image.file).toString)
 
     val cacheKey: String =
-      if !looseInstallCache
-      then
-        val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
-        (cacheId(image) ++ install ++ volumeCacheKey ++ Seq("flat")).mkString("\n")
-      else
-        (cacheId(image) ++ install ++ Seq("flat")).mkString("\n")
-
+      val volumeCacheKey = volumes.map((f, _) => FileService.hashNoCache(f).toString) ++ volumes.map((_, d) => d)
+      (cacheId(image) ++ install ++ volumeCacheKey ++ Seq("flat")).mkString("\n")
 
     val cacheDirectory = workspace.tmpDirectory /> "container" /> "cached" /> cacheKey
     val serializedFlatImage = cacheDirectory / "flatimage.bin"

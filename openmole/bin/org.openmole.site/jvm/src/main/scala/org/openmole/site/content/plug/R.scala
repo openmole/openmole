@@ -40,8 +40,7 @@ It takes the following arguments :
 ${ul(
    li{html"${code{"script"}} String,$mandatory. The R script to be executed, either R code directly or a R script file."},
    li{html"${code{"libraries"}} Sequence of strings or tuple, $optional (default = empty). The names of R libraries that will be used by the script and need to be installed beforehand (note: as detailed below, installations are only done during the first execution of the R script, and then stored in a cached docker image). Dependencies for R libraries can be automatically resolved and installed, for that you can write (\"ggrah\", true) instead of \"ggraph\"."},
-   Native.containerCache,
-   Native.looseInstallCache
+   Native.containerCache
 )}
 
 $br

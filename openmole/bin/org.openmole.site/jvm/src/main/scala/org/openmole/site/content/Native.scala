@@ -69,7 +69,3 @@ object Native:
     import org.openmole.site.tools
     li{html"${tools.code{"clearContainerCache"}} Boolean, $optional (default = ${tools.code{"false"}}). Should the container image and libraries be cleared and reinstalled (to ensure an update for example)? If ${tools.code{"true"}}, the task will perform the installation (and thus the update) even if the library was already installed."}
 
-  def looseInstallCache =
-    import org.openmole.site.tools
-    li {html"${tools.code{"looseInstallCache"}} Boolean, $optional (default = ${tools.code{"false"}}). For debuging purposes you can make the cacching mechanisme loose to avoid some long rebuild operations of your container."}
-
