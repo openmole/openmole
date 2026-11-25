@@ -24,6 +24,7 @@ object ContainerSystem:
   enum SingularityVariant:
     case Singularity, Apptainer
 
+  def cachedInstall = SingularityDirectoryOverlay(embedResources = false)
 
 sealed trait ContainerSystem
 case class SingularityDirectoryOverlay(verbose: Boolean = false, embedResources: Boolean = true, debug: Boolean = false, userNamespace: OptionalArgument[Boolean] = None) extends ContainerSystem
