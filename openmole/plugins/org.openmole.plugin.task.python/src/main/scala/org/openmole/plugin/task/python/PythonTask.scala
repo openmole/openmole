@@ -23,25 +23,33 @@ import org.openmole.plugin.task.container
 object PythonTask:
   def dockerImage(version: String) = DockerImage("python", version)
 
-  def installCommands(install: Seq[String], libraries: Seq[String], major: Int): Vector[String] =
-    // need to install pip2 in case of python 2
-    val effintsall =
-      install ++ (
-        if major == 2
-        then Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py")
-        else Seq.empty
-      )
+  def installCommands(install: Seq[String], libraries: Seq[String], major: Int, useUV: Boolean): Vector[String] =
+      if !useUV
+      then
+        // need to install pip2 in case of python 2
+        val effintsall =
+          install ++ (
+            if major == 2
+            then Seq("curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py","python2 get-pip.py")
+            else Seq.empty
+          )
 
-    val pipValue = s"""pip$major install --prefer-binary"""
+        val pipValue = s"""pip$major install --prefer-binary"""
 
-    if libraries.isEmpty
-    then effintsall.toVector
-    else (effintsall ++ Seq(s"$pipValue ${libraries.mkString(" ")}")).toVector
+        if libraries.isEmpty
+        then effintsall.toVector
+        else (effintsall ++ Seq(s"$pipValue ${libraries.mkString(" ")}")).toVector
+      else
+        val uvValue = s"""uv pip install"""
+
+        if libraries.isEmpty
+        then Vector.empty
+        else Vector(s"u$uvValue ${libraries.mkString(" ")}")
 
   def apply(
     script:                 RunnableScript,
     arguments:              OptionalArgument[String] = None,
-    image:                  ContainerImage                     = "openmole/python:3.14.2",
+    image:                  ContainerImage                     = "openmole/python:3.15.2",
     libraries:              Seq[String]                        = Seq.empty,
     install:                Seq[String]                        = Seq.empty,
     prepare:                Seq[String]                        = Seq.empty,
@@ -52,8 +60,8 @@ object PythonTask:
     stdOut:                 OptionalArgument[Val[String]]      = None,
     stdErr:                 OptionalArgument[Val[String]]      = None,
     containerSystem:        OptionalArgument[ContainerSystem]  = None,
-    clearContainerCache:             Boolean                            = false,
-    looseInstallCache:      Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
+    useUV:                  Boolean                            = true,
+    clearContainerCache:    Boolean                            = false)(using sourcecode.Name, DefinitionScope) =
 
     ContainerTask.build("PythonTask"): buildParameters =>
       import buildParameters.*
@@ -68,10 +76,9 @@ object PythonTask:
         ContainerTask.install(
           containerSystem,
           image,
-          installCommands(install, libraries, major),
+          installCommands(install, libraries, major, useUV = useUV),
           buildParameters = buildParameters,
-          clearContainerCache = clearContainerCache,
-          looseInstallCache = looseInstallCache
+          clearContainerCache = clearContainerCache
         )
 
       def workDirectory = "/_workdirectory_"
